@@ -3,161 +3,161 @@
         <ncm:namespace>urn:opendaylight:params:xml:ns:yang:controller:threadpool</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>threadpool</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-04-09</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:params:xml:ns:yang:controller:logback:config</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>config-logging</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-07-16</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:model:statistics:types</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>opendaylight-statistics-types</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+        <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-09-25</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:params:xml:ns:yang:controller:md:sal:core:spi:config-dom-store</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>opendaylight-config-dom-datastore</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2014-06-17</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:flow:table:statistics</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>opendaylight-flow-table-statistics</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-12-15</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:meter:service</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>sal-meter</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-09-18</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:params:xml:ns:yang:controller:config:toaster-provider:impl</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>toaster-provider-impl</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2014-01-31</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:table:types</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>opendaylight-table-types</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-10-26</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:table:service</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>sal-table</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-10-26</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:params:xml:ns:yang:controller:shutdown</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>shutdown</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-12-18</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:port:service</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>sal-port</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-11-07</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:params:xml:ns:yang:controller:netty:eventexecutor</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>netty-event-executor</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-11-12</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:params:xml:ns:yang:controller:md:sal:remote</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>sal-remote</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2014-01-14</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:model:topology:view</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>opendaylight-topology-view</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-10-30</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:params:xml:ns:yang:controller:netty:threadgroup</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>threadgroup</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-11-07</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:TBD:params:xml:ns:yang:network-topology</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>network-topology</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-07-12</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:params:xml:ns:yang:controller:threadpool:impl:fixed</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>threadpool-impl-fixed</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-12-01</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>opendaylight-sal-binding-broker-impl</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-10-28</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:ietf:params:xml:ns:yang:ietf-restconf</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>ietf-restconf</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-10-19</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:node:error:service</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>node-error</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2014-04-10</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:flow:errors</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>flow-errors</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-11-16</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:flow:service</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>sal-flow</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-08-19</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:ietf:params:xml:ns:yang:rpc-context</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>rpc-context</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-06-17</ncm:version>
     </ncm:schema>
     <ncm:schema>
@@ -165,350 +165,350 @@
         </ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>opendaylight-operational-dom-datastore</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2014-06-17</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:flow:types:queue</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>opendaylight-queue-types</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-09-25</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>ietf-netconf-monitoring</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2010-10-04</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:netconf-node-inventory</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>netconf-node-inventory</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2014-01-08</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:ietf:params:xml:ns:yang:ietf-yang-types</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>ietf-yang-types</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-07-15</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:meter:statistics</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>opendaylight-meter-statistics</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-11-11</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:flow:inventory</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>flow-node-inventory</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-08-19</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:params:xml:ns:yang:controller:md:sal:connector:netconf</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>odl-sal-netconf-connector-cfg</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-10-28</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:params:xml:ns:yang:controller:threadpool:impl:scheduled</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>threadpool-impl-scheduled</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-12-01</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:TBD:params:xml:ns:yang:network-topology</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>network-topology</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-10-21</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>http://netconfcentral.org/ns/toaster</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>toaster</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2009-11-20</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:params:xml:ns:yang:controller:config:netconf</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>odl-netconf-cfg</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2014-04-08</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:meter:types</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>opendaylight-meter-types</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-09-18</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:impl</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>opendaylight-sal-dom-broker-impl</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-10-28</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:flow:topology:discovery</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>flow-topology-discovery</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-08-19</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:yang:extension:yang-ext</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>yang-ext</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-07-09</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:params:xml:ns:yang:controller:threadpool:impl</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>threadpool-impl</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-04-05</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:flow:types:port</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>opendaylight-port-types</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-09-25</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>opendaylight-md-sal-binding</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-10-28</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:packet:service</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>packet-processing</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-07-09</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:params:xml:ns:yang:controller:threadpool:impl:flexible</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>threadpool-impl-flexible</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-12-01</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:queue:service</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>sal-queue</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-11-07</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:ietf:params:xml:ns:yang:ietf-inet-types</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>ietf-inet-types</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2010-09-24</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:params:xml:ns:yang:controller:md:sal:rest:connector</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>opendaylight-rest-connector</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2014-07-24</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:flow:transaction</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>flow-capable-transaction</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-11-03</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:flow:statistics</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>opendaylight-flow-statistics</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-08-19</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:params:xml:ns:yang:controller:protocol:framework</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>protocol-framework</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2014-03-13</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:model:match:types</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>opendaylight-match-types</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-10-26</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:ietf:params:xml:ns:yang:ietf-yang-types</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>ietf-yang-types</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2010-09-24</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:group:service</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>sal-group</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-09-18</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:params:xml:ns:yang:controller:inmemory-datastore-provider</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>opendaylight-inmemory-datastore-provider</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2014-06-17</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:params:xml:ns:yang:controller:netty:timer</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>netty-timer</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-11-19</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:group:statistics</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>opendaylight-group-statistics</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-11-11</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:params:xml:ns:yang:controller:config</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>config</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-04-05</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:params:xml:ns:yang:controller:config:netconf:client:dispatcher</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>odl-netconfig-client-cfg</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2014-04-08</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:l2:types</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>opendaylight-l2-types</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-08-27</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:action:types</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>opendaylight-action-types</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-11-12</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>opendaylight-md-sal-dom</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-10-28</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:params:xml:ns:yang:controller:md:sal:common</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>opendaylight-md-sal-common</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-10-28</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:group:types</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>opendaylight-group-types</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-10-18</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring-extension</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>ietf-netconf-monitoring-extension</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-12-10</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:inventory</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>opendaylight-inventory</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-08-19</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:params:xml:ns:yang:controller:netty</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>netty</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-11-19</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:model:topology:general</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>opendaylight-topology</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-10-30</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:port:statistics</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>opendaylight-port-statistics</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version></ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:queue:statistics</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>opendaylight-queue-statistics</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-12-16</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:params:xml:ns:yang:controller:config:kitchen-service:impl</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>kitchen-service-impl</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2014-01-31</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:flow:types</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>opendaylight-flow-types</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-10-26</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:params:xml:ns:yang:controller:shutdown:impl</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>shutdown-impl</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-12-18</ncm:version>
     </ncm:schema>
     <ncm:schema>
         <ncm:namespace>urn:opendaylight:model:topology:inventory</ncm:namespace>
         <ncm:location>NETCONF</ncm:location>
         <ncm:identifier>opendaylight-topology-inventory</ncm:identifier>
-        <ncm:format>yang</ncm:format>
+                <ncm:format xmlns:prefix="urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring">prefix:yang</ncm:format>
         <ncm:version>2013-10-30</ncm:version>
     </ncm:schema>
 </ncm:schemas>
