@@ -1,0 +1,164 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_3d146ff4",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/registration/EventSource.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-03-04T09:45:56Z",
+      "side": 1,
+      "message": "These two NotificationListener and DataChangeListener are specific to concrete EventSource registration, please remove them.\n\nOther EventSources - e.g. Openflow or IOT may not need these interfaces, since they will be obtaining events via other way.",
+      "range": {
+        "startLine": 16,
+        "startChar": 60,
+        "endLine": 16,
+        "endChar": 100
+      },
+      "revId": "3568ed3cc9e2472957cae72a83a2b33f889dcc23",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_bd687f88",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/registration/EventSourceNodeRegistration.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-03-04T09:45:56Z",
+      "side": 1,
+      "message": "Pleas use Eclipse Public License header as was present in other sources.",
+      "revId": "3568ed3cc9e2472957cae72a83a2b33f889dcc23",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_9d6b4385",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/registration/EventSourceNodeRegistration.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-03-04T09:45:56Z",
+      "side": 1,
+      "message": "Please use whitespaces instead of tabs.\nIndent level is 4 spaces.",
+      "range": {
+        "startLine": 17,
+        "startChar": 0,
+        "endLine": 17,
+        "endChar": 1
+      },
+      "revId": "3568ed3cc9e2472957cae72a83a2b33f889dcc23",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_fd6e0796",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/registration/EventSourceNodeRegistration.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-03-04T09:45:56Z",
+      "side": 1,
+      "message": "Event source does not need to be data change listener, this is only specific to NetconfEventSource.",
+      "range": {
+        "startLine": 44,
+        "startChar": 0,
+        "endLine": 45,
+        "endChar": 84
+      },
+      "revId": "3568ed3cc9e2472957cae72a83a2b33f889dcc23",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_5d05bbc0",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/registration/EventSourceNodeRegistry.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-03-04T09:45:56Z",
+      "side": 1,
+      "message": "Pleas use Eclipse Public License header as was present in other sources.",
+      "revId": "3568ed3cc9e2472957cae72a83a2b33f889dcc23",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_7d0af7d3",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/registration/EventSourceRegistration.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-03-04T09:45:56Z",
+      "side": 1,
+      "message": "Pleas use Eclipse Public License header as was present in other sources.",
+      "revId": "3568ed3cc9e2472957cae72a83a2b33f889dcc23",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_1d0f33e3",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/registration/EventSourceRegistry.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-03-04T09:45:56Z",
+      "side": 1,
+      "message": "Pleas use Eclipse Public License header as was present in other sources.",
+      "revId": "3568ed3cc9e2472957cae72a83a2b33f889dcc23",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_dd71cb78",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/registration/EventSourceRegistry.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-03-04T09:45:56Z",
+      "side": 1,
+      "message": "This is not needed - since we have Registration object, which close method should be used to unregister.\n\nThis method makes sense for implementation but do not export it in public API contract.",
+      "range": {
+        "startLine": 24,
+        "startChar": 1,
+        "endLine": 24,
+        "endChar": 47
+      },
+      "revId": "3568ed3cc9e2472957cae72a83a2b33f889dcc23",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
