@@ -11,8 +11,11 @@ import java.io.IOException;
 import java.util.Dictionary;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.cm.ConfigurationEvent;
+import org.osgi.service.cm.ConfigurationListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,12 +28,19 @@ import org.slf4j.LoggerFactory;
 public class DatastoreContextConfigAdminOverlay implements AutoCloseable {
     public static final String CONFIG_ID = "org.opendaylight.controller.cluster.datastore";
 
+    public static interface Listener {
+        void onDatastoreContextUpdated(DatastoreContext context);
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(DatastoreContextConfigAdminOverlay.class);
 
     private final DatastoreContextIntrospector introspector;
     private final BundleContext bundleContext;
+    private ServiceRegistration<?> configListenerServiceRef;
+    private Listener listener;
 
-    public DatastoreContextConfigAdminOverlay(DatastoreContextIntrospector introspector, BundleContext bundleContext) {
+    public DatastoreContextConfigAdminOverlay(DatastoreContextIntrospector introspector,
+            BundleContext bundleContext) {
         this.introspector = introspector;
         this.bundleContext = bundleContext;
 
@@ -40,7 +50,14 @@ public class DatastoreContextConfigAdminOverlay implements AutoCloseable {
             LOG.warn("No ConfigurationAdmin service found");
         } else {
             overlaySettings(configAdminServiceReference);
+
+            configListenerServiceRef = bundleContext.registerService(ConfigurationListener.class.getName(),
+                    new DatastoreConfigurationListener(), null);
         }
+    }
+
+    public void setListener(Listener listener) {
+        this.listener = listener;
     }
 
     private void overlaySettings(ServiceReference<ConfigurationAdmin> configAdminServiceReference) {
@@ -53,7 +70,11 @@ public class DatastoreContextConfigAdminOverlay implements AutoCloseable {
 
                 LOG.debug("Overlaying settings: {}", properties);
 
-                introspector.update(properties);
+                if(introspector.update(properties)) {
+                    if(listener != null) {
+                        listener.onDatastoreContextUpdated(introspector.getContext());
+                    }
+                }
             } else {
                 LOG.debug("No Configuration found for {}", CONFIG_ID);
             }
@@ -72,5 +93,20 @@ public class DatastoreContextConfigAdminOverlay implements AutoCloseable {
 
     @Override
     public void close() {
+        listener = null;
+
+        if(configListenerServiceRef != null) {
+            configListenerServiceRef.unregister();
+        }
+    }
+
+    private class DatastoreConfigurationListener implements ConfigurationListener {
+        @Override
+        public void configurationEvent(ConfigurationEvent event) {
+            if(CONFIG_ID.equals(event.getPid()) && event.getType() == ConfigurationEvent.CM_UPDATED) {
+                LOG.debug("configurationEvent: config {} was updated", CONFIG_ID);
+                overlaySettings(event.getReference());
+            }
+        }
     }
 }
