@@ -25,6 +25,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 import org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.Yang;
 import org.opendaylight.yangtools.util.concurrent.ExceptionMapper;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.Node;
@@ -71,7 +72,7 @@ public final class NetconfRemoteSchemaYangSourceProvider implements SchemaSource
 
         final QName formatQName = QName.cachedReference(QName.create(NetconfMessageTransformUtil.GET_SCHEMA_QNAME, "format"));
         final YangInstanceIdentifier.NodeIdentifier formatId = new YangInstanceIdentifier.NodeIdentifier(formatQName);
-        final LeafNode<String> format = Builders.<String>leafBuilder().withNodeIdentifier(formatId).withValue("yang").build();
+        final LeafNode<QName> format = Builders.<QName>leafBuilder().withNodeIdentifier(formatId).withValue(Yang.QNAME).build();
 
         final DataContainerNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier, ContainerNode> builder = Builders.containerBuilder();
 
