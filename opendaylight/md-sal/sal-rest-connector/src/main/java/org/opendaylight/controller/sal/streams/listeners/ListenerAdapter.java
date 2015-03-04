@@ -23,12 +23,10 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
-import javax.activation.UnsupportedDataTypeException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -44,13 +42,11 @@ import org.opendaylight.controller.sal.rest.impl.XmlMapper;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithValue;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -185,7 +181,7 @@ public class ListenerAdapter implements DOMDataChangeListener {
         /**
          * Sets event data.
          *
-         * @param String
+         * @param data
          *            data.
          */
         public void setData(final String data) {
@@ -284,7 +280,7 @@ public class ListenerAdapter implements DOMDataChangeListener {
      * @param dataChangedNotificationEventElement
      *            {@link Element}
      * @param change
-     *            {@link DataChangeEvent}
+     *            {@link org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode}
      */
     private void addValuesToDataChangedNotificationEventElement(final Document doc,
             final Element dataChangedNotificationEventElement,
@@ -308,8 +304,6 @@ public class ListenerAdapter implements DOMDataChangeListener {
      *            Set of {@link YangInstanceIdentifier}.
      * @param element
      *            {@link Element}
-     * @param store
-     *            {@link Store}
      * @param operation
      *            {@link Operation}
      */
@@ -319,35 +313,13 @@ public class ListenerAdapter implements DOMDataChangeListener {
             return;
         }
         for (final YangInstanceIdentifier path : data) {
-            final Node node = createDataChangeEventElement(doc, path, null, operation);
-            element.appendChild(node);
+            if (!ControllerContext.getInstance().isNodeMixin(path)) {
+                Node node = createDataChangeEventElement(doc, path, operation);
+                element.appendChild(node);
+            }
         }
     }
 
-    /**
-     * Adds values from data to element.
-     *
-     * @param doc
-     *            {@link Document}
-     * @param data
-     *            Map of {@link YangInstanceIdentifier} and {@link CompositeNode}.
-     * @param element
-     *            {@link Element}
-     * @param store
-     *            {@link Store}
-     * @param operation
-     *            {@link Operation}
-     */
-    private void addValuesFromDataToElement(final Document doc, final Map<YangInstanceIdentifier, CompositeNode> data, final Element element,
-            final Operation operation) {
-        if (data == null || data.isEmpty()) {
-            return;
-        }
-        for (final Entry<YangInstanceIdentifier, CompositeNode> entry : data.entrySet()) {
-            final Node node = createDataChangeEventElement(doc, entry.getKey(), entry.getValue(), operation);
-            element.appendChild(node);
-        }
-    }
 
     /**
      * Creates changed event element from data.
@@ -356,65 +328,23 @@ public class ListenerAdapter implements DOMDataChangeListener {
      *            {@link Document}
      * @param path
      *            Path to data in data store.
-     * @param data
-     *            {@link CompositeNode}
-     * @param store
-     *            {@link Store}
      * @param operation
      *            {@link Operation}
      * @return {@link Node} node represented by changed event element.
      */
-    private Node createDataChangeEventElement(final Document doc, final YangInstanceIdentifier path, final CompositeNode data,
-            final Operation operation) {
+    private Node createDataChangeEventElement(final Document doc, final YangInstanceIdentifier path, final Operation operation) {
         final Element dataChangeEventElement = doc.createElement("data-change-event");
         final Element pathElement = doc.createElement("path");
         addPathAsValueToElement(path, pathElement);
         dataChangeEventElement.appendChild(pathElement);
 
-        // Element storeElement = doc.createElement("store");
-        // storeElement.setTextContent(store.value);
-        // dataChangeEventElement.appendChild(storeElement);
-
         final Element operationElement = doc.createElement("operation");
         operationElement.setTextContent(operation.value);
         dataChangeEventElement.appendChild(operationElement);
 
-        if (data != null) {
-            final Element dataElement = doc.createElement("data");
-            final Node dataAnyXml = translateToXml(path, data);
-            final Node adoptedNode = doc.adoptNode(dataAnyXml);
-            dataElement.appendChild(adoptedNode);
-            dataChangeEventElement.appendChild(dataElement);
-        }
-
         return dataChangeEventElement;
     }
 
-    /**
-     * Translates {@link CompositeNode} data to XML format.
-     *
-     * @param path
-     *            Path to data in data store.
-     * @param data
-     *            {@link CompositeNode}
-     * @return Data in XML format.
-     */
-    private Node translateToXml(final YangInstanceIdentifier path, final CompositeNode data) {
-        final DataNodeContainer schemaNode = ControllerContext.getInstance().getDataNodeContainerFor(path);
-        if (schemaNode == null) {
-            LOG.info(
-                    "Path '{}' contains node with unsupported type (supported type is Container or List) or some node was not found.",
-                    path);
-            return null;
-        }
-        try {
-            final Document xml = xmlMapper.write(data, schemaNode);
-            return xml.getFirstChild();
-        } catch (final UnsupportedDataTypeException e) {
-            LOG.error("Error occured during translation of notification to XML.", e);
-            return null;
-        }
-    }
 
     /**
      * Adds path as value to element.
@@ -427,11 +357,14 @@ public class ListenerAdapter implements DOMDataChangeListener {
     private void addPathAsValueToElement(final YangInstanceIdentifier path, final Element element) {
         // Map< key = namespace, value = prefix>
         final Map<String, String> prefixes = new HashMap<>();
-        final YangInstanceIdentifier instanceIdentifier = path;
+        final YangInstanceIdentifier normalizedPath = ControllerContext.getInstance().toXpathRepresentation(path);
         final StringBuilder textContent = new StringBuilder();
 
         // FIXME: BUG-1281: this is duplicated code from yangtools (BUG-1275)
-        for (final PathArgument pathArgument : instanceIdentifier.getPathArguments()) {
+        for (final PathArgument pathArgument : normalizedPath.getPathArguments()) {
+            if (pathArgument instanceof YangInstanceIdentifier.AugmentationIdentifier) {
+                continue;
+            }
             textContent.append("/");
             writeIdentifierWithNamespacePrefix(element, textContent, pathArgument.getNodeType(), prefixes);
             if (pathArgument instanceof NodeIdentifierWithPredicates) {

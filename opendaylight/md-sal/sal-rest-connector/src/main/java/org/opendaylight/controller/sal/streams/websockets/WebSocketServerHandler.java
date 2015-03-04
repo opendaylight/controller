@@ -162,7 +162,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
      * @return String representation of web socket location.
      */
     private static String getWebSocketLocation(final HttpRequest req) {
-        return "http://" + req.headers().get(HOST) + req.getUri();
+        return "ws://" + req.headers().get(HOST) + req.getUri();
     }
 
 }
