@@ -52,6 +52,24 @@
       "revId": "542d12373e86ae12165df6fd54d6f20fdc6c1a48",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_3d81cf4a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/identifiers/TransactionIdentifier.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-04T16:52:50Z",
+      "side": 1,
+      "message": "Actually debug logging won\u0027t invoke toString unless debug is on and it formats - not sure what I was thinking. Also, while toString() is called when sending the CreateTransaction, that is not on the \"unused\" path. So the way I had it before does avoid the stringRepresentation being created. So that was my motivation. I should put it back - do you agree?\n\nWe could avoid the toString() on CreateTransaction by passing the long ID. I could do that in another patch.",
+      "parentUuid": "7a96c907_56a39fff",
+      "revId": "542d12373e86ae12165df6fd54d6f20fdc6c1a48",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
