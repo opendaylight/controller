@@ -10,7 +10,7 @@ package org.opendaylight.controller.mdsal;
 import org.opendaylight.controller.config.yang.messagebus.app.impl.NamespaceToStream;
 import org.opendaylight.controller.messagebus.app.impl.EventAggregator;
 import org.opendaylight.controller.messagebus.app.impl.EventSourceManager;
-import org.opendaylight.controller.messagebus.app.impl.EventSourceTopology;
+import org.opendaylight.controller.messagebus.app.impl.NetconfEventSourceTopology;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sal.core.api.Broker;
 import org.slf4j.Logger;
@@ -23,14 +23,14 @@ public class InitializationContext {
 
     private final MdSAL mdSal;
     private final DataStore dataStore;
-    private final EventSourceTopology eventSourceTopology;
+    private final NetconfEventSourceTopology eventSourceTopology;
     private final EventSourceManager eventSourceManager;
     private final EventAggregator eventAggregator;
 
     public InitializationContext(List<NamespaceToStream> namespaceMapping) {
         this.mdSal = new MdSAL();
         this.dataStore = new DataStore(mdSal);
-        this.eventSourceTopology = new EventSourceTopology(dataStore);
+        this.eventSourceTopology = new NetconfEventSourceTopology(dataStore, mdSal);
         this.eventSourceManager = new EventSourceManager(dataStore, mdSal, eventSourceTopology, namespaceMapping);
         this.eventAggregator = new EventAggregator(mdSal, eventSourceTopology);
     }

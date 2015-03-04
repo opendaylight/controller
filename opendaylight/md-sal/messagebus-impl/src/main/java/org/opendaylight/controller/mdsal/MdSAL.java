@@ -41,6 +41,16 @@ public class MdSAL {
     private BindingAwareBroker.ProviderContext bindingAwareContext;
     private Broker.ProviderSession bindingIndependentContext;
 
+    
+    public BindingAwareBroker.ProviderContext getBindingAwareContext(){
+    	return this.bindingAwareContext;
+    }
+    
+    public Broker.ProviderSession getBindingIndependentContext(){
+    	return bindingIndependentContext;
+    }
+    
+    
     // -----------------------------
     // ----- FRAMEWORK METHODS -----
     // -----------------------------
@@ -84,6 +94,7 @@ public class MdSAL {
         registration.registerPath(NodeContext.class, nodeRef.getValue());
     }
 
+    
     public ListenerRegistration<NotificationListener> addNotificationListener(String nodeId,
                                                                               QName notification,
                                                                               NotificationListener listener) {

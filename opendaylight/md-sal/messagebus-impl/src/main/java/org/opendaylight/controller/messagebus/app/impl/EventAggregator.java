@@ -29,9 +29,9 @@ public class EventAggregator implements EventAggregatorService {
     private static final Logger LOGGER = LoggerFactory.getLogger(EventAggregator.class);
 
     private final MdSAL mdSAL;
-    private final EventSourceTopology eventSourceTopology;
+    private final NetconfEventSourceTopology eventSourceTopology;
 
-    public EventAggregator(final MdSAL mdSAL, final EventSourceTopology eventSourceTopology) {
+    public EventAggregator(final MdSAL mdSAL, final NetconfEventSourceTopology eventSourceTopology) {
         this.mdSAL = mdSAL;
         this.eventSourceTopology = eventSourceTopology;
     }
