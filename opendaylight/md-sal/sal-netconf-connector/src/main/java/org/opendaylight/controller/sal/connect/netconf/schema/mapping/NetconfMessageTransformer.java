@@ -65,7 +65,6 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
 
     private static final Logger LOG= LoggerFactory.getLogger(NetconfMessageTransformer.class);
 
-    private static final DomToNormalizedNodeParserFactory NORMALIZED_NODE_PARSER_FACTORY = DomToNormalizedNodeParserFactory.getInstance(XmlUtils.DEFAULT_XML_CODEC_PROVIDER);
 
     private static final Function<SchemaNode, QName> QNAME_FUNCTION = new Function<SchemaNode, QName>() {
         @Override
@@ -99,10 +98,12 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
     private final MessageCounter counter;
     private final Map<QName, RpcDefinition> mappedRpcs;
     private final Multimap<QName, NotificationDefinition> mappedNotifications;
+    private final DomToNormalizedNodeParserFactory parserFactory;
 
     public NetconfMessageTransformer(final SchemaContext schemaContext) {
         this.counter = new MessageCounter();
         this.schemaContext = schemaContext;
+        parserFactory = DomToNormalizedNodeParserFactory.getInstance(XmlUtils.DEFAULT_XML_CODEC_PROVIDER, schemaContext);
 
         mappedRpcs = Maps.uniqueIndex(schemaContext.getOperations(), QNAME_FUNCTION);
         mappedNotifications = Multimaps.index(schemaContext.getNotifications(), QNAME_NOREV_FUNCTION);
@@ -129,7 +130,7 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
 
         // We wrap the notification as a container node in order to reuse the parsers and builders for container node
         final ContainerSchemaNode notificationAsContainerSchemaNode = NetconfMessageTransformUtil.createSchemaForNotification(next);
-        return NORMALIZED_NODE_PARSER_FACTORY.getContainerNodeParser().parse(Collections.singleton(stripped.getDomElement()), notificationAsContainerSchemaNode);
+        return parserFactory.getContainerNodeParser().parse(Collections.singleton(stripped.getDomElement()), notificationAsContainerSchemaNode);
     }
 
     // FIXME move somewhere to util
@@ -219,7 +220,7 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
         if (NetconfMessageTransformUtil.isDataRetrievalOperation(rpc.getLastComponent())) {
             final Element xmlData = NetconfMessageTransformUtil.getDataSubtree(message.getDocument());
             final ContainerSchemaNode schemaForDataRead = NetconfMessageTransformUtil.createSchemaForDataRead(schemaContext);
-            final ContainerNode dataNode = NORMALIZED_NODE_PARSER_FACTORY.getContainerNodeParser().parse(Collections.singleton(xmlData), schemaForDataRead);
+            final ContainerNode dataNode = parserFactory.getContainerNodeParser().parse(Collections.singleton(xmlData), schemaForDataRead);
 
             normalizedNode = Builders.containerBuilder().withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(NetconfMessageTransformUtil.NETCONF_RPC_REPLY_QNAME))
                     .withChild(dataNode).build();
@@ -234,7 +235,7 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
                         "Unexpected content in response of rpc: %s, %s", rpcDefinition.getQName(), message);
                 normalizedNode = null;
             } else {
-                normalizedNode = NORMALIZED_NODE_PARSER_FACTORY.getContainerNodeParser().parse(documentElement, rpcDefinition.getOutput());
+                normalizedNode = parserFactory.getContainerNodeParser().parse(documentElement, rpcDefinition.getOutput());
             }
         }
         return new DefaultDOMRpcResult(normalizedNode);
