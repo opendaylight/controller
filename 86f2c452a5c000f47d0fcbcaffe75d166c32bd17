@@ -1,0 +1,78 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_00538d39",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DistributedDataStore.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-04T01:23:30Z",
+      "side": 1,
+      "message": "If the semaphore isn\u0027t acquired, i.e. at least 1 shard didn\u0027t elect a leader, should we proceed with startup knowing transactions will fail? We could throw an exception back to the config system although not sure how it would handle it. Maybe the config system tries again later or could be enhanced to do so. \n\nAnother option is to loop forever until it succeeds. \n\nWe can think about this and refine it later.",
+      "range": {
+        "startLine": 138,
+        "startChar": 79,
+        "endLine": 138,
+        "endChar": 88
+      },
+      "revId": "86f2c452a5c000f47d0fcbcaffe75d166c32bd17",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_60429169",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DistributedDataStore.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-04T01:23:30Z",
+      "side": 1,
+      "message": "I think the timeout should be at least shardLeaderElectionTimeout * 2 since a shard will time out out twice as follower and candidate if no leader is elected. We probably want to cushion a little more time for latencies and b/c shards aren\u0027t created until the ShardManager has gotten all the last known schemas. Maybe shardLeaderElectionTimeout * 3.",
+      "revId": "86f2c452a5c000f47d0fcbcaffe75d166c32bd17",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_e003010e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-04T01:23:30Z",
+      "side": 1,
+      "message": "I haven\u0027t used Semaphores but I assume you\u0027re checking availablePermits here to avoid releasing more than once. Would a CountDownLatch might be more appropriate here? Calling countDown() when it\u0027s already 0 has no effect.",
+      "revId": "86f2c452a5c000f47d0fcbcaffe75d166c32bd17",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_803ebdd8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-04T01:23:30Z",
+      "side": 1,
+      "message": "Can you this into another method for clarity?",
+      "revId": "86f2c452a5c000f47d0fcbcaffe75d166c32bd17",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
