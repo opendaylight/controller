@@ -11,11 +11,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
@@ -23,23 +24,18 @@ import org.opendaylight.controller.sal.binding.api.data.DataChangeListener;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.controller.sal.binding.test.AbstractDataServiceTest;
 import org.opendaylight.controller.sal.binding.test.AugmentationVerifier;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.Counter32;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.Counter64;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNode;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowCapableNodeBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.Nodes;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.NodeKey;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.NodeMeterStatistics;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.NodeMeterStatisticsBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.statistics.rev131111.nodes.node.meter.MeterStatisticsBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.MeterId;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.meter.statistics.DurationBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.meter.statistics.reply.MeterStats;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.meter.statistics.reply.MeterStatsBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.meter.types.rev130918.meter.statistics.reply.MeterStatsKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.augment.rev140709.TreeComplexUsesAugment;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.augment.rev140709.TreeComplexUsesAugmentBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.augment.rev140709.TreeLeafOnlyAugment;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.augment.rev140709.TreeLeafOnlyAugmentBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.augment.rev140709.complex.from.grouping.ContainerWithUsesBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.augment.rev140709.complex.from.grouping.ListViaUses;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.augment.rev140709.complex.from.grouping.ListViaUsesBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.augment.rev140709.complex.from.grouping.ListViaUsesKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.Top;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelList;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelListBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelListKey;
 import org.opendaylight.yangtools.yang.binding.Augmentation;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -50,24 +46,24 @@ import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 @Deprecated
 public class MultipleAugmentationPutsTest extends AbstractDataServiceTest implements DataChangeListener {
 
-    private static final QName NODE_ID_QNAME = QName.create(Node.QNAME, "id");
+    private static final QName NODE_ID_QNAME = QName.create(TopLevelList.QNAME, "name");
     private static final String NODE_ID = "openflow:1";
 
-    private static final NodeKey NODE_KEY = new NodeKey(new NodeId(NODE_ID));
+    private static final TopLevelListKey NODE_KEY = new TopLevelListKey(NODE_ID);
 
     private static final Map<QName, Object> NODE_KEY_BI = Collections.<QName, Object> singletonMap(NODE_ID_QNAME,
             NODE_ID);
 
-    private static final InstanceIdentifier<Nodes> NODES_INSTANCE_ID_BA = InstanceIdentifier.builder(Nodes.class) //
+    private static final InstanceIdentifier<Top> NODES_INSTANCE_ID_BA = InstanceIdentifier.builder(Top.class) //
             .toInstance();
 
-    private static final InstanceIdentifier<Node> NODE_INSTANCE_ID_BA =
-            NODES_INSTANCE_ID_BA.child(Node.class, NODE_KEY);
+    private static final InstanceIdentifier<TopLevelList> NODE_INSTANCE_ID_BA =
+            NODES_INSTANCE_ID_BA.child(TopLevelList.class, NODE_KEY);
 
     private static final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier NODE_INSTANCE_ID_BI = //
     org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.builder() //
-            .node(Nodes.QNAME) //
-            .nodeWithKey(Node.QNAME, NODE_KEY_BI) //
+            .node(Top.QNAME) //
+            .nodeWithKey(TopLevelList.QNAME, NODE_KEY_BI) //
             .toInstance();
     private DataChangeEvent<InstanceIdentifier<?>, DataObject> receivedChangeEvent;
 
@@ -81,56 +77,56 @@ public class MultipleAugmentationPutsTest extends AbstractDataServiceTest implem
 
         baDataService.registerDataChangeListener(NODES_INSTANCE_ID_BA, this);
 
-        Node flowCapableNode = createTestNode(FlowCapableNode.class, flowCapableNodeAugmentation());
+        TopLevelList flowCapableNode = createTestNode(TreeLeafOnlyAugment.class, createTreeLeafOnlyAugmentation());
         commitNodeAndVerifyTransaction(flowCapableNode);
 
         assertNotNull(receivedChangeEvent);
-        verifyNode((Nodes) receivedChangeEvent.getUpdatedOperationalSubtree(), flowCapableNode);
+        verifyNode((Top) receivedChangeEvent.getUpdatedOperationalSubtree(), flowCapableNode);
 
-        Nodes nodes = checkForNodes();
-        verifyNode(nodes, flowCapableNode).assertHasAugmentation(FlowCapableNode.class);
+        Top nodes = checkForNodes();
+        verifyNode(nodes, flowCapableNode).assertHasAugmentation(TreeLeafOnlyAugment.class);
         assertBindingIndependentVersion(NODE_INSTANCE_ID_BI);
-//        Node meterStatsNode = createTestNode(NodeMeterStatistics.class, nodeMeterStatistics());
-//        commitNodeAndVerifyTransaction(meterStatsNode);
-//
-//        assertNotNull(receivedChangeEvent);
-//        verifyNode((Nodes) receivedChangeEvent.getUpdatedOperationalSubtree(), meterStatsNode);
-//
-//        assertBindingIndependentVersion(NODE_INSTANCE_ID_BI);
-//
-//        Node mergedNode = (Node) baDataService.readOperationalData(NODE_INSTANCE_ID_BA);
-//
-//        AugmentationVerifier.from(mergedNode) //
-//                .assertHasAugmentation(FlowCapableNode.class) //
-//                .assertHasAugmentation(NodeMeterStatistics.class);
-//
-//        assertBindingIndependentVersion(NODE_INSTANCE_ID_BI);
-//
-//        Node meterStatsNodeWithDuration = createTestNode(NodeMeterStatistics.class, nodeMeterStatistics(5, true));
-//        commitNodeAndVerifyTransaction(meterStatsNodeWithDuration);
-//
-//
-//        Node nodeWithUpdatedList = (Node) baDataService.readOperationalData(NODE_INSTANCE_ID_BA);
-//        AugmentationVerifier.from(nodeWithUpdatedList) //
-//                .assertHasAugmentation(FlowCapableNode.class) //
-//                .assertHasAugmentation(NodeMeterStatistics.class);
-//
-//        List<MeterStats> meterStats = nodeWithUpdatedList.getAugmentation(NodeMeterStatistics.class).getMeterStatistics().getMeterStats();
-//        assertNotNull(meterStats);
-//        assertFalse(meterStats.isEmpty());
-//        assertBindingIndependentVersion(NODE_INSTANCE_ID_BI);
+        TopLevelList meterStatsNode = createTestNode(TreeComplexUsesAugment.class, createTreeComplexUsesAugment());
+        commitNodeAndVerifyTransaction(meterStatsNode);
+
+        assertNotNull(receivedChangeEvent);
+        verifyNode((Top) receivedChangeEvent.getUpdatedOperationalSubtree(), meterStatsNode);
+
+        assertBindingIndependentVersion(NODE_INSTANCE_ID_BI);
+
+        TopLevelList mergedNode = (TopLevelList) baDataService.readOperationalData(NODE_INSTANCE_ID_BA);
+
+        AugmentationVerifier.from(mergedNode) //
+                .assertHasAugmentation(TreeLeafOnlyAugment.class) //
+                .assertHasAugmentation(TreeComplexUsesAugment.class);
+
+        assertBindingIndependentVersion(NODE_INSTANCE_ID_BI);
+
+        TopLevelList meterStatsNodeWithDuration = createTestNode(TreeComplexUsesAugment.class, createTreeComplexUsesAugment(5));
+        commitNodeAndVerifyTransaction(meterStatsNodeWithDuration);
+
+
+        TopLevelList nodeWithUpdatedList = (TopLevelList) baDataService.readOperationalData(NODE_INSTANCE_ID_BA);
+        AugmentationVerifier.from(nodeWithUpdatedList) //
+                .assertHasAugmentation(TreeLeafOnlyAugment.class) //
+                .assertHasAugmentation(TreeComplexUsesAugment.class);
+
+        List<ListViaUses> meterStats = nodeWithUpdatedList.getAugmentation(TreeComplexUsesAugment.class).getListViaUses();
+        assertNotNull(meterStats);
+        Assert.assertFalse(meterStats.isEmpty());
+        assertBindingIndependentVersion(NODE_INSTANCE_ID_BI);
         testNodeRemove();
     }
 
-    private <T extends Augmentation<Node>> Node createTestNode(final Class<T> augmentationClass, final T augmentation) {
-        NodeBuilder nodeBuilder = new NodeBuilder();
-        nodeBuilder.setId(new NodeId(NODE_ID));
+    private static <T extends Augmentation<TopLevelList>> TopLevelList createTestNode(final Class<T> augmentationClass, final T augmentation) {
+        TopLevelListBuilder nodeBuilder = new TopLevelListBuilder();
         nodeBuilder.setKey(NODE_KEY);
+        nodeBuilder.setName(NODE_KEY.getName());
         nodeBuilder.addAugmentation(augmentationClass, augmentation);
         return nodeBuilder.build();
     }
 
-    private DataModificationTransaction commitNodeAndVerifyTransaction(final Node original) throws Exception {
+    private DataModificationTransaction commitNodeAndVerifyTransaction(final TopLevelList original) throws Exception {
         DataModificationTransaction transaction = baDataService.beginTransaction();
         transaction.putOperationalData(NODE_INSTANCE_ID_BA, original);
         RpcResult<TransactionStatus> result = transaction.commit().get();
@@ -144,18 +140,18 @@ public class MultipleAugmentationPutsTest extends AbstractDataServiceTest implem
         RpcResult<TransactionStatus> result = transaction.commit().get();
         assertEquals(TransactionStatus.COMMITED, result.getResult());
 
-        Node node = (Node) baDataService.readOperationalData(NODE_INSTANCE_ID_BA);
+        TopLevelList node = (TopLevelList) baDataService.readOperationalData(NODE_INSTANCE_ID_BA);
         assertNull(node);
     }
 
-    private AugmentationVerifier<Node> verifyNode(final Nodes nodes, final Node original) {
+    private static AugmentationVerifier<TopLevelList> verifyNode(final Top nodes, final TopLevelList original) {
         assertNotNull(nodes);
-        assertNotNull(nodes.getNode());
-        assertEquals(1, nodes.getNode().size());
-        Node readedNode = nodes.getNode().get(0);
-        assertEquals(original.getId(), readedNode.getId());
+        assertNotNull(nodes.getTopLevelList());
+        assertEquals(1, nodes.getTopLevelList().size());
+        TopLevelList readedNode = nodes.getTopLevelList().get(0);
+        assertEquals(original.getName(), readedNode.getName());
         assertEquals(original.getKey(), readedNode.getKey());
-        return new AugmentationVerifier<Node>(readedNode);
+        return new AugmentationVerifier<>(readedNode);
     }
 
     private void assertBindingIndependentVersion(final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier nodeId) {
@@ -163,46 +159,36 @@ public class MultipleAugmentationPutsTest extends AbstractDataServiceTest implem
         assertNotNull(node);
     }
 
-    private Nodes checkForNodes() {
-        return (Nodes) baDataService.readOperationalData(NODES_INSTANCE_ID_BA);
+    private Top checkForNodes() {
+        return (Top) baDataService.readOperationalData(NODES_INSTANCE_ID_BA);
     }
 
-    private NodeMeterStatistics nodeMeterStatistics() {
-        return nodeMeterStatistics(10, false);
+    private static TreeComplexUsesAugment createTreeComplexUsesAugment() {
+        return createTreeComplexUsesAugment(10);
     }
 
-    private NodeMeterStatistics nodeMeterStatistics(final int count, final boolean setDuration) {
-        NodeMeterStatisticsBuilder nmsb = new NodeMeterStatisticsBuilder();
-        MeterStatisticsBuilder meterStats = new MeterStatisticsBuilder();
+    private static TreeComplexUsesAugment createTreeComplexUsesAugment(final int count) {
+        TreeComplexUsesAugmentBuilder tcuaBld = new TreeComplexUsesAugmentBuilder();
+        ContainerWithUsesBuilder cwuBld = new ContainerWithUsesBuilder();
+        cwuBld.setLeafFromGrouping("lfg1");
 
-        List<MeterStats> stats = new ArrayList<>(count);
+        List<ListViaUses> lvuBag = new ArrayList<>(count);
         for (int i = 0; i <= count; i++) {
-            MeterStatsBuilder statistic = new MeterStatsBuilder();
-            statistic.setKey(new MeterStatsKey(new MeterId((long) i)));
-            statistic.setByteInCount(new Counter64(BigInteger.valueOf(34590 + i)));
-            statistic.setFlowCount(new Counter32(4569L + i));
-
-            if (setDuration) {
-                DurationBuilder duration = new DurationBuilder();
-                duration.setNanosecond(new Counter32(70L));
-                statistic.setDuration(duration.build());
-            }
-
-            stats.add(statistic.build());
+            ListViaUsesBuilder statistic = new ListViaUsesBuilder();
+            String name = String.valueOf(i);
+            statistic.setKey(new ListViaUsesKey(name));
+            statistic.setName(name);
+            lvuBag.add(statistic.build());
         }
-       // meterStats.setMeterStats(stats);
-        nmsb.setMeterStatistics(meterStats.build());
-        return nmsb.build();
+        tcuaBld.setContainerWithUses(cwuBld.build());
+        tcuaBld.setListViaUses(lvuBag);
+        return tcuaBld.build();
     }
 
-    private FlowCapableNode flowCapableNodeAugmentation() {
-        FlowCapableNodeBuilder fnub = new FlowCapableNodeBuilder();
-        fnub.setHardware("Hardware Foo");
-        fnub.setManufacturer("Manufacturer Foo");
-        fnub.setSerialNumber("Serial Foo");
-        fnub.setDescription("Description Foo");
-        fnub.setSoftware("JUnit emulated");
-        FlowCapableNode fnu = fnub.build();
+    private static TreeLeafOnlyAugment createTreeLeafOnlyAugmentation() {
+        TreeLeafOnlyAugmentBuilder fnub = new TreeLeafOnlyAugmentBuilder();
+        fnub.setSimpleValue("meVerySimpleIs");
+        TreeLeafOnlyAugment fnu = fnub.build();
         return fnu;
     }
 

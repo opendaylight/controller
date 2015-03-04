@@ -103,7 +103,6 @@
     <module>features/adsal</module>
     <module>features/nsf</module>
     <module>features/extras</module>
-    <module>features/adsal-compatibility</module>
   </modules>
   <profiles>
     <profile>
