@@ -44,7 +44,7 @@ baseline, for example on an upcoming major release. Single artifact
 release is useful for example for API bundles which are supposed to be
 used by others, this in fact seal the contract for that given version
 and others can rest assured won't change because the maven repository
-will not allow a the same artifact with the same version to be
+will not allow the same artifact with the same version to be
 re-deployed.
 
 HOW TO BULK RELEASE ARTIFACTS
