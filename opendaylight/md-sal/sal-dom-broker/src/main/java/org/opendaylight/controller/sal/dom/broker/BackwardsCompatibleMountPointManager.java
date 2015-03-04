@@ -88,7 +88,7 @@ public class BackwardsCompatibleMountPointManager implements MountProvisionServi
 
     @Override
     public void onMountPointCreated(final YangInstanceIdentifier path) {
-        notifyMountCreated(path);
+//        notifyMountCreated(path);
     }
 
     @Override
