@@ -69,6 +69,24 @@
       "revId": "1e7b76d3fbd9d5af3b68b03a8a9299c6ccdf9767",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_dbd83a20",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/FollowerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 191,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-04T01:22:16Z",
+      "side": 1,
+      "message": "Right - I missed that you\u0027re looking for the absence of the message.",
+      "parentUuid": "7a96c907_9beb9212",
+      "revId": "1e7b76d3fbd9d5af3b68b03a8a9299c6ccdf9767",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
