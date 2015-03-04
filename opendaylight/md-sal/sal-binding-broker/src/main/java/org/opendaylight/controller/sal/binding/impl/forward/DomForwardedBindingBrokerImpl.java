@@ -146,12 +146,12 @@ public class DomForwardedBindingBrokerImpl extends RootBindingAwareBroker implem
 
         @Override
         public void onMountPointCreated(org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier path) {
-            tryToDeployDomForwarder(path);
+//            tryToDeployDomForwarder(path);
         }
 
         @Override
         public void onMountPointRemoved(org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier path) {
-            undeployDomForwarder(path);
+//            undeployDomForwarder(path);
         }
     }
 
