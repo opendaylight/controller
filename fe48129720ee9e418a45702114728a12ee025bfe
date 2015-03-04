@@ -16,6 +16,24 @@
       "revId": "fe48129720ee9e418a45702114728a12ee025bfe",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_fd78472d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1582,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-04T12:43:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_363933d7",
+      "revId": "fe48129720ee9e418a45702114728a12ee025bfe",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
