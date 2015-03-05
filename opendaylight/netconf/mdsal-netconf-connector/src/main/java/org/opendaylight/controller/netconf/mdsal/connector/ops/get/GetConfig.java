@@ -61,7 +61,6 @@ public class GetConfig extends AbstractGet {
             final Optional<NormalizedNode<?, ?>> normalizedNodeOptional = rwTx.read(LogicalDatastoreType.CONFIGURATION, dataRoot).checkedGet();
             if (getConfigExecution.getDatastore().get() == Datastore.running) {
                 transactionProvider.abortRunningTransaction(rwTx);
-                rwTx = null;
             }
             return (Element) transformNormalizedNode(document, normalizedNodeOptional.get(), dataRoot);
         } catch (ReadFailedException e) {
