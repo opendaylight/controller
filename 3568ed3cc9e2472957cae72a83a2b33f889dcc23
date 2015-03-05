@@ -2,6 +2,57 @@
   "comments": [
     {
       "key": {
+        "uuid": "5a93c517_03091231",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/mdsal/DataStore.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-03-05T10:26:40Z",
+      "side": 1,
+      "message": "trailing whitespace",
+      "revId": "3568ed3cc9e2472957cae72a83a2b33f889dcc23",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_a305be15",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/mdsal/DataStore.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-03-05T10:26:40Z",
+      "side": 1,
+      "message": "convert tabs to spaces",
+      "revId": "3568ed3cc9e2472957cae72a83a2b33f889dcc23",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_66ffc402",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/registration/EventSource.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-03-05T10:26:40Z",
+      "side": 1,
+      "message": "missing copyright header",
+      "revId": "3568ed3cc9e2472957cae72a83a2b33f889dcc23",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_3d146ff4",
         "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/registration/EventSource.java",
         "patchSetId": 1
@@ -25,6 +76,23 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_460e4836",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/registration/EventSource.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-03-05T10:26:40Z",
+      "side": 1,
+      "message": "public is implied for all interface methods, stating it explicitly triggers a Sonar warning",
+      "revId": "3568ed3cc9e2472957cae72a83a2b33f889dcc23",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_bd687f88",
         "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/registration/EventSourceNodeRegistration.java",
         "patchSetId": 1
@@ -36,6 +104,23 @@
       "writtenOn": "2015-03-04T09:45:56Z",
       "side": 1,
       "message": "Pleas use Eclipse Public License header as was present in other sources.",
+      "revId": "3568ed3cc9e2472957cae72a83a2b33f889dcc23",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_a61cec6b",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/registration/EventSourceNodeRegistration.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-03-05T10:26:40Z",
+      "side": 1,
+      "message": "LOGGER -\u003e LOG, as per coding style guidelines",
       "revId": "3568ed3cc9e2472957cae72a83a2b33f889dcc23",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -105,6 +190,40 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_c619f87a",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/registration/EventSourceNodeRegistry.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-03-05T10:26:40Z",
+      "side": 1,
+      "message": "use Preconditions.checkNotNull(), we do not want to propagate nulls.",
+      "revId": "3568ed3cc9e2472957cae72a83a2b33f889dcc23",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_6626e4bc",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/registration/EventSourceNodeRegistry.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-03-05T10:26:40Z",
+      "side": 1,
+      "message": "this should not be necessary -- closing a registration should be the only way to do this.",
+      "revId": "3568ed3cc9e2472957cae72a83a2b33f889dcc23",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_7d0af7d3",
         "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/registration/EventSourceRegistration.java",
         "patchSetId": 1
@@ -122,6 +241,23 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_2620dc9a",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/registration/EventSourceRegistration.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-03-05T10:26:40Z",
+      "side": 1,
+      "message": "needs to be an interface, plus provide an AbstractEventSourceRegistration.",
+      "revId": "3568ed3cc9e2472957cae72a83a2b33f889dcc23",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_1d0f33e3",
         "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/registration/EventSourceRegistry.java",
         "patchSetId": 1
@@ -133,6 +269,23 @@
       "writtenOn": "2015-03-04T09:45:56Z",
       "side": 1,
       "message": "Pleas use Eclipse Public License header as was present in other sources.",
+      "revId": "3568ed3cc9e2472957cae72a83a2b33f889dcc23",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_862bf081",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/registration/EventSourceRegistry.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-03-05T10:26:40Z",
+      "side": 1,
+      "message": "\u003cT extends EventSource\u003c?\u003e\u003e EventSourceRegistration\u003cT\u003e registerEventSource(T es);\n\nDeclared return needs to be an interface, not an abstract class.",
       "revId": "3568ed3cc9e2472957cae72a83a2b33f889dcc23",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
