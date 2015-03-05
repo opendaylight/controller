@@ -31,8 +31,19 @@
     <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>yang-data-impl</artifactId>
+      <exclusions>
+          <exclusion>
+              <groupId>org.opendaylight.yangtools</groupId>
+              <artifactId>object-cache-api</artifactId>
+          </exclusion>
+      </exclusions>
+
     </dependency>
-    <dependency>
+      <dependency>
+          <groupId>org.opendaylight.yangtools</groupId>
+          <artifactId>object-cache-noop</artifactId>
+      </dependency>
+      <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-core-api</artifactId>
     </dependency>
@@ -57,8 +68,33 @@
       <artifactId>config-util</artifactId>
     </dependency>
       <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>config-api</artifactId>
+      </dependency>
+      <dependency>
           <groupId>org.opendaylight.yangtools</groupId>
           <artifactId>yang-data-operations</artifactId>
+      </dependency>
+      <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>sal-broker-impl</artifactId>
+          <scope>test</scope>
+      </dependency>
+      <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>sal-distributed-datastore</artifactId>
+          <scope>test</scope>
+      </dependency>
+      <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>netconf-util</artifactId>
+          <type>test-jar</type>
+          <scope>test</scope>
+      </dependency>
+      <dependency>
+          <groupId>xmlunit</groupId>
+          <artifactId>xmlunit</artifactId>
+          <scope>test</scope>
       </dependency>
 
   </dependencies>

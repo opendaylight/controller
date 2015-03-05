@@ -1,0 +1,39 @@
+<!--
+  ~ Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+  ~
+  ~ This program and the accompanying materials are made available under the
+  ~ terms of the Eclipse Public License v1.0 which accompanies this distribution,
+  ~ and is available at http://www.eclipse.org/legal/epl-v10.html
+  -->
+
+<rpc message-id="a" a="64" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+    <edit-config>
+        <target>
+            <candidate/>
+        </target>
+        <test-option>
+            set
+        </test-option>
+        <default-operation>merge</default-operation>
+        <config>
+            <mapping-nodes xmlns="urn:opendaylight:mdsal:mapping:test">
+                <mapping-node xmlns:a="urn:ietf:params:xml:ns:netconf:base:1.0" a:operation="delete">
+                    <id>node1-merge</id>
+                    <content>overwritten old content node1</content>
+                </mapping-node>
+                <mapping-node xmlns:a="urn:ietf:params:xml:ns:netconf:base:1.0" a:operation="delete">
+                    <id>node2-merge</id>
+                    <content>overwritten old content node2</content>
+                </mapping-node>
+                <mapping-node>
+                    <id>new-node5</id>
+                    <content>new node5 content</content>
+                </mapping-node>
+                <mapping-node>
+                    <id>new-node6</id>
+                    <content>new node6 content</content>
+                </mapping-node>
+            </mapping-nodes>
+        </config>
+    </edit-config>
+</rpc>

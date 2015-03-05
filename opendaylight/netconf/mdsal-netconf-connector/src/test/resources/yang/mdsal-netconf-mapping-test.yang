@@ -1,0 +1,21 @@
+module config {
+    yang-version 1;
+    namespace "urn:opendaylight:mdsal:mapping:test";
+    prefix "map";
+
+    revision "2015-02-26";
+
+    container mapping-nodes {
+
+        list mapping-node{
+            key "id";
+            leaf id {
+                type string;
+            }
+
+            leaf content {
+                type string;
+            }
+        }
+    }
+}
