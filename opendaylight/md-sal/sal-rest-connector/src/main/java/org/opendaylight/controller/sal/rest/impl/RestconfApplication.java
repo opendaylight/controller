@@ -47,10 +47,10 @@ public class RestconfApplication extends Application {
         singletons.add(brokerFacade);
         singletons.add(schemaRetrieval);
         singletons.add(new RestconfCompositeWrapper(StatisticsRestconfServiceWrapper.getInstance(), schemaRetrieval));
-        singletons.add(StructuredDataToXmlProvider.INSTANCE);
-        singletons.add(StructuredDataToJsonProvider.INSTANCE);
-        singletons.add(JsonToCompositeNodeProvider.INSTANCE);
-        singletons.add(XmlToCompositeNodeProvider.INSTANCE);
+//        singletons.add(StructuredDataToXmlProvider.INSTANCE);
+//        singletons.add(StructuredDataToJsonProvider.INSTANCE);
+//        singletons.add(JsonToCompositeNodeProvider.INSTANCE);
+//        singletons.add(XmlToCompositeNodeProvider.INSTANCE);
         return singletons;
     }
 
