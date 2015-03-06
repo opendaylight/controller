@@ -12,14 +12,20 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import java.io.IOException;
 import java.net.URI;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
+import javax.xml.transform.dom.DOMResult;
+import javax.xml.transform.dom.DOMSource;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.util.messages.NetconfMessageUtil;
+import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf.base._1._0.rev110601.edit.config.input.EditContent;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf.notification._1._0.rev080714.CreateSubscriptionInput;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.NetconfState;
@@ -30,26 +36,41 @@ import org.opendaylight.yangtools.yang.common.RpcError.ErrorSeverity;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.ModifyAction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.AnyXmlNode;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
+import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeWriter;
+import org.opendaylight.yangtools.yang.data.impl.codec.xml.XMLStreamNormalizedNodeStreamWriter;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeAttrBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.NormalizedNodeAttrBuilder;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
-import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
-import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.NotificationDefinition;
-import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class NetconfMessageTransformUtil {
 
+    private static final Logger LOG= LoggerFactory.getLogger(NetconfMessageTransformUtil.class);
+
     public static final String MESSAGE_ID_ATTR = "message-id";
+    public static final XMLOutputFactory XML_FACTORY;
+
+    static {
+        XML_FACTORY = XMLOutputFactory.newFactory();
+        XML_FACTORY.setProperty(XMLOutputFactory.IS_REPAIRING_NAMESPACES, false);
+    }
+
     public static final QName CREATE_SUBSCRIPTION_RPC_QNAME = QName.cachedReference(QName.create(CreateSubscriptionInput.QNAME, "create-subscription"));
     private static final String SUBTREE = "subtree";
+
+    // Blank document used for creation of new DOM nodes
+    private static final Document BLANK_DOCUMENT = XmlUtil.newDocument();
 
     private NetconfMessageTransformUtil() {}
 
@@ -121,13 +142,22 @@ public class NetconfMessageTransformUtil {
             Builders.containerBuilder().withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(CREATE_SUBSCRIPTION_RPC_QNAME)).build();
 
     public static DataContainerChild<?, ?> toFilterStructure(final YangInstanceIdentifier identifier, final SchemaContext ctx) {
-        final DataContainerNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier, ContainerNode> filterBuilder = Builders.containerBuilder().withNodeIdentifier(toId(NETCONF_FILTER_QNAME));
-        filterBuilder.withAttributes(Collections.singletonMap(NETCONF_TYPE_QNAME, SUBTREE));
+        final NormalizedNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier, DOMSource, AnyXmlNode> anyXmlBuilder = Builders.anyXmlBuilder().withNodeIdentifier(toId(NETCONF_FILTER_QNAME));
+        anyXmlBuilder.withAttributes(Collections.singletonMap(NETCONF_TYPE_QNAME, SUBTREE));
 
-        if (Iterables.isEmpty(identifier.getPathArguments()) == false) {
-            filterBuilder.withChild((DataContainerChild<?, ?>) InstanceIdToNodes.serialize(ctx, identifier));
+        final NormalizedNode<?, ?> filterContent = InstanceIdToNodes.serialize(ctx, identifier);
+
+        final Element element = XmlUtil.createElement(BLANK_DOCUMENT, NETCONF_FILTER_QNAME.getLocalName(), Optional.of(NETCONF_FILTER_QNAME.getNamespace().toString()));
+        element.setAttributeNS(NETCONF_FILTER_QNAME.getNamespace().toString(), NETCONF_TYPE_QNAME.getLocalName(), "subtree");
+
+        try {
+            writeNormalizedNode(filterContent, new DOMResult(element), SchemaPath.ROOT, ctx);
+        } catch (IOException | XMLStreamException e) {
+            throw new IllegalStateException("Unable to serialize filter element for path " + identifier, e);
         }
-        return filterBuilder.build();
+        anyXmlBuilder.withValue(new DOMSource(element));
+
+        return anyXmlBuilder.build();
     }
 
     public static void checkValidReply(final NetconfMessage input, final NetconfMessage output)
@@ -215,127 +245,13 @@ public class NetconfMessageTransformUtil {
                         NETCONF_GET_QNAME.getLocalName()));
     }
 
-    public static boolean isDataEditOperation(final QName rpc) {
-        return NETCONF_URI.equals(rpc.getNamespace())
-                && rpc.getLocalName().equals(NETCONF_EDIT_CONFIG_QNAME.getLocalName());
-    }
-
-    /**
-     * Creates artificial schema node for edit-config rpc. This artificial schema looks like:
-     * <pre>
-     * {@code
-     * rpc
-     *   edit-config
-     *     config
-     *         // All schema nodes from remote schema
-     *     config
-     *   edit-config
-     * rpc
-     * }
-     * </pre>
-     *
-     * This makes the translation of rpc edit-config request(especially the config node)
-     * to xml use schema which is crucial for some types of nodes e.g. identity-ref.
-     */
-    public static DataNodeContainer createSchemaForEdit(final SchemaContext schemaContext) {
-        final QName config = QName.create(NETCONF_EDIT_CONFIG_QNAME, "config");
-        final QName editConfig = QName.create(NETCONF_EDIT_CONFIG_QNAME, "edit-config");
-        final NodeContainerProxy configProxy = new NodeContainerProxy(config, schemaContext.getChildNodes());
-        final NodeContainerProxy editConfigProxy = new NodeContainerProxy(editConfig, Sets.<DataSchemaNode>newHashSet(configProxy));
-        return new NodeContainerProxy(NETCONF_RPC_QNAME, Sets.<DataSchemaNode>newHashSet(editConfigProxy));
-    }
-
     public static ContainerSchemaNode createSchemaForDataRead(final SchemaContext schemaContext) {
         final QName config = QName.create(NETCONF_EDIT_CONFIG_QNAME, "data");
         return new NodeContainerProxy(config, schemaContext.getChildNodes());
     }
 
-
     public static ContainerSchemaNode createSchemaForNotification(final NotificationDefinition next) {
         return new NodeContainerProxy(next.getQName(), next.getChildNodes(), next.getAvailableAugmentations());
-    }
-
-    /**
-     * Creates artificial schema node for edit-config rpc. This artificial schema looks like:
-     * <pre>
-     * {@code
-     * rpc
-     *   get
-     *     filter
-     *         // All schema nodes from remote schema
-     *     filter
-     *   get
-     * rpc
-     * }
-     * </pre>
-     *
-     * This makes the translation of rpc get request(especially the config node)
-     * to xml use schema which is crucial for some types of nodes e.g. identity-ref.
-     */
-    public static DataNodeContainer createSchemaForGet(final SchemaContext schemaContext) {
-        final QName filter = QName.create(NETCONF_GET_QNAME, "filter");
-        final QName get = QName.create(NETCONF_GET_QNAME, "get");
-        final NodeContainerProxy configProxy = new NodeContainerProxy(filter, schemaContext.getChildNodes());
-        final NodeContainerProxy editConfigProxy = new NodeContainerProxy(get, Sets.<DataSchemaNode>newHashSet(configProxy));
-        return new NodeContainerProxy(NETCONF_RPC_QNAME, Sets.<DataSchemaNode>newHashSet(editConfigProxy));
-    }
-
-    /**
-     * Creates artificial schema node for get rpc. This artificial schema looks like:
-     * <pre>
-     * {@code
-     * rpc
-     *   get-config
-     *     filter
-     *         // All schema nodes from remote schema
-     *     filter
-     *   get-config
-     * rpc
-     * }
-     * </pre>
-     *
-     * This makes the translation of rpc get-config request(especially the config node)
-     * to xml use schema which is crucial for some types of nodes e.g. identity-ref.
-     */
-    public static DataNodeContainer createSchemaForGetConfig(final SchemaContext schemaContext) {
-        final QName filter = QName.create(NETCONF_GET_CONFIG_QNAME, "filter");
-        final QName getConfig = QName.create(NETCONF_GET_CONFIG_QNAME, "get-config");
-        final NodeContainerProxy configProxy = new NodeContainerProxy(filter, schemaContext.getChildNodes());
-        final NodeContainerProxy editConfigProxy = new NodeContainerProxy(getConfig, Sets.<DataSchemaNode>newHashSet(configProxy));
-        return new NodeContainerProxy(NETCONF_RPC_QNAME, Sets.<DataSchemaNode>newHashSet(editConfigProxy));
-    }
-
-    public static Optional<RpcDefinition> findSchemaForRpc(final QName rpcName, final SchemaContext schemaContext) {
-        Preconditions.checkNotNull(rpcName);
-        Preconditions.checkNotNull(schemaContext);
-
-        for (final RpcDefinition rpcDefinition : schemaContext.getOperations()) {
-            if(rpcDefinition.getQName().equals(rpcName)) {
-                return Optional.of(rpcDefinition);
-            }
-        }
-
-        return Optional.absent();
-    }
-
-    /**
-     * Creates artificial schema node for schema defined rpc. This artificial schema looks like:
-     * <pre>
-     * {@code
-     * rpc
-     *   rpc-name
-     *      // All schema nodes from remote schema
-     *   rpc-name
-     * rpc
-     * }
-     * </pre>
-     *
-     * This makes the translation of schema defined rpc request
-     * to xml use schema which is crucial for some types of nodes e.g. identity-ref.
-     */
-    public static DataNodeContainer createSchemaForRpc(final RpcDefinition rpcDefinition) {
-        final NodeContainerProxy rpcBodyProxy = new NodeContainerProxy(rpcDefinition.getQName(), rpcDefinition.getInput().getChildNodes());
-        return new NodeContainerProxy(NETCONF_RPC_QNAME, Sets.<DataSchemaNode>newHashSet(rpcBodyProxy));
     }
 
     public static ContainerNode wrap(final QName name, final DataContainerChild<?, ?>... node) {
@@ -344,32 +260,27 @@ public class NetconfMessageTransformUtil {
 
     public static DataContainerChild<?, ?> createEditConfigStructure(final SchemaContext ctx, final YangInstanceIdentifier dataPath,
                                                                      final Optional<ModifyAction> operation, final Optional<NormalizedNode<?, ?>> lastChildOverride) {
-        // TODO The config element inside the EditContent should be AnyXml not Container, but AnyXml is based on outdated API
+        final NormalizedNode<?, ?> configContent;
+
         if(Iterables.isEmpty(dataPath.getPathArguments())) {
             Preconditions.checkArgument(lastChildOverride.isPresent(), "Data has to be present when creating structure for top level element");
             Preconditions.checkArgument(lastChildOverride.get() instanceof DataContainerChild<?, ?>,
                     "Data has to be either container or a list node when creating structure for top level element, but was: %s", lastChildOverride.get());
-            return Builders.choiceBuilder().withNodeIdentifier(toId(EditContent.QNAME)).withChild(
-                    wrap(NETCONF_CONFIG_QNAME, ((DataContainerChild<?, ?>) lastChildOverride.get()))).build();
+            configContent = lastChildOverride.get();
         } else {
-            return Builders.choiceBuilder().withNodeIdentifier(toId(EditContent.QNAME)).withChild(
-                    wrap(NETCONF_CONFIG_QNAME, (DataContainerChild<?, ?>) InstanceIdToNodes.serialize(ctx, dataPath, lastChildOverride, operation))).build();
+            configContent = InstanceIdToNodes.serialize(ctx, dataPath, lastChildOverride, operation);
         }
-    }
 
-    public static void addPredicatesToCompositeNodeBuilder(final Map<QName, Object> predicates,
-                                                           final DataContainerNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier, ContainerNode> builder) {
-        for (final Map.Entry<QName, Object> entry : predicates.entrySet()) {
-            builder.withChild(Builders.leafBuilder().withNodeIdentifier(toId(entry.getKey())).withValue(entry.getValue()).build());
+        final Element element = XmlUtil.createElement(BLANK_DOCUMENT, NETCONF_CONFIG_QNAME.getLocalName(), Optional.of(NETCONF_CONFIG_QNAME.getNamespace().toString()));
+        try {
+            writeNormalizedNode(configContent, new DOMResult(element), SchemaPath.ROOT, ctx);
+        } catch (IOException | XMLStreamException e) {
+            throw new IllegalStateException("Unable to serialize edit config content element for path " + dataPath, e);
         }
-    }
+        final DOMSource value = new DOMSource(element);
 
-    public static Map<QName, Object> getPredicates(final YangInstanceIdentifier.PathArgument arg) {
-        Map<QName, Object> predicates = Collections.emptyMap();
-        if (arg instanceof YangInstanceIdentifier.NodeIdentifierWithPredicates) {
-            predicates = ((YangInstanceIdentifier.NodeIdentifierWithPredicates) arg).getKeyValues();
-        }
-        return predicates;
+        return Builders.choiceBuilder().withNodeIdentifier(toId(EditContent.QNAME)).withChild(
+                Builders.anyXmlBuilder().withNodeIdentifier(toId(NETCONF_CONFIG_QNAME)).withValue(value).build()).build();
     }
 
     public static SchemaPath toPath(final QName rpc) {
@@ -378,5 +289,36 @@ public class NetconfMessageTransformUtil {
 
     public static String modifyOperationToXmlString(final ModifyAction operation) {
         return operation.name().toLowerCase();
+    }
+
+    // FIXME similar code is in netconf-notifications-impl , DRY
+    public static void writeNormalizedNode(final NormalizedNode<?, ?> normalized, final DOMResult result, final SchemaPath schemaPath, final SchemaContext context)
+            throws IOException, XMLStreamException {
+        NormalizedNodeWriter normalizedNodeWriter = null;
+        NormalizedNodeStreamWriter normalizedNodeStreamWriter = null;
+        XMLStreamWriter writer = null;
+        try {
+            writer = XML_FACTORY.createXMLStreamWriter(result);
+            normalizedNodeStreamWriter = XMLStreamNormalizedNodeStreamWriter.create(writer, context, schemaPath);
+            normalizedNodeWriter = NormalizedNodeWriter.forStreamWriter(normalizedNodeStreamWriter);
+
+            normalizedNodeWriter.write(normalized);
+
+            normalizedNodeWriter.flush();
+        } finally {
+            try {
+                if(normalizedNodeWriter != null) {
+                    normalizedNodeWriter.close();
+                }
+                if(normalizedNodeStreamWriter != null) {
+                    normalizedNodeStreamWriter.close();
+                }
+                if(writer != null) {
+                    writer.close();
+                }
+            } catch (final Exception e) {
+                LOG.warn("Unable to close resource properly", e);
+            }
+        }
     }
 }

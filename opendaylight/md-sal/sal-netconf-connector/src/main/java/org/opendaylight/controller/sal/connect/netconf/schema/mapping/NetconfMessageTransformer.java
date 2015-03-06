@@ -7,15 +7,9 @@
  */
 package org.opendaylight.controller.sal.connect.netconf.schema.mapping;
 
-import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_CONFIG_QNAME;
-import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_FILTER_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_RPC_QNAME;
-import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_TYPE_QNAME;
-import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_URI;
-import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.toId;
 
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
@@ -30,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
-import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.dom.DOMResult;
@@ -43,11 +36,9 @@ import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.controller.sal.connect.api.MessageTransformer;
 import org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil;
 import org.opendaylight.controller.sal.connect.util.MessageCounter;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf.base._1._0.rev110601.edit.config.input.EditContent;
 import org.opendaylight.yangtools.sal.binding.generator.impl.ModuleInfoBackedContext;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.schema.ChoiceNode;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -67,7 +58,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 
 public class NetconfMessageTransformer implements MessageTransformer<NetconfMessage> {
 
@@ -177,14 +167,7 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
         final DOMResult result = prepareDomResultForRpcRequest(rpcQName);
 
         try {
-            final SchemaContext baseNetconfCtx = schemaContext.findModuleByNamespace(NETCONF_URI).isEmpty() ? BASE_NETCONF_CTX : schemaContext;
-            if(NetconfMessageTransformUtil.isDataEditOperation(rpcQName)) {
-                writeNormalizedEdit(payload, result, rpc, baseNetconfCtx);
-            } else if(NetconfMessageTransformUtil.isDataRetrievalOperation(rpcQName)) {
-                writeNormalizedGet(payload, result, rpc, baseNetconfCtx);
-            } else {
-                writeNormalizedRpc(payload, result, rpc, schemaContext);
-            }
+            writeNormalizedRpc(payload, result, rpc, schemaContext);
         } catch (final XMLStreamException | IOException | IllegalStateException e) {
             throw new IllegalStateException("Unable to serialize " + rpc, e);
         }
@@ -204,99 +187,12 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
         return new DOMResult(elementNS);
     }
 
-    static final XMLOutputFactory XML_FACTORY;
-    static {
-        XML_FACTORY = XMLOutputFactory.newFactory();
-        XML_FACTORY.setProperty(XMLOutputFactory.IS_REPAIRING_NAMESPACES, true);
-    }
-
-    // FIXME similar code is in netconf-notifications-impl , DRY
-    private void writeNormalizedNode(final NormalizedNode<?, ?> normalized, final DOMResult result, final SchemaPath schemaPath, final SchemaContext context)
-            throws IOException, XMLStreamException {
-        NormalizedNodeWriter normalizedNodeWriter = null;
-        NormalizedNodeStreamWriter normalizedNodeStreamWriter = null;
-        XMLStreamWriter writer = null;
-        try {
-            writer = XML_FACTORY.createXMLStreamWriter(result);
-            normalizedNodeStreamWriter = XMLStreamNormalizedNodeStreamWriter.create(writer, context, schemaPath);
-            normalizedNodeWriter = NormalizedNodeWriter.forStreamWriter(normalizedNodeStreamWriter);
-
-            normalizedNodeWriter.write(normalized);
-
-            normalizedNodeWriter.flush();
-        } finally {
-            try {
-                if(normalizedNodeWriter != null) {
-                    normalizedNodeWriter.close();
-                }
-                if(normalizedNodeStreamWriter != null) {
-                    normalizedNodeStreamWriter.close();
-                }
-                if(writer != null) {
-                    writer.close();
-                }
-            } catch (final Exception e) {
-                LOG.warn("Unable to close resource properly", e);
-            }
-        }
-    }
-
-    private void writeNormalizedEdit(final ContainerNode normalized, final DOMResult result, final SchemaPath schemaPath, final SchemaContext baseNetconfCtx) throws IOException, XMLStreamException {
-        final NormalizedNodeWriter normalizedNodeWriter;
-        NormalizedNodeStreamWriter normalizedNodeStreamWriter = null;
-        XMLStreamWriter writer = null;
-        try {
-            writer = XML_FACTORY.createXMLStreamWriter(result);
-            normalizedNodeStreamWriter = XMLStreamNormalizedNodeStreamWriter.create(writer, baseNetconfCtx, schemaPath);
-            normalizedNodeWriter = NormalizedNodeWriter.forStreamWriter(normalizedNodeStreamWriter);
-
-            Optional<Iterable<Element>> editDataElements = Optional.absent();
-            for (final DataContainerChild<? extends YangInstanceIdentifier.PathArgument, ?> editElement : normalized.getValue()) {
-                if(editElement.getNodeType().getLocalName().equals(EditContent.QNAME.getLocalName())) {
-                    Preconditions.checkState(editElement instanceof ChoiceNode,
-                            "Edit content element is expected to be %s, not %s", ChoiceNode.class, editElement);
-                    final Optional<DataContainerChild<? extends YangInstanceIdentifier.PathArgument, ?>> configContentHolder =
-                            ((ChoiceNode) editElement).getChild(toId(NETCONF_CONFIG_QNAME));
-                    // TODO The config element inside the EditContent should be AnyXml not Container, but AnyXml is based on outdated API
-                    Preconditions.checkState(configContentHolder.isPresent() && configContentHolder.get() instanceof ContainerNode,
-                            "Edit content/config element is expected to be present as a container node");
-                    normalizedNodeStreamWriter.startChoiceNode(toId(editElement.getNodeType()), 1);
-                    normalizedNodeStreamWriter.anyxmlNode(toId(NETCONF_CONFIG_QNAME), null);
-                    normalizedNodeStreamWriter.endNode();
-
-                    editDataElements = Optional.of(serializeAnyXmlAccordingToSchema(((ContainerNode) configContentHolder.get()).getValue()));
-                } else {
-                    normalizedNodeWriter.write(editElement);
-                }
-            }
-
-            normalizedNodeWriter.flush();
-
-            // FIXME this is a workaround for filter content serialization
-            // Any xml is not supported properly by the stream writer
-            if(editDataElements.isPresent()) {
-                appendEditData(result, editDataElements.get());
-            }
-        } finally {
-            try {
-                if(normalizedNodeStreamWriter != null) {
-                    normalizedNodeStreamWriter.close();
-                }
-                if(writer != null) {
-                    writer.close();
-                }
-            } catch (final Exception e) {
-                LOG.warn("Unable to close resource properly", e);
-            }
-        }
-    }
-
     private void writeNormalizedRpc(final ContainerNode normalized, final DOMResult result, final SchemaPath schemaPath, final SchemaContext baseNetconfCtx) throws IOException, XMLStreamException {
         final NormalizedNodeWriter normalizedNodeWriter;
         NormalizedNodeStreamWriter normalizedNodeStreamWriter = null;
         XMLStreamWriter writer = null;
         try {
-            writer = XML_FACTORY.createXMLStreamWriter(result);
+            writer = NetconfMessageTransformUtil.XML_FACTORY.createXMLStreamWriter(result);
             normalizedNodeStreamWriter = XMLStreamNormalizedNodeStreamWriter.create(writer, baseNetconfCtx, schemaPath);
             normalizedNodeWriter = NormalizedNodeWriter.forStreamWriter(normalizedNodeStreamWriter);
 
@@ -318,84 +214,6 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
         }
     }
 
-    private void writeNormalizedGet(final ContainerNode normalized, final DOMResult result, final SchemaPath schemaPath, final SchemaContext baseNetconfCtx) throws IOException, XMLStreamException {
-        final NormalizedNodeWriter normalizedNodeWriter;
-        NormalizedNodeStreamWriter normalizedNodeStreamWriter = null;
-        XMLStreamWriter writer = null;
-        try {
-            writer = XML_FACTORY.createXMLStreamWriter(result);
-            normalizedNodeStreamWriter = XMLStreamNormalizedNodeStreamWriter.create(writer, baseNetconfCtx, schemaPath);
-            normalizedNodeWriter = NormalizedNodeWriter.forStreamWriter(normalizedNodeStreamWriter);
-
-            Optional<Iterable<Element>> filterElements = Optional.absent();
-
-            for (final DataContainerChild<? extends YangInstanceIdentifier.PathArgument, ?> editElement : normalized.getValue()) {
-                Preconditions.checkState(editElement instanceof ContainerNode);
-                if(editElement.getNodeType().getLocalName().equals(NETCONF_FILTER_QNAME.getLocalName())) {
-                    Preconditions.checkState(editElement instanceof ContainerNode,
-                            "Filter element is expected to be %s, not %s", ContainerNode.class, editElement);
-                    normalizedNodeStreamWriter.anyxmlNode(toId(editElement.getNodeType()), null);
-                    filterElements = Optional.of(serializeAnyXmlAccordingToSchema(((ContainerNode) editElement).getValue()));
-                } else {
-                    normalizedNodeWriter.write(editElement);
-                }
-            }
-
-            normalizedNodeWriter.flush();
-
-            // FIXME this is a workaround for filter content serialization
-            // Any xml is not supported properly by the stream writer
-            if(filterElements.isPresent()) {
-                appendFilter(result, filterElements.get());
-            }
-        } finally {
-            try {
-                if(normalizedNodeStreamWriter != null) {
-                    normalizedNodeStreamWriter.close();
-                }
-                if(writer != null) {
-                    writer.close();
-                }
-            } catch (final Exception e) {
-                LOG.warn("Unable to close resource properly", e);
-            }
-        }
-    }
-
-    private void appendFilter(final DOMResult result, final Iterable<Element> filterElements) {
-        final Element rpcElement = ((Element) result.getNode());
-        final Node filterParent = rpcElement.getElementsByTagNameNS(NETCONF_FILTER_QNAME.getNamespace().toString(), NETCONF_FILTER_QNAME.getLocalName()).item(0);
-        final Document ownerDocument = rpcElement.getOwnerDocument();
-        // TODO workaround, add subtree attribute, since it is not serialized by the caller of this method
-        ((Element) filterParent).setAttributeNS(NETCONF_TYPE_QNAME.getNamespace().toString(), NETCONF_TYPE_QNAME.getLocalName(), "subtree");
-        for (final Element element : filterElements) {
-            filterParent.appendChild(ownerDocument.importNode(element, true));
-        }
-    }
-
-    private void appendEditData(final DOMResult result, final Iterable<Element> filterElements) {
-        final Element rpcElement = ((Element) result.getNode());
-        final Node configParent = rpcElement.getElementsByTagNameNS(NETCONF_CONFIG_QNAME.getNamespace().toString(), NETCONF_CONFIG_QNAME.getLocalName()).item(0);
-        for (final Element element : filterElements) {
-            configParent.appendChild(rpcElement.getOwnerDocument().importNode(element, true));
-        }
-    }
-
-    private Iterable<Element> serializeAnyXmlAccordingToSchema(final Iterable<DataContainerChild<? extends YangInstanceIdentifier.PathArgument, ?>> values) throws IOException, XMLStreamException {
-        return Iterables.transform(values, new Function<DataContainerChild<? extends YangInstanceIdentifier.PathArgument,?>, Element>() {
-            @Override
-            public Element apply(final DataContainerChild<? extends YangInstanceIdentifier.PathArgument, ?> input) {
-                final DOMResult domResult = new DOMResult(XmlUtil.newDocument());
-                try {
-                    writeNormalizedNode(input, domResult, SchemaPath.ROOT, schemaContext);
-                } catch (IOException | XMLStreamException e) {
-                    throw new IllegalStateException(e);
-                }
-                return ((Document) domResult.getNode()).getDocumentElement();
-            }
-        });
-    }
-
     @Override
     public synchronized DOMRpcResult toRpcResult(final NetconfMessage message, final SchemaPath rpc) {
         final NormalizedNode<?, ?> normalizedNode;
@@ -404,7 +222,6 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
             final ContainerSchemaNode schemaForDataRead = NetconfMessageTransformUtil.createSchemaForDataRead(schemaContext);
             final ContainerNode dataNode = parserFactory.getContainerNodeParser().parse(Collections.singleton(xmlData), schemaForDataRead);
 
-            // TODO check if the response is wrapper correctly
             normalizedNode = Builders.containerBuilder().withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(NetconfMessageTransformUtil.NETCONF_RPC_REPLY_QNAME))
                     .withChild(dataNode).build();
         } else {
@@ -413,7 +230,7 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
             Preconditions.checkArgument(rpcDefinition != null, "Unable to parse response of %s, the rpc is unknown", rpc.getLastComponent());
 
             // In case no input for rpc is defined, we can simply construct the payload here
-            if(rpcDefinition.getOutput() == null) {
+            if (rpcDefinition.getOutput() == null) {
                 Preconditions.checkArgument(XmlElement.fromDomDocument(message.getDocument()).getOnlyChildElementWithSameNamespaceOptionally("ok").isPresent(),
                         "Unexpected content in response of rpc: %s, %s", rpcDefinition.getQName(), message);
                 normalizedNode = null;
