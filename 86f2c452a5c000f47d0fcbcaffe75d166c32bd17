@@ -95,6 +95,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_d7ee84b4",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-06T20:55:24Z",
+      "side": 1,
+      "message": "CDL is more clear to me b/c I\u0027ve used it so much. It\u0027s fine either way.",
+      "parentUuid": "5a93c517_17f5cc82",
+      "revId": "86f2c452a5c000f47d0fcbcaffe75d166c32bd17",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_803ebdd8",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
         "patchSetId": 2
