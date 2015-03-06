@@ -20,6 +20,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.io.IOException;
 import java.io.InputStream;
+import javax.xml.transform.dom.DOMSource;
 import org.apache.commons.io.IOUtils;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
@@ -27,7 +28,6 @@ import org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransf
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
 import org.opendaylight.yangtools.util.concurrent.ExceptionMapper;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.AnyXmlNode;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
@@ -43,6 +43,7 @@ import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
 import org.opendaylight.yangtools.yang.model.repo.spi.SchemaSourceProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Element;
 
 public final class NetconfRemoteSchemaYangSourceProvider implements SchemaSourceProvider<YangTextSchemaSource> {
 
@@ -102,10 +103,11 @@ public final class NetconfRemoteSchemaYangSourceProvider implements SchemaSource
                 "%s Unexpected response to get-schema, expected response with one child %s, but was %s", id,
                 schemaWrapperNode, result);
 
-        final Node<?> wrappedNode = (Node<?>) child.get().getValue();
-        final Object potential = wrappedNode.getValue();
+        final DOMSource wrappedNode = ((AnyXmlNode) child.get()).getValue();
+        Preconditions.checkNotNull(wrappedNode.getNode());
+        final Element dataNode = (Element) wrappedNode.getNode();
 
-        return potential instanceof String ? Optional.of((String) potential) : Optional.<String> absent();
+        return Optional.of(dataNode.getTextContent().trim());
     }
 
     @Override

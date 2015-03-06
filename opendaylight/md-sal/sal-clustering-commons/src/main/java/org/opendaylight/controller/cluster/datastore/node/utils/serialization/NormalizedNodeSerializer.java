@@ -8,11 +8,28 @@
 
 package org.opendaylight.controller.cluster.datastore.node.utils.serialization;
 
+import static org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeType.ANY_XML_NODE_TYPE;
+import static org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeType.AUGMENTATION_NODE_TYPE;
+import static org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeType.CHOICE_NODE_TYPE;
+import static org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeType.CONTAINER_NODE_TYPE;
+import static org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeType.LEAF_NODE_TYPE;
+import static org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeType.LEAF_SET_ENTRY_NODE_TYPE;
+import static org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeType.LEAF_SET_NODE_TYPE;
+import static org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeType.MAP_ENTRY_NODE_TYPE;
+import static org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeType.MAP_NODE_TYPE;
+import static org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeType.ORDERED_LEAF_SET_NODE_TYPE;
+import static org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeType.ORDERED_MAP_NODE_TYPE;
+import static org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeType.UNKEYED_LIST_ENTRY_NODE_TYPE;
+import static org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeType.UNKEYED_LIST_NODE_TYPE;
+import static org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeType.getSerializableNodeType;
+
 import com.google.common.base.Preconditions;
+import java.util.EnumMap;
+import java.util.Map;
+import javax.xml.transform.dom.DOMSource;
 import org.opendaylight.controller.cluster.datastore.util.InstanceIdentifierUtils;
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder;
-import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.AnyXmlNode;
 import org.opendaylight.yangtools.yang.data.api.schema.AugmentationNode;
@@ -33,22 +50,6 @@ import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContaine
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.ListNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.NormalizedNodeAttrBuilder;
-import java.util.EnumMap;
-import java.util.Map;
-import static org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeType.ANY_XML_NODE_TYPE;
-import static org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeType.AUGMENTATION_NODE_TYPE;
-import static org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeType.CHOICE_NODE_TYPE;
-import static org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeType.CONTAINER_NODE_TYPE;
-import static org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeType.LEAF_NODE_TYPE;
-import static org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeType.LEAF_SET_ENTRY_NODE_TYPE;
-import static org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeType.LEAF_SET_NODE_TYPE;
-import static org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeType.MAP_ENTRY_NODE_TYPE;
-import static org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeType.MAP_NODE_TYPE;
-import static org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeType.ORDERED_LEAF_SET_NODE_TYPE;
-import static org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeType.ORDERED_MAP_NODE_TYPE;
-import static org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeType.UNKEYED_LIST_ENTRY_NODE_TYPE;
-import static org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeType.UNKEYED_LIST_NODE_TYPE;
-import static org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeType.getSerializableNodeType;
 
 /**
  * NormalizedNodeSerializer can be used to convert a Normalized node to and and
@@ -392,7 +393,7 @@ public class NormalizedNodeSerializer {
                     @Override public NormalizedNode<?, ?> apply(
                         DeSerializer deSerializer,
                         NormalizedNodeMessages.Node node) {
-                        NormalizedNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier, Node<?>, AnyXmlNode>
+                        NormalizedNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier, DOMSource, AnyXmlNode>
                             builder =
                             Builders.anyXmlBuilder();
 
