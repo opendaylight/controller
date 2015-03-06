@@ -1,0 +1,70 @@
+module event-source-helloworld-impl {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:messagebus:eventsource:sample:helloworld:impl";
+    prefix "binding-impl";
+
+    import config { prefix config; revision-date 2013-04-05; }
+    import opendaylight-md-sal-binding {prefix sal;}
+    import opendaylight-md-sal-dom {prefix dom;}
+
+
+    description
+        "Sample of messagebus event source.";
+ 
+    revision "2015-03-16" {
+        description "Initial revision";
+    }
+
+    identity event-source-helloworld-impl {
+        base config:module-type;
+        config:java-name-prefix EventSourceSampleHelloWorldImpl;
+    }
+
+    grouping module-configuration {        
+         leaf number-event-sources {
+            type uint8 {
+               range "1 .. 20";
+            }
+            description "Sample application will generate given number of sample event sources.";
+         } 
+
+         leaf message-generate-period {
+            type uint8 {
+               range "1 .. 10";
+            }
+            description "Each event source will generate message in given interval.";
+        }
+
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+        case event-source-helloworld-impl {
+            when "/config:modules/config:module/config:type = 'event-source-helloworld-impl'";
+            
+            container binding-broker {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity sal:binding-broker-osgi-registry;
+                    }
+                }
+            }
+
+            container dom-broker {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity dom:dom-broker-osgi-registry;
+                    }
+                }
+            }
+
+        }
+    }
+
+    augment "/config:modules/config:module/config:state" {
+        case event-source-helloworld-impl {
+            when "/config:modules/config:module/config:type = 'event-source-helloworld-impl'";
+        }
+    }
+}
