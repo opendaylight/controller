@@ -21,7 +21,12 @@ public class AbstractIdentifierAwareJaxRsProvider {
     }
 
     protected InstanceIdentifierContext getInstanceIdentifierContext() {
-        return ControllerContext.getInstance().toInstanceIdentifier(getIdentifier());
+        final String ident = getIdentifier();
+        if (ident.contains(ControllerContext.MOUNT)) {
+            return ControllerContext.getInstance().toMountPointIdentifier(ident);
+        } else {
+            return ControllerContext.getInstance().toInstanceIdentifier(ident);
+        }
     }
 
     protected UriInfo getUriInfo() {

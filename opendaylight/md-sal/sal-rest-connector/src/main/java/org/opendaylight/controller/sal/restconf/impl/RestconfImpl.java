@@ -642,7 +642,7 @@ public class RestconfImpl implements RestconfService {
     private CheckedFuture<DOMRpcResult, DOMRpcException> invokeSalRemoteRpcSubscribeRPC(final NormalizedNodeContext payload) {
         final ContainerNode value = (ContainerNode) payload.getData();
         final QName rpcQName = payload.getInstanceIdentifierContext().getSchemaNode().getQName();
-        Optional<DataContainerChild<? extends PathArgument, ?>> path = value.getChild(new NodeIdentifier(
+        final Optional<DataContainerChild<? extends PathArgument, ?>> path = value.getChild(new NodeIdentifier(
                 QName.create(payload.getInstanceIdentifierContext().getSchemaNode().getQName(), "path")));
         final Object pathValue = path.isPresent() ? path.get().getValue() : null;
 
@@ -673,18 +673,18 @@ public class RestconfImpl implements RestconfService {
                     ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
         }
 
-        QName outputQname = QName.create(rpcQName, "output");
-        QName streamNameQname = QName.create(rpcQName, "stream-name");
+        final QName outputQname = QName.create(rpcQName, "output");
+        final QName streamNameQname = QName.create(rpcQName, "stream-name");
 
-        ContainerNode output = ImmutableContainerNodeBuilder.create().withNodeIdentifier(new NodeIdentifier(outputQname))
+        final ContainerNode output = ImmutableContainerNodeBuilder.create().withNodeIdentifier(new NodeIdentifier(outputQname))
                 .withChild(ImmutableNodes.leafNode(streamNameQname, streamName)).build();
 
         if (!Notificator.existListenerFor(streamName)) {
-            YangInstanceIdentifier normalizedPathIdentifier = controllerContext.toNormalized(pathIdentifier);
+            final YangInstanceIdentifier normalizedPathIdentifier = controllerContext.toNormalized(pathIdentifier);
             Notificator.createListener(normalizedPathIdentifier, streamName);
         }
 
-        DOMRpcResult defaultDOMRpcResult = new DefaultDOMRpcResult(output);
+        final DOMRpcResult defaultDOMRpcResult = new DefaultDOMRpcResult(output);
 
         return Futures.immediateCheckedFuture(defaultDOMRpcResult);
     }
@@ -1169,17 +1169,13 @@ public class RestconfImpl implements RestconfService {
         }
 
         final DOMMountPoint mountPoint = payload.getInstanceIdentifierContext().getMountPoint();
-
-        final InstanceIdentifierContext iiWithData = mountPoint != null
-                ? controllerContext.toMountPointIdentifier(identifier)
-                : controllerContext.toInstanceIdentifier(identifier);
-        final YangInstanceIdentifier normalizedII = iiWithData.getInstanceIdentifier();
+        final YangInstanceIdentifier yangIdent = checkConsistencyOfNormalizedNodeContext(payload);
 
         try {
             if (mountPoint != null) {
-                broker.commitConfigurationDataPost(mountPoint, normalizedII, payload.getData());
+                broker.commitConfigurationDataPost(mountPoint, yangIdent, payload.getData());
             } else {
-                broker.commitConfigurationDataPost(normalizedII, payload.getData());
+                broker.commitConfigurationDataPost(yangIdent, payload.getData());
             }
         } catch(final RestconfDocumentedException e) {
             throw e;
@@ -1189,11 +1185,38 @@ public class RestconfImpl implements RestconfService {
 
 
         final ResponseBuilder responseBuilder = Response.status(Status.NO_CONTENT);
-        final URI location = resolveLocation(uriInfo, "config", mountPoint, normalizedII);
+        final URI location = resolveLocation(uriInfo, "config", mountPoint, yangIdent);
         if (location != null) {
             responseBuilder.location(location);
         }
         return responseBuilder.build();
+    }
+
+    // FIXME create RestconfIdetifierHelper and move this method there
+    private YangInstanceIdentifier checkConsistencyOfNormalizedNodeContext(final NormalizedNodeContext payload) {
+        Preconditions.checkArgument(payload != null);
+        Preconditions.checkArgument(payload.getData() != null);
+        Preconditions.checkArgument(payload.getData().getNodeType() != null);
+        Preconditions.checkArgument(payload.getInstanceIdentifierContext() != null);
+        Preconditions.checkArgument(payload.getInstanceIdentifierContext().getInstanceIdentifier() != null);
+
+        final QName payloadNodeQname = payload.getData().getNodeType();
+        final YangInstanceIdentifier yangIdent = payload.getInstanceIdentifierContext().getInstanceIdentifier();
+        if (payloadNodeQname.compareTo(yangIdent.getLastPathArgument().getNodeType()) > 0) {
+            return yangIdent;
+        }
+        final InstanceIdentifierContext parentContext = payload.getInstanceIdentifierContext();
+        final DataSchemaNode parentSchemaNode = parentContext.getSchemaNode();
+        if(parentSchemaNode instanceof DataNodeContainer) {
+            final DataNodeContainer cast = (DataNodeContainer) parentSchemaNode;
+            for (final DataSchemaNode child : cast.getChildNodes()) {
+                if (payloadNodeQname.compareTo(child.getQName()) == 0) {
+                    return YangInstanceIdentifier.builder(yangIdent).node(child.getQName()).build();
+                }
+            }
+        }
+        final String errMsg = "Error parsing input: DataSchemaNode has not children";
+        throw new RestconfDocumentedException(errMsg, ErrorType.PROTOCOL, ErrorTag.MALFORMED_MESSAGE);
     }
 
     @Override
@@ -1333,7 +1356,7 @@ public class RestconfImpl implements RestconfService {
             final String paramName) {
         final QNameModule salRemoteAugment = QNameModule.create(NAMESPACE_EVENT_SUBSCRIPTION_AUGMENT,
                 EVENT_SUBSCRIPTION_AUGMENT_REVISION);
-        Optional<DataContainerChild<? extends PathArgument, ?>> enumNode = value.getChild(new NodeIdentifier(
+        final Optional<DataContainerChild<? extends PathArgument, ?>> enumNode = value.getChild(new NodeIdentifier(
                 QName.create(salRemoteAugment, paramName)));
         if (!enumNode.isPresent()) {
             return null;

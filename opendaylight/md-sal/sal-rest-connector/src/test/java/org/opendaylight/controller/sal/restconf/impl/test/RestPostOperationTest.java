@@ -245,7 +245,7 @@ public class RestPostOperationTest extends JerseyTest {
 //        final String URI_1 = "/config";
 //        assertEquals(204, post(URI_1, Draft02.MediaTypes.DATA + XML, xmlTestInterface));
 //        verify(brokerFacade).commitConfigurationDataPost(instanceIdCaptor.capture(), compNodeCaptor.capture());
-        final String identifier = "[(urn:ietf:params:xml:ns:yang:test-interface?revision=2014-07-01)interfaces]";
+        String identifier = "[(urn:ietf:params:xml:ns:yang:test-interface?revision=2014-07-01)interfaces]";
 //        assertEquals(identifier, ImmutableList.copyOf(instanceIdCaptor.getValue().getPathArguments()).toString());
 
         final String URI_2 = "/config/test-interface:interfaces";
@@ -254,8 +254,7 @@ public class RestPostOperationTest extends JerseyTest {
 //        verify(brokerFacade, times(2))
         verify(brokerFacade, times(1))
                 .commitConfigurationDataPost(instanceIdCaptor.capture(), compNodeCaptor.capture());
-        // FIXME : identifier flow to interface only, why we want to see block too ?
-//        identifier = "[(urn:ietf:params:xml:ns:yang:test-interface?revision=2014-07-01)interfaces, (urn:ietf:params:xml:ns:yang:test-interface?revision=2014-07-01)block]";
+        identifier = "[(urn:ietf:params:xml:ns:yang:test-interface?revision=2014-07-01)interfaces, (urn:ietf:params:xml:ns:yang:test-interface?revision=2014-07-01)block]";
         assertEquals(identifier, ImmutableList.copyOf(instanceIdCaptor.getValue().getPathArguments()).toString());
     }
 
