@@ -730,13 +730,10 @@ public class RestconfImpl implements RestconfService {
         final InstanceIdentifierContext iiWithData = controllerContext.toInstanceIdentifier(identifier);
         final DOMMountPoint mountPoint = iiWithData.getMountPoint();
         NormalizedNode<?, ?> data = null;
-        YangInstanceIdentifier normalizedII;
+        final YangInstanceIdentifier normalizedII = iiWithData.getInstanceIdentifier();
         if (mountPoint != null) {
-            normalizedII = new DataNormalizer(mountPoint.getSchemaContext()).toNormalized(iiWithData
-                    .getInstanceIdentifier());
             data = broker.readConfigurationData(mountPoint, normalizedII);
         } else {
-            normalizedII = controllerContext.toNormalized(iiWithData.getInstanceIdentifier());
             data = broker.readConfigurationData(normalizedII);
         }
         return new NormalizedNodeContext(iiWithData, data);
@@ -789,13 +786,10 @@ public class RestconfImpl implements RestconfService {
         final InstanceIdentifierContext iiWithData = controllerContext.toInstanceIdentifier(identifier);
         final DOMMountPoint mountPoint = iiWithData.getMountPoint();
         NormalizedNode<?, ?> data = null;
-        YangInstanceIdentifier normalizedII;
+        final YangInstanceIdentifier normalizedII = iiWithData.getInstanceIdentifier();
         if (mountPoint != null) {
-            normalizedII = new DataNormalizer(mountPoint.getSchemaContext()).toNormalized(iiWithData
-                    .getInstanceIdentifier());
             data = broker.readOperationalData(mountPoint, normalizedII);
         } else {
-            normalizedII = controllerContext.toNormalized(iiWithData.getInstanceIdentifier());
             data = broker.readOperationalData(normalizedII);
         }
 

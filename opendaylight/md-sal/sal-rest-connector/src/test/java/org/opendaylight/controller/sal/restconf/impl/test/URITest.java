@@ -13,6 +13,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
@@ -43,9 +44,9 @@ public class URITest {
 
     @BeforeClass
     public static void init() throws FileNotFoundException {
-        Set<Module> allModules = TestUtils.loadModulesFrom("/full-versions/yangs");
+        final Set<Module> allModules = TestUtils.loadModulesFrom("/full-versions/yangs");
         assertNotNull(allModules);
-        SchemaContext schemaContext = TestUtils.loadSchemaContext(allModules);
+        final SchemaContext schemaContext = TestUtils.loadSchemaContext(allModules);
         controllerContext.setSchemas(schemaContext);
     }
 
@@ -80,7 +81,7 @@ public class URITest {
 
     @Test
     public void testToInstanceIdentifierContainer() throws FileNotFoundException {
-        InstanceIdentifierContext instanceIdentifier = controllerContext.toInstanceIdentifier("simple-nodes:users");
+        final InstanceIdentifierContext instanceIdentifier = controllerContext.toInstanceIdentifier("simple-nodes:users");
         assertEquals(instanceIdentifier.getSchemaNode().getQName().getLocalName(), "users");
         assertTrue(instanceIdentifier.getSchemaNode() instanceof ContainerSchemaNode);
         assertEquals(2, ((ContainerSchemaNode) instanceIdentifier.getSchemaNode()).getChildNodes().size());
@@ -88,7 +89,7 @@ public class URITest {
 
     @Test
     public void testToInstanceIdentifierChoice() throws FileNotFoundException {
-        InstanceIdentifierContext instanceIdentifier = controllerContext
+        final InstanceIdentifierContext instanceIdentifier = controllerContext
                 .toInstanceIdentifier("simple-nodes:food/nonalcoholic");
         assertEquals(instanceIdentifier.getSchemaNode().getQName().getLocalName(), "nonalcoholic");
     }
@@ -120,17 +121,17 @@ public class URITest {
     @Test
     public void testMountPointWithExternModul() throws FileNotFoundException {
         initMountService(true);
-        InstanceIdentifierContext instanceIdentifier = controllerContext
+        final InstanceIdentifierContext instanceIdentifier = controllerContext
                 .toInstanceIdentifier("simple-nodes:users/yang-ext:mount/test-interface2:class/student/name");
         assertEquals(
-                "[(urn:ietf:params:xml:ns:yang:test-interface2?revision=2014-08-01)class, (urn:ietf:params:xml:ns:yang:test-interface2?revision=2014-08-01)student[{(urn:ietf:params:xml:ns:yang:test-interface2?revision=2014-08-01)name=name}]]",
+                "[(urn:ietf:params:xml:ns:yang:test-interface2?revision=2014-08-01)class, (urn:ietf:params:xml:ns:yang:test-interface2?revision=2014-08-01)student, (urn:ietf:params:xml:ns:yang:test-interface2?revision=2014-08-01)student[{(urn:ietf:params:xml:ns:yang:test-interface2?revision=2014-08-01)name=name}]]",
                 ImmutableList.copyOf(instanceIdentifier.getInstanceIdentifier().getPathArguments()).toString());
     }
 
     @Test
     public void testMountPointWithoutExternModul() throws FileNotFoundException {
         initMountService(true);
-        InstanceIdentifierContext instanceIdentifier = controllerContext
+        final InstanceIdentifierContext instanceIdentifier = controllerContext
                 .toInstanceIdentifier("simple-nodes:users/yang-ext:mount/");
         assertTrue(Iterables.isEmpty(instanceIdentifier.getInstanceIdentifier().getPathArguments()));
     }
@@ -152,16 +153,16 @@ public class URITest {
     }
 
     public void initMountService(final boolean withSchema) {
-        DOMMountPointService mountService = mock(DOMMountPointService.class);
+        final DOMMountPointService mountService = mock(DOMMountPointService.class);
         controllerContext.setMountService(mountService);
-        BrokerFacade brokerFacade = mock(BrokerFacade.class);
-        RestconfImpl restconfImpl = RestconfImpl.getInstance();
+        final BrokerFacade brokerFacade = mock(BrokerFacade.class);
+        final RestconfImpl restconfImpl = RestconfImpl.getInstance();
         restconfImpl.setBroker(brokerFacade);
         restconfImpl.setControllerContext(controllerContext);
 
-        Set<Module> modules2 = TestUtils.loadModulesFrom("/test-config-data/yang2");
-        SchemaContext schemaContext2 = TestUtils.loadSchemaContext(modules2);
-        DOMMountPoint mountInstance = mock(DOMMountPoint.class);
+        final Set<Module> modules2 = TestUtils.loadModulesFrom("/test-config-data/yang2");
+        final SchemaContext schemaContext2 = TestUtils.loadSchemaContext(modules2);
+        final DOMMountPoint mountInstance = mock(DOMMountPoint.class);
         if (withSchema) {
             when(mountInstance.getSchemaContext()).thenReturn(schemaContext2);
         } else {
