@@ -601,7 +601,7 @@ public class RestconfImpl implements RestconfService {
         }
     }
 
-    private void validateInput(final DataSchemaNode inputSchema, final NormalizedNodeContext payload) {
+    private void validateInput(final SchemaNode inputSchema, final NormalizedNodeContext payload) {
         if (inputSchema != null && payload.getData() == null) {
             // expected a non null payload
             throw new RestconfDocumentedException("Input is required.", ErrorType.PROTOCOL, ErrorTag.MALFORMED_MESSAGE);
@@ -643,7 +643,7 @@ public class RestconfImpl implements RestconfService {
     private CheckedFuture<DOMRpcResult, DOMRpcException> invokeSalRemoteRpcSubscribeRPC(final NormalizedNodeContext payload) {
         final ContainerNode value = (ContainerNode) payload.getData();
         final QName rpcQName = payload.getInstanceIdentifierContext().getSchemaNode().getQName();
-        Optional<DataContainerChild<? extends PathArgument, ?>> path = value.getChild(new NodeIdentifier(
+        final Optional<DataContainerChild<? extends PathArgument, ?>> path = value.getChild(new NodeIdentifier(
                 QName.create(payload.getInstanceIdentifierContext().getSchemaNode().getQName(), "path")));
         final Object pathValue = path.isPresent() ? path.get().getValue() : null;
 
@@ -674,18 +674,18 @@ public class RestconfImpl implements RestconfService {
                     ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
         }
 
-        QName outputQname = QName.create(rpcQName, "output");
-        QName streamNameQname = QName.create(rpcQName, "stream-name");
+        final QName outputQname = QName.create(rpcQName, "output");
+        final QName streamNameQname = QName.create(rpcQName, "stream-name");
 
-        ContainerNode output = ImmutableContainerNodeBuilder.create().withNodeIdentifier(new NodeIdentifier(outputQname))
+        final ContainerNode output = ImmutableContainerNodeBuilder.create().withNodeIdentifier(new NodeIdentifier(outputQname))
                 .withChild(ImmutableNodes.leafNode(streamNameQname, streamName)).build();
 
         if (!Notificator.existListenerFor(streamName)) {
-            YangInstanceIdentifier normalizedPathIdentifier = controllerContext.toNormalized(pathIdentifier);
+            final YangInstanceIdentifier normalizedPathIdentifier = controllerContext.toNormalized(pathIdentifier);
             Notificator.createListener(normalizedPathIdentifier, streamName);
         }
 
-        DOMRpcResult defaultDOMRpcResult = new DefaultDOMRpcResult(output);
+        final DOMRpcResult defaultDOMRpcResult = new DefaultDOMRpcResult(output);
 
         return Futures.immediateCheckedFuture(defaultDOMRpcResult);
     }
@@ -946,7 +946,7 @@ public class RestconfImpl implements RestconfService {
     @Override
     public Response updateConfigurationData(final String identifier, final NormalizedNodeContext payload) {
         Preconditions.checkNotNull(identifier);
-        final InstanceIdentifierContext<DataSchemaNode> iiWithData = controllerContext.toInstanceIdentifier(identifier);
+        final InstanceIdentifierContext iiWithData = controllerContext.toInstanceIdentifier(identifier);
 
         validateInput(iiWithData.getSchemaNode(), payload);
         validateTopLevelNodeName(payload, iiWithData.getInstanceIdentifier());
@@ -1358,7 +1358,7 @@ public class RestconfImpl implements RestconfService {
             final String paramName) {
         final QNameModule salRemoteAugment = QNameModule.create(NAMESPACE_EVENT_SUBSCRIPTION_AUGMENT,
                 EVENT_SUBSCRIPTION_AUGMENT_REVISION);
-        Optional<DataContainerChild<? extends PathArgument, ?>> enumNode = value.getChild(new NodeIdentifier(
+        final Optional<DataContainerChild<? extends PathArgument, ?>> enumNode = value.getChild(new NodeIdentifier(
                 QName.create(salRemoteAugment, paramName)));
         if (!enumNode.isPresent()) {
             return null;
