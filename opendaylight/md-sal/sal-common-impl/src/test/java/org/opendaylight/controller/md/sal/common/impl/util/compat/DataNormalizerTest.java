@@ -289,8 +289,7 @@ public class DataNormalizerTest {
         CompositeNode anyXmlNodeValue = NodeFactory.createImmutableCompositeNode(ANY_XML_DATA_QNAME, null,
                 Arrays.asList(leafChild, innerContainer));
 
-        AnyXmlNode testAnyXmlNode = Builders.anyXmlBuilder().withNodeIdentifier(new NodeIdentifier(TEST_QNAME))
-                .withValue(anyXmlNodeValue).build();
+        AnyXmlNode testAnyXmlNode = Builders.anyXmlBuilder().withNodeIdentifier(new NodeIdentifier(TEST_QNAME)).build();
 
         ContainerNode testContainerNode = Builders.containerBuilder()
                 .withNodeIdentifier(new NodeIdentifier(TEST_QNAME)).withChild(testAnyXmlNode).build();
