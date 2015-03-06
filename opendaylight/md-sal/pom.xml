@@ -84,6 +84,7 @@
     <!-- Message Bus -->
     <module>messagebus-api</module>
     <module>messagebus-impl</module>
+    <module>messagebus-config</module>
   </modules>
 
   <build>
@@ -150,7 +151,7 @@
                     </goals>
                   </pluginExecutionFilter>
                   <action>
-                    <execute></execute>
+                    <execute/>
                   </action>
                 </pluginExecution>
               </pluginExecutions>
