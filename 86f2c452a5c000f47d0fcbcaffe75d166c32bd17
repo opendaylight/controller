@@ -42,6 +42,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_57035473",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DistributedDataStore.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-06T20:48:03Z",
+      "side": 1,
+      "message": "I\u0027ll make it 3 times as you suggest",
+      "parentUuid": "7a96c907_60429169",
+      "revId": "86f2c452a5c000f47d0fcbcaffe75d166c32bd17",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_e003010e",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
         "patchSetId": 2
@@ -59,6 +77,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_17f5cc82",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-06T20:48:03Z",
+      "side": 1,
+      "message": "It\u0027s roughly the same thing. I can change it if you think CountDownLatch is more clear.",
+      "parentUuid": "7a96c907_e003010e",
+      "revId": "86f2c452a5c000f47d0fcbcaffe75d166c32bd17",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_803ebdd8",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
         "patchSetId": 2
@@ -70,6 +106,24 @@
       "writtenOn": "2015-03-04T01:23:30Z",
       "side": 1,
       "message": "Can you this into another method for clarity?",
+      "revId": "86f2c452a5c000f47d0fcbcaffe75d166c32bd17",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_f7f7008b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-06T20:48:03Z",
+      "side": 1,
+      "message": "yes",
+      "parentUuid": "7a96c907_803ebdd8",
       "revId": "86f2c452a5c000f47d0fcbcaffe75d166c32bd17",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
