@@ -15,17 +15,12 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.regex.Pattern;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.sal.common.util.Rpcs;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.Node;
-import org.opendaylight.yangtools.yang.binding.DataObject;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
 public final class Util {
     private static final MessageDigest messageDigestTemplate = getDigestInstance();
@@ -33,65 +28,43 @@ public final class Util {
     private static MessageDigest getDigestInstance() {
         try {
             return MessageDigest.getInstance("MD5");
-        } catch (NoSuchAlgorithmException e) {
+        } catch (final NoSuchAlgorithmException e) {
             throw new RuntimeException("Unable to get MD5 instance");
         }
     }
 
-    public static String md5String(final String inputString) {
+    static String md5String(final String inputString) {
 
         try {
-            MessageDigest md = (MessageDigest)messageDigestTemplate.clone();
+            final MessageDigest md = (MessageDigest)messageDigestTemplate.clone();
             md.update(inputString.getBytes("UTF-8"), 0, inputString.length());
             return new BigInteger(1, md.digest()).toString(16);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new RuntimeException("Unable to get MD5 instance");
         }
     }
 
-    public static <T> Future<RpcResult<T>> resultFor(final T output) {
-        RpcResult<T> result = Rpcs.getRpcResult(true, output, Collections.<RpcError>emptyList());
+    static <T> Future<RpcResult<T>> resultFor(final T output) {
+        final RpcResult<T> result = Rpcs.getRpcResult(true, output, Collections.<RpcError>emptyList());
         return Futures.immediateFuture(result);
-    }
-
-    /**
-     * Extracts affected node from data change event.
-     * @param event
-     * @return
-     */
-    public static Node getAffectedNode(final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> event) {
-        // TODO: expect listener method to be called even when change impact node
-        // TODO: test with change.getCreatedData()
-        for (Map.Entry<InstanceIdentifier<?>, DataObject> changeEntry : event.getUpdatedData().entrySet()) {
-            if (isNode(changeEntry)) {
-                return (Node) changeEntry.getValue();
-            }
-        }
-
-        return null;
-    }
-
-    private static boolean isNode(final Map.Entry<InstanceIdentifier<?>, DataObject> changeEntry )  {
-        return Node.class.equals(changeEntry.getKey().getTargetType());
     }
 
     /**
      * Method filters qnames based on wildcard strings
      *
-     * @param availableQnames
+     * @param list
      * @param patterh matching pattern
      * @return list of filtered qnames
      */
-    public static List<QName> expandQname(final List<QName> availableQnames, final Pattern pattern) {
-        List<QName> matchingQnames = new ArrayList<>();
+    public static List<SchemaPath> expandQname(final List<SchemaPath> list, final Pattern pattern) {
+        final List<SchemaPath> matchingQnames = new ArrayList<>();
 
-        for (QName qname : availableQnames) {
-            String namespace = qname.getNamespace().toString();
+        for (final SchemaPath notification : list) {
+            final String namespace = notification.getLastComponent().getNamespace().toString();
             if (pattern.matcher(namespace).matches()) {
-                matchingQnames.add(qname);
+                matchingQnames.add(notification);
             }
         }
-
         return matchingQnames;
     }
 
@@ -101,9 +74,9 @@ public final class Util {
      * @return
      */
     static String wildcardToRegex(final String wildcard){
-        StringBuffer s = new StringBuffer(wildcard.length());
+        final StringBuffer s = new StringBuffer(wildcard.length());
         s.append('^');
-        for (char c : wildcard.toCharArray()) {
+        for (final char c : wildcard.toCharArray()) {
             switch(c) {
                 case '*':
                     s.append(".*");
