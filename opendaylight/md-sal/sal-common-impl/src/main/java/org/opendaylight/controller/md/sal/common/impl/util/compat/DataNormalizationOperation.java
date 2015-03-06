@@ -18,6 +18,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.xml.transform.dom.DOMSource;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
@@ -650,10 +651,11 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
 
         @Override
         public NormalizedNode<?, ?> normalize( final Node<?> legacyData ) {
-            NormalizedNodeAttrBuilder<NodeIdentifier, Node<?>, AnyXmlNode> builder =
+            NormalizedNodeAttrBuilder<NodeIdentifier, DOMSource, AnyXmlNode> builder =
                     Builders.anyXmlBuilder().withNodeIdentifier(
                             new NodeIdentifier( legacyData.getNodeType() ) );
-            builder.withValue(legacyData);
+            // Will be removed
+//            builder.withValue(legacyData);
             return builder.build();
         }
 

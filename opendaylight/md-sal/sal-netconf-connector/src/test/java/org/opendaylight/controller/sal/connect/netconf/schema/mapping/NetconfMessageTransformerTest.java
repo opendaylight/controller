@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import javax.xml.transform.dom.DOMSource;
 import org.custommonkey.xmlunit.Diff;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.hamcrest.CoreMatchers;
@@ -64,6 +65,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 public class NetconfMessageTransformerTest {
@@ -119,8 +121,8 @@ public class NetconfMessageTransformerTest {
         final DOMRpcResult compositeNodeRpcResult = netconfMessageTransformer.toRpcResult(response, toPath(GET_SCHEMA_QNAME));
         assertTrue(compositeNodeRpcResult.getErrors().isEmpty());
         assertNotNull(compositeNodeRpcResult.getResult());
-        final Object schemaContent = ((AnyXmlNode) ((ContainerNode) compositeNodeRpcResult.getResult()).getValue().iterator().next()).getValue().getValue();
-        assertThat(schemaContent.toString(), CoreMatchers.containsString("Random YANG SCHEMA"));
+        final DOMSource schemaContent = ((AnyXmlNode) ((ContainerNode) compositeNodeRpcResult.getResult()).getValue().iterator().next()).getValue();
+        assertThat(((Element) schemaContent.getNode()).getTextContent(), CoreMatchers.containsString("Random YANG SCHEMA"));
     }
 
     @Test
@@ -203,7 +205,7 @@ public class NetconfMessageTransformerTest {
         final MapEntryNode schemaNode = Builders.mapEntryBuilder().withNodeIdentifier(identifierWithPredicates).withValue(values).build();
 
         final YangInstanceIdentifier id = YangInstanceIdentifier.builder().node(NetconfState.QNAME).node(Schemas.QNAME).node(Schema.QNAME).nodeWithKey(Schema.QNAME, keys).build();
-        final DataContainerChild<?, ?> editConfigStructure = createEditConfigStructure(NetconfDevice.INIT_SCHEMA_CTX, id, Optional.of(ModifyAction.REPLACE), Optional.<NormalizedNode<?, ?>>fromNullable(schemaNode));
+        final DataContainerChild<?, ?> editConfigStructure = createEditConfigStructure(NetconfDevice.INIT_SCHEMA_CTX, id, Optional.<ModifyAction>absent(), Optional.<NormalizedNode<?, ?>>fromNullable(schemaNode));
 
         final DataContainerChild<?, ?> target = NetconfBaseOps.getTargetNode(NETCONF_CANDIDATE_QNAME);
 

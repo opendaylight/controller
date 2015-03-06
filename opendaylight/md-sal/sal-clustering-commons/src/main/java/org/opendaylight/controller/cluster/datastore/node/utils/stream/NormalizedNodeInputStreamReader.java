@@ -24,9 +24,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.xml.transform.dom.DOMSource;
 import org.opendaylight.controller.cluster.datastore.node.utils.QNameFactory;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
@@ -170,7 +170,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
 
             case NodeTypes.ANY_XML_NODE :
                 LOG.debug("Read xml node");
-                return Builders.anyXmlBuilder().withValue((Node<?>) readObject()).build();
+                return Builders.anyXmlBuilder().withValue((DOMSource) readObject()).build();
 
             case NodeTypes.MAP_NODE :
                 LOG.debug("Read map node {}", identifier);
