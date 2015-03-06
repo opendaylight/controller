@@ -26,11 +26,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import javax.xml.transform.dom.DOMSource;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationException;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.ModifyAction;
-import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.AugmentationIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
@@ -441,13 +441,13 @@ public abstract class InstanceIdToNodes<T extends PathArgument> implements Ident
         public NormalizedNode<?, ?> create(final YangInstanceIdentifier legacyData, final Optional<NormalizedNode<?, ?>> deepestChild, final Optional<ModifyAction> operation) {
             if(deepestChild.isPresent()) {
                 Preconditions.checkState(deepestChild instanceof AnyXmlNode);
-                final NormalizedNodeAttrBuilder<NodeIdentifier, Node<?>, AnyXmlNode> anyXmlBuilder =
+                final NormalizedNodeAttrBuilder<NodeIdentifier, DOMSource, AnyXmlNode> anyXmlBuilder =
                         Builders.anyXmlBuilder().withNodeIdentifier(getIdentifier()).withValue(((AnyXmlNode) deepestChild).getValue());
                 addModifyOpIfPresent(operation, anyXmlBuilder);
                 return anyXmlBuilder.build();
             }
 
-            final NormalizedNodeAttrBuilder<NodeIdentifier, Node<?>, AnyXmlNode> builder =
+            final NormalizedNodeAttrBuilder<NodeIdentifier, DOMSource, AnyXmlNode> builder =
                     Builders.anyXmlBuilder().withNodeIdentifier(getIdentifier());
             return builder.build();
         }
