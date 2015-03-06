@@ -116,7 +116,7 @@ public final class EventSourceManager implements DataChangeListener {
 
     private boolean isEventSource(NetconfNode node) {
         for (String capability : node.getInitialCapability()) {
-            if(capability.startsWith("urn:ietf:params:xml:ns:netconf:notification")) {
+            if(capability.startsWith("(urn:ietf:params:xml:ns:netconf:notification")) {
                 return true;
             }
         }

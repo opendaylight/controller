@@ -306,6 +306,14 @@
       <artifactId>model-inventory</artifactId>
     </dependency>
 
+ <!-- message-bus -->
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>messagebus-config</artifactId>
+      <version>${mdsal.version}</version>
+      <type>xml</type>
+      <classifier>config</classifier>
+    </dependency>
     <dependency>
       <groupId>org.opendaylight.controller.samples</groupId>
       <artifactId>clustering-it-config</artifactId>
@@ -337,6 +345,7 @@
       <artifactId>clustering-it-provider</artifactId>
       <version>${mdsal.version}</version>
     </dependency>
+
 
     <!-- toaster -->
     <dependency>
