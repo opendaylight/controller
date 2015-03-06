@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 
+import javax.xml.transform.dom.DOMSource;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
@@ -128,7 +129,7 @@ public class DataNormalizer {
         if (normalizedData instanceof DataContainerNode<?>) {
             return toLegacyFromDataContainer((DataContainerNode<?>) normalizedData);
         } else if (normalizedData instanceof AnyXmlNode) {
-            Node<?> value = ((AnyXmlNode) normalizedData).getValue();
+            DOMSource value = ((AnyXmlNode) normalizedData).getValue();
             return value instanceof CompositeNode ? (CompositeNode) value : null;
         }
         return null;
@@ -147,7 +148,7 @@ public class DataNormalizer {
         if (node instanceof DataContainerNode<?>) {
             return toLegacyFromDataContainer((DataContainerNode<?>) node);
         } else if (node instanceof AnyXmlNode) {
-            return ((AnyXmlNode) node).getValue();
+            return null;
         }
         return toLegacySimple(node);
 
