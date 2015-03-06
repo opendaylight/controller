@@ -54,11 +54,12 @@ public class EventAggregator implements EventAggregatorService {
         //# Notify existing nodes
         //# Code reader note: Context of Node type is NetworkTopology
         List<Node> nodes = eventSourceTopology.snapshot();
-        for (Node node : nodes) {
-            NodeId nodeIdToNotify = node.getAugmentation(Node1.class).getEventSourceNode();
-            topic.notifyNode(nodeIdToNotify);
+        if(nodes != null){
+            for (Node node : nodes) {
+                NodeId nodeIdToNotify = node.getAugmentation(Node1.class).getEventSourceNode();
+                topic.notifyNode(nodeIdToNotify);
+            }
         }
-
         CreateTopicOutput cto = new CreateTopicOutputBuilder()
                 .setTopicId(topic.getTopicId())
                 .build();

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+
+ This program and the accompanying materials are made available under the
+ terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ and is available at http://www.eclipse.org/legal/epl-v10.html
+-->
+<snapshot>
+      <configuration>
+      <data xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+          <modules xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
+              <module>
+                  <name>messagebus-app</name>
+                  <type xmlns:binding-impl="urn:opendaylight:params:xml:ns:yang:controller:messagebus:app:impl">binding-impl:messagebus-app-impl</type>
+                  <binding-broker xmlns="urn:opendaylight:params:xml:ns:yang:controller:messagebus:app:impl">
+                      <type xmlns:md-sal-binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">md-sal-binding:binding-broker-osgi-registry</type>
+                      <name>binding-osgi-broker</name>
+                  </binding-broker>
+                  <dom-broker xmlns="urn:opendaylight:params:xml:ns:yang:controller:messagebus:app:impl">
+                      <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:dom-broker-osgi-registry</type>
+                      <name>dom-broker</name>
+                  </dom-broker>
+                  <namespace-to-stream>
+					  <urn-prefix>urn:ietf:params:xml:ns:yang:smiv2</urn-prefix>
+					  <stream-name>SNMP</stream-name>
+                  </namespace-to-stream>
+                  <namespace-to-stream>
+					  <urn-prefix>urn:ietf:params:xml:ns:yang:ietf-syslog-notification</urn-prefix>
+					  <stream-name>SYSLOG</stream-name>
+                  </namespace-to-stream>
+              </module>
+          </modules>
+      </data>
+  </configuration>
+  <required-capabilities>
+      <capability>urn:opendaylight:params:xml:ns:yang:controller:messagebus:app:impl?module=messagebus-app-impl&amp;revision=2015-02-03</capability>
+  </required-capabilities>
+</snapshot>
