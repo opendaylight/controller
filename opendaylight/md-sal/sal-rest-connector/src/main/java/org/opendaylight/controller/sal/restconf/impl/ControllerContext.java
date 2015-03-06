@@ -501,7 +501,7 @@ public class ControllerContext implements SchemaContextListener {
         }
 
         if (strings.isEmpty()) {
-            return new InstanceIdentifierContext(builder.toInstance(), ((DataSchemaNode) parentNode), mountPoint,mountPoint != null ? mountPoint.getSchemaContext() : globalSchema);
+            return createContext(builder.toInstance(), ((DataSchemaNode) parentNode), mountPoint,mountPoint != null ? mountPoint.getSchemaContext() : globalSchema);
         }
 
         final String head = strings.iterator().next();
@@ -671,7 +671,14 @@ public class ControllerContext implements SchemaContextListener {
                     returnJustMountPoint);
         }
 
-        return new InstanceIdentifierContext(builder.toInstance(), targetNode, mountPoint,mountPoint != null ? mountPoint.getSchemaContext() : globalSchema);
+        return createContext(builder.build(), targetNode, mountPoint,mountPoint != null ? mountPoint.getSchemaContext() : globalSchema);
+    }
+
+    private InstanceIdentifierContext createContext(final YangInstanceIdentifier instance, final DataSchemaNode dataSchemaNode,
+            final DOMMountPoint mountPoint, final SchemaContext schemaContext) {
+
+        final YangInstanceIdentifier instanceIdentifier = new DataNormalizer(schemaContext).toNormalized(instance);
+        return new InstanceIdentifierContext(instanceIdentifier, dataSchemaNode, mountPoint,schemaContext);
     }
 
     public static DataSchemaNode findInstanceDataChildByNameAndNamespace(final DataNodeContainer container, final String name,
