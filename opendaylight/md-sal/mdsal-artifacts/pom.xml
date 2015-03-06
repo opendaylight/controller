@@ -312,12 +312,12 @@
             <!-- MessageBus -->
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
-                <artifactId>message-bus-api</artifactId>
+                <artifactId>messagebus-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
-                <artifactId>message-bus-impl</artifactId>
+                <artifactId>messagebus-impl</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
