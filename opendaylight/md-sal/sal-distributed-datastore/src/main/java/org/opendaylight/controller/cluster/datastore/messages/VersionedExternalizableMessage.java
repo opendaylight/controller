@@ -11,6 +11,7 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 
 /**
  * Abstract base class for a versioned Externalizable message.
@@ -20,7 +21,7 @@ import java.io.ObjectOutput;
 public abstract class VersionedExternalizableMessage implements Externalizable, SerializableMessage {
     private static final long serialVersionUID = 1L;
 
-    private short version;
+    private short version = DataStoreVersions.CURRENT_VERSION;
 
     public VersionedExternalizableMessage() {
     }
