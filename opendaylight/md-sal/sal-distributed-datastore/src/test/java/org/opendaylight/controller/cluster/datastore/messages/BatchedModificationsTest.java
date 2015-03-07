@@ -41,15 +41,19 @@ public class BatchedModificationsTest {
 
         YangInstanceIdentifier deletePath = TestModel.TEST_PATH;
 
-        BatchedModifications batched = new BatchedModifications(DataStoreVersions.CURRENT_VERSION);
+        BatchedModifications batched = new BatchedModifications("tx1", DataStoreVersions.CURRENT_VERSION, "txChain");
         batched.addModification(new WriteModification(writePath, writeData));
         batched.addModification(new MergeModification(mergePath, mergeData));
         batched.addModification(new DeleteModification(deletePath));
+        batched.setReady(true);
 
         BatchedModifications clone = (BatchedModifications) SerializationUtils.clone(
                 (Serializable) batched.toSerializable());
 
         assertEquals("getVersion", DataStoreVersions.CURRENT_VERSION, clone.getVersion());
+        assertEquals("getTransactionID", "tx1", clone.getTransactionID());
+        assertEquals("getTransactionChainID", "txChain", clone.getTransactionChainID());
+        assertEquals("isReady", true, clone.isReady());
 
         assertEquals("getModifications size", 3, clone.getModifications().size());
 
@@ -66,6 +70,20 @@ public class BatchedModificationsTest {
         DeleteModification delete = (DeleteModification)clone.getModifications().get(2);
         assertEquals("getVersion", DataStoreVersions.CURRENT_VERSION, delete.getVersion());
         assertEquals("getPath", deletePath, delete.getPath());
+
+        // Test with different params.
+
+        batched = new BatchedModifications("tx2", (short)10, null);
+
+        clone = (BatchedModifications) SerializationUtils.clone((Serializable) batched.toSerializable());
+
+        assertEquals("getVersion", 10, clone.getVersion());
+        assertEquals("getTransactionID", "tx2", clone.getTransactionID());
+        assertEquals("getTransactionChainID", "", clone.getTransactionChainID());
+        assertEquals("isReady", false, clone.isReady());
+
+        assertEquals("getModifications size", 0, clone.getModifications().size());
+
     }
 
     @Test
@@ -73,5 +91,11 @@ public class BatchedModificationsTest {
         BatchedModificationsReply clone = (BatchedModificationsReply) SerializationUtils.clone(
                 (Serializable) new BatchedModificationsReply(100).toSerializable());
         assertEquals("getNumBatched", 100, clone.getNumBatched());
+        assertEquals("getCohortPath", null, clone.getCohortPath());
+
+        clone = (BatchedModificationsReply) SerializationUtils.clone(
+                (Serializable) new BatchedModificationsReply(50, "cohort path").toSerializable());
+        assertEquals("getNumBatched", 50, clone.getNumBatched());
+        assertEquals("getCohortPath", "cohort path", clone.getCohortPath());
     }
 }

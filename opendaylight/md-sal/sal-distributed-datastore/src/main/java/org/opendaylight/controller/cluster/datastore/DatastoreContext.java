@@ -58,6 +58,7 @@ public class DatastoreContext {
     private final DefaultConfigParamsImpl raftConfig = new DefaultConfigParamsImpl();
     private String dataStoreType = UNKNOWN_DATA_STORE_TYPE;
     private int shardBatchedModificationCount = DEFAULT_SHARD_BATCHED_MODIFICATION_COUNT;
+    private boolean writeOnlyTransactionOptimizationsEnabled = false;
 
     private DatastoreContext() {
         setShardJournalRecoveryLogBatchSize(DEFAULT_JOURNAL_RECOVERY_BATCH_SIZE);
@@ -82,6 +83,7 @@ public class DatastoreContext {
         this.transactionCreationInitialRateLimit = other.transactionCreationInitialRateLimit;
         this.dataStoreType = other.dataStoreType;
         this.shardBatchedModificationCount = other.shardBatchedModificationCount;
+        this.writeOnlyTransactionOptimizationsEnabled = other.writeOnlyTransactionOptimizationsEnabled;
 
         setShardJournalRecoveryLogBatchSize(other.raftConfig.getJournalRecoveryLogBatchSize());
         setSnapshotBatchCount(other.raftConfig.getSnapshotBatchCount());
@@ -184,6 +186,10 @@ public class DatastoreContext {
 
     public int getShardBatchedModificationCount() {
         return shardBatchedModificationCount;
+    }
+
+    public boolean isWriteOnlyTransactionOptimizationsEnabled() {
+        return writeOnlyTransactionOptimizationsEnabled;
     }
 
     public static class Builder {
@@ -323,6 +329,11 @@ public class DatastoreContext {
 
         public Builder shardBatchedModificationCount(int shardBatchedModificationCount) {
             datastoreContext.shardBatchedModificationCount = shardBatchedModificationCount;
+            return this;
+        }
+
+        public Builder writeOnlyTransactionOptimizationsEnabled(boolean value) {
+            datastoreContext.writeOnlyTransactionOptimizationsEnabled = value;
             return this;
         }
 

@@ -9,17 +9,26 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorRef;
 import akka.actor.Status;
+import akka.serialization.Serialization;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.RemovalCause;
+import com.google.common.cache.RemovalListener;
+import com.google.common.cache.RemovalNotification;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
+import org.opendaylight.controller.cluster.datastore.messages.BatchedModificationsReply;
 import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransactionReply;
-import org.opendaylight.controller.cluster.datastore.modification.CompositeModification;
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
+import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.slf4j.Logger;
 
 /**
@@ -29,9 +38,16 @@ import org.slf4j.Logger;
  */
 public class ShardCommitCoordinator {
 
+    // Interface hook for unit tests to replace or decorate the DOMStoreThreePhaseCommitCohorts.
+    public interface CohortDecorator {
+        DOMStoreThreePhaseCommitCohort decorate(String transactionID, DOMStoreThreePhaseCommitCohort actual);
+    }
+
     private final Cache<String, CohortEntry> cohortCache;
 
     private CohortEntry currentCohortEntry;
+
+    private final DOMTransactionFactory transactionFactory;
 
     private final Queue<CohortEntry> queuedCohortEntries;
 
@@ -41,14 +57,33 @@ public class ShardCommitCoordinator {
 
     private final String name;
 
-    public ShardCommitCoordinator(long cacheExpiryTimeoutInSec, int queueCapacity, Logger log,
-            String name) {
-        cohortCache = CacheBuilder.newBuilder().expireAfterAccess(
-                cacheExpiryTimeoutInSec, TimeUnit.SECONDS).build();
+    private final String shardActorPath;
+
+    private final RemovalListener<String, CohortEntry> cacheRemovalListener =
+            new RemovalListener<String, CohortEntry>() {
+                @Override
+                public void onRemoval(RemovalNotification<String, CohortEntry> notification) {
+                    if(notification.getCause() == RemovalCause.EXPIRED) {
+                        log.warn("{}: Transaction {} was timed out of the cache", name, notification.getKey());
+                    }
+                }
+            };
+
+    // This is a hook for unit tests to replace or decorate the DOMStoreThreePhaseCommitCohorts.
+    private CohortDecorator cohortDecorator;
+
+    public ShardCommitCoordinator(DOMTransactionFactory transactionFactory,
+            long cacheExpiryTimeoutInSec, int queueCapacity, ActorRef shardActor, Logger log, String name) {
 
         this.queueCapacity = queueCapacity;
         this.log = log;
         this.name = name;
+        this.transactionFactory = transactionFactory;
+
+        shardActorPath = Serialization.serializedActorPath(shardActor);
+
+        cohortCache = CacheBuilder.newBuilder().expireAfterAccess(cacheExpiryTimeoutInSec, TimeUnit.SECONDS).
+                removalListener(cacheRemovalListener).build();
 
         // We use a LinkedList here to avoid synchronization overhead with concurrent queue impls
         // since this should only be accessed on the shard's dispatcher.
@@ -60,17 +95,60 @@ public class ShardCommitCoordinator {
     }
 
     /**
-     * This method caches a cohort entry for the given transactions ID in preparation for the
-     * subsequent 3-phase commit.
+     * This method is called to ready a transaction that was prepared by ShardTransaction actor. It caches
+     * the prepared cohort entry for the given transactions ID in preparation for the subsequent 3-phase commit.
      *
      * @param transactionID the ID of the transaction
      * @param cohort the cohort to participate in the transaction commit
-     * @param modification the modification made by the transaction
+     * @param modification the modifications made by the transaction
      */
     public void transactionReady(String transactionID, DOMStoreThreePhaseCommitCohort cohort,
-            Modification modification) {
+            MutableCompositeModification modification) {
 
         cohortCache.put(transactionID, new CohortEntry(transactionID, cohort, modification));
+    }
+
+    /**
+     * This method handles a BatchedModifications message for a transaction being prepared directly on the
+     * Shard actor instead of via a ShardTransaction actor. If there's no currently cached
+     * DOMStoreWriteTransaction, one is created. The batched modifications are applied to the write Tx. If
+     * the BatchedModifications is ready to commit then a DOMStoreThreePhaseCommitCohort is created.
+     *
+     * @param batched the BatchedModifications
+     * @param shardActor the transaction's shard actor
+     *
+     * @throws ExecutionException if an error occurs loading the cache
+     */
+    public BatchedModificationsReply handleTransactionModifications(BatchedModifications batched)
+            throws ExecutionException {
+        CohortEntry cohortEntry = cohortCache.getIfPresent(batched.getTransactionID());
+        if(cohortEntry == null) {
+            cohortEntry = new CohortEntry(batched.getTransactionID(),
+                    transactionFactory.<DOMStoreWriteTransaction>newTransaction(
+                        TransactionProxy.TransactionType.WRITE_ONLY, batched.getTransactionID(),
+                        batched.getTransactionChainID()));
+            cohortCache.put(batched.getTransactionID(), cohortEntry);
+        }
+
+        if(log.isDebugEnabled()) {
+            log.debug("{}: Applying {} batched modifications for Tx {}", name,
+                    batched.getModifications().size(), batched.getTransactionID());
+        }
+
+        cohortEntry.applyModifications(batched.getModifications());
+
+        String cohortPath = null;
+        if(batched.isReady()) {
+            if(log.isDebugEnabled()) {
+                log.debug("{}: Readying Tx {}, client version {}", name,
+                        batched.getTransactionID(), batched.getVersion());
+            }
+
+            cohortEntry.ready(cohortDecorator);
+            cohortPath = shardActorPath;
+        }
+
+        return new BatchedModificationsReply(batched.getModifications().size(), cohortPath);
     }
 
     /**
@@ -216,19 +294,33 @@ public class ShardCommitCoordinator {
         }
     }
 
+    @VisibleForTesting
+    void setCohortDecorator(CohortDecorator cohortDecorator) {
+        this.cohortDecorator = cohortDecorator;
+    }
+
+
     static class CohortEntry {
         private final String transactionID;
-        private final DOMStoreThreePhaseCommitCohort cohort;
-        private final Modification modification;
+        private DOMStoreThreePhaseCommitCohort cohort;
+        private final MutableCompositeModification compositeModification;
+        private final DOMStoreWriteTransaction transaction;
         private ActorRef canCommitSender;
         private ActorRef shard;
         private long lastAccessTime;
 
+        CohortEntry(String transactionID, DOMStoreWriteTransaction transaction) {
+            this.compositeModification = new MutableCompositeModification();
+            this.transaction = transaction;
+            this.transactionID = transactionID;
+        }
+
         CohortEntry(String transactionID, DOMStoreThreePhaseCommitCohort cohort,
-                Modification modification) {
+                MutableCompositeModification compositeModification) {
             this.transactionID = transactionID;
             this.cohort = cohort;
-            this.modification = modification;
+            this.compositeModification = compositeModification;
+            this.transaction = null;
         }
 
         void updateLastAccessTime() {
@@ -247,8 +339,26 @@ public class ShardCommitCoordinator {
             return cohort;
         }
 
-        Modification getModification() {
-            return modification;
+        MutableCompositeModification getModification() {
+            return compositeModification;
+        }
+
+        void applyModifications(Iterable<Modification> modifications) {
+            for(Modification modification: modifications) {
+                compositeModification.addModification(modification);
+                modification.apply(transaction);
+            }
+        }
+
+        void ready(CohortDecorator cohortDecorator) {
+            Preconditions.checkState(cohort == null, "cohort was already set");
+
+            cohort = transaction.ready();
+
+            if(cohortDecorator != null) {
+                // Call the hook for unit tests.
+                cohort = cohortDecorator.decorate(transactionID, cohort);
+            }
         }
 
         ActorRef getCanCommitSender() {
@@ -268,10 +378,7 @@ public class ShardCommitCoordinator {
         }
 
         boolean hasModifications(){
-            if(modification instanceof CompositeModification){
-                return ((CompositeModification) modification).getModifications().size() > 0;
-            }
-            return true;
+            return compositeModification.getModifications().size() > 0;
         }
     }
 }

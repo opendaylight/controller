@@ -163,7 +163,8 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
 
             // Create the write Tx
 
-            final DOMStoreWriteTransaction writeTx = dataStore.newWriteOnlyTransaction();
+            // TODO - we'll want to test this with write-only as well when FindPrimary returns the leader shard.
+            final DOMStoreWriteTransaction writeTx = dataStore.newReadWriteTransaction();
             assertNotNull("newReadWriteTransaction returned null", writeTx);
 
             // Do some modification operations and ready the Tx on a separate thread.
@@ -473,7 +474,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
 
             // Create the write Tx.
 
-            final DOMStoreWriteTransaction writeTx = dataStore.newWriteOnlyTransaction();
+            final DOMStoreWriteTransaction writeTx = dataStore.newReadWriteTransaction();
             assertNotNull("newReadWriteTransaction returned null", writeTx);
 
             // Do some modifications and ready the Tx on a separate thread.
