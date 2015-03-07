@@ -13,6 +13,8 @@ import akka.pattern.Patterns;
 import akka.testkit.JavaTestKit;
 import akka.util.Timeout;
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import org.junit.Assert;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeader;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
@@ -21,12 +23,9 @@ import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
 
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+public class ShardTestKit extends JavaTestKit {
 
-class ShardTestKit extends JavaTestKit {
-
-    ShardTestKit(ActorSystem actorSystem) {
+    protected ShardTestKit(ActorSystem actorSystem) {
         super(actorSystem);
     }
 
