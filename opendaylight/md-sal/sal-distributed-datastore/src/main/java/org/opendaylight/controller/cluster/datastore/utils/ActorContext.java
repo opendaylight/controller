@@ -31,6 +31,7 @@ import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.Configuration;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.exceptions.LocalShardNotFoundException;
+import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.exceptions.NotInitializedException;
 import org.opendaylight.controller.cluster.datastore.exceptions.PrimaryNotFoundException;
 import org.opendaylight.controller.cluster.datastore.exceptions.TimeoutException;
@@ -94,6 +95,7 @@ public class ActorContext {
     private final JmxReporter jmxReporter = JmxReporter.forRegistry(metricRegistry).inDomain(DOMAIN).build();
     private final int transactionOutstandingOperationLimit;
     private Timeout transactionCommitOperationTimeout;
+    private Timeout shardInitializationTimeout;
     private final Dispatchers dispatchers;
 
     private volatile SchemaContext schemaContext;
@@ -137,6 +139,8 @@ public class ActorContext {
 
         transactionCommitOperationTimeout =  new Timeout(Duration.create(
                 datastoreContext.getShardTransactionCommitTimeoutInSeconds(), TimeUnit.SECONDS));
+
+        shardInitializationTimeout = new Timeout(datastoreContext.getShardInitializationTimeout().duration().$times(2));
     }
 
     public DatastoreContext getDatastoreContext() {
@@ -205,8 +209,7 @@ public class ActorContext {
 
     public Future<ActorSelection> findPrimaryShardAsync(final String shardName) {
         Future<Object> future = executeOperationAsync(shardManager,
-                new FindPrimary(shardName, true).toSerializable(),
-                datastoreContext.getShardInitializationTimeout());
+                new FindPrimary(shardName, true).toSerializable(), shardInitializationTimeout);
 
         return future.transform(new Mapper<Object, ActorSelection>() {
             @Override
@@ -223,6 +226,8 @@ public class ActorContext {
                 } else if(response instanceof PrimaryNotFound) {
                     throw new PrimaryNotFoundException(
                             String.format("No primary shard found for %S.", shardName));
+                } else if(response instanceof NoShardLeaderException) {
+                    throw (NoShardLeaderException)response;
                 }
 
                 throw new UnknownMessageException(String.format(
@@ -258,7 +263,7 @@ public class ActorContext {
      */
     public Future<ActorRef> findLocalShardAsync( final String shardName) {
         Future<Object> future = executeOperationAsync(shardManager,
-                new FindLocalShard(shardName, true), datastoreContext.getShardInitializationTimeout());
+                new FindLocalShard(shardName, true), shardInitializationTimeout);
 
         return future.map(new Mapper<Object, ActorRef>() {
             @Override
@@ -274,6 +279,8 @@ public class ActorContext {
                 } else if(response instanceof LocalShardNotFound) {
                     throw new LocalShardNotFoundException(
                             String.format("Local shard for %s does not exist.", shardName));
+                } else if(response instanceof NoShardLeaderException) {
+                    throw (NoShardLeaderException)response;
                 }
 
                 throw new UnknownMessageException(String.format(
