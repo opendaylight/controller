@@ -12,10 +12,14 @@ import com.google.common.base.Preconditions;
 
 public class ShardTransactionIdentifier {
     private final String remoteTransactionId;
+    private final String stringRepresentation;
 
     private ShardTransactionIdentifier(String remoteTransactionId) {
         this.remoteTransactionId = Preconditions.checkNotNull(remoteTransactionId,
                 "remoteTransactionId should not be null");
+
+        stringRepresentation = new StringBuilder(remoteTransactionId.length() + 6).append("shard-").
+                append(remoteTransactionId).toString();
     }
 
     public static Builder builder(){
@@ -50,9 +54,7 @@ public class ShardTransactionIdentifier {
     }
 
     @Override public String toString() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("shard-").append(remoteTransactionId);
-        return sb.toString();
+        return stringRepresentation;
     }
 
     public static class Builder {

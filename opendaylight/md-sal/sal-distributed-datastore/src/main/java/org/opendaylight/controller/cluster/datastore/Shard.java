@@ -43,6 +43,8 @@ import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.ActorInitialized;
+import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
+import org.opendaylight.controller.cluster.datastore.messages.BatchedModificationsReply;
 import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionChain;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransaction;
@@ -76,8 +78,6 @@ import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreFactory;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransaction;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionFactory;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -105,7 +105,7 @@ public class Shard extends RaftActor {
     private final InMemoryDOMDataStore store;
 
     /// The name of this shard
-    private final ShardIdentifier name;
+    private final String name;
 
     private final ShardStats shardMBean;
 
@@ -138,7 +138,7 @@ public class Shard extends RaftActor {
     private ShardRecoveryCoordinator recoveryCoordinator;
     private List<Object> currentLogRecoveryBatch;
 
-    private final Map<String, DOMStoreTransactionChain> transactionChains = new HashMap<>();
+    private final DOMTransactionFactory transactionFactory;
 
     private final String txnDispatcherPath;
 
@@ -147,7 +147,7 @@ public class Shard extends RaftActor {
         super(name.toString(), mapPeerAddresses(peerAddresses),
                 Optional.of(datastoreContext.getShardRaftConfig()));
 
-        this.name = name;
+        this.name = name.toString();
         this.datastoreContext = datastoreContext;
         this.schemaContext = schemaContext;
         this.dataPersistenceProvider = (datastoreContext.isPersistent())
@@ -173,8 +173,11 @@ public class Shard extends RaftActor {
             getContext().become(new MeteringBehavior(this));
         }
 
-        commitCoordinator = new ShardCommitCoordinator(TimeUnit.SECONDS.convert(1, TimeUnit.MINUTES),
-                datastoreContext.getShardTransactionCommitQueueCapacity(), LOG, name.toString());
+        transactionFactory = new DOMTransactionFactory(store, shardMBean, LOG, this.name);
+
+        commitCoordinator = new ShardCommitCoordinator(transactionFactory,
+                TimeUnit.SECONDS.convert(5, TimeUnit.MINUTES),
+                datastoreContext.getShardTransactionCommitQueueCapacity(), LOG, this.name);
 
         setTransactionCommitTimeout();
 
@@ -267,6 +270,8 @@ public class Shard extends RaftActor {
         try {
             if (message.getClass().equals(CreateTransaction.SERIALIZABLE_CLASS)) {
                 handleCreateTransaction(message);
+            } else if (BatchedModifications.class.isInstance(message)) {
+                handleBatchedModifications((BatchedModifications)message);
             } else if (message instanceof ForwardedReadyTransaction) {
                 handleForwardedReadyTransaction((ForwardedReadyTransaction) message);
             } else if (message.getClass().equals(CanCommitTransaction.SERIALIZABLE_CLASS)) {
@@ -442,6 +447,23 @@ public class Shard extends RaftActor {
         commitCoordinator.handleCanCommit(canCommit, getSender(), self());
     }
 
+    private void handleBatchedModifications(BatchedModifications batched) {
+        // This message is sent to prepare the modificationsa transaction directly on the Shard as an
+        // optimization to avoid the extra overhead of a separate ShardTransaction actor. On the last
+        // BatchedModifications message, the caller sets the ready flag in the message indicating
+        // modifications are complete. The reply contains the cohort actor path (this actor) for the caller
+        // to initiate the 3-phase commit. This also avoids the overhead of sending an additional
+        // ReadyTransaction message.
+
+        try {
+            BatchedModificationsReply reply = commitCoordinator.handleTransactionModifications(batched, self());
+            sender().tell(reply, self());
+        } catch (Exception e) {
+            LOG.error("{}: Error handling BatchedModifications for Tx {}", persistenceId(), batched.getTransactionID(), e);
+            getSender().tell(new akka.actor.Status.Failure(e), getSelf());
+        }
+    }
+
     private void handleForwardedReadyTransaction(ForwardedReadyTransaction ready) {
         LOG.debug("{}: Readying transaction {}, client version {}", persistenceId(),
                 ready.getTransactionID(), ready.getTxnClientVersion());
@@ -450,7 +472,7 @@ public class Shard extends RaftActor {
         // commitCoordinator in preparation for the subsequent three phase commit initiated by
         // the front-end.
         commitCoordinator.transactionReady(ready.getTransactionID(), ready.getCohort(),
-                ready.getModification());
+                (MutableCompositeModification) ready.getModification());
 
         // Return our actor path as we'll handle the three phase commit, except if the Tx client
         // version < 1 (Helium-1 version). This means the Tx was initiated by a base Helium version
@@ -523,55 +545,18 @@ public class Shard extends RaftActor {
     }
 
     private void closeTransactionChain(final CloseTransactionChain closeTransactionChain) {
-        DOMStoreTransactionChain chain =
-            transactionChains.remove(closeTransactionChain.getTransactionChainId());
-
-        if(chain != null) {
-            chain.close();
-        }
+        transactionFactory.closeTransactionChain(closeTransactionChain.getTransactionChainId());
     }
 
     private ActorRef createTypedTransactionActor(int transactionType,
             ShardTransactionIdentifier transactionId, String transactionChainId,
             short clientVersion ) {
 
-        DOMStoreTransactionFactory factory = store;
+        DOMStoreTransaction transaction = transactionFactory.newTransaction(
+                TransactionProxy.TransactionType.fromInt(transactionType), transactionId.toString(),
+                transactionChainId);
 
-        if(!transactionChainId.isEmpty()) {
-            factory = transactionChains.get(transactionChainId);
-            if(factory == null){
-                DOMStoreTransactionChain transactionChain = store.createTransactionChain();
-                transactionChains.put(transactionChainId, transactionChain);
-                factory = transactionChain;
-            }
-        }
-
-        if(this.schemaContext == null) {
-            throw new IllegalStateException("SchemaContext is not set");
-        }
-
-        if (transactionType == TransactionProxy.TransactionType.READ_ONLY.ordinal()) {
-
-            shardMBean.incrementReadOnlyTransactionCount();
-
-            return createShardTransaction(factory.newReadOnlyTransaction(), transactionId, clientVersion);
-
-        } else if (transactionType == TransactionProxy.TransactionType.READ_WRITE.ordinal()) {
-
-            shardMBean.incrementReadWriteTransactionCount();
-
-            return createShardTransaction(factory.newReadWriteTransaction(), transactionId, clientVersion);
-
-        } else if (transactionType == TransactionProxy.TransactionType.WRITE_ONLY.ordinal()) {
-
-            shardMBean.incrementWriteOnlyTransactionCount();
-
-            return createShardTransaction(factory.newWriteOnlyTransaction(), transactionId, clientVersion);
-        } else {
-            throw new IllegalArgumentException(
-                "Shard="+name + ":CreateTransaction message has unidentified transaction type="
-                    + transactionType);
-        }
+        return createShardTransaction(transaction, transactionId, clientVersion);
     }
 
     private ActorRef createShardTransaction(DOMStoreTransaction transaction, ShardTransactionIdentifier transactionId,
@@ -914,17 +899,14 @@ public class Shard extends RaftActor {
         shardMBean.setCurrentTerm(getCurrentTerm());
 
         // If this actor is no longer the leader close all the transaction chains
-        if(!isLeader){
-            for(Map.Entry<String, DOMStoreTransactionChain> entry : transactionChains.entrySet()){
-                if(LOG.isDebugEnabled()) {
-                    LOG.debug(
-                        "{}: onStateChanged: Closing transaction chain {} because shard {} is no longer the leader",
-                        persistenceId(), entry.getKey(), getId());
-                }
-                entry.getValue().close();
+        if(!isLeader) {
+            if(LOG.isDebugEnabled()) {
+                LOG.debug(
+                    "{}: onStateChanged: Closing all transaction chains because shard {} is no longer the leader",
+                    persistenceId(), getId());
             }
 
-            transactionChains.clear();
+            transactionFactory.closeAllTransactionChains();
         }
     }
 
@@ -938,13 +920,19 @@ public class Shard extends RaftActor {
     }
 
     @Override public String persistenceId() {
-        return this.name.toString();
+        return this.name;
     }
 
     @VisibleForTesting
     DataPersistenceProvider getDataPersistenceProvider() {
         return dataPersistenceProvider;
     }
+
+    @VisibleForTesting
+    ShardCommitCoordinator getCommitCoordinator() {
+        return commitCoordinator;
+    }
+
 
     private static class ShardCreator implements Creator<Shard> {
 
