@@ -41,13 +41,11 @@ import org.opendaylight.controller.cluster.datastore.exceptions.NotInitializedEx
 import org.opendaylight.controller.cluster.datastore.exceptions.PrimaryNotFoundException;
 import org.opendaylight.controller.cluster.datastore.exceptions.TimeoutException;
 import org.opendaylight.controller.cluster.datastore.exceptions.UnknownMessageException;
-import org.opendaylight.controller.cluster.datastore.messages.ActorNotInitialized;
 import org.opendaylight.controller.cluster.datastore.messages.FindLocalShard;
 import org.opendaylight.controller.cluster.datastore.messages.FindPrimary;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardFound;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardNotFound;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryFound;
-import org.opendaylight.controller.cluster.datastore.messages.PrimaryNotFound;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
@@ -209,25 +207,22 @@ public class ActorContext {
             return ret;
         }
         Future<Object> future = executeOperationAsync(shardManager,
-                new FindPrimary(shardName, true).toSerializable(), shardInitializationTimeout);
+                new FindPrimary(shardName, true), shardInitializationTimeout);
 
         return future.transform(new Mapper<Object, ActorSelection>() {
             @Override
             public ActorSelection checkedApply(Object response) throws Exception {
-                if(PrimaryFound.SERIALIZABLE_CLASS.isInstance(response)) {
-                    PrimaryFound found = PrimaryFound.fromSerializable(response);
+                if(response instanceof PrimaryFound) {
+                    PrimaryFound found = (PrimaryFound)response;
 
                     LOG.debug("Primary found {}", found.getPrimaryPath());
                     ActorSelection actorSelection = actorSystem.actorSelection(found.getPrimaryPath());
                     primaryShardActorSelectionCache.put(shardName, Futures.successful(actorSelection));
                     return actorSelection;
-                } else if(response instanceof ActorNotInitialized) {
-                    throw new NotInitializedException(
-                            String.format("Found primary shard %s but it's not initialized yet. " +
-                                          "Please try again later", shardName));
-                } else if(response instanceof PrimaryNotFound) {
-                    throw new PrimaryNotFoundException(
-                            String.format("No primary shard found for %S.", shardName));
+                } else if(response instanceof NotInitializedException) {
+                    throw (NotInitializedException)response;
+                } else if(response instanceof PrimaryNotFoundException) {
+                    throw (PrimaryNotFoundException)response;
                 } else if(response instanceof NoShardLeaderException) {
                     throw (NoShardLeaderException)response;
                 }
@@ -274,10 +269,8 @@ public class ActorContext {
                     LocalShardFound found = (LocalShardFound)response;
                     LOG.debug("Local shard found {}", found.getPath());
                     return found.getPath();
-                } else if(response instanceof ActorNotInitialized) {
-                    throw new NotInitializedException(
-                            String.format("Found local shard for %s but it's not initialized yet.",
-                                    shardName));
+                } else if(response instanceof NotInitializedException) {
+                    throw (NotInitializedException)response;
                 } else if(response instanceof LocalShardNotFound) {
                     throw new LocalShardNotFoundException(
                             String.format("Local shard for %s does not exist.", shardName));
