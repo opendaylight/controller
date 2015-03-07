@@ -9,6 +9,8 @@
 package org.opendaylight.controller.cluster.datastore.utils;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableMap;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -18,11 +20,23 @@ import org.opendaylight.controller.cluster.datastore.Configuration;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategy;
 
 public class MockConfiguration implements Configuration{
-    @Override public List<String> getMemberShardNames(final String memberName) {
-        return Arrays.asList("default");
+    private Map<String, List<String>> shardMembers = ImmutableMap.<String, List<String>>builder().
+            put("default", Arrays.asList("member-1", "member-2")).
+            /*put("astronauts", Arrays.asList("member-2", "member-3")).*/build();
+
+    public MockConfiguration() {
     }
 
-    @Override public Optional<String> getModuleNameFromNameSpace(
+    public MockConfiguration(Map<String, List<String>> shardMembers) {
+        this.shardMembers = shardMembers;
+    }
+
+    @Override
+    public List<String> getMemberShardNames(final String memberName) {
+        return new ArrayList<>(shardMembers.keySet());
+    }
+    @Override
+    public Optional<String> getModuleNameFromNameSpace(
         final String nameSpace) {
         return Optional.absent();
     }
@@ -44,7 +58,8 @@ public class MockConfiguration implements Configuration{
             return Arrays.asList("member-2", "member-3");
         }
 
-        return Collections.emptyList();
+        List<String> members = shardMembers.get(shardName);
+        return members != null ? members : Collections.<String>emptyList();
     }
 
     @Override public Set<String> getAllShardNames() {

@@ -8,56 +8,48 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
+import java.io.Serializable;
 
-public class PrimaryFound implements SerializableMessage {
-  public static final Class<PrimaryFound> SERIALIZABLE_CLASS = PrimaryFound.class;
-  private final String primaryPath;
+public class PrimaryFound implements Serializable {
+    private static final long serialVersionUID = 1L;
 
-  public PrimaryFound(final String primaryPath) {
-    this.primaryPath = primaryPath;
-  }
+    private final String primaryPath;
 
-  public String getPrimaryPath() {
-    return primaryPath;
-  }
+    public PrimaryFound(final String primaryPath) {
+        this.primaryPath = primaryPath;
+    }
 
-  @Override
-  public boolean equals(final Object o) {
-    if (this == o) {
+    public String getPrimaryPath() {
+        return primaryPath;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        PrimaryFound that = (PrimaryFound) o;
+
+        if (!primaryPath.equals(that.primaryPath)) {
+            return false;
+        }
+
         return true;
     }
-    if (o == null || getClass() != o.getClass()) {
-        return false;
+
+    @Override
+    public int hashCode() {
+        return primaryPath.hashCode();
     }
 
-    PrimaryFound that = (PrimaryFound) o;
-
-    if (!primaryPath.equals(that.primaryPath)) {
-        return false;
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("PrimaryFound [primaryPath=").append(primaryPath).append("]");
+        return builder.toString();
     }
-
-    return true;
-  }
-
-  @Override
-  public int hashCode() {
-    return primaryPath.hashCode();
-  }
-
-  @Override
-  public String toString() {
-    return "PrimaryFound{" +
-            "primaryPath='" + primaryPath + '\'' +
-            '}';
-  }
-
-
-  @Override
-  public Object toSerializable() {
-    return  this;
-  }
-
-  public static PrimaryFound fromSerializable(final Object message){
-    return (PrimaryFound) message;
-  }
 }
