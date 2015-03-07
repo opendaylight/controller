@@ -981,7 +981,7 @@ public class Shard extends RaftActor {
     }
 
     @VisibleForTesting
-    InMemoryDOMDataStore getDataStore() {
+    public InMemoryDOMDataStore getDataStore() {
         return store;
     }
 
