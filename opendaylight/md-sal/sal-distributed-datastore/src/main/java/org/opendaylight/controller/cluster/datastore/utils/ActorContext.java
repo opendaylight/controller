@@ -16,6 +16,7 @@ import akka.actor.ActorSystem;
 import akka.actor.Address;
 import akka.actor.PoisonPill;
 import akka.dispatch.Mapper;
+import akka.dispatch.OnComplete;
 import akka.pattern.AskTimeoutException;
 import akka.util.Timeout;
 import com.codahale.metrics.JmxReporter;
@@ -31,6 +32,7 @@ import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.Configuration;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.exceptions.LocalShardNotFoundException;
+import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.exceptions.NotInitializedException;
 import org.opendaylight.controller.cluster.datastore.exceptions.PrimaryNotFoundException;
 import org.opendaylight.controller.cluster.datastore.exceptions.TimeoutException;
@@ -94,6 +96,7 @@ public class ActorContext {
     private final JmxReporter jmxReporter = JmxReporter.forRegistry(metricRegistry).inDomain(DOMAIN).build();
     private final int transactionOutstandingOperationLimit;
     private Timeout transactionCommitOperationTimeout;
+    private Timeout shardInitializationTimeout;
     private final Dispatchers dispatchers;
 
     private volatile SchemaContext schemaContext;
@@ -137,6 +140,8 @@ public class ActorContext {
 
         transactionCommitOperationTimeout =  new Timeout(Duration.create(
                 datastoreContext.getShardTransactionCommitTimeoutInSeconds(), TimeUnit.SECONDS));
+
+        shardInitializationTimeout = new Timeout(datastoreContext.getShardInitializationTimeout().duration().$times(2));
     }
 
     public DatastoreContext getDatastoreContext() {
@@ -189,24 +194,9 @@ public class ActorContext {
         return schemaContext;
     }
 
-    /**
-     * Finds the primary shard for the given shard name
-     *
-     * @param shardName
-     * @return
-     */
-    public Optional<ActorSelection> findPrimaryShard(String shardName) {
-        String path = findPrimaryPathOrNull(shardName);
-        if (path == null){
-            return Optional.absent();
-        }
-        return Optional.of(actorSystem.actorSelection(path));
-    }
-
     public Future<ActorSelection> findPrimaryShardAsync(final String shardName) {
         Future<Object> future = executeOperationAsync(shardManager,
-                new FindPrimary(shardName, true).toSerializable(),
-                datastoreContext.getShardInitializationTimeout());
+                new FindPrimary(shardName, true).toSerializable(), shardInitializationTimeout);
 
         return future.transform(new Mapper<Object, ActorSelection>() {
             @Override
@@ -223,6 +213,8 @@ public class ActorContext {
                 } else if(response instanceof PrimaryNotFound) {
                     throw new PrimaryNotFoundException(
                             String.format("No primary shard found for %S.", shardName));
+                } else if(response instanceof NoShardLeaderException) {
+                    throw (NoShardLeaderException)response;
                 }
 
                 throw new UnknownMessageException(String.format(
@@ -258,7 +250,7 @@ public class ActorContext {
      */
     public Future<ActorRef> findLocalShardAsync( final String shardName) {
         Future<Object> future = executeOperationAsync(shardManager,
-                new FindLocalShard(shardName, true), datastoreContext.getShardInitializationTimeout());
+                new FindLocalShard(shardName, true), shardInitializationTimeout);
 
         return future.map(new Mapper<Object, ActorRef>() {
             @Override
@@ -409,16 +401,21 @@ public class ActorContext {
      *
      * @param message
      */
-    public void broadcast(Object message){
-        for(String shardName : configuration.getAllShardNames()){
+    public void broadcast(final Object message){
+        for(final String shardName : configuration.getAllShardNames()){
 
-            Optional<ActorSelection> primary = findPrimaryShard(shardName);
-            if (primary.isPresent()) {
-                primary.get().tell(message, ActorRef.noSender());
-            } else {
-                LOG.warn("broadcast failed to send message {} to shard {}. Primary not found",
-                        message.getClass().getSimpleName(), shardName);
-            }
+            Future<ActorSelection> primaryFuture = findPrimaryShardAsync(shardName);
+            primaryFuture.onComplete(new OnComplete<ActorSelection>() {
+                @Override
+                public void onComplete(Throwable failure, ActorSelection primaryShard) {
+                    if(failure != null) {
+                        LOG.warn("broadcast failed to send message {} to shard {}. Primary not found",
+                                message.getClass().getSimpleName(), shardName);
+                    } else {
+                        primaryShard.tell(message, ActorRef.noSender());
+                    }
+                }
+            }, getClientDispatcher());
         }
     }
 

@@ -3,7 +3,6 @@ package org.opendaylight.controller.cluster.datastore.utils;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
@@ -274,17 +273,15 @@ public class ActorContextTest extends AbstractActorTest{
 
     @Test
     public void testRateLimiting(){
-        DatastoreContext mockDataStoreContext = mock(DatastoreContext.class);
-
-        doReturn(155L).when(mockDataStoreContext).getTransactionCreationInitialRateLimit();
-        doReturn("config").when(mockDataStoreContext).getDataStoreType();
+        DatastoreContext dataStoreContext = DatastoreContext.newBuilder().dataStoreType("config").
+                transactionCreationInitialRateLimit(155L).build();
 
         ActorContext actorContext =
                 new ActorContext(getSystem(), mock(ActorRef.class), mock(ClusterWrapper.class),
-                        mock(Configuration.class), mockDataStoreContext);
+                        mock(Configuration.class), dataStoreContext);
 
         // Check that the initial value is being picked up from DataStoreContext
-        assertEquals(mockDataStoreContext.getTransactionCreationInitialRateLimit(), actorContext.getTxCreationLimit(), 1e-15);
+        assertEquals(dataStoreContext.getTransactionCreationInitialRateLimit(), actorContext.getTxCreationLimit(), 1e-15);
 
         actorContext.setTxCreationLimit(1.0);
 
@@ -306,15 +303,9 @@ public class ActorContextTest extends AbstractActorTest{
 
     @Test
     public void testClientDispatcherIsGlobalDispatcher(){
-
-        DatastoreContext mockDataStoreContext = mock(DatastoreContext.class);
-
-        doReturn(155L).when(mockDataStoreContext).getTransactionCreationInitialRateLimit();
-        doReturn("config").when(mockDataStoreContext).getDataStoreType();
-
         ActorContext actorContext =
                 new ActorContext(getSystem(), mock(ActorRef.class), mock(ClusterWrapper.class),
-                        mock(Configuration.class), mockDataStoreContext);
+                        mock(Configuration.class), DatastoreContext.newBuilder().build());
 
         assertEquals(getSystem().dispatchers().defaultGlobalDispatcher(), actorContext.getClientDispatcher());
 
@@ -322,17 +313,11 @@ public class ActorContextTest extends AbstractActorTest{
 
     @Test
     public void testClientDispatcherIsNotGlobalDispatcher(){
-
-        DatastoreContext mockDataStoreContext = mock(DatastoreContext.class);
-
-        doReturn(155L).when(mockDataStoreContext).getTransactionCreationInitialRateLimit();
-        doReturn("config").when(mockDataStoreContext).getDataStoreType();
-
         ActorSystem actorSystem = ActorSystem.create("with-custom-dispatchers", ConfigFactory.load("application-with-custom-dispatchers.conf"));
 
         ActorContext actorContext =
                 new ActorContext(actorSystem, mock(ActorRef.class), mock(ClusterWrapper.class),
-                        mock(Configuration.class), mockDataStoreContext);
+                        mock(Configuration.class), DatastoreContext.newBuilder().build());
 
         assertNotEquals(actorSystem.dispatchers().defaultGlobalDispatcher(), actorContext.getClientDispatcher());
 
