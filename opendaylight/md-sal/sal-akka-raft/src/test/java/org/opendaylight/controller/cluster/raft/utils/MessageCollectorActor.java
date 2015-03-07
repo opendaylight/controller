@@ -8,6 +8,8 @@
 
 package org.opendaylight.controller.cluster.raft.utils;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
@@ -109,6 +111,22 @@ public class MessageCollectorActor extends UntypedActor {
         }
 
         return output;
+    }
+
+    public static <T> List<T> expectMatching(ActorRef actor, Class<T> clazz, int count) throws Exception {
+        List<T> matches =  null;
+        for(int i = 0; i < 5000 / 100; i++) {
+            matches = MessageCollectorActor.getAllMatching(actor, clazz);
+            assertNotNull(matches);
+            if(matches.size() == count) {
+                break;
+            }
+            Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
+        }
+
+        assertEquals("Expected messages of type " + clazz, count, matches.size());
+
+        return matches;
     }
 
     public static void waitUntilReady(ActorRef actor) throws Exception {

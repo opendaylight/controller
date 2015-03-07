@@ -11,6 +11,7 @@ package org.opendaylight.controller.cluster.datastore;
 import akka.actor.ActorPath;
 import akka.actor.ActorRef;
 import akka.actor.Address;
+import akka.actor.Cancellable;
 import akka.actor.OneForOneStrategy;
 import akka.actor.Props;
 import akka.actor.SupervisorStrategy;
@@ -25,19 +26,21 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActorWithMetering;
+import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardManagerIdentifier;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shardmanager.ShardManagerInfo;
@@ -53,6 +56,7 @@ import org.opendaylight.controller.cluster.datastore.messages.PrimaryFound;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryNotFound;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
 import org.opendaylight.controller.cluster.datastore.utils.Dispatchers;
+import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListener;
 import org.opendaylight.controller.cluster.notifications.RoleChangeNotification;
 import org.opendaylight.controller.cluster.raft.RaftState;
@@ -74,7 +78,7 @@ import scala.concurrent.duration.Duration;
  */
 public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
-    private final Logger LOG = LoggerFactory.getLogger(getClass());
+    private static final Logger LOG = LoggerFactory.getLogger(ShardManager.class);
 
     // Stores a mapping between a member name and the address of the member
     // Member names look like "member-1", "member-2" etc and are as specified
@@ -172,15 +176,45 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             onRoleChangeNotification((RoleChangeNotification) message);
         } else if(message instanceof FollowerInitialSyncUpStatus){
             onFollowerInitialSyncStatus((FollowerInitialSyncUpStatus) message);
-        } else{
+        } else if(message instanceof ShardNotInitializedTimeout) {
+            onShardNotInitializedTimeout((ShardNotInitializedTimeout)message);
+        } else if(message instanceof LeaderStateChanged) {
+            onLeaderStateChanged((LeaderStateChanged)message);
+        } else {
             unknownMessage(message);
         }
 
     }
 
+    private void onLeaderStateChanged(LeaderStateChanged leaderStateChanged) {
+        LOG.info("{}: Received LeaderStateChanged message: {}", persistenceId(), leaderStateChanged);
+
+        ShardInformation shardInformation = findShardInformation(leaderStateChanged.getMemberId());
+        if(shardInformation != null) {
+            shardInformation.setLeaderId(leaderStateChanged.getLeaderId());
+        } else {
+            LOG.debug("No shard found with member Id {}", leaderStateChanged.getMemberId());
+        }
+    }
+
+    private void onShardNotInitializedTimeout(ShardNotInitializedTimeout message) {
+        ShardInformation shardInfo = message.getShardInfo();
+
+        LOG.debug("{}: Received ShardNotInitializedTimeout message for shard {}", persistenceId(),
+                shardInfo.getShardId());
+
+        shardInfo.removeOnShardInitialized(message.getOnShardInitialized());
+
+        if(!shardInfo.isShardInitialized()) {
+            message.getSender().tell(new ActorNotInitialized(), getSelf());
+        } else {
+            message.getSender().tell(createNoShardLeaderException(shardInfo.shardId), getSelf());
+        }
+    }
+
     private void onFollowerInitialSyncStatus(FollowerInitialSyncUpStatus status) {
-        LOG.info("Received follower initial sync status for {} status sync done {}", status.getName(),
-                status.isInitialSyncDone());
+        LOG.info("{} Received follower initial sync status for {} status sync done {}", persistenceId(),
+                status.getName(), status.isInitialSyncDone());
 
         ShardInformation shardInformation = findShardInformation(status.getName());
 
@@ -193,7 +227,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     }
 
     private void onRoleChangeNotification(RoleChangeNotification roleChanged) {
-        LOG.info("Received role changed for {} from {} to {}", roleChanged.getMemberId(),
+        LOG.info("{}: Received role changed for {} from {} to {}", persistenceId(), roleChanged.getMemberId(),
                 roleChanged.getOldRole(), roleChanged.getNewRole());
 
         ShardInformation shardInformation = findShardInformation(roleChanged.getMemberId());
@@ -201,8 +235,8 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             shardInformation.setRole(roleChanged.getNewRole());
 
             if (isReady()) {
-                LOG.info("All Shards are ready - data store {} is ready, available count is {}", type,
-                        waitTillReadyCountdownLatch.getCount());
+                LOG.info("{}: All Shards are ready - data store {} is ready, available count is {}",
+                        persistenceId(), type, waitTillReadyCountdownLatch.getCount());
 
                 waitTillReadyCountdownLatch.countDown();
             }
@@ -225,7 +259,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     private boolean isReady() {
         boolean isReady = true;
         for (ShardInformation info : localShards.values()) {
-            if(RaftState.Candidate.name().equals(info.getRole()) || Strings.isNullOrEmpty(info.getRole())){
+            if(!info.isShardReady()){
                 isReady = false;
                 break;
             }
@@ -300,7 +334,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             return;
         }
 
-        sendResponse(shardInformation, message.isWaitUntilInitialized(), new Supplier<Object>() {
+        sendResponse(shardInformation, message.isWaitUntilInitialized(), false, new Supplier<Object>() {
             @Override
             public Object get() {
                 return new LocalShardFound(shardInformation.getActor());
@@ -308,26 +342,48 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         });
     }
 
-    private void sendResponse(ShardInformation shardInformation, boolean waitUntilInitialized,
-            final Supplier<Object> messageSupplier) {
-        if (!shardInformation.isShardInitialized()) {
-            if(waitUntilInitialized) {
+    private void sendResponse(ShardInformation shardInformation, boolean doWait,
+            boolean wantShardReady, final Supplier<Object> messageSupplier) {
+        if (!shardInformation.isShardInitialized() || (wantShardReady && !shardInformation.isShardReadyWithLeaderId())) {
+            if(doWait) {
                 final ActorRef sender = getSender();
                 final ActorRef self = self();
-                shardInformation.addRunnableOnInitialized(new Runnable() {
+
+                Runnable replyRunnable = new Runnable() {
                     @Override
                     public void run() {
                         sender.tell(messageSupplier.get(), self);
                     }
-                });
-            } else {
+                };
+
+                OnShardInitialized onShardInitialized = wantShardReady ? new OnShardReady(replyRunnable) :
+                    new OnShardInitialized(replyRunnable);
+
+                shardInformation.addOnShardInitialized(onShardInitialized);
+
+                Cancellable timeoutSchedule = getContext().system().scheduler().scheduleOnce(
+                        datastoreContext.getShardInitializationTimeout().duration(), getSelf(),
+                        new ShardNotInitializedTimeout(shardInformation, onShardInitialized, sender),
+                        getContext().dispatcher(), getSelf());
+
+                onShardInitialized.setTimeoutSchedule(timeoutSchedule);
+
+            } else if (!shardInformation.isShardInitialized()) {
                 getSender().tell(new ActorNotInitialized(), getSelf());
+            } else {
+                getSender().tell(createNoShardLeaderException(shardInformation.shardId), getSelf());
             }
 
             return;
         }
 
         getSender().tell(messageSupplier.get(), getSelf());
+    }
+
+    private NoShardLeaderException createNoShardLeaderException(ShardIdentifier shardId) {
+        return new NoShardLeaderException(String.format(
+                "Could not find a leader for shard %s. This typically happens when the system is coming up or " +
+                "recovering and a leader is being elected. Try again later.", shardId));
     }
 
     private void memberRemoved(ClusterEvent.MemberRemoved message) {
@@ -342,7 +398,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         for(ShardInformation info : localShards.values()){
             String shardName = info.getShardName();
             info.updatePeerAddress(getShardIdentifier(memberName, shardName),
-                getShardActorPath(shardName, memberName));
+                getShardActorPath(shardName, memberName), getSelf());
         }
     }
 
@@ -384,9 +440,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                     LOG.debug("Sending new SchemaContext to Shards");
                     for (ShardInformation info : localShards.values()) {
                         if (info.getActor() == null) {
-                            info.setActor(getContext().actorOf(Shard.props(info.getShardId(),
-                                    info.getPeerAddresses(), datastoreContext, schemaContext)
-                                            .withDispatcher(shardDispatcherPath), info.getShardId().toString()));
+                            info.setActor(newShardActor(schemaContext, info));
                         } else {
                             info.getActor().tell(message, getSelf());
                         }
@@ -402,13 +456,20 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
     }
 
+    @VisibleForTesting
+    protected ActorRef newShardActor(final SchemaContext schemaContext, ShardInformation info) {
+        return getContext().actorOf(Shard.props(info.getShardId(),
+                info.getPeerAddresses(), datastoreContext, schemaContext)
+                        .withDispatcher(shardDispatcherPath), info.getShardId().toString());
+    }
+
     private void findPrimary(FindPrimary message) {
         String shardName = message.getShardName();
 
         // First see if the there is a local replica for the shard
         final ShardInformation info = localShards.get(shardName);
         if (info != null) {
-            sendResponse(info, message.isWaitUntilInitialized(), new Supplier<Object>() {
+            sendResponse(info, message.isWaitUntilReady(), true, new Supplier<Object>() {
                 @Override
                 public Object get() {
                     return new PrimaryFound(info.getActorPath().toString()).toSerializable();
@@ -552,7 +613,8 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         return mBean;
     }
 
-    private class ShardInformation {
+    @VisibleForTesting
+    protected static class ShardInformation {
         private final ShardIdentifier shardId;
         private final String shardName;
         private ActorRef actor;
@@ -564,8 +626,9 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
         private boolean followerSyncStatus = false;
 
-        private final List<Runnable> runnablesOnInitialized = Lists.newArrayList();
+        private final Set<OnShardInitialized> onShardInitializedSet = Sets.newHashSet();
         private String role ;
+        private String leaderId;
 
         private ShardInformation(String shardName, ShardIdentifier shardId,
                 Map<ShardIdentifier, String> peerAddresses) {
@@ -599,7 +662,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             return peerAddresses;
         }
 
-        void updatePeerAddress(ShardIdentifier peerId, String peerAddress){
+        void updatePeerAddress(ShardIdentifier peerId, String peerAddress, ActorRef sender){
             LOG.info("updatePeerAddress for peer {} with address {}", peerId,
                 peerAddress);
             if(peerAddresses.containsKey(peerId)){
@@ -611,9 +674,17 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                                 peerId, peerAddress, actor.path());
                     }
 
-                    actor.tell(new PeerAddressResolved(peerId, peerAddress), getSelf());
+                    actor.tell(new PeerAddressResolved(peerId, peerAddress), sender);
                 }
             }
+        }
+
+        boolean isShardReady() {
+            return !RaftState.Candidate.name().equals(role) && !Strings.isNullOrEmpty(role);
+        }
+
+        boolean isShardReadyWithLeaderId() {
+            return isShardReady() && !Strings.isNullOrEmpty(leaderId);
         }
 
         boolean isShardInitialized() {
@@ -621,21 +692,48 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         }
 
         void setActorInitialized() {
+            LOG.debug("Shard {} is initialized", shardId);
+
             this.actorInitialized = true;
 
-            for(Runnable runnable: runnablesOnInitialized) {
-                runnable.run();
-            }
-
-            runnablesOnInitialized.clear();
+            notifyOnShardInitializedCallbacks();
         }
 
-        void addRunnableOnInitialized(Runnable runnable) {
-            runnablesOnInitialized.add(runnable);
+        private void notifyOnShardInitializedCallbacks() {
+            if(onShardInitializedSet.isEmpty()) {
+                return;
+            }
+
+            boolean ready = isShardReadyWithLeaderId();
+
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("Shard {} is {} - notifying {} OnShardInitialized callbacks", shardId,
+                        ready ? "ready" : "initialized", onShardInitializedSet.size());
+            }
+
+            Iterator<OnShardInitialized> iter = onShardInitializedSet.iterator();
+            while(iter.hasNext()) {
+                OnShardInitialized onShardInitialized = iter.next();
+                if(!(onShardInitialized instanceof OnShardReady) || ready) {
+                    iter.remove();
+                    onShardInitialized.getTimeoutSchedule().cancel();
+                    onShardInitialized.getReplyRunnable().run();
+                }
+            }
+        }
+
+        void addOnShardInitialized(OnShardInitialized onShardInitialized) {
+            onShardInitializedSet.add(onShardInitialized);
+        }
+
+        void removeOnShardInitialized(OnShardInitialized onShardInitialized) {
+            onShardInitializedSet.remove(onShardInitialized);
         }
 
         public void setRole(String newRole) {
             this.role = newRole;
+
+            notifyOnShardInitializedCallbacks();
         }
 
         public String getRole(){
@@ -656,6 +754,15 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             return false;
         }
 
+        public String getLeaderId() {
+            return leaderId;
+        }
+
+        public void setLeaderId(String leaderId) {
+            this.leaderId = leaderId;
+
+            notifyOnShardInitializedCallbacks();
+        }
     }
 
     private static class ShardManagerCreator implements Creator<ShardManager> {
@@ -677,6 +784,57 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         @Override
         public ShardManager create() throws Exception {
             return new ShardManager(cluster, configuration, datastoreContext, waitTillReadyCountdownLatch);
+        }
+    }
+
+    private static class OnShardInitialized {
+        private final Runnable replyRunnable;
+        private Cancellable timeoutSchedule;
+
+        OnShardInitialized(Runnable replyRunnable) {
+            this.replyRunnable = replyRunnable;
+        }
+
+        Runnable getReplyRunnable() {
+            return replyRunnable;
+        }
+
+        Cancellable getTimeoutSchedule() {
+            return timeoutSchedule;
+        }
+
+        void setTimeoutSchedule(Cancellable timeoutSchedule) {
+            this.timeoutSchedule = timeoutSchedule;
+        }
+    }
+
+    private static class OnShardReady extends OnShardInitialized {
+        OnShardReady(Runnable replyRunnable) {
+            super(replyRunnable);
+        }
+    }
+
+    private static class ShardNotInitializedTimeout {
+        private final ActorRef sender;
+        private final ShardInformation shardInfo;
+        private final OnShardInitialized onShardInitialized;
+
+        ShardNotInitializedTimeout(ShardInformation shardInfo, OnShardInitialized onShardInitialized, ActorRef sender) {
+            this.sender = sender;
+            this.shardInfo = shardInfo;
+            this.onShardInitialized = onShardInitialized;
+        }
+
+        ActorRef getSender() {
+            return sender;
+        }
+
+        ShardInformation getShardInfo() {
+            return shardInfo;
+        }
+
+        OnShardInitialized getOnShardInitialized() {
+            return onShardInitialized;
         }
     }
 
