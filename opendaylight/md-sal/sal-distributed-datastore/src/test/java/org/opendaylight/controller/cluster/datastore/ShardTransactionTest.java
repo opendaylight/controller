@@ -372,7 +372,7 @@ public class ShardTransactionTest extends AbstractActorTest {
 
             YangInstanceIdentifier deletePath = TestModel.TEST_PATH;
 
-            BatchedModifications batched = new BatchedModifications(DataStoreVersions.CURRENT_VERSION);
+            BatchedModifications batched = new BatchedModifications("tx1", DataStoreVersions.CURRENT_VERSION, null);
             batched.addModification(new WriteModification(writePath, writeData));
             batched.addModification(new MergeModification(mergePath, mergeData));
             batched.addModification(new DeleteModification(deletePath));
