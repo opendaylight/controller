@@ -94,8 +94,7 @@ public abstract class AbstractTransactionProxyTest {
 
     protected final String memberName = "mock-member";
 
-    protected final Builder dataStoreContextBuilder = DatastoreContext.newBuilder().operationTimeoutInSeconds(2).
-            shardBatchedModificationCount(1);
+    protected final Builder dataStoreContextBuilder = DatastoreContext.newBuilder().operationTimeoutInSeconds(2);
 
     @BeforeClass
     public static void setUpClass() throws IOException {
@@ -251,6 +250,13 @@ public abstract class AbstractTransactionProxyTest {
                 eq(actorSelection(actorRef)), isA(BatchedModifications.class));
     }
 
+    protected void expectBatchedModificationsReady(ActorRef actorRef, int count) {
+        Future<BatchedModificationsReply> replyFuture = Futures.successful(
+                new BatchedModificationsReply(count, actorRef.path().toString()));
+        doReturn(replyFuture).when(mockActorContext).executeOperationAsync(
+                eq(actorSelection(actorRef)), isA(BatchedModifications.class));
+    }
+
     protected void expectBatchedModifications(int count) {
         doReturn(batchedModificationsReply(count)).when(mockActorContext).executeOperationAsync(
                 any(ActorSelection.class), isA(BatchedModifications.class));
@@ -307,15 +313,20 @@ public abstract class AbstractTransactionProxyTest {
     protected ActorRef setupActorContextWithInitialCreateTransaction(ActorSystem actorSystem,
             TransactionType type, int transactionVersion, String prefix, ActorRef shardActorRef) {
 
-        ActorRef txActorRef = actorSystem.actorOf(Props.create(DoNothingActor.class));
-        log.info("Created mock shard Tx actor {}", txActorRef);
+        ActorRef txActorRef;
+        if(type == TransactionType.WRITE_ONLY && transactionVersion >= DataStoreVersions.LITHIUM_VERSION) {
+            txActorRef = shardActorRef;
+        } else {
+            txActorRef = actorSystem.actorOf(Props.create(DoNothingActor.class));
+            log.info("Created mock shard Tx actor {}", txActorRef);
 
-        doReturn(actorSystem.actorSelection(txActorRef.path())).when(mockActorContext).actorSelection(
-                txActorRef.path().toString());
+            doReturn(actorSystem.actorSelection(txActorRef.path())).
+            when(mockActorContext).actorSelection(txActorRef.path().toString());
 
-        doReturn(Futures.successful(createTransactionReply(txActorRef, transactionVersion))).when(mockActorContext).
-                executeOperationAsync(eq(actorSystem.actorSelection(shardActorRef.path())),
-                        eqCreateTransaction(prefix, type));
+            doReturn(Futures.successful(createTransactionReply(txActorRef, transactionVersion))).when(mockActorContext).
+            executeOperationAsync(eq(actorSystem.actorSelection(shardActorRef.path())),
+                    eqCreateTransaction(prefix, type));
+        }
 
         return txActorRef;
     }
@@ -358,17 +369,18 @@ public abstract class AbstractTransactionProxyTest {
         return captured;
     }
 
-    protected void verifyOneBatchedModification(ActorRef actorRef, Modification expected) {
+    protected void verifyOneBatchedModification(ActorRef actorRef, Modification expected, boolean expIsReady) {
         List<BatchedModifications> batchedModifications = captureBatchedModifications(actorRef);
         assertEquals("Captured BatchedModifications count", 1, batchedModifications.size());
 
-        verifyBatchedModifications(batchedModifications.get(0), expected);
+        verifyBatchedModifications(batchedModifications.get(0), expIsReady, expected);
     }
 
-    protected void verifyBatchedModifications(Object message, Modification... expected) {
+    protected void verifyBatchedModifications(Object message, boolean expIsReady, Modification... expected) {
         assertEquals("Message type", BatchedModifications.class, message.getClass());
         BatchedModifications batchedModifications = (BatchedModifications)message;
         assertEquals("BatchedModifications size", expected.length, batchedModifications.getModifications().size());
+        assertEquals("isReady", expIsReady, batchedModifications.isReady());
         for(int i = 0; i < batchedModifications.getModifications().size(); i++) {
             Modification actual = batchedModifications.getModifications().get(i);
             assertEquals("Modification type", expected[i].getClass(), actual.getClass());
