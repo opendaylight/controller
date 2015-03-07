@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.datastore;
+package org.opendaylight.controller.cluster.datastore.compat;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
@@ -16,6 +16,13 @@ import akka.testkit.TestActorRef;
 import java.util.Collections;
 import org.junit.Assert;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.datastore.AbstractActorTest;
+import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
+import org.opendaylight.controller.cluster.datastore.DatastoreContext;
+import org.opendaylight.controller.cluster.datastore.Shard;
+import org.opendaylight.controller.cluster.datastore.ShardTest;
+import org.opendaylight.controller.cluster.datastore.ShardTestKit;
+import org.opendaylight.controller.cluster.datastore.TransactionProxy;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransactionReply;
@@ -46,7 +53,6 @@ import scala.concurrent.duration.FiniteDuration;
  */
 public class ShardTransactionHeliumBackwardsCompatibilityTest extends AbstractActorTest {
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testTransactionCommit() throws Exception {
         new ShardTestKit(getSystem()) {{
