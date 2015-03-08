@@ -52,9 +52,15 @@ abstract class AbstractDOMRpcRoutingTableEntry {
         return impls.keySet();
     }
 
+    /**
+     *
+     * @param implementation
+     * @param newRpcs List of new RPCs, must be mutable
+     * @return
+     */
     final AbstractDOMRpcRoutingTableEntry add(final DOMRpcImplementation implementation, final List<YangInstanceIdentifier> newRpcs) {
         final Builder<YangInstanceIdentifier, List<DOMRpcImplementation>> vb = ImmutableMap.builder();
-        for (Entry<YangInstanceIdentifier, List<DOMRpcImplementation>> ve : impls.entrySet()) {
+        for (final Entry<YangInstanceIdentifier, List<DOMRpcImplementation>> ve : impls.entrySet()) {
             if (newRpcs.remove(ve.getKey())) {
                 final ArrayList<DOMRpcImplementation> i = new ArrayList<>(ve.getValue().size() + 1);
                 i.addAll(ve.getValue());
@@ -64,13 +70,18 @@ abstract class AbstractDOMRpcRoutingTableEntry {
                 vb.put(ve);
             }
         }
+        for(final YangInstanceIdentifier ii : newRpcs) {
+            final ArrayList<DOMRpcImplementation> impl = new ArrayList<>(1);
+            impl.add(implementation);
+            vb.put(ii,impl);
+        }
 
         return newInstance(vb.build());
     }
 
     final AbstractDOMRpcRoutingTableEntry remove(final DOMRpcImplementation implementation, final List<YangInstanceIdentifier> removed) {
         final Builder<YangInstanceIdentifier, List<DOMRpcImplementation>> vb = ImmutableMap.builder();
-        for (Entry<YangInstanceIdentifier, List<DOMRpcImplementation>> ve : impls.entrySet()) {
+        for (final Entry<YangInstanceIdentifier, List<DOMRpcImplementation>> ve : impls.entrySet()) {
             if (removed.remove(ve.getKey())) {
                 final ArrayList<DOMRpcImplementation> i = new ArrayList<>(ve.getValue());
                 i.remove(implementation);
