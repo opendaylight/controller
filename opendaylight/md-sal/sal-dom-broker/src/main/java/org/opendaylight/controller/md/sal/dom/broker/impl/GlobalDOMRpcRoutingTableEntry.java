@@ -20,6 +20,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 
 final class GlobalDOMRpcRoutingTableEntry extends AbstractDOMRpcRoutingTableEntry {
+    private static final YangInstanceIdentifier ROOT = YangInstanceIdentifier.builder().build();
     private final DOMRpcIdentifier rpcId;
 
     private GlobalDOMRpcRoutingTableEntry(final DOMRpcIdentifier rpcId, final Map<YangInstanceIdentifier, List<DOMRpcImplementation>> impls) {
@@ -36,7 +37,7 @@ final class GlobalDOMRpcRoutingTableEntry extends AbstractDOMRpcRoutingTableEntr
 
     @Override
     protected CheckedFuture<DOMRpcResult, DOMRpcException> invokeRpc(final NormalizedNode<?, ?> input) {
-        return getImplementations(null).get(0).invokeRpc(rpcId, input);
+        return getImplementations(ROOT).get(0).invokeRpc(rpcId, input);
     }
 
     @Override

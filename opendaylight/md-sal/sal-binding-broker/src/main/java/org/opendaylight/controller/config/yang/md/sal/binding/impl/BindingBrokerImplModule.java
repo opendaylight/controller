@@ -16,11 +16,21 @@
  */
 package org.opendaylight.controller.config.yang.md.sal.binding.impl;
 
-import org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolder;
+import org.opendaylight.controller.md.sal.binding.api.MountPointService;
+import org.opendaylight.controller.md.sal.binding.compat.HeliumRpcProviderRegistry;
+import org.opendaylight.controller.md.sal.binding.compat.HydrogenMountProvisionServiceAdapter;
+import org.opendaylight.controller.md.sal.binding.impl.BindingDOMMountPointServiceAdapter;
+import org.opendaylight.controller.md.sal.binding.impl.BindingDOMRpcProviderServiceAdapter;
+import org.opendaylight.controller.md.sal.binding.impl.BindingDOMRpcServiceAdapter;
+import org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodec;
+import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
+import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
+import org.opendaylight.controller.sal.binding.api.mount.MountProviderService;
 import org.opendaylight.controller.sal.binding.impl.RootBindingAwareBroker;
-import org.opendaylight.controller.sal.binding.impl.RpcProviderRegistryImpl;
-import org.opendaylight.controller.sal.binding.impl.forward.DomForwardedBindingBrokerImpl;
-import org.opendaylight.controller.sal.binding.impl.forward.DomForwardingUtils;
+import org.opendaylight.controller.sal.core.api.Broker;
+import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 
 /**
 *
@@ -45,41 +55,60 @@ public final class BindingBrokerImplModule extends
     }
 
     @Override
-    public java.lang.AutoCloseable createInstance() {
+    public RootBindingAwareBroker createInstance() {
+        final Broker domBroker = getDomAsyncBrokerDependency();
+        final BindingToNormalizedNodeCodec codec = getBindingMappingServiceDependency();
+        final ProviderSession session = domBroker.registerProvider(new DummyDOMProvider());
 
-        RootBindingAwareBroker broker;
-        if (DomForwardingUtils.isDomForwardedBroker(getDataBrokerDependency())) {
-            broker = createForwardedBroker();
-        } else {
-            broker = createStandaloneBroker();
-        }
+        final MountPointService mount = createMountPointAdapter(codec,session);
+        final BindingDOMRpcServiceAdapter rpcConsumer = createRpcConsumer(codec,session);
+        final BindingDOMRpcProviderServiceAdapter rpcProvider = createRpcProvider(codec,session);
+        final RootBindingAwareBroker broker = new RootBindingAwareBroker(getIdentifier().getInstanceName());
+        final RpcProviderRegistry heliumRpcBroker = new HeliumRpcProviderRegistry(rpcConsumer, rpcProvider);
+        final MountProviderService legacyMount = createLegacyMountPointService(mount);
+
+        broker.setLegacyDataBroker(getDataBrokerDependency());
+        broker.setNotificationBroker(getNotificationServiceDependency());
+        broker.setRpcBroker(heliumRpcBroker);
+        broker.setDataBroker(getRootDataBrokerDependency());
+        broker.setMountService(mount);
+        broker.setLegacyMountManager(legacyMount);
         broker.start();
         return broker;
     }
 
-    private RootBindingAwareBroker createStandaloneBroker() {
-        RootBindingAwareBroker broker = new RootBindingAwareBroker(getIdentifier().getInstanceName());
 
-        broker.setLegacyDataBroker(getDataBrokerDependency());
-        broker.setNotificationBroker(getNotificationServiceDependency());
-        broker.setRpcBroker(new RpcProviderRegistryImpl(broker.getIdentifier()));
-        broker.setDataBroker(getRootDataBrokerDependency());
-        return broker;
+    @SuppressWarnings("deprecation")
+    private MountProviderService createLegacyMountPointService(final MountPointService service) {
+        if(service != null) {
+            return new HydrogenMountProvisionServiceAdapter(service);
+        }
+        return null;
     }
 
-    private RootBindingAwareBroker createForwardedBroker() {
-        DomForwardedBindingBrokerImpl broker = new DomForwardedBindingBrokerImpl(getIdentifier().getInstanceName());
-
-        broker.setLegacyDataBroker(getDataBrokerDependency());
-        broker.setNotificationBroker(getNotificationServiceDependency());
-        broker.setRpcBroker(new RpcProviderRegistryImpl(broker.getIdentifier()));
-
-        broker.getMountManager().setDataCommitExecutor(SingletonHolder.getDefaultCommitExecutor());
-        broker.getMountManager().setNotificationExecutor(SingletonHolder.getDefaultNotificationExecutor());
-
-        broker.setDataBroker(getRootDataBrokerDependency());
-        DomForwardingUtils.reuseForwardingFrom(broker, broker.getDataBroker());
-        broker.startForwarding();
-        return broker;
+    private BindingDOMRpcProviderServiceAdapter createRpcProvider(final BindingToNormalizedNodeCodec codec,
+            final ProviderSession session) {
+        final DOMRpcProviderService domService = session.getService(DOMRpcProviderService.class);
+        if(domService != null) {
+            return new BindingDOMRpcProviderServiceAdapter(domService, codec);
+        }
+        return null;
     }
+
+    private BindingDOMRpcServiceAdapter createRpcConsumer(final BindingToNormalizedNodeCodec codec, final ProviderSession session) {
+        final DOMRpcService domService = session.getService(DOMRpcService.class);
+        if(domService != null) {
+            return new BindingDOMRpcServiceAdapter(domService, codec);
+        }
+        return null;
+    }
+
+    private MountPointService createMountPointAdapter(final BindingToNormalizedNodeCodec codec, final ProviderSession session) {
+        final DOMMountPointService domService = session.getService(DOMMountPointService.class);
+        if(domService != null) {
+            return new BindingDOMMountPointServiceAdapter(domService, codec);
+        }
+        return null;
+    }
+
 }

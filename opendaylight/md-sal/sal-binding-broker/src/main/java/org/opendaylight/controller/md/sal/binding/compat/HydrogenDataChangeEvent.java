@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.md.sal.binding.impl;
+package org.opendaylight.controller.md.sal.binding.compat;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -18,10 +18,10 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 @Deprecated
-public abstract class LegacyDataChangeEvent implements
+public abstract class HydrogenDataChangeEvent implements
         DataChangeEvent<InstanceIdentifier<? extends DataObject>, DataObject> {
 
-    private LegacyDataChangeEvent() {
+    private HydrogenDataChangeEvent() {
     }
 
     public static final DataChangeEvent<InstanceIdentifier<?>, DataObject> createOperational(
@@ -95,7 +95,7 @@ public abstract class LegacyDataChangeEvent implements
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private final static class OperationalChangeEvent extends LegacyDataChangeEvent {
+    private final static class OperationalChangeEvent extends HydrogenDataChangeEvent {
 
         private final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> delegate;
         private Map<InstanceIdentifier<?>, DataObject> updatedCache;
@@ -150,7 +150,7 @@ public abstract class LegacyDataChangeEvent implements
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private final static class ConfigurationChangeEvent extends LegacyDataChangeEvent {
+    private final static class ConfigurationChangeEvent extends HydrogenDataChangeEvent {
 
         private final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> delegate;
         private Map<InstanceIdentifier<?>, DataObject> updatedCache;

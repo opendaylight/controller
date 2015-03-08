@@ -3,7 +3,6 @@ package org.opendaylight.controller.config.yang.md.sal.binding.impl;
 import org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodec;
 import org.opendaylight.controller.md.sal.binding.impl.ForwardedBindingDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
-import org.opendaylight.controller.sal.core.api.model.SchemaService;
 
 public class BindingAsyncDataBrokerImplModule extends
         org.opendaylight.controller.config.yang.md.sal.binding.impl.AbstractBindingAsyncDataBrokerImplModule {
@@ -30,8 +29,7 @@ public class BindingAsyncDataBrokerImplModule extends
     public java.lang.AutoCloseable createInstance() {
         final BindingToNormalizedNodeCodec mappingService = getBindingMappingServiceDependency();
         final DOMDataBroker domDataBroker = getDomAsyncBrokerDependency();
-        final SchemaService schemaService = getSchemaServiceDependency();
-        return new ForwardedBindingDataBroker(domDataBroker, mappingService, schemaService);
+        return new ForwardedBindingDataBroker(domDataBroker, mappingService);
     }
 
 }

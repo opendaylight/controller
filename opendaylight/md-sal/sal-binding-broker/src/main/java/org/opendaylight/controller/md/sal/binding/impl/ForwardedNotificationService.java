@@ -7,15 +7,20 @@
  */
 package org.opendaylight.controller.md.sal.binding.impl;
 
+import com.google.common.collect.ClassToInstanceMap;
+import com.google.common.collect.ImmutableSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.md.sal.binding.api.NotificationService;
+import org.opendaylight.controller.md.sal.binding.impl.BindingDOMAdapterBuilder.Factory;
 import org.opendaylight.controller.md.sal.dom.api.DOMNotification;
 import org.opendaylight.controller.md.sal.dom.api.DOMNotificationListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMNotificationService;
+import org.opendaylight.controller.md.sal.dom.api.DOMService;
+import org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolder;
 import org.opendaylight.controller.sal.binding.spi.NotificationInvokerFactory;
 import org.opendaylight.yangtools.binding.data.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.yangtools.concepts.AbstractListenerRegistration;
@@ -27,6 +32,14 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
 public class ForwardedNotificationService implements NotificationService, AutoCloseable {
 
+    public static final Factory<NotificationService> BUILDER_FACTORY = new Factory<NotificationService>() {
+
+        @Override
+        public BindingDOMAdapterBuilder<NotificationService> newBuilder() {
+            return new Builder();
+        }
+
+    };
     private final BindingNormalizedNodeSerializer codec;
     private final DOMNotificationService domNotifService;
     private final NotificationInvokerFactory notificationInvokerFactory;
@@ -92,4 +105,23 @@ public class ForwardedNotificationService implements NotificationService, AutoCl
         }
     }
 
+    private static class Builder extends BindingDOMAdapterBuilder<NotificationService> {
+
+
+        @Override
+        protected NotificationService createInstance(BindingToNormalizedNodeCodec codec,
+                ClassToInstanceMap<DOMService> delegates) {
+            DOMNotificationService domNotification = delegates.getInstance(DOMNotificationService.class);
+            NotificationInvokerFactory invokerFactory = SingletonHolder.INVOKER_FACTORY;
+            return new ForwardedNotificationService(codec.getCodecFactory(), domNotification, invokerFactory);
+        }
+
+        @Override
+        public Set<? extends Class<? extends DOMService>> getRequiredDelegates() {
+            return ImmutableSet.of(DOMNotificationService.class);
+        }
+
+
+
+    }
 }

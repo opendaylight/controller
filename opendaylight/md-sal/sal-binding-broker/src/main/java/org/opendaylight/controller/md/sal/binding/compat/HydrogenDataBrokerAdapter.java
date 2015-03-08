@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.md.sal.binding.impl;
+package org.opendaylight.controller.md.sal.binding.compat;
 
 import com.google.common.base.Function;
 import com.google.common.util.concurrent.AsyncFunction;
@@ -23,6 +23,8 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.RegistrationListener;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
@@ -34,12 +36,10 @@ import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandlerRegis
 import org.opendaylight.controller.md.sal.common.api.data.DataReader;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.impl.service.AbstractDataTransaction;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.controller.sal.binding.api.data.DataChangeListener;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
-import org.opendaylight.controller.sal.core.api.model.SchemaService;
+import org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolder;
 import org.opendaylight.yangtools.concepts.AbstractObjectRegistration;
 import org.opendaylight.yangtools.concepts.Delegator;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
@@ -53,23 +53,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Deprecated
-public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDataBroker implements DataProviderService, AutoCloseable {
+public class HydrogenDataBrokerAdapter implements DataProviderService, AutoCloseable {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ForwardedBackwardsCompatibleDataBroker.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HydrogenDataBrokerAdapter.class);
 
     private final ConcurrentHashMap<InstanceIdentifier<?>, CommitHandlerRegistrationImpl> commitHandlers = new ConcurrentHashMap<>();
-    private final ListeningExecutorService executorService;
+    private final ListeningExecutorService executorService = SingletonHolder.getDefaultCommitExecutor();
 
-    public ForwardedBackwardsCompatibleDataBroker(final DOMDataBroker domDataBroker,
-            final BindingToNormalizedNodeCodec mappingService, final SchemaService schemaService,final ListeningExecutorService executor) {
-        super(domDataBroker, mappingService,schemaService);
-        executorService = executor;
+    private final DataBroker delegate;
+
+    public HydrogenDataBrokerAdapter(final DataBroker dataBroker) {
+        delegate = dataBroker;
         LOG.info("ForwardedBackwardsCompatibleBroker started.");
     }
 
     @Override
     public DataModificationTransaction beginTransaction() {
-        return new ForwardedBackwardsCompatibleTransacion(getDelegate().newReadWriteTransaction(), getCodec());
+        return new ForwardedBackwardsCompatibleTransacion(delegate.newReadWriteTransaction());
     }
 
     @Override
@@ -88,11 +88,6 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
     public Registration registerCommitHandler(
             final InstanceIdentifier<? extends DataObject> path,
             final DataCommitHandler<InstanceIdentifier<? extends DataObject>, DataObject> commitHandler) {
-
-
-        //transformingCommitHandler = new TransformingDataChangeListener
-        //fakeCommitHandler =  registerDataChangeListener(LogicalDatastoreType.CONFIGURATION, path, listener, DataChangeScope.SUBTREE);
-
         CommitHandlerRegistrationImpl reg = new CommitHandlerRegistrationImpl(path, commitHandler);
         commitHandlers.put(path, reg);
         return reg;
@@ -113,8 +108,8 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
         org.opendaylight.controller.md.sal.binding.api.DataChangeListener asyncOperListener = new BackwardsCompatibleOperationalDataChangeInvoker(listener);
         org.opendaylight.controller.md.sal.binding.api.DataChangeListener asyncCfgListener = new BackwardsCompatibleConfigurationDataChangeInvoker(listener);
 
-        ListenerRegistration<org.opendaylight.controller.md.sal.binding.api.DataChangeListener> cfgReg = registerDataChangeListener(LogicalDatastoreType.CONFIGURATION, path, asyncCfgListener, DataChangeScope.SUBTREE);
-        ListenerRegistration<org.opendaylight.controller.md.sal.binding.api.DataChangeListener> operReg = registerDataChangeListener(LogicalDatastoreType.OPERATIONAL, path, asyncOperListener, DataChangeScope.SUBTREE);
+        ListenerRegistration<org.opendaylight.controller.md.sal.binding.api.DataChangeListener> cfgReg = delegate.registerDataChangeListener(LogicalDatastoreType.CONFIGURATION, path, asyncCfgListener, DataChangeScope.SUBTREE);
+        ListenerRegistration<org.opendaylight.controller.md.sal.binding.api.DataChangeListener> operReg = delegate.registerDataChangeListener(LogicalDatastoreType.OPERATIONAL, path, asyncOperListener, DataChangeScope.SUBTREE);
 
         return new LegacyListenerRegistration(listener,cfgReg,operReg);
     }
@@ -159,7 +154,7 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
             @Override
             public ListenableFuture<RpcResult<TransactionStatus>> apply(final Boolean requestCommitSuccess) throws Exception {
                 if(requestCommitSuccess) {
-                    return AbstractDataTransaction.convertToLegacyCommitFuture(tx.getDelegate().submit());
+                    return AbstractDataTransaction.convertToLegacyCommitFuture(tx.delegate.submit());
                 }
                 return Futures.immediateFuture(RpcResultBuilder.<TransactionStatus>failed().withResult(TransactionStatus.FAILED).build());
             }
@@ -184,8 +179,7 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
     }
 
     @Deprecated
-    private class ForwardedBackwardsCompatibleTransacion extends
-            AbstractReadWriteTransaction implements DataModificationTransaction {
+    private class ForwardedBackwardsCompatibleTransacion implements DataModificationTransaction {
 
         private final ListenerRegistry<DataTransactionListener> listeners = ListenerRegistry.create();
         private final Map<InstanceIdentifier<? extends DataObject>, DataObject> updated = new HashMap<>();
@@ -197,15 +191,16 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
         private final Set<InstanceIdentifier<? extends DataObject>> posponedRemovedOperational = new HashSet<>();
         private final Set<InstanceIdentifier<? extends DataObject>> posponedRemovedConfiguration = new HashSet<>();
 
+        private final ReadWriteTransaction delegate;
+
 
         @Override
         public final TransactionStatus getStatus() {
             return status;
         }
 
-        protected ForwardedBackwardsCompatibleTransacion(final DOMDataReadWriteTransaction delegate,
-                final BindingToNormalizedNodeCodec codec) {
-            super(delegate, codec);
+        protected ForwardedBackwardsCompatibleTransacion(final ReadWriteTransaction delegate) {
+            this.delegate = delegate;
             LOG.debug("Tx {} allocated.",getIdentifier());
         }
 
@@ -216,9 +211,9 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
             @SuppressWarnings({ "rawtypes", "unchecked" })
             final InstanceIdentifier<DataObject> castedPath = (InstanceIdentifier) path;
             if(previouslyRemoved) {
-                put(LogicalDatastoreType.OPERATIONAL, castedPath, data,true);
+                delegate.put(LogicalDatastoreType.OPERATIONAL, castedPath, data,true);
             } else {
-                merge(LogicalDatastoreType.OPERATIONAL, castedPath, data,true);
+                delegate.merge(LogicalDatastoreType.OPERATIONAL, castedPath, data,true);
             }
         }
 
@@ -236,9 +231,9 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
             @SuppressWarnings({"rawtypes","unchecked"})
             final InstanceIdentifier<DataObject> castedPath = (InstanceIdentifier) path;
             if(previouslyRemoved) {
-                put(LogicalDatastoreType.CONFIGURATION, castedPath, data,true);
+                delegate.put(LogicalDatastoreType.CONFIGURATION, castedPath, data,true);
             } else {
-                merge(LogicalDatastoreType.CONFIGURATION, castedPath, data,true);
+                delegate.merge(LogicalDatastoreType.CONFIGURATION, castedPath, data,true);
             }
         }
 
@@ -295,7 +290,7 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
         @Override
         public DataObject readOperationalData(final InstanceIdentifier<? extends DataObject> path) {
             try {
-                return doRead(getDelegate(), LogicalDatastoreType.OPERATIONAL, path).get().orNull();
+                return delegate.read(LogicalDatastoreType.OPERATIONAL, path).get().orNull();
             } catch (InterruptedException | ExecutionException e) {
                 LOG.error("Read of {} failed.", path,e);
                 return null;
@@ -305,7 +300,7 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
         @Override
         public DataObject readConfigurationData(final InstanceIdentifier<? extends DataObject> path) {
             try {
-                return doRead(getDelegate(), LogicalDatastoreType.CONFIGURATION, path).get().orNull();
+                return delegate.read(LogicalDatastoreType.CONFIGURATION, path).get().orNull();
             } catch (InterruptedException | ExecutionException e) {
                 LOG.error("Read of {} failed.", path,e);
                 return null;
@@ -329,16 +324,16 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
         public ListenableFuture<RpcResult<TransactionStatus>> commit() {
 
             for(InstanceIdentifier<? extends DataObject> path : posponedRemovedConfiguration) {
-                doDelete(LogicalDatastoreType.CONFIGURATION, path);
+                delegate.delete(LogicalDatastoreType.CONFIGURATION, path);
             }
 
             for(InstanceIdentifier<? extends DataObject> path : posponedRemovedOperational) {
-                doDelete(LogicalDatastoreType.OPERATIONAL, path);
+                delegate.delete(LogicalDatastoreType.OPERATIONAL, path);
             }
 
             changeStatus(TransactionStatus.SUBMITED);
 
-            final ListenableFuture<RpcResult<TransactionStatus>> f = ForwardedBackwardsCompatibleDataBroker.this.commit(this);
+            final ListenableFuture<RpcResult<TransactionStatus>> f = HydrogenDataBrokerAdapter.this.commit(this);
 
             Futures.addCallback(f, new FutureCallback<RpcResult<TransactionStatus>>() {
                 @Override
@@ -359,6 +354,12 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
         @Override
         public ListenerRegistration<DataTransactionListener> registerListener(final DataTransactionListener listener) {
             return listeners.register(listener);
+        }
+
+        @Override
+        public Object getIdentifier() {
+            // TODO Auto-generated method stub
+            return null;
         }
 
     }
@@ -422,7 +423,7 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
         @Override
         public void onDataChanged(final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
 
-            DataChangeEvent legacyChange = LegacyDataChangeEvent.createOperational(change);
+            DataChangeEvent legacyChange = HydrogenDataChangeEvent.createOperational(change);
             delegate.onDataChanged(legacyChange);
 
         }
@@ -445,7 +446,7 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
         @Override
         public void onDataChanged(final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
 
-            DataChangeEvent legacyChange = LegacyDataChangeEvent.createConfiguration(change);
+            DataChangeEvent legacyChange = HydrogenDataChangeEvent.createConfiguration(change);
 
             delegate.onDataChanged(legacyChange);
 
@@ -456,5 +457,10 @@ public class ForwardedBackwardsCompatibleDataBroker extends AbstractForwardedDat
             return (DataChangeListener) delegate;
         }
 
+    }
+
+    @Override
+    public void close() throws Exception {
+        // TODO Auto-generated method stub
     }
 }
