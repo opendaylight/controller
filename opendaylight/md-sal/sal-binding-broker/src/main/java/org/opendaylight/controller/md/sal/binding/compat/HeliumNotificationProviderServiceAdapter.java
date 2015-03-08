@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.md.sal.binding.impl.compat;
+package org.opendaylight.controller.md.sal.binding.compat;
 
 import java.util.concurrent.ExecutorService;
 import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService;

@@ -7,14 +7,12 @@
  */
 package org.opendaylight.controller.md.sal.binding.api;
 
+import com.google.common.base.Optional;
 import java.util.EventListener;
-
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-import com.google.common.base.Optional;
-
-public interface MountPointService {
+public interface MountPointService extends BindingService {
 
     Optional<MountPoint> getMountPoint(InstanceIdentifier<?> mountPoint);
 

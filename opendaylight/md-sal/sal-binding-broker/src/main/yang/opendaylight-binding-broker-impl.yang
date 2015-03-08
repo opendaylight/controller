@@ -117,30 +117,33 @@ module opendaylight-sal-binding-broker-impl {
                     }
                 }
             }*/
-
-            container data-broker {
-                uses config:service-ref {
-                    refine type {
-                        mandatory false;
-                        config:required-identity sal:binding-data-broker;
+            container binding-broker-impl {
+                uses dom-forwarding-component;
+    
+                container data-broker {
+                    uses config:service-ref {
+                        refine type {
+                            mandatory false;
+                            config:required-identity sal:binding-data-broker;
+                        }
                     }
                 }
-            }
-
-            container notification-service {
-                uses config:service-ref {
-                    refine type {
-                        mandatory true;
-                        config:required-identity sal:binding-notification-service;
+    
+                container notification-service {
+                    uses config:service-ref {
+                        refine type {
+                            mandatory true;
+                            config:required-identity sal:binding-notification-service;
+                        }
                     }
                 }
-            }
-
-            container root-data-broker {
-                uses config:service-ref {
-                    refine type {
-                        mandatory false;
-                        config:required-identity sal:binding-async-data-broker;
+    
+                container root-data-broker {
+                    uses config:service-ref {
+                        refine type {
+                            mandatory false;
+                            config:required-identity sal:binding-async-data-broker;
+                        }
                     }
                 }
             }
@@ -151,7 +154,16 @@ module opendaylight-sal-binding-broker-impl {
         case binding-data-compatible-broker {
             when "/config:modules/config:module/config:type = 'binding-data-compatible-broker'";
 
-            uses dom-forwarding-component;
+            container binding-data-compatible-broker {
+                container data-broker {
+                    uses config:service-ref {
+                        refine type {
+                            mandatory false;
+                            config:required-identity sal:binding-async-data-broker;
+                        }
+                    }
+                }
+            }
         }
     }
 

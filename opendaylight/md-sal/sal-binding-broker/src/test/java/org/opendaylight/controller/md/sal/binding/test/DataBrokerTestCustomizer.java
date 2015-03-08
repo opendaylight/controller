@@ -38,7 +38,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 public class DataBrokerTestCustomizer {
 
     private DOMDataBroker domDataBroker;
-    private DOMNotificationRouter domNotificationRouter;
+    private final DOMNotificationRouter domNotificationRouter;
     private final RuntimeGeneratedMappingServiceImpl mappingService;
     private final MockSchemaService schemaService;
     private ImmutableMap<LogicalDatastoreType, DOMStore> datastores;
@@ -53,24 +53,24 @@ public class DataBrokerTestCustomizer {
 
     public DataBrokerTestCustomizer() {
         schemaService = new MockSchemaService();
-        ClassPool pool = ClassPool.getDefault();
+        final ClassPool pool = ClassPool.getDefault();
         mappingService = new RuntimeGeneratedMappingServiceImpl(pool);
-        DataObjectSerializerGenerator generator = StreamWriterGenerator.create(JavassistUtils.forClassPool(pool));
-        BindingNormalizedNodeCodecRegistry codecRegistry = new BindingNormalizedNodeCodecRegistry(generator);
-        GeneratedClassLoadingStrategy loading = GeneratedClassLoadingStrategy.getTCCLClassLoadingStrategy();
+        final DataObjectSerializerGenerator generator = StreamWriterGenerator.create(JavassistUtils.forClassPool(pool));
+        final BindingNormalizedNodeCodecRegistry codecRegistry = new BindingNormalizedNodeCodecRegistry(generator);
+        final GeneratedClassLoadingStrategy loading = GeneratedClassLoadingStrategy.getTCCLClassLoadingStrategy();
         bindingToNormalized = new BindingToNormalizedNodeCodec(loading, mappingService, codecRegistry);
         schemaService.registerSchemaContextListener(bindingToNormalized);
         domNotificationRouter = DOMNotificationRouter.create(16);
     }
 
     public DOMStore createConfigurationDatastore() {
-        InMemoryDOMDataStore store = new InMemoryDOMDataStore("CFG", MoreExecutors.sameThreadExecutor());
+        final InMemoryDOMDataStore store = new InMemoryDOMDataStore("CFG", MoreExecutors.sameThreadExecutor());
         schemaService.registerSchemaContextListener(store);
         return store;
     }
 
     public DOMStore createOperationalDatastore() {
-        InMemoryDOMDataStore store = new InMemoryDOMDataStore("OPER", MoreExecutors.sameThreadExecutor());
+        final InMemoryDOMDataStore store = new InMemoryDOMDataStore("OPER", MoreExecutors.sameThreadExecutor());
         schemaService.registerSchemaContextListener(store);
         return store;
     }
@@ -94,7 +94,7 @@ public class DataBrokerTestCustomizer {
     }
 
     public DataBroker createDataBroker() {
-        return new ForwardedBindingDataBroker(getDOMDataBroker(), bindingToNormalized, schemaService );
+        return new ForwardedBindingDataBroker(getDOMDataBroker(), bindingToNormalized);
     }
 
     public BindingToNormalizedNodeCodec getBindingToNormalized() {

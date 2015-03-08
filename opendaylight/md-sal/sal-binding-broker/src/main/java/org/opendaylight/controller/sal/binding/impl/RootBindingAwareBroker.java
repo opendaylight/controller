@@ -9,7 +9,9 @@ package org.opendaylight.controller.sal.binding.impl;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.common.collect.ImmutableClassToInstanceMap;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.MountPointService;
 import org.opendaylight.controller.md.sal.binding.util.AbstractBindingSalProviderInstance;
 import org.opendaylight.controller.md.sal.binding.util.BindingContextUtils;
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChangeListener;
@@ -35,8 +37,6 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ImmutableClassToInstanceMap;
-
 public class RootBindingAwareBroker implements //
         Mutable, //
         Identifiable<String>, //
@@ -52,27 +52,25 @@ public class RootBindingAwareBroker implements //
 
     private NotificationProviderService notificationBroker;
 
+    @SuppressWarnings("deprecation")
     private DataProviderService legacyDataBroker;
 
     private DataBroker dataBroker;
 
-    private MountPointManagerImpl mountManager;
-
-    public MountPointManagerImpl getMountManager() {
-        return mountManager;
-    }
-
-    public void setMountManager(final MountPointManagerImpl mountManager) {
-        this.mountManager = mountManager;
-    }
+    private MountProviderService legacyMount;
 
     private ImmutableClassToInstanceMap<BindingAwareService> supportedConsumerServices;
 
     private ImmutableClassToInstanceMap<BindingAwareService> supportedProviderServices;
 
+    private MountPointService mountService;
+
+    public void setLegacyMountManager(final MountProviderService legacyMount) {
+        this.legacyMount = legacyMount;
+    }
+
     public RootBindingAwareBroker(final String instanceName) {
         this.identifier = instanceName;
-        mountManager = new MountPointManagerImpl();
     }
 
     @Override
@@ -100,6 +98,22 @@ public class RootBindingAwareBroker implements //
         return rpcBroker;
     }
 
+    public MountPointService getMountService() {
+        return mountService;
+    }
+
+    public MountProviderService getLegacyMount() {
+        return legacyMount;
+    }
+
+    public void setDataBroker(final DataBroker asyncDataBroker) {
+        dataBroker = asyncDataBroker;
+    }
+
+    public void setMountService(final MountPointService mount) {
+        this.mountService = mount;
+    }
+
     public void setRpcBroker(final RpcProviderRegistry rpcBroker) {
         this.rpcBroker = rpcBroker;
     }
@@ -118,31 +132,31 @@ public class RootBindingAwareBroker implements //
 
         controllerRoot = new RootSalInstance(getRpcProviderRegistry(), getNotificationBroker(), getDataBroker());
 
-        ImmutableClassToInstanceMap.Builder<BindingAwareService> consBuilder = ImmutableClassToInstanceMap.builder();
+        final ImmutableClassToInstanceMap.Builder<BindingAwareService> consBuilder = ImmutableClassToInstanceMap
+                .builder();
 
         consBuilder.put(NotificationService.class, getRoot());
         consBuilder.put(DataBrokerService.class, getRoot());
         consBuilder.put(RpcConsumerRegistry.class, getRoot());
-        if(dataBroker != null) {
+        if (dataBroker != null) {
             consBuilder.put(DataBroker.class, dataBroker);
         }
-        consBuilder.put(MountService.class, mountManager).build();
+        consBuilder.put(MountPointService.class, mountService);
+        consBuilder.put(MountService.class, legacyMount).build();
         supportedConsumerServices = consBuilder.build();
         supportedProviderServices = ImmutableClassToInstanceMap.<BindingAwareService> builder()
                 .putAll(supportedConsumerServices).put(NotificationProviderService.class, getRoot())
                 .put(DataProviderService.class, getRoot()).put(RpcProviderRegistry.class, getRoot())
-                .put(MountProviderService.class, mountManager).build();
+                .put(MountProviderService.class, legacyMount).build();
     }
 
     @Override
-    public ConsumerContext registerConsumer(BindingAwareConsumer consumer,
-            BundleContext ctx) {
+    public ConsumerContext registerConsumer(final BindingAwareConsumer consumer, final BundleContext ctx) {
         return registerConsumer(consumer);
     }
 
     @Override
-    public ProviderContext registerProvider(BindingAwareProvider provider,
-            BundleContext ctx) {
+    public ProviderContext registerProvider(final BindingAwareProvider provider, final BundleContext ctx) {
         return registerProvider(provider);
     }
 
@@ -195,7 +209,4 @@ public class RootBindingAwareBroker implements //
         }
     }
 
-    public void setDataBroker(final DataBroker asyncDataBroker) {
-        dataBroker = asyncDataBroker;
-    }
 }
