@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.argThat;
@@ -65,6 +66,8 @@ import org.opendaylight.controller.protobuff.messages.transaction.ShardTransacti
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
@@ -75,6 +78,8 @@ import scala.concurrent.duration.Duration;
  * @author Thomas Pantelis
  */
 public abstract class AbstractTransactionProxyTest {
+    protected final Logger log = LoggerFactory.getLogger(getClass());
+
     private static ActorSystem system;
 
     private final Configuration configuration = new MockConfiguration();
@@ -276,6 +281,8 @@ public abstract class AbstractTransactionProxyTest {
 
     protected ActorRef setupActorContextWithoutInitialCreateTransaction(ActorSystem actorSystem) {
         ActorRef actorRef = actorSystem.actorOf(Props.create(DoNothingActor.class));
+        log.info("Created mock shard actor {}", actorRef);
+
         doReturn(actorSystem.actorSelection(actorRef.path())).
                 when(mockActorContext).actorSelection(actorRef.path().toString());
 
@@ -291,13 +298,26 @@ public abstract class AbstractTransactionProxyTest {
 
     protected ActorRef setupActorContextWithInitialCreateTransaction(ActorSystem actorSystem,
             TransactionType type, int transactionVersion) {
-        ActorRef actorRef = setupActorContextWithoutInitialCreateTransaction(actorSystem);
+        ActorRef shardActorRef = setupActorContextWithoutInitialCreateTransaction(actorSystem);
 
-        doReturn(Futures.successful(createTransactionReply(actorRef, transactionVersion))).when(mockActorContext).
-                executeOperationAsync(eq(actorSystem.actorSelection(actorRef.path())),
-                        eqCreateTransaction(memberName, type));
+        return setupActorContextWithInitialCreateTransaction(actorSystem, type, transactionVersion,
+                memberName, shardActorRef);
+    }
 
-        return actorRef;
+    protected ActorRef setupActorContextWithInitialCreateTransaction(ActorSystem actorSystem,
+            TransactionType type, int transactionVersion, String prefix, ActorRef shardActorRef) {
+
+        ActorRef txActorRef = actorSystem.actorOf(Props.create(DoNothingActor.class));
+        log.info("Created mock shard Tx actor {}", txActorRef);
+
+        doReturn(actorSystem.actorSelection(txActorRef.path())).when(mockActorContext).actorSelection(
+                txActorRef.path().toString());
+
+        doReturn(Futures.successful(createTransactionReply(txActorRef, transactionVersion))).when(mockActorContext).
+                executeOperationAsync(eq(actorSystem.actorSelection(shardActorRef.path())),
+                        eqCreateTransaction(prefix, type));
+
+        return txActorRef;
     }
 
     protected ActorRef setupActorContextWithInitialCreateTransaction(ActorSystem actorSystem, TransactionType type) {
@@ -375,12 +395,12 @@ public abstract class AbstractTransactionProxyTest {
                     ActorSelection actual = Await.result(future, Duration.create(5, TimeUnit.SECONDS));
                     assertEquals("Cohort actor path", expReply, actual);
                 } else {
-                    // Expecting exception.
                     try {
                         Await.result(future, Duration.create(5, TimeUnit.SECONDS));
                         fail("Expected exception from ready operation Future");
                     } catch(Exception e) {
-                        // Expected
+                        assertTrue(String.format("Expected exception type %s. Actual %s",
+                                expReply, e.getClass()), ((Class<?>)expReply).isInstance(e));
                     }
                 }
             }
