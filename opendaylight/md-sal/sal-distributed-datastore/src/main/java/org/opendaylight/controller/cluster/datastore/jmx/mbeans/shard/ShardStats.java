@@ -28,41 +28,41 @@ import org.opendaylight.yangtools.util.concurrent.QueuedNotificationManager;
 public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
     public static String JMX_CATEGORY_SHARD = "Shards";
 
-    private final AtomicLong committedTransactionsCount = new AtomicLong();
+    private long committedTransactionsCount;
 
-    private final AtomicLong readOnlyTransactionCount = new AtomicLong();
+    private long readOnlyTransactionCount;
 
-    private final AtomicLong writeOnlyTransactionCount = new AtomicLong();
+    private long writeOnlyTransactionCount;
 
-    private final AtomicLong readWriteTransactionCount = new AtomicLong();
+    private long readWriteTransactionCount;
 
     private String leader;
 
     private String raftState;
 
-    private volatile long lastLogTerm = -1L;
+    private long lastLogTerm = -1L;
 
-    private volatile long lastLogIndex = -1L;
+    private long lastLogIndex = -1L;
 
-    private volatile long currentTerm = -1L;
+    private long currentTerm = -1L;
 
-    private volatile long commitIndex = -1L;
+    private long commitIndex = -1L;
 
-    private volatile long lastApplied = -1L;
+    private long lastApplied = -1L;
 
-    private volatile long lastCommittedTransactionTime;
+    private long lastCommittedTransactionTime;
 
-    private final AtomicLong failedTransactionsCount = new AtomicLong();
+    private long failedTransactionsCount;
 
     private final AtomicLong failedReadTransactionsCount = new AtomicLong();
 
-    private final AtomicLong abortTransactionsCount = new AtomicLong();
+    private long abortTransactionsCount;
 
     private ThreadExecutorStatsMXBeanImpl notificationExecutorStatsBean;
 
     private QueuedNotificationManagerMXBeanImpl notificationManagerStatsBean;
 
-    private volatile long dataSize = 0;
+    private long dataSize = 0;
 
     private final SimpleDateFormat sdf =
         new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
@@ -87,7 +87,7 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
 
     @Override
     public long getCommittedTransactionsCount() {
-        return committedTransactionsCount.get();
+        return committedTransactionsCount;
     }
 
     @Override
@@ -102,17 +102,17 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
 
     @Override
     public long getReadOnlyTransactionCount() {
-        return readOnlyTransactionCount.get();
+        return readOnlyTransactionCount;
     }
 
     @Override
     public long getWriteOnlyTransactionCount() {
-        return writeOnlyTransactionCount.get();
+        return writeOnlyTransactionCount;
     }
 
     @Override
     public long getReadWriteTransactionCount() {
-        return readWriteTransactionCount.get();
+        return readWriteTransactionCount;
     }
 
     @Override
@@ -148,7 +148,7 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
 
     @Override
     public long getFailedTransactionsCount() {
-        return failedTransactionsCount.get();
+        return failedTransactionsCount;
     }
 
     @Override
@@ -158,27 +158,27 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
 
     @Override
     public long getAbortTransactionsCount() {
-        return abortTransactionsCount.get();
+        return abortTransactionsCount;
     }
 
     public long incrementCommittedTransactionCount() {
-        return committedTransactionsCount.incrementAndGet();
+        return ++committedTransactionsCount;
     }
 
     public long incrementReadOnlyTransactionCount() {
-        return readOnlyTransactionCount.incrementAndGet();
+        return ++readOnlyTransactionCount;
     }
 
     public long incrementWriteOnlyTransactionCount() {
-        return writeOnlyTransactionCount.incrementAndGet();
+        return ++writeOnlyTransactionCount;
     }
 
     public long incrementReadWriteTransactionCount() {
-        return readWriteTransactionCount.incrementAndGet();
+        return ++readWriteTransactionCount;
     }
 
     public long incrementFailedTransactionsCount() {
-        return failedTransactionsCount.incrementAndGet();
+        return ++failedTransactionsCount;
     }
 
     public long incrementFailedReadTransactionsCount() {
@@ -187,7 +187,7 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
 
     public long incrementAbortTransactionsCount ()
     {
-        return abortTransactionsCount.incrementAndGet();
+        return ++abortTransactionsCount;
     }
 
     public void setLeader(final String leader) {
@@ -257,21 +257,21 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
      */
     @Override
     public void resetTransactionCounters(){
-        committedTransactionsCount.set(0);
+        committedTransactionsCount = 0;
 
-        readOnlyTransactionCount.set(0);
+        readOnlyTransactionCount = 0;
 
-        writeOnlyTransactionCount.set(0);
+        writeOnlyTransactionCount = 0;
 
-        readWriteTransactionCount.set(0);
+        readWriteTransactionCount = 0;
 
         lastCommittedTransactionTime = 0;
 
-        failedTransactionsCount.set(0);
+        failedTransactionsCount = 0;
 
-        failedReadTransactionsCount.set(0);
+        failedReadTransactionsCount.set(0);;
 
-        abortTransactionsCount.set(0);
+        abortTransactionsCount = 0;
 
     }
 
