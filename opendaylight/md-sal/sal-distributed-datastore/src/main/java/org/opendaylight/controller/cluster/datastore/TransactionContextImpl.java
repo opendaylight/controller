@@ -153,8 +153,8 @@ public class TransactionContextImpl extends AbstractTransactionContext {
 
                 } else {
                     // Throwing an exception here will fail the Future.
-                    throw new IllegalArgumentException(String.format("Invalid reply type %s",
-                            serializedReadyReply.getClass()));
+                    throw new IllegalArgumentException(String.format("%s: Invalid reply type %s",
+                            identifier, serializedReadyReply.getClass()));
                 }
             }
         }, TransactionProxy.SAME_FAILURE_TRANSFORMER, actorContext.getClientDispatcher());
