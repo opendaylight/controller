@@ -314,28 +314,40 @@ public class RestconfImpl implements RestconfService {
     }
 
     @Override
-    public StructuredData getOperations(final UriInfo uriInfo) {
+    public NormalizedNodeContext getOperations(final UriInfo uriInfo) {
         final Set<Module> allModules = controllerContext.getAllModules();
-        return operationsFromModulesToStructuredData(allModules, null, parsePrettyPrintParameter(uriInfo));
+        return operationsFromModulesToNormalizedContext(allModules, null);
     }
 
     @Override
-    public StructuredData getOperations(final String identifier, final UriInfo uriInfo) {
+    public NormalizedNodeContext getOperations(final String identifier, final UriInfo uriInfo) {
         Set<Module> modules = null;
         DOMMountPoint mountPoint = null;
         if (identifier.contains(ControllerContext.MOUNT)) {
             final InstanceIdentifierContext mountPointIdentifier = controllerContext.toMountPointIdentifier(identifier);
             mountPoint = mountPointIdentifier.getMountPoint();
             modules = controllerContext.getAllModules(mountPoint);
+
         } else {
-            throw new RestconfDocumentedException(
-                    "URI has bad format. If operations behind mount point should be showed, URI has to end with "
-                            + ControllerContext.MOUNT, ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
+            final String errMsg = "URI has bad format. If operations behind mount point should be showed, URI has to end with ";
+            throw new RestconfDocumentedException(errMsg + ControllerContext.MOUNT, ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
         }
 
-        return operationsFromModulesToStructuredData(modules, mountPoint, parsePrettyPrintParameter(uriInfo));
+        return operationsFromModulesToNormalizedContext(modules, mountPoint);
     }
 
+    private NormalizedNodeContext operationsFromModulesToNormalizedContext(final Set<Module> modules,
+            final DOMMountPoint mountPoint) {
+
+        // FIXME find best way to change restconf-netconf yang schema for provide this functionality
+        final String errMsg = "We are not able support view operations functionality yet.";
+        throw new RestconfDocumentedException(errMsg, ErrorType.APPLICATION, ErrorTag.OPERATION_NOT_SUPPORTED);
+    }
+
+    /**
+     * @deprecated method will be removed in Lithium release
+     */
+    @Deprecated
     private StructuredData operationsFromModulesToStructuredData(final Set<Module> modules,
             final DOMMountPoint mountPoint, final boolean prettyPrint) {
         final List<Node<?>> operationsAsData = new ArrayList<Node<?>>();
