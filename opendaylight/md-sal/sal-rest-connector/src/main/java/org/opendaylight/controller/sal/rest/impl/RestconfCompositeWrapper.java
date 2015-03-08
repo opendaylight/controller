@@ -97,7 +97,7 @@ public class RestconfCompositeWrapper implements RestconfService, SchemaRetrieva
     }
 
     @Override
-    public StructuredData getAvailableStreams(final UriInfo uriInfo) {
+    public NormalizedNodeContext getAvailableStreams(final UriInfo uriInfo) {
         return restconf.getAvailableStreams(uriInfo);
     }
 

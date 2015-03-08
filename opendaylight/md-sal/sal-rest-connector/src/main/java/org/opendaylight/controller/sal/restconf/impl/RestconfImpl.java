@@ -285,22 +285,32 @@ public class RestconfImpl implements RestconfService {
     }
 
     @Override
-    public StructuredData getAvailableStreams(final UriInfo uriInfo) {
+    public NormalizedNodeContext getAvailableStreams(final UriInfo uriInfo) {
+        final SchemaContext schemaContext = controllerContext.getGlobalSchema();
         final Set<String> availableStreams = Notificator.getStreamNames();
-
-        final List<Node<?>> streamsAsData = new ArrayList<Node<?>>();
         final Module restconfModule = getRestconfModule();
         final DataSchemaNode streamSchemaNode = controllerContext.getRestconfModuleRestConfSchemaNode(restconfModule,
                 Draft02.RestConfModule.STREAM_LIST_SCHEMA_NODE);
+        Preconditions.checkState(streamSchemaNode instanceof ListSchemaNode);
+
+        final CollectionNodeBuilder<MapEntryNode, MapNode> listStreamsBuilder = Builders
+                .mapBuilder((ListSchemaNode) streamSchemaNode);
+
         for (final String streamName : availableStreams) {
-            streamsAsData.add(toStreamCompositeNode(streamName, streamSchemaNode));
+            listStreamsBuilder.withChild(toStreamEntryNode(streamName, streamSchemaNode));
         }
 
-        final DataSchemaNode streamsSchemaNode = controllerContext.getRestconfModuleRestConfSchemaNode(restconfModule,
-                Draft02.RestConfModule.STREAMS_CONTAINER_SCHEMA_NODE);
-        final QName qName = streamsSchemaNode.getQName();
-        final CompositeNode streamsNode = NodeFactory.createImmutableCompositeNode(qName, null, streamsAsData);
-        return new StructuredData(streamsNode, streamsSchemaNode, null, parsePrettyPrintParameter(uriInfo));
+        final DataSchemaNode streamsContainerSchemaNode = controllerContext.getRestconfModuleRestConfSchemaNode(
+                restconfModule, Draft02.RestConfModule.STREAMS_CONTAINER_SCHEMA_NODE);
+        Preconditions.checkState(streamsContainerSchemaNode instanceof ContainerSchemaNode);
+
+        final DataContainerNodeAttrBuilder<NodeIdentifier, ContainerNode> streamsContainerBuilder =
+                Builders.containerBuilder((ContainerSchemaNode) streamsContainerSchemaNode);
+        streamsContainerBuilder.withChild(listStreamsBuilder.build());
+
+
+        return new NormalizedNodeContext(new InstanceIdentifierContext(null, streamsContainerSchemaNode, null,
+                schemaContext), streamsContainerBuilder.build());
     }
 
     @Override
@@ -1663,4 +1673,49 @@ public class RestconfImpl implements RestconfService {
         Preconditions.checkArgument(moduleSchemaNode instanceof ListSchemaNode,
                 "moduleSchemaNode has to be of type ListSchemaNode");        final ListSchemaNode listModuleSchemaNode = (ListSchemaNode) moduleSchemaNode;        final DataContainerNodeAttrBuilder<NodeIdentifierWithPredicates, MapEntryNode> moduleNodeValues = Builders                .mapEntryBuilder(listModuleSchemaNode);        List<DataSchemaNode> instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(                (listModuleSchemaNode), "name");        final DataSchemaNode nameSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);        Preconditions.checkState(nameSchemaNode instanceof LeafSchemaNode);        moduleNodeValues.withChild(Builders.leafBuilder((LeafSchemaNode) nameSchemaNode).withValue(module.getName())                .build());        instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(                (listModuleSchemaNode), "revision");        final DataSchemaNode revisionSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);        Preconditions.checkState(revisionSchemaNode instanceof LeafSchemaNode);        final String revision = REVISION_FORMAT.format(module.getRevision());        moduleNodeValues.withChild(Builders.leafBuilder((LeafSchemaNode) revisionSchemaNode).withValue(revision)                .build());        instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(                (listModuleSchemaNode), "namespace");        final DataSchemaNode namespaceSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);        Preconditions.checkState(namespaceSchemaNode instanceof LeafSchemaNode);        moduleNodeValues.withChild(Builders.leafBuilder((LeafSchemaNode) namespaceSchemaNode)                .withValue(module.getNamespace().toString()).build());        instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(                (listModuleSchemaNode), "feature");        final DataSchemaNode featureSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);        Preconditions.checkState(featureSchemaNode instanceof LeafListSchemaNode);        final ListNodeBuilder<Object, LeafSetEntryNode<Object>> featuresBuilder = Builders                .leafSetBuilder((LeafListSchemaNode) featureSchemaNode);        for (final FeatureDefinition feature : module.getFeatures()) {            featuresBuilder.withChild(Builders.leafSetEntryBuilder(((LeafListSchemaNode) featureSchemaNode))                    .withValue(feature.getQName().getLocalName()).build());        }        moduleNodeValues.withChild(featuresBuilder.build());
         return moduleNodeValues.build();    }
+
+    protected MapEntryNode toStreamEntryNode(final String streamName, final DataSchemaNode streamSchemaNode) {
+        Preconditions.checkArgument(streamSchemaNode instanceof ListSchemaNode,
+                "streamSchemaNode has to be of type ListSchemaNode");
+        final ListSchemaNode listStreamSchemaNode = (ListSchemaNode) streamSchemaNode;
+        final DataContainerNodeAttrBuilder<NodeIdentifierWithPredicates, MapEntryNode> streamNodeValues = Builders
+                .mapEntryBuilder(listStreamSchemaNode);
+
+        List<DataSchemaNode> instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(
+                (listStreamSchemaNode), "name");
+        final DataSchemaNode nameSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);
+        Preconditions.checkState(nameSchemaNode instanceof LeafSchemaNode);
+        streamNodeValues.withChild(Builders.leafBuilder((LeafSchemaNode) nameSchemaNode).withValue(streamName)
+                .build());
+
+        instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(
+                (listStreamSchemaNode), "description");
+        final DataSchemaNode descriptionSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);
+        Preconditions.checkState(descriptionSchemaNode instanceof LeafSchemaNode);
+        streamNodeValues.withChild(Builders.leafBuilder((LeafSchemaNode) nameSchemaNode)
+                .withValue("DESCRIPTION_PLACEHOLDER").build());
+
+        instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(
+                (listStreamSchemaNode), "replay-support");
+        final DataSchemaNode replaySupportSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);
+        Preconditions.checkState(replaySupportSchemaNode instanceof LeafSchemaNode);
+        streamNodeValues.withChild(Builders.leafBuilder((LeafSchemaNode) replaySupportSchemaNode)
+                .withValue(Boolean.valueOf(true)).build());
+
+        instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(
+                (listStreamSchemaNode), "replay-log-creation-time");
+        final DataSchemaNode replayLogCreationTimeSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);
+        Preconditions.checkState(replayLogCreationTimeSchemaNode instanceof LeafSchemaNode);
+        streamNodeValues.withChild(Builders.leafBuilder((LeafSchemaNode) replayLogCreationTimeSchemaNode)
+                .withValue("").build());
+
+        instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(
+                (listStreamSchemaNode), "events");
+        final DataSchemaNode eventsSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);
+        Preconditions.checkState(eventsSchemaNode instanceof LeafSchemaNode);
+        streamNodeValues.withChild(Builders.leafBuilder((LeafSchemaNode) eventsSchemaNode)
+                .withValue("").build());
+
+        return streamNodeValues.build();
+    }
 }
