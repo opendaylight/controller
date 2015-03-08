@@ -14,8 +14,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import com.google.common.util.concurrent.Futures;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RoutedRpcRegistration;
@@ -30,6 +32,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.store.rev140422.lists.unordered.container.UnorderedList;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.store.rev140422.lists.unordered.container.UnorderedListKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,6 +59,10 @@ public class RoutedServiceTest extends AbstractTest {
     public void setUp() {
         odlRoutedService1 = mock(OpendaylightTestRoutedRpcService.class, "First Flow Service");
         odlRoutedService2 = mock(OpendaylightTestRoutedRpcService.class, "Second Flow Service");
+        Mockito.when(odlRoutedService1.routedSimpleRoute(Mockito.<RoutedSimpleRouteInput>any()))
+            .thenReturn(Futures.<RpcResult<Void>>immediateFuture(null));
+        Mockito.when(odlRoutedService2.routedSimpleRoute(Mockito.<RoutedSimpleRouteInput>any()))
+            .thenReturn(Futures.<RpcResult<Void>>immediateFuture(null));
     }
 
     @Test
@@ -63,9 +70,9 @@ public class RoutedServiceTest extends AbstractTest {
 
         assertNotNull(getBroker());
 
-        BindingAwareProvider provider1 = new AbstractTestProvider() {
+        final BindingAwareProvider provider1 = new AbstractTestProvider() {
             @Override
-            public void onSessionInitiated(ProviderContext session) {
+            public void onSessionInitiated(final ProviderContext session) {
                 assertNotNull(session);
                 firstReg = session.addRoutedRpcImplementation(OpendaylightTestRoutedRpcService.class, odlRoutedService1);
             }
@@ -76,9 +83,9 @@ public class RoutedServiceTest extends AbstractTest {
         assertNotNull("Registration should not be null", firstReg);
         assertSame(odlRoutedService1, firstReg.getInstance());
 
-        BindingAwareProvider provider2 = new AbstractTestProvider() {
+        final BindingAwareProvider provider2 = new AbstractTestProvider() {
             @Override
-            public void onSessionInitiated(ProviderContext session) {
+            public void onSessionInitiated(final ProviderContext session) {
                 assertNotNull(session);
                 secondReg = session.addRoutedRpcImplementation(OpendaylightTestRoutedRpcService.class, odlRoutedService2);
             }
@@ -90,9 +97,9 @@ public class RoutedServiceTest extends AbstractTest {
         assertSame(odlRoutedService2, secondReg.getInstance());
         assertNotSame(secondReg, firstReg);
 
-        BindingAwareConsumer consumer = new BindingAwareConsumer() {
+        final BindingAwareConsumer consumer = new BindingAwareConsumer() {
             @Override
-            public void onSessionInitialized(ConsumerContext session) {
+            public void onSessionInitialized(final ConsumerContext session) {
                 consumerService = session.getRpcService(OpendaylightTestRoutedRpcService.class);
             }
         };
@@ -102,7 +109,7 @@ public class RoutedServiceTest extends AbstractTest {
         assertNotNull("MD-SAL instance of test Service should be returned", consumerService);
         assertNotSame("Provider instance and consumer instance should not be same.", odlRoutedService1, consumerService);
 
-        InstanceIdentifier<UnorderedList> nodeOnePath = createNodeRef("foo:node:1");
+        final InstanceIdentifier<UnorderedList> nodeOnePath = createNodeRef("foo:node:1");
 
         LOG.info("Provider 1 registers path of node 1");
         firstReg.registerPath(TestContext.class, nodeOnePath);
@@ -111,7 +118,7 @@ public class RoutedServiceTest extends AbstractTest {
          * Consumer creates addFlow message for node one and sends it to the
          * MD-SAL
          */
-        RoutedSimpleRouteInput simpleRouteFirstFoo = createSimpleRouteInput(nodeOnePath);
+        final RoutedSimpleRouteInput simpleRouteFirstFoo = createSimpleRouteInput(nodeOnePath);
         consumerService.routedSimpleRoute(simpleRouteFirstFoo);
 
         /**
@@ -125,14 +132,14 @@ public class RoutedServiceTest extends AbstractTest {
         verify(odlRoutedService2, times(0)).routedSimpleRoute(simpleRouteFirstFoo);
 
         LOG.info("Provider 2 registers path of node 2");
-        InstanceIdentifier<UnorderedList> nodeTwo = createNodeRef("foo:node:2");
+        final InstanceIdentifier<UnorderedList> nodeTwo = createNodeRef("foo:node:2");
         secondReg.registerPath(TestContext.class, nodeTwo);
 
         /**
          * Consumer sends message to nodeTwo for three times. Should be
          * processed by second instance.
          */
-        RoutedSimpleRouteInput simpleRouteSecondFoo = createSimpleRouteInput(nodeTwo);
+        final RoutedSimpleRouteInput simpleRouteSecondFoo = createSimpleRouteInput(nodeTwo);
         consumerService.routedSimpleRoute(simpleRouteSecondFoo);
         consumerService.routedSimpleRoute(simpleRouteSecondFoo);
         consumerService.routedSimpleRoute(simpleRouteSecondFoo);
@@ -154,7 +161,7 @@ public class RoutedServiceTest extends AbstractTest {
         /**
          * A consumer sends third message to node 1
          */
-        RoutedSimpleRouteInput simpleRouteThirdFoo = createSimpleRouteInput(nodeOnePath);
+        final RoutedSimpleRouteInput simpleRouteThirdFoo = createSimpleRouteInput(nodeOnePath);
         consumerService.routedSimpleRoute(simpleRouteThirdFoo);
 
         /**
@@ -174,9 +181,9 @@ public class RoutedServiceTest extends AbstractTest {
      *            string with key(path)
      * @return instance identifier to {@link UnorderedList}
      */
-    private static InstanceIdentifier<UnorderedList> createNodeRef(String string) {
-        UnorderedListKey key = new UnorderedListKey(string);
-        InstanceIdentifier<UnorderedList> path = InstanceIdentifier.builder(Lists.class)
+    private static InstanceIdentifier<UnorderedList> createNodeRef(final String string) {
+        final UnorderedListKey key = new UnorderedListKey(string);
+        final InstanceIdentifier<UnorderedList> path = InstanceIdentifier.builder(Lists.class)
                 .child(UnorderedContainer.class)
                 .child(UnorderedList.class, key)
                 .build();
@@ -191,8 +198,8 @@ public class RoutedServiceTest extends AbstractTest {
      *            NodeRef value
      * @return simpleRouteInput instance
      */
-    static RoutedSimpleRouteInput createSimpleRouteInput(InstanceIdentifier<UnorderedList> node) {
-        RoutedSimpleRouteInputBuilder ret = new RoutedSimpleRouteInputBuilder();
+    static RoutedSimpleRouteInput createSimpleRouteInput(final InstanceIdentifier<UnorderedList> node) {
+        final RoutedSimpleRouteInputBuilder ret = new RoutedSimpleRouteInputBuilder();
         ret.setRoute(node);
         return ret.build();
     }

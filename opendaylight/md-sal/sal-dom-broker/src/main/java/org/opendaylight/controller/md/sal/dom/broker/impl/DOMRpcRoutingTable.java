@@ -16,6 +16,7 @@ import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -81,7 +82,7 @@ final class DOMRpcRoutingTable {
         // Now iterate over existing entries, modifying them as appropriate...
         final Builder<SchemaPath, AbstractDOMRpcRoutingTableEntry> mb = ImmutableMap.builder();
         for (Entry<SchemaPath, AbstractDOMRpcRoutingTableEntry> re : this.rpcs.entrySet()) {
-            List<YangInstanceIdentifier> newRpcs = toAdd.removeAll(re.getKey());
+            List<YangInstanceIdentifier> newRpcs = new ArrayList<>(toAdd.removeAll(re.getKey()));
             if (!newRpcs.isEmpty()) {
                 final AbstractDOMRpcRoutingTableEntry ne = re.getValue().add(implementation, newRpcs);
                 mb.put(re.getKey(), ne);
@@ -115,7 +116,7 @@ final class DOMRpcRoutingTable {
         // Now iterate over existing entries, modifying them as appropriate...
         final Builder<SchemaPath, AbstractDOMRpcRoutingTableEntry> b = ImmutableMap.builder();
         for (Entry<SchemaPath, AbstractDOMRpcRoutingTableEntry> e : this.rpcs.entrySet()) {
-            final List<YangInstanceIdentifier> removed = toRemove.removeAll(e.getKey());
+            final List<YangInstanceIdentifier> removed = new ArrayList<>(toRemove.removeAll(e.getKey()));
             if (!removed.isEmpty()) {
                 final AbstractDOMRpcRoutingTableEntry ne = e.getValue().remove(implementation, removed);
                 if (ne != null) {
@@ -163,7 +164,7 @@ final class DOMRpcRoutingTable {
                 for (DataSchemaNode c : input.getChildNodes()) {
                     for (UnknownSchemaNode extension : c.getUnknownSchemaNodes()) {
                         if (CONTEXT_REFERENCE.equals(extension.getNodeType())) {
-                            final YangInstanceIdentifier keyId = YangInstanceIdentifier.builder().node(input.getQName()).node(c.getQName()).build();
+                            final YangInstanceIdentifier keyId = YangInstanceIdentifier.builder().node(c.getQName()).build();
                             return new RoutedDOMRpcRoutingTableEntry(rpcDef, keyId, implementations);
                         }
                     }

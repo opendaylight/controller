@@ -9,23 +9,18 @@ package org.opendaylight.controller.md.sal.binding.impl;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
 import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataChangeListener;
-import org.opendaylight.controller.sal.binding.impl.connect.dom.BindingIndependentConnector;
-import org.opendaylight.controller.sal.binding.impl.forward.DomForwardedBroker;
-import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.yangtools.concepts.AbstractListenerRegistration;
 import org.opendaylight.yangtools.concepts.Delegator;
@@ -35,28 +30,26 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBroker>, DomForwardedBroker,
-        SchemaContextListener, AutoCloseable {
+public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBroker>, AutoCloseable {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractForwardedDataBroker.class);
     // The Broker to whom we do all forwarding
     private final DOMDataBroker domDataBroker;
 
     private final BindingToNormalizedNodeCodec codec;
-    private BindingIndependentConnector connector;
-    private ProviderSession context;
-    private final ListenerRegistration<SchemaContextListener> schemaListenerRegistration;
 
     protected AbstractForwardedDataBroker(final DOMDataBroker domDataBroker, final BindingToNormalizedNodeCodec codec,
             final SchemaService schemaService) {
         this.domDataBroker = domDataBroker;
         this.codec = codec;
-        this.schemaListenerRegistration = schemaService.registerSchemaContextListener(this);
+    }
+
+    protected AbstractForwardedDataBroker(final DOMDataBroker domDataBroker, final BindingToNormalizedNodeCodec codec) {
+        this.domDataBroker = domDataBroker;
+        this.codec = codec;
     }
 
     protected BindingToNormalizedNodeCodec getCodec() {
@@ -68,33 +61,28 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
         return domDataBroker;
     }
 
-    @Override
-    public void onGlobalContextUpdated(final SchemaContext ctx) {
-        // NOOP
-    }
-
     public ListenerRegistration<DataChangeListener> registerDataChangeListener(final LogicalDatastoreType store,
             final InstanceIdentifier<?> path, final DataChangeListener listener, final DataChangeScope triggeringScope) {
-        DOMDataChangeListener domDataChangeListener = new TranslatingDataChangeInvoker(store, path, listener,
+        final DOMDataChangeListener domDataChangeListener = new TranslatingDataChangeInvoker(store, path, listener,
                 triggeringScope);
-        YangInstanceIdentifier domPath = codec.toNormalized(path);
-        ListenerRegistration<DOMDataChangeListener> domRegistration = domDataBroker.registerDataChangeListener(store,
+        final YangInstanceIdentifier domPath = codec.toNormalized(path);
+        final ListenerRegistration<DOMDataChangeListener> domRegistration = domDataBroker.registerDataChangeListener(store,
                 domPath, domDataChangeListener, triggeringScope);
         return new ListenerRegistrationImpl(listener, domRegistration);
     }
 
     protected Map<InstanceIdentifier<?>, DataObject> toBinding(final InstanceIdentifier<?> path,
             final Map<YangInstanceIdentifier, ? extends NormalizedNode<?, ?>> normalized) {
-        Map<InstanceIdentifier<?>, DataObject> newMap = new HashMap<>();
+        final Map<InstanceIdentifier<?>, DataObject> newMap = new HashMap<>();
 
-        for (Map.Entry<YangInstanceIdentifier, ? extends NormalizedNode<?, ?>> entry : normalized.entrySet()) {
+        for (final Map.Entry<YangInstanceIdentifier, ? extends NormalizedNode<?, ?>> entry : normalized.entrySet()) {
             try {
-                Optional<Entry<InstanceIdentifier<? extends DataObject>, DataObject>> potential = getCodec().toBinding(entry);
+                final Optional<Entry<InstanceIdentifier<? extends DataObject>, DataObject>> potential = getCodec().toBinding(entry);
                 if (potential.isPresent()) {
-                    Entry<InstanceIdentifier<? extends DataObject>, DataObject> binding = potential.get();
+                    final Entry<InstanceIdentifier<? extends DataObject>, DataObject> binding = potential.get();
                     newMap.put(binding.getKey(), binding.getValue());
                 }
-            } catch (DeserializationException e) {
+            } catch (final DeserializationException e) {
                 LOG.warn("Failed to transform {}, omitting it", entry, e);
             }
         }
@@ -103,17 +91,17 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
 
     protected Set<InstanceIdentifier<?>> toBinding(final InstanceIdentifier<?> path,
             final Set<YangInstanceIdentifier> normalized) {
-        Set<InstanceIdentifier<?>> hashSet = new HashSet<>();
-        for (YangInstanceIdentifier normalizedPath : normalized) {
+        final Set<InstanceIdentifier<?>> hashSet = new HashSet<>();
+        for (final YangInstanceIdentifier normalizedPath : normalized) {
             try {
-                Optional<InstanceIdentifier<? extends DataObject>> potential = getCodec().toBinding(normalizedPath);
+                final Optional<InstanceIdentifier<? extends DataObject>> potential = getCodec().toBinding(normalizedPath);
                 if (potential.isPresent()) {
-                    InstanceIdentifier<? extends DataObject> binding = potential.get();
+                    final InstanceIdentifier<? extends DataObject> binding = potential.get();
                     hashSet.add(binding);
                 } else if (normalizedPath.getLastPathArgument() instanceof YangInstanceIdentifier.AugmentationIdentifier) {
                     hashSet.add(path);
                 }
-            } catch (DeserializationException e) {
+            } catch (final DeserializationException e) {
                 LOG.warn("Failed to transform {}, omitting it", normalizedPath, e);
             }
         }
@@ -255,33 +243,7 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
     }
 
     @Override
-    public BindingIndependentConnector getConnector() {
-        return this.connector;
-    }
-
-    @Override
-    public ProviderSession getDomProviderContext() {
-        return this.context;
-    }
-
-    @Override
-    public void setConnector(final BindingIndependentConnector connector) {
-        this.connector = connector;
-    }
-
-    @Override
-    public void setDomProviderContext(final ProviderSession domProviderContext) {
-        this.context = domProviderContext;
-    }
-
-    @Override
-    public void startForwarding() {
-        // NOOP
-    }
-
-    @Override
-    public void close() throws Exception {
-        this.schemaListenerRegistration.close();
+    public void close() {
     }
 
 }

@@ -1,9 +1,14 @@
 package org.opendaylight.controller.md.sal.binding.impl.test;
 
-import com.google.common.util.concurrent.MoreExecutors;
+import static junit.framework.TestCase.assertNotNull;
+
+import org.opendaylight.controller.md.sal.binding.compat.HydrogenDataBrokerAdapter;
+
+import com.google.common.collect.ImmutableSet;
+import java.util.concurrent.ExecutionException;
 import org.junit.Test;
-import org.opendaylight.controller.md.sal.binding.impl.ForwardedBackwardsCompatibleDataBroker;
-import org.opendaylight.controller.md.sal.binding.test.AbstractSchemaAwareTest;
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.test.AbstractDataBrokerTest;
 import org.opendaylight.controller.md.sal.binding.test.DataBrokerTestCustomizer;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
@@ -13,17 +18,15 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelListKey;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
+import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 
-import java.util.concurrent.ExecutionException;
-
-import static junit.framework.TestCase.assertNotNull;
-
+@Deprecated
 public class ForwardedBackwardsCompatibleDataBrokerTest extends
-    AbstractSchemaAwareTest {
+    AbstractDataBrokerTest {
 
     private DataBrokerTestCustomizer testCustomizer;
-    private ForwardedBackwardsCompatibleDataBroker dataBroker;
+    private HydrogenDataBrokerAdapter dataBroker;
     private DOMDataBroker domBroker;
 
     private static final InstanceIdentifier<Top> TOP_PATH = InstanceIdentifier.create(Top.class);
@@ -31,22 +34,20 @@ public class ForwardedBackwardsCompatibleDataBrokerTest extends
     private static final InstanceIdentifier<TopLevelList> NODE_PATH = TOP_PATH.child(TopLevelList.class, TOP_LIST_KEY);
     private static final TopLevelList NODE = new TopLevelListBuilder().setKey(TOP_LIST_KEY).build();
 
+    @Override
+    protected Iterable<YangModuleInfo> getModuleInfos() throws Exception {
+        return ImmutableSet.of(BindingReflections.getModuleInfo(TopLevelList.class));
+    }
+
+    @Override
     protected DataBrokerTestCustomizer createDataBrokerTestCustomizer() {
         return new DataBrokerTestCustomizer();
     }
 
     @Override
-    protected void setupWithSchema(final SchemaContext context) {
-        testCustomizer = createDataBrokerTestCustomizer();
-
-        domBroker = testCustomizer.createDOMDataBroker();
-        dataBroker = createBackwardsCompatibleDataBroker();
-        testCustomizer.updateSchema(context);
-    }
-
-    public ForwardedBackwardsCompatibleDataBroker createBackwardsCompatibleDataBroker() {
-        return new ForwardedBackwardsCompatibleDataBroker(domBroker, testCustomizer.getBindingToNormalized(), testCustomizer.getSchemaService(), MoreExecutors
-            .sameThreadExecutor());
+    protected void setupWithDataBroker(final DataBroker dataBroker) {
+        super.setupWithDataBroker(dataBroker);
+        this.dataBroker = new HydrogenDataBrokerAdapter(dataBroker);
     }
 
 
@@ -62,15 +63,15 @@ public class ForwardedBackwardsCompatibleDataBrokerTest extends
      */
     @Test
     public void testEnsureParentsByMerge() throws InterruptedException, ExecutionException {
-        DataModificationTransaction writeTx =
+        final DataModificationTransaction writeTx =
             dataBroker.beginTransaction();
 
         writeTx.putOperationalData(NODE_PATH, NODE);
 
-        writeTx.commit();
+        writeTx.commit().get();
 
         // TOP_PATH should exist as it is the parent of NODE_PATH
-        DataObject object = dataBroker.readOperationalData(TOP_PATH);
+        final DataObject object = dataBroker.readOperationalData(TOP_PATH);
 
         assertNotNull(object);
 
