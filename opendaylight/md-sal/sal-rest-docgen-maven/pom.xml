@@ -28,6 +28,11 @@
             <artifactId>sal-rest-docgen</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.opendaylight.yangtools</groupId>
             <artifactId>yang-maven-plugin-spi</artifactId>
         </dependency>

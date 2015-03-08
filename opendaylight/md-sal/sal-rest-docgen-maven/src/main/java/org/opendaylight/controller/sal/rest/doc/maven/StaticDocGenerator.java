@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.ws.rs.core.UriInfo;
-import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.opendaylight.controller.sal.rest.doc.impl.ApiDocGenerator;
 import org.opendaylight.controller.sal.rest.doc.swagger.ApiDeclaration;
@@ -27,14 +26,15 @@ import org.opendaylight.controller.sal.rest.doc.swagger.Resource;
 import org.opendaylight.controller.sal.rest.doc.swagger.ResourceList;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang2sources.spi.CodeGenerator;
+import org.opendaylight.yangtools.yang2sources.spi.BasicCodeGenerator;
+import org.opendaylight.yangtools.yang2sources.spi.MavenProjectAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * This class gathers all yang defined {@link Module}s and generates Swagger compliant documentation.
  */
-public class StaticDocGenerator extends ApiDocGenerator implements CodeGenerator {
+public class StaticDocGenerator extends ApiDocGenerator implements BasicCodeGenerator, MavenProjectAware {
 
     private static final String DEFAULT_OUTPUT_BASE_DIR_PATH = "target" + File.separator + "generated-resources"
         + File.separator + "swagger-api-documentation";
@@ -125,10 +125,6 @@ public class StaticDocGenerator extends ApiDocGenerator implements CodeGenerator
             return RESTCONF_CONTEXT_ROOT;
         }
         return super.createBasePathFromUriInfo(uriInfo);
-    }
-
-    @Override
-    public void setLog(final Log log) {
     }
 
     @Override
