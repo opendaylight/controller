@@ -8,40 +8,65 @@
 
 package org.opendaylight.controller.netconf.mdsal.connector.ops.get;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Collections;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.dom.DOMResult;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorSeverity;
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorTag;
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorType;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.mdsal.connector.CurrentSchemaContext;
 import org.opendaylight.controller.netconf.mdsal.connector.ops.Datastore;
 import org.opendaylight.controller.netconf.util.mapping.AbstractLastNetconfOperation;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
+import org.opendaylight.controller.sal.connect.netconf.util.InstanceIdToNodes;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
+import org.opendaylight.yangtools.yang.data.api.schema.DataContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeWriter;
 import org.opendaylight.yangtools.yang.data.impl.codec.xml.XMLStreamNormalizedNodeStreamWriter;
+import org.opendaylight.yangtools.yang.data.impl.schema.transform.dom.DomUtils;
+import org.opendaylight.yangtools.yang.data.impl.schema.transform.dom.parser.DomToNormalizedNodeParserFactory;
+import org.opendaylight.yangtools.yang.model.api.AnyXmlSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.ChoiceSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.Module;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 public abstract class AbstractGet extends AbstractLastNetconfOperation {
 
-    protected static final YangInstanceIdentifier ROOT = YangInstanceIdentifier.builder().build();
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractGet.class);
 
+    protected static final String FILTER = "filter";
+    static final YangInstanceIdentifier ROOT = YangInstanceIdentifier.builder().build();
     protected final CurrentSchemaContext schemaContext;
-
 
     public AbstractGet(final String netconfSessionIdForReporting, final CurrentSchemaContext schemaContext) {
         super(netconfSessionIdForReporting);
@@ -70,6 +95,7 @@ public abstract class AbstractGet extends AbstractLastNetconfOperation {
         return result.getNode();
     }
 
+
     private XMLStreamWriter getXmlStreamWriter(final DOMResult result) {
         try {
             return XML_OUTPUT_FACTORY.createXMLStreamWriter(result);
@@ -92,8 +118,12 @@ public abstract class AbstractGet extends AbstractLastNetconfOperation {
     // TODO this code is located in Restconf already
     private void writeRootElement(final XMLStreamWriter xmlWriter, final NormalizedNodeWriter nnWriter, final ContainerNode data) {
         try {
-            for (final DataContainerChild<? extends PathArgument, ?> child : data.getValue()) {
-                nnWriter.write(child);
+            if (data.getNodeType().equals(SchemaContext.NAME)) {
+                for (final DataContainerChild<? extends PathArgument, ?> child : data.getValue()) {
+                    nnWriter.write(child);
+                }
+            } else {
+                nnWriter.write(data);
             }
             nnWriter.flush();
             xmlWriter.flush();
@@ -102,9 +132,89 @@ public abstract class AbstractGet extends AbstractLastNetconfOperation {
         }
     }
 
-    protected static final class GetConfigExecution {
-        private final Optional<Datastore> datastore;
+    private DataSchemaNode getSchemaNodeFromNamespace(final XmlElement element) throws NetconfDocumentedException {
 
+        try {
+            final Module module = schemaContext.getCurrentContext().findModuleByNamespaceAndRevision(new URI(element.getNamespace()), null);
+            DataSchemaNode dataSchemaNode = module.getDataChildByName(element.getName());
+            if (dataSchemaNode != null) {
+                return dataSchemaNode;
+            }
+        } catch (URISyntaxException e) {
+            LOG.debug("Unable to create URI for namespace : {}", element.getNamespace());
+            throw new NetconfDocumentedException("Unable to create URI for namespace");
+        }
+        throw new NetconfDocumentedException("Unable to find node with namespace: " + element.getNamespace() + "in schema context: " + schemaContext.getCurrentContext().toString(),
+                ErrorType.application,
+                ErrorTag.unknown_namespace,
+                ErrorSeverity.error);
+    }
+
+    protected Element serializeNodeWithParentStructure(Document document, YangInstanceIdentifier dataRoot, NormalizedNode node) {
+        if (!dataRoot.equals(ROOT)) {
+            return (Element) transformNormalizedNode(document,
+                    InstanceIdToNodes.serialize(schemaContext.getCurrentContext(), dataRoot, node),
+                    ROOT);
+        }
+        return  (Element) transformNormalizedNode(document, node, ROOT);
+    }
+
+    protected Optional<YangInstanceIdentifier> getDataRootFromFilter(XmlElement operationElement) throws NetconfDocumentedException {
+        Optional<XmlElement> filterElement = operationElement.getOnlyChildElementOptionally(FILTER);
+        if (filterElement.isPresent()) {
+            if (filterElement.get().getChildElements().size() == 0) {
+                return Optional.absent();
+            }
+            return Optional.of(getInstanceIdentifierFromFilter(filterElement.get()));
+        } else {
+            return Optional.of(ROOT);
+        }
+    }
+
+    @VisibleForTesting
+    protected YangInstanceIdentifier getInstanceIdentifierFromFilter(XmlElement filterElement) throws NetconfDocumentedException {
+        XmlElement element = filterElement.getOnlyChildElement();
+        DataSchemaNode schemaNode = getSchemaNodeFromNamespace(element);
+
+        return getReadPointFromNode(YangInstanceIdentifier.builder().build(), filterToNormalizedNode(element, schemaNode));
+    }
+
+    private YangInstanceIdentifier getReadPointFromNode(final YangInstanceIdentifier pathArg, final NormalizedNode nNode) {
+        final YangInstanceIdentifier path = pathArg.node(nNode.getIdentifier());
+        if (nNode instanceof DataContainerNode) {
+            DataContainerNode node = (DataContainerNode) nNode;
+            if (node.getValue().size() == 1) {
+                return getReadPointFromNode(path, (NormalizedNode) Lists.newArrayList(node.getValue()).get(0));
+            }
+        }
+        return path;
+    }
+
+    private NormalizedNode filterToNormalizedNode(XmlElement element, DataSchemaNode schemaNode) {
+        DomToNormalizedNodeParserFactory parserFactory = DomToNormalizedNodeParserFactory
+                .getInstance(DomUtils.defaultValueCodecProvider(), schemaContext.getCurrentContext());
+
+        final NormalizedNode parsedNode;
+
+        if (schemaNode instanceof ContainerSchemaNode) {
+            parsedNode = parserFactory.getContainerNodeParser().parse(Collections.singletonList(element.getDomElement()), (ContainerSchemaNode) schemaNode);
+        } else if (schemaNode instanceof ListSchemaNode) {
+            parsedNode = parserFactory.getMapNodeParser().parse(Collections.singletonList(element.getDomElement()), (ListSchemaNode) schemaNode);
+        } else if (schemaNode instanceof LeafListSchemaNode) {
+            parsedNode = parserFactory.getLeafSetNodeParser().parse(Collections.singletonList(element.getDomElement()), (LeafListSchemaNode) schemaNode);
+        } else if (schemaNode instanceof LeafSchemaNode) {
+            parsedNode = parserFactory.getLeafNodeParser().parse(Collections.singletonList(element.getDomElement()), (LeafSchemaNode) schemaNode);
+        } else if (schemaNode instanceof AnyXmlSchemaNode) {
+            parsedNode = parserFactory.getAnyXmlNodeParser().parse(Collections.singletonList(element.getDomElement()), (AnyXmlSchemaNode) schemaNode);
+        } else {
+            parsedNode = parserFactory.getChoiceNodeParser().parse(Collections.singletonList(element.getDomElement()), (ChoiceSchemaNode) schemaNode);
+        }
+        return parsedNode;
+    }
+
+    protected static final class GetConfigExecution {
+
+        private final Optional<Datastore> datastore;
         public GetConfigExecution(final Optional<Datastore> datastore) {
             this.datastore = datastore;
         }
@@ -127,8 +237,6 @@ public abstract class AbstractGet extends AbstractLastNetconfOperation {
                 throw new NetconfDocumentedException("Get-config source attribute error: " + e.getMessage(), e.getErrorType(), e.getErrorTag(), e.getErrorSeverity(), e.getErrorInfo());
             }
 
-            // Add filter
-
             return new GetConfigExecution(sourceDatastore);
         }
 
@@ -144,6 +252,7 @@ public abstract class AbstractGet extends AbstractLastNetconfOperation {
             xml.checkName(operationName);
             xml.checkNamespace(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
         }
+
     }
 
 }
