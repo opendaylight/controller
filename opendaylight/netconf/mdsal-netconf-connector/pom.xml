@@ -92,6 +92,10 @@
           <artifactId>xmlunit</artifactId>
           <scope>test</scope>
       </dependency>
+      <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>sal-netconf-connector</artifactId>
+      </dependency>
 
   </dependencies>
 
