@@ -7,8 +7,11 @@
  */
 package org.opendaylight.md.controller.topology.lldp.utils;
 
-import java.nio.charset.Charset;
+import java.security.NoSuchAlgorithmException;
 
+import java.security.MessageDigest;
+import java.lang.management.ManagementFactory;
+import java.nio.charset.Charset;
 import org.opendaylight.controller.liblldp.Ethernet;
 import org.opendaylight.controller.liblldp.LLDP;
 import org.opendaylight.controller.liblldp.LLDPTLV;
@@ -54,16 +57,21 @@ public class LLDPDiscoveryUtils {
             try {
                 NodeId srcNodeId = null;
                 NodeConnectorId srcNodeConnectorId = null;
+                byte[] lLDPHash = new byte[0];
                 for (LLDPTLV lldptlv : lldp.getOptionalTLVList()) {
                     if (lldptlv.getType() == LLDPTLV.TLVType.Custom.getValue()) {
                         srcNodeConnectorId = new NodeConnectorId(LLDPTLV.getCustomString(lldptlv.getValue(), lldptlv.getLength()));
-                    }
-                    if (lldptlv.getType() == LLDPTLV.TLVType.SystemName.getValue()) {
+                    } else if (lldptlv.getType() == LLDPTLV.TLVType.SystemName.getValue()) {
                         String srcNodeIdString = new String(lldptlv.getValue(),Charset.defaultCharset());
                         srcNodeId = new NodeId(srcNodeIdString);
+                    } else if (lldptlv.getType() == LLDPTLV.TLVType.CustomSec.getValue()) {
+                        lLDPHash = lldptlv.getValue();
                     }
                 }
-                if(srcNodeId != null && srcNodeConnectorId != null) {
+                byte[] calculatedHash = calculateHash(srcNodeConnectorId);
+                if (calculatedHash != lLDPHash) {
+                    LOG.warn("Attack. LLDP packet witch inconsistent CustomSec field was sent.");
+                } else if(srcNodeId != null && srcNodeConnectorId != null) {
                     InstanceIdentifier<NodeConnector> srcInstanceId = InstanceIdentifier.builder(Nodes.class)
                             .child(Node.class,new NodeKey(srcNodeId))
                             .child(NodeConnector.class, new NodeConnectorKey(srcNodeConnectorId))
@@ -73,6 +81,22 @@ public class LLDPDiscoveryUtils {
             } catch (Exception e) {
                 LOG.warn("Caught exception ", e);
             }
+        }
+        return null;
+    }
+
+    /**
+     * @param srcNodeConnectorId
+     * @return
+     */
+    private static byte[] calculateHash(final NodeConnectorId srcNodeConnectorId) {
+        final String pureValue = srcNodeConnectorId.getValue()+ManagementFactory.getRuntimeMXBean().getName();
+        MessageDigest messageDigest = null;
+        try {
+            messageDigest = MessageDigest.getInstance("MD5");
+            return messageDigest.digest(pureValue.getBytes());
+        } catch (NoSuchAlgorithmException e) {
+            LOG.debug("Message digest instance for calculating MD5 wasn't found while calculating hash for LLDP TLV CustomSec.");
         }
         return null;
     }
