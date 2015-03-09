@@ -12,6 +12,7 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Function;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Optional;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -39,6 +40,7 @@ import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.AbstractMap;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -49,6 +51,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import javax.annotation.Nullable;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.apache.sshd.common.util.ThreadUtils;
@@ -57,6 +60,7 @@ import org.apache.sshd.server.keyprovider.PEMGeneratorHostKeyProvider;
 import org.apache.sshd.server.session.ServerSession;
 import org.opendaylight.controller.netconf.api.Capability;
 import org.opendaylight.controller.netconf.api.monitoring.CapabilityListener;
+import org.opendaylight.controller.netconf.api.monitoring.NetconfManagementSession;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
@@ -64,7 +68,6 @@ import org.opendaylight.controller.netconf.impl.NetconfServerDispatcherImpl;
 import org.opendaylight.controller.netconf.impl.NetconfServerSessionNegotiatorFactory;
 import org.opendaylight.controller.netconf.impl.SessionIdProvider;
 import org.opendaylight.controller.netconf.impl.osgi.AggregatedNetconfOperationServiceFactory;
-import org.opendaylight.controller.netconf.impl.osgi.NetconfMonitoringServiceImpl;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
@@ -81,6 +84,20 @@ import org.opendaylight.controller.netconf.test.tool.rpc.SimulatedGet;
 import org.opendaylight.controller.netconf.test.tool.rpc.SimulatedGetConfig;
 import org.opendaylight.controller.netconf.test.tool.rpc.SimulatedLock;
 import org.opendaylight.controller.netconf.test.tool.rpc.SimulatedUnLock;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.Yang;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state.Capabilities;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state.CapabilitiesBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state.Schemas;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state.SchemasBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state.Sessions;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state.SessionsBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state.schemas.Schema;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state.schemas.Schema.Location;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state.schemas.Schema.Location.Enumeration;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state.schemas.SchemaBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state.schemas.SchemaKey;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state.sessions.Session;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.repo.api.SchemaSourceException;
 import org.opendaylight.yangtools.yang.model.repo.api.SchemaSourceRepresentation;
@@ -102,6 +119,7 @@ import org.slf4j.LoggerFactory;
 public class NetconfDeviceSimulator implements Closeable {
 
     private static final Logger LOG = LoggerFactory.getLogger(NetconfDeviceSimulator.class);
+    private static final Sessions EMPTY_SESSIONS = new SessionsBuilder().setSession(Collections.<Session>emptyList()).build();
 
     private final NioEventLoopGroup nettyThreadgroup;
     private final HashedWheelTimer hashedWheelTimer;
@@ -146,9 +164,90 @@ public class NetconfDeviceSimulator implements Closeable {
         final AggregatedNetconfOperationServiceFactory aggregatedNetconfOperationServiceFactory = new AggregatedNetconfOperationServiceFactory();
         final SimulatedOperationProvider simulatedOperationProvider = new SimulatedOperationProvider(idProvider, capabilities, notificationsFile);
 
-        final NetconfMonitoringService monitoringService1 = new NetconfMonitoringServiceImpl(aggregatedNetconfOperationServiceFactory);
+        final Capabilities capabilities1 = new CapabilitiesBuilder().setCapability(Lists.newArrayList(Collections2.transform(capabilities, new Function<Capability, Uri>() {
+
+            @Nullable
+            @Override
+            public Uri apply(Capability capability) {
+                return new Uri(capability.getCapabilityUri());
+            }
+        }))).build();
+
+        final Schemas schemas = new SchemasBuilder().setSchema(Lists.newArrayList(Collections2.transform(capabilities, new Function<Capability, Schema>() {
+            @Nullable
+            @Override
+            public Schema apply(@Nullable Capability capability) {
+                return new SchemaBuilder()
+                        .setIdentifier(capability.getModuleName().get())
+                        .setNamespace(new Uri(capability.getModuleNamespace().get()))
+                        .setFormat(Yang.class)
+                        .setVersion(capability.getRevision().get())
+                        .setLocation(Collections.singletonList(new Location(Enumeration.NETCONF)))
+                        .setKey(new SchemaKey(Yang.class, capability.getModuleName().get(), capability.getRevision().get())).build();
+            }
+        }))).build();
+
+        final ArrayListMultimap<String, Capability> capabilityMultiMap = ArrayListMultimap.create();
+        for (Capability cap : capabilities) {
+            capabilityMultiMap.put(cap.getModuleName().get(), cap);
+        }
+
+        final NetconfMonitoringService monitoringService1 = new NetconfMonitoringService() {
+            @Override
+            public Sessions getSessions() {
+                return EMPTY_SESSIONS;
+            }
+
+            @Override
+            public Schemas getSchemas() {
+                return schemas;
+            }
+
+            @Override
+            public String getSchemaForCapability(String moduleName, Optional<String> revision) {
+
+                for (Capability capability : capabilityMultiMap.get(moduleName)) {
+                    if (capability.getRevision().get().equals(revision.get())) {
+                        return capability.getCapabilitySchema().get();
+                    }
+                }
+                throw new IllegalArgumentException("Module with name: " + moduleName + " and revision: " + revision + " does not exist");
+            }
+
+            @Override
+            public Capabilities getCapabilities() {
+                return capabilities1;
+            }
+
+            @Override
+            public AutoCloseable registerListener(MonitoringListener listener) {
+                return null;
+            }
+
+            @Override
+            public void onCapabilitiesAdded(Set<Capability> addedCaps) {
+
+            }
+
+            @Override
+            public void onCapabilitiesRemoved(Set<Capability> removedCaps) {
+
+            }
+
+            @Override
+            public void onSessionUp(NetconfManagementSession session) {
+
+            }
+
+            @Override
+            public void onSessionDown(NetconfManagementSession session) {
+
+            }
+        };
+
         final NetconfMonitoringActivator.NetconfMonitoringOperationServiceFactory monitoringService =
-                new NetconfMonitoringActivator.NetconfMonitoringOperationServiceFactory(new NetconfMonitoringOperationService(monitoringService1));
+                new NetconfMonitoringActivator.NetconfMonitoringOperationServiceFactory(
+                        new NetconfMonitoringOperationService(monitoringService1));
         aggregatedNetconfOperationServiceFactory.onAddNetconfOperationServiceFactory(simulatedOperationProvider);
         aggregatedNetconfOperationServiceFactory.onAddNetconfOperationServiceFactory(monitoringService);
 
