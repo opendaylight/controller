@@ -20,9 +20,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.opendaylight.controller.md.sal.binding.api.BindingTransactionChain;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
 import org.opendaylight.controller.sal.connect.netconf.listener.NetconfDeviceCapabilities;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
@@ -37,6 +39,8 @@ public class NetconfDeviceTopologyAdapterTest {
     @Mock
     private WriteTransaction writeTx;
     @Mock
+    private BindingTransactionChain txChain;
+    @Mock
     private Node data;
 
     private String txIdent = "test transaction";
@@ -44,7 +48,8 @@ public class NetconfDeviceTopologyAdapterTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        doReturn(writeTx).when(broker).newWriteOnlyTransaction();
+        doReturn(txChain).when(broker).createTransactionChain(any(TransactionChainListener.class));
+        doReturn(writeTx).when(txChain).newWriteOnlyTransaction();
         doNothing().when(writeTx).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class));
         doNothing().when(writeTx).merge(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class));
 
@@ -58,7 +63,7 @@ public class NetconfDeviceTopologyAdapterTest {
         NetconfDeviceTopologyAdapter adapter = new NetconfDeviceTopologyAdapter(id, broker);
         adapter.setDeviceAsFailed(null);
 
-        verify(broker, times(2)).newWriteOnlyTransaction();
+        verify(txChain, times(2)).newWriteOnlyTransaction();
         verify(writeTx, times(3)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class));
     }
 
@@ -69,7 +74,7 @@ public class NetconfDeviceTopologyAdapterTest {
         NetconfDeviceTopologyAdapter adapter = new NetconfDeviceTopologyAdapter(id, broker);
         adapter.updateDeviceData(true, new NetconfDeviceCapabilities());
 
-        verify(broker, times(2)).newWriteOnlyTransaction();
+        verify(txChain, times(2)).newWriteOnlyTransaction();
         verify(writeTx, times(3)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class));
     }
 
