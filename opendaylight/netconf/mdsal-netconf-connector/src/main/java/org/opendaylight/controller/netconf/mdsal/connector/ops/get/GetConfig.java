@@ -17,10 +17,12 @@ import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorSeverity;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorTag;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorType;
+import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.mdsal.connector.CurrentSchemaContext;
 import org.opendaylight.controller.netconf.mdsal.connector.TransactionProvider;
 import org.opendaylight.controller.netconf.mdsal.connector.ops.Datastore;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
+import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
@@ -33,7 +35,6 @@ public class GetConfig extends AbstractGet {
     private static final Logger LOG = LoggerFactory.getLogger(GetConfig.class);
 
     private static final String OPERATION_NAME = "get-config";
-
     private final TransactionProvider transactionProvider;
 
     public GetConfig(final String netconfSessionIdForReporting, final CurrentSchemaContext schemaContext, final TransactionProvider transactionProvider) {
@@ -52,7 +53,13 @@ public class GetConfig extends AbstractGet {
             throw e;
         }
 
-        final YangInstanceIdentifier dataRoot = ROOT;
+        final Optional<YangInstanceIdentifier> dataRootOptional = getDataRootFromFilter(operationElement);
+        if (!dataRootOptional.isPresent()) {
+            return XmlUtil.createElement(document, XmlNetconfConstants.DATA_KEY, Optional.<String>absent());
+        }
+
+        final YangInstanceIdentifier dataRoot = dataRootOptional.get();
+
         // Proper exception should be thrown
         Preconditions.checkState(getConfigExecution.getDatastore().isPresent(), "Source element missing from request");
 
@@ -62,7 +69,12 @@ public class GetConfig extends AbstractGet {
             if (getConfigExecution.getDatastore().get() == Datastore.running) {
                 transactionProvider.abortRunningTransaction(rwTx);
             }
-            return (Element) transformNormalizedNode(document, normalizedNodeOptional.get(), dataRoot);
+
+            if (!normalizedNodeOptional.isPresent()) {
+                return XmlUtil.createElement(document, XmlNetconfConstants.DATA_KEY, Optional.<String>absent());
+            }
+
+            return serializeNodeWithParentStructure(document, dataRoot, normalizedNodeOptional.get());
         } catch (ReadFailedException e) {
             LOG.warn("Unable to read data: {}", dataRoot, e);
             throw new IllegalStateException("Unable to read data " + dataRoot, e);
