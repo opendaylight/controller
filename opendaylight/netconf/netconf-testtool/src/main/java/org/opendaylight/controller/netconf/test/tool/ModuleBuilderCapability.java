@@ -19,6 +19,7 @@ import org.opendaylight.yangtools.yang.parser.builder.impl.ModuleBuilder;
 
 final class ModuleBuilderCapability implements Capability {
     private static final Date NO_REVISION = new Date(0);
+    private static final List<String> NETCONF = Collections.singletonList("NETCONF");
     private final ModuleBuilder input;
     private final Optional<String> content;
 
@@ -60,6 +61,6 @@ final class ModuleBuilderCapability implements Capability {
 
     @Override
     public List<String> getLocation() {
-        return Collections.emptyList();
+        return NETCONF;
     }
 }
