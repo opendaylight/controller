@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.sal.rest.impl;
 
-import com.google.common.base.Optional;
+import com.google.common.collect.Iterables;
 import com.google.gson.stream.JsonReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,10 +27,14 @@ import org.opendaylight.controller.sal.restconf.impl.NormalizedNodeContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
+import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
 import org.opendaylight.yangtools.yang.data.codec.gson.JsonParserStream;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNormalizedNodeStreamWriter;
 import org.opendaylight.yangtools.yang.data.impl.schema.NormalizedNodeResult;
+import org.opendaylight.yangtools.yang.model.api.SchemaNode;
+import org.opendaylight.yangtools.yang.model.util.SchemaContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,14 +57,25 @@ public class JsonNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPr
             final MultivaluedMap<String, String> httpHeaders, final InputStream entityStream) throws IOException,
             WebApplicationException {
         try {
-            Optional<InstanceIdentifierContext> path = getIdentifierWithSchema();
-            NormalizedNodeResult resultHolder = new NormalizedNodeResult();
-            NormalizedNodeStreamWriter writer = ImmutableNormalizedNodeStreamWriter.from(resultHolder);
-            JsonParserStream jsonParser = JsonParserStream.create(writer, path.get().getSchemaContext());
-            JsonReader reader = new JsonReader(new InputStreamReader(entityStream));
+            final InstanceIdentifierContext<?> path = getIdentifierWithSchema().get();
+            final NormalizedNodeResult resultHolder = new NormalizedNodeResult();
+            final NormalizedNodeStreamWriter writer = ImmutableNormalizedNodeStreamWriter.from(resultHolder);
+
+            final SchemaNode parentSchema = SchemaContextUtil.findDataSchemaNode(path.getSchemaContext(), path.getSchemaNode().getPath().getParent());
+            final JsonParserStream jsonParser = JsonParserStream.create(writer, path.getSchemaContext(), parentSchema);
+            final JsonReader reader = new JsonReader(new InputStreamReader(entityStream));
             jsonParser.parse(reader);
-            return new NormalizedNodeContext(path.get(),resultHolder.getResult());
-        } catch (Exception e) {
+
+            final NormalizedNode<?, ?> partialResult = resultHolder.getResult();
+            final NormalizedNode<?, ?> result;
+            if(partialResult instanceof MapNode) {
+
+                result = Iterables.getOnlyElement(((MapNode) partialResult).getValue());
+            } else {
+                result = partialResult;
+            }
+            return new NormalizedNodeContext(path,result);
+        } catch (final Exception e) {
             LOG.debug("Error parsing json input", e);
 
             throw new RestconfDocumentedException("Error parsing input: " + e.getMessage(), ErrorType.PROTOCOL,

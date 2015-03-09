@@ -13,7 +13,7 @@ public class AbstractIdentifierAwareJaxRsProvider {
     private UriInfo uriInfo;
 
     protected final String getIdentifier() {
-        return uriInfo.getPathParameters().getFirst(RestconfConstants.IDENTIFIER);
+        return uriInfo.getPathParameters(false).getFirst(RestconfConstants.IDENTIFIER);
     }
 
     protected final Optional<InstanceIdentifierContext> getIdentifierWithSchema() {
