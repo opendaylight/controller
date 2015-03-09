@@ -64,7 +64,6 @@ import org.opendaylight.controller.netconf.impl.NetconfServerDispatcherImpl;
 import org.opendaylight.controller.netconf.impl.NetconfServerSessionNegotiatorFactory;
 import org.opendaylight.controller.netconf.impl.SessionIdProvider;
 import org.opendaylight.controller.netconf.impl.osgi.AggregatedNetconfOperationServiceFactory;
-import org.opendaylight.controller.netconf.impl.osgi.NetconfMonitoringServiceImpl;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
@@ -142,13 +141,14 @@ public class NetconfDeviceSimulator implements Closeable {
 
         final SessionIdProvider idProvider = new SessionIdProvider();
 
-
         final AggregatedNetconfOperationServiceFactory aggregatedNetconfOperationServiceFactory = new AggregatedNetconfOperationServiceFactory();
         final SimulatedOperationProvider simulatedOperationProvider = new SimulatedOperationProvider(idProvider, capabilities, notificationsFile);
 
-        final NetconfMonitoringService monitoringService1 = new NetconfMonitoringServiceImpl(aggregatedNetconfOperationServiceFactory);
+        final NetconfMonitoringService monitoringService1 = new DummyMonitoringService(capabilities);
+
         final NetconfMonitoringActivator.NetconfMonitoringOperationServiceFactory monitoringService =
-                new NetconfMonitoringActivator.NetconfMonitoringOperationServiceFactory(new NetconfMonitoringOperationService(monitoringService1));
+                new NetconfMonitoringActivator.NetconfMonitoringOperationServiceFactory(
+                        new NetconfMonitoringOperationService(monitoringService1));
         aggregatedNetconfOperationServiceFactory.onAddNetconfOperationServiceFactory(simulatedOperationProvider);
         aggregatedNetconfOperationServiceFactory.onAddNetconfOperationServiceFactory(monitoringService);
 
