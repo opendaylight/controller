@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_093fec26",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/netconf/sal/NetconfDeviceDatastoreAdapter.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-03-09T14:37:26Z",
+      "side": 1,
+      "message": "The transaction chain should be closed here for both inventory and topology",
+      "revId": "a73d4cffdc146e7c476413937689ea10f0c50fb3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
