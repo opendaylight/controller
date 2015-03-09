@@ -7,8 +7,18 @@
  */
 package org.opendaylight.md.controller.topology.lldp.utils;
 
-import java.nio.charset.Charset;
+import org.apache.commons.lang3.ArrayUtils;
+import com.google.common.hash.HashCode;
+import org.opendaylight.controller.liblldp.BitBufferHelper;
+import org.opendaylight.controller.liblldp.CustomTLVKey;
+import com.google.common.hash.HashCode;
 
+import com.google.common.hash.Hasher;
+import com.google.common.hash.Hashing;
+import com.google.common.hash.HashFunction;
+import java.security.NoSuchAlgorithmException;
+import java.lang.management.ManagementFactory;
+import java.nio.charset.Charset;
 import org.opendaylight.controller.liblldp.Ethernet;
 import org.opendaylight.controller.liblldp.LLDP;
 import org.opendaylight.controller.liblldp.LLDPTLV;
@@ -54,16 +64,36 @@ public class LLDPDiscoveryUtils {
             try {
                 NodeId srcNodeId = null;
                 NodeConnectorId srcNodeConnectorId = null;
-                for (LLDPTLV lldptlv : lldp.getOptionalTLVList()) {
-                    if (lldptlv.getType() == LLDPTLV.TLVType.Custom.getValue()) {
-                        srcNodeConnectorId = new NodeConnectorId(LLDPTLV.getCustomString(lldptlv.getValue(), lldptlv.getLength()));
-                    }
-                    if (lldptlv.getType() == LLDPTLV.TLVType.SystemName.getValue()) {
-                        String srcNodeIdString = new String(lldptlv.getValue(),Charset.defaultCharset());
-                        srcNodeId = new NodeId(srcNodeIdString);
-                    }
+                byte[] lLDPHash = null;
+
+                final LLDPTLV systemIdTLV = lldp.getSystemNameId();
+                if (systemIdTLV != null) {
+                    String srcNodeIdString = new String(systemIdTLV.getValue(),Charset.defaultCharset());
+                    srcNodeId = new NodeId(srcNodeIdString);
+                } else {
+                    return null;
                 }
-                if(srcNodeId != null && srcNodeConnectorId != null) {
+                
+                final LLDPTLV nodeConnectorIdLldptlv = lldp.getCustomTLV(
+                        new CustomTLVKey(BitBufferHelper.getInt(LLDPTLV.OFOUI), LLDPTLV.CUSTOM_TLV_SUB_TYPE_NODE_CONNECTOR_ID[0]));
+                if (nodeConnectorIdLldptlv != null) {
+                    srcNodeConnectorId = new NodeConnectorId(LLDPTLV.getCustomString(
+                            nodeConnectorIdLldptlv.getValue(), nodeConnectorIdLldptlv.getLength()));
+                } else {
+                    LOG.debug("Node connector wasn't specified via Custom TLV in LLDP packet.");
+                }
+
+                final LLDPTLV hashLldptlv = lldp.getCustomTLV(
+                        new CustomTLVKey(BitBufferHelper.getInt(LLDPTLV.OFOUI), LLDPTLV.CUSTOM_TLV_SUB_TYPE_CUSTOM_SEC[0]));
+                if (hashLldptlv != null) {
+                    byte[] value = hashLldptlv.getValue();
+                    lLDPHash = ArrayUtils.subarray(value, 4, value.length);
+                }
+
+                byte[] calculatedHash = getValueForLLDPPacketIntegrityEnsuring(srcNodeConnectorId);
+                if (calculatedHash != lLDPHash) {
+                    LOG.warn("Attack. LLDP packet witch inconsistent CustomSec field was sent.");
+                } else {
                     InstanceIdentifier<NodeConnector> srcInstanceId = InstanceIdentifier.builder(Nodes.class)
                             .child(Node.class,new NodeKey(srcNodeId))
                             .child(NodeConnector.class, new NodeConnectorKey(srcNodeConnectorId))
@@ -76,4 +106,14 @@ public class LLDPDiscoveryUtils {
         }
         return null;
     }
+
+    public static byte[] getValueForLLDPPacketIntegrityEnsuring(final NodeConnectorId nodeConnectorId) throws NoSuchAlgorithmException {
+        final String pureValue = nodeConnectorId+ManagementFactory.getRuntimeMXBean().getName();
+        final byte[] pureBytes = pureValue.getBytes();
+        HashFunction hashFunction = Hashing.md5();
+        Hasher hasher = hashFunction.newHasher();
+        HashCode hashedValue = hasher.putBytes(pureBytes).hash();
+        return hashedValue.asBytes();
+    }
+
 }
