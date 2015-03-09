@@ -16,10 +16,12 @@ import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorSeverity;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorTag;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorType;
+import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.mdsal.connector.CurrentSchemaContext;
 import org.opendaylight.controller.netconf.mdsal.connector.TransactionProvider;
 import org.opendaylight.controller.netconf.mdsal.connector.ops.Datastore;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
+import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
@@ -32,7 +34,6 @@ public class Get extends AbstractGet {
     private static final Logger LOG = LoggerFactory.getLogger(Get.class);
 
     private static final String OPERATION_NAME = "get";
-
     private final TransactionProvider transactionProvider;
 
     public Get(final String netconfSessionIdForReporting, final CurrentSchemaContext schemaContext, final TransactionProvider transactionProvider) {
@@ -43,12 +44,29 @@ public class Get extends AbstractGet {
     @Override
     protected Element handleWithNoSubsequentOperations(Document document, XmlElement operationElement) throws NetconfDocumentedException {
 
-        final YangInstanceIdentifier dataRoot = ROOT;
+        final YangInstanceIdentifier dataRoot;
+
+        Optional<XmlElement> filterElement = operationElement.getOnlyChildElementOptionally(FILTER);
+        if (filterElement.isPresent()) {
+            if (filterElement.get().getChildElements().size() == 0) {
+                //empty filter response should be empty data container
+                return XmlUtil.createElement(document, XmlNetconfConstants.DATA_KEY, Optional.<String>absent());
+            }
+            dataRoot = getInstanceIdentifierFromFilter(filterElement.get());
+        } else {
+            dataRoot = ROOT;
+        }
+
         DOMDataReadWriteTransaction rwTx = getTransaction(Datastore.running);
         try {
             final Optional<NormalizedNode<?, ?>> normalizedNodeOptional = rwTx.read(LogicalDatastoreType.OPERATIONAL, dataRoot).checkedGet();
             transactionProvider.abortRunningTransaction(rwTx);
-            return (Element) transformNormalizedNode(document, normalizedNodeOptional.get(), dataRoot);
+
+            if (!normalizedNodeOptional.isPresent()) {
+                return XmlUtil.createElement(document, XmlNetconfConstants.DATA_KEY, Optional.<String>absent());
+            }
+
+            return serializeNodeWithParentStructure(document, dataRoot, normalizedNodeOptional.get());
         } catch (ReadFailedException e) {
             LOG.warn("Unable to read data: {}", dataRoot, e);
             throw new IllegalStateException("Unable to read data " + dataRoot, e);

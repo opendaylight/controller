@@ -18,4 +18,55 @@ module config {
             }
         }
     }
+
+    container top {
+
+        container users {
+
+            list user {
+
+                leaf name {
+                    type string;
+                }
+
+                leaf type {
+                    type string;
+                }
+
+                leaf full-name {
+                    type string;
+                }
+
+                container company-info {
+
+                    leaf dept {
+                        type string;
+                    }
+
+                    leaf id {
+                        type string;
+                    }
+                }
+            }
+        }
+
+        container modules {
+
+            list module {
+
+                leaf id {
+                    type string;
+                }
+
+                leaf type {
+                    type string;
+                }
+
+                leaf desc {
+                    type string;
+                }
+            }
+        }
+    } //top
+
 }
