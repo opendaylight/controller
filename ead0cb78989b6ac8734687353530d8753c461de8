@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_06027b3e",
+        "filename": "opendaylight/netconf/mdsal-netconf-connector/src/main/java/org/opendaylight/controller/netconf/mdsal/connector/ops/RuntimeRpc.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-03-09T08:29:35Z",
+      "side": 1,
+      "message": "The writers here are neither flushed, nor closed. Take a look at sal-netconf-connector in md-sal.",
+      "revId": "ead0cb78989b6ac8734687353530d8753c461de8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
