@@ -38,7 +38,7 @@ public class LLDPTLV extends Packet {
     public enum TLVType {
         Unknown((byte) 0), ChassisID((byte) 1), PortID((byte) 2), TTL((byte) 3), PortDesc(
                 (byte) 4), SystemName((byte) 5), SystemDesc((byte) 6), Custom(
-                        (byte) 127);
+                        (byte) 127), CustomSec((byte)16);
 
         private byte value;
 
