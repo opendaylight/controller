@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_7f7982fb",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-09T23:26:14Z",
+      "side": 1,
+      "message": "shardLeaderElectionTimeout can be dynamically changed so we could move this to setCachedProperties. Not a big deal though.",
+      "revId": "76601bed132933632ab6d397e71cc2aa533bf82f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_bf1f0ab7",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-09T23:26:14Z",
+      "side": 1,
+      "message": "These 3 are set in setCachedProperties.",
+      "revId": "76601bed132933632ab6d397e71cc2aa533bf82f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
