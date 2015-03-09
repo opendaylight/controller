@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_c96104d5",
+        "filename": "opendaylight/netconf/netconf-testtool/src/main/java/org/opendaylight/controller/netconf/test/tool/NetconfDeviceSimulator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-03-09T10:32:22Z",
+      "side": 1,
+      "message": "Please move the NetconfMonitoringService into a standalone class. Also move the moduleBuilders/capabilities/schemas transformation there",
+      "revId": "9a80fad4231e805383333a46b20e42d75759efcf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
