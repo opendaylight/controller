@@ -16,9 +16,13 @@ import com.google.common.util.concurrent.Futures;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
+import org.opendaylight.controller.md.sal.binding.api.BindingTransactionChain;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionChain;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.sal.connect.netconf.listener.NetconfDeviceCapabilities;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
@@ -68,7 +72,7 @@ final class NetconfDeviceTopologyAdapter implements AutoCloseable {
     };
 
     private final RemoteDeviceId id;
-    private final DataBroker dataService;
+    private final BindingTransactionChain txChain;
 
     private final InstanceIdentifier<NetworkTopology> networkTopologyPath;
     private final KeyedInstanceIdentifier<Topology, TopologyKey> topologyListPath;
@@ -76,7 +80,18 @@ final class NetconfDeviceTopologyAdapter implements AutoCloseable {
 
     NetconfDeviceTopologyAdapter(final RemoteDeviceId id, final DataBroker dataService) {
         this.id = id;
-        this.dataService = dataService;
+        this.txChain = dataService.createTransactionChain(new TransactionChainListener() {
+            @Override
+            public void onTransactionChainFailed(TransactionChain<?, ?> chain, AsyncTransaction<?, ?> transaction, Throwable cause) {
+                logger.error("{}: TransactionChain({}) {} FAILED!", id, chain, transaction.getIdentifier(), cause);
+                throw new IllegalStateException(id + "  TransactionChain(" + chain + ") not committed correctly", cause);
+            }
+
+            @Override
+            public void onTransactionChainSuccessful(TransactionChain<?, ?> chain) {
+                logger.trace("{}: TransactionChain({}) {} SUCCESSFUL", id, chain);
+            }
+        });
 
         this.networkTopologyPath = InstanceIdentifier.builder(NetworkTopology.class).build();
         this.topologyListPath = networkTopologyPath.child(Topology.class, new TopologyKey(new TopologyId(TopologyNetconf.QNAME.getLocalName())));
@@ -85,7 +100,7 @@ final class NetconfDeviceTopologyAdapter implements AutoCloseable {
     }
 
      private void initDeviceData() {
-        final WriteTransaction writeTx = dataService.newWriteOnlyTransaction();
+        final WriteTransaction writeTx = txChain.newWriteOnlyTransaction();
 
         createNetworkTopologyIfNotPresent(writeTx);
 
@@ -112,7 +127,7 @@ final class NetconfDeviceTopologyAdapter implements AutoCloseable {
     public void updateDeviceData(boolean up, NetconfDeviceCapabilities capabilities) {
         final Node data = buildDataForNetconfNode(up, capabilities);
 
-        final WriteTransaction writeTx = dataService.newWriteOnlyTransaction();
+        final WriteTransaction writeTx = txChain.newWriteOnlyTransaction();
         logger.trace("{}: Update device state transaction {} merging operational data started.", id, writeTx.getIdentifier());
         writeTx.put(LogicalDatastoreType.OPERATIONAL, id.getTopologyBindingPath(), data);
         logger.trace("{}: Update device state transaction {} merging operational data ended.", id, writeTx.getIdentifier());
@@ -126,7 +141,7 @@ final class NetconfDeviceTopologyAdapter implements AutoCloseable {
         final NetconfNode netconfNode = new NetconfNodeBuilder().setConnectionStatus(ConnectionStatus.UnableToConnect).setConnectedMessage(reason).build();
         final Node data = getNodeIdBuilder(id).addAugmentation(NetconfNode.class, netconfNode).build();
 
-        final WriteTransaction writeTx = dataService.newWriteOnlyTransaction();
+        final WriteTransaction writeTx = txChain.newWriteOnlyTransaction();
         logger.trace("{}: Setting device state as failed {} putting operational data started.", id, writeTx.getIdentifier());
         writeTx.put(LogicalDatastoreType.OPERATIONAL, id.getTopologyBindingPath(), data);
         logger.trace("{}: Setting device state as failed {} putting operational data ended.", id, writeTx.getIdentifier());
@@ -158,7 +173,7 @@ final class NetconfDeviceTopologyAdapter implements AutoCloseable {
     }
 
     public void removeDeviceConfiguration() {
-        final WriteTransaction writeTx = dataService.newWriteOnlyTransaction();
+        final WriteTransaction writeTx = txChain.newWriteOnlyTransaction();
 
         logger.trace("{}: Close device state transaction {} removing all data started.", id, writeTx.getIdentifier());
         writeTx.delete(LogicalDatastoreType.CONFIGURATION, id.getTopologyBindingPath());
