@@ -57,6 +57,7 @@ public class LLDPDiscoveryUtils {
             try {
                 NodeId srcNodeId = null;
                 NodeConnectorId srcNodeConnectorId = null;
+                byte[] lLDPHash = null;
                 for (LLDPTLV lldptlv : lldp.getOptionalTLVList()) {
                     if (lldptlv.getType() == LLDPTLV.TLVType.Custom.getValue()) {
                         srcNodeConnectorId = new NodeConnectorId(LLDPTLV.getCustomString(lldptlv.getValue(), lldptlv.getLength()));
@@ -64,14 +65,28 @@ public class LLDPDiscoveryUtils {
                     if (lldptlv.getType() == LLDPTLV.TLVType.SystemName.getValue()) {
                         String srcNodeIdString = new String(lldptlv.getValue(),Charset.defaultCharset());
                         srcNodeId = new NodeId(srcNodeIdString);
+                    } else if (lldptlv.getType() == LLDPTLV.TLVType.CustomSec.getValue()) {
+                        lLDPHash = lldptlv.getValue();
                     }
                 }
-                if(srcNodeId != null && srcNodeConnectorId != null) {
-                    InstanceIdentifier<NodeConnector> srcInstanceId = InstanceIdentifier.builder(Nodes.class)
-                            .child(Node.class,new NodeKey(srcNodeId))
-                            .child(NodeConnector.class, new NodeConnectorKey(srcNodeConnectorId))
-                            .toInstance();
-                    return new NodeConnectorRef(srcInstanceId);
+                if (srcNodeConnectorId == null) {
+                    LOG.debug("Node connector wasn't specified via Custom TLV in LLDP packet.");
+                } else {
+                    byte[] calculatedHash = new byte[1];
+                    //TODO: correct handling of not existing MD5 algorithm
+                    try {
+                        calculatedHash = getValueForLLDPPacketIntegrityEnsuring(srcNodeConnectorId);
+                    } catch (NoSuchAlgorithmException e) {}
+
+                    if (calculatedHash != lLDPHash) {
+                        LOG.warn("Attack. LLDP packet witch inconsistent CustomSec field was sent.");
+                    } else if(srcNodeId != null) {
+                        InstanceIdentifier<NodeConnector> srcInstanceId = InstanceIdentifier.builder(Nodes.class)
+                                .child(Node.class,new NodeKey(srcNodeId))
+                                .child(NodeConnector.class, new NodeConnectorKey(srcNodeConnectorId))
+                                .toInstance();
+                        return new NodeConnectorRef(srcInstanceId);
+                    }
                 }
             } catch (Exception e) {
                 LOG.warn("Caught exception ", e);
@@ -86,4 +101,5 @@ public class LLDPDiscoveryUtils {
         final MessageDigest messageDigest = MessageDigest.getInstance("MD5");
         return messageDigest.digest(pureBytes);
     }
+
 }
