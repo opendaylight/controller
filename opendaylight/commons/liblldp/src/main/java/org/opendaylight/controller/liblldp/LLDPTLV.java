@@ -8,13 +8,17 @@
 
 package org.opendaylight.controller.liblldp;
 
+import com.google.common.hash.Hasher;
+
+import com.google.common.hash.Hashing;
+import com.google.common.hash.HashFunction;
+import java.lang.management.ManagementFactory;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -38,7 +42,7 @@ public class LLDPTLV extends Packet {
     public enum TLVType {
         Unknown((byte) 0), ChassisID((byte) 1), PortID((byte) 2), TTL((byte) 3), PortDesc(
                 (byte) 4), SystemName((byte) 5), SystemDesc((byte) 6), Custom(
-                        (byte) 127);
+                        (byte) 127), CustomSec((byte)16);
 
         private byte value;
 
@@ -266,6 +270,19 @@ public class LLDPTLV extends Packet {
                 customArray.length);
 
         return customValue;
+    }
+
+    /**
+     * Calculate CustomSec value for LLDP packet.
+     *
+     * @return calculated md5 value for combination of node connector ID and running PID of JAVA
+     */
+    public static byte[] createCustomSecTLVValue(final String srcNodeConnectorId) {
+        final String pureValue = srcNodeConnectorId+ManagementFactory.getRuntimeMXBean().getName();
+        final HashFunction hashFunction = Hashing.md5();
+        final Hasher hasher = hashFunction.newHasher();
+        hasher.putString(pureValue);
+        return hasher.hash().asBytes();
     }
 
     /**

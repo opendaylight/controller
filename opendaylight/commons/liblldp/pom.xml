@@ -24,6 +24,10 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
+    <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+    </dependency>
   </dependencies>
 
   <build>
@@ -36,7 +40,8 @@
           <instructions>
             <Import-Package>org.slf4j,
               org.apache.commons.lang3.builder,
-              org.apache.commons.lang3.tuple
+              org.apache.commons.lang3.tuple,
+              com.google.common
             </Import-Package>
             <Export-Package>
               org.opendaylight.controller.liblldp</Export-Package>
