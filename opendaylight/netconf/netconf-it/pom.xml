@@ -42,16 +42,16 @@
       <artifactId>config-api</artifactId>
       <scope>test</scope>
     </dependency>
-      <dependency>
-          <groupId>org.opendaylight.yangtools</groupId>
-          <artifactId>object-cache-guava</artifactId>
-      </dependency>
-      <dependency>
-          <groupId>org.opendaylight.yangtools</groupId>
-          <artifactId>mockito-configuration</artifactId>
-      </dependency>
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>object-cache-guava</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>mockito-configuration</artifactId>
+    </dependency>
 
-      <dependency>
+    <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>config-manager</artifactId>
       <scope>test</scope>
