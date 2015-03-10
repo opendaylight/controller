@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.md.sal.binding.impl;
 
+import com.google.common.base.Optional;
 import org.opendaylight.controller.md.sal.binding.api.MountPointService.MountPointListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionListener;
@@ -41,21 +42,30 @@ final class BindingDOMMountPointListenerAdapter<T extends MountPointListener> im
     @Override
     public void onMountPointCreated(final YangInstanceIdentifier path) {
         try {
-            final InstanceIdentifier<? extends DataObject> bindingPath = codec.toBinding(path).get();
+            final InstanceIdentifier<? extends DataObject> bindingPath = toBinding(path);
             listener.onMountPointCreated(bindingPath);
         } catch (final DeserializationException e) {
-            BindingDOMMountPointServiceAdapter.LOG.error("Unable to translate mountPoint path {}. Ommiting event.",path,e);
+            BindingDOMMountPointServiceAdapter.LOG.error("Unable to translate mountPoint path {}. Omitting event.",path,e);
         }
 
+    }
+
+    private InstanceIdentifier<? extends DataObject> toBinding(final YangInstanceIdentifier path) throws DeserializationException {
+        final Optional<InstanceIdentifier<? extends DataObject>> instanceIdentifierOptional = codec.toBinding(path);
+        if(instanceIdentifierOptional.isPresent()) {
+            return instanceIdentifierOptional.get();
+        } else {
+            throw new DeserializationException("Deserialization unsuccessful, " + instanceIdentifierOptional);
+        }
     }
 
     @Override
     public void onMountPointRemoved(final YangInstanceIdentifier path) {
         try {
-            final InstanceIdentifier<? extends DataObject> bindingPath = codec.toBinding(path).get();
+            final InstanceIdentifier<? extends DataObject> bindingPath = toBinding(path);
             listener.onMountPointRemoved(bindingPath);
         } catch (final DeserializationException e) {
-            BindingDOMMountPointServiceAdapter.LOG.error("Unable to translate mountPoint path {}. Ommiting event.",path,e);
+            BindingDOMMountPointServiceAdapter.LOG.error("Unable to translate mountPoint path {}. Omitting event.",path,e);
         }
     }
 }

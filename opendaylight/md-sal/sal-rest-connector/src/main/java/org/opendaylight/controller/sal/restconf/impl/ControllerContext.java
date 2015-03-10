@@ -529,7 +529,7 @@ public class ControllerContext implements SchemaContextListener {
                             ErrorType.APPLICATION, ErrorTag.OPERATION_NOT_SUPPORTED);
                 }
 
-                final YangInstanceIdentifier partialPath = builder.toInstance();
+                final YangInstanceIdentifier partialPath = dataNormalizer.toNormalized(builder.build());
                 final Optional<DOMMountPoint> mountOpt = mountService.getMountPoint(partialPath);
                 if (!mountOpt.isPresent()) {
                     LOG.debug("Instance identifier to missing mount point: {}", partialPath);
@@ -544,12 +544,7 @@ public class ControllerContext implements SchemaContextListener {
                             ErrorType.APPLICATION, ErrorTag.UNKNOWN_ELEMENT);
                 }
 
-                if (returnJustMountPoint) {
-                    final YangInstanceIdentifier instance = YangInstanceIdentifier.builder().toInstance();
-                    return new InstanceIdentifierContext(instance, mountPointSchema, mount,mountPointSchema);
-                }
-
-                if (strings.size() == 1) {
+                if (returnJustMountPoint || strings.size() == 1) {
                     final YangInstanceIdentifier instance = YangInstanceIdentifier.builder().toInstance();
                     return new InstanceIdentifierContext(instance, mountPointSchema, mount,mountPointSchema);
                 }
