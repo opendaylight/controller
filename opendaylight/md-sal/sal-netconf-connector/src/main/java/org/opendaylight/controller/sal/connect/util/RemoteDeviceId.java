@@ -96,7 +96,9 @@ public final class RemoteDeviceId {
                 org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.builder();
         builder
                 .node(NetworkTopology.QNAME)
+                .node(Topology.QNAME)
                 .nodeWithKey(Topology.QNAME, QName.create(Topology.QNAME, "topology-id"), TopologyNetconf.QNAME.getLocalName())
+                .node(org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node.QNAME)
                 .nodeWithKey(org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node.QNAME,
                         QName.create(org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node.QNAME, "node-id"), name);
         return builder.build();
