@@ -27,7 +27,7 @@
       <branding.version>1.1.0-SNAPSHOT</branding.version>
       <karaf.resources.version>1.5.0-SNAPSHOT</karaf.resources.version>
       <karaf.version>3.0.1</karaf.version>
-      <feature.test.version>0.7.0-SNAPSHOT</feature.test.version>
+      <feature.test.version>1.5.0-SNAPSHOT</feature.test.version>
       <karaf.empty.version>1.5.0-SNAPSHOT</karaf.empty.version>
       <surefire.version>2.16</surefire.version>
    </properties>
@@ -104,7 +104,7 @@
     -->
     <!-- test to validate features.xml -->
     <dependency>
-      <groupId>org.opendaylight.yangtools</groupId>
+      <groupId>org.opendaylight.odlparent</groupId>
       <artifactId>features-test</artifactId>
       <version>${feature.test.version}</version>
       <scope>test</scope>
@@ -179,7 +179,7 @@
                 <karaf.distro.version>${karaf.empty.version}</karaf.distro.version>
               </systemPropertyVariables>
               <dependenciesToScan>
-               <dependency>org.opendaylight.yangtools:features-test</dependency>
+               <dependency>org.opendaylight.odlparent:features-test</dependency>
               </dependenciesToScan>
             </configuration>
           </plugin>
