@@ -9,6 +9,7 @@ package org.opendaylight.controller.sal.restconf.impl;
 
 import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION;
 import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.OPERATIONAL;
+
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -40,6 +41,7 @@ import org.opendaylight.controller.sal.streams.listeners.ListenerAdapter;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.slf4j.Logger;
@@ -204,7 +206,16 @@ public class BrokerFacade {
 
     private CheckedFuture<Void, TransactionCommitFailedException> postDataViaTransaction(
             final DOMDataReadWriteTransaction rWTransaction, final LogicalDatastoreType datastore,
-            final YangInstanceIdentifier path, final NormalizedNode<?, ?> payload, final DataNormalizationOperation<?> root) {
+            final YangInstanceIdentifier parentPath, final NormalizedNode<?, ?> payload, final DataNormalizationOperation<?> root) {
+        // FIXME: This is doing correct post for container and list children
+        //        not sure if this will work for choice case
+        final YangInstanceIdentifier path;
+        if(payload instanceof MapEntryNode) {
+            path = parentPath.node(payload.getNodeType()).node(payload.getIdentifier());
+        } else {
+            path = parentPath.node(payload.getIdentifier());
+        }
+
         final ListenableFuture<Optional<NormalizedNode<?, ?>>> futureDatastoreData = rWTransaction.read(datastore, path);
         try {
             final Optional<NormalizedNode<?, ?>> optionalDatastoreData = futureDatastoreData.get();

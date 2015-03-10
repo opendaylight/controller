@@ -86,6 +86,8 @@ public class ControllerContext implements SchemaContextListener {
 
     private static final Splitter SLASH_SPLITTER = Splitter.on('/');
 
+    private static final YangInstanceIdentifier ROOT = YangInstanceIdentifier.builder().build();
+
     private final AtomicReference<Map<QName, RpcDefinition>> qnameToRpc =
             new AtomicReference<>(Collections.<QName, RpcDefinition>emptyMap());
 
@@ -134,6 +136,10 @@ public class ControllerContext implements SchemaContextListener {
 
     private InstanceIdentifierContext toIdentifier(final String restconfInstance, final boolean toMountPointIdentifier) {
         checkPreconditions();
+
+        if(restconfInstance == null) {
+            return new InstanceIdentifierContext<>(ROOT, globalSchema, null, globalSchema);
+        }
 
         final List<String> pathArgs = urlPathArgsDecode(SLASH_SPLITTER.split(restconfInstance));
         omitFirstAndLastEmptyString(pathArgs);
@@ -866,9 +872,9 @@ public class ControllerContext implements SchemaContextListener {
 
     private CharSequence convertToRestconfIdentifier(final PathArgument argument, final DataNodeContainer node, final DOMMountPoint mount) {
         if (argument instanceof NodeIdentifier && node instanceof ContainerSchemaNode) {
-            return convertToRestconfIdentifier((NodeIdentifier) argument, (ContainerSchemaNode) node);
+            return convertToRestconfIdentifier((NodeIdentifier) argument, mount);
         } else if (argument instanceof NodeIdentifierWithPredicates && node instanceof ListSchemaNode) {
-            return convertToRestconfIdentifier(argument, node, mount);
+            return convertToRestconfIdentifierWithPredicates((NodeIdentifierWithPredicates) argument, (ListSchemaNode) node, mount);
         } else if (argument != null && node != null) {
             throw new IllegalArgumentException("Conversion of generic path argument is not supported");
         } else {
@@ -877,11 +883,11 @@ public class ControllerContext implements SchemaContextListener {
         }
     }
 
-    private CharSequence convertToRestconfIdentifier(final NodeIdentifier argument, final ContainerSchemaNode node) {
-        return "/" + this.toRestconfIdentifier(argument.getNodeType());
+    private CharSequence convertToRestconfIdentifier(final NodeIdentifier argument, final DOMMountPoint node) {
+        return "/" + this.toRestconfIdentifier(argument.getNodeType(),node);
     }
 
-    private CharSequence convertToRestconfIdentifier(final NodeIdentifierWithPredicates argument,
+    private CharSequence convertToRestconfIdentifierWithPredicates(final NodeIdentifierWithPredicates argument,
             final ListSchemaNode node, final DOMMountPoint mount) {
         final QName nodeType = argument.getNodeType();
         final CharSequence nodeIdentifier = this.toRestconfIdentifier(nodeType, mount);
@@ -966,18 +972,18 @@ public class ControllerContext implements SchemaContextListener {
     public YangInstanceIdentifier toXpathRepresentation(final YangInstanceIdentifier instanceIdentifier) {
         try {
             return dataNormalizer.toLegacy(instanceIdentifier);
-        } catch (NullPointerException e) {
+        } catch (final NullPointerException e) {
             throw new RestconfDocumentedException("Data normalizer isn't set. Normalization isn't possible", e);
-        } catch (DataNormalizationException e) {
+        } catch (final DataNormalizationException e) {
             throw new RestconfDocumentedException("Data normalizer failed. Normalization isn't possible", e);
         }
     }
 
-    public boolean isNodeMixin(YangInstanceIdentifier path) {
+    public boolean isNodeMixin(final YangInstanceIdentifier path) {
         final DataNormalizationOperation<?> operation;
         try {
             operation = dataNormalizer.getOperation(path);
-        } catch (DataNormalizationException e) {
+        } catch (final DataNormalizationException e) {
             throw new RestconfDocumentedException("Data normalizer failed. Normalization isn't possible", e);
         }
         return operation.isMixin();

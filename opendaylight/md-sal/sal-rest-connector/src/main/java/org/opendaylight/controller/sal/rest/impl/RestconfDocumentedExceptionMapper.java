@@ -138,7 +138,7 @@ public class RestconfDocumentedExceptionMapper implements ExceptionMapper<Restco
         }
         errContBuild.withChild(listErorsBuilder.build());
 
-        final NormalizedNodeContext errContext =  new NormalizedNodeContext(new InstanceIdentifierContext(null,
+        final NormalizedNodeContext errContext =  new NormalizedNodeContext(new InstanceIdentifierContext<DataSchemaNode>(null,
                 (DataSchemaNode) errorsSchemaNode, null, context.getGlobalSchema()), errContBuild.build());
 
         Object responseBody;
@@ -197,7 +197,7 @@ public class RestconfDocumentedExceptionMapper implements ExceptionMapper<Restco
 
         final ByteArrayOutputStream outStream = new ByteArrayOutputStream();
         NormalizedNode<?, ?> data = errorsNode.getData();
-        final InstanceIdentifierContext<DataSchemaNode> context = errorsNode.getInstanceIdentifierContext();
+        final InstanceIdentifierContext<DataSchemaNode> context = (InstanceIdentifierContext<DataSchemaNode>) errorsNode.getInstanceIdentifierContext();
         final DataSchemaNode schema = context.getSchemaNode();
 
         SchemaPath path = context.getSchemaNode().getPath();
@@ -241,7 +241,7 @@ public class RestconfDocumentedExceptionMapper implements ExceptionMapper<Restco
 
     private Object toXMLResponseBody(final NormalizedNodeContext errorsNode, final DataNodeContainer errorsSchemaNode) {
 
-        final InstanceIdentifierContext pathContext = errorsNode.getInstanceIdentifierContext();
+        final InstanceIdentifierContext<DataSchemaNode> pathContext = (InstanceIdentifierContext<DataSchemaNode>) errorsNode.getInstanceIdentifierContext();
         final ByteArrayOutputStream outStream = new ByteArrayOutputStream();
 
         XMLStreamWriter xmlWriter;

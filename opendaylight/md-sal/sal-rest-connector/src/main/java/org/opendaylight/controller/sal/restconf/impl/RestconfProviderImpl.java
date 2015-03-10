@@ -19,7 +19,7 @@ import org.opendaylight.controller.config.yang.md.sal.rest.connector.RestConnect
 import org.opendaylight.controller.config.yang.md.sal.rest.connector.Rpcs;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
-import org.opendaylight.controller.md.sal.dom.broker.impl.DOMRpcRouter;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 import org.opendaylight.controller.sal.core.api.Provider;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
@@ -33,7 +33,6 @@ public class RestconfProviderImpl implements Provider, AutoCloseable, RestConnec
 
     private final StatisticsRestconfServiceWrapper stats = StatisticsRestconfServiceWrapper.getInstance();
     private ListenerRegistration<SchemaContextListener> listenerRegistration;
-    private ListenerRegistration<SchemaContextListener> rpcRouterSchemalistenerRegistration;
     private PortNumber port;
     private Thread webSocketServerThread;
 
@@ -47,13 +46,9 @@ public class RestconfProviderImpl implements Provider, AutoCloseable, RestConnec
 
         BrokerFacade.getInstance().setContext(session);
         BrokerFacade.getInstance().setDomDataBroker( domDataBroker);
-
-        final DOMRpcRouter rpcRouter = new DOMRpcRouter();
-
         final SchemaService schemaService = session.getService(SchemaService.class);
         listenerRegistration = schemaService.registerSchemaContextListener(ControllerContext.getInstance());
-        rpcRouterSchemalistenerRegistration = schemaService.registerSchemaContextListener(rpcRouter);
-        BrokerFacade.getInstance().setRpcService(rpcRouter);
+        BrokerFacade.getInstance().setRpcService(session.getService(DOMRpcService.class));
 
 
         ControllerContext.getInstance().setSchemas(schemaService.getGlobalContext());
@@ -71,10 +66,6 @@ public class RestconfProviderImpl implements Provider, AutoCloseable, RestConnec
 
     @Override
     public void close() {
-
-        if (rpcRouterSchemalistenerRegistration != null) {
-            rpcRouterSchemalistenerRegistration.close();
-        }
 
         if (listenerRegistration != null) {
             listenerRegistration.close();

@@ -19,14 +19,12 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 import org.opendaylight.controller.sal.rest.api.Draft02;
 import org.opendaylight.controller.sal.rest.api.RestconfService;
 import org.opendaylight.controller.sal.restconf.impl.InstanceIdentifierContext;
 import org.opendaylight.controller.sal.restconf.impl.NormalizedNodeContext;
-import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
@@ -63,10 +61,10 @@ public class NormalizedNodeJsonBodyWriter implements MessageBodyWriter<Normalize
                     throws IOException, WebApplicationException {
         NormalizedNode<?, ?> data = t.getData();
         if (data == null) {
-            throw new RestconfDocumentedException(Response.Status.NOT_FOUND);
+            return;
         }
 
-        final InstanceIdentifierContext<DataSchemaNode> context = t.getInstanceIdentifierContext();
+        final InstanceIdentifierContext<DataSchemaNode> context = (InstanceIdentifierContext<DataSchemaNode>) t.getInstanceIdentifierContext();
 
         SchemaPath path = context.getSchemaNode().getPath();
         boolean isDataRoot = false;
