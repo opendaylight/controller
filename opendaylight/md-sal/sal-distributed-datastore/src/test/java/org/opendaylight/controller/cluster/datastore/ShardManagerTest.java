@@ -20,8 +20,10 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
@@ -48,6 +50,7 @@ import org.opendaylight.controller.cluster.datastore.utils.MockClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.utils.MockConfiguration;
 import org.opendaylight.controller.cluster.notifications.RoleChangeNotification;
 import org.opendaylight.controller.cluster.raft.RaftState;
+import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyncUpStatus;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.yang.model.api.ModuleIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -469,6 +472,132 @@ public class ShardManagerTest extends AbstractActorTest {
     }
 
 
+    @Test
+    public void testByDefaultSyncStatusIsFalse() throws Exception{
+        final Props persistentProps = ShardManager.props(
+                new MockClusterWrapper(),
+                new MockConfiguration(),
+                DatastoreContext.newBuilder().persistent(true).build(), ready);
+        final TestActorRef<ShardManager> shardManager =
+                TestActorRef.create(getSystem(), persistentProps);
+
+        ShardManager shardManagerActor = shardManager.underlyingActor();
+
+        assertEquals(false, shardManagerActor.getMBean().getSyncStatus());
+    }
+
+    @Test
+    public void testWhenShardIsLeaderSyncStatusIsTrue() throws Exception{
+        final Props persistentProps = ShardManager.props(
+                new MockClusterWrapper(),
+                new MockConfiguration(),
+                DatastoreContext.newBuilder().persistent(true).build(), ready);
+        final TestActorRef<ShardManager> shardManager =
+                TestActorRef.create(getSystem(), persistentProps);
+
+        ShardManager shardManagerActor = shardManager.underlyingActor();
+        shardManagerActor.onReceiveCommand(new RoleChangeNotification("member-1-shard-default-unknown",
+                RaftState.Follower.name(), RaftState.Leader.name()));
+
+        assertEquals(true, shardManagerActor.getMBean().getSyncStatus());
+    }
+
+    @Test
+    public void testWhenShardIsCandidateSyncStatusIsFalse() throws Exception{
+        final Props persistentProps = ShardManager.props(
+                new MockClusterWrapper(),
+                new MockConfiguration(),
+                DatastoreContext.newBuilder().persistent(true).build(), ready);
+        final TestActorRef<ShardManager> shardManager =
+                TestActorRef.create(getSystem(), persistentProps);
+
+        ShardManager shardManagerActor = shardManager.underlyingActor();
+        shardManagerActor.onReceiveCommand(new RoleChangeNotification("member-1-shard-default-unknown",
+                RaftState.Follower.name(), RaftState.Candidate.name()));
+
+        assertEquals(false, shardManagerActor.getMBean().getSyncStatus());
+
+        // Send a FollowerInitialSyncStatus with status = true for the replica whose current state is candidate
+        shardManagerActor.onReceiveCommand(new FollowerInitialSyncUpStatus(true, "member-1-shard-default-unknown"));
+
+        assertEquals(false, shardManagerActor.getMBean().getSyncStatus());
+    }
+
+    @Test
+    public void testWhenShardIsFollowerSyncStatusDependsOnFollowerInitialSyncStatus() throws Exception{
+        final Props persistentProps = ShardManager.props(
+                new MockClusterWrapper(),
+                new MockConfiguration(),
+                DatastoreContext.newBuilder().persistent(true).build(), ready);
+        final TestActorRef<ShardManager> shardManager =
+                TestActorRef.create(getSystem(), persistentProps);
+
+        ShardManager shardManagerActor = shardManager.underlyingActor();
+        shardManagerActor.onReceiveCommand(new RoleChangeNotification("member-1-shard-default-unknown",
+                RaftState.Candidate.name(), RaftState.Follower.name()));
+
+        // Initially will be false
+        assertEquals(false, shardManagerActor.getMBean().getSyncStatus());
+
+        // Send status true will make sync status true
+        shardManagerActor.onReceiveCommand(new FollowerInitialSyncUpStatus(true, "member-1-shard-default-unknown"));
+
+        assertEquals(true, shardManagerActor.getMBean().getSyncStatus());
+
+        // Send status false will make sync status false
+        shardManagerActor.onReceiveCommand(new FollowerInitialSyncUpStatus(false, "member-1-shard-default-unknown"));
+
+        assertEquals(false, shardManagerActor.getMBean().getSyncStatus());
+
+    }
+
+    @Test
+    public void testWhenMultipleShardsPresentSyncStatusMustBeTrueForAllShards() throws Exception{
+        final Props persistentProps = ShardManager.props(
+                new MockClusterWrapper(),
+                new MockConfiguration() {
+                    @Override
+                    public List<String> getMemberShardNames(String memberName) {
+                        return Arrays.asList("default", "astronauts");
+                    }
+                },
+                DatastoreContext.newBuilder().persistent(true).build(), ready);
+        final TestActorRef<ShardManager> shardManager =
+                TestActorRef.create(getSystem(), persistentProps);
+
+        ShardManager shardManagerActor = shardManager.underlyingActor();
+
+        // Initially will be false
+        assertEquals(false, shardManagerActor.getMBean().getSyncStatus());
+
+        // Make default shard leader
+        shardManagerActor.onReceiveCommand(new RoleChangeNotification("member-1-shard-default-unknown",
+                RaftState.Follower.name(), RaftState.Leader.name()));
+
+        // default = Leader, astronauts is unknown so sync status remains false
+        assertEquals(false, shardManagerActor.getMBean().getSyncStatus());
+
+        // Make astronauts shard leader as well
+        shardManagerActor.onReceiveCommand(new RoleChangeNotification("member-1-shard-astronauts-unknown",
+                RaftState.Follower.name(), RaftState.Leader.name()));
+
+        // Now sync status should be true
+        assertEquals(true, shardManagerActor.getMBean().getSyncStatus());
+
+        // Make astronauts a Follower
+        shardManagerActor.onReceiveCommand(new RoleChangeNotification("member-1-shard-astronauts-unknown",
+                RaftState.Leader.name(), RaftState.Follower.name()));
+
+        // Sync status is not true
+        assertEquals(false, shardManagerActor.getMBean().getSyncStatus());
+
+        // Make the astronauts follower sync status true
+        shardManagerActor.onReceiveCommand(new FollowerInitialSyncUpStatus(true, "member-1-shard-astronauts-unknown"));
+
+        // Sync status is now true
+        assertEquals(true, shardManagerActor.getMBean().getSyncStatus());
+
+    }
 
     private static class TestShardManager extends ShardManager {
         private final CountDownLatch recoveryComplete = new CountDownLatch(1);
