@@ -300,6 +300,10 @@
       <type>xml</type>
       <classifier>config</classifier>
     </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>netconf-ssh</artifactId>
+    </dependency>
 
     <dependency>
       <groupId>org.opendaylight.controller.model</groupId>
