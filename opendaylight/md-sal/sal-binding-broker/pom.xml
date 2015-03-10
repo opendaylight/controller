@@ -48,11 +48,6 @@
       <artifactId>sal-core-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-test-model</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>binding-generator-impl</artifactId>
     </dependency>
