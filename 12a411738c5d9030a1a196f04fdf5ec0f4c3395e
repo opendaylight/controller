@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_b0e2d9d3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/AbstractTransactionProxyTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-10T18:26:51Z",
+      "side": 1,
+      "message": "If AbstractTransactionProxyTest is designed to be the base class for legacy and current TransactionProxy shouldn\u0027t we either pass the current version or pick the version from some abstract method where the derived class returns the version?",
+      "revId": "12a411738c5d9030a1a196f04fdf5ec0f4c3395e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
