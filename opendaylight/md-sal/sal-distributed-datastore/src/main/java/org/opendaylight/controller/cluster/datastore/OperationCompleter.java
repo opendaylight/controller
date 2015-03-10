@@ -12,7 +12,7 @@ import com.google.common.base.Preconditions;
 import java.util.concurrent.Semaphore;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModificationsReply;
 
-final class OperationCompleter extends OnComplete<Object> {
+public final class OperationCompleter extends OnComplete<Object> {
     private final Semaphore operationLimiter;
 
     OperationCompleter(Semaphore operationLimiter){
