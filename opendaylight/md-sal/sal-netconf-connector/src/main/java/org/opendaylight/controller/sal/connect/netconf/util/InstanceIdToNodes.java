@@ -167,8 +167,10 @@ public abstract class InstanceIdToNodes<T extends PathArgument> implements Ident
 
                 final YangInstanceIdentifier childId = YangInstanceIdentifier.create(Iterables.skip(id.getPathArguments(), 1));
                 builder.addChild(childOp.create(childId, lastChild, operation));
-            } else if(lastChild.isPresent()) {
-                builder.withValue(Lists.newArrayList((Collection<?>) lastChild.get().getValue()));
+            } else {
+                if(lastChild.isPresent()) {
+                    builder.withValue(Lists.newArrayList((Collection<?>) lastChild.get().getValue()));
+                }
                 if(operation.isPresent()) {
                     Preconditions.checkArgument(builder instanceof AttributesBuilder<?>);
                     addModifyOpIfPresent(operation, ((AttributesBuilder<?>) builder));
@@ -449,6 +451,7 @@ public abstract class InstanceIdToNodes<T extends PathArgument> implements Ident
 
             final NormalizedNodeAttrBuilder<NodeIdentifier, DOMSource, AnyXmlNode> builder =
                     Builders.anyXmlBuilder().withNodeIdentifier(getIdentifier());
+            addModifyOpIfPresent(operation, builder);
             return builder.build();
         }
 
