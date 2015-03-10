@@ -248,7 +248,6 @@ public class RestPostOperationTest extends JerseyTest {
 //        verify(brokerFacade, times(2))
         verify(brokerFacade, times(1))
                 .commitConfigurationDataPost(instanceIdCaptor.capture(), compNodeCaptor.capture());
-        // FIXME : identifier flow to interface only, why we want to see block too ?
 //        identifier = "[(urn:ietf:params:xml:ns:yang:test-interface?revision=2014-07-01)interfaces, (urn:ietf:params:xml:ns:yang:test-interface?revision=2014-07-01)block]";
         assertEquals(identifier, ImmutableList.copyOf(instanceIdCaptor.getValue().getPathArguments()).toString());
     }

@@ -66,7 +66,7 @@ public class NormalizedNodeJsonBodyWriter implements MessageBodyWriter<Normalize
             throw new RestconfDocumentedException(Response.Status.NOT_FOUND);
         }
 
-        final InstanceIdentifierContext<DataSchemaNode> context = t.getInstanceIdentifierContext();
+        final InstanceIdentifierContext<DataSchemaNode> context = (InstanceIdentifierContext<DataSchemaNode>) t.getInstanceIdentifierContext();
 
         SchemaPath path = context.getSchemaNode().getPath();
         boolean isDataRoot = false;

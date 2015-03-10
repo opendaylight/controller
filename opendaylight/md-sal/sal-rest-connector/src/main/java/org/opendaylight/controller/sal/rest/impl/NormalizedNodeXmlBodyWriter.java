@@ -8,6 +8,7 @@
 package org.opendaylight.controller.sal.rest.impl;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.Iterables;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
@@ -41,6 +42,7 @@ import org.opendaylight.yangtools.yang.data.impl.codec.xml.XMLStreamNormalizedNo
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
+import org.opendaylight.yangtools.yang.model.util.SchemaContextUtil;
 
 @Provider
 @Produces({ Draft02.MediaTypes.API + RestconfService.XML, Draft02.MediaTypes.DATA + RestconfService.XML,
@@ -89,18 +91,29 @@ public class NormalizedNodeXmlBodyWriter implements MessageBodyWriter<Normalized
         NormalizedNode<?, ?> data = t.getData();
         SchemaPath schemaPath = pathContext.getSchemaNode().getPath();
 
+        // The utility method requires the path to be size of 2
+        boolean isRpc = false;
+        if(Iterables.size(schemaPath.getPathFromRoot()) > 1) {
+            isRpc = SchemaContextUtil.getRpcDataSchema(t.getInstanceIdentifierContext().getSchemaContext(), schemaPath) != null;
+        }
+
         boolean isDataRoot = false;
         if (SchemaPath.ROOT.equals(schemaPath)) {
             isDataRoot = true;
+        // The rpc definitions required the schema path to point to the output container, not the parent (rpc itself)
         } else {
-            schemaPath = schemaPath.getParent();
+            if(!isRpc) {
+                schemaPath = schemaPath.getParent();
+            }
         }
 
         NormalizedNodeStreamWriter jsonWriter = XMLStreamNormalizedNodeStreamWriter.create(xmlWriter,
                 pathContext.getSchemaContext(), schemaPath);
         NormalizedNodeWriter nnWriter = NormalizedNodeWriter.forStreamWriter(jsonWriter);
         if (isDataRoot) {
-            writeRootElement(xmlWriter, nnWriter, (ContainerNode) data);
+            writeRootElement(xmlWriter, nnWriter, (ContainerNode) data, SchemaContext.NAME);
+        } else if(isRpc) {
+            writeRootElement(xmlWriter, nnWriter, (ContainerNode) data, schemaPath.getLastComponent());
         } else {
             if (data instanceof MapEntryNode) {
                 // Restconf allows returning one list item. We need to wrap it
@@ -112,10 +125,9 @@ public class NormalizedNodeXmlBodyWriter implements MessageBodyWriter<Normalized
         }
     }
 
-    private void writeRootElement(XMLStreamWriter xmlWriter, NormalizedNodeWriter nnWriter, ContainerNode data)
+    private void writeRootElement(XMLStreamWriter xmlWriter, NormalizedNodeWriter nnWriter, ContainerNode data, final QName name)
             throws IOException {
         try {
-            QName name = SchemaContext.NAME;
             xmlWriter.writeStartElement(name.getNamespace().toString(), name.getLocalName());
             for (DataContainerChild<? extends PathArgument, ?> child : data.getValue()) {
                 nnWriter.write(child);
