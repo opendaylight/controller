@@ -257,7 +257,7 @@ public final class NetconfBaseOps {
                 ).build();
     }
 
-    public static NormalizedNode<?, ?> getLockContent(final QName datastore) {
+    public static ContainerNode getLockContent(final QName datastore) {
         return Builders.containerBuilder().withNodeIdentifier(toId(NETCONF_LOCK_QNAME))
                 .withChild(getTargetNode(datastore)).build();
     }

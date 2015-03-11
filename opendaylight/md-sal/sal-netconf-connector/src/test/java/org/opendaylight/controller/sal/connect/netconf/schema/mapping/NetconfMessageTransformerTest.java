@@ -21,6 +21,7 @@ import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessag
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_EDIT_CONFIG_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_GET_CONFIG_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_GET_QNAME;
+import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_LOCK_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_RUNNING_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.createEditConfigStructure;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.toFilterStructure;
@@ -80,9 +81,28 @@ public class NetconfMessageTransformerTest {
         XMLUnit.setIgnoreAttributeOrder(true);
         XMLUnit.setIgnoreComments(true);
 
-        schema = getSchema();
+        schema = getSchema(true);
         netconfMessageTransformer = getTransformer(schema);
 
+    }
+
+    @Test
+    public void testLockRequestBaseSchemaNotPresent() throws Exception {
+        final SchemaContext partialSchema = getSchema(false);
+        final NetconfMessageTransformer transformer = getTransformer(partialSchema);
+        final NetconfMessage netconfMessage = transformer.toRpcRequest(toPath(NETCONF_LOCK_QNAME),
+                NetconfBaseOps.getLockContent(NETCONF_CANDIDATE_QNAME));
+
+        assertThat(XmlUtil.toString(netconfMessage.getDocument()), CoreMatchers.containsString("<lock"));
+    }
+
+    @Test
+    public void tesLockSchemaRequest() throws Exception {
+        final SchemaContext partialSchema = getSchema(false);
+        final NetconfMessageTransformer transformer = getTransformer(partialSchema);
+        final String result = "<rpc-reply xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\"><ok/></rpc-reply>";
+
+        transformer.toRpcResult(new NetconfMessage(XmlUtil.readXmlToDocument(result)), toPath(NETCONF_LOCK_QNAME));
     }
 
     @Test
@@ -105,9 +125,10 @@ public class NetconfMessageTransformerTest {
                 "</rpc>");
     }
 
+
     @Test
     public void tesGetSchemaResponse() throws Exception {
-        final NetconfMessageTransformer netconfMessageTransformer = getTransformer(getSchema());
+        final NetconfMessageTransformer netconfMessageTransformer = getTransformer(getSchema(true));
         final NetconfMessage response = new NetconfMessage(XmlUtil.readXmlToDocument(
                 "<rpc-reply message-id=\"101\"\n" +
                         "xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
@@ -143,7 +164,7 @@ public class NetconfMessageTransformerTest {
                 "</data>\n" +
                 "</rpc-reply>"));
 
-        final NetconfMessageTransformer netconfMessageTransformer = getTransformer(getSchema());
+        final NetconfMessageTransformer netconfMessageTransformer = getTransformer(getSchema(true));
         final DOMRpcResult compositeNodeRpcResult = netconfMessageTransformer.toRpcResult(response, toPath(NETCONF_GET_CONFIG_QNAME));
         assertTrue(compositeNodeRpcResult.getErrors().isEmpty());
         assertNotNull(compositeNodeRpcResult.getResult());
@@ -276,9 +297,11 @@ public class NetconfMessageTransformerTest {
         assertNull(compositeNodeRpcResult.getResult());
     }
 
-    public SchemaContext getSchema() {
+    public SchemaContext getSchema(boolean addBase) {
         final ModuleInfoBackedContext moduleInfoBackedContext = ModuleInfoBackedContext.create();
-        moduleInfoBackedContext.addModuleInfos(Collections.singleton($YangModuleInfoImpl.getInstance()));
+        if(addBase) {
+            moduleInfoBackedContext.addModuleInfos(Collections.singleton($YangModuleInfoImpl.getInstance()));
+        }
         moduleInfoBackedContext.addModuleInfos(Collections.singleton(org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.$YangModuleInfoImpl.getInstance()));
         return moduleInfoBackedContext.tryToCreateSchemaContext().get();
     }
