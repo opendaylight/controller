@@ -59,7 +59,7 @@ public class ShardTransactionHeliumBackwardsCompatibilityTest extends AbstractAc
             SchemaContext schemaContext = TestModel.createTestContext();
             Props shardProps = Shard.props(ShardIdentifier.builder().memberName("member-1").
                     shardName("inventory").type("config").build(),
-                    Collections.<ShardIdentifier,String>emptyMap(),
+                    Collections.<String,String>emptyMap(),
                     DatastoreContext.newBuilder().shardHeartbeatIntervalInMillis(100).build(),
                     schemaContext).withDispatcher(Dispatchers.DefaultDispatcherId());
 
@@ -133,7 +133,7 @@ public class ShardTransactionHeliumBackwardsCompatibilityTest extends AbstractAc
             SchemaContext schemaContext = TestModel.createTestContext();
             Props shardProps = Shard.props(ShardIdentifier.builder().memberName("member-1").
                     shardName("inventory").type("config").build(),
-                    Collections.<ShardIdentifier,String>emptyMap(),
+                    Collections.<String,String>emptyMap(),
                     DatastoreContext.newBuilder().shardHeartbeatIntervalInMillis(100).build(),
                     schemaContext).withDispatcher(Dispatchers.DefaultDispatcherId());
 
