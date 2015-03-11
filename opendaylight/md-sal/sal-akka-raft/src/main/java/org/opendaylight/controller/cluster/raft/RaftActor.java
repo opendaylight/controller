@@ -371,7 +371,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 context.getReplicatedLog().size());
 
         } else if (message instanceof CaptureSnapshot) {
-            LOG.info("{}: CaptureSnapshot received by actor", persistenceId());
+            LOG.debug("{}: CaptureSnapshot received by actor: {}", persistenceId(), message);
 
             if(captureSnapshot == null) {
                 captureSnapshot = (CaptureSnapshot)message;
@@ -675,7 +675,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     private void handleCaptureSnapshotReply(byte[] snapshotBytes) {
-        LOG.info("{}: CaptureSnapshotReply received by actor: snapshot size {}", persistenceId(), snapshotBytes.length);
+        LOG.debug("{}: CaptureSnapshotReply received by actor: snapshot size {}", persistenceId(), snapshotBytes.length);
 
         // create a snapshot object from the state provided and save it
         // when snapshot is saved async, SaveSnapshotSuccess is raised.
@@ -692,13 +692,24 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         long dataThreshold = Runtime.getRuntime().totalMemory() *
                 getRaftActorContext().getConfigParams().getSnapshotDataThresholdPercentage() / 100;
         if (context.getReplicatedLog().dataSize() > dataThreshold) {
+
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("{}: dataSize {} exceeds dataThreshold {} - doing snapshotPreCommit with index {}",
+                        persistenceId(), context.getReplicatedLog().dataSize(), dataThreshold,
+                        captureSnapshot.getLastAppliedIndex());
+            }
+
             // if memory is less, clear the log based on lastApplied.
             // this could/should only happen if one of the followers is down
             // as normally we keep removing from the log when its replicated to all.
             context.getReplicatedLog().snapshotPreCommit(captureSnapshot.getLastAppliedIndex(),
                     captureSnapshot.getLastAppliedTerm());
 
-            getCurrentBehavior().setReplicatedToAllIndex(captureSnapshot.getReplicatedToAllIndex());
+            // Don't reset replicatedToAllIndex to -1 as this may prevent us from trimming the log after an
+            // install snapshot to a follower.
+            if(captureSnapshot.getReplicatedToAllIndex() >= 0) {
+                getCurrentBehavior().setReplicatedToAllIndex(captureSnapshot.getReplicatedToAllIndex());
+            }
         } else if(captureSnapshot.getReplicatedToAllIndex() != -1){
             // clear the log based on replicatedToAllIndex
             context.getReplicatedLog().snapshotPreCommit(captureSnapshot.getReplicatedToAllIndex(),
@@ -715,9 +726,9 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         }
 
 
-        LOG.info("{}: Removed in-memory snapshotted entries, adjusted snaphsotIndex:{} " +
-            "and term:{}", persistenceId(), captureSnapshot.getLastAppliedIndex(),
-            captureSnapshot.getLastAppliedTerm());
+        LOG.info("{}: Removed in-memory snapshotted entries, adjusted snaphsotIndex: {} " +
+            "and term: {}", persistenceId(), replicatedLog.getSnapshotIndex(),
+            replicatedLog.getSnapshotTerm());
 
         if (isLeader() && captureSnapshot.isInstallSnapshotInitiated()) {
             // this would be call straight to the leader and won't initiate in serialization
