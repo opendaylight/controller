@@ -69,6 +69,12 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
 
     private boolean followerInitialSyncStatus = false;
 
+    private long journalSize;
+
+    private long replicatedToAllIndex;
+
+    private long snapshotIndex;
+
     public ShardStats(final String shardName, final String mxBeanType) {
         super(shardName, mxBeanType, JMX_CATEGORY_SHARD);
     }
@@ -226,6 +232,18 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
         this.dataSize = dataSize;
     }
 
+    public void setInMemoryJournalSize(long size) {
+        this.journalSize = size;
+    }
+
+    public void setReplicatedToAllIndex(long index){
+        this.replicatedToAllIndex = index;
+    }
+
+    public void setSnapshotIndex(long index){
+        this.snapshotIndex = index;
+    }
+
     @Override
     public long getInMemoryJournalDataSize(){
         return dataSize;
@@ -250,6 +268,21 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
     @Override
     public int getMaxNotificationMgrListenerQueueSize() {
         return notificationManagerStatsBean.getMaxListenerQueueSize();
+    }
+
+    @Override
+    public long getInMemoryJournalSize() {
+        return journalSize;
+    }
+
+    @Override
+    public long getReplicatedToAllIndex() {
+        return replicatedToAllIndex;
+    }
+
+    @Override
+    public long getSnapshotIndex() {
+        return snapshotIndex;
     }
 
     /**

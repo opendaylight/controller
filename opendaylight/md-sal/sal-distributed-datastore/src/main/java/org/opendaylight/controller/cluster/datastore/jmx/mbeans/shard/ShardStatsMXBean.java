@@ -55,4 +55,10 @@ public interface ShardStatsMXBean {
    long getInMemoryJournalDataSize();
 
    boolean getFollowerInitialSyncStatus();
+
+   long getInMemoryJournalSize();
+
+   long getReplicatedToAllIndex();
+
+   long getSnapshotIndex();
 }
