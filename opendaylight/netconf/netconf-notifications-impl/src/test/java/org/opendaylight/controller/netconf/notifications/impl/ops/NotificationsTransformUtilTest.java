@@ -27,7 +27,6 @@ public class NotificationsTransformUtilTest {
     private static final Date DATE = new Date();
     private static final String innerNotification = "<netconf-capability-change xmlns=\"urn:ietf:params:xml:ns:yang:ietf-netconf-notifications\">" +
             "<deleted-capability>uri3</deleted-capability>" +
-            "<deleted-capability>uri4</deleted-capability>" +
             "<added-capability>uri1</added-capability>" +
             "</netconf-capability-change>";
 
@@ -41,7 +40,7 @@ public class NotificationsTransformUtilTest {
         final NetconfCapabilityChangeBuilder netconfCapabilityChangeBuilder = new NetconfCapabilityChangeBuilder();
 
         netconfCapabilityChangeBuilder.setAddedCapability(Lists.newArrayList(new Uri("uri1"), new Uri("uri1")));
-        netconfCapabilityChangeBuilder.setDeletedCapability(Lists.newArrayList(new Uri("uri3"), new Uri("uri4")));
+        netconfCapabilityChangeBuilder.setDeletedCapability(Lists.newArrayList(new Uri("uri3"), new Uri("uri3")));
 
         final NetconfCapabilityChange capabilityChange = netconfCapabilityChangeBuilder.build();
         final NetconfNotification transform = NotificationsTransformUtil.transform(capabilityChange, DATE);
