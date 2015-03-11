@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_d4d51444",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 551,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-11T22:20:50Z",
+      "side": 0,
+      "message": "This code below was moved to the ShardTransactonFactory for reuse.",
+      "revId": "b9508ff048e882f4227abbaa9b6ac991bb45f9ab",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_5448242d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionContextImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-11T22:20:50Z",
+      "side": 0,
+      "message": "Code moved to the PreLithium class.",
+      "revId": "b9508ff048e882f4227abbaa9b6ac991bb45f9ab",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

@@ -1,0 +1,208 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_14bb7c0f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardCommitCoordinator.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-11T22:20:50Z",
+      "side": 1,
+      "message": "I realized you can add a RemovalListener to a guava cache - useful for warning.",
+      "revId": "1b4003ac07ce3e42c1e1996028f528235c2da350",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_b43728b0",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionContextImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-11T22:20:50Z",
+      "side": 1,
+      "message": "Need tx chain ID for BatchedModifications.",
+      "revId": "1b4003ac07ce3e42c1e1996028f528235c2da350",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_344b182d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionContextImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-11T22:20:50Z",
+      "side": 1,
+      "message": "This class now only handles read-write tx\u0027s - we still need to record the last batched mods Future and send the ReadyTransaction.",
+      "revId": "1b4003ac07ce3e42c1e1996028f528235c2da350",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_7441a00a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionContextImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-11T22:20:50Z",
+      "side": 1,
+      "message": "Refactored into a method for reuse.",
+      "revId": "1b4003ac07ce3e42c1e1996028f528235c2da350",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_14529cdd",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-11T22:20:50Z",
+      "side": 1,
+      "message": "Used by Shard for conversion from int.",
+      "revId": "1b4003ac07ce3e42c1e1996028f528235c2da350",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_b45e48e8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 717,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-11T22:20:50Z",
+      "side": 1,
+      "message": "Refactored into separate method for reuse",
+      "revId": "1b4003ac07ce3e42c1e1996028f528235c2da350",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_d463d4af",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/WriteOnlyTransactionContextImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-11T22:20:50Z",
+      "side": 1,
+      "message": "We only send the last BatchedModifications with ready set.",
+      "revId": "1b4003ac07ce3e42c1e1996028f528235c2da350",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_7458c0fa",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/identifiers/ShardTransactionIdentifier.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-11T22:20:50Z",
+      "side": 1,
+      "message": "Avoids memory allocation every time toString is called.",
+      "revId": "1b4003ac07ce3e42c1e1996028f528235c2da350",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_945d4cec",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DistributedDataStoreIntegrationTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-11T22:20:50Z",
+      "side": 1,
+      "message": "This is done in the next patch.",
+      "revId": "1b4003ac07ce3e42c1e1996028f528235c2da350",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_3472387d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DistributedDataStoreIntegrationTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 477,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-11T22:20:50Z",
+      "side": 1,
+      "message": "Changed to read-write to avoid test failure. This will be handled in the next patch.",
+      "revId": "1b4003ac07ce3e42c1e1996028f528235c2da350",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_546fc492",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 454,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-11T22:20:50Z",
+      "side": 1,
+      "message": "Uses the decorator hook so we can verify the cohorts are called in the right order.",
+      "revId": "1b4003ac07ce3e42c1e1996028f528235c2da350",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_f46b7083",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 789,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-11T22:20:50Z",
+      "side": 1,
+      "message": "Tests that the local follower shard forwards to the leader shard.",
+      "revId": "1b4003ac07ce3e42c1e1996028f528235c2da350",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
