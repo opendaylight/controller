@@ -1,0 +1,5 @@
+<tomcat-users>
+<!-- By default, no users are configured. This commented out user is provided as a template for creating your own users
+  <user name="admin" password="admin" roles="System-Admin,Network-Admin,Network-Operator,Container-User" />
+-->
+</tomcat-users>
