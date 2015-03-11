@@ -147,10 +147,9 @@ public class Shard extends RaftActor {
 
     private final String txnDispatcherPath;
 
-    protected Shard(final ShardIdentifier name, final Map<ShardIdentifier, String> peerAddresses,
+    protected Shard(final ShardIdentifier name, final Map<String, String> peerAddresses,
             final DatastoreContext datastoreContext, final SchemaContext schemaContext) {
-        super(name.toString(), mapPeerAddresses(peerAddresses),
-                Optional.of(datastoreContext.getShardRaftConfig()));
+        super(name.toString(), new HashMap<>(peerAddresses), Optional.of(datastoreContext.getShardRaftConfig()));
 
         this.name = name.toString();
         this.datastoreContext = datastoreContext;
@@ -198,20 +197,8 @@ public class Shard extends RaftActor {
                 datastoreContext.getShardTransactionCommitTimeoutInSeconds(), TimeUnit.SECONDS);
     }
 
-    private static Map<String, String> mapPeerAddresses(
-        final Map<ShardIdentifier, String> peerAddresses) {
-        Map<String, String> map = new HashMap<>();
-
-        for (Map.Entry<ShardIdentifier, String> entry : peerAddresses
-            .entrySet()) {
-            map.put(entry.getKey().toString(), entry.getValue());
-        }
-
-        return map;
-    }
-
     public static Props props(final ShardIdentifier name,
-        final Map<ShardIdentifier, String> peerAddresses,
+        final Map<String, String> peerAddresses,
         final DatastoreContext datastoreContext, final SchemaContext schemaContext) {
         Preconditions.checkNotNull(name, "name should not be null");
         Preconditions.checkNotNull(peerAddresses, "peerAddresses should not be null");
@@ -973,11 +960,11 @@ public class Shard extends RaftActor {
         private static final long serialVersionUID = 1L;
 
         final ShardIdentifier name;
-        final Map<ShardIdentifier, String> peerAddresses;
+        final Map<String, String> peerAddresses;
         final DatastoreContext datastoreContext;
         final SchemaContext schemaContext;
 
-        ShardCreator(final ShardIdentifier name, final Map<ShardIdentifier, String> peerAddresses,
+        ShardCreator(final ShardIdentifier name, final Map<String, String> peerAddresses,
                 final DatastoreContext datastoreContext, final SchemaContext schemaContext) {
             this.name = name;
             this.peerAddresses = peerAddresses;
