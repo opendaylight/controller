@@ -95,7 +95,7 @@ public class RaftActorTest extends AbstractActorTest {
 
     public static class MockRaftActor extends RaftActor {
 
-        private final DataPersistenceProvider dataPersistenceProvider;
+        protected DataPersistenceProvider dataPersistenceProvider;
         private final RaftActor delegate;
         private final CountDownLatch recoveryComplete = new CountDownLatch(1);
         private final List<Object> state;
@@ -178,7 +178,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         @Override protected void applyState(ActorRef clientActor, String identifier, Object data) {
             delegate.applyState(clientActor, identifier, data);
-            LOG.info("applyState called");
+            LOG.info("{}: applyState called", persistenceId());
         }
 
         @Override
@@ -220,10 +220,12 @@ public class RaftActorTest extends AbstractActorTest {
         }
 
         @Override protected void createSnapshot() {
+            LOG.info("{}: createSnapshot called", persistenceId());
             delegate.createSnapshot();
         }
 
         @Override protected void applySnapshot(byte [] snapshot) {
+            LOG.info("{}: applySnapshot called", persistenceId());
             delegate.applySnapshot(snapshot);
         }
 
@@ -271,7 +273,7 @@ public class RaftActorTest extends AbstractActorTest {
     }
 
 
-    private static class RaftActorTestKit extends JavaTestKit {
+    public static class RaftActorTestKit extends JavaTestKit {
         private final ActorRef raftActor;
 
         public RaftActorTestKit(ActorSystem actorSystem, String actorName) {
@@ -307,7 +309,7 @@ public class RaftActorTest extends AbstractActorTest {
             waitUntilLeader(raftActor);
         }
 
-        protected void waitUntilLeader(ActorRef actorRef) {
+        public static void waitUntilLeader(ActorRef actorRef) {
             FiniteDuration duration = Duration.create(100, TimeUnit.MILLISECONDS);
             for(int i = 0; i < 20 * 5; i++) {
                 Future<Object> future = Patterns.ask(actorRef, new FindLeader(), new Timeout(duration));
