@@ -91,6 +91,11 @@
     <!-- PAX EXAM ITs -->
     <module>sal-binding-it</module>
     <module>sal-binding-dom-it</module>
+
+    <!-- IT Base and Parent -->
+    <module>mdsal-it-base</module>
+    <module>mdsal-it-parent</module>
+
   </modules>
 
   <build>
