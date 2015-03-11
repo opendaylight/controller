@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_b1d3ba37",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/netconf/sal/NetconfDeviceRpc.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-03-11T15:44:45Z",
+      "side": 1,
+      "message": "This is fixed by commit:\nhttps://git.opendaylight.org/gerrit/#/c/16332/\n\nPlease remove from this one to prevent conflicts.",
+      "revId": "ed4ab31145f65fdf9b25a523a6d9d6a78e9dd63d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
