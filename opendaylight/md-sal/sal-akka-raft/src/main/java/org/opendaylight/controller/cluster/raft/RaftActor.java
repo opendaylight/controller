@@ -693,7 +693,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
         LOG.info("{}: Persisting of snapshot done:{}", persistenceId(), sn.getLogMessage());
 
-        long dataThreshold = Runtime.getRuntime().totalMemory() *
+        long dataThreshold = getTotalMemory() *
                 getRaftActorContext().getConfigParams().getSnapshotDataThresholdPercentage() / 100;
         if (context.getReplicatedLog().dataSize() > dataThreshold) {
 
@@ -742,6 +742,10 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
         captureSnapshot = null;
         context.setSnapshotCaptureInitiated(false);
+    }
+
+    protected long getTotalMemory() {
+        return Runtime.getRuntime().totalMemory();
     }
 
     protected boolean hasFollowers(){
@@ -834,7 +838,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                             dataSizeForCheck = dataSizeSinceLastSnapshot / DATA_SIZE_DIVIDER;
                         }
 
-                        long dataThreshold = Runtime.getRuntime().totalMemory() *
+                        long dataThreshold = getTotalMemory() *
                                 getRaftActorContext().getConfigParams().getSnapshotDataThresholdPercentage() / 100;
 
                         // when a snaphsot is being taken, captureSnapshot != null
