@@ -8,7 +8,6 @@
 package org.opendaylight.controller.sal.connect.netconf.sal;
 
 import com.google.common.base.Function;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Collections2;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
@@ -28,7 +27,6 @@ import org.opendaylight.controller.sal.connect.api.MessageTransformer;
 import org.opendaylight.controller.sal.connect.api.RemoteDeviceCommunicator;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.common.RpcResult;
-import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -61,9 +59,7 @@ public final class NetconfDeviceRpc implements DOMRpcService {
     @Nonnull
     @Override
     public CheckedFuture<DOMRpcResult, DOMRpcException> invokeRpc(@Nonnull final SchemaPath type, @Nullable final NormalizedNode<?, ?> input) {
-        Preconditions.checkArgument(input instanceof ContainerNode, "Epc payload has to be a %s, was %s", ContainerNode.class, input);
-
-        final NetconfMessage message = transformer.toRpcRequest(type, (ContainerNode) input);
+        final NetconfMessage message = transformer.toRpcRequest(type, input);
         final ListenableFuture<RpcResult<NetconfMessage>> delegateFutureWithPureResult = listener.sendRequest(message, type.getLastComponent());
 
         final ListenableFuture<DOMRpcResult> transformed = Futures.transform(delegateFutureWithPureResult, new Function<RpcResult<NetconfMessage>, DOMRpcResult>() {
