@@ -52,7 +52,7 @@ import org.slf4j.LoggerFactory;
 
 public class BaseYangSwaggerGenerator {
 
-    private static Logger _logger = LoggerFactory.getLogger(BaseYangSwaggerGenerator.class);
+    private static final Logger LOG = LoggerFactory.getLogger(BaseYangSwaggerGenerator.class);
 
     protected static final String API_VERSION = "1.0.0";
     protected static final String SWAGGER_VERSION = "1.2";
@@ -84,19 +84,19 @@ public class BaseYangSwaggerGenerator {
 
         List<Resource> resources = new ArrayList<>(modules.size());
 
-        _logger.info("Modules found [{}]", modules.size());
+        LOG.info("Modules found [{}]", modules.size());
 
         for (Module module : modules) {
             String revisionString = SIMPLE_DATE_FORMAT.format(module.getRevision());
             Resource resource = new Resource();
-            _logger.debug("Working on [{},{}]...", module.getName(), revisionString);
+            LOG.debug("Working on [{},{}]...", module.getName(), revisionString);
             ApiDeclaration doc = getApiDeclaration(module.getName(), revisionString, uriInfo, schemaContext, context);
 
             if (doc != null) {
                 resource.setPath(generatePath(uriInfo, module.getName(), revisionString));
                 resources.add(resource);
             } else {
-                _logger.debug("Could not generate doc for {},{}", module.getName(), revisionString);
+                LOG.debug("Could not generate doc for {},{}", module.getName(), revisionString);
             }
         }
 
@@ -158,11 +158,11 @@ public class BaseYangSwaggerGenerator {
         List<Api> apis = new ArrayList<Api>();
 
         Collection<DataSchemaNode> dataSchemaNodes = m.getChildNodes();
-        _logger.debug("child nodes size [{}]", dataSchemaNodes.size());
+        LOG.debug("child nodes size [{}]", dataSchemaNodes.size());
         for (DataSchemaNode node : dataSchemaNodes) {
             if ((node instanceof ListSchemaNode) || (node instanceof ContainerSchemaNode)) {
 
-                _logger.debug("Is Configuration node [{}] [{}]", node.isConfiguration(), node.getQName().getLocalName());
+                LOG.debug("Is Configuration node [{}] [{}]", node.isConfiguration(), node.getQName().getLocalName());
 
                 List<Parameter> pathParams = new ArrayList<Parameter>();
                 String resourcePath = getDataStorePath("/config/", context);
@@ -181,7 +181,7 @@ public class BaseYangSwaggerGenerator {
             addRpcs(rpcDefinition, apis, resourcePath, schemaContext);
         }
 
-        _logger.debug("Number of APIs found [{}]", apis.size());
+        LOG.debug("Number of APIs found [{}]", apis.size());
 
         if (!apis.isEmpty()) {
             doc.setApis(apis);
@@ -190,8 +190,8 @@ public class BaseYangSwaggerGenerator {
             try {
                 models = jsonConverter.convertToJsonSchema(m, schemaContext);
                 doc.setModels(models);
-                if (_logger.isDebugEnabled()) {
-                    _logger.debug(mapper.writeValueAsString(doc));
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(mapper.writeValueAsString(doc));
                 }
             } catch (IOException | JSONException e) {
                 e.printStackTrace();
@@ -240,7 +240,7 @@ public class BaseYangSwaggerGenerator {
         List<Parameter> pathParams = new ArrayList<Parameter>(parentPathParams);
 
         String resourcePath = parentPath + createPath(node, pathParams, schemaContext) + "/";
-        _logger.debug("Adding path: [{}]", resourcePath);
+        LOG.debug("Adding path: [{}]", resourcePath);
         api.setPath(resourcePath);
 
         Iterable<DataSchemaNode> childSchemaNodes = Collections.<DataSchemaNode> emptySet();
