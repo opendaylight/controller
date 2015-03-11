@@ -12,6 +12,7 @@ import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.JdkFutureAdapters;
 import com.google.common.util.concurrent.ListenableFuture;
+import javax.annotation.Nullable;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcImplementation;
@@ -33,7 +34,7 @@ public class BindingRpcImplementationAdapter implements DOMRpcImplementation {
     private static final Function<? super Exception, DOMRpcException> EXCEPTION_MAPPER = new Function<Exception, DOMRpcException>() {
 
         @Override
-        public DOMRpcException apply(Exception input) {
+        public DOMRpcException apply(final Exception input) {
             // FIXME: Return correct exception
             return null;
         }
@@ -44,7 +45,7 @@ public class BindingRpcImplementationAdapter implements DOMRpcImplementation {
     private final RpcService delegate;
     private final QNameModule module;
 
-    private Function<RpcResult<?>,DOMRpcResult> lazySerializedMapper = new Function<RpcResult<?>,DOMRpcResult>() {
+    private final Function<RpcResult<?>,DOMRpcResult> lazySerializedMapper = new Function<RpcResult<?>,DOMRpcResult>() {
 
         @Override
         public DOMRpcResult apply(final RpcResult<?> input) {
@@ -52,11 +53,11 @@ public class BindingRpcImplementationAdapter implements DOMRpcImplementation {
         }
     };
 
-    public <T extends RpcService> BindingRpcImplementationAdapter(BindingNormalizedNodeCodecRegistry codec, Class<T> type ,T delegate) {
+    public <T extends RpcService> BindingRpcImplementationAdapter(final BindingNormalizedNodeCodecRegistry codec, final Class<T> type ,final T delegate) {
         this.codec = codec;
         this.delegate = delegate;
-        this.invoker = RpcServiceInvoker.from(type);
-        this.module = BindingReflections.getQNameModule(type);
+        invoker = RpcServiceInvoker.from(type);
+        module = BindingReflections.getQNameModule(type);
     }
 
     public QNameModule getQNameModule() {
@@ -64,29 +65,29 @@ public class BindingRpcImplementationAdapter implements DOMRpcImplementation {
     }
 
     @Override
-    public CheckedFuture<DOMRpcResult, DOMRpcException> invokeRpc(DOMRpcIdentifier rpc, NormalizedNode<?, ?> input) {
-        SchemaPath schemaPath = rpc.getType();
-        DataObject bindingInput = deserilialize(rpc.getType(),input);
-        ListenableFuture<RpcResult<?>> bindingResult = invoke(schemaPath,bindingInput);
+    public CheckedFuture<DOMRpcResult, DOMRpcException> invokeRpc(final DOMRpcIdentifier rpc, @Nullable final NormalizedNode<?, ?> input) {
+        final SchemaPath schemaPath = rpc.getType();
+        final DataObject bindingInput = input != null ? deserilialize(rpc.getType(),input) : null;
+        final ListenableFuture<RpcResult<?>> bindingResult = invoke(schemaPath, bindingInput);
         return transformResult(schemaPath,bindingResult);
     }
 
-    private DataObject deserilialize(SchemaPath rpcPath, NormalizedNode<?, ?> input) {
+    private DataObject deserilialize(final SchemaPath rpcPath, final NormalizedNode<?, ?> input) {
         if(input instanceof LazySerializedContainerNode) {
             return ((LazySerializedContainerNode) input).bindingData();
         }
-        SchemaPath inputSchemaPath = rpcPath.createChild(QName.create(module,"input"));
+        final SchemaPath inputSchemaPath = rpcPath.createChild(QName.create(module,"input"));
         return codec.fromNormalizedNodeRpcData(inputSchemaPath, (ContainerNode) input);
     }
 
 
-    private ListenableFuture<RpcResult<?>> invoke(SchemaPath schemaPath, DataObject input) {
+    private ListenableFuture<RpcResult<?>> invoke(final SchemaPath schemaPath, final DataObject input) {
         return JdkFutureAdapters.listenInPoolThread(invoker.invokeRpc(delegate, schemaPath.getLastComponent(), input));
     }
 
-    private CheckedFuture<DOMRpcResult, DOMRpcException> transformResult(SchemaPath schemaPath,
-            ListenableFuture<RpcResult<?>> bindingResult) {
-        ListenableFuture<DOMRpcResult> transformed = Futures.transform(bindingResult, lazySerializedMapper);
+    private CheckedFuture<DOMRpcResult, DOMRpcException> transformResult(final SchemaPath schemaPath,
+            final ListenableFuture<RpcResult<?>> bindingResult) {
+        final ListenableFuture<DOMRpcResult> transformed = Futures.transform(bindingResult, lazySerializedMapper);
         return Futures.makeChecked(transformed, EXCEPTION_MAPPER);
     }
 

@@ -61,7 +61,9 @@ public final class NetconfDeviceRpc implements DOMRpcService {
     @Nonnull
     @Override
     public CheckedFuture<DOMRpcResult, DOMRpcException> invokeRpc(@Nonnull final SchemaPath type, @Nullable final NormalizedNode<?, ?> input) {
-        Preconditions.checkArgument(input instanceof ContainerNode, "Epc payload has to be a %s, was %s", ContainerNode.class, input);
+        if (input != null) {
+            Preconditions.checkArgument(input instanceof ContainerNode, "Epc payload has to be a %s, was %s", ContainerNode.class, input);
+        }
 
         final NetconfMessage message = transformer.toRpcRequest(type, (ContainerNode) input);
         final ListenableFuture<RpcResult<NetconfMessage>> delegateFutureWithPureResult = listener.sendRequest(message, type.getLastComponent());
