@@ -41,7 +41,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.junit.Test;
 import org.mockito.InOrder;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
-import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
@@ -155,7 +154,7 @@ public class ShardTest extends AbstractShardTest {
 
                 @Override
                 public Shard create() throws Exception {
-                    return new Shard(shardID, Collections.<ShardIdentifier,String>emptyMap(),
+                    return new Shard(shardID, Collections.<String,String>emptyMap(),
                             newDatastoreContext(), SCHEMA_CONTEXT) {
                         @Override
                         public void onReceiveCommand(final Object message) throws Exception {
@@ -283,7 +282,7 @@ public class ShardTest extends AbstractShardTest {
             final CountDownLatch recoveryComplete = new CountDownLatch(1);
             class TestShard extends Shard {
                 TestShard() {
-                    super(shardID, Collections.<ShardIdentifier, String>singletonMap(shardID, null),
+                    super(shardID, Collections.<String, String>singletonMap(shardID.toString(), null),
                             newDatastoreContext(), SCHEMA_CONTEXT);
                 }
 
@@ -759,7 +758,7 @@ public class ShardTest extends AbstractShardTest {
             Creator<Shard> creator = new Creator<Shard>() {
                 @Override
                 public Shard create() throws Exception {
-                    return new Shard(shardID, Collections.<ShardIdentifier,String>emptyMap(),
+                    return new Shard(shardID, Collections.<String,String>emptyMap(),
                             newDatastoreContext(), SCHEMA_CONTEXT) {
                         @Override
                         protected boolean isLeader() {
@@ -1312,7 +1311,7 @@ public class ShardTest extends AbstractShardTest {
             Creator<Shard> creator = new Creator<Shard>() {
                 @Override
                 public Shard create() throws Exception {
-                    return new Shard(shardID, Collections.<ShardIdentifier,String>emptyMap(),
+                    return new Shard(shardID, Collections.<String,String>emptyMap(),
                             newDatastoreContext(), SCHEMA_CONTEXT) {
 
                         DelegatingPersistentDataProvider delegating;
@@ -1413,13 +1412,13 @@ public class ShardTest extends AbstractShardTest {
         final DatastoreContext persistentContext = DatastoreContext.newBuilder().
                 shardJournalRecoveryLogBatchSize(3).shardSnapshotBatchCount(5000).persistent(true).build();
 
-        final Props persistentProps = Shard.props(shardID, Collections.<ShardIdentifier, String>emptyMap(),
+        final Props persistentProps = Shard.props(shardID, Collections.<String, String>emptyMap(),
                 persistentContext, SCHEMA_CONTEXT);
 
         final DatastoreContext nonPersistentContext = DatastoreContext.newBuilder().
                 shardJournalRecoveryLogBatchSize(3).shardSnapshotBatchCount(5000).persistent(false).build();
 
-        final Props nonPersistentProps = Shard.props(shardID, Collections.<ShardIdentifier, String>emptyMap(),
+        final Props nonPersistentProps = Shard.props(shardID, Collections.<String, String>emptyMap(),
                 nonPersistentContext, SCHEMA_CONTEXT);
 
         new ShardTestKit(getSystem()) {{
