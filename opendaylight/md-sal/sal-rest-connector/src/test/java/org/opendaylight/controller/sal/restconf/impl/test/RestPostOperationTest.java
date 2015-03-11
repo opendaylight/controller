@@ -116,6 +116,16 @@ public class RestPostOperationTest extends JerseyTest {
         restconfImpl.setControllerContext(context);
     }
 
+//    @Test
+//    public void postRpcNoPayload() throws Exception {
+//        setSchemaControllerContext(schemaContextTestModule);
+//        final String uri = "/operations/test-module:no-payload-rpc-test";
+//        final String mediaType = MediaType.APPLICATION_XML;
+//        final Response response = target(uri).request(mediaType).post(Entity.entity("", mediaType));
+//        assertNotNull(response);
+//
+//    }
+
     @Test
     @Ignore //FIXME we don't wish to mock CompositeNode as result
     public void postOperationsStatusCodes() throws IOException {

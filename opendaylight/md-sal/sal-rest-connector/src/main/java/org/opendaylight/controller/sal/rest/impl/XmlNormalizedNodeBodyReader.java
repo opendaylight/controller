@@ -85,6 +85,11 @@ public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPro
         try {
             final Optional<InstanceIdentifierContext> path = getIdentifierWithSchema();
 
+            if (entityStream.available() < 1) {
+                // represent empty nopayload input
+                return new NormalizedNodeContext(path.get(), null);
+            }
+
             final DocumentBuilder dBuilder;
             try {
                 dBuilder = BUILDERFACTORY.newDocumentBuilder();
@@ -96,7 +101,7 @@ public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPro
             final NormalizedNode<?, ?> result = parse(path.get(),doc);
             return new NormalizedNodeContext(path.get(),result);
         } catch (final Exception e) {
-            LOG.debug("Error parsing json input", e);
+            LOG.debug("Error parsing xml input", e);
 
             throw new RestconfDocumentedException("Error parsing input: " + e.getMessage(), ErrorType.PROTOCOL,
                     ErrorTag.MALFORMED_MESSAGE);
