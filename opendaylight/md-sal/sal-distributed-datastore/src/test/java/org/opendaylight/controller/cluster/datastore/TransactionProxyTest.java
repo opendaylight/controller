@@ -33,6 +33,8 @@ import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.datastore.TransactionProxy.TransactionType;
+import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
+import org.opendaylight.controller.cluster.datastore.exceptions.NotInitializedException;
 import org.opendaylight.controller.cluster.datastore.exceptions.PrimaryNotFoundException;
 import org.opendaylight.controller.cluster.datastore.exceptions.TimeoutException;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
@@ -655,11 +657,8 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         verifyCohortFutures(proxy, TestException.class);
     }
 
-    @Test
-    public void testReadyWithInitialCreateTransactionFailure() throws Exception {
-
-        doReturn(Futures.failed(new PrimaryNotFoundException("mock"))).when(
-                mockActorContext).findPrimaryShardAsync(anyString());
+    private void testWriteOnlyTxWithFindPrimaryShardFailure(Exception toThrow) throws Exception {
+        doReturn(Futures.failed(toThrow)).when(mockActorContext).findPrimaryShardAsync(anyString());
 
         TransactionProxy transactionProxy = new TransactionProxy(mockActorContext, WRITE_ONLY);
 
@@ -677,7 +676,22 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         ThreePhaseCommitCohortProxy proxy = (ThreePhaseCommitCohortProxy) ready;
 
-        verifyCohortFutures(proxy, PrimaryNotFoundException.class);
+        verifyCohortFutures(proxy, toThrow.getClass());
+    }
+
+    @Test
+    public void testWriteOnlyTxWithPrimaryNotFoundException() throws Exception {
+        testWriteOnlyTxWithFindPrimaryShardFailure(new PrimaryNotFoundException("mock"));
+    }
+
+    @Test
+    public void testWriteOnlyTxWithNotInitializedException() throws Exception {
+        testWriteOnlyTxWithFindPrimaryShardFailure(new NotInitializedException("mock"));
+    }
+
+    @Test
+    public void testWriteOnlyTxWithNoShardLeaderException() throws Exception {
+        testWriteOnlyTxWithFindPrimaryShardFailure(new NoShardLeaderException("mock"));
     }
 
     @Test

@@ -79,7 +79,7 @@ public class ShardTransactionTest extends AbstractActorTest {
 
     private ActorRef createShard(){
         return getSystem().actorOf(Shard.props(SHARD_IDENTIFIER,
-            Collections.<ShardIdentifier, String>emptyMap(), datastoreContext, TestModel.createTestContext()));
+            Collections.<String, String>emptyMap(), datastoreContext, TestModel.createTestContext()));
     }
 
     private ActorRef newTransactionActor(DOMStoreTransaction transaction, String name) {

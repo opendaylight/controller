@@ -147,8 +147,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
         }};
     }
 
-    @Test
-    public void testTransactionWritesWithShardNotInitiallyReady() throws Exception{
+    private void testTransactionWritesWithShardNotInitiallyReady(final boolean writeOnly) throws Exception {
         new IntegrationTestKit(getSystem()) {{
             String testName = "testTransactionWritesWithShardNotInitiallyReady";
             String shardName = "test-1";
@@ -163,8 +162,8 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
 
             // Create the write Tx
 
-            // TODO - we'll want to test this with write-only as well when FindPrimary returns the leader shard.
-            final DOMStoreWriteTransaction writeTx = dataStore.newReadWriteTransaction();
+            final DOMStoreWriteTransaction writeTx = writeOnly ? dataStore.newWriteOnlyTransaction() :
+                    dataStore.newReadWriteTransaction();
             assertNotNull("newReadWriteTransaction returned null", writeTx);
 
             // Do some modification operations and ready the Tx on a separate thread.
@@ -240,7 +239,17 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
     }
 
     @Test
-    public void testTransactionReadsWithShardNotInitiallyReady() throws Exception{
+    public void testWriteOnlyTransactionWithShardNotInitiallyReady() throws Exception {
+        testTransactionWritesWithShardNotInitiallyReady(true);
+    }
+
+    @Test
+    public void testReadWriteTransactionWithShardNotInitiallyReady() throws Exception {
+        testTransactionWritesWithShardNotInitiallyReady(false);
+    }
+
+    @Test
+    public void testTransactionReadsWithShardNotInitiallyReady() throws Exception {
         new IntegrationTestKit(getSystem()) {{
             String testName = "testTransactionReadsWithShardNotInitiallyReady";
             String shardName = "test-1";
@@ -455,8 +464,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
         }};
     }
 
-    @Test(expected=NoShardLeaderException.class)
-    public void testTransactionCommitFailureWithNoShardLeader() throws Throwable{
+    private void testTransactionCommitFailureWithNoShardLeader(final boolean writeOnly) throws Throwable {
         new IntegrationTestKit(getSystem()) {{
             String testName = "testTransactionCommitFailureWithNoShardLeader";
             String shardName = "test-1";
@@ -465,6 +473,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
             // by setting the election timeout, which is based on the heartbeat interval, really high.
 
             datastoreContextBuilder.shardHeartbeatIntervalInMillis(30000);
+            datastoreContextBuilder.shardInitializationTimeout(300, TimeUnit.MILLISECONDS);
 
             // Set the leader election timeout low for the test.
 
@@ -474,7 +483,8 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
 
             // Create the write Tx.
 
-            final DOMStoreWriteTransaction writeTx = dataStore.newReadWriteTransaction();
+            final DOMStoreWriteTransaction writeTx = writeOnly ? dataStore.newWriteOnlyTransaction() :
+                dataStore.newReadWriteTransaction();
             assertNotNull("newReadWriteTransaction returned null", writeTx);
 
             // Do some modifications and ready the Tx on a separate thread.
@@ -521,6 +531,16 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
                 cleanup(dataStore);
             }
         }};
+    }
+
+    @Test(expected=NoShardLeaderException.class)
+    public void testWriteOnlyransactionCommitFailureWithNoShardLeader() throws Throwable {
+        testTransactionCommitFailureWithNoShardLeader(true);
+    }
+
+    @Test(expected=NoShardLeaderException.class)
+    public void testReadWriteransactionCommitFailureWithNoShardLeader() throws Throwable {
+        testTransactionCommitFailureWithNoShardLeader(false);
     }
 
     @Test
