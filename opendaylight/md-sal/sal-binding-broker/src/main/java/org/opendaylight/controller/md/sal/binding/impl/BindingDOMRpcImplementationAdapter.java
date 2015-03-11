@@ -50,8 +50,8 @@ public class BindingDOMRpcImplementationAdapter implements DOMRpcImplementation 
     public <T extends RpcService> BindingDOMRpcImplementationAdapter(final BindingNormalizedNodeCodecRegistry codec, final Class<T> type ,final T delegate) {
         this.codec = codec;
         this.delegate = delegate;
-        this.invoker = RpcServiceInvoker.from(type);
-        this.module = BindingReflections.getQNameModule(type);
+        invoker = RpcServiceInvoker.from(type);
+        module = BindingReflections.getQNameModule(type);
     }
 
     public QNameModule getQNameModule() {
@@ -61,7 +61,7 @@ public class BindingDOMRpcImplementationAdapter implements DOMRpcImplementation 
     @Override
     public CheckedFuture<DOMRpcResult, DOMRpcException> invokeRpc(final DOMRpcIdentifier rpc, final NormalizedNode<?, ?> input) {
         final SchemaPath schemaPath = rpc.getType();
-        final DataObject bindingInput = deserilialize(rpc.getType(),input);
+        final DataObject bindingInput = input != null ? deserilialize(rpc.getType(),input) : null;
         final ListenableFuture<RpcResult<?>> bindingResult = invoke(schemaPath,bindingInput);
         return transformResult(schemaPath,bindingResult);
     }
