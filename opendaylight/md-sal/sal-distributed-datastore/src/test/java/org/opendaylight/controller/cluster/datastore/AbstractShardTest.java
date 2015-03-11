@@ -86,7 +86,7 @@ public abstract class AbstractShardTest extends AbstractActorTest{
     }
 
     protected Props newShardProps() {
-        return Shard.props(shardID, Collections.<ShardIdentifier,String>emptyMap(),
+        return Shard.props(shardID, Collections.<String,String>emptyMap(),
                 newDatastoreContext(), SCHEMA_CONTEXT);
     }
 
@@ -101,7 +101,7 @@ public abstract class AbstractShardTest extends AbstractActorTest{
         Creator<Shard> creator = new Creator<Shard>() {
             @Override
             public Shard create() throws Exception {
-                return new Shard(shardID, Collections.<ShardIdentifier,String>emptyMap(),
+                return new Shard(shardID, Collections.<String,String>emptyMap(),
                         newDatastoreContext(), SCHEMA_CONTEXT) {
                     @Override
                     protected void onRecoveryComplete() {
