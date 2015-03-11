@@ -460,6 +460,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         if (followerActor != null) {
             long followerNextIndex = followerLogInformation.getNextIndex();
             boolean isFollowerActive = followerLogInformation.isFollowerActive();
+            boolean sendAppendEntries = false;
+            List<ReplicatedLogEntry> entries = Collections.EMPTY_LIST;
 
             if (mapFollowerToSnapshot.get(followerId) != null) {
                 // if install snapshot is in process , then sent next chunk if possible
@@ -467,8 +469,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                     sendSnapshotChunk(followerActor, followerId);
                 } else if(sendHeartbeat) {
                     // we send a heartbeat even if we have not received a reply for the last chunk
-                    sendAppendEntriesToFollower(followerActor, followerLogInformation.getNextIndex(),
-                        Collections.<ReplicatedLogEntry>emptyList(), followerId);
+                    sendAppendEntries = true;
                 }
             } else {
                 long leaderLastIndex = context.getReplicatedLog().lastIndex();
@@ -485,10 +486,10 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                             followerNextIndex, followerId);
 
                     // FIXME : Sending one entry at a time
-                    final List<ReplicatedLogEntry> entries = context.getReplicatedLog().getFrom(followerNextIndex, 1);
-
-                    sendAppendEntriesToFollower(followerActor, followerNextIndex, entries, followerId);
-
+                    if(followerLogInformation.okToReplicate()) {
+                        entries = context.getReplicatedLog().getFrom(followerNextIndex, 1);
+                        sendAppendEntries = true;
+                    }
                 } else if (isFollowerActive && followerNextIndex >= 0 &&
                     leaderLastIndex > followerNextIndex && !context.isSnapshotCaptureInitiated()) {
                     // if the followers next index is not present in the leaders log, and
@@ -503,18 +504,20 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                     }
 
                     // Send heartbeat to follower whenever install snapshot is initiated.
-                    sendAppendEntriesToFollower(followerActor, followerLogInformation.getNextIndex(),
-                            Collections.<ReplicatedLogEntry>emptyList(), followerId);
-
+                    sendAppendEntries = true;
                     initiateCaptureSnapshot(followerId, followerNextIndex);
 
                 } else if(sendHeartbeat) {
-                    //we send an AppendEntries, even if the follower is inactive
+                    // we send an AppendEntries, even if the follower is inactive
                     // in-order to update the followers timestamp, in case it becomes active again
-                    sendAppendEntriesToFollower(followerActor, followerLogInformation.getNextIndex(),
-                        Collections.<ReplicatedLogEntry>emptyList(), followerId);
+                    sendAppendEntries = true;
                 }
 
+            }
+
+            if(sendAppendEntries) {
+                sendAppendEntriesToFollower(followerActor, followerNextIndex,
+                        entries, followerId);
             }
         }
     }
