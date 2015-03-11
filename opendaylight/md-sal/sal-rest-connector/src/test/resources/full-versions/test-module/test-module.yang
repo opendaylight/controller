@@ -46,6 +46,13 @@ module test-module {
     }
   }
 
+  rpc no-payload-rpc-test {
+      output {
+          container cont-output {
+          }
+      }
+  }
+  
   rpc rpc-test {
     input {
       container cont {

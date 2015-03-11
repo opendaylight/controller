@@ -35,6 +35,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNormalizedNodeS
 import org.opendaylight.yangtools.yang.data.impl.schema.NormalizedNodeResult;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaNode;
+import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.opendaylight.yangtools.yang.model.util.SchemaContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,6 +60,9 @@ public class JsonNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPr
             WebApplicationException {
         try {
             final InstanceIdentifierContext<?> path = getIdentifierWithSchema().get();
+            if (entityStream.available() < 1) {
+                return new NormalizedNodeContext(path, null);
+            }
             final NormalizedNodeResult resultHolder = new NormalizedNodeResult();
             final NormalizedNodeStreamWriter writer = ImmutableNormalizedNodeStreamWriter.from(resultHolder);
 
@@ -66,10 +70,14 @@ public class JsonNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPr
             if(isPost()) {
                 // FIXME: We need dispatch for RPC.
                 parentSchema = path.getSchemaNode();
-            } else if(path.getSchemaContext() instanceof SchemaContext) {
+            } else if(path.getSchemaNode() instanceof SchemaContext) {
                 parentSchema = path.getSchemaContext();
             } else {
-                parentSchema = SchemaContextUtil.findDataSchemaNode(path.getSchemaContext(), path.getSchemaNode().getPath().getParent());
+                if (SchemaPath.ROOT.equals(path.getSchemaNode().getPath().getParent())) {
+                    parentSchema = path.getSchemaContext();
+                } else {
+                    parentSchema = SchemaContextUtil.findDataSchemaNode(path.getSchemaContext(), path.getSchemaNode().getPath().getParent());
+                }
             }
 
             final JsonParserStream jsonParser = JsonParserStream.create(writer, path.getSchemaContext(), parentSchema);
