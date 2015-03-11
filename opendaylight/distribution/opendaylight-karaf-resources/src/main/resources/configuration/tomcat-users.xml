@@ -1,0 +1,4 @@
+<tomcat-users>
+<!-- admin/admin is enabled by default for backwards compatibility. Users are encouraged to change these credentials when deploying OpenDaylight. -->
+  <user name="admin" password="admin" roles="System-Admin,Network-Admin,Network-Operator,Container-User" />
+</tomcat-users>
