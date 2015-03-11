@@ -485,7 +485,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
                 @Override
                 public void onComplete(Throwable failure, ActorSelection primaryShard) {
                     if(failure != null) {
-                        newTxFutureCallback.onComplete(failure, null);
+                        newTxFutureCallback.createTransactionContext(failure, null);
                     } else {
                         newTxFutureCallback.setPrimaryShard(primaryShard);
                     }
@@ -565,7 +565,8 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
             this.primaryShard = primaryShard;
 
             if(transactionType == TransactionType.WRITE_ONLY) {
-                LOG.debug("Tx {} Primary shard found - creating WRITE_ONLY transaction context", identifier);
+                LOG.debug("Tx {} Primary shard {} found - creating WRITE_ONLY transaction context",
+                        identifier, primaryShard);
 
                 // For write-only Tx's we prepare the transaction modifications directly on the shard actor
                 // to avoid the overhead of creating a separate transaction actor.
@@ -611,7 +612,9 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
          * Performs a CreateTransaction try async.
          */
         private void tryCreateTransaction() {
-            LOG.debug("Tx {} Primary shard found - trying create transaction", identifier);
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("Tx {} Primary shard {} found - trying create transaction", identifier, primaryShard);
+            }
 
             Object serializedCreateMessage = new CreateTransaction(identifier.toString(),
                     TransactionProxy.this.transactionType.ordinal(),
@@ -644,6 +647,10 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
                 }
             }
 
+            createTransactionContext(failure, response);
+        }
+
+        private void createTransactionContext(Throwable failure, Object response) {
             // Mainly checking for state violation here to perform a volatile read of "initialized" to
             // ensure updates to operationLimter et al are visible to this thread (ie we're doing
             // "piggy-back" synchronization here).
