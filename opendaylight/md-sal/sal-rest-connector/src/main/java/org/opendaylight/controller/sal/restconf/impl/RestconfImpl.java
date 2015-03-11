@@ -732,7 +732,7 @@ public class RestconfImpl implements RestconfService {
 
         if (rpc.getInput() != null) {
             // FIXME : find a correct Error from specification
-            throw new IllegalStateException("RPC " + rpc + " needs input value!");
+            throw new IllegalStateException("RPC " + rpc + " does'n need input value!");
         }
 
         final CheckedFuture<DOMRpcResult, DOMRpcException> response;
