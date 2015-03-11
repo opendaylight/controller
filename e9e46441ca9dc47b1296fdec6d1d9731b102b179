@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_4e23b105",
+        "filename": "opendaylight/distribution/opendaylight-karaf-resources/src/main/resources/configuration/tomcat-users.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-03-11T11:44:10Z",
+      "side": 1,
+      "message": "I\u0027d think that admin/admin should be enabled by default, just like it was meant to be in current Hydro/Helium release.\n\nA comment/doc saying how to disable this is probably more backwards compatible. And since tomcat is not used in Lithium, leaving it disabled [in master] may make more sense.",
+      "revId": "e9e46441ca9dc47b1296fdec6d1d9731b102b179",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
