@@ -17,7 +17,7 @@ import jline.console.completer.NullCompleter;
 import org.opendaylight.controller.netconf.cli.io.ConsoleContext;
 import org.opendaylight.controller.netconf.cli.io.ConsoleIO;
 import org.opendaylight.yangtools.yang.data.api.Node;
-import org.opendaylight.yangtools.yang.model.api.ChoiceNode;
+import org.opendaylight.yangtools.yang.model.api.ChoiceSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -88,8 +88,8 @@ public abstract class AbstractReader<T extends DataSchemaNode> implements Reader
         String defaultValue = null;
         if (schemaNode instanceof LeafSchemaNode) {
             defaultValue = ((LeafSchemaNode) schemaNode).getDefault();
-        } else if (schemaNode instanceof ChoiceNode) {
-            defaultValue = ((ChoiceNode) schemaNode).getDefaultCase();
+        } else if (schemaNode instanceof ChoiceSchemaNode) {
+            defaultValue = ((ChoiceSchemaNode) schemaNode).getDefaultCase();
         }
 
         return Optional.fromNullable(defaultValue);

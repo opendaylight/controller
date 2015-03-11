@@ -23,7 +23,7 @@ import org.opendaylight.controller.netconf.cli.reader.ReadingException;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.model.api.AnyXmlSchemaNode;
-import org.opendaylight.yangtools.yang.model.api.ChoiceNode;
+import org.opendaylight.yangtools.yang.model.api.ChoiceSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode;
@@ -86,9 +86,9 @@ public class GenericReader extends AbstractReader<DataSchemaNode> {
                             getSchemaContext(), getReadConfigNode());
                     return new GenericListReader<>(console, entryReader, getSchemaContext(), getReadConfigNode())
                             .read((LeafListSchemaNode) schemaNode);
-                } else if (schemaNode instanceof ChoiceNode) {
+                } else if (schemaNode instanceof ChoiceSchemaNode) {
                     return new ChoiceReader(console, argumentHandlerRegistry, getSchemaContext(), getReadConfigNode())
-                            .read((ChoiceNode) schemaNode);
+                            .read((ChoiceSchemaNode) schemaNode);
                 } else if (schemaNode instanceof AnyXmlSchemaNode) {
                     return new AnyXmlReader(console, getSchemaContext(), getReadConfigNode())
                             .read((AnyXmlSchemaNode) schemaNode);

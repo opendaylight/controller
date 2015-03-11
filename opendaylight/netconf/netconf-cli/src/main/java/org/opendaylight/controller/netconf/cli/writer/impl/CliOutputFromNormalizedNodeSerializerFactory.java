@@ -24,6 +24,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.transform.FromNormalized
 import org.opendaylight.yangtools.yang.data.impl.schema.transform.base.serializer.NodeSerializerDispatcher;
 import org.opendaylight.yangtools.yang.model.api.AnyXmlSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.AugmentationSchema;
+import org.opendaylight.yangtools.yang.model.api.ChoiceSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
@@ -69,7 +70,7 @@ public final class CliOutputFromNormalizedNodeSerializerFactory implements FromN
     }
 
     @Override
-    public FromNormalizedNodeSerializer<String, ChoiceNode, org.opendaylight.yangtools.yang.model.api.ChoiceNode> getChoiceNodeSerializer() {
+    public FromNormalizedNodeSerializer<String, ChoiceNode, ChoiceSchemaNode> getChoiceNodeSerializer() {
         return choiceSerializer;
     }
 

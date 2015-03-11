@@ -20,7 +20,7 @@ import org.opendaylight.yangtools.yang.data.composite.node.schema.cnsn.parser.Cn
 import org.opendaylight.yangtools.yang.data.impl.schema.transform.base.serializer.NodeSerializerDispatcher;
 import org.opendaylight.yangtools.yang.data.impl.schema.transform.dom.DomUtils;
 import org.opendaylight.yangtools.yang.model.api.AugmentationSchema;
-import org.opendaylight.yangtools.yang.model.api.ChoiceNode;
+import org.opendaylight.yangtools.yang.model.api.ChoiceSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode;
@@ -83,8 +83,8 @@ public class NormalizedNodeWriter extends AbstractWriter<DataSchemaNode> {
             return factoryParsing.getLeafSetNodeParser().parse(dataNodes, (LeafListSchemaNode) dataSchemaNode);
         } else if (dataSchemaNode instanceof ListSchemaNode) {
             return factoryParsing.getMapNodeParser().parse(dataNodes, (ListSchemaNode) dataSchemaNode);
-        } else if (dataSchemaNode instanceof ChoiceNode) {
-            return factoryParsing.getChoiceNodeParser().parse(dataNodes, (ChoiceNode) dataSchemaNode);
+        } else if (dataSchemaNode instanceof ChoiceSchemaNode) {
+            return factoryParsing.getChoiceNodeParser().parse(dataNodes, (ChoiceSchemaNode) dataSchemaNode);
         } else if (dataSchemaNode instanceof AugmentationSchema) {
             return factoryParsing.getAugmentationNodeParser().parse(dataNodes, (AugmentationSchema) dataSchemaNode);
         }

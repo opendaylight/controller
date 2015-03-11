@@ -22,7 +22,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.model.api.AugmentationSchema;
 import org.opendaylight.yangtools.yang.model.api.ChoiceCaseNode;
-import org.opendaylight.yangtools.yang.model.api.ChoiceNode;
+import org.opendaylight.yangtools.yang.model.api.ChoiceSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ConstraintDefinition;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
@@ -93,8 +93,8 @@ public final class YangSchemaUtils {
 
     private static DataSchemaNode searchInChoices(final DataNodeContainer node, final QName arg) {
         for (DataSchemaNode child : node.getChildNodes()) {
-            if (child instanceof ChoiceNode) {
-                ChoiceNode choiceNode = (ChoiceNode) child;
+            if (child instanceof ChoiceSchemaNode) {
+                ChoiceSchemaNode choiceNode = (ChoiceSchemaNode) child;
                 DataSchemaNode potential = searchInCases(choiceNode, arg);
                 if (potential != null) {
                     return potential;
@@ -104,7 +104,7 @@ public final class YangSchemaUtils {
         return null;
     }
 
-    private static DataSchemaNode searchInCases(final ChoiceNode choiceNode, final QName arg) {
+    private static DataSchemaNode searchInCases(final ChoiceSchemaNode choiceNode, final QName arg) {
         Set<ChoiceCaseNode> cases = choiceNode.getCases();
         for (ChoiceCaseNode caseNode : cases) {
             DataSchemaNode node = caseNode.getDataChildByName(arg);

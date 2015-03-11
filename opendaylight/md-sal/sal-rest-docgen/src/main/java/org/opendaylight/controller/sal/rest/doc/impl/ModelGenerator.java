@@ -27,7 +27,7 @@ import org.opendaylight.controller.sal.rest.doc.model.builder.OperationBuilder;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.AnyXmlSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ChoiceCaseNode;
-import org.opendaylight.yangtools.yang.model.api.ChoiceNode;
+import org.opendaylight.yangtools.yang.model.api.ChoiceSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ConstraintDefinition;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
@@ -69,7 +69,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ModelGenerator {
 
-    private static Logger _logger = LoggerFactory.getLogger(ModelGenerator.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ModelGenerator.class);
 
     private static final String BASE_64 = "base64";
     private static final String BINARY_ENCODING_KEY = "binaryEncoding";
@@ -201,12 +201,12 @@ public class ModelGenerator {
 
         String moduleName = module.getName();
         Set<IdentitySchemaNode> idNodes = module.getIdentities();
-        _logger.debug("Processing Identities for module {} . Found {} identity statements", moduleName, idNodes.size());
+        LOG.debug("Processing Identities for module {} . Found {} identity statements", moduleName, idNodes.size());
 
         for (IdentitySchemaNode idNode : idNodes) {
             JSONObject identityObj = new JSONObject();
             String identityName = idNode.getQName().getLocalName();
-            _logger.debug("Processing Identity: {}", identityName);
+            LOG.debug("Processing Identity: {}", identityName);
 
             identityObj.put(ID_KEY, identityName);
             identityObj.put(DESCRIPTION_KEY, idNode.getDescription());
@@ -351,8 +351,8 @@ public class ModelGenerator {
                 } else if (node instanceof LeafListSchemaNode) {
                     property = processLeafListNode((LeafListSchemaNode) node);
 
-                } else if (node instanceof ChoiceNode) {
-                    property = processChoiceNode((ChoiceNode) node, moduleName, models, schemaContext);
+                } else if (node instanceof ChoiceSchemaNode) {
+                    property = processChoiceNode((ChoiceSchemaNode) node, moduleName, models, schemaContext);
 
                 } else if (node instanceof AnyXmlSchemaNode) {
                     property = processAnyXMLNode((AnyXmlSchemaNode) node);
@@ -398,7 +398,7 @@ public class ModelGenerator {
      * @throws JSONException
      * @throws IOException
      */
-    private JSONObject processChoiceNode(ChoiceNode choiceNode, String moduleName, JSONObject models,
+    private JSONObject processChoiceNode(ChoiceSchemaNode choiceNode, String moduleName, JSONObject models,
             SchemaContext schemaContext) throws JSONException, IOException {
 
         Set<ChoiceCaseNode> cases = choiceNode.getCases();

@@ -12,11 +12,12 @@ import java.util.Collections;
 import org.opendaylight.controller.netconf.cli.writer.OutFormatter;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.data.api.schema.ChoiceNode;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.impl.schema.transform.base.serializer.ChoiceNodeBaseSerializer;
 import org.opendaylight.yangtools.yang.data.impl.schema.transform.base.serializer.NodeSerializerDispatcher;
 import org.opendaylight.yangtools.yang.model.api.ChoiceCaseNode;
-import org.opendaylight.yangtools.yang.model.api.ChoiceNode;
+import org.opendaylight.yangtools.yang.model.api.ChoiceSchemaNode;
 
 final class ChoiceNodeCliSerializer extends ChoiceNodeBaseSerializer<String> {
     private final NodeSerializerDispatcher<String> dispatcher;
@@ -28,7 +29,7 @@ final class ChoiceNodeCliSerializer extends ChoiceNodeBaseSerializer<String> {
     }
 
     @Override
-    public Iterable<String> serialize(final ChoiceNode schema, final org.opendaylight.yangtools.yang.data.api.schema.ChoiceNode node) {
+    public Iterable<String> serialize(final ChoiceSchemaNode schema, final ChoiceNode node) {
         final StringBuilder output = new StringBuilder();
         out.increaseIndent();
         out.addStringWithIndent(output, "choice ");
@@ -49,7 +50,7 @@ final class ChoiceNodeCliSerializer extends ChoiceNodeBaseSerializer<String> {
         return Collections.singletonList(output.toString());
     }
 
-    private String detectCase(final ChoiceNode schema, final org.opendaylight.yangtools.yang.data.api.schema.ChoiceNode node) {
+    private String detectCase(final ChoiceSchemaNode schema, final ChoiceNode node) {
         for (final DataContainerChild<? extends PathArgument, ?> caseChild : node.getValue()) {
             final QName presentChildQName = caseChild.getNodeType();
             for (final ChoiceCaseNode choiceCaseNode : schema.getCases()) {

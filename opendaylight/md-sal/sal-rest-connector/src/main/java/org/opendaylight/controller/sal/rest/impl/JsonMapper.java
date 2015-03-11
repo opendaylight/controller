@@ -32,7 +32,7 @@ import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.SimpleNode;
 import org.opendaylight.yangtools.yang.model.api.AnyXmlSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ChoiceCaseNode;
-import org.opendaylight.yangtools.yang.model.api.ChoiceNode;
+import org.opendaylight.yangtools.yang.model.api.ChoiceSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
@@ -176,8 +176,8 @@ class JsonMapper {
             if (node.getNodeType().equals(dsn.getQName())) {
                 return dsn;
             }
-            if (dsn instanceof ChoiceNode) {
-                for (ChoiceCaseNode choiceCase : ((ChoiceNode) dsn).getCases()) {
+            if (dsn instanceof ChoiceSchemaNode) {
+                for (ChoiceCaseNode choiceCase : ((ChoiceSchemaNode) dsn).getCases()) {
                     DataSchemaNode foundDsn = findFirstSchemaForNode(node, choiceCase.getChildNodes());
                     if (foundDsn != null) {
                         return foundDsn;

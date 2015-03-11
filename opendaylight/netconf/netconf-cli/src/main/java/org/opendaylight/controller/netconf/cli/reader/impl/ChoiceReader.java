@@ -28,7 +28,7 @@ import org.opendaylight.controller.netconf.cli.reader.ReadingException;
 import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
 import org.opendaylight.yangtools.yang.model.api.ChoiceCaseNode;
-import org.opendaylight.yangtools.yang.model.api.ChoiceNode;
+import org.opendaylight.yangtools.yang.model.api.ChoiceSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -36,7 +36,7 @@ import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ChoiceReader extends AbstractReader<ChoiceNode> {
+public class ChoiceReader extends AbstractReader<ChoiceSchemaNode> {
 
     private static final Logger LOG = LoggerFactory.getLogger(ChoiceReader.class);
 
@@ -55,7 +55,7 @@ public class ChoiceReader extends AbstractReader<ChoiceNode> {
     }
 
     @Override
-    public List<Node<?>> readWithContext(final ChoiceNode choiceNode) throws IOException, ReadingException {
+    public List<Node<?>> readWithContext(final ChoiceSchemaNode choiceNode) throws IOException, ReadingException {
         final Map<String, ChoiceCaseNode> availableCases = collectAllCases(choiceNode);
         console.formatLn("Select case for choice %s from: %s", choiceNode.getQName().getLocalName(),
                 formatSet(availableCases.keySet()));
@@ -117,7 +117,7 @@ public class ChoiceReader extends AbstractReader<ChoiceNode> {
         return false;
     }
 
-    private Map<String, ChoiceCaseNode> collectAllCases(final ChoiceNode schemaNode) {
+    private Map<String, ChoiceCaseNode> collectAllCases(final ChoiceSchemaNode schemaNode) {
         return Maps.uniqueIndex(schemaNode.getCases(), new Function<ChoiceCaseNode, String>() {
             @Override
             public String apply(final ChoiceCaseNode input) {
@@ -127,8 +127,8 @@ public class ChoiceReader extends AbstractReader<ChoiceNode> {
     }
 
     @Override
-    protected ConsoleContext getContext(final ChoiceNode schemaNode) {
-        return new BaseConsoleContext<ChoiceNode>(schemaNode) {
+    protected ConsoleContext getContext(final ChoiceSchemaNode schemaNode) {
+        return new BaseConsoleContext<ChoiceSchemaNode>(schemaNode) {
             @Override
             public List<Completer> getAdditionalCompleters() {
                 return Collections

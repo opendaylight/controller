@@ -41,6 +41,7 @@ import org.opendaylight.yangtools.yang.model.api.AnyXmlSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.AugmentationSchema;
 import org.opendaylight.yangtools.yang.model.api.AugmentationTarget;
 import org.opendaylight.yangtools.yang.model.api.ChoiceCaseNode;
+import org.opendaylight.yangtools.yang.model.api.ChoiceSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
@@ -594,7 +595,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         private final ImmutableMap<QName, DataNormalizationOperation<?>> byQName;
         private final ImmutableMap<PathArgument, DataNormalizationOperation<?>> byArg;
 
-        protected ChoiceNodeNormalization(final org.opendaylight.yangtools.yang.model.api.ChoiceNode schema) {
+        protected ChoiceNodeNormalization(final ChoiceSchemaNode schema) {
             super(new NodeIdentifier(schema.getQName()),schema);
             ImmutableMap.Builder<QName, DataNormalizationOperation<?>> byQNameBuilder = ImmutableMap.builder();
             ImmutableMap.Builder<PathArgument, DataNormalizationOperation<?>> byArgBuilder = ImmutableMap.builder();
@@ -673,8 +674,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
     private static final Optional<DataSchemaNode> findChildSchemaNode(final DataNodeContainer parent,final QName child) {
         DataSchemaNode potential = parent.getDataChildByName(child);
         if (potential == null) {
-            Iterable<org.opendaylight.yangtools.yang.model.api.ChoiceNode> choices = FluentIterable.from(
-                    parent.getChildNodes()).filter(org.opendaylight.yangtools.yang.model.api.ChoiceNode.class);
+            Iterable<ChoiceSchemaNode> choices = FluentIterable.from(parent.getChildNodes()).filter(ChoiceSchemaNode.class);
             potential = findChoice(choices, child);
         }
         return Optional.fromNullable(potential);
@@ -696,10 +696,9 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         return fromDataSchemaNode(result);
     }
 
-    private static org.opendaylight.yangtools.yang.model.api.ChoiceNode findChoice(
-            final Iterable<org.opendaylight.yangtools.yang.model.api.ChoiceNode> choices, final QName child) {
-        org.opendaylight.yangtools.yang.model.api.ChoiceNode foundChoice = null;
-        choiceLoop: for (org.opendaylight.yangtools.yang.model.api.ChoiceNode choice : choices) {
+    private static ChoiceSchemaNode findChoice(final Iterable<ChoiceSchemaNode> choices, final QName child) {
+        ChoiceSchemaNode foundChoice = null;
+        choiceLoop: for (ChoiceSchemaNode choice : choices) {
             for (ChoiceCaseNode caze : choice.getCases()) {
                 if (findChildSchemaNode(caze, child).isPresent()) {
                     foundChoice = choice;
@@ -766,8 +765,8 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
             return fromListSchemaNode((ListSchemaNode) potential);
         } else if (potential instanceof LeafSchemaNode) {
             return new LeafNormalization((LeafSchemaNode) potential);
-        } else if (potential instanceof org.opendaylight.yangtools.yang.model.api.ChoiceNode) {
-            return new ChoiceNodeNormalization((org.opendaylight.yangtools.yang.model.api.ChoiceNode) potential);
+        } else if (potential instanceof ChoiceSchemaNode) {
+            return new ChoiceNodeNormalization((ChoiceSchemaNode) potential);
         } else if (potential instanceof LeafListSchemaNode) {
             return fromLeafListSchemaNode((LeafListSchemaNode) potential);
         } else if (potential instanceof AnyXmlSchemaNode) {

@@ -22,7 +22,7 @@ import org.opendaylight.yangtools.yang.data.impl.SimpleNodeTOImpl;
 import org.opendaylight.yangtools.yang.data.impl.codec.TypeDefinitionAwareCodec;
 import org.opendaylight.yangtools.yang.data.impl.codec.xml.XmlCodecProvider;
 import org.opendaylight.yangtools.yang.model.api.ChoiceCaseNode;
-import org.opendaylight.yangtools.yang.model.api.ChoiceNode;
+import org.opendaylight.yangtools.yang.model.api.ChoiceSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
@@ -76,7 +76,7 @@ public class XmlDocumentUtils {
   }
 
   public static final QName OPERATION_ATTRIBUTE_QNAME = QName.create(URI.create("urn:ietf:params:xml:ns:netconf:base:1.0"), null, "operation");
-  private static final Logger logger = LoggerFactory.getLogger(XmlDocumentUtils.class);
+  private static final Logger LOG = LoggerFactory.getLogger(XmlDocumentUtils.class);
   private static final XMLOutputFactory FACTORY = XMLOutputFactory.newFactory();
 
   /**
@@ -107,7 +107,7 @@ public class XmlDocumentUtils {
       writer.close();
       return (Document)result.getNode();
     } catch (XMLStreamException e) {
-      logger.error("Failed to serialize data {}", data, e);
+      LOG.error("Failed to serialize data {}", data, e);
       return null;
     }
   }
@@ -151,23 +151,23 @@ public class XmlDocumentUtils {
     String text = xmlElement.getTextContent();
     Object value = null;
     if (codec != null) {
-      logger.debug("toSimpleNodeWithType: found codec, deserializing text {}", text);
+      LOG.debug("toSimpleNodeWithType: found codec, deserializing text {}", text);
       value = codec.deserialize(text);
     }
 
     final TypeDefinition<?> baseType = XmlUtils.resolveBaseTypeFrom(schema.getType());
     if (baseType instanceof InstanceIdentifierType) {
-      logger.debug("toSimpleNodeWithType: base type of node is instance identifier, deserializing element", xmlElement);
+      LOG.debug("toSimpleNodeWithType: base type of node is instance identifier, deserializing element", xmlElement);
       value = InstanceIdentifierForXmlCodec.deserialize(xmlElement,schemaCtx);
 
     } else if(baseType instanceof IdentityrefTypeDefinition){
-      logger.debug("toSimpleNodeWithType: base type of node is IdentityrefTypeDefinition, deserializing element", xmlElement);
+      LOG.debug("toSimpleNodeWithType: base type of node is IdentityrefTypeDefinition, deserializing element", xmlElement);
       value = InstanceIdentifierForXmlCodec.toIdentity(xmlElement.getTextContent(), xmlElement, schemaCtx);
 
     }
 
     if (value == null) {
-      logger.debug("toSimpleNodeWithType: no type found for element, returning just the text string value of element {}", xmlElement);
+      LOG.debug("toSimpleNodeWithType: no type found for element, returning just the text string value of element {}", xmlElement);
       value = xmlElement.getTextContent();
     }
 
@@ -181,18 +181,18 @@ public class XmlDocumentUtils {
     String text = xmlElement.getTextContent();
     Object value = null;
     if (codec != null) {
-      logger.debug("toSimpleNodeWithType: found codec, deserializing text {}", text);
+      LOG.debug("toSimpleNodeWithType: found codec, deserializing text {}", text);
       value = codec.deserialize(text);
     }
 
     final TypeDefinition<?> baseType = XmlUtils.resolveBaseTypeFrom(schema.getType());
     if (baseType instanceof InstanceIdentifierType) {
-      logger.debug("toSimpleNodeWithType: base type of node is instance identifier, deserializing element", xmlElement);
+      LOG.debug("toSimpleNodeWithType: base type of node is instance identifier, deserializing element", xmlElement);
       value = InstanceIdentifierForXmlCodec.deserialize(xmlElement,schemaCtx);
     }
 
     if (value == null) {
-      logger.debug("toSimpleNodeWithType: no type found for element, returning just the text string value of element {}", xmlElement);
+      LOG.debug("toSimpleNodeWithType: no type found for element, returning just the text string value of element {}", xmlElement);
       value = xmlElement.getTextContent();
     }
 
@@ -229,8 +229,8 @@ public class XmlDocumentUtils {
       for (DataSchemaNode dsn : dataSchemaNode) {
         if (qname.isEqualWithoutRevision(dsn.getQName())) {
           return Optional.<DataSchemaNode> of(dsn);
-        } else if (dsn instanceof ChoiceNode) {
-          for (ChoiceCaseNode choiceCase : ((ChoiceNode) dsn).getCases()) {
+        } else if (dsn instanceof ChoiceSchemaNode) {
+          for (ChoiceCaseNode choiceCase : ((ChoiceSchemaNode) dsn).getCases()) {
             Optional<DataSchemaNode> foundDsn = findFirstSchema(qname, choiceCase.getChildNodes());
             if (foundDsn != null && foundDsn.isPresent()) {
               return foundDsn;

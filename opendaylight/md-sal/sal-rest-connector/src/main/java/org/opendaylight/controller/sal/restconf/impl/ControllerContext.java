@@ -52,7 +52,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgum
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.AnyXmlSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ChoiceCaseNode;
-import org.opendaylight.yangtools.yang.model.api.ChoiceNode;
+import org.opendaylight.yangtools.yang.model.api.ChoiceSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
@@ -445,7 +445,7 @@ public class ControllerContext implements SchemaContextListener {
         return null;
     }
 
-    private static DataSchemaNode childByQName(final ChoiceNode container, final QName name) {
+    private static DataSchemaNode childByQName(final ChoiceSchemaNode container, final QName name) {
         for (final ChoiceCaseNode caze : container.getCases()) {
             final DataSchemaNode ret = ControllerContext.childByQName(caze, name);
             if (ret != null) {
@@ -480,8 +480,8 @@ public class ControllerContext implements SchemaContextListener {
         final DataSchemaNode ret = container.getDataChildByName(name);
         if (ret == null) {
             for (final DataSchemaNode node : container.getChildNodes()) {
-                if ((node instanceof ChoiceNode)) {
-                    final ChoiceNode choiceNode = ((ChoiceNode) node);
+                if ((node instanceof ChoiceSchemaNode)) {
+                    final ChoiceSchemaNode choiceNode = ((ChoiceSchemaNode) node);
                     final DataSchemaNode childByQName = ControllerContext.childByQName(choiceNode, name);
                     if (childByQName != null) {
                         return childByQName;
@@ -708,9 +708,9 @@ public class ControllerContext implements SchemaContextListener {
         return instantiatedDataNodeContainers;
     }
 
-    private static final Function<ChoiceNode, Set<ChoiceCaseNode>> CHOICE_FUNCTION = new Function<ChoiceNode, Set<ChoiceCaseNode>>() {
+    private static final Function<ChoiceSchemaNode, Set<ChoiceCaseNode>> CHOICE_FUNCTION = new Function<ChoiceSchemaNode, Set<ChoiceCaseNode>>() {
         @Override
-        public Set<ChoiceCaseNode> apply(final ChoiceNode node) {
+        public Set<ChoiceCaseNode> apply(final ChoiceSchemaNode node) {
             return node.getCases();
         }
     };
@@ -735,7 +735,7 @@ public class ControllerContext implements SchemaContextListener {
             }
         }
 
-        final Iterable<ChoiceNode> choiceNodes = Iterables.filter(container.getChildNodes(), ChoiceNode.class);
+        final Iterable<ChoiceSchemaNode> choiceNodes = Iterables.filter(container.getChildNodes(), ChoiceSchemaNode.class);
         final Iterable<Set<ChoiceCaseNode>> map = Iterables.transform(choiceNodes, CHOICE_FUNCTION);
 
         final Iterable<ChoiceCaseNode> allCases = Iterables.<ChoiceCaseNode> concat(map);
@@ -922,8 +922,8 @@ public class ControllerContext implements SchemaContextListener {
     private static DataSchemaNode childByQName(final Object container, final QName name) {
         if (container instanceof ChoiceCaseNode) {
             return childByQName((ChoiceCaseNode) container, name);
-        } else if (container instanceof ChoiceNode) {
-            return childByQName((ChoiceNode) container, name);
+        } else if (container instanceof ChoiceSchemaNode) {
+            return childByQName((ChoiceSchemaNode) container, name);
         } else if (container instanceof ContainerSchemaNode) {
             return childByQName((ContainerSchemaNode) container, name);
         } else if (container instanceof ListSchemaNode) {

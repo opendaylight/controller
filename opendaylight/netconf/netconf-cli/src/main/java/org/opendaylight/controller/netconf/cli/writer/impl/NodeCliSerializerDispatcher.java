@@ -21,6 +21,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.MixinNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.transform.FromNormalizedNodeSerializerFactory;
 import org.opendaylight.yangtools.yang.data.impl.schema.transform.base.serializer.NodeSerializerDispatcher;
 import org.opendaylight.yangtools.yang.model.api.AugmentationSchema;
+import org.opendaylight.yangtools.yang.model.api.ChoiceSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
@@ -63,10 +64,9 @@ public class NodeCliSerializerDispatcher implements NodeSerializerDispatcher<Str
 
     private Iterable<String> onChoiceNode(final Object childSchema,
             final DataContainerChild<? extends YangInstanceIdentifier.PathArgument, ?> dataContainerChild) {
-        checkSchemaCompatibility(childSchema, org.opendaylight.yangtools.yang.model.api.ChoiceNode.class,
-                dataContainerChild);
+        checkSchemaCompatibility(childSchema, ChoiceSchemaNode.class, dataContainerChild);
         return factory.getChoiceNodeSerializer().serialize(
-                (org.opendaylight.yangtools.yang.model.api.ChoiceNode) childSchema, (ChoiceNode) dataContainerChild);
+                (ChoiceSchemaNode) childSchema, (ChoiceNode) dataContainerChild);
     }
 
     private Iterable<String> onListNode(final Object childSchema,
