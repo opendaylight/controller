@@ -42,6 +42,7 @@
 
     <module>config-artifacts</module>
     <module>config-parent</module>
+    <module>config-it-base</module>
   </modules>
 
   <dependencies>
