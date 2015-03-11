@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_74abe089",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-11T22:54:00Z",
+      "side": 1,
+      "message": "Cached for efficiency.",
+      "revId": "bbfbeeab2850dacfe191b3904d16416916885ca1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_54926458",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 531,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-11T22:54:00Z",
+      "side": 1,
+      "message": "The meat of the changes - forward to the first other member we find. The fact that it\u0027s in the memberNameToAddress map means it\u0027s most likely up. What if it isn\u0027t? We could do an ask and try another member if it times out. Future enhancement.",
+      "revId": "bbfbeeab2850dacfe191b3904d16416916885ca1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_f49e1063",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/resources/application.conf",
+        "patchSetId": 8
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-11T22:54:00Z",
+      "side": 1,
+      "message": "Remoting configurations for the remote shards test in ShardManagerTest",
+      "revId": "bbfbeeab2850dacfe191b3904d16416916885ca1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
