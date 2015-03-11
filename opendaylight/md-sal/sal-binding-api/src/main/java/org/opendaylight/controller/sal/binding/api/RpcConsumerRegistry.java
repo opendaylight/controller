@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.sal.binding.api;
 
+import org.opendaylight.controller.md.sal.binding.api.BindingService;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 
 /**
@@ -16,7 +17,7 @@ import org.opendaylight.yangtools.yang.binding.RpcService;
  * RPC implementations are registered using the {@link RpcProviderRegistry}.
  *
  */
-public interface RpcConsumerRegistry extends BindingAwareService {
+public interface RpcConsumerRegistry extends BindingAwareService, BindingService {
     /**
      * Returns an implementation of a requested RPC service.
      *

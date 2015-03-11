@@ -131,6 +131,8 @@
                             org.opendaylight.controller.sal.binding.codegen,
                             org.opendaylight.controller.sal.binding.codegen.*,
                             org.opendaylight.controller.md.sal.binding.impl,
+                            org.opendaylight.controller.md.sal.binding.compat,
+                            org.opendaylight.controller.md.sal.binding.spi,
               <!--org.opendaylight.controller.sal.binding.dom.*,-->
               org.opendaylight.controller.sal.binding.osgi.*,
                             org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.binding.impl.rev131028.*

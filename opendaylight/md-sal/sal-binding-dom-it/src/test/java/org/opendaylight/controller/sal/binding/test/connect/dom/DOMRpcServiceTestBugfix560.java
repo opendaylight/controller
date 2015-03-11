@@ -11,43 +11,44 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.MoreExecutors;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcAvailabilityListener;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
+import org.opendaylight.controller.md.sal.dom.spi.DefaultDOMRpcResult;
 import org.opendaylight.controller.sal.binding.api.mount.MountProviderInstance;
 import org.opendaylight.controller.sal.binding.api.mount.MountProviderService;
 import org.opendaylight.controller.sal.binding.test.util.BindingBrokerTestFactory;
 import org.opendaylight.controller.sal.binding.test.util.BindingTestContext;
-import org.opendaylight.controller.sal.core.api.RpcImplementation;
-import org.opendaylight.controller.sal.core.api.mount.MountProvisionInstance;
-import org.opendaylight.controller.sal.core.api.mount.MountProvisionService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.bi.ba.rpcservice.rev140701.OpendaylightTestRpcServiceService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.bi.ba.rpcservice.rev140701.RockTheHouseInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.Top;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelList;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelListKey;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
-import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.opendaylight.yangtools.yang.model.parser.api.YangContextParser;
 import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
-
-import com.google.common.collect.ImmutableSet;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.MoreExecutors;
 
 /**
  * Test case for reported bug 560
@@ -70,7 +71,7 @@ public class DOMRpcServiceTestBugfix560 {
     private static final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier BI_MOUNT_ID = createBITllIdentifier(TLL_NAME);
 
     private BindingTestContext testContext;
-    private MountProvisionService domMountPointService;
+    private DOMMountPointService domMountPointService;
     private MountProviderService bindingMountPointService;
     private SchemaContext schemaContext;
 
@@ -79,7 +80,7 @@ public class DOMRpcServiceTestBugfix560 {
      */
     @Before
     public void setUp() throws Exception {
-        BindingBrokerTestFactory testFactory = new BindingBrokerTestFactory();
+        final BindingBrokerTestFactory testFactory = new BindingBrokerTestFactory();
         testFactory.setExecutor(MoreExecutors.sameThreadExecutor());
         testFactory.setStartWithParsedSchema(true);
         testContext = testFactory.getTestContext();
@@ -95,10 +96,12 @@ public class DOMRpcServiceTestBugfix560 {
                 .getModuleSourceStream();
 
         assertNotNull(moduleStream);
-        List<InputStream> rpcModels = Collections.singletonList(moduleStream);
+        final List<InputStream> rpcModels = Collections.singletonList(moduleStream);
         @SuppressWarnings("deprecation")
+        final
         Set<Module> modules = parser.parseYangModelsFromStreams(rpcModels);
         @SuppressWarnings("deprecation")
+        final
         SchemaContext mountSchemaContext = parser.resolveSchemaContext(modules);
         schemaContext = mountSchemaContext;
     }
@@ -107,6 +110,7 @@ public class DOMRpcServiceTestBugfix560 {
             final String mount) {
         return org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier
                 .builder().node(Top.QNAME)
+                .node(TopLevelList.QNAME)
                 .nodeWithKey(TopLevelList.QNAME, TLL_NAME_QNAME, mount)
                 .toInstance();
     }
@@ -122,33 +126,22 @@ public class DOMRpcServiceTestBugfix560 {
     public void test() throws ExecutionException, InterruptedException {
         // FIXME: This is made to only make sure instance identifier codec
         // for path is instantiated.
-        testContext.getBindingDataBroker().readOperationalData(BA_MOUNT_ID);
-        final MountProvisionInstance mountPoint = domMountPointService
-                .createMountPoint(BI_MOUNT_ID);
-        mountPoint.setSchemaContext(schemaContext);
-        assertNotNull(mountPoint);
+        domMountPointService
+                .createMountPoint(BI_MOUNT_ID).addService(DOMRpcService.class, new DOMRpcService() {
 
-        mountPoint.addRpcImplementation(RPC_NAME, new RpcImplementation() {
+                    @Override
+                    public <T extends DOMRpcAvailabilityListener> ListenerRegistration<T> registerRpcListener(final T arg0) {
+                        // TODO Auto-generated method stub
+                        return null;
+                    }
 
-            @Override
-            public ListenableFuture<RpcResult<CompositeNode>> invokeRpc(
-                    final QName rpc, final CompositeNode input) {
-
-                return Futures.immediateFuture(RpcResultBuilder
-                        .<CompositeNode> success().build());
-            }
-
-            @Override
-            public Set<QName> getSupportedRpcs() {
-                return ImmutableSet.of(RPC_NAME);
-            }
-        });
-
-        final Set<QName> biSupportedRpcs = mountPoint.getSupportedRpcs();
-        assertNotNull(biSupportedRpcs);
-        assertTrue(!biSupportedRpcs.isEmpty());
-
-        MountProviderInstance mountInstance = bindingMountPointService
+                    @Override
+                    public CheckedFuture<DOMRpcResult, DOMRpcException> invokeRpc(final SchemaPath arg0, final NormalizedNode<?, ?> arg1) {
+                        final DOMRpcResult result = new DefaultDOMRpcResult((NormalizedNode<?, ?>) null);
+                        return Futures.immediateCheckedFuture(result);
+                    }
+                }).register();
+        final MountProviderInstance mountInstance = bindingMountPointService
                 .getMountPoint(BA_MOUNT_ID);
         assertNotNull(mountInstance);
         final OpendaylightTestRpcServiceService rpcService = mountInstance
@@ -156,10 +149,10 @@ public class DOMRpcServiceTestBugfix560 {
         assertNotNull(rpcService);
 
         try {
-            Future<RpcResult<Void>> result = rpcService
+            final Future<RpcResult<Void>> result = rpcService
                     .rockTheHouse(new RockTheHouseInputBuilder().build());
             assertTrue(result.get().isSuccessful());
-        } catch (IllegalStateException ex) {
+        } catch (final IllegalStateException ex) {
             fail("OpendaylightTestRpcServiceService class doesn't contain rockTheHouse method!");
         }
     }

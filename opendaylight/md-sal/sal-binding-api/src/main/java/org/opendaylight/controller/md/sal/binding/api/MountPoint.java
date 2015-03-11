@@ -7,14 +7,12 @@
  */
 package org.opendaylight.controller.md.sal.binding.api;
 
-import org.opendaylight.controller.sal.binding.api.BindingAwareService;
+import com.google.common.base.Optional;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-import com.google.common.base.Optional;
-
 public interface MountPoint extends Identifiable<InstanceIdentifier<?>>{
 
-    <T extends BindingAwareService> Optional<T> getService(Class<T> service);
+    <T extends BindingService> Optional<T> getService(Class<T> service);
 
 }

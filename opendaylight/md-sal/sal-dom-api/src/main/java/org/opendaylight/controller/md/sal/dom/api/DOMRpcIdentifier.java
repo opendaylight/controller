@@ -9,10 +9,12 @@ package org.opendaylight.controller.md.sal.dom.api;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
+import java.util.Collections;
 import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
 /**
@@ -22,6 +24,9 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
  * contexts concurrently.
  */
 public abstract class DOMRpcIdentifier {
+
+    private static final YangInstanceIdentifier GLOBAL_CONTEXT = YangInstanceIdentifier.create(Collections.<PathArgument>emptySet());
+
     private static final class Global extends DOMRpcIdentifier {
         private Global(final @Nonnull SchemaPath type) {
             super(type);
@@ -29,7 +34,7 @@ public abstract class DOMRpcIdentifier {
 
         @Override
         public YangInstanceIdentifier getContextReference() {
-            return null;
+            return GLOBAL_CONTEXT;
         }
     }
 
@@ -71,7 +76,7 @@ public abstract class DOMRpcIdentifier {
      * @return A global RPC identifier, guaranteed to be non-null.
      */
     public static @Nonnull DOMRpcIdentifier create(final @Nonnull SchemaPath type, final @Nullable YangInstanceIdentifier contextReference) {
-        if (contextReference == null) {
+        if (contextReference == null || GLOBAL_CONTEXT.equals(contextReference)) {
             return new Global(type);
         } else {
             return new Local(type, contextReference);
@@ -92,7 +97,7 @@ public abstract class DOMRpcIdentifier {
      *
      * @return RPC context reference.
      */
-    public abstract @Nullable YangInstanceIdentifier getContextReference();
+    public abstract @Nonnull YangInstanceIdentifier getContextReference();
 
     @Override
     public final int hashCode() {
