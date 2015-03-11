@@ -33,6 +33,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStre
 import org.opendaylight.yangtools.yang.data.codec.gson.JsonParserStream;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNormalizedNodeStreamWriter;
 import org.opendaylight.yangtools.yang.data.impl.schema.NormalizedNodeResult;
+import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaNode;
 import org.opendaylight.yangtools.yang.model.util.SchemaContextUtil;
@@ -59,13 +60,20 @@ public class JsonNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPr
             WebApplicationException {
         try {
             final InstanceIdentifierContext<?> path = getIdentifierWithSchema().get();
+            if (entityStream.available() < 1) {
+                return new NormalizedNodeContext(path, null);
+            }
             final NormalizedNodeResult resultHolder = new NormalizedNodeResult();
             final NormalizedNodeStreamWriter writer = ImmutableNormalizedNodeStreamWriter.from(resultHolder);
 
             final SchemaNode parentSchema;
             if(isPost()) {
                 // FIXME: We need dispatch for RPC.
-                parentSchema = path.getSchemaNode();
+                if (path.getSchemaNode() instanceof RpcDefinition) {
+                    parentSchema = ((RpcDefinition) path.getSchemaNode()).getInput();
+                } else {
+                    parentSchema = path.getSchemaNode();
+                }
             } else if(path.getSchemaContext() instanceof SchemaContext) {
                 parentSchema = path.getSchemaContext();
             } else {
