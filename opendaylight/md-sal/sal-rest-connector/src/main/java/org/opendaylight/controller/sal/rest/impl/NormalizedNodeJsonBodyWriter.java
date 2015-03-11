@@ -37,7 +37,9 @@ import org.opendaylight.yangtools.yang.data.codec.gson.JSONNormalizedNodeStreamW
 import org.opendaylight.yangtools.yang.data.codec.gson.JsonWriterFactory;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.SchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
 @Provider
@@ -64,12 +66,15 @@ public class NormalizedNodeJsonBodyWriter implements MessageBodyWriter<Normalize
             return;
         }
 
-        final InstanceIdentifierContext<DataSchemaNode> context = (InstanceIdentifierContext<DataSchemaNode>) t.getInstanceIdentifierContext();
+        final InstanceIdentifierContext<SchemaNode> context = (InstanceIdentifierContext<SchemaNode>) t.getInstanceIdentifierContext();
 
         SchemaPath path = context.getSchemaNode().getPath();
         boolean isDataRoot = false;
         if (SchemaPath.ROOT.equals(path)) {
             isDataRoot = true;
+        } else if (context.getSchemaNode() instanceof RpcDefinition) {
+            isDataRoot = true;
+            path = ((RpcDefinition) context.getSchemaNode()).getOutput().getPath();
         } else {
             path = path.getParent();
             // FIXME: Add proper handling of reading root.
@@ -93,14 +98,14 @@ public class NormalizedNodeJsonBodyWriter implements MessageBodyWriter<Normalize
         jsonWriter.flush();
     }
 
-    private NormalizedNodeWriter createNormalizedNodeWriter(final InstanceIdentifierContext<DataSchemaNode> context,
+    private NormalizedNodeWriter createNormalizedNodeWriter(final InstanceIdentifierContext<SchemaNode> context,
             final SchemaPath path, final JsonWriter jsonWriter) {
 
-        final DataSchemaNode schema = context.getSchemaNode();
+        final SchemaNode schema = context.getSchemaNode();
         final JSONCodecFactory codecs = getCodecFactory(context);
 
         URI initialNs = null;
-        if(!schema.isAugmenting() && !(schema instanceof SchemaContext)) {
+        if ( ! (schema instanceof RpcDefinition) && (!((DataSchemaNode)schema).isAugmenting() && !(schema instanceof SchemaContext))) {
             initialNs = schema.getQName().getNamespace();
         }
         final NormalizedNodeStreamWriter streamWriter = JSONNormalizedNodeStreamWriter.createNestedWriter(codecs,path,initialNs,jsonWriter);
