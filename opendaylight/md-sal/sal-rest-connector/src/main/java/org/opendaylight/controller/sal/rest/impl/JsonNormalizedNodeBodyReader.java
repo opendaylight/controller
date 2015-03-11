@@ -33,6 +33,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStre
 import org.opendaylight.yangtools.yang.data.codec.gson.JsonParserStream;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNormalizedNodeStreamWriter;
 import org.opendaylight.yangtools.yang.data.impl.schema.NormalizedNodeResult;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaNode;
 import org.opendaylight.yangtools.yang.model.util.SchemaContextUtil;
 import org.slf4j.Logger;
@@ -61,7 +62,16 @@ public class JsonNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPr
             final NormalizedNodeResult resultHolder = new NormalizedNodeResult();
             final NormalizedNodeStreamWriter writer = ImmutableNormalizedNodeStreamWriter.from(resultHolder);
 
-            final SchemaNode parentSchema = SchemaContextUtil.findDataSchemaNode(path.getSchemaContext(), path.getSchemaNode().getPath().getParent());
+            final SchemaNode parentSchema;
+            if(isPost()) {
+                // FIXME: We need dispatch for RPC.
+                parentSchema = path.getSchemaNode();
+            } else if(path.getSchemaContext() instanceof SchemaContext) {
+                parentSchema = path.getSchemaContext();
+            } else {
+                parentSchema = SchemaContextUtil.findDataSchemaNode(path.getSchemaContext(), path.getSchemaNode().getPath().getParent());
+            }
+
             final JsonParserStream jsonParser = JsonParserStream.create(writer, path.getSchemaContext(), parentSchema);
             final JsonReader reader = new JsonReader(new InputStreamReader(entityStream));
             jsonParser.parse(reader);
@@ -69,7 +79,6 @@ public class JsonNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPr
             final NormalizedNode<?, ?> partialResult = resultHolder.getResult();
             final NormalizedNode<?, ?> result;
             if(partialResult instanceof MapNode) {
-
                 result = Iterables.getOnlyElement(((MapNode) partialResult).getValue());
             } else {
                 result = partialResult;

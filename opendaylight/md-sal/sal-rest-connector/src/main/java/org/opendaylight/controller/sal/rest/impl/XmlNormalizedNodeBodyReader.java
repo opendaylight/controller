@@ -119,7 +119,6 @@ public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPro
         final String docRootElm = doc.getDocumentElement().getLocalName();
         final String schemaNodeName = pathContext.getSchemaNode().getQName().getLocalName();
 
-        // TODO : do we want to really follow netconf-restconf specification ?
         if (!schemaNodeName.equalsIgnoreCase(docRootElm)) {
             final Collection<DataSchemaNode> children = ((DataNodeContainer) schemaNode).getChildNodes();
             for (final DataSchemaNode child : children) {
@@ -139,7 +138,7 @@ public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPro
         } else if(schemaNode instanceof ListSchemaNode) {
             final ListSchemaNode casted = (ListSchemaNode) schemaNode;
             return parserFactory.getMapEntryNodeParser().parse(elements, casted);
-        }
+        } // FIXME : add another DataSchemaNode extensions e.g. LeafSchemaNode
         return null;
     }
 }

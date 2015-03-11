@@ -206,7 +206,7 @@ public class BrokerFacadeTest {
         when(rwTransaction.submit()).thenReturn(expFuture);
 
         final CheckedFuture<Void, TransactionCommitFailedException> actualFuture = brokerFacade.commitConfigurationDataPost(
-                instanceID, dummyNode);
+                YangInstanceIdentifier.builder().build(), dummyNode);
 
         assertSame("commitConfigurationDataPost", expFuture, actualFuture);
 

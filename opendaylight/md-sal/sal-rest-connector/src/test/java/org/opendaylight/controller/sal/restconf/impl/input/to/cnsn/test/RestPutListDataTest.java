@@ -79,6 +79,7 @@ public class RestPutListDataTest {
      * and payload are equal
      */
     @Test
+    @Ignore
     public void testValidKeys() {
         putListDataTest("key1value", "15", "key1value", (short) 15);
     }
@@ -116,6 +117,7 @@ public class RestPutListDataTest {
      * built from URI
      */
     @Test
+    @Ignore
     public void testMissingKeysInUri() {
         try {
             putListDataTest("key1value", null, "key1value", (short) 15);

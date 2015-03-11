@@ -550,11 +550,10 @@ public class RestconfImpl implements RestconfService {
         final DOMRpcResult result = checkRpcResponse(response);
 
         DataSchemaNode resultNodeSchema = null;
-        NormalizedNode<?, ?> resultData = null;
+        final NormalizedNode<?, ?> resultData = result.getResult();
         if (result != null && result.getResult() != null) {
-            resultData = result.getResult();
-            final ContainerSchemaNode rpcDataSchemaNode = SchemaContextUtil.getRpcDataSchema(schemaContext, type);
-            resultNodeSchema = rpcDataSchemaNode.getDataChildByName(result.getResult().getNodeType());
+            final RpcDefinition rpcDef = (RpcDefinition) payload.getInstanceIdentifierContext().getSchemaNode();
+            resultNodeSchema = rpcDef.getOutput();
         }
 
         return new NormalizedNodeContext(new InstanceIdentifierContext(null, resultNodeSchema, mountPoint,
@@ -601,7 +600,7 @@ public class RestconfImpl implements RestconfService {
         }
     }
 
-    private void validateInput(final DataSchemaNode inputSchema, final NormalizedNodeContext payload) {
+    private void validateInput(final SchemaNode inputSchema, final NormalizedNodeContext payload) {
         if (inputSchema != null && payload.getData() == null) {
             // expected a non null payload
             throw new RestconfDocumentedException("Input is required.", ErrorType.PROTOCOL, ErrorTag.MALFORMED_MESSAGE);
@@ -643,7 +642,7 @@ public class RestconfImpl implements RestconfService {
     private CheckedFuture<DOMRpcResult, DOMRpcException> invokeSalRemoteRpcSubscribeRPC(final NormalizedNodeContext payload) {
         final ContainerNode value = (ContainerNode) payload.getData();
         final QName rpcQName = payload.getInstanceIdentifierContext().getSchemaNode().getQName();
-        Optional<DataContainerChild<? extends PathArgument, ?>> path = value.getChild(new NodeIdentifier(
+        final Optional<DataContainerChild<? extends PathArgument, ?>> path = value.getChild(new NodeIdentifier(
                 QName.create(payload.getInstanceIdentifierContext().getSchemaNode().getQName(), "path")));
         final Object pathValue = path.isPresent() ? path.get().getValue() : null;
 
@@ -674,18 +673,18 @@ public class RestconfImpl implements RestconfService {
                     ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
         }
 
-        QName outputQname = QName.create(rpcQName, "output");
-        QName streamNameQname = QName.create(rpcQName, "stream-name");
+        final QName outputQname = QName.create(rpcQName, "output");
+        final QName streamNameQname = QName.create(rpcQName, "stream-name");
 
-        ContainerNode output = ImmutableContainerNodeBuilder.create().withNodeIdentifier(new NodeIdentifier(outputQname))
+        final ContainerNode output = ImmutableContainerNodeBuilder.create().withNodeIdentifier(new NodeIdentifier(outputQname))
                 .withChild(ImmutableNodes.leafNode(streamNameQname, streamName)).build();
 
         if (!Notificator.existListenerFor(streamName)) {
-            YangInstanceIdentifier normalizedPathIdentifier = controllerContext.toNormalized(pathIdentifier);
+            final YangInstanceIdentifier normalizedPathIdentifier = controllerContext.toNormalized(pathIdentifier);
             Notificator.createListener(normalizedPathIdentifier, streamName);
         }
 
-        DOMRpcResult defaultDOMRpcResult = new DefaultDOMRpcResult(output);
+        final DOMRpcResult defaultDOMRpcResult = new DefaultDOMRpcResult(output);
 
         return Futures.immediateCheckedFuture(defaultDOMRpcResult);
     }
@@ -878,6 +877,11 @@ public class RestconfImpl implements RestconfService {
         } else {
             data = broker.readConfigurationData(normalizedII);
         }
+        if(data == null) {
+            throw new RestconfDocumentedException(
+                "Request could not be completed because the relevant data model content does not exist.",
+                ErrorType.APPLICATION, ErrorTag.DATA_MISSING);
+        }
         return new NormalizedNodeContext(iiWithData, data);
     }
 
@@ -934,7 +938,11 @@ public class RestconfImpl implements RestconfService {
         } else {
             data = broker.readOperationalData(normalizedII);
         }
-
+        if(data == null) {
+            throw new RestconfDocumentedException(
+                "Request could not be completed because the relevant data model content does not exist.",
+                ErrorType.APPLICATION, ErrorTag.DATA_MISSING);
+        }
         return new NormalizedNodeContext(iiWithData, data);
     }
 
@@ -946,7 +954,8 @@ public class RestconfImpl implements RestconfService {
     @Override
     public Response updateConfigurationData(final String identifier, final NormalizedNodeContext payload) {
         Preconditions.checkNotNull(identifier);
-        final InstanceIdentifierContext<DataSchemaNode> iiWithData = controllerContext.toInstanceIdentifier(identifier);
+        final InstanceIdentifierContext<DataSchemaNode> iiWithData =
+                (InstanceIdentifierContext<DataSchemaNode>) payload.getInstanceIdentifierContext();
 
         validateInput(iiWithData.getSchemaNode(), payload);
         validateTopLevelNodeName(payload, iiWithData.getInstanceIdentifier());
@@ -1056,7 +1065,7 @@ public class RestconfImpl implements RestconfService {
      *             if key values or key count in payload and URI isn't equal
      *
      */
-    private void validateListKeysEqualityInPayloadAndUri(final InstanceIdentifierContext iiWithData,
+    private void validateListKeysEqualityInPayloadAndUri(final InstanceIdentifierContext<DataSchemaNode> iiWithData,
             final NormalizedNode<?, ?> payload) {
         if (iiWithData.getSchemaNode() instanceof ListSchemaNode) {
             final List<QName> keyDefinitions = ((ListSchemaNode) iiWithData.getSchemaNode()).getKeyDefinition();
@@ -1152,43 +1161,7 @@ public class RestconfImpl implements RestconfService {
 
     @Override
     public Response createConfigurationData(final String identifier, final NormalizedNodeContext payload, final UriInfo uriInfo) {
-        if (payload == null) {
-            throw new RestconfDocumentedException("Input is required.", ErrorType.PROTOCOL, ErrorTag.MALFORMED_MESSAGE);
-        }
-
-        final URI payloadNS = payload.getData().getNodeType().getNamespace();
-        if (payloadNS == null) {
-            throw new RestconfDocumentedException(
-                    "Data has bad format. Root element node must have namespace (XML format) or module name(JSON format)",
-                    ErrorType.PROTOCOL, ErrorTag.UNKNOWN_NAMESPACE);
-        }
-
-        final DOMMountPoint mountPoint = payload.getInstanceIdentifierContext().getMountPoint();
-
-        final InstanceIdentifierContext iiWithData = mountPoint != null
-                ? controllerContext.toMountPointIdentifier(identifier)
-                : controllerContext.toInstanceIdentifier(identifier);
-        final YangInstanceIdentifier normalizedII = iiWithData.getInstanceIdentifier();
-
-        try {
-            if (mountPoint != null) {
-                broker.commitConfigurationDataPost(mountPoint, normalizedII, payload.getData());
-            } else {
-                broker.commitConfigurationDataPost(normalizedII, payload.getData());
-            }
-        } catch(final RestconfDocumentedException e) {
-            throw e;
-        } catch (final Exception e) {
-            throw new RestconfDocumentedException("Error creating data", e);
-        }
-
-
-        final ResponseBuilder responseBuilder = Response.status(Status.NO_CONTENT);
-        final URI location = resolveLocation(uriInfo, "config", mountPoint, normalizedII);
-        if (location != null) {
-            responseBuilder.location(location);
-        }
-        return responseBuilder.build();
+       return createConfigurationData(payload, uriInfo);
     }
 
     // FIXME create RestconfIdetifierHelper and move this method there
@@ -1235,9 +1208,9 @@ public class RestconfImpl implements RestconfService {
         }
 
         final DOMMountPoint mountPoint = payload.getInstanceIdentifierContext().getMountPoint();
-        final InstanceIdentifierContext iiWithData = payload.getInstanceIdentifierContext();
+        final InstanceIdentifierContext<DataSchemaNode> iiWithData = (InstanceIdentifierContext<DataSchemaNode>) payload.getInstanceIdentifierContext();
         final YangInstanceIdentifier normalizedII = iiWithData.getInstanceIdentifier();
-
+        final YangInstanceIdentifier resultII;
         try {
             if (mountPoint != null) {
                 broker.commitConfigurationDataPost(mountPoint, normalizedII, payload.getData());
@@ -1252,6 +1225,7 @@ public class RestconfImpl implements RestconfService {
         }
 
         final ResponseBuilder responseBuilder = Response.status(Status.NO_CONTENT);
+        // FIXME: Provide path to result.
         final URI location = resolveLocation(uriInfo, "", mountPoint, normalizedII);
         if (location != null) {
             responseBuilder.location(location);
@@ -1273,17 +1247,14 @@ public class RestconfImpl implements RestconfService {
 
     @Override
     public Response deleteConfigurationData(final String identifier) {
-        final InstanceIdentifierContext iiWithData = controllerContext.toInstanceIdentifier(identifier);
+        final InstanceIdentifierContext<DataSchemaNode> iiWithData = controllerContext.toInstanceIdentifier(identifier);
         final DOMMountPoint mountPoint = iiWithData.getMountPoint();
-        YangInstanceIdentifier normalizedII;
+        final YangInstanceIdentifier normalizedII = iiWithData.getInstanceIdentifier();
 
         try {
             if (mountPoint != null) {
-                normalizedII = new DataNormalizer(mountPoint.getSchemaContext()).toNormalized(iiWithData
-                        .getInstanceIdentifier());
                 broker.commitConfigurationDataDelete(mountPoint, normalizedII);
             } else {
-                normalizedII = controllerContext.toNormalized(iiWithData.getInstanceIdentifier());
                 broker.commitConfigurationDataDelete(normalizedII).get();
             }
         } catch (final Exception e) {
@@ -1358,7 +1329,7 @@ public class RestconfImpl implements RestconfService {
             final String paramName) {
         final QNameModule salRemoteAugment = QNameModule.create(NAMESPACE_EVENT_SUBSCRIPTION_AUGMENT,
                 EVENT_SUBSCRIPTION_AUGMENT_REVISION);
-        Optional<DataContainerChild<? extends PathArgument, ?>> enumNode = value.getChild(new NodeIdentifier(
+        final Optional<DataContainerChild<? extends PathArgument, ?>> enumNode = value.getChild(new NodeIdentifier(
                 QName.create(salRemoteAugment, paramName)));
         if (!enumNode.isPresent()) {
             return null;
