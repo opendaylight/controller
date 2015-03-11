@@ -13,15 +13,11 @@ import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.controller.sal.rest.doc.swagger.ApiDeclaration;
 import org.opendaylight.controller.sal.rest.doc.swagger.ResourceList;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This class gathers all yang defined {@link Module}s and generates Swagger compliant documentation.
  */
 public class ApiDocGenerator extends BaseYangSwaggerGenerator {
-
-    private static Logger _logger = LoggerFactory.getLogger(ApiDocGenerator.class);
 
     private static final ApiDocGenerator INSTANCE = new ApiDocGenerator();
     private SchemaService schemaService;
