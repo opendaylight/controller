@@ -16,22 +16,16 @@ import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
 
-/**
- *
- */
 public final class OperationBuilder {
 
     public static final String OPERATIONAL = "(operational)";
     public static final String CONFIG = "(config)";
 
-    /**
-   *
-   */
     public static class Get {
 
         protected Operation spec;
         protected DataSchemaNode schemaNode;
-        private final String METHOD_NAME = "GET";
+        private static final String METHOD_NAME = "GET";
 
         public Get(DataSchemaNode node, boolean isConfig) {
             this.schemaNode = node;
@@ -53,13 +47,10 @@ public final class OperationBuilder {
         }
     }
 
-    /**
-   *
-   */
     public static class Put {
         protected Operation spec;
         protected String nodeName;
-        private final String METHOD_NAME = "PUT";
+        private static final String METHOD_NAME = "PUT";
 
         public Put(String nodeName, final String description) {
             this.nodeName = nodeName;
@@ -85,9 +76,6 @@ public final class OperationBuilder {
         }
     }
 
-    /**
-   *
-   */
     public static final class Post extends Put {
 
         public static final String METHOD_NAME = "POST";
@@ -129,11 +117,8 @@ public final class OperationBuilder {
         }
     }
 
-    /**
-   *
-   */
     public static final class Delete extends Get {
-        private final String METHOD_NAME = "DELETE";
+        private static final String METHOD_NAME = "DELETE";
 
         public Delete(DataSchemaNode node) {
             super(node, false);
