@@ -25,6 +25,17 @@
   <Listener className="org.apache.catalina.mbeans.GlobalResourcesLifecycleListener" />
   <Listener className="org.apache.catalina.core.ThreadLocalLeakPreventionListener" />
 
+  <GlobalNamingResources>
+    <!-- Editable user database that can also be used by
+                  UserDatabaseRealm to authenticate users
+    -->
+    <Resource name="UserDatabase" auth="Container"
+              type="org.apache.catalina.UserDatabase"
+              description="User database that can be updated and saved"
+              factory="org.apache.catalina.users.MemoryUserDatabaseFactory"
+              pathname="configuration/tomcat-users.xml" />
+  </GlobalNamingResources>
+
   <Service name="Catalina">
     <Connector port="8080" protocol="HTTP/1.1"
                connectionTimeout="20000"
@@ -48,7 +59,20 @@
       <Host name="localhost" appBase=""
             unpackWARs="false" autoDeploy="false"
             deployOnStartup="false" createDirs="false">
-            <Realm className="org.opendaylight.controller.karafsecurity.ControllerCustomRealm" />
+      <!-- WIP custom realm, use the UserDatabaseRealm for now
+      <Realm className="org.opendaylight.controller.karafsecurity.ControllerCustomRealm" />
+      -->
+
+      <!-- Use the LockOutRealm to prevent attempts to guess user passwords
+                      via a brute-force attack -->
+      <Realm className="org.apache.catalina.realm.LockOutRealm">
+        <!-- This Realm uses the UserDatabase configured in the global JNDI
+                          resources under the key "UserDatabase".  Any edits
+             that are performed against this UserDatabase are immediately
+             available for use by the Realm.  -->
+        <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
+               resourceName="UserDatabase"/>
+      </Realm>
             <Valve className="org.apache.catalina.authenticator.SingleSignOn" />
             <Valve className="org.apache.catalina.valves.AccessLogValve" directory="logs"
                         prefix="web_access_log_" suffix=".txt" resolveHosts="false"
