@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_b4d3a837",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-11T22:41:04Z",
+      "side": 0,
+      "message": "Removed this and changed broadcast to call the async version.",
+      "revId": "a1117246368f665dad71662e22b8e15e0ec58054",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

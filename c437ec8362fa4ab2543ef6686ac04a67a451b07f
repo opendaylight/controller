@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_942b0c30",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 306,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-11T22:41:04Z",
+      "side": 1,
+      "message": "We really should register here after the actor has initialized so we know the shard is ready to accept the message.",
+      "revId": "c437ec8362fa4ab2543ef6686ac04a67a451b07f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_f4193023",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 373,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-11T22:41:04Z",
+      "side": 1,
+      "message": "Register a timer to fail the request if the shard isn\u0027t ready by then.",
+      "revId": "c437ec8362fa4ab2543ef6686ac04a67a451b07f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_1417fcee",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 488,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-11T22:41:04Z",
+      "side": 1,
+      "message": "Changed this call b/c FindPrimary can now return NoShardLeaderException and we don\u0027t want onComplete to blindly schedule a CreateTransaction retry. This actually caused an NPE b/c of null primaryShard.",
+      "revId": "c437ec8362fa4ab2543ef6686ac04a67a451b07f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_14ee1ced",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 413,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-11T22:41:04Z",
+      "side": 1,
+      "message": "Changed to use findPrimaryShardAsync.",
+      "revId": "c437ec8362fa4ab2543ef6686ac04a67a451b07f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_d4bf54cf",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/RoleChangeNotifierTest.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-11T22:41:04Z",
+      "side": 1,
+      "message": "This should\u0027ve been in the previous patch but I missed moving it when I split up the patches.",
+      "revId": "c437ec8362fa4ab2543ef6686ac04a67a451b07f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_74b440f2",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/utils/MessageCollectorActor.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-11T22:41:04Z",
+      "side": 1,
+      "message": "Copied this from the raft class - I have a another patch to remove this one.",
+      "revId": "c437ec8362fa4ab2543ef6686ac04a67a451b07f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
