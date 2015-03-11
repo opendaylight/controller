@@ -50,6 +50,7 @@ import org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransf
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
 import org.opendaylight.controller.sal.core.api.RpcImplementation;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.ModuleImport;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -278,7 +279,7 @@ public class NetconfDeviceTest {
 
     public MessageTransformer<NetconfMessage> getMessageTransformer() throws Exception {
         final MessageTransformer<NetconfMessage> messageTransformer = mockClass(MessageTransformer.class);
-        doReturn(notification).when(messageTransformer).toRpcRequest(any(SchemaPath.class), any(ContainerNode.class));
+        doReturn(notification).when(messageTransformer).toRpcRequest(any(SchemaPath.class), any(NormalizedNode.class));
         doReturn(rpcResultC).when(messageTransformer).toRpcResult(any(NetconfMessage.class), any(SchemaPath.class));
         doReturn(compositeNode).when(messageTransformer).toNotification(any(NetconfMessage.class));
         return messageTransformer;

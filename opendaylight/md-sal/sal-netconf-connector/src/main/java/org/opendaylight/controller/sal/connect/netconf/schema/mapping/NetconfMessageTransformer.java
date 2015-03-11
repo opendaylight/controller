@@ -152,7 +152,7 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
     }
 
     @Override
-    public NetconfMessage toRpcRequest(SchemaPath rpc, final ContainerNode payload) {
+    public NetconfMessage toRpcRequest(SchemaPath rpc, final NormalizedNode<?, ?> payload) {
         // In case no input for rpc is defined, we can simply construct the payload here
         final QName rpcQName = rpc.getLastComponent();
         Map<QName, RpcDefinition> currentMappedRpcs = mappedRpcs;
@@ -172,6 +172,10 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
             return new NetconfMessage(document);
         }
 
+        Preconditions.checkNotNull(payload, "Transforming an rpc with input: %s, payload cannot be null", rpcQName);
+        Preconditions.checkArgument(payload instanceof ContainerNode,
+                "Transforming an rpc with input: %s, payload has to be a container, but was: %s", rpcQName, payload);
+
         // Set the path to the input of rpc for the node stream writer
         rpc = rpc.createChild(QName.cachedReference(QName.create(rpcQName, "input")));
         final DOMResult result = prepareDomResultForRpcRequest(rpcQName);
@@ -179,7 +183,7 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
         try {
             // If the schema context for netconf device does not contain model for base netconf operations, use default pre build context with just the base model
             // This way operations like lock/unlock are supported even if the source for base model was not provided
-            writeNormalizedRpc(payload, result, rpc, needToUseBaseCtx ? BASE_NETCONF_CTX : schemaContext);
+            writeNormalizedRpc(((ContainerNode) payload), result, rpc, needToUseBaseCtx ? BASE_NETCONF_CTX : schemaContext);
         } catch (final XMLStreamException | IOException | IllegalStateException e) {
             throw new IllegalStateException("Unable to serialize " + rpc, e);
         }
