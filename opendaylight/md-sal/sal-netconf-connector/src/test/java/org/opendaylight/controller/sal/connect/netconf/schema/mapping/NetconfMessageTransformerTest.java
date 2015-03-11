@@ -107,8 +107,7 @@ public class NetconfMessageTransformerTest {
 
     @Test
     public void testDiscardChangesRequest() throws Exception {
-        final NetconfMessage netconfMessage = netconfMessageTransformer.toRpcRequest(toPath(NETCONF_DISCARD_CHANGES_QNAME),
-                NetconfMessageTransformUtil.DISCARD_CHANGES_RPC_CONTENT);
+        final NetconfMessage netconfMessage = netconfMessageTransformer.toRpcRequest(toPath(NETCONF_DISCARD_CHANGES_QNAME), null);
         assertThat(XmlUtil.toString(netconfMessage.getDocument()), CoreMatchers.containsString("<discard"));
     }
 
@@ -124,7 +123,6 @@ public class NetconfMessageTransformerTest {
                 "</get-schema>\n" +
                 "</rpc>");
     }
-
 
     @Test
     public void tesGetSchemaResponse() throws Exception {
