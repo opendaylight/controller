@@ -383,7 +383,10 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                 followerToSnapshot.markSendStatus(false);
             }
 
-            if (!wasLastChunk && followerToSnapshot.canSendNextChunk()) {
+            if (wasLastChunk && !context.isSnapshotCaptureInitiated()) {
+                // Since the follower is now caught up try to purge the log.
+                purgeInMemoryLog();
+            } else if (!wasLastChunk && followerToSnapshot.canSendNextChunk()) {
                 ActorSelection followerActor = context.getPeerActorSelection(followerId);
                 if(followerActor != null) {
                     sendSnapshotChunk(followerActor, followerId);
