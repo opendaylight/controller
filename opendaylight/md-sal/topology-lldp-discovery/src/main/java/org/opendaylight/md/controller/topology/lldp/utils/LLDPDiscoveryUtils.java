@@ -7,8 +7,11 @@
  */
 package org.opendaylight.md.controller.topology.lldp.utils;
 
-import java.nio.charset.Charset;
+import java.security.NoSuchAlgorithmException;
 
+import java.security.MessageDigest;
+import java.lang.management.ManagementFactory;
+import java.nio.charset.Charset;
 import org.opendaylight.controller.liblldp.Ethernet;
 import org.opendaylight.controller.liblldp.LLDP;
 import org.opendaylight.controller.liblldp.LLDPTLV;
@@ -75,5 +78,12 @@ public class LLDPDiscoveryUtils {
             }
         }
         return null;
+    }
+
+    public static byte[] getValueForLLDPPacketIntegrityEnsuring(final NodeConnectorId nodeConnectorId) throws NoSuchAlgorithmException {
+        final String pureValue = nodeConnectorId+ManagementFactory.getRuntimeMXBean().getName();
+        final byte[] pureBytes = pureValue.getBytes();
+        final MessageDigest messageDigest = MessageDigest.getInstance("MD5");
+        return messageDigest.digest(pureBytes);
     }
 }
