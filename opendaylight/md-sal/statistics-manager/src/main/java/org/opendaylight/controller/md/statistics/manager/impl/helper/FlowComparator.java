@@ -9,8 +9,11 @@ package org.opendaylight.controller.md.statistics.manager.impl.helper;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.net.InetAddresses;
+
 import java.net.Inet4Address;
+
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv6Prefix;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.Flow;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.Match;
@@ -18,6 +21,15 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.EthernetMatch;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.Layer3Match;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.Ipv4Match;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.Ipv6Match;
+import java.math.BigInteger;
+
+import java.net.Inet6Address;
+import java.net.InetAddress;
+import java.nio.ByteBuffer;
+
+import com.google.common.base.Preconditions;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +38,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class FlowComparator {
     private final static Logger LOG = LoggerFactory.getLogger(FlowComparator.class);
+    private static final BigInteger MINUS_ONE = BigInteger.valueOf(-1);
 
     private FlowComparator() {
         throw new UnsupportedOperationException("Utilities class should not be instantiated");
@@ -139,7 +152,8 @@ public final class FlowComparator {
             if (statsFlow.getIpMatch() != null) {
                 return false;
             }
-        } else if(!storedFlow.getIpMatch().equals(statsFlow.getIpMatch())) {
+        }
+        else if(!storedFlow.getIpMatch().equals(statsFlow.getIpMatch())) {
             return false;
         }
         if (storedFlow.getLayer3Match()== null) {
@@ -228,7 +242,7 @@ public final class FlowComparator {
             verdict = checkNullValues;
         } else {
             if(verdict){
-                verdict = macAddressEquals(statsEthernetMatchFields.getAddress(),storedEthernetMatchFields.getAddress());
+                verdict = macAddressEquals(statsEthernetMatchFields.getAddress(), storedEthernetMatchFields.getAddress());
             }
             if(verdict){
                 verdict = macAddressEquals(statsEthernetMatchFields.getMask(),storedEthernetMatchFields.getMask());
@@ -263,7 +277,20 @@ public final class FlowComparator {
                 verdict = compareNullSafe(
                         statsIpv4Match.getIpv4Source(), storedIpv4Match.getIpv4Source());
             }
-        } else {
+        }else if (statsLayer3Match instanceof Ipv6Match && storedLayer3Match instanceof Ipv6Match) {
+            final Ipv6Match statsIpv6Match = (Ipv6Match)statsLayer3Match;
+            final Ipv6Match storedIpv6Match = (Ipv6Match)storedLayer3Match;
+
+
+            if (verdict) {
+                verdict = compareNullSafe(storedIpv6Match.getIpv6Destination(), statsIpv6Match.getIpv6Destination());
+            }
+            if (verdict) {
+                verdict = compareNullSafe(statsIpv6Match.getIpv6Source(), storedIpv6Match.getIpv6Source());
+            }
+
+
+        }else{
             final Boolean nullCheckOut = checkNullValues(storedLayer3Match, statsLayer3Match);
             if (nullCheckOut != null) {
                 verdict = nullCheckOut;
@@ -287,6 +314,18 @@ public final class FlowComparator {
         return verdict;
     }
 
+    private static boolean compareNullSafe(final Ipv6Prefix statsIpv6, final Ipv6Prefix storedIpv6) {
+        boolean verdict = true;
+        final Boolean checkDestNullValuesOut = checkNullValues(storedIpv6, statsIpv6);
+        if (checkDestNullValuesOut != null) {
+            verdict = checkDestNullValuesOut;
+        } else if(!IpAddressEquals(statsIpv6, storedIpv6)){
+            verdict = false;
+        }
+
+        return verdict;
+    }
+
     private static Boolean checkNullValues(final Object v1, final Object v2) {
         Boolean verdict = null;
         if (v1 == null && v2 != null) {
@@ -298,6 +337,27 @@ public final class FlowComparator {
         }
 
         return verdict;
+    }
+
+    /**
+     *
+     * @param statsIpAddress
+     * @param storedIpAddress
+     * @return true if IPv6prefixes equals
+     */
+    private static boolean IpAddressEquals(final Ipv6Prefix statsIpAddress, final Ipv6Prefix storedIpAddress) {
+
+        final IntegerIpAddress statsIpAddressInt = StrIpToIntIpIpv6(statsIpAddress.getValue());
+        final IntegerIpAddress storedIpAddressInt =  StrIpToIntIpIpv6(storedIpAddress.getValue());
+
+        if(IpAndMaskBasedMatch(statsIpAddressInt,storedIpAddressInt)){
+            return true;
+        }
+        if(IpBasedMatch(statsIpAddressInt,storedIpAddressInt)){
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -326,6 +386,25 @@ public final class FlowComparator {
 
     private static boolean IpBasedMatch(final IntegerIpAddress statsIpAddressInt,final IntegerIpAddress storedIpAddressInt){
         return (statsIpAddressInt.getIp() == storedIpAddressInt.getIp());
+    }
+
+    /**
+     * Method return integer version of ip address. Converted int will be mask if
+     * mask specified
+     */
+    private static IntegerIpAddress StrIpToIntIpIpv6(final String ipAddress){
+
+        final String[] parts = ipAddress.split("/");
+        final String ipString = parts[0];
+        int prefix = 128;
+
+        if (parts.length == 2) prefix = Integer.parseInt(parts[1]);
+        final InetAddress a = InetAddresses.forString(ipString);
+        Preconditions.checkArgument(a instanceof Inet6Address);
+        final byte[] ipByte = a.getAddress();
+        int ip = ByteBuffer.wrap(ipByte).getInt();
+        final int mask = 0xffffffff << 128 - prefix;
+        return new IntegerIpAddress(ip, mask);
     }
 
     /**

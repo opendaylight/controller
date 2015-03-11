@@ -11,6 +11,7 @@ package org.opendaylight.controller.md.statistics.manager.impl.helper;
 import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Prefix;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv6Prefix;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.l2.types.rev130827.EtherType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.ethernet.match.fields.EthernetSourceBuilder;
@@ -19,6 +20,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.EthernetMatchBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.Ipv4Match;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.Ipv4MatchBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.Ipv6Match;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.model.match.types.rev131026.match.layer._3.match.Ipv6MatchBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,6 +58,26 @@ public class StatisticsUpdateCommiterTest {
                 {{null, null}, {null, null}},
         };
 
+        final String[][][] matchSeedsIpv6 = new String[][][] {
+                {{"aabb:1234:2acf:e9ff::fe21:6431/64", "aabb:1234:2acf:e9ff::fe21:6431/64"}, {"aabb:1234:2acf:e9ff::fe21:6431/64", "aabb:1234:2acf:e9ff::fe21:6431/64"}},
+                {{"aabb:1234:2acf:e9ff::fe21:6431/64", "aabb:1234:2acf:e9ff::fe21:6431/64"}, {"aabb:1234:2acf:e9ff::fe21:6431/64", "fe80::2acf:e9ff:fe21:6431/128"}},
+                {{"fe80::2acf:e9ff:fe21:6431/128", "aabb:1234:2acf:e9ff::fe21:6431/64"}, {"aabb:1234:2acf:e9ff::fe21:6431/64", "aabb:1234:2acf:e9ff::fe21:6431/64"}},
+                {{"fe80::2acf:e9ff:fe21:6431/128", "fe80::2acf:e9ff:fe21:6431/128"}, {"aabb:1234:2acf:e9ff::fe21:6431/64", "aabb:1234:2acf:e9ff::fe21:6431/64"}},
+
+                {{"fe80::2acf:e9ff:fe21:6431/128", null}, {"fe80::2acf:e9ff:fe21:6431/128", "aabb:1234:2acf:e9ff::fe21:6431/64"}},
+                {{"fe80::2acf:e9ff:fe21:6431/128", null}, {"aabb:1234:2acf:e9ff::fe21:6431/64", "aabb:1234:2acf:e9ff::fe21:6431/64"}},
+                {{"fe80::2acf:e9ff:fe21:6431/128", null}, {"aabb:1234:2acf:e9ff::fe21:6431/64", null}},
+                {{"fe80::2acf:e9ff:fe21:6431/128", null}, {"fe80::2acf:e9ff:fe21:6431/128", null}},
+
+                {{null, "fe80::2acf:e9ff:fe21:6431/128"}, {"aabb:1234:2acf:e9ff::fe21:6431/64", "fe80::2acf:e9ff:fe21:6431/128"}},
+                {{null, "fe80::2acf:e9ff:fe21:6431/128"}, {"aabb:1234:2acf:e9ff::fe21:6431/64", "aabb:1234:2acf:e9ff::fe21:6431/64"}},
+                {{null, "fe80::2acf:e9ff:fe21:6431/128"}, {null, "aabb:1234:2acf:e9ff::fe21:6431/64"}},
+                {{null, "fe80::2acf:e9ff:fe21:6431/128"}, {null, "fe80::2acf:e9ff:fe21:6431/128"}},
+
+                {{null, null}, {null, "fe80::2acf:e9ff:fe21:6431/128"}},
+                {{null, null}, {null, null}},
+        };
+
         final boolean[] matches = new boolean[] {
                 true,
                 false,
@@ -76,9 +99,16 @@ public class StatisticsUpdateCommiterTest {
         };
 
         for (int i = 0; i < matches.length; i++) {
-            checkComparisonOfL3Match(
+            checkComparisonOfL3MatchIpv4(
                     matchSeeds[i][0][0], matchSeeds[i][0][1],
                     matchSeeds[i][1][0], matchSeeds[i][1][1],
+                    matches[i]);
+        }
+
+       for (int i = 0; i < matches.length; i++) {
+            checkComparisonOfL3MatchIpv6(
+                    matchSeedsIpv6[i][0][0], matchSeedsIpv6[i][0][1],
+                    matchSeedsIpv6[i][1][0], matchSeedsIpv6[i][1][1],
                     matches[i]);
         }
     }
@@ -91,7 +121,7 @@ public class StatisticsUpdateCommiterTest {
      * @param matches expected match output
      *
      */
-    private static void checkComparisonOfL3Match(final String m1Source, final String m1Destination,
+    private static void checkComparisonOfL3MatchIpv4(final String m1Source, final String m1Destination,
             final String m2Source, final String msDestination, final boolean matches) {
         final Ipv4Match m1Layer3 = prepareIPv4Match(m1Source, m1Destination);
         final Ipv4Match m2Layer3 = prepareIPv4Match(m2Source, msDestination);
@@ -116,6 +146,41 @@ public class StatisticsUpdateCommiterTest {
         }
 
         return ipv4MatchBuilder.build();
+    }
+
+    /**
+     * @param m1Source match1 - src
+     * @param m1Destination match1 - dest
+     * @param m2Source match2 - src
+     * @param msDestination match2 - dest
+     * @param matches expected match output
+     *
+     */
+    private static void checkComparisonOfL3MatchIpv6(final String m1Source, final String m1Destination,
+                                                 final String m2Source, final String msDestination, final boolean matches) {
+        final Ipv6Match m1Layer3 = prepareIPv6Match(m1Source, m1Destination);
+        final Ipv6Match m2Layer3 = prepareIPv6Match(m2Source, msDestination);
+        boolean comparisonResult;
+        try {
+            comparisonResult = FlowComparator.layer3MatchEquals(m1Layer3, m2Layer3);
+            Assert.assertEquals("failed to compare: "+m1Layer3+" vs. "+m2Layer3,
+                    matches, comparisonResult);
+        } catch (final Exception e) {
+            LOG.error("failed to compare: {} vs. {}", m1Layer3, m2Layer3, e);
+            Assert.fail(e.getMessage());
+        }
+    }
+
+    private static Ipv6Match prepareIPv6Match(final String source, final String destination) {
+        final Ipv6MatchBuilder ipv6MatchBuilder = new Ipv6MatchBuilder();
+        if (source != null) {
+            ipv6MatchBuilder.setIpv6Source(new Ipv6Prefix(source));
+        }
+        if (destination != null) {
+            ipv6MatchBuilder.setIpv6Destination(new Ipv6Prefix(destination));
+        }
+
+        return ipv6MatchBuilder.build();
     }
     /**
      * Test method for {@link org.opendaylight.controller.md.statistics.manager.impl.helper.FlowComparator#ethernetMatchEquals(EthernetMatch, EthernetMatch)
