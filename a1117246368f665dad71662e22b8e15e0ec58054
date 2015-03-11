@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_d40af4d1",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 389,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-11T22:27:01Z",
+      "side": 1,
+      "message": "Need to capture the previous behavior and leaderId. The latter could change without a new behavior instance created.",
+      "revId": "a1117246368f665dad71662e22b8e15e0ec58054",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_14005ca9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 614,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-11T22:27:01Z",
+      "side": 1,
+      "message": "I split this patch out from the next patch and accidentally included this change.",
+      "revId": "a1117246368f665dad71662e22b8e15e0ec58054",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_f40290b3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/PeerAddressResolved.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-11T22:27:01Z",
+      "side": 1,
+      "message": "I split this patch out from the next patch and accidentally included this change.",
+      "revId": "a1117246368f665dad71662e22b8e15e0ec58054",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_b42c084c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 316,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-11T22:27:01Z",
+      "side": 1,
+      "message": "I split this patch out from the next patch and accidentally included this change.",
+      "revId": "a1117246368f665dad71662e22b8e15e0ec58054",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
