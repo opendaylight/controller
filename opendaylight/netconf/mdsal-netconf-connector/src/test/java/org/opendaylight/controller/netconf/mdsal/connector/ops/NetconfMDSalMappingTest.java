@@ -29,7 +29,6 @@ import org.custommonkey.xmlunit.Diff;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.custommonkey.xmlunit.examples.RecursiveElementNameAndTextQualifier;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.ConcurrentDOMDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -184,7 +183,6 @@ public class NetconfMDSalMappingTest {
 
     }
 
-    @Ignore("Xml is not similar")
     @Test
     public void testMoreComplexEditConfigs() throws Exception {
 
@@ -243,12 +241,12 @@ public class NetconfMDSalMappingTest {
         }
     }
 
-    @Ignore("Xml is not similar")
     @Test
     public void testEditWithCreate() throws Exception {
 
         verifyResponse(edit("messages/mapping/editConfig_create.xml"), RPC_REPLY_OK);
-        verifyResponse(getConfigCandidate(), XmlFileLoader.xmlFileToDocument("messages/mapping/editConfig_merge_n1_control.xml"));
+        verifyResponse(getConfigCandidate(), XmlFileLoader.xmlFileToDocument("messages/mapping/editConfig_create_n1_control.xml"));
+
 
         try {
             edit("messages/mapping/editConfig_create.xml");
@@ -301,7 +299,7 @@ public class NetconfMDSalMappingTest {
         assertEmptyDatastore(getConfigRunning());
     }
 
-    private void verifyResponse(Document response, Document template) {
+    private void verifyResponse(Document response, Document template){
         DetailedDiff dd = new DetailedDiff(new Diff(response, template));
         dd.overrideElementQualifier(new RecursiveElementNameAndTextQualifier());
         assertTrue(dd.similar());

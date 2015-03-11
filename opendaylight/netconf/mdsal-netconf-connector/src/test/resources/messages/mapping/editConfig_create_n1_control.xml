@@ -7,12 +7,12 @@
   -->
 
 <rpc-reply a="64" id="a" message-id="101" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" xmlnx="a:b:c:d">
-<data xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
-    <mapping-nodes xmlns:a="urn:ietf:params:xml:ns:netconf:base:1.0" a:operation="replace" xmlns="urn:opendaylight:mdsal:mapping:test">
-        <mapping-node>
-            <id>new-node7</id>
-            <content>new node content</content>
-        </mapping-node>
-    </mapping-nodes>
-</data>
+    <data xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+        <mapping-nodes xmlns:a="urn:ietf:params:xml:ns:netconf:base:1.0" a:operation="create" xmlns="urn:opendaylight:mdsal:mapping:test">
+            <mapping-node>
+                <id>node1-put</id>
+                <content>put content</content>
+            </mapping-node>
+        </mapping-nodes>
+    </data>
 </rpc-reply>
