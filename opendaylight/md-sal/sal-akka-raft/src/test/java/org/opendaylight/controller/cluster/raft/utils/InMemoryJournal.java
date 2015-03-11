@@ -1,23 +1,12 @@
 /*
- * Copyright (c) 2014 Brocade Communications Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015 Brocade Communications Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.datastore.utils;
+package org.opendaylight.controller.cluster.raft.utils;
 
-import static org.junit.Assert.assertEquals;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import com.google.common.collect.Maps;
-import com.google.common.util.concurrent.Uninterruptibles;
-import scala.concurrent.Future;
 import akka.dispatch.Futures;
 import akka.japi.Procedure;
 import akka.persistence.PersistentConfirmation;
@@ -25,12 +14,35 @@ import akka.persistence.PersistentId;
 import akka.persistence.PersistentImpl;
 import akka.persistence.PersistentRepr;
 import akka.persistence.journal.japi.AsyncWriteJournal;
+import com.google.common.collect.Maps;
+import com.google.common.util.concurrent.Uninterruptibles;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import scala.concurrent.Future;
 
+/**
+ * An akka AsyncWriteJournal implementation that stores data in memory. This is intended for testing.
+ *
+ * @author Thomas Pantelis
+ */
 public class InMemoryJournal extends AsyncWriteJournal {
+
+    static final Logger LOG = LoggerFactory.getLogger(InMemoryJournal.class);
 
     private static final Map<String, Map<Long, Object>> journals = new ConcurrentHashMap<>();
 
     private static final Map<String, CountDownLatch> deleteMessagesCompleteLatches = new ConcurrentHashMap<>();
+
+    private static final Map<String, CountDownLatch> writeMessagesCompleteLatches = new ConcurrentHashMap<>();
 
     private static final Map<String, CountDownLatch> blockReadMessagesLatches = new ConcurrentHashMap<>();
 
@@ -50,18 +62,62 @@ public class InMemoryJournal extends AsyncWriteJournal {
         journals.clear();
     }
 
+    @SuppressWarnings("unchecked")
+    public static <T> List<T> get(String persistenceId, Class<T> type) {
+        Map<Long, Object> journalMap = journals.get(persistenceId);
+        if(journalMap == null) {
+            return Collections.<T>emptyList();
+        }
+
+        synchronized (journalMap) {
+            List<T> journal = new ArrayList<>(journalMap.size());
+            for(Object entry: journalMap.values()) {
+                if(type.isInstance(entry)) {
+                    journal.add((T) entry);
+                }
+            }
+
+            return journal;
+        }
+    }
+
     public static Map<Long, Object> get(String persistenceId) {
-        Map<Long, Object> journal = journals.get(persistenceId);
-        return journal != null ? journal : Collections.<Long, Object>emptyMap();
+        Map<Long, Object> journalMap = journals.get(persistenceId);
+        return journalMap != null ? journalMap : Collections.<Long, Object>emptyMap();
+    }
+
+    public static void dumpJournal(String persistenceId) {
+        StringBuilder builder = new StringBuilder(String.format("Journal log for %s:", persistenceId));
+        Map<Long, Object> journalMap = journals.get(persistenceId);
+        if(journalMap != null) {
+            synchronized (journalMap) {
+                for(Map.Entry<Long, Object> e: journalMap.entrySet()) {
+                    builder.append("\n    ").append(e.getKey()).append(" = ").append(e.getValue());
+                }
+            }
+        }
+
+        LOG.info(builder.toString());
     }
 
     public static void waitForDeleteMessagesComplete(String persistenceId) {
-        assertEquals("Recovery complete", true, Uninterruptibles.awaitUninterruptibly(
-                deleteMessagesCompleteLatches.get(persistenceId), 5, TimeUnit.SECONDS));
+        if(!Uninterruptibles.awaitUninterruptibly(deleteMessagesCompleteLatches.get(persistenceId), 5, TimeUnit.SECONDS)) {
+            throw new AssertionError("Delete messages did not complete");
+        }
+    }
+
+    public static void waitForWriteMessagesComplete(String persistenceId) {
+        if(!Uninterruptibles.awaitUninterruptibly(writeMessagesCompleteLatches.get(persistenceId), 5, TimeUnit.SECONDS)) {
+            throw new AssertionError("Journal write messages did not complete");
+        }
     }
 
     public static void addDeleteMessagesCompleteLatch(String persistenceId) {
         deleteMessagesCompleteLatches.put(persistenceId, new CountDownLatch(1));
+    }
+
+    public static void addWriteMessagesCompleteLatch(String persistenceId, int count) {
+        writeMessagesCompleteLatches.put(persistenceId, new CountDownLatch(count));
     }
 
     public static void addBlockReadMessagesLatch(String persistenceId, CountDownLatch latch) {
@@ -100,7 +156,23 @@ public class InMemoryJournal extends AsyncWriteJournal {
 
     @Override
     public Future<Long> doAsyncReadHighestSequenceNr(String persistenceId, long fromSequenceNr) {
-        return Futures.successful(-1L);
+        // Akka calls this during recovery.
+
+        Map<Long, Object> journal = journals.get(persistenceId);
+        if(journal == null) {
+            return Futures.successful(-1L);
+        }
+
+        synchronized (journal) {
+            long highest = -1;
+            for (Long seqNr : journal.keySet()) {
+                if(seqNr.longValue() >= fromSequenceNr && seqNr.longValue() > highest) {
+                    highest = seqNr.longValue();
+                }
+            }
+
+            return Futures.successful(highest);
+        }
     }
 
     @Override
@@ -116,9 +188,17 @@ public class InMemoryJournal extends AsyncWriteJournal {
                     }
 
                     synchronized (journal) {
+                        LOG.trace("doAsyncWriteMessages: id: {}: seqNr: {}, payload: {}", repr.persistenceId(),
+                                repr.sequenceNr(), repr.payload());
                         journal.put(repr.sequenceNr(), repr.payload());
                     }
+
+                    CountDownLatch latch = writeMessagesCompleteLatches.get(repr.persistenceId());
+                    if(latch != null) {
+                        latch.countDown();
+                    }
                 }
+
                 return null;
             }
         }, context().dispatcher());
