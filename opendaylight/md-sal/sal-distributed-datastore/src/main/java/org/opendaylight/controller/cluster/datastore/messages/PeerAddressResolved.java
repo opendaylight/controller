@@ -8,18 +8,17 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
-import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 
 public class PeerAddressResolved {
-    private final ShardIdentifier peerId;
+    private final String peerId;
     private final String peerAddress;
 
-    public PeerAddressResolved(ShardIdentifier peerId, String peerAddress) {
+    public PeerAddressResolved(String peerId, String peerAddress) {
         this.peerId = peerId;
         this.peerAddress = peerAddress;
     }
 
-    public ShardIdentifier getPeerId() {
+    public String getPeerId() {
         return peerId;
     }
 

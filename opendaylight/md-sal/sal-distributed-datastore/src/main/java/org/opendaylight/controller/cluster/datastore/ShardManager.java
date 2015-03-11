@@ -611,7 +611,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                                 peerId, peerAddress, actor.path());
                     }
 
-                    actor.tell(new PeerAddressResolved(peerId, peerAddress), getSelf());
+                    actor.tell(new PeerAddressResolved(peerId.toString(), peerAddress), getSelf());
                 }
             }
         }

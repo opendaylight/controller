@@ -314,7 +314,7 @@ public class ShardTest extends AbstractShardTest {
                     Uninterruptibles.awaitUninterruptibly(recoveryComplete, 5, TimeUnit.SECONDS));
 
             String address = "akka://foobar";
-            shard.underlyingActor().onReceiveCommand(new PeerAddressResolved(shardID, address));
+            shard.underlyingActor().onReceiveCommand(new PeerAddressResolved(shardID.toString(), address));
 
             assertEquals("getPeerAddresses", address,
                     ((TestShard)shard.underlyingActor()).getPeerAddresses().get(shardID.toString()));
