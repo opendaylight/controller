@@ -549,15 +549,14 @@ public class RestconfImpl implements RestconfService {
 
         final DOMRpcResult result = checkRpcResponse(response);
 
-        DataSchemaNode resultNodeSchema = null;
+        RpcDefinition resultNodeSchema = null;
         final NormalizedNode<?, ?> resultData = result.getResult();
         if (result != null && result.getResult() != null) {
-            final RpcDefinition rpcDef = (RpcDefinition) payload.getInstanceIdentifierContext().getSchemaNode();
-            resultNodeSchema = rpcDef.getOutput();
+            resultNodeSchema = (RpcDefinition) payload.getInstanceIdentifierContext().getSchemaNode();
         }
 
-        return new NormalizedNodeContext(new InstanceIdentifierContext(null, resultNodeSchema, mountPoint,
-                schemaContext), resultData);
+        return new NormalizedNodeContext(new InstanceIdentifierContext<RpcDefinition>(null,
+                resultNodeSchema, mountPoint, schemaContext), resultData);
     }
 
     private DOMRpcResult checkRpcResponse(final CheckedFuture<DOMRpcResult, DOMRpcException> response) {
@@ -732,7 +731,7 @@ public class RestconfImpl implements RestconfService {
 
         if (rpc.getInput() != null) {
             // FIXME : find a correct Error from specification
-            throw new IllegalStateException("RPC " + rpc + " needs input value!");
+            throw new IllegalStateException("RPC " + rpc + " does'n need input value!");
         }
 
         final CheckedFuture<DOMRpcResult, DOMRpcException> response;

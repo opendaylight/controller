@@ -8,13 +8,20 @@ module invoke-rpc-module {
   }
 
   rpc rpc-test {
-    input {
-        container cont {
-            leaf lf {
-                type string;
-            }
-        }
-    }
+      input {
+          container cont {
+              leaf lf {
+                  type string;
+              }
+          }
+      }
+      output {
+          container cont-out {
+              leaf lf-out {
+                  type string;
+              }
+          }
+      }
   }  
 
   rpc rpc-noop {

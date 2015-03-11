@@ -1,0 +1,5 @@
+<output xmlns="invoke:rpc:module">
+    <cont-out>
+        <lf-out>lf-test</lf-out>
+    </cont-out>
+</output>
