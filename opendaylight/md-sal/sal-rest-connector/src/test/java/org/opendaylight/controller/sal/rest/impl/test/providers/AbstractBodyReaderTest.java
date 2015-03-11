@@ -11,12 +11,12 @@ package org.opendaylight.controller.sal.rest.impl.test.providers;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
 import java.lang.reflect.Field;
 import java.util.Collections;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Request;
 import javax.ws.rs.core.UriInfo;
 import org.opendaylight.controller.md.sal.rest.common.TestRestconfUtils;
 import org.opendaylight.controller.sal.rest.api.RestconfConstants;
@@ -40,10 +40,13 @@ public abstract class AbstractBodyReaderTest {
     protected final static ControllerContext controllerContext = ControllerContext.getInstance();
     protected final MediaType mediaType;
     private static Field uriField;
+    private static Field requestField;
 
     public AbstractBodyReaderTest () throws NoSuchFieldException, SecurityException {
         uriField = AbstractIdentifierAwareJaxRsProvider.class.getDeclaredField("uriInfo");
         uriField.setAccessible(true);
+        requestField = AbstractIdentifierAwareJaxRsProvider.class.getDeclaredField("request");
+        requestField.setAccessible(true);
         mediaType = getMediaType();
     }
 
@@ -54,7 +57,7 @@ public abstract class AbstractBodyReaderTest {
     }
 
     protected static <T extends AbstractIdentifierAwareJaxRsProvider> void mockBodyReader(
-            final String identifier, final T normalizedNodeProvider) throws NoSuchFieldException,
+            final String identifier, final T normalizedNodeProvider, final boolean isPost) throws NoSuchFieldException,
             SecurityException, IllegalArgumentException, IllegalAccessException {
         final UriInfo uriInfoMock = mock(UriInfo.class);
         final MultivaluedMap<String, String> pathParm = new MultivaluedHashMap<>(1);
@@ -63,6 +66,13 @@ public abstract class AbstractBodyReaderTest {
         when(uriInfoMock.getPathParameters(false)).thenReturn(pathParm);
         when(uriInfoMock.getPathParameters(true)).thenReturn(pathParm);
         uriField.set(normalizedNodeProvider, uriInfoMock);
+        final Request request = mock(Request.class);
+        if (isPost) {
+            when(request.getMethod()).thenReturn("POST");
+        } else {
+            when(request.getMethod()).thenReturn("PUT");
+        }
+        requestField.set(normalizedNodeProvider, request);
     }
 
     protected static void checkMountPointNormalizedNodeContext(final NormalizedNodeContext nnContext) {
