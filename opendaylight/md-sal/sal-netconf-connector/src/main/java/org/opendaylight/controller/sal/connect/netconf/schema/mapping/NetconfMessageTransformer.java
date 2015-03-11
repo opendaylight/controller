@@ -8,6 +8,7 @@
 package org.opendaylight.controller.sal.connect.netconf.schema.mapping;
 
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_RPC_QNAME;
+import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_URI;
 
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
@@ -84,7 +85,6 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
     static {
         try {
             final ModuleInfoBackedContext moduleInfoBackedContext = ModuleInfoBackedContext.create();
-            // TODO this should be used only if the base is not present
             moduleInfoBackedContext.addModuleInfos(
                     Lists.newArrayList(org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf.base._1._0.rev110601.$YangModuleInfoImpl.getInstance()));
             BASE_NETCONF_CTX = moduleInfoBackedContext.tryToCreateSchemaContext().get();
@@ -93,6 +93,7 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
             throw new ExceptionInInitializerError(e);
         }
     }
+    private static final Map<QName, RpcDefinition> MAPPED_BASE_RPCS = Maps.uniqueIndex(BASE_NETCONF_CTX.getOperations(), QNAME_FUNCTION);
 
     private final SchemaContext schemaContext;
     private final MessageCounter counter;
@@ -154,8 +155,17 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
     public NetconfMessage toRpcRequest(SchemaPath rpc, final ContainerNode payload) {
         // In case no input for rpc is defined, we can simply construct the payload here
         final QName rpcQName = rpc.getLastComponent();
-        Preconditions.checkNotNull(mappedRpcs.get(rpcQName), "Unknown rpc %s, available rpcs: %s", rpcQName, mappedRpcs.keySet());
-        if(mappedRpcs.get(rpcQName).getInput() == null) {
+        Map<QName, RpcDefinition> currentMappedRpcs = mappedRpcs;
+
+        // Determine whether a base netconf operation is being invoked and also check if the device exposed model for base netconf
+        // If no, use pre built base netconf operations model
+        final boolean needToUseBaseCtx = mappedRpcs.get(rpcQName) == null && isBaseRpc(rpcQName);
+        if(needToUseBaseCtx) {
+            currentMappedRpcs = MAPPED_BASE_RPCS;
+        }
+
+        Preconditions.checkNotNull(currentMappedRpcs.get(rpcQName), "Unknown rpc %s, available rpcs: %s", rpcQName, currentMappedRpcs.keySet());
+        if(currentMappedRpcs.get(rpcQName).getInput() == null) {
             final Document document = XmlUtil.newDocument();
             final Element elementNS = document.createElementNS(rpcQName.getNamespace().toString(), rpcQName.getLocalName());
             document.appendChild(elementNS);
@@ -167,7 +177,9 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
         final DOMResult result = prepareDomResultForRpcRequest(rpcQName);
 
         try {
-            writeNormalizedRpc(payload, result, rpc, schemaContext);
+            // If the schema context for netconf device does not contain model for base netconf operations, use default pre build context with just the base model
+            // This way operations like lock/unlock are supported even if the source for base model was not provided
+            writeNormalizedRpc(payload, result, rpc, needToUseBaseCtx ? BASE_NETCONF_CTX : schemaContext);
         } catch (final XMLStreamException | IOException | IllegalStateException e) {
             throw new IllegalStateException("Unable to serialize " + rpc, e);
         }
@@ -176,6 +188,10 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
 
         node.getDocumentElement().setAttribute(NetconfMessageTransformUtil.MESSAGE_ID_ATTR, counter.getNewMessageId(MESSAGE_ID_PREFIX));
         return new NetconfMessage(node);
+    }
+
+    private static boolean isBaseRpc(final QName rpc) {
+        return rpc.getNamespace().equals(NETCONF_URI);
     }
 
     private DOMResult prepareDomResultForRpcRequest(final QName rpcQName) {
@@ -217,7 +233,8 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
     @Override
     public synchronized DOMRpcResult toRpcResult(final NetconfMessage message, final SchemaPath rpc) {
         final NormalizedNode<?, ?> normalizedNode;
-        if (NetconfMessageTransformUtil.isDataRetrievalOperation(rpc.getLastComponent())) {
+        final QName rpcQName = rpc.getLastComponent();
+        if (NetconfMessageTransformUtil.isDataRetrievalOperation(rpcQName)) {
             final Element xmlData = NetconfMessageTransformUtil.getDataSubtree(message.getDocument());
             final ContainerSchemaNode schemaForDataRead = NetconfMessageTransformUtil.createSchemaForDataRead(schemaContext);
             final ContainerNode dataNode = parserFactory.getContainerNodeParser().parse(Collections.singleton(xmlData), schemaForDataRead);
@@ -226,8 +243,18 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
                     .withChild(dataNode).build();
         } else {
             final Set<Element> documentElement = Collections.singleton(message.getDocument().getDocumentElement());
-            final RpcDefinition rpcDefinition = mappedRpcs.get(rpc.getLastComponent());
-            Preconditions.checkArgument(rpcDefinition != null, "Unable to parse response of %s, the rpc is unknown", rpc.getLastComponent());
+
+            Map<QName, RpcDefinition> currentMappedRpcs = mappedRpcs;
+
+            // Determine whether a base netconf operation is being invoked and also check if the device exposed model for base netconf
+            // If no, use pre built base netconf operations model
+            final boolean needToUseBaseCtx = mappedRpcs.get(rpcQName) == null && isBaseRpc(rpcQName);
+            if(needToUseBaseCtx) {
+                currentMappedRpcs = MAPPED_BASE_RPCS;
+            }
+
+            final RpcDefinition rpcDefinition = currentMappedRpcs.get(rpcQName);
+            Preconditions.checkArgument(rpcDefinition != null, "Unable to parse response of %s, the rpc is unknown", rpcQName);
 
             // In case no input for rpc is defined, we can simply construct the payload here
             if (rpcDefinition.getOutput() == null) {
