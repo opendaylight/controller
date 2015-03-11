@@ -15,7 +15,7 @@ import java.io.InputStream;
 import javax.ws.rs.core.MediaType;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.opendaylight.controller.sal.rest.impl.XmlNormalizedNodeBodyReader;
+import org.opendaylight.controller.sal.rest.impl.JsonNormalizedNodeBodyReader;
 import org.opendaylight.controller.sal.restconf.impl.NormalizedNodeContext;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -35,16 +35,16 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
  *
  * @author <a href="mailto:vdemcak@cisco.com">Vaclav Demcak</a>
  *
- * Created: Mar 7, 2015
+ * Created: Mar 11, 2015
  */
-public class TestXmlBodyReader extends AbstractBodyReaderTest {
+public class TestJsonBodyReader extends AbstractBodyReaderTest {
 
-    private final XmlNormalizedNodeBodyReader xmlBodyReader;
+    private final JsonNormalizedNodeBodyReader jsonBodyReader;
     private static SchemaContext schemaContext;
 
-    public TestXmlBodyReader () throws NoSuchFieldException, SecurityException {
+    public TestJsonBodyReader () throws NoSuchFieldException, SecurityException {
         super();
-        xmlBodyReader = new XmlNormalizedNodeBodyReader();
+        jsonBodyReader = new JsonNormalizedNodeBodyReader();
     }
 
     @Override
@@ -64,10 +64,10 @@ public class TestXmlBodyReader extends AbstractBodyReaderTest {
     public void moduleDataTest() throws Exception {
         final DataSchemaNode dataSchemaNode = schemaContext.getDataChildByName("cont");
         final String uri = "instance-identifier-module:cont";
-        mockBodyReader(uri, xmlBodyReader, false);
-        final InputStream inputStream = TestXmlBodyReader.class
-                .getResourceAsStream("/instanceidentifier/xml/xmldata.xml");
-        final NormalizedNodeContext returnValue = xmlBodyReader
+        mockBodyReader(uri, jsonBodyReader, false);
+        final InputStream inputStream = TestJsonBodyReader.class
+                .getResourceAsStream("/instanceidentifier/json/jsondata.json");
+        final NormalizedNodeContext returnValue = jsonBodyReader
                 .readFrom(null, null, null, mediaType, null, inputStream);
         checkNormalizedNodeContext(returnValue);
         checkExpectValueNormalizeNodeContext(dataSchemaNode, returnValue);
@@ -77,10 +77,10 @@ public class TestXmlBodyReader extends AbstractBodyReaderTest {
     public void moduleSubContainerDataPutTest() throws Exception {
         final DataSchemaNode dataSchemaNode = schemaContext.getDataChildByName("cont");
         final String uri = "instance-identifier-module:cont/cont1";
-        mockBodyReader(uri, xmlBodyReader, false);
-        final InputStream inputStream = TestXmlBodyReader.class
-                .getResourceAsStream("/instanceidentifier/xml/xml_sub_container.xml");
-        final NormalizedNodeContext returnValue = xmlBodyReader
+        mockBodyReader(uri, jsonBodyReader, false);
+        final InputStream inputStream = TestJsonBodyReader.class
+                .getResourceAsStream("/instanceidentifier/json/json_sub_container.json");
+        final NormalizedNodeContext returnValue = jsonBodyReader
                 .readFrom(null, null, null, mediaType, null, inputStream);
         checkNormalizedNodeContext(returnValue);
         checkExpectValueNormalizeNodeContext(dataSchemaNode, returnValue, "cont1");
@@ -90,10 +90,10 @@ public class TestXmlBodyReader extends AbstractBodyReaderTest {
     public void moduleSubContainerDataPostTest() throws Exception {
         final DataSchemaNode dataSchemaNode = schemaContext.getDataChildByName("cont");
         final String uri = "instance-identifier-module:cont";
-        mockBodyReader(uri, xmlBodyReader, true);
-        final InputStream inputStream = TestXmlBodyReader.class
-                .getResourceAsStream("/instanceidentifier/xml/xml_sub_container.xml");
-        final NormalizedNodeContext returnValue = xmlBodyReader
+        mockBodyReader(uri, jsonBodyReader, true);
+        final InputStream inputStream = TestJsonBodyReader.class
+                .getResourceAsStream("/instanceidentifier/json/json_sub_container.json");
+        final NormalizedNodeContext returnValue = jsonBodyReader
                 .readFrom(null, null, null, mediaType, null, inputStream);
         checkNormalizedNodeContext(returnValue);
         checkExpectValueNormalizeNodeContext(dataSchemaNode, returnValue);
@@ -102,15 +102,19 @@ public class TestXmlBodyReader extends AbstractBodyReaderTest {
     @Test
     public void rpcModuleInputTest() throws Exception {
         final String uri = "invoke-rpc-module:rpc-test";
-        mockBodyReader(uri, xmlBodyReader, true);
-        final InputStream inputStream = TestXmlBodyReader.class
-                .getResourceAsStream("/invoke-rpc/xml/rpc-input.xml");
-        final NormalizedNodeContext returnValue = xmlBodyReader
+        mockBodyReader(uri, jsonBodyReader, true);
+        final InputStream inputStream = TestJsonBodyReader.class
+                .getResourceAsStream("/invoke-rpc/json/rpc-input.json");
+        final NormalizedNodeContext returnValue = jsonBodyReader
                 .readFrom(null, null, null, mediaType, null, inputStream);
         checkNormalizedNodeContext(returnValue);
-        final ContainerNode contNode = (ContainerNode) returnValue.getData();
-        final YangInstanceIdentifier yangleaf = YangInstanceIdentifier.of(QName.create(contNode.getNodeType(), "lf"));
-        final Optional<DataContainerChild<? extends PathArgument, ?>> leafDataNode = contNode.getChild(yangleaf.getLastPathArgument());
+        final ContainerNode inputNode = (ContainerNode) returnValue.getData();
+        final YangInstanceIdentifier yangCont = YangInstanceIdentifier.of(QName.create(inputNode.getNodeType(), "cont"));
+        final Optional<DataContainerChild<? extends PathArgument, ?>> contDataNode = inputNode.getChild(yangCont.getLastPathArgument());
+        assertTrue(contDataNode.isPresent());
+        assertTrue(contDataNode.get() instanceof ContainerNode);
+        final YangInstanceIdentifier yangleaf = YangInstanceIdentifier.of(QName.create(inputNode.getNodeType(), "lf"));
+        final Optional<DataContainerChild<? extends PathArgument, ?>> leafDataNode = ((ContainerNode)contDataNode.get()).getChild(yangleaf.getLastPathArgument());
         assertTrue(leafDataNode.isPresent());
         assertTrue("lf-test".equalsIgnoreCase(leafDataNode.get().getValue().toString()));
     }
