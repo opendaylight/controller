@@ -87,6 +87,10 @@
     <module>messagebus-spi</module>
     <module>messagebus-impl</module>
     <module>messagebus-config</module>
+
+    <!-- IT Base and Parent -->
+    <module>mdsal-it-base</module>
+    <module>mdsal-it-parent</module>
   </modules>
 
   <build>
