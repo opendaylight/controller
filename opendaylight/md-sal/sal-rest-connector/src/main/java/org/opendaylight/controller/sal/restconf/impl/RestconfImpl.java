@@ -18,6 +18,7 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import java.math.BigInteger;
@@ -74,12 +75,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.InstanceI
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
-import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
-import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
-import org.opendaylight.yangtools.yang.data.api.schema.LeafSetEntryNode;
-import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
-import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.*;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.ModifiedNodeDoesNotExistException;
 import org.opendaylight.yangtools.yang.data.composite.node.schema.cnsn.parser.CnSnToNormalizedNodeParserFactory;
 import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
@@ -168,8 +164,6 @@ public class RestconfImpl implements RestconfService {
 
     private static final URI NAMESPACE_EVENT_SUBSCRIPTION_AUGMENT = URI.create("urn:sal:restconf:event:subscription");
 
-    private static final Date EVENT_SUBSCRIPTION_AUGMENT_REVISION;
-
     private static final String DATASTORE_PARAM_NAME = "datastore";
 
     private static final String SCOPE_PARAM_NAME = "scope";
@@ -180,10 +174,18 @@ public class RestconfImpl implements RestconfService {
 
     private static final QName NETCONF_BASE_QNAME;
 
+    private static final QNameModule SAL_REMOTE_AUGMENT;
+
+    private static final YangInstanceIdentifier.AugmentationIdentifier SAL_REMOTE_AUG_IDENTIFIER;
+
     static {
         try {
-            EVENT_SUBSCRIPTION_AUGMENT_REVISION = new SimpleDateFormat("yyyy-MM-dd").parse("2014-07-08");
+            final Date eventSubscriptionAugRevision = new SimpleDateFormat("yyyy-MM-dd").parse("2014-07-08");
             NETCONF_BASE_QNAME = QName.create(QNameModule.create(new URI(NETCONF_BASE), null), NETCONF_BASE_PAYLOAD_NAME );
+            SAL_REMOTE_AUGMENT = QNameModule.create(NAMESPACE_EVENT_SUBSCRIPTION_AUGMENT,
+                    eventSubscriptionAugRevision);
+            SAL_REMOTE_AUG_IDENTIFIER = new YangInstanceIdentifier.AugmentationIdentifier(Sets.newHashSet(QName.create(SAL_REMOTE_AUGMENT, "scope"),
+                    QName.create(SAL_REMOTE_AUGMENT, "datastore")));
         } catch (final ParseException e) {
             throw new RestconfDocumentedException(
                     "It wasn't possible to convert revision date of sal-remote-augment to date", ErrorType.APPLICATION,
@@ -1327,10 +1329,12 @@ public class RestconfImpl implements RestconfService {
      */
     private <T> T parseEnumTypeParameter(final ContainerNode value, final Class<T> classDescriptor,
             final String paramName) {
-        final QNameModule salRemoteAugment = QNameModule.create(NAMESPACE_EVENT_SUBSCRIPTION_AUGMENT,
-                EVENT_SUBSCRIPTION_AUGMENT_REVISION);
-        final Optional<DataContainerChild<? extends PathArgument, ?>> enumNode = value.getChild(new NodeIdentifier(
-                QName.create(salRemoteAugment, paramName)));
+        final Optional<DataContainerChild<? extends PathArgument, ?>> augNode = value.getChild(SAL_REMOTE_AUG_IDENTIFIER);
+        if (!augNode.isPresent() && !(augNode instanceof AugmentationNode)) {
+            return null;
+        }
+        final Optional<DataContainerChild<? extends PathArgument, ?>> enumNode =
+                ((AugmentationNode) augNode.get()).getChild(new NodeIdentifier(QName.create(SAL_REMOTE_AUGMENT, paramName)));
         if (!enumNode.isPresent()) {
             return null;
         }
