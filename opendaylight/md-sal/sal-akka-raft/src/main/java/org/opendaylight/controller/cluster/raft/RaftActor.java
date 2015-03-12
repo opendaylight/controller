@@ -87,6 +87,13 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     private static final long APPLY_STATE_DELAY_THRESHOLD_IN_NANOS = TimeUnit.MILLISECONDS.toNanos(50L); // 50 millis
 
+    private static final Procedure<ApplyJournalEntries> APPLY_JOURNAL_ENTRIES_PERSIST_CALLBACK =
+            new Procedure<ApplyJournalEntries>() {
+                @Override
+                public void apply(ApplyJournalEntries param) throws Exception {
+                }
+            };
+
     protected final Logger LOG = LoggerFactory.getLogger(getClass());
 
     /**
@@ -319,11 +326,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             if(LOG.isDebugEnabled()) {
                 LOG.debug("{}: Persisting ApplyLogEntries with index={}", persistenceId(), applyEntries.getToIndex());
             }
-            persistence().persist(applyEntries, new Procedure<ApplyJournalEntries>() {
-                @Override
-                public void apply(ApplyJournalEntries param) throws Exception {
-                }
-            });
+
+            persistence().persist(applyEntries, APPLY_JOURNAL_ENTRIES_PERSIST_CALLBACK);
 
         } else if(message instanceof ApplySnapshot ) {
             Snapshot snapshot = ((ApplySnapshot) message).getSnapshot();
