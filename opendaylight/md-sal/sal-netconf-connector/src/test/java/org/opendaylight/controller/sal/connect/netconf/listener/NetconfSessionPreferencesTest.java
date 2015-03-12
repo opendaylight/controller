@@ -32,8 +32,8 @@ public class NetconfSessionPreferencesTest {
         final NetconfSessionPreferences sessionCaps2 = NetconfSessionPreferences.fromStrings(caps2);
         assertCaps(sessionCaps2, 1, 2);
 
-        final NetconfSessionPreferences merged = sessionCaps1.replaceModuleCaps(sessionCaps2);
-        assertCaps(merged, 2, 2 + 1 /*Preserved monitoring*/);
+        final NetconfSessionPreferences merged = sessionCaps1.addModuleCaps(sessionCaps2);
+        assertCaps(merged, 2, 2 + 1 /*Preserved monitoring*/ + 2 /*already present*/);
         for (final QName qName : sessionCaps2.getModuleBasedCaps()) {
             assertThat(merged.getModuleBasedCaps(), hasItem(qName));
         }

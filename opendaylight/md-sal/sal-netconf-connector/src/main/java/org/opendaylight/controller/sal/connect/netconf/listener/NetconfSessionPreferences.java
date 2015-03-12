@@ -115,14 +115,11 @@ public final class NetconfSessionPreferences {
                 || containsNonModuleCapability(NetconfMessageTransformUtil.IETF_NETCONF_MONITORING.getNamespace().toString());
     }
 
-    public NetconfSessionPreferences replaceModuleCaps(final NetconfSessionPreferences netconfSessionModuleCapabilities) {
-        final Set<QName> moduleBasedCaps = Sets.newHashSet(netconfSessionModuleCapabilities.getModuleBasedCaps());
-
-        // Preserve monitoring module, since it indicates support for ietf-netconf-monitoring
-        if(containsModuleCapability(NetconfMessageTransformUtil.IETF_NETCONF_MONITORING)) {
-            moduleBasedCaps.add(NetconfMessageTransformUtil.IETF_NETCONF_MONITORING);
-        }
-        return new NetconfSessionPreferences(getNonModuleCaps(), moduleBasedCaps);
+    public NetconfSessionPreferences addModuleCaps(final NetconfSessionPreferences netconfSessionModuleCapabilities) {
+        final HashSet<QName> mergedCaps = Sets.newHashSetWithExpectedSize(moduleBasedCaps.size() + netconfSessionModuleCapabilities.getModuleBasedCaps().size());
+        mergedCaps.addAll(moduleBasedCaps);
+        mergedCaps.addAll(netconfSessionModuleCapabilities.getModuleBasedCaps());
+        return new NetconfSessionPreferences(getNonModuleCaps(), mergedCaps);
     }
 
     public static NetconfSessionPreferences fromNetconfSession(final NetconfClientSession session) {
