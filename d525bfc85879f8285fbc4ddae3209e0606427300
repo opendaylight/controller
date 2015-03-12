@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_a5ddb016",
+        "filename": "opendaylight/distribution/opendaylight-karaf-resources/src/main/resources/configuration/context.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2015-03-12T19:32:25Z",
+      "side": 1,
+      "message": "Is this change actually related or just a good idea? If it\u0027s just a good idea that\u0027s fine, but it might make sense to factor it out into it\u0027s own patch or add it to the commit message.",
+      "revId": "d525bfc85879f8285fbc4ddae3209e0606427300",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
