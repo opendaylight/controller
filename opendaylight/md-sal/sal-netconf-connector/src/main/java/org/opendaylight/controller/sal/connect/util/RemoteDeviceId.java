@@ -77,7 +77,7 @@ public final class RemoteDeviceId {
     private static org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier createBIPath(final String name) {
         final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.InstanceIdentifierBuilder builder =
                 org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.builder();
-        builder.node(Nodes.QNAME).nodeWithKey(Node.QNAME, QName.create(Node.QNAME.getNamespace(), Node.QNAME.getRevision(), "id"), name);
+        builder.node(Nodes.QNAME).node(Node.QNAME).nodeWithKey(Node.QNAME, QName.create(Node.QNAME.getNamespace(), Node.QNAME.getRevision(), "id"), name);
 
         return builder.build();
     }
