@@ -8,6 +8,8 @@
 
 package org.opendaylight.controller.liblldp;
 
+import java.util.Collections;
+import com.google.common.collect.Iterables;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -28,6 +30,8 @@ public class LLDP extends Packet {
     public static final byte[] LLDPMulticastMac = { 1, (byte) 0x80,
             (byte) 0xc2, 0, 0, (byte) 0xe };
     private Map<Byte, LLDPTLV> tlvList;
+
+    private List<LLDPTLV> optionalTlvList = Collections.emptyList();
 
     /**
      * Default constructor that creates the tlvList LinkedHashMap
@@ -174,9 +178,8 @@ public class LLDP extends Packet {
      * @return LLDP
      */
     public LLDP setOptionalTLVList(List<LLDPTLV> optionalTLVList) {
-        for (LLDPTLV tlv : optionalTLVList) {
-            tlvList.put(tlv.getType(), tlv);
-        }
+        this.optionalTlvList = new ArrayList<>(optionalTLVList.size());
+        Collections.copy(this.optionalTlvList, optionalTLVList);
         return this;
     }
 
@@ -212,8 +215,8 @@ public class LLDP extends Packet {
         int startOffset = 0;
         byte[] serializedBytes = new byte[getLLDPPacketLength()];
 
-        for (Map.Entry<Byte, LLDPTLV> entry : tlvList.entrySet()) {
-            LLDPTLV tlv = entry.getValue();
+        final Iterable<LLDPTLV> allTlvs = Iterables.concat(optionalTlvList, tlvList.values());
+        for (LLDPTLV tlv : allTlvs) {
             int numBits = tlv.getTLVSize();
             try {
                 BitBufferHelper.setBytes(serializedBytes, tlv.serialize(),
