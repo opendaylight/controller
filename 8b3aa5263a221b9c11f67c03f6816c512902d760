@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_059ca468",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 710,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-03-12T18:40:49Z",
+      "side": 1,
+      "message": "In most cases, it could happen that the historical replicatedToAllIndex gets cleared off since we purge based on LastAppliedIndex.\n\nBut i see no harm in preserving it, since we check for the validity of the replicatedToAllIndex while purging.",
+      "revId": "8b3aa5263a221b9c11f67c03f6816c512902d760",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
