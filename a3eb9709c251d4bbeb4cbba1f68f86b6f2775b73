@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_54ad8430",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-12T03:20:41Z",
+      "side": 1,
+      "message": "I don\u0027t think this should be reported as an error. It can happen due to natural latencies.",
+      "revId": "a3eb9709c251d4bbeb4cbba1f68f86b6f2775b73",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_f4a93025",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-12T03:20:41Z",
+      "side": 1,
+      "message": "Utilize the new updated boolean returned from FollowerLogInformation to log the follower\u0027s current indexes but only if they changed.",
+      "revId": "a3eb9709c251d4bbeb4cbba1f68f86b6f2775b73",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_14a7fc50",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 230,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-12T03:20:41Z",
+      "side": 1,
+      "message": "I realized the slf4j logging API has vararg methods that allow any # of format objs and only has specific methods that take 1 or 2 args. So if you have more than 2 format args it will call the vararg method and incur an implicit Object[] construction which isn\u0027t ideal on the fast path. Hence the isDebugEnabled check.",
+      "revId": "a3eb9709c251d4bbeb4cbba1f68f86b6f2775b73",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_b463a819",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 243,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-12T03:20:41Z",
+      "side": 1,
+      "message": "Pass !updated as isHeartbeat so we don\u0027t log unnecessary debug in sendUpdatesToFollower when nothing changed here.",
+      "revId": "a3eb9709c251d4bbeb4cbba1f68f86b6f2775b73",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_5474a4ce",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 589,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-12T03:20:41Z",
+      "side": 1,
+      "message": "Found it useful to log the whole CaptureSnapshot message. I don\u0027t think we need this to be info.",
+      "revId": "a3eb9709c251d4bbeb4cbba1f68f86b6f2775b73",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_347798d6",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 642,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-12T03:20:41Z",
+      "side": 1,
+      "message": "I don\u0027t think we need this to be info.",
+      "revId": "a3eb9709c251d4bbeb4cbba1f68f86b6f2775b73",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
