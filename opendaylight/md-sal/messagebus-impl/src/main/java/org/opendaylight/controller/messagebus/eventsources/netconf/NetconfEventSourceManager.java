@@ -1,17 +1,19 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.messagebus.app.impl;
+package org.opendaylight.controller.messagebus.eventsources.netconf;
 
-import com.google.common.base.Optional;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+
 import org.opendaylight.controller.config.yang.messagebus.app.impl.NamespaceToStream;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
@@ -23,6 +25,9 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
 import org.opendaylight.controller.md.sal.dom.api.DOMNotificationPublishService;
+import org.opendaylight.controller.messagebus.api.EventSourceRegistry;
+import org.opendaylight.controller.messagebus.registry.EventSourceRegistration;
+import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.topology.rev150114.NetconfNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.topology.rev150114.NetconfNodeFields.ConnectionStatus;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.topology.rev150114.network.topology.topology.topology.types.TopologyNetconf;
@@ -40,6 +45,8 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Optional;
+
 public final class NetconfEventSourceManager implements DataChangeListener, AutoCloseable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NetconfEventSourceManager.class);
@@ -56,32 +63,56 @@ public final class NetconfEventSourceManager implements DataChangeListener, Auto
             .build();
     private static final QName NODE_ID_QNAME = QName.create(Node.QNAME,"node-id");
 
-
-    private final EventSourceTopology eventSourceTopology;
     private final Map<String, String> streamMap;
-
-    private final Map<InstanceIdentifier<?>, NetconfEventSource> netconfSources = new HashMap<>();
-    private final ListenerRegistration<DataChangeListener> listenerReg;
+    private final ConcurrentHashMap<InstanceIdentifier<?>, EventSourceRegistration> eventSourceRegistration = new ConcurrentHashMap<>();
     private final DOMNotificationPublishService publishService;
     private final DOMMountPointService domMounts;
     private final MountPointService bindingMounts;
+    private final RpcProviderRegistry rpcRegistry;
+    private ListenerRegistration<DataChangeListener> listenerRegistration;
+    private EventSourceRegistry eventSourceRegistry;
 
-    public NetconfEventSourceManager(final DataBroker dataStore,
-                              final DOMNotificationPublishService domPublish,
+    public static NetconfEventSourceManager create(final DataBroker dataBroker,
+            final DOMNotificationPublishService domPublish,
+            final DOMMountPointService domMount,
+            final MountPointService bindingMount,
+            final RpcProviderRegistry rpcRegistry,
+            final List<NamespaceToStream> namespaceMapping){
+
+        NetconfEventSourceManager eventSourceManager =
+                new NetconfEventSourceManager(domPublish, domMount, bindingMount, rpcRegistry, namespaceMapping);
+
+        eventSourceManager.initialize(dataBroker, rpcRegistry);
+
+        return eventSourceManager;
+
+    }
+
+    private NetconfEventSourceManager(final DOMNotificationPublishService domPublish,
                               final DOMMountPointService domMount,
                               final MountPointService bindingMount,
-                              final EventSourceTopology eventSourceTopology,
+                              final RpcProviderRegistry rpcRegistry,
                               final List<NamespaceToStream> namespaceMapping) {
 
-        listenerReg = dataStore.registerDataChangeListener(LogicalDatastoreType.OPERATIONAL, NETCONF_DEVICE_PATH, this, DataChangeScope.SUBTREE);
-        this.eventSourceTopology = eventSourceTopology;
         this.streamMap = namespaceToStreamMapping(namespaceMapping);
         this.domMounts = domMount;
         this.bindingMounts = bindingMount;
         this.publishService = domPublish;
-        LOGGER.info("EventSourceManager initialized.");
+        this.rpcRegistry = rpcRegistry;
     }
 
+    private void initialize(final DataBroker dataBroker, final RpcProviderRegistry rpcRegistry){
+        listenerRegistration = dataBroker.registerDataChangeListener(LogicalDatastoreType.OPERATIONAL, NETCONF_DEVICE_PATH, this, DataChangeScope.SUBTREE);
+        LOGGER.info("NetconfEventSourceManager initialized.");
+    }
+
+    private EventSourceRegistry getEventSourceRegistry(){
+        if(eventSourceRegistry == null){
+            eventSourceRegistry = rpcRegistry.getRpcService(EventSourceRegistry.class);
+        }
+        return eventSourceRegistry;
+    }
+    
     private Map<String,String> namespaceToStreamMapping(final List<NamespaceToStream> namespaceMapping) {
         final Map<String, String> streamMap = new HashMap<>(namespaceMapping.size());
 
@@ -94,7 +125,7 @@ public final class NetconfEventSourceManager implements DataChangeListener, Auto
 
     @Override
     public void onDataChanged(final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> event) {
-        //FIXME: Prevent creating new event source on subsequent changes in inventory, like disconnect.
+
         LOGGER.debug("[DataChangeEvent<InstanceIdentifier<?>, DataObject>: {}]", event);
         for (final Map.Entry<InstanceIdentifier<?>, DataObject> changeEntry : event.getCreatedData().entrySet()) {
             if (changeEntry.getValue() instanceof Node) {
@@ -102,13 +133,11 @@ public final class NetconfEventSourceManager implements DataChangeListener, Auto
             }
         }
 
-
         for (final Map.Entry<InstanceIdentifier<?>, DataObject> changeEntry : event.getUpdatedData().entrySet()) {
             if (changeEntry.getValue() instanceof Node) {
                 nodeUpdated(changeEntry.getKey(),(Node) changeEntry.getValue());
             }
         }
-
 
     }
 
@@ -116,8 +145,7 @@ public final class NetconfEventSourceManager implements DataChangeListener, Auto
 
         // we listen on node tree, therefore we should rather throw IllegalStateException when node is null
         if ( node == null ) {
-            LOGGER.debug("OnDataChanged Event. Node is null.");
-            return;
+            throw new IllegalStateException("Node is null");
         }
         if ( isNetconfNode(node) == false ) {
             LOGGER.debug("OnDataChanged Event. Not a Netconf node.");
@@ -131,20 +159,32 @@ public final class NetconfEventSourceManager implements DataChangeListener, Auto
             return;
         }
 
-        if(!netconfSources.containsKey(key)) {
+        if(!eventSourceRegistration.containsKey(key)) {
             createEventSource(key,node);
         }
     }
 
-    private synchronized void createEventSource(final InstanceIdentifier<?> key, final Node node) {
+    private void createEventSource(final InstanceIdentifier<?> key, final Node node) {
         final Optional<DOMMountPoint> netconfMount = domMounts.getMountPoint(domMountPath(node.getNodeId()));
         final Optional<MountPoint> bindingMount = bindingMounts.getMountPoint(key);
 
         if(netconfMount.isPresent() && bindingMount.isPresent()) {
-            final String nodeId = node.getNodeId().getValue();
-            final NetconfEventSource netconfEventSource = new NetconfEventSource(nodeId, streamMap, netconfMount.get(), publishService, bindingMount.get());
-            eventSourceTopology.register(node,netconfEventSource);
-            netconfSources.put(key, netconfEventSource);
+            EventSourceRegistration esr = null;
+            NetconfEventSource netconfEventSource=null;
+            try {
+                netconfEventSource = new NetconfEventSource(node, streamMap, netconfMount.get(), publishService, bindingMount.get());
+                //FIXME: eventSourceRegistry can be null
+                esr = getEventSourceRegistry().registerEventSource(node, netconfEventSource).get().getResult();
+                eventSourceRegistration.putIfAbsent(key, esr);
+            } catch (InterruptedException | ExecutionException e) {
+                try {
+                    LOGGER.error("Can not register NetConfEventSource [{}], Exception: {}", netconfEventSource, e);
+                    netconfEventSource.close();
+                } catch (Exception e1) {
+                    LOGGER.error("Can not close NetConfEventSource [{}], Exception: {}", netconfEventSource,e1);
+                    throw new IllegalStateException("Can not close NetConfEventSource");
+                }
+            }
         }
     }
 
@@ -174,6 +214,10 @@ public final class NetconfEventSourceManager implements DataChangeListener, Auto
 
     @Override
     public void close() {
-        listenerReg.close();
+        for(EventSourceRegistration reg : eventSourceRegistration.values()){
+            reg.close();
+        }
+        listenerRegistration.close();
     }
+
 }

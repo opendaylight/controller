@@ -8,19 +8,24 @@
 
 package org.opendaylight.controller.messagebus.app.impl;
 
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.Futures;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.regex.Pattern;
+
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.controller.messagebus.api.EventSource;
+import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RoutedRpcRegistration;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RpcRegistration;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventaggregator.rev141202.CreateTopicInput;
@@ -53,6 +58,9 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Optional;
+import com.google.common.util.concurrent.Futures;
+
 
 public class EventSourceTopology implements EventAggregatorService, AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(EventSourceTopology.class);
@@ -70,17 +78,21 @@ public class EventSourceTopology implements EventAggregatorService, AutoCloseabl
                     .child(TopologyTypes.class)
                     .augmentation(TopologyTypes1.class);
 
-    private final Map<DataChangeListener, ListenerRegistration<DataChangeListener>> registrations =
+    private final Map<DataChangeListener, ListenerRegistration<DataChangeListener>> topicListenerRegistrations =
             new ConcurrentHashMap<>();
+    private final Map<NodeKey, RoutedRpcRegistration<EventSourceService>> routedRpcRegistartions =
+            new ConcurrentHashMap<>();;
 
     private final DataBroker dataBroker;
     private final RpcRegistration<EventAggregatorService> aggregatorRpcReg;
     private final EventSourceService eventSourceService;
     private final RpcProviderRegistry rpcRegistry;
+    private final ExecutorService executorService;
 
     public EventSourceTopology(final DataBroker dataBroker, final RpcProviderRegistry rpcRegistry) {
         this.dataBroker = dataBroker;
         this.rpcRegistry = rpcRegistry;
+        this.executorService = Executors.newCachedThreadPool();
         aggregatorRpcReg = rpcRegistry.addRpcImplementation(EventAggregatorService.class, this);
         eventSourceService = rpcRegistry.getRpcService(EventSourceService.class);
 
@@ -97,6 +109,12 @@ public class EventSourceTopology implements EventAggregatorService, AutoCloseabl
         tx.submit();
     }
 
+    private <T extends DataObject>  void deleteData(final LogicalDatastoreType store, final InstanceIdentifier<T> path){
+        final WriteTransaction tx = dataBroker.newWriteOnlyTransaction();
+        tx.delete(OPERATIONAL, path);
+        tx.submit();
+    }
+
     private void insert(final KeyedInstanceIdentifier<Node, NodeKey> sourcePath, final Node node) {
         final NodeKey nodeKey = node.getKey();
         final InstanceIdentifier<Node1> augmentPath = sourcePath.augmentation(Node1.class);
@@ -104,23 +122,13 @@ public class EventSourceTopology implements EventAggregatorService, AutoCloseabl
         putData(OPERATIONAL, augmentPath, nodeAgument);
     }
 
-    // TODO: Should we expose this functionality over RPC?
-    public List<Node> snapshot() {
-        try (ReadOnlyTransaction tx = dataBroker.newReadOnlyTransaction();) {
-        final Optional<Topology> data = tx.read(OPERATIONAL, EVENT_SOURCE_TOPOLOGY_PATH).checkedGet();
+    private void remove(final KeyedInstanceIdentifier<Node, NodeKey> sourcePath){
+        final InstanceIdentifier<Node1> augmentPath = sourcePath.augmentation(Node1.class);
+        deleteData(OPERATIONAL, augmentPath);
+    }
 
-
-        if(data.isPresent()) {
-            final List<Node> nodeList = data.get().getNode();
-            if(nodeList != null) {
-                return nodeList;
-            }
-        }
-        return Collections.emptyList();
-        } catch (final ReadFailedException e) {
-            LOG.error("Unable to retrieve node list.", e);
-            return Collections.emptyList();
-        }
+    private void notifyExistingNodes(final Pattern nodeIdPatternRegex, final EventSourceTopic eventSourceTopic){
+        executorService.execute(new NotifyAllNodeExecutor(dataBroker, nodeIdPatternRegex, eventSourceTopic));
     }
 
     @Override
@@ -130,23 +138,19 @@ public class EventSourceTopology implements EventAggregatorService, AutoCloseabl
                 input.getNodeIdPattern());
 
         final NotificationPattern notificationPattern = new NotificationPattern(input.getNotificationPattern());
-        final EventSourceTopic topic = new EventSourceTopic(notificationPattern, input.getNodeIdPattern().getValue(), eventSourceService);
+        final String nodeIdPattern = input.getNodeIdPattern().getValue();
+        final Pattern nodeIdPatternRegex = Pattern.compile(Util.wildcardToRegex(nodeIdPattern));
+        final EventSourceTopic eventSourceTopic = new EventSourceTopic(notificationPattern, nodeIdPattern, eventSourceService);
 
-        //# Make sure we capture all nodes from now on
-        registerTopic(topic);
+        registerTopic(eventSourceTopic);
 
-        //# Notify existing nodes
-        //# Code reader note: Context of Node type is NetworkTopology
-        final List<Node> nodes = snapshot();
-        for (final Node node : nodes) {
-            topic.notifyNode(EVENT_SOURCE_TOPOLOGY_PATH.child(Node.class, node.getKey()));
-        }
+        notifyExistingNodes(nodeIdPatternRegex, eventSourceTopic);
 
         final CreateTopicOutput cto = new CreateTopicOutputBuilder()
-                .setTopicId(topic.getTopicId())
+                .setTopicId(eventSourceTopic.getTopicId())
                 .build();
 
-        return Util.resultFor(cto);
+        return Util.resultRpcSuccessFor(cto);
     }
 
     @Override
@@ -157,22 +161,77 @@ public class EventSourceTopology implements EventAggregatorService, AutoCloseabl
     @Override
     public void close() {
         aggregatorRpcReg.close();
+        for(ListenerRegistration<DataChangeListener> reg : topicListenerRegistrations.values()){
+            reg.close();
+        }
     }
 
-    public void registerTopic(final EventSourceTopic listener) {
+    private void registerTopic(final EventSourceTopic listener) {
         final ListenerRegistration<DataChangeListener> listenerRegistration = dataBroker.registerDataChangeListener(OPERATIONAL,
                 EVENT_SOURCE_TOPOLOGY_PATH,
                 listener,
                 DataBroker.DataChangeScope.SUBTREE);
 
-        registrations.put(listener, listenerRegistration);
+        topicListenerRegistrations.put(listener, listenerRegistration);
     }
 
-    public void register(final Node node, final NetconfEventSource netconfEventSource) {
+    public void register(final Node node, final EventSource eventSource){
         final KeyedInstanceIdentifier<Node, NodeKey> sourcePath = EVENT_SOURCE_TOPOLOGY_PATH.child(Node.class, node.getKey());
-        rpcRegistry.addRoutedRpcImplementation(EventSourceService.class, netconfEventSource)
-            .registerPath(NodeContext.class, sourcePath);
+        RoutedRpcRegistration<EventSourceService> reg = rpcRegistry.addRoutedRpcImplementation(EventSourceService.class, eventSource);
+        reg.registerPath(NodeContext.class, sourcePath);
+        routedRpcRegistartions.put(node.getKey(),reg);
         insert(sourcePath,node);
-        // FIXME: Return registartion object.
+    }
+
+    public void unRegister(final EventSource eventSource){
+        NodeKey nodeKey = eventSource.getSourceNodeKey();
+        final KeyedInstanceIdentifier<Node, NodeKey> sourcePath = EVENT_SOURCE_TOPOLOGY_PATH.child(Node.class, nodeKey);
+        if(routedRpcRegistartions.containsKey(nodeKey)){
+            routedRpcRegistartions.get(nodeKey).close();
+            routedRpcRegistartions.remove(nodeKey);
+        }
+        remove(sourcePath);
+    }
+
+    private class NotifyAllNodeExecutor implements Runnable {
+
+        private final EventSourceTopic topic;
+        private final DataBroker dataBroker;
+        final Pattern nodeIdPatternRegex;
+        
+        public NotifyAllNodeExecutor(final DataBroker dataBroker, final Pattern nodeIdPatternRegex, final EventSourceTopic topic) {
+            this.topic = topic;
+            this.dataBroker = dataBroker;
+            this.nodeIdPatternRegex = nodeIdPatternRegex;
+            
+        }
+        @Override
+        public void run() {
+            //# Code reader note: Context of Node type is NetworkTopology
+            final List<Node> nodes = snapshot();
+            for (final Node node : nodes) {
+                if (nodeIdPatternRegex.matcher(node.getNodeId().getValue()).matches()) {
+                    topic.notifyNode(EVENT_SOURCE_TOPOLOGY_PATH.child(Node.class, node.getKey()));
+                }
+            }
+        }
+
+        private List<Node> snapshot() {
+            try (ReadOnlyTransaction tx = dataBroker.newReadOnlyTransaction();) {
+
+                final Optional<Topology> data = tx.read(OPERATIONAL, EVENT_SOURCE_TOPOLOGY_PATH).checkedGet();
+
+                if(data.isPresent()) {
+                    final List<Node> nodeList = data.get().getNode();
+                    if(nodeList != null) {
+                        return nodeList;
+                    }
+                }
+                return Collections.emptyList();
+            } catch (final ReadFailedException e) {
+                LOG.error("Unable to retrieve node list.", e);
+                return Collections.emptyList();
+            }
+        }
     }
 }

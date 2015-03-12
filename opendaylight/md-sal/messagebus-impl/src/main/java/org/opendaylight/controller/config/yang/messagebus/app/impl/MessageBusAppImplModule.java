@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.config.yang.messagebus.app.impl;
 
-import java.util.List;
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
@@ -15,7 +14,8 @@ import org.opendaylight.controller.md.sal.binding.api.MountPointService;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
 import org.opendaylight.controller.md.sal.dom.api.DOMNotificationPublishService;
 import org.opendaylight.controller.messagebus.app.impl.EventSourceTopology;
-import org.opendaylight.controller.messagebus.app.impl.NetconfEventSourceManager;
+import org.opendaylight.controller.messagebus.eventsources.netconf.NetconfEventSourceManager;
+import org.opendaylight.controller.messagebus.registry.EventSourceRegistryImpl;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
@@ -52,7 +52,6 @@ public class MessageBusAppImplModule extends
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        final List<NamespaceToStream> namespaceMapping = getNamespaceToStream();
 
         final ProviderContext bindingCtx = getBindingBrokerDependency().registerProvider(new Providers.BindingAware());
         final ProviderSession domCtx = getDomBrokerDependency().registerProvider(new Providers.BindingIndependent());
@@ -64,25 +63,23 @@ public class MessageBusAppImplModule extends
         final RpcProviderRegistry rpcRegistry = bindingCtx.getSALService(RpcProviderRegistry.class);
 
         final EventSourceTopology eventSourceTopology = new EventSourceTopology(dataBroker, rpcRegistry);
-        final NetconfEventSourceManager eventSourceManager = new NetconfEventSourceManager(dataBroker, domPublish,
-                domMount, bindingMount, eventSourceTopology, getNamespaceToStream());
+        final EventSourceRegistryImpl eventSourceRegistry = EventSourceRegistryImpl.create(eventSourceTopology, rpcRegistry);
+        final NetconfEventSourceManager netconfEventSourceManager = NetconfEventSourceManager.create(dataBroker, domPublish,domMount, bindingMount, rpcRegistry, getNamespaceToStream());
 
         final AutoCloseable closer = new AutoCloseable() {
             @Override
             public void close() {
-                eventSourceTopology.close();
-                eventSourceManager.close();
+                try {
+                    eventSourceRegistry.close();
+                    eventSourceTopology.close();
+                    netconfEventSourceManager.close();
+                } catch (Exception e) {
+                    LOGGER.error("Exception while closing. Exception: {}", e);
+                }
             }
         };
 
         return closer;
     }
 
-    private void closeProvider(final AutoCloseable closable) {
-        try {
-            closable.close();
-        } catch (final Exception e) {
-            LOGGER.error("Exception while closing: {}\n Exception: {}", closable, e);
-        }
-    }
 }

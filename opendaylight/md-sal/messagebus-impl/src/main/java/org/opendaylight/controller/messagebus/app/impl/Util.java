@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -8,44 +8,27 @@
 
 package org.opendaylight.controller.messagebus.app.impl;
 
-import com.google.common.util.concurrent.Futures;
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.regex.Pattern;
-import org.opendaylight.controller.sal.common.util.Rpcs;
-import org.opendaylight.yangtools.yang.common.RpcError;
+
 import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
+import com.google.common.util.concurrent.Futures;
+
 public final class Util {
-    private static final MessageDigest messageDigestTemplate = getDigestInstance();
-
-    private static MessageDigest getDigestInstance() {
-        try {
-            return MessageDigest.getInstance("MD5");
-        } catch (final NoSuchAlgorithmException e) {
-            throw new RuntimeException("Unable to get MD5 instance");
-        }
+    
+    public static String getUUIDIdent(){
+        UUID uuid = UUID.randomUUID();
+        return uuid.toString();
     }
 
-    static String md5String(final String inputString) {
-
-        try {
-            final MessageDigest md = (MessageDigest)messageDigestTemplate.clone();
-            md.update(inputString.getBytes("UTF-8"), 0, inputString.length());
-            return new BigInteger(1, md.digest()).toString(16);
-        } catch (final Exception e) {
-            throw new RuntimeException("Unable to get MD5 instance");
-        }
-    }
-
-    static <T> Future<RpcResult<T>> resultFor(final T output) {
-        final RpcResult<T> result = Rpcs.getRpcResult(true, output, Collections.<RpcError>emptyList());
+    public static <T> Future<RpcResult<T>> resultRpcSuccessFor(final T output) {
+        final RpcResult<T> result = RpcResultBuilder.success(output).build();
         return Futures.immediateFuture(result);
     }
 
@@ -73,7 +56,7 @@ public final class Util {
      * @param wildcard
      * @return
      */
-    static String wildcardToRegex(final String wildcard){
+    public static String wildcardToRegex(final String wildcard){
         final StringBuffer s = new StringBuffer(wildcard.length());
         s.append('^');
         for (final char c : wildcard.toCharArray()) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -8,9 +8,9 @@
 
 package org.opendaylight.controller.messagebus.app.impl;
 
-import com.google.common.base.Preconditions;
 import java.util.Map;
 import java.util.regex.Pattern;
+
 import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventaggregator.rev141202.NotificationPattern;
@@ -23,6 +23,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.nodes.N
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Preconditions;
 
 public class EventSourceTopic implements DataChangeListener {
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(EventSourceTopic.class);
@@ -39,10 +41,7 @@ public class EventSourceTopic implements DataChangeListener {
         final String regex = Util.wildcardToRegex(nodeIdPattern);
         this.nodeIdPattern = Pattern.compile(regex);
 
-
-        // FIXME: We need to perform some salting in order to make
-        //        the topic IDs less predictable.
-        this.topicId = new TopicId(Util.md5String(notificationPattern + nodeIdPattern));
+        this.topicId = new TopicId(Util.getUUIDIdent());
     }
 
     public TopicId getTopicId() {
@@ -79,6 +78,5 @@ public class EventSourceTopic implements DataChangeListener {
                         .build();
         return jti;
     }
-
 
 }
