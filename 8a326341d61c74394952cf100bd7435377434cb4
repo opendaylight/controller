@@ -93,6 +93,114 @@
       "revId": "8a326341d61c74394952cf100bd7435377434cb4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_dac3fb36",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/EventSourceTopology.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-12T14:40:40Z",
+      "side": 1,
+      "message": "Could this read could be done async to avoid blocking the thread? With CDS this could be a remote call and take some time.",
+      "revId": "8a326341d61c74394952cf100bd7435377434cb4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_9a8fb323",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/EventSourceTopology.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-12T14:40:40Z",
+      "side": 1,
+      "message": "Please indent code properly.",
+      "revId": "8a326341d61c74394952cf100bd7435377434cb4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_7a03c773",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/NetconfEventSource.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-12T14:40:40Z",
+      "side": 1,
+      "message": "This call iterates the urnPrefixToStreamMap which is passed in the constructor and not mutated by this class. I am assuming that the caller can\u0027t mutate urnPrefixToStreamMap either (which would be bad if it did) so, since urnPrefixToStreamMap appears to be immutable, it doesn\u0027t need to be in a synchronized block.",
+      "revId": "8a326341d61c74394952cf100bd7435377434cb4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_3af53f83",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/NetconfEventSource.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-12T14:40:40Z",
+      "side": 1,
+      "message": "It seems that streamIsActive can be a ConcurrentMap and putIfAbsent can be used here to call startSubscription if absent. Then synchronized wouldn\u0027t be needed in this method or the other methods.",
+      "revId": "8a326341d61c74394952cf100bd7435377434cb4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_ba170fa3",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/NetconfEventSourceManager.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-12T14:40:40Z",
+      "side": 1,
+      "message": "What are you protecting with the synchronized block? I assume it\u0027s netconfSources. However netconfSources is accessed unsynchronized  by he caller. \n\nonDataChanged won\u0027t be called concurrently so you don\u0027t need atomic access. However it can be called by across different threads so you do need synchronization to publish the write below. You can use a ConcurrentHashMap for this and avoid the synchronized lock on every call.",
+      "range": {
+        "startLine": 139,
+        "startChar": 12,
+        "endLine": 139,
+        "endChar": 24
+      },
+      "revId": "8a326341d61c74394952cf100bd7435377434cb4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_5a0ccb94",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/Util.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-12T14:40:40Z",
+      "side": 1,
+      "message": "Rpcs is deprecated - please use RpcResultBuilder.",
+      "revId": "8a326341d61c74394952cf100bd7435377434cb4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
