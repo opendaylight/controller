@@ -8,19 +8,20 @@
 
 package org.opendaylight.controller.messagebus.app.impl;
 
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.Futures;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
+
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.controller.messagebus.api.EventSource;
+import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RoutedRpcRegistration;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RpcRegistration;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventaggregator.rev141202.CreateTopicInput;
@@ -52,6 +53,9 @@ import org.opendaylight.yangtools.yang.binding.KeyedInstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Optional;
+import com.google.common.util.concurrent.Futures;
 
 
 public class EventSourceTopology implements EventAggregatorService, AutoCloseable {
@@ -97,6 +101,12 @@ public class EventSourceTopology implements EventAggregatorService, AutoCloseabl
         tx.submit();
     }
 
+    private <T extends DataObject>  void deleteData(final LogicalDatastoreType store, final InstanceIdentifier<T> path){
+        final WriteTransaction tx = dataBroker.newWriteOnlyTransaction();
+        tx.delete(OPERATIONAL, path);
+        tx.submit();
+    }
+
     private void insert(final KeyedInstanceIdentifier<Node, NodeKey> sourcePath, final Node node) {
         final NodeKey nodeKey = node.getKey();
         final InstanceIdentifier<Node1> augmentPath = sourcePath.augmentation(Node1.class);
@@ -104,11 +114,14 @@ public class EventSourceTopology implements EventAggregatorService, AutoCloseabl
         putData(OPERATIONAL, augmentPath, nodeAgument);
     }
 
+    private void remove(final KeyedInstanceIdentifier<Node, NodeKey> sourcePath){
+        final InstanceIdentifier<Node1> augmentPath = sourcePath.augmentation(Node1.class);
+        deleteData(OPERATIONAL, augmentPath);
+    }
     // TODO: Should we expose this functionality over RPC?
     public List<Node> snapshot() {
         try (ReadOnlyTransaction tx = dataBroker.newReadOnlyTransaction();) {
         final Optional<Topology> data = tx.read(OPERATIONAL, EVENT_SOURCE_TOPOLOGY_PATH).checkedGet();
-
 
         if(data.isPresent()) {
             final List<Node> nodeList = data.get().getNode();
@@ -139,6 +152,7 @@ public class EventSourceTopology implements EventAggregatorService, AutoCloseabl
         //# Code reader note: Context of Node type is NetworkTopology
         final List<Node> nodes = snapshot();
         for (final Node node : nodes) {
+            //FIXME: only node matches by NodeIdPattern can be notified
             topic.notifyNode(EVENT_SOURCE_TOPOLOGY_PATH.child(Node.class, node.getKey()));
         }
 
@@ -146,7 +160,7 @@ public class EventSourceTopology implements EventAggregatorService, AutoCloseabl
                 .setTopicId(topic.getTopicId())
                 .build();
 
-        return Util.resultFor(cto);
+        return Util.resultRpcSuccessFor(cto);
     }
 
     @Override
@@ -168,11 +182,27 @@ public class EventSourceTopology implements EventAggregatorService, AutoCloseabl
         registrations.put(listener, listenerRegistration);
     }
 
-    public void register(final Node node, final NetconfEventSource netconfEventSource) {
+//    public void register(final Node node, final NetconfEventSource netconfEventSource) {
+//        final KeyedInstanceIdentifier<Node, NodeKey> sourcePath = EVENT_SOURCE_TOPOLOGY_PATH.child(Node.class, node.getKey());
+//        rpcRegistry.addRoutedRpcImplementation(EventSourceService.class, netconfEventSource)
+//            .registerPath(NodeContext.class, sourcePath);
+//        insert(sourcePath,node);
+//        // FIXME: Return registration object.
+//    }
+
+    public void register(final EventSource eventSource){
+        final Node node = eventSource.getSourceNode();
         final KeyedInstanceIdentifier<Node, NodeKey> sourcePath = EVENT_SOURCE_TOPOLOGY_PATH.child(Node.class, node.getKey());
-        rpcRegistry.addRoutedRpcImplementation(EventSourceService.class, netconfEventSource)
-            .registerPath(NodeContext.class, sourcePath);
+        //FIXME: keep registration object to close() by unregister
+        RoutedRpcRegistration<EventSourceService> reg = rpcRegistry.addRoutedRpcImplementation(EventSourceService.class, eventSource);
+        reg.registerPath(NodeContext.class, sourcePath);
         insert(sourcePath,node);
-        // FIXME: Return registartion object.
+    }
+
+    public void unRegister(final EventSource eventSource){
+        final Node node = eventSource.getSourceNode();
+        final KeyedInstanceIdentifier<Node, NodeKey> sourcePath = EVENT_SOURCE_TOPOLOGY_PATH.child(Node.class, node.getKey());
+        //FIXME: close RoutedRpcRegistration object
+        remove(sourcePath);
     }
 }

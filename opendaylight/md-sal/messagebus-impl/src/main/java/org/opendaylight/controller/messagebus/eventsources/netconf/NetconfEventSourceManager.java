@@ -1,17 +1,20 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.messagebus.app.impl;
+package org.opendaylight.controller.messagebus.eventsources.netconf;
 
-import com.google.common.base.Optional;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+
 import org.opendaylight.controller.config.yang.messagebus.app.impl.NamespaceToStream;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
@@ -23,6 +26,10 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
 import org.opendaylight.controller.md.sal.dom.api.DOMNotificationPublishService;
+import org.opendaylight.controller.messagebus.api.EventSourceManager;
+import org.opendaylight.controller.messagebus.registry.EventSourceRegistration;
+import org.opendaylight.controller.messagebus.registry.EventSourceRegistryService;
+import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.topology.rev150114.NetconfNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.topology.rev150114.NetconfNodeFields.ConnectionStatus;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.topology.rev150114.network.topology.topology.topology.types.TopologyNetconf;
@@ -40,7 +47,9 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class NetconfEventSourceManager implements DataChangeListener, AutoCloseable {
+import com.google.common.base.Optional;
+
+public final class NetconfEventSourceManager implements EventSourceManager, DataChangeListener, AutoCloseable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NetconfEventSourceManager.class);
     private static final TopologyKey NETCONF_TOPOLOGY_KEY = new TopologyKey(new TopologyId(TopologyNetconf.QNAME.getLocalName()));
@@ -56,32 +65,50 @@ public final class NetconfEventSourceManager implements DataChangeListener, Auto
             .build();
     private static final QName NODE_ID_QNAME = QName.create(Node.QNAME,"node-id");
 
-
-    private final EventSourceTopology eventSourceTopology;
+    //private final EventSourceTopology eventSourceTopology;
     private final Map<String, String> streamMap;
-
-    private final Map<InstanceIdentifier<?>, NetconfEventSource> netconfSources = new HashMap<>();
-    private final ListenerRegistration<DataChangeListener> listenerReg;
+    private final Map<InstanceIdentifier<?>, EventSourceRegistration> eventSourceRegistration = new HashMap<>();
     private final DOMNotificationPublishService publishService;
     private final DOMMountPointService domMounts;
     private final MountPointService bindingMounts;
 
-    public NetconfEventSourceManager(final DataBroker dataStore,
-                              final DOMNotificationPublishService domPublish,
+    private ListenerRegistration<DataChangeListener> listenerReg;
+    private EventSourceRegistryService eventSourceRegistry;
+
+    public static NetconfEventSourceManager create(final DataBroker dataBroker,
+            final DOMNotificationPublishService domPublish,
+            final DOMMountPointService domMount,
+            final MountPointService bindingMount,
+            final RpcProviderRegistry rpcRegistry,
+            final List<NamespaceToStream> namespaceMapping){
+
+        NetconfEventSourceManager eventSourceManager =
+                new NetconfEventSourceManager(domPublish, domMount, bindingMount, namespaceMapping);
+
+        eventSourceManager.initialize(dataBroker, rpcRegistry);
+
+        return eventSourceManager;
+
+    }
+
+    private NetconfEventSourceManager(final DOMNotificationPublishService domPublish,
                               final DOMMountPointService domMount,
                               final MountPointService bindingMount,
-                              final EventSourceTopology eventSourceTopology,
                               final List<NamespaceToStream> namespaceMapping) {
 
-        listenerReg = dataStore.registerDataChangeListener(LogicalDatastoreType.OPERATIONAL, NETCONF_DEVICE_PATH, this, DataChangeScope.SUBTREE);
-        this.eventSourceTopology = eventSourceTopology;
         this.streamMap = namespaceToStreamMapping(namespaceMapping);
         this.domMounts = domMount;
         this.bindingMounts = bindingMount;
         this.publishService = domPublish;
-        LOGGER.info("EventSourceManager initialized.");
     }
 
+    private void initialize(final DataBroker dataBroker, final RpcProviderRegistry rpcRegistry){
+        listenerReg = dataBroker.registerDataChangeListener(LogicalDatastoreType.OPERATIONAL, NETCONF_DEVICE_PATH, this, DataChangeScope.SUBTREE);
+        eventSourceRegistry = rpcRegistry.getRpcService(EventSourceRegistryService.class);
+        eventSourceRegistry.registerEventSourceManager(this);
+        LOGGER.info("NetconfEventSourceManager initialized.");
+    }
+    
     private Map<String,String> namespaceToStreamMapping(final List<NamespaceToStream> namespaceMapping) {
         final Map<String, String> streamMap = new HashMap<>(namespaceMapping.size());
 
@@ -102,13 +129,11 @@ public final class NetconfEventSourceManager implements DataChangeListener, Auto
             }
         }
 
-
         for (final Map.Entry<InstanceIdentifier<?>, DataObject> changeEntry : event.getUpdatedData().entrySet()) {
             if (changeEntry.getValue() instanceof Node) {
                 nodeUpdated(changeEntry.getKey(),(Node) changeEntry.getValue());
             }
         }
-
 
     }
 
@@ -131,7 +156,7 @@ public final class NetconfEventSourceManager implements DataChangeListener, Auto
             return;
         }
 
-        if(!netconfSources.containsKey(key)) {
+        if(!eventSourceRegistration.containsKey(key)) {
             createEventSource(key,node);
         }
     }
@@ -141,10 +166,14 @@ public final class NetconfEventSourceManager implements DataChangeListener, Auto
         final Optional<MountPoint> bindingMount = bindingMounts.getMountPoint(key);
 
         if(netconfMount.isPresent() && bindingMount.isPresent()) {
-            final String nodeId = node.getNodeId().getValue();
-            final NetconfEventSource netconfEventSource = new NetconfEventSource(nodeId, streamMap, netconfMount.get(), publishService, bindingMount.get());
-            eventSourceTopology.register(node,netconfEventSource);
-            netconfSources.put(key, netconfEventSource);
+            try {
+                final NetconfEventSource netconfEventSource = new NetconfEventSource(node, streamMap, netconfMount.get(), publishService, bindingMount.get());
+                final EventSourceRegistration esr = eventSourceRegistry.registerEventSource(netconfEventSource).get().getResult();
+                eventSourceRegistration.put(key, esr);
+            } catch (InterruptedException | ExecutionException e) {
+                // FIXME:  dont drown exception... solve it
+            }
+           
         }
     }
 
@@ -175,5 +204,11 @@ public final class NetconfEventSourceManager implements DataChangeListener, Auto
     @Override
     public void close() {
         listenerReg.close();
+    }
+
+    @Override
+    public List<EventSourceRegistration> getEventSourceRegistrations() {
+        List<EventSourceRegistration> listReg = new ArrayList<EventSourceRegistration>(eventSourceRegistration.values());
+        return Collections.unmodifiableList(listReg);
     }
 }

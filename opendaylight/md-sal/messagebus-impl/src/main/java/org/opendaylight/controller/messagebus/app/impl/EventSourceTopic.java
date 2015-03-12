@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -39,10 +39,7 @@ public class EventSourceTopic implements DataChangeListener {
         final String regex = Util.wildcardToRegex(nodeIdPattern);
         this.nodeIdPattern = Pattern.compile(regex);
 
-
-        // FIXME: We need to perform some salting in order to make
-        //        the topic IDs less predictable.
-        this.topicId = new TopicId(Util.md5String(notificationPattern + nodeIdPattern));
+        this.topicId = new TopicId(Util.getUUIDIdent());
     }
 
     public TopicId getTopicId() {
@@ -79,6 +76,5 @@ public class EventSourceTopic implements DataChangeListener {
                         .build();
         return jti;
     }
-
 
 }
