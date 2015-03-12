@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_ffa6e952",
+        "filename": "features/mdsal/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 320,
+      "author": {
+        "id": 2834
+      },
+      "writtenOn": "2015-03-12T10:13:42Z",
+      "side": 1,
+      "message": "Onle removed, features/netconf-connector/pom.xml contains this dependency",
+      "parentUuid": "5a93c517_5f835dcc",
+      "range": {
+        "startLine": 313,
+        "startChar": 0,
+        "endLine": 320,
+        "endChar": 17
+      },
+      "revId": "8a326341d61c74394952cf100bd7435377434cb4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_7f8899e7",
         "filename": "features/netconf-connector/src/main/resources/features.xml",
         "patchSetId": 4
@@ -36,6 +60,30 @@
       "writtenOn": "2015-03-12T09:44:29Z",
       "side": 1,
       "message": "please add odl- prefix to feature name.",
+      "range": {
+        "startLine": 120,
+        "startChar": 19,
+        "endLine": 120,
+        "endChar": 30
+      },
+      "revId": "8a326341d61c74394952cf100bd7435377434cb4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_bf6861f6",
+        "filename": "features/netconf-connector/src/main/resources/features.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 2834
+      },
+      "writtenOn": "2015-03-12T10:13:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_7f8899e7",
       "range": {
         "startLine": 120,
         "startChar": 19,
