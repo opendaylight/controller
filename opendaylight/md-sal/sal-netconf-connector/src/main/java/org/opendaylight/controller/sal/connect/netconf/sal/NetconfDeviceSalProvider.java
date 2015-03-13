@@ -123,11 +123,13 @@ final class NetconfDeviceSalProvider implements AutoCloseable, Provider, Binding
             this.notificationService = notificationService;
 
             registration = mountBuilder.register();
+            logger.debug("{}: Mountpoint exposed into MD-SAL {}", id, registration);
         }
 
         @Deprecated
         synchronized void onDeviceDisconnected() {
             if(registration == null) {
+                logger.trace("{}: Not removing mountpoint from MD-SAL, mountpoint was not registered yet", id);
                 return;
             }
 
@@ -137,6 +139,7 @@ final class NetconfDeviceSalProvider implements AutoCloseable, Provider, Binding
                 // Only log and ignore
                 logger.warn("Unable to unregister mount instance for {}. Ignoring exception", id.getPath(), e);
             } finally {
+                logger.debug("{}: Mountpoint removed from MD-SAL {}", id, registration);
                 registration = null;
             }
         }
@@ -156,10 +159,13 @@ final class NetconfDeviceSalProvider implements AutoCloseable, Provider, Binding
             mountBuilder.addService(DOMNotificationService.class, notificationService);
 
             topologyRegistration = mountBuilder.register();
+            logger.debug("{}: TOPOLOGY Mountpoint exposed into MD-SAL {}", id, registration);
+
         }
 
         synchronized void onTopologyDeviceDisconnected() {
             if(topologyRegistration == null) {
+                logger.trace("{}: Not removing TOPOLOGY mountpoint from MD-SAL, mountpoint was not registered yet", id);
                 return;
             }
 
@@ -169,16 +175,15 @@ final class NetconfDeviceSalProvider implements AutoCloseable, Provider, Binding
                 // Only log and ignore
                 logger.warn("Unable to unregister mount instance for {}. Ignoring exception", id.getTopologyPath(), e);
             } finally {
+                logger.debug("{}: TOPOLOGY Mountpoint removed from MD-SAL {}", id, registration);
                 topologyRegistration = null;
             }
         }
 
         @Override
         synchronized public void close() throws Exception {
-            if(registration != null) {
-                onDeviceDisconnected();
-                onTopologyDeviceDisconnected();
-            }
+            onDeviceDisconnected();
+            onTopologyDeviceDisconnected();
             mountService = null;
         }
 
