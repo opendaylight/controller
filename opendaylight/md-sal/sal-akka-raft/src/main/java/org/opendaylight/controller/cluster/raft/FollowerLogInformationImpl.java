@@ -22,9 +22,9 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
 
     private final RaftActorContext context;
 
-    private volatile long nextIndex;
+    private long nextIndex;
 
-    private volatile long matchIndex;
+    private long matchIndex;
 
     private long lastReplicatedIndex = -1L;
 
