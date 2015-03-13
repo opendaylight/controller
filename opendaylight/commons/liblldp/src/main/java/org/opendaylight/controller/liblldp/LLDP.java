@@ -8,12 +8,12 @@
 
 package org.opendaylight.controller.liblldp;
 
-import java.util.Collections;
-import com.google.common.collect.Iterables;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.google.common.collect.Iterables;
 
 /**
  * Class that represents the LLDP frame objects
@@ -31,14 +31,15 @@ public class LLDP extends Packet {
             (byte) 0xc2, 0, 0, (byte) 0xe };
     private Map<Byte, LLDPTLV> tlvList;
 
-    private List<LLDPTLV> customTlvList = Collections.emptyList();
+    private List<LLDPTLV> customTlvList;
 
     /**
      * Default constructor that creates the tlvList LinkedHashMap
      */
     public LLDP() {
         super();
-        tlvList = new LinkedHashMap<Byte, LLDPTLV>(LLDPDefaultTlvs);
+        tlvList = new LinkedHashMap<>(LLDPDefaultTlvs);
+        customTlvList = new ArrayList<>();
     }
 
     /**
@@ -63,6 +64,8 @@ public class LLDP extends Packet {
             return LLDPTLV.TLVType.PortID.getValue();
         } else if (typeDesc.equals(TTL)) {
             return LLDPTLV.TLVType.TTL.getValue();
+        } else if (typeDesc.equals(SYSTEMNAMEID)) {
+            return LLDPTLV.TLVType.SystemName.getValue();
         } else {
             return LLDPTLV.TLVType.Unknown.getValue();
         }
@@ -163,13 +166,21 @@ public class LLDP extends Packet {
             byte type = entry.getKey();
             if ((type == LLDPTLV.TLVType.ChassisID.getValue())
                     || (type == LLDPTLV.TLVType.PortID.getValue())
-                    || (type == LLDPTLV.TLVType.TTL.getValue())) {
+                    || (type == LLDPTLV.TLVType.TTL.getValue())
+                    || (type == LLDPTLV.TLVType.SystemName.getValue())) {
                 continue;
             } else {
                 list.add(entry.getValue());
             }
         }
         return list;
+    }
+
+    /**
+     * @return the customTlvList
+     */
+    public List<LLDPTLV> getCustomTlvList() {
+        return customTlvList;
     }
 
     /**
@@ -216,7 +227,11 @@ public class LLDP extends Packet {
             int tlvSize = tlv.getTLVSize(); // Size of current TLV in bits
             lldpOffset += tlvSize;
             lldpSize -= tlvSize;
-            this.tlvList.put(tlv.getType(), tlv);
+            if (tlv.getType() == LLDPTLV.TLVType.Custom.getValue()) {
+                customTlvList.add(tlv);
+            } else {
+                this.tlvList.put(tlv.getType(), tlv);
+            }
         }
         return this;
     }

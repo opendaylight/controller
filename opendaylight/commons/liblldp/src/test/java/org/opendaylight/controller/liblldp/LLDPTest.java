@@ -10,16 +10,23 @@ package org.opendaylight.controller.liblldp;
 import static org.junit.Assert.assertArrayEquals;
 
 import java.util.ArrayList;
-
 import java.util.List;
-import org.junit.internal.ArrayComparisonFailure;
-import org.junit.Test;
+
 import org.apache.commons.lang3.ArrayUtils;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.internal.ArrayComparisonFailure;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.primitives.Bytes;
 
 /**
  * Test of {@link LLDP} serialization feature (TODO: and deserialization)
  */
 public class LLDPTest {
+
+    private static final Logger LOG = LoggerFactory.getLogger(LLDPTest.class);
 
     private static final byte[] CHASSIS_ID_VALUE = "chassis".getBytes();
     private static final short CHASSIS_ID_LENGTH = (short) CHASSIS_ID_VALUE.length;
@@ -49,6 +56,7 @@ public class LLDPTest {
 
     /**
      * Tests whether serialization of LLDP packet is correct
+     *
      * @see LLDP#serialize()
      * @throws PacketException
      */
@@ -82,14 +90,78 @@ public class LLDPTest {
         offset = checkTLV(serialized, offset, (byte) 0b00000010, "ChassisID", CHASSIS_ID_LENGTH, CHASSIS_ID_VALUE);
         offset = checkTLV(serialized, offset, (byte) 0b00000110, "TTL", TTL_LENGTH, TTL_VALUE);
         offset = checkTLV(serialized, offset, (byte) 0b00000100, "PortID", PORT_LENGTH, PORT_VALUE);
-        offset = checkTLV(serialized, offset, (byte) 0b00001010, "SystemName", SYSTEM_NAME_LENGTH, SYSTEM_NAME_VALUE);
-        offset = checkTLV(serialized, offset, (byte) 0b00010000, "System capabilities", SYSTEM_CAPABILITIES_LENGTH,
-                SYSTEM_CAPABILITIES_VALUE);
-        offset = checkTLV(serialized, offset, (byte) 0b11111110, "Custom subtype A", CUSTOM_SUBTYPE_A_LENGTH,
-                CUSTOM_SUBTYPE_A_VALUE, OUI[0], OUI[1], OUI[2], OUI_SUBTYPE_A[0]);
-        offset = checkTLV(serialized, offset, (byte) 0b11111110, "Custom subtype B", CUSTOM_SUBTYPE_B_LENGTH,
-                CUSTOM_SUBTYPE_B_VALUE, OUI[0], OUI[1], OUI[2], OUI_SUBTYPE_B[0]);
+        offset = checkTLV(serialized, offset, (byte) 0b00001010, "SystemName", SYSTEM_NAME_LENGTH,
+                SYSTEM_NAME_VALUE);
+        offset = checkTLV(serialized, offset, (byte) 0b00010000, "System capabilities",
+                SYSTEM_CAPABILITIES_LENGTH, SYSTEM_CAPABILITIES_VALUE);
+        offset = checkTLV(serialized, offset, (byte) 0b11111110, "Custom subtype A",
+                CUSTOM_SUBTYPE_A_LENGTH, CUSTOM_SUBTYPE_A_VALUE, OUI[0], OUI[1], OUI[2],
+                OUI_SUBTYPE_A[0]);
+        offset = checkTLV(serialized, offset, (byte) 0b11111110, "Custom subtype B",
+                CUSTOM_SUBTYPE_B_LENGTH, CUSTOM_SUBTYPE_B_VALUE, OUI[0], OUI[1], OUI[2],
+                OUI_SUBTYPE_B[0]);
 
+    }
+
+    /**
+     * Tests whether serialization of LLDP packet is correct
+     *
+     * @see LLDP#deserialize(byte[], int, int)
+     * @throws Exception
+     */
+    @Test
+    public void testDeserialize() throws Exception {
+        LLDP lldp = new LLDP();
+        byte[] bytesBeforeCustomA = new byte[] { 0x00, 0x26, (byte) 0xe1, OUI_SUBTYPE_A[0] };
+        byte[] bytesBeforeCustomB = new byte[] { 0x00, 0x26, (byte) 0xe1, OUI_SUBTYPE_B[0] };
+
+        byte[] rawLldpTlv = Bytes.concat(
+                awaitedBytes((byte) 0b00000010, CHASSIS_ID_LENGTH, CHASSIS_ID_VALUE, null),
+                awaitedBytes((byte) 0b00000110, TTL_LENGTH, TTL_VALUE, null),
+                awaitedBytes((byte) 0b00000100, PORT_LENGTH, PORT_VALUE, null),
+                awaitedBytes((byte) 0b00001010, SYSTEM_NAME_LENGTH, SYSTEM_NAME_VALUE, null),
+                awaitedBytes((byte) 0b00010010, SYSTEM_CAPABILITIES_LENGTH,
+                        SYSTEM_CAPABILITIES_VALUE, null),
+                awaitedBytes((byte) 0b11111110, CUSTOM_SUBTYPE_A_LENGTH, CUSTOM_SUBTYPE_A_VALUE,
+                        bytesBeforeCustomA),
+                awaitedBytes((byte) 0b11111110, CUSTOM_SUBTYPE_B_LENGTH, CUSTOM_SUBTYPE_B_VALUE,
+                        bytesBeforeCustomB));
+
+        lldp.deserialize(rawLldpTlv, 0, rawLldpTlv.length * NetUtils.NumBitsInAByte);
+        Assert.assertEquals("chassis", new String(lldp.getChassisId().getValue()));
+        Assert.assertArrayEquals(TTL_VALUE, lldp.getTtl().getValue());
+        Assert.assertEquals("dummy port id", new String(lldp.getPortId().getValue()));
+        Assert.assertEquals("dummy system name", new String(lldp.getSystemNameId().getValue()));
+
+        // optional items check
+        List<LLDPTLV> tlvOptionalList = lldp.getOptionalTLVList();
+        Assert.assertEquals(1, tlvOptionalList.size());
+
+        LLDPTLV itemOpt0 = tlvOptionalList.get(0);
+        Assert.assertEquals(9, itemOpt0.getType());
+        Assert.assertEquals("dummy system capabilities", new String(itemOpt0.getValue()));
+
+        // custom items check
+        List<LLDPTLV> tlvCustomList = lldp.getCustomTlvList();
+        Assert.assertEquals(2, tlvCustomList.size());
+
+        checkCustomTlv(tlvCustomList.get(0), "first custom value A");
+        checkCustomTlv(tlvCustomList.get(1), "second custom value B");
+    }
+
+    /**
+     * @param customItem
+     * @param expectedValue
+     */
+    private static void checkCustomTlv(LLDPTLV customItem, String expectedValue) {
+        Assert.assertEquals(127, customItem.getType());
+        LOG.debug("custom TLV1.length: {}", customItem.getLength());
+        Assert.assertEquals(expectedValue,
+                new String(
+                        LLDPTLV.getCustomString(
+                                customItem.getValue(),
+                                customItem.getLength()))
+        );
     }
 
     private static int checkTLV(byte[] serializedData, int offset, byte typeTLVBits, String typeTLVName, short lengthTLV,
