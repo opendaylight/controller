@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_575ee146",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2015-03-13T19:17:26Z",
+      "side": 1,
+      "message": "In general, line-wrapping to ~80-100 characters is considered friendly.",
+      "revId": "178efb79b4b4d824e3d1a93e21a3b72352a8cbd4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_572581c0",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/test/java/org/opendaylight/controller/sal/restconf/impl/test/RestPostOperationTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2015-03-13T19:17:26Z",
+      "side": 1,
+      "message": "I\u0027d rather not see the whitespace *only* changes here or and either see them in another patch.",
+      "revId": "178efb79b4b4d824e3d1a93e21a3b72352a8cbd4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
