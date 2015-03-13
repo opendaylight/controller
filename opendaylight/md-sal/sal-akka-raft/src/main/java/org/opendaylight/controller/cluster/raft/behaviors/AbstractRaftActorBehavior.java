@@ -464,6 +464,11 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
         long lastApplied = context.getLastApplied();
         long tempMin = Math.min(snapshotCapturedIndex, (lastApplied > -1 ? lastApplied - 1 : -1));
 
+        if(LOG.isTraceEnabled()) {
+            LOG.trace("{}: performSnapshotWithoutCapture: snapshotCapturedIndex: {}, lastApplied: {}, tempMin: {}",
+                    logName, snapshotCapturedIndex, lastApplied, tempMin);
+        }
+
         if (tempMin > -1 && context.getReplicatedLog().isPresent(tempMin))  {
             LOG.debug("{}: fakeSnapshot purging log to {} for term {}", logName(), tempMin,
                     context.getTermInformation().getCurrentTerm());
@@ -472,6 +477,13 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
             ReplicatedLogEntry entry = context.getReplicatedLog().get(tempMin);
             context.getReplicatedLog().snapshotPreCommit(tempMin, entry.getTerm());
             context.getReplicatedLog().snapshotCommit();
+            setReplicatedToAllIndex(tempMin);
+        } else if(tempMin > getReplicatedToAllIndex()) {
+            // It's possible a follower was lagging and an install snapshot advanced its match index past
+            // the current replicatedToAllIndex. Since the follower is now caught up we should advance the
+            // replicatedToAllIndex (to tempMin). The fact that tempMin wasn't found in the log is likely
+            // due to a previous snapshot triggered by the memory threshold exceeded, in that case we
+            // trim the log to the last applied index even if previous entries weren't replicated to all followers.
             setReplicatedToAllIndex(tempMin);
         }
     }
