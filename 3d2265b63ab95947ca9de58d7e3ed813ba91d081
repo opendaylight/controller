@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_14aa9719",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/api/EventSource.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 2834
+      },
+      "writtenOn": "2015-03-13T13:58:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_45f62cd9",
+      "range": {
+        "startLine": 22,
+        "startChar": 3,
+        "endLine": 22,
+        "endChar": 25
+      },
+      "revId": "3d2265b63ab95947ca9de58d7e3ed813ba91d081",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_e502d8b3",
         "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/api/EventSource.java",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2015-03-12T18:04:13Z",
       "side": 1,
       "message": "better name would be matchesNotificationPattern(...) - and maybe we could move that to event-source...\n\nor extend event topology model and provide list of available notifications there.\n\nThen EventSources does not need to implement notification pattern matching, that could be done by topic running on list from topology model.",
+      "range": {
+        "startLine": 23,
+        "startChar": 12,
+        "endLine": 23,
+        "endChar": 86
+      },
+      "revId": "3d2265b63ab95947ca9de58d7e3ed813ba91d081",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_34a79351",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/api/EventSource.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 2834
+      },
+      "writtenOn": "2015-03-13T13:58:02Z",
+      "side": 1,
+      "message": "Done - rename method",
+      "parentUuid": "5a93c517_e502d8b3",
       "range": {
         "startLine": 23,
         "startChar": 12,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_d463cf18",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/api/EventSource.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 2834
+      },
+      "writtenOn": "2015-03-13T13:58:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_c531dca3",
+      "range": {
+        "startLine": 24,
+        "startChar": 4,
+        "endLine": 24,
+        "endChar": 62
+      },
+      "revId": "3d2265b63ab95947ca9de58d7e3ed813ba91d081",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_852bd42f",
         "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/api/EventSourceManager.java",
         "patchSetId": 1
@@ -82,6 +154,30 @@
       "writtenOn": "2015-03-12T18:04:13Z",
       "side": 1,
       "message": "Please do not expose list of registrants.",
+      "range": {
+        "startLine": 19,
+        "startChar": 4,
+        "endLine": 24,
+        "endChar": 64
+      },
+      "revId": "3d2265b63ab95947ca9de58d7e3ed813ba91d081",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_f4684bf7",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/api/EventSourceManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 2834
+      },
+      "writtenOn": "2015-03-13T13:58:02Z",
+      "side": 1,
+      "message": "Done - remove all interface",
+      "parentUuid": "5a93c517_852bd42f",
       "range": {
         "startLine": 19,
         "startChar": 4,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_b472c3e3",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/EventSourceTopology.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 2834
+      },
+      "writtenOn": "2015-03-13T13:58:02Z",
+      "side": 1,
+      "message": "EventSourceRegistry return EventSourceRegistrationObject",
+      "parentUuid": "5a93c517_2520c048",
+      "range": {
+        "startLine": 193,
+        "startChar": 11,
+        "endLine": 193,
+        "endChar": 15
+      },
+      "revId": "3d2265b63ab95947ca9de58d7e3ed813ba91d081",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_e5197823",
         "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/eventsources/netconf/NetconfEventSourceManager.java",
         "patchSetId": 1
@@ -128,6 +248,30 @@
       "writtenOn": "2015-03-12T18:04:13Z",
       "side": 1,
       "message": "NetconfEventSourceManager should use implementation, not implements this interface.\n\nI was thinking of following interaction model:\n\nNetconfEventSourceManager listen on Netconf mount points pop ups.\n\nIf mountpoint with correct capabilities is available - It creates NetconfEventSource\nand invokes an register(EventSource) method (not java RPC) on EventSourceRegistry (or Topology).\n\nEventSourceRegistry will update topology (write necessary data to DS, register RPC)\nand return EventSourceRegistration which on close will call-back EventSourceRegistry to remove node from topology and deregister RPC.",
+      "range": {
+        "startLine": 52,
+        "startChar": 56,
+        "endLine": 52,
+        "endChar": 74
+      },
+      "revId": "3d2265b63ab95947ca9de58d7e3ed813ba91d081",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_74743bcf",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/eventsources/netconf/NetconfEventSourceManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 2834
+      },
+      "writtenOn": "2015-03-13T13:58:02Z",
+      "side": 1,
+      "message": "Done - EventSourceManager has been removed",
+      "parentUuid": "5a93c517_e5197823",
       "range": {
         "startLine": 52,
         "startChar": 56,
@@ -163,6 +307,30 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_d44aef82",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/eventsources/netconf/NetconfEventSourceManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 2834
+      },
+      "writtenOn": "2015-03-13T13:58:02Z",
+      "side": 1,
+      "message": "I propose to keep it, I want to avoid to register instance before constructor is done.",
+      "parentUuid": "5a93c517_0517c4ee",
+      "range": {
+        "startLine": 105,
+        "startChar": 0,
+        "endLine": 110,
+        "endChar": 5
+      },
+      "revId": "3d2265b63ab95947ca9de58d7e3ed813ba91d081",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_c5d8fc55",
         "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/registry/EventSourceRegistryService.java",
         "patchSetId": 1
@@ -174,6 +342,30 @@
       "writtenOn": "2015-03-12T18:04:13Z",
       "side": 1,
       "message": "I think one method in md-sal style would be sufficient\n\nEventSourceRegistration registerEventSource(EventSource),\n\nEventSourceManager (for specific event source types) is implementation specific and I do not see reason why they should be registered, but if there is any, could you comment on that?",
+      "range": {
+        "startLine": 23,
+        "startChar": 3,
+        "endLine": 29,
+        "endChar": 79
+      },
+      "revId": "3d2265b63ab95947ca9de58d7e3ed813ba91d081",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_f44feb90",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/registry/EventSourceRegistryService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 2834
+      },
+      "writtenOn": "2015-03-13T13:58:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_c5d8fc55",
       "range": {
         "startLine": 23,
         "startChar": 3,
