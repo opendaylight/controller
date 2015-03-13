@@ -1,0 +1,210 @@
+// Contents of "yang_test"
+module yang_test {
+    namespace "urn:opendaylight:test_yang";
+    prefix "test_yang";
+
+    revision 2015-03-11 {
+        description "rev 1";
+    }
+
+    typedef percent {
+        type uint8 {
+            range "0..100";
+        }
+        description "Percentage";
+    }
+
+    notification ntf_noop {
+    }
+
+    notification ntf0 {
+        description "ntf0_desc";
+        leaf ntf0_name {
+            type string;
+        }
+    }
+
+    notification ntf1 {
+        description "ntf1_desc";
+        container ntf1_cont1 {
+            leaf ntf1_name {
+                type string;
+            }
+            list ntf1_list {
+                leaf ntf1_name {
+                    type string;
+                }
+                leaf ntf1_id {
+                    type int32;
+                }
+            }
+        }
+        leaf ntf1_enum {
+            type enumeration {
+                enum ntf1_e1 {
+                    description "e1";
+                }
+                enum ntf1_e2 {
+                    description "e2";
+                }
+            }
+            default "ntf1_e1";
+        }
+        container ntf1_cont2 {
+            list ntf1_ls1 {
+                choice ntf1_ch1 {
+                    case ntf1_case1 {
+                        leaf ntf1_lf1 {
+                            type string;
+                        }
+                    }
+                    case ntf2_case1 {
+                        leaf ntf1_lf1 {
+                            type string;
+                        }
+                    }
+                    case ntf3_case1 {
+                    }
+                }
+            }
+        }
+    }
+
+    container devices {
+        list device {
+            key "dev_type dev_sn";
+            leaf dev_type {
+                type string;
+            }
+            leaf dev_sn {
+                type int32;
+            }
+            anyxml dev_data;
+
+            container dev_category {
+                choice category {
+                    default other;
+                    case network {
+                        container address {
+                            leaf ip {
+                                type string;
+                            }
+                            leaf port {
+                                type int16;
+                            }
+                            must "if port < 1000 and part > 4000" {
+                                error-message "Port must be in 1000..4000";
+                            }
+                        }
+                    }
+                    case other {
+                        leaf dev_description {
+                            type string;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    leaf-list percentages {
+        type percent;
+        description "Percentages list";
+        min-elements 2;
+        max-elements 5;
+    }
+
+    container ord_list {
+        list simple_map {
+            key "ord_list_id";
+            ordered-by user;
+            leaf ord_list_id {
+                type int32;
+            }
+            leaf ord_list_val {
+                type string;
+            }
+        }
+    }
+
+    rpc rpc_noop {
+    }
+
+    rpc rpc0 {
+        input {
+            leaf rpc0_l1 {
+                type string;
+            }
+        }
+    }
+
+    rpc rpc1 {
+        output {
+            leaf rpc1_l1 {
+                type string;
+            }
+        }
+    }
+
+    rpc rpc2 {
+        input {
+            container rpc2_cont1 {
+                leaf rpc2_id {
+                    type int32;
+                }
+                leaf rpc2_type {
+                    type string;
+                }
+            }
+            container rpc2_cont2 {
+                choice rpc2_category {
+                    default rpc2_other;
+                    case rpc2_network {
+                        container rpc2_address {
+                            leaf rpc2_ip {
+                                type string;
+                            }
+                            leaf rpc2_port {
+                                type int16;
+                            }
+                            must "if port < 1000 and part > 4000" {
+                                error-message "Port must be in 1000..4000";
+                            }
+                        }
+                    }
+                    case rpc2_other {
+                        leaf rpc2_dev_description {
+                            type string;
+                        }
+                    }
+                }
+                anyxml rpc2_xml_out;
+            }
+        }
+
+        output {
+            container rpc2_cont3 {
+                choice rpc2_result {
+                    default rpc2_success;
+                    case rpc2_failure {
+                        leaf rpc2_fail {
+                            type string;
+                        }
+                    }
+                    case rpc2_success {
+                    }
+                }
+                list rpc2_map {
+                    key "rpc2_map_id";
+                    leaf rpc2_map_id {
+                        type int32;
+                    }
+                    leaf rpc2_map_val {
+                        type string;
+                    }
+                }
+            }
+            anyxml rpc2_xml_out;
+        }
+    }
+}
