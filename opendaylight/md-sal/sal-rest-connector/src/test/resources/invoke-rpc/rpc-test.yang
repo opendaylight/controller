@@ -1,0 +1,154 @@
+// Contents of "rpc-test"
+module rpc-test {
+    namespace "urn:opendaylight:rpc-test";
+    prefix "rpc-test";
+
+    revision 2015-03-13 {
+        description "rev 1";
+    }
+
+    rpc rpc-noop {
+    }
+
+    rpc rpc-in-null-out-container {
+        input {
+        }
+        output {
+            container out-cont-in-null {
+                leaf lf-out-cont-in-null {
+                    type string;
+                }
+            }
+        }
+    }
+
+    rpc rpc-in-null-out-list {
+        input {
+        }
+        output {
+            list out-list-in-null {
+                leaf lf2-out-list-in-null {
+                    type string;
+                }
+            }
+        }
+    }
+
+    rpc rpc-in-null-out-choice {
+        input {
+        }
+        output {
+            choice out-choice-in-null {
+                case case1 {
+                    leaf lf-out-choice-in-null {
+                        type string;
+                    }
+                }
+            }
+        }
+    }
+    
+    rpc rpc-in-null-out-int {
+        input {
+        }
+        output {
+            leaf out-int-in-null {
+                type int32;
+            }
+        }
+    }
+
+    rpc rpc-in-null-out-string {
+        input {
+        }
+        output {
+            leaf out-string-in-null {
+                type string;
+            }
+        }
+    }
+
+    rpc rpc-in-null-out-enum {
+        input {
+        }
+        output {
+            leaf out-enum-in-null {
+                type enumeration {
+                    enum enum-out-enum-in-null;
+                }
+            }
+        }
+    }
+
+    // --------------------
+
+    rpc rpc-in-container-out-null {
+        input {
+            container out-null-in-cont {
+                leaf lf-out-null-in-cont {
+                    type string;
+                }
+            }
+        }
+        output {
+        }
+    }
+
+    rpc rpc-in-list-out-null {
+        input {
+            list out-null-in-list {
+                leaf lf2-out-null-in-list {
+                    type string;
+                }
+            }
+        }
+        output {
+        }
+    }
+
+    rpc rpc-in-choice-out-null {
+        input {
+            choice out-null-in-choice {
+                case case1 {
+                    leaf lf-out-null-in-choice {
+                        type string;
+                    }
+                }
+            }
+        }
+        output {
+        }
+    }
+
+    rpc rpc-in-int-out-null {
+        input {
+        }
+        output {
+            leaf out-null-in-int {
+                type int32;
+            }
+        }
+    } 
+    
+    rpc rpc-in-string-out-null {
+        input {
+        }
+        output {
+            leaf out-null-in-string {
+                type string;
+            }
+        }
+    }
+
+    rpc rpc-in-enum-out-null {
+        input {
+        }
+        output {
+            leaf out-null-in-enum {
+                type enumeration {
+                    enum enum-out-null-in-enum;
+                }
+            }
+        }
+    }
+}
