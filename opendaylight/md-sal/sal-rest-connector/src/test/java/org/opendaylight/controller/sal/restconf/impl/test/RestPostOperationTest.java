@@ -19,6 +19,7 @@ import static org.opendaylight.controller.sal.restconf.impl.test.RestOperationUt
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.Futures;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -40,6 +41,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
 import org.opendaylight.controller.sal.rest.api.Draft02;
@@ -268,8 +270,8 @@ public class RestPostOperationTest extends JerseyTest {
     public void createConfigurationDataNullTest() throws UnsupportedEncodingException {
         initMocking();
 
-        when(brokerFacade.commitConfigurationDataPost(any(YangInstanceIdentifier.class), any(NormalizedNode.class)))
-                .thenReturn(null);
+        when(brokerFacade.commitConfigurationDataPost(any(YangInstanceIdentifier.class),any(NormalizedNode.class)))
+                .thenReturn(Futures.<Void, TransactionCommitFailedException>immediateCheckedFuture(null));
 
         //FIXME : find who is set schemaContext
 //        final String URI_1 = "/config";
