@@ -29,7 +29,7 @@ public class DatastoreContext {
     public static final Duration DEFAULT_SHARD_TRANSACTION_IDLE_TIMEOUT = Duration.create(10, TimeUnit.MINUTES);
     public static final int DEFAULT_OPERATION_TIMEOUT_IN_SECONDS = 5;
     public static final int DEFAULT_SHARD_TX_COMMIT_TIMEOUT_IN_SECONDS = 30;
-    public static final int DEFAULT_JOURNAL_RECOVERY_BATCH_SIZE = 1000;
+    public static final int DEFAULT_JOURNAL_RECOVERY_BATCH_SIZE = 100;
     public static final int DEFAULT_SNAPSHOT_BATCH_COUNT = 20000;
     public static final int DEFAULT_HEARTBEAT_INTERVAL_IN_MILLIS = 500;
     public static final int DEFAULT_ISOLATED_LEADER_CHECK_INTERVAL_IN_MILLIS = DEFAULT_HEARTBEAT_INTERVAL_IN_MILLIS * 10;
