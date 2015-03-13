@@ -46,6 +46,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
+@Ignore
 public class RestPutOperationTest extends JerseyTest {
 
     private static String xmlData;
