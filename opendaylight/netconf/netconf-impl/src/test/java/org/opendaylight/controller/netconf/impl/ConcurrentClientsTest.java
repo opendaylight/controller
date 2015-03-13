@@ -16,10 +16,10 @@ import static org.mockito.Matchers.anySetOf;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.common.io.ByteStreams;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -42,7 +42,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicLong;
-import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -330,11 +329,11 @@ public class ConcurrentClientsTest {
             }
             LOG.info(sb.toString());
 
-            outToServer.write(IOUtils.toByteArray(clientHello));
+            outToServer.write(ByteStreams.toByteArray(clientHello));
             outToServer.write("]]>]]>".getBytes());
             outToServer.flush();
             // Thread.sleep(100);
-            outToServer.write(IOUtils.toByteArray(getConfig));
+            outToServer.write(ByteStreams.toByteArray(getConfig));
             outToServer.write("]]>]]>".getBytes());
             outToServer.flush();
             Thread.sleep(100);

@@ -8,12 +8,11 @@
 package org.opendaylight.controller.config.manager.impl.osgi;
 
 import static java.lang.String.format;
-
 import com.google.common.annotations.VisibleForTesting;
-import java.io.InputStream;
+import com.google.common.base.Charsets;
+import com.google.common.io.Resources;
+import java.io.IOException;
 import java.net.URL;
-import java.util.List;
-import org.apache.commons.io.IOUtils;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleEvent;
@@ -21,7 +20,6 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.BundleTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 /**
  * OSGi extender that listens for bundle activation events. Reads file
@@ -46,12 +44,11 @@ public class ModuleFactoryBundleTracker implements BundleTrackerCustomizer<Objec
         LOG.trace("Got addingBundle event of bundle {}, resource {}, event {}",
                 bundle, resource, event);
         if (resource != null) {
-            try (InputStream inputStream = resource.openStream()) {
-                List<String> lines = IOUtils.readLines(inputStream);
-                for (String factoryClassName : lines) {
+            try {
+                for (String factoryClassName : Resources.readLines(resource, Charsets.UTF_8)) {
                     registerFactory(factoryClassName, bundle);
                 }
-            } catch (Exception e) {
+            } catch (IOException e) {
                 LOG.error("Error while reading {}", resource, e);
                 throw new RuntimeException(e);
             }

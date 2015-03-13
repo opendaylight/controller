@@ -8,13 +8,13 @@
 package org.opendaylight.controller.config.manager.impl.osgi.mapping;
 
 import static java.lang.String.format;
-
-import java.io.InputStream;
+import com.google.common.base.Charsets;
+import com.google.common.io.Resources;
+import java.io.IOException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import org.apache.commons.io.IOUtils;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.sal.binding.generator.api.ModuleInfoRegistry;
 import org.opendaylight.yangtools.yang.binding.YangModelBindingProvider;
@@ -50,18 +50,17 @@ public final class ModuleInfoBundleTracker implements BundleTrackerCustomizer<Co
         }
         List<ObjectRegistration<YangModuleInfo>> registrations = new LinkedList<>();
 
-        try (InputStream inputStream = resource.openStream()) {
-            List<String> lines = IOUtils.readLines(inputStream);
-            for (String moduleInfoName : lines) {
+        try {
+            for (String moduleInfoName : Resources.readLines(resource, Charsets.UTF_8)) {
                 LOG.trace("Retrieve ModuleInfo({}, {})", moduleInfoName, bundle);
                 YangModuleInfo moduleInfo = retrieveModuleInfo(moduleInfoName, bundle);
                 registrations.add(moduleInfoRegistry.registerModuleInfo(moduleInfo));
             }
-
-        } catch (Exception e) {
+        } catch (IOException e) {
             LOG.error("Error while reading {}", resource, e);
             throw new RuntimeException(e);
         }
+
         LOG.trace("Got following registrations {}", registrations);
         return registrations;
     }

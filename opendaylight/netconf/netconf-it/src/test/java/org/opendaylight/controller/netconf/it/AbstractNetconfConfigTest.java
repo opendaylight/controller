@@ -14,7 +14,7 @@ import static org.mockito.Matchers.anySetOf;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
-
+import com.google.common.io.ByteStreams;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
@@ -34,7 +34,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.opendaylight.controller.config.manager.impl.AbstractConfigTest;
@@ -262,7 +261,7 @@ public abstract class AbstractNetconfConfigTest extends AbstractConfigTest {
                 assertNotNull(inputStream);
                 final byte[] content;
                 try {
-                    content = IOUtils.toByteArray(inputStream);
+                    content = ByteStreams.toByteArray(inputStream);
                 } catch (IOException e) {
                     throw new IllegalStateException("Cannot read " + inputStream, e);
                 }
