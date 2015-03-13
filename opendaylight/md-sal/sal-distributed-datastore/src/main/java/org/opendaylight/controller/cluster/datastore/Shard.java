@@ -141,7 +141,7 @@ public class Shard extends RaftActor {
      * Coordinates persistence recovery on startup.
      */
     private ShardRecoveryCoordinator recoveryCoordinator;
-    private List<Object> currentLogRecoveryBatch;
+    private List<ModificationPayload> currentLogRecoveryBatch;
 
     private final DOMTransactionFactory transactionFactory;
 
@@ -721,18 +721,20 @@ public class Shard extends RaftActor {
 
     @Override
     protected void appendRecoveredLogEntry(final Payload data) {
-        if(data instanceof ModificationPayload) {
-            try {
-                currentLogRecoveryBatch.add(((ModificationPayload) data).getModification());
-            } catch (ClassNotFoundException | IOException e) {
-                LOG.error("{}: Error extracting ModificationPayload", persistenceId(), e);
+        try {
+            if(data instanceof ModificationPayload) {
+                currentLogRecoveryBatch.add((ModificationPayload) data);
+            } else if (data instanceof CompositeModificationPayload) {
+                currentLogRecoveryBatch.add(new ModificationPayload(MutableCompositeModification.fromSerializable(
+                        ((CompositeModificationPayload) data).getModification())));
+            } else if (data instanceof CompositeModificationByteStringPayload) {
+                currentLogRecoveryBatch.add(new ModificationPayload(MutableCompositeModification.fromSerializable(
+                        ((CompositeModificationByteStringPayload) data).getModification())));
+            } else {
+                LOG.error("{}: Unknown state received {} during recovery", persistenceId(), data);
             }
-        } else if (data instanceof CompositeModificationPayload) {
-            currentLogRecoveryBatch.add(((CompositeModificationPayload) data).getModification());
-        } else if (data instanceof CompositeModificationByteStringPayload) {
-            currentLogRecoveryBatch.add(((CompositeModificationByteStringPayload) data).getModification());
-        } else {
-            LOG.error("{}: Unknown state received {} during recovery", persistenceId(), data);
+        } catch (IOException e) {
+            LOG.error("{}: Error extracting ModificationPayload", persistenceId(), e);
         }
     }
 
@@ -763,6 +765,8 @@ public class Shard extends RaftActor {
             LOG.debug("{}: submitted log recovery batch with size {}", persistenceId(),
                     currentLogRecoveryBatch.size());
         }
+
+        currentLogRecoveryBatch = null;
     }
 
     @Override

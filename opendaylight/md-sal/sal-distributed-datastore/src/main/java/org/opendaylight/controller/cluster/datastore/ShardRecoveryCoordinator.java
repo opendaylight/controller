@@ -8,13 +8,11 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import org.opendaylight.controller.cluster.datastore.modification.ModificationPayload;
 import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
 import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
@@ -37,7 +35,6 @@ class ShardRecoveryCoordinator {
     private static final int TIME_OUT = 10;
 
     private final List<DOMStoreWriteTransaction> resultingTxList = Lists.newArrayList();
-    private final SchemaContext schemaContext;
     private final String shardName;
     private final ExecutorService executor;
     private final Logger log;
@@ -45,14 +42,14 @@ class ShardRecoveryCoordinator {
 
     ShardRecoveryCoordinator(String shardName, SchemaContext schemaContext, Logger log,
             String name) {
-        this.schemaContext = schemaContext;
         this.shardName = shardName;
         this.log = log;
         this.name = name;
 
-        executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(),
-                new ThreadFactoryBuilder().setDaemon(true)
-                        .setNameFormat("ShardRecovery-" + shardName + "-%d").build());
+        executor = null;
+//        executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(),
+//                new ThreadFactoryBuilder().setDaemon(true)
+//                        .setNameFormat("ShardRecovery-" + shardName + "-%d").build());
     }
 
     /**
@@ -61,10 +58,11 @@ class ShardRecoveryCoordinator {
      * @param logEntries the serialized journal log entries
      * @param resultingTx the write Tx to which to apply the entries
      */
-    void submit(List<Object> logEntries, DOMStoreWriteTransaction resultingTx) {
+    void submit(List<ModificationPayload> logEntries, DOMStoreWriteTransaction resultingTx) {
         LogRecoveryTask task = new LogRecoveryTask(logEntries, resultingTx);
-        resultingTxList.add(resultingTx);
-        executor.execute(task);
+        task.run();
+        //resultingTxList.add(resultingTx);
+        //executor.execute(task);
     }
 
     /**
@@ -75,23 +73,24 @@ class ShardRecoveryCoordinator {
      */
     void submit(byte[] snapshotBytes, DOMStoreWriteTransaction resultingTx) {
         SnapshotRecoveryTask task = new SnapshotRecoveryTask(snapshotBytes, resultingTx);
-        resultingTxList.add(resultingTx);
-        executor.execute(task);
+        task.run();
+        //resultingTxList.add(resultingTx);
+        //executor.execute(task);
     }
 
     Collection<DOMStoreWriteTransaction> getTransactions() {
         // Shutdown the executor and wait for task completion.
-        executor.shutdown();
-
-        try {
-            if(executor.awaitTermination(TIME_OUT, TimeUnit.MINUTES))  {
-                return resultingTxList;
-            } else {
-                log.error("{}: Recovery for shard {} timed out after {} minutes", name, shardName, TIME_OUT);
-            }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+//        executor.shutdown();
+//
+//        try {
+//            if(executor.awaitTermination(TIME_OUT, TimeUnit.MINUTES))  {
+//                return resultingTxList;
+//            } else {
+//                log.error("{}: Recovery for shard {} timed out after {} minutes", name, shardName, TIME_OUT);
+//            }
+//        } catch (InterruptedException e) {
+//            Thread.currentThread().interrupt();
+//        }
 
         return Collections.emptyList();
     }
@@ -107,9 +106,9 @@ class ShardRecoveryCoordinator {
 
     private class LogRecoveryTask extends ShardRecoveryTask {
 
-        private final List<Object> logEntries;
+        private final List<ModificationPayload> logEntries;
 
-        LogRecoveryTask(List<Object> logEntries, DOMStoreWriteTransaction resultingTx) {
+        LogRecoveryTask(List<ModificationPayload> logEntries, DOMStoreWriteTransaction resultingTx) {
             super(resultingTx);
             this.logEntries = logEntries;
         }
@@ -117,8 +116,13 @@ class ShardRecoveryCoordinator {
         @Override
         public void run() {
             for(int i = 0; i < logEntries.size(); i++) {
-                MutableCompositeModification.fromSerializable(
-                        logEntries.get(i)).apply(resultingTx);
+                try {
+                    MutableCompositeModification.fromSerializable(
+                            logEntries.get(i).getModification()).apply(resultingTx);
+                } catch (Exception e) {
+                    log.error("{}: Error extracting ModificationPayload", shardName, e);
+                }
+
                 // Null out to GC quicker.
                 logEntries.set(i, null);
             }
