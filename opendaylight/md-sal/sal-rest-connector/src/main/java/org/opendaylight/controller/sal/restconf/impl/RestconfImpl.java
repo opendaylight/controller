@@ -952,11 +952,10 @@ public class RestconfImpl implements RestconfService {
             if (mountPoint != null) {
                 normalizedII = new DataNormalizer(mountPoint.getSchemaContext()).toNormalized(iiWithData
                         .getInstanceIdentifier());
-                broker.commitConfigurationDataPost(mountPoint, normalizedII, datastoreNormalizedData);
-
+                broker.commitConfigurationDataPost(mountPoint, normalizedII, datastoreNormalizedData).checkedGet();
             } else {
                 normalizedII = controllerContext.toNormalized(iiWithData.getInstanceIdentifier());
-                broker.commitConfigurationDataPost(normalizedII, datastoreNormalizedData);
+                broker.commitConfigurationDataPost(normalizedII, datastoreNormalizedData).checkedGet();
             }
         } catch(RestconfDocumentedException e) {
             throw e;
