@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_d42c2f4d",
+        "filename": "karaf/karaf-parent/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-03-13T09:55:21Z",
+      "side": 1,
+      "message": "This introduces assumptions about filesystem layout\nand if I happen to have odlparent at that path I need to have checked out always latest version.\n\nWhich actually breaks assumptions for people compiling odl projects that running with -U will download all latest cross-project dependencies.",
+      "range": {
+        "startLine": 15,
+        "startChar": 18,
+        "endLine": 15,
+        "endChar": 46
+      },
+      "revId": "5725697157c9b48bcb8397439ac43a9051d4d59f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_9426a767",
+        "filename": "opendaylight/commons/opendaylight/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-03-13T09:55:21Z",
+      "side": 1,
+      "message": "Same as in previous files - assumptions about filesystem layout outside git repository.",
+      "range": {
+        "startLine": 8,
+        "startChar": 18,
+        "endLine": 8,
+        "endChar": 49
+      },
+      "revId": "5725697157c9b48bcb8397439ac43a9051d4d59f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_b42ba32f",
+        "filename": "opendaylight/config/config-parent/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-03-13T09:55:21Z",
+      "side": 1,
+      "message": "Assumptions about filesystem layout -  now related to yangtools project. If yangtools project decides to move that parent file to different location inside repository (which is in scope of yangtools, since I do not see build directory layout as API contract) will break build.",
+      "range": {
+        "startLine": 15,
+        "startChar": 18,
+        "endLine": 15,
+        "endChar": 69
+      },
+      "revId": "5725697157c9b48bcb8397439ac43a9051d4d59f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
