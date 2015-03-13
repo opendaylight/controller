@@ -211,7 +211,7 @@ public class PreLithiumShardTest extends AbstractShardTest {
         new ShardTestKit(getSystem()) {{
             final TestActorRef<Shard> shard = TestActorRef.create(getSystem(),
                     newShardProps().withDispatcher(Dispatchers.DefaultDispatcherId()),
-                    "testConcurrentThreePhaseCommits");
+                    "testPreLithiumConcurrentThreePhaseCommits");
 
             waitUntilLeader(shard);
 
@@ -386,7 +386,7 @@ public class PreLithiumShardTest extends AbstractShardTest {
             assertTrue("Missing leaf " + TestModel.ID_QNAME.getLocalName(), idLeaf.isPresent());
             assertEquals(TestModel.ID_QNAME.getLocalName() + " value", 1, idLeaf.get().getValue());
 
-            verifyLastLogIndex(shard, 2);
+            verifyLastApplied(shard, 2);
 
             shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
         }};

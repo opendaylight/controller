@@ -593,7 +593,7 @@ public class ShardTest extends AbstractShardTest {
             assertTrue("Missing leaf " + TestModel.ID_QNAME.getLocalName(), idLeaf.isPresent());
             assertEquals(TestModel.ID_QNAME.getLocalName() + " value", 1, idLeaf.get().getValue());
 
-            verifyLastLogIndex(shard, 2);
+            verifyLastApplied(shard, 2);
 
             shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
         }};
