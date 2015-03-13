@@ -10,7 +10,6 @@ package org.opendaylight.controller.sal.connect.netconf.util;
 
 import com.google.common.util.concurrent.FutureCallback;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
-import org.opendaylight.controller.sal.connect.netconf.sal.tx.WriteRunningTx;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +18,7 @@ import org.slf4j.LoggerFactory;
  * Simple Netconf rpc logging callback
  */
 public class NetconfRpcFutureCallback implements FutureCallback<DOMRpcResult> {
-    private static final Logger LOG  = LoggerFactory.getLogger(WriteRunningTx.class);
+    private static final Logger LOG  = LoggerFactory.getLogger(NetconfRpcFutureCallback.class);
 
     private final String type;
     private final RemoteDeviceId id;

@@ -8,7 +8,6 @@
 
 package org.opendaylight.controller.sal.connect.netconf.util;
 
-import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.DISCARD_CHANGES_RPC_CONTENT;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_CANDIDATE_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_COPY_CONFIG_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_DEFAULT_OPERATION_QNAME;
@@ -108,7 +107,7 @@ public final class NetconfBaseOps {
     public ListenableFuture<DOMRpcResult> discardChanges(final FutureCallback<DOMRpcResult> callback) {
         Preconditions.checkNotNull(callback);
 
-        final ListenableFuture<DOMRpcResult> future = rpc.invokeRpc(toPath(NETCONF_DISCARD_CHANGES_QNAME), DISCARD_CHANGES_RPC_CONTENT);
+        final ListenableFuture<DOMRpcResult> future = rpc.invokeRpc(toPath(NETCONF_DISCARD_CHANGES_QNAME), null);
         Futures.addCallback(future, callback);
         return future;
     }

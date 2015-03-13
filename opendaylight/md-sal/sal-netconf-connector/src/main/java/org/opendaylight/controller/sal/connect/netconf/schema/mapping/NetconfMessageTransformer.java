@@ -166,10 +166,7 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
 
         Preconditions.checkNotNull(currentMappedRpcs.get(rpcQName), "Unknown rpc %s, available rpcs: %s", rpcQName, currentMappedRpcs.keySet());
         if(currentMappedRpcs.get(rpcQName).getInput() == null) {
-            final Document document = XmlUtil.newDocument();
-            final Element elementNS = document.createElementNS(rpcQName.getNamespace().toString(), rpcQName.getLocalName());
-            document.appendChild(elementNS);
-            return new NetconfMessage(document);
+            return new NetconfMessage(prepareDomResultForRpcRequest(rpcQName).getNode().getOwnerDocument());
         }
 
         Preconditions.checkNotNull(payload, "Transforming an rpc with input: %s, payload cannot be null", rpcQName);
@@ -190,7 +187,6 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
 
         final Document node = result.getNode().getOwnerDocument();
 
-        node.getDocumentElement().setAttribute(NetconfMessageTransformUtil.MESSAGE_ID_ATTR, counter.getNewMessageId(MESSAGE_ID_PREFIX));
         return new NetconfMessage(node);
     }
 
@@ -201,6 +197,8 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
     private DOMResult prepareDomResultForRpcRequest(final QName rpcQName) {
         final Document document = XmlUtil.newDocument();
         final Element rpcNS = document.createElementNS(NETCONF_RPC_QNAME.getNamespace().toString(), NETCONF_RPC_QNAME.getLocalName());
+        // set msg id
+        rpcNS.setAttribute(NetconfMessageTransformUtil.MESSAGE_ID_ATTR, counter.getNewMessageId(MESSAGE_ID_PREFIX));
         final Element elementNS = document.createElementNS(rpcQName.getNamespace().toString(), rpcQName.getLocalName());
         rpcNS.appendChild(elementNS);
         document.appendChild(rpcNS);

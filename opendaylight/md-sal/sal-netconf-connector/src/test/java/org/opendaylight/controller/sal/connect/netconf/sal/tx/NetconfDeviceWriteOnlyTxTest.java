@@ -6,7 +6,6 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
-import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.DISCARD_CHANGES_RPC_CONTENT;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_CANDIDATE_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_RUNNING_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.toPath;
@@ -70,7 +69,7 @@ public class NetconfDeviceWriteOnlyTxTest {
             final InOrder inOrder = inOrder(rpc);
             inOrder.verify(rpc).invokeRpc(toPath(NetconfMessageTransformUtil.NETCONF_LOCK_QNAME), NetconfBaseOps.getLockContent(NETCONF_CANDIDATE_QNAME));
             inOrder.verify(rpc).invokeRpc(toPath(NetconfMessageTransformUtil.NETCONF_COMMIT_QNAME), NetconfMessageTransformUtil.COMMIT_RPC_CONTENT);
-            inOrder.verify(rpc).invokeRpc(toPath(NetconfMessageTransformUtil.NETCONF_DISCARD_CHANGES_QNAME), DISCARD_CHANGES_RPC_CONTENT);
+            inOrder.verify(rpc).invokeRpc(eq(toPath(NetconfMessageTransformUtil.NETCONF_DISCARD_CHANGES_QNAME)), any(NormalizedNode.class));
             inOrder.verify(rpc).invokeRpc(toPath(NetconfMessageTransformUtil.NETCONF_UNLOCK_QNAME), NetconfBaseOps.getUnLockContent(NETCONF_CANDIDATE_QNAME));
             return;
         }
