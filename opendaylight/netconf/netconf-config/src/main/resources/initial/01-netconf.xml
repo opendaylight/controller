@@ -88,6 +88,13 @@
             <provider>/modules/module[type='threadpool-scheduled'][name='global-netconf-ssh-scheduled-executor']</provider>
           </instance>
         </service>
+          <service>
+              <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:threadpool">prefix:scheduled-threadpool</type>
+              <instance>
+                  <name>global-netconf-ssh-scheduled-executor</name>
+                  <provider>/modules/module[type='threadpool-scheduled'][name='global-netconf-ssh-scheduled-executor']</provider>
+              </instance>
+          </service>
       </services>
 
     </data>
