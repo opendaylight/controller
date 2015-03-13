@@ -1,9 +1,12 @@
 package org.opendaylight.controller.remote.rpc;
 
+import static akka.pattern.Patterns.ask;
 import akka.actor.ActorRef;
 import akka.dispatch.OnComplete;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
+import java.util.Collections;
+import java.util.Set;
 import org.opendaylight.controller.remote.rpc.messages.InvokeRpc;
 import org.opendaylight.controller.remote.rpc.messages.RpcResponse;
 import org.opendaylight.controller.sal.core.api.RoutedRpcDefaultImplementation;
@@ -19,11 +22,6 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.ExecutionContext;
-
-import java.util.Collections;
-import java.util.Set;
-
-import static akka.pattern.Patterns.ask;
 
 public class RemoteRpcImplementation implements RpcImplementation, RoutedRpcDefaultImplementation {
     private static final Logger LOG = LoggerFactory.getLogger(RemoteRpcImplementation.class);
@@ -57,7 +55,7 @@ public class RemoteRpcImplementation implements RpcImplementation, RoutedRpcDefa
         return executeMsg(rpcMsg);
     }
 
-    private ListenableFuture<RpcResult<CompositeNode>> executeMsg(InvokeRpc rpcMsg) {
+    private ListenableFuture<RpcResult<CompositeNode>> executeMsg(final InvokeRpc rpcMsg) {
 
         final SettableFuture<RpcResult<CompositeNode>> listenableFuture = SettableFuture.create();
 
@@ -67,7 +65,16 @@ public class RemoteRpcImplementation implements RpcImplementation, RoutedRpcDefa
             @Override
             public void onComplete(Throwable failure, Object reply) throws Throwable {
                 if(failure != null) {
-                    LOG.error("InvokeRpc failed", failure);
+
+                    // When we return a failure to the caller they can choose to log it if they like
+                    // so here we just do basic warn logging by default and log the stack trace only when debug
+                    // is enabled
+
+                    LOG.warn("InvokeRpc failed rpc = {}, identifier = {}", rpcMsg.getRpc(), rpcMsg.getIdentifier());
+
+                    if(LOG.isDebugEnabled()){
+                        LOG.debug("Detailed Error", failure);
+                    }
 
                     RpcResult<CompositeNode> rpcResult;
                     if(failure instanceof RpcErrorsException) {
