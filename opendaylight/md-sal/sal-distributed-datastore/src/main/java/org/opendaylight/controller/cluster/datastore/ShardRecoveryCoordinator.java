@@ -8,19 +8,19 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import java.util.Collection;
-import java.util.Collections;
+import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import org.opendaylight.controller.cluster.datastore.modification.ModificationPayload;
 import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
 import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils;
+import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationByteStringPayload;
+import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationPayload;
+import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
+import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 
 /**
@@ -34,115 +34,86 @@ import org.slf4j.Logger;
  */
 class ShardRecoveryCoordinator {
 
-    private static final int TIME_OUT = 10;
-
-    private final List<DOMStoreWriteTransaction> resultingTxList = Lists.newArrayList();
-    private final SchemaContext schemaContext;
+    private final InMemoryDOMDataStore store;
+    private List<ModificationPayload> currentLogRecoveryBatch;
     private final String shardName;
-    private final ExecutorService executor;
     private final Logger log;
-    private final String name;
 
-    ShardRecoveryCoordinator(String shardName, SchemaContext schemaContext, Logger log,
-            String name) {
-        this.schemaContext = schemaContext;
+    ShardRecoveryCoordinator(InMemoryDOMDataStore store, String shardName, Logger log) {
+        this.store = store;
         this.shardName = shardName;
         this.log = log;
-        this.name = name;
+    }
 
-        executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(),
-                new ThreadFactoryBuilder().setDaemon(true)
-                        .setNameFormat("ShardRecovery-" + shardName + "-%d").build());
+    void startLogRecoveryBatch(int maxBatchSize) {
+        currentLogRecoveryBatch = Lists.newArrayListWithCapacity(maxBatchSize);
+
+        log.debug("{}: starting log recovery batch with max size {}", shardName, maxBatchSize);
+    }
+
+    void appendRecoveredLogPayload(Payload payload) {
+        try {
+            if(payload instanceof ModificationPayload) {
+                currentLogRecoveryBatch.add((ModificationPayload) payload);
+            } else if (payload instanceof CompositeModificationPayload) {
+                currentLogRecoveryBatch.add(new ModificationPayload(MutableCompositeModification.fromSerializable(
+                        ((CompositeModificationPayload) payload).getModification())));
+            } else if (payload instanceof CompositeModificationByteStringPayload) {
+                currentLogRecoveryBatch.add(new ModificationPayload(MutableCompositeModification.fromSerializable(
+                        ((CompositeModificationByteStringPayload) payload).getModification())));
+            } else {
+                log.error("{}: Unknown payload {} received during recovery", shardName, payload);
+            }
+        } catch (IOException e) {
+            log.error("{}: Error extracting ModificationPayload", shardName, e);
+        }
+
+    }
+
+    private void commitTransaction(DOMStoreWriteTransaction transaction) {
+        DOMStoreThreePhaseCommitCohort commitCohort = transaction.ready();
+        try {
+            commitCohort.preCommit().get();
+            commitCohort.commit().get();
+        } catch (Exception e) {
+            log.error("{}: Failed to commit Tx on recovery", shardName, e);
+        }
     }
 
     /**
-     * Submits a batch of journal log entries.
-     *
-     * @param logEntries the serialized journal log entries
-     * @param resultingTx the write Tx to which to apply the entries
+     * Applies the current batched log entries to the data store.
      */
-    void submit(List<Object> logEntries, DOMStoreWriteTransaction resultingTx) {
-        LogRecoveryTask task = new LogRecoveryTask(logEntries, resultingTx);
-        resultingTxList.add(resultingTx);
-        executor.execute(task);
+    void applyCurrentLogRecoveryBatch() {
+        log.debug("{}: Applying current log recovery batch with size {}", shardName, currentLogRecoveryBatch.size());
+
+        DOMStoreWriteTransaction writeTx = store.newWriteOnlyTransaction();
+        for(ModificationPayload payload: currentLogRecoveryBatch) {
+            try {
+                MutableCompositeModification.fromSerializable(payload.getModification()).apply(writeTx);
+            } catch (Exception e) {
+                log.error("{}: Error extracting ModificationPayload", shardName, e);
+            }
+        }
+
+        commitTransaction(writeTx);
+
+        currentLogRecoveryBatch = null;
     }
 
     /**
-     * Submits a snapshot.
+     * Applies a recovered snapshot to the data store.
      *
      * @param snapshotBytes the serialized snapshot
-     * @param resultingTx the write Tx to which to apply the entries
      */
-    void submit(byte[] snapshotBytes, DOMStoreWriteTransaction resultingTx) {
-        SnapshotRecoveryTask task = new SnapshotRecoveryTask(snapshotBytes, resultingTx);
-        resultingTxList.add(resultingTx);
-        executor.execute(task);
-    }
+    void applyRecoveredSnapshot(final byte[] snapshotBytes) {
+        log.debug("{}: Applyng recovered sbapshot", shardName);
 
-    Collection<DOMStoreWriteTransaction> getTransactions() {
-        // Shutdown the executor and wait for task completion.
-        executor.shutdown();
+        DOMStoreWriteTransaction writeTx = store.newWriteOnlyTransaction();
 
-        try {
-            if(executor.awaitTermination(TIME_OUT, TimeUnit.MINUTES))  {
-                return resultingTxList;
-            } else {
-                log.error("{}: Recovery for shard {} timed out after {} minutes", name, shardName, TIME_OUT);
-            }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+        NormalizedNode<?, ?> node = SerializationUtils.deserializeNormalizedNode(snapshotBytes);
 
-        return Collections.emptyList();
-    }
+        writeTx.write(YangInstanceIdentifier.builder().build(), node);
 
-    private static abstract class ShardRecoveryTask implements Runnable {
-
-        final DOMStoreWriteTransaction resultingTx;
-
-        ShardRecoveryTask(DOMStoreWriteTransaction resultingTx) {
-            this.resultingTx = resultingTx;
-        }
-    }
-
-    private class LogRecoveryTask extends ShardRecoveryTask {
-
-        private final List<Object> logEntries;
-
-        LogRecoveryTask(List<Object> logEntries, DOMStoreWriteTransaction resultingTx) {
-            super(resultingTx);
-            this.logEntries = logEntries;
-        }
-
-        @Override
-        public void run() {
-            for(int i = 0; i < logEntries.size(); i++) {
-                MutableCompositeModification.fromSerializable(
-                        logEntries.get(i)).apply(resultingTx);
-                // Null out to GC quicker.
-                logEntries.set(i, null);
-            }
-        }
-    }
-
-    private class SnapshotRecoveryTask extends ShardRecoveryTask {
-
-        private final byte[] snapshotBytes;
-
-        SnapshotRecoveryTask(byte[] snapshotBytes, DOMStoreWriteTransaction resultingTx) {
-            super(resultingTx);
-            this.snapshotBytes = snapshotBytes;
-        }
-
-        @Override
-        public void run() {
-            NormalizedNode<?, ?> node = SerializationUtils.deserializeNormalizedNode(snapshotBytes);
-
-            // delete everything first
-            resultingTx.delete(YangInstanceIdentifier.builder().build());
-
-            // Add everything from the remote node back
-            resultingTx.write(YangInstanceIdentifier.builder().build(), node);
-        }
+        commitTransaction(writeTx);
     }
 }
