@@ -1212,10 +1212,9 @@ public class RestconfImpl implements RestconfService {
         final YangInstanceIdentifier resultII;
         try {
             if (mountPoint != null) {
-                broker.commitConfigurationDataPost(mountPoint, normalizedII, payload.getData());
-
+                broker.commitConfigurationDataPost(mountPoint, normalizedII, payload.getData()).checkedGet();
             } else {
-                broker.commitConfigurationDataPost(normalizedII, payload.getData());
+                broker.commitConfigurationDataPost(normalizedII, payload.getData()).checkedGet();
             }
         } catch(final RestconfDocumentedException e) {
             throw e;
