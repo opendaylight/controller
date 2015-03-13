@@ -66,7 +66,6 @@ import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils;
 import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListener;
 import org.opendaylight.controller.cluster.notifications.RoleChangeNotifier;
 import org.opendaylight.controller.cluster.raft.RaftActor;
-import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyncUpStatus;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationByteStringPayload;
@@ -173,6 +172,7 @@ public class Shard extends RaftActor {
         shardMBean = ShardMBeanFactory.getShardStatsMBean(name.toString(),
                 datastoreContext.getDataStoreMXBeanType());
         shardMBean.setNotificationManager(store.getDataChangeListenerNotificationManager());
+        shardMBean.setShardActor(getSelf());
 
         if (isMetricsCaptureEnabled()) {
             getContext().become(new MeteringBehavior(this));
@@ -792,7 +792,6 @@ public class Shard extends RaftActor {
 
         recoveryCoordinator = null;
         currentLogRecoveryBatch = null;
-        updateJournalStats();
 
         //notify shard manager
         getContext().parent().tell(new ActorInitialized(), getSelf());
@@ -831,9 +830,6 @@ public class Shard extends RaftActor {
                     persistenceId(), data, data.getClass().getClassLoader(),
                     CompositeModificationPayload.class.getClassLoader());
         }
-
-        updateJournalStats();
-
     }
 
     private void applyModificationToState(ActorRef clientActor, String identifier, Object modification) {
@@ -849,19 +845,6 @@ public class Shard extends RaftActor {
             // This must be the OK to commit after replication consensus.
             finishCommit(clientActor, identifier);
         }
-    }
-
-    private void updateJournalStats() {
-        ReplicatedLogEntry lastLogEntry = getLastLogEntry();
-
-        if (lastLogEntry != null) {
-            shardMBean.setLastLogIndex(lastLogEntry.getIndex());
-            shardMBean.setLastLogTerm(lastLogEntry.getTerm());
-        }
-
-        shardMBean.setCommitIndex(getCommitIndex());
-        shardMBean.setLastApplied(getLastApplied());
-        shardMBean.setInMemoryJournalDataSize(getRaftActorContext().getReplicatedLog().dataSize());
     }
 
     @Override
@@ -921,9 +904,6 @@ public class Shard extends RaftActor {
             delayedListenerRegistrations.clear();
         }
 
-        shardMBean.setRaftState(getRaftState().name());
-        shardMBean.setCurrentTerm(getCurrentTerm());
-
         // If this actor is no longer the leader close all the transaction chains
         if(!isLeader){
             for(Map.Entry<String, DOMStoreTransactionChain> entry : transactionChains.entrySet()){
@@ -942,10 +922,6 @@ public class Shard extends RaftActor {
     @Override
     protected DataPersistenceProvider persistence() {
         return dataPersistenceProvider;
-    }
-
-    @Override protected void onLeaderChanged(final String oldLeader, final String newLeader) {
-        shardMBean.setLeader(newLeader);
     }
 
     @Override public String persistenceId() {
