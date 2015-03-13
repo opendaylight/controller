@@ -30,6 +30,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -153,16 +154,17 @@ public abstract class AbstractShardTest extends AbstractActorTest{
         shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
     }
 
-    protected void verifyLastLogIndex(TestActorRef<Shard> shard, long expectedValue) {
+    protected void verifyLastApplied(TestActorRef<Shard> shard, long expectedValue) {
+        long lastApplied = -1;
         for(int i = 0; i < 20 * 5; i++) {
-            long lastLogIndex = shard.underlyingActor().getShardMBean().getLastLogIndex();
-            if(lastLogIndex == expectedValue) {
-                break;
+            lastApplied = shard.underlyingActor().getShardMBean().getLastApplied();
+            if(lastApplied == expectedValue) {
+                return;
             }
             Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
         }
 
-        assertEquals("Last log index", expectedValue, shard.underlyingActor().getShardMBean().getLastLogIndex());
+        Assert.fail(String.format("Expected last applied: %d, Actual: %d", expectedValue, lastApplied));
     }
 
     protected NormalizedNode<?, ?> readStore(final InMemoryDOMDataStore store) throws ReadFailedException {

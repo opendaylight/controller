@@ -8,10 +8,20 @@
 
 package org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard;
 
+import akka.actor.ActorRef;
+import akka.pattern.Patterns;
+import akka.util.Timeout;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import org.opendaylight.controller.cluster.raft.client.messages.FollowerInfo;
+import org.opendaylight.controller.cluster.raft.client.messages.GetOnDemandRaftState;
+import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
 import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
 import org.opendaylight.controller.md.sal.common.util.jmx.QueuedNotificationManagerMXBeanImpl;
 import org.opendaylight.controller.md.sal.common.util.jmx.ThreadExecutorStats;
@@ -19,6 +29,9 @@ import org.opendaylight.controller.md.sal.common.util.jmx.ThreadExecutorStatsMXB
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.yangtools.util.concurrent.ListenerNotificationQueueStats;
 import org.opendaylight.yangtools.util.concurrent.QueuedNotificationManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import scala.concurrent.Await;
 
 /**
  * Maintains statistics for a shard.
@@ -28,6 +41,13 @@ import org.opendaylight.yangtools.util.concurrent.QueuedNotificationManager;
 public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
     public static String JMX_CATEGORY_SHARD = "Shards";
 
+    private static final Logger LOG = LoggerFactory.getLogger(ShardStats.class);
+
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+
+    private static final Cache<String, OnDemandRaftState> onDemandRaftStatsCache =
+            CacheBuilder.newBuilder().expireAfterWrite(2, TimeUnit.SECONDS).build();
+
     private long committedTransactionsCount;
 
     private long readOnlyTransactionCount;
@@ -35,20 +55,6 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
     private long writeOnlyTransactionCount;
 
     private long readWriteTransactionCount;
-
-    private String leader;
-
-    private String raftState;
-
-    private long lastLogTerm = -1L;
-
-    private long lastLogIndex = -1L;
-
-    private long currentTerm = -1L;
-
-    private long commitIndex = -1L;
-
-    private long lastApplied = -1L;
 
     private long lastCommittedTransactionTime;
 
@@ -62,12 +68,9 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
 
     private QueuedNotificationManagerMXBeanImpl notificationManagerStatsBean;
 
-    private long dataSize = 0;
-
-    private final SimpleDateFormat sdf =
-        new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-
     private boolean followerInitialSyncStatus = false;
+
+    private ActorRef shardActor;
 
     public ShardStats(final String shardName, final String mxBeanType) {
         super(shardName, mxBeanType, JMX_CATEGORY_SHARD);
@@ -78,6 +81,31 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
                 "notification-manager", getMBeanType(), getMBeanCategory());
 
         this.notificationExecutorStatsBean = ThreadExecutorStatsMXBeanImpl.create(manager.getExecutor());
+    }
+
+    public void setShardActor(ActorRef shardActor) {
+        this.shardActor = shardActor;
+    }
+
+    private OnDemandRaftState getOnDemandRaftStats() {
+        String name = getShardName();
+        OnDemandRaftState stats = onDemandRaftStatsCache.getIfPresent(name);
+        if(stats == null) {
+            if(shardActor != null) {
+                Timeout timeout = new Timeout(5, TimeUnit.SECONDS);
+                try {
+                    stats = (OnDemandRaftState) Await.result(Patterns.ask(shardActor,
+                            GetOnDemandRaftState.INSTANCE, timeout), timeout.duration());
+                    onDemandRaftStatsCache.put(name, stats);
+                } catch (Exception e) {
+                    LOG.warn("Could not retrieve follower info: {}", e);
+                }
+            }
+
+            stats = stats != null ? stats : OnDemandRaftState.builder().build();
+        }
+
+        return stats;
     }
 
     @Override
@@ -92,12 +120,12 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
 
     @Override
     public String getLeader() {
-        return leader;
+        return getOnDemandRaftStats().getLeader();
     }
 
     @Override
     public String getRaftState() {
-        return raftState;
+        return getOnDemandRaftStats().getRaftState();
     }
 
     @Override
@@ -117,33 +145,68 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
 
     @Override
     public long getLastLogIndex() {
-        return lastLogIndex;
+        return getOnDemandRaftStats().getLastLogIndex();
     }
 
     @Override
     public long getLastLogTerm() {
-        return lastLogTerm;
+        return getOnDemandRaftStats().getLastLogTerm();
     }
 
     @Override
     public long getCurrentTerm() {
-        return currentTerm;
+        return getOnDemandRaftStats().getCurrentTerm();
     }
 
     @Override
     public long getCommitIndex() {
-        return commitIndex;
+        return getOnDemandRaftStats().getCommitIndex();
     }
 
     @Override
     public long getLastApplied() {
-        return lastApplied;
+        return getOnDemandRaftStats().getLastApplied();
+    }
+
+    @Override
+    public long getLastIndex() {
+        return getOnDemandRaftStats().getLastIndex();
+    }
+
+    @Override
+    public long getLastTerm() {
+        return getOnDemandRaftStats().getLastTerm();
+    }
+
+    @Override
+    public long getSnapshotIndex() {
+        return getOnDemandRaftStats().getSnapshotIndex();
+    }
+
+    @Override
+    public long getSnapshotTerm() {
+        return getOnDemandRaftStats().getSnapshotTerm();
+    }
+
+    @Override
+    public long getReplicatedToAllIndex() {
+        return getOnDemandRaftStats().getReplicatedToAllIndex();
+    }
+
+    @Override
+    public String getVotedFor() {
+        // TODO Auto-generated method stub
+        return getOnDemandRaftStats().getVotedFor();
+    }
+
+    @Override
+    public boolean isSnapshotCaptureInitiated() {
+        return getOnDemandRaftStats().isSnapshotCaptureInitiated();
     }
 
     @Override
     public String getLastCommittedTransactionTime() {
-
-        return sdf.format(new Date(lastCommittedTransactionTime));
+        return DATE_FORMAT.format(new Date(lastCommittedTransactionTime));
     }
 
     @Override
@@ -190,45 +253,18 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
         return ++abortTransactionsCount;
     }
 
-    public void setLeader(final String leader) {
-        this.leader = leader;
-    }
-
-    public void setRaftState(final String raftState) {
-        this.raftState = raftState;
-    }
-
-    public void setLastLogTerm(final long lastLogTerm) {
-        this.lastLogTerm = lastLogTerm;
-    }
-
-    public void setLastLogIndex(final long lastLogIndex) {
-        this.lastLogIndex = lastLogIndex;
-    }
-
-    public void setCurrentTerm(final long currentTerm) {
-        this.currentTerm = currentTerm;
-    }
-
-    public void setCommitIndex(final long commitIndex) {
-        this.commitIndex = commitIndex;
-    }
-
-    public void setLastApplied(final long lastApplied) {
-        this.lastApplied = lastApplied;
-    }
-
     public void setLastCommittedTransactionTime(final long lastCommittedTransactionTime) {
         this.lastCommittedTransactionTime = lastCommittedTransactionTime;
     }
 
-    public void setInMemoryJournalDataSize(long dataSize){
-        this.dataSize = dataSize;
+    @Override
+    public long getInMemoryJournalDataSize(){
+        return getOnDemandRaftStats().getInMemoryJournalDataSize();
     }
 
     @Override
-    public long getInMemoryJournalDataSize(){
-        return dataSize;
+    public long getInMemoryJournalLogSize() {
+        return getOnDemandRaftStats().getInMemoryJournalLogSize();
     }
 
     @Override
@@ -286,5 +322,25 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
     @Override
     public boolean getFollowerInitialSyncStatus() {
         return followerInitialSyncStatus;
+    }
+
+    @Override
+    public List<FollowerInfo> getFollowerInfo() {
+        return getOnDemandRaftStats().getFollowerInfoList();
+    }
+
+    @Override
+    public String getPeerAddresses() {
+        StringBuilder builder = new StringBuilder();
+        int i = 0;
+        for(Map.Entry<String, String> e: getOnDemandRaftStats().getPeerAddresses().entrySet()) {
+            if(i++ > 0) {
+                builder.append(", ");
+            }
+
+            builder.append(e.getKey()).append(": ").append(e.getValue());
+        }
+
+        return builder.toString();
     }
 }

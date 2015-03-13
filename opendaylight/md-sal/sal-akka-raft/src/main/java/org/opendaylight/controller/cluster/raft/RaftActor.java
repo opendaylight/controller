@@ -19,10 +19,15 @@ import akka.persistence.SnapshotSelectionCriteria;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.protobuf.ByteString;
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import org.apache.commons.lang.time.DurationFormatUtils;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActor;
 import org.opendaylight.controller.cluster.notifications.RoleChanged;
@@ -34,11 +39,15 @@ import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.base.messages.Replicate;
 import org.opendaylight.controller.cluster.raft.base.messages.SendInstallSnapshot;
+import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader;
 import org.opendaylight.controller.cluster.raft.behaviors.AbstractRaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.behaviors.Follower;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeader;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
+import org.opendaylight.controller.cluster.raft.client.messages.FollowerInfo;
+import org.opendaylight.controller.cluster.raft.client.messages.GetOnDemandRaftState;
+import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -384,13 +393,57 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
         } else if (message instanceof CaptureSnapshotReply){
             handleCaptureSnapshotReply(((CaptureSnapshotReply) message).getSnapshot());
-
+        } else if(message instanceof GetOnDemandRaftState) {
+            onGetOnDemandRaftStats();
         } else {
             RaftActorBehavior oldBehavior = currentBehavior;
             currentBehavior = currentBehavior.handleMessage(getSender(), message);
 
             handleBehaviorChange(oldBehavior, currentBehavior);
         }
+    }
+
+    private void onGetOnDemandRaftStats() {
+        // Debugging message to retrieve raft stats.
+
+        OnDemandRaftState.Builder builder = OnDemandRaftState.builder()
+                .commitIndex(context.getCommitIndex())
+                .currentTerm(context.getTermInformation().getCurrentTerm())
+                .inMemoryJournalDataSize(replicatedLog.dataSize())
+                .inMemoryJournalLogSize(replicatedLog.size())
+                .isSnapshotCaptureInitiated(context.isSnapshotCaptureInitiated())
+                .lastApplied(context.getLastApplied())
+                .lastIndex(replicatedLog.lastIndex())
+                .lastTerm(replicatedLog.lastTerm())
+                .leader(getLeaderId())
+                .raftState(currentBehavior.state().toString())
+                .replicatedToAllIndex(currentBehavior.getReplicatedToAllIndex())
+                .snapshotIndex(replicatedLog.getSnapshotIndex())
+                .snapshotTerm(replicatedLog.getSnapshotTerm())
+                .votedFor(context.getTermInformation().getVotedFor())
+                .peerAddresses(ImmutableMap.copyOf(context.getPeerAddresses()));
+
+        ReplicatedLogEntry lastLogEntry = getLastLogEntry();
+        if (lastLogEntry != null) {
+            builder.lastLogIndex(lastLogEntry.getIndex());
+            builder.lastLogTerm(lastLogEntry.getTerm());
+        }
+
+        if(currentBehavior instanceof AbstractLeader) {
+            AbstractLeader leader = (AbstractLeader)currentBehavior;
+            Collection<String> followerIds = leader.getFollowerIds();
+            List<FollowerInfo> followerInfoList = Lists.newArrayListWithCapacity(followerIds.size());
+            for(String id: followerIds) {
+                final FollowerLogInformation info = leader.getFollower(id);
+                followerInfoList.add(new FollowerInfo(id, info.getNextIndex(), info.getMatchIndex(),
+                        info.isFollowerActive(), DurationFormatUtils.formatDurationHMS(info.timeSinceLastActivity())));
+            }
+
+            builder.followerInfoList(followerInfoList);
+        }
+
+        sender().tell(builder.build(), self());
+
     }
 
     private void handleBehaviorChange(RaftActorBehavior oldBehavior, RaftActorBehavior currentBehavior) {
