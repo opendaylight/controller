@@ -124,7 +124,7 @@ module distributed-datastore-provider {
          }
 
          leaf shard-journal-recovery-log-batch-size {
-            default 5000;
+            default 100;
             type non-zero-uint32-type;
             description "The maximum number of journal log entries to batch on recovery for a shard before committing to the data store.";
          }
