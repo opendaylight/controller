@@ -94,6 +94,7 @@ public class NetconfMessageTransformerTest {
                 NetconfBaseOps.getLockContent(NETCONF_CANDIDATE_QNAME));
 
         assertThat(XmlUtil.toString(netconfMessage.getDocument()), CoreMatchers.containsString("<lock"));
+        assertThat(XmlUtil.toString(netconfMessage.getDocument()), CoreMatchers.containsString("<rpc"));
     }
 
     @Test
@@ -109,6 +110,8 @@ public class NetconfMessageTransformerTest {
     public void testDiscardChangesRequest() throws Exception {
         final NetconfMessage netconfMessage = netconfMessageTransformer.toRpcRequest(toPath(NETCONF_DISCARD_CHANGES_QNAME), null);
         assertThat(XmlUtil.toString(netconfMessage.getDocument()), CoreMatchers.containsString("<discard"));
+        assertThat(XmlUtil.toString(netconfMessage.getDocument()), CoreMatchers.containsString("<rpc"));
+        assertThat(XmlUtil.toString(netconfMessage.getDocument()), CoreMatchers.containsString("message-id"));
     }
 
     @Test

@@ -220,8 +220,9 @@ public final class NetconfDevice implements RemoteDevice<NetconfSessionPreferenc
         messageTransformer = new NetconfMessageTransformer(result);
 
         updateTransformer(messageTransformer);
-        notificationHandler.onRemoteSchemaUp(messageTransformer);
+        // salFacade.onDeviceConnected has to be called before the notification handler is initialized
         salFacade.onDeviceConnected(result, remoteSessionCapabilities, deviceRpc);
+        notificationHandler.onRemoteSchemaUp(messageTransformer);
 
         logger.info("{}: Netconf connector initialized successfully", id);
     }
