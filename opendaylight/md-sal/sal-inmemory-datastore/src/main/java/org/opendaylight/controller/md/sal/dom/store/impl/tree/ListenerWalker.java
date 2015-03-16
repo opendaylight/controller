@@ -16,7 +16,10 @@ import org.opendaylight.controller.md.sal.dom.store.impl.DataChangeListenerRegis
  * exposes the underlying tree structure.
  *
  * @author Robert Varga
+ *
+ * @deprecated Superseded by {@link RegistrationTreeSnapshot}.
  */
+@Deprecated
 public class ListenerWalker implements AutoCloseable {
     private final RegistrationTreeSnapshot<DataChangeListenerRegistration<?>> delegate;
 
