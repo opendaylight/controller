@@ -7,11 +7,10 @@
  */
 package org.opendaylight.controller.sal.dom.broker;
 
+import com.google.common.base.Preconditions;
 import org.opendaylight.controller.sal.core.api.Broker.RpcRegistration;
 import org.opendaylight.controller.sal.core.api.RpcImplementation;
 import org.opendaylight.yangtools.yang.common.QName;
-
-import com.google.common.base.Preconditions;
 
 public class RpcRegistrationWrapper implements RpcRegistration {
 
