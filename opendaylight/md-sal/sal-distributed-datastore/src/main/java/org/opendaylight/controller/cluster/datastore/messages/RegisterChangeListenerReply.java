@@ -34,7 +34,7 @@ public class RegisterChangeListenerReply implements SerializableMessage{
   public static RegisterChangeListenerReply fromSerializable(final ActorSystem actorSystem,final Object serializable){
     ListenerRegistrationMessages.RegisterChangeListenerReply o = (ListenerRegistrationMessages.RegisterChangeListenerReply) serializable;
     return new RegisterChangeListenerReply(
-        actorSystem.actorFor(o.getListenerRegistrationPath()).path()
+        actorSystem.actorSelection(o.getListenerRegistrationPath()).anchorPath()
         );
   }
 }

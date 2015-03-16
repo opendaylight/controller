@@ -54,10 +54,10 @@ public class RegisterChangeListener implements SerializableMessage {
           .setDataChangeScope(scope.ordinal()).build();
     }
 
-  public static RegisterChangeListener fromSerializable(ActorSystem actorSystem,Object serializable){
+  public static RegisterChangeListener fromSerializable(ActorSystem actorSystem, Object serializable){
     ListenerRegistrationMessages.RegisterChangeListener o = (ListenerRegistrationMessages.RegisterChangeListener) serializable;
     return new RegisterChangeListener(InstanceIdentifierUtils.fromSerializable(o.getInstanceIdentifierPath()),
-                                                actorSystem.actorFor(o.getDataChangeListenerActorPath()).path(),
+                                                actorSystem.actorSelection(o.getDataChangeListenerActorPath()).anchorPath(),
                                               AsyncDataBroker.DataChangeScope.values()[o.getDataChangeScope()]);
   }
 
