@@ -147,18 +147,6 @@ public interface Broker {
      */
     public interface ConsumerSession {
 
-        /**
-         * Sends an RPC to other components registered to the broker.
-         *
-         * @see RpcImplementation
-         * @param rpc
-         *            Name of RPC
-         * @param input
-         *            Input data to the RPC
-         * @return Result of the RPC call
-         */
-        Future<RpcResult<CompositeNode>> rpc(QName rpc, CompositeNode input);
-
         boolean isClosed();
 
         /**
@@ -199,33 +187,6 @@ public interface Broker {
      */
     public interface ProviderSession extends ConsumerSession {
         /**
-         * Registers an implementation of the rpc.
-         *
-         * <p>
-         * The registered rpc functionality will be available to all other
-         * consumers and providers registered to the broker, which are aware of
-         * the {@link QName} assigned to the rpc.
-         *
-         * <p>
-         * There is no assumption that rpc type is in the set returned by
-         * invoking {@link RpcImplementation#getSupportedRpcs()}. This allows
-         * for dynamic rpc implementations.
-         *
-         * @param rpcType
-         *            Name of Rpc
-         * @param implementation
-         *            Provider's Implementation of the RPC functionality
-         * @throws IllegalArgumentException
-         *             If the name of RPC is invalid
-         */
-        RpcRegistration addRpcImplementation(QName rpcType, RpcImplementation implementation)
-                throws IllegalArgumentException;
-
-        RoutedRpcRegistration addRoutedRpcImplementation(QName rpcType, RpcImplementation implementation);
-
-        RoutedRpcRegistration addMountedRpcImplementation(QName rpcType, RpcImplementation implementation);
-
-        /**
          * Closes a session between provider and SAL.
          *
          * <p>
@@ -237,10 +198,6 @@ public interface Broker {
 
         @Override
         boolean isClosed();
-
-        Set<QName> getSupportedRpcs();
-
-        ListenerRegistration<RpcRegistrationListener> addRpcRegistrationListener(RpcRegistrationListener listener);
     }
 
     public interface RpcRegistration extends ObjectRegistration<RpcImplementation> {

@@ -57,7 +57,6 @@ import org.opendaylight.controller.sal.rest.api.RestconfService;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
 import org.opendaylight.controller.sal.restconf.rpc.impl.BrokerRpcExecutor;
-import org.opendaylight.controller.sal.restconf.rpc.impl.MountPointRpcExecutor;
 import org.opendaylight.controller.sal.restconf.rpc.impl.RpcExecutor;
 import org.opendaylight.controller.sal.streams.listeners.ListenerAdapter;
 import org.opendaylight.controller.sal.streams.listeners.Notificator;
@@ -793,13 +792,7 @@ public class RestconfImpl implements RestconfService {
         if (rpc == null) {
             throw new RestconfDocumentedException("RPC does not exist.", ErrorType.RPC, ErrorTag.UNKNOWN_ELEMENT);
         }
-
-        if (mountPoint == null) {
-            return new BrokerRpcExecutor(rpc, broker);
-        } else {
-            return new MountPointRpcExecutor(rpc, mountPoint);
-        }
-
+        return new BrokerRpcExecutor(rpc, broker);
     }
 
     private RpcDefinition findRpc(final SchemaContext schemaContext, final String identifierDecoded) {
