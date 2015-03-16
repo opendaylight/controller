@@ -7,38 +7,38 @@
  */
 package org.opendaylight.controller.sal.dom.broker;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.Future;
-
-import org.opendaylight.controller.md.sal.common.api.routing.RouteChangeListener;
-import org.opendaylight.controller.sal.core.api.Broker;
-import org.opendaylight.controller.sal.core.api.BrokerService;
-import org.opendaylight.controller.sal.core.api.Consumer;
-import org.opendaylight.controller.sal.core.api.Provider;
-import org.opendaylight.controller.sal.core.api.RoutedRpcDefaultImplementation;
-import org.opendaylight.controller.sal.core.api.RpcImplementation;
-import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry;
-import org.opendaylight.controller.sal.core.api.RpcRegistrationListener;
-import org.opendaylight.controller.sal.core.api.RpcRoutingContext;
-import org.opendaylight.controller.sal.dom.broker.spi.RpcRouter;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
-import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.common.RpcResult;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.osgi.framework.BundleContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.ImmutableClassToInstanceMap;
-import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.CheckedFuture;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcAvailabilityListener;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcIdentifier;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcImplementation;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcImplementationRegistration;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
+import org.opendaylight.controller.md.sal.dom.broker.impl.DOMRpcRouter;
+import org.opendaylight.controller.sal.core.api.Broker;
+import org.opendaylight.controller.sal.core.api.BrokerService;
+import org.opendaylight.controller.sal.core.api.Consumer;
+import org.opendaylight.controller.sal.core.api.Provider;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.model.api.SchemaPath;
+import org.osgi.framework.BundleContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class BrokerImpl implements Broker, RpcProvisionRegistry, AutoCloseable {
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
+public class BrokerImpl implements Broker, DOMRpcProviderService, DOMRpcService, AutoCloseable {
     private final static Logger log = LoggerFactory.getLogger(BrokerImpl.class);
 
     // Broker Generic Context
@@ -49,11 +49,11 @@ public class BrokerImpl implements Broker, RpcProvisionRegistry, AutoCloseable {
 
     private AutoCloseable deactivator = null;
 
-    private RpcRouter router = null;
+    private DOMRpcRouter router = null;
 
     private final ClassToInstanceMap<BrokerService> services;
 
-    public  BrokerImpl(final RpcRouter router,final ClassToInstanceMap<BrokerService> services) {
+    public  BrokerImpl(final DOMRpcRouter router,final ClassToInstanceMap<BrokerService> services) {
         this.router = Preconditions.checkNotNull(router, "RPC Router must not be null");
         this.services = ImmutableClassToInstanceMap.copyOf(services);
     }
@@ -69,11 +69,6 @@ public class BrokerImpl implements Broker, RpcProvisionRegistry, AutoCloseable {
     public ProviderSession registerProvider(final Provider provider,
             final BundleContext ctx) {
         return registerProvider(provider);
-    }
-
-    protected Future<RpcResult<CompositeNode>> invokeRpcAsync(final QName rpc,
-            final CompositeNode input) {
-        return router.invokeRpc(rpc, input);
     }
 
     // Validation
@@ -121,48 +116,6 @@ public class BrokerImpl implements Broker, RpcProvisionRegistry, AutoCloseable {
         }
     }
 
-    @Override
-    public RpcRegistration addRpcImplementation(final QName rpcType,
-            final RpcImplementation implementation)
-            throws IllegalArgumentException {
-        return router.addRpcImplementation(rpcType, implementation);
-    }
-
-    @Override
-    public RoutedRpcRegistration addRoutedRpcImplementation(
-            final QName rpcType, final RpcImplementation implementation) {
-        return router.addRoutedRpcImplementation(rpcType, implementation);
-    }
-
-    @Override
-    public void setRoutedRpcDefaultDelegate(
-            final RoutedRpcDefaultImplementation defaultImplementation) {
-        router.setRoutedRpcDefaultDelegate(defaultImplementation);
-    }
-
-    @Override
-    public ListenerRegistration<RpcRegistrationListener> addRpcRegistrationListener(
-            final RpcRegistrationListener listener) {
-        return router.addRpcRegistrationListener(listener);
-    }
-
-    @Override
-    public <L extends RouteChangeListener<RpcRoutingContext, YangInstanceIdentifier>> ListenerRegistration<L> registerRouteChangeListener(
-            final L listener) {
-        return router.registerRouteChangeListener(listener);
-    }
-
-    @Override
-    public Set<QName> getSupportedRpcs() {
-        return router.getSupportedRpcs();
-    }
-
-    @Override
-    public ListenableFuture<RpcResult<CompositeNode>> invokeRpc(
-            final QName rpc, final CompositeNode input) {
-        return router.invokeRpc(rpc, input);
-    }
-
     /**
      * @return the deactivator
      */
@@ -181,7 +134,7 @@ public class BrokerImpl implements Broker, RpcProvisionRegistry, AutoCloseable {
     /**
      * @return the router
      */
-    public RpcRouter getRouter() {
+    public DOMRpcRouter getRouter() {
         return router;
     }
 
@@ -189,7 +142,7 @@ public class BrokerImpl implements Broker, RpcProvisionRegistry, AutoCloseable {
      * @param router
      *            the router to set
      */
-    public void setRouter(final RpcRouter router) {
+    public void setRouter(final DOMRpcRouter router) {
         this.router = router;
     }
 
@@ -218,4 +171,28 @@ public class BrokerImpl implements Broker, RpcProvisionRegistry, AutoCloseable {
         return session;
     }
 
+
+    @Nonnull
+    @Override
+    public <T extends DOMRpcImplementation> DOMRpcImplementationRegistration<T> registerRpcImplementation(@Nonnull final T implementation, @Nonnull final DOMRpcIdentifier... rpcs) {
+        return router.registerRpcImplementation(implementation, rpcs);
+    }
+
+    @Nonnull
+    @Override
+    public <T extends DOMRpcImplementation> DOMRpcImplementationRegistration<T> registerRpcImplementation(@Nonnull final T implementation, @Nonnull final Set<DOMRpcIdentifier> rpcs) {
+        return router.registerRpcImplementation(implementation, rpcs);
+    }
+
+    @Nonnull
+    @Override
+    public CheckedFuture<DOMRpcResult, DOMRpcException> invokeRpc(@Nonnull final SchemaPath type, @Nullable final NormalizedNode<?, ?> input) {
+        return router.invokeRpc(type, input);
+    }
+
+    @Nonnull
+    @Override
+    public <T extends DOMRpcAvailabilityListener> ListenerRegistration<T> registerRpcListener(@Nonnull final T listener) {
+        return router.registerRpcListener(listener);
+    }
 }

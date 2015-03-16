@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.sal.rest.doc.mountpoints;
 
+import com.google.common.base.Optional;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -18,9 +19,9 @@ import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.ws.rs.core.UriInfo;
+import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
+import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
-import org.opendaylight.controller.sal.core.api.mount.MountProvisionInstance;
-import org.opendaylight.controller.sal.core.api.mount.MountProvisionService;
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionListener;
 import org.opendaylight.controller.sal.rest.doc.impl.BaseYangSwaggerGenerator;
 import org.opendaylight.controller.sal.rest.doc.swagger.Api;
@@ -40,7 +41,7 @@ public class MountPointSwagger extends BaseYangSwaggerGenerator implements Mount
     private static final String DATASTORES_REVISION = "-";
     private static final String DATASTORES_LABEL = "Datastores";
 
-    private MountProvisionService mountService;
+    private DOMMountPointService mountService;
     private final Map<YangInstanceIdentifier, Long> instanceIdToLongId = new TreeMap<>(
             new Comparator<YangInstanceIdentifier>() {
                 @Override
@@ -150,12 +151,12 @@ public class MountPointSwagger extends BaseYangSwaggerGenerator implements Mount
             return null;
         }
 
-        MountProvisionInstance mountPoint = mountService.getMountPoint(id);
-        if (mountPoint == null) {
+        Optional<DOMMountPoint> mountPoint = mountService.getMountPoint(id);
+        if (!mountPoint.isPresent()) {
             return null;
         }
 
-        SchemaContext context = mountPoint.getSchemaContext();
+        SchemaContext context = mountPoint.get().getSchemaContext();
         if (context == null) {
             return null;
         }
@@ -204,7 +205,7 @@ public class MountPointSwagger extends BaseYangSwaggerGenerator implements Mount
         return api;
     }
 
-    public void setMountService(final MountProvisionService mountService) {
+    public void setMountService(final DOMMountPointService mountService) {
         this.mountService = mountService;
     }
 

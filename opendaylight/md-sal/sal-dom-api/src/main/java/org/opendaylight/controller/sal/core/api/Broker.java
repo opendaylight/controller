@@ -7,16 +7,6 @@
  */
 package org.opendaylight.controller.sal.core.api;
 
-import java.util.Set;
-import java.util.concurrent.Future;
-
-import org.opendaylight.controller.md.sal.common.api.routing.RoutedRegistration;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
-import org.opendaylight.yangtools.concepts.ObjectRegistration;
-import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.common.RpcResult;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -28,19 +18,6 @@ import org.osgi.framework.BundleContext;
  * {@link ConsumerSession} and provide access to infrastructure services, which
  * removes direct dependencies between providers and consumers.
  *
- *
- * <h3>Infrastructure services</h3> Some examples of infrastructure services:
- *
- * <ul>
- * <li>RPC Invocation - see {@link ConsumerSession#rpc(QName, CompositeNode)},
- * {@link ProviderSession#addRpcImplementation(QName, RpcImplementation)} and
- * {@link RpcImplementation}
- * <li>Notification Service - see {@link org.opendaylight.controller.sal.core.api.notify.NotificationService} and
- * {@link org.opendaylight.controller.sal.core.api.notify.NotificationPublishService}
- * <li>Functionality and Data model
- * <li>Data Store access and modification - see {@link org.opendaylight.controller.sal.core.api.data.DataBrokerService} and
- * {@link org.opendaylight.controller.sal.core.api.data.DataProviderService}
- * </ul>
  *
  * The services are exposed via session.
  *
@@ -100,12 +77,6 @@ public interface Broker {
      * from consumer, using the {@link Provider#getProviderFunctionality()}, and
      * register that functionality into system and concrete infrastructure
      * services.
-     *
-     * <p>
-     * Note that consumer could register additional functionality at later point
-     * by using service and functionality specific APIs (e.g.
-     * {@link ProviderSession#addRpcImplementation(QName, RpcImplementation)}
-     *
      * <p>
      * The consumer is <b>required to use</b> returned session for all
      * communication with broker or one of the broker services. The session is
@@ -147,18 +118,6 @@ public interface Broker {
      */
     public interface ConsumerSession {
 
-        /**
-         * Sends an RPC to other components registered to the broker.
-         *
-         * @see RpcImplementation
-         * @param rpc
-         *            Name of RPC
-         * @param input
-         *            Input data to the RPC
-         * @return Result of the RPC call
-         */
-        Future<RpcResult<CompositeNode>> rpc(QName rpc, CompositeNode input);
-
         boolean isClosed();
 
         /**
@@ -199,33 +158,6 @@ public interface Broker {
      */
     public interface ProviderSession extends ConsumerSession {
         /**
-         * Registers an implementation of the rpc.
-         *
-         * <p>
-         * The registered rpc functionality will be available to all other
-         * consumers and providers registered to the broker, which are aware of
-         * the {@link QName} assigned to the rpc.
-         *
-         * <p>
-         * There is no assumption that rpc type is in the set returned by
-         * invoking {@link RpcImplementation#getSupportedRpcs()}. This allows
-         * for dynamic rpc implementations.
-         *
-         * @param rpcType
-         *            Name of Rpc
-         * @param implementation
-         *            Provider's Implementation of the RPC functionality
-         * @throws IllegalArgumentException
-         *             If the name of RPC is invalid
-         */
-        RpcRegistration addRpcImplementation(QName rpcType, RpcImplementation implementation)
-                throws IllegalArgumentException;
-
-        RoutedRpcRegistration addRoutedRpcImplementation(QName rpcType, RpcImplementation implementation);
-
-        RoutedRpcRegistration addMountedRpcImplementation(QName rpcType, RpcImplementation implementation);
-
-        /**
          * Closes a session between provider and SAL.
          *
          * <p>
@@ -237,19 +169,5 @@ public interface Broker {
 
         @Override
         boolean isClosed();
-
-        Set<QName> getSupportedRpcs();
-
-        ListenerRegistration<RpcRegistrationListener> addRpcRegistrationListener(RpcRegistrationListener listener);
-    }
-
-    public interface RpcRegistration extends ObjectRegistration<RpcImplementation> {
-        QName getType();
-
-        @Override
-        void close();
-    }
-
-    public interface RoutedRpcRegistration extends RpcRegistration, RoutedRegistration<QName, YangInstanceIdentifier, RpcImplementation> {
     }
 }

@@ -9,7 +9,6 @@ package org.opendaylight.controller.sal.connect.netconf;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyCollectionOf;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -42,13 +41,11 @@ import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.controller.sal.connect.api.MessageTransformer;
 import org.opendaylight.controller.sal.connect.api.RemoteDeviceHandler;
-import org.opendaylight.controller.sal.connect.api.SchemaSourceProviderFactory;
 import org.opendaylight.controller.sal.connect.netconf.listener.NetconfDeviceCommunicator;
 import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionPreferences;
 import org.opendaylight.controller.sal.connect.netconf.sal.NetconfDeviceRpc;
 import org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
-import org.opendaylight.controller.sal.core.api.RpcImplementation;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
@@ -62,7 +59,6 @@ import org.opendaylight.yangtools.yang.model.repo.api.SourceIdentifier;
 import org.opendaylight.yangtools.yang.model.repo.spi.PotentialSchemaSource;
 import org.opendaylight.yangtools.yang.model.repo.spi.SchemaSourceRegistration;
 import org.opendaylight.yangtools.yang.model.repo.spi.SchemaSourceRegistry;
-import org.opendaylight.yangtools.yang.model.util.repo.SchemaSourceProvider;
 import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
 
 public class NetconfDeviceTest {
@@ -250,16 +246,6 @@ public class NetconfDeviceTest {
     private <T extends AutoCloseable> T mockCloseableClass(final Class<T> remoteDeviceHandlerClass) throws Exception {
         final T mock = mockClass(remoteDeviceHandlerClass);
         doNothing().when(mock).close();
-        return mock;
-    }
-
-    public SchemaSourceProviderFactory<InputStream> getSourceProviderFactory() {
-        final SchemaSourceProviderFactory<InputStream> mock = mockClass(SchemaSourceProviderFactory.class);
-
-        final SchemaSourceProvider<InputStream> schemaSourceProvider = mockClass(SchemaSourceProvider.class);
-        doReturn(Optional.<String>absent()).when(schemaSourceProvider).getSchemaSource(anyString(), any(Optional.class));
-
-        doReturn(schemaSourceProvider).when(mock).createSourceProvider(any(RpcImplementation.class));
         return mock;
     }
 

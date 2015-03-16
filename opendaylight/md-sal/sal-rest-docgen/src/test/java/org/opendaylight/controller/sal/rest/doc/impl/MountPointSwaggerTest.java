@@ -12,6 +12,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.google.common.base.Optional;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -21,9 +22,9 @@ import java.util.TreeSet;
 import javax.ws.rs.core.UriInfo;
 import org.junit.Before;
 import org.junit.Test;
+import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
+import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
-import org.opendaylight.controller.sal.core.api.mount.MountProvisionInstance;
-import org.opendaylight.controller.sal.core.api.mount.MountProvisionService;
 import org.opendaylight.controller.sal.rest.doc.mountpoints.MountPointSwagger;
 import org.opendaylight.controller.sal.rest.doc.swagger.Api;
 import org.opendaylight.controller.sal.rest.doc.swagger.ApiDeclaration;
@@ -130,11 +131,11 @@ public class MountPointSwaggerTest {
         SchemaContext context = helper.createMockSchemaContext();
         SchemaService schemaService = helper.createMockSchemaService(context);
 
-        MountProvisionInstance mountPoint = mock(MountProvisionInstance.class);
+        DOMMountPoint mountPoint = mock(DOMMountPoint.class);
         when(mountPoint.getSchemaContext()).thenReturn(context);
 
-        MountProvisionService service = mock(MountProvisionService.class);
-        when(service.getMountPoint(instanceId)).thenReturn(mountPoint);
+        DOMMountPointService service = mock(DOMMountPointService.class);
+        when(service.getMountPoint(instanceId)).thenReturn(Optional.of(mountPoint));
         swagger.setMountService(service);
         swagger.setGlobalSchema(schemaService);
 

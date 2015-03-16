@@ -17,7 +17,6 @@ import org.opendaylight.controller.sal.binding.test.util.BindingTestContext;
 @SuppressWarnings("deprecation")
 public abstract class AbstractDataServiceTest {
 
-    protected org.opendaylight.controller.sal.core.api.data.DataProviderService biDataService;
     protected DataProviderService baDataService;
 
     protected BindingTestContext testContext;
@@ -32,7 +31,6 @@ public abstract class AbstractDataServiceTest {
         testContext.start();
 
         baDataService = testContext.getBindingDataBroker();
-        biDataService = testContext.getDomDataBroker();
     }
 
     protected boolean getStartWithSchema() {
