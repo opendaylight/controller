@@ -7,133 +7,99 @@
  */
 package org.opendaylight.controller.sal.binding.test.connect.dom;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-
-import java.util.Collections;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
-import org.junit.Test;
-import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
-import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
-import org.opendaylight.controller.sal.binding.api.data.DataChangeListener;
 import org.opendaylight.controller.sal.binding.test.AbstractDataServiceTest;
-import org.opendaylight.controller.sal.core.api.data.DataModificationTransaction;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.TllComplexAugment;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.aug.grouping.List1;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.aug.grouping.List1Builder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.aug.grouping.List1Key;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.aug.grouping.list1.List11Builder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.aug.grouping.list1.List11Key;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.aug.grouping.list1.List12Builder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.of.migration.test.model.rev150210.aug.grouping.list1.List12Key;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.Top;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelList;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelListKey;
-import org.opendaylight.yangtools.yang.binding.DataObject;
-import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.common.RpcResult;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.util.concurrent.SettableFuture;
 
 /**
  * FIXME: Migrate to use new Data Broker APIs
  */
 @SuppressWarnings("deprecation")
 public class ChangeOriginatedInDomBrokerTest extends AbstractDataServiceTest {
-
-    protected static final Logger LOG = LoggerFactory.getLogger(ChangeOriginatedInDomBrokerTest.class);
-
-    private static final QName TLL_NAME_QNAME = QName.create(TopLevelList.QNAME, "name");
-    private static final QName LIST1_ATTR_STR_QNAME = QName.create(List1.QNAME, "attr-str");
-
-    private static final String TLL_NAME = "1";
-    private static final int LIST11_ATTR_INT = 1234;
-    private static final String LIST1_ATTR_STR = "foo:foo";
-
-    private static final TopLevelListKey TLL_KEY = new TopLevelListKey(TLL_NAME);
-    private static final List1Key LIST1_KEY = new List1Key(LIST1_ATTR_STR);
-    private static final List11Key LIST11_KEY = new List11Key(LIST11_ATTR_INT);
-
-    protected final SettableFuture<DataChangeEvent<InstanceIdentifier<?>, DataObject>> modificationCapture = SettableFuture.create();
-
-    private static final Map<QName, Object> TLL_KEY_BI = Collections.<QName, Object> singletonMap(TLL_NAME_QNAME,
-            TLL_NAME);
-
-    private static final InstanceIdentifier<TopLevelList> NODE_INSTANCE_ID_BA = InstanceIdentifier.builder(Top.class) //
-            .child(TopLevelList.class, TLL_KEY).toInstance();
-
-    private static final Map<QName, Object> LIST1_KEY_BI = //
-    ImmutableMap.<QName, Object> of(LIST1_ATTR_STR_QNAME, LIST1_ATTR_STR);;
-
-    private static final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier LIST1_INSTANCE_ID_BI = //
-    org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.builder() //
-            .node(Top.QNAME) //
-            .nodeWithKey(TopLevelList.QNAME, TLL_KEY_BI) //
-            .nodeWithKey(List1.QNAME, LIST1_KEY_BI) //
-            .toInstance();
-
-    private static final InstanceIdentifier<List1> LIST1_PATH_BA = //
-            NODE_INSTANCE_ID_BA.builder() //
-            .augmentation(TllComplexAugment.class) //
-            .child(List1.class, LIST1_KEY) //
-            .toInstance();
-
-    @Test
-    public void simpleModifyOperation() throws Exception {
-
-        assertNull(biDataService.readConfigurationData(LIST1_INSTANCE_ID_BI));
-
-        registerChangeListener();
-
-        CompositeNode domflow = createTestList1();
-        DataModificationTransaction biTransaction = biDataService.beginTransaction();
-        biTransaction.putConfigurationData(LIST1_INSTANCE_ID_BI, domflow);
-        RpcResult<TransactionStatus> biResult = biTransaction.commit().get();
-        assertEquals(TransactionStatus.COMMITED, biResult.getResult());
-        DataChangeEvent<InstanceIdentifier<?>, DataObject> event = modificationCapture.get(1000,TimeUnit.MILLISECONDS);
-        assertNotNull(event);
-        LOG.info("Created Configuration :{}",event.getCreatedConfigurationData());
-        List1 list1 = (List1) event.getCreatedConfigurationData().get(LIST1_PATH_BA);
-        assertNotNull(list1);
-        assertNotNull(list1.getAttrStr());
-        assertNotNull(list1.getList11());
-        assertNotNull(list1.getList12());
-        assertEquals(TransactionStatus.COMMITED, biResult.getResult());
-
-    }
-
-    private void registerChangeListener() {
-        baDataService.registerDataChangeListener(LIST1_PATH_BA, new DataChangeListener() {
-
-            @Override
-            public void onDataChanged(final DataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
-                LOG.info("Data Change listener invoked.");
-                modificationCapture.set(change);
-            }
-        });
-    }
-
-    private CompositeNode createTestList1() {
-        List1Builder l1b = new List1Builder();
-        List11Builder l11b = new List11Builder();
-        List12Builder l12b = new List12Builder();
-        l11b.setKey(LIST11_KEY);
-        l11b.setAttrStr("foo:foo:foo");
-        l12b.setKey(new List12Key(321));
-        l12b.setAttrStr("foo:foo:bar");
-        l1b.setKey(LIST1_KEY);
-        l1b.setList11(ImmutableList.of(l11b.build()));
-        l1b.setList12(ImmutableList.of(l12b.build()));
-        CompositeNode domList1 = mappingService.toDataDom(l1b.build());
-        return domList1;
-    }
+//
+//    protected static final Logger LOG = LoggerFactory.getLogger(ChangeOriginatedInDomBrokerTest.class);
+//
+//    private static final QName TLL_NAME_QNAME = QName.create(TopLevelList.QNAME, "name");
+//    private static final QName LIST1_ATTR_STR_QNAME = QName.create(List1.QNAME, "attr-str");
+//
+//    private static final String TLL_NAME = "1";
+//    private static final int LIST11_ATTR_INT = 1234;
+//    private static final String LIST1_ATTR_STR = "foo:foo";
+//
+//    private static final TopLevelListKey TLL_KEY = new TopLevelListKey(TLL_NAME);
+//    private static final List1Key LIST1_KEY = new List1Key(LIST1_ATTR_STR);
+//    private static final List11Key LIST11_KEY = new List11Key(LIST11_ATTR_INT);
+//
+//    protected final SettableFuture<DataChangeEvent<InstanceIdentifier<?>, DataObject>> modificationCapture = SettableFuture.create();
+//
+//    private static final Map<QName, Object> TLL_KEY_BI = Collections.<QName, Object> singletonMap(TLL_NAME_QNAME,
+//            TLL_NAME);
+//
+//    private static final InstanceIdentifier<TopLevelList> NODE_INSTANCE_ID_BA = InstanceIdentifier.builder(Top.class) //
+//            .child(TopLevelList.class, TLL_KEY).toInstance();
+//
+//    private static final Map<QName, Object> LIST1_KEY_BI = //
+//    ImmutableMap.<QName, Object> of(LIST1_ATTR_STR_QNAME, LIST1_ATTR_STR);;
+//
+//    private static final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier LIST1_INSTANCE_ID_BI = //
+//    org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.builder() //
+//            .node(Top.QNAME) //
+//            .nodeWithKey(TopLevelList.QNAME, TLL_KEY_BI) //
+//            .nodeWithKey(List1.QNAME, LIST1_KEY_BI) //
+//            .toInstance();
+//
+//    private static final InstanceIdentifier<List1> LIST1_PATH_BA = //
+//            NODE_INSTANCE_ID_BA.builder() //
+//            .augmentation(TllComplexAugment.class) //
+//            .child(List1.class, LIST1_KEY) //
+//            .toInstance();
+//
+//    @Test
+//    public void simpleModifyOperation() throws Exception {
+//
+//        assertNull(biDataService.readConfigurationData(LIST1_INSTANCE_ID_BI));
+//
+//        registerChangeListener();
+//
+//        CompositeNode domflow = createTestList1();
+//        DataModificationTransaction biTransaction = biDataService.beginTransaction();
+//        biTransaction.putConfigurationData(LIST1_INSTANCE_ID_BI, domflow);
+//        RpcResult<TransactionStatus> biResult = biTransaction.commit().get();
+//        assertEquals(TransactionStatus.COMMITED, biResult.getResult());
+//        DataChangeEvent<InstanceIdentifier<?>, DataObject> event = modificationCapture.get(1000,TimeUnit.MILLISECONDS);
+//        assertNotNull(event);
+//        LOG.info("Created Configuration :{}",event.getCreatedConfigurationData());
+//        List1 list1 = (List1) event.getCreatedConfigurationData().get(LIST1_PATH_BA);
+//        assertNotNull(list1);
+//        assertNotNull(list1.getAttrStr());
+//        assertNotNull(list1.getList11());
+//        assertNotNull(list1.getList12());
+//        assertEquals(TransactionStatus.COMMITED, biResult.getResult());
+//
+//    }
+//
+//    private void registerChangeListener() {
+//        baDataService.registerDataChangeListener(LIST1_PATH_BA, new DataChangeListener() {
+//
+//            @Override
+//            public void onDataChanged(final DataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
+//                LOG.info("Data Change listener invoked.");
+//                modificationCapture.set(change);
+//            }
+//        });
+//    }
+//
+//    private CompositeNode createTestList1() {
+//        List1Builder l1b = new List1Builder();
+//        List11Builder l11b = new List11Builder();
+//        List12Builder l12b = new List12Builder();
+//        l11b.setKey(LIST11_KEY);
+//        l11b.setAttrStr("foo:foo:foo");
+//        l12b.setKey(new List12Key(321));
+//        l12b.setAttrStr("foo:foo:bar");
+//        l1b.setKey(LIST1_KEY);
+//        l1b.setList11(ImmutableList.of(l11b.build()));
+//        l1b.setList12(ImmutableList.of(l12b.build()));
+//        CompositeNode domList1 = mappingService.toDataDom(l1b.build());
+//        return domList1;
+//    }
 }

@@ -7,24 +7,18 @@
  */
 package org.opendaylight.controller.sal.dom.broker;
 
-import java.util.Collection;
-import java.util.concurrent.Future;
-
-import javax.annotation.concurrent.GuardedBy;
-
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ClassToInstanceMap;
+import com.google.common.collect.MutableClassToInstanceMap;
 import org.opendaylight.controller.sal.core.api.Broker.ConsumerSession;
 import org.opendaylight.controller.sal.core.api.BrokerService;
 import org.opendaylight.controller.sal.core.api.Consumer;
 import org.opendaylight.controller.sal.dom.broker.osgi.AbstractBrokerServiceProxy;
 import org.opendaylight.controller.sal.dom.broker.osgi.ProxyFactory;
-import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.common.RpcResult;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ClassToInstanceMap;
-import com.google.common.collect.MutableClassToInstanceMap;
+import javax.annotation.concurrent.GuardedBy;
+import java.util.Collection;
 
 class ConsumerContextImpl implements ConsumerSession {
 
@@ -39,13 +33,6 @@ class ConsumerContextImpl implements ConsumerSession {
     public ConsumerContextImpl(final Consumer provider, final BrokerImpl brokerImpl) {
         broker = brokerImpl;
         consumer = provider;
-    }
-
-    @Override
-    public Future<RpcResult<CompositeNode>> rpc(final QName rpc,
-            final CompositeNode input) {
-        checkNotClosed();
-        return broker.invokeRpcAsync(rpc, input);
     }
 
     @Override
@@ -83,6 +70,7 @@ class ConsumerContextImpl implements ConsumerSession {
         broker.consumerSessionClosed(this);
         broker = null;
     }
+
 
     @Override
     public synchronized boolean isClosed() {

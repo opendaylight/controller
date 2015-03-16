@@ -17,20 +17,11 @@ import org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 import org.opendaylight.controller.md.sal.dom.broker.impl.DOMNotificationRouter;
 import org.opendaylight.controller.md.sal.dom.broker.impl.DOMRpcRouter;
-import org.opendaylight.controller.md.sal.dom.broker.impl.compat.BackwardsCompatibleDataBroker;
 import org.opendaylight.controller.md.sal.dom.broker.impl.mount.DOMMountPointServiceImpl;
 import org.opendaylight.controller.sal.core.api.BrokerService;
-import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry;
-import org.opendaylight.controller.sal.core.api.data.DataBrokerService;
-import org.opendaylight.controller.sal.core.api.data.DataProviderService;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
-import org.opendaylight.controller.sal.core.api.mount.MountProvisionService;
-import org.opendaylight.controller.sal.core.api.mount.MountService;
-import org.opendaylight.controller.sal.dom.broker.BackwardsCompatibleMountPointManager;
 import org.opendaylight.controller.sal.dom.broker.BrokerImpl;
 import org.opendaylight.controller.sal.dom.broker.GlobalBundleScanningSchemaServiceImpl;
-import org.opendaylight.controller.sal.dom.broker.impl.SchemaAwareRpcBroker;
-import org.opendaylight.controller.sal.dom.broker.impl.SchemaContextProviders;
 
 /**
 *
@@ -66,14 +57,8 @@ public final class DomBrokerImplModule extends org.opendaylight.controller.confi
 
         final SchemaService schemaService = getSchemaServiceImpl();
         services.putInstance(SchemaService.class, schemaService);
-        final SchemaAwareRpcBroker router = new SchemaAwareRpcBroker("/", SchemaContextProviders
-                .fromSchemaService(schemaService));
-        services.putInstance(RpcProvisionRegistry.class, router);
 
         services.putInstance(DOMDataBroker.class, asyncBroker);
-        final DataProviderService legacyData = new BackwardsCompatibleDataBroker(asyncBroker,schemaService);
-        services.putInstance(DataProviderService.class,legacyData);
-        services.putInstance(DataBrokerService.class, legacyData);
 
         final DOMRpcRouter rpcRouter = new DOMRpcRouter();
         schemaService.registerSchemaContextListener(rpcRouter);
@@ -83,12 +68,7 @@ public final class DomBrokerImplModule extends org.opendaylight.controller.confi
         final DOMMountPointService mountService = new DOMMountPointServiceImpl();
         services.putInstance(DOMMountPointService.class, mountService);
 
-        // TODO remove backwards service, use only new DOMMountPointService
-        final MountProvisionService backwardsMountService = new BackwardsCompatibleMountPointManager(mountService);
-        services.putInstance(MountService.class, backwardsMountService);
-        services.putInstance(MountProvisionService.class, backwardsMountService);
-
-        return new BrokerImpl(router, services);
+        return new BrokerImpl(rpcRouter, services);
     }
 
     private SchemaService getSchemaServiceImpl() {

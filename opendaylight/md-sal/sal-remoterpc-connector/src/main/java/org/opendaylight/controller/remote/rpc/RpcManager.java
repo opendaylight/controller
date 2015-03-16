@@ -86,7 +86,7 @@ public class RpcManager extends AbstractUntypedActor {
     routeChangeListener = new RoutedRpcListener(rpcRegistry);
     rpcImplementation = new RemoteRpcImplementation(rpcBroker, schemaContext, config);
 
-    brokerSession.addRpcRegistrationListener(rpcListener);
+//    brokerSession.addRpcRegistrationListener(rpcListener);
     rpcProvisionRegistry.registerRouteChangeListener(routeChangeListener);
     rpcProvisionRegistry.setRoutedRpcDefaultDelegate(rpcImplementation);
     announceSupportedRpcs();
@@ -96,11 +96,11 @@ public class RpcManager extends AbstractUntypedActor {
    * Add all the locally registered RPCs in the clustered routing table
    */
   private void announceSupportedRpcs(){
-    LOG.debug("Adding all supported rpcs to routing table");
-    Set<QName> currentlySupported = brokerSession.getSupportedRpcs();
-    for (QName rpc : currentlySupported) {
-      rpcListener.onRpcImplementationAdded(rpc);
-    }
+//    LOG.debug("Adding all supported rpcs to routing table");
+//    Set<QName> currentlySupported = brokerSession.getSupportedRpcs();
+//    for (QName rpc : currentlySupported) {
+//      rpcListener.onRpcImplementationAdded(rpc);
+//    }
   }
 
 
