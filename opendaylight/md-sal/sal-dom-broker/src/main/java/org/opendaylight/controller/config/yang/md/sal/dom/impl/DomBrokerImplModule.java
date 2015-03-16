@@ -83,11 +83,6 @@ public final class DomBrokerImplModule extends org.opendaylight.controller.confi
         final DOMMountPointService mountService = new DOMMountPointServiceImpl();
         services.putInstance(DOMMountPointService.class, mountService);
 
-        // TODO remove backwards service, use only new DOMMountPointService
-        final MountProvisionService backwardsMountService = new BackwardsCompatibleMountPointManager(mountService);
-        services.putInstance(MountService.class, backwardsMountService);
-        services.putInstance(MountProvisionService.class, backwardsMountService);
-
         return new BrokerImpl(router, services);
     }
 

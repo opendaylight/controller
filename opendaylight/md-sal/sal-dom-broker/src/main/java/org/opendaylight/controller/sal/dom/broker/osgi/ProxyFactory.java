@@ -31,22 +31,6 @@ public class ProxyFactory {
         return ((T) _createProxyImpl);
     }
 
-    @Deprecated
-    private static Object _createProxyImpl(final ServiceReference<?> ref,
-            final DataBrokerService service) {
-
-        return new DataBrokerServiceProxy(
-                ((ServiceReference<DataBrokerService>) ref), service);
-    }
-
-    @Deprecated
-    private static Object _createProxyImpl(final ServiceReference<?> ref,
-            final DataProviderService service) {
-
-        return new DataProviderServiceProxy(
-                ((ServiceReference<DataProviderService>) ref), service);
-    }
-
     private static Object _createProxyImpl(final ServiceReference<?> ref,
             final NotificationPublishService service) {
 
@@ -61,14 +45,6 @@ public class ProxyFactory {
                 ((ServiceReference<NotificationService>) ref), service);
     }
 
-    @Deprecated
-    private static Object _createProxyImpl(final ServiceReference<?> ref,
-            final MountProvisionService service) {
-
-        return new MountProviderServiceProxy(
-                ((ServiceReference<MountProvisionService>) ref), service);
-    }
-
     private static Object _createProxyImpl(final ServiceReference<?> ref,
             final DOMMountPointService service) {
 
@@ -81,13 +57,6 @@ public class ProxyFactory {
 
         return new SchemaServiceProxy(((ServiceReference<SchemaService>) ref),
                 service);
-    }
-
-    private static Object _createProxyImpl(final ServiceReference<?> ref,
-            final RpcProvisionRegistry service) {
-
-        return new RpcProvisionRegistryProxy(
-                ((ServiceReference<RpcProvisionRegistry>) ref), service);
     }
 
     private static DOMDataBrokerProxy _createProxyImpl(
@@ -108,16 +77,8 @@ public class ProxyFactory {
 
         if (service instanceof DOMDataBroker) {
             return _createProxyImpl(ref, (DOMDataBroker) service);
-        } else if (service instanceof RpcProvisionRegistry) {
-            return _createProxyImpl(ref, (RpcProvisionRegistry) service);
-        } else if (service instanceof DataProviderService) {
-            return _createProxyImpl(ref, (DataProviderService) service);
-        } else if (service instanceof MountProvisionService) {
-            return _createProxyImpl(ref, (MountProvisionService) service);
         } else if (service instanceof NotificationPublishService) {
             return _createProxyImpl(ref, (NotificationPublishService) service);
-        } else if (service instanceof DataBrokerService) {
-            return _createProxyImpl(ref, (DataBrokerService) service);
         } else if (service instanceof SchemaService) {
             return _createProxyImpl(ref, (SchemaService) service);
         } else if (service instanceof NotificationService) {

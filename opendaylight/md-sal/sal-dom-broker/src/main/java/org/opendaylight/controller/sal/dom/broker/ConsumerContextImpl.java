@@ -12,6 +12,10 @@ import java.util.concurrent.Future;
 
 import javax.annotation.concurrent.GuardedBy;
 
+import com.google.common.util.concurrent.CheckedFuture;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcIdentifier;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.sal.core.api.Broker.ConsumerSession;
 import org.opendaylight.controller.sal.core.api.BrokerService;
 import org.opendaylight.controller.sal.core.api.Consumer;
@@ -25,6 +29,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.MutableClassToInstanceMap;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 class ConsumerContextImpl implements ConsumerSession {
 
@@ -42,8 +47,7 @@ class ConsumerContextImpl implements ConsumerSession {
     }
 
     @Override
-    public Future<RpcResult<CompositeNode>> rpc(final QName rpc,
-            final CompositeNode input) {
+    public CheckedFuture<DOMRpcResult, DOMRpcException> rpc(DOMRpcIdentifier rpc, NormalizedNode<?, ?> input) {
         checkNotClosed();
         return broker.invokeRpcAsync(rpc, input);
     }

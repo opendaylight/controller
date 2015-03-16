@@ -9,13 +9,14 @@ package org.opendaylight.controller.sal.dom.broker.spi;
 
 import java.util.Set;
 
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcImplementation;
 import org.opendaylight.controller.sal.core.api.Broker.RoutedRpcRegistration;
 import org.opendaylight.controller.sal.core.api.Broker.RpcRegistration;
 import org.opendaylight.controller.sal.core.api.RpcImplementation;
 import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry;
 import org.opendaylight.yangtools.yang.common.QName;
 
-public interface RpcRouter extends RpcProvisionRegistry, RpcImplementation {
+public interface RpcRouter extends RpcProvisionRegistry, DOMRpcImplementation {
 
     @Override
     public RoutedRpcRegistration addRoutedRpcImplementation(QName rpcType, RpcImplementation implementation);
@@ -24,6 +25,6 @@ public interface RpcRouter extends RpcProvisionRegistry, RpcImplementation {
     public RpcRegistration addRpcImplementation(QName rpcType, RpcImplementation implementation)
             throws IllegalArgumentException;
 
-    @Override
-    public Set<QName> getSupportedRpcs();
+//    @Override
+//    public Set<QName> getSupportedRpcs();
 }

@@ -12,7 +12,11 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Future;
 
+import com.google.common.util.concurrent.CheckedFuture;
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChangeListener;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcIdentifier;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.sal.core.api.Broker;
 import org.opendaylight.controller.sal.core.api.BrokerService;
 import org.opendaylight.controller.sal.core.api.Consumer;
@@ -28,6 +32,7 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +42,9 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.ImmutableClassToInstanceMap;
 import com.google.common.util.concurrent.ListenableFuture;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class BrokerImpl implements Broker, RpcProvisionRegistry, AutoCloseable {
     private final static Logger log = LoggerFactory.getLogger(BrokerImpl.class);
@@ -71,8 +79,7 @@ public class BrokerImpl implements Broker, RpcProvisionRegistry, AutoCloseable {
         return registerProvider(provider);
     }
 
-    protected Future<RpcResult<CompositeNode>> invokeRpcAsync(final QName rpc,
-            final CompositeNode input) {
+    protected CheckedFuture<DOMRpcResult, DOMRpcException> invokeRpcAsync(DOMRpcIdentifier rpc, NormalizedNode<?, ?> input) {
         return router.invokeRpc(rpc, input);
     }
 
@@ -157,9 +164,9 @@ public class BrokerImpl implements Broker, RpcProvisionRegistry, AutoCloseable {
         return router.getSupportedRpcs();
     }
 
+    @Nonnull
     @Override
-    public ListenableFuture<RpcResult<CompositeNode>> invokeRpc(
-            final QName rpc, final CompositeNode input) {
+    public CheckedFuture<DOMRpcResult, DOMRpcException> invokeRpc(@Nonnull final DOMRpcIdentifier rpc, @Nullable final NormalizedNode<?, ?> input) {
         return router.invokeRpc(rpc, input);
     }
 
@@ -217,5 +224,6 @@ public class BrokerImpl implements Broker, RpcProvisionRegistry, AutoCloseable {
         providerSessions.add(session);
         return session;
     }
+
 
 }
