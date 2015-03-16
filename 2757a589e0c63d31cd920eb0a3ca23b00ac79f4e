@@ -1,0 +1,225 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_c35eafe9",
+        "filename": "features/mdsal/src/main/resources/features.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-03-16T08:29:38Z",
+      "side": 1,
+      "message": "Add a TODO entry for what needs to be done in order to remove dependency on the sal-netconf-connector bundle, yangtools models feature and model-inventory.",
+      "revId": "2757a589e0c63d31cd920eb0a3ca23b00ac79f4e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_030337b9",
+        "filename": "opendaylight/netconf/mdsal-netconf-connector/src/main/java/org/opendaylight/controller/netconf/mdsal/connector/ops/get/AbstractGet.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-03-16T08:29:38Z",
+      "side": 1,
+      "message": "The namespace can be extracted from the element, does not have to be passed separately",
+      "revId": "2757a589e0c63d31cd920eb0a3ca23b00ac79f4e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_c32c6f4d",
+        "filename": "opendaylight/netconf/mdsal-netconf-connector/src/main/java/org/opendaylight/controller/netconf/mdsal/connector/ops/get/AbstractGet.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-03-16T08:29:38Z",
+      "side": 1,
+      "message": "Isnt this functionality (finding a node in schema context by namespace and name) already in some utility class ?",
+      "revId": "2757a589e0c63d31cd920eb0a3ca23b00ac79f4e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_43ce1f85",
+        "filename": "opendaylight/netconf/mdsal-netconf-connector/src/main/java/org/opendaylight/controller/netconf/mdsal/connector/ops/get/AbstractGet.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-03-16T08:29:38Z",
+      "side": 1,
+      "message": "Is this protected on purpose (Use protected only if aimed to be overridden, use the least visibility whenever possible)? Why would this be overridden ?\nAlso should be static if does not work with instance fields (This goes for all the methods: If possible, make static)",
+      "revId": "2757a589e0c63d31cd920eb0a3ca23b00ac79f4e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_2369938b",
+        "filename": "opendaylight/netconf/mdsal-netconf-connector/src/main/java/org/opendaylight/controller/netconf/mdsal/connector/ops/get/AbstractGet.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-03-16T08:29:38Z",
+      "side": 1,
+      "message": "This instance of FilterSchema should be extracted into a constant located preferably inside the FilterSchema class.",
+      "revId": "2757a589e0c63d31cd920eb0a3ca23b00ac79f4e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_a32b632f",
+        "filename": "opendaylight/netconf/mdsal-netconf-connector/src/main/java/org/opendaylight/controller/netconf/mdsal/connector/ops/get/FilterSchema.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-03-16T08:29:38Z",
+      "side": 1,
+      "message": "final if possible",
+      "revId": "2757a589e0c63d31cd920eb0a3ca23b00ac79f4e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_83266767",
+        "filename": "opendaylight/netconf/mdsal-netconf-connector/src/main/java/org/opendaylight/controller/netconf/mdsal/connector/ops/get/FilterSchema.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-03-16T08:29:38Z",
+      "side": 1,
+      "message": "Why is this constructor here?",
+      "revId": "2757a589e0c63d31cd920eb0a3ca23b00ac79f4e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_c3ba2fe1",
+        "filename": "opendaylight/netconf/mdsal-netconf-connector/src/main/java/org/opendaylight/controller/netconf/mdsal/connector/ops/get/FilterSchema.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-03-16T08:29:38Z",
+      "side": 1,
+      "message": "Same named method is is present in FilterNode class... is it really necessary to have both FilterSchema and FilterNode classes ?",
+      "revId": "2757a589e0c63d31cd920eb0a3ca23b00ac79f4e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_e3316ba3",
+        "filename": "opendaylight/netconf/mdsal-netconf-connector/src/main/java/org/opendaylight/controller/netconf/mdsal/connector/ops/get/FilterSchema.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-03-16T08:29:38Z",
+      "side": 1,
+      "message": "this should be a static final class. If its not static, each instance has to carry a reference to the FitlerSchema instance.",
+      "revId": "2757a589e0c63d31cd920eb0a3ca23b00ac79f4e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_63e47b0d",
+        "filename": "opendaylight/netconf/mdsal-netconf-connector/src/main/java/org/opendaylight/controller/netconf/mdsal/connector/ops/get/FilterSchema.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-03-16T08:29:38Z",
+      "side": 1,
+      "message": "How does this work for augmentation, choice, case and similar nodes ?",
+      "revId": "2757a589e0c63d31cd920eb0a3ca23b00ac79f4e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_8358a7fb",
+        "filename": "opendaylight/netconf/mdsal-netconf-connector/src/main/java/org/opendaylight/controller/netconf/mdsal/connector/ops/get/Get.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-03-16T08:29:38Z",
+      "side": 1,
+      "message": "These code snippets here and in GetConfig look very similar. Should be extracted into the abstract super class.",
+      "revId": "2757a589e0c63d31cd920eb0a3ca23b00ac79f4e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_e3bf2bcf",
+        "filename": "opendaylight/netconf/mdsal-netconf-connector/src/test/java/org/opendaylight/controller/netconf/mdsal/connector/ops/NetconfMDSalMappingTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 364,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-03-16T08:29:38Z",
+      "side": 1,
+      "message": "This does not work properly as the results depends on the order of elements. This might blow up on a mac as did in netconf-notifications-impl:\n\nhttps://ask.opendaylight.org/question/2420/maven-build-failing-in-netconf-notifications-impl/?answer\u003d2866#post-id-2866",
+      "revId": "2757a589e0c63d31cd920eb0a3ca23b00ac79f4e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_036c979b",
+        "filename": "opendaylight/netconf/mdsal-netconf-connector/src/test/resources/yang/mdsal-netconf-mapping-test.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-03-16T08:29:38Z",
+      "side": 1,
+      "message": "Augmentations, choices, cases and all the other yang structures need to be added to this schema. Filtering tests then need to be written against that.",
+      "revId": "2757a589e0c63d31cd920eb0a3ca23b00ac79f4e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
