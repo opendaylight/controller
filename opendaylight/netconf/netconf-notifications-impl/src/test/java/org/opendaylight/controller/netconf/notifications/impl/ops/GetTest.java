@@ -8,14 +8,9 @@
 
 package org.opendaylight.controller.netconf.notifications.impl.ops;
 
-import static org.junit.Assert.assertTrue;
-
 import com.google.common.collect.Lists;
 import java.io.IOException;
-import org.custommonkey.xmlunit.Diff;
-import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.Test;
-import org.opendaylight.controller.netconf.notifications.impl.ops.Get;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf.notification._1._0.rev080714.StreamNameType;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netmod.notification.rev080714.netconf.Streams;
@@ -41,22 +36,20 @@ public class GetTest {
 
         final Document response = getBlankResponse();
         Get.serializeStreamsSubtree(response, streams);
-        final Diff diff = XMLUnit.compareXML(XmlUtil.toString(response),
+        NotificationsTransformUtilTest.compareXml(XmlUtil.toString(response),
                 "<rpc-reply message-id=\"101\" xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
-                "<data>\n" +
-                "<netconf xmlns=\"urn:ietf:params:xml:ns:netmod:notification\">\n" +
-                "<streams>\n" +
-                "<stream>\n" +
-                "<name>base</name>\n" +
-                "<description>description</description>\n" +
-                "<replaySupport>false</replaySupport>\n" +
-                "</stream>\n" +
-                "</streams>\n" +
-                "</netconf>\n" +
-                "</data>\n" +
-                "</rpc-reply>\n");
-
-        assertTrue(diff.toString(), diff.identical());
+                        "<data>\n" +
+                        "<netconf xmlns=\"urn:ietf:params:xml:ns:netmod:notification\">\n" +
+                        "<streams>\n" +
+                        "<stream>\n" +
+                        "<name>base</name>\n" +
+                        "<description>description</description>\n" +
+                        "<replaySupport>false</replaySupport>\n" +
+                        "</stream>\n" +
+                        "</streams>\n" +
+                        "</netconf>\n" +
+                        "</data>\n" +
+                        "</rpc-reply>\n");
     }
 
     private Document getBlankResponse() throws IOException, SAXException {
