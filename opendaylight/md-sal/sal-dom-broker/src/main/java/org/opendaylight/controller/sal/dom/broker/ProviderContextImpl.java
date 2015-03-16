@@ -10,6 +10,9 @@ package org.opendaylight.controller.sal.dom.broker;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcAvailabilityListener;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcImplementation;
+import org.opendaylight.controller.sal.core.api.Broker;
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 import org.opendaylight.controller.sal.core.api.Broker.RoutedRpcRegistration;
 import org.opendaylight.controller.sal.core.api.Broker.RpcRegistration;
@@ -28,19 +31,23 @@ class ProviderContextImpl extends ConsumerContextImpl implements ProviderSession
         this.provider = provider;
     }
 
-    @Override
-    public RpcRegistrationWrapper addRpcImplementation(final QName rpcType,
-            final RpcImplementation implementation) throws IllegalArgumentException {
-        final RpcRegistration origReg = getBrokerChecked().getRouter()
-                .addRpcImplementation(rpcType, implementation);
-        final RpcRegistrationWrapper newReg = new RpcRegistrationWrapper(
-                origReg);
-        registrations.add(newReg);
-        return newReg;
-    }
-
     protected boolean removeRpcImplementation(final RpcRegistrationWrapper implToRemove) {
         return registrations.remove(implToRemove);
+    }
+
+    @Override
+    public RpcRegistration addRpcImplementation(final QName rpcType, final RpcImplementation implementation) throws IllegalArgumentException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public RoutedRpcRegistration addRoutedRpcImplementation(final QName rpcType, final RpcImplementation implementation) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public RoutedRpcRegistration addMountedRpcImplementation(final QName rpcType, final RpcImplementation implementation) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -51,28 +58,13 @@ class ProviderContextImpl extends ConsumerContextImpl implements ProviderSession
     }
 
     @Override
-    public RoutedRpcRegistration addMountedRpcImplementation(
-            final QName rpcType, final RpcImplementation implementation) {
-        throw new UnsupportedOperationException(
-                "TODO: auto-generated method stub");
-
-    }
-
-    @Override
-    public RoutedRpcRegistration addRoutedRpcImplementation(
-            final QName rpcType, final RpcImplementation implementation) {
-        return getBrokerChecked().getRouter().addRoutedRpcImplementation(rpcType, implementation);
-    }
-
-    @Override
     public Set<QName> getSupportedRpcs() {
-        return getBrokerChecked().getRouter().getSupportedRpcs();
+        throw new UnsupportedOperationException();
     }
 
     @Override
-    public ListenerRegistration<RpcRegistrationListener> addRpcRegistrationListener(
-            final RpcRegistrationListener listener) {
-        return getBrokerChecked().getRouter().addRpcRegistrationListener(listener);
+    public ListenerRegistration<RpcRegistrationListener> addRpcRegistrationListener(final RpcRegistrationListener listener) {
+        return null;
     }
 
     /**
