@@ -7,8 +7,22 @@
  */
 package org.opendaylight.md.controller.topology.lldp.utils;
 
+import org.apache.commons.lang3.ArrayUtils;
+
+import com.google.common.hash.HashCode;
+
+import org.opendaylight.controller.liblldp.BitBufferHelper;
+
+import com.google.common.hash.Hasher;
+import com.google.common.hash.Hashing;
+import com.google.common.hash.HashFunction;
+
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+import java.lang.management.ManagementFactory;
 import java.nio.charset.Charset;
 
+import org.opendaylight.controller.liblldp.CustomTLVKey;
 import org.opendaylight.controller.liblldp.Ethernet;
 import org.opendaylight.controller.liblldp.LLDP;
 import org.opendaylight.controller.liblldp.LLDPTLV;
@@ -40,7 +54,21 @@ public class LLDPDiscoveryUtils {
         return b.toString();
     }
 
+    /**
+     * @param payload
+     * @return nodeConnectorId - encoded in custom TLV of given lldp
+     * @see LLDPDiscoveryUtils#lldpToNodeConnectorRef(byte[], boolean)
+     */
     public static NodeConnectorRef lldpToNodeConnectorRef(byte[] payload)  {
+        return lldpToNodeConnectorRef(payload, false);
+    }
+
+    /**
+     * @param payload
+     * @param useExtraAuthenticatorCheck make it more secure (CVE-2015-1611 CVE-2015-1612)
+     * @return nodeConnectorId - encoded in custom TLV of given lldp
+     */
+    public static NodeConnectorRef lldpToNodeConnectorRef(byte[] payload, boolean useExtraAuthenticatorCheck)  {
         Ethernet ethPkt = new Ethernet();
         try {
             ethPkt.deserialize(payload, 0,payload.length * NetUtils.NumBitsInAByte);
@@ -48,32 +76,84 @@ public class LLDPDiscoveryUtils {
             LOG.warn("Failed to decode LLDP packet {}", e);
         }
 
+        NodeConnectorRef nodeConnectorRef = null;
+
         if (ethPkt.getPayload() instanceof LLDP) {
             LLDP lldp = (LLDP) ethPkt.getPayload();
 
             try {
                 NodeId srcNodeId = null;
                 NodeConnectorId srcNodeConnectorId = null;
-                for (LLDPTLV lldptlv : lldp.getOptionalTLVList()) {
-                    if (lldptlv.getType() == LLDPTLV.TLVType.Custom.getValue()) {
-                        srcNodeConnectorId = new NodeConnectorId(LLDPTLV.getCustomString(lldptlv.getValue(), lldptlv.getLength()));
-                    }
-                    if (lldptlv.getType() == LLDPTLV.TLVType.SystemName.getValue()) {
-                        String srcNodeIdString = new String(lldptlv.getValue(),Charset.defaultCharset());
-                        srcNodeId = new NodeId(srcNodeIdString);
+
+                final LLDPTLV systemIdTLV = lldp.getSystemNameId();
+                if (systemIdTLV != null) {
+                    String srcNodeIdString = new String(systemIdTLV.getValue(),Charset.defaultCharset());
+                    srcNodeId = new NodeId(srcNodeIdString);
+                } else {
+                    throw new Exception("Node id wasn't specified via systemNameId in LLDP packet.");
+                }
+
+                final LLDPTLV nodeConnectorIdLldptlv = lldp.getCustomTLV(
+                        new CustomTLVKey(BitBufferHelper.getInt(LLDPTLV.OFOUI), LLDPTLV.CUSTOM_TLV_SUB_TYPE_NODE_CONNECTOR_ID[0]));
+                if (nodeConnectorIdLldptlv != null) {
+                    srcNodeConnectorId = new NodeConnectorId(LLDPTLV.getCustomString(
+                            nodeConnectorIdLldptlv.getValue(), nodeConnectorIdLldptlv.getLength()));
+                } else {
+                    throw new Exception("Node connector wasn't specified via Custom TLV in LLDP packet.");
+                }
+
+                if (useExtraAuthenticatorCheck) {
+                    boolean secure = checkExtraAuthenticator(lldp, srcNodeConnectorId);
+                    if (! secure) {
+                        LOG.warn("SECURITY ALERT: there is probably a LLDP spoofing attack in progress.");
+                        throw new Exception("Attack. LLDP packet with inconsistent extra authenticator field was received.");
                     }
                 }
-                if(srcNodeId != null && srcNodeConnectorId != null) {
-                    InstanceIdentifier<NodeConnector> srcInstanceId = InstanceIdentifier.builder(Nodes.class)
-                            .child(Node.class,new NodeKey(srcNodeId))
-                            .child(NodeConnector.class, new NodeConnectorKey(srcNodeConnectorId))
-                            .toInstance();
-                    return new NodeConnectorRef(srcInstanceId);
-                }
+
+                InstanceIdentifier<NodeConnector> srcInstanceId = InstanceIdentifier.builder(Nodes.class)
+                        .child(Node.class,new NodeKey(srcNodeId))
+                        .child(NodeConnector.class, new NodeConnectorKey(srcNodeConnectorId))
+                        .toInstance();
+                nodeConnectorRef = new NodeConnectorRef(srcInstanceId);
             } catch (Exception e) {
-                LOG.warn("Caught exception ", e);
+                LOG.debug("Caught exception while parsing out lldp optional and custom fields: {}", e.getMessage(), e);
             }
         }
-        return null;
+        return nodeConnectorRef;
+    }
+
+    /**
+     * @param nodeConnectorId
+     * @return extra authenticator for lldp security
+     * @throws NoSuchAlgorithmException
+     */
+    public static byte[] getValueForLLDPPacketIntegrityEnsuring(final NodeConnectorId nodeConnectorId) throws NoSuchAlgorithmException {
+        final String pureValue = nodeConnectorId+ManagementFactory.getRuntimeMXBean().getName();
+        final byte[] pureBytes = pureValue.getBytes();
+        HashFunction hashFunction = Hashing.md5();
+        Hasher hasher = hashFunction.newHasher();
+        HashCode hashedValue = hasher.putBytes(pureBytes).hash();
+        return hashedValue.asBytes();
+    }
+
+    /**
+     * @param lldp
+     * @param srcNodeConnectorId
+     * @throws NoSuchAlgorithmException
+     */
+    private static boolean checkExtraAuthenticator(LLDP lldp, NodeConnectorId srcNodeConnectorId) throws NoSuchAlgorithmException {
+        final LLDPTLV hashLldptlv = lldp.getCustomTLV(
+                new CustomTLVKey(BitBufferHelper.getInt(LLDPTLV.OFOUI), LLDPTLV.CUSTOM_TLV_SUB_TYPE_CUSTOM_SEC[0]));
+        boolean secAuthenticatorOk = false;
+        if (hashLldptlv != null) {
+            byte[] rawTlvValue = hashLldptlv.getValue();
+            byte[] lldpCustomSecurityHash = ArrayUtils.subarray(rawTlvValue, 4, rawTlvValue.length);
+            byte[] calculatedHash = getValueForLLDPPacketIntegrityEnsuring(srcNodeConnectorId);
+            secAuthenticatorOk = Arrays.equals(calculatedHash, lldpCustomSecurityHash);
+        } else {
+            LOG.debug("Custom security hint wasn't specified via Custom TLV in LLDP packet.");
+        }
+
+        return secAuthenticatorOk;
     }
 }
