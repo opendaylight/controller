@@ -27,6 +27,7 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>
@@ -43,8 +44,8 @@
         <configuration>
           <instructions>
             <Import-Package>org.slf4j,
-              org.apache.commons.lang3.builder,
-              org.apache.commons.lang3.tuple
+              org.apache.commons.lang3.*,
+              com.google.common.*
             </Import-Package>
             <Export-Package>
               org.opendaylight.controller.liblldp</Export-Package>
