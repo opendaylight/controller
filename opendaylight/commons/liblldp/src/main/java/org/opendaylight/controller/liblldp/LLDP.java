@@ -8,7 +8,6 @@
 
 package org.opendaylight.controller.liblldp;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,32 +23,34 @@ public class LLDP extends Packet {
     private static final String SYSTEMNAMEID = "SystemNameID";
     private static final String PORTID = "PortId";
     private static final String TTL = "TTL";
-    private static final int LLDPDefaultTlvs = 4;
-    private static LLDPTLV emptyTLV = new LLDPTLV().setLength((short) 0)
-            .setType((byte) 0);
-    public static final byte[] LLDPMulticastMac = { 1, (byte) 0x80,
-            (byte) 0xc2, 0, 0, (byte) 0xe };
-    private Map<Byte, LLDPTLV> tlvList;
+    private static final int LLDPDefaultTlvs = 3;
+    private static LLDPTLV emptyTLV = new LLDPTLV().setLength((short) 0).setType((byte) 0);
+    public static final byte[] LLDPMulticastMac = { 1, (byte) 0x80, (byte) 0xc2, 0, 0, (byte) 0xe };
 
-    private List<LLDPTLV> customTlvList;
+    private Map<Byte, LLDPTLV> mandatoryTLVs;
+    private Map<Byte, LLDPTLV> optionalTLVs;
+    private Map<CustomTLVKey, LLDPTLV> customTLVs;
 
     /**
      * Default constructor that creates the tlvList LinkedHashMap
      */
     public LLDP() {
         super();
-        tlvList = new LinkedHashMap<>(LLDPDefaultTlvs);
-        customTlvList = new ArrayList<>();
+        init();
     }
 
     /**
-     * Constructor that creates the tlvList LinkedHashMap and sets the write
-     * access for the same
+     * Constructor that creates the tlvList LinkedHashMap and sets the write access for the same
      */
     public LLDP(boolean writeAccess) {
         super(writeAccess);
-        tlvList = new LinkedHashMap<Byte, LLDPTLV>(LLDPDefaultTlvs); // Mandatory
-                                                                     // TLVs
+        init();
+    }
+
+    private void init() {
+        mandatoryTLVs = new LinkedHashMap<>(LLDPDefaultTlvs);
+        optionalTLVs = new LinkedHashMap<>();
+        customTLVs = new LinkedHashMap<>();
     }
 
     /**
@@ -71,13 +72,35 @@ public class LLDP extends Packet {
         }
     }
 
+    private LLDPTLV getFromTLVs(Byte type) {
+        LLDPTLV tlv = null;
+        tlv = mandatoryTLVs.get(type);
+        if (tlv == null) {
+            tlv = optionalTLVs.get(type);
+        }
+        return tlv;
+    }
+
+    private void putToTLVs(final Byte type, final LLDPTLV tlv) {
+        if (type == LLDPTLV.TLVType.ChassisID.getValue() || type == LLDPTLV.TLVType.PortID.getValue()
+                || type == LLDPTLV.TLVType.TTL.getValue()) {
+            mandatoryTLVs.put(type, tlv);
+        } else if (type != LLDPTLV.TLVType.Custom.getValue()) {
+            optionalTLVs.put(type, tlv);
+        }
+    }
+
     /**
      * @param String
      *            - description of the type of TLV
      * @return LLDPTLV - full TLV
      */
     public LLDPTLV getTLV(String type) {
-        return tlvList.get(getType(type));
+        return getFromTLVs(getType(type));
+    }
+
+    public LLDPTLV getCustomTLV(CustomTLVKey key) {
+        return customTLVs.get(key);
     }
 
     /**
@@ -88,7 +111,7 @@ public class LLDP extends Packet {
      * @return void
      */
     public void setTLV(String type, LLDPTLV tlv) {
-        tlvList.put(getType(type), tlv);
+        putToTLVs(getType(type), tlv);
     }
 
     /**
@@ -103,7 +126,7 @@ public class LLDP extends Packet {
      *            - the chassisId to set
      */
     public LLDP setChassisId(LLDPTLV chassisId) {
-        tlvList.put(getType(CHASSISID), chassisId);
+        setTLV(CHASSISID, chassisId);
         return this;
     }
 
@@ -119,7 +142,7 @@ public class LLDP extends Packet {
      *            - the chassisId to set
      */
     public LLDP setSystemNameId(LLDPTLV systemNameId) {
-        tlvList.put(getType(SYSTEMNAMEID), systemNameId);
+        setTLV(SYSTEMNAMEID, systemNameId);
         return this;
     }
 
@@ -127,7 +150,7 @@ public class LLDP extends Packet {
      * @return LLDPTLV - the portId TLV
      */
     public LLDPTLV getPortId() {
-        return tlvList.get(getType(PORTID));
+        return getTLV(PORTID);
     }
 
     /**
@@ -136,7 +159,7 @@ public class LLDP extends Packet {
      * @return LLDP
      */
     public LLDP setPortId(LLDPTLV portId) {
-        tlvList.put(getType(PORTID), portId);
+        setTLV(PORTID, portId);
         return this;
     }
 
@@ -144,7 +167,7 @@ public class LLDP extends Packet {
      * @return LLDPTLV - the ttl TLV
      */
     public LLDPTLV getTtl() {
-        return tlvList.get(getType(TTL));
+        return getTLV(TTL);
     }
 
     /**
@@ -153,34 +176,22 @@ public class LLDP extends Packet {
      * @return LLDP
      */
     public LLDP setTtl(LLDPTLV ttl) {
-        tlvList.put(getType(TTL), ttl);
+        setTLV(TTL, ttl);
         return this;
     }
 
     /**
      * @return the optionalTLVList
      */
-    public List<LLDPTLV> getOptionalTLVList() {
-        List<LLDPTLV> list = new ArrayList<LLDPTLV>();
-        for (Map.Entry<Byte, LLDPTLV> entry : tlvList.entrySet()) {
-            byte type = entry.getKey();
-            if ((type == LLDPTLV.TLVType.ChassisID.getValue())
-                    || (type == LLDPTLV.TLVType.PortID.getValue())
-                    || (type == LLDPTLV.TLVType.TTL.getValue())
-                    || (type == LLDPTLV.TLVType.SystemName.getValue())) {
-                continue;
-            } else {
-                list.add(entry.getValue());
-            }
-        }
-        return list;
+    public Iterable<LLDPTLV> getOptionalTLVList() {
+        return optionalTLVs.values();
     }
 
     /**
      * @return the customTlvList
      */
-    public List<LLDPTLV> getCustomTlvList() {
-        return customTlvList;
+    public Iterable<LLDPTLV> getCustomTlvList() {
+        return customTLVs.values();
     }
 
     /**
@@ -190,7 +201,7 @@ public class LLDP extends Packet {
      */
     public LLDP setOptionalTLVList(List<LLDPTLV> optionalTLVList) {
         for (LLDPTLV tlv : optionalTLVList) {
-            tlvList.put(tlv.getType(), tlv);
+            optionalTLVs.put(tlv.getType(), tlv);
         }
         return this;
     }
@@ -200,20 +211,22 @@ public class LLDP extends Packet {
      *            the list of custom TLVs to set
      * @return this LLDP
      */
-    public LLDP setCustomTLVList(final List<LLDPTLV> customTLVList) {
-        this.customTlvList = new ArrayList<>(customTLVList);
+    public LLDP addCustomTLV(final LLDPTLV customTLV) {
+        CustomTLVKey key = new CustomTLVKey(LLDPTLV.extractCustomOUI(customTLV),
+                LLDPTLV.extractCustomSubtype(customTLV));
+        customTLVs.put(key, customTLV);
+
         return this;
     }
 
     @Override
-    public Packet deserialize(byte[] data, int bitOffset, int size)
-            throws PacketException {
+    public Packet deserialize(byte[] data, int bitOffset, int size) throws PacketException {
         int lldpOffset = bitOffset; // LLDP start
         int lldpSize = size; // LLDP size
 
         if (logger.isTraceEnabled()) {
-          logger.trace("LLDP: {} (offset {} bitsize {})", new Object[] {
-                  HexEncode.bytesToHexString(data), lldpOffset, lldpSize });
+            logger.trace("LLDP: {} (offset {} bitsize {})", new Object[] { HexEncode.bytesToHexString(data),
+                    lldpOffset, lldpSize });
         }
         /*
          * Deserialize the TLVs until we reach the end of the packet
@@ -222,15 +235,15 @@ public class LLDP extends Packet {
             LLDPTLV tlv = new LLDPTLV();
             tlv.deserialize(data, lldpOffset, lldpSize);
             if (tlv.getType() == 0 && tlv.getLength() == 0) {
-               break;
+                break;
             }
             int tlvSize = tlv.getTLVSize(); // Size of current TLV in bits
             lldpOffset += tlvSize;
             lldpSize -= tlvSize;
             if (tlv.getType() == LLDPTLV.TLVType.Custom.getValue()) {
-                customTlvList.add(tlv);
+                addCustomTLV(tlv);
             } else {
-                this.tlvList.put(tlv.getType(), tlv);
+                this.putToTLVs(tlv.getType(), tlv);
             }
         }
         return this;
@@ -241,12 +254,11 @@ public class LLDP extends Packet {
         int startOffset = 0;
         byte[] serializedBytes = new byte[getLLDPPacketLength()];
 
-        final Iterable<LLDPTLV> allTlvs = Iterables.concat(tlvList.values(), customTlvList);
+        final Iterable<LLDPTLV> allTlvs = Iterables.concat(mandatoryTLVs.values(), optionalTLVs.values(), customTLVs.values());
         for (LLDPTLV tlv : allTlvs) {
             int numBits = tlv.getTLVSize();
             try {
-                BitBufferHelper.setBytes(serializedBytes, tlv.serialize(),
-                        startOffset, numBits);
+                BitBufferHelper.setBytes(serializedBytes, tlv.serialize(), startOffset, numBits);
             } catch (BufferException e) {
                 throw new PacketException(e.getMessage());
             }
@@ -254,16 +266,14 @@ public class LLDP extends Packet {
         }
         // Now add the empty LLDPTLV at the end
         try {
-            BitBufferHelper.setBytes(serializedBytes,
-                    LLDP.emptyTLV.serialize(), startOffset,
+            BitBufferHelper.setBytes(serializedBytes, LLDP.emptyTLV.serialize(), startOffset,
                     LLDP.emptyTLV.getTLVSize());
         } catch (BufferException e) {
             throw new PacketException(e.getMessage());
         }
 
         if (logger.isTraceEnabled()) {
-          logger.trace("LLDP: serialized: {}",
-                  HexEncode.bytesToHexString(serializedBytes));
+            logger.trace("LLDP: serialized: {}", HexEncode.bytesToHexString(serializedBytes));
         }
         return serializedBytes;
     }
@@ -275,15 +285,9 @@ public class LLDP extends Packet {
      */
     private int getLLDPPacketLength() {
         int len = 0;
-        LLDPTLV tlv;
 
-        for (Map.Entry<Byte, LLDPTLV> entry : this.tlvList.entrySet()) {
-            tlv = entry.getValue();
-            len += tlv.getTLVSize();
-        }
-
-        for (LLDPTLV customTlv : this.customTlvList) {
-            len += customTlv.getTLVSize();
+        for (LLDPTLV lldptlv : Iterables.concat(mandatoryTLVs.values(), optionalTLVs.values(), customTLVs.values())) {
+            len += lldptlv.getTLVSize();
         }
 
         len += LLDP.emptyTLV.getTLVSize();

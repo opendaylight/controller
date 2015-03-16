@@ -8,6 +8,8 @@
 
 package org.opendaylight.controller.liblldp;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
@@ -333,5 +335,15 @@ public class LLDPTLV extends Packet {
         }
 
         return customString;
+    }
+
+    public static int extractCustomOUI(final LLDPTLV lldptlv) {
+        byte[] value = lldptlv.getValue();
+        return BitBufferHelper.getInt(ArrayUtils.subarray(value, 0, 3));
+    }
+
+    public static byte extractCustomSubtype(final LLDPTLV lldptlv) {
+        byte[] value = lldptlv.getValue();
+        return BitBufferHelper.getByte(ArrayUtils.subarray(value, 3, 4));
     }
 }
