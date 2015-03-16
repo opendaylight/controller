@@ -96,7 +96,7 @@ public class DataChangeListenerRegistrationProxyTest extends AbstractActorTest {
             Assert.assertEquals("getPath", path, registerMsg.getPath());
             Assert.assertEquals("getScope", scope, registerMsg.getScope());
 
-            reply(new RegisterChangeListenerReply(getRef().path()));
+            reply(new RegisterChangeListenerReply(getRef()));
 
             for(int i = 0; (i < 20 * 5) && proxy.getListenerRegistrationActor() == null; i++) {
                 Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
@@ -242,7 +242,7 @@ public class DataChangeListenerRegistrationProxyTest extends AbstractActorTest {
                 @Override
                 public Future<Object> answer(InvocationOnMock invocation) {
                     proxy.close();
-                    return Futures.successful((Object)new RegisterChangeListenerReply(getRef().path()));
+                    return Futures.successful((Object)new RegisterChangeListenerReply(getRef()));
                 }
             };
 
