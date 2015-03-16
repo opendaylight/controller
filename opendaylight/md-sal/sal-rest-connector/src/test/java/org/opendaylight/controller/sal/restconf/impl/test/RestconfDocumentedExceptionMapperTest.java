@@ -56,9 +56,11 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.api.Draft02;
 import org.opendaylight.controller.sal.rest.api.RestconfService;
+import org.opendaylight.controller.sal.rest.impl.JsonNormalizedNodeBodyReader;
+import org.opendaylight.controller.sal.rest.impl.NormalizedNodeJsonBodyWriter;
+import org.opendaylight.controller.sal.rest.impl.NormalizedNodeXmlBodyWriter;
 import org.opendaylight.controller.sal.rest.impl.RestconfDocumentedExceptionMapper;
-import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
-import org.opendaylight.controller.sal.rest.impl.StructuredDataToXmlProvider;
+import org.opendaylight.controller.sal.rest.impl.XmlNormalizedNodeBodyReader;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.NormalizedNodeContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
@@ -211,8 +213,8 @@ public class RestconfDocumentedExceptionMapperTest extends JerseyTest {
     @Override
     protected Application configure() {
         ResourceConfig resourceConfig = new ResourceConfig();
-        resourceConfig = resourceConfig.registerInstances(mockRestConf, StructuredDataToXmlProvider.INSTANCE,
-                StructuredDataToJsonProvider.INSTANCE);
+        resourceConfig = resourceConfig.registerInstances(mockRestConf, new XmlNormalizedNodeBodyReader(),
+                new JsonNormalizedNodeBodyReader(), new NormalizedNodeJsonBodyWriter(), new NormalizedNodeXmlBodyWriter());
         resourceConfig.registerClasses(RestconfDocumentedExceptionMapper.class);
         return resourceConfig;
     }
@@ -240,27 +242,6 @@ public class RestconfDocumentedExceptionMapperTest extends JerseyTest {
 
         testJsonResponse(new RestconfDocumentedException("mock error"), Status.INTERNAL_SERVER_ERROR,
                 ErrorType.APPLICATION, ErrorTag.OPERATION_FAILED, "mock error", null, null);
-
-        // To test verification code
-        // String json =
-        // "{ errors: {" +
-        // "    error: [{" +
-        // "      error-tag : \"operation-failed\"" +
-        // "      ,error-type : \"application\"" +
-        // "      ,error-message : \"An error occurred\"" +
-        // "      ,error-info : {" +
-        // "        session-id: \"123\"" +
-        // "        ,address: \"1.2.3.4\"" +
-        // "      }" +
-        // "    }]" +
-        // "  }" +
-        // "}";
-        //
-        // verifyJsonResponseBody( new java.io.StringBufferInputStream(json ),
-        // ErrorType.APPLICATION,
-        // ErrorTag.OPERATION_FAILED, "An error occurred", null,
-        // com.google.common.collect.ImmutableMap.of( "session-id", "123",
-        // "address", "1.2.3.4" ) );
     }
 
     @Test
@@ -466,26 +447,6 @@ public class RestconfDocumentedExceptionMapperTest extends JerseyTest {
 
         testXMLResponse(new RestconfDocumentedException("mock error"), Status.INTERNAL_SERVER_ERROR,
                 ErrorType.APPLICATION, ErrorTag.OPERATION_FAILED, "mock error", null, null);
-
-        // To test verification code
-        // String xml =
-        // "<errors xmlns=\"urn:ietf:params:xml:ns:yang:ietf-restconf\">"+
-        // "  <error>" +
-        // "    <error-type>application</error-type>"+
-        // "    <error-tag>operation-failed</error-tag>"+
-        // "    <error-message>An error occurred</error-message>"+
-        // "    <error-info>" +
-        // "      <session-id>123</session-id>" +
-        // "      <address>1.2.3.4</address>" +
-        // "    </error-info>" +
-        // "  </error>" +
-        // "</errors>";
-        //
-        // verifyXMLResponseBody( new java.io.StringBufferInputStream(xml),
-        // ErrorType.APPLICATION,
-        // ErrorTag.OPERATION_FAILED, "An error occurred", null,
-        // com.google.common.collect.ImmutableMap.of( "session-id", "123",
-        // "address", "1.2.3.4" ) );
     }
 
     @Test
