@@ -1,11 +1,6 @@
 package org.opendaylight.controller.config.yang.netconf.mdsal.monitoring;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 import org.opendaylight.controller.netconf.api.Capability;
 import org.opendaylight.controller.netconf.api.monitoring.CapabilityListener;
@@ -14,7 +9,6 @@ import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
 import org.opendaylight.controller.netconf.monitoring.GetSchema;
-import org.opendaylight.controller.netconf.monitoring.MonitoringConstants;
 
 public class NetconfMdsalMonitoringMapperModule extends org.opendaylight.controller.config.yang.netconf.mdsal.monitoring.AbstractNetconfMdsalMonitoringMapperModule {
     public NetconfMdsalMonitoringMapperModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier, final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
@@ -56,47 +50,12 @@ public class NetconfMdsalMonitoringMapperModule extends org.opendaylight.control
 
         private final NetconfOperationService operationService;
 
-        private static final Set<Capability> CAPABILITIES = Sets.<Capability>newHashSet(new Capability() {
-
-            @Override
-            public String getCapabilityUri() {
-                return MonitoringConstants.URI;
-            }
-
-            @Override
-            public Optional<String> getModuleNamespace() {
-                return Optional.of(MonitoringConstants.NAMESPACE);
-            }
-
-            @Override
-            public Optional<String> getModuleName() {
-                return Optional.of(MonitoringConstants.MODULE_NAME);
-            }
-
-            @Override
-            public Optional<String> getRevision() {
-                return Optional.of(MonitoringConstants.MODULE_REVISION);
-            }
-
-            @Override
-            public Optional<String> getCapabilitySchema() {
-                return Optional.absent();
-            }
-
-            @Override
-            public Collection<String> getLocation() {
-                return Collections.emptyList();
-            }
-        });
-
         private static final AutoCloseable AUTO_CLOSEABLE = new AutoCloseable() {
             @Override
             public void close() throws Exception {
                 // NOOP
             }
         };
-
-        private final List<CapabilityListener> listeners = new ArrayList<>();
 
         public MdSalMonitoringMapperFactory(final NetconfOperationService operationService) {
             this.operationService = operationService;
@@ -109,22 +68,19 @@ public class NetconfMdsalMonitoringMapperModule extends org.opendaylight.control
 
         @Override
         public Set<Capability> getCapabilities() {
-            return CAPABILITIES;
+            // TODO
+            // No capabilities exposed to prevent clashes with schemas from mdsal-netconf-connector (it exposes all the schemas)
+            // If the schemas exposed by mdsal-netconf-connector are filtered, this class would expose monitoring related models
+            return Collections.emptySet();
         }
 
         @Override
         public AutoCloseable registerCapabilityListener(final CapabilityListener listener) {
-            listener.onCapabilitiesAdded(getCapabilities());
-            listeners.add(listener);
             return AUTO_CLOSEABLE;
         }
 
         @Override
-        public void close() {
-            for (final CapabilityListener listener : listeners) {
-                listener.onCapabilitiesRemoved(getCapabilities());
-            }
-        }
+        public void close() {}
     }
 
 

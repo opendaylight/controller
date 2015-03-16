@@ -78,6 +78,10 @@
       <groupId>org.opendaylight.yangtools.model</groupId>
       <artifactId>ietf-yang-types</artifactId>
     </dependency>
+      <dependency>
+          <groupId>org.opendaylight.yangtools</groupId>
+          <artifactId>yang-model-api</artifactId>
+      </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>netconf-mapping-api</artifactId>

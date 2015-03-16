@@ -35,6 +35,7 @@
   </feature>
   <feature name='odl-netconf-util' version='${project.version}'>
     <feature version='${project.version}'>odl-netconf-mapping-api</feature>
+    <bundle>mvn:org.opendaylight.yangtools/yang-model-api/${yangtools.version}</bundle>
     <bundle>mvn:org.opendaylight.controller/netconf-util/${project.version}</bundle>
   </feature>
     <feature name='odl-netconf-impl' version='${project.version}' description="OpenDaylight :: Netconf :: Impl">
