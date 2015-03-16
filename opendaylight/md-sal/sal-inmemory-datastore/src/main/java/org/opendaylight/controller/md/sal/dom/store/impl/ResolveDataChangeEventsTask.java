@@ -14,10 +14,10 @@ import com.google.common.collect.Multimap;
 import java.util.Collection;
 import java.util.Map.Entry;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
+import org.opendaylight.controller.md.sal.dom.spi.RegistrationTreeSnapshot;
 import org.opendaylight.controller.md.sal.dom.store.impl.DOMImmutableDataChangeEvent.Builder;
 import org.opendaylight.controller.md.sal.dom.store.impl.DOMImmutableDataChangeEvent.SimpleEventFactory;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.ListenerTree;
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.ListenerWalker;
 import org.opendaylight.yangtools.util.concurrent.NotificationManager;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -51,7 +51,7 @@ final class ResolveDataChangeEventsTask {
      * Resolves and submits notification tasks to the specified manager.
      */
     public synchronized void resolve(final NotificationManager<DataChangeListenerRegistration<?>, DOMImmutableDataChangeEvent> manager) {
-        try (final ListenerWalker w = listenerRoot.getWalker()) {
+        try (final RegistrationTreeSnapshot<DataChangeListenerRegistration<?>> w = listenerRoot.takeSnapshot()) {
             // Defensive: reset internal state
             collectedEvents = ArrayListMultimap.create();
 
