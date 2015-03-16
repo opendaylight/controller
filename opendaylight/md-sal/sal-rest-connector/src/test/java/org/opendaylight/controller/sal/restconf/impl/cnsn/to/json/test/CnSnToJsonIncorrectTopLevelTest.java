@@ -7,22 +7,13 @@
  */
 package org.opendaylight.controller.sal.restconf.impl.cnsn.to.json.test;
 
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
 import java.util.List;
 import java.util.Set;
-import javax.activation.UnsupportedDataTypeException;
-import javax.ws.rs.WebApplicationException;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.opendaylight.controller.sal.rest.impl.StructuredDataToJsonProvider;
-import org.opendaylight.controller.sal.rest.impl.XmlToCompositeNodeProvider;
-import org.opendaylight.controller.sal.restconf.impl.test.TestUtils;
 import org.opendaylight.controller.sal.restconf.impl.test.YangAndXmlAndDataSchemaLoader;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.model.api.ConstraintDefinition;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
@@ -147,24 +138,24 @@ public class CnSnToJsonIncorrectTopLevelTest extends YangAndXmlAndDataSchemaLoad
     @Test
     @Ignore
     public void incorrectTopLevelElementTest() {
-
-        final Node<?> node = TestUtils.readInputToCnSn("/cnsn-to-json/simple-data-types/xml/data.xml", XmlToCompositeNodeProvider.INSTANCE);
-        DataSchemaNode incorrectDataSchema = null;
-        incorrectDataSchema = new IncorrectDataSchema();
-
-        TestUtils.normalizeCompositeNode(node, modules, "simple-data-types:cont");
-
-        boolean exceptionRaised = false;
-        try {
-            TestUtils.writeCompNodeWithSchemaContextToOutput(node, modules, incorrectDataSchema,
-                    StructuredDataToJsonProvider.INSTANCE);
-        } catch (final UnsupportedDataTypeException e) {
-            exceptionRaised = true;
-        } catch (WebApplicationException | IOException e) {
-            LOG.error("WebApplicationException or IOException was raised");
-        }
-
-        assertTrue(exceptionRaised);
+//
+//        final Node<?> node = TestUtils.readInputToCnSn("/cnsn-to-json/simple-data-types/xml/data.xml", XmlToCompositeNodeProvider.INSTANCE);
+//        DataSchemaNode incorrectDataSchema = null;
+//        incorrectDataSchema = new IncorrectDataSchema();
+//
+//        TestUtils.normalizeCompositeNode(node, modules, "simple-data-types:cont");
+//
+//        boolean exceptionRaised = false;
+//        try {
+//            TestUtils.writeCompNodeWithSchemaContextToOutput(node, modules, incorrectDataSchema,
+//                    StructuredDataToJsonProvider.INSTANCE);
+//        } catch (final UnsupportedDataTypeException e) {
+//            exceptionRaised = true;
+//        } catch (WebApplicationException | IOException e) {
+//            LOG.error("WebApplicationException or IOException was raised");
+//        }
+//
+//        assertTrue(exceptionRaised);
     }
 
 }

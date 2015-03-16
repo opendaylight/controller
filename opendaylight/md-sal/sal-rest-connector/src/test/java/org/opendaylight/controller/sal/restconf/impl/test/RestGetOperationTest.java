@@ -60,19 +60,14 @@ import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
 import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableMapEntryNodeBuilder;
-import org.opendaylight.yangtools.yang.data.impl.util.CompositeNodeBuilder;
-import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
-import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -727,184 +722,184 @@ public class RestGetOperationTest extends JerseyTest {
     @Test
     @Ignore
     public void getDataWithUriDepthParameterTest() throws UnsupportedEncodingException {
-        setControllerContext(schemaContextModules);
-
-        final CompositeNode depth1Cont = toCompositeNode(toCompositeNodeData(
-                toNestedQName("depth1-cont"),
-                toCompositeNodeData(
-                        toNestedQName("depth2-cont1"),
-                        toCompositeNodeData(
-                                toNestedQName("depth3-cont1"),
-                                toCompositeNodeData(toNestedQName("depth4-cont1"),
-                                        toSimpleNodeData(toNestedQName("depth5-leaf1"), "depth5-leaf1-value")),
-                                toSimpleNodeData(toNestedQName("depth4-leaf1"), "depth4-leaf1-value")),
-                        toSimpleNodeData(toNestedQName("depth3-leaf1"), "depth3-leaf1-value")),
-                toCompositeNodeData(
-                        toNestedQName("depth2-cont2"),
-                        toCompositeNodeData(
-                                toNestedQName("depth3-cont2"),
-                                toCompositeNodeData(toNestedQName("depth4-cont2"),
-                                        toSimpleNodeData(toNestedQName("depth5-leaf2"), "depth5-leaf2-value")),
-                                toSimpleNodeData(toNestedQName("depth4-leaf2"), "depth4-leaf2-value")),
-                        toSimpleNodeData(toNestedQName("depth3-leaf2"), "depth3-leaf2-value")),
-                toSimpleNodeData(toNestedQName("depth2-leaf1"), "depth2-leaf1-value")));
-
-        final Module module = TestUtils.findModule(schemaContextModules.getModules(), "nested-module");
-        assertNotNull(module);
-
-        final DataSchemaNode dataSchemaNode = TestUtils.resolveDataSchemaNode("depth1-cont", module);
-        assertNotNull(dataSchemaNode);
-
-        when(brokerFacade.readConfigurationData(any(YangInstanceIdentifier.class))).thenReturn(
-                TestUtils.compositeNodeToDatastoreNormalizedNode(depth1Cont, dataSchemaNode));
-
-        // Test config with depth 1
-
-        Response response = target("/config/nested-module:depth1-cont").queryParam("depth", "1")
-                .request("application/xml").get();
-
-        verifyXMLResponse(response, expectEmptyContainer("depth1-cont"));
-
-        // Test config with depth 2
-
-        response = target("/config/nested-module:depth1-cont").queryParam("depth", "2").request("application/xml")
-                .get();
-
-        // String
-        // xml="<depth1-cont><depth2-cont1/><depth2-cont2/><depth2-leaf1>depth2-leaf1-value</depth2-leaf1></depth1-cont>";
-        // Response mr=mock(Response.class);
-        // when(mr.getEntity()).thenReturn( new
-        // java.io.StringBufferInputStream(xml) );
-
-        verifyXMLResponse(
-                response,
-                expectContainer("depth1-cont", expectEmptyContainer("depth2-cont1"),
-                        expectEmptyContainer("depth2-cont2"), expectLeaf("depth2-leaf1", "depth2-leaf1-value")));
-
-        // Test config with depth 3
-
-        response = target("/config/nested-module:depth1-cont").queryParam("depth", "3").request("application/xml")
-                .get();
-
-        verifyXMLResponse(
-                response,
-                expectContainer(
-                        "depth1-cont",
-                        expectContainer("depth2-cont1", expectEmptyContainer("depth3-cont1"),
-                                expectLeaf("depth3-leaf1", "depth3-leaf1-value")),
-                        expectContainer("depth2-cont2", expectEmptyContainer("depth3-cont2"),
-                                expectLeaf("depth3-leaf2", "depth3-leaf2-value")),
-                        expectLeaf("depth2-leaf1", "depth2-leaf1-value")));
-
-        // Test config with depth 4
-
-        response = target("/config/nested-module:depth1-cont").queryParam("depth", "4").request("application/xml")
-                .get();
-
-        verifyXMLResponse(
-                response,
-                expectContainer(
-                        "depth1-cont",
-                        expectContainer(
-                                "depth2-cont1",
-                                expectContainer("depth3-cont1", expectEmptyContainer("depth4-cont1"),
-                                        expectLeaf("depth4-leaf1", "depth4-leaf1-value")),
-                                expectLeaf("depth3-leaf1", "depth3-leaf1-value")),
-                        expectContainer(
-                                "depth2-cont2",
-                                expectContainer("depth3-cont2", expectEmptyContainer("depth4-cont2"),
-                                        expectLeaf("depth4-leaf2", "depth4-leaf2-value")),
-                                expectLeaf("depth3-leaf2", "depth3-leaf2-value")),
-                        expectLeaf("depth2-leaf1", "depth2-leaf1-value")));
-
-        // Test config with depth 5
-
-        response = target("/config/nested-module:depth1-cont").queryParam("depth", "5").request("application/xml")
-                .get();
-
-        verifyXMLResponse(
-                response,
-                expectContainer(
-                        "depth1-cont",
-                        expectContainer(
-                                "depth2-cont1",
-                                expectContainer(
-                                        "depth3-cont1",
-                                        expectContainer("depth4-cont1",
-                                                expectLeaf("depth5-leaf1", "depth5-leaf1-value")),
-                                        expectLeaf("depth4-leaf1", "depth4-leaf1-value")),
-                                expectLeaf("depth3-leaf1", "depth3-leaf1-value")),
-                        expectContainer(
-                                "depth2-cont2",
-                                expectContainer(
-                                        "depth3-cont2",
-                                        expectContainer("depth4-cont2",
-                                                expectLeaf("depth5-leaf2", "depth5-leaf2-value")),
-                                        expectLeaf("depth4-leaf2", "depth4-leaf2-value")),
-                                expectLeaf("depth3-leaf2", "depth3-leaf2-value")),
-                        expectLeaf("depth2-leaf1", "depth2-leaf1-value")));
-
-        // Test config with depth unbounded
-
-        response = target("/config/nested-module:depth1-cont").queryParam("depth", "unbounded")
-                .request("application/xml").get();
-
-        verifyXMLResponse(
-                response,
-                expectContainer(
-                        "depth1-cont",
-                        expectContainer(
-                                "depth2-cont1",
-                                expectContainer(
-                                        "depth3-cont1",
-                                        expectContainer("depth4-cont1",
-                                                expectLeaf("depth5-leaf1", "depth5-leaf1-value")),
-                                        expectLeaf("depth4-leaf1", "depth4-leaf1-value")),
-                                expectLeaf("depth3-leaf1", "depth3-leaf1-value")),
-                        expectContainer(
-                                "depth2-cont2",
-                                expectContainer(
-                                        "depth3-cont2",
-                                        expectContainer("depth4-cont2",
-                                                expectLeaf("depth5-leaf2", "depth5-leaf2-value")),
-                                        expectLeaf("depth4-leaf2", "depth4-leaf2-value")),
-                                expectLeaf("depth3-leaf2", "depth3-leaf2-value")),
-                        expectLeaf("depth2-leaf1", "depth2-leaf1-value")));
-
-        // Test operational
-
-        final CompositeNode depth2Cont1 = toCompositeNode(toCompositeNodeData(
-                toNestedQName("depth2-cont1"),
-                toCompositeNodeData(
-                        toNestedQName("depth3-cont1"),
-                        toCompositeNodeData(toNestedQName("depth4-cont1"),
-                                toSimpleNodeData(toNestedQName("depth5-leaf1"), "depth5-leaf1-value")),
-                        toSimpleNodeData(toNestedQName("depth4-leaf1"), "depth4-leaf1-value")),
-                toSimpleNodeData(toNestedQName("depth3-leaf1"), "depth3-leaf1-value")));
-
-        assertTrue(dataSchemaNode instanceof DataNodeContainer);
-        DataSchemaNode depth2cont1Schema = null;
-        for (final DataSchemaNode childNode : ((DataNodeContainer) dataSchemaNode).getChildNodes()) {
-            if (childNode.getQName().getLocalName().equals("depth2-cont1")) {
-                depth2cont1Schema = childNode;
-                break;
-            }
-        }
-        assertNotNull(depth2Cont1);
-
-        when(brokerFacade.readOperationalData(any(YangInstanceIdentifier.class))).thenReturn(
-                TestUtils.compositeNodeToDatastoreNormalizedNode(depth2Cont1, depth2cont1Schema));
-
-        response = target("/operational/nested-module:depth1-cont/depth2-cont1").queryParam("depth", "3")
-                .request("application/xml").get();
-
-        verifyXMLResponse(
-                response,
-                expectContainer(
-                        "depth2-cont1",
-                        expectContainer("depth3-cont1", expectEmptyContainer("depth4-cont1"),
-                                expectLeaf("depth4-leaf1", "depth4-leaf1-value")),
-                        expectLeaf("depth3-leaf1", "depth3-leaf1-value")));
+//        setControllerContext(schemaContextModules);
+//
+//        final CompositeNode depth1Cont = toCompositeNode(toCompositeNodeData(
+//                toNestedQName("depth1-cont"),
+//                toCompositeNodeData(
+//                        toNestedQName("depth2-cont1"),
+//                        toCompositeNodeData(
+//                                toNestedQName("depth3-cont1"),
+//                                toCompositeNodeData(toNestedQName("depth4-cont1"),
+//                                        toSimpleNodeData(toNestedQName("depth5-leaf1"), "depth5-leaf1-value")),
+//                                toSimpleNodeData(toNestedQName("depth4-leaf1"), "depth4-leaf1-value")),
+//                        toSimpleNodeData(toNestedQName("depth3-leaf1"), "depth3-leaf1-value")),
+//                toCompositeNodeData(
+//                        toNestedQName("depth2-cont2"),
+//                        toCompositeNodeData(
+//                                toNestedQName("depth3-cont2"),
+//                                toCompositeNodeData(toNestedQName("depth4-cont2"),
+//                                        toSimpleNodeData(toNestedQName("depth5-leaf2"), "depth5-leaf2-value")),
+//                                toSimpleNodeData(toNestedQName("depth4-leaf2"), "depth4-leaf2-value")),
+//                        toSimpleNodeData(toNestedQName("depth3-leaf2"), "depth3-leaf2-value")),
+//                toSimpleNodeData(toNestedQName("depth2-leaf1"), "depth2-leaf1-value")));
+//
+//        final Module module = TestUtils.findModule(schemaContextModules.getModules(), "nested-module");
+//        assertNotNull(module);
+//
+//        final DataSchemaNode dataSchemaNode = TestUtils.resolveDataSchemaNode("depth1-cont", module);
+//        assertNotNull(dataSchemaNode);
+//
+//        when(brokerFacade.readConfigurationData(any(YangInstanceIdentifier.class))).thenReturn(
+//                TestUtils.compositeNodeToDatastoreNormalizedNode(depth1Cont, dataSchemaNode));
+//
+//        // Test config with depth 1
+//
+//        Response response = target("/config/nested-module:depth1-cont").queryParam("depth", "1")
+//                .request("application/xml").get();
+//
+//        verifyXMLResponse(response, expectEmptyContainer("depth1-cont"));
+//
+//        // Test config with depth 2
+//
+//        response = target("/config/nested-module:depth1-cont").queryParam("depth", "2").request("application/xml")
+//                .get();
+//
+//        // String
+//        // xml="<depth1-cont><depth2-cont1/><depth2-cont2/><depth2-leaf1>depth2-leaf1-value</depth2-leaf1></depth1-cont>";
+//        // Response mr=mock(Response.class);
+//        // when(mr.getEntity()).thenReturn( new
+//        // java.io.StringBufferInputStream(xml) );
+//
+//        verifyXMLResponse(
+//                response,
+//                expectContainer("depth1-cont", expectEmptyContainer("depth2-cont1"),
+//                        expectEmptyContainer("depth2-cont2"), expectLeaf("depth2-leaf1", "depth2-leaf1-value")));
+//
+//        // Test config with depth 3
+//
+//        response = target("/config/nested-module:depth1-cont").queryParam("depth", "3").request("application/xml")
+//                .get();
+//
+//        verifyXMLResponse(
+//                response,
+//                expectContainer(
+//                        "depth1-cont",
+//                        expectContainer("depth2-cont1", expectEmptyContainer("depth3-cont1"),
+//                                expectLeaf("depth3-leaf1", "depth3-leaf1-value")),
+//                        expectContainer("depth2-cont2", expectEmptyContainer("depth3-cont2"),
+//                                expectLeaf("depth3-leaf2", "depth3-leaf2-value")),
+//                        expectLeaf("depth2-leaf1", "depth2-leaf1-value")));
+//
+//        // Test config with depth 4
+//
+//        response = target("/config/nested-module:depth1-cont").queryParam("depth", "4").request("application/xml")
+//                .get();
+//
+//        verifyXMLResponse(
+//                response,
+//                expectContainer(
+//                        "depth1-cont",
+//                        expectContainer(
+//                                "depth2-cont1",
+//                                expectContainer("depth3-cont1", expectEmptyContainer("depth4-cont1"),
+//                                        expectLeaf("depth4-leaf1", "depth4-leaf1-value")),
+//                                expectLeaf("depth3-leaf1", "depth3-leaf1-value")),
+//                        expectContainer(
+//                                "depth2-cont2",
+//                                expectContainer("depth3-cont2", expectEmptyContainer("depth4-cont2"),
+//                                        expectLeaf("depth4-leaf2", "depth4-leaf2-value")),
+//                                expectLeaf("depth3-leaf2", "depth3-leaf2-value")),
+//                        expectLeaf("depth2-leaf1", "depth2-leaf1-value")));
+//
+//        // Test config with depth 5
+//
+//        response = target("/config/nested-module:depth1-cont").queryParam("depth", "5").request("application/xml")
+//                .get();
+//
+//        verifyXMLResponse(
+//                response,
+//                expectContainer(
+//                        "depth1-cont",
+//                        expectContainer(
+//                                "depth2-cont1",
+//                                expectContainer(
+//                                        "depth3-cont1",
+//                                        expectContainer("depth4-cont1",
+//                                                expectLeaf("depth5-leaf1", "depth5-leaf1-value")),
+//                                        expectLeaf("depth4-leaf1", "depth4-leaf1-value")),
+//                                expectLeaf("depth3-leaf1", "depth3-leaf1-value")),
+//                        expectContainer(
+//                                "depth2-cont2",
+//                                expectContainer(
+//                                        "depth3-cont2",
+//                                        expectContainer("depth4-cont2",
+//                                                expectLeaf("depth5-leaf2", "depth5-leaf2-value")),
+//                                        expectLeaf("depth4-leaf2", "depth4-leaf2-value")),
+//                                expectLeaf("depth3-leaf2", "depth3-leaf2-value")),
+//                        expectLeaf("depth2-leaf1", "depth2-leaf1-value")));
+//
+//        // Test config with depth unbounded
+//
+//        response = target("/config/nested-module:depth1-cont").queryParam("depth", "unbounded")
+//                .request("application/xml").get();
+//
+//        verifyXMLResponse(
+//                response,
+//                expectContainer(
+//                        "depth1-cont",
+//                        expectContainer(
+//                                "depth2-cont1",
+//                                expectContainer(
+//                                        "depth3-cont1",
+//                                        expectContainer("depth4-cont1",
+//                                                expectLeaf("depth5-leaf1", "depth5-leaf1-value")),
+//                                        expectLeaf("depth4-leaf1", "depth4-leaf1-value")),
+//                                expectLeaf("depth3-leaf1", "depth3-leaf1-value")),
+//                        expectContainer(
+//                                "depth2-cont2",
+//                                expectContainer(
+//                                        "depth3-cont2",
+//                                        expectContainer("depth4-cont2",
+//                                                expectLeaf("depth5-leaf2", "depth5-leaf2-value")),
+//                                        expectLeaf("depth4-leaf2", "depth4-leaf2-value")),
+//                                expectLeaf("depth3-leaf2", "depth3-leaf2-value")),
+//                        expectLeaf("depth2-leaf1", "depth2-leaf1-value")));
+//
+//        // Test operational
+//
+//        final CompositeNode depth2Cont1 = toCompositeNode(toCompositeNodeData(
+//                toNestedQName("depth2-cont1"),
+//                toCompositeNodeData(
+//                        toNestedQName("depth3-cont1"),
+//                        toCompositeNodeData(toNestedQName("depth4-cont1"),
+//                                toSimpleNodeData(toNestedQName("depth5-leaf1"), "depth5-leaf1-value")),
+//                        toSimpleNodeData(toNestedQName("depth4-leaf1"), "depth4-leaf1-value")),
+//                toSimpleNodeData(toNestedQName("depth3-leaf1"), "depth3-leaf1-value")));
+//
+//        assertTrue(dataSchemaNode instanceof DataNodeContainer);
+//        DataSchemaNode depth2cont1Schema = null;
+//        for (final DataSchemaNode childNode : ((DataNodeContainer) dataSchemaNode).getChildNodes()) {
+//            if (childNode.getQName().getLocalName().equals("depth2-cont1")) {
+//                depth2cont1Schema = childNode;
+//                break;
+//            }
+//        }
+//        assertNotNull(depth2Cont1);
+//
+//        when(brokerFacade.readOperationalData(any(YangInstanceIdentifier.class))).thenReturn(
+//                TestUtils.compositeNodeToDatastoreNormalizedNode(depth2Cont1, depth2cont1Schema));
+//
+//        response = target("/operational/nested-module:depth1-cont/depth2-cont1").queryParam("depth", "3")
+//                .request("application/xml").get();
+//
+//        verifyXMLResponse(
+//                response,
+//                expectContainer(
+//                        "depth2-cont1",
+//                        expectContainer("depth3-cont1", expectEmptyContainer("depth4-cont1"),
+//                                expectLeaf("depth4-leaf1", "depth4-leaf1-value")),
+//                        expectLeaf("depth3-leaf1", "depth3-leaf1-value")));
     }
 
     /**
@@ -1016,21 +1011,21 @@ public class RestGetOperationTest extends JerseyTest {
         return QName.create("urn:nested:module", "2014-06-3", localName);
     }
 
-    @SuppressWarnings("unchecked")
-    private CompositeNode toCompositeNode(final NodeData nodeData) {
-        final CompositeNodeBuilder<ImmutableCompositeNode> builder = ImmutableCompositeNode.builder();
-        builder.setQName((QName) nodeData.key);
-
-        for (final NodeData child : (List<NodeData>) nodeData.data) {
-            if (child.data instanceof List) {
-                builder.add(toCompositeNode(child));
-            } else {
-                builder.addLeaf((QName) child.key, child.data);
-            }
-        }
-
-        return builder.toInstance();
-    }
+//    @SuppressWarnings("unchecked")
+//    private CompositeNode toCompositeNode(final NodeData nodeData) {
+//        final CompositeNodeBuilder<ImmutableCompositeNode> builder = ImmutableCompositeNode.builder();
+//        builder.setQName((QName) nodeData.key);
+//
+//        for (final NodeData child : (List<NodeData>) nodeData.data) {
+//            if (child.data instanceof List) {
+//                builder.add(toCompositeNode(child));
+//            } else {
+//                builder.addLeaf((QName) child.key, child.data);
+//            }
+//        }
+//
+//        return builder.toInstance();
+//    }
 
     private NodeData toCompositeNodeData(final QName key, final NodeData... childData) {
         return new NodeData(key, Lists.newArrayList(childData));
