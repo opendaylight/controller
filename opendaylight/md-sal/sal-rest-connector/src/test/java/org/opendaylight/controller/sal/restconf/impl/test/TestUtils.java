@@ -8,7 +8,6 @@
 package org.opendaylight.controller.sal.restconf.impl.test;
 
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -34,9 +33,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.ext.MessageBodyReader;
-import javax.ws.rs.ext.MessageBodyWriter;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -46,19 +42,13 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
-import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
-import org.opendaylight.controller.sal.restconf.impl.InstanceIdentifierContext;
-import org.opendaylight.controller.sal.restconf.impl.NodeWrapper;
-import org.opendaylight.controller.sal.restconf.impl.NormalizedNodeContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
 import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
-import org.opendaylight.controller.sal.restconf.impl.StructuredData;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.Node;
@@ -66,16 +56,15 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.composite.node.schema.cnsn.parser.CnSnToNormalizedNodeParserFactory;
-import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeAttrBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableMapEntryNodeBuilder;
-import org.opendaylight.yangtools.yang.data.impl.util.CompositeNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
 import org.opendaylight.yangtools.yang.model.parser.api.YangContextParser;
 import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
 import org.slf4j.Logger;
@@ -88,6 +77,18 @@ public final class TestUtils {
     private static final Logger LOG = LoggerFactory.getLogger(TestUtils.class);
 
     private final static YangContextParser parser = new YangParserImpl();
+
+
+    private static class TypeDef {
+        public final TypeDefinition<? extends Object> typedef;
+        public final QName qName;
+
+        TypeDef(final TypeDefinition<? extends Object> typedef, final QName qName) {
+            this.typedef = typedef;
+            this.qName = qName;
+        }
+    }
+
 
     private static Set<Module> loadModules(final String resourceDirectory) throws FileNotFoundException {
         final File testDir = new File(resourceDirectory);
@@ -166,28 +167,381 @@ public final class TestUtils {
 
     }
 
-    /**
-     * @deprecated method will be removed in Lithium release
-     *      we don't wish to use Node and CompositeNode anywhere -
-     *
-     * Fill missing data (namespaces) and build correct data type in {@code compositeNode} according to
-     * {@code dataSchemaNode}. The method {@link RestconfImpl#createConfigurationData createConfigurationData} is used
-     * because it contains calling of method {code normalizeNode}
-     */
-    @Deprecated
-    public static void normalizeCompositeNode(final Node<?> node, final Set<Module> modules, final String schemaNodePath) {
-        final RestconfImpl restconf = RestconfImpl.getInstance();
-        ControllerContext.getInstance().setSchemas(TestUtils.loadSchemaContext(modules));
-        prepareMocksForRestconf(modules, restconf);
+//    /**
+//     * @deprecated method will be removed in Lithium release
+//     *      we don't wish to use Node and CompositeNode anywhere -
+//     *
+//     * Fill missing data (namespaces) and build correct data type in {@code compositeNode} according to
+//     * {@code dataSchemaNode}. The method {@link RestconfImpl#createConfigurationData createConfigurationData} is used
+//     * because it contains calling of method {code normalizeNode}
+//     */
+//    @Deprecated
+//    public static void normalizeCompositeNode(final Node<?> node, final Set<Module> modules, final String schemaNodePath) {
+//        final RestconfImpl restconf = RestconfImpl.getInstance();
+//        ControllerContext.getInstance().setSchemas(TestUtils.loadSchemaContext(modules));
+//        prepareMocksForRestconf(modules, restconf);
+//
+//        final InstanceIdentifierContext iiContext = ControllerContext.getInstance().toInstanceIdentifier(schemaNodePath);
+//        final DOMMountPoint mountPoint = iiContext.getMountPoint();
+//        final CompositeNode value = normalizeNode(node, (DataSchemaNode) iiContext.getSchemaNode(), mountPoint);
+//        final NormalizedNode<?, ?> normNodePayload = compositeNodeToDatastoreNormalizedNode(value, (DataSchemaNode) iiContext.getSchemaNode());
+//        final NormalizedNodeContext normlNodeContext = new NormalizedNodeContext(iiContext, normNodePayload);
+//
+//        restconf.updateConfigurationData(schemaNodePath, normlNodeContext);
+//    }
+//
+//    /**
+//     * @deprecated
+//     */
+//    @Deprecated
+//    private static void normalizeNode(final NodeWrapper<? extends Object> nodeBuilder, final DataSchemaNode schema,
+//            final QName previousAugment, final DOMMountPoint mountPoint) {
+//        if (schema == null) {
+//            throw new RestconfDocumentedException("Data has bad format.\n\"" + nodeBuilder.getLocalName()
+//                    + "\" does not exist in yang schema.", ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
+//        }
+//
+//        QName currentAugment = null;
+//        if (nodeBuilder.getQname() != null) {
+//            currentAugment = previousAugment;
+//        } else {
+//            currentAugment = normalizeNodeName(nodeBuilder, schema, previousAugment, mountPoint);
+//            if (nodeBuilder.getQname() == null) {
+//                throw new RestconfDocumentedException(
+//                        "Data has bad format.\nIf data is in XML format then namespace for \""
+//                                + nodeBuilder.getLocalName() + "\" should be \"" + schema.getQName().getNamespace()
+//                                + "\".\n" + "If data is in JSON format then module name for \""
+//                                + nodeBuilder.getLocalName() + "\" should be corresponding to namespace \""
+//                                + schema.getQName().getNamespace() + "\".", ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
+//            }
+//        }
+//
+//        if (nodeBuilder instanceof CompositeNodeWrapper) {
+//            if (schema instanceof DataNodeContainer) {
+//                normalizeCompositeNode((CompositeNodeWrapper) nodeBuilder, (DataNodeContainer) schema, mountPoint,
+//                        currentAugment);
+//            } else if (schema instanceof AnyXmlSchemaNode) {
+//                normalizeAnyXmlNode((CompositeNodeWrapper) nodeBuilder, (AnyXmlSchemaNode) schema);
+//            }
+//        } else if (nodeBuilder instanceof SimpleNodeWrapper) {
+//            normalizeSimpleNode((SimpleNodeWrapper) nodeBuilder, schema, mountPoint);
+//        } else if ((nodeBuilder instanceof EmptyNodeWrapper)) {
+//            normalizeEmptyNode((EmptyNodeWrapper) nodeBuilder, schema);
+//        }
+//    }
 
-        final InstanceIdentifierContext iiContext = ControllerContext.getInstance().toInstanceIdentifier(schemaNodePath);
-        final DOMMountPoint mountPoint = iiContext.getMountPoint();
-        final CompositeNode value = RestconfImpl.getInstance().normalizeNode(node, (DataSchemaNode) iiContext.getSchemaNode(), mountPoint);
-        final NormalizedNode<?, ?> normNodePayload = compositeNodeToDatastoreNormalizedNode(value, (DataSchemaNode) iiContext.getSchemaNode());
-        final NormalizedNodeContext normlNodeContext = new NormalizedNodeContext(iiContext, normNodePayload);
+//    @Deprecated
+//    private static void normalizeCompositeNode(final CompositeNodeWrapper compositeNodeBuilder,
+//            final DataNodeContainer schema, final DOMMountPoint mountPoint, final QName currentAugment) {
+//        final List<NodeWrapper<?>> children = compositeNodeBuilder.getValues();
+//        checkNodeMultiplicityAccordingToSchema(schema, children);
+//        for (final NodeWrapper<? extends Object> child : children) {
+//            final List<DataSchemaNode> potentialSchemaNodes = ControllerContext.findInstanceDataChildrenByName(
+//                    schema, child.getLocalName());
+//
+//            if (potentialSchemaNodes.size() > 1 && child.getNamespace() == null) {
+//                final StringBuilder builder = new StringBuilder();
+//                for (final DataSchemaNode potentialSchemaNode : potentialSchemaNodes) {
+//                    builder.append("   ").append(potentialSchemaNode.getQName().getNamespace().toString()).append("\n");
+//                }
+//
+//                throw new RestconfDocumentedException("Node \"" + child.getLocalName()
+//                        + "\" is added as augment from more than one module. "
+//                        + "Therefore node must have namespace (XML format) or module name (JSON format)."
+//                        + "\nThe node is added as augment from modules with namespaces:\n" + builder,
+//                        ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
+//            }
+//
+//            boolean rightNodeSchemaFound = false;
+//            for (final DataSchemaNode potentialSchemaNode : potentialSchemaNodes) {
+//                if (!rightNodeSchemaFound) {
+//                    final QName potentialCurrentAugment = normalizeNodeName(child, potentialSchemaNode,
+//                            currentAugment, mountPoint);
+//                    if (child.getQname() != null) {
+//                        normalizeNode(child, potentialSchemaNode, potentialCurrentAugment, mountPoint);
+//                        rightNodeSchemaFound = true;
+//                    }
+//                }
+//            }
+//
+//            if (!rightNodeSchemaFound) {
+//                throw new RestconfDocumentedException("Schema node \"" + child.getLocalName()
+//                        + "\" was not found in module.", ErrorType.APPLICATION, ErrorTag.UNKNOWN_ELEMENT);
+//            }
+//        }
+//
+//        if ((schema instanceof ListSchemaNode)) {
+//            final ListSchemaNode listSchemaNode = (ListSchemaNode) schema;
+//            final List<QName> listKeys = listSchemaNode.getKeyDefinition();
+//            for (final QName listKey : listKeys) {
+//                boolean foundKey = false;
+//                for (final NodeWrapper<? extends Object> child : children) {
+//                    if (Objects.equal(child.unwrap().getNodeType().getLocalName(), listKey.getLocalName())) {
+//                        foundKey = true;
+//                    }
+//                }
+//
+//                if (!foundKey) {
+//                    throw new RestconfDocumentedException("Missing key in URI \"" + listKey.getLocalName()
+//                            + "\" of list \"" + listSchemaNode.getQName().getLocalName() + "\"", ErrorType.PROTOCOL,
+//                            ErrorTag.DATA_MISSING);
+//                }
+//            }
+//        }
+//    }
 
-        restconf.updateConfigurationData(schemaNodePath, normlNodeContext);
-    }
+//    @Deprecated
+//    private static void checkNodeMultiplicityAccordingToSchema(final DataNodeContainer dataNodeContainer,
+//            final List<NodeWrapper<?>> nodes) {
+//        final Map<String, Integer> equalNodeNamesToCounts = new HashMap<String, Integer>();
+//        for (final NodeWrapper<?> child : nodes) {
+//            Integer count = equalNodeNamesToCounts.get(child.getLocalName());
+//            equalNodeNamesToCounts.put(child.getLocalName(), count == null ? 1 : ++count);
+//        }
+//
+//        for (final DataSchemaNode childSchemaNode : dataNodeContainer.getChildNodes()) {
+//            if (childSchemaNode instanceof ContainerSchemaNode || childSchemaNode instanceof LeafSchemaNode) {
+//                final String localName = childSchemaNode.getQName().getLocalName();
+//                final Integer count = equalNodeNamesToCounts.get(localName);
+//                if (count != null && count > 1) {
+//                    throw new RestconfDocumentedException("Multiple input data elements were specified for '"
+//                            + childSchemaNode.getQName().getLocalName()
+//                            + "'. The data for this element type can only be specified once.", ErrorType.APPLICATION,
+//                            ErrorTag.BAD_ELEMENT);
+//                }
+//            }
+//        }
+//    }
+
+//    @Deprecated
+//    private static QName normalizeNodeName(final NodeWrapper<? extends Object> nodeBuilder, final DataSchemaNode schema,
+//            final QName previousAugment, final DOMMountPoint mountPoint) {
+//        QName validQName = schema.getQName();
+//        QName currentAugment = previousAugment;
+//        if (schema.isAugmenting()) {
+//            currentAugment = schema.getQName();
+//        } else if (previousAugment != null
+//                && !Objects.equal(schema.getQName().getNamespace(), previousAugment.getNamespace())) {
+//            validQName = QName.create(currentAugment, schema.getQName().getLocalName());
+//        }
+//
+//        String moduleName = null;
+//        if (mountPoint == null) {
+//            moduleName = ControllerContext.getInstance().findModuleNameByNamespace(validQName.getNamespace());
+//        } else {
+//            moduleName = ControllerContext.getInstance().findModuleNameByNamespace(mountPoint, validQName.getNamespace());
+//        }
+//
+//        if (nodeBuilder.getNamespace() == null || Objects.equal(nodeBuilder.getNamespace(), validQName.getNamespace())
+//                || Objects.equal(nodeBuilder.getNamespace().toString(), moduleName)) {
+//            /*
+//             * || Note : this check is wrong -
+//             * can never be true as it compares
+//             * a URI with a String not sure what
+//             * the intention is so commented out
+//             * ... Objects . equal ( nodeBuilder
+//             * . getNamespace ( ) ,
+//             * MOUNT_POINT_MODULE_NAME )
+//             */
+//
+//            nodeBuilder.setQname(validQName);
+//        }
+//
+//        return currentAugment;
+//    }
+
+//    @Deprecated
+//    private static void normalizeAnyXmlNode(final CompositeNodeWrapper compositeNode, final AnyXmlSchemaNode schema) {
+//        final List<NodeWrapper<?>> children = compositeNode.getValues();
+//        for (final NodeWrapper<? extends Object> child : children) {
+//            child.setNamespace(schema.getQName().getNamespace());
+//            if (child instanceof CompositeNodeWrapper) {
+//                normalizeAnyXmlNode((CompositeNodeWrapper) child, schema);
+//            }
+//        }
+//    }
+
+//    @Deprecated
+//    private static void normalizeEmptyNode(final EmptyNodeWrapper emptyNodeBuilder, final DataSchemaNode schema) {
+//        if ((schema instanceof LeafSchemaNode)) {
+//            emptyNodeBuilder.setComposite(false);
+//        } else {
+//            if ((schema instanceof ContainerSchemaNode)) {
+//                // FIXME: Add presence check
+//                emptyNodeBuilder.setComposite(true);
+//            }
+//        }
+//    }
+
+//    @Deprecated
+//    private static void normalizeSimpleNode(final SimpleNodeWrapper simpleNode, final DataSchemaNode schema,
+//            final DOMMountPoint mountPoint) {
+//        final Object value = simpleNode.getValue();
+//        Object inputValue = value;
+//        final TypeDef typeDef = typeDefinition(schema);
+//        TypeDefinition<? extends Object> typeDefinition = typeDef != null ? typeDef.typedef : null;
+//
+//        // For leafrefs, extract the type it is pointing to
+//        if(typeDefinition instanceof LeafrefTypeDefinition) {
+//            if (schema.getQName().equals(typeDef.qName)) {
+//                typeDefinition = SchemaContextUtil.getBaseTypeForLeafRef(((LeafrefTypeDefinition) typeDefinition), mountPoint == null ? ControllerContext.getInstance().getGlobalSchema() : mountPoint.getSchemaContext(), schema);
+//            } else {
+//                typeDefinition = SchemaContextUtil.getBaseTypeForLeafRef(((LeafrefTypeDefinition) typeDefinition), mountPoint == null ? ControllerContext.getInstance().getGlobalSchema() : mountPoint.getSchemaContext(), typeDef.qName);
+//            }
+//        }
+//
+//        if (typeDefinition instanceof IdentityrefTypeDefinition) {
+//            inputValue = parseToIdentityValuesDTO(simpleNode, value, inputValue);
+//        }
+//
+//        Object outputValue = inputValue;
+//
+//        if (typeDefinition != null) {
+//            final Codec<Object, Object> codec = RestCodec.from(typeDefinition, mountPoint);
+//            outputValue = codec == null ? null : codec.deserialize(inputValue);
+//        }
+//
+//        simpleNode.setValue(outputValue);
+//    }
+
+//    @Deprecated
+//    private static TypeDef typeDefinition(final DataSchemaNode node) {
+//        if (node instanceof LeafListSchemaNode) {
+//            return typeDefinition(((LeafListSchemaNode)node).getType(), node.getQName());
+//        } else if (node instanceof LeafSchemaNode) {
+//            return typeDefinition(((LeafSchemaNode)node).getType(), node.getQName());
+//        } else if (node instanceof AnyXmlSchemaNode) {
+//            return null;
+//        } else {
+//            throw new IllegalArgumentException("Unhandled parameter types: " + Arrays.<Object> asList(node).toString());
+//        }
+//    }
+
+//    @Deprecated
+//    private static TypeDef typeDefinition(final TypeDefinition<?> type, final QName nodeQName) {
+//        TypeDefinition<?> baseType = type;
+//        QName qName = nodeQName;
+//        while (baseType.getBaseType() != null) {
+//            if (baseType instanceof ExtendedType) {
+//                qName = baseType.getQName();
+//            }
+//            baseType = baseType.getBaseType();
+//        }
+//
+//        return new TypeDef(baseType, qName);
+//
+//    }
+
+//    @Deprecated
+//    private static Object parseToIdentityValuesDTO(final SimpleNodeWrapper simpleNode, final Object value, Object inputValue) {
+//        if ((value instanceof String)) {
+//            inputValue = new IdentityValuesDTO(simpleNode.getNamespace().toString(), (String) value, null,
+//                    (String) value);
+//        } // else value is already instance of IdentityValuesDTO
+//        return inputValue;
+//    }
+
+//    /**
+//     * @deprecated method will be removed in Lithium release
+//     *      we don't wish to use Node and CompositeNode anywhere
+//     */
+//    @Deprecated
+//    public static CompositeNode normalizeNode(final Node<?> node, final DataSchemaNode schema, final DOMMountPoint mountPoint) {
+//        if (schema == null) {
+//            final String localName = node == null ? null :
+//                    node instanceof NodeWrapper ? ((NodeWrapper<?>)node).getLocalName() :
+//                    node.getNodeType().getLocalName();
+//
+//            throw new RestconfDocumentedException("Data schema node was not found for " + localName,
+//                    ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
+//        }
+//
+//        if (!(schema instanceof DataNodeContainer)) {
+//            throw new RestconfDocumentedException("Root element has to be container or list yang datatype.",
+//                    ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
+//        }
+//
+//        if ((node instanceof NodeWrapper<?>)) {
+//            NodeWrapper<?> nodeWrap = (NodeWrapper<?>) node;
+//            final boolean isChangeAllowed = ((NodeWrapper<?>) node).isChangeAllowed();
+//            if (isChangeAllowed) {
+//                nodeWrap = topLevelElementAsCompositeNodeWrapper((NodeWrapper<?>) node, schema);
+//                try {
+//                    normalizeNode(nodeWrap, schema, null, mountPoint);
+//                } catch (final IllegalArgumentException e) {
+//                    final RestconfDocumentedException restconfDocumentedException = new RestconfDocumentedException(e.getMessage(), ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
+//                    restconfDocumentedException.addSuppressed(e);
+//                    throw restconfDocumentedException;
+//                }
+//                if (nodeWrap instanceof CompositeNodeWrapper) {
+//                    return ((CompositeNodeWrapper) nodeWrap).unwrap();
+//                }
+//            }
+//        }
+//
+//        if (node instanceof CompositeNode) {
+//            return (CompositeNode) node;
+//        }
+//
+//        throw new RestconfDocumentedException("Top level element is not interpreted as composite node.",
+//                ErrorType.APPLICATION, ErrorTag.INVALID_VALUE);
+//    }
+
+//    /**
+//     * @deprecated
+//     */
+//    @Deprecated
+//    private static CompositeNodeWrapper topLevelElementAsCompositeNodeWrapper(final NodeWrapper<?> node,
+//            final DataSchemaNode schemaNode) {
+//        if (node instanceof CompositeNodeWrapper) {
+//            return (CompositeNodeWrapper) node;
+//        } else if (node instanceof SimpleNodeWrapper && isDataContainerNode(schemaNode)) {
+//            final SimpleNodeWrapper simpleNodeWrapper = (SimpleNodeWrapper) node;
+//            return new CompositeNodeWrapper(namespace(simpleNodeWrapper), localName(simpleNodeWrapper));
+//        }
+//
+//        throw new RestconfDocumentedException(new RestconfError(ErrorType.APPLICATION, ErrorTag.INVALID_VALUE,
+//                "Top level element has to be composite node or has to represent data container node."));
+//    }
+
+//    /**
+//     * @deprecated
+//     */
+//    @Deprecated
+//    private static URI namespace(final Node<?> data) {
+//        if (data instanceof NodeWrapper) {
+//            return ((NodeWrapper<?>) data).getNamespace();
+//        } else if (data != null) {
+//            return data.getNodeType().getNamespace();
+//        } else {
+//            throw new IllegalArgumentException("Unhandled parameter types: " + Arrays.<Object> asList(data).toString());
+//        }
+//    }
+//
+//    /**
+//     * @deprecated
+//     */
+//    @Deprecated
+//    private static String localName(final Node<?> data) {
+//        if (data instanceof NodeWrapper) {
+//            return ((NodeWrapper<?>) data).getLocalName();
+//        } else if (data != null) {
+//            return data.getNodeType().getLocalName();
+//        } else {
+//            throw new IllegalArgumentException("Unhandled parameter types: " + Arrays.<Object> asList(data).toString());
+//        }
+//    }
+
+//    /**
+//     * @deprecated
+//     */
+//    @Deprecated
+//    private static boolean isDataContainerNode(final DataSchemaNode schemaNode) {
+//        if (schemaNode instanceof ContainerSchemaNode || schemaNode instanceof ListSchemaNode) {
+//            return true;
+//        }
+//        return false;
+//    }
 
     /**
      * Searches module with name {@code searchedModuleName} in {@code modules}. If module name isn't specified and
@@ -244,14 +598,14 @@ public final class TestUtils {
         return buildQName(name, "", null);
     }
 
-    private static void addDummyNamespaceToAllNodes(final NodeWrapper<?> wrappedNode) throws URISyntaxException {
-        wrappedNode.setNamespace(new URI(""));
-        if (wrappedNode instanceof CompositeNodeWrapper) {
-            for (final NodeWrapper<?> childNodeWrapper : ((CompositeNodeWrapper) wrappedNode).getValues()) {
-                addDummyNamespaceToAllNodes(childNodeWrapper);
-            }
-        }
-    }
+//    private static void addDummyNamespaceToAllNodes(final NodeWrapper<?> wrappedNode) throws URISyntaxException {
+//        wrappedNode.setNamespace(new URI(""));
+//        if (wrappedNode instanceof CompositeNodeWrapper) {
+//            for (final NodeWrapper<?> childNodeWrapper : ((CompositeNodeWrapper) wrappedNode).getValues()) {
+//                addDummyNamespaceToAllNodes(childNodeWrapper);
+//            }
+//        }
+//    }
 
     private static void prepareMocksForRestconf(final Set<Module> modules, final RestconfImpl restconf) {
         final ControllerContext controllerContext = ControllerContext.getInstance();
@@ -266,29 +620,29 @@ public final class TestUtils {
         restconf.setBroker(mockedBrokerFacade);
     }
 
-    public static Node<?> readInputToCnSn(final String path, final boolean dummyNamespaces,
-            final MessageBodyReader<Node<?>> reader) throws WebApplicationException {
-
-        final InputStream inputStream = TestUtils.class.getResourceAsStream(path);
-        try {
-            final Node<?> node = reader.readFrom(null, null, null, null, null, inputStream);
-            assertTrue(node instanceof CompositeNodeWrapper);
-            if (dummyNamespaces) {
-                try {
-                    TestUtils.addDummyNamespaceToAllNodes((CompositeNodeWrapper) node);
-                    return ((CompositeNodeWrapper) node).unwrap();
-                } catch (final URISyntaxException e) {
-                    LOG.error(e.getMessage());
-                    assertTrue(e.getMessage(), false);
-                }
-            }
-            return node;
-        } catch (final IOException e) {
-            LOG.error(e.getMessage());
-            assertTrue(e.getMessage(), false);
-        }
-        return null;
-    }
+//    public static Node<?> readInputToCnSn(final String path, final boolean dummyNamespaces,
+//            final MessageBodyReader<Node<?>> reader) throws WebApplicationException {
+//
+//        final InputStream inputStream = TestUtils.class.getResourceAsStream(path);
+//        try {
+//            final Node<?> node = reader.readFrom(null, null, null, null, null, inputStream);
+//            assertTrue(node instanceof CompositeNodeWrapper);
+//            if (dummyNamespaces) {
+//                try {
+//                    TestUtils.addDummyNamespaceToAllNodes((CompositeNodeWrapper) node);
+//                    return ((CompositeNodeWrapper) node).unwrap();
+//                } catch (final URISyntaxException e) {
+//                    LOG.error(e.getMessage());
+//                    assertTrue(e.getMessage(), false);
+//                }
+//            }
+//            return node;
+//        } catch (final IOException e) {
+//            LOG.error(e.getMessage());
+//            assertTrue(e.getMessage(), false);
+//        }
+//        return null;
+//    }
 
 //    public static Node<?> readInputToCnSnNew(String path, MessageBodyReader<Node<?>> reader) throws WebApplicationException {
 //        InputStream inputStream = TestUtils.class.getResourceAsStream(path);
@@ -301,26 +655,26 @@ public final class TestUtils {
 //        return null;
 //    }
 
-    public static Node<?> readInputToCnSn(final String path, final MessageBodyReader<Node<?>> reader) {
-        return readInputToCnSn(path, false, reader);
-    }
+//    public static Node<?> readInputToCnSn(final String path, final MessageBodyReader<Node<?>> reader) {
+//        return readInputToCnSn(path, false, reader);
+//    }
 
-    public static String writeCompNodeWithSchemaContextToOutput(final Node<?> node, final Set<Module> modules,
-            final DataSchemaNode dataSchemaNode, final MessageBodyWriter<StructuredData> messageBodyWriter) throws IOException,
-            WebApplicationException {
-
-        assertNotNull(dataSchemaNode);
-        assertNotNull("Composite node can't be null", node);
-        final ByteArrayOutputStream byteArrayOS = new ByteArrayOutputStream();
-
-        ControllerContext.getInstance().setSchemas(loadSchemaContext(modules));
-
-        assertTrue(node instanceof CompositeNode);
-        messageBodyWriter.writeTo(new StructuredData((CompositeNode)node, dataSchemaNode, null), null, null, null, null,
-                null, byteArrayOS);
-
-        return byteArrayOS.toString();
-    }
+//    public static String writeCompNodeWithSchemaContextToOutput(final Node<?> node, final Set<Module> modules,
+//            final DataSchemaNode dataSchemaNode, final MessageBodyWriter<StructuredData> messageBodyWriter) throws IOException,
+//            WebApplicationException {
+//
+//        assertNotNull(dataSchemaNode);
+//        assertNotNull("Composite node can't be null", node);
+//        final ByteArrayOutputStream byteArrayOS = new ByteArrayOutputStream();
+//
+//        ControllerContext.getInstance().setSchemas(loadSchemaContext(modules));
+//
+//        assertTrue(node instanceof CompositeNode);
+//        messageBodyWriter.writeTo(new StructuredData((CompositeNode)node, dataSchemaNode, null), null, null, null, null,
+//                null, byteArrayOS);
+//
+//        return byteArrayOS.toString();
+//    }
 
     public static String loadTextFile(final String filePath) throws IOException {
         final FileReader fileReader = new FileReader(filePath);
@@ -404,19 +758,19 @@ public final class TestUtils {
                 predicate);
     }
 
-    /**
-     * @deprecated method has to be removed for Lithium release
-     *          so please use prepareNormalizedNodeWithIetfInterfacesInterfacesData method
-     */
-    @Deprecated
-    public static CompositeNode prepareCompositeNodeWithIetfInterfacesInterfacesData() {
-        final CompositeNodeBuilder<ImmutableCompositeNode> interfaceBuilder = ImmutableCompositeNode.builder();
-        interfaceBuilder.addLeaf(buildQName("name", "dummy", "2014-07-29"), "eth0");
-        interfaceBuilder.addLeaf(buildQName("type", "dummy", "2014-07-29"), "ethernetCsmacd");
-        interfaceBuilder.addLeaf(buildQName("enabled", "dummy", "2014-07-29"), "false");
-        interfaceBuilder.addLeaf(buildQName("description", "dummy", "2014-07-29"), "some interface");
-        return interfaceBuilder.toInstance();
-    }
+//    /**
+//     * @deprecated method has to be removed for Lithium release
+//     *          so please use prepareNormalizedNodeWithIetfInterfacesInterfacesData method
+//     */
+//    @Deprecated
+//    public static CompositeNode prepareCompositeNodeWithIetfInterfacesInterfacesData() {
+//        final CompositeNodeBuilder<ImmutableCompositeNode> interfaceBuilder = ImmutableCompositeNode.builder();
+//        interfaceBuilder.addLeaf(buildQName("name", "dummy", "2014-07-29"), "eth0");
+//        interfaceBuilder.addLeaf(buildQName("type", "dummy", "2014-07-29"), "ethernetCsmacd");
+//        interfaceBuilder.addLeaf(buildQName("enabled", "dummy", "2014-07-29"), "false");
+//        interfaceBuilder.addLeaf(buildQName("description", "dummy", "2014-07-29"), "some interface");
+//        return interfaceBuilder.toInstance();
+//    }
 
     static NormalizedNode<?,?> prepareNormalizedNodeWithIetfInterfacesInterfacesData() throws ParseException {
         final String ietfInterfacesDate = "2013-07-04";

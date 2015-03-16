@@ -23,13 +23,10 @@ import com.google.common.util.concurrent.Futures;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Application;
@@ -51,14 +48,11 @@ import org.opendaylight.controller.sal.rest.impl.NormalizedNodeXmlBodyWriter;
 import org.opendaylight.controller.sal.rest.impl.RestconfDocumentedExceptionMapper;
 import org.opendaylight.controller.sal.rest.impl.XmlNormalizedNodeBodyReader;
 import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
-import org.opendaylight.controller.sal.restconf.impl.CompositeNodeWrapper;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
 import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
 import org.opendaylight.yangtools.yang.common.RpcError;
-import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
-import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -72,7 +66,7 @@ public class RestPostOperationTest extends JerseyTest {
     private static String xmlDataRpcInput;
     private static String xmlBlockData;
     private static String xmlTestInterface;
-    private static CompositeNodeWrapper cnSnDataOutput;
+//    private static CompositeNodeWrapper cnSnDataOutput;
     private static String xmlData3;
     private static String xmlData4;
 
@@ -131,26 +125,26 @@ public class RestPostOperationTest extends JerseyTest {
     @Test
     @Ignore //FIXME we don't wish to mock CompositeNode as result
     public void postOperationsStatusCodes() throws IOException {
-        setSchemaControllerContext(schemaContextTestModule);
-        mockInvokeRpc(cnSnDataOutput, true);
-        String uri = "/operations/test-module:rpc-test";
-        assertEquals(200, post(uri, MediaType.APPLICATION_XML, xmlDataRpcInput));
-
-        mockInvokeRpc(null, true);
-        assertEquals(204, post(uri, MediaType.APPLICATION_XML, xmlDataRpcInput));
-
-        mockInvokeRpc(null, false);
-        assertEquals(500, post(uri, MediaType.APPLICATION_XML, xmlDataRpcInput));
-
-        final List<RpcError> rpcErrors = new ArrayList<>();
-        rpcErrors.add(RpcResultBuilder.newError(ErrorType.RPC, "tag1", "message1", "applicationTag1", "info1", null));
-        rpcErrors.add(RpcResultBuilder.newWarning(ErrorType.PROTOCOL, "tag2", "message2", "applicationTag2", "info2",
-                null));
-        mockInvokeRpc(null, false, rpcErrors);
-        assertEquals(500, post(uri, MediaType.APPLICATION_XML, xmlDataRpcInput));
-
-        uri = "/operations/test-module:rpc-wrongtest";
-        assertEquals(400, post(uri, MediaType.APPLICATION_XML, xmlDataRpcInput));
+//        setSchemaControllerContext(schemaContextTestModule);
+//        mockInvokeRpc(cnSnDataOutput, true);
+//        String uri = "/operations/test-module:rpc-test";
+//        assertEquals(200, post(uri, MediaType.APPLICATION_XML, xmlDataRpcInput));
+//
+//        mockInvokeRpc(null, true);
+//        assertEquals(204, post(uri, MediaType.APPLICATION_XML, xmlDataRpcInput));
+//
+//        mockInvokeRpc(null, false);
+//        assertEquals(500, post(uri, MediaType.APPLICATION_XML, xmlDataRpcInput));
+//
+//        final List<RpcError> rpcErrors = new ArrayList<>();
+//        rpcErrors.add(RpcResultBuilder.newError(ErrorType.RPC, "tag1", "message1", "applicationTag1", "info1", null));
+//        rpcErrors.add(RpcResultBuilder.newWarning(ErrorType.PROTOCOL, "tag2", "message2", "applicationTag2", "info2",
+//                null));
+//        mockInvokeRpc(null, false, rpcErrors);
+//        assertEquals(500, post(uri, MediaType.APPLICATION_XML, xmlDataRpcInput));
+//
+//        uri = "/operations/test-module:rpc-wrongtest";
+//        assertEquals(400, post(uri, MediaType.APPLICATION_XML, xmlDataRpcInput));
     }
 
     @Test
@@ -311,18 +305,18 @@ public class RestPostOperationTest extends JerseyTest {
         final String xmlPathTestInterface = RestconfImplTest.class.getResource("/test-config-data/xml/test-interface.xml")
                 .getPath();
         xmlTestInterface = TestUtils.loadTextFile(xmlPathTestInterface);
-        cnSnDataOutput = prepareCnSnRpcOutput();
+//        cnSnDataOutput = prepareCnSnRpcOutput();
         final String data3Input = RestconfImplTest.class.getResource("/full-versions/test-data2/data3.xml").getPath();
         xmlData3 = TestUtils.loadTextFile(data3Input);
         final String data4Input = RestconfImplTest.class.getResource("/full-versions/test-data2/data7.xml").getPath();
         xmlData4 = TestUtils.loadTextFile(data4Input);
     }
 
-    private static CompositeNodeWrapper prepareCnSnRpcOutput() throws URISyntaxException {
-        final CompositeNodeWrapper cnSnDataOutput = new CompositeNodeWrapper(new URI("test:module"), "output");
-        final CompositeNodeWrapper cont = new CompositeNodeWrapper(new URI("test:module"), "cont-output");
-        cnSnDataOutput.addValue(cont);
-        cnSnDataOutput.unwrap();
-        return cnSnDataOutput;
-    }
+//    private static CompositeNodeWrapper prepareCnSnRpcOutput() throws URISyntaxException {
+//        final CompositeNodeWrapper cnSnDataOutput = new CompositeNodeWrapper(new URI("test:module"), "output");
+//        final CompositeNodeWrapper cont = new CompositeNodeWrapper(new URI("test:module"), "cont-output");
+//        cnSnDataOutput.addValue(cont);
+//        cnSnDataOutput.unwrap();
+//        return cnSnDataOutput;
+//    }
 }
