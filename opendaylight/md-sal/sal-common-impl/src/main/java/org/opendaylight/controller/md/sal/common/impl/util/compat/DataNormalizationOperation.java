@@ -7,9 +7,10 @@
  */
 package org.opendaylight.controller.md.sal.common.impl.util.compat;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-
+import com.google.common.base.Optional;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -17,26 +18,17 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
-import javax.xml.transform.dom.DOMSource;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.AugmentationIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithValue;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
-import org.opendaylight.yangtools.yang.data.api.Node;
-import org.opendaylight.yangtools.yang.data.api.SimpleNode;
-import org.opendaylight.yangtools.yang.data.api.schema.AnyXmlNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
-import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeAttrBuilder;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.NormalizedNodeAttrBuilder;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.NormalizedNodeContainerBuilder;
 import org.opendaylight.yangtools.yang.model.api.AnyXmlSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.AugmentationSchema;
 import org.opendaylight.yangtools.yang.model.api.AugmentationTarget;
@@ -51,15 +43,6 @@ import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaNode;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-
-/**
- * @deprecated This class provides compatibility between {@link CompositeNode} and {@link NormalizedNode}.
- *             Users of this class should use {@link NormalizedNode}s directly.
- */
 @Deprecated
 public abstract class DataNormalizationOperation<T extends PathArgument> implements Identifiable<T> {
 
@@ -98,7 +81,6 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
 
     public abstract DataNormalizationOperation<?> getChild(QName child) throws DataNormalizationException;
 
-    public abstract NormalizedNode<?, ?> normalize(Node<?> legacyData);
 
     public abstract boolean isLeaf();
 
@@ -112,15 +94,6 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         protected SimpleTypeNormalization(final T identifier, final DataSchemaNode potential) {
             super(identifier,potential);
         }
-
-        @Override
-        public NormalizedNode<?, ?> normalize(final Node<?> legacyData) {
-            checkArgument(legacyData != null);
-            checkArgument(legacyData instanceof SimpleNode<?>);
-            return normalizeImpl((SimpleNode<?>) legacyData);
-        }
-
-        protected abstract NormalizedNode<?, ?> normalizeImpl(SimpleNode<?> node);
 
         @Override
         public DataNormalizationOperation<?> getChild(final PathArgument child) {
@@ -150,11 +123,6 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
             super(new NodeIdentifier(potential.getQName()),potential);
         }
 
-        @Override
-        protected NormalizedNode<?, ?> normalizeImpl(final SimpleNode<?> node) {
-            return ImmutableNodes.leafNode(node.getNodeType(), node.getValue());
-        }
-
     }
 
     private static final class LeafListEntryNormalization extends SimpleTypeNormalization<NodeWithValue> {
@@ -162,13 +130,6 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         public LeafListEntryNormalization(final LeafListSchemaNode potential) {
             super(new NodeWithValue(potential.getQName(), null),potential);
         }
-
-        @Override
-        protected NormalizedNode<?, ?> normalizeImpl(final SimpleNode<?> node) {
-            NodeWithValue nodeId = new NodeWithValue(node.getNodeType(), node.getValue());
-            return Builders.leafSetEntryBuilder().withNodeIdentifier(nodeId).withValue(node.getValue()).build();
-        }
-
 
         @Override
         public boolean isKeyedEntry() {
@@ -183,58 +144,11 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
             super(identifier,schema);
         }
 
-        @SuppressWarnings({ "rawtypes", "unchecked" })
-        @Override
-        public final NormalizedNode<?, ?> normalize(final Node<?> legacyData) {
-            checkArgument(legacyData != null);
-            if (!isMixin() && getIdentifier().getNodeType() != null) {
-                checkArgument(getIdentifier().getNodeType().equals(legacyData.getNodeType()),
-                        "Node QName must be %s was %s", getIdentifier().getNodeType(), legacyData.getNodeType());
-            }
-            checkArgument(legacyData instanceof CompositeNode, "Node %s should be composite", legacyData);
-            CompositeNode compositeNode = (CompositeNode) legacyData;
-            NormalizedNodeContainerBuilder builder = createBuilder(compositeNode);
-
-            Set<DataNormalizationOperation<?>> usedMixins = new HashSet<>();
-            for (Node<?> childLegacy : compositeNode.getValue()) {
-                final DataNormalizationOperation childOp;
-
-                try {
-                    childOp = getChild(childLegacy.getNodeType());
-                } catch (DataNormalizationException e) {
-                    throw new IllegalArgumentException(String.format("Failed to normalize data %s", compositeNode.getValue()), e);
-                }
-
-                // We skip unknown nodes if this node is mixin since
-                // it's nodes and parent nodes are interleaved
-                if (childOp == null && isMixin()) {
-                    continue;
-                }
-
-                checkArgument(childOp != null, "Node %s is not allowed inside %s", childLegacy.getNodeType(),
-                        getIdentifier());
-                if (childOp.isMixin()) {
-                    if (usedMixins.contains(childOp)) {
-                        // We already run / processed that mixin, so to avoid
-                        // duplicity we are skipping next nodes.
-                        continue;
-                    }
-                    builder.addChild(childOp.normalize(compositeNode));
-                    usedMixins.add(childOp);
-                } else {
-                    builder.addChild(childOp.normalize(childLegacy));
-                }
-            }
-            return builder.build();
-        }
-
         @Override
         public boolean isLeaf() {
             return false;
         }
 
-        @SuppressWarnings("rawtypes")
-        protected abstract NormalizedNodeContainerBuilder createBuilder(final CompositeNode compositeNode);
 
     }
 
@@ -307,20 +221,6 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         }
 
         @Override
-        protected NormalizedNodeContainerBuilder<?, ?, ?, ?> createBuilder(final CompositeNode compositeNode) {
-            ImmutableMap.Builder<QName, Object> keys = ImmutableMap.builder();
-            for (QName key : keyDefinition) {
-
-                SimpleNode<?> valueNode = checkNotNull(compositeNode.getFirstSimpleByName(key),
-                        "List node %s MUST contain leaf %s with value.", getIdentifier().getNodeType(), key);
-                keys.put(key, valueNode.getValue());
-            }
-
-            return Builders.mapEntryBuilder().withNodeIdentifier(
-                    new NodeIdentifierWithPredicates(getIdentifier().getNodeType(), keys.build()));
-        }
-
-        @Override
         public NormalizedNode<?, ?> createDefault(final PathArgument currentArg) {
             DataContainerNodeAttrBuilder<NodeIdentifierWithPredicates, MapEntryNode> builder = Builders
                     .mapEntryBuilder().withNodeIdentifier((NodeIdentifierWithPredicates) currentArg);
@@ -347,11 +247,6 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         }
 
         @Override
-        protected NormalizedNodeContainerBuilder<?, ?, ?, ?> createBuilder(final CompositeNode compositeNode) {
-            return Builders.unkeyedListEntryBuilder().withNodeIdentifier(getIdentifier());
-        }
-
-        @Override
         public NormalizedNode<?, ?> createDefault(final PathArgument currentArg) {
             return Builders.unkeyedListEntryBuilder().withNodeIdentifier((NodeIdentifier) currentArg).build();
         }
@@ -362,11 +257,6 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
 
         protected ContainerNormalization(final ContainerSchemaNode schema) {
             super(new NodeIdentifier(schema.getQName()),schema, schema);
-        }
-
-        @Override
-        protected NormalizedNodeContainerBuilder<?, ?, ?, ?> createBuilder(final CompositeNode compositeNode) {
-            return Builders.containerBuilder().withNodeIdentifier(getIdentifier());
         }
 
         @Override
@@ -399,11 +289,6 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         }
 
         @Override
-        protected NormalizedNodeContainerBuilder<?, ?, ?, ?> createBuilder(final CompositeNode compositeNode) {
-            return Builders.orderedLeafSetBuilder().withNodeIdentifier(getIdentifier());
-        }
-
-        @Override
         public NormalizedNode<?, ?> createDefault(final PathArgument currentArg) {
             return Builders.orderedLeafSetBuilder().withNodeIdentifier(getIdentifier()).build();
         }
@@ -417,12 +302,6 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
             super(new NodeIdentifier(potential.getQName()),potential);
             innerOp = new LeafListEntryNormalization(potential);
         }
-
-        @Override
-        protected NormalizedNodeContainerBuilder<?, ?, ?, ?> createBuilder(final CompositeNode compositeNode) {
-            return Builders.leafSetBuilder().withNodeIdentifier(getIdentifier());
-        }
-
         @Override
         public NormalizedNode<?, ?> createDefault(final PathArgument currentArg) {
             return Builders.leafSetBuilder().withNodeIdentifier(getIdentifier()).build();
@@ -480,12 +359,6 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
             return getIdentifier().getPossibleChildNames();
         }
 
-        @SuppressWarnings("rawtypes")
-        @Override
-        protected NormalizedNodeContainerBuilder createBuilder(final CompositeNode compositeNode) {
-            return Builders.augmentationBuilder().withNodeIdentifier(getIdentifier());
-        }
-
         @Override
         public NormalizedNode<?, ?> createDefault(final PathArgument currentArg) {
             return Builders.augmentationBuilder().withNodeIdentifier(getIdentifier()).build();
@@ -501,12 +374,6 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
             super(new NodeIdentifier(list.getQName()),list);
             this.innerNode = new ListItemNormalization(new NodeIdentifierWithPredicates(list.getQName(),
                     Collections.<QName, Object> emptyMap()), list);
-        }
-
-        @SuppressWarnings("rawtypes")
-        @Override
-        protected NormalizedNodeContainerBuilder createBuilder(final CompositeNode compositeNode) {
-            return Builders.mapBuilder().withNodeIdentifier(getIdentifier());
         }
 
         @Override
@@ -542,12 +409,6 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
             this.innerNode = new UnkeyedListItemNormalization(list);
         }
 
-        @SuppressWarnings("rawtypes")
-        @Override
-        protected NormalizedNodeContainerBuilder createBuilder(final CompositeNode compositeNode) {
-            return Builders.unkeyedListBuilder().withNodeIdentifier(getIdentifier());
-        }
-
         @Override
         public NormalizedNode<?, ?> createDefault(final PathArgument currentArg) {
             return Builders.unkeyedListBuilder().withNodeIdentifier(getIdentifier()).build();
@@ -575,12 +436,6 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
 
         public OrderedMapMixinNormalization(final ListSchemaNode list) {
             super(list);
-        }
-
-        @SuppressWarnings("rawtypes")
-        @Override
-        protected NormalizedNodeContainerBuilder createBuilder(final CompositeNode compositeNode) {
-            return Builders.orderedMapBuilder().withNodeIdentifier(getIdentifier());
         }
 
         @Override
@@ -624,11 +479,6 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         }
 
         @Override
-        protected NormalizedNodeContainerBuilder<?, ?, ?, ?> createBuilder(final CompositeNode compositeNode) {
-            return Builders.choiceBuilder().withNodeIdentifier(getIdentifier());
-        }
-
-        @Override
         public NormalizedNode<?, ?> createDefault(final PathArgument currentArg) {
             return Builders.choiceBuilder().withNodeIdentifier(getIdentifier()).build();
         }
@@ -648,16 +498,6 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         @Override
         public DataNormalizationOperation<?> getChild( final QName child ) throws DataNormalizationException {
             return null;
-        }
-
-        @Override
-        public NormalizedNode<?, ?> normalize( final Node<?> legacyData ) {
-            NormalizedNodeAttrBuilder<NodeIdentifier, DOMSource, AnyXmlNode> builder =
-                    Builders.anyXmlBuilder().withNodeIdentifier(
-                            new NodeIdentifier( legacyData.getNodeType() ) );
-            // Will be removed
-//            builder.withValue(legacyData);
-            return builder.build();
         }
 
         @Override
