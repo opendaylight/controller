@@ -8,9 +8,7 @@
 
 package org.opendaylight.controller.netconf.notifications.impl.osgi;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -26,6 +24,7 @@ import org.opendaylight.controller.netconf.notifications.NetconfNotificationColl
 import org.opendaylight.controller.netconf.notifications.impl.NetconfNotificationManager;
 import org.opendaylight.controller.netconf.notifications.impl.ops.CreateSubscription;
 import org.opendaylight.controller.netconf.notifications.impl.ops.Get;
+import org.opendaylight.controller.netconf.util.capability.BasicCapability;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -43,7 +42,7 @@ public class Activator implements BundleActivator {
 
         final NetconfOperationServiceFactory netconfOperationServiceFactory = new NetconfOperationServiceFactory() {
 
-            private final Set<Capability> capabilities = Collections.<Capability>singleton(new NotificationsCapability());
+            private final Set<Capability> capabilities = Collections.<Capability>singleton(new BasicCapability(NetconfNotification.NOTIFICATION_NAMESPACE));
 
             @Override
             public Set<Capability> getCapabilities() {
@@ -101,38 +100,6 @@ public class Activator implements BundleActivator {
         if (operationaServiceRegistration != null) {
             operationaServiceRegistration.unregister();
             operationaServiceRegistration = null;
-        }
-    }
-
-    private class NotificationsCapability implements Capability {
-        @Override
-        public String getCapabilityUri() {
-            return NetconfNotification.NOTIFICATION_NAMESPACE;
-        }
-
-        @Override
-        public Optional<String> getModuleNamespace() {
-            return Optional.absent();
-        }
-
-        @Override
-        public Optional<String> getModuleName() {
-            return Optional.absent();
-        }
-
-        @Override
-        public Optional<String> getRevision() {
-            return Optional.absent();
-        }
-
-        @Override
-        public Optional<String> getCapabilitySchema() {
-            return Optional.absent();
-        }
-
-        @Override
-        public Collection<String> getLocation() {
-            return Collections.emptyList();
         }
     }
 }

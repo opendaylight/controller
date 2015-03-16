@@ -17,7 +17,7 @@ import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.parser.builder.impl.ModuleBuilder;
 
-final class ModuleBuilderCapability implements Capability {
+class ModuleBuilderCapability implements Capability {
     private static final Date NO_REVISION = new Date(0);
     private static final List<String> NETCONF = Collections.singletonList("NETCONF");
     private final ModuleBuilder input;
@@ -30,7 +30,6 @@ final class ModuleBuilderCapability implements Capability {
 
     @Override
     public String getCapabilityUri() {
-        // FIXME capabilities in Netconf-impl need to check for NO REVISION
         final String withoutRevision = getModuleNamespace().get() + "?module=" + getModuleName().get();
         return hasRevision() ? withoutRevision + "&revision=" + Util.writeDate(input.getRevision()) : withoutRevision;
     }

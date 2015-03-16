@@ -27,6 +27,7 @@ import org.opendaylight.controller.netconf.api.monitoring.CapabilityListener;
 import org.opendaylight.controller.netconf.notifications.BaseNetconfNotificationListener;
 import org.opendaylight.controller.netconf.notifications.BaseNotificationPublisherRegistration;
 import org.opendaylight.controller.netconf.notifications.NetconfNotificationCollector;
+import org.opendaylight.controller.netconf.util.capability.YangModuleCapability;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.notifications.rev120206.NetconfCapabilityChange;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.notifications.rev120206.NetconfCapabilityChangeBuilder;
@@ -154,7 +155,7 @@ public class YangStoreService implements YangStoreContext {
     private static final Function<Module, Capability> MODULE_TO_CAPABILITY = new Function<Module, Capability>() {
         @Override
         public Capability apply(final Module module) {
-            return new NetconfOperationServiceFactoryImpl.YangStoreCapability(module, module.getSource());
+            return new YangModuleCapability(module, module.getSource());
         }
     };
 
@@ -191,7 +192,7 @@ public class YangStoreService implements YangStoreContext {
     private static final Function<Module, Uri> MODULE_TO_URI = new Function<Module, Uri>() {
         @Override
         public Uri apply(final Module input) {
-            return new Uri(new NetconfOperationServiceFactoryImpl.YangStoreCapability(input, input.getSource()).getCapabilityUri());
+            return new Uri(new YangModuleCapability(input, input.getSource()).getCapabilityUri());
         }
     };
 
