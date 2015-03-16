@@ -8,19 +8,13 @@
 package org.opendaylight.controller.md.sal.dom.store.impl.tree;
 
 import com.google.common.base.Optional;
-import java.lang.ref.Reference;
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
+import com.google.common.base.Preconditions;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import org.opendaylight.controller.md.sal.dom.spi.RegistrationTreeNode;
 import org.opendaylight.controller.md.sal.dom.store.impl.DataChangeListenerRegistration;
-import org.opendaylight.controller.md.sal.dom.store.impl.tree.ListenerTree.DataChangeListenerRegistrationImpl;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.StoreTreeNode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This is a single node within the listener tree. Note that the data returned from
@@ -31,27 +25,25 @@ import org.slf4j.LoggerFactory;
  * @author Robert Varga
  */
 public class ListenerNode implements StoreTreeNode<ListenerNode>, Identifiable<PathArgument> {
+    final RegistrationTreeNode<DataChangeListenerRegistration<?>> delegate;
 
-    private static final Logger LOG = LoggerFactory.getLogger(ListenerNode.class);
-
-    private final Collection<DataChangeListenerRegistration<?>> listeners = new ArrayList<>();
-    private final Map<PathArgument, ListenerNode> children = new HashMap<>();
-    private final PathArgument identifier;
-    private final Reference<ListenerNode> parent;
-
-    ListenerNode(final ListenerNode parent, final PathArgument identifier) {
-        this.parent = new WeakReference<>(parent);
-        this.identifier = identifier;
+    ListenerNode(final RegistrationTreeNode<DataChangeListenerRegistration<?>> delegate) {
+        this.delegate = Preconditions.checkNotNull(delegate);
     }
 
     @Override
     public PathArgument getIdentifier() {
-        return identifier;
+        return delegate.getIdentifier();
     }
 
     @Override
     public Optional<ListenerNode> getChild(final PathArgument child) {
-        return Optional.fromNullable(children.get(child));
+        final RegistrationTreeNode<DataChangeListenerRegistration<?>> c = delegate.getChild(child);
+        if (c == null) {
+            return Optional.absent();
+        }
+
+        return Optional.of(new ListenerNode(c));
     }
 
     /**
@@ -62,45 +54,11 @@ public class ListenerNode implements StoreTreeNode<ListenerNode>, Identifiable<P
      * @return the list of current listeners
      */
     public Collection<DataChangeListenerRegistration<?>> getListeners() {
-        return listeners;
-    }
-
-    ListenerNode ensureChild(final PathArgument child) {
-        ListenerNode potential = children.get(child);
-        if (potential == null) {
-            potential = new ListenerNode(this, child);
-            children.put(child, potential);
-        }
-        return potential;
-    }
-
-    void addListener(final DataChangeListenerRegistration<?> listener) {
-        listeners.add(listener);
-        LOG.debug("Listener {} registered", listener);
-    }
-
-    void removeListener(final DataChangeListenerRegistrationImpl<?> listener) {
-        listeners.remove(listener);
-        LOG.debug("Listener {} unregistered", listener);
-
-        // We have been called with the write-lock held, so we can perform some cleanup.
-        removeThisIfUnused();
-    }
-
-    private void removeThisIfUnused() {
-        final ListenerNode p = parent.get();
-        if (p != null && listeners.isEmpty() && children.isEmpty()) {
-            p.removeChild(identifier);
-        }
-    }
-
-    private void removeChild(final PathArgument arg) {
-        children.remove(arg);
-        removeThisIfUnused();
+        return delegate.getRegistrations();
     }
 
     @Override
     public String toString() {
-        return "Node [identifier=" + identifier + ", listeners=" + listeners.size() + ", children=" + children.size() + "]";
+        return delegate.toString();
     }
 }

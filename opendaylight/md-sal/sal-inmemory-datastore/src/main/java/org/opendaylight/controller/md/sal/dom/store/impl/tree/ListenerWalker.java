@@ -8,8 +8,8 @@
 package org.opendaylight.controller.md.sal.dom.store.impl.tree;
 
 import com.google.common.base.Preconditions;
-import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
-import java.util.concurrent.locks.Lock;
+import org.opendaylight.controller.md.sal.dom.spi.RegistrationTreeSnapshot;
+import org.opendaylight.controller.md.sal.dom.store.impl.DataChangeListenerRegistration;
 
 /**
  * A walking context, pretty much equivalent to an iterator, but it
@@ -18,27 +18,18 @@ import java.util.concurrent.locks.Lock;
  * @author Robert Varga
  */
 public class ListenerWalker implements AutoCloseable {
-    private static final AtomicIntegerFieldUpdater<ListenerWalker> CLOSED_UPDATER = AtomicIntegerFieldUpdater.newUpdater(ListenerWalker.class, "closed");
-    private final Lock lock;
-    private final ListenerNode node;
+    private final RegistrationTreeSnapshot<DataChangeListenerRegistration<?>> delegate;
 
-    // Used via CLOSED_UPDATER
-    @SuppressWarnings("unused")
-    private volatile int closed = 0;
-
-    ListenerWalker(final Lock lock, final ListenerNode node) {
-        this.lock = Preconditions.checkNotNull(lock);
-        this.node = Preconditions.checkNotNull(node);
+    ListenerWalker(final RegistrationTreeSnapshot<DataChangeListenerRegistration<?>> delegate) {
+        this.delegate = Preconditions.checkNotNull(delegate);
     }
 
     public ListenerNode getRootNode() {
-        return node;
+        return new ListenerNode(delegate.getRootNode());
     }
 
     @Override
     public void close() {
-        if (CLOSED_UPDATER.compareAndSet(this, 0, 1)) {
-            lock.unlock();
-        }
+        delegate.getRootNode();
     }
 }
