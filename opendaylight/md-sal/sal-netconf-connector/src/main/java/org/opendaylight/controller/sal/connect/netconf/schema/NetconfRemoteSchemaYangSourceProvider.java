@@ -18,10 +18,10 @@ import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.xml.transform.dom.DOMSource;
-import org.apache.commons.io.IOUtils;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 import org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil;
@@ -201,7 +201,7 @@ public final class NetconfRemoteSchemaYangSourceProvider implements SchemaSource
 
         @Override
         public InputStream openStream() throws IOException {
-            return IOUtils.toInputStream(schemaString.get());
+            return new ByteArrayInputStream(schemaString.get().getBytes());
         }
     }
 }
