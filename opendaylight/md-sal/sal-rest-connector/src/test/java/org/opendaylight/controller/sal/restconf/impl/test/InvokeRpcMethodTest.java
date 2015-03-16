@@ -18,11 +18,9 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
-
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import java.io.FileNotFoundException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -38,12 +36,10 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcImplementationNotAvailableException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.md.sal.dom.spi.DefaultDOMRpcResult;
-import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry;
 import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.InstanceIdentifierContext;
@@ -55,9 +51,7 @@ import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
 import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcError;
-import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafNode;
@@ -399,48 +393,48 @@ public class InvokeRpcMethodTest {
     @Test
     @Ignore // FIXME find how to use mockito for it
     public void testMountedRpcCallNoPayload_Success() throws Exception {
-        final RpcResult<CompositeNode> rpcResult = RpcResultBuilder.<CompositeNode>success().build();
-
-        final ListenableFuture<RpcResult<CompositeNode>> mockListener = mock(ListenableFuture.class);
-        when(mockListener.get()).thenReturn(rpcResult);
-
-        final QName cancelToastQName = QName.create("namespace", "2014-05-28", "cancelToast");
-
-        final RpcDefinition mockRpc = mock(RpcDefinition.class);
-        when(mockRpc.getQName()).thenReturn(cancelToastQName);
-
-        final DOMMountPoint mockMountPoint = mock(DOMMountPoint.class);
-        final RpcProvisionRegistry mockedRpcProvisionRegistry = mock(RpcProvisionRegistry.class);
-        when(mockedRpcProvisionRegistry.invokeRpc(eq(cancelToastQName), any(CompositeNode.class))).thenReturn(mockListener);
-        when(mockMountPoint.getService(eq(RpcProvisionRegistry.class))).thenReturn(Optional.of(mockedRpcProvisionRegistry));
-        when(mockMountPoint.getSchemaContext()).thenReturn(TestUtils.loadSchemaContext("/invoke-rpc"));
-
-        final InstanceIdentifierContext mockedInstanceId = mock(InstanceIdentifierContext.class);
-        when(mockedInstanceId.getMountPoint()).thenReturn(mockMountPoint);
-
-        final ControllerContext mockedContext = mock(ControllerContext.class);
-        final String rpcNoop = "invoke-rpc-module:rpc-noop";
-        when(mockedContext.urlPathArgDecode(rpcNoop)).thenReturn(rpcNoop);
-        when(mockedContext.getRpcDefinition(rpcNoop)).thenReturn(mockRpc);
-        when(
-                mockedContext.toMountPointIdentifier(eq("opendaylight-inventory:nodes/node/"
-                        + "REMOTE_HOST/yang-ext:mount/invoke-rpc-module:rpc-noop"))).thenReturn(mockedInstanceId);
-
-        restconfImpl.setControllerContext(mockedContext);
-        try {
-            restconfImpl.invokeRpc(
-                    "opendaylight-inventory:nodes/node/REMOTE_HOST/yang-ext:mount/invoke-rpc-module:rpc-noop", "",
-                    uriInfo);
-            fail("RestconfDocumentedException wasn't raised");
-        } catch (final RestconfDocumentedException e) {
-            final List<RestconfError> errors = e.getErrors();
-            assertNotNull(errors);
-            assertEquals(1, errors.size());
-            assertEquals(ErrorType.APPLICATION, errors.iterator().next().getErrorType());
-            assertEquals(ErrorTag.OPERATION_FAILED, errors.iterator().next().getErrorTag());
-        }
-
-        // additional validation in the fact that the restconfImpl does not
-        // throw an exception.
+//        final RpcResult<CompositeNode> rpcResult = RpcResultBuilder.<CompositeNode>success().build();
+//
+//        final ListenableFuture<RpcResult<CompositeNode>> mockListener = mock(ListenableFuture.class);
+//        when(mockListener.get()).thenReturn(rpcResult);
+//
+//        final QName cancelToastQName = QName.create("namespace", "2014-05-28", "cancelToast");
+//
+//        final RpcDefinition mockRpc = mock(RpcDefinition.class);
+//        when(mockRpc.getQName()).thenReturn(cancelToastQName);
+//
+//        final DOMMountPoint mockMountPoint = mock(DOMMountPoint.class);
+//        final RpcProvisionRegistry mockedRpcProvisionRegistry = mock(RpcProvisionRegistry.class);
+//        when(mockedRpcProvisionRegistry.invokeRpc(eq(cancelToastQName), any(CompositeNode.class))).thenReturn(mockListener);
+//        when(mockMountPoint.getService(eq(RpcProvisionRegistry.class))).thenReturn(Optional.of(mockedRpcProvisionRegistry));
+//        when(mockMountPoint.getSchemaContext()).thenReturn(TestUtils.loadSchemaContext("/invoke-rpc"));
+//
+//        final InstanceIdentifierContext mockedInstanceId = mock(InstanceIdentifierContext.class);
+//        when(mockedInstanceId.getMountPoint()).thenReturn(mockMountPoint);
+//
+//        final ControllerContext mockedContext = mock(ControllerContext.class);
+//        final String rpcNoop = "invoke-rpc-module:rpc-noop";
+//        when(mockedContext.urlPathArgDecode(rpcNoop)).thenReturn(rpcNoop);
+//        when(mockedContext.getRpcDefinition(rpcNoop)).thenReturn(mockRpc);
+//        when(
+//                mockedContext.toMountPointIdentifier(eq("opendaylight-inventory:nodes/node/"
+//                        + "REMOTE_HOST/yang-ext:mount/invoke-rpc-module:rpc-noop"))).thenReturn(mockedInstanceId);
+//
+//        restconfImpl.setControllerContext(mockedContext);
+//        try {
+//            restconfImpl.invokeRpc(
+//                    "opendaylight-inventory:nodes/node/REMOTE_HOST/yang-ext:mount/invoke-rpc-module:rpc-noop", "",
+//                    uriInfo);
+//            fail("RestconfDocumentedException wasn't raised");
+//        } catch (final RestconfDocumentedException e) {
+//            final List<RestconfError> errors = e.getErrors();
+//            assertNotNull(errors);
+//            assertEquals(1, errors.size());
+//            assertEquals(ErrorType.APPLICATION, errors.iterator().next().getErrorType());
+//            assertEquals(ErrorTag.OPERATION_FAILED, errors.iterator().next().getErrorTag());
+//        }
+//
+//        // additional validation in the fact that the restconfImpl does not
+//        // throw an exception.
     }
 }
