@@ -96,6 +96,19 @@ public class Follower extends AbstractRaftActorBehavior {
         // to make it easier to read. Before refactoring ensure tests
         // cover the code properly
 
+        if (snapshotTracker != null) {
+            // if snapshot install is in progress, follower should just acknowledge append entries with a reply.
+            AppendEntriesReply reply = new AppendEntriesReply(context.getId(), currentTerm(), true,
+                    lastIndex(), lastTerm());
+
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("{}: snapshot install is in progress, replying immediately with {}", logName(), reply);
+            }
+            sender.tell(reply, actor());
+
+            return this;
+        }
+
         // 1. Reply false if term < currentTerm (§5.1)
         // This is handled in the appendEntries method of the base class
 
