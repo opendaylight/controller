@@ -23,7 +23,10 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.StoreTreeNode;
  * unclosed.
  *
  * @author Robert Varga
+ *
+ * @deprecated Use {@link RegistrationTreeNode} instead.
  */
+@Deprecated
 public class ListenerNode implements StoreTreeNode<ListenerNode>, Identifiable<PathArgument> {
     final RegistrationTreeNode<DataChangeListenerRegistration<?>> delegate;
 
