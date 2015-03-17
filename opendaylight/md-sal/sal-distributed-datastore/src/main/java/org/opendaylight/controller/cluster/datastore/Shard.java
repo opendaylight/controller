@@ -56,6 +56,8 @@ import org.opendaylight.controller.cluster.datastore.messages.PeerAddressResolve
 import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListener;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListenerReply;
+import org.opendaylight.controller.cluster.datastore.messages.RegisterTreeChangeListener;
+import org.opendaylight.controller.cluster.datastore.messages.RegisterTreeChangeListenerReply;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
 import org.opendaylight.controller.cluster.datastore.modification.ModificationPayload;
@@ -682,6 +684,14 @@ public class Shard extends RaftActor {
                 persistenceId(), listenerRegistration.path());
 
         getSender().tell(new RegisterChangeListenerReply(listenerRegistration.path()), getSelf());
+    }
+
+    private void registerTreeChangeListener(final RegisterTreeChangeListener registerTreeChangeListener) {
+
+        ActorRef listenerRegistration = getContext().actorOf(
+            DataTreeChangeListenerRegistration.props(registration));
+
+        getSender().tell(new RegisterTreeChangeListenerReply(listenerRegistration.path()), getSelf());
     }
 
     private ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier,
