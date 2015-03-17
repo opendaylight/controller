@@ -117,6 +117,13 @@
         <bundle>mvn:org.opendaylight.controller/netconf-tcp/${netconf.version}</bundle>
       </feature>
 
+    <feature name='odl-message-bus' version='${project.version}'>
+        <feature version='${project.version}'>odl-netconf-connector</feature>
+        <feature version='${project.version}'>odl-mdsal-broker</feature>
+        <bundle>mvn:org.opendaylight.controller/messagebus-api/${project.version}</bundle>
+        <bundle>mvn:org.opendaylight.controller/messagebus-impl/${project.version}</bundle>
+        <configfile finalname="${config.configfile.directory}/05-message-bus.xml">mvn:org.opendaylight.controller/messagebus-config/${project.version}/xml/config</configfile>
+    </feature>
     <!-- Optional TODO: Remove TODO Comments -->
 
 </features>

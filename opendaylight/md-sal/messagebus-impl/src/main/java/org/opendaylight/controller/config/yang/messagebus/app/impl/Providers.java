@@ -6,7 +6,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.mdsal;
+package org.opendaylight.controller.config.yang.messagebus.app.impl;
 
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sal.binding.api.BindingAwareProvider;
@@ -19,16 +19,10 @@ public class Providers {
     private static final Logger LOGGER = LoggerFactory.getLogger(Providers.class);
 
     public static class BindingAware implements BindingAwareProvider, AutoCloseable {
-        private final InitializationContext initializationContext;
 
-        public BindingAware(InitializationContext ic) {
-            this.initializationContext = ic;
-        }
 
         @Override
-        public void onSessionInitiated(BindingAwareBroker.ProviderContext session) {
-            initializationContext.set(session);
-
+        public void onSessionInitiated(final BindingAwareBroker.ProviderContext session) {
             LOGGER.info("BindingAwareBroker.ProviderContext initialized");
         }
 
@@ -37,16 +31,9 @@ public class Providers {
     }
 
     public static class BindingIndependent extends AbstractProvider implements AutoCloseable {
-        private final InitializationContext initializationContext;
-
-        public BindingIndependent(InitializationContext ic) {
-            this.initializationContext = ic;
-        }
 
         @Override
-        public void onSessionInitiated(Broker.ProviderSession session) {
-            initializationContext.set(session);
-
+        public void onSessionInitiated(final Broker.ProviderSession session) {
             LOGGER.info("Broker.ProviderSession initialized");
         }
 
