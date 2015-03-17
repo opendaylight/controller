@@ -11,12 +11,16 @@ import akka.actor.ActorRef;
 import akka.actor.Status;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.RemovalCause;
+import com.google.common.cache.RemovalListener;
+import com.google.common.cache.RemovalNotification;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransactionReply;
+import org.opendaylight.controller.cluster.datastore.modification.CompositeModification;
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.slf4j.Logger;
@@ -40,10 +44,16 @@ public class ShardCommitCoordinator {
 
     private final String name;
 
+    private final CacheRemovalListener cacheRemovalListener;
+
     public ShardCommitCoordinator(long cacheExpiryTimeoutInSec, int queueCapacity, Logger log,
             String name) {
-        cohortCache = CacheBuilder.newBuilder().expireAfterAccess(
-                cacheExpiryTimeoutInSec, TimeUnit.SECONDS).build();
+
+        cacheRemovalListener = new CacheRemovalListener(log);
+
+        cohortCache = CacheBuilder.newBuilder()
+                .expireAfterAccess(cacheExpiryTimeoutInSec, TimeUnit.SECONDS)
+                .removalListener(cacheRemovalListener).build();
 
         this.queueCapacity = queueCapacity;
         this.log = log;
@@ -264,6 +274,37 @@ public class ShardCommitCoordinator {
 
         void setShard(ActorRef shard) {
             this.shard = shard;
+        }
+
+        boolean hasModifications(){
+            if(modification instanceof CompositeModification){
+                return ((CompositeModification) modification).getModifications().size() > 0;
+            }
+            return true;
+        }
+
+        @Override
+        public String toString() {
+            return "CohortEntry{" +
+                    "transactionID='" + transactionID + '\'' +
+                    ", lastAccessTime=" + lastAccessTime +
+                    '}';
+        }
+    }
+
+    private static class CacheRemovalListener implements RemovalListener<String, CohortEntry>{
+
+        private final Logger log;
+
+        private CacheRemovalListener(Logger log){
+            this.log = log;
+        }
+
+        @Override
+        public void onRemoval(RemovalNotification<String, CohortEntry> removalNotification) {
+            if (removalNotification.getCause() == RemovalCause.EXPIRED) {
+                log.error("{} expired", removalNotification.getValue());
+            }
         }
     }
 }
