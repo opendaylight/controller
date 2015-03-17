@@ -20,10 +20,12 @@ import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.cluster.datastore.utils.Dispatchers;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreTreeChangePublisher;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -37,7 +39,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class DistributedDataStore implements DOMStore, SchemaContextListener,
-        DatastoreContextConfigAdminOverlay.Listener, AutoCloseable {
+        DatastoreContextConfigAdminOverlay.Listener, DOMStoreTreeChangePublisher, AutoCloseable {
 
     private static final Logger LOG = LoggerFactory.getLogger(DistributedDataStore.class);
     private static final String UNKNOWN_TYPE = "unknown";
@@ -115,6 +117,21 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
         final DataChangeListenerRegistrationProxy listenerRegistrationProxy =
                 new DataChangeListenerRegistrationProxy(shardName, actorContext, listener);
         listenerRegistrationProxy.init(path, scope);
+
+        return listenerRegistrationProxy;
+    }
+
+    @Override
+    public <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerTreeChangeListener(YangInstanceIdentifier treeId, L listener) {
+        Preconditions.checkNotNull(treeId, "treeId should not be null");
+        Preconditions.checkNotNull(listener, "listener should not be null");
+
+        final String shardName = ShardStrategyFactory.getStrategy(treeId).findShard(treeId);
+        LOG.debug("Registering tree listener: {} for tree: {} shard: {}", listener, treeId, shardName);
+
+        final DOMDataTreeChangeListenerProxy<L> listenerRegistrationProxy =
+                new DOMDataTreeChangeListenerProxy<L>(actorContext, listener);
+        listenerRegistrationProxy.init(shardName, treeId);
 
         return listenerRegistrationProxy;
     }
