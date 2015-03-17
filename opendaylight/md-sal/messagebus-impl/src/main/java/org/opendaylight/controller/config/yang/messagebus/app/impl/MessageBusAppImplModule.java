@@ -7,17 +7,24 @@
  */
 package org.opendaylight.controller.config.yang.messagebus.app.impl;
 
+import java.util.List;
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
-import org.opendaylight.controller.mdsal.InitializationContext;
-import org.opendaylight.controller.mdsal.Providers;
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.MountPointService;
+import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
+import org.opendaylight.controller.md.sal.dom.api.DOMNotificationPublishService;
+import org.opendaylight.controller.messagebus.app.impl.EventSourceTopology;
+import org.opendaylight.controller.messagebus.app.impl.NetconfEventSourceManager;
+import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
+import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
+import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-
-public class MessageBusAppImplModule extends org.opendaylight.controller.config.yang.messagebus.app.impl.AbstractMessageBusAppImplModule {
+public class MessageBusAppImplModule extends
+        org.opendaylight.controller.config.yang.messagebus.app.impl.AbstractMessageBusAppImplModule {
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageBusAppImplModule.class);
 
     private BundleContext bundleContext;
@@ -26,49 +33,55 @@ public class MessageBusAppImplModule extends org.opendaylight.controller.config.
         return bundleContext;
     }
 
-    public void setBundleContext(BundleContext bundleContext) {
+    public void setBundleContext(final BundleContext bundleContext) {
         this.bundleContext = bundleContext;
     }
 
-    public MessageBusAppImplModule( ModuleIdentifier identifier, DependencyResolver dependencyResolver) {
+    public MessageBusAppImplModule(final ModuleIdentifier identifier, final DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
     }
 
-    public MessageBusAppImplModule( ModuleIdentifier identifier,
-                                    DependencyResolver dependencyResolver,
-                                    MessageBusAppImplModule oldModule,
-                                    java.lang.AutoCloseable oldInstance) {
+    public MessageBusAppImplModule(final ModuleIdentifier identifier, final DependencyResolver dependencyResolver,
+            final MessageBusAppImplModule oldModule, final java.lang.AutoCloseable oldInstance) {
         super(identifier, dependencyResolver, oldModule, oldInstance);
     }
 
     @Override
-    protected void customValidation() {}
+    protected void customValidation() {
+    }
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        List<NamespaceToStream> namespaceMapping = getNamespaceToStream();
-        InitializationContext ic = new InitializationContext(namespaceMapping);
+        final List<NamespaceToStream> namespaceMapping = getNamespaceToStream();
 
-        final Providers.BindingAware bap = new Providers.BindingAware(ic);
-        final Providers.BindingIndependent bip = new Providers.BindingIndependent(ic);
+        final ProviderContext bindingCtx = getBindingBrokerDependency().registerProvider(new Providers.BindingAware());
+        final ProviderSession domCtx = getDomBrokerDependency().registerProvider(new Providers.BindingIndependent());
 
-        getBindingBrokerDependency().registerProvider(bap, getBundleContext());
-        getDomBrokerDependency().registerProvider(bip);
+        final DataBroker dataBroker = bindingCtx.getSALService(DataBroker.class);
+        final DOMNotificationPublishService domPublish = domCtx.getService(DOMNotificationPublishService.class);
+        final DOMMountPointService domMount = domCtx.getService(DOMMountPointService.class);
+        final MountPointService bindingMount = bindingCtx.getSALService(MountPointService.class);
+        final RpcProviderRegistry rpcRegistry = bindingCtx.getSALService(RpcProviderRegistry.class);
 
-        AutoCloseable closer = new AutoCloseable() {
-            @Override public void close()  {
-                closeProvider(bap);
-                closeProvider(bip);
+        final EventSourceTopology eventSourceTopology = new EventSourceTopology(dataBroker, rpcRegistry);
+        final NetconfEventSourceManager eventSourceManager = new NetconfEventSourceManager(dataBroker, domPublish,
+                domMount, bindingMount, eventSourceTopology, getNamespaceToStream());
+
+        final AutoCloseable closer = new AutoCloseable() {
+            @Override
+            public void close() {
+                eventSourceTopology.close();
+                eventSourceManager.close();
             }
         };
 
         return closer;
     }
 
-    private void closeProvider(AutoCloseable closable) {
+    private void closeProvider(final AutoCloseable closable) {
         try {
             closable.close();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LOGGER.error("Exception while closing: {}\n Exception: {}", closable, e);
         }
     }
