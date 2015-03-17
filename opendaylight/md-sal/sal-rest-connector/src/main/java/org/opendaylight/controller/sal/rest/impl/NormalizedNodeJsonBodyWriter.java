@@ -66,36 +66,54 @@ public class NormalizedNodeJsonBodyWriter implements MessageBodyWriter<Normalize
             return;
         }
 
+        @SuppressWarnings("unchecked")
         final InstanceIdentifierContext<SchemaNode> context = (InstanceIdentifierContext<SchemaNode>) t.getInstanceIdentifierContext();
 
         SchemaPath path = context.getSchemaNode().getPath();
-        boolean isDataRoot = false;
+        final JsonWriter jsonWriter = createJsonWriter(entityStream);
+        jsonWriter.beginObject();
+        writeNormalizedNode(jsonWriter,path,context,data);
+        jsonWriter.endObject();
+        jsonWriter.flush();
+    }
+
+    private void writeNormalizedNode(JsonWriter jsonWriter, SchemaPath path,
+            InstanceIdentifierContext<SchemaNode> context, NormalizedNode<?, ?> data) throws IOException {
+        final NormalizedNodeWriter nnWriter;
         if (SchemaPath.ROOT.equals(path)) {
-            isDataRoot = true;
+            /*
+             *  Creates writer without initialNs and we write children of root data container
+             *  which is not visible in restconf
+             */
+            nnWriter = createNormalizedNodeWriter(context,path,jsonWriter);
+            writeChildren(nnWriter,(ContainerNode) data);
         } else if (context.getSchemaNode() instanceof RpcDefinition) {
-            isDataRoot = true;
+            /*
+             *  RpcDefinition is not supported as initial codec in JSONStreamWriter,
+             *  so we need to emit initial output declaratation..
+             */
             path = ((RpcDefinition) context.getSchemaNode()).getOutput().getPath();
+            nnWriter = createNormalizedNodeWriter(context,path,jsonWriter);
+            jsonWriter.name("output");
+            jsonWriter.beginObject();
+            writeChildren(nnWriter, (ContainerNode) data);
+            jsonWriter.endObject();
         } else {
             path = path.getParent();
-            // FIXME: Add proper handling of reading root.
-        }
 
-        final JsonWriter jsonWriter = createJsonWriter(entityStream);
-        final NormalizedNodeWriter nnWriter = createNormalizedNodeWriter(context,path,jsonWriter);
-
-        jsonWriter.beginObject();
-        if(isDataRoot) {
-            writeDataRoot(nnWriter,(ContainerNode) data);
-        } else {
             if(data instanceof MapEntryNode) {
                 data = ImmutableNodes.mapNodeBuilder(data.getNodeType()).withChild(((MapEntryNode) data)).build();
             }
+            nnWriter = createNormalizedNodeWriter(context,path,jsonWriter);
             nnWriter.write(data);
         }
-
         nnWriter.flush();
-        jsonWriter.endObject();
-        jsonWriter.flush();
+    }
+
+    private void writeChildren(final NormalizedNodeWriter nnWriter, final ContainerNode data) throws IOException {
+        for(final DataContainerChild<? extends PathArgument, ?> child : data.getValue()) {
+            nnWriter.write(child);
+        }
     }
 
     private NormalizedNodeWriter createNormalizedNodeWriter(final InstanceIdentifierContext<SchemaNode> context,
@@ -104,9 +122,15 @@ public class NormalizedNodeJsonBodyWriter implements MessageBodyWriter<Normalize
         final SchemaNode schema = context.getSchemaNode();
         final JSONCodecFactory codecs = getCodecFactory(context);
 
-        URI initialNs = null;
-        if ( ! (schema instanceof RpcDefinition) && (!((DataSchemaNode)schema).isAugmenting() && !(schema instanceof SchemaContext))) {
+        final URI initialNs;
+        if ((schema instanceof DataSchemaNode)
+                && !((DataSchemaNode)schema).isAugmenting()
+                && !(schema instanceof SchemaContext)) {
             initialNs = schema.getQName().getNamespace();
+        } else if (schema instanceof RpcDefinition) {
+            initialNs = schema.getQName().getNamespace();
+        } else {
+            initialNs = null;
         }
         final NormalizedNodeStreamWriter streamWriter = JSONNormalizedNodeStreamWriter.createNestedWriter(codecs,path,initialNs,jsonWriter);
         return NormalizedNodeWriter.forStreamWriter(streamWriter);
@@ -118,15 +142,9 @@ public class NormalizedNodeJsonBodyWriter implements MessageBodyWriter<Normalize
 
     }
 
-    private JSONCodecFactory getCodecFactory(final InstanceIdentifierContext context) {
+    private JSONCodecFactory getCodecFactory(final InstanceIdentifierContext<?> context) {
         // TODO: Performance: Cache JSON Codec factory and schema context
         return JSONCodecFactory.create(context.getSchemaContext());
-    }
-
-    private void writeDataRoot(final NormalizedNodeWriter nnWriter, final ContainerNode data) throws IOException {
-        for(final DataContainerChild<? extends PathArgument, ?> child : data.getValue()) {
-            nnWriter.write(child);
-        }
     }
 
 }

@@ -18,6 +18,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
+import javax.xml.XMLConstants;
 import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -27,9 +28,7 @@ import org.opendaylight.controller.sal.rest.api.RestconfService;
 import org.opendaylight.controller.sal.restconf.impl.InstanceIdentifierContext;
 import org.opendaylight.controller.sal.restconf.impl.NormalizedNodeContext;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
-import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
@@ -85,38 +84,45 @@ public class NormalizedNodeXmlBodyWriter implements MessageBodyWriter<Normalized
         NormalizedNode<?, ?> data = t.getData();
         SchemaPath schemaPath = pathContext.getSchemaNode().getPath();
 
-        boolean isDataRoot = false;
-        if (SchemaPath.ROOT.equals(schemaPath)) {
-            isDataRoot = true;
-        }  else if (pathContext.getSchemaNode() instanceof RpcDefinition) {
-            isDataRoot = true;
-            schemaPath = ((RpcDefinition) pathContext.getSchemaNode()).getOutput().getPath();
-        } else {
-            schemaPath = schemaPath.getParent();
-        }
 
-        final NormalizedNodeStreamWriter jsonWriter = XMLStreamNormalizedNodeStreamWriter.create(xmlWriter,
-                pathContext.getSchemaContext(), schemaPath);
-        final NormalizedNodeWriter nnWriter = NormalizedNodeWriter.forStreamWriter(jsonWriter);
-        if (isDataRoot) {
-            writeRootElement(xmlWriter, nnWriter, (ContainerNode) data);
+
+        writeNormalizedNode(xmlWriter,schemaPath,pathContext,data);
+    }
+
+    private void writeNormalizedNode(XMLStreamWriter xmlWriter, SchemaPath schemaPath,InstanceIdentifierContext<?> pathContext, NormalizedNode<?, ?> data) throws IOException {
+        final NormalizedNodeWriter nnWriter;
+        final SchemaContext schemaCtx = pathContext.getSchemaContext();
+        if (SchemaPath.ROOT.equals(schemaPath)) {
+            nnWriter = createNormalizedNodeWriter(xmlWriter, schemaCtx, schemaPath);
+            writeElements(xmlWriter, nnWriter, (ContainerNode) data);
+        }  else if (pathContext.getSchemaNode() instanceof RpcDefinition) {
+            nnWriter = createNormalizedNodeWriter(xmlWriter, schemaCtx, ((RpcDefinition) pathContext.getSchemaNode()).getOutput().getPath());
+            writeElements(xmlWriter, nnWriter, (ContainerNode) data);
         } else {
+            nnWriter = createNormalizedNodeWriter(xmlWriter, schemaCtx, schemaPath.getParent());
             if (data instanceof MapEntryNode) {
                 // Restconf allows returning one list item. We need to wrap it
                 // in map node in order to serialize it properly
                 data = ImmutableNodes.mapNodeBuilder(data.getNodeType()).addChild((MapEntryNode) data).build();
             }
             nnWriter.write(data);
-            nnWriter.flush();
         }
+        nnWriter.flush();
     }
 
-    private void writeRootElement(final XMLStreamWriter xmlWriter, final NormalizedNodeWriter nnWriter, final ContainerNode data)
+    private NormalizedNodeWriter createNormalizedNodeWriter(XMLStreamWriter xmlWriter,
+            SchemaContext schemaContext, SchemaPath schemaPath) {
+        NormalizedNodeStreamWriter xmlStreamWriter = XMLStreamNormalizedNodeStreamWriter.create(xmlWriter, schemaContext, schemaPath);
+        return NormalizedNodeWriter.forStreamWriter(xmlStreamWriter);
+    }
+
+    private void writeElements(final XMLStreamWriter xmlWriter, final NormalizedNodeWriter nnWriter, final ContainerNode data)
             throws IOException {
         try {
-            final QName name = SchemaContext.NAME;
-            xmlWriter.writeStartElement(name.getNamespace().toString(), name.getLocalName());
-            for (final DataContainerChild<? extends PathArgument, ?> child : data.getValue()) {
+            final QName name = data.getNodeType();
+            xmlWriter.writeStartElement(XMLConstants.DEFAULT_NS_PREFIX, name.getLocalName(), name.getNamespace().toString());
+            xmlWriter.writeDefaultNamespace(name.getNamespace().toString());
+            for(NormalizedNode<?,?> child : data.getValue()) {
                 nnWriter.write(child);
             }
             nnWriter.flush();
