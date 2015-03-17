@@ -66,7 +66,7 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
         output = new DataOutputStream(stream);
     }
 
-    public NormalizedNodeOutputStreamWriter(DataOutput output) throws IOException {
+    public NormalizedNodeOutputStreamWriter(DataOutput output) {
         this.output = Preconditions.checkNotNull(output);
     }
 
