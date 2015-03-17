@@ -71,11 +71,16 @@ public class FeatureConfigPusher {
     private LinkedHashSet<FeatureConfigSnapshotHolder> pushConfig(final Feature feature) throws Exception, InterruptedException {
         LinkedHashSet<FeatureConfigSnapshotHolder> configs = new LinkedHashSet<FeatureConfigSnapshotHolder>();
         if(isInstalled(feature)) {
-            ChildAwareFeatureWrapper wrappedFeature = new ChildAwareFeatureWrapper(feature,featuresService);
-            configs = wrappedFeature.getFeatureConfigSnapshotHolders();
-            if(!configs.isEmpty()) {
-                configs = pushConfig(configs);
-                feature2configs.putAll(feature, configs);
+            // FIXME Workaround for BUG-2836, features service returns null for feature: standard-condition-webconsole_0_0_0, 3.0.1
+            if(featuresService.getFeature(feature.getName(), feature.getVersion()) == null) {
+                LOG.warn("Feature: {}, {} is missing from features service. Skipping", feature.getName(), feature.getVersion());
+            } else {
+                ChildAwareFeatureWrapper wrappedFeature = new ChildAwareFeatureWrapper(feature, featuresService);
+                configs = wrappedFeature.getFeatureConfigSnapshotHolders();
+                if (!configs.isEmpty()) {
+                    configs = pushConfig(configs);
+                    feature2configs.putAll(feature, configs);
+                }
             }
         }
         return configs;
