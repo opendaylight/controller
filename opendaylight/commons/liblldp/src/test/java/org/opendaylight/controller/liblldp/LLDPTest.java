@@ -8,7 +8,13 @@
 package org.opendaylight.controller.liblldp;
 
 import static org.junit.Assert.assertArrayEquals;
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import org.junit.Before;
+import java.util.Iterator;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,7 +50,7 @@ public class LLDPTest {
     private static final byte[] SYSTEM_CAPABILITIES_VALUE = "dummy system capabilities".getBytes();
     private static final short SYSTEM_CAPABILITIES_LENGTH = (short) SYSTEM_CAPABILITIES_VALUE.length;
 
-    private static final byte[] OUI = new byte[] { (byte) 0X11, (byte) 0X22, (byte) 0X33 };
+    private static final byte[] OUI = LLDPTLV.OFOUI;
 
     private static final byte[] OUI_SUBTYPE_A = new byte[] { (byte) 0 };
     private static final byte[] CUSTOM_SUBTYPE_A_VALUE = "first custom value A".getBytes();
@@ -54,6 +60,15 @@ public class LLDPTest {
     private static final byte[] CUSTOM_SUBTYPE_B_VALUE = "second custom value B".getBytes();
     private static final short CUSTOM_SUBTYPE_B_LENGTH = (short) (OUI.length + OUI_SUBTYPE_B.length + CUSTOM_SUBTYPE_B_VALUE.length);
 
+    private static final byte[] BYTES_BEFORE_CUSTOM_A = new byte[] { 0x00, 0x26, (byte) 0xe1, OUI_SUBTYPE_A[0] };
+    private static final byte[] BYTES_BEFORE_CUSTOM_B = new byte[] { 0x00, 0x26, (byte) 0xe1, OUI_SUBTYPE_B[0] };
+    private LLDP lldpBuilder;
+
+    @Before
+    public void setup() {
+        lldpBuilder = new LLDP();
+    }
+
     /**
      * Tests whether serialization of LLDP packet is correct
      *
@@ -62,8 +77,6 @@ public class LLDPTest {
      */
     @Test
     public void testSerialize() throws PacketException {
-        LLDP lldpBuilder = new LLDP();
-
         lldpBuilder.setChassisId(dummyTlv(LLDPTLV.TLVType.ChassisID.getValue(), CHASSIS_ID_LENGTH, CHASSIS_ID_VALUE));
         lldpBuilder.setTtl(dummyTlv(LLDPTLV.TLVType.TTL.getValue(), TTL_LENGTH, TTL_VALUE));
         lldpBuilder.setPortId(dummyTlv(LLDPTLV.TLVType.PortID.getValue(), PORT_LENGTH, PORT_VALUE));
@@ -76,13 +89,11 @@ public class LLDPTest {
         optionalTLVs.add(dummyTlv(SYSTEM_CAPABILITIES_TLV, SYSTEM_CAPABILITIES_LENGTH, SYSTEM_CAPABILITIES_VALUE));
         lldpBuilder.setOptionalTLVList(optionalTLVs);
 
-        // // adding custom TLVs
-         final List<LLDPTLV> customTLVs = new ArrayList<>();
-         customTLVs.add(dummyCustomTlv(LLDPTLV.TLVType.Custom.getValue(), OUI, OUI_SUBTYPE_A,
-         CUSTOM_SUBTYPE_A_LENGTH, CUSTOM_SUBTYPE_A_VALUE));
-         customTLVs.add(dummyCustomTlv(LLDPTLV.TLVType.Custom.getValue(), OUI, OUI_SUBTYPE_B,
-         CUSTOM_SUBTYPE_B_LENGTH, CUSTOM_SUBTYPE_B_VALUE));
-         lldpBuilder.setCustomTLVList(customTLVs);
+        // adding custom TLVs
+        lldpBuilder.addCustomTLV(dummyCustomTlv(LLDPTLV.TLVType.Custom.getValue(), OUI, OUI_SUBTYPE_A,
+                CUSTOM_SUBTYPE_A_LENGTH, CUSTOM_SUBTYPE_A_VALUE));
+        lldpBuilder.addCustomTLV(dummyCustomTlv(LLDPTLV.TLVType.Custom.getValue(), OUI, OUI_SUBTYPE_B,
+                CUSTOM_SUBTYPE_B_LENGTH, CUSTOM_SUBTYPE_B_VALUE));
 
         byte[] serialized = lldpBuilder.serialize();
 
@@ -111,9 +122,6 @@ public class LLDPTest {
      */
     @Test
     public void testDeserialize() throws Exception {
-        LLDP lldp = new LLDP();
-        byte[] bytesBeforeCustomA = new byte[] { 0x00, 0x26, (byte) 0xe1, OUI_SUBTYPE_A[0] };
-        byte[] bytesBeforeCustomB = new byte[] { 0x00, 0x26, (byte) 0xe1, OUI_SUBTYPE_B[0] };
 
         byte[] rawLldpTlv = Bytes.concat(
                 awaitedBytes((byte) 0b00000010, CHASSIS_ID_LENGTH, CHASSIS_ID_VALUE, null),
@@ -123,30 +131,83 @@ public class LLDPTest {
                 awaitedBytes((byte) 0b00010010, SYSTEM_CAPABILITIES_LENGTH,
                         SYSTEM_CAPABILITIES_VALUE, null),
                 awaitedBytes((byte) 0b11111110, CUSTOM_SUBTYPE_A_LENGTH, CUSTOM_SUBTYPE_A_VALUE,
-                        bytesBeforeCustomA),
+                        BYTES_BEFORE_CUSTOM_A),
                 awaitedBytes((byte) 0b11111110, CUSTOM_SUBTYPE_B_LENGTH, CUSTOM_SUBTYPE_B_VALUE,
-                        bytesBeforeCustomB));
+                        BYTES_BEFORE_CUSTOM_B));
 
-        lldp.deserialize(rawLldpTlv, 0, rawLldpTlv.length * NetUtils.NumBitsInAByte);
-        Assert.assertEquals("chassis", new String(lldp.getChassisId().getValue()));
-        Assert.assertArrayEquals(TTL_VALUE, lldp.getTtl().getValue());
-        Assert.assertEquals("dummy port id", new String(lldp.getPortId().getValue()));
-        Assert.assertEquals("dummy system name", new String(lldp.getSystemNameId().getValue()));
+        lldpBuilder.deserialize(rawLldpTlv, 0, rawLldpTlv.length * NetUtils.NumBitsInAByte);
+        Assert.assertEquals("chassis", new String(lldpBuilder.getChassisId().getValue()));
+        Assert.assertArrayEquals(TTL_VALUE, lldpBuilder.getTtl().getValue());
+        Assert.assertEquals("dummy port id", new String(lldpBuilder.getPortId().getValue()));
+        Assert.assertEquals("dummy system name", new String(lldpBuilder.getSystemNameId().getValue()));
 
         // optional items check
-        List<LLDPTLV> tlvOptionalList = lldp.getOptionalTLVList();
-        Assert.assertEquals(1, tlvOptionalList.size());
+        Iterator<LLDPTLV> iteratorTlvOptional = lldpBuilder.getOptionalTLVList().iterator();
 
-        LLDPTLV itemOpt0 = tlvOptionalList.get(0);
-        Assert.assertEquals(9, itemOpt0.getType());
-        Assert.assertEquals("dummy system capabilities", new String(itemOpt0.getValue()));
+        assertTrue(iteratorTlvOptional.hasNext());
+        LLDPTLV item0 = iteratorTlvOptional.next();
+        Assert.assertEquals(5, item0.getType());
+        Assert.assertEquals("dummy system name", new String(item0.getValue()));
+        assertTrue(iteratorTlvOptional.hasNext());
+
+        assertTrue(iteratorTlvOptional.hasNext());
+        LLDPTLV item1 = iteratorTlvOptional.next();
+        Assert.assertEquals(9, item1.getType());
+        Assert.assertEquals("dummy system capabilities", new String(item1.getValue()));
+        assertFalse(iteratorTlvOptional.hasNext());
 
         // custom items check
-        List<LLDPTLV> tlvCustomList = lldp.getCustomTlvList();
-        Assert.assertEquals(2, tlvCustomList.size());
+        Iterable<LLDPTLV> customTlvs = lldpBuilder.getCustomTlvList();
+        Iterator<LLDPTLV> iteratorLLDPTLV = customTlvs.iterator();
+        assertEquals(true, iteratorLLDPTLV.hasNext());
+        checkCustomTlv(iteratorLLDPTLV.next(), "first custom value A");
+        assertEquals(true, iteratorLLDPTLV.hasNext());
+        checkCustomTlv(iteratorLLDPTLV.next(), "second custom value B");
+        assertEquals(false, iteratorLLDPTLV.hasNext());
+    }
 
-        checkCustomTlv(tlvCustomList.get(0), "first custom value A");
-        checkCustomTlv(tlvCustomList.get(1), "second custom value B");
+    /**
+     * Test of {@link LLDP#addCustomTLV(LLDPTLV)}
+     * @throws PacketException
+     */
+    @Test
+    public void testAddCustomTLV() throws PacketException {
+        byte[] customA = awaitedBytes((byte) 0b11111110, CUSTOM_SUBTYPE_A_LENGTH, CUSTOM_SUBTYPE_A_VALUE,
+                BYTES_BEFORE_CUSTOM_A);
+        byte[] customB = awaitedBytes((byte) 0b11111110, CUSTOM_SUBTYPE_B_LENGTH, CUSTOM_SUBTYPE_B_VALUE,
+                BYTES_BEFORE_CUSTOM_B);
+
+        Packet lldptlvA = new LLDPTLV().deserialize(customA, 0, customA.length);
+        assertTrue(lldptlvA instanceof LLDPTLV);
+        Packet lldptlvB = new LLDPTLV().deserialize(customB, 0, customB.length);
+        assertTrue(lldptlvB instanceof LLDPTLV);
+
+        lldpBuilder.addCustomTLV((LLDPTLV) lldptlvA);
+        lldpBuilder.addCustomTLV((LLDPTLV) lldptlvB);
+
+        Iterator<LLDPTLV> customTLVsIterator = lldpBuilder.getCustomTlvList().iterator();
+        assertTrue(customTLVsIterator.hasNext());
+        customTLVsIterator.next();
+        assertTrue(customTLVsIterator.hasNext());
+        customTLVsIterator.next();
+        assertFalse(customTLVsIterator.hasNext());
+    }
+
+    @Test
+    public void testGetCustomTLV() throws PacketException {
+        int ouiInt = BitBufferHelper.getInt(OUI);
+        CustomTLVKey key = new CustomTLVKey(ouiInt, OUI_SUBTYPE_A[0]);
+        LLDPTLV customTLV = lldpBuilder.getCustomTLV(key);
+        assertNull(customTLV);
+
+        byte[] customA = awaitedBytes((byte) 0b11111110, CUSTOM_SUBTYPE_A_LENGTH, CUSTOM_SUBTYPE_A_VALUE,
+                BYTES_BEFORE_CUSTOM_A);
+        lldpBuilder.deserialize(customA, 0, customA.length);
+
+        customTLV = lldpBuilder.getCustomTLV(key);
+        assertNotNull(customTLV);
+        assertEquals(ouiInt, LLDPTLV.extractCustomOUI(customTLV));
+        assertEquals(OUI_SUBTYPE_A[0], LLDPTLV.extractCustomSubtype(customTLV));
     }
 
     /**
