@@ -23,6 +23,7 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -56,6 +57,8 @@ import org.opendaylight.controller.cluster.datastore.messages.PeerAddressResolve
 import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListener;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListenerReply;
+import org.opendaylight.controller.cluster.datastore.messages.RegisterTreeChangeListener;
+import org.opendaylight.controller.cluster.datastore.messages.RegisterTreeChangeListenerReply;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
 import org.opendaylight.controller.cluster.datastore.modification.ModificationPayload;
@@ -73,6 +76,7 @@ import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Compos
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationPayload;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreFactory;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
@@ -114,6 +118,8 @@ public class Shard extends RaftActor {
 
     private final List<DelayedListenerRegistration> delayedListenerRegistrations =
                                                                        Lists.newArrayList();
+
+    private final Collection<DelayedTreeListenerRegistration> delayedTreeListenerRegistrations = new ArrayList<>();
 
     private DatastoreContext datastoreContext;
 
@@ -284,6 +290,8 @@ public class Shard extends RaftActor {
                 closeTransactionChain(CloseTransactionChain.fromSerializable(message));
             } else if (message instanceof RegisterChangeListener) {
                 registerChangeListener((RegisterChangeListener) message);
+            } else if (message instanceof RegisterTreeChangeListener) {
+                registerTreeChangeListener((RegisterTreeChangeListener) message);
             } else if (message instanceof UpdateSchemaContext) {
                 updateSchemaContext((UpdateSchemaContext) message);
             } else if (message instanceof PeerAddressResolved) {
@@ -709,6 +717,52 @@ public class Shard extends RaftActor {
                 registerChangeListener.getScope());
     }
 
+    private void registerTreeChangeListener(final RegisterTreeChangeListener registerTreeChangeListener) {
+        LOG.debug("{}: registerTreeChangeListener for {}", persistenceId(), registerTreeChangeListener.getPath());
+
+        final ListenerRegistration<DOMDataTreeChangeListener> registration;
+        if (!isLeader()) {
+            LOG.debug("{}: Shard is not the leader - delaying registration", persistenceId());
+
+            DelayedTreeListenerRegistration delayedReg =
+                    new DelayedTreeListenerRegistration(registerTreeChangeListener);
+            delayedTreeListenerRegistrations.add(delayedReg);
+            registration = delayedReg;
+        } else {
+            registration = doTreeChangeListenerRegistration(registerTreeChangeListener);
+        }
+
+        ActorRef listenerRegistration = getContext().actorOf(
+                DataTreeChangeListenerRegistration.props(registration));
+
+        LOG.debug("{}: registerDataChangeListener sending reply, listenerRegistrationPath = {} ",
+                persistenceId(), listenerRegistration.path());
+
+        getSender().tell(new RegisterTreeChangeListenerReply(listenerRegistration.path()), getSelf());
+    }
+
+    private ListenerRegistration<DOMDataTreeChangeListener> doTreeChangeListenerRegistration(
+        final RegisterTreeChangeListener registerTreeChangeListener) {
+
+        ActorSelection dataChangeListenerPath = getContext().system().actorSelection(
+            registerTreeChangeListener.getDataTreeChangeListenerPath());
+
+        // Notify the listener if notifications should be enabled or not
+        // If this shard is the leader then it will enable notifications else
+        // it will not
+        dataChangeListenerPath.tell(new EnableNotification(true), getSelf());
+
+        // Now store a reference to the data change listener so it can be notified
+        // at a later point if notifications should be enabled or disabled
+        dataChangeListeners.add(dataChangeListenerPath);
+
+        DOMDataTreeChangeListener listener = new DataTreeChangeListenerProxy(dataChangeListenerPath);
+
+        LOG.debug("{}: Registering for path {}", persistenceId(), registerTreeChangeListener.getPath());
+
+        return store.registerTreeChangeListener(registerTreeChangeListener.getPath(), listener);
+    }
+
     private boolean isMetricsCaptureEnabled(){
         CommonConfig config = new CommonConfig(getContext().system().settings().config());
         return config.isMetricCaptureEnabled();
@@ -919,6 +973,17 @@ public class Shard extends RaftActor {
             }
 
             delayedListenerRegistrations.clear();
+
+            for (DelayedTreeListenerRegistration reg : delayedTreeListenerRegistrations) {
+                // Check for closed and delegation setter need to occur atomically as the registration
+                // may be closed by a different actor.
+                synchronized (reg) {
+                    if (!reg.isClosed()) {
+                        reg.setDelegate(doTreeChangeListenerRegistration(reg.getRegisterTreeChangeListener()));
+                    }
+                }
+            }
+            delayedTreeListenerRegistrations.clear();
         }
 
         shardMBean.setRaftState(getRaftState().name());
