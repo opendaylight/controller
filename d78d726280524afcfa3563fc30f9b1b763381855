@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_d56e60c9",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-17T22:27:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_9bbe3264",
+      "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_1bb22294",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2015-03-04T03:49:21Z",
       "side": 1,
       "message": "I think this should first call currentState.isCapturing() to avoid the debug logging in AbstractSnapshotState as it\u0027s valid to call this method if already capturing.",
+      "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_b5acf4ee",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-17T22:27:45Z",
+      "side": 1,
+      "message": "I\u0027ve got a state machine here. Calling this method in an invalid state should ideally be throwing an exception. If I check for isCapturing here and not even log the message then the consumer of this class will never realize that the call they just made was invalid.",
+      "parentUuid": "7a96c907_1bb22294",
       "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_35bc64bb",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-17T22:27:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_7bb9e677",
+      "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_3b883ec4",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
         "patchSetId": 5
@@ -64,6 +118,24 @@
       "writtenOn": "2015-03-04T03:49:21Z",
       "side": 1,
       "message": "We can remove these logs in lieu of the proposed debug log below.",
+      "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_b59394a2",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-17T22:27:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_3b883ec4",
       "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_95969893",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-17T22:27:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_1b8b02c4",
+      "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_db035a0e",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
         "patchSetId": 5
@@ -98,6 +188,24 @@
       "writtenOn": "2015-03-04T03:49:21Z",
       "side": 1,
       "message": "Since we\u0027re not done capturing in this state, it should return true from isCapturing().",
+      "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_758d0c7b",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 233,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-17T22:27:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_db035a0e",
       "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_55901095",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 297,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-17T22:27:45Z",
+      "side": 1,
+      "message": "The only correct thing to do would be trimLog in Idle state. Nothing else seems right to me.",
+      "parentUuid": "7a96c907_760c9b3b",
+      "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_1b046248",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
         "patchSetId": 5
@@ -132,6 +258,24 @@
       "writtenOn": "2015-03-04T03:49:21Z",
       "side": 1,
       "message": "You could initialize these to -1 at the start of the method then you wouldn\u0027t need the else or the one above. But not a big deal.",
+      "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_15ea880f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 357,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-17T22:27:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_1b046248",
       "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_95dd3873",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/SnapshotManagerTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-17T22:27:45Z",
+      "side": 1,
+      "message": "I\u0027ve built a state machine which does not throw an exception when a caller makes an illegal call - but I still consider this an illegal operation. We should not call capture when capturing.",
+      "parentUuid": "7a96c907_3bafde2b",
+      "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_5b6bcaf0",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/SnapshotManagerTest.java",
         "patchSetId": 5
@@ -166,6 +328,24 @@
       "writtenOn": "2015-03-04T03:49:21Z",
       "side": 1,
       "message": "It would be good to capture the Snapshot instance and verify its contents.",
+      "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_75ee6cee",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/SnapshotManagerTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-17T22:27:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_5b6bcaf0",
       "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -189,6 +369,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_95ce9882",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/SnapshotManagerTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-17T22:27:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_fba4164c",
+      "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_dba7da4e",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/SnapshotManagerTest.java",
         "patchSetId": 5
@@ -200,6 +398,24 @@
       "writtenOn": "2015-03-04T03:49:21Z",
       "side": 1,
       "message": "Don\u0027t need to setup expectation for dataSize() here since we\u0027re not testing persist(). Same in some of the other tests.",
+      "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_b5cb9471",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/SnapshotManagerTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-17T22:27:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_dba7da4e",
       "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -223,6 +439,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_d5abc087",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/SnapshotManagerTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-17T22:27:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_9b65d21f",
+      "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_1b79c2c7",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/SnapshotManagerTest.java",
         "patchSetId": 5
@@ -234,6 +468,24 @@
       "writtenOn": "2015-03-04T03:49:21Z",
       "side": 1,
       "message": "when replicatedToAllIndex !\u003d -1",
+      "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_f5b03cf6",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/SnapshotManagerTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-17T22:27:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_1b79c2c7",
       "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -257,6 +509,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_b592b455",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/SnapshotManagerTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-17T22:27:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_3b76fed7",
+      "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_db7efaae",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/SnapshotManagerTest.java",
         "patchSetId": 5
@@ -268,6 +538,24 @@
       "writtenOn": "2015-03-04T03:49:21Z",
       "side": 1,
       "message": "Should also verify mockRaftActorBehavior.setReplicatedToAllIndex gets called.",
+      "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_559fb05f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/SnapshotManagerTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 266,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-17T22:27:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_db7efaae",
       "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -297,6 +585,30 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_f587dc0d",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/SnapshotManagerTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 287,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-17T22:27:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_fb7bb6bb",
+      "range": {
+        "startLine": 287,
+        "startChar": 77,
+        "endLine": 287,
+        "endChar": 96
+      },
+      "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_bb51ae37",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/SnapshotManagerTest.java",
         "patchSetId": 5
@@ -308,6 +620,24 @@
       "writtenOn": "2015-03-04T03:49:21Z",
       "side": 1,
       "message": "This could be moved to setUp to avoid duplicating in other tests.",
+      "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_957c5822",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/SnapshotManagerTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 330,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-17T22:27:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_bb51ae37",
       "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -331,6 +661,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_f59efc55",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/SnapshotManagerTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 347,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-17T22:27:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_9b4cf29f",
+      "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_5b42ea68",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/SnapshotManagerTest.java",
         "patchSetId": 5
@@ -342,6 +690,24 @@
       "writtenOn": "2015-03-04T03:49:21Z",
       "side": 1,
       "message": "Don\u0027t need dataSize expectation.",
+      "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_95a3f89d",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/SnapshotManagerTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 354,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-17T22:27:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_5b42ea68",
       "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -365,6 +731,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_b5a07491",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/SnapshotManagerTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 374,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-17T22:27:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_7b47a677",
+      "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_3b0b5e2b",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/SnapshotManagerTest.java",
         "patchSetId": 5
@@ -382,6 +766,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_55ad7087",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/SnapshotManagerTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 380,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-17T22:27:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_3b0b5e2b",
+      "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_5b10aa58",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/SnapshotManagerTest.java",
         "patchSetId": 5
@@ -393,6 +795,24 @@
       "writtenOn": "2015-03-04T03:49:21Z",
       "side": 1,
       "message": "We don\u0027t want snapshotPreCommit called at all so technically we should verify the params with anyLong().",
+      "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_15b7e8d9",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/SnapshotManagerTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 513,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-17T22:27:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a96c907_5b10aa58",
       "revId": "d78d726280524afcfa3563fc30f9b1b763381855",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
