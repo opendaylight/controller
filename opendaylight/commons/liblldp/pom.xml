@@ -24,6 +24,7 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
+      <scope>test</scope>
   </dependencies>
 
   <build>
