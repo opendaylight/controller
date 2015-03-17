@@ -17,6 +17,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransactionReply;
+import org.opendaylight.controller.cluster.datastore.modification.CompositeModification;
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.slf4j.Logger;
@@ -264,6 +265,13 @@ public class ShardCommitCoordinator {
 
         void setShard(ActorRef shard) {
             this.shard = shard;
+        }
+
+        boolean hasModifications(){
+            if(modification instanceof CompositeModification){
+                return ((CompositeModification) modification).getModifications().size() > 0;
+            }
+            return true;
         }
     }
 }
