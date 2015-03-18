@@ -28,16 +28,16 @@ import org.opendaylight.yangtools.concepts.Delegator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class BindingTranslatedTransactionChain implements BindingTransactionChain, Delegator<DOMTransactionChain> {
+final class BindingDOMTransactionChainAdapter implements BindingTransactionChain, Delegator<DOMTransactionChain> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(BindingTranslatedTransactionChain.class);
+    private static final Logger LOG = LoggerFactory.getLogger(BindingDOMTransactionChainAdapter.class);
 
     private final DOMTransactionChain delegate;
     private final BindingToNormalizedNodeCodec codec;
     private final DelegateChainListener domListener;
     private final TransactionChainListener bindingListener;
 
-    public BindingTranslatedTransactionChain(final DOMDataBroker chainFactory,
+    public BindingDOMTransactionChainAdapter(final DOMDataBroker chainFactory,
             final BindingToNormalizedNodeCodec codec, final TransactionChainListener listener) {
         Preconditions.checkNotNull(chainFactory, "DOM Transaction chain factory must not be null");
         this.domListener = new DelegateChainListener();
@@ -54,14 +54,14 @@ final class BindingTranslatedTransactionChain implements BindingTransactionChain
     @Override
     public ReadOnlyTransaction newReadOnlyTransaction() {
         DOMDataReadOnlyTransaction delegateTx = delegate.newReadOnlyTransaction();
-        ReadOnlyTransaction bindingTx = new BindingDataReadTransactionImpl(delegateTx, codec);
+        ReadOnlyTransaction bindingTx = new BindingDOMReadTransactionAdapter(delegateTx, codec);
         return bindingTx;
     }
 
     @Override
     public ReadWriteTransaction newReadWriteTransaction() {
         DOMDataReadWriteTransaction delegateTx = delegate.newReadWriteTransaction();
-        ReadWriteTransaction bindingTx = new BindingDataReadWriteTransactionImpl(delegateTx, codec) {
+        ReadWriteTransaction bindingTx = new BindingDOMReadWriteTransactionAdapter(delegateTx, codec) {
 
             @Override
             public CheckedFuture<Void, TransactionCommitFailedException> submit() {
@@ -75,7 +75,7 @@ final class BindingTranslatedTransactionChain implements BindingTransactionChain
     @Override
     public WriteTransaction newWriteOnlyTransaction() {
         final DOMDataWriteTransaction delegateTx = delegate.newWriteOnlyTransaction();
-        WriteTransaction bindingTx = new BindingDataWriteTransactionImpl<DOMDataWriteTransaction>(delegateTx, codec) {
+        WriteTransaction bindingTx = new BindingDOMWriteTransactionAdapter<DOMDataWriteTransaction>(delegateTx, codec) {
 
             @Override
             public CheckedFuture<Void,TransactionCommitFailedException> submit() {
@@ -141,7 +141,7 @@ final class BindingTranslatedTransactionChain implements BindingTransactionChain
         public void onTransactionChainSuccessful(final TransactionChain<?, ?> chain) {
             Preconditions.checkState(delegate.equals(chain),
                     "Illegal state - listener for %s was invoked for incorrect chain %s.", delegate, chain);
-            bindingListener.onTransactionChainSuccessful(BindingTranslatedTransactionChain.this);
+            bindingListener.onTransactionChainSuccessful(BindingDOMTransactionChainAdapter.this);
         }
     }
 

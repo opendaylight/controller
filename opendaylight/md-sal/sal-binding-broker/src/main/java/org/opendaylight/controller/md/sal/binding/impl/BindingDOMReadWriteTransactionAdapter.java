@@ -7,20 +7,20 @@
  */
 package org.opendaylight.controller.md.sal.binding.impl;
 
-import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
+import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 
-class BindingDataReadTransactionImpl extends AbstractForwardedTransaction<DOMDataReadOnlyTransaction> implements
-        ReadOnlyTransaction {
+class BindingDOMReadWriteTransactionAdapter extends
+        BindingDOMWriteTransactionAdapter<DOMDataReadWriteTransaction> implements ReadWriteTransaction {
 
-    protected BindingDataReadTransactionImpl(final DOMDataReadOnlyTransaction delegate,
+    protected BindingDOMReadWriteTransactionAdapter(final DOMDataReadWriteTransaction delegate,
             final BindingToNormalizedNodeCodec codec) {
         super(delegate, codec);
     }
@@ -28,12 +28,6 @@ class BindingDataReadTransactionImpl extends AbstractForwardedTransaction<DOMDat
     @Override
     public <T extends DataObject> CheckedFuture<Optional<T>,ReadFailedException> read(
             final LogicalDatastoreType store, final InstanceIdentifier<T> path) {
-        return doRead(getDelegate(),store, path);
+        return doRead(getDelegate(), store, path);
     }
-
-    @Override
-    public void close() {
-        getDelegate().close();
-    }
-
 }

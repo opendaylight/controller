@@ -23,7 +23,7 @@ import org.opendaylight.yangtools.yang.binding.Notification;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
-public class ForwardedNotificationPublishService implements NotificationPublishService, AutoCloseable {
+public class BindingDOMNotificationPublishServiceAdapter implements NotificationPublishService, AutoCloseable {
 
     static final Factory<NotificationPublishService> BUILDER_FACTORY = new BindingDOMAdapterBuilder.Factory<NotificationPublishService>() {
 
@@ -37,7 +37,7 @@ public class ForwardedNotificationPublishService implements NotificationPublishS
     private final BindingNormalizedNodeSerializer codecRegistry;
     private final DOMNotificationPublishService domPublishService;
 
-    public ForwardedNotificationPublishService(BindingNormalizedNodeSerializer codecRegistry, DOMNotificationPublishService domPublishService) {
+    public BindingDOMNotificationPublishServiceAdapter(BindingNormalizedNodeSerializer codecRegistry, DOMNotificationPublishService domPublishService) {
         this.codecRegistry = codecRegistry;
         this.domPublishService = domPublishService;
     }
@@ -105,7 +105,7 @@ public class ForwardedNotificationPublishService implements NotificationPublishS
                 ClassToInstanceMap<DOMService> delegates) {
             BindingNormalizedNodeSerializer codecReg = codec.getCodecRegistry();
             DOMNotificationPublishService domPublish = delegates.getInstance(DOMNotificationPublishService.class);
-            return new ForwardedNotificationPublishService(codecReg, domPublish);
+            return new BindingDOMNotificationPublishServiceAdapter(codecReg, domPublish);
         }
 
     }

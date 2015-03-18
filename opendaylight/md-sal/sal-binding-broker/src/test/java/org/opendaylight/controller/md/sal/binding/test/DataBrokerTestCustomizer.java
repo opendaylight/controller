@@ -15,9 +15,9 @@ import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService;
 import org.opendaylight.controller.md.sal.binding.api.NotificationService;
 import org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodec;
-import org.opendaylight.controller.md.sal.binding.impl.ForwardedBindingDataBroker;
-import org.opendaylight.controller.md.sal.binding.impl.ForwardedNotificationPublishService;
-import org.opendaylight.controller.md.sal.binding.impl.ForwardedNotificationService;
+import org.opendaylight.controller.md.sal.binding.impl.BindingDOMDataBrokerAdapter;
+import org.opendaylight.controller.md.sal.binding.impl.BindingDOMNotificationPublishServiceAdapter;
+import org.opendaylight.controller.md.sal.binding.impl.BindingDOMNotificationServiceAdapter;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.broker.impl.DOMNotificationRouter;
@@ -80,12 +80,12 @@ public class DataBrokerTestCustomizer {
     }
 
     public NotificationService createNotificationService() {
-        return new ForwardedNotificationService(bindingToNormalized.getCodecRegistry(), domNotificationRouter,
+        return new BindingDOMNotificationServiceAdapter(bindingToNormalized.getCodecRegistry(), domNotificationRouter,
                 SingletonHolder.INVOKER_FACTORY);
     }
 
     public NotificationPublishService createNotificationPublishService() {
-        return new ForwardedNotificationPublishService(bindingToNormalized.getCodecRegistry(), domNotificationRouter);
+        return new BindingDOMNotificationPublishServiceAdapter(bindingToNormalized.getCodecRegistry(), domNotificationRouter);
     }
 
 
@@ -94,7 +94,7 @@ public class DataBrokerTestCustomizer {
     }
 
     public DataBroker createDataBroker() {
-        return new ForwardedBindingDataBroker(getDOMDataBroker(), bindingToNormalized);
+        return new BindingDOMDataBrokerAdapter(getDOMDataBroker(), bindingToNormalized);
     }
 
     public BindingToNormalizedNodeCodec getBindingToNormalized() {
