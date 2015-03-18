@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_dbf3ef08",
+        "filename": "opendaylight/md-sal/messagebus-config/pom.xml",
+        "patchSetId": 10
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 2834
+      },
+      "writtenOn": "2015-03-18T09:25:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_aa232f04",
+      "revId": "dcd22a92e88f220f051bf10b3bc7dca69c9c7769",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_0a7a63f1",
         "filename": "opendaylight/md-sal/messagebus-config/src/main/resources/initial/05-message-bus.xml",
         "patchSetId": 10
@@ -30,6 +48,24 @@
       "writtenOn": "2015-03-17T18:13:59Z",
       "side": 1,
       "message": "wrong year",
+      "revId": "dcd22a92e88f220f051bf10b3bc7dca69c9c7769",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_9bdd6773",
+        "filename": "opendaylight/md-sal/messagebus-config/src/main/resources/initial/05-message-bus.xml",
+        "patchSetId": 10
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 2834
+      },
+      "writtenOn": "2015-03-18T09:25:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_0a7a63f1",
       "revId": "dcd22a92e88f220f051bf10b3bc7dca69c9c7769",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_bbdaa376",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/EventSourceTopic.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 2834
+      },
+      "writtenOn": "2015-03-18T09:25:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_ca0c7b97",
+      "revId": "dcd22a92e88f220f051bf10b3bc7dca69c9c7769",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_6a1d27bd",
         "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/TopicDOMNotification.java",
         "patchSetId": 10
@@ -64,6 +118,24 @@
       "writtenOn": "2015-03-17T18:13:59Z",
       "side": 1,
       "message": "missing copyright",
+      "revId": "dcd22a92e88f220f051bf10b3bc7dca69c9c7769",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_5be7df40",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/TopicDOMNotification.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 2834
+      },
+      "writtenOn": "2015-03-18T09:25:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_6a1d27bd",
       "revId": "dcd22a92e88f220f051bf10b3bc7dca69c9c7769",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
