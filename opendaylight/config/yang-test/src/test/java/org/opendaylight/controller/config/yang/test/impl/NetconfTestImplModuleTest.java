@@ -12,7 +12,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
@@ -30,8 +29,7 @@ import org.opendaylight.controller.config.manager.impl.factoriesresolver.Hardcod
 import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.test.types.rev131127.TestIdentity1;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.test.types.rev131127.TestIdentity2;
-import org.opendaylight.yangtools.yang.data.impl.codec.CodecRegistry;
-import org.opendaylight.yangtools.yang.data.impl.codec.IdentityCodec;
+import org.opendaylight.yangtools.sal.binding.generator.util.BindingRuntimeContext;
 
 public class NetconfTestImplModuleTest  extends AbstractConfigTest {
 
@@ -48,13 +46,10 @@ public class NetconfTestImplModuleTest  extends AbstractConfigTest {
     }
 
     @Override
-    protected CodecRegistry getCodecRegistry() {
-        final IdentityCodec<?> codec = mock(IdentityCodec.class);
-        doReturn(TestIdentity1.class).when(codec).deserialize(TestIdentity1.QNAME);
-        doReturn(TestIdentity2.class).when(codec).deserialize(TestIdentity2.QNAME);
-
-        final CodecRegistry ret = super.getCodecRegistry();
-        doReturn(codec).when(ret).getIdentityCodec();
+    protected BindingRuntimeContext getBindingRuntimeContext() {
+        final BindingRuntimeContext ret = super.getBindingRuntimeContext();
+        doReturn(TestIdentity1.class).when(ret).getIdentityClass(TestIdentity1.QNAME);
+        doReturn(TestIdentity2.class).when(ret).getIdentityClass(TestIdentity2.QNAME);
         return ret;
     }
 

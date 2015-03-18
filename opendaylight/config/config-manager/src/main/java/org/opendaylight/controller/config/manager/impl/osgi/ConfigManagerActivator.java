@@ -17,7 +17,7 @@ import javax.management.InstanceAlreadyExistsException;
 import javax.management.MBeanServer;
 import org.opendaylight.controller.config.manager.impl.ConfigRegistryImpl;
 import org.opendaylight.controller.config.manager.impl.jmx.ConfigRegistryJMXRegistrator;
-import org.opendaylight.controller.config.manager.impl.osgi.mapping.CodecRegistryProvider;
+import org.opendaylight.controller.config.manager.impl.osgi.mapping.BindingContextProvider;
 import org.opendaylight.controller.config.manager.impl.osgi.mapping.ModuleInfoBundleTracker;
 import org.opendaylight.controller.config.manager.impl.osgi.mapping.RefreshingSCPModuleInfoRegistry;
 import org.opendaylight.controller.config.manager.impl.util.OsgiRegistrationUtil;
@@ -38,18 +38,19 @@ public class ConfigManagerActivator implements BundleActivator {
 
         ModuleInfoBackedContext moduleInfoBackedContext = ModuleInfoBackedContext.create();// the inner strategy is backed by thread context cl?
 
+        BindingContextProvider bindingContextProvider = new BindingContextProvider();
+
         RefreshingSCPModuleInfoRegistry moduleInfoRegistryWrapper = new RefreshingSCPModuleInfoRegistry(
-                moduleInfoBackedContext, moduleInfoBackedContext, context);
+                moduleInfoBackedContext, moduleInfoBackedContext, moduleInfoBackedContext, bindingContextProvider);
 
         ModuleInfoBundleTracker moduleInfoBundleTracker = new ModuleInfoBundleTracker(moduleInfoRegistryWrapper);
 
-        CodecRegistryProvider codecRegistryProvider = new CodecRegistryProvider(moduleInfoBackedContext, context);
 
         // start config registry
         BundleContextBackedModuleFactoriesResolver bundleContextBackedModuleFactoriesResolver = new BundleContextBackedModuleFactoriesResolver(
                 context);
         ConfigRegistryImpl configRegistry = new ConfigRegistryImpl(bundleContextBackedModuleFactoriesResolver, configMBeanServer,
-                codecRegistryProvider.getCodecRegistry());
+                bindingContextProvider);
 
         // track bundles containing factories
         BlankTransactionServiceTracker blankTransactionServiceTracker = new BlankTransactionServiceTracker(
@@ -80,7 +81,7 @@ public class ConfigManagerActivator implements BundleActivator {
         serviceTracker.open();
 
         List<AutoCloseable> list = Arrays.asList(
-                codecRegistryProvider, clsReg,configRegistry, wrap(bundleTracker), configRegReg, configRegistryJMXRegistrator, wrap(serviceTracker));
+                bindingContextProvider, clsReg,configRegistry, wrap(bundleTracker), configRegReg, configRegistryJMXRegistrator, wrap(serviceTracker));
         autoCloseable = OsgiRegistrationUtil.aggregate(list);
     }
 

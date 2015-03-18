@@ -8,30 +8,32 @@
 
 package org.opendaylight.controller.config.manager.impl.osgi.mapping;
 
-import java.util.Hashtable;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
+import org.opendaylight.yangtools.sal.binding.generator.api.ClassLoadingStrategy;
 import org.opendaylight.yangtools.sal.binding.generator.api.ModuleInfoRegistry;
 import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
 
 /**
  * Update SchemaContext service in Service Registry each time new YangModuleInfo is added or removed.
  */
-public class RefreshingSCPModuleInfoRegistry implements ModuleInfoRegistry, AutoCloseable {
+public class RefreshingSCPModuleInfoRegistry implements ModuleInfoRegistry {
 
     private final ModuleInfoRegistry moduleInfoRegistry;
-    private final ServiceRegistration<SchemaContextProvider> osgiReg;
+    private final SchemaContextProvider schemaContextProvider;
+    private final BindingContextProvider bindingContextProvider;
+    private final ClassLoadingStrategy classLoadingStrat;
 
-    public RefreshingSCPModuleInfoRegistry(ModuleInfoRegistry moduleInfoRegistry,
-                                           SchemaContextProvider schemaContextProvider, BundleContext bundleContext) {
+    public RefreshingSCPModuleInfoRegistry(final ModuleInfoRegistry moduleInfoRegistry,
+                                           final SchemaContextProvider schemaContextProvider, final ClassLoadingStrategy classLoadingStrat, final BindingContextProvider bindingContextProvider) {
         this.moduleInfoRegistry = moduleInfoRegistry;
-        osgiReg = bundleContext.registerService(SchemaContextProvider.class, schemaContextProvider, new Hashtable<String, String>());
+        this.schemaContextProvider = schemaContextProvider;
+        this.classLoadingStrat = classLoadingStrat;
+        this.bindingContextProvider = bindingContextProvider;
     }
 
     private void updateService() {
-        osgiReg.setProperties(null); // send modifiedService event
+        bindingContextProvider.update(classLoadingStrat, schemaContextProvider);
     }
 
     @Override
@@ -42,11 +44,6 @@ public class RefreshingSCPModuleInfoRegistry implements ModuleInfoRegistry, Auto
         return wrapper;
     }
 
-
-    @Override
-    public void close() {
-        osgiReg.unregister();
-    }
 
     private class ObjectRegistrationWrapper implements ObjectRegistration<YangModuleInfo> {
         private final ObjectRegistration<YangModuleInfo> inner;
