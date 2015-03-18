@@ -260,7 +260,13 @@
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>mdsal-netconf-monitoring</artifactId>
       </dependency>
-
+      <dependency>
+          <groupId>org.opendaylight.controller</groupId>
+          <artifactId>netconf-mdsal-config</artifactId>
+          <version>${netconf.version}</version>
+          <type>xml</type>
+          <classifier>config</classifier>
+      </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-netconf-connector</artifactId>
