@@ -8,17 +8,18 @@
 package org.opendaylight.controller.remote.rpc.messages;
 
 import java.io.Serializable;
+import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
 
 public class RpcResponse implements Serializable {
     private static final long serialVersionUID = -4211279498688989245L;
 
-    private final String resultCompositeNode;
+    private final NormalizedNodeMessages.Node resultNormalizedNode;
 
-    public RpcResponse(final String resultCompositeNode) {
-        this.resultCompositeNode = resultCompositeNode;
+    public RpcResponse(final NormalizedNodeMessages.Node inputNormalizedNode) {
+        resultNormalizedNode = inputNormalizedNode;
     }
 
-    public String getResultCompositeNode() {
-        return resultCompositeNode;
+    public NormalizedNodeMessages.Node getResultNormalizedNode() {
+        return resultNormalizedNode;
     }
 }

@@ -11,8 +11,8 @@ package org.opendaylight.controller.remote.rpc;
 import akka.actor.ActorSystem;
 import akka.osgi.BundleDelegatingClassLoader;
 import com.typesafe.config.Config;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService;
 import org.opendaylight.controller.sal.core.api.Broker;
-import org.opendaylight.controller.sal.core.api.RpcProvisionRegistry;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,21 +23,21 @@ public class RemoteRpcProviderFactory {
     public static RemoteRpcProvider createInstance(
             final Broker broker, final BundleContext bundleContext, final RemoteRpcProviderConfig config){
 
-      RemoteRpcProvider rpcProvider =
-          new RemoteRpcProvider(createActorSystem(bundleContext, config), (RpcProvisionRegistry) broker);
+      final RemoteRpcProvider rpcProvider =
+          new RemoteRpcProvider(createActorSystem(bundleContext, config), (DOMRpcProviderService) broker);
 
       broker.registerProvider(rpcProvider);
       return rpcProvider;
     }
 
-    private static ActorSystem createActorSystem(BundleContext bundleContext, RemoteRpcProviderConfig config){
+    private static ActorSystem createActorSystem(final BundleContext bundleContext, final RemoteRpcProviderConfig config){
 
         // Create an OSGi bundle classloader for actor system
-        BundleDelegatingClassLoader classLoader =
+        final BundleDelegatingClassLoader classLoader =
                 new BundleDelegatingClassLoader(bundleContext.getBundle(),
                         Thread.currentThread().getContextClassLoader());
 
-        Config actorSystemConfig = config.get();
+        final Config actorSystemConfig = config.get();
         if(LOG.isDebugEnabled()) {
             LOG.debug("Actor system configuration\n{}", actorSystemConfig.root().render());
         }

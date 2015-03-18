@@ -10,17 +10,17 @@ package org.opendaylight.controller.remote.rpc.messages;
 import com.google.common.base.Preconditions;
 import java.io.Serializable;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 public class InvokeRpc implements Serializable {
     private static final long serialVersionUID = -2813459607858108953L;
 
     private final QName rpc;
     private final YangInstanceIdentifier identifier;
-    private final CompositeNode input;
+    private final NormalizedNode<?,?> input;
 
-    public InvokeRpc(final QName rpc, final YangInstanceIdentifier identifier, final CompositeNode input) {
+    public InvokeRpc(final QName rpc, final YangInstanceIdentifier identifier, final NormalizedNode<?,?> input) {
         Preconditions.checkNotNull(rpc, "rpc qname should not be null");
         Preconditions.checkNotNull(input, "rpc input should not be null");
 
@@ -37,7 +37,7 @@ public class InvokeRpc implements Serializable {
         return identifier;
     }
 
-    public CompositeNode getInput() {
+    public NormalizedNode<?,?> getInput() {
         return input;
     }
 }

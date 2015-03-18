@@ -8,44 +8,41 @@
 
 package org.opendaylight.controller.remote.rpc;
 
+import static akka.pattern.Patterns.ask;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.dispatch.OnComplete;
 import akka.japi.Creator;
 import akka.japi.Pair;
-
+import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.JdkFutureAdapters;
 import com.google.common.util.concurrent.ListenableFuture;
-
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
+import org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeSerializer;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
+import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node;
 import org.opendaylight.controller.remote.rpc.messages.ExecuteRpc;
 import org.opendaylight.controller.remote.rpc.messages.InvokeRpc;
 import org.opendaylight.controller.remote.rpc.messages.RpcResponse;
-import org.opendaylight.controller.remote.rpc.messages.UpdateSchemaContext;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry;
 import org.opendaylight.controller.remote.rpc.utils.LatestEntryRoutingLogic;
 import org.opendaylight.controller.remote.rpc.utils.RoutingLogic;
 import org.opendaylight.controller.sal.connector.api.RpcRouter;
-import org.opendaylight.controller.sal.core.api.Broker;
-import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
-import org.opendaylight.controller.xml.codec.XmlUtils;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
-import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.Future;
-
-import static akka.pattern.Patterns.ask;
 
 /**
  * Actor to initiate execution of remote RPC on other nodes of the cluster.
@@ -54,68 +51,60 @@ import static akka.pattern.Patterns.ask;
 public class RpcBroker extends AbstractUntypedActor {
 
     private static final Logger LOG = LoggerFactory.getLogger(RpcBroker.class);
-    private final Broker.ProviderSession brokerSession;
     private final ActorRef rpcRegistry;
-    private SchemaContext schemaContext;
     private final RemoteRpcProviderConfig config;
+    private final DOMRpcService rpcService;
 
-    private RpcBroker(Broker.ProviderSession brokerSession, ActorRef rpcRegistry,
-            SchemaContext schemaContext) {
-        this.brokerSession = brokerSession;
+    private RpcBroker(final DOMRpcService rpcService, final ActorRef rpcRegistry) {
+        this.rpcService = rpcService;
         this.rpcRegistry = rpcRegistry;
-        this.schemaContext = schemaContext;
         config = new RemoteRpcProviderConfig(getContext().system().settings().config());
     }
 
-    public static Props props(Broker.ProviderSession brokerSession, ActorRef rpcRegistry,
-            SchemaContext schemaContext) {
-        return Props.create(new RpcBrokerCreator(brokerSession, rpcRegistry, schemaContext));
+    public static Props props(final DOMRpcService rpcService, final ActorRef rpcRegistry) {
+        Preconditions.checkNotNull(rpcRegistry, "ActorRef can not be null!");
+        Preconditions.checkNotNull(rpcService, "DOMRpcService can not be null");
+        return Props.create(new RpcBrokerCreator(rpcService, rpcRegistry));
     }
 
     @Override
-    protected void handleReceive(Object message) throws Exception {
+    protected void handleReceive(final Object message) throws Exception {
         if(message instanceof InvokeRpc) {
             invokeRemoteRpc((InvokeRpc) message);
         } else if(message instanceof ExecuteRpc) {
             executeRpc((ExecuteRpc) message);
-        } else if(message instanceof UpdateSchemaContext) {
-            updateSchemaContext((UpdateSchemaContext) message);
         }
-    }
-
-    private void updateSchemaContext(UpdateSchemaContext message) {
-        this.schemaContext = message.getSchemaContext();
     }
 
     private void invokeRemoteRpc(final InvokeRpc msg) {
         if(LOG.isDebugEnabled()) {
             LOG.debug("Looking up the remote actor for rpc {}", msg.getRpc());
         }
-        RpcRouter.RouteIdentifier<?,?,?> routeId = new RouteIdentifierImpl(
+        final RpcRouter.RouteIdentifier<?,?,?> routeId = new RouteIdentifierImpl(
                 null, msg.getRpc(), msg.getIdentifier());
-        RpcRegistry.Messages.FindRouters findMsg = new RpcRegistry.Messages.FindRouters(routeId);
+        final RpcRegistry.Messages.FindRouters findMsg = new RpcRegistry.Messages.FindRouters(routeId);
 
-        scala.concurrent.Future<Object> future = ask(rpcRegistry, findMsg, config.getAskDuration());
+        final scala.concurrent.Future<Object> future = ask(rpcRegistry, findMsg, config.getAskDuration());
 
         final ActorRef sender = getSender();
         final ActorRef self = self();
 
-        OnComplete<Object> onComplete = new OnComplete<Object>() {
+        final OnComplete<Object> onComplete = new OnComplete<Object>() {
             @Override
-            public void onComplete(Throwable failure, Object reply) throws Throwable {
+            public void onComplete(final Throwable failure, final Object reply) throws Throwable {
                 if(failure != null) {
                     LOG.error("FindRouters failed", failure);
                     sender.tell(new akka.actor.Status.Failure(failure), self);
                     return;
                 }
 
-                RpcRegistry.Messages.FindRoutersReply findReply =
+                final RpcRegistry.Messages.FindRoutersReply findReply =
                                                 (RpcRegistry.Messages.FindRoutersReply)reply;
 
-                List<Pair<ActorRef, Long>> actorRefList = findReply.getRouterWithUpdateTime();
+                final List<Pair<ActorRef, Long>> actorRefList = findReply.getRouterWithUpdateTime();
 
                 if(actorRefList == null || actorRefList.isEmpty()) {
-                    String message = String.format(
+                    final String message = String.format(
                             "No remote implementation found for rpc %s",  msg.getRpc());
                     sender.tell(new akka.actor.Status.Failure(new RpcErrorsException(
                             message, Arrays.asList(RpcResultBuilder.newError(ErrorType.RPC,
@@ -133,16 +122,16 @@ public class RpcBroker extends AbstractUntypedActor {
     protected void finishInvokeRpc(final List<Pair<ActorRef, Long>> actorRefList,
             final InvokeRpc msg, final ActorRef sender, final ActorRef self) {
 
-        RoutingLogic logic = new LatestEntryRoutingLogic(actorRefList);
+        final RoutingLogic logic = new LatestEntryRoutingLogic(actorRefList);
 
-        ExecuteRpc executeMsg = new ExecuteRpc(XmlUtils.inputCompositeNodeToXml(msg.getInput(),
-                schemaContext), msg.getRpc());
+        final Node serializedNode = NormalizedNodeSerializer.serialize(msg.getInput());
+        final ExecuteRpc executeMsg = new ExecuteRpc(serializedNode, msg.getRpc());
 
-        scala.concurrent.Future<Object> future = ask(logic.select(), executeMsg, config.getAskDuration());
+        final scala.concurrent.Future<Object> future = ask(logic.select(), executeMsg, config.getAskDuration());
 
-        OnComplete<Object> onComplete = new OnComplete<Object>() {
+        final OnComplete<Object> onComplete = new OnComplete<Object>() {
             @Override
-            public void onComplete(Throwable failure, Object reply) throws Throwable {
+            public void onComplete(final Throwable failure, final Object reply) throws Throwable {
                 if(failure != null) {
                     LOG.error("ExecuteRpc failed", failure);
                     sender.tell(new akka.actor.Status.Failure(failure), self);
@@ -160,24 +149,22 @@ public class RpcBroker extends AbstractUntypedActor {
         if(LOG.isDebugEnabled()) {
             LOG.debug("Executing rpc {}", msg.getRpc());
         }
-        Future<RpcResult<CompositeNode>> future = brokerSession.rpc(msg.getRpc(),
-                XmlUtils.inputXmlToCompositeNode(msg.getRpc(), msg.getInputCompositeNode(),
-                        schemaContext));
+        final NormalizedNode<?, ?> input = NormalizedNodeSerializer.deSerialize(msg.getInputNormalizedNode());
+        final SchemaPath schemaPath = SchemaPath.create(true, msg.getRpc());
 
-        ListenableFuture<RpcResult<CompositeNode>> listenableFuture =
+        final CheckedFuture<DOMRpcResult, DOMRpcException> future = rpcService.invokeRpc(schemaPath, input);
+
+        final ListenableFuture<DOMRpcResult> listenableFuture =
                 JdkFutureAdapters.listenInPoolThread(future);
 
         final ActorRef sender = getSender();
         final ActorRef self = self();
 
-        Futures.addCallback(listenableFuture, new FutureCallback<RpcResult<CompositeNode>>() {
+        Futures.addCallback(listenableFuture, new FutureCallback<DOMRpcResult>() {
             @Override
-            public void onSuccess(RpcResult<CompositeNode> result) {
-                if(result.isSuccessful()) {
-                    sender.tell(new RpcResponse(XmlUtils.outputCompositeNodeToXml(result.getResult(),
-                            schemaContext)), self);
-                } else {
-                    String message = String.format("Execution of RPC %s failed",  msg.getRpc());
+            public void onSuccess(final DOMRpcResult result) {
+                if (result.getErrors() != null && ( ! result.getErrors().isEmpty())) {
+                    final String message = String.format("Execution of RPC %s failed",  msg.getRpc());
                     Collection<RpcError> errors = result.getErrors();
                     if(errors == null || errors.size() == 0) {
                         errors = Arrays.asList(RpcResultBuilder.newError(ErrorType.RPC,
@@ -186,11 +173,14 @@ public class RpcBroker extends AbstractUntypedActor {
 
                     sender.tell(new akka.actor.Status.Failure(new RpcErrorsException(
                             message, errors)), self);
+                } else {
+                    final Node serializedResultNode = NormalizedNodeSerializer.serialize(result.getResult());
+                    sender.tell(new RpcResponse(serializedResultNode), self);
                 }
             }
 
             @Override
-            public void onFailure(Throwable t) {
+            public void onFailure(final Throwable t) {
                 LOG.error("executeRpc for {} failed: {}", msg.getRpc(), t);
                 sender.tell(new akka.actor.Status.Failure(t), self);
             }
@@ -200,20 +190,17 @@ public class RpcBroker extends AbstractUntypedActor {
     private static class RpcBrokerCreator implements Creator<RpcBroker> {
         private static final long serialVersionUID = 1L;
 
-        final Broker.ProviderSession brokerSession;
+        final DOMRpcService rpcService;
         final ActorRef rpcRegistry;
-        final SchemaContext schemaContext;
 
-        RpcBrokerCreator(ProviderSession brokerSession, ActorRef rpcRegistry,
-                SchemaContext schemaContext) {
-            this.brokerSession = brokerSession;
+        RpcBrokerCreator(final DOMRpcService rpcService, final ActorRef rpcRegistry) {
+            this.rpcService = rpcService;
             this.rpcRegistry = rpcRegistry;
-            this.schemaContext = schemaContext;
         }
 
         @Override
         public RpcBroker create() throws Exception {
-            return new RpcBroker(brokerSession, rpcRegistry, schemaContext);
+            return new RpcBroker(rpcService, rpcRegistry);
         }
     }
 }

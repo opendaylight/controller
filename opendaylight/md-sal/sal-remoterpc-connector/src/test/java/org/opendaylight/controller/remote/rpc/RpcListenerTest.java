@@ -8,18 +8,11 @@
 
 package org.opendaylight.controller.remote.rpc;
 
-import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.testkit.JavaTestKit;
 import com.typesafe.config.ConfigFactory;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Test;
-import org.opendaylight.controller.remote.rpc.registry.RpcRegistry;
-import org.opendaylight.yangtools.yang.common.QName;
-
-import java.net.URI;
-import java.net.URISyntaxException;
 
 public class RpcListenerTest {
 
@@ -37,37 +30,4 @@ public class RpcListenerTest {
     system = null;
   }
 
-  @Test
-  public void testRpcAdd() throws URISyntaxException {
-    new JavaTestKit(system) {
-      {
-        JavaTestKit probeReg = new JavaTestKit(system);
-        ActorRef rpcRegistry = probeReg.getRef();
-
-        RpcListener rpcListener = new RpcListener(rpcRegistry);
-
-        QName qName = new QName(new URI("actor2"), "actor2");
-
-        rpcListener.onRpcImplementationAdded(qName);
-        probeReg.expectMsgClass(RpcRegistry.Messages.AddOrUpdateRoutes.class);
-      }};
-
-  }
-
-  @Test
-  public void testRpcRemove() throws URISyntaxException {
-    new JavaTestKit(system) {
-      {
-        JavaTestKit probeReg = new JavaTestKit(system);
-        ActorRef rpcRegistry = probeReg.getRef();
-
-        RpcListener rpcListener = new RpcListener(rpcRegistry);
-
-        QName qName = new QName(new URI("actor2"), "actor2");
-
-        rpcListener.onRpcImplementationRemoved(qName);
-        probeReg.expectMsgClass(RpcRegistry.Messages.RemoveRoutes.class);
-      }};
-
-  }
 }
