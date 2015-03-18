@@ -24,9 +24,9 @@ public abstract class BindingDOMAdapterLoader extends AdapterLoader<BindingServi
 
 
     private static final Map<Class<?>,BindingDOMAdapterBuilder.Factory<?>> FACTORIES = ImmutableMap.<Class<?>,BindingDOMAdapterBuilder.Factory<?>>builder()
-            .put(NotificationService.class,ForwardedNotificationService.BUILDER_FACTORY)
-            .put(NotificationPublishService.class,ForwardedNotificationPublishService.BUILDER_FACTORY)
-            .put(DataBroker.class,ForwardedBindingDataBroker.BUILDER_FACTORY)
+            .put(NotificationService.class,BindingDOMNotificationServiceAdapter.BUILDER_FACTORY)
+            .put(NotificationPublishService.class,BindingDOMNotificationPublishServiceAdapter.BUILDER_FACTORY)
+            .put(DataBroker.class,BindingDOMDataBrokerAdapter.BUILDER_FACTORY)
             .put(RpcConsumerRegistry.class,BindingDOMRpcServiceAdapter.BUILDER_FACTORY)
             .build();
 

@@ -27,10 +27,10 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgum
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.ListenableFuture;
 
-class BindingDataWriteTransactionImpl<T extends DOMDataWriteTransaction> extends
+class BindingDOMWriteTransactionAdapter<T extends DOMDataWriteTransaction> extends
         AbstractWriteTransaction<T> implements WriteTransaction {
 
-    protected BindingDataWriteTransactionImpl(final T delegateTx, final BindingToNormalizedNodeCodec codec) {
+    protected BindingDOMWriteTransactionAdapter(final T delegateTx, final BindingToNormalizedNodeCodec codec) {
         super(delegateTx, codec);
     }
 

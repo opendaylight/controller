@@ -30,7 +30,7 @@ import org.opendaylight.yangtools.yang.binding.NotificationListener;
 import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
-public class ForwardedNotificationService implements NotificationService, AutoCloseable {
+public class BindingDOMNotificationServiceAdapter implements NotificationService, AutoCloseable {
 
     public static final Factory<NotificationService> BUILDER_FACTORY = new Factory<NotificationService>() {
 
@@ -44,7 +44,7 @@ public class ForwardedNotificationService implements NotificationService, AutoCl
     private final DOMNotificationService domNotifService;
     private final NotificationInvokerFactory notificationInvokerFactory;
 
-    public ForwardedNotificationService(BindingNormalizedNodeSerializer codec, DOMNotificationService domNotifService, NotificationInvokerFactory notificationInvokerFactory) {
+    public BindingDOMNotificationServiceAdapter(BindingNormalizedNodeSerializer codec, DOMNotificationService domNotifService, NotificationInvokerFactory notificationInvokerFactory) {
         this.codec = codec;
         this.domNotifService = domNotifService;
         this.notificationInvokerFactory = notificationInvokerFactory;
@@ -113,7 +113,7 @@ public class ForwardedNotificationService implements NotificationService, AutoCl
                 ClassToInstanceMap<DOMService> delegates) {
             DOMNotificationService domNotification = delegates.getInstance(DOMNotificationService.class);
             NotificationInvokerFactory invokerFactory = SingletonHolder.INVOKER_FACTORY;
-            return new ForwardedNotificationService(codec.getCodecRegistry(), domNotification, invokerFactory);
+            return new BindingDOMNotificationServiceAdapter(codec.getCodecRegistry(), domNotification, invokerFactory);
         }
 
         @Override
