@@ -17,6 +17,8 @@ import javax.annotation.Nonnull;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationException;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationOperation;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizer;
+import org.opendaylight.yangtools.binding.data.codec.api.BindingCodecTree;
+import org.opendaylight.yangtools.binding.data.codec.api.BindingCodecTreeFactory;
 import org.opendaylight.yangtools.binding.data.codec.impl.BindingNormalizedNodeCodecRegistry;
 import org.opendaylight.yangtools.sal.binding.generator.impl.GeneratedClassLoadingStrategy;
 import org.opendaylight.yangtools.sal.binding.generator.util.BindingRuntimeContext;
@@ -29,7 +31,6 @@ import org.opendaylight.yangtools.yang.common.QNameModule;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService;
 import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
@@ -37,17 +38,14 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
-public class BindingToNormalizedNodeCodec implements SchemaContextListener,AutoCloseable {
+public class BindingToNormalizedNodeCodec implements BindingCodecTreeFactory, SchemaContextListener, AutoCloseable {
 
-    private final BindingIndependentMappingService bindingToLegacy;
     private final BindingNormalizedNodeCodecRegistry codecRegistry;
     private DataNormalizer legacyToNormalized;
     private final GeneratedClassLoadingStrategy classLoadingStrategy;
     private BindingRuntimeContext runtimeContext;
 
-    public BindingToNormalizedNodeCodec(final GeneratedClassLoadingStrategy classLoadingStrategy, final BindingIndependentMappingService mappingService, final BindingNormalizedNodeCodecRegistry codecRegistry) {
-        super();
-        this.bindingToLegacy = mappingService;
+    public BindingToNormalizedNodeCodec(final GeneratedClassLoadingStrategy classLoadingStrategy, final BindingNormalizedNodeCodecRegistry codecRegistry) {
         this.classLoadingStrategy = classLoadingStrategy;
         this.codecRegistry = codecRegistry;
 
@@ -147,20 +145,11 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener,AutoC
         return currentOp.createDefault(path.getLastPathArgument());
     }
 
-    public BindingIndependentMappingService getLegacy() {
-        return bindingToLegacy;
-    }
-
     public BindingNormalizedNodeCodecRegistry getCodecRegistry() {
         return codecRegistry;
     }
 
-    @Override
-    public void close() {
-        // NOOP Intentionally
-    }
-
-    public BindingNormalizedNodeCodecRegistry getCodecFactory() {
+    public BindingCodecTreeFactory getCodecTreeFactory() {
         return codecRegistry;
     }
 
@@ -187,5 +176,20 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener,AutoC
             return key.getMethod(methodName, inputClz);
         }
         return key.getMethod(methodName);
+    }
+
+    @Override
+    public BindingCodecTree create(BindingRuntimeContext context) {
+        return codecRegistry.create(context);
+    }
+
+    @Override
+    public BindingCodecTree create(SchemaContext context, Class<?>... bindingClasses) {
+        return codecRegistry.create(context, bindingClasses);
+    }
+
+    @Override
+    public void close() {
+        // NOOP Intentionally
     }
 }

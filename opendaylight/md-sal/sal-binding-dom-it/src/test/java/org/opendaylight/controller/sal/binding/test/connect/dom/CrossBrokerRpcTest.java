@@ -123,7 +123,7 @@ public class CrossBrokerRpcTest {
 
             @Override
             public CheckedFuture<DOMRpcResult, DOMRpcException> invokeRpc(DOMRpcIdentifier rpc, NormalizedNode<?, ?> input) {
-                ContainerNode result = testContext.getCodec().getCodecFactory().toNormalizedNodeRpcData(output);
+                ContainerNode result = testContext.getCodec().getCodecRegistry().toNormalizedNodeRpcData(output);
                 return Futures.<DOMRpcResult, DOMRpcException>immediateCheckedFuture(new DefaultDOMRpcResult(result));
             }
         }, DOMRpcIdentifier.create(KNOCK_KNOCK_PATH, BI_NODE_C_ID));
@@ -136,7 +136,7 @@ public class CrossBrokerRpcTest {
     }
 
     private ContainerNode toDomRpcInput(DataObject addFlowA) {
-        return testContext.getCodec().getCodecFactory().toNormalizedNodeRpcData(addFlowA);
+        return testContext.getCodec().getCodecRegistry().toNormalizedNodeRpcData(addFlowA);
     }
 
     @After

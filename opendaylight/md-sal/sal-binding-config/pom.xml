@@ -18,6 +18,10 @@
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-binding-api</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>binding-data-codec</artifactId>
+    </dependency>
   </dependencies>
 
   <build>
