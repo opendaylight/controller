@@ -8,6 +8,7 @@
 package org.opendaylight.controller.config.manager.impl.dependencyresolver;
 
 import static com.google.common.base.Preconditions.checkState;
+
 import com.google.common.base.Preconditions;
 import com.google.common.reflect.AbstractInvocationHandler;
 import com.google.common.reflect.Reflection;
@@ -33,9 +34,9 @@ import org.opendaylight.controller.config.manager.impl.ModuleInternalInfo;
 import org.opendaylight.controller.config.manager.impl.TransactionIdentifier;
 import org.opendaylight.controller.config.manager.impl.TransactionStatus;
 import org.opendaylight.controller.config.manager.impl.jmx.TransactionModuleJMXRegistrator.TransactionModuleJMXRegistration;
+import org.opendaylight.controller.config.manager.impl.osgi.mapping.BindingContextProvider;
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
-import org.opendaylight.yangtools.yang.data.impl.codec.CodecRegistry;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -50,19 +51,19 @@ public class DependencyResolverManager implements DependencyResolverFactory, Aut
     private final ModulesHolder modulesHolder;
     private final TransactionStatus transactionStatus;
     private final ServiceReferenceReadableRegistry readableRegistry;
-    private final CodecRegistry codecRegistry;
+    private final BindingContextProvider bindingContextProvider;
     private final DeadlockMonitor deadlockMonitor;
     private final MBeanServer mBeanServer;
 
     public DependencyResolverManager(final TransactionIdentifier transactionIdentifier,
                                      final TransactionStatus transactionStatus,
-                                     final ServiceReferenceReadableRegistry readableRegistry, final CodecRegistry codecRegistry,
+                                     final ServiceReferenceReadableRegistry readableRegistry, final BindingContextProvider bindingContextProvider,
                                      final MBeanServer mBeanServer) {
         this.transactionIdentifier = transactionIdentifier;
         this.modulesHolder = new ModulesHolder(transactionIdentifier);
         this.transactionStatus = transactionStatus;
         this.readableRegistry = readableRegistry;
-        this.codecRegistry = codecRegistry;
+        this.bindingContextProvider = bindingContextProvider;
         this.deadlockMonitor = new DeadlockMonitor(transactionIdentifier);
         this.mBeanServer = mBeanServer;
     }
@@ -77,7 +78,7 @@ public class DependencyResolverManager implements DependencyResolverFactory, Aut
         if (dependencyResolver == null) {
             transactionStatus.checkNotCommitted();
             dependencyResolver = new DependencyResolverImpl(name, transactionStatus, modulesHolder, readableRegistry,
-                    codecRegistry, transactionIdentifier.getName(), mBeanServer);
+                    bindingContextProvider, transactionIdentifier.getName(), mBeanServer);
             moduleIdentifiersToDependencyResolverMap.put(name, dependencyResolver);
         }
         return dependencyResolver;

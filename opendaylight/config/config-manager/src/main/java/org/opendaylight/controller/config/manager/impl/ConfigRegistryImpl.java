@@ -44,11 +44,11 @@ import org.opendaylight.controller.config.manager.impl.jmx.RootRuntimeBeanRegist
 import org.opendaylight.controller.config.manager.impl.jmx.TransactionJMXRegistrator;
 import org.opendaylight.controller.config.manager.impl.osgi.BeanToOsgiServiceManager;
 import org.opendaylight.controller.config.manager.impl.osgi.BeanToOsgiServiceManager.OsgiRegistration;
+import org.opendaylight.controller.config.manager.impl.osgi.mapping.BindingContextProvider;
 import org.opendaylight.controller.config.manager.impl.util.LookupBeansUtil;
 import org.opendaylight.controller.config.manager.impl.util.ModuleQNameUtil;
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
-import org.opendaylight.yangtools.yang.data.impl.codec.CodecRegistry;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,7 +63,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
 
     private final ModuleFactoriesResolver resolver;
     private final MBeanServer configMBeanServer;
-    private final CodecRegistry codecRegistry;
+    private final BindingContextProvider bindingContextProvider;
 
     @GuardedBy("this")
     private long version = 0;
@@ -111,20 +111,20 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
 
     // constructor
     public ConfigRegistryImpl(ModuleFactoriesResolver resolver,
-                              MBeanServer configMBeanServer, CodecRegistry codecRegistry) {
+                              MBeanServer configMBeanServer, BindingContextProvider bindingContextProvider) {
         this(resolver, configMBeanServer,
-                new BaseJMXRegistrator(configMBeanServer), codecRegistry);
+                new BaseJMXRegistrator(configMBeanServer), bindingContextProvider);
     }
 
     // constructor
     public ConfigRegistryImpl(ModuleFactoriesResolver resolver,
                               MBeanServer configMBeanServer,
-                              BaseJMXRegistrator baseJMXRegistrator, CodecRegistry codecRegistry) {
+                              BaseJMXRegistrator baseJMXRegistrator, BindingContextProvider bindingContextProvider) {
         this.resolver = resolver;
         this.beanToOsgiServiceManager = new BeanToOsgiServiceManager();
         this.configMBeanServer = configMBeanServer;
         this.baseJMXRegistrator = baseJMXRegistrator;
-        this.codecRegistry = codecRegistry;
+        this.bindingContextProvider = bindingContextProvider;
         this.registryMBeanServer = MBeanServerFactory
                 .createMBeanServer("ConfigRegistry" + configMBeanServer.getDefaultDomain());
         this.transactionsMBeanServer = MBeanServerFactory
@@ -179,7 +179,7 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
                 readableSRRegistry, txLookupRegistry, allCurrentFactories);
 
         ConfigTransactionControllerInternal transactionController = new ConfigTransactionControllerImpl(
-                txLookupRegistry, version, codecRegistry,
+                txLookupRegistry, version, bindingContextProvider,
                 versionCounter, allCurrentFactories, transactionsMBeanServer,
                 configMBeanServer, blankTransaction, writableRegistry);
         try {

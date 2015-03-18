@@ -10,6 +10,7 @@ package org.opendaylight.controller.config.manager.impl.osgi.mapping;
 
 import java.util.Hashtable;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
+import org.opendaylight.yangtools.sal.binding.generator.api.ClassLoadingStrategy;
 import org.opendaylight.yangtools.sal.binding.generator.api.ModuleInfoRegistry;
 import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
@@ -22,15 +23,23 @@ import org.osgi.framework.ServiceRegistration;
 public class RefreshingSCPModuleInfoRegistry implements ModuleInfoRegistry, AutoCloseable {
 
     private final ModuleInfoRegistry moduleInfoRegistry;
+    private final SchemaContextProvider schemaContextProvider;
+    private final BindingContextProvider bindingContextProvider;
+    private final ClassLoadingStrategy classLoadingStrat;
+
     private final ServiceRegistration<SchemaContextProvider> osgiReg;
 
-    public RefreshingSCPModuleInfoRegistry(ModuleInfoRegistry moduleInfoRegistry,
-                                           SchemaContextProvider schemaContextProvider, BundleContext bundleContext) {
+    public RefreshingSCPModuleInfoRegistry(final ModuleInfoRegistry moduleInfoRegistry,
+                                           final SchemaContextProvider schemaContextProvider, final ClassLoadingStrategy classLoadingStrat, final BindingContextProvider bindingContextProvider, final BundleContext bundleContext) {
         this.moduleInfoRegistry = moduleInfoRegistry;
+        this.schemaContextProvider = schemaContextProvider;
+        this.classLoadingStrat = classLoadingStrat;
+        this.bindingContextProvider = bindingContextProvider;
         osgiReg = bundleContext.registerService(SchemaContextProvider.class, schemaContextProvider, new Hashtable<String, String>());
     }
 
     private void updateService() {
+        bindingContextProvider.update(classLoadingStrat, schemaContextProvider);
         osgiReg.setProperties(null); // send modifiedService event
     }
 
@@ -42,11 +51,11 @@ public class RefreshingSCPModuleInfoRegistry implements ModuleInfoRegistry, Auto
         return wrapper;
     }
 
-
     @Override
-    public void close() {
+    public void close() throws Exception {
         osgiReg.unregister();
     }
+
 
     private class ObjectRegistrationWrapper implements ObjectRegistration<YangModuleInfo> {
         private final ObjectRegistration<YangModuleInfo> inner;
