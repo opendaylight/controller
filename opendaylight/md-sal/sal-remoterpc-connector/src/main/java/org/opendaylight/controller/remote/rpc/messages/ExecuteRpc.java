@@ -10,24 +10,25 @@ package org.opendaylight.controller.remote.rpc.messages;
 
 import com.google.common.base.Preconditions;
 import java.io.Serializable;
+import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
 import org.opendaylight.yangtools.yang.common.QName;
 
 public class ExecuteRpc implements Serializable {
     private static final long serialVersionUID = 1128904894827335676L;
 
-    private final String inputCompositeNode;
+    private final NormalizedNodeMessages.Node inputNormalizedNode;
     private final QName rpc;
 
-    public ExecuteRpc(final String inputCompositeNode, final QName rpc) {
-        Preconditions.checkNotNull(inputCompositeNode, "Composite Node input string should be present");
+    public ExecuteRpc(final NormalizedNodeMessages.Node inputNormalizedNode, final QName rpc) {
+        Preconditions.checkNotNull(inputNormalizedNode, "Normalized Node input string should be present");
         Preconditions.checkNotNull(rpc, "rpc Qname should not be null");
 
-        this.inputCompositeNode = inputCompositeNode;
+        this.inputNormalizedNode = inputNormalizedNode;
         this.rpc = rpc;
     }
 
-    public String getInputCompositeNode() {
-        return inputCompositeNode;
+    public NormalizedNodeMessages.Node getInputNormalizedNode() {
+        return inputNormalizedNode;
     }
 
     public QName getRpc() {

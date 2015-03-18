@@ -8,37 +8,27 @@
 
 package org.opendaylight.controller.remote.rpc;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.testkit.JavaTestKit;
-import com.google.common.collect.ImmutableList;
+import java.io.File;
+import java.net.URI;
+import java.util.Arrays;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.mockito.Mockito;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 import org.opendaylight.controller.sal.core.api.Broker;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorSeverity;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
-import org.opendaylight.yangtools.yang.common.RpcResult;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.Node;
-import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
-import org.opendaylight.yangtools.yang.data.impl.util.CompositeNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
-
-import java.io.File;
-import java.net.URI;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Base class for RPC tests.
@@ -64,11 +54,12 @@ public class AbstractRpcTest {
     protected JavaTestKit probeReg2;
     protected Broker.ProviderSession brokerSession;
     protected SchemaContext schemaContext;
+    protected DOMRpcService rpcService;
 
     @BeforeClass
     public static void setup() throws InterruptedException {
-        RemoteRpcProviderConfig config1 = new RemoteRpcProviderConfig.Builder("memberA").build();
-        RemoteRpcProviderConfig config2 = new RemoteRpcProviderConfig.Builder("memberB").build();
+        final RemoteRpcProviderConfig config1 = new RemoteRpcProviderConfig.Builder("memberA").build();
+        final RemoteRpcProviderConfig config2 = new RemoteRpcProviderConfig.Builder("memberB").build();
         node1 = ActorSystem.create("opendaylight-rpc", config1.get());
         node2 = ActorSystem.create("opendaylight-rpc", config2.get());
     }
@@ -87,16 +78,18 @@ public class AbstractRpcTest {
                 new File(RpcBrokerTest.class.getResource("/test-rpc.yang").getPath())));
 
         brokerSession = Mockito.mock(Broker.ProviderSession.class);
+        rpcService = Mockito.mock(DOMRpcService.class);
+
         probeReg1 = new JavaTestKit(node1);
-        rpcBroker1 = node1.actorOf(RpcBroker.props(brokerSession, probeReg1.getRef(), schemaContext));
+        rpcBroker1 = node1.actorOf(RpcBroker.props(rpcService, probeReg1.getRef()));
         probeReg2 = new JavaTestKit(node2);
-        rpcBroker2 = node2.actorOf(RpcBroker.props(brokerSession, probeReg2.getRef(), schemaContext));
+        rpcBroker2 = node2.actorOf(RpcBroker.props(rpcService, probeReg2.getRef()));
 
     }
 
-    static void assertRpcErrorEquals(RpcError rpcError, ErrorSeverity severity,
-            ErrorType errorType, String tag, String message, String applicationTag, String info,
-            String causeMsg) {
+    static void assertRpcErrorEquals(final RpcError rpcError, final ErrorSeverity severity,
+            final ErrorType errorType, final String tag, final String message, final String applicationTag, final String info,
+            final String causeMsg) {
         assertEquals("getSeverity", severity, rpcError.getSeverity());
         assertEquals("getErrorType", errorType, rpcError.getErrorType());
         assertEquals("getTag", tag, rpcError.getTag());
@@ -109,57 +102,6 @@ public class AbstractRpcTest {
         } else {
             assertEquals("Cause message", causeMsg, rpcError.getCause().getMessage());
         }
-    }
-
-    static void assertCompositeNodeEquals(CompositeNode exp, CompositeNode actual) {
-        assertEquals("NodeType getNamespace", exp.getNodeType().getNamespace(),
-                actual.getNodeType().getNamespace());
-        assertEquals("NodeType getLocalName", exp.getNodeType().getLocalName(),
-                actual.getNodeType().getLocalName());
-        for(Node<?> child: exp.getValue()) {
-            List<Node<?>> c = actual.get(child.getNodeType());
-            assertNotNull("Missing expected child " + child.getNodeType(), c);
-            if(child instanceof CompositeNode) {
-                assertCompositeNodeEquals((CompositeNode) child, (CompositeNode)c.get(0));
-            } else {
-                assertEquals("Value for Node " + child.getNodeType(), child.getValue(),
-                        c.get(0).getValue());
-            }
-        }
-    }
-
-    static CompositeNode makeRPCInput(String data) {
-        CompositeNodeBuilder<ImmutableCompositeNode> builder = ImmutableCompositeNode.builder()
-                .setQName(TEST_RPC_INPUT).addLeaf(TEST_RPC_INPUT_DATA, data);
-        return ImmutableCompositeNode.create(
-                TEST_RPC, ImmutableList.<Node<?>>of(builder.toInstance()));
-    }
-
-    static CompositeNode makeRPCOutput(String data) {
-        CompositeNodeBuilder<ImmutableCompositeNode> builder = ImmutableCompositeNode.builder()
-                .setQName(TEST_RPC_OUTPUT).addLeaf(TEST_RPC_OUTPUT_DATA, data);
-        return ImmutableCompositeNode.create(
-                TEST_RPC, ImmutableList.<Node<?>>of(builder.toInstance()));
-    }
-
-    static void assertFailedRpcResult(RpcResult<CompositeNode> rpcResult, ErrorSeverity severity,
-            ErrorType errorType, String tag, String message, String applicationTag, String info,
-            String causeMsg) {
-
-        assertNotNull("RpcResult was null", rpcResult);
-        assertEquals("isSuccessful", false, rpcResult.isSuccessful());
-        Collection<RpcError> rpcErrors = rpcResult.getErrors();
-        assertEquals("RpcErrors count", 1, rpcErrors.size());
-        assertRpcErrorEquals(rpcErrors.iterator().next(), severity, errorType, tag, message,
-                applicationTag, info, causeMsg);
-    }
-
-    static void assertSuccessfulRpcResult(RpcResult<CompositeNode> rpcResult,
-            CompositeNode expOutput) {
-
-        assertNotNull("RpcResult was null", rpcResult);
-        assertEquals("isSuccessful", true, rpcResult.isSuccessful());
-        assertCompositeNodeEquals(expOutput, rpcResult.getResult());
     }
 
     static class TestException extends Exception {

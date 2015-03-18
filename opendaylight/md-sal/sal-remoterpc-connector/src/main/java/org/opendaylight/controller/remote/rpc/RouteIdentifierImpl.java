@@ -8,12 +8,10 @@
 package org.opendaylight.controller.remote.rpc;
 
 import com.google.common.base.Preconditions;
+import java.io.Serializable;
 import org.opendaylight.controller.sal.connector.api.RpcRouter;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-
-
-import java.io.Serializable;
 
 public class RouteIdentifierImpl implements RpcRouter.RouteIdentifier<QName, QName, YangInstanceIdentifier>,Serializable {
   private static final long serialVersionUID = 1L;
@@ -31,26 +29,26 @@ public class RouteIdentifierImpl implements RpcRouter.RouteIdentifier<QName, QNa
 
   @Override
   public QName getContext() {
-    return this.context;
+    return context;
   }
 
   @Override
   public QName getType() {
-    return this.type;
+    return type;
   }
 
   @Override
   public YangInstanceIdentifier getRoute() {
-    return this.route;
+    return route;
   }
 
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(final Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
 
-    RouteIdentifierImpl that = (RouteIdentifierImpl) o;
+    final RouteIdentifierImpl that = (RouteIdentifierImpl) o;
 
     if (context == null){
       if (that.getContext() != null)  return false;
@@ -72,7 +70,7 @@ public class RouteIdentifierImpl implements RpcRouter.RouteIdentifier<QName, QNa
 
   @Override
   public int hashCode() {
-    int prime = 31;
+    final int prime = 31;
     int result = 0;
     result = prime * result + (context == null ? 0:context.hashCode());
     result = prime * result + (type    == null ? 0:type.hashCode());
