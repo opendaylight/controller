@@ -33,16 +33,13 @@ import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
 import org.opendaylight.controller.sal.streams.listeners.ListenerAdapter;
 import org.opendaylight.controller.sal.streams.listeners.Notificator;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.InstanceIdentifierBuilder;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafNode;
-import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeAttrBuilder;
-import org.opendaylight.yangtools.yang.data.impl.util.CompositeNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
@@ -158,21 +155,5 @@ public class URIParametersParsing {
         container.withChild(scopeNode);
 
         return new NormalizedNodeContext(new InstanceIdentifierContext(null, rpcInputSchemaNode, null, schema), container.build());
-    }
-
-    /**
-     * @deprecated method has to be removed for a Lithium release
-     */
-    @Deprecated
-    private CompositeNode prepareRpcNode(final String datastore, final String scope) {
-        final CompositeNodeBuilder<ImmutableCompositeNode> inputBuilder = ImmutableCompositeNode.builder();
-        inputBuilder.setQName(QName.create("urn:opendaylight:params:xml:ns:yang:controller:md:sal:remote",
-                "2014-01-14", "input"));
-        inputBuilder.addLeaf(
-                QName.create("urn:opendaylight:params:xml:ns:yang:controller:md:sal:remote", "2014-01-14", "path"),
-                YangInstanceIdentifier.builder().node(QName.create("urn:opendaylight:inventory", "2013-08-19", "nodes")).build());
-        inputBuilder.addLeaf(QName.create("urn:sal:restconf:event:subscription", "2014-7-8", "datastore"), datastore);
-        inputBuilder.addLeaf(QName.create("urn:sal:restconf:event:subscription", "2014-7-8", "scope"), scope);
-        return inputBuilder.toInstance();
     }
 }
