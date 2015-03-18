@@ -7,16 +7,9 @@
  */
 package org.opendaylight.controller.md.sal.binding.data;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
+import com.google.common.util.concurrent.ListenableFuture;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -38,16 +31,16 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.store.rev140422.lists.unordered.container.UnorderedListKey;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.Node;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.OrderedMapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.UnkeyedListNode;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableList;
-import com.google.common.util.concurrent.ListenableFuture;
+import java.util.concurrent.ExecutionException;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /*
  * FIXME: THis test should be moved to sal-binding-broker and rewriten
@@ -170,24 +163,7 @@ public class ListProcessingAndOrderingTest extends AbstractDataServiceTest {
     }
 
     private void assertXmlRepresentation(final InstanceIdentifier<?> containerPath, final String... childNameValues) {
-
-        org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier domPath = testContext.getBindingToDomMappingService().toDataDom(containerPath);
-        CompositeNode compositeNode = testContext.getDomDataBroker().readOperationalData(domPath);
-        assertNotNull(compositeNode);
-
-        Set<String> childValues = new HashSet<>();
-        Collections.addAll(childValues, childNameValues);
-
-        for(Node<?> child : compositeNode.getChildren()) {
-            assertTrue(child instanceof CompositeNode);
-            CompositeNode compChild = (CompositeNode) child;
-            String nameLeafValue = (String) compChild.getSimpleNodesByName("name").get(0).getValue();
-            String valueLeafValue = (String) compChild.getSimpleNodesByName("value").get(0).getValue();
-
-            assertEquals(createValue(nameLeafValue), valueLeafValue);
-            childValues.remove(nameLeafValue);
-        }
-        assertTrue(childValues.isEmpty());
+        //TODO: Implement with NormalizedNodes
     }
 
 }

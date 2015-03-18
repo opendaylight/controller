@@ -7,10 +7,7 @@
  */
 package org.opendaylight.controller.sal.binding.test.bugfix;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-
+import com.google.common.collect.ImmutableSet;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
@@ -29,9 +26,9 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
-import com.google.common.collect.ImmutableSet;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 @SuppressWarnings("deprecation")
 public class FlagsSerializationTest extends AbstractDataServiceTest {
@@ -74,27 +71,7 @@ public class FlagsSerializationTest extends AbstractDataServiceTest {
     }
 
     private void testFlags(final BitFlags flagsToTest, final ImmutableSet<String> domFlags) throws Exception {
-        List11 list11 = createList11(flagsToTest);
-        assertNotNull(list11);
-
-        CompositeNode domList11 = biDataService.readConfigurationData(mappingService.toDataDom(LIST11_INSTANCE_ID_BA));
-
-        assertNotNull(domList11);
-        org.opendaylight.yangtools.yang.data.api.Node<?> readedFlags = domList11.getFirstSimpleByName(LIST11_FLAGS_QNAME);
-
-        if(domFlags != null) {
-            assertNotNull(readedFlags);
-            assertEquals(domFlags,readedFlags.getValue());
-        } else {
-            assertNull(readedFlags);
-        }
-        assertEquals(flagsToTest, list11.getFlags());
-
-        DataModificationTransaction transaction = baDataService.beginTransaction();
-        transaction.removeConfigurationData(LIST11_INSTANCE_ID_BA);
-        RpcResult<TransactionStatus> result = transaction.commit().get();
-        assertEquals(TransactionStatus.COMMITED, result.getResult());
-
+        //TODO: Implement with NormalizedNodes
     }
 
     private List11 createList11(final BitFlags flagsToTest) throws Exception {

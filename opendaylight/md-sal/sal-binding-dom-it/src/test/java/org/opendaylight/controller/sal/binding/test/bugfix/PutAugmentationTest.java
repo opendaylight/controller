@@ -7,15 +7,7 @@
  */
 package org.opendaylight.controller.sal.binding.test.bugfix;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
-import java.util.Collections;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
+import com.google.common.util.concurrent.SettableFuture;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
@@ -39,9 +31,15 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
-import com.google.common.util.concurrent.SettableFuture;
+import java.util.Collections;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 @SuppressWarnings("deprecation")
 public class PutAugmentationTest extends AbstractDataServiceTest implements DataChangeListener {
@@ -208,8 +206,7 @@ public class PutAugmentationTest extends AbstractDataServiceTest implements Data
     }
 
     private void assertBindingIndependentVersion(final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier tllId) {
-        CompositeNode tll = biDataService.readOperationalData(tllId);
-        assertNotNull(tll);
+        //TODO: Implement with NormalizedNodes
     }
 
     @Override
