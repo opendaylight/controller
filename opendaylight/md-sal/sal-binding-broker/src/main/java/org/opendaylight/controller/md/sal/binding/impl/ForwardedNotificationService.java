@@ -113,7 +113,7 @@ public class ForwardedNotificationService implements NotificationService, AutoCl
                 ClassToInstanceMap<DOMService> delegates) {
             DOMNotificationService domNotification = delegates.getInstance(DOMNotificationService.class);
             NotificationInvokerFactory invokerFactory = SingletonHolder.INVOKER_FACTORY;
-            return new ForwardedNotificationService(codec.getCodecFactory(), domNotification, invokerFactory);
+            return new ForwardedNotificationService(codec.getCodecRegistry(), domNotification, invokerFactory);
         }
 
         @Override

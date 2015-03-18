@@ -81,7 +81,7 @@ public class BindingDOMRpcServiceAdapter implements RpcConsumerRegistry, Invocat
     @Override
     public ListenableFuture<RpcResult<?>> invoke(final SchemaPath rpc, final DataObject input) {
         final CheckedFuture<DOMRpcResult, DOMRpcException> domFuture = domService.invokeRpc(rpc, serialize(rpc,input));
-        return transformFuture(rpc,domFuture,codec.getCodecFactory());
+        return transformFuture(rpc,domFuture,codec.getCodecRegistry());
     }
 
     private RpcServiceAdapter createProxy(final Class<? extends RpcService> key) {
@@ -96,7 +96,7 @@ public class BindingDOMRpcServiceAdapter implements RpcConsumerRegistry, Invocat
             return null;
         }
         final QName rpcInputIdentifier = QName.create(rpc.getLastComponent(),"input");
-        return new LazySerializedContainerNode(rpcInputIdentifier, input, codec.getCodecFactory());
+        return new LazySerializedContainerNode(rpcInputIdentifier, input, codec.getCodecRegistry());
     }
 
     private static ListenableFuture<RpcResult<?>> transformFuture(final SchemaPath rpc,final ListenableFuture<DOMRpcResult> domFuture, final BindingNormalizedNodeCodecRegistry codec) {
