@@ -7,10 +7,8 @@
  */
 package org.opendaylight.controller.sal.restconf.broker.client;
 
+import com.google.common.base.Preconditions;
 import java.net.URL;
-
-import javassist.ClassPool;
-
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext;
 import org.opendaylight.controller.sal.binding.api.BindingAwareConsumer;
 import org.opendaylight.controller.sal.restconf.broker.SalRemoteServiceBroker;
@@ -18,33 +16,30 @@ import org.opendaylight.yangtools.restconf.client.RestconfClientFactory;
 import org.opendaylight.yangtools.restconf.client.api.RestconfClientContext;
 import org.opendaylight.yangtools.restconf.client.api.UnsupportedProtocolException;
 import org.opendaylight.yangtools.sal.binding.generator.impl.ModuleInfoBackedContext;
-import org.opendaylight.yangtools.sal.binding.generator.impl.RuntimeGeneratedMappingServiceImpl;
 import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.api.SchemaContextHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
-
-class SalRemoteClientImpl implements SalRemoteClient {
+class SalRemoteClientImpl implements SalRemoteClient, SchemaContextHolder {
 
     private static final Logger logger = LoggerFactory.getLogger(SalRemoteClientImpl.class);
 
     private final RestconfClientContext restconfClientContext;
     private final SalRemoteServiceBroker salRemoteBroker;
-    private final RuntimeGeneratedMappingServiceImpl mappingService;
+
+    private SchemaContext schemaContext;
 
     public SalRemoteClientImpl(final URL url) {
         Preconditions.checkNotNull(url);
 
-        this.mappingService = new RuntimeGeneratedMappingServiceImpl(ClassPool.getDefault());
 
         final ModuleInfoBackedContext moduleInfo = ModuleInfoBackedContext.create();
         moduleInfo.addModuleInfos(BindingReflections.loadModuleInfos());
-        this.mappingService.onGlobalContextUpdated(moduleInfo.tryToCreateSchemaContext().get());
-
+        schemaContext = moduleInfo.tryToCreateSchemaContext().get();
         try {
-            this.restconfClientContext = new RestconfClientFactory().getRestconfClientContext(url, this.mappingService,
-                    this.mappingService);
+            this.restconfClientContext = new RestconfClientFactory().getRestconfClientContext(url,this);
 
             this.salRemoteBroker = new SalRemoteServiceBroker("remote-broker", restconfClientContext);
             this.salRemoteBroker.start();
@@ -62,6 +57,11 @@ class SalRemoteClientImpl implements SalRemoteClient {
             public void onSessionInitialized(ConsumerContext session) {
             }
         }, null);
+    }
+
+    @Override
+    public SchemaContext getSchemaContext() {
+        return schemaContext;
     }
 
     @Override

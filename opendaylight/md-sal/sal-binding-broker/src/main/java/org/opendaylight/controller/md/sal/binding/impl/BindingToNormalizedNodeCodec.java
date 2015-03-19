@@ -31,7 +31,6 @@ import org.opendaylight.yangtools.yang.common.QNameModule;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService;
 import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
@@ -41,16 +40,13 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
 public class BindingToNormalizedNodeCodec implements BindingCodecTreeFactory, SchemaContextListener, AutoCloseable {
 
-    private final BindingIndependentMappingService bindingToLegacy;
     private final BindingNormalizedNodeCodecRegistry codecRegistry;
     private DataNormalizer legacyToNormalized;
     private final GeneratedClassLoadingStrategy classLoadingStrategy;
     private BindingRuntimeContext runtimeContext;
 
     public BindingToNormalizedNodeCodec(final GeneratedClassLoadingStrategy classLoadingStrategy,
-            final BindingIndependentMappingService mappingService,
             final BindingNormalizedNodeCodecRegistry codecRegistry) {
-        this.bindingToLegacy = mappingService;
         this.classLoadingStrategy = classLoadingStrategy;
         this.codecRegistry = codecRegistry;
 
@@ -148,10 +144,6 @@ public class BindingToNormalizedNodeCodec implements BindingCodecTreeFactory, Sc
             }
         }
         return currentOp.createDefault(path.getLastPathArgument());
-    }
-
-    public BindingIndependentMappingService getLegacy() {
-        return bindingToLegacy;
     }
 
     public BindingNormalizedNodeCodecRegistry getCodecRegistry() {

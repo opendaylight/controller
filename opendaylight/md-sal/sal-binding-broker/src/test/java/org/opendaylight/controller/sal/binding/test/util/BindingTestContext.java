@@ -25,11 +25,11 @@ import org.opendaylight.controller.md.sal.binding.api.MountPointService;
 import org.opendaylight.controller.md.sal.binding.compat.HeliumRpcProviderRegistry;
 import org.opendaylight.controller.md.sal.binding.compat.HydrogenDataBrokerAdapter;
 import org.opendaylight.controller.md.sal.binding.compat.HydrogenMountProvisionServiceAdapter;
+import org.opendaylight.controller.md.sal.binding.impl.BindingDOMDataBrokerAdapter;
 import org.opendaylight.controller.md.sal.binding.impl.BindingDOMMountPointServiceAdapter;
 import org.opendaylight.controller.md.sal.binding.impl.BindingDOMRpcProviderServiceAdapter;
 import org.opendaylight.controller.md.sal.binding.impl.BindingDOMRpcServiceAdapter;
 import org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodec;
-import org.opendaylight.controller.md.sal.binding.impl.BindingDOMDataBrokerAdapter;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
@@ -62,21 +62,18 @@ import org.opendaylight.yangtools.binding.data.codec.impl.BindingNormalizedNodeC
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.sal.binding.generator.impl.GeneratedClassLoadingStrategy;
 import org.opendaylight.yangtools.sal.binding.generator.impl.ModuleInfoBackedContext;
-import org.opendaylight.yangtools.sal.binding.generator.impl.RuntimeGeneratedMappingServiceImpl;
 import org.opendaylight.yangtools.sal.binding.generator.util.JavassistUtils;
 import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
 import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 @Beta
 public class BindingTestContext implements AutoCloseable {
 
 
-    private RuntimeGeneratedMappingServiceImpl mappingServiceImpl;
     private BindingToNormalizedNodeCodec codec;
 
     private RootBindingAwareBroker baBrokerImpl;
@@ -247,13 +244,11 @@ public class BindingTestContext implements AutoCloseable {
 
     public void startBindingToDomMappingService() {
         checkState(classPool != null, "ClassPool needs to be present");
-        mappingServiceImpl = new RuntimeGeneratedMappingServiceImpl(classPool);
-        mockSchemaService.registerSchemaContextListener(mappingServiceImpl);
 
         final DataObjectSerializerGenerator generator = StreamWriterGenerator.create(JavassistUtils.forClassPool(classPool));
         final BindingNormalizedNodeCodecRegistry codecRegistry = new BindingNormalizedNodeCodecRegistry(generator);
         final GeneratedClassLoadingStrategy loading = GeneratedClassLoadingStrategy.getTCCLClassLoadingStrategy();
-        codec = new BindingToNormalizedNodeCodec(loading, mappingServiceImpl, codecRegistry);
+        codec = new BindingToNormalizedNodeCodec(loading,  codecRegistry);
         mockSchemaService.registerSchemaContextListener(codec);
     }
 
@@ -327,10 +322,6 @@ public class BindingTestContext implements AutoCloseable {
     @Deprecated
     public org.opendaylight.controller.sal.core.api.data.DataProviderService getDomDataBroker() {
         return biDataLegacyBroker;
-    }
-
-    public BindingIndependentMappingService getBindingToDomMappingService() {
-        return mappingServiceImpl;
     }
 
     public RpcProviderRegistry getBindingRpcRegistry() {
