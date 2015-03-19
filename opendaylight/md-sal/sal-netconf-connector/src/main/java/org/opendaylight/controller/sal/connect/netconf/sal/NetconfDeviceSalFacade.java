@@ -73,14 +73,14 @@ public final class NetconfDeviceSalFacade implements AutoCloseable, RemoteDevice
     }
 
     @Override
-    public void onDeviceFailed(final Throwable throwable) {
+    public synchronized void onDeviceFailed(final Throwable throwable) {
         salProvider.getTopologyDatastoreAdapter().setDeviceAsFailed(throwable);
         salProvider.getMountInstance().onDeviceDisconnected();
         salProvider.getMountInstance().onTopologyDeviceDisconnected();
     }
 
     @Override
-    public void close() {
+    public synchronized void close() {
         for (final AutoCloseable reg : Lists.reverse(salRegistrations)) {
             closeGracefully(reg);
         }
