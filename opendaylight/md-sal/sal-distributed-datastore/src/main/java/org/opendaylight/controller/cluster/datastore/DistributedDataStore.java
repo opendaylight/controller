@@ -11,10 +11,14 @@ package org.opendaylight.controller.cluster.datastore;
 import akka.actor.ActorSystem;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardManagerIdentifier;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.DatastoreConfigurationMXBeanImpl;
+import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.cluster.datastore.utils.Dispatchers;
@@ -46,20 +50,19 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
 
     private static final long READY_WAIT_FACTOR = 3;
 
+    @GuardedBy("this")
+    private final Collection<DOMDataTreeChangeListenerProxy<?>> treeChangeListeners = new ArrayList<>();
+    private final CountDownLatch waitTillReadyCountDownLatch = new CountDownLatch(1);
     private final ActorContext actorContext;
     private final long waitTillReadyTimeInMillis;
-
+    private final String type;
 
     private AutoCloseable closeable;
 
     private DatastoreConfigurationMXBeanImpl datastoreConfigMXBean;
 
-    private CountDownLatch waitTillReadyCountDownLatch = new CountDownLatch(1);
-
-    private final String type;
-
-    public DistributedDataStore(ActorSystem actorSystem, ClusterWrapper cluster,
-            Configuration configuration, DatastoreContext datastoreContext) {
+    public DistributedDataStore(final ActorSystem actorSystem, final ClusterWrapper cluster,
+            final Configuration configuration, final DatastoreContext datastoreContext) {
         Preconditions.checkNotNull(actorSystem, "actorSystem should not be null");
         Preconditions.checkNotNull(cluster, "cluster should not be null");
         Preconditions.checkNotNull(configuration, "configuration should not be null");
@@ -88,7 +91,7 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
         datastoreConfigMXBean.registerMBean();
     }
 
-    public DistributedDataStore(ActorContext actorContext) {
+    public DistributedDataStore(final ActorContext actorContext) {
         this.actorContext = Preconditions.checkNotNull(actorContext, "actorContext should not be null");
         this.type = UNKNOWN_TYPE;
         this.waitTillReadyTimeInMillis =
@@ -96,7 +99,7 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
 
     }
 
-    public void setCloseable(AutoCloseable closeable) {
+    public void setCloseable(final AutoCloseable closeable) {
         this.closeable = closeable;
     }
 
@@ -104,8 +107,8 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
     @Override
     public <L extends AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>>
                                               ListenerRegistration<L> registerChangeListener(
-        final YangInstanceIdentifier path, L listener,
-        AsyncDataBroker.DataChangeScope scope) {
+        final YangInstanceIdentifier path, final L listener,
+        final AsyncDataBroker.DataChangeScope scope) {
 
         Preconditions.checkNotNull(path, "path should not be null");
         Preconditions.checkNotNull(listener, "listener should not be null");
@@ -122,7 +125,7 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
     }
 
     @Override
-    public <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerTreeChangeListener(YangInstanceIdentifier treeId, L listener) {
+    public synchronized <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerTreeChangeListener(final YangInstanceIdentifier treeId, final L listener) {
         Preconditions.checkNotNull(treeId, "treeId should not be null");
         Preconditions.checkNotNull(listener, "listener should not be null");
 
@@ -130,10 +133,15 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
         LOG.debug("Registering tree listener: {} for tree: {} shard: {}", listener, treeId, shardName);
 
         final DOMDataTreeChangeListenerProxy<L> listenerRegistrationProxy =
-                new DOMDataTreeChangeListenerProxy<L>(shardName, actorContext, listener);
-        listenerRegistrationProxy.init(treeId);
+                new DOMDataTreeChangeListenerProxy<L>(this, actorContext, listener);
+        listenerRegistrationProxy.init(shardName, treeId);
 
+        treeChangeListeners.add(listenerRegistrationProxy);
         return listenerRegistrationProxy;
+    }
+
+    synchronized void removeTreeChangeListener(final DOMDataTreeChangeListenerProxy<?> listener) {
+        treeChangeListeners.remove(listener);
     }
 
     @Override
@@ -159,12 +167,19 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
     }
 
     @Override
-    public void onGlobalContextUpdated(SchemaContext schemaContext) {
+    public void onGlobalContextUpdated(final SchemaContext schemaContext) {
         actorContext.setSchemaContext(schemaContext);
+
+        final UpdateSchemaContext message = new UpdateSchemaContext(schemaContext);
+        synchronized (this) {
+            for (DOMDataTreeChangeListenerProxy<?> l : treeChangeListeners) {
+                l.updateContext(message);
+            }
+        }
     }
 
     @Override
-    public void onDatastoreContextUpdated(DatastoreContext context) {
+    public void onDatastoreContextUpdated(final DatastoreContext context) {
         LOG.info("DatastoreContext updated for data store {}", actorContext.getDataStoreType());
 
         actorContext.setDatastoreContext(context);
