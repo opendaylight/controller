@@ -29,7 +29,7 @@ import org.opendaylight.controller.md.sal.binding.impl.BindingDOMMountPointServi
 import org.opendaylight.controller.md.sal.binding.impl.BindingDOMRpcProviderServiceAdapter;
 import org.opendaylight.controller.md.sal.binding.impl.BindingDOMRpcServiceAdapter;
 import org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodec;
-import org.opendaylight.controller.md.sal.binding.impl.ForwardedBindingDataBroker;
+import org.opendaylight.controller.md.sal.binding.impl.BindingDOMDataBrokerAdapter;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
@@ -136,7 +136,7 @@ public class BindingTestContext implements AutoCloseable {
     public void startNewDataBroker() {
         checkState(executor != null, "Executor needs to be set");
         checkState(newDOMDataBroker != null, "DOM Data Broker must be set");
-        dataBroker = new ForwardedBindingDataBroker(newDOMDataBroker, codec);
+        dataBroker = new BindingDOMDataBrokerAdapter(newDOMDataBroker, codec);
     }
 
     public void startNewDomDataBroker() {

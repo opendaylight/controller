@@ -32,7 +32,7 @@ import org.opendaylight.controller.sal.core.api.model.SchemaService;
  *
 
  */
-public class ForwardedBindingDataBroker extends AbstractForwardedDataBroker implements DataBroker {
+public class BindingDOMDataBrokerAdapter extends AbstractForwardedDataBroker implements DataBroker {
 
 
     static final Factory<DataBroker> BUILDER_FACTORY = new BindingDOMAdapterBuilder.Factory<DataBroker>() {
@@ -44,34 +44,34 @@ public class ForwardedBindingDataBroker extends AbstractForwardedDataBroker impl
 
     };
 
-    public ForwardedBindingDataBroker(final DOMDataBroker domDataBroker, final BindingToNormalizedNodeCodec codec) {
+    public BindingDOMDataBrokerAdapter(final DOMDataBroker domDataBroker, final BindingToNormalizedNodeCodec codec) {
         super(domDataBroker, codec);
     }
 
     @Deprecated
-    public ForwardedBindingDataBroker(final DOMDataBroker domDataBroker, final BindingToNormalizedNodeCodec codec, final SchemaService schemaService) {
+    public BindingDOMDataBrokerAdapter(final DOMDataBroker domDataBroker, final BindingToNormalizedNodeCodec codec, final SchemaService schemaService) {
         super(domDataBroker, codec,schemaService);
     }
 
     @Override
 
     public ReadOnlyTransaction newReadOnlyTransaction() {
-        return new BindingDataReadTransactionImpl(getDelegate().newReadOnlyTransaction(),getCodec());
+        return new BindingDOMReadTransactionAdapter(getDelegate().newReadOnlyTransaction(),getCodec());
     }
 
     @Override
     public ReadWriteTransaction newReadWriteTransaction() {
-        return new BindingDataReadWriteTransactionImpl(getDelegate().newReadWriteTransaction(),getCodec());
+        return new BindingDOMReadWriteTransactionAdapter(getDelegate().newReadWriteTransaction(),getCodec());
     }
 
     @Override
     public WriteTransaction newWriteOnlyTransaction() {
-        return new BindingDataWriteTransactionImpl<>(getDelegate().newWriteOnlyTransaction(),getCodec());
+        return new BindingDOMWriteTransactionAdapter<>(getDelegate().newWriteOnlyTransaction(),getCodec());
     }
 
     @Override
     public BindingTransactionChain createTransactionChain(final TransactionChainListener listener) {
-        return new BindingTranslatedTransactionChain(getDelegate(), getCodec(), listener);
+        return new BindingDOMTransactionChainAdapter(getDelegate(), getCodec(), listener);
     }
 
     private static class Builder extends BindingDOMAdapterBuilder<DataBroker> {
@@ -85,7 +85,7 @@ public class ForwardedBindingDataBroker extends AbstractForwardedDataBroker impl
         protected DataBroker createInstance(BindingToNormalizedNodeCodec codec,
                 ClassToInstanceMap<DOMService> delegates) {
             DOMDataBroker domDataBroker = delegates.getInstance(DOMDataBroker.class);
-            return new ForwardedBindingDataBroker(domDataBroker, codec);
+            return new BindingDOMDataBrokerAdapter(domDataBroker, codec);
         }
 
 

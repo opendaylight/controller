@@ -10,7 +10,7 @@ package org.opendaylight.controller.config.yang.md.sal.binding.impl;
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodec;
-import org.opendaylight.controller.md.sal.binding.impl.ForwardedNotificationPublishService;
+import org.opendaylight.controller.md.sal.binding.impl.BindingDOMNotificationPublishServiceAdapter;
 import org.opendaylight.controller.md.sal.dom.api.DOMNotificationPublishService;
 import org.opendaylight.controller.sal.core.api.Broker;
 
@@ -33,7 +33,7 @@ public class BindingNotificationPublishAdapterModule extends AbstractBindingNoti
         final BindingToNormalizedNodeCodec codec = getBindingMappingServiceDependency();
         final Broker.ProviderSession session = getDomAsyncBrokerDependency().registerProvider(new DummyDOMProvider());
         final DOMNotificationPublishService publishService = session.getService(DOMNotificationPublishService.class);
-        return new ForwardedNotificationPublishService(codec.getCodecRegistry(), publishService);
+        return new BindingDOMNotificationPublishServiceAdapter(codec.getCodecRegistry(), publishService);
     }
 
 }
