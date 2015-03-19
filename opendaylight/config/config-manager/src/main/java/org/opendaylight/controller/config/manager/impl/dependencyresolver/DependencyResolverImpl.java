@@ -30,12 +30,11 @@ import org.opendaylight.controller.config.api.ServiceReferenceReadableRegistry;
 import org.opendaylight.controller.config.api.annotations.AbstractServiceInterface;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.config.manager.impl.TransactionStatus;
+import org.opendaylight.controller.config.manager.impl.osgi.mapping.BindingContextProvider;
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.opendaylight.yangtools.yang.binding.BaseIdentity;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.impl.codec.CodecRegistry;
-import org.opendaylight.yangtools.yang.data.impl.codec.IdentityCodec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,15 +53,15 @@ final class DependencyResolverImpl implements DependencyResolver,
     @GuardedBy("this")
     private final Set<ModuleIdentifier> dependencies = new HashSet<>();
     private final ServiceReferenceReadableRegistry readableRegistry;
-    private final CodecRegistry codecRegistry;
+    private final BindingContextProvider bindingContextProvider;
     private final String transactionName;
     private final MBeanServer mBeanServer;
 
     DependencyResolverImpl(ModuleIdentifier currentModule,
                            TransactionStatus transactionStatus, ModulesHolder modulesHolder,
-                           ServiceReferenceReadableRegistry readableRegistry, CodecRegistry codecRegistry,
+                           ServiceReferenceReadableRegistry readableRegistry, BindingContextProvider bindingContextProvider,
                            String transactionName, MBeanServer mBeanServer) {
-        this.codecRegistry = codecRegistry;
+        this.bindingContextProvider = bindingContextProvider;
         this.name = currentModule;
         this.transactionStatus = transactionStatus;
         this.modulesHolder = modulesHolder;
@@ -211,11 +210,10 @@ final class DependencyResolverImpl implements DependencyResolver,
     @Override
     public <T extends BaseIdentity> Class<? extends T> resolveIdentity(IdentityAttributeRef identityRef, Class<T> expectedBaseClass) {
         final QName qName = QName.create(identityRef.getqNameOfIdentity());
-        IdentityCodec<?> identityCodec = codecRegistry.getIdentityCodec();
-        Class<? extends BaseIdentity> deserialized = identityCodec.deserialize(qName);
+        Class<?> deserialized  = bindingContextProvider.getBindingContext().getIdentityClass(qName);
         if (deserialized == null) {
             throw new IllegalStateException("Unable to retrieve identity class for " + qName + ", null response from "
-                    + codecRegistry);
+                    + bindingContextProvider.getBindingContext());
         }
         if (expectedBaseClass.isAssignableFrom(deserialized)) {
             return (Class<T>) deserialized;

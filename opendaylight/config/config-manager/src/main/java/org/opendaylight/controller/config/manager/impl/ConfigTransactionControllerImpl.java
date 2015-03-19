@@ -38,10 +38,10 @@ import org.opendaylight.controller.config.manager.impl.dynamicmbean.ReadOnlyAtom
 import org.opendaylight.controller.config.manager.impl.factoriesresolver.HierarchicalConfigMBeanFactoriesHolder;
 import org.opendaylight.controller.config.manager.impl.jmx.TransactionModuleJMXRegistrator;
 import org.opendaylight.controller.config.manager.impl.jmx.TransactionModuleJMXRegistrator.TransactionModuleJMXRegistration;
+import org.opendaylight.controller.config.manager.impl.osgi.mapping.BindingContextProvider;
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.opendaylight.yangtools.concepts.Identifiable;
-import org.opendaylight.yangtools.yang.data.impl.codec.CodecRegistry;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,7 +83,7 @@ class ConfigTransactionControllerImpl implements
     private final SearchableServiceReferenceWritableRegistry writableSRRegistry;
 
     public ConfigTransactionControllerImpl(ConfigTransactionLookupRegistry txLookupRegistry,
-                                           long parentVersion, CodecRegistry codecRegistry, long currentVersion,
+                                           long parentVersion, BindingContextProvider bindingContextProvider, long currentVersion,
                                            Map<String, Entry<ModuleFactory, BundleContext>> currentlyRegisteredFactories,
                                            MBeanServer transactionsMBeanServer, MBeanServer configMBeanServer,
                                            boolean blankTransaction, SearchableServiceReferenceWritableRegistry  writableSRRegistry) {
@@ -96,7 +96,7 @@ class ConfigTransactionControllerImpl implements
         this.factoriesHolder = new HierarchicalConfigMBeanFactoriesHolder(currentlyRegisteredFactories);
         this.transactionStatus = new TransactionStatus();
         this.dependencyResolverManager = new DependencyResolverManager(txLookupRegistry.getTransactionIdentifier(),
-                transactionStatus, writableSRRegistry, codecRegistry, transactionsMBeanServer);
+                transactionStatus, writableSRRegistry, bindingContextProvider, transactionsMBeanServer);
         this.transactionsMBeanServer = transactionsMBeanServer;
         this.configMBeanServer = configMBeanServer;
         this.blankTransaction = blankTransaction;

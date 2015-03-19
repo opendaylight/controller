@@ -105,8 +105,7 @@ import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.test.types.rev131127.TestIdentity1;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.test.types.rev131127.TestIdentity2;
-import org.opendaylight.yangtools.yang.data.impl.codec.CodecRegistry;
-import org.opendaylight.yangtools.yang.data.impl.codec.IdentityCodec;
+import org.opendaylight.yangtools.sal.binding.generator.util.BindingRuntimeContext;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
@@ -200,14 +199,11 @@ public class NetconfMappingTest extends AbstractConfigTest {
     }
 
     @Override
-    protected CodecRegistry getCodecRegistry() {
-        IdentityCodec<?> idCodec = mock(IdentityCodec.class);
-        doReturn(TestIdentity1.class).when(idCodec).deserialize(TestIdentity1.QNAME);
-        doReturn(TestIdentity2.class).when(idCodec).deserialize(TestIdentity2.QNAME);
-
-        CodecRegistry codecReg = super.getCodecRegistry();
-        doReturn(idCodec).when(codecReg).getIdentityCodec();
-        return codecReg;
+    protected BindingRuntimeContext getBindingRuntimeContext() {
+        final BindingRuntimeContext ret = super.getBindingRuntimeContext();
+        doReturn(TestIdentity1.class).when(ret).getIdentityClass(TestIdentity1.QNAME);
+        doReturn(TestIdentity2.class).when(ret).getIdentityClass(TestIdentity2.QNAME);
+        return ret;
     }
 
     @Test

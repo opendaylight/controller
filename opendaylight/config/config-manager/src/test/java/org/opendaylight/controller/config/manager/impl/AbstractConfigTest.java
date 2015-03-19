@@ -39,12 +39,15 @@ import org.opendaylight.controller.config.manager.impl.factoriesresolver.ModuleF
 import org.opendaylight.controller.config.manager.impl.jmx.BaseJMXRegistrator;
 import org.opendaylight.controller.config.manager.impl.jmx.ConfigRegistryJMXRegistrator;
 import org.opendaylight.controller.config.manager.impl.jmx.InternalJMXRegistrator;
+import org.opendaylight.controller.config.manager.impl.osgi.mapping.BindingContextProvider;
 import org.opendaylight.controller.config.manager.testingservices.scheduledthreadpool.TestingScheduledThreadPoolImpl;
 import org.opendaylight.controller.config.manager.testingservices.threadpool.TestingFixedThreadPool;
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.util.ConfigRegistryJMXClient;
 import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
-import org.opendaylight.yangtools.yang.data.impl.codec.CodecRegistry;
+import org.opendaylight.yangtools.sal.binding.generator.api.ClassLoadingStrategy;
+import org.opendaylight.yangtools.sal.binding.generator.util.BindingRuntimeContext;
+import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
@@ -121,8 +124,17 @@ public abstract class AbstractConfigTest extends
         internalJmxRegistrator = new InternalJMXRegistrator(platformMBeanServer);
         baseJmxRegistrator = new BaseJMXRegistrator(internalJmxRegistrator);
 
-        configRegistry = new ConfigRegistryImpl(resolver,
-                platformMBeanServer, baseJmxRegistrator, getCodecRegistry());
+        configRegistry = new ConfigRegistryImpl(resolver, platformMBeanServer, baseJmxRegistrator, new BindingContextProvider() {
+            @Override
+            public synchronized void update(final ClassLoadingStrategy classLoadingStrategy, final SchemaContextProvider ctxProvider) {
+                // NOOP
+            }
+
+            @Override
+            public synchronized BindingRuntimeContext getBindingContext() {
+                return getBindingRuntimeContext();
+            }
+        });
 
         try {
             configRegistryJMXRegistrator.registerToJMX(configRegistry);
@@ -192,8 +204,8 @@ public abstract class AbstractConfigTest extends
         return new ClassBasedModuleFactory(implementationName, configBeanClass);
     }
 
-    protected CodecRegistry getCodecRegistry() {
-        return mock(CodecRegistry.class);
+    protected BindingRuntimeContext getBindingRuntimeContext() {
+        return mock(BindingRuntimeContext.class);
     }
 
     public static interface BundleContextServiceRegistrationHandler {
