@@ -7,12 +7,8 @@
  */
 package org.opendaylight.controller.sal.core.spi;
 
-import java.util.concurrent.Future;
 import org.opendaylight.controller.sal.core.api.Broker.ConsumerSession;
 import org.opendaylight.controller.sal.core.api.BrokerService;
-import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.common.RpcResult;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
 
 public abstract class ForwardingConsumerSession implements ConsumerSession {
 
@@ -32,12 +28,5 @@ public abstract class ForwardingConsumerSession implements ConsumerSession {
     public boolean isClosed() {
         return delegate().isClosed();
     }
-
-    @Override
-    @Deprecated
-    public Future<RpcResult<CompositeNode>> rpc(QName arg0, CompositeNode arg1) {
-        return delegate().rpc(arg0, arg1);
-    }
-
 
 }

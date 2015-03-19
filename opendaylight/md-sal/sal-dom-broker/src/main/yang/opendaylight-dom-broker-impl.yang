@@ -43,14 +43,6 @@ module opendaylight-sal-dom-broker-impl {
     augment "/config:modules/config:module/config:configuration" {
         case dom-broker-impl {
             when "/config:modules/config:module/config:type = 'dom-broker-impl'";
-            container data-store {
-                uses config:service-ref {
-                    refine type {
-                        mandatory false;
-                        config:required-identity sal:dom-data-store;
-                    }
-                }
-            }
 
             container async-data-broker {
                 uses config:service-ref {
