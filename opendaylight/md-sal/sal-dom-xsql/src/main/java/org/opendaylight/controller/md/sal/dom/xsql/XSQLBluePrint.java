@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.opendaylight.controller.md.sal.dom.xsql;
 
 import java.io.DataInputStream;
@@ -23,7 +30,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
+/**
+ * @author Sharon Aicler(saichler@gmail.com)
+ **/
 public class XSQLBluePrint implements DatabaseMetaData, Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -203,15 +212,23 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
         return result;
     }
 
-    public void addToBluePrintCache(XSQLBluePrintNode blNode) {
-        this.tableNameToBluePrint.put(blNode.getBluePrintNodeName(), blNode);
-        Map<String, XSQLBluePrintNode> map = this.odlNameToBluePrint.get(blNode
-                .getODLTableName());
-        if (map == null) {
-            map = new HashMap<String, XSQLBluePrintNode>();
-            this.odlNameToBluePrint.put(blNode.getODLTableName(), map);
+    public XSQLBluePrintNode addToBluePrintCache(XSQLBluePrintNode blNode,XSQLBluePrintNode parent) {
+        XSQLBluePrintNode existingNode = this.tableNameToBluePrint.get(blNode.getBluePrintNodeName());
+        if(existingNode!=null){
+            existingNode.mergeAugmentation(blNode);
+            return existingNode;
+        }else{
+            this.tableNameToBluePrint.put(blNode.getBluePrintNodeName(), blNode);
+            Map<String, XSQLBluePrintNode> map = this.odlNameToBluePrint.get(blNode.getODLTableName());
+            if (map == null) {
+                map = new HashMap<String, XSQLBluePrintNode>();
+                this.odlNameToBluePrint.put(blNode.getODLTableName(), map);
+            }
+            map.put(blNode.getBluePrintNodeName(), blNode);
+            if(parent!=null)
+                parent.addChild(blNode);
+            return blNode;
         }
-        map.put(blNode.getBluePrintNodeName(), blNode);
     }
 
     public Class<?> getGenericType(ParameterizedType type) {
