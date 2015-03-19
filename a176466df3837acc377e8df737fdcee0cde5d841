@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_80cbaf71",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-03-19T11:41:34Z",
+      "side": 1,
+      "message": "Commons-io is removed and the code was migrated to use guava or standard java features instead. You can remove this dependency if on current master.",
+      "revId": "a176466df3837acc377e8df737fdcee0cde5d841",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_20c89b73",
+        "filename": "opendaylight/netconf/mdsal-netconf-connector/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-03-19T11:41:34Z",
+      "side": 1,
+      "message": "Please add a TODO on why this is here and how it should be fixed in the future",
+      "revId": "a176466df3837acc377e8df737fdcee0cde5d841",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_607c6321",
+        "filename": "opendaylight/netconf/mdsal-netconf-connector/src/main/java/org/opendaylight/controller/netconf/mdsal/connector/ops/get/AbstractGet.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-03-19T11:41:34Z",
+      "side": 1,
+      "message": "A liitle javadoc or just plain comments should be added to describe the contract of this method (in particular: Optional.absent returned if the filter is present but contains no tree and Optional.of(ROOT) returned in case not filter is present).",
+      "revId": "a176466df3837acc377e8df737fdcee0cde5d841",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_00a79fbe",
+        "filename": "opendaylight/netconf/mdsal-netconf-connector/src/main/java/org/opendaylight/controller/netconf/mdsal/connector/ops/get/AbstractGet.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-03-19T11:41:34Z",
+      "side": 1,
+      "message": "Add a TODO for supporting multiple filter trees.",
+      "revId": "a176466df3837acc377e8df737fdcee0cde5d841",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_409cc769",
+        "filename": "opendaylight/netconf/mdsal-netconf-connector/src/main/java/org/opendaylight/controller/netconf/mdsal/connector/ops/get/AbstractGet.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-03-19T11:41:34Z",
+      "side": 1,
+      "message": "If the filter always starts from ROOT, then AnyXml or Leaf node types would be unexpected here. Yang schema only allows for container nodes and list nodes to be defined at top level. So cases other than container and list are redundant here. Please remove if my assumptions are correct.",
+      "revId": "a176466df3837acc377e8df737fdcee0cde5d841",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
