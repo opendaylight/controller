@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_fe2c944c",
+        "filename": "opendaylight/commons/liblldp/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 556
+      },
+      "writtenOn": "2015-03-19T18:19:47Z",
+      "side": 1,
+      "message": "please add content of pom.xml from https://git.opendaylight.org/gerrit/#/c/16689 in order to avoid dependency breakage",
+      "revId": "828359636df56f757d530ef054e4634407e3dce7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
