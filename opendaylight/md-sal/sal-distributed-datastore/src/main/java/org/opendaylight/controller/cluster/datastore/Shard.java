@@ -657,13 +657,9 @@ public class Shard extends RaftActor {
 
     private void updateSchemaContext(final UpdateSchemaContext message) {
         this.schemaContext = message.getSchemaContext();
-        updateSchemaContext(message.getSchemaContext());
         store.onGlobalContextUpdated(message.getSchemaContext());
-    }
 
-    @VisibleForTesting
-    void updateSchemaContext(final SchemaContext schemaContext) {
-        store.onGlobalContextUpdated(schemaContext);
+        // FIXME: cascade the message to all DataTreeChangeListeners
     }
 
     private void registerChangeListener(final RegisterChangeListener registerChangeListener) {
