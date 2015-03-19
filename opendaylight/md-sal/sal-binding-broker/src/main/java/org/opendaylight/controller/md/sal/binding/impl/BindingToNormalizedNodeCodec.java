@@ -17,6 +17,8 @@ import javax.annotation.Nonnull;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationException;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationOperation;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizer;
+import org.opendaylight.yangtools.binding.data.codec.api.BindingCodecTree;
+import org.opendaylight.yangtools.binding.data.codec.api.BindingCodecTreeFactory;
 import org.opendaylight.yangtools.binding.data.codec.impl.BindingNormalizedNodeCodecRegistry;
 import org.opendaylight.yangtools.sal.binding.generator.impl.GeneratedClassLoadingStrategy;
 import org.opendaylight.yangtools.sal.binding.generator.util.BindingRuntimeContext;
@@ -37,7 +39,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
-public class BindingToNormalizedNodeCodec implements SchemaContextListener,AutoCloseable {
+public class BindingToNormalizedNodeCodec implements BindingCodecTreeFactory, SchemaContextListener, AutoCloseable {
 
     private final BindingIndependentMappingService bindingToLegacy;
     private final BindingNormalizedNodeCodecRegistry codecRegistry;
@@ -45,8 +47,9 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener,AutoC
     private final GeneratedClassLoadingStrategy classLoadingStrategy;
     private BindingRuntimeContext runtimeContext;
 
-    public BindingToNormalizedNodeCodec(final GeneratedClassLoadingStrategy classLoadingStrategy, final BindingIndependentMappingService mappingService, final BindingNormalizedNodeCodecRegistry codecRegistry) {
-        super();
+    public BindingToNormalizedNodeCodec(final GeneratedClassLoadingStrategy classLoadingStrategy,
+            final BindingIndependentMappingService mappingService,
+            final BindingNormalizedNodeCodecRegistry codecRegistry) {
         this.bindingToLegacy = mappingService;
         this.classLoadingStrategy = classLoadingStrategy;
         this.codecRegistry = codecRegistry;
@@ -188,4 +191,15 @@ public class BindingToNormalizedNodeCodec implements SchemaContextListener,AutoC
         }
         return key.getMethod(methodName);
     }
+
+    @Override
+    public BindingCodecTree create(BindingRuntimeContext context) {
+        return codecRegistry.create(context);
+    }
+
+    @Override
+    public BindingCodecTree create(SchemaContext context, Class<?>... bindingClasses) {
+        return codecRegistry.create(context, bindingClasses);
+    }
+
 }

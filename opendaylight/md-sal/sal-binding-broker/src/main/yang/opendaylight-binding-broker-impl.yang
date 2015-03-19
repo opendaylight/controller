@@ -69,6 +69,7 @@ module opendaylight-sal-binding-broker-impl {
     identity runtime-generated-mapping {
         base config:module-type;
         config:provided-service binding-dom-mapping-service;
+        config:provided-service sal:binding-codec-tree-factory;
         config:java-name-prefix RuntimeMapping;
     }
 
