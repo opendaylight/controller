@@ -19,7 +19,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.sshd.common.util.ThreadUtils;
 import org.apache.sshd.server.keyprovider.PEMGeneratorHostKeyProvider;
@@ -38,7 +37,7 @@ public class NetconfSSHActivator implements BundleActivator {
     private static final java.lang.String ALGORITHM = "RSA";
     private static final int KEY_SIZE = 4096;
     public static final int POOL_SIZE = 8;
-    private static final int DEFAULT_IDLE_TIMEOUT = (int) TimeUnit.MINUTES.toMillis(20);
+    private static final int DEFAULT_IDLE_TIMEOUT = Integer.MAX_VALUE;
 
     private ScheduledExecutorService minaTimerExecutor;
     private NioEventLoopGroup clientGroup;
