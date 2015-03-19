@@ -92,7 +92,10 @@ public final class ListenerTree extends AbstractRegistrationTree<DataChangeListe
      * the listener tree.
      *
      * @return A walker instance.
+     *
+     * @deprecated Use {@link #takeSnapshot()} instead.
      */
+    @Deprecated
     public ListenerWalker getWalker() {
         /*
          * TODO: The only current user of this method is local to the datastore.
