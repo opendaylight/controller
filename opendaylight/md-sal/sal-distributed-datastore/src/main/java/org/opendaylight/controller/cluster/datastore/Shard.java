@@ -224,7 +224,7 @@ public class Shard extends RaftActor {
         return Props.create(new ShardCreator(name, peerAddresses, datastoreContext, schemaContext));
     }
 
-    private Optional<ActorRef> createRoleChangeNotifier(String shardId) {
+    private Optional<ActorRef> createRoleChangeNotifier(final String shardId) {
         ActorRef shardRoleChangeNotifier = this.getContext().actorOf(
             RoleChangeNotifier.getProps(shardId), shardId + "-notifier");
         return Optional.of(shardRoleChangeNotifier);
@@ -320,7 +320,7 @@ public class Shard extends RaftActor {
         return roleChangeNotifier;
     }
 
-    private void onDatastoreContext(DatastoreContext context) {
+    private void onDatastoreContext(final DatastoreContext context) {
         datastoreContext = context;
 
         commitCoordinator.setQueueCapacity(datastoreContext.getShardTransactionCommitQueueCapacity());
@@ -458,7 +458,7 @@ public class Shard extends RaftActor {
         commitCoordinator.handleCanCommit(canCommit, getSender(), self());
     }
 
-    private void handleForwardedReadyTransaction(ForwardedReadyTransaction ready) {
+    private void handleForwardedReadyTransaction(final ForwardedReadyTransaction ready) {
         LOG.debug("{}: Readying transaction {}, client version {}", persistenceId(),
                 ready.getTransactionID(), ready.getTxnClientVersion());
 
@@ -551,9 +551,9 @@ public class Shard extends RaftActor {
         }
     }
 
-    private ActorRef createTypedTransactionActor(int transactionType,
-            ShardTransactionIdentifier transactionId, String transactionChainId,
-            short clientVersion ) {
+    private ActorRef createTypedTransactionActor(final int transactionType,
+            final ShardTransactionIdentifier transactionId, final String transactionChainId,
+            final short clientVersion ) {
 
         DOMStoreTransactionFactory factory = store;
 
@@ -595,8 +595,8 @@ public class Shard extends RaftActor {
         }
     }
 
-    private ActorRef createShardTransaction(DOMStoreTransaction transaction, ShardTransactionIdentifier transactionId,
-                                            short clientVersion){
+    private ActorRef createShardTransaction(final DOMStoreTransaction transaction, final ShardTransactionIdentifier transactionId,
+                                            final short clientVersion){
         return getContext().actorOf(
                 ShardTransaction.props(transaction, getSelf(),
                         schemaContext, datastoreContext, shardMBean,
@@ -606,7 +606,7 @@ public class Shard extends RaftActor {
 
     }
 
-    private void createTransaction(CreateTransaction createTransaction) {
+    private void createTransaction(final CreateTransaction createTransaction) {
         try {
             ActorRef transactionActor = createTransaction(createTransaction.getTransactionType(),
                 createTransaction.getTransactionId(), createTransaction.getTransactionChainId(),
@@ -619,8 +619,8 @@ public class Shard extends RaftActor {
         }
     }
 
-    private ActorRef createTransaction(int transactionType, String remoteTransactionId,
-            String transactionChainId, short clientVersion) {
+    private ActorRef createTransaction(final int transactionType, final String remoteTransactionId,
+            final String transactionChainId, final short clientVersion) {
 
 
         ShardTransactionIdentifier transactionId = new ShardTransactionIdentifier(remoteTransactionId);
@@ -659,6 +659,7 @@ public class Shard extends RaftActor {
         this.schemaContext = message.getSchemaContext();
         updateSchemaContext(message.getSchemaContext());
         store.onGlobalContextUpdated(message.getSchemaContext());
+        // FIXME: propagate to all current DataTreeChangeListeners
     }
 
     @VisibleForTesting
@@ -890,7 +891,7 @@ public class Shard extends RaftActor {
 
     }
 
-    private void applyModificationToState(ActorRef clientActor, String identifier, Object modification) {
+    private void applyModificationToState(final ActorRef clientActor, final String identifier, final Object modification) {
         if(modification == null) {
             LOG.error(
                     "{}: modification is null - this is very unexpected, clientActor = {}, identifier = {}",
