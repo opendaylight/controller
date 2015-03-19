@@ -8,6 +8,8 @@
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
 import static com.google.common.base.Preconditions.checkState;
+import com.google.common.collect.ImmutableMap;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -16,23 +18,52 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataChangeListener;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeService;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeIdentifier;
+import org.opendaylight.controller.md.sal.dom.api.DOMExtensibleService;
+import org.opendaylight.controller.md.sal.dom.api.DOMServiceExtension;
 import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreTreeChangePublisher;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractDOMDataBroker extends AbstractDOMForwardedTransactionFactory<DOMStore> implements DOMDataBroker, AutoCloseable {
+public abstract class AbstractDOMDataBroker extends AbstractDOMForwardedTransactionFactory<DOMStore> implements DOMDataBroker, DOMExtensibleService, AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractDOMDataBroker.class);
 
     private final AtomicLong txNum = new AtomicLong();
     private final AtomicLong chainNum = new AtomicLong();
+    private final Map<Class<? extends DOMServiceExtension>, DOMServiceExtension> extensions;
     private volatile AutoCloseable closeable;
 
     protected AbstractDOMDataBroker(final Map<LogicalDatastoreType, DOMStore> datastores) {
         super(datastores);
+
+        boolean treeChange = true;
+        for (DOMStore ds : datastores.values()) {
+            if (!(ds instanceof DOMStoreTreeChangePublisher)) {
+                treeChange = false;
+                break;
+            }
+        }
+
+        if (treeChange) {
+            extensions = ImmutableMap.<Class<? extends DOMServiceExtension>, DOMServiceExtension>of(DOMDataTreeChangeService.class, new DOMDataTreeChangeService() {
+                @Override
+                public <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerDataTreeChangeListener(final DOMDataTreeIdentifier treeId, final L listener) {
+                    DOMStore publisher = getTxFactories().get(treeId.getDatastoreType());
+                    checkState(publisher != null, "Requested logical data store is not available.");
+
+                    return ((DOMStoreTreeChangePublisher)publisher).registerTreeChangeListener(treeId.getRootIdentifier(), listener);
+                }
+            });
+        } else {
+            extensions = Collections.emptyMap();
+        }
     }
 
     public void setCloseable(final AutoCloseable closeable) {
@@ -64,6 +95,11 @@ public abstract class AbstractDOMDataBroker extends AbstractDOMForwardedTransact
         DOMStore potentialStore = getTxFactories().get(store);
         checkState(potentialStore != null, "Requested logical data store is not available.");
         return potentialStore.registerChangeListener(path, listener, triggeringScope);
+    }
+
+    @Override
+    public Map<Class<? extends DOMServiceExtension>, DOMServiceExtension> getSupportedExtensions() {
+        return extensions;
     }
 
     @Override
