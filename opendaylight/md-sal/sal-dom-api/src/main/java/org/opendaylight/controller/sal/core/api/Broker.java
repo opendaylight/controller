@@ -7,10 +7,6 @@
  */
 package org.opendaylight.controller.sal.core.api;
 
-import org.opendaylight.controller.md.sal.common.api.routing.RoutedRegistration;
-import org.opendaylight.yangtools.concepts.ObjectRegistration;
-import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -22,19 +18,6 @@ import org.osgi.framework.BundleContext;
  * {@link ConsumerSession} and provide access to infrastructure services, which
  * removes direct dependencies between providers and consumers.
  *
- *
- * <h3>Infrastructure services</h3> Some examples of infrastructure services:
- *
- * <ul>
- * <li>RPC Invocation - see {@link ConsumerSession#rpc(QName, CompositeNode)},
- * {@link ProviderSession#addRpcImplementation(QName, RpcImplementation)} and
- * {@link RpcImplementation}
- * <li>Notification Service - see {@link org.opendaylight.controller.sal.core.api.notify.NotificationService} and
- * {@link org.opendaylight.controller.sal.core.api.notify.NotificationPublishService}
- * <li>Functionality and Data model
- * <li>Data Store access and modification - see {@link org.opendaylight.controller.sal.core.api.data.DataBrokerService} and
- * {@link org.opendaylight.controller.sal.core.api.data.DataProviderService}
- * </ul>
  *
  * The services are exposed via session.
  *
@@ -94,12 +77,6 @@ public interface Broker {
      * from consumer, using the {@link Provider#getProviderFunctionality()}, and
      * register that functionality into system and concrete infrastructure
      * services.
-     *
-     * <p>
-     * Note that consumer could register additional functionality at later point
-     * by using service and functionality specific APIs (e.g.
-     * {@link ProviderSession#addRpcImplementation(QName, RpcImplementation)}
-     *
      * <p>
      * The consumer is <b>required to use</b> returned session for all
      * communication with broker or one of the broker services. The session is
@@ -192,15 +169,5 @@ public interface Broker {
 
         @Override
         boolean isClosed();
-    }
-
-    public interface RpcRegistration extends ObjectRegistration<RpcImplementation> {
-        QName getType();
-
-        @Override
-        void close();
-    }
-
-    public interface RoutedRpcRegistration extends RpcRegistration, RoutedRegistration<QName, YangInstanceIdentifier, RpcImplementation> {
     }
 }

@@ -13,12 +13,11 @@ import com.google.common.collect.ImmutableList;
 import java.util.Iterator;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 /**
- * @deprecated This class provides compatibility between {@link CompositeNode} and {@link NormalizedNode}.
- *             Users of this class should use {@link NormalizedNode}s directly.
+ * @deprecated This class provides compatibility between XML semantics
+ * and {@link org.opendaylight.yangtools.yang.data.util.DataSchemaContextTree}
  */
 @Deprecated
 public class DataNormalizer {

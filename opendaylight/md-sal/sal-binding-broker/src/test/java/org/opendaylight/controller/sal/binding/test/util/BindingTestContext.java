@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.sal.binding.test.util;
 
+import static com.google.common.base.Preconditions.checkState;
+
 import com.google.common.annotations.Beta;
 import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.ImmutableClassToInstanceMap;
@@ -55,8 +57,6 @@ import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
 import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
-import static com.google.common.base.Preconditions.checkState;
-
 @Beta
 public class BindingTestContext implements AutoCloseable {
 
@@ -68,8 +68,6 @@ public class BindingTestContext implements AutoCloseable {
     private NotificationBrokerImpl baNotifyImpl;
 
 
-    @Deprecated
-    private org.opendaylight.controller.sal.core.api.data.DataProviderService biDataLegacyBroker;
     private BrokerImpl biBrokerImpl;
 
     private final ListeningExecutorService executor;
@@ -168,7 +166,6 @@ public class BindingTestContext implements AutoCloseable {
         final ClassToInstanceMap<BrokerService> domBrokerServices = ImmutableClassToInstanceMap
                 .<BrokerService> builder()
                 //
-                .put(org.opendaylight.controller.sal.core.api.data.DataProviderService.class, biDataLegacyBroker) //
                 .put(DOMRpcRouter.class, biBrokerImpl.getRouter()) //
                 .put(DOMMountPointService.class, biMountImpl)
                 .build();
@@ -264,11 +261,6 @@ public class BindingTestContext implements AutoCloseable {
     @Deprecated
     public DataProviderService getBindingDataBroker() {
         return baData;
-    }
-
-    @Deprecated
-    public org.opendaylight.controller.sal.core.api.data.DataProviderService getDomDataBroker() {
-        return biDataLegacyBroker;
     }
 
     public RpcProviderRegistry getBindingRpcRegistry() {

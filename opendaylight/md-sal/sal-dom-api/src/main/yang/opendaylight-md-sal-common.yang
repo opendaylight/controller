@@ -37,7 +37,7 @@ module opendaylight-md-sal-common {
             }
         }
     }
-    
+
     grouping rpc-state {
         list rpc-router {
             uses rpc-router;

@@ -11,11 +11,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-
+import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
 import org.opendaylight.controller.sal.core.api.Broker;
 import org.opendaylight.controller.sal.core.api.Provider;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
-import org.opendaylight.controller.sal.core.api.mount.MountProvisionService;
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionListener;
 import org.opendaylight.controller.sal.rest.doc.impl.ApiDocGenerator;
 import org.opendaylight.controller.sal.rest.doc.mountpoints.MountPointSwagger;
@@ -49,8 +48,8 @@ public class DocProvider implements BundleActivator, ServiceTrackerCustomizer<Br
         SchemaService schemaService = providerSession.getService(SchemaService.class);
         ApiDocGenerator.getInstance().setSchemaService(schemaService);
 
-        MountProvisionService mountService = providerSession
-                .getService(MountProvisionService.class);
+        DOMMountPointService mountService = providerSession
+                .getService(DOMMountPointService.class);
         ListenerRegistration<MountProvisionListener> registration = mountService
                 .registerProvisionListener(MountPointSwagger.getInstance());
         MountPointSwagger.getInstance().setGlobalSchema(schemaService);
