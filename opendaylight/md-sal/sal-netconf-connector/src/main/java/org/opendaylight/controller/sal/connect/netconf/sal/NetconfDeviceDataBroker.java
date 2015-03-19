@@ -8,6 +8,8 @@
 
 package org.opendaylight.controller.sal.connect.netconf.sal;
 
+import java.util.Collections;
+import java.util.Map;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
@@ -16,6 +18,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
+import org.opendaylight.controller.md.sal.dom.api.DOMServiceExtension;
 import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
 import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionPreferences;
 import org.opendaylight.controller.sal.connect.netconf.sal.tx.ReadOnlyTx;
@@ -71,6 +74,11 @@ final class NetconfDeviceDataBroker implements DOMDataBroker {
     @Override
     public DOMTransactionChain createTransactionChain(final TransactionChainListener listener) {
         throw new UnsupportedOperationException(id + ": Transaction chains not supported for netconf mount point");
+    }
+
+    @Override
+    public Map<Class<? extends DOMServiceExtension>, DOMServiceExtension> getSupportedExtensions() {
+        return Collections.emptyMap();
     }
 
 }

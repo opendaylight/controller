@@ -16,6 +16,7 @@ import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.JdkFutureAdapters;
 import com.google.common.util.concurrent.ListenableFuture;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -41,6 +42,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
 import org.opendaylight.controller.md.sal.dom.api.DOMService;
+import org.opendaylight.controller.md.sal.dom.api.DOMServiceExtension;
 import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
 import org.opendaylight.controller.md.sal.dom.broker.impl.compat.BackwardsCompatibleDataBroker;
 import org.opendaylight.controller.sal.common.DataStoreIdentifier;
@@ -563,6 +565,11 @@ public class BackwardsCompatibleMountPoint implements MountProvisionInstance, Sc
             public ListenableFuture<RpcResult<TransactionStatus>> commit() {
                 return delegateWriteTx.commit();
             }
+        }
+
+        @Override
+        public Map<Class<? extends DOMServiceExtension>, DOMServiceExtension> getSupportedExtensions() {
+            return Collections.emptyMap();
         }
     }
 
