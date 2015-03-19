@@ -6,14 +6,13 @@ import static org.opendaylight.controller.md.sal.test.model.util.ListsBindingUti
 import static org.opendaylight.controller.md.sal.test.model.util.ListsBindingUtils.TOP_FOO_KEY;
 import static org.opendaylight.controller.md.sal.test.model.util.ListsBindingUtils.path;
 
-import org.opendaylight.controller.md.sal.binding.compat.HeliumRpcProviderRegistry;
-
 import com.google.common.base.Throwables;
 import java.util.Arrays;
 import javassist.ClassPool;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.opendaylight.controller.md.sal.binding.compat.HeliumRpcProviderRegistry;
 import org.opendaylight.controller.md.sal.binding.impl.BindingDOMRpcProviderServiceAdapter;
 import org.opendaylight.controller.md.sal.binding.impl.BindingDOMRpcServiceAdapter;
 import org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodec;
@@ -66,7 +65,7 @@ public class RpcProviderRegistryTest  extends AbstractSchemaAwareTest {
         final DataObjectSerializerGenerator generator = StreamWriterGenerator.create(JavassistUtils.forClassPool(ClassPool.getDefault()));
         final BindingNormalizedNodeCodecRegistry codecRegistry = new BindingNormalizedNodeCodecRegistry(generator);
         final GeneratedClassLoadingStrategy classLoadingStrategy = GeneratedClassLoadingStrategy.getTCCLClassLoadingStrategy();
-        final BindingToNormalizedNodeCodec codec = new BindingToNormalizedNodeCodec(classLoadingStrategy, null, codecRegistry);
+        final BindingToNormalizedNodeCodec codec = new BindingToNormalizedNodeCodec(classLoadingStrategy, codecRegistry);
         final DOMRpcRouter domRpcRegistry = new DOMRpcRouter();
         domRpcRegistry.onGlobalContextUpdated(context);
         codec.onGlobalContextUpdated(context);

@@ -7,21 +7,19 @@
  */
 package org.opendaylight.controller.sal.binding.test;
 
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 import org.junit.Before;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.opendaylight.controller.sal.binding.test.util.BindingBrokerTestFactory;
 import org.opendaylight.controller.sal.binding.test.util.BindingTestContext;
-import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService;
-
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
 
 @SuppressWarnings("deprecation")
 public abstract class AbstractDataServiceTest {
 
     protected org.opendaylight.controller.sal.core.api.data.DataProviderService biDataService;
     protected DataProviderService baDataService;
-    protected BindingIndependentMappingService mappingService;
+
     protected BindingTestContext testContext;
 
     @Before
@@ -35,7 +33,6 @@ public abstract class AbstractDataServiceTest {
 
         baDataService = testContext.getBindingDataBroker();
         biDataService = testContext.getDomDataBroker();
-        mappingService = testContext.getBindingToDomMappingService();
     }
 
     protected boolean getStartWithSchema() {

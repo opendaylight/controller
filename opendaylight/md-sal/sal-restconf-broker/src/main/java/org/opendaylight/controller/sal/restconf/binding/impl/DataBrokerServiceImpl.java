@@ -8,7 +8,6 @@
 package org.opendaylight.controller.sal.restconf.binding.impl;
 
 import java.net.URL;
-
 import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.binding.api.data.DataChangeListener;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
@@ -18,7 +17,6 @@ import org.opendaylight.yangtools.restconf.client.api.RestconfClientContextFacto
 import org.opendaylight.yangtools.restconf.client.api.UnsupportedProtocolException;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.impl.codec.BindingIndependentMappingService;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,8 +27,8 @@ public class DataBrokerServiceImpl implements DataBrokerService {
     private final RestconfClientContext restconfClientContext;
     private final RestconfClientContextFactory restconfClientContextFactory = null;
 
-    public DataBrokerServiceImpl(URL baseUrl, BindingIndependentMappingService mappingService, SchemaContextHolder schemaContextHolder) throws UnsupportedProtocolException {
-        this.restconfClientContext = restconfClientContextFactory.getRestconfClientContext(baseUrl, mappingService, schemaContextHolder);
+    public DataBrokerServiceImpl(URL baseUrl, SchemaContextHolder schemaContextHolder) throws UnsupportedProtocolException {
+        this.restconfClientContext = restconfClientContextFactory.getRestconfClientContext(baseUrl, schemaContextHolder);
     }
 
     @Override

@@ -10,12 +10,13 @@ package org.opendaylight.controller.sal.binding.test.bugfix;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Collections;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
@@ -26,9 +27,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelList;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
-
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
 
 @SuppressWarnings("deprecation")
 public class DOMCodecBug02Test extends AbstractDataServiceTest {
@@ -54,7 +52,6 @@ public class DOMCodecBug02Test extends AbstractDataServiceTest {
 
         baDataService = testContext.getBindingDataBroker();
         biDataService = testContext.getDomDataBroker();
-        mappingService = testContext.getBindingToDomMappingService();
     };
 
     @Test
