@@ -178,6 +178,7 @@ public class ActorContext {
         if(shardManager != null) {
             shardManager.tell(new UpdateSchemaContext(schemaContext), ActorRef.noSender());
         }
+        // FIXME: tell all DataTreeChangeListener about this change
     }
 
     public void setDatastoreContext(DatastoreContext context) {
