@@ -8,10 +8,12 @@
 package org.opendaylight.controller.md.sal.dom.spi;
 
 import com.google.common.collect.ForwardingObject;
+import java.util.Map;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataBrokerExtension;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataChangeListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
@@ -53,5 +55,10 @@ public abstract class ForwardingDOMDataBroker extends ForwardingObject implement
     @Override
     public DOMTransactionChain createTransactionChain(final TransactionChainListener listener) {
         return delegate().createTransactionChain(listener);
+    }
+
+    @Override
+    public Map<Class<? extends DOMDataBrokerExtension>, DOMDataBrokerExtension> getSupportedExtensions() {
+        return delegate().getSupportedExtensions();
     }
 }

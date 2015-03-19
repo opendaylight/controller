@@ -23,7 +23,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
  */
 public interface DOMDataBroker extends
         AsyncDataBroker<YangInstanceIdentifier, NormalizedNode<?, ?>, DOMDataChangeListener>,
-        TransactionChainFactory<YangInstanceIdentifier, NormalizedNode<?, ?>>, BrokerService, DOMService {
+        TransactionChainFactory<YangInstanceIdentifier, NormalizedNode<?, ?>>, BrokerService, DOMExtensibleService<DOMDataBroker, DOMDataBrokerExtension> {
 
     /**
      * {@inheritDoc}
