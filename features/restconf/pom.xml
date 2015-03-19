@@ -255,14 +255,12 @@
       Optional TODO: Remove TODO comments.
     -->
     <!-- test to validate features.xml -->
-    <!-- TEMPORARILY DISABLE TO BREAK CYCLIC DEPENDENCY
     <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>features-test</artifactId>
       <version>${yangtools.version}</version>
       <scope>test</scope>
     </dependency>
-    -->
     <!-- dependency for opendaylight-karaf-empty for use by testing -->
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
