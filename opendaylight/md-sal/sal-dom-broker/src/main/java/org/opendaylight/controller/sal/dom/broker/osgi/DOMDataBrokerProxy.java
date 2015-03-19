@@ -1,8 +1,10 @@
 package org.opendaylight.controller.sal.dom.broker.osgi;
 
+import java.util.Map;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataBrokerExtension;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataChangeListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
@@ -45,4 +47,8 @@ public class DOMDataBrokerProxy extends AbstractBrokerServiceProxy<DOMDataBroker
         return getDelegate().createTransactionChain(listener);
     }
 
+    @Override
+    public Map<Class<? extends DOMDataBrokerExtension>, DOMDataBrokerExtension> getSupportedExtensions() {
+        return getDelegate().getSupportedExtensions();
+    }
 }

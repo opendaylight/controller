@@ -11,7 +11,11 @@ import com.google.common.base.Preconditions;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeService;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.controller.md.sal.dom.spi.ForwardingDOMDataBroker;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
 
 /**
  * An implementation of a {@link DOMDataBroker}, which forwards most requests to a delegate.
@@ -20,7 +24,7 @@ import org.opendaylight.controller.md.sal.dom.spi.ForwardingDOMDataBroker;
  * guarantee transaction ordering between transactions allocated directly from the broker
  * and its transaction chains.
  */
-public final class PingPongDataBroker extends ForwardingDOMDataBroker implements AutoCloseable {
+public final class PingPongDataBroker extends ForwardingDOMDataBroker implements AutoCloseable, DOMDataTreeChangeService {
     private final DOMDataBroker delegate;
 
     /**
@@ -46,5 +50,14 @@ public final class PingPongDataBroker extends ForwardingDOMDataBroker implements
     @Override
     public void close() {
         // TODO Auto-generated method stub
+    }
+
+    @Override
+    public <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerDataTreeChangeListener(final DOMDataTreeIdentifier treeId, final L listener) {
+        if (delegate instanceof DOMDataTreeChangeService) {
+            return ((DOMDataTreeChangeService)delegate).registerDataTreeChangeListener(treeId, listener);
+        }
+
+        throw new UnsupportedOperationException("Delegate " + delegate + " does not support required functionality");
     }
 }

@@ -11,10 +11,10 @@ import javax.annotation.Nonnull;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 
 /**
- * A {@link DOMService} which allows users to register for changes to a
+ * A {@link DOMServiceExtension} which allows users to register for changes to a
  * subtree.
  */
-public interface DOMDataTreeChangeService extends DOMService {
+public interface DOMDataTreeChangeService extends DOMDataBrokerExtension {
     /**
      * Registers a {@link DOMDataTreeChangeListener} to receive
      * notifications when data changes under a given path in the conceptual data
