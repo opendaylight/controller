@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.md.sal.rest.common;
 
+import javax.ws.rs.core.Response.Status;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
@@ -29,6 +30,18 @@ public class RestconfValidationUtils {
 
     private RestconfValidationUtils () {
         throw new UnsupportedOperationException("Utility class");
+    }
+
+    /**
+     * Method returns {@link RestconfDocumentedException} for a false condition.
+     *
+     * @param condition - condition for rise {@link RestconfDocumentedException}
+     * @param status    - input {@link Status} for create {@link RestconfDocumentedException}
+     */
+    public static void checkDocumentedError(final boolean condition, final Status status) {
+        if(!condition) {
+            throw new RestconfDocumentedException(status);
+        }
     }
 
     /**
