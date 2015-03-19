@@ -101,43 +101,46 @@ final class ResolveDataChangeEventsTask {
      * @return True if the subtree changed, false otherwise
      */
     private boolean resolveAnyChangeEvent(final ResolveDataChangeState state, final DataTreeCandidateNode node) {
-        if (node.getModificationType() != ModificationType.UNMODIFIED &&
-                !node.getDataAfter().isPresent() && !node.getDataBefore().isPresent()) {
+        final Optional<NormalizedNode<?, ?>> maybeBefore = node.getDataBefore();
+        final Optional<NormalizedNode<?, ?>> maybeAfter = node.getDataAfter();
+        final ModificationType type = node.getModificationType();
+
+        if (type != ModificationType.UNMODIFIED && !maybeAfter.isPresent() && !maybeBefore.isPresent()) {
             LOG.debug("Modification at {} has type {}, but no before- and after-data. Assuming unchanged.",
-                    state.getPath(), node.getModificationType());
+                    state.getPath(), type);
             return false;
         }
 
         // no before and after state is present
 
-        switch (node.getModificationType()) {
+        switch (type) {
         case SUBTREE_MODIFIED:
             return resolveSubtreeChangeEvent(state, node);
         case MERGE:
         case WRITE:
-            Preconditions.checkArgument(node.getDataAfter().isPresent(),
-                    "Modification at {} has type {} but no after-data", state.getPath(), node.getModificationType());
-            if (!node.getDataBefore().isPresent()) {
+            Preconditions.checkArgument(maybeAfter.isPresent(),
+                    "Modification at {} has type {} but no after-data", state.getPath(), type);
+            if (!maybeBefore.isPresent()) {
                 @SuppressWarnings({ "unchecked", "rawtypes" })
-                final NormalizedNode<PathArgument, ?> afterNode = (NormalizedNode)node.getDataAfter().get();
+                final NormalizedNode<PathArgument, ?> afterNode = (NormalizedNode)maybeAfter.get();
                 resolveSameEventRecursivelly(state, afterNode, DOMImmutableDataChangeEvent.getCreateEventFactory());
                 return true;
             }
 
-            return resolveReplacedEvent(state, node.getDataBefore().get(), node.getDataAfter().get());
+            return resolveReplacedEvent(state, maybeBefore.get(), maybeAfter.get());
         case DELETE:
-            Preconditions.checkArgument(node.getDataBefore().isPresent(),
-                    "Modification at {} has type {} but no before-data", state.getPath(), node.getModificationType());
+            Preconditions.checkArgument(maybeBefore.isPresent(),
+                    "Modification at {} has type {} but no before-data", state.getPath(), type);
 
             @SuppressWarnings({ "unchecked", "rawtypes" })
-            final NormalizedNode<PathArgument, ?> beforeNode = (NormalizedNode)node.getDataBefore().get();
+            final NormalizedNode<PathArgument, ?> beforeNode = (NormalizedNode)maybeBefore.get();
             resolveSameEventRecursivelly(state, beforeNode, DOMImmutableDataChangeEvent.getRemoveEventFactory());
             return true;
         case UNMODIFIED:
             return false;
         }
 
-        throw new IllegalStateException(String.format("Unhandled node state %s at %s", node.getModificationType(), state.getPath()));
+        throw new IllegalStateException(String.format("Unhandled node state %s at %s", type, state.getPath()));
     }
 
     private boolean resolveReplacedEvent(final ResolveDataChangeState state,
@@ -257,8 +260,11 @@ final class ResolveDataChangeEventsTask {
     }
 
     private boolean resolveSubtreeChangeEvent(final ResolveDataChangeState state, final DataTreeCandidateNode modification) {
-        Preconditions.checkArgument(modification.getDataBefore().isPresent(), "Subtree change with before-data not present at path %s", state.getPath());
-        Preconditions.checkArgument(modification.getDataAfter().isPresent(), "Subtree change with after-data not present at path %s", state.getPath());
+        final Optional<NormalizedNode<?, ?>> maybeBefore = modification.getDataBefore();
+        final Optional<NormalizedNode<?, ?>> maybeAfter = modification.getDataAfter();
+
+        Preconditions.checkArgument(maybeBefore.isPresent(), "Subtree change with before-data not present at path %s", state.getPath());
+        Preconditions.checkArgument(maybeAfter.isPresent(), "Subtree change with after-data not present at path %s", state.getPath());
 
         if (!state.needsProcessing()) {
             LOG.trace("Not processing modified subtree {}", state.getPath());
@@ -288,8 +294,8 @@ final class ResolveDataChangeEventsTask {
             }
         }
 
-        final NormalizedNode<?, ?> before = modification.getDataBefore().get();
-        final NormalizedNode<?, ?> after = modification.getDataAfter().get();
+        final NormalizedNode<?, ?> before = maybeBefore.get();
+        final NormalizedNode<?, ?> after = maybeAfter.get();
 
         if (scope != null) {
             DOMImmutableDataChangeEvent one = DOMImmutableDataChangeEvent.builder(scope).addUpdated(state.getPath(), before, after).build();
