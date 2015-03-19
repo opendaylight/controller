@@ -110,7 +110,7 @@ public class NetconfDeviceCommunicator implements NetconfClientSessionListener, 
 
             @Override
             public void operationComplete(Future<Object> future) throws Exception {
-                if (!future.isSuccess()) {
+                if (!future.isSuccess() && !future.isCancelled()) {
                     logger.debug("{}: Connection failed", id, future.cause());
                     NetconfDeviceCommunicator.this.remoteDevice.onRemoteSessionFailed(future.cause());
                 }
@@ -197,9 +197,8 @@ public class NetconfDeviceCommunicator implements NetconfClientSessionListener, 
         // Disconnect from device
         if(session != null) {
             session.close();
+            // tear down not necessary, called indirectly by above close
         }
-
-        tearDown(id + ": Netconf session closed");
     }
 
     @Override
