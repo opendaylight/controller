@@ -21,8 +21,10 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.List;
+import javax.xml.parsers.ParserConfigurationException;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
+import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessage;
 import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessageAdditionalHeader;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
@@ -61,7 +63,7 @@ public final class NetconfXMLToHelloMessageDecoder extends ByteToMessageDecoder 
 
     @Override
     @VisibleForTesting
-    public void decode(final ChannelHandlerContext ctx, final ByteBuf in, final List<Object> out) throws IOException, SAXException, NetconfDocumentedException {
+    public void decode(final ChannelHandlerContext ctx, final ByteBuf in, final List<Object> out) throws IOException, SAXException, NetconfDocumentedException, ParserConfigurationException {
         if (in.readableBytes() == 0) {
             LOG.debug("No more content in incoming buffer.");
             return;
@@ -91,6 +93,17 @@ public final class NetconfXMLToHelloMessageDecoder extends ByteToMessageDecoder 
             }
 
             Document doc = XmlUtil.readXmlToDocument(new ByteArrayInputStream(bytes));
+
+            /* Some devices send <hello> messages without namespace, but ODL
+             * requires that namespace to handle those messages properly. To
+             * improve the interoperability of ODL, when we are faced with a
+             * <hello> message without namespace, we re-create the XML
+             * representation of the <hello> messages with a namespace.
+             */
+            if (NetconfHelloFixer.isHelloAndLacksNamespace(doc)) {
+                doc = NetconfHelloFixer.recreateWithNamespace(doc,
+                        XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
+            }
 
             final NetconfMessage message = getNetconfMessage(additionalHeader, doc);
             if (message instanceof NetconfHelloMessage) {
