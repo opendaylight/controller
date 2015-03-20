@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_e3315d0c",
+        "filename": "opendaylight/netconf/mdsal-netconf-connector/src/main/java/org/opendaylight/controller/netconf/mdsal/connector/ops/get/AbstractGet.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-03-20T11:02:19Z",
+      "side": 1,
+      "message": "This exception probably cannot occur. The namespace of XML element is a valid URI string so if the XML was parsed, the URI should be fine. Remove the log and NetconfDocumentedException. Instead throw IllegalArgumentException and add log that this should not happen and why.",
+      "revId": "d9159b7470e7bb64cec9c651fb9008aca07d47bb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
