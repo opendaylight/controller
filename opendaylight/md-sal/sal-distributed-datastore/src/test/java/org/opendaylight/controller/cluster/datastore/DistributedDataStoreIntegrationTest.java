@@ -468,7 +468,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
     private void testTransactionCommitFailureWithNoShardLeader(final boolean writeOnly) throws Throwable {
         new IntegrationTestKit(getSystem()) {{
             String testName = "testTransactionCommitFailureWithNoShardLeader";
-            String shardName = "test-1";
+            String shardName = "default";
 
             // We don't want the shard to become the leader so prevent shard election from completing
             // by setting the election timeout, which is based on the heartbeat interval, really high.
@@ -497,8 +497,8 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
                 @Override
                 public void run() {
                     try {
-                        writeTx.write(TestModel.TEST_PATH,
-                                ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+                        writeTx.write(TestModel.JUNK_PATH,
+                                ImmutableNodes.containerNode(TestModel.JUNK_QNAME));
 
                         txCohort.set(writeTx.ready());
                     } catch(Exception e) {

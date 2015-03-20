@@ -48,6 +48,7 @@ import scala.concurrent.duration.FiniteDuration;
 public class LeaderTest extends AbstractLeaderTest {
 
     static final String FOLLOWER_ID = "follower";
+    public static final String LEADER_ID = "leader";
 
     private final TestActorRef<ForwardMessageToBehaviorActor> leaderActor = actorFactory.createTestActor(
             Props.create(ForwardMessageToBehaviorActor.class), actorFactory.generateActorId("leader"));
@@ -946,7 +947,7 @@ public class LeaderTest extends AbstractLeaderTest {
 
     @Override
     protected MockRaftActorContext createActorContext(ActorRef actorRef) {
-        return createActorContext("leader", actorRef);
+        return createActorContext(LEADER_ID, actorRef);
     }
 
     private MockRaftActorContext createActorContextWithFollower() {
@@ -1025,14 +1026,15 @@ public class LeaderTest extends AbstractLeaderTest {
         MockRaftActorContext leaderActorContext = createActorContext();
 
         MockRaftActorContext followerActorContext = createActorContext(FOLLOWER_ID, followerActor);
+        followerActorContext.setPeerAddresses(ImmutableMap.of(LEADER_ID, leaderActor.path().toString()));
 
         Follower follower = new Follower(followerActorContext);
         followerActor.underlyingActor().setBehavior(follower);
 
-        Map<String, String> peerAddresses = new HashMap<>();
-        peerAddresses.put(FOLLOWER_ID, followerActor.path().toString());
+        Map<String, String> leaderPeerAddresses = new HashMap<>();
+        leaderPeerAddresses.put(FOLLOWER_ID, followerActor.path().toString());
 
-        leaderActorContext.setPeerAddresses(peerAddresses);
+        leaderActorContext.setPeerAddresses(leaderPeerAddresses);
 
         leaderActorContext.getReplicatedLog().removeFrom(0);
 
@@ -1267,6 +1269,7 @@ public class LeaderTest extends AbstractLeaderTest {
         MockRaftActorContext followerActorContext = createActorContext(FOLLOWER_ID, followerActor);
 
         followerActorContext.setConfigParams(configParams);
+        followerActorContext.setPeerAddresses(ImmutableMap.of(LEADER_ID, leaderActor.path().toString()));
 
         Follower follower = new Follower(followerActorContext);
         followerActor.underlyingActor().setBehavior(follower);
