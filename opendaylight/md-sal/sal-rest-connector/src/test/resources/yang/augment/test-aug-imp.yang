@@ -1,0 +1,93 @@
+module test-aug-imp {
+    yang-version 1;
+    namespace "urn:opendaylight:test-aug-imp";
+    prefix "test-aug-imp";
+
+    container cont-grp-used {
+        grouping grp-used {
+            list lst-outer {
+                key "lst-outer-key";
+                leaf lst-outer-key {
+                    type string;
+                }
+
+                choice lst-outer-choice {
+                    case lst-outer-case {
+                        leaf lst-outer-case-lf {
+                            type string;
+                        }
+                    }
+                }
+
+                list lst-inner {
+                    key "lst-inner-key";
+                    leaf lst-inner-key {
+                        type string;
+                    }
+                    leaf lst-inner-lf {
+                        type string;
+                        mandatory true;
+                    }
+                    ordered-by user;
+                }
+            }
+        }
+    }
+
+    container aug-cont-outer {
+        grouping aug-grp-outer {
+            container aug-cont {
+                leaf aug-cont-lf-cond {
+                    type int32;
+                }
+                leaf aug-cont-lf {
+                    type string;
+                }
+            }
+
+            list aug-list {
+                key "aut-list-lf";
+                leaf aut-list-lf {
+                    type string;
+                }
+            }
+
+            choice aug-choice {
+                case aug-case1 {
+                }
+            }
+        }
+    }
+    
+    identity iden;
+
+    identity iden1 {
+        base iden;
+    }
+
+    typedef idenref {
+        type identityref {
+            base iden;
+        }
+    }
+    
+    typedef aug-union {
+        type union {
+            type int32;
+            type string;
+        }
+    }
+
+    rpc aug-rpc {
+        input {
+            uses aug-grp-outer;
+        }
+        output {
+            uses aug-grp-outer;
+        }
+    }
+
+    notification aug-ntf {
+        uses aug-grp-outer;
+    }
+}

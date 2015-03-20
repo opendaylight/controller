@@ -1,0 +1,22 @@
+module test-leaf-list {
+    namespace "urn:opendaylight:test-leaf-list";
+    prefix "test-leaf-list";
+
+    leaf-list lls-simple {
+        description "simple leaf-list";
+        type string;
+    }
+
+    leaf-list lls-constrained {
+        type string;
+
+        min-elements 2;
+        max-elements 4;
+    }
+
+    leaf-list lls-order-user {
+        type string;
+
+        ordered-by user;
+    }
+}

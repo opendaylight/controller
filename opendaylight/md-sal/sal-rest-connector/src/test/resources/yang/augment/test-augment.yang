@@ -1,0 +1,67 @@
+module test-augment {
+    yang-version 1;
+    namespace "urn:opendaylight:test-augment";
+    prefix "test-augment";
+
+    import test-aug-imp { prefix imp; revision-date 1970-01-01; }
+
+    augment "imp:aug-cont-outer/imp:aug-grp-outer/imp:aug-cont" {
+        when "imp:aug-cont-lf-cond < 8";
+        leaf aug-cont-added {
+            type string;
+        }
+        uses imp:grp-used;
+    }
+    
+    augment "imp:aug-cont-outer/imp:aug-grp-outer/imp:aug-list" {
+        leaf aug-list-lf-str {
+            type string;
+        }
+        leaf aug-leafref-str {
+            type leafref {
+                path "../aug-list-lf-str";
+            }
+        }
+        leaf aug-list-lf-idenref {
+            type imp:idenref;
+        }        
+        leaf aug-leafref-idenref {
+            type leafref {
+                path "../aug-list-lf-idenref";
+            }
+        }
+        
+        leaf aug-list-lf-union {
+            type imp:aug-union;
+        }
+        leaf aug-leafref-union{
+            type leafref {
+                path "../aug-list-lf-union";
+            }
+        }
+    }    
+    
+    augment "imp:aug-cont-outer/imp:aug-grp-outer/imp:aug-choice" {
+        case case-added {
+            leaf case-added-lf {
+                type string;
+            }
+        }
+    }
+    
+    augment "imp:aug-rpc/imp:input/imp:aug-cont" {
+        leaf aug-lf-added-inp {
+            type string;
+        }
+    }
+    augment "imp:aug-rpc/imp:output/imp:aug-cont" {
+        leaf aug-lf-added-out {
+            type string;
+        }
+    }
+    augment "imp:aug-ntf" {
+        leaf aug-lf-added-ntf {
+            type string;
+        }
+    }
+}

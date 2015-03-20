@@ -1,0 +1,26 @@
+module main {
+    yang-version 1;
+    namespace "urn:opendaylight:main";
+    prefix "main";
+
+    import imp-module { prefix imp-module; revision-date 2015-01-01; }
+
+    include incl-submod {
+        revision-date 2015-01-01;
+    }
+
+    organization "org";
+    contact "cont";
+    description "desc";
+    reference "ref";
+    
+    uses imp-module:imp-module-grp1 {
+        refine imp-module-c2 {
+            presence true;
+        }
+    }
+    
+    leaf main-lf-imp-tdf {
+        type imp-module:imp-module-tdf1;
+    }
+}

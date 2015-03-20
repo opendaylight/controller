@@ -1,0 +1,46 @@
+module test-choice {
+    yang-version 1;
+    namespace "urn:opendaylight:test-choice";
+    prefix "test-choice";
+
+    choice choice-empty {
+    }
+
+    choice choice-empty-cases {
+        case case-emp1 {
+        }
+        case case-emp2 {
+        }
+    }
+
+    choice choice-single {
+        container choice-single-cont {
+        }
+    }
+
+    choice choice-simple {
+        case case-simple1 {
+            leaf lf-case-sim1 {
+                type string;
+            }
+        }
+        case case-simple2 {
+            leaf lf-case-sim2 {
+                type string;
+            }
+        }
+        default case-simple2;
+    }
+    
+    choice choice-mand-empty {
+        mandatory true;
+    }
+
+    choice choice-mand {
+        case choice-mand1 {
+        }
+        case choice-mand2 {
+        }
+        mandatory true;
+    }
+}

@@ -1,0 +1,5 @@
+module test-identity {
+    yang-version 1;
+    namespace "urn:opendaylight:test-identity";
+    prefix "test-identity";
+}

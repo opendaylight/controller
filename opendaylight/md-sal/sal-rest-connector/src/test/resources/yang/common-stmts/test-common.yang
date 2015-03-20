@@ -1,0 +1,11 @@
+module test-common {
+    yang-version 1;
+    namespace "urn:opendaylight:test-common";
+    prefix "test-common";
+    
+    leaf common-lf {
+        if-feature common-lf;
+        type string;
+        status current;
+    }
+}
