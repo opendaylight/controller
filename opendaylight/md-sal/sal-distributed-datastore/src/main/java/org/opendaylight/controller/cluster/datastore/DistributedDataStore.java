@@ -178,11 +178,13 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
         LOG.info("Beginning to wait for data store to become ready : {}", type);
 
         try {
-            waitTillReadyCountDownLatch.await(waitTillReadyTimeInMillis, TimeUnit.MILLISECONDS);
-
-            LOG.debug("Data store {} is now ready", type);
+            if (waitTillReadyCountDownLatch.await(waitTillReadyTimeInMillis, TimeUnit.MILLISECONDS)) {
+                LOG.debug("Data store {} is now ready", type);
+            } else {
+                LOG.error("Shared leaders failed to settle in {} seconds, giving up", TimeUnit.MILLISECONDS.toSeconds(waitTillReadyTimeInMillis));
+            }
         } catch (InterruptedException e) {
-            LOG.error("Interrupted when trying to wait for shards to become leader in a reasonable amount of time - giving up");
+            LOG.error("Interrupted while waiting for shards to settle", e);
         }
     }
 
