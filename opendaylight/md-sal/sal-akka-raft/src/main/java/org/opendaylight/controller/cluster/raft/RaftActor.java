@@ -935,7 +935,6 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
                 @Override public void apply(UpdateElectionTerm param)
                     throws Exception {
-
                 }
             });
         }

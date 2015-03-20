@@ -58,7 +58,14 @@ public class Candidate extends AbstractRaftActorBehavior {
         votesRequired = getMajorityVoteCount(peers.size());
 
         startNewTerm();
-        scheduleElection(electionDuration());
+
+        if(context.getPeerAddresses().isEmpty()){
+            actor().tell(new ElectionTimeout(), actor());
+        } else {
+            scheduleElection(electionDuration());
+        }
+
+
     }
 
     @Override protected RaftActorBehavior handleAppendEntries(ActorRef sender,
