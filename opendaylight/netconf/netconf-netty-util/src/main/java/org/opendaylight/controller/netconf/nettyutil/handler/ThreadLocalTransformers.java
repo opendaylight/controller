@@ -47,7 +47,7 @@ final class ThreadLocalTransformers {
             }
 
             ret.setOutputProperty(OutputKeys.INDENT, "yes");
-            ret.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+            ret.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
             return ret;
         };
 
