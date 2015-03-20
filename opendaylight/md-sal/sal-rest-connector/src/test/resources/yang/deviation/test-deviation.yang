@@ -1,0 +1,25 @@
+module test-deviation {
+    yang-version 1;
+    namespace "urn:opendaylight:test-deviation";
+    prefix "test-deviation";
+
+    import "test-deviation-imp" { prefix "imp"; revision-date 1970-01-01; }
+
+    deviation /imp:dev-cont/imp:lf-add {
+        deviate add {
+            default "def";
+        }
+    }
+
+    deviation /imp:dev-cont/imp:lf-replace {
+        deviate replace {
+            default "new def";
+        }
+    }
+
+    deviation /imp:dev-cont/imp:lf-delete {
+        deviate delete {
+            default "def";
+        }
+    }
+}

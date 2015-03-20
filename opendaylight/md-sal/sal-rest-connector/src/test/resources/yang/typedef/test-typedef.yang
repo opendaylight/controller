@@ -1,0 +1,101 @@
+module test-typedef {
+    namespace "urn:opendaylight:test-typedef";
+    prefix "test-typedef";
+    
+    import ietf-inet-types {
+        prefix "inet-types";
+        revision-date 2010-09-24;
+    }   
+    
+    typedef tdf-import {
+        type inet-types:ipv4-address;
+    }
+
+    typedef tdf-string {
+        type string;
+    }
+    
+    typedef tdf-string-default {
+        type string;
+        default "default-str-val";
+    }
+    
+    typedef tdf-int {
+        type int32;
+    }
+    
+    typedef tdf-int-default {
+        type int32;
+        default 1;
+    }  
+    
+    typedef tdf-enum {
+        type enumeration {
+            enum tdf-enum1 {
+                value "tdf-enum1-val";
+                description "tdf-enum1-desc";
+            }
+            enum tdf-enum2 {
+                value "tdf-enum2-val";
+            }
+            enum tdf-enum3 {
+                value "tdf-enum3-val";
+            }
+        }
+    }
+    
+    typedef tdf-from-enum {
+        type tdf-enum;
+    }
+    
+    typedef tdf-bits {
+        type bits {
+            bit tdf-bit1 {
+                position 0;
+            }
+            bit tdf-bit2 {
+                position 1;
+            }
+         }
+    } 
+    
+    // -----
+    
+    typedef tdf-chain1 {
+        type string;
+    }
+    
+    typedef tdf-chain2 {
+        type tdf-chain1;
+    }
+    typedef tdf-chain3 {
+        type tdf-chain2;
+    }
+    
+    typedef tdf-chain4 {
+        type tdf-chain3;
+    }
+    
+    // -----
+    
+    typedef tdf-union {
+        type union {
+            type string;
+            type int32;
+            type tdf-chain4;
+            type tdf-enum;
+            type tdf-bits;
+        }
+    }
+    
+    typedef tdf-from-union {
+        type tdf-union;
+    }
+    
+    typedef tdf-string-pattern {
+        type string {
+            length "0..4";
+            pattern "[0-9a-fA-F]*";
+        }
+    }
+}

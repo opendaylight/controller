@@ -1,0 +1,9 @@
+module test-identity-imp {
+    yang-version 1;
+    namespace "urn:opendaylight:test-identity-imp";
+    prefix "test-identity-imp";
+
+    identity ident {
+        description "base";
+    }
+}

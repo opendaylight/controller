@@ -1,0 +1,36 @@
+module test-uses {
+    namespace "urn:opendaylight:test-uses";
+    prefix "test-uses";
+
+    import test-uses-imp { prefix imp; }
+
+    uses imp:grp {
+        refine gp-cont {
+            presence true;
+            must "must_ = 1";
+        }
+
+        refine grp-lf {
+            description "new lf desc";
+            reference "new lf ref";
+            config false;
+        }
+
+        refine grp-lls {
+            must "new = n";
+            config false;
+            min-elements 8;
+            max-elements 10;
+        }
+
+        refine grp-ls {
+            config false;
+            min-elements 8;
+            max-elements 10;
+        }
+        
+        refine grp-axml {
+            mandatory false;
+        }
+    }
+}

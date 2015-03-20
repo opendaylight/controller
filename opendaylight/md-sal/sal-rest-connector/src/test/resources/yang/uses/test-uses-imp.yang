@@ -1,0 +1,44 @@
+module test-uses-imp {
+    namespace "urn:opendaylight:test-uses-imp";
+    prefix "test-uses-imp";
+
+    grouping grp {
+        container grp-cont {
+            description "old lf desc";
+            reference "old lf ref";
+            config true;
+            leaf grp-lf {
+                type string;
+                description "old lf desc";
+                reference "old lf ref";
+                config true;
+            }
+
+            leaf-list grp-lls {
+                type string;
+                config true;
+                must "old = o";
+                min-elements 2;
+                max-elements 4;
+            }
+
+            list grp-ls {
+                config true;
+                min-elements 2;
+                max-elements 4;
+            }
+
+            choice grp-choice {
+                default grp-choice1;
+                case grp-choice1 {
+                }
+                case grp-choice2 {
+                }
+            }
+
+            anyxml grp-axml {
+                mandatory true;
+            }
+        }
+    }
+}

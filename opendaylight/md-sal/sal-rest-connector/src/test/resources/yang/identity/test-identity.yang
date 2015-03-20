@@ -1,0 +1,17 @@
+module test-identity {
+    yang-version 1;
+    namespace "urn:opendaylight:test-identity";
+    prefix "test-identity";
+
+    import "test-identity-imp" { prefix "imp"; }
+
+    identity derived1 {
+        base "imp:ident";
+        description "ident derived1";
+    }
+
+    identity derived1 {
+        base "imp:ident";
+        description "ident derived2";
+    }
+}

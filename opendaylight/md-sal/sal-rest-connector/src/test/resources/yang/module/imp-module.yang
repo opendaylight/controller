@@ -1,0 +1,32 @@
+module imp-module {
+    namespace "urn:opendaylight:imp-module";
+    prefix "imp-module";
+
+    revision "2015-01-01" {
+        description "desc";
+        reference "ref";
+    }
+    
+    container imp-module-c1 {
+        grouping imp-module-grp1 {
+            container imp-module-c2 {
+                leaf imp-module-lf-str {
+                    type string;
+                }
+                leaf imp-module-lf-enum {
+                    type enumeration {
+                        enum imp-module-e1;
+                    }
+                }
+            }
+        }
+        
+        typedef imp-module-tdf1 {
+            type int64;
+        }
+
+        anyxml imp-module-xml {
+            mandatory true;
+        }
+    }    
+}

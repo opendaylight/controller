@@ -1,0 +1,25 @@
+module test-deviation-imp {
+    yang-version 1;
+    namespace "urn:opendaylight:test-deviation-imp";
+    prefix "test-deviation-imp";
+
+    container dev-cont {
+        leaf lf-not-supp {
+            type string;
+        }
+
+        leaf lf-add {
+            type string;
+        }
+
+        leaf lf-replace {
+            type string;
+            default "def";
+        }
+
+        leaf lf-delete {
+            type string;
+            default "def";
+        }
+    }
+}

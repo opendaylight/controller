@@ -1,0 +1,73 @@
+module test-aug-imp {
+    yang-version 1;
+    namespace "urn:opendaylight:test-leafref";
+    prefix "test-leafref";
+    
+    container cont-target {
+        list list-target {
+            key "type1 type2 type3";
+            leaf target1 {
+                type string;
+            }
+            leaf target2 {
+                type string;
+            }
+            leaf target3 {
+                type string;
+            }
+            leaf target-val {
+                type string;
+            }
+        }
+    }
+    
+    container devices {
+        list device {
+            key "lnk1 lnk3";
+            leaf lnk1 {
+                type leafref {
+                    path "/cont-target/list-target/target1";
+                }
+            }
+            leaf lnk2 {
+                type leafref {
+                    path "/cont-target/list-target/target2";
+                }
+            }
+            leaf lnk3 {
+                type leafref {
+                    path "/cont-target/list-target/target3";
+                }
+            }
+
+            leaf lnk-val {
+                type leafref {
+                    path "/cont-target/list-target[target1 = current()/../lnk1][target2 = current()/../lnk2][target3 = current()/../lnk3]/target-val";
+                }
+            }
+            
+            choice lnk-chc-out {
+                case lnk-case-out1 {
+                    choice lnk-chc-in {
+                        case lnk-case-in1 {
+                            leaf lnk-case-out1-lf {
+                                type leafref {
+                                    path "../../con1/lf1";
+                                }
+                            }
+                        }
+                        case c2 {
+                        }
+                    }
+                }
+                case lnk-case-out2 {
+                }
+            }
+        }
+        container con1 {
+            leaf lf1 {
+                type empty;
+            }
+        }
+    }    
+}

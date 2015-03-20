@@ -1,0 +1,56 @@
+module test-enum {
+    namespace "urn:opendaylight:test-enum";
+    prefix "test-enum";
+
+    leaf lf-enum-empty {
+        type enumeration {
+        }
+    }
+    
+    leaf lf-empty {
+        type empty;
+    }
+
+    leaf lf-enum {
+        type enumeration {
+            enum e1;
+            enum e2;
+            enum e3 {
+                value 3;
+            }
+        }
+        default "e3";
+    }
+
+    leaf lf-bits-empty {
+        type bits {
+        }
+    }
+
+    leaf lf-bits {
+        type bits {
+            bit b1 {
+                position 0;
+            }
+            bit b2 {
+                position 1;
+            }
+            bit b3 {
+                position 2;
+            }
+        }
+        default "b1";
+    }
+    
+    leaf lf-string-pattern {
+        type string {
+            pattern "[a-z]";
+        }
+    }
+    
+    leaf lf-units {
+        type string;
+        units 24-hour-clock;
+        default 1am;
+    }
+}

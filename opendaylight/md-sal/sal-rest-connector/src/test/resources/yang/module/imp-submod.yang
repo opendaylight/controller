@@ -1,0 +1,6 @@
+module imp-submod {
+    namespace "urn:opendaylight:imp-submod";
+    prefix "imp-submod";
+
+    revision "2015-01-01";
+}

@@ -1,0 +1,177 @@
+module test-list {
+    yang-version 1;
+    namespace "urn:opendaylight:test-list";
+    prefix "test-list";
+
+    import ietf-inet-types { prefix "inet-types"; revision-date 2010-09-24; }
+
+    list ls-simple {
+        description "simple list";
+        leaf ls-simple-lf {
+            type string;
+        }
+    }
+
+    list ls-simple-key {
+        key "ls-simple-lf";
+        leaf ls-simple-lf {
+            type string;
+        }
+    }
+
+    list ls-comp-key-some {
+        description "some of leafs in key";
+        key "ls-comp-key-some-ip ls-comp-key-some-port";
+        unique "ls-comp-key-some-port ls-comp-key-some-name";
+
+        leaf ls-comp-key-some-name {
+            type string;
+        }
+        leaf ls-comp-key-some-ip {
+            type inet-types:ipv4-address;
+        }
+        leaf ls-comp-key-some-port {
+            type int16;
+        }
+    }
+
+    list ls-comp-key-all {
+        description "all of leafs in key";
+        key "ls-comp-key-all1 ls-comp-key-all2 ls-comp-key-all3";
+
+        leaf ls-comp-key-all1 {
+            type string;
+        }
+        leaf ls-comp-key-all2 {
+            type string;
+        }
+        leaf ls-comp-key-all3 {
+            type string;
+        }
+    }
+
+    list ls-all-types {
+        container ls-all-types-cont {
+        }
+
+        leaf ls-all-types-lf {
+            type string;
+        }
+
+        list ls-all-types-list {
+            key "ls-all-types-list-lf1 ls-all-types-list-lf3";
+            leaf ls-all-types-list-lf1 {
+                type string;
+            }
+            leaf ls-all-types-list-lf2 {
+                type string;
+            }
+            leaf ls-all-types-list-lf3 {
+                type string;
+            }
+        }
+
+        leaf-list ls-all-types-lfls {
+            type string;
+        }
+
+        choice ls-all-types-choice {
+            default ls-all-types-case2;
+            case ls-all-types-case1;
+            case ls-all-types-case2 {
+                leaf ls-all-types-case2-lf {
+                    type string;
+                }
+            }
+            case ls-all-types-case3;
+        }
+
+        anyxml ls-all-types-anyxml;
+    }
+
+    grouping grouping-ls {
+        leaf grouping-ls-lf {
+            type string;
+        }
+    }
+
+    list ls-grouping-simple {
+        key "grouping-ls";
+        uses grouping-ls;
+    }
+    
+    list ls-grouping-comp {
+        key "grouping-ls ls-grouping-comp-lf1";
+        uses grouping-ls;
+        leaf ls-grouping-comp-lf1 {
+            type string;
+        }
+        leaf ls-grouping-comp-lf2 {
+            type string;
+        }
+    }
+    
+    list ls-aug-simple {
+        key "ls-aug-simple-lf";
+    }
+
+    augment /ls-aug-simple {
+        leaf ls-aug-simple-lf {
+            type string;
+        }
+    }
+    
+    list ls-aug-comp {
+        key "ls-aug-comp-lf ls-aug-comp-lf1";
+        uses grouping-ls;
+        leaf ls-aug-comp-lf1 {
+            type string;
+        }
+        leaf ls-aug-comp-lf2 {
+            type string;
+        }
+    }  
+    
+    augment /ls-aug-comp {
+        leaf ls-aug-comp-lf {
+            type string;
+        }
+    }
+    
+    list ls-aug-grouping {
+        key "grouping-ls"; 
+    }
+    
+    augment /ls-aug-grouping {
+        uses grouping-ls;
+    }
+    
+    list ls-constrained {
+        min-elements 2;
+        max-elements 4;
+        
+        key "ls-constrained-lf";
+        
+        leaf ls-constrained-lf {
+            type string;
+        }
+    }
+    
+    list ls-order-user {
+        ordered-by user;
+        key "ls-order-user-lf";
+        
+        leaf ls-order-user-lf {
+            type string;
+        }
+    }
+    
+    list ls-tdf {
+        typedef int {
+            type int32;
+        }
+        leaf ls-tdf-lf {
+            type int;
+        }
+    }
+}

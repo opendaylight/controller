@@ -1,0 +1,61 @@
+module test-cont {
+    namespace "urn:opendaylight:test-cont";
+    prefix "test-cont";
+
+    container cont-presence {
+        presence true;
+
+        leaf cont-presence-lf {
+            type string;
+        }
+    }
+
+    leaf constraint {
+        type int8;
+    }
+    
+    container cont-must {
+        leaf cont-must-val {
+            type int8;
+        }
+        must "./cont-must-val = ../constraint" {
+            error-app-tag "err tag";
+            error-message "err msg";
+        }
+    }
+    
+    anyxml cont-xml {
+        description "anyxml";
+    }
+    
+    notification cont-ntf {
+        leaf cont-ntf-lf {
+            type string;
+        }
+    }
+    
+    choice cont-choice {
+        case one {
+        }
+        case two {
+        }
+    }
+    
+    rpc cont-rpc {
+        input {
+        }
+    }
+    
+    list cont-list {
+        leaf cont-list-lf {
+            type string;
+        }
+    }
+    
+    leaf-list cont-leaflist {
+        type string;
+    }
+    
+    grouping cont-grp {
+    }
+}

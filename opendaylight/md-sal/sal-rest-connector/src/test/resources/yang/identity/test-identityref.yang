@@ -1,0 +1,36 @@
+module test-identityref {
+    yang-version 1;
+    namespace "urn:opendaylight:test-identityref";
+    prefix "test-identityref";
+
+    import test-identity-imp { prefix imp; revision-date 1970-01-01; }
+    import test-identity-aug { prefix aug; revision-date 1970-01-01; }
+
+    identity child {
+        base "imp:ident";
+    }
+
+    container cont-idenref {
+        leaf idenref {
+            type identityref {
+                base "imp:base";
+            }
+        }
+    }
+    
+    augment "/gmo:cont/gmo:cont1" {
+        leaf lf11 {
+            type identityref {
+                base "idemo:iden";
+            }
+        }
+    }
+    
+    augment "/aug:cont-aug-out/aug:cont-aug-in" {
+        leaf lf-aug {
+            type identityref {
+                base "imp:ident";
+            }
+        }
+    }
+}

@@ -1,0 +1,39 @@
+module test-notification {
+    yang-version 1;
+    namespace "urn:opendaylight:test-notification";
+    prefix "test-notofication";
+
+    notification ntf-empty {
+    }
+
+    notification ntf-simple {
+        leaf ntf-simple-lf {
+            type empty;
+        }
+    }
+
+    notification ntf-with-mand {
+        leaf ntf-simple-lf {
+            type string;
+            mandatory true;
+        }
+    }
+
+    grouping grp-ntf {
+        container grp-ntf-cont {
+            leaf grp-ntf-lf {
+                type string;
+            }
+        }
+    }
+
+    notification ntf-uses {
+        container ntf-uses {
+            uses grp-ntf {
+                refine grp-ntf-cont/grp-ntf-lf {
+                    default "a";
+                }
+            }
+        }
+    }
+}

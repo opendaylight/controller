@@ -1,0 +1,14 @@
+submodule incl-submod {
+    belongs-to main {
+        prefix "main";
+    }
+
+    import imp-submod { prefix imp-submod; revision-date 2015-01-01; }
+
+    revision "2015-01-01";
+    
+    extension imp-submod-ext {
+        description "desc";
+        argument "arg";
+    }
+}

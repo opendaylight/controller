@@ -1,0 +1,10 @@
+ module test-identity-aug {
+    yang-version 1;
+    namespace "urn:opendaylight:test-identity-aug";
+    prefix "test-identity-aug";
+
+    container cont-aug-out {
+        container cont-aug-in {
+        }
+    }
+}
