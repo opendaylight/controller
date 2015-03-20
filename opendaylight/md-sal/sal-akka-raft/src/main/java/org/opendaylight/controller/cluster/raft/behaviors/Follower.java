@@ -46,9 +46,14 @@ public class Follower extends AbstractRaftActorBehavior {
     public Follower(RaftActorContext context) {
         super(context, RaftState.Follower);
 
-        scheduleElection(electionDuration());
-
         initialSyncStatusTracker = new InitialSyncStatusTracker(context.getActor());
+
+        if(context.getPeerAddresses().isEmpty()){
+            actor().tell(new ElectionTimeout(), actor());
+        } else {
+            scheduleElection(electionDuration());
+        }
+
     }
 
     private boolean isLogEntryPresent(long index){
