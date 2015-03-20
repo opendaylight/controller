@@ -261,4 +261,8 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         assertEquals("ReplicatedLogEntry getIndex", expIndex, replicatedLogEntry.getIndex());
         assertEquals("ReplicatedLogEntry getData", payload, replicatedLogEntry.getData());
     }
+
+    protected String testActorPath(String id){
+        return "akka://test/user" + id;
+    }
 }

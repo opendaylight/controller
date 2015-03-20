@@ -39,6 +39,8 @@ import scala.concurrent.duration.FiniteDuration;
  */
 public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
 
+    protected static final ElectionTimeout ELECTION_TIMEOUT = new ElectionTimeout();
+
     /**
      * Information about the RaftActor whose behavior this class represents
      */
@@ -254,7 +256,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
         // message is sent to itself
         electionCancel =
             context.getActorSystem().scheduler().scheduleOnce(interval,
-                context.getActor(), new ElectionTimeout(),
+                context.getActor(), ELECTION_TIMEOUT,
                 context.getActorSystem().dispatcher(), context.getActor());
     }
 
