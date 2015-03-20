@@ -27,6 +27,7 @@ import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfSessionListener;
 import org.opendaylight.controller.netconf.api.NetconfSessionPreferences;
+import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.nettyutil.handler.FramingMechanismHandlerFactory;
 import org.opendaylight.controller.netconf.nettyutil.handler.NetconfChunkAggregator;
 import org.opendaylight.controller.netconf.nettyutil.handler.NetconfMessageToXMLEncoder;
@@ -229,9 +230,9 @@ public abstract class AbstractNetconfSessionNegotiator<P extends NetconfSessionP
     }
 
     private boolean containsBase11Capability(final Document doc) {
-        final NodeList nList = doc.getElementsByTagName("capability");
+        final NodeList nList = doc.getElementsByTagName(XmlNetconfConstants.CAPABILITY);
         for (int i = 0; i < nList.getLength(); i++) {
-            if (nList.item(i).getTextContent().contains("base:1.1")) {
+            if (nList.item(i).getTextContent().contains(XmlNetconfConstants.URN_IETF_PARAMS_NETCONF_BASE_1_1)) {
                 return true;
             }
         }
