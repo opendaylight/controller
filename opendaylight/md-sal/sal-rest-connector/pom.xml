@@ -139,6 +139,7 @@
               org.opendaylight.controller.sal.restconf.rpc.*,
               org.opendaylight.controller.sal.restconf.impl,
               org.opendaylight.controller.md.sal.rest.common.*,
+              org.opendaylight.controller.md.sal.rest.impl.*,
               org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.rest.connector.rev140724.*,
             </Private-Package>
             <Import-Package>*,
