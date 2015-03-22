@@ -41,6 +41,8 @@ import org.opendaylight.controller.md.sal.dom.xsql.XSQLODLUtils;
 public class JDBCResultSet implements Serializable, ResultSet,
         ResultSetMetaData {
     private static final long serialVersionUID = -7450200738431047057L;
+    private static final ClassLoader CLASS_LOADER = JDBCResultSet.class.getClassLoader();
+    private static final Class<?>[] PROXY_INTERFACES = new Class[] { ResultSet.class };
     private static int nextID = 0;
 
     private String sql = null;
@@ -58,7 +60,7 @@ public class JDBCResultSet implements Serializable, ResultSet,
     private transient Map<String,JDBCResultSet> subQueries = new HashMap<String,JDBCResultSet>();
 
     public ResultSet getProxy() {
-         return (ResultSet) Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[] {ResultSet.class }, new JDBCProxy(this));
+         return (ResultSet) Proxy.newProxyInstance(CLASS_LOADER, PROXY_INTERFACES, new JDBCProxy(this));
     }
 
     public void setSQL(String _sql) {
