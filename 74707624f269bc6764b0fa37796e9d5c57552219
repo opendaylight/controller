@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_cff8ff7e",
+        "filename": "opendaylight/md-sal/sal-dom-xsql/src/main/java/org/opendaylight/controller/md/sal/dom/xsql/XSQLODLUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 236,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-03-22T00:07:32Z",
+      "side": 1,
+      "message": "Is the intent to return a mutable or immutable collection? It looks like Collections.emptyList() may be more appropriate here.",
+      "revId": "74707624f269bc6764b0fa37796e9d5c57552219",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
