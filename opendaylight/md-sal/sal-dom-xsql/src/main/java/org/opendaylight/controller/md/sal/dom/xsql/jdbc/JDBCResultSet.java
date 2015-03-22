@@ -41,6 +41,7 @@ import org.opendaylight.controller.md.sal.dom.xsql.XSQLODLUtils;
 public class JDBCResultSet implements Serializable, ResultSet,
         ResultSetMetaData {
     private static final long serialVersionUID = -7450200738431047057L;
+    private static int nextID = 0;
 
     private String sql = null;
     private List<XSQLBluePrintNode> tablesInQuery = new ArrayList<XSQLBluePrintNode>();
@@ -50,7 +51,6 @@ public class JDBCResultSet implements Serializable, ResultSet,
     private transient Map<String, Object> currentRecord = null;
     private boolean finished = false;
     private int id = 0;
-    private static Integer nextID = new Integer(0);
     public int numberOfTasks = 0;
     private Map<String, Map<XSQLColumn, List<XSQLCriteria>>> criteria = new ConcurrentHashMap<String, Map<XSQLColumn, List<XSQLCriteria>>>();
     private Exception err = null;
