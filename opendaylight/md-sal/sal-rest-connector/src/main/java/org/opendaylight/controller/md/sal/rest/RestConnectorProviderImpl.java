@@ -20,7 +20,10 @@ import org.opendaylight.controller.config.yang.md.sal.rest.connector.Post;
 import org.opendaylight.controller.config.yang.md.sal.rest.connector.Put;
 import org.opendaylight.controller.config.yang.md.sal.rest.connector.RestConnectorRuntimeMXBean;
 import org.opendaylight.controller.config.yang.md.sal.rest.connector.Rpcs;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 import org.opendaylight.controller.md.sal.rest.common.RestconfValidationUtils;
+import org.opendaylight.controller.md.sal.rest.impl.RestBrokerFacadeImpl;
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 import org.opendaylight.controller.sal.core.api.Provider;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
@@ -52,6 +55,7 @@ public class RestConnectorProviderImpl implements Provider, RestConnector, Schem
     private final static Logger LOG = LoggerFactory.getLogger(RestConnectorProviderImpl.class);
 
     private static SchemaContext globalSchema;
+    private static RestBrokerFacade restBroker;
 
     private StatisticsRestconfServiceWrapper stats;
     private ListenerRegistration<SchemaContextListener> listenerRegistration;
@@ -61,6 +65,11 @@ public class RestConnectorProviderImpl implements Provider, RestConnector, Schem
     public static SchemaContext getSchemaContext() {
         RestconfValidationUtils.checkDocumentedError(globalSchema != null, Status.SERVICE_UNAVAILABLE);
         return globalSchema;
+    }
+
+    public static RestBrokerFacade getRestBroker() {
+        RestconfValidationUtils.checkDocumentedError(globalSchema != null, Status.SERVICE_UNAVAILABLE);
+        return restBroker;
     }
 
     public void setWebsocketPort(final PortNumber port) {
@@ -73,8 +82,11 @@ public class RestConnectorProviderImpl implements Provider, RestConnector, Schem
         listenerRegistration = schemaService.registerSchemaContextListener(ControllerContext.getInstance());
         globalSchema = schemaService.getGlobalContext();
 
+        final DOMRpcService domRpcServices = session.getService(DOMRpcService.class);
+        final DOMDataBroker domDataBroker = session.getService(DOMDataBroker.class);
+        restBroker = new RestBrokerFacadeImpl(domDataBroker, domRpcServices);
+
         // TODO : initialize RestContextHolder
-        // TODO : initialize RestBrokerFacade
         // TODO : think about runtime initialization ResourceConfig with @ApplicationPath for web.xml remove
 
         webSocketServerThread = new Thread(WebSocketServer.createInstance(port.getValue().intValue()));
