@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_38f9abe9",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/EventSourceTopology.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-23T12:42:29Z",
+      "side": 1,
+      "message": "By using a FutureTask in this manner, it will execute on the current thread. You can make it async by adding a callback to the read Future directly. i.e.:\n\nReadOnlyTransaction tx \u003d dataBroker.newReadOnlyTransaction();\nListenableFuture\u003cOptional\u003cTopology\u003e\u003e readFuture \u003d tx.read(OPERATIONAL,\n          EVENT_SOURCE_TOPOLOGY_PATH);\n\nFutures.addCallback(readFuture, new FutureCallback\u003cOptional\u003cTopology\u003e\u003e() {\n            @Override\n            public void onSuccess(Optional\u003cTopology\u003e data) {\n                if(data.isPresent()) {\n                    final List\u003cNode\u003e nodeList \u003d data.get().getNode();\n                    for (final Node node : nodeList) {\n                        ...\n                    }\n                }\n            }\n\n            @Override\n            public void onFailure(Throwable t) {\n                LOG.error(\"Can not notify existing nodes {}\", t);\n            }\n        });",
+      "revId": "f72397d200893519daaa70b07ec68cbd24fb6027",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
