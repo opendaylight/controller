@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_7553be17",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/EventSourceTopology.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-23T04:24:04Z",
+      "side": 1,
+      "message": "Sorry - I was out last week so I missed reviewing your latest changes. What I actually meant in my original comment was to process the read Future async so as not to block a thread. Specifically, add an async callback (via Futures.addCallback) to the CheckedFuture returned from the read. This would offload the read and obviate the need for the ExecutorService.",
+      "revId": "35128aa4927b06a97e3d1f505a6852105dc81fed",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
