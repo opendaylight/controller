@@ -16,6 +16,24 @@
       "revId": "35128aa4927b06a97e3d1f505a6852105dc81fed",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_15ffda68",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/EventSourceTopology.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 2834
+      },
+      "writtenOn": "2015-03-23T10:11:11Z",
+      "side": 1,
+      "message": "Done see https://git.opendaylight.org/gerrit/#/c/16976/",
+      "parentUuid": "5a93c517_7553be17",
+      "revId": "35128aa4927b06a97e3d1f505a6852105dc81fed",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
