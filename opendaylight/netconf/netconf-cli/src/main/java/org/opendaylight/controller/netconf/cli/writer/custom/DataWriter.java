@@ -17,8 +17,9 @@ import org.opendaylight.controller.netconf.cli.writer.OutFormatter;
 import org.opendaylight.controller.netconf.cli.writer.WriteException;
 import org.opendaylight.controller.netconf.cli.writer.impl.AbstractWriter;
 import org.opendaylight.controller.netconf.cli.writer.impl.NormalizedNodeWriter;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.Node;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
+import org.opendaylight.yangtools.yang.data.api.schema.DataContainerNode;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.codec.xml.XmlDocumentUtils;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -35,19 +36,20 @@ public class DataWriter extends AbstractWriter<DataSchemaNode> {
     }
 
     @Override
-    protected void writeInner(final DataSchemaNode dataSchemaNode, final List<Node<?>> dataNodes) throws IOException, WriteException {
+    protected void writeInner(final DataSchemaNode dataSchemaNode, final List<NormalizedNode<?, ?>> dataNodes) throws IOException, WriteException {
         Preconditions.checkArgument(dataNodes.size() == 1, "Expected only 1 element for data node");
-        final Node<?> dataNode = dataNodes.get(0);
-        Preconditions.checkArgument(dataNode instanceof CompositeNode, "Unexpected node type: %s, should be %s", dataNode, CompositeNode.class);
+        final NormalizedNode<?, ?> dataNode = dataNodes.get(0);
+        Preconditions.checkArgument(dataNode instanceof ContainerNode, "Unexpected node type: %s, should be %s", dataNode, ContainerNode.class);
 
         StringBuilder output = new StringBuilder();
         out.increaseIndent().addStringWithIndent(output, dataSchemaNode.getQName().getLocalName()).openComposite(output);
         console.writeLn(output.toString());
 
-        for (final Node<?> childNode : ((CompositeNode) dataNode).getValue()) {
+        for (final Object oChildNode : ((DataContainerNode) dataNode).getValue()) {
+            final NormalizedNode<?, ?> childNode = (NormalizedNode<?, ?>) oChildNode;
             final Optional<DataSchemaNode> schemaNode = XmlDocumentUtils.findFirstSchema(childNode.getNodeType(), remoteSchemaContext.getDataDefinitions());
             Preconditions.checkState(schemaNode.isPresent(), "Unknown data node %s, not defined in schema", childNode.getNodeType());
-            new NormalizedNodeWriter(console, out).write(schemaNode.get(), Collections.<Node<?>>singletonList(childNode));
+            new NormalizedNodeWriter(console, out).write(schemaNode.get(), Collections.<NormalizedNode<?, ?>>singletonList(childNode));
         }
 
         output = new StringBuilder();

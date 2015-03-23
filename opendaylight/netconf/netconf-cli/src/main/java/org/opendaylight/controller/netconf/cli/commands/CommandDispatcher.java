@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 import org.opendaylight.controller.netconf.cli.NetconfDeviceConnectionHandler;
 import org.opendaylight.controller.netconf.cli.NetconfDeviceConnectionManager;
 import org.opendaylight.controller.netconf.cli.commands.local.Close;
@@ -27,7 +28,6 @@ import org.opendaylight.controller.netconf.cli.commands.local.Disconnect;
 import org.opendaylight.controller.netconf.cli.commands.local.Help;
 import org.opendaylight.controller.netconf.cli.commands.remote.RemoteCommand;
 import org.opendaylight.controller.netconf.cli.io.IOUtil;
-import org.opendaylight.controller.sal.core.api.RpcImplementation;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
@@ -106,15 +106,15 @@ public class CommandDispatcher {
     public static final Collection<String> BASE_NETCONF_SCHEMA_PATHS = Lists.newArrayList("/schema/remote/ietf-netconf.yang",
             "/schema/common/netconf-cli-ext.yang", "/schema/common/ietf-inet-types.yang");
 
-    public synchronized void addRemoteCommands(final RpcImplementation rpcInvoker, final SchemaContext remoteSchema) {
-        this.addRemoteCommands(rpcInvoker, remoteSchema, parseSchema(BASE_NETCONF_SCHEMA_PATHS));
+    public synchronized void addRemoteCommands(final DOMRpcService rpcService, final SchemaContext remoteSchema) {
+        this.addRemoteCommands(rpcService, remoteSchema, parseSchema(BASE_NETCONF_SCHEMA_PATHS));
     }
 
-    public synchronized void addRemoteCommands(final RpcImplementation rpcInvoker, final SchemaContext remoteSchema, final SchemaContext baseNetconfSchema) {
+    public synchronized void addRemoteCommands(final DOMRpcService rpcService, final SchemaContext remoteSchema, final SchemaContext baseNetconfSchema) {
         for (final SchemaContext context : Lists.newArrayList(remoteSchema, baseNetconfSchema)) {
             for (final Module module : context.getModules()) {
                 for (final RpcDefinition rpcDefinition : module.getRpcs()) {
-                    final Command command = RemoteCommand.fromRpc(rpcDefinition, rpcInvoker);
+                    final Command command = RemoteCommand.fromRpc(rpcDefinition, rpcService);
                     remoteCommands.put(rpcDefinition.getQName(), command);
                     nameToQNameRemote.put(getCommandName(rpcDefinition, module), rpcDefinition.getQName());
                 }

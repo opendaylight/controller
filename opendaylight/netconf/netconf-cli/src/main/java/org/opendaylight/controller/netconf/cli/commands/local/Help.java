@@ -20,10 +20,14 @@ import org.opendaylight.controller.netconf.cli.commands.input.InputDefinition;
 import org.opendaylight.controller.netconf.cli.commands.output.Output;
 import org.opendaylight.controller.netconf.cli.commands.output.OutputDefinition;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.Node;
-import org.opendaylight.yangtools.yang.data.impl.CompositeNodeTOImpl;
-import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
-import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
+import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
+import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
+import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableMapEntryNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableMapNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 
 /**
@@ -40,21 +44,34 @@ public class Help extends AbstractCommand {
 
     @Override
     public Output invoke(final Input inputArgs) {
-        final ArrayList<Node<?>> value = Lists.newArrayList();
+        final ArrayList<MapEntryNode> value = Lists.newArrayList();
 
         for (final String id : commandDispatcher.getCommandIds()) {
             final Optional<Command> cmd = commandDispatcher.getCommand(id);
             Preconditions.checkState(cmd.isPresent(), "Command %s has to be present in command dispatcher", id);
             final Optional<String> description = cmd.get().getCommandDescription();
-            final List<Node<?>> nameAndDescription = Lists.newArrayList();
-            nameAndDescription.add(NodeFactory.createImmutableSimpleNode(QName.create(getCommandId(), "id"), null, id));
+            final List<DataContainerChild<?, ?>> nameAndDescription = Lists.newArrayList();
+            nameAndDescription.add(
+                    ImmutableLeafNodeBuilder.create()
+                            .withNodeIdentifier(new NodeIdentifier(QName.create(getCommandId(), "id")))
+                            .withValue(id).build());
             if(description.isPresent()) {
-                nameAndDescription.add(NodeFactory.createImmutableSimpleNode(QName.create(getCommandId(), "description"), null, description.get()));
+                nameAndDescription.add(
+                        ImmutableLeafNodeBuilder.create()
+                                .withNodeIdentifier(new NodeIdentifier(QName.create(getCommandId(), "description")))
+                                .withValue(description.get()).build());
             }
-            value.add(ImmutableCompositeNode.create(QName.create(getCommandId(), "commands"), nameAndDescription));
+            value.add(ImmutableMapEntryNodeBuilder.create()
+                    .withValue(nameAndDescription)
+                    .withNodeIdentifier(
+                            new NodeIdentifierWithPredicates(QName.create(getCommandId(), "commands"),
+                                    QName.create(getCommandId(), "id"), id)).build());
         }
+        MapNode mappedHelp = ImmutableMapNodeBuilder.create()
+                .withNodeIdentifier(new NodeIdentifier(QName.create(getCommandId(), "commands")))
+                .withValue(value).build();
 
-        return new Output(new CompositeNodeTOImpl(getCommandId(), null, value));
+        return new Output(mappedHelp);
     }
 
     public static Command create(final RpcDefinition rpcDefinition, final CommandDispatcher commandDispatcher) {

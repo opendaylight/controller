@@ -30,9 +30,9 @@ import org.opendaylight.controller.netconf.cli.reader.ReadingException;
 import org.opendaylight.controller.netconf.cli.writer.OutFormatter;
 import org.opendaylight.controller.netconf.cli.writer.WriteException;
 import org.opendaylight.controller.netconf.cli.writer.Writer;
-import org.opendaylight.controller.netconf.cli.writer.impl.CompositeNodeWriter;
+import org.opendaylight.controller.netconf.cli.writer.impl.NormalizedNodeWriter;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.Node;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.UnknownSchemaNode;
 
@@ -102,7 +102,7 @@ public class Cli implements Runnable {
 
     private void handleRegularOutput(final Output response, final OutputDefinition outputDefinition,
             final Writer<DataSchemaNode> outHandler) {
-        final Map<DataSchemaNode, List<Node<?>>> unwrap = response.unwrap(outputDefinition);
+        final Map<DataSchemaNode, List<NormalizedNode<?, ?>>> unwrap = response.unwrap(outputDefinition);
 
         for (final DataSchemaNode schemaNode : unwrap.keySet()) {
             Preconditions.checkNotNull(schemaNode);
@@ -132,8 +132,8 @@ public class Cli implements Runnable {
 
     private void handleEmptyOutput(final Command command, final Output response) {
         try {
-            new CompositeNodeWriter(consoleIO, new OutFormatter()).write(null,
-                    Collections.<Node<?>> singletonList(response.getOutput()));
+            new NormalizedNodeWriter(consoleIO, new OutFormatter()).write(null,
+                    Collections.<NormalizedNode<?, ?>>singletonList(response.getOutput()));
         } catch (final WriteException e) {
             throw new IllegalStateException("Unable to write value for: " + response.getOutput().getNodeType()
                     + " from: " + command.getCommandId(), e);
@@ -141,7 +141,7 @@ public class Cli implements Runnable {
     }
 
     private Input handleInput(final InputDefinition inputDefinition) {
-        List<Node<?>> allArgs = Collections.emptyList();
+        List<NormalizedNode<?, ?>> allArgs = Collections.emptyList();
         try {
             if (!inputDefinition.isEmpty()) {
                 allArgs = argumentHandlerRegistry.getGenericReader(schemaContextRegistry.getLocalSchemaContext()).read(

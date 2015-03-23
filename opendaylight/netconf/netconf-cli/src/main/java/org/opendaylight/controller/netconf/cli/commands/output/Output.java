@@ -13,8 +13,8 @@ import com.google.common.collect.Maps;
 import java.util.List;
 import java.util.Map;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.Node;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 
 /**
@@ -22,30 +22,32 @@ import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
  */
 public class Output {
 
-    private final CompositeNode output;
+    private final NormalizedNode<?, ?> output;
 
-    public Output(final CompositeNode output) {
-        this.output = output;
+    public Output(final NormalizedNode<?, ?> output) {
+        if (output instanceof ContainerNode && output.getNodeType().getLocalName() == "rpc-reply") {
+            this.output = ((ContainerNode) output).getValue().iterator().next();
+        } else {
+            this.output = output;
+        }
     }
 
-    public Map<DataSchemaNode, List<Node<?>>> unwrap(final OutputDefinition outputDefinition) {
+    public Map<DataSchemaNode, List<NormalizedNode<?, ?>>> unwrap(final OutputDefinition outputDefinition) {
         Preconditions.checkArgument(outputDefinition.isEmpty() == false);
 
         final Map<QName, DataSchemaNode> mappedSchemaNodes = mapOutput(outputDefinition);
-        final Map<DataSchemaNode, List<Node<?>>> mappedNodesToSchema = Maps.newHashMap();
+        final Map<DataSchemaNode, List<NormalizedNode<?, ?>>> mappedNodesToSchema = Maps.newHashMap();
 
-        for (final Node<?> node : output.getValue()) {
-            final DataSchemaNode schemaNode = mappedSchemaNodes.get(node.getKey().withoutRevision());
-            final List<Node<?>> list = mappedNodesToSchema.get(schemaNode) == null ? Lists.<Node<?>> newArrayList()
-                    : mappedNodesToSchema.get(schemaNode);
-            list.add(node);
-            mappedNodesToSchema.put(schemaNode, list);
-        }
+        final DataSchemaNode schemaNode = mappedSchemaNodes.get(output.getNodeType().withoutRevision());
+        final List<NormalizedNode<?, ?>> list = mappedNodesToSchema.get(schemaNode) == null ? Lists.<NormalizedNode<?, ?>>newArrayList()
+                : mappedNodesToSchema.get(schemaNode);
+        list.add(output);
+        mappedNodesToSchema.put(schemaNode, list);
 
         return mappedNodesToSchema;
     }
 
-    public CompositeNode getOutput() {
+    public NormalizedNode<?, ?> getOutput() {
         return output;
     }
 

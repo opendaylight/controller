@@ -25,9 +25,10 @@ import org.opendaylight.controller.netconf.cli.io.IOUtil;
 import org.opendaylight.controller.netconf.cli.reader.AbstractReader;
 import org.opendaylight.controller.netconf.cli.reader.ReadingException;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.Node;
-import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.codec.TypeDefinitionAwareCodec;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.IdentitySchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
@@ -55,7 +56,7 @@ public abstract class BasicDataHolderReader<T extends DataSchemaNode> extends Ab
     }
 
     @Override
-    public List<Node<?>> readWithContext(final T schemaNode) throws IOException, ReadingException {
+    public List<NormalizedNode<?, ?>> readWithContext(final T schemaNode) throws IOException, ReadingException {
         TypeDefinition<?> type = getType(schemaNode);
         console.formatLn("Submit %s %s(%s)", listType(schemaNode), schemaNode.getQName().getLocalName(), type.getQName().getLocalName());
 
@@ -100,7 +101,7 @@ public abstract class BasicDataHolderReader<T extends DataSchemaNode> extends Ab
         return wrapValue(schemaNode, resolvedValue);
     }
 
-    private List<Node<?>> postSkipOperations(final DataSchemaNode schemaNode) throws IOException {
+    private List<NormalizedNode<?, ?>> postSkipOperations(final DataSchemaNode schemaNode) throws IOException {
         console.formatLn("Skipping %s", schemaNode.getQName());
         return Collections.emptyList();
     }
@@ -116,9 +117,11 @@ public abstract class BasicDataHolderReader<T extends DataSchemaNode> extends Ab
         return console.read();
     }
 
-    private List<Node<?>> wrapValue(final T schemaNode, final Object value) {
-        final Node<?> newNode = NodeFactory.createImmutableSimpleNode(schemaNode.getQName(), null, value);
-        return Collections.<Node<?>> singletonList(newNode);
+    private List<NormalizedNode<?, ?>> wrapValue(final T schemaNode, final Object value) {
+        final NormalizedNode<?, ?> newNode = ImmutableLeafNodeBuilder.create()
+                .withNodeIdentifier(new NodeIdentifier(schemaNode.getQName()))
+                .withValue(value).build();
+        return Collections.<NormalizedNode<?, ?>>singletonList(newNode);
     }
 
     protected abstract TypeDefinition<?> getType(final T schemaNode);

@@ -21,7 +21,7 @@ import org.opendaylight.controller.netconf.cli.reader.GenericListEntryReader;
 import org.opendaylight.controller.netconf.cli.reader.Reader;
 import org.opendaylight.controller.netconf.cli.reader.ReadingException;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.Node;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.AnyXmlSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ChoiceSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
@@ -49,7 +49,7 @@ public class GenericReader extends AbstractReader<DataSchemaNode> {
     }
 
     @Override
-    protected List<Node<?>> readWithContext(final DataSchemaNode schemaNode) throws IOException, ReadingException {
+    protected List<NormalizedNode<?, ?>> readWithContext(final DataSchemaNode schemaNode) throws IOException, ReadingException {
         final Optional<Class<? extends Reader<DataSchemaNode>>> customReaderClassOpt = tryGetCustomHandler(schemaNode);
 
         if (customReaderClassOpt.isPresent()) {
@@ -65,8 +65,8 @@ public class GenericReader extends AbstractReader<DataSchemaNode> {
         // TODO reuse instances
     }
 
-    private List<Node<?>> readGeneric(final DataSchemaNode schemaNode) throws ReadingException, IOException {
-        final List<Node<?>> newNodes = new ArrayList<>();
+    private List<NormalizedNode<?, ?>> readGeneric(final DataSchemaNode schemaNode) throws ReadingException, IOException {
+        final List<NormalizedNode<?, ?>> newNodes = new ArrayList<>();
         boolean isRedCorrectly = false;
         do {
             try {

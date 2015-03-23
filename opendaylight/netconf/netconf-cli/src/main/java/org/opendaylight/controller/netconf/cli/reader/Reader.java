@@ -8,7 +8,7 @@
 package org.opendaylight.controller.netconf.cli.reader;
 
 import java.util.List;
-import org.opendaylight.yangtools.yang.data.api.Node;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 
 /**
@@ -16,6 +16,6 @@ import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
  */
 public interface Reader<T extends DataSchemaNode> {
 
-    List<Node<?>> read(T schemaNode) throws ReadingException;
+    List<NormalizedNode<?, ?>> read(T schemaNode) throws ReadingException;
 
 }

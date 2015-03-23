@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.netconf.cli.commands.local;
 
-import com.google.common.collect.Lists;
 import org.opendaylight.controller.netconf.cli.NetconfDeviceConnectionManager;
 import org.opendaylight.controller.netconf.cli.commands.AbstractCommand;
 import org.opendaylight.controller.netconf.cli.commands.Command;
@@ -16,9 +15,9 @@ import org.opendaylight.controller.netconf.cli.commands.input.InputDefinition;
 import org.opendaylight.controller.netconf.cli.commands.output.Output;
 import org.opendaylight.controller.netconf.cli.commands.output.OutputDefinition;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.Node;
-import org.opendaylight.yangtools.yang.data.impl.CompositeNodeTOImpl;
-import org.opendaylight.yangtools.yang.data.impl.SimpleNodeTOImpl;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 
 /**
@@ -39,9 +38,12 @@ public class Disconnect extends AbstractCommand {
     public Output invoke(final Input inputArgs) {
         connectionManager.disconnect();
 
-        return new Output(new CompositeNodeTOImpl(getCommandId(), null,
-                Lists.<Node<?>> newArrayList(new SimpleNodeTOImpl<>(QName.create(getCommandId(), "status"), null,
-                        "Connection disconnected"))));
+        return new Output(
+                ImmutableContainerNodeBuilder.create()
+                        .withNodeIdentifier(new NodeIdentifier(getCommandId()))
+                        .withChild(ImmutableLeafNodeBuilder.create()
+                                .withNodeIdentifier(new NodeIdentifier(QName.create(getCommandId(), "status")))
+                                .withValue("Connection disconnected").build()).build());
     }
 
     public static Command create(final RpcDefinition rpcDefinition,

@@ -8,46 +8,52 @@
 package org.opendaylight.controller.netconf.cli.commands.input;
 
 import com.google.common.base.Preconditions;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
-import org.opendaylight.yangtools.yang.data.api.Node;
-import org.opendaylight.yangtools.yang.data.impl.CompositeNodeTOImpl;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 
 /**
  * Input arguments for and rpc/command execution
  */
 public class Input {
 
-    private final List<Node<?>> args;
+    private final List<NormalizedNode<?, ?>> args;
 
-    private final Map<String, Node<?>> nameToArg = new HashMap<String, Node<?>>();
+    private final Map<String, NormalizedNode<?, ?>> nameToArg = new HashMap<>();
 
-    public Input(final List<Node<?>> args) {
+    public Input(final List<NormalizedNode<?, ?>> args) {
         // FIXME empty Input should be constructed from static factory method
         if(args.isEmpty()) {
             this.args = Collections.emptyList();
             return;
         }
 
-        final Node<?> input = args.iterator().next();
+        final NormalizedNode<?, ?> input = args.iterator().next();
         Preconditions
-                .checkArgument(input instanceof CompositeNode, "Input container has to be of type composite node.");
-        this.args = ((CompositeNode) input).getValue();
+                .checkArgument(input instanceof DataContainerChild<?, ?>, "Input container has to be of type Data Container Child.");
+        this.args = new ArrayList<>((Collection) input.getValue());
 
-        for (final Node<?> arg : this.args) {
+        for (final NormalizedNode<?, ?> arg : this.args) {
             nameToArg.put(arg.getNodeType().getLocalName(), arg);
         }
     }
 
-    public Node<?> getArg(final String name) {
+    public NormalizedNode<?, ?> getArg(final String name) {
         return nameToArg.get(name);
     }
 
-    public CompositeNode wrap(final QName rpcQName) {
-        return new CompositeNodeTOImpl(rpcQName, null, args);
+    public NormalizedNode<?, ?> wrap(final QName rpcQName) {
+        //TODO just add the list as children to the node
+        return ImmutableContainerNodeBuilder.create()
+                .withNodeIdentifier(new NodeIdentifier(rpcQName))
+                .withValue((Collection) args).build();
     }
 }

@@ -16,7 +16,7 @@ import org.opendaylight.controller.netconf.cli.io.ConsoleIO;
 import org.opendaylight.controller.netconf.cli.reader.ReadingException;
 import org.opendaylight.controller.netconf.cli.reader.impl.ChoiceReader;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.Node;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.ChoiceCaseNode;
 import org.opendaylight.yangtools.yang.model.api.ChoiceSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -33,7 +33,7 @@ public class EditContentReader extends ChoiceReader {
     }
 
     @Override
-    public List<Node<?>> readWithContext(final ChoiceSchemaNode choiceNode) throws IOException, ReadingException {
+    public List<NormalizedNode<?, ?>> readWithContext(final ChoiceSchemaNode choiceNode) throws IOException, ReadingException {
         Preconditions.checkState(choiceNode.getQName().equals(EDIT_CONTENT_QNAME), "Unexpected choice %s, expected %s", choiceNode, EDIT_CONTENT_QNAME);
         final ChoiceCaseNode selectedCase = choiceNode.getCaseNodeByName(CONFIG_QNAME);
         Preconditions.checkNotNull(selectedCase, "Unexpected choice %s, expected %s that contains %s", choiceNode, EDIT_CONTENT_QNAME, CONFIG_QNAME);

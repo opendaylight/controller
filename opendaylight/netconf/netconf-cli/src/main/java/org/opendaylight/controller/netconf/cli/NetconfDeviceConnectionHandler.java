@@ -10,13 +10,13 @@ package org.opendaylight.controller.netconf.cli;
 import com.google.common.base.Optional;
 import jline.console.completer.Completer;
 import jline.console.completer.NullCompleter;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 import org.opendaylight.controller.netconf.cli.commands.CommandDispatcher;
 import org.opendaylight.controller.netconf.cli.io.ConsoleContext;
 import org.opendaylight.controller.netconf.cli.io.ConsoleIO;
 import org.opendaylight.controller.sal.connect.api.RemoteDeviceHandler;
 import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionPreferences;
-import org.opendaylight.controller.sal.core.api.RpcImplementation;
-import org.opendaylight.yangtools.yang.data.api.CompositeNode;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 /**
@@ -42,7 +42,7 @@ public class NetconfDeviceConnectionHandler implements RemoteDeviceHandler<Netco
 
     @Override
     public synchronized void onDeviceConnected(final SchemaContext context,
-            final NetconfSessionPreferences preferences, final RpcImplementation rpcImplementation) {
+            final NetconfSessionPreferences preferences, final DOMRpcService rpcService) {
         console.enterRootContext(new ConsoleContext() {
 
             @Override
@@ -60,7 +60,7 @@ public class NetconfDeviceConnectionHandler implements RemoteDeviceHandler<Netco
         // possible
         // TODO detect netconf base version
         // TODO detect inet types version
-        commandDispatcher.addRemoteCommands(rpcImplementation, context);
+        commandDispatcher.addRemoteCommands(rpcService, context);
         schemaContextRegistry.setRemoteSchemaContext(context);
         up = true;
         this.notify();
@@ -87,8 +87,8 @@ public class NetconfDeviceConnectionHandler implements RemoteDeviceHandler<Netco
     }
 
     @Override
-    public void onNotification(final CompositeNode compositeNode) {
-        // FIXME
+    public void onNotification(ContainerNode domNotification) {
+
     }
 
     @Override

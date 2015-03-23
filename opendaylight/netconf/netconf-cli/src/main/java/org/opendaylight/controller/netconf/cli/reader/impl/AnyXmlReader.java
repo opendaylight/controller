@@ -21,9 +21,13 @@ import org.opendaylight.controller.netconf.cli.io.ConsoleIO;
 import org.opendaylight.controller.netconf.cli.reader.AbstractReader;
 import org.opendaylight.controller.netconf.cli.reader.ReadingException;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
-import org.opendaylight.yangtools.yang.data.api.Node;
-import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
-import org.opendaylight.yangtools.yang.data.impl.codec.xml.XmlDocumentUtils;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.transform.dom.DomUtils;
+import org.opendaylight.yangtools.yang.data.impl.schema.transform.dom.parser.DomToNormalizedNodeParserFactory;
 import org.opendaylight.yangtools.yang.model.api.AnyXmlSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.w3c.dom.Document;
@@ -40,32 +44,38 @@ public class AnyXmlReader extends AbstractReader<AnyXmlSchemaNode> {
     }
 
     @Override
-    protected List<Node<?>> readWithContext(final AnyXmlSchemaNode schemaNode) throws IOException, ReadingException {
+    protected List<NormalizedNode<?, ?>> readWithContext(final AnyXmlSchemaNode schemaNode) throws IOException, ReadingException {
         console.writeLn(listType(schemaNode) + " " + schemaNode.getQName().getLocalName());
 
         final String rawValue = console.read();
 
-        Node<?> newNode = null;
+        DataContainerChild<?, ?> newNode = null;
         if (!isSkipInput(rawValue)) {
-            final Optional<Node<?>> value = tryParse(rawValue);
+            final Optional<DataContainerChild<?, ?>> value = tryParse(rawValue, schemaNode);
 
             if (value.isPresent()) {
-                newNode = NodeFactory.createImmutableCompositeNode(schemaNode.getQName(), null,
-                        Collections.<Node<?>> singletonList(value.get()));
+                newNode = ImmutableContainerNodeBuilder.create()
+                        .withNodeIdentifier(new NodeIdentifier(schemaNode.getQName()))
+                        .withChild(value.get()).build();
             } else {
-                newNode = NodeFactory.createImmutableSimpleNode(schemaNode.getQName(), null, rawValue);
+                newNode = ImmutableLeafNodeBuilder.create().withNodeIdentifier(new NodeIdentifier(schemaNode.getQName())).withValue(rawValue).build();
             }
         }
 
-        final List<Node<?>> newNodes = new ArrayList<>();
+        final List<NormalizedNode<?, ?>> newNodes = new ArrayList<>();
         newNodes.add(newNode);
         return newNodes;
     }
 
-    private Optional<Node<?>> tryParse(final String rawValue) {
+    private Optional<DataContainerChild<?, ?>> tryParse(final String rawValue, final AnyXmlSchemaNode schemaNode) {
         try {
             final Document dom = XmlUtil.readXmlToDocument(rawValue);
-            return Optional.<Node<?>> of(XmlDocumentUtils.toDomNode(dom));
+            return Optional.<DataContainerChild<?, ?>> of(
+                    DomToNormalizedNodeParserFactory.
+                            getInstance(DomUtils.defaultValueCodecProvider(), getSchemaContext()).
+                            getAnyXmlNodeParser().
+                            parse(Collections.singletonList(dom.getDocumentElement()), schemaNode)
+            );
         } catch (SAXException | IOException e) {
             // TODO log
             return Optional.absent();

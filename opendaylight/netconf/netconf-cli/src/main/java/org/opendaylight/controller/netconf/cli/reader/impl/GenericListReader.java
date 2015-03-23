@@ -19,7 +19,7 @@ import org.opendaylight.controller.netconf.cli.io.ConsoleIO;
 import org.opendaylight.controller.netconf.cli.reader.AbstractReader;
 import org.opendaylight.controller.netconf.cli.reader.GenericListEntryReader;
 import org.opendaylight.controller.netconf.cli.reader.ReadingException;
-import org.opendaylight.yangtools.yang.data.api.Node;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
@@ -43,8 +43,8 @@ public class GenericListReader<T extends DataSchemaNode> extends AbstractReader<
     }
 
     @Override
-    public List<Node<?>> readWithContext(final T schemaNode) throws IOException, ReadingException {
-        final List<Node<?>> newNodes = new ArrayList<>();
+    public List<NormalizedNode<?, ?>> readWithContext(final T schemaNode) throws IOException, ReadingException {
+        final List<NormalizedNode<?, ?>> newNodes = new ArrayList<>();
         Optional<Boolean> readNextListEntry = Optional.of(Boolean.TRUE);
         console.formatLn("Reading collection type argument: %s", schemaNode.getQName().getLocalName());
         while (readNextListEntry.isPresent() && readNextListEntry.get()) {
