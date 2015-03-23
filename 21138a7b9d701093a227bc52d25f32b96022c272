@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_35f9b6e9",
+        "filename": "opendaylight/netconf/mdsal-netconf-connector/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-03-23T08:29:09Z",
+      "side": 1,
+      "message": "Why is this dependency here ? should not be...\n\nNote: When adding a dependency, feature files have to be updated as well",
+      "revId": "21138a7b9d701093a227bc52d25f32b96022c272",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_f5934ea1",
+        "filename": "opendaylight/netconf/mdsal-netconf-connector/src/main/java/org/opendaylight/controller/config/yang/netconf/mdsal/mapper/NetconfMdsalMapperModule.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-03-23T08:29:09Z",
+      "side": 1,
+      "message": "A better solution would be if MdsalNetconfOperationServiceFactory implemented Provider interface and it was registered into domBroker. This way no need for empty Provider implementation and no need to pass the session in constructor bacause the session would be injected via the onSessionInitiated method.\n\nNote: It is not actually a provider but only a consumer (we do not provide any implementations of RPC or data into MD-SAL). Consumer instead of a Provider should be sufficient,",
+      "revId": "21138a7b9d701093a227bc52d25f32b96022c272",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_9590ca96",
+        "filename": "opendaylight/netconf/mdsal-netconf-connector/src/main/java/org/opendaylight/controller/config/yang/netconf/mdsal/mapper/NetconfMdsalMapperModule.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-03-23T08:29:09Z",
+      "side": 1,
+      "message": "When doing inner class, make it static if possible. Non static class carries a reference to parent class. It is especially dangerous in this case, when a provider is registered into MD-SAL and the provider carries a reference to this module, which carries a hidden reference to dependency resolver (dependency resolver carries a snapshot of all modules currently configured). This might cause memory leaks.",
+      "revId": "21138a7b9d701093a227bc52d25f32b96022c272",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_55ea4210",
+        "filename": "opendaylight/netconf/mdsal-netconf-connector/src/main/java/org/opendaylight/controller/netconf/mdsal/connector/ops/RuntimeRpc.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-03-23T08:29:09Z",
+      "side": 1,
+      "message": "This should return cannot handle if no such rpc is present. The operation router on higher level handles it (sends netconf error if no operation is available to handle request).",
+      "revId": "21138a7b9d701093a227bc52d25f32b96022c272",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_75ef3e1f",
+        "filename": "opendaylight/netconf/mdsal-netconf-connector/src/main/java/org/opendaylight/controller/netconf/mdsal/connector/ops/RuntimeRpc.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-03-23T08:29:09Z",
+      "side": 1,
+      "message": "Is this really true ? The canHandle above is using operation name and namespace to detect this.",
+      "revId": "21138a7b9d701093a227bc52d25f32b96022c272",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_b58dc67d",
+        "filename": "opendaylight/netconf/mdsal-netconf-connector/src/main/java/org/opendaylight/controller/netconf/mdsal/connector/ops/RuntimeRpc.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-03-23T08:29:09Z",
+      "side": 1,
+      "message": "How does this behave when module with multiple revisions is present in the system ? Does it pick the newest revision by default ? That would be the correct behaviour ... should be verified if not verified yet.",
+      "revId": "21138a7b9d701093a227bc52d25f32b96022c272",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_15f4baf0",
+        "filename": "opendaylight/netconf/mdsal-netconf-connector/src/main/java/org/opendaylight/controller/netconf/mdsal/connector/ops/RuntimeRpc.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 213,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-03-23T08:29:09Z",
+      "side": 1,
+      "message": "This method looks very familiar at this point :) Isnt the exact same code already somewhere ? If so we should start using a utility class for this method. Along with the xml factories and builder creation. Just add a TODO here, this will be handled in another commit.",
+      "revId": "21138a7b9d701093a227bc52d25f32b96022c272",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_d5ddf271",
+        "filename": "opendaylight/netconf/mdsal-netconf-connector/src/test/resources/yang/mdsal-netconf-rpc-test.yang",
+        "patchSetId": 4
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-03-23T08:29:09Z",
+      "side": 1,
+      "message": "Add also rpc with no output for testing and test it.",
+      "revId": "21138a7b9d701093a227bc52d25f32b96022c272",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
