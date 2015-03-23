@@ -1,0 +1,191 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_1845cf6f",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/NormalizedNodeOutputStreamWriter.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-23T15:44:24Z",
+      "side": 1,
+      "message": "Looks like you just added final to method params - this could\u0027ve been done in a separate patch to keep this one smaller. But it\u0027s fine.",
+      "revId": "104cff8a130389b5c1cd49cf664c6b35b1271a1f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_c341b83a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DelayedTreeListenerRegistration.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-23T15:44:24Z",
+      "side": 1,
+      "message": "This should close the delegate I think.",
+      "revId": "104cff8a130389b5c1cd49cf664c6b35b1271a1f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_23265cb8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 764,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-23T15:44:24Z",
+      "side": 1,
+      "message": "This code could be moved to a separate class (e.g. ShardDataTreeChangeListenerManager) for modularity as Shard has gotten a bit monolithic. That would also make it easier to unit test.",
+      "revId": "104cff8a130389b5c1cd49cf664c6b35b1271a1f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_63530418",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 984,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-23T15:44:24Z",
+      "side": 1,
+      "message": "The synchronization and isClosed check could be moved setDelegate to hide the internal synchronization.",
+      "revId": "104cff8a130389b5c1cd49cf664c6b35b1271a1f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_e39394a1",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/DataTreeCandidateImpl.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-23T15:44:24Z",
+      "side": 1,
+      "message": "Can yang tools provide this as a default implementation of DataTreeCandidate for reusability? This is a simple DTO.\n\nAlso I don\u0027t see this class used.",
+      "revId": "104cff8a130389b5c1cd49cf664c6b35b1271a1f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_03f480f0",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/DataTreeCandidateNodeImpl.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-23T15:44:24Z",
+      "side": 1,
+      "message": "Can yang tools provide this as a default implementation of DataTreeCandidate for reusability? \n\nAlso I don\u0027t see this class used.",
+      "revId": "104cff8a130389b5c1cd49cf664c6b35b1271a1f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_43d12856",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/NormalizedNodeObjectInput.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-23T15:44:24Z",
+      "side": 1,
+      "message": "What\u0027s the purpose of this class? I don\u0027t see it used. Also since this class is a utility and not a message it should be in a utils package.",
+      "revId": "104cff8a130389b5c1cd49cf664c6b35b1271a1f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_63d6a451",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/NormalizedNodeObjectOutput.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-23T15:44:24Z",
+      "side": 1,
+      "message": "What\u0027s the purpose of this class? I don\u0027t see it used. Also since this class is a utility and not a message it should be in a utils package.",
+      "revId": "104cff8a130389b5c1cd49cf664c6b35b1271a1f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_433848a0",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/RegisterTreeChangeListener.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-23T15:44:24Z",
+      "side": 1,
+      "message": "I\u0027m not sure if ActorPath is Serializable. In other places we serialize it to a String - see CreateTransactionReply. Please add a unit test to verify serialization/de-serialization.",
+      "revId": "104cff8a130389b5c1cd49cf664c6b35b1271a1f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_e348742f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/RegisterTreeChangeListener.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-23T15:44:24Z",
+      "side": 1,
+      "message": "I know YangInstanceIdentifier is Serializable but we use our own serialization for efficiency. See DeleteModification for an example. Probably doesn\u0027t matter much for this message class as it probably won\u0027t be high volume but wouldn\u0027t hurt to be consistent.",
+      "revId": "104cff8a130389b5c1cd49cf664c6b35b1271a1f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_a3526cdb",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/RegisterTreeChangeListenerReply.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-23T15:44:24Z",
+      "side": 1,
+      "message": "See comment re: ActorPath serialization in RegisterTreeChangeListener.",
+      "revId": "104cff8a130389b5c1cd49cf664c6b35b1271a1f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
