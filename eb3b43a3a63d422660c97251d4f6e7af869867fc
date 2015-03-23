@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_29f95be9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shard/ShardStats.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-23T21:27:08Z",
+      "side": 1,
+      "message": "I could - do you think this would need to be configured?",
+      "parentUuid": "5a93c517_492707b7",
+      "range": {
+        "startLine": 49,
+        "startChar": 55,
+        "endLine": 49,
+        "endChar": 56
+      },
+      "revId": "eb3b43a3a63d422660c97251d4f6e7af869867fc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_29263bb8",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shard/ShardStats.java",
         "patchSetId": 3
@@ -42,6 +66,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_a9e48b3b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shard/ShardStats.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-23T21:27:08Z",
+      "side": 1,
+      "message": "can do.",
+      "parentUuid": "5a93c517_29263bb8",
+      "revId": "eb3b43a3a63d422660c97251d4f6e7af869867fc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_0921ff9e",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shard/ShardStats.java",
         "patchSetId": 3
@@ -53,6 +95,24 @@
       "writtenOn": "2015-03-23T20:57:51Z",
       "side": 1,
       "message": "Instead of logging a warning, how about adding an attribute which reports the problem. Maybe the queue is really backed up at this point.",
+      "revId": "eb3b43a3a63d422660c97251d4f6e7af869867fc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_89e74f40",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shard/ShardStats.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-23T21:27:08Z",
+      "side": 1,
+      "message": "can do. That\u0027s the downside of using a message. But some of the stats are difficult to keep up to date in the bean - on-demand gets most up to date. I could keep critical ones like leaderId and raftState the way they were so we can always get that info. What do you think?",
+      "parentUuid": "5a93c517_0921ff9e",
       "revId": "eb3b43a3a63d422660c97251d4f6e7af869867fc",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
