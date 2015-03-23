@@ -16,6 +16,24 @@
       "revId": "f72397d200893519daaa70b07ec68cbd24fb6027",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_2382dc4f",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/EventSourceTopology.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 2834
+      },
+      "writtenOn": "2015-03-23T15:16:42Z",
+      "side": 1,
+      "message": "Done, many thanks for your advice",
+      "parentUuid": "5a93c517_38f9abe9",
+      "revId": "f72397d200893519daaa70b07ec68cbd24fb6027",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
