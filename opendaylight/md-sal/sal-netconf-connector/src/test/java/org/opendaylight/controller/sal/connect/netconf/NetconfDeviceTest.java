@@ -19,7 +19,9 @@ import static org.mockito.Mockito.verify;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Futures;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -46,6 +48,7 @@ import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionPr
 import org.opendaylight.controller.sal.connect.netconf.sal.NetconfDeviceRpc;
 import org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
+import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
@@ -132,6 +135,7 @@ public class NetconfDeviceTest {
     public void testNetconfDeviceMissingSource() throws Exception {
         final RemoteDeviceHandler<NetconfSessionPreferences> facade = getFacade();
         final NetconfDeviceCommunicator listener = getListener();
+        final SchemaContext schema = getSchema();
 
         final SchemaContextFactory schemaFactory = getSchemaFactory();
 
@@ -143,13 +147,23 @@ public class NetconfDeviceTest {
                 if(((Collection<?>) invocation.getArguments()[0]).size() == 2) {
                     return Futures.immediateFailedCheckedFuture(schemaResolutionException);
                 } else {
-                    return Futures.immediateCheckedFuture(getSchema());
+                    return Futures.immediateCheckedFuture(schema);
                 }
             }
         }).when(schemaFactory).createSchemaContext(anyCollectionOf(SourceIdentifier.class));
 
         final NetconfDevice.SchemaResourcesDTO schemaResourcesDTO
-                = new NetconfDevice.SchemaResourcesDTO(getSchemaRegistry(), schemaFactory, stateSchemasResolver);
+                = new NetconfDevice.SchemaResourcesDTO(getSchemaRegistry(), schemaFactory, new NetconfStateSchemas.NetconfStateSchemasResolver() {
+            @Override
+            public NetconfStateSchemas resolve(final NetconfDeviceRpc deviceRpc, final NetconfSessionPreferences remoteSessionCapabilities, final RemoteDeviceId id) {
+                final Module first = Iterables.getFirst(schema.getModules(), null);
+                final QName qName = QName.create(first.getQNameModule(), first.getName());
+                final NetconfStateSchemas.RemoteYangSchema source1 = new NetconfStateSchemas.RemoteYangSchema(qName);
+                final NetconfStateSchemas.RemoteYangSchema source2 = new NetconfStateSchemas.RemoteYangSchema(QName.create(first.getQNameModule(), "test-module2"));
+                return new NetconfStateSchemas(Sets.newHashSet(source1, source2));
+            }
+        });
+
         final NetconfDevice device = new NetconfDevice(schemaResourcesDTO, getId(), facade, getExecutor(), true);
         // Monitoring supported
         final NetconfSessionPreferences sessionCaps = getSessionCaps(true, Lists.newArrayList(TEST_CAPABILITY, TEST_CAPABILITY2));
