@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_492707b7",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shard/ShardStats.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-23T20:57:51Z",
+      "side": 1,
+      "message": "It would be good if we could make this configurable.",
+      "range": {
+        "startLine": 49,
+        "startChar": 55,
+        "endLine": 49,
+        "endChar": 56
+      },
+      "revId": "eb3b43a3a63d422660c97251d4f6e7af869867fc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_29263bb8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shard/ShardStats.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-23T20:57:51Z",
+      "side": 1,
+      "message": "How about an attribute which reports how much time it took to get the stats?",
+      "revId": "eb3b43a3a63d422660c97251d4f6e7af869867fc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_0921ff9e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shard/ShardStats.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-23T20:57:51Z",
+      "side": 1,
+      "message": "Instead of logging a warning, how about adding an attribute which reports the problem. Maybe the queue is really backed up at this point.",
+      "revId": "eb3b43a3a63d422660c97251d4f6e7af869867fc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
