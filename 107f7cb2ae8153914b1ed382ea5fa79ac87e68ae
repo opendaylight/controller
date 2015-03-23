@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_f89343a1",
+        "filename": "opendaylight/netconf/netconf-netty-util/src/main/java/org/opendaylight/controller/netconf/nettyutil/handler/NetconfXMLToMessageDecoder.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-03-23T12:33:36Z",
+      "side": 1,
+      "message": "This looks fine but could something like this be a bit better solution? : \n\n...\n\n    private static final byte XML_START \u003d 0x0c;\n...\n\n            // Try to find the start of xml netconf message by finding \u0027\u003c\u0027 byte and strip all bytes prior to \u0027\u003c\u0027\n            final int properStart \u003d in.bytesBefore(XML_START);\n            if(properStart \u003d\u003d -1) {\n                throw new IOException(\"Unable to parse netconf message, unable to find character \" + XML_START + \" as xml starting point\" +\n                        \" in message \" + ByteBufUtil.hexDump(in));\n            } else if(properStart !\u003d 0) {\n                // Reading invalid leading bytes moves the reader index to the proper start for further processing\n                final ByteBuf strippedLeadingBytes \u003d in.readBytes(properStart);\n                LOG.warn(\"Invalid xml message with leading whitespaces detected. Discarded the {} leading byte(s): {}\", properStart, strippedLeadingBytes);\n            }\n\n\n?\n\nThis finds the start of the xml by looking for \"\u003c\" and strips everything prior to it. The code is a bit simpler and it does not need to hardcode all the characters to strip.\n\nNote: Could you also provide a test case for this workaround ?\nNote2: I think this should be fixed in the remote device part. I think the XML is invalid if even a whitespace character is placed before \u003c?xml.",
+      "revId": "107f7cb2ae8153914b1ed382ea5fa79ac87e68ae",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
