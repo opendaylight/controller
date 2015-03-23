@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_03ac809f",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/EventSourceTopology.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-23T16:03:21Z",
+      "side": 1,
+      "message": "Creating the tx in a resource try might not be safe. close() will be called as soon the block completes which might cause the tx to be closed prematurely before the read is processed async (probably not with IMDS but possibly with CDS). \n\nYou don\u0027t really have to call close on RO transactions as resources will eventually get freed by the CDS when it\u0027s GC\u0027ed. That said, resources will be freed quicker by explicitly calling close so it\u0027s not a bad idea. I think you should close it in onSuccess/onFailure to be safe.",
+      "revId": "4118dfe8c82967f95fc6fb2db295c2d4eae9e9eb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_a3002cab",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/EventSourceTopology.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-23T16:03:21Z",
+      "side": 1,
+      "message": "Don\u0027t need this line.",
+      "revId": "4118dfe8c82967f95fc6fb2db295c2d4eae9e9eb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
