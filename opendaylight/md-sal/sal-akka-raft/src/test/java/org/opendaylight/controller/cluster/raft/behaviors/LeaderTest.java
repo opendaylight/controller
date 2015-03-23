@@ -43,7 +43,6 @@ import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.utils.ForwardMessageToBehaviorActor;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
-import org.opendaylight.controller.protobuff.messages.cluster.raft.InstallSnapshotMessages;
 import scala.concurrent.duration.FiniteDuration;
 
 public class LeaderTest extends AbstractLeaderTest {
@@ -265,10 +264,7 @@ public class LeaderTest extends AbstractLeaderTest {
 
         leader.handleMessage(leaderActor, new SendHeartBeat());
 
-        InstallSnapshotMessages.InstallSnapshot isproto = MessageCollectorActor.expectFirstMatching(followerActor,
-                InstallSnapshot.SERIALIZABLE_CLASS);
-
-        InstallSnapshot is = (InstallSnapshot) SerializationUtils.fromSerializable(isproto);
+        InstallSnapshot is = MessageCollectorActor.expectFirstMatching(followerActor, InstallSnapshot.class);
 
         assertEquals(snapshotIndex, is.getLastIncludedIndex());
     }
@@ -417,8 +413,7 @@ public class LeaderTest extends AbstractLeaderTest {
 
         // check if installsnapshot gets called with the correct values.
 
-        InstallSnapshot installSnapshot = (InstallSnapshot) SerializationUtils.fromSerializable(
-                MessageCollectorActor.expectFirstMatching(followerActor, InstallSnapshotMessages.InstallSnapshot.class));
+        InstallSnapshot installSnapshot = MessageCollectorActor.expectFirstMatching(followerActor, InstallSnapshot.class);
 
         assertNotNull(installSnapshot.getData());
         assertEquals(snapshotIndex, installSnapshot.getLastIncludedIndex());
@@ -522,8 +517,7 @@ public class LeaderTest extends AbstractLeaderTest {
 
         leader.handleMessage(leaderActor, new SendInstallSnapshot(bs));
 
-        InstallSnapshotMessages.InstallSnapshot installSnapshot = MessageCollectorActor.expectFirstMatching(
-                followerActor, InstallSnapshotMessages.InstallSnapshot.class);
+        InstallSnapshot installSnapshot = MessageCollectorActor.expectFirstMatching(followerActor, InstallSnapshot.class);
 
         assertEquals(1, installSnapshot.getChunkIndex());
         assertEquals(3, installSnapshot.getTotalChunks());
@@ -532,8 +526,7 @@ public class LeaderTest extends AbstractLeaderTest {
         leader.handleMessage(followerActor, new InstallSnapshotReply(actorContext.getTermInformation().getCurrentTerm(),
                 FOLLOWER_ID, installSnapshot.getChunkIndex(), true));
 
-        installSnapshot = MessageCollectorActor.expectFirstMatching(
-                followerActor, InstallSnapshotMessages.InstallSnapshot.class);
+        installSnapshot = MessageCollectorActor.expectFirstMatching(followerActor, InstallSnapshot.class);
 
         assertEquals(2, installSnapshot.getChunkIndex());
         assertEquals(3, installSnapshot.getTotalChunks());
@@ -542,16 +535,14 @@ public class LeaderTest extends AbstractLeaderTest {
         leader.handleMessage(followerActor, new InstallSnapshotReply(actorContext.getTermInformation().getCurrentTerm(),
                 FOLLOWER_ID, installSnapshot.getChunkIndex(), true));
 
-        installSnapshot = MessageCollectorActor.expectFirstMatching(
-                followerActor, InstallSnapshotMessages.InstallSnapshot.class);
+        installSnapshot = MessageCollectorActor.expectFirstMatching(followerActor, InstallSnapshot.class);
 
         // Send snapshot reply one more time and make sure that a new snapshot message should not be sent to follower
         followerActor.underlyingActor().clear();
         leader.handleMessage(followerActor, new InstallSnapshotReply(actorContext.getTermInformation().getCurrentTerm(),
                 FOLLOWER_ID, installSnapshot.getChunkIndex(), true));
 
-        installSnapshot = MessageCollectorActor.getFirstMatching(
-                followerActor, InstallSnapshotMessages.InstallSnapshot.class);
+        installSnapshot = MessageCollectorActor.getFirstMatching(followerActor, InstallSnapshot.class);
 
         Assert.assertNull(installSnapshot);
     }
@@ -592,10 +583,10 @@ public class LeaderTest extends AbstractLeaderTest {
         ByteString bs = toByteString(leadersSnapshot);
         leader.setSnapshot(Optional.of(bs));
 
+        Uninterruptibles.sleepUninterruptibly(1, TimeUnit.SECONDS);
         leader.handleMessage(leaderActor, new SendInstallSnapshot(bs));
 
-        InstallSnapshotMessages.InstallSnapshot installSnapshot = MessageCollectorActor.expectFirstMatching(
-                followerActor, InstallSnapshotMessages.InstallSnapshot.class);
+        InstallSnapshot installSnapshot = MessageCollectorActor.expectFirstMatching(followerActor, InstallSnapshot.class);
 
         assertEquals(1, installSnapshot.getChunkIndex());
         assertEquals(3, installSnapshot.getTotalChunks());
@@ -610,8 +601,7 @@ public class LeaderTest extends AbstractLeaderTest {
 
         leader.handleMessage(leaderActor, new SendHeartBeat());
 
-        installSnapshot = MessageCollectorActor.expectFirstMatching(
-                followerActor, InstallSnapshotMessages.InstallSnapshot.class);
+        installSnapshot = MessageCollectorActor.expectFirstMatching(followerActor, InstallSnapshot.class);
 
         assertEquals(1, installSnapshot.getChunkIndex());
         assertEquals(3, installSnapshot.getTotalChunks());
@@ -654,12 +644,11 @@ public class LeaderTest extends AbstractLeaderTest {
 
         leader.handleMessage(leaderActor, new SendInstallSnapshot(bs));
 
-        InstallSnapshotMessages.InstallSnapshot installSnapshot = MessageCollectorActor.expectFirstMatching(
-                followerActor, InstallSnapshotMessages.InstallSnapshot.class);
+        InstallSnapshot installSnapshot = MessageCollectorActor.expectFirstMatching(followerActor, InstallSnapshot.class);
 
         assertEquals(1, installSnapshot.getChunkIndex());
         assertEquals(3, installSnapshot.getTotalChunks());
-        assertEquals(AbstractLeader.INITIAL_LAST_CHUNK_HASH_CODE, installSnapshot.getLastChunkHashCode());
+        assertEquals(AbstractLeader.INITIAL_LAST_CHUNK_HASH_CODE, installSnapshot.getLastChunkHashCode().get().intValue());
 
         int hashCode = installSnapshot.getData().hashCode();
 
@@ -668,12 +657,11 @@ public class LeaderTest extends AbstractLeaderTest {
         leader.handleMessage(followerActor, new InstallSnapshotReply(installSnapshot.getTerm(),
                 FOLLOWER_ID, 1, true));
 
-        installSnapshot = MessageCollectorActor.expectFirstMatching(
-                followerActor, InstallSnapshotMessages.InstallSnapshot.class);
+        installSnapshot = MessageCollectorActor.expectFirstMatching(followerActor, InstallSnapshot.class);
 
         assertEquals(2, installSnapshot.getChunkIndex());
         assertEquals(3, installSnapshot.getTotalChunks());
-        assertEquals(hashCode, installSnapshot.getLastChunkHashCode());
+        assertEquals(hashCode, installSnapshot.getLastChunkHashCode().get().intValue());
     }
 
     @Test
