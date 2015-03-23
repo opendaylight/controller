@@ -1,0 +1,78 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_5e501f32",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-23T20:32:17Z",
+      "side": 1,
+      "message": "We should use a static ElectionTimeout instance, both here and in scheduleElection. But that can be done in another patch.",
+      "revId": "28ecbc68ca60911d890eca8100a3dfd093ccd63f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_5e37bfff",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/CandidateTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 202,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-23T20:32:17Z",
+      "side": 1,
+      "message": "Might want to bump up the heartbeatInterval for this test to say 500 ms so the ElectionTimeOutInterval is 1 sec to be safe so we don\u0027t get a spurious failure if it happens to take 200 ms on jenkins.",
+      "range": {
+        "startLine": 202,
+        "startChar": 58,
+        "endLine": 202,
+        "endChar": 81
+      },
+      "revId": "28ecbc68ca60911d890eca8100a3dfd093ccd63f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_de22efb8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DistributedDataStoreIntegrationTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 489,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-23T20:32:17Z",
+      "side": 1,
+      "message": "What\u0027s the reason for these changes?",
+      "revId": "28ecbc68ca60911d890eca8100a3dfd093ccd63f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_5e1edf71",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-23T20:32:17Z",
+      "side": 1,
+      "message": "Is this related to the other changes in this patch or to fix a spurious test failure? Just curious.",
+      "revId": "28ecbc68ca60911d890eca8100a3dfd093ccd63f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
