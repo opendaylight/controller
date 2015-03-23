@@ -174,7 +174,7 @@ public final class NetconfStateSchemas {
     public final static class RemoteYangSchema {
         private final QName qname;
 
-        private RemoteYangSchema(final QName qname) {
+        RemoteYangSchema(final QName qname) {
             this.qname = qname;
         }
 
