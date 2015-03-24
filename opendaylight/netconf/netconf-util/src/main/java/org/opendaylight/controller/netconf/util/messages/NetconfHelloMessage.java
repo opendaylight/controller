@@ -94,9 +94,9 @@ public final class NetconfHelloMessage extends NetconfMessage {
     private static boolean isHelloMessage(final Document document) {
         XmlElement element = XmlElement.fromDomElement(document.getDocumentElement());
         try {
+            // accept id hello has no namespace
             return element.getName().equals(HELLO_TAG) &&
-                   element.hasNamespace() &&
-                   element.getNamespace().equals(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
+                    (!element.hasNamespace() || element.getNamespace().equals(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0));
         } catch (MissingNameSpaceException e) {
             // Cannot happen, since we check for hasNamespace
             throw new IllegalStateException(e);

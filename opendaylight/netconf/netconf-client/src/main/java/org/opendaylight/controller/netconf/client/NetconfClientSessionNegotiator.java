@@ -8,7 +8,7 @@
 
 package org.opendaylight.controller.netconf.client;
 
-import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -44,6 +44,9 @@ public class NetconfClientSessionNegotiator extends
 
     private static final XPathExpression sessionIdXPath = XMLNetconfUtil
             .compileXPath("/netconf:hello/netconf:session-id");
+
+    private static final XPathExpression sessionIdXPathNoNamespace = XMLNetconfUtil
+            .compileXPath("/hello/session-id");
 
     private static final String EXI_1_0_CAPABILITY_MARKER = "exi:1.0";
 
@@ -113,14 +116,20 @@ public class NetconfClientSessionNegotiator extends
     }
 
     private long extractSessionId(final Document doc) {
-        final Node sessionIdNode = (Node) XmlUtil.evaluateXPath(sessionIdXPath, doc, XPathConstants.NODE);
-        Preconditions.checkState(sessionIdNode != null, "");
-        String textContent = sessionIdNode.getTextContent();
-        if (textContent == null || textContent.equals("")) {
-            throw new IllegalStateException("Session id not received from server");
+        String textContent = getSessionIdWithXPath(doc, sessionIdXPath);
+        if (Strings.isNullOrEmpty(textContent)) {
+            textContent = getSessionIdWithXPath(doc, sessionIdXPathNoNamespace);
+            if (Strings.isNullOrEmpty(textContent)) {
+                throw new IllegalStateException("Session id not received from server, hello message: " + XmlUtil.toString(doc));
+            }
         }
 
         return Long.valueOf(textContent);
+    }
+
+    private String getSessionIdWithXPath(final Document doc, final XPathExpression sessionIdXPath) {
+        final Node sessionIdNode = (Node) XmlUtil.evaluateXPath(sessionIdXPath, doc, XPathConstants.NODE);
+        return sessionIdNode!= null ?sessionIdNode.getTextContent() : null;
     }
 
     @Override
