@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_e4acfaef",
+        "filename": "opendaylight/netconf/mdsal-netconf-connector/src/main/java/org/opendaylight/controller/config/yang/netconf/mdsal/mapper/NetconfMdsalMapperModule.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-03-24T08:12:58Z",
+      "side": 1,
+      "message": "make the MDsalNetconfOperationServiceFactory implement the consumer interface, not this module. The session will be injected directly to the factory via onSessionInitiated method instead of using the return value of registerConsumer. The Factory would be just registered here as a consumer into the dom broker.",
+      "revId": "572a0ed423daf4eec074680bdc15e8f0faf9372b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_c4969e94",
+        "filename": "opendaylight/netconf/mdsal-netconf-connector/src/main/java/org/opendaylight/controller/netconf/mdsal/connector/ops/RuntimeRpc.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-03-24T08:12:58Z",
+      "side": 1,
+      "message": "This method overrides method canHandle from AbstractNetconfOperation and the code is identical... so theres no need to have this here.",
+      "revId": "572a0ed423daf4eec074680bdc15e8f0faf9372b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_64ef8a1f",
+        "filename": "opendaylight/netconf/mdsal-netconf-connector/src/main/java/org/opendaylight/controller/netconf/mdsal/connector/ops/RuntimeRpc.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-03-24T08:12:58Z",
+      "side": 1,
+      "message": "Using exceptions for flow control is not a good practice. Method getRpcDefinitionFromModule should rather return an Optional and the decision should be based on the return value.",
+      "revId": "572a0ed423daf4eec074680bdc15e8f0faf9372b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_24f982e9",
+        "filename": "opendaylight/netconf/mdsal-netconf-connector/src/main/java/org/opendaylight/controller/netconf/mdsal/connector/ops/RuntimeRpc.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-03-24T08:12:58Z",
+      "side": 1,
+      "message": "the entire body of catch block could be replaced with:\n\n// Cannot occur, namespace in parsed XML cannot be invalid URI\nthrow new IllegalStateException(e, \"Unable to parse URI \" + namespace);\n\njust wrapping checked exception as unchecked, because we know that this cannot happen with the way its called",
+      "revId": "572a0ed423daf4eec074680bdc15e8f0faf9372b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_c4dd3e72",
+        "filename": "opendaylight/netconf/mdsal-netconf-connector/src/main/java/org/opendaylight/controller/netconf/mdsal/connector/ops/RuntimeRpc.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-03-24T08:12:58Z",
+      "side": 1,
+      "message": "This might return null and result in NullPointerException in canHandle -\u003e getRpcDefinitionFromModule ... should be probably wrapped as Optional",
+      "revId": "572a0ed423daf4eec074680bdc15e8f0faf9372b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
