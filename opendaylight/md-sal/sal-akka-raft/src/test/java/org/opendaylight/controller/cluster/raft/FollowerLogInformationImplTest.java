@@ -60,4 +60,24 @@ public class FollowerLogInformationImplTest {
         stopwatch.stop();
         return stopwatch.elapsed(TimeUnit.MILLISECONDS);
     }
+
+    @Test
+    public void testOkToReplicate(){
+        MockRaftActorContext context = new MockRaftActorContext();
+        context.setCommitIndex(9);
+        FollowerLogInformation followerLogInformation =
+                new FollowerLogInformationImpl(
+                        "follower1", 10, context);
+
+        assertTrue(followerLogInformation.okToReplicate());
+        assertFalse(followerLogInformation.okToReplicate());
+
+        // wait for 150 milliseconds and it should work again
+        Uninterruptibles.sleepUninterruptibly(150, TimeUnit.MILLISECONDS);
+        assertTrue(followerLogInformation.okToReplicate());
+
+        //increment next index and try immediately and it should work again
+        followerLogInformation.incrNextIndex();
+        assertTrue(followerLogInformation.okToReplicate());
+    }
 }

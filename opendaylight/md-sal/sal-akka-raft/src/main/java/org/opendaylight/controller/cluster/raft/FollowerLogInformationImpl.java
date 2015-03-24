@@ -26,6 +26,11 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
 
     private volatile long matchIndex;
 
+    private long lastReplicatedIndex = -1L;
+
+    private final Stopwatch lastReplicatedStopwatch = Stopwatch.createUnstarted();
+
+
     public FollowerLogInformationImpl(String id, long matchIndex, RaftActorContext context) {
         this.id = id;
         this.nextIndex = context.getCommitIndex();
@@ -111,6 +116,28 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
     }
 
     @Override
+    public boolean okToReplicate() {
+        // Return false if we are trying to send duplicate data before the heartbeat interval
+        if(getNextIndex() == lastReplicatedIndex){
+            if(lastReplicatedStopwatch.elapsed(TimeUnit.MILLISECONDS) < context.getConfigParams()
+                    .getHeartBeatInterval().toMillis()){
+                return false;
+            }
+        }
+
+        resetLastReplicated();
+        return true;
+    }
+
+    private void resetLastReplicated(){
+        lastReplicatedIndex = getNextIndex();
+        if(lastReplicatedStopwatch.isRunning()){
+            lastReplicatedStopwatch.reset();
+        }
+        lastReplicatedStopwatch.start();
+    }
+
+    @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("FollowerLogInformationImpl [id=").append(id).append(", nextIndex=").append(nextIndex)
@@ -120,6 +147,4 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
                 .append(context.getConfigParams().getElectionTimeOutInterval().toMillis()).append("]");
         return builder.toString();
     }
-
-
 }

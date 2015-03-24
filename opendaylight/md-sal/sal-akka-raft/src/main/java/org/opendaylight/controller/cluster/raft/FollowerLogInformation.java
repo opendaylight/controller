@@ -91,4 +91,10 @@ public interface FollowerLogInformation {
      */
     long timeSinceLastActivity();
 
+    /**
+     * This method checks if it is ok to replicate
+     *
+     * @return true if it is ok to replicate
+     */
+    boolean okToReplicate();
 }
