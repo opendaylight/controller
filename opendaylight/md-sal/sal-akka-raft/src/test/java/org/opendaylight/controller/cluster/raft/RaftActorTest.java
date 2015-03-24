@@ -54,6 +54,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.datastore.DataPersistenceProviderMonitor;
+import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.RoleChanged;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyLogEntries;
@@ -64,6 +65,7 @@ import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotRep
 import org.opendaylight.controller.cluster.raft.base.messages.SendHeartBeat;
 import org.opendaylight.controller.cluster.raft.behaviors.Follower;
 import org.opendaylight.controller.cluster.raft.behaviors.Leader;
+import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeader;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
@@ -944,7 +946,8 @@ public class RaftActorTest extends AbstractActorTest {
     @Test
     public void testRaftRoleChangeNotifier() throws Exception {
         new JavaTestKit(getSystem()) {{
-            ActorRef notifierActor = factory.createActor(Props.create(MessageCollectorActor.class));
+            TestActorRef<MessageCollectorActor> notifierActor = factory.createTestActor(
+                    Props.create(MessageCollectorActor.class));
             MessageCollectorActor.waitUntilReady(notifierActor);
 
             DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
@@ -954,20 +957,10 @@ public class RaftActorTest extends AbstractActorTest {
 
             String persistenceId = factory.generateActorId("notifier-");
 
-            factory.createTestActor(MockRaftActor.props(persistenceId,
+            TestActorRef<MockRaftActor> raftActorRef = factory.createTestActor(MockRaftActor.props(persistenceId,
                     Collections.<String, String>emptyMap(), Optional.<ConfigParams>of(config), notifierActor), persistenceId);
 
-            List<RoleChanged> matches =  null;
-            for(int i = 0; i < 5000 / heartBeatInterval; i++) {
-                matches = MessageCollectorActor.getAllMatching(notifierActor, RoleChanged.class);
-                assertNotNull(matches);
-                if(matches.size() == 3) {
-                    break;
-                }
-                Uninterruptibles.sleepUninterruptibly(heartBeatInterval, TimeUnit.MILLISECONDS);
-            }
-
-            assertEquals(3, matches.size());
+            List<RoleChanged> matches =  MessageCollectorActor.expectMatching(notifierActor, RoleChanged.class, 3);
 
             // check if the notifier got a role change from null to Follower
             RoleChanged raftRoleChanged = matches.get(0);
@@ -986,6 +979,41 @@ public class RaftActorTest extends AbstractActorTest {
             assertEquals(persistenceId, raftRoleChanged.getMemberId());
             assertEquals(RaftState.Candidate.name(), raftRoleChanged.getOldRole());
             assertEquals(RaftState.Leader.name(), raftRoleChanged.getNewRole());
+
+            LeaderStateChanged leaderStateChange = MessageCollectorActor.expectFirstMatching(
+                    notifierActor, LeaderStateChanged.class);
+
+            assertEquals(raftRoleChanged.getMemberId(), leaderStateChange.getLeaderId());
+
+            notifierActor.underlyingActor().clear();
+
+            MockRaftActor raftActor = raftActorRef.underlyingActor();
+            final String newLeaderId = "new-leader";
+            Follower follower = new Follower(raftActor.getRaftActorContext()) {
+                @Override
+                public RaftActorBehavior handleMessage(ActorRef sender, Object message) {
+                    leaderId = newLeaderId;
+                    return this;
+                }
+            };
+
+            raftActor.changeCurrentBehavior(follower);
+
+            leaderStateChange = MessageCollectorActor.expectFirstMatching(notifierActor, LeaderStateChanged.class);
+            assertEquals(persistenceId, leaderStateChange.getMemberId());
+            assertEquals(null, leaderStateChange.getLeaderId());
+
+            raftRoleChanged = MessageCollectorActor.expectFirstMatching(notifierActor, RoleChanged.class);
+            assertEquals(RaftState.Leader.name(), raftRoleChanged.getOldRole());
+            assertEquals(RaftState.Follower.name(), raftRoleChanged.getNewRole());
+
+            notifierActor.underlyingActor().clear();
+
+            raftActor.handleCommand("any");
+
+            leaderStateChange = MessageCollectorActor.expectFirstMatching(notifierActor, LeaderStateChanged.class);
+            assertEquals(persistenceId, leaderStateChange.getMemberId());
+            assertEquals(newLeaderId, leaderStateChange.getLeaderId());
         }};
     }
 

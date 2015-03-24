@@ -1,21 +1,22 @@
 package org.opendaylight.controller.cluster.datastore;
 
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.utils.MessageCollectorActor;
+import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListener;
 import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListenerReply;
 import org.opendaylight.controller.cluster.notifications.RoleChangeNotification;
 import org.opendaylight.controller.cluster.notifications.RoleChangeNotifier;
 import org.opendaylight.controller.cluster.notifications.RoleChanged;
 import org.opendaylight.controller.cluster.raft.RaftState;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 
 public class RoleChangeNotifierTest extends AbstractActorTest  {
 
@@ -73,6 +74,32 @@ public class RoleChangeNotifierTest extends AbstractActorTest  {
 
         }};
 
+    }
+
+    @Test
+    public void testHandleLeaderStateChanged() throws Exception {
+        new JavaTestKit(getSystem()) {{
+            String actorId = "testHandleLeaderStateChanged";
+            TestActorRef<RoleChangeNotifier> notifierTestActorRef = TestActorRef.create(
+                getSystem(), RoleChangeNotifier.getProps(actorId), actorId);
+
+            notifierTestActorRef.tell(new LeaderStateChanged("member1", "leader1"), ActorRef.noSender());
+
+            // listener registers after the sate has been changed, ensure we sent the latest state change after a reply
+            notifierTestActorRef.tell(new RegisterRoleChangeListener(), getRef());
+
+            expectMsgClass(RegisterRoleChangeListenerReply.class);
+
+            LeaderStateChanged leaderStateChanged = expectMsgClass(LeaderStateChanged.class);
+            assertEquals("getMemberId", "member1", leaderStateChanged.getMemberId());
+            assertEquals("getLeaderId", "leader1", leaderStateChanged.getLeaderId());
+
+            notifierTestActorRef.tell(new LeaderStateChanged("member1", "leader2"), ActorRef.noSender());
+
+            leaderStateChanged = expectMsgClass(LeaderStateChanged.class);
+            assertEquals("getMemberId", "member1", leaderStateChanged.getMemberId());
+            assertEquals("getLeaderId", "leader2", leaderStateChanged.getLeaderId());
+        }};
     }
 }
 
