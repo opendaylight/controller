@@ -151,6 +151,24 @@
       "revId": "28ecbc68ca60911d890eca8100a3dfd093ccd63f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_6466aa53",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-24T11:48:41Z",
+      "side": 1,
+      "message": "Gotcha. I\u0027ve noticed that TestActors use a calling thread executor by default but you can override to use the normal async fork/join executor - I\u0027ve done that in other tests. Either way is fine - don\u0027t need persistence for this test.",
+      "parentUuid": "5a93c517_c9af97e2",
+      "revId": "28ecbc68ca60911d890eca8100a3dfd093ccd63f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
