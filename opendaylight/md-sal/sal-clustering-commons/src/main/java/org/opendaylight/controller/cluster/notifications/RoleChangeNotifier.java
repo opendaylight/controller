@@ -17,16 +17,17 @@ import java.util.Map;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
 
 /**
- * The RoleChangeNotifier is responsible for receiving Raft role change messages and notifying
+ * The RoleChangeNotifier is responsible for receiving Raft role and leader state change messages and notifying
  * the listeners (within the same node), which are registered with it.
  * <p/>
  * The RoleChangeNotifier is instantiated by the Shard and injected into the RaftActor.
  */
 public class RoleChangeNotifier extends AbstractUntypedActor implements AutoCloseable {
 
-    private String memberId;
-    private Map<ActorPath, ActorRef> registeredListeners = Maps.newHashMap();
+    private final String memberId;
+    private final Map<ActorPath, ActorRef> registeredListeners = Maps.newHashMap();
     private RoleChangeNotification latestRoleChangeNotification = null;
+    private LeaderStateChanged latestLeaderStateChanged;
 
     public RoleChangeNotifier(String memberId) {
         this.memberId = memberId;
@@ -62,6 +63,10 @@ public class RoleChangeNotifier extends AbstractUntypedActor implements AutoClos
 
             getSender().tell(new RegisterRoleChangeListenerReply(), getSelf());
 
+            if(latestLeaderStateChanged != null) {
+                getSender().tell(latestLeaderStateChanged, getSelf());
+            }
+
             if (latestRoleChangeNotification != null) {
                 getSender().tell(latestRoleChangeNotification, getSelf());
             }
@@ -80,6 +85,12 @@ public class RoleChangeNotifier extends AbstractUntypedActor implements AutoClos
 
             for (ActorRef listener: registeredListeners.values()) {
                 listener.tell(latestRoleChangeNotification, getSelf());
+            }
+        } else if (message instanceof LeaderStateChanged) {
+            latestLeaderStateChanged = (LeaderStateChanged)message;
+
+            for (ActorRef listener: registeredListeners.values()) {
+                listener.tell(latestLeaderStateChanged, getSelf());
             }
         }
     }

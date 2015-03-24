@@ -17,6 +17,7 @@ import akka.persistence.SaveSnapshotSuccess;
 import akka.persistence.SnapshotOffer;
 import akka.persistence.SnapshotSelectionCriteria;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableMap;
@@ -30,6 +31,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActor;
+import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.RoleChanged;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyLogEntries;
@@ -127,6 +129,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     private Stopwatch recoveryTimer;
 
     private int currentRecoveryBatchCount;
+
+    private final BehaviorStateHolder reusableBehaviorStateHolder = new BehaviorStateHolder();
 
     public RaftActor(String id, Map<String, String> peerAddresses) {
         this(id, peerAddresses, Optional.<ConfigParams>absent());
@@ -306,9 +310,9 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     protected void changeCurrentBehavior(RaftActorBehavior newBehavior){
-        RaftActorBehavior oldBehavior = currentBehavior;
+        reusableBehaviorStateHolder.init(currentBehavior);
         currentBehavior = newBehavior;
-        handleBehaviorChange(oldBehavior, currentBehavior);
+        handleBehaviorChange(reusableBehaviorStateHolder, currentBehavior);
     }
 
     @Override public void handleCommand(Object message) {
@@ -396,10 +400,11 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         } else if(message instanceof GetOnDemandRaftState) {
             onGetOnDemandRaftStats();
         } else {
-            RaftActorBehavior oldBehavior = currentBehavior;
+            reusableBehaviorStateHolder.init(currentBehavior);
+
             currentBehavior = currentBehavior.handleMessage(getSender(), message);
 
-            handleBehaviorChange(oldBehavior, currentBehavior);
+            handleBehaviorChange(reusableBehaviorStateHolder, currentBehavior);
         }
     }
 
@@ -446,22 +451,30 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     }
 
-    private void handleBehaviorChange(RaftActorBehavior oldBehavior, RaftActorBehavior currentBehavior) {
+    private void handleBehaviorChange(BehaviorStateHolder oldBehaviorState, RaftActorBehavior currentBehavior) {
+        RaftActorBehavior oldBehavior = oldBehaviorState.getBehavior();
+
         if (oldBehavior != currentBehavior){
             onStateChanged();
         }
 
-        String oldBehaviorLeaderId = oldBehavior == null? null : oldBehavior.getLeaderId();
-        String oldBehaviorState = oldBehavior == null? null : oldBehavior.state().name();
+        String oldBehaviorLeaderId = oldBehavior == null ? null : oldBehaviorState.getLeaderId();
+        String oldBehaviorStateName = oldBehavior == null ? null : oldBehavior.state().name();
 
         // it can happen that the state has not changed but the leader has changed.
-        onLeaderChanged(oldBehaviorLeaderId, currentBehavior.getLeaderId());
+        Optional<ActorRef> roleChangeNotifier = getRoleChangeNotifier();
+        if(!Objects.equal(oldBehaviorLeaderId, currentBehavior.getLeaderId())) {
+            if(roleChangeNotifier.isPresent()) {
+                roleChangeNotifier.get().tell(new LeaderStateChanged(getId(), currentBehavior.getLeaderId()), getSelf());
+            }
 
-        if (getRoleChangeNotifier().isPresent() &&
+            onLeaderChanged(oldBehaviorLeaderId, currentBehavior.getLeaderId());
+        }
+
+        if (roleChangeNotifier.isPresent() &&
                 (oldBehavior == null || (oldBehavior.state() != currentBehavior.state()))) {
-            getRoleChangeNotifier().get().tell(
-                    new RoleChanged(getId(), oldBehaviorState , currentBehavior.state().name()),
-                    getSelf());
+            roleChangeNotifier.get().tell(new RoleChanged(getId(), oldBehaviorStateName ,
+                    currentBehavior.state().name()), getSelf());
         }
     }
 
@@ -1051,4 +1064,21 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         return currentBehavior;
     }
 
+    private static class BehaviorStateHolder {
+        private RaftActorBehavior behavior;
+        private String leaderId;
+
+        void init(RaftActorBehavior behavior) {
+            this.behavior = behavior;
+            this.leaderId = behavior != null ? behavior.getLeaderId() : null;
+        }
+
+        RaftActorBehavior getBehavior() {
+            return behavior;
+        }
+
+        String getLeaderId() {
+            return leaderId;
+        }
+    }
 }
