@@ -1,0 +1,379 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_29739bea",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/api/EventSource.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-24T05:09:52Z",
+      "side": 1,
+      "message": "Can you add class and method javadocs?",
+      "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_a92c8bac",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/api/EventSourceRegistry.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-24T05:09:52Z",
+      "side": 1,
+      "message": "What does RpcService provide here?",
+      "range": {
+        "startLine": 20,
+        "startChar": 17,
+        "endLine": 20,
+        "endChar": 36
+      },
+      "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_e92293b8",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/api/EventSourceRegistry.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-24T05:09:52Z",
+      "side": 1,
+      "message": "Misspelling - should be unRegisterEventSource.",
+      "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_892f4fa1",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/api/EventSourceRegistry.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-24T05:09:52Z",
+      "side": 1,
+      "message": "These methods should return ListenableFuture to make it easier for callers to add async callbacks.\n\nDoes returning RpcResult add any value here? It seems more natural to propagate errors via exceptions - I\u0027ve found RpcResult to be a bit esoteric. I think ListenableFuture\u003cEventSourceRegistration\u003e and ListenableFuture\u003cVoid\u003e are simpler. If you want to propagate a specific exception type then use a CheckedFuture, e.g. CheckedFuture\u003c EventSourceRegistration, EventSourceRegistryException\u003e",
+      "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_c97797d3",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/api/EventSourceRegistry.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-24T05:09:52Z",
+      "side": 1,
+      "message": "Can you add class and method javadocs?",
+      "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_09457f6f",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/EventSourceTopology.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-24T05:09:52Z",
+      "side": 1,
+      "message": "Misspelling - should be \"routedRpcRegistrations\".",
+      "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_6950c332",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/EventSourceTopology.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 191,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-24T05:09:52Z",
+      "side": 1,
+      "message": "You could do 1 atomic lookup and remove, i.e.:\n\nRoutedRpcRegistration\u003cEventSourceService\u003e reg \u003d   \n                        routedRpcRegistartions.remove(nodeKey);\nif(reg !\u003d null) {\n    reg.close();\n}",
+      "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_e95b7352",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/eventsources/netconf/NetconfEventSource.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-24T05:09:52Z",
+      "side": 1,
+      "message": "Looks like listenerRegistrations needs to be synchronized. However, the registerNotificationListener interface indicates that \"registering an instance multiple times results in notifications being delivered to each registration\". So if this method is called twice for the same SchemaPath, we would have 2 registrations which I don\u0027t think is desired.\n\nSo similar to what I commented below for streamIsActive, you could use a LoadingCache\u003cSchemaPath, ListenerRegistration\u003cNetconfEventSource\u003e\u003e for listenerRegistrations. You would need to register for each SchemaPath separately instead of passing the entire list in one registerNotificationListener call.",
+      "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_c95eb745",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/eventsources/netconf/NetconfEventSource.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-24T05:09:52Z",
+      "side": 1,
+      "message": "The streamIsActive call should really be done atomically with startSubscription. \n\nHowever it seems that a guava LoadingCache could be used for activeStreams: \n\nLoadingCache\u003cString, Boolean\u003e activeStreams \u003dCacheBuilder.newBuilder().build(\n           new CacheLoader\u003cString, Boolean\u003e() {\n               public Boolean load(String streamName) {\n                   final ContainerNode input \u003d  Builders.containerBuilder().         \n                       withNodeIdentifier(new NodeIdentifier(\n                              CreateSubscriptionInput.QNAME)).withChild(\n                                ImmutableNodes.leafNode(STREAM_QNAME, streamName))\n                                  .build();\n                   netconfMount.getService(DOMRpcService.class).get().\n                                          invokeRpc(CREATE_SUBSCRIPTION, input);\n                   return Boolean.TRUE;\n               }\n           });\n\nThen just call activeStreams.get(streamName) to load it if not present.\n\nIn resubscribeToActiveStreams you would do:\n\n  Collection\u003cString\u003e streamNames \u003d new ArrayList\u003c\u003e( \n                                          activeStreams.asMap().keySet());\n  for(String streamName: streamNames) {\n      activeStreams.refresh(streamName);\n  }",
+      "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_29415b5a",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/eventsources/netconf/NetconfEventSourceManager.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-24T05:09:52Z",
+      "side": 1,
+      "message": "This probably should be declared volatile to ensure immediate thread visibility.",
+      "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_09133f67",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/eventsources/netconf/NetconfEventSourceManager.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-24T05:09:52Z",
+      "side": 1,
+      "message": "registerEventSource returns a Future so ideally should handle it async.",
+      "range": {
+        "startLine": 178,
+        "startChar": 47,
+        "endLine": 178,
+        "endChar": 66
+      },
+      "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_691e8372",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/registry/EventSourceRegistration.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-24T05:09:52Z",
+      "side": 1,
+      "message": "Shouldn\u0027t this class be in the messagebus/api package where EventSourceRegistry lives since it\u0027s referenced in the EventSourceRegistry API?",
+      "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_49194787",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/registry/EventSourceRegistration.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-24T05:09:52Z",
+      "side": 1,
+      "message": "Java docs?",
+      "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_c92557c3",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/registry/EventSourceRegistryImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-24T05:09:52Z",
+      "side": 1,
+      "message": "Misspelling - should be serviceRegistration.",
+      "range": {
+        "startLine": 45,
+        "startChar": 17,
+        "endLine": 45,
+        "endChar": 36
+      },
+      "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_e9093332",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/test/java/org/opendaylight/controller/messagebus/app/impl/NetconfEventSourceManagerTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-24T05:09:52Z",
+      "side": 1,
+      "message": "Optional is a simple class - don\u0027t really need to mock it.",
+      "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_c90c7745",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/test/java/org/opendaylight/controller/messagebus/app/impl/NetconfEventSourceManagerTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-24T05:09:52Z",
+      "side": 1,
+      "message": "Need some blank lines to make this more readable.",
+      "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_89066f1f",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/test/java/org/opendaylight/controller/messagebus/app/impl/NetconfEventSourceManagerTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-24T05:09:52Z",
+      "side": 1,
+      "message": "It looks like the main purpose of onDataChanged is to register EventSources so you should verify registerEventSource gets called appropriately.\n\nWould also be useful to call close and verify close is called on EventSourceRegistration.",
+      "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_a9032b0e",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/test/java/org/opendaylight/controller/messagebus/app/impl/NetconfEventSourceManagerTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-24T05:09:52Z",
+      "side": 1,
+      "message": "It seems like this test is basically the same as onDataChangedTest.",
+      "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_44004e01",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/test/java/org/opendaylight/controller/messagebus/app/impl/NetconfEventSource_01_Test.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-24T05:09:52Z",
+      "side": 1,
+      "message": "I\u0027m curious why the original test class was split into 2 test classes and what\u0027s the significance of 01 and 02.",
+      "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_64054a10",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/test/java/org/opendaylight/controller/messagebus/app/impl/NetconfEventSource_01_Test.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-24T05:09:52Z",
+      "side": 1,
+      "message": "This test doesn\u0027t really add any value as the \"new\" operation in setUp can\u0027t return null.",
+      "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_040a4621",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/test/java/org/opendaylight/controller/messagebus/app/impl/NetconfEventSource_01_Test.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-24T05:09:52Z",
+      "side": 1,
+      "message": "From where is this expecting an NPE thrown?\n\nNegative tests are fine but we also need a positive test for onNotification, i.e. verify DOMNotificationPublishService#putNotification is called with the correct data.",
+      "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
