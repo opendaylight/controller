@@ -35,10 +35,10 @@ public class NetconfConfigUtilTest {
         assertEquals(NetconfConfigUtil.getNetconfLocalAddress(), new LocalAddress("netconf"));
 
         doReturn("").when(bundleContext).getProperty("netconf.connectionTimeoutMillis");
-        assertEquals(NetconfConfigUtil.extractTimeoutMillis(bundleContext), 5000);
+        assertEquals(NetconfConfigUtil.extractTimeoutMillis(bundleContext), NetconfConfigUtil.DEFAULT_TIMEOUT_MILLIS);
 
         doReturn("a").when(bundleContext).getProperty("netconf.connectionTimeoutMillis");
-        assertEquals(NetconfConfigUtil.extractTimeoutMillis(bundleContext), 5000);
+        assertEquals(NetconfConfigUtil.extractTimeoutMillis(bundleContext), NetconfConfigUtil.DEFAULT_TIMEOUT_MILLIS);
     }
 
     @Test
