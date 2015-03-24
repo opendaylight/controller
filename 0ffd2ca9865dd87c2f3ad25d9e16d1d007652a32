@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_b854d654",
+        "filename": "opendaylight/netconf/mdsal-netconf-connector/src/main/java/org/opendaylight/controller/netconf/mdsal/connector/MdsalNetconfOperationServiceFactory.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-03-24T15:56:45Z",
+      "side": 1,
+      "message": "This is ideal place to perform Preconditions.checkState(dataBroker !\u003d null, \"MD-SAL provider not yet initialized\") .",
+      "revId": "0ffd2ca9865dd87c2f3ad25d9e16d1d007652a32",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_984b1ab0",
+        "filename": "opendaylight/netconf/mdsal-netconf-connector/src/main/java/org/opendaylight/controller/netconf/mdsal/connector/MdsalNetconfOperationServiceFactory.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-03-24T15:56:45Z",
+      "side": 1,
+      "message": "Probably Collections.emptySet would be better than returing null. Every time a collection should be somewhere and there are no actual values, using an empty collection is far better than using null.",
+      "revId": "0ffd2ca9865dd87c2f3ad25d9e16d1d007652a32",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_18ee2a89",
+        "filename": "opendaylight/netconf/mdsal-netconf-connector/src/test/java/org/opendaylight/controller/netconf/mdsal/connector/ops/RuntimeRpcTest.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 242,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-03-24T15:56:45Z",
+      "side": 1,
+      "message": "In this test using a mocked SchemaService might be a bit more efficient (fewer lines of code required). The registerSchemaContextListener would be stubbed using doAnswer and would return a mock of ListenerRegistration. Please replace with a mock.",
+      "revId": "0ffd2ca9865dd87c2f3ad25d9e16d1d007652a32",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
