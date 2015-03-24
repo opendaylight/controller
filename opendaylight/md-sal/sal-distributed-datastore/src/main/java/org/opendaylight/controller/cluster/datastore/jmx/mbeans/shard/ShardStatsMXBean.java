@@ -1,7 +1,7 @@
 package org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard;
 
 import java.util.List;
-
+import org.opendaylight.controller.cluster.raft.client.messages.FollowerInfo;
 import org.opendaylight.controller.md.sal.common.util.jmx.ThreadExecutorStats;
 import org.opendaylight.yangtools.util.concurrent.ListenerNotificationQueueStats;
 
@@ -11,6 +11,10 @@ import org.opendaylight.yangtools.util.concurrent.ListenerNotificationQueueStats
 public interface ShardStatsMXBean {
 
    String getShardName();
+
+   String getStatRetrievalTime();
+
+   String getStatRetrievalError();
 
    long getCommittedTransactionsCount();
 
@@ -30,6 +34,16 @@ public interface ShardStatsMXBean {
 
    long getLastApplied();
 
+   long getLastIndex();
+
+   long getLastTerm();
+
+   long getSnapshotIndex();
+
+   long getSnapshotTerm();
+
+   long getReplicatedToAllIndex();
+
    String getLastCommittedTransactionTime();
 
    long getFailedTransactionsCount();
@@ -41,6 +55,10 @@ public interface ShardStatsMXBean {
    String getLeader();
 
    String getRaftState();
+
+   String getVotedFor();
+
+   boolean isSnapshotCaptureInitiated();
 
    ThreadExecutorStats getDataStoreExecutorStats();
 
@@ -54,5 +72,11 @@ public interface ShardStatsMXBean {
 
    long getInMemoryJournalDataSize();
 
+   long getInMemoryJournalLogSize();
+
    boolean getFollowerInitialSyncStatus();
+
+   List<FollowerInfo> getFollowerInfo();
+
+   String getPeerAddresses();
 }

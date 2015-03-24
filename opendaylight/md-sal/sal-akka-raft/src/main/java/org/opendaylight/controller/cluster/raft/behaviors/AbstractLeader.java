@@ -134,7 +134,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
      *
      * @return Collection of follower IDs
      */
-    protected final Collection<String> getFollowerIds() {
+    public final Collection<String> getFollowerIds() {
         return followerToLog.keySet();
     }
 
