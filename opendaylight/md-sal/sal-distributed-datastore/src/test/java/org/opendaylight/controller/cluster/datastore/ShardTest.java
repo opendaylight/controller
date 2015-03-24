@@ -53,6 +53,7 @@ import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionRe
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListener;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListenerReply;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
+import org.opendaylight.controller.cluster.datastore.modification.DeleteModification;
 import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
 import org.opendaylight.controller.cluster.datastore.modification.ModificationPayload;
@@ -82,6 +83,7 @@ import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreFactory;
+import org.opendaylight.controller.protobuff.messages.cohort3pc.ThreePhaseCommitCohortMessages;
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.CreateTransactionReply;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
@@ -650,6 +652,117 @@ public class ShardTest extends AbstractShardTest {
 
             shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
         }};
+    }
+
+    @Test
+    public void testCommitWhenTransactionHasNoModifications(){
+        // Note that persistence is enabled which would normally result in the entry getting written to the journal
+        // but here that need not happen
+        new ShardTestKit(getSystem()) {
+            {
+                final TestActorRef<Shard> shard = TestActorRef.create(getSystem(),
+                        newShardProps().withDispatcher(Dispatchers.DefaultDispatcherId()),
+                        "testCommitWhenTransactionHasNoModifications");
+
+                waitUntilLeader(shard);
+
+                String transactionID = "tx1";
+                MutableCompositeModification modification = new MutableCompositeModification();
+                DOMStoreThreePhaseCommitCohort cohort = mock(DOMStoreThreePhaseCommitCohort.class, "cohort1");
+                doReturn(Futures.immediateFuture(Boolean.TRUE)).when(cohort).canCommit();
+                doReturn(Futures.immediateFuture(Boolean.TRUE)).when(cohort).preCommit();
+                doReturn(Futures.immediateFuture(Boolean.TRUE)).when(cohort).commit();
+
+                FiniteDuration duration = duration("5 seconds");
+
+                // Simulate the ForwardedReadyTransaction messages that would be sent
+                // by the ShardTransaction.
+
+                shard.tell(new ForwardedReadyTransaction(transactionID, CURRENT_VERSION,
+                        cohort, modification, true), getRef());
+                expectMsgClass(duration, ReadyTransactionReply.SERIALIZABLE_CLASS);
+
+                // Send the CanCommitTransaction message.
+
+                shard.tell(new CanCommitTransaction(transactionID).toSerializable(), getRef());
+                CanCommitTransactionReply canCommitReply = CanCommitTransactionReply.fromSerializable(
+                        expectMsgClass(duration, CanCommitTransactionReply.SERIALIZABLE_CLASS));
+                assertEquals("Can commit", true, canCommitReply.getCanCommit());
+
+                shard.tell(new CommitTransaction(transactionID).toSerializable(), getRef());
+                expectMsgClass(duration, ThreePhaseCommitCohortMessages.CommitTransactionReply.class);
+
+                InOrder inOrder = inOrder(cohort);
+                inOrder.verify(cohort).canCommit();
+                inOrder.verify(cohort).preCommit();
+                inOrder.verify(cohort).commit();
+
+                // Use MBean for verification
+                // Committed transaction count should increase as usual
+                assertEquals(1,shard.underlyingActor().getShardMBean().getCommittedTransactionsCount());
+
+                // Commit index should not advance because this does not go into the journal
+                assertEquals(-1, shard.underlyingActor().getShardMBean().getCommitIndex());
+
+                shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
+
+            }
+        };
+    }
+
+    @Test
+    public void testCommitWhenTransactionHasModifications(){
+        new ShardTestKit(getSystem()) {
+            {
+                final TestActorRef<Shard> shard = TestActorRef.create(getSystem(),
+                        newShardProps().withDispatcher(Dispatchers.DefaultDispatcherId()),
+                        "testCommitWhenTransactionHasModifications");
+
+                waitUntilLeader(shard);
+
+                String transactionID = "tx1";
+                MutableCompositeModification modification = new MutableCompositeModification();
+                modification.addModification(new DeleteModification(YangInstanceIdentifier.builder().build()));
+                DOMStoreThreePhaseCommitCohort cohort = mock(DOMStoreThreePhaseCommitCohort.class, "cohort1");
+                doReturn(Futures.immediateFuture(Boolean.TRUE)).when(cohort).canCommit();
+                doReturn(Futures.immediateFuture(Boolean.TRUE)).when(cohort).preCommit();
+                doReturn(Futures.immediateFuture(Boolean.TRUE)).when(cohort).commit();
+
+                FiniteDuration duration = duration("5 seconds");
+
+                // Simulate the ForwardedReadyTransaction messages that would be sent
+                // by the ShardTransaction.
+
+                shard.tell(new ForwardedReadyTransaction(transactionID, CURRENT_VERSION,
+                        cohort, modification, true), getRef());
+                expectMsgClass(duration, ReadyTransactionReply.SERIALIZABLE_CLASS);
+
+                // Send the CanCommitTransaction message.
+
+                shard.tell(new CanCommitTransaction(transactionID).toSerializable(), getRef());
+                CanCommitTransactionReply canCommitReply = CanCommitTransactionReply.fromSerializable(
+                        expectMsgClass(duration, CanCommitTransactionReply.SERIALIZABLE_CLASS));
+                assertEquals("Can commit", true, canCommitReply.getCanCommit());
+
+                shard.tell(new CommitTransaction(transactionID).toSerializable(), getRef());
+                expectMsgClass(duration, ThreePhaseCommitCohortMessages.CommitTransactionReply.class);
+
+                InOrder inOrder = inOrder(cohort);
+                inOrder.verify(cohort).canCommit();
+                inOrder.verify(cohort).preCommit();
+                inOrder.verify(cohort).commit();
+
+                // Use MBean for verification
+                // Committed transaction count should increase as usual
+                assertEquals(1,shard.underlyingActor().getShardMBean().getCommittedTransactionsCount());
+
+                // Commit index should advance as we do not have an empty modification
+                assertEquals(0, shard.underlyingActor().getShardMBean().getCommitIndex());
+
+                shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
+
+            }
+        };
     }
 
     @Test

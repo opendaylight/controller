@@ -374,9 +374,10 @@ public class Shard extends RaftActor {
             // currently uses a same thread executor anyway.
             cohortEntry.getCohort().preCommit().get();
 
-            // If we do not have any followers and we are not using persistence we can
-            // apply modification to the state immediately
-            if(!hasFollowers() && !persistence().isRecoveryApplicable()){
+            // If we do not have any followers and we are not using persistence
+            // or if cohortEntry has no modifications
+            // we can apply modification to the state immediately
+            if((!hasFollowers() && !persistence().isRecoveryApplicable()) || (!cohortEntry.hasModifications())){
                 applyModificationToState(getSender(), transactionID, cohortEntry.getModification());
             } else {
                 Shard.this.persistData(getSender(), transactionID,
