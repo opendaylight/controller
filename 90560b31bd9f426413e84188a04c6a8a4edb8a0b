@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_aea32c9d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-25T01:53:18Z",
+      "side": 1,
+      "message": "We were accessing toString() everywhere and treating it as a String so I simplified it to a String.",
+      "parentUuid": "5a93c517_2e387c9f",
+      "revId": "90560b31bd9f426413e84188a04c6a8a4edb8a0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_4e3dc88e",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardCommitCoordinator.java",
         "patchSetId": 6
@@ -30,6 +48,24 @@
       "writtenOn": "2015-03-25T00:49:38Z",
       "side": 1,
       "message": "instead \"of\" via",
+      "revId": "90560b31bd9f426413e84188a04c6a8a4edb8a0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_cea0f892",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardCommitCoordinator.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-25T01:53:18Z",
+      "side": 1,
+      "message": "Fixed",
+      "parentUuid": "5a93c517_4e3dc88e",
       "revId": "90560b31bd9f426413e84188a04c6a8a4edb8a0b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_6ead2488",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardCommitCoordinator.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-25T01:53:18Z",
+      "side": 1,
+      "message": "Yes good catch.",
+      "parentUuid": "5a93c517_6e6c449d",
+      "revId": "90560b31bd9f426413e84188a04c6a8a4edb8a0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_0eb100f8",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardCommitCoordinator.java",
         "patchSetId": 6
@@ -64,6 +118,24 @@
       "writtenOn": "2015-03-25T00:49:38Z",
       "side": 1,
       "message": "typo in method name",
+      "revId": "90560b31bd9f426413e84188a04c6a8a4edb8a0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_4ebce8bb",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardCommitCoordinator.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 294,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-25T01:53:18Z",
+      "side": 1,
+      "message": "Fixed",
+      "parentUuid": "5a93c517_0eb100f8",
       "revId": "90560b31bd9f426413e84188a04c6a8a4edb8a0b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_0eb6e0d9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardCommitCoordinator.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-25T01:53:18Z",
+      "side": 1,
+      "message": "You\u0027re right - I think this was a remnant of a previous iteration of the code.",
+      "parentUuid": "5a93c517_4e64e8b8",
+      "revId": "90560b31bd9f426413e84188a04c6a8a4edb8a0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_ce6f9891",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardCommitCoordinator.java",
         "patchSetId": 6
@@ -98,6 +188,24 @@
       "writtenOn": "2015-03-25T00:49:38Z",
       "side": 1,
       "message": "remove this - see above",
+      "revId": "90560b31bd9f426413e84188a04c6a8a4edb8a0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_aeca4c4d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardCommitCoordinator.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 333,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-25T01:53:18Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "5a93c517_ce6f9891",
       "revId": "90560b31bd9f426413e84188a04c6a8a4edb8a0b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_cec79844",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardCommitCoordinator.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 352,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-25T01:53:18Z",
+      "side": 1,
+      "message": "I assume you mean throw if cohort \u003d\u003d null. ready() doesn\u0027t return null so I assume you mean check the cohort returned from the decorator. Done.",
+      "parentUuid": "5a93c517_ae724c7a",
+      "revId": "90560b31bd9f426413e84188a04c6a8a4edb8a0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_8e69908d",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionContextImpl.java",
         "patchSetId": 6
@@ -132,6 +258,24 @@
       "writtenOn": "2015-03-25T00:49:38Z",
       "side": 1,
       "message": "+1",
+      "revId": "90560b31bd9f426413e84188a04c6a8a4edb8a0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_6ec44440",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionContextImpl.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-25T01:53:18Z",
+      "side": 1,
+      "message": "yeah - wanted to get all the backwards compat stuff out of here.",
+      "parentUuid": "5a93c517_8e69908d",
       "revId": "90560b31bd9f426413e84188a04c6a8a4edb8a0b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_8ed8b01e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-25T01:53:18Z",
+      "side": 1,
+      "message": "It would but values() returns a clone of the statically defined array to prevent someone from modifying it so I wanted to avoid the copy and GC overhead. I figured a few comparison checks were less cycles then cloning.",
+      "parentUuid": "5a93c517_2ebb9ce6",
+      "revId": "90560b31bd9f426413e84188a04c6a8a4edb8a0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_4ec06850",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/BatchedModifications.java",
         "patchSetId": 6
@@ -166,6 +328,24 @@
       "writtenOn": "2015-03-25T00:49:38Z",
       "side": 1,
       "message": "why do we have a setter for ready? shouldn\u0027t this get passed in via a constructor?",
+      "revId": "90560b31bd9f426413e84188a04c6a8a4edb8a0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_0e04a079",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/BatchedModifications.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-25T01:53:18Z",
+      "side": 1,
+      "message": "Because TransactionContextImpl doesn\u0027t know at the time of construction if it should be ready. It sets ready on the current batch when the tx is readied.",
+      "parentUuid": "5a93c517_4ec06850",
       "revId": "90560b31bd9f426413e84188a04c6a8a4edb8a0b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
