@@ -1,0 +1,174 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_2e387c9f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-25T00:49:38Z",
+      "side": 1,
+      "message": "Why this switch to String?",
+      "revId": "90560b31bd9f426413e84188a04c6a8a4edb8a0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_4e3dc88e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardCommitCoordinator.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-25T00:49:38Z",
+      "side": 1,
+      "message": "instead \"of\" via",
+      "revId": "90560b31bd9f426413e84188a04c6a8a4edb8a0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_6e6c449d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardCommitCoordinator.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-25T00:49:38Z",
+      "side": 1,
+      "message": "shardActor or the path of the shardActor should be passed to the constructor of ShardCommitCoordinator - will save on the repeated serialization here.",
+      "revId": "90560b31bd9f426413e84188a04c6a8a4edb8a0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_0eb100f8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardCommitCoordinator.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 294,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-25T00:49:38Z",
+      "side": 1,
+      "message": "typo in method name",
+      "revId": "90560b31bd9f426413e84188a04c6a8a4edb8a0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_4e64e8b8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardCommitCoordinator.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-25T00:49:38Z",
+      "side": 1,
+      "message": "Why was transactionID made non-final? It looks like the only place from which we are setting transaction id is also where we are creating CohortEntry. I think this should be made final again.",
+      "revId": "90560b31bd9f426413e84188a04c6a8a4edb8a0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_ce6f9891",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardCommitCoordinator.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 333,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-25T00:49:38Z",
+      "side": 1,
+      "message": "remove this - see above",
+      "revId": "90560b31bd9f426413e84188a04c6a8a4edb8a0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_ae724c7a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardCommitCoordinator.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 352,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-25T00:49:38Z",
+      "side": 1,
+      "message": "Add Precondition. Throw if cohort !\u003d null.",
+      "revId": "90560b31bd9f426413e84188a04c6a8a4edb8a0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_8e69908d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionContextImpl.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-25T00:49:38Z",
+      "side": 1,
+      "message": "+1",
+      "revId": "90560b31bd9f426413e84188a04c6a8a4edb8a0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_2ebb9ce6",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-25T00:49:38Z",
+      "side": 1,
+      "message": "Why did you add this method? Wouldn\u0027t TransactionType.values()[type] do the same thing?",
+      "revId": "90560b31bd9f426413e84188a04c6a8a4edb8a0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_4ec06850",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/BatchedModifications.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-25T00:49:38Z",
+      "side": 1,
+      "message": "why do we have a setter for ready? shouldn\u0027t this get passed in via a constructor?",
+      "revId": "90560b31bd9f426413e84188a04c6a8a4edb8a0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
