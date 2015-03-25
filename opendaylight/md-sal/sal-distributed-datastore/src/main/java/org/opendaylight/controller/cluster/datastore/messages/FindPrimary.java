@@ -18,22 +18,22 @@ public class FindPrimary implements SerializableMessage{
     public static final Class<FindPrimary> SERIALIZABLE_CLASS = FindPrimary.class;
 
     private final String shardName;
-    private final boolean waitUntilInitialized;
+    private final boolean waitUntilReady;
 
-    public FindPrimary(String shardName, boolean waitUntilInitialized){
+    public FindPrimary(String shardName, boolean waitUntilReady){
 
         Preconditions.checkNotNull(shardName, "shardName should not be null");
 
         this.shardName = shardName;
-        this.waitUntilInitialized = waitUntilInitialized;
+        this.waitUntilReady = waitUntilReady;
     }
 
     public String getShardName() {
         return shardName;
     }
 
-    public boolean isWaitUntilInitialized() {
-        return waitUntilInitialized;
+    public boolean isWaitUntilReady() {
+        return waitUntilReady;
     }
 
     @Override
@@ -43,5 +43,13 @@ public class FindPrimary implements SerializableMessage{
 
     public static FindPrimary fromSerializable(Object message){
         return (FindPrimary) message;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("FindPrimary [shardName=").append(shardName).append(", waitUntilReady=").append(waitUntilReady)
+                .append("]");
+        return builder.toString();
     }
 }

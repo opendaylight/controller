@@ -10,13 +10,14 @@ package org.opendaylight.controller.cluster.datastore.utils;
 
 import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
-
 import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import org.junit.Assert;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
@@ -31,7 +32,7 @@ import scala.concurrent.duration.FiniteDuration;
  * </p>
  */
 public class MessageCollectorActor extends UntypedActor {
-    private List<Object> messages = new ArrayList<>();
+    private final List<Object> messages = new ArrayList<>();
 
     @Override public void onReceive(Object message) throws Exception {
         if(message instanceof String){
@@ -41,6 +42,10 @@ public class MessageCollectorActor extends UntypedActor {
         } else {
             messages.add(message);
         }
+    }
+
+    public void clear() {
+        messages.clear();
     }
 
     public static List<Object> getAllMessages(ActorRef actor) throws Exception {
@@ -87,4 +92,20 @@ public class MessageCollectorActor extends UntypedActor {
         return output;
     }
 
+    public static <T> T expectFirstMatching(ActorRef actor, Class<T> clazz) {
+        int count = 5000 / 50;
+        for(int i = 0; i < count; i++) {
+            try {
+                T message = (T) getFirstMatching(actor, clazz);
+                if(message != null) {
+                    return message;
+                }
+            } catch (Exception e) {}
+
+            Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
+        }
+
+        Assert.fail("Did not receive message of type " + clazz);
+        return null;
+    }
 }

@@ -60,7 +60,7 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
     }
 
     private ActorRef createShard(){
-        return getSystem().actorOf(Shard.props(SHARD_IDENTIFIER, Collections.<ShardIdentifier, String>emptyMap(), datastoreContext,
+        return getSystem().actorOf(Shard.props(SHARD_IDENTIFIER, Collections.<String, String>emptyMap(), datastoreContext,
                 TestModel.createTestContext()));
     }
 
