@@ -47,7 +47,7 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCoh
  *
  * @author Thomas Pantelis
  */
-public class DOMConcurrentDataCommitCoordinatorTest {
+public class ConcurrentDOMDataBrokerTest {
 
     private final DOMDataWriteTransaction transaction = mock(DOMDataWriteTransaction.class);
     private final DOMStoreThreePhaseCommitCohort mockCohort1 = mock(DOMStoreThreePhaseCommitCohort.class);
