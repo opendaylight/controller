@@ -187,7 +187,7 @@
     <yang-ext.version>2013.09.07.7-SNAPSHOT</yang-ext.version>
     <yang-jmx-generator.version>1.1.0-SNAPSHOT</yang-jmx-generator.version>
     <yangtools.version>0.7.0-SNAPSHOT</yangtools.version>
-    <sshd-core.version>0.12.0</sshd-core.version>
+    <sshd-core.version>0.14.0</sshd-core.version>
     <jmh.version>0.9.7</jmh.version>
     <lmax.version>3.3.0</lmax.version>
   </properties>
