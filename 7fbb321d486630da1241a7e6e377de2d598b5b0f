@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_ae3fac24",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1010,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-25T02:03:55Z",
+      "side": 1,
+      "message": "yup - that\u0027s what it does. I\u0027ll change to BehaviorStateHolder.",
+      "parentUuid": "5a93c517_ee99346f",
+      "revId": "7fbb321d486630da1241a7e6e377de2d598b5b0f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_8eaaf06e",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/PeerAddressResolved.java",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2015-03-25T01:14:38Z",
       "side": 1,
       "message": "Don\u0027t understand why this was changed.",
+      "revId": "7fbb321d486630da1241a7e6e377de2d598b5b0f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_2e139cb9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/PeerAddressResolved.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-25T02:03:55Z",
+      "side": 1,
+      "message": "I had commented on this back in patch set #1 but unfortunately previous comments don\u0027t carry forward - \"I split this patch out from the next patch and accidentally included this change\". Technically I should\u0027ve moved it but went the lazy route and just commented the patch set :)  I can fix this if you want.",
+      "parentUuid": "5a93c517_8eaaf06e",
       "revId": "7fbb321d486630da1241a7e6e377de2d598b5b0f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
