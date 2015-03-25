@@ -247,6 +247,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_ce86b8b9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardCommitCoordinator.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 352,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-25T02:42:25Z",
+      "side": 1,
+      "message": "No I mean if cohort is not null when ready is called it would be a state violation and you should throw an exception",
+      "parentUuid": "5a93c517_cec79844",
+      "revId": "90560b31bd9f426413e84188a04c6a8a4edb8a0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_8e69908d",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionContextImpl.java",
         "patchSetId": 6
@@ -317,6 +335,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_2ebddc68",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-25T02:42:25Z",
+      "side": 1,
+      "message": "ok. I can live with this.",
+      "parentUuid": "5a93c517_8ed8b01e",
+      "revId": "90560b31bd9f426413e84188a04c6a8a4edb8a0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_4ec06850",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/BatchedModifications.java",
         "patchSetId": 6
@@ -346,6 +382,24 @@
       "side": 1,
       "message": "Because TransactionContextImpl doesn\u0027t know at the time of construction if it should be ready. It sets ready on the current batch when the tx is readied.",
       "parentUuid": "5a93c517_4ec06850",
+      "revId": "90560b31bd9f426413e84188a04c6a8a4edb8a0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_2e64fc20",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/BatchedModifications.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-25T02:42:25Z",
+      "side": 1,
+      "message": "makes sense",
+      "parentUuid": "5a93c517_0e04a079",
       "revId": "90560b31bd9f426413e84188a04c6a8a4edb8a0b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
