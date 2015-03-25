@@ -2,8 +2,13 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.testkit.TestActorRef;
@@ -577,12 +582,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
 
         follower = createBehavior(context);
 
-        HashMap<String, String> followerSnapshot = new HashMap<>();
-        followerSnapshot.put("1", "A");
-        followerSnapshot.put("2", "B");
-        followerSnapshot.put("3", "C");
-
-        ByteString bsSnapshot  = toByteString(followerSnapshot);
+        ByteString bsSnapshot  = createSnapshot();
         int offset = 0;
         int snapshotLength = bsSnapshot.size();
         int chunkSize = 50;
@@ -627,6 +627,57 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
         assertNull("Expected null SnapshotTracker", ((Follower) follower).getSnapshotTracker());
     }
 
+
+    /**
+     * Verify that when an AppendEntries is sent to a follower during a snapshot install
+     * the Follower short-circuits the processing of the AppendEntries message.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testReceivingAppendEntriesDuringInstallSnapshot() throws Exception {
+        logStart("testReceivingAppendEntriesDuringInstallSnapshot");
+
+        MockRaftActorContext context = createActorContext();
+
+        follower = createBehavior(context);
+
+        ByteString bsSnapshot  = createSnapshot();
+        int snapshotLength = bsSnapshot.size();
+        int chunkSize = 50;
+        int totalChunks = (snapshotLength / chunkSize) + ((snapshotLength % chunkSize) > 0 ? 1 : 0);
+        int lastIncludedIndex = 1;
+
+        // Check that snapshot installation is not in progress
+        assertNull(((Follower) follower).getSnapshotTracker());
+
+        // Make sure that we have more than 1 chunk to send
+        assertTrue(totalChunks > 1);
+
+        // Send an install snapshot with the first chunk to start the process of installing a snapshot
+        ByteString chunkData = getNextChunk(bsSnapshot, 0, chunkSize);
+        follower.handleMessage(leaderActor, new InstallSnapshot(1, "leader", lastIncludedIndex, 1,
+                chunkData, 1, totalChunks));
+
+        // Check if snapshot installation is in progress now
+        assertNotNull(((Follower) follower).getSnapshotTracker());
+
+        // Send an append entry
+        AppendEntries appendEntries = mock(AppendEntries.class);
+        doReturn(context.getTermInformation().getCurrentTerm()).when(appendEntries).getTerm();
+
+        follower.handleMessage(leaderActor, appendEntries);
+
+        AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(leaderActor, AppendEntriesReply.class);
+        assertEquals(context.getReplicatedLog().lastIndex(), reply.getLogLastIndex());
+        assertEquals(context.getReplicatedLog().lastTerm(), reply.getLogLastTerm());
+        assertEquals(context.getTermInformation().getCurrentTerm(), reply.getTerm());
+
+        // We should not hit the code that needs to look at prevLogIndex because we are short circuiting
+        verify(appendEntries, never()).getPrevLogIndex();
+
+    }
+
     @Test
     public void testInitialSyncUpWithHandleInstallSnapshotFollowedByAppendEntries() throws Exception {
         logStart("testInitialSyncUpWithHandleInstallSnapshot");
@@ -635,12 +686,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
 
         follower = createBehavior(context);
 
-        HashMap<String, String> followerSnapshot = new HashMap<>();
-        followerSnapshot.put("1", "A");
-        followerSnapshot.put("2", "B");
-        followerSnapshot.put("3", "C");
-
-        ByteString bsSnapshot  = toByteString(followerSnapshot);
+        ByteString bsSnapshot  = createSnapshot();
         int offset = 0;
         int snapshotLength = bsSnapshot.size();
         int chunkSize = 50;
@@ -692,12 +738,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
 
         follower = createBehavior(context);
 
-        HashMap<String, String> followerSnapshot = new HashMap<>();
-        followerSnapshot.put("1", "A");
-        followerSnapshot.put("2", "B");
-        followerSnapshot.put("3", "C");
-
-        ByteString bsSnapshot = toByteString(followerSnapshot);
+        ByteString bsSnapshot = createSnapshot();
 
         InstallSnapshot installSnapshot = new InstallSnapshot(1, "leader", 3, 1,
                 getNextChunk(bsSnapshot, 10, 50), 3, 3);
@@ -744,6 +785,15 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
     private ReplicatedLogEntry newReplicatedLogEntry(long term, long index, String data) {
         return new MockRaftActorContext.MockReplicatedLogEntry(term, index,
                 new MockRaftActorContext.MockPayload(data));
+    }
+
+    private ByteString createSnapshot(){
+        HashMap<String, String> followerSnapshot = new HashMap<>();
+        followerSnapshot.put("1", "A");
+        followerSnapshot.put("2", "B");
+        followerSnapshot.put("3", "C");
+
+        return toByteString(followerSnapshot);
     }
 
     @Override
