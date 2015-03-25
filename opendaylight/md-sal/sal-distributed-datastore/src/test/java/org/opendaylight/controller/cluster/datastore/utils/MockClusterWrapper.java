@@ -14,14 +14,22 @@ import akka.actor.AddressFromURIString;
 import akka.cluster.ClusterEvent;
 import akka.cluster.MemberStatus;
 import akka.cluster.UniqueAddress;
-import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
-import scala.collection.JavaConversions;
 import java.util.HashSet;
 import java.util.Set;
+import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
+import scala.collection.JavaConversions;
 
 public class MockClusterWrapper implements ClusterWrapper{
 
     private Address selfAddress = new Address("akka.tcp", "test", "127.0.0.1", 2550);
+    private String currentMemberName = "member-1";
+
+    public MockClusterWrapper() {
+    }
+
+    public MockClusterWrapper(String currentMemberName) {
+        this.currentMemberName = currentMemberName;
+    }
 
     @Override
     public void subscribeToMemberEvents(ActorRef actorRef) {
@@ -29,7 +37,7 @@ public class MockClusterWrapper implements ClusterWrapper{
 
     @Override
     public String getCurrentMemberName() {
-        return "member-1";
+        return currentMemberName;
     }
 
     @Override

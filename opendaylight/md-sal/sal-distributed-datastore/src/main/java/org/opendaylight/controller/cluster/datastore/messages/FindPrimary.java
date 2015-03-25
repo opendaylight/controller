@@ -9,13 +9,14 @@
 package org.opendaylight.controller.cluster.datastore.messages;
 
 import com.google.common.base.Preconditions;
+import java.io.Serializable;
 
 /**
  * The FindPrimary message is used to locate the primary of any given shard
  *
  */
-public class FindPrimary implements SerializableMessage{
-    public static final Class<FindPrimary> SERIALIZABLE_CLASS = FindPrimary.class;
+public class FindPrimary implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     private final String shardName;
     private final boolean waitUntilReady;
@@ -34,15 +35,6 @@ public class FindPrimary implements SerializableMessage{
 
     public boolean isWaitUntilReady() {
         return waitUntilReady;
-    }
-
-    @Override
-    public Object toSerializable() {
-        return this;
-    }
-
-    public static FindPrimary fromSerializable(Object message){
-        return (FindPrimary) message;
     }
 
     @Override
