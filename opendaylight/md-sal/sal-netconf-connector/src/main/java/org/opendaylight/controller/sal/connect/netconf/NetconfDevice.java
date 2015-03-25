@@ -414,7 +414,9 @@ public final class NetconfDevice implements RemoteDevice<NetconfSessionPreferenc
 
             // If no more sources, fail
             if(requiredSources.isEmpty()) {
-                handleSalInitializationFailure(new IllegalStateException(id + ": No more sources for schema context"), listener);
+                final IllegalStateException cause = new IllegalStateException(id + ": No more sources for schema context");
+                handleSalInitializationFailure(cause, listener);
+                salFacade.onDeviceFailed(cause);
                 return;
             }
 
