@@ -69,6 +69,24 @@
       "revId": "7fbb321d486630da1241a7e6e377de2d598b5b0f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_ae26cc14",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/PeerAddressResolved.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-25T02:05:53Z",
+      "side": 1,
+      "message": "Since I\u0027m making changes to this patch anyway I\u0027ll fix up the misplaced changes.",
+      "parentUuid": "5a93c517_2e139cb9",
+      "revId": "7fbb321d486630da1241a7e6e377de2d598b5b0f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
