@@ -393,6 +393,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
 
         if(txFutureCallbackMap.size() == 0) {
             onTransactionReady(Collections.<Future<ActorSelection>>emptyList());
+            TransactionRateLimitingCallback.adjustNewRateLimitForUnusedTransaction(actorContext);
             return NoOpDOMStoreThreePhaseCommitCohort.INSTANCE;
         }
 

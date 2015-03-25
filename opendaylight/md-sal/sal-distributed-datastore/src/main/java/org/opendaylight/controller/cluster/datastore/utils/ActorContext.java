@@ -20,7 +20,6 @@ import akka.dispatch.Mapper;
 import akka.dispatch.OnComplete;
 import akka.pattern.AskTimeoutException;
 import akka.util.Timeout;
-import com.codahale.metrics.JmxReporter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.annotations.VisibleForTesting;
@@ -67,7 +66,6 @@ public class ActorContext {
     private static final String UNKNOWN_DATA_STORE_TYPE = "unknown";
     private static final String DISTRIBUTED_DATA_STORE_METRIC_REGISTRY = "distributed-data-store";
     private static final String METRIC_RATE = "rate";
-    private static final String DOMAIN = "org.opendaylight.controller.cluster.datastore";
     private static final Mapper<Throwable, Throwable> FIND_PRIMARY_FAILURE_TRANSFORMER =
                                                               new Mapper<Throwable, Throwable>() {
         @Override
@@ -94,8 +92,6 @@ public class ActorContext {
     private Timeout operationTimeout;
     private final String selfAddressHostPort;
     private RateLimiter txRateLimiter;
-    private final MetricRegistry metricRegistry = new MetricRegistry();
-    private final JmxReporter jmxReporter = JmxReporter.forRegistry(metricRegistry).inDomain(DOMAIN).build();
     private final int transactionOutstandingOperationLimit;
     private Timeout transactionCommitOperationTimeout;
     private Timeout shardInitializationTimeout;
@@ -131,8 +127,6 @@ public class ActorContext {
         }
 
         transactionOutstandingOperationLimit = new CommonConfig(this.getActorSystem().settings().config()).getMailBoxCapacity();
-        jmxReporter.start();
-
     }
 
     private void setCachedProperties() {
@@ -482,8 +476,13 @@ public class ActorContext {
      * @return
      */
     public Timer getOperationTimer(String operationName){
-        final String rate = MetricRegistry.name(DISTRIBUTED_DATA_STORE_METRIC_REGISTRY, datastoreContext.getDataStoreType(), operationName, METRIC_RATE);
-        return metricRegistry.timer(rate);
+        return getOperationTimer(datastoreContext.getDataStoreType(), operationName);
+    }
+
+    public Timer getOperationTimer(String dataStoreType, String operationName){
+        final String rate = MetricRegistry.name(DISTRIBUTED_DATA_STORE_METRIC_REGISTRY, dataStoreType,
+                operationName, METRIC_RATE);
+        return DatastoreContext.METRIC_REGISTRY.timer(rate);
     }
 
     /**
