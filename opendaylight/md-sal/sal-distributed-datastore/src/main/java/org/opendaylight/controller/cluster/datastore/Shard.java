@@ -677,7 +677,7 @@ public class Shard extends RaftActor {
         LOG.debug("{}: registerDataChangeListener sending reply, listenerRegistrationPath = {} ",
                 persistenceId(), listenerRegistration.path());
 
-        getSender().tell(new RegisterChangeListenerReply(listenerRegistration.path()), getSelf());
+        getSender().tell(new RegisterChangeListenerReply(listenerRegistration), getSelf());
     }
 
     private ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier,

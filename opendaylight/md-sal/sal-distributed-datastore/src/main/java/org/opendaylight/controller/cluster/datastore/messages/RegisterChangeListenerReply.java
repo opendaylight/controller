@@ -9,32 +9,34 @@
 package org.opendaylight.controller.cluster.datastore.messages;
 
 import akka.actor.ActorPath;
+import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
+import akka.serialization.Serialization;
 import org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages;
 
 public class RegisterChangeListenerReply implements SerializableMessage{
   public static final Class<ListenerRegistrationMessages.RegisterChangeListenerReply> SERIALIZABLE_CLASS =
           ListenerRegistrationMessages.RegisterChangeListenerReply.class;
-  private final ActorPath listenerRegistrationPath;
+  private final ActorRef listenerRegistration;
 
-  public RegisterChangeListenerReply(final ActorPath listenerRegistrationPath) {
-    this.listenerRegistrationPath = listenerRegistrationPath;
+  public RegisterChangeListenerReply(final ActorRef listenerRegistration) {
+    this.listenerRegistration = listenerRegistration;
   }
 
   public ActorPath getListenerRegistrationPath() {
-    return listenerRegistrationPath;
+    return listenerRegistration.path();
   }
 
   @Override
   public ListenerRegistrationMessages.RegisterChangeListenerReply toSerializable() {
     return ListenerRegistrationMessages.RegisterChangeListenerReply.newBuilder()
-            .setListenerRegistrationPath(listenerRegistrationPath.toString()).build();
+            .setListenerRegistrationPath(Serialization.serializedActorPath(listenerRegistration)).build();
   }
 
   public static RegisterChangeListenerReply fromSerializable(final ActorSystem actorSystem,final Object serializable){
     ListenerRegistrationMessages.RegisterChangeListenerReply o = (ListenerRegistrationMessages.RegisterChangeListenerReply) serializable;
     return new RegisterChangeListenerReply(
-        actorSystem.actorFor(o.getListenerRegistrationPath()).path()
+        actorSystem.provider().resolveActorRef(o.getListenerRegistrationPath())
         );
   }
 }
