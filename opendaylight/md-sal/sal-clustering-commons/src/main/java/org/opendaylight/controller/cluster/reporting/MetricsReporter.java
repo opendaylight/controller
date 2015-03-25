@@ -9,6 +9,9 @@ package org.opendaylight.controller.cluster.reporting;
 
 import com.codahale.metrics.JmxReporter;
 import com.codahale.metrics.MetricRegistry;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 
 /**
  * Maintains metrics registry that is provided to reporters.
@@ -20,26 +23,36 @@ import com.codahale.metrics.MetricRegistry;
  */
 public class MetricsReporter implements AutoCloseable {
 
-    private static final MetricRegistry METRICS_REGISTRY = new MetricRegistry();
-    private static final String DOMAIN = "org.opendaylight.controller.actor.metric";
-    private static final MetricsReporter INSTANCE = new MetricsReporter();
+    private static LoadingCache<String, MetricsReporter> METRIC_REPORTERS = CacheBuilder.newBuilder().build(
+            new CacheLoader<String, MetricsReporter>() {
+                @Override
+                public MetricsReporter load(String domainName) {
+                    return new MetricsReporter(domainName);
+                }
+            });
 
-    private final JmxReporter jmxReporter = JmxReporter.forRegistry(METRICS_REGISTRY).inDomain(DOMAIN).build();
+    private final String domainName;
+    private final JmxReporter jmxReporter;
+    private final MetricRegistry metricRegistry = new MetricRegistry();
 
-    private MetricsReporter() {
+    private MetricsReporter(String domainName) {
+        this.domainName = domainName;
+        jmxReporter = JmxReporter.forRegistry(metricRegistry).inDomain(domainName).build();
         jmxReporter.start();
     }
 
-    public static MetricsReporter getInstance() {
-        return INSTANCE;
+    public static MetricsReporter getInstance(String domainName) {
+        return METRIC_REPORTERS.getUnchecked(domainName);
     }
 
     public MetricRegistry getMetricsRegistry() {
-        return METRICS_REGISTRY;
+        return metricRegistry;
     }
 
     @Override
     public void close() {
         jmxReporter.close();
+
+        METRIC_REPORTERS.invalidate(domainName);
     }
 }

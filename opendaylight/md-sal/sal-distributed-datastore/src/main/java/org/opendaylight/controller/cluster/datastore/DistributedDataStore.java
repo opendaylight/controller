@@ -15,6 +15,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardManagerIdentifier;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.DatastoreConfigurationMXBeanImpl;
+import org.opendaylight.controller.cluster.datastore.jmx.mbeans.DatastoreInfoMXBeanImpl;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.cluster.datastore.utils.Dispatchers;
@@ -52,7 +53,9 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
 
     private DatastoreConfigurationMXBeanImpl datastoreConfigMXBean;
 
-    private CountDownLatch waitTillReadyCountDownLatch = new CountDownLatch(1);
+    private DatastoreInfoMXBeanImpl datastoreInfoMXBean;
+
+    private final CountDownLatch waitTillReadyCountDownLatch = new CountDownLatch(1);
 
     private final String type;
 
@@ -84,6 +87,9 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
         datastoreConfigMXBean = new DatastoreConfigurationMXBeanImpl(datastoreContext.getDataStoreMXBeanType());
         datastoreConfigMXBean.setContext(datastoreContext);
         datastoreConfigMXBean.registerMBean();
+
+        datastoreInfoMXBean = new DatastoreInfoMXBeanImpl(datastoreContext.getDataStoreMXBeanType(), actorContext);
+        datastoreInfoMXBean.registerMBean();
     }
 
     public DistributedDataStore(ActorContext actorContext) {
@@ -157,6 +163,7 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
     @Override
     public void close() {
         datastoreConfigMXBean.unregisterMBean();
+        datastoreInfoMXBean.unregisterMBean();
 
         if(closeable != null) {
             try {

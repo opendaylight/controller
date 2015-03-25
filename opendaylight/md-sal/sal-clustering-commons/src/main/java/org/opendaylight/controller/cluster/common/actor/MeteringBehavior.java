@@ -26,10 +26,11 @@ import org.opendaylight.controller.cluster.reporting.MetricsReporter;
  * The information is reported to {@link org.opendaylight.controller.cluster.reporting.MetricsReporter}
  */
 public class MeteringBehavior implements Procedure<Object> {
+    public static final String DOMAIN = "org.opendaylight.controller.actor.metric";
 
     private final UntypedActor meteredActor;
 
-    private final MetricRegistry METRICREGISTRY = MetricsReporter.getInstance().getMetricsRegistry();
+    private final MetricRegistry METRICREGISTRY = MetricsReporter.getInstance(DOMAIN).getMetricsRegistry();
     private final String MSG_PROCESSING_RATE = "msg-rate";
 
     private String actorQualifiedName;
