@@ -9,6 +9,10 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.util.Timeout;
+import com.codahale.metrics.JmxReporter;
+import com.codahale.metrics.MetricRegistry;
+import com.google.common.collect.Sets;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.text.WordUtils;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationReader;
@@ -25,6 +29,14 @@ import scala.concurrent.duration.FiniteDuration;
  * @author Thomas Pantelis
  */
 public class DatastoreContext {
+    private static final String DOMAIN = "org.opendaylight.controller.cluster.datastore";
+
+    public static final MetricRegistry METRIC_REGISTRY = new MetricRegistry();
+
+    private static final JmxReporter JMX_REPORTER = JmxReporter.forRegistry(METRIC_REGISTRY).inDomain(DOMAIN).build();
+    static {
+        JMX_REPORTER.start();
+    }
 
     public static final Duration DEFAULT_SHARD_TRANSACTION_IDLE_TIMEOUT = Duration.create(10, TimeUnit.MINUTES);
     public static final int DEFAULT_OPERATION_TIMEOUT_IN_SECONDS = 5;
@@ -44,6 +56,8 @@ public class DatastoreContext {
     public static final String UNKNOWN_DATA_STORE_TYPE = "unknown";
     public static final int DEFAULT_SHARD_BATCHED_MODIFICATION_COUNT= 100;
 
+    private static Set<String> globalDatastoreTypes = Sets.newConcurrentHashSet();
+
     private InMemoryDOMDataStoreConfigProperties dataStoreProperties;
     private Duration shardTransactionIdleTimeout = DatastoreContext.DEFAULT_SHARD_TRANSACTION_IDLE_TIMEOUT;
     private int operationTimeoutInSeconds = DEFAULT_OPERATION_TIMEOUT_IN_SECONDS;
@@ -59,6 +73,10 @@ public class DatastoreContext {
     private String dataStoreType = UNKNOWN_DATA_STORE_TYPE;
     private int shardBatchedModificationCount = DEFAULT_SHARD_BATCHED_MODIFICATION_COUNT;
     private boolean writeOnlyTransactionOptimizationsEnabled = false;
+
+    public static Set<String> getGlobalDatastoreTypes() {
+        return globalDatastoreTypes;
+    }
 
     private DatastoreContext() {
         setShardJournalRecoveryLogBatchSize(DEFAULT_JOURNAL_RECOVERY_BATCH_SIZE);
@@ -361,6 +379,11 @@ public class DatastoreContext {
             datastoreContext.dataStoreProperties = InMemoryDOMDataStoreConfigProperties.create(
                     maxShardDataChangeExecutorPoolSize, maxShardDataChangeExecutorQueueSize,
                     maxShardDataChangeListenerQueueSize, maxShardDataStoreExecutorQueueSize);
+
+            if(datastoreContext.dataStoreType != null) {
+                globalDatastoreTypes.add(datastoreContext.dataStoreType);
+            }
+
             return datastoreContext;
         }
     }

@@ -23,6 +23,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Matchers;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 
@@ -170,12 +171,47 @@ public class TransactionRateLimitingCommitCallbackTest {
 
     }
 
+    @Test
+    public void testAdjustRateLimitForUnusedTransaction() {
+        doReturn(commitTimer).when(actorContext).getOperationTimer("one", "commit");
+
+        Timer commitTimer2 = Mockito.mock(Timer.class);
+        Snapshot commitSnapshot2 = Mockito.mock(Snapshot.class);
+
+        doReturn(commitSnapshot2).when(commitTimer2).getSnapshot();
+
+        doReturn(commitTimer2).when(actorContext).getOperationTimer("two", "commit");
+
+        DatastoreContext.newBuilder().dataStoreType("one").build();
+        DatastoreContext.newBuilder().dataStoreType("two").build();
+
+        doReturn(TimeUnit.MICROSECONDS.toNanos(500) * 1D).when(commitSnapshot).getValue(1 * 0.1);
+
+        TransactionRateLimitingCallback.adjustRateLimitForUnusedTransaction(actorContext);
+
+        verify(actorContext, never()).setTxCreationLimit(anyDouble());
+
+        Mockito.reset(commitSnapshot);
+
+        TransactionRateLimitingCallback.adjustRateLimitForUnusedTransaction(actorContext);
+
+        verify(actorContext, never()).setTxCreationLimit(anyDouble());
+
+        System.out.println(""+TimeUnit.SECONDS.toNanos(30)/TimeUnit.MICROSECONDS.toNanos(100));
+
+        doReturn(TimeUnit.MICROSECONDS.toNanos(100) * 1D).when(commitSnapshot2).getValue(1 * 0.1);
+
+        TransactionRateLimitingCallback.adjustRateLimitForUnusedTransaction(actorContext);
+
+        verify(actorContext).setTxCreationLimit(Matchers.doubleThat(approximately(1000)));
+    }
+
     public Matcher<Double> approximately(final double val){
         return new BaseMatcher<Double>() {
             @Override
             public boolean matches(Object o) {
                 Double aDouble = (Double) o;
-                return aDouble > val && aDouble < val+1;
+                return aDouble >= val && aDouble <= val+1;
             }
 
             @Override
