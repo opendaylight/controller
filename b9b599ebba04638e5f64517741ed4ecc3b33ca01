@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_a70caf43",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/FollowerTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 677,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-25T17:18:46Z",
+      "side": 1,
+      "message": "This may be a little fragile if code is innocently refactored to call getPrevLogIndex first w/o using it or if a debug log is added to dump the AppendEntries info. It might be better to cause a situation where out-of-sync or applyLogToStateMachine would occur if the AppendEntries was processed. But it\u0027s fine for now...",
+      "revId": "b9b599ebba04638e5f64517741ed4ecc3b33ca01",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
