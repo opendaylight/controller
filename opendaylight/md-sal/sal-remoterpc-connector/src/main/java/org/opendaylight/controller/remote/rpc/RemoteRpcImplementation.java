@@ -53,7 +53,16 @@ public class RemoteRpcImplementation implements DOMRpcImplementation {
             @Override
             public void onComplete(final Throwable failure, final Object reply) throws Throwable {
                 if(failure != null) {
-                    LOG.error("InvokeRpc failed", failure);
+
+                    // When we return a failure to the caller they can choose to log it if they like
+                    // so here we just do basic warn logging by default and log the stack trace only when debug
+                    // is enabled
+
+                    LOG.warn("InvokeRpc failed rpc = {}, identifier = {}", rpcMsg.getRpc(), rpcMsg.getIdentifier());
+
+                    if(LOG.isDebugEnabled()){
+                        LOG.debug("Detailed Error", failure);
+                    }
 
                     final String message = String.format("Execution of RPC %s failed",  rpcMsg.getRpc());
                     Collection<RpcError> errors = ((RpcErrorsException)failure).getRpcErrors();
