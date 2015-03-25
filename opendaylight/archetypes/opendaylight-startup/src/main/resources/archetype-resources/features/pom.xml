@@ -72,6 +72,13 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
     </dependency>
     <dependency>
       <groupId>${symbol_dollar}{project.groupId}</groupId>
+      <artifactId>${artifactId}-impl</artifactId>
+      <version>${symbol_dollar}{project.version}</version>
+      <type>xml</type>
+      <classifier>config</classifier>
+    </dependency>
+    <dependency>
+      <groupId>${symbol_dollar}{project.groupId}</groupId>
       <artifactId>${artifactId}-api</artifactId>
       <version>${symbol_dollar}{project.version}</version>
     </dependency>
