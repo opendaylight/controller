@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_51532d17",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 761,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-25T03:33:46Z",
+      "side": 1,
+      "message": "unused now",
+      "revId": "4837442ba12b0b2ecd7d48425dfd683fa7fc2e63",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_f157d900",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 779,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-25T03:33:46Z",
+      "side": 1,
+      "message": "unused now",
+      "revId": "4837442ba12b0b2ecd7d48425dfd683fa7fc2e63",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
