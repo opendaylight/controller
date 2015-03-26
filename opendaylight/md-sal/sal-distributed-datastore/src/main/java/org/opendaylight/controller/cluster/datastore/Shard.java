@@ -30,7 +30,6 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
-import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.common.actor.CommonConfig;
 import org.opendaylight.controller.cluster.common.actor.MeteringBehavior;
 import org.opendaylight.controller.cluster.datastore.ShardCommitCoordinator.CohortEntry;
@@ -116,8 +115,6 @@ public class Shard extends RaftActor {
 
     private DatastoreContext datastoreContext;
 
-    private DataPersistenceProvider dataPersistenceProvider;
-
     private SchemaContext schemaContext;
 
     private int createSnapshotTransactionCounter;
@@ -153,11 +150,10 @@ public class Shard extends RaftActor {
         this.name = name.toString();
         this.datastoreContext = datastoreContext;
         this.schemaContext = schemaContext;
-        this.dataPersistenceProvider = (datastoreContext.isPersistent())
-                ? new PersistentDataProvider() : new NonPersistentRaftDataProvider();
         this.txnDispatcherPath = new Dispatchers(context().system().dispatchers())
                 .getDispatcherPath(Dispatchers.DispatcherType.Transaction);
 
+        setPersistence(datastoreContext.isPersistent());
 
         LOG.info("Shard created : {}, persistent : {}", name, datastoreContext.isPersistent());
 
@@ -311,12 +307,10 @@ public class Shard extends RaftActor {
 
         setTransactionCommitTimeout();
 
-        if(datastoreContext.isPersistent() &&
-                dataPersistenceProvider instanceof NonPersistentRaftDataProvider) {
-            dataPersistenceProvider = new PersistentDataProvider();
-        } else if(!datastoreContext.isPersistent() &&
-                dataPersistenceProvider instanceof PersistentDataProvider) {
-            dataPersistenceProvider = new NonPersistentRaftDataProvider();
+        if(datastoreContext.isPersistent() && !persistence().isRecoveryApplicable()) {
+            setPersistence(true);
+        } else if(!datastoreContext.isPersistent() && persistence().isRecoveryApplicable()) {
+            setPersistence(false);
         }
 
         updateConfigParams(datastoreContext.getShardRaftConfig());
@@ -913,17 +907,8 @@ public class Shard extends RaftActor {
     }
 
     @Override
-    protected DataPersistenceProvider persistence() {
-        return dataPersistenceProvider;
-    }
-
-    @Override public String persistenceId() {
+    public String persistenceId() {
         return this.name;
-    }
-
-    @VisibleForTesting
-    DataPersistenceProvider getDataPersistenceProvider() {
-        return dataPersistenceProvider;
     }
 
     @VisibleForTesting
