@@ -27,14 +27,12 @@ public class ShardTransactionChain extends AbstractUntypedActor {
 
     private final DOMStoreTransactionChain chain;
     private final DatastoreContext datastoreContext;
-    private final SchemaContext schemaContext;
     private final ShardStats shardStats;
 
-    public ShardTransactionChain(DOMStoreTransactionChain chain, SchemaContext schemaContext,
-            DatastoreContext datastoreContext, ShardStats shardStats) {
+    public ShardTransactionChain(DOMStoreTransactionChain chain, DatastoreContext datastoreContext,
+            ShardStats shardStats) {
         this.chain = chain;
         this.datastoreContext = datastoreContext;
-        this.schemaContext = schemaContext;
         this.shardStats = shardStats;
     }
 
@@ -61,22 +59,19 @@ public class ShardTransactionChain extends AbstractUntypedActor {
                 TransactionProxy.TransactionType.READ_ONLY.ordinal()) {
             return getContext().actorOf(
                     ShardTransaction.props( chain.newReadOnlyTransaction(), getShardActor(),
-                            schemaContext, datastoreContext, shardStats,
-                            createTransaction.getTransactionId(),
+                            datastoreContext, shardStats, createTransaction.getTransactionId(),
                             createTransaction.getVersion()), transactionName);
         } else if (createTransaction.getTransactionType() ==
                 TransactionProxy.TransactionType.READ_WRITE.ordinal()) {
             return getContext().actorOf(
                     ShardTransaction.props( chain.newReadWriteTransaction(), getShardActor(),
-                            schemaContext, datastoreContext, shardStats,
-                            createTransaction.getTransactionId(),
+                            datastoreContext, shardStats, createTransaction.getTransactionId(),
                             createTransaction.getVersion()), transactionName);
         } else if (createTransaction.getTransactionType() ==
                 TransactionProxy.TransactionType.WRITE_ONLY.ordinal()) {
             return getContext().actorOf(
                     ShardTransaction.props( chain.newWriteOnlyTransaction(), getShardActor(),
-                            schemaContext, datastoreContext, shardStats,
-                            createTransaction.getTransactionId(),
+                            datastoreContext, shardStats, createTransaction.getTransactionId(),
                             createTransaction.getVersion()), transactionName);
         } else {
             throw new IllegalArgumentException (
@@ -94,8 +89,7 @@ public class ShardTransactionChain extends AbstractUntypedActor {
 
     public static Props props(DOMStoreTransactionChain chain, SchemaContext schemaContext,
         DatastoreContext datastoreContext, ShardStats shardStats) {
-        return Props.create(new ShardTransactionChainCreator(chain, schemaContext,
-                datastoreContext, shardStats));
+        return Props.create(new ShardTransactionChainCreator(chain, datastoreContext, shardStats));
     }
 
     private static class ShardTransactionChainCreator implements Creator<ShardTransactionChain> {
@@ -103,21 +97,19 @@ public class ShardTransactionChain extends AbstractUntypedActor {
 
         final DOMStoreTransactionChain chain;
         final DatastoreContext datastoreContext;
-        final SchemaContext schemaContext;
         final ShardStats shardStats;
 
 
-        ShardTransactionChainCreator(DOMStoreTransactionChain chain, SchemaContext schemaContext,
-            DatastoreContext datastoreContext, ShardStats shardStats) {
+        ShardTransactionChainCreator(DOMStoreTransactionChain chain, DatastoreContext datastoreContext,
+                ShardStats shardStats) {
             this.chain = chain;
             this.datastoreContext = datastoreContext;
-            this.schemaContext = schemaContext;
             this.shardStats = shardStats;
         }
 
         @Override
         public ShardTransactionChain create() throws Exception {
-            return new ShardTransactionChain(chain, schemaContext, datastoreContext, shardStats);
+            return new ShardTransactionChain(chain, datastoreContext, shardStats);
         }
     }
 }
