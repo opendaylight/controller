@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_3ecae56e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 626,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-26T23:16:06Z",
+      "side": 1,
+      "message": "This test looks the same as the other one. Maybe all we need is 1 test and verify countDown \"never\" after RoleChangeNotification.",
+      "revId": "5211dff6f2c36bfff41c5b40e11dbdcb1bbca33e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
