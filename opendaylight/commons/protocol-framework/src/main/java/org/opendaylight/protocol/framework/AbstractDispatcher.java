@@ -54,7 +54,7 @@ public abstract class AbstractDispatcher<S extends ProtocolSession<?>, L extends
         void initializeChannel(CH channel, Promise<S> promise);
     }
 
-    protected interface PipelineInitializer<S extends ProtocolSession<?>> extends ChannelPipelineInitializer<SocketChannel, S> {
+    protected interface PipelineInitializer<S extends ProtocolSession<?>> extends ChannelPipelineInitializer<Channel, S> {
 
     }
 
@@ -155,7 +155,7 @@ public abstract class AbstractDispatcher<S extends ProtocolSession<?>, L extends
      *         as well as session negotiation.
      */
     protected Future<S> createClient(final InetSocketAddress address, final ReconnectStrategy strategy, final PipelineInitializer<S> initializer) {
-        final Bootstrap b = new Bootstrap();
+        final Bootstrap b = createBootstrap();
         final ProtocolSessionPromise<S> p = new ProtocolSessionPromise<>(executor, address, strategy, b);
         b.option(ChannelOption.SO_KEEPALIVE, true).handler(
                 new ChannelInitializer<SocketChannel>() {
@@ -172,6 +172,10 @@ public abstract class AbstractDispatcher<S extends ProtocolSession<?>, L extends
         p.connect();
         LOG.debug("Client created.");
         return p;
+    }
+
+    protected Bootstrap createBootstrap() {
+        return new Bootstrap();
     }
 
     private void setWorkerGroup(final Bootstrap b) {
@@ -243,7 +247,7 @@ public abstract class AbstractDispatcher<S extends ProtocolSession<?>, L extends
      */
     protected Future<Void> createReconnectingClient(final InetSocketAddress address, final ReconnectStrategyFactory connectStrategyFactory,
             final PipelineInitializer<S> initializer) {
-        final Bootstrap b = new Bootstrap();
+        final Bootstrap b = createBootstrap();
 
         final ReconnectPromise<S, L> p = new ReconnectPromise<>(GlobalEventExecutor.INSTANCE, this, address, connectStrategyFactory, b, initializer);
 

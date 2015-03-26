@@ -9,9 +9,9 @@ package org.opendaylight.protocol.framework;
 
 import com.google.common.base.Preconditions;
 import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.channel.socket.SocketChannel;
 import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.EventExecutor;
 import io.netty.util.concurrent.Future;
@@ -48,7 +48,7 @@ final class ReconnectPromise<S extends ProtocolSession<?>, L extends SessionList
         // Set up a client with pre-configured bootstrap, but add a closed channel handler into the pipeline to support reconnect attempts
         pending = this.dispatcher.createClient(this.address, cs, b, new AbstractDispatcher.PipelineInitializer<S>() {
             @Override
-            public void initializeChannel(final SocketChannel channel, final Promise<S> promise) {
+            public void initializeChannel(final Channel channel, final Promise<S> promise) {
                 initializer.initializeChannel(channel, promise);
                 // add closed channel handler
                 // This handler has to be added as last channel handler and the channel inactive event has to be caught by it

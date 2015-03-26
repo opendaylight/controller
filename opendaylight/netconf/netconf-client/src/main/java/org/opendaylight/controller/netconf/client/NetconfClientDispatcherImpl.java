@@ -8,8 +8,8 @@
 
 package org.opendaylight.controller.netconf.client;
 
+import io.netty.channel.Channel;
 import io.netty.channel.EventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
 import io.netty.util.Timer;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.Promise;
@@ -57,15 +57,15 @@ public class NetconfClientDispatcherImpl extends AbstractDispatcher<NetconfClien
 
     private Future<NetconfClientSession> createTcpClient(final NetconfClientConfiguration currentConfiguration) {
         LOG.debug("Creating TCP client with configuration: {}", currentConfiguration);
-        return super.createClient(currentConfiguration.getAddress(), currentConfiguration.getReconnectStrategy(),
+        return createClient(currentConfiguration.getAddress(), currentConfiguration.getReconnectStrategy(),
                 new PipelineInitializer<NetconfClientSession>() {
 
                     @Override
-                    public void initializeChannel(final SocketChannel ch, final Promise<NetconfClientSession> promise) {
+                    public void initializeChannel(final Channel ch, final Promise<NetconfClientSession> promise) {
                         initialize(ch, promise);
                     }
 
-                    private void initialize(final SocketChannel ch, final Promise<NetconfClientSession> promise) {
+                    private void initialize(final Channel ch, final Promise<NetconfClientSession> promise) {
                         new TcpClientChannelInitializer(getNegotiatorFactory(currentConfiguration), currentConfiguration
                                 .getSessionListener()).initialize(ch, promise);
                     }
@@ -80,7 +80,7 @@ public class NetconfClientDispatcherImpl extends AbstractDispatcher<NetconfClien
         return super.createReconnectingClient(currentConfiguration.getAddress(), currentConfiguration.getConnectStrategyFactory(),
                 currentConfiguration.getReconnectStrategy(), new PipelineInitializer<NetconfClientSession>() {
                     @Override
-                    public void initializeChannel(final SocketChannel ch, final Promise<NetconfClientSession> promise) {
+                    public void initializeChannel(final Channel ch, final Promise<NetconfClientSession> promise) {
                         init.initialize(ch, promise);
                     }
                 });
@@ -88,11 +88,11 @@ public class NetconfClientDispatcherImpl extends AbstractDispatcher<NetconfClien
 
     private Future<NetconfClientSession> createSshClient(final NetconfClientConfiguration currentConfiguration) {
         LOG.debug("Creating SSH client with configuration: {}", currentConfiguration);
-        return super.createClient(currentConfiguration.getAddress(), currentConfiguration.getReconnectStrategy(),
+        return createClient(currentConfiguration.getAddress(), currentConfiguration.getReconnectStrategy(),
                 new PipelineInitializer<NetconfClientSession>() {
 
                     @Override
-                    public void initializeChannel(final SocketChannel ch,
+                    public void initializeChannel(final Channel ch,
                                                   final Promise<NetconfClientSession> sessionPromise) {
                         new SshClientChannelInitializer(currentConfiguration.getAuthHandler(),
                                 getNegotiatorFactory(currentConfiguration), currentConfiguration.getSessionListener())
@@ -110,7 +110,7 @@ public class NetconfClientDispatcherImpl extends AbstractDispatcher<NetconfClien
         return super.createReconnectingClient(currentConfiguration.getAddress(), currentConfiguration.getConnectStrategyFactory(), currentConfiguration.getReconnectStrategy(),
                 new PipelineInitializer<NetconfClientSession>() {
                     @Override
-                    public void initializeChannel(final SocketChannel ch, final Promise<NetconfClientSession> promise) {
+                    public void initializeChannel(final Channel ch, final Promise<NetconfClientSession> promise) {
                         init.initialize(ch, promise);
                     }
                 });

@@ -7,19 +7,16 @@
  */
 package org.opendaylight.protocol.framework;
 
+import com.google.common.base.Preconditions;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOutboundHandler;
 import io.netty.channel.EventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.Promise;
-
 import java.net.InetSocketAddress;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Preconditions;
 
 public class SimpleDispatcher extends AbstractDispatcher<SimpleSession, SimpleSessionListener> {
     private static final Logger logger = LoggerFactory.getLogger(SimpleDispatcher.class);
@@ -35,7 +32,7 @@ public class SimpleDispatcher extends AbstractDispatcher<SimpleSession, SimpleSe
         }
 
         @Override
-        public void initializeChannel(final SocketChannel channel, final Promise<SimpleSession> promise) {
+        public void initializeChannel(final Channel channel, final Promise<SimpleSession> promise) {
             channel.pipeline().addLast(new SimpleByteToMessageDecoder());
             channel.pipeline().addLast("negotiator", negotiatorFactory.getSessionNegotiator(listenerFactory, channel, promise));
             channel.pipeline().addLast(encoder);
