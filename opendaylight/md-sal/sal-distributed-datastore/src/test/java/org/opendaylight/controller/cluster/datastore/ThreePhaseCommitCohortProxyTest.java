@@ -38,6 +38,7 @@ import org.opendaylight.controller.cluster.datastore.messages.SerializableMessag
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.cluster.datastore.utils.DoNothingActor;
 import scala.concurrent.Future;
+import scala.concurrent.duration.Duration;
 
 public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
 
@@ -116,6 +117,9 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
 
         stubber.when(actorContext).executeOperationAsync(any(ActorSelection.class),
                 isA(requestType), any(Timeout.class));
+
+        doReturn(new Timeout(Duration.apply(1000, TimeUnit.MILLISECONDS)))
+                .when(actorContext).getTransactionCommitOperationTimeout();
     }
 
     private void verifyCohortInvocations(int nCohorts, Class<?> requestType) {
@@ -180,9 +184,11 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
 
         ListenableFuture<Boolean> future = proxy.canCommit();
 
-        assertEquals("canCommit", false, future.get(5, TimeUnit.SECONDS));
+        Boolean actual = future.get(5, TimeUnit.SECONDS);
 
-        verifyCohortInvocations(3, CanCommitTransaction.SERIALIZABLE_CLASS);
+        assertEquals("canCommit", false, actual);
+
+        verifyCohortInvocations(2, CanCommitTransaction.SERIALIZABLE_CLASS);
     }
 
     @Test(expected = TestException.class)
