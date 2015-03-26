@@ -66,11 +66,11 @@ import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils;
 import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListener;
 import org.opendaylight.controller.cluster.notifications.RoleChangeNotifier;
 import org.opendaylight.controller.cluster.raft.RaftActor;
+import org.opendaylight.controller.cluster.raft.RaftActorRecoveryCohort;
 import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyncUpStatus;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationByteStringPayload;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationPayload;
-import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreFactory;
@@ -131,12 +131,6 @@ public class Shard extends RaftActor {
     private final ReadyTransactionReply READY_TRANSACTION_REPLY = new ReadyTransactionReply(
             Serialization.serializedActorPath(getSelf()));
 
-
-    /**
-     * Coordinates persistence recovery on startup.
-     */
-    private ShardRecoveryCoordinator recoveryCoordinator;
-
     private final DOMTransactionFactory transactionFactory;
 
     private final String txnDispatcherPath;
@@ -184,8 +178,6 @@ public class Shard extends RaftActor {
 
         appendEntriesReplyTracker = new MessageTracker(AppendEntriesReply.class,
                 getRaftActorContext().getConfigParams().getIsolatedCheckIntervalInMillis());
-
-        recoveryCoordinator = new ShardRecoveryCoordinator(store, persistenceId(), LOG);
     }
 
     private void setTransactionCommitTimeout() {
@@ -705,30 +697,13 @@ public class Shard extends RaftActor {
     }
 
     @Override
-    protected
-    void startLogRecoveryBatch(final int maxBatchSize) {
-        recoveryCoordinator.startLogRecoveryBatch(maxBatchSize);
-    }
-
-    @Override
-    protected void appendRecoveredLogEntry(final Payload data) {
-        recoveryCoordinator.appendRecoveredLogPayload(data);
-    }
-
-    @Override
-    protected void applyRecoverySnapshot(final byte[] snapshotBytes) {
-        recoveryCoordinator.applyRecoveredSnapshot(snapshotBytes);
-    }
-
-    @Override
-    protected void applyCurrentLogRecoveryBatch() {
-        recoveryCoordinator.applyCurrentLogRecoveryBatch();
+    @Nonnull
+    protected RaftActorRecoveryCohort getRaftActorRecoveryCohort() {
+        return new ShardRecoveryCoordinator(store, persistenceId(), LOG);
     }
 
     @Override
     protected void onRecoveryComplete() {
-        recoveryCoordinator = null;
-
         //notify shard manager
         getContext().parent().tell(new ActorInitialized(), getSelf());
 
