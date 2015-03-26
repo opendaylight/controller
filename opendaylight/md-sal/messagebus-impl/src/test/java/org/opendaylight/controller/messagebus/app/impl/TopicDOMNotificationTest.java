@@ -7,6 +7,11 @@
  */
 package org.opendaylight.controller.messagebus.app.impl;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -14,12 +19,9 @@ import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.even
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.mock;
-
 public class TopicDOMNotificationTest {
 
+    private static final String containerNodeBodyMockToString = "containerNodeBodyMock";
     ContainerNode containerNodeBodyMock;
     TopicDOMNotification topicDOMNotification;
 
@@ -30,6 +32,7 @@ public class TopicDOMNotificationTest {
     @Before
     public void setUp() throws Exception {
         containerNodeBodyMock = mock(ContainerNode.class);
+        doReturn(containerNodeBodyMockToString).when(containerNodeBodyMock).toString();
         topicDOMNotification = new TopicDOMNotification(containerNodeBodyMock);
     }
 
@@ -51,7 +54,7 @@ public class TopicDOMNotificationTest {
 
     @Test
     public void getToStringTest() {
-        String bodyString = "TopicDOMNotification [body=" + containerNodeBodyMock + "]";
+        String bodyString = "TopicDOMNotification [body=" + containerNodeBodyMockToString + "]";
         assertEquals("String has not been created correctly.", bodyString, topicDOMNotification.toString());
     }
 }

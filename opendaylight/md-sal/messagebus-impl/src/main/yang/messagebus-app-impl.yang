@@ -6,7 +6,7 @@ module messagebus-app-impl {
     import config { prefix config; revision-date 2013-04-05; }
     import opendaylight-md-sal-binding {prefix sal;}
     import opendaylight-md-sal-dom {prefix dom;}
-
+    import messagebus-event-source-registry {prefix esr;}
 
     description
         "Service definition for Message Bus application implementation.";
@@ -17,9 +17,10 @@ module messagebus-app-impl {
 
     identity messagebus-app-impl {
         base config:module-type;
+        config:provided-service esr:event-source-registry;
         config:java-name-prefix MessageBusAppImpl;
     }
-    
+
     augment "/config:modules/config:module/config:configuration" {
         case messagebus-app-impl {
             when "/config:modules/config:module/config:type = 'messagebus-app-impl'";

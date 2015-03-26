@@ -317,6 +317,11 @@
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
+                <artifactId>messagebus-spi</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.opendaylight.controller</groupId>
                 <artifactId>messagebus-impl</artifactId>
                 <version>${project.version}</version>
             </dependency>

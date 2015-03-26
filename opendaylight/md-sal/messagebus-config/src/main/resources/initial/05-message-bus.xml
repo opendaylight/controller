@@ -7,11 +7,11 @@
  and is available at http://www.eclipse.org/legal/epl-v10.html
 -->
 <snapshot>
-      <configuration>
+    <configuration>
       <data xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
           <modules xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
               <module>
-                  <name>messagebus-app</name>
+                  <name>messagebus-app-impl</name>
                   <type xmlns:binding-impl="urn:opendaylight:params:xml:ns:yang:controller:messagebus:app:impl">binding-impl:messagebus-app-impl</type>
                   <binding-broker xmlns="urn:opendaylight:params:xml:ns:yang:controller:messagebus:app:impl">
                       <type xmlns:md-sal-binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">md-sal-binding:binding-broker-osgi-registry</type>
@@ -31,9 +31,19 @@
                   </namespace-to-stream>
               </module>
           </modules>
+          <services>
+              <service>
+                  <type xmlns:mb-esr="urn:opendaylight:params:xml:ns:yang:controller:messagebus:spi:eventsourceregistry">mb-esr:event-source-registry</type>
+                    <instance>
+                        <name>messagebus-app-impl</name>
+                        <provider>/modules/module[type='messagebus-app-impl'][name='messagebus-app-impl']</provider>
+                    </instance>
+              </service>
+          </services>
       </data>
   </configuration>
   <required-capabilities>
       <capability>urn:opendaylight:params:xml:ns:yang:controller:messagebus:app:impl?module=messagebus-app-impl&amp;revision=2015-02-03</capability>
+      <capability>urn:opendaylight:params:xml:ns:yang:controller:messagebus:spi:eventsourceregistry?module=messagebus-event-source-registry&amp;revision=2015-04-02</capability>
   </required-capabilities>
 </snapshot>
