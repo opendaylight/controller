@@ -28,6 +28,7 @@ import org.opendaylight.controller.cluster.notifications.RoleChangeNotifier;
 import org.opendaylight.controller.cluster.raft.ConfigParams;
 import org.opendaylight.controller.cluster.raft.RaftActor;
 import org.opendaylight.controller.cluster.raft.RaftActorRecoveryCohort;
+import org.opendaylight.controller.cluster.raft.RaftActorSnapshotCohort;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.behaviors.Leader;
@@ -36,7 +37,7 @@ import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payloa
 /**
  * A sample actor showing how the RaftActor is to be extended
  */
-public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort {
+public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, RaftActorSnapshotCohort {
 
     private final Map<String, String> state = new HashMap();
 
@@ -120,7 +121,8 @@ public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort {
         }
     }
 
-    @Override protected void createSnapshot() {
+    @Override
+    public void createSnapshot(ActorRef actorRef) {
         ByteString bs = null;
         try {
             bs = fromObject(state);
@@ -130,7 +132,8 @@ public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort {
         getSelf().tell(new CaptureSnapshotReply(bs.toByteArray()), null);
     }
 
-    @Override protected void applySnapshot(byte [] snapshot) {
+    @Override
+    public void applySnapshot(byte [] snapshot) {
         state.clear();
         try {
             state.putAll((HashMap) toObject(snapshot));
@@ -217,5 +220,10 @@ public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort {
 
     @Override
     public void applyRecoverySnapshot(byte[] snapshot) {
+    }
+
+    @Override
+    protected RaftActorSnapshotCohort getRaftActorSnapshotCohort() {
+        return this;
     }
 }

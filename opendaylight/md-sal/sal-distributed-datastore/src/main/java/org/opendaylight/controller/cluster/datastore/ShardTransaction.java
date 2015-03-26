@@ -31,7 +31,6 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 /**
  * The ShardTransaction Actor represents a remote transaction
@@ -54,25 +53,22 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
     protected static final boolean SERIALIZED_REPLY = true;
 
     private final ActorRef shardActor;
-    private final SchemaContext schemaContext;
     private final ShardStats shardStats;
     private final String transactionID;
     private final short clientTxVersion;
 
-    protected ShardTransaction(ActorRef shardActor, SchemaContext schemaContext,
-            ShardStats shardStats, String transactionID, short clientTxVersion) {
+    protected ShardTransaction(ActorRef shardActor, ShardStats shardStats, String transactionID,
+            short clientTxVersion) {
         super("shard-tx"); //actor name override used for metering. This does not change the "real" actor name
         this.shardActor = shardActor;
-        this.schemaContext = schemaContext;
         this.shardStats = shardStats;
         this.transactionID = transactionID;
         this.clientTxVersion = clientTxVersion;
     }
 
     public static Props props(DOMStoreTransaction transaction, ActorRef shardActor,
-            SchemaContext schemaContext,DatastoreContext datastoreContext, ShardStats shardStats,
-            String transactionID, short txnClientVersion) {
-        return Props.create(new ShardTransactionCreator(transaction, shardActor, schemaContext,
+            DatastoreContext datastoreContext, ShardStats shardStats, String transactionID, short txnClientVersion) {
+        return Props.create(new ShardTransactionCreator(transaction, shardActor,
            datastoreContext, shardStats, transactionID, txnClientVersion));
     }
 
@@ -84,10 +80,6 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
 
     protected String getTransactionID() {
         return transactionID;
-    }
-
-    protected SchemaContext getSchemaContext() {
-        return schemaContext;
     }
 
     protected short getClientTxVersion() {
@@ -161,19 +153,16 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
 
         final DOMStoreTransaction transaction;
         final ActorRef shardActor;
-        final SchemaContext schemaContext;
         final DatastoreContext datastoreContext;
         final ShardStats shardStats;
         final String transactionID;
         final short txnClientVersion;
 
         ShardTransactionCreator(DOMStoreTransaction transaction, ActorRef shardActor,
-                SchemaContext schemaContext, DatastoreContext datastoreContext,
-                ShardStats shardStats, String transactionID, short txnClientVersion) {
+                DatastoreContext datastoreContext, ShardStats shardStats, String transactionID, short txnClientVersion) {
             this.transaction = transaction;
             this.shardActor = shardActor;
             this.shardStats = shardStats;
-            this.schemaContext = schemaContext;
             this.datastoreContext = datastoreContext;
             this.transactionID = transactionID;
             this.txnClientVersion = txnClientVersion;
@@ -184,13 +173,13 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
             ShardTransaction tx;
             if(transaction instanceof DOMStoreReadWriteTransaction) {
                 tx = new ShardReadWriteTransaction((DOMStoreReadWriteTransaction)transaction,
-                        shardActor, schemaContext, shardStats, transactionID, txnClientVersion);
+                        shardActor, shardStats, transactionID, txnClientVersion);
             } else if(transaction instanceof DOMStoreReadTransaction) {
                 tx = new ShardReadTransaction((DOMStoreReadTransaction)transaction, shardActor,
-                        schemaContext, shardStats, transactionID, txnClientVersion);
+                        shardStats, transactionID, txnClientVersion);
             } else {
                 tx = new ShardWriteTransaction((DOMStoreWriteTransaction)transaction,
-                        shardActor, schemaContext, shardStats, transactionID, txnClientVersion);
+                        shardActor, shardStats, transactionID, txnClientVersion);
             }
 
             tx.getContext().setReceiveTimeout(datastoreContext.getShardTransactionIdleTimeout());
