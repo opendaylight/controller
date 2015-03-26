@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -19,31 +19,11 @@ import org.junit.Test;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
-
+/**
+ * @author ppalmar
+ *
+ */
 public class UtilTest {
-
-    @Test
-    public void testMD5Hash() throws Exception {
-        // empty string
-        createAndAssertHash("", "d41d8cd98f00b204e9800998ecf8427e");
-
-        // non-empty string
-        createAndAssertHash("The Guardian", "69b929ae473ed732d5fb8e0a55a8dc8d");
-
-        // the same hash for the same string
-        createAndAssertHash("The Independent", "db793706d70c37dcc16454fa8eb21b1c");
-        createAndAssertHash("The Independent", "db793706d70c37dcc16454fa8eb21b1c"); // one more time
-
-        // different strings must have different hashes
-        createAndAssertHash("orange", "fe01d67a002dfa0f3ac084298142eccd");
-        createAndAssertHash("yellow", "d487dd0b55dfcacdd920ccbdaeafa351");
-    }
-
-    //TODO: IllegalArgumentException would be better
-    @Test(expected = RuntimeException.class)
-    public void testMD5HashInvalidInput() throws Exception {
-        Util.md5String(null);
-    }
 
     @Test
     public void testWildcardToRegex() throws Exception {
@@ -73,14 +53,14 @@ public class UtilTest {
     public void testResultFor() throws Exception {
         {
             final String expectedResult = "dummy string";
-            RpcResult<String> rpcResult = Util.resultFor(expectedResult).get();
+            RpcResult<String> rpcResult = Util.resultRpcSuccessFor(expectedResult).get();
             assertEquals(expectedResult, rpcResult.getResult());
             assertTrue(rpcResult.isSuccessful());
             assertTrue(rpcResult.getErrors().isEmpty());
         }
         {
             final Integer expectedResult = 42;
-            RpcResult<Integer> rpcResult = Util.resultFor(expectedResult).get();
+            RpcResult<Integer> rpcResult = Util.resultRpcSuccessFor(expectedResult).get();
             assertEquals(expectedResult, rpcResult.getResult());
             assertTrue(rpcResult.isSuccessful());
             assertTrue(rpcResult.getErrors().isEmpty());
@@ -123,10 +103,6 @@ public class UtilTest {
             assertTrue(matchingPaths.contains(paths.get(1)));
             assertEquals(1, matchingPaths.size());
         }
-    }
-
-    private static void createAndAssertHash(final String inString, final String expectedHash) {
-        assertEquals("Incorrect hash.", expectedHash, Util.md5String(inString));
     }
 
     private static void createAndAssertRegex(final String wildcardStr, final String expectedRegex) {

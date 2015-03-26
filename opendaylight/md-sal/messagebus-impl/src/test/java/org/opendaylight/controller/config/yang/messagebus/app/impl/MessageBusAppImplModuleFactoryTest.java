@@ -7,16 +7,16 @@
  */
 package org.opendaylight.controller.config.yang.messagebus.app.impl;
 
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.DynamicMBeanWithInstance;
 import org.osgi.framework.BundleContext;
-
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 
 public class MessageBusAppImplModuleFactoryTest {
 

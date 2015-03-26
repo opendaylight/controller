@@ -19,7 +19,7 @@ module messagebus-app-impl {
         base config:module-type;
         config:java-name-prefix MessageBusAppImpl;
     }
-    
+
     augment "/config:modules/config:module/config:configuration" {
         case messagebus-app-impl {
             when "/config:modules/config:module/config:type = 'messagebus-app-impl'";
