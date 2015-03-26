@@ -7,7 +7,20 @@
  */
 package org.opendaylight.controller.messagebus.app.impl;
 
-import com.google.common.base.Optional;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.notNull;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -22,7 +35,12 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
 import org.opendaylight.controller.md.sal.dom.api.DOMNotificationPublishService;
+import org.opendaylight.controller.messagebus.api.EventSource;
+import org.opendaylight.controller.messagebus.api.EventSourceRegistration;
+import org.opendaylight.controller.messagebus.api.EventSourceRegistry;
+import org.opendaylight.controller.messagebus.eventsources.netconf.NetconfEventSourceManager;
 import org.opendaylight.controller.sal.binding.api.RpcConsumerRegistry;
+import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf.notification._1._0.rev080714.NotificationsService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.topology.rev150114.NetconfNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.topology.rev150114.NetconfNodeFields;
@@ -34,31 +52,19 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.notNull;
+import com.google.common.base.Optional;
 
 public class NetconfEventSourceManagerTest {
 
+    private static final String notification_capability_prefix = "(urn:ietf:params:xml:ns:netconf:notification";
     NetconfEventSourceManager netconfEventSourceManager;
     ListenerRegistration listenerRegistrationMock;
     DOMMountPointService domMountPointServiceMock;
     MountPointService mountPointServiceMock;
     EventSourceTopology eventSourceTopologyMock;
     AsyncDataChangeEvent asyncDataChangeEventMock;
-
+    RpcProviderRegistry rpcProviderRegistryMock;
+    EventSourceRegistry eventSourceRegistry;
     @BeforeClass
     public static void initTestClass() throws IllegalAccessException, InstantiationException {
     }
@@ -70,58 +76,76 @@ public class NetconfEventSourceManagerTest {
         domMountPointServiceMock = mock(DOMMountPointService.class);
         mountPointServiceMock = mock(MountPointService.class);
         eventSourceTopologyMock = mock(EventSourceTopology.class);
+        rpcProviderRegistryMock = mock(RpcProviderRegistry.class);
+        eventSourceRegistry = mock(EventSourceRegistry.class);
         List<NamespaceToStream> namespaceToStreamList = new ArrayList<>();
 
         listenerRegistrationMock = mock(ListenerRegistration.class);
         doReturn(listenerRegistrationMock).when(dataBrokerMock).registerDataChangeListener(eq(LogicalDatastoreType.OPERATIONAL), any(InstanceIdentifier.class), any(NetconfEventSourceManager.class), eq(AsyncDataBroker.DataChangeScope.SUBTREE));
 
-        netconfEventSourceManager = new NetconfEventSourceManager(dataBrokerMock, domNotificationPublishServiceMock, domMountPointServiceMock,
-                mountPointServiceMock, eventSourceTopologyMock, namespaceToStreamList);
+        netconfEventSourceManager =
+                NetconfEventSourceManager.create(dataBrokerMock,
+                                                 domNotificationPublishServiceMock,
+                                                 domMountPointServiceMock,
+                                                 mountPointServiceMock,
+                                                 eventSourceRegistry,
+                                                 namespaceToStreamList);
     }
 
     @Test
-    public void constructorTest() {
-        assertNotNull("Instance has not been created correctly.", netconfEventSourceManager);
-    }
-
-    @Test
-    public void onDataChangedTest() {
-        AsyncDataChangeEvent asyncDataChangeEventMock = mock(AsyncDataChangeEvent.class);
-        Map<InstanceIdentifier, DataObject> map = new HashMap<>();
-        InstanceIdentifier instanceIdentifierMock = mock(InstanceIdentifier.class);
-        Node dataObjectMock = mock(Node.class);
-        map.put(instanceIdentifierMock, dataObjectMock);
-        doReturn(map).when(asyncDataChangeEventMock).getCreatedData();
-        doReturn(map).when(asyncDataChangeEventMock).getUpdatedData();
+    public void onDataChangedCreateEventSourceTestByCreateEntry() throws InterruptedException, ExecutionException {
+        onDataChangedTestHelper(true,false,true,notification_capability_prefix);
         netconfEventSourceManager.onDataChanged(asyncDataChangeEventMock);
-        verify(dataObjectMock, times(2)).getAugmentation(NetconfNode.class);
+        verify(eventSourceRegistry, times(1)).registerEventSource(any(EventSource.class));
     }
 
     @Test
-    public void onDataChangedCreateEventSourceTest() {
-        onDataChangedCreateEventSourceTestHelper();
+    public void onDataChangedCreateEventSourceTestByUpdateEntry() throws InterruptedException, ExecutionException {
+        onDataChangedTestHelper(false,true,true, notification_capability_prefix);
         netconfEventSourceManager.onDataChanged(asyncDataChangeEventMock);
-        verify(eventSourceTopologyMock, times(1)).register(any(Node.class), any(NetconfEventSource.class));
+        verify(eventSourceRegistry, times(1)).registerEventSource(any(EventSource.class));
     }
 
-    private void onDataChangedCreateEventSourceTestHelper(){
+    @Test
+    public void onDataChangedCreateEventSourceTestNotNeconf() throws InterruptedException, ExecutionException {
+        onDataChangedTestHelper(false,true,false,notification_capability_prefix);
+        netconfEventSourceManager.onDataChanged(asyncDataChangeEventMock);
+        verify(eventSourceRegistry, times(0)).registerEventSource(any(EventSource.class));
+    }
+
+    @Test
+    public void onDataChangedCreateEventSourceTestNotNotificationCapability() throws InterruptedException, ExecutionException {
+        onDataChangedTestHelper(false,true,true,"bad-prefix");
+        netconfEventSourceManager.onDataChanged(asyncDataChangeEventMock);
+        verify(eventSourceRegistry, times(0)).registerEventSource(any(EventSource.class));
+    }
+
+    private void onDataChangedTestHelper(boolean create, boolean update, boolean isNetconf, String notificationCapabilityPrefix) throws InterruptedException, ExecutionException{
         asyncDataChangeEventMock = mock(AsyncDataChangeEvent.class);
-        Map<InstanceIdentifier, DataObject> map = new HashMap<>();
+        Map<InstanceIdentifier, DataObject> mapCreate = new HashMap<>();
+        Map<InstanceIdentifier, DataObject> mapUpdate = new HashMap<>();
         InstanceIdentifier instanceIdentifierMock = mock(InstanceIdentifier.class);
         Node dataObjectMock = mock(Node.class);
-        map.put(instanceIdentifierMock, dataObjectMock);
-        doReturn(map).when(asyncDataChangeEventMock).getCreatedData();
-        doReturn(map).when(asyncDataChangeEventMock).getUpdatedData();
-
+        if(create){
+            mapCreate.put(instanceIdentifierMock, dataObjectMock);
+        }
+        if(update){
+            mapUpdate.put(instanceIdentifierMock, dataObjectMock);
+        }
+        doReturn(mapCreate).when(asyncDataChangeEventMock).getCreatedData();
+        doReturn(mapUpdate).when(asyncDataChangeEventMock).getUpdatedData();
         NetconfNode netconfNodeMock = mock(NetconfNode.class);
         AvailableCapabilities availableCapabilitiesMock = mock(AvailableCapabilities.class);
-        doReturn(netconfNodeMock).when(dataObjectMock).getAugmentation(NetconfNode.class);
-        doReturn(availableCapabilitiesMock).when(netconfNodeMock).getAvailableCapabilities();
-        List<String> availableCapabilityList = new ArrayList<>();
-        availableCapabilityList.add("(urn:ietf:params:xml:ns:netconf:notification_availableCapabilityString1");
-        doReturn(availableCapabilityList).when(availableCapabilitiesMock).getAvailableCapability();
-
-        doReturn(NetconfNodeFields.ConnectionStatus.Connected).when(netconfNodeMock).getConnectionStatus();
+        if(isNetconf){
+            doReturn(netconfNodeMock).when(dataObjectMock).getAugmentation(NetconfNode.class);
+            doReturn(availableCapabilitiesMock).when(netconfNodeMock).getAvailableCapabilities();
+            List<String> availableCapabilityList = new ArrayList<>();
+            availableCapabilityList.add(notificationCapabilityPrefix +"_availableCapabilityString1");
+            doReturn(availableCapabilityList).when(availableCapabilitiesMock).getAvailableCapability();
+            doReturn(NetconfNodeFields.ConnectionStatus.Connected).when(netconfNodeMock).getConnectionStatus();
+        } else {
+            doReturn(null).when(dataObjectMock).getAugmentation(NetconfNode.class);
+        }
 
         Optional optionalMock = mock(Optional.class);
         Optional optionalBindingMountMock = mock(Optional.class);
@@ -144,37 +168,8 @@ public class NetconfEventSourceManagerTest {
         doReturn(onlyOptionalMock).when(mountPointMock).getService(RpcConsumerRegistry.class);
         doReturn(rpcConsumerRegistryMock).when(onlyOptionalMock).get();
         doReturn(notificationsServiceMock).when(rpcConsumerRegistryMock).getRpcService(NotificationsService.class);
+        EventSourceRegistration esrMock = mock(EventSourceRegistration.class);
+        doReturn(esrMock).when(eventSourceRegistry).registerEventSource(any(EventSource.class));
     }
 
-    @Test
-    public void isEventSourceTest() {
-        Node nodeMock = mock(Node.class);
-        NetconfNode netconfNodeMock = mock(NetconfNode.class);
-        AvailableCapabilities availableCapabilitiesMock = mock(AvailableCapabilities.class);
-        doReturn(netconfNodeMock).when(nodeMock).getAugmentation(NetconfNode.class);
-        doReturn(availableCapabilitiesMock).when(netconfNodeMock).getAvailableCapabilities();
-        List<String> availableCapabilityList = new ArrayList<>();
-        availableCapabilityList.add("(urn:ietf:params:xml:ns:netconf:notification_availableCapabilityString1");
-        doReturn(availableCapabilityList).when(availableCapabilitiesMock).getAvailableCapability();
-        assertTrue("Method has not been run correctly.", netconfEventSourceManager.isEventSource(nodeMock));
-    }
-
-    @Test
-    public void isNotEventSourceTest() {
-        Node nodeMock = mock(Node.class);
-        NetconfNode netconfNodeMock = mock(NetconfNode.class);
-        AvailableCapabilities availableCapabilitiesMock = mock(AvailableCapabilities.class);
-        doReturn(netconfNodeMock).when(nodeMock).getAugmentation(NetconfNode.class);
-        doReturn(availableCapabilitiesMock).when(netconfNodeMock).getAvailableCapabilities();
-        List<String> availableCapabilityList = new ArrayList<>();
-        availableCapabilityList.add("availableCapabilityString1");
-        doReturn(availableCapabilityList).when(availableCapabilitiesMock).getAvailableCapability();
-        assertFalse("Method has not been run correctly.", netconfEventSourceManager.isEventSource(nodeMock));
-    }
-
-    @Test
-    public void closeTest() {
-        netconfEventSourceManager.close();
-        verify(listenerRegistrationMock, times(1)).close();
-    }
 }

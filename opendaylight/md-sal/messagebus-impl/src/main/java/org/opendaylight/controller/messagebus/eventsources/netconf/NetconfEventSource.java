@@ -6,13 +6,16 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.messagebus.app.impl;
+package org.opendaylight.controller.messagebus.eventsources.netconf;
+
+import static com.google.common.util.concurrent.Futures.immediateFuture;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.Future;
 import java.util.regex.Pattern;
@@ -30,21 +33,27 @@ import org.opendaylight.controller.md.sal.dom.api.DOMNotificationListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMNotificationPublishService;
 import org.opendaylight.controller.md.sal.dom.api.DOMNotificationService;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
+import org.opendaylight.controller.messagebus.api.EventSource;
+import org.opendaylight.controller.messagebus.app.impl.TopicDOMNotification;
+import org.opendaylight.controller.messagebus.app.impl.Util;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
-import org.opendaylight.controller.sal.binding.api.RpcConsumerRegistry;
 import org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventaggregator.rev141202.NotificationPattern;
+import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventaggregator.rev141202.TopicId;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventaggregator.rev141202.TopicNotification;
-import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventsource.rev141202.EventSourceService;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventsource.rev141202.JoinTopicInput;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventsource.rev141202.JoinTopicOutput;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventsource.rev141202.JoinTopicOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventsource.rev141202.JoinTopicStatus;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf.notification._1._0.rev080714.CreateSubscriptionInput;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf.notification._1._0.rev080714.NotificationsService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.inventory.rev140108.NetconfNode;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node;
+import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.NodeKey;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
@@ -63,7 +72,7 @@ import org.w3c.dom.Element;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 
-public class NetconfEventSource implements EventSourceService, DOMNotificationListener, DataChangeListener {
+public class NetconfEventSource implements EventSource, DOMNotificationListener, DataChangeListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(NetconfEventSource.class);
 
@@ -74,23 +83,20 @@ public class NetconfEventSource implements EventSourceService, DOMNotificationLi
     private static final NodeIdentifier STREAM_QNAME = new NodeIdentifier(QName.create(CreateSubscriptionInput.QNAME,"stream"));
     private static final SchemaPath CREATE_SUBSCRIPTION = SchemaPath.create(true, QName.create(CreateSubscriptionInput.QNAME, "create-subscription"));
 
-
     private final String nodeId;
-
+    private final Node node;
 
     private final DOMMountPoint netconfMount;
     private final DOMNotificationPublishService domPublish;
-    private final NotificationsService notificationRpcService;
-
     private final Set<String> activeStreams = new ConcurrentSkipListSet<>();
 
     private final Map<String, String> urnPrefixToStreamMap;
+    private final ConcurrentHashMap<TopicId,ListenerRegistration<NetconfEventSource>> listenerRegistrationMap = new ConcurrentHashMap<>();
 
-
-    public NetconfEventSource(final String nodeId, final Map<String, String> streamMap, final DOMMountPoint netconfMount, final DOMNotificationPublishService publishService, final MountPoint bindingMount) {
+    public NetconfEventSource(final Node node, final Map<String, String> streamMap, final DOMMountPoint netconfMount, final DOMNotificationPublishService publishService, final MountPoint bindingMount) {
         this.netconfMount = netconfMount;
-        this.notificationRpcService = bindingMount.getService(RpcConsumerRegistry.class).get().getRpcService(NotificationsService.class);
-        this.nodeId = nodeId;
+        this.node = node;
+        this.nodeId = node.getNodeId().getValue();
         this.urnPrefixToStreamMap = streamMap;
         this.domPublish = publishService;
         LOG.info("NetconfEventSource [{}] created.", nodeId);
@@ -99,46 +105,37 @@ public class NetconfEventSource implements EventSourceService, DOMNotificationLi
     @Override
     public Future<RpcResult<JoinTopicOutput>> joinTopic(final JoinTopicInput input) {
         final NotificationPattern notificationPattern = input.getNotificationPattern();
-
-        // FIXME: default language should already be regex
-        final String regex = Util.wildcardToRegex(notificationPattern.getValue());
-
-        final Pattern pattern = Pattern.compile(regex);
-        final List<SchemaPath> matchingNotifications = Util.expandQname(availableNotifications(), pattern);
-        registerNotificationListener(matchingNotifications);
-        final JoinTopicOutput output = new JoinTopicOutputBuilder().build();
-        return com.google.common.util.concurrent.Futures.immediateFuture(RpcResultBuilder.success(output).build());
+        final List<SchemaPath> matchingNotifications = getMatchingNotifications(notificationPattern);
+        return registerNotificationListener(input.getTopicId(),matchingNotifications);
     }
 
-    private List<SchemaPath> availableNotifications() {
-        // FIXME: use SchemaContextListener to get changes asynchronously
-        final Set<NotificationDefinition> availableNotifications = netconfMount.getSchemaContext().getNotifications();
-        final List<SchemaPath> qNs = new ArrayList<>(availableNotifications.size());
-        for (final NotificationDefinition nd : availableNotifications) {
-            qNs.add(nd.getPath());
+    private synchronized Future<RpcResult<JoinTopicOutput>> registerNotificationListener(final TopicId topicId, final List<SchemaPath> notificationsToSubscribe){
+        if(listenerRegistrationMap.containsKey(topicId)){
+            final String errMessage = "Can not join topic twice. Topic " + topicId.getValue() + " has been joined to node " + this.nodeId;
+            return immediateFuture(RpcResultBuilder.<JoinTopicOutput>failed().withError(ErrorType.APPLICATION, errMessage).build());
         }
-        return qNs;
-    }
-
-    private void registerNotificationListener(final List<SchemaPath> notificationsToSubscribe) {
-
+        ListenerRegistration<NetconfEventSource> registration = null;
+        JoinTopicStatus joinTopicStatus = JoinTopicStatus.Down;
         final Optional<DOMNotificationService> notifyService = netconfMount.getService(DOMNotificationService.class);
+
         if(notifyService.isPresent()) {
             for (final SchemaPath qName : notificationsToSubscribe) {
                 startSubscription(qName);
             }
-            // FIXME: Capture registration
-            notifyService.get().registerNotificationListener(this, notificationsToSubscribe);
+            registration = notifyService.get().registerNotificationListener(this, notificationsToSubscribe);
         }
+
+        if(registration != null){
+            listenerRegistrationMap.put(topicId,registration);
+            joinTopicStatus = JoinTopicStatus.Up;
+        }
+        final JoinTopicOutput output = new JoinTopicOutputBuilder().setStatus(joinTopicStatus).build();
+        return immediateFuture(RpcResultBuilder.success(output).build());
     }
 
     private void startSubscription(final SchemaPath path) {
         final String streamName = resolveStream(path.getLastComponent());
-
-        if (streamIsActive(streamName) == false) {
-            LOG.info("Stream {} is not active on node {}. Will subscribe.", streamName, nodeId);
-            startSubscription(streamName);
-        }
+        startSubscription(streamName);
     }
 
     private void resubscribeToActiveStreams() {
@@ -148,11 +145,14 @@ public class NetconfEventSource implements EventSourceService, DOMNotificationLi
     }
 
     private synchronized void startSubscription(final String streamName) {
-        final ContainerNode input = Builders.containerBuilder().withNodeIdentifier(new NodeIdentifier(CreateSubscriptionInput.QNAME))
-            .withChild(ImmutableNodes.leafNode(STREAM_QNAME, streamName))
-            .build();
-        netconfMount.getService(DOMRpcService.class).get().invokeRpc(CREATE_SUBSCRIPTION, input);
-        activeStreams.add(streamName);
+        if(streamIsActive(streamName) == false){
+            LOG.info("Stream {} is not active on node {}. Will subscribe.", streamName, nodeId);
+            final ContainerNode input = Builders.containerBuilder().withNodeIdentifier(new NodeIdentifier(CreateSubscriptionInput.QNAME))
+                    .withChild(ImmutableNodes.leafNode(STREAM_QNAME, streamName))
+                    .build();
+            netconfMount.getService(DOMRpcService.class).get().invokeRpc(CREATE_SUBSCRIPTION, input);
+            activeStreams.add(streamName);
+        }
     }
 
     private String resolveStream(final QName qName) {
@@ -193,7 +193,6 @@ public class NetconfEventSource implements EventSourceService, DOMNotificationLi
         final Document doc = XmlUtil.newDocument();
         final Optional<String> namespace = Optional.of(PAYLOAD_ARG.getNodeType().getNamespace().toString());
         final Element element = XmlUtil.createElement(doc , "payload", namespace);
-
 
         final DOMResult result = new DOMResult(element);
 
@@ -236,6 +235,37 @@ public class NetconfEventSource implements EventSourceService, DOMNotificationLi
 
     private static boolean isNetconfNode(final Map.Entry<InstanceIdentifier<?>, DataObject> changeEntry )  {
         return NetconfNode.class.equals(changeEntry.getKey().getTargetType());
+    }
+
+    private List<SchemaPath> getMatchingNotifications(NotificationPattern notificationPattern){
+        // FIXME: default language should already be regex
+        final String regex = Util.wildcardToRegex(notificationPattern.getValue());
+
+        final Pattern pattern = Pattern.compile(regex);
+        return Util.expandQname(getAvailableNotifications(), pattern);
+    }
+
+    @Override
+    public void close() throws Exception {
+        for(ListenerRegistration<NetconfEventSource> registration : listenerRegistrationMap.values()){
+            registration.close();
+        }
+    }
+
+    @Override
+    public NodeKey getSourceNodeKey(){
+        return node.getKey();
+    }
+
+    @Override
+    public List<SchemaPath> getAvailableNotifications() {
+        // FIXME: use SchemaContextListener to get changes asynchronously
+        final Set<NotificationDefinition> availableNotifications = netconfMount.getSchemaContext().getNotifications();
+        final List<SchemaPath> qNs = new ArrayList<>(availableNotifications.size());
+        for (final NotificationDefinition nd : availableNotifications) {
+            qNs.add(nd.getPath());
+        }
+        return qNs;
     }
 
 }
