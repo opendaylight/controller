@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_7d03980f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 3621
+      },
+      "writtenOn": "2015-03-26T09:22:57Z",
+      "side": 1,
+      "message": "I would re-write that sentence: \"Several network equipments (such as Cisco routers) do not set the namespace attribute (xmlns) in their NETCONF messages. Whether this is valid or not is unclear according to RFC 6241 (NETCONF). This patch improves interoperability by relaxing the constraint for a namespace in NETCONF hello messages.\"",
+      "range": {
+        "startLine": 8,
+        "startChar": 0,
+        "endLine": 10,
+        "endChar": 39
+      },
+      "revId": "eb5c0c9e79fae64b5cca9b7de19564e117216dbf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_bd5b6053",
+        "filename": "opendaylight/netconf/netconf-client/src/main/java/org/opendaylight/controller/netconf/client/NetconfClientSessionNegotiator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 3621
+      },
+      "writtenOn": "2015-03-26T09:22:57Z",
+      "side": 1,
+      "message": "Code style: missing spaces around \"!\u003d\" and \"?\"",
+      "range": {
+        "startLine": 132,
+        "startChar": 15,
+        "endLine": 132,
+        "endChar": 67
+      },
+      "revId": "eb5c0c9e79fae64b5cca9b7de19564e117216dbf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_fd49e88b",
+        "filename": "opendaylight/netconf/netconf-util/src/main/java/org/opendaylight/controller/netconf/util/messages/NetconfHelloMessage.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 3621
+      },
+      "writtenOn": "2015-03-26T09:22:57Z",
+      "side": 1,
+      "message": "Typo error in comment I think: should be accept *if* hello has no namespace.",
+      "range": {
+        "startLine": 97,
+        "startChar": 22,
+        "endLine": 97,
+        "endChar": 24
+      },
+      "revId": "eb5c0c9e79fae64b5cca9b7de19564e117216dbf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_7d55d81b",
+        "filename": "opendaylight/netconf/netconf-util/src/main/java/org/opendaylight/controller/netconf/util/messages/NetconfMessageUtil.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 3621
+      },
+      "writtenOn": "2015-03-26T09:22:57Z",
+      "side": 1,
+      "message": "I would add a comment to clarify this. Something like: \"Look for the \u003ccapabilities\u003e element either with the same namespace as the XML document or with no namespace.\"",
+      "range": {
+        "startLine": 63,
+        "startChar": 8,
+        "endLine": 66,
+        "endChar": 90
+      },
+      "revId": "eb5c0c9e79fae64b5cca9b7de19564e117216dbf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
