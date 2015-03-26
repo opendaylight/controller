@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_959c3cc2",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/api/EventSource.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 2834
+      },
+      "writtenOn": "2015-03-26T11:11:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_29739bea",
+      "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_a92c8bac",
         "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/api/EventSourceRegistry.java",
         "patchSetId": 4
@@ -30,6 +48,30 @@
       "writtenOn": "2015-03-24T05:09:52Z",
       "side": 1,
       "message": "What does RpcService provide here?",
+      "range": {
+        "startLine": 20,
+        "startChar": 17,
+        "endLine": 20,
+        "endChar": 36
+      },
+      "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_84589657",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/api/EventSourceRegistry.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 2834
+      },
+      "writtenOn": "2015-03-26T11:11:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_a92c8bac",
       "range": {
         "startLine": 20,
         "startChar": 17,
@@ -59,6 +101,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_c4e77e11",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/api/EventSourceRegistry.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 2834
+      },
+      "writtenOn": "2015-03-26T11:11:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_e92293b8",
+      "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_892f4fa1",
         "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/api/EventSourceRegistry.java",
         "patchSetId": 4
@@ -70,6 +130,24 @@
       "writtenOn": "2015-03-24T05:09:52Z",
       "side": 1,
       "message": "These methods should return ListenableFuture to make it easier for callers to add async callbacks.\n\nDoes returning RpcResult add any value here? It seems more natural to propagate errors via exceptions - I\u0027ve found RpcResult to be a bit esoteric. I think ListenableFuture\u003cEventSourceRegistration\u003e and ListenableFuture\u003cVoid\u003e are simpler. If you want to propagate a specific exception type then use a CheckedFuture, e.g. CheckedFuture\u003c EventSourceRegistration, EventSourceRegistryException\u003e",
+      "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_e45b9a52",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/api/EventSourceRegistry.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 2834
+      },
+      "writtenOn": "2015-03-26T11:11:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_892f4fa1",
       "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -93,6 +171,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_f55d8016",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/api/EventSourceRegistry.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 2834
+      },
+      "writtenOn": "2015-03-26T11:11:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_c97797d3",
+      "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_09457f6f",
         "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/EventSourceTopology.java",
         "patchSetId": 4
@@ -104,6 +200,24 @@
       "writtenOn": "2015-03-24T05:09:52Z",
       "side": 1,
       "message": "Misspelling - should be \"routedRpcRegistrations\".",
+      "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_c47c5e23",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/EventSourceTopology.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 2834
+      },
+      "writtenOn": "2015-03-26T11:11:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_09457f6f",
       "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -127,6 +241,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_64954a32",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/app/impl/EventSourceTopology.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 191,
+      "author": {
+        "id": 2834
+      },
+      "writtenOn": "2015-03-26T11:11:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_6950c332",
+      "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_e95b7352",
         "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/eventsources/netconf/NetconfEventSource.java",
         "patchSetId": 4
@@ -138,6 +270,24 @@
       "writtenOn": "2015-03-24T05:09:52Z",
       "side": 1,
       "message": "Looks like listenerRegistrations needs to be synchronized. However, the registerNotificationListener interface indicates that \"registering an instance multiple times results in notifications being delivered to each registration\". So if this method is called twice for the same SchemaPath, we would have 2 registrations which I don\u0027t think is desired.\n\nSo similar to what I commented below for streamIsActive, you could use a LoadingCache\u003cSchemaPath, ListenerRegistration\u003cNetconfEventSource\u003e\u003e for listenerRegistrations. You would need to register for each SchemaPath separately instead of passing the entire list in one registerNotificationListener call.",
+      "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_b5edb827",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/eventsources/netconf/NetconfEventSource.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 2834
+      },
+      "writtenOn": "2015-03-26T11:11:27Z",
+      "side": 1,
+      "message": "I have modified registerNotificationListener method and I have changed ListenerRegistration into concurrent hash map. It could by enough to do registration of listener atomically.",
+      "parentUuid": "5a93c517_e95b7352",
       "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -161,6 +311,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_d5e7243f",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/eventsources/netconf/NetconfEventSource.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 2834
+      },
+      "writtenOn": "2015-03-26T11:11:27Z",
+      "side": 1,
+      "message": "Many thanks for advice. I have added conditions streamIsActive() \u003d\u003d false into startSubscription(final String streamName) and removed it from startSubscription(final SchemaPath path). I think, it is enough to solve this sync issue. Your recommendation is nice and elegant, but I chose this simple solution in this time. It could be refactored in the future, of course.",
+      "parentUuid": "5a93c517_c95eb745",
+      "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_29415b5a",
         "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/eventsources/netconf/NetconfEventSourceManager.java",
         "patchSetId": 4
@@ -172,6 +340,24 @@
       "writtenOn": "2015-03-24T05:09:52Z",
       "side": 1,
       "message": "This probably should be declared volatile to ensure immediate thread visibility.",
+      "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_3838c69f",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/eventsources/netconf/NetconfEventSourceManager.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 2834
+      },
+      "writtenOn": "2015-03-26T11:11:27Z",
+      "side": 1,
+      "message": "Implementation has been changed, EventSourceRegistry is injected by constructor as a final. Volatile is not need.",
+      "parentUuid": "5a93c517_29415b5a",
       "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -201,6 +387,30 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_78be4e01",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/eventsources/netconf/NetconfEventSourceManager.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 2834
+      },
+      "writtenOn": "2015-03-26T11:11:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_09133f67",
+      "range": {
+        "startLine": 178,
+        "startChar": 47,
+        "endLine": 178,
+        "endChar": 66
+      },
+      "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_691e8372",
         "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/registry/EventSourceRegistration.java",
         "patchSetId": 4
@@ -218,6 +428,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_98523adc",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/registry/EventSourceRegistration.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 2834
+      },
+      "writtenOn": "2015-03-26T11:11:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_691e8372",
+      "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_49194787",
         "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/registry/EventSourceRegistration.java",
         "patchSetId": 4
@@ -229,6 +457,24 @@
       "writtenOn": "2015-03-24T05:09:52Z",
       "side": 1,
       "message": "Java docs?",
+      "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_f58b4066",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/registry/EventSourceRegistration.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 2834
+      },
+      "writtenOn": "2015-03-26T11:11:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_49194787",
       "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -258,6 +504,30 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_5864b2b8",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/registry/EventSourceRegistryImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 2834
+      },
+      "writtenOn": "2015-03-26T11:11:27Z",
+      "side": 1,
+      "message": "method has been removed",
+      "parentUuid": "5a93c517_c92557c3",
+      "range": {
+        "startLine": 45,
+        "startChar": 17,
+        "endLine": 45,
+        "endChar": 36
+      },
+      "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_e9093332",
         "filename": "opendaylight/md-sal/messagebus-impl/src/test/java/org/opendaylight/controller/messagebus/app/impl/NetconfEventSourceManagerTest.java",
         "patchSetId": 4
@@ -269,6 +539,24 @@
       "writtenOn": "2015-03-24T05:09:52Z",
       "side": 1,
       "message": "Optional is a simple class - don\u0027t really need to mock it.",
+      "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_b59ff8b3",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/test/java/org/opendaylight/controller/messagebus/app/impl/NetconfEventSourceManagerTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 2834
+      },
+      "writtenOn": "2015-03-26T11:11:27Z",
+      "side": 1,
+      "message": "We use mock because we use it with advantage in mockito doReturn methods.",
+      "parentUuid": "5a93c517_e9093332",
       "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -292,6 +580,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_75a970de",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/test/java/org/opendaylight/controller/messagebus/app/impl/NetconfEventSourceManagerTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 2834
+      },
+      "writtenOn": "2015-03-26T11:11:27Z",
+      "side": 1,
+      "message": "I have tried add several blank lines to separate related sections of code.",
+      "parentUuid": "5a93c517_c90c7745",
+      "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_89066f1f",
         "filename": "opendaylight/md-sal/messagebus-impl/src/test/java/org/opendaylight/controller/messagebus/app/impl/NetconfEventSourceManagerTest.java",
         "patchSetId": 4
@@ -303,6 +609,24 @@
       "writtenOn": "2015-03-24T05:09:52Z",
       "side": 1,
       "message": "It looks like the main purpose of onDataChanged is to register EventSources so you should verify registerEventSource gets called appropriately.\n\nWould also be useful to call close and verify close is called on EventSourceRegistration.",
+      "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_35abe8d7",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/test/java/org/opendaylight/controller/messagebus/app/impl/NetconfEventSourceManagerTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 2834
+      },
+      "writtenOn": "2015-03-26T11:11:27Z",
+      "side": 1,
+      "message": "Test has been rewritten.",
+      "parentUuid": "5a93c517_89066f1f",
       "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -326,6 +650,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_d5b9642f",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/test/java/org/opendaylight/controller/messagebus/app/impl/NetconfEventSourceManagerTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 2834
+      },
+      "writtenOn": "2015-03-26T11:11:27Z",
+      "side": 1,
+      "message": "Test has been rewritten.",
+      "parentUuid": "5a93c517_a9032b0e",
+      "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_44004e01",
         "filename": "opendaylight/md-sal/messagebus-impl/src/test/java/org/opendaylight/controller/messagebus/app/impl/NetconfEventSource_01_Test.java",
         "patchSetId": 4
@@ -337,6 +679,24 @@
       "writtenOn": "2015-03-24T05:09:52Z",
       "side": 1,
       "message": "I\u0027m curious why the original test class was split into 2 test classes and what\u0027s the significance of 01 and 02.",
+      "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_f5b4a036",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/test/java/org/opendaylight/controller/messagebus/app/impl/NetconfEventSource_01_Test.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 2834
+      },
+      "writtenOn": "2015-03-26T11:11:27Z",
+      "side": 1,
+      "message": "Test classes has been joined.",
+      "parentUuid": "5a93c517_44004e01",
       "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -360,6 +720,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_b5861864",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/test/java/org/opendaylight/controller/messagebus/app/impl/NetconfEventSource_01_Test.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 2834
+      },
+      "writtenOn": "2015-03-26T11:11:27Z",
+      "side": 1,
+      "message": "We have used static method NetconfEventSource.create before and this method could fail. ConstructorTest was a relict and it was removed.",
+      "parentUuid": "5a93c517_64054a10",
+      "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_040a4621",
         "filename": "opendaylight/md-sal/messagebus-impl/src/test/java/org/opendaylight/controller/messagebus/app/impl/NetconfEventSource_01_Test.java",
         "patchSetId": 4
@@ -371,6 +749,24 @@
       "writtenOn": "2015-03-24T05:09:52Z",
       "side": 1,
       "message": "From where is this expecting an NPE thrown?\n\nNegative tests are fine but we also need a positive test for onNotification, i.e. verify DOMNotificationPublishService#putNotification is called with the correct data.",
+      "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_557d546d",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/test/java/org/opendaylight/controller/messagebus/app/impl/NetconfEventSource_01_Test.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 2834
+      },
+      "writtenOn": "2015-03-26T11:11:27Z",
+      "side": 1,
+      "message": "I have removed this test at this time, we will rewrite it in short future.",
+      "parentUuid": "5a93c517_040a4621",
       "revId": "8d1c7def473c0b20947e0a50a33ac64fc08d966e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
