@@ -194,6 +194,13 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         ShardInformation shardInformation = findShardInformation(leaderStateChanged.getMemberId());
         if(shardInformation != null) {
             shardInformation.setLeaderId(leaderStateChanged.getLeaderId());
+            if (isReadyWithLeaderId()) {
+                LOG.info("{}: All Shards are ready - data store {} is ready, available count is {}",
+                        persistenceId(), type, waitTillReadyCountdownLatch.getCount());
+
+                waitTillReadyCountdownLatch.countDown();
+            }
+
         } else {
             LOG.debug("No shard found with member Id {}", leaderStateChanged.getMemberId());
         }
@@ -236,7 +243,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         if(shardInformation != null) {
             shardInformation.setRole(roleChanged.getNewRole());
 
-            if (isReady()) {
+            if (isReadyWithLeaderId()) {
                 LOG.info("{}: All Shards are ready - data store {} is ready, available count is {}",
                         persistenceId(), type, waitTillReadyCountdownLatch.getCount());
 
@@ -258,10 +265,10 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         return null;
     }
 
-    private boolean isReady() {
+    private boolean isReadyWithLeaderId() {
         boolean isReady = true;
         for (ShardInformation info : localShards.values()) {
-            if(!info.isShardReady()){
+            if(!info.isShardReadyWithLeaderId()){
                 isReady = false;
                 break;
             }

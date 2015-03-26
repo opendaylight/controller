@@ -604,6 +604,8 @@ public class ShardManagerTest extends AbstractActorTest {
                 shardManager.underlyingActor().onReceiveCommand(new RoleChangeNotification(
                         memberId, RaftState.Candidate.name(), RaftState.Leader.name()));
 
+                shardManager.underlyingActor().onReceiveCommand(new LeaderStateChanged(memberId, memberId));
+
                 verify(ready, times(1)).countDown();
 
             }};
