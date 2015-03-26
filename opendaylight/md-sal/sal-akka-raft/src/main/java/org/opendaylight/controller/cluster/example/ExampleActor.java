@@ -19,6 +19,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.example.messages.KeyValue;
 import org.opendaylight.controller.cluster.example.messages.KeyValueSaved;
 import org.opendaylight.controller.cluster.example.messages.PrintRole;
@@ -26,6 +27,7 @@ import org.opendaylight.controller.cluster.example.messages.PrintState;
 import org.opendaylight.controller.cluster.notifications.RoleChangeNotifier;
 import org.opendaylight.controller.cluster.raft.ConfigParams;
 import org.opendaylight.controller.cluster.raft.RaftActor;
+import org.opendaylight.controller.cluster.raft.RaftActorRecoveryCohort;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.behaviors.Leader;
@@ -34,7 +36,7 @@ import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payloa
 /**
  * A sample actor showing how the RaftActor is to be extended
  */
-public class ExampleActor extends RaftActor {
+public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort {
 
     private final Map<String, String> state = new HashMap();
 
@@ -192,22 +194,28 @@ public class ExampleActor extends RaftActor {
     }
 
     @Override
-    protected void startLogRecoveryBatch(int maxBatchSize) {
+    @Nonnull
+    protected RaftActorRecoveryCohort getRaftActorRecoveryCohort() {
+        return this;
     }
 
     @Override
-    protected void appendRecoveredLogEntry(Payload data) {
+    public void startLogRecoveryBatch(int maxBatchSize) {
     }
 
     @Override
-    protected void applyCurrentLogRecoveryBatch() {
+    public void appendRecoveredLogEntry(Payload data) {
     }
 
     @Override
-    protected void onRecoveryComplete() {
+    public void applyCurrentLogRecoveryBatch() {
     }
 
     @Override
-    protected void applyRecoverySnapshot(byte[] snapshot) {
+    public void onRecoveryComplete() {
+    }
+
+    @Override
+    public void applyRecoverySnapshot(byte[] snapshot) {
     }
 }

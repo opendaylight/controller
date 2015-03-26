@@ -13,6 +13,7 @@ import java.util.List;
 import org.opendaylight.controller.cluster.datastore.modification.ModificationPayload;
 import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
 import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils;
+import org.opendaylight.controller.cluster.raft.RaftActorRecoveryCohort;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationByteStringPayload;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationPayload;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
@@ -32,7 +33,7 @@ import org.slf4j.Logger;
  *
  * @author Thomas Panetelis
  */
-class ShardRecoveryCoordinator {
+class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
 
     private final InMemoryDOMDataStore store;
     private List<ModificationPayload> currentLogRecoveryBatch;
@@ -45,13 +46,15 @@ class ShardRecoveryCoordinator {
         this.log = log;
     }
 
-    void startLogRecoveryBatch(int maxBatchSize) {
+    @Override
+    public void startLogRecoveryBatch(int maxBatchSize) {
         currentLogRecoveryBatch = Lists.newArrayListWithCapacity(maxBatchSize);
 
         log.debug("{}: starting log recovery batch with max size {}", shardName, maxBatchSize);
     }
 
-    void appendRecoveredLogPayload(Payload payload) {
+    @Override
+    public void appendRecoveredLogEntry(Payload payload) {
         try {
             if(payload instanceof ModificationPayload) {
                 currentLogRecoveryBatch.add((ModificationPayload) payload);
@@ -83,7 +86,8 @@ class ShardRecoveryCoordinator {
     /**
      * Applies the current batched log entries to the data store.
      */
-    void applyCurrentLogRecoveryBatch() {
+    @Override
+    public void applyCurrentLogRecoveryBatch() {
         log.debug("{}: Applying current log recovery batch with size {}", shardName, currentLogRecoveryBatch.size());
 
         DOMStoreWriteTransaction writeTx = store.newWriteOnlyTransaction();
@@ -105,7 +109,8 @@ class ShardRecoveryCoordinator {
      *
      * @param snapshotBytes the serialized snapshot
      */
-    void applyRecoveredSnapshot(final byte[] snapshotBytes) {
+    @Override
+    public void applyRecoverySnapshot(final byte[] snapshotBytes) {
         log.debug("{}: Applyng recovered sbapshot", shardName);
 
         DOMStoreWriteTransaction writeTx = store.newWriteOnlyTransaction();
