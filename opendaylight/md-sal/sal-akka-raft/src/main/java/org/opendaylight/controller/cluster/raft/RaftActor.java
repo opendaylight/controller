@@ -29,6 +29,8 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
+import org.opendaylight.controller.cluster.DelegatingPersistentDataProvider;
+import org.opendaylight.controller.cluster.NonPersistentDataProvider;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActor;
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.RoleChanged;
@@ -117,6 +119,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
      * only to be consumed by the RaftActorBehaviors
      */
     private final RaftActorContextImpl context;
+
+    private final DelegatingPersistentDataProvider delegatingPersistenceProvider = new DelegatingPersistentDataProvider(null);
 
     private final Procedure<Void> createSnapshotProcedure = new CreateSnapshotProcedure();
 
@@ -587,6 +591,14 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         context.setConfigParams(configParams);
     }
 
+    public final DataPersistenceProvider persistence() {
+        return delegatingPersistenceProvider.getDelegate();
+    }
+
+    public void setPersistence(DataPersistenceProvider provider) {
+        delegatingPersistenceProvider.setDelegate(provider);
+    }
+
     /**
      * setPeerAddress sets the address of a known peer at a later time.
      * <p>
@@ -687,8 +699,6 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
      * isLeader or getLeader to do something useful
      */
     protected abstract void onStateChanged();
-
-    protected abstract DataPersistenceProvider persistence();
 
     /**
      * Notifier Actor for this RaftActor to notify when a role change happens

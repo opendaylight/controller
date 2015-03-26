@@ -57,7 +57,6 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         private TestRaftActor(String id, Map<String, String> peerAddresses, ConfigParams config,
                 TestActorRef<MessageCollectorActor> collectorActor) {
             super(id, peerAddresses, Optional.of(config), null);
-            dataPersistenceProvider = new PersistentDataProvider();
             this.collectorActor = collectorActor;
         }
 
