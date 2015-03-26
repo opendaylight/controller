@@ -24,16 +24,21 @@ public interface SnapshotState {
      *
      * @param lastLogEntry the last entry in the replicated log
      * @param replicatedToAllIndex the current replicatedToAllIndex
+     *
+     * @return true if capture was started
      */
-    void capture(ReplicatedLogEntry lastLogEntry, long replicatedToAllIndex);
+    boolean capture(ReplicatedLogEntry lastLogEntry, long replicatedToAllIndex);
 
     /**
      * Initiate capture snapshot for the purposing of installing that snapshot
      *
      * @param lastLogEntry
      * @param replicatedToAllIndex
+     * @param targetFollower
+     *
+     * @return true if capture was started
      */
-    void captureToInstall(ReplicatedLogEntry lastLogEntry, long replicatedToAllIndex);
+    boolean captureToInstall(ReplicatedLogEntry lastLogEntry, long replicatedToAllIndex, String targetFollower);
 
     /**
      * Create the snapshot
@@ -48,8 +53,10 @@ public interface SnapshotState {
      * @param persistenceProvider
      * @param snapshotBytes
      * @param currentBehavior
+     * @param totalMemory
      */
-    void persist(DataPersistenceProvider persistenceProvider, byte[] snapshotBytes, RaftActorBehavior currentBehavior);
+    void persist(DataPersistenceProvider persistenceProvider, byte[] snapshotBytes, RaftActorBehavior currentBehavior
+            ,long totalMemory);
 
     /**
      * Commit the snapshot by trimming the log
@@ -70,5 +77,5 @@ public interface SnapshotState {
      * @param desiredTrimIndex
      * @return the actual trim index
      */
-    long trimLog(long desiredTrimIndex);
+    long trimLog(long desiredTrimIndex, RaftActorBehavior currentBehavior);
 }

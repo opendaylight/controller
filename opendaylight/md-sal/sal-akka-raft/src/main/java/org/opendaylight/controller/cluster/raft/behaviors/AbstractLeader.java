@@ -33,7 +33,6 @@ import org.opendaylight.controller.cluster.raft.FollowerLogInformationImpl;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
-import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.Replicate;
 import org.opendaylight.controller.cluster.raft.base.messages.SendHeartBeat;
 import org.opendaylight.controller.cluster.raft.base.messages.SendInstallSnapshot;
@@ -235,7 +234,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             applyLogToStateMachine(context.getCommitIndex());
         }
 
-        if (!context.isSnapshotCaptureInitiated()) {
+        if (!context.getSnapshotManager().isCapturing()) {
             purgeInMemoryLog();
         }
 
@@ -388,7 +387,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                 followerToSnapshot.markSendStatus(false);
             }
 
-            if (wasLastChunk && !context.isSnapshotCaptureInitiated()) {
+            if (wasLastChunk && !context.getSnapshotManager().isCapturing()) {
                 // Since the follower is now caught up try to purge the log.
                 purgeInMemoryLog();
             } else if (!wasLastChunk && followerToSnapshot.canSendNextChunk()) {
@@ -491,7 +490,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                         sendAppendEntries = true;
                     }
                 } else if (isFollowerActive && followerNextIndex >= 0 &&
-                    leaderLastIndex > followerNextIndex && !context.isSnapshotCaptureInitiated()) {
+                    leaderLastIndex > followerNextIndex && !context.getSnapshotManager().isCapturing()) {
                     // if the followers next index is not present in the leaders log, and
                     // if the follower is just not starting and if leader's index is more than followers index
                     // then snapshot should be sent
@@ -562,37 +561,10 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                 final ActorSelection followerActor = context.getPeerActorSelection(followerId);
                 sendSnapshotChunk(followerActor, followerId);
 
-            } else if (!context.isSnapshotCaptureInitiated()) {
 
-                ReplicatedLogEntry lastAppliedEntry = context.getReplicatedLog().get(context.getLastApplied());
-                long lastAppliedIndex = -1;
-                long lastAppliedTerm = -1;
-
-                if (lastAppliedEntry != null) {
-                    lastAppliedIndex = lastAppliedEntry.getIndex();
-                    lastAppliedTerm = lastAppliedEntry.getTerm();
-                } else if (context.getReplicatedLog().getSnapshotIndex() > -1) {
-                    lastAppliedIndex = context.getReplicatedLog().getSnapshotIndex();
-                    lastAppliedTerm = context.getReplicatedLog().getSnapshotTerm();
-                }
-
-                boolean isInstallSnapshotInitiated = true;
-                long replicatedToAllIndex = super.getReplicatedToAllIndex();
-                ReplicatedLogEntry replicatedToAllEntry = context.getReplicatedLog().get(replicatedToAllIndex);
-
-                CaptureSnapshot captureSnapshot = new CaptureSnapshot(
-                        lastIndex(), lastTerm(), lastAppliedIndex, lastAppliedTerm,
-                        (replicatedToAllEntry != null ? replicatedToAllEntry.getIndex() : -1),
-                        (replicatedToAllEntry != null ? replicatedToAllEntry.getTerm() : -1),
-                        isInstallSnapshotInitiated);
-
-                if(LOG.isDebugEnabled()) {
-                    LOG.debug("{}: Initiating install snapshot to follower {}: {}", logName(), followerId,
-                            captureSnapshot);
-                }
-
-                actor().tell(captureSnapshot, actor());
-                context.setSnapshotCaptureInitiated(true);
+            } else {
+                context.getSnapshotManager().captureToInstall(context.getReplicatedLog().last(),
+                        this.getReplicatedToAllIndex(), followerId);
             }
         }
     }

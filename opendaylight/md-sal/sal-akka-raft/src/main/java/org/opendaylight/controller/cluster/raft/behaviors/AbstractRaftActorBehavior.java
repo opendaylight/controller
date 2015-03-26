@@ -460,31 +460,10 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      * @param snapshotCapturedIndex
      */
     protected void performSnapshotWithoutCapture(final long snapshotCapturedIndex) {
-        //  we would want to keep the lastApplied as its used while capturing snapshots
-        long lastApplied = context.getLastApplied();
-        long tempMin = Math.min(snapshotCapturedIndex, (lastApplied > -1 ? lastApplied - 1 : -1));
+        long actualIndex = context.getSnapshotManager().trimLog(snapshotCapturedIndex, this);
 
-        if(LOG.isTraceEnabled()) {
-            LOG.trace("{}: performSnapshotWithoutCapture: snapshotCapturedIndex: {}, lastApplied: {}, tempMin: {}",
-                    logName, snapshotCapturedIndex, lastApplied, tempMin);
-        }
-
-        if (tempMin > -1 && context.getReplicatedLog().isPresent(tempMin))  {
-            LOG.debug("{}: fakeSnapshot purging log to {} for term {}", logName(), tempMin,
-                    context.getTermInformation().getCurrentTerm());
-
-            //use the term of the temp-min, since we check for isPresent, entry will not be null
-            ReplicatedLogEntry entry = context.getReplicatedLog().get(tempMin);
-            context.getReplicatedLog().snapshotPreCommit(tempMin, entry.getTerm());
-            context.getReplicatedLog().snapshotCommit();
-            setReplicatedToAllIndex(tempMin);
-        } else if(tempMin > getReplicatedToAllIndex()) {
-            // It's possible a follower was lagging and an install snapshot advanced its match index past
-            // the current replicatedToAllIndex. Since the follower is now caught up we should advance the
-            // replicatedToAllIndex (to tempMin). The fact that tempMin wasn't found in the log is likely
-            // due to a previous snapshot triggered by the memory threshold exceeded, in that case we
-            // trim the log to the last applied index even if previous entries weren't replicated to all followers.
-            setReplicatedToAllIndex(tempMin);
+        if(actualIndex != -1){
+            setReplicatedToAllIndex(actualIndex);
         }
     }
 
