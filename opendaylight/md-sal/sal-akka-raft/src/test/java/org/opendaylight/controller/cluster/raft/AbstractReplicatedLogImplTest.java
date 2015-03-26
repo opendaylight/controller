@@ -11,6 +11,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import akka.japi.Procedure;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -219,6 +220,10 @@ public class AbstractReplicatedLogImplTest {
 
         public List<ReplicatedLogEntry> getEntriesTill(final int index) {
             return journal.subList(0, index);
+        }
+
+        @Override
+        public void appendAndPersist(ReplicatedLogEntry replicatedLogEntry, Procedure<ReplicatedLogEntry> callback) {
         }
     }
 }
