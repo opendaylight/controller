@@ -14,6 +14,8 @@ import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.actor.UntypedActorContext;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Supplier;
 import java.util.Map;
 import org.slf4j.Logger;
 
@@ -39,25 +41,22 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     private ConfigParams configParams;
 
-    private boolean snapshotCaptureInitiated;
+    @VisibleForTesting
+    private Supplier<Long> totalMemoryRetriever;
 
     // Snapshot manager will need to be created on demand as it needs raft actor context which cannot
     // be passed to it in the constructor
     private SnapshotManager snapshotManager;
 
-    public RaftActorContextImpl(ActorRef actor, UntypedActorContext context,
-        String id,
-        ElectionTerm termInformation, long commitIndex,
-        long lastApplied, ReplicatedLog replicatedLog,
-        Map<String, String> peerAddresses, ConfigParams configParams,
-        Logger logger) {
+    public RaftActorContextImpl(ActorRef actor, UntypedActorContext context, String id,
+            ElectionTerm termInformation, long commitIndex, long lastApplied, Map<String, String> peerAddresses,
+            ConfigParams configParams, Logger logger) {
         this.actor = actor;
         this.context = context;
         this.id = id;
         this.termInformation = termInformation;
         this.commitIndex = commitIndex;
         this.lastApplied = lastApplied;
-        this.replicatedLog = replicatedLog;
         this.peerAddresses = peerAddresses;
         this.configParams = configParams;
         this.LOG = logger;
@@ -161,10 +160,26 @@ public class RaftActorContextImpl implements RaftActorContext {
         peerAddresses.put(peerId, peerAddress);
     }
 
+    @Override
     public SnapshotManager getSnapshotManager() {
         if(snapshotManager == null){
             snapshotManager = new SnapshotManager(this, LOG);
         }
         return snapshotManager;
+    }
+
+    @Override
+    public long getTotalMemory() {
+        return totalMemoryRetriever != null ? totalMemoryRetriever.get() : Runtime.getRuntime().totalMemory();
+    }
+
+    @Override
+    public void setTotalMemoryRetriever(Supplier<Long> retriever) {
+        totalMemoryRetriever = retriever;
+    }
+
+    @Override
+    public boolean hasFollowers() {
+        return getPeerAddresses().keySet().size() > 0;
     }
 }
