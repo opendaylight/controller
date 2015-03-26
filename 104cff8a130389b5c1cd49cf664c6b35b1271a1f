@@ -125,6 +125,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_7ee14dfd",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 764,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-03-26T22:48:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_23265cb8",
+      "revId": "104cff8a130389b5c1cd49cf664c6b35b1271a1f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_63530418",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
         "patchSetId": 14
@@ -154,6 +172,24 @@
       "side": 1,
       "message": "Unfortunately we cannot *quite* do it, as we are running doTreeChangeListenerRegistration() under lock.",
       "parentUuid": "5a93c517_63530418",
+      "revId": "104cff8a130389b5c1cd49cf664c6b35b1271a1f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_9ed45921",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 984,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-03-26T22:48:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_fbc32f55",
       "revId": "104cff8a130389b5c1cd49cf664c6b35b1271a1f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -281,6 +317,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_de03c1b6",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/RegisterTreeChangeListener.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-03-26T22:48:36Z",
+      "side": 1,
+      "message": "This was a slight mistake. ActorRef is a Serializable, I just mixed up the two types.",
+      "parentUuid": "5a93c517_3b919752",
+      "revId": "104cff8a130389b5c1cd49cf664c6b35b1271a1f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_e348742f",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/RegisterTreeChangeListener.java",
         "patchSetId": 14
@@ -327,6 +381,24 @@
       "writtenOn": "2015-03-23T15:44:24Z",
       "side": 1,
       "message": "See comment re: ActorPath serialization in RegisterTreeChangeListener.",
+      "revId": "104cff8a130389b5c1cd49cf664c6b35b1271a1f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_3e1c2513",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/RegisterTreeChangeListenerReply.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-03-26T22:48:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_a3526cdb",
       "revId": "104cff8a130389b5c1cd49cf664c6b35b1271a1f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
