@@ -18,6 +18,7 @@ import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
+import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableMap;
 import java.util.Collections;
 import java.util.List;
@@ -52,7 +53,6 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         private final TestActorRef<MessageCollectorActor> collectorActor;
         private final Map<Class<?>, Boolean> dropMessages = new ConcurrentHashMap<>();
         private volatile byte[] snapshot;
-        private volatile long mockTotalMemory;
 
         private TestRaftActor(String id, Map<String, String> peerAddresses, ConfigParams config,
                 TestActorRef<MessageCollectorActor> collectorActor) {
@@ -74,13 +74,18 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
             dropMessages.remove(msgClass);
         }
 
-        void setMockTotalMemory(long mockTotalMemory) {
-            this.mockTotalMemory = mockTotalMemory;
-        }
+        void setMockTotalMemory(final long mockTotalMemory) {
+            if(mockTotalMemory > 0) {
+                getRaftActorContext().setTotalMemoryRetriever(new Supplier<Long>() {
+                    @Override
+                    public Long get() {
+                        return mockTotalMemory;
+                    }
 
-        @Override
-        protected long getTotalMemory() {
-            return mockTotalMemory > 0 ? mockTotalMemory : super.getTotalMemory();
+                });
+            } else {
+                getRaftActorContext().setTotalMemoryRetriever(null);
+            }
         }
 
         @Override
