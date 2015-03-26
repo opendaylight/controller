@@ -12,6 +12,8 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Supplier;
 import java.util.Map;
 import org.slf4j.Logger;
 
@@ -167,5 +169,12 @@ public interface RaftActorContext {
     ConfigParams getConfigParams();
 
     SnapshotManager getSnapshotManager();
+
+    boolean hasFollowers();
+
+    long getTotalMemory();
+
+    @VisibleForTesting
+    void setTotalMemoryRetriever(Supplier<Long> retriever);
 
 }
