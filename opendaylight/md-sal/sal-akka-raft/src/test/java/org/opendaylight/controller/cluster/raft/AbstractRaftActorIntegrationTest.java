@@ -119,7 +119,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         }
 
         @Override
-        protected void applyRecoverySnapshot(byte[] bytes) {
+        public void applyRecoverySnapshot(byte[] bytes) {
         }
 
         void setSnapshot(byte[] snapshot) {

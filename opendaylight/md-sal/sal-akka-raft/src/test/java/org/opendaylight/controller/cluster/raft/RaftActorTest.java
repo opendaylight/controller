@@ -49,6 +49,7 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import javax.annotation.Nonnull;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -97,9 +98,10 @@ public class RaftActorTest extends AbstractActorTest {
         InMemorySnapshotStore.clear();
     }
 
-    public static class MockRaftActor extends RaftActor {
+    public static class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort {
 
-        private final RaftActor delegate;
+        private final RaftActor actorDelegate;
+        private final RaftActorRecoveryCohort cohortDelegate;
         private final CountDownLatch recoveryComplete = new CountDownLatch(1);
         private final List<Object> state;
         private ActorRef roleChangeNotifier;
@@ -136,7 +138,8 @@ public class RaftActorTest extends AbstractActorTest {
                              DataPersistenceProvider dataPersistenceProvider) {
             super(id, peerAddresses, config);
             state = new ArrayList<>();
-            this.delegate = mock(RaftActor.class);
+            this.actorDelegate = mock(RaftActor.class);
+            this.cohortDelegate = mock(RaftActorRecoveryCohort.class);
             if(dataPersistenceProvider == null){
                 setPersistence(true);
             } else {
@@ -197,26 +200,32 @@ public class RaftActorTest extends AbstractActorTest {
 
 
         @Override protected void applyState(ActorRef clientActor, String identifier, Object data) {
-            delegate.applyState(clientActor, identifier, data);
+            actorDelegate.applyState(clientActor, identifier, data);
             LOG.info("{}: applyState called", persistenceId());
         }
 
         @Override
-        protected void startLogRecoveryBatch(int maxBatchSize) {
+        @Nonnull
+        protected RaftActorRecoveryCohort getRaftActorRecoveryCohort() {
+            return this;
         }
 
         @Override
-        protected void appendRecoveredLogEntry(Payload data) {
+        public void startLogRecoveryBatch(int maxBatchSize) {
+        }
+
+        @Override
+        public void appendRecoveredLogEntry(Payload data) {
             state.add(data);
         }
 
         @Override
-        protected void applyCurrentLogRecoveryBatch() {
+        public void applyCurrentLogRecoveryBatch() {
         }
 
         @Override
         protected void onRecoveryComplete() {
-            delegate.onRecoveryComplete();
+            actorDelegate.onRecoveryComplete();
             recoveryComplete.countDown();
         }
 
@@ -227,8 +236,8 @@ public class RaftActorTest extends AbstractActorTest {
         }
 
         @Override
-        protected void applyRecoverySnapshot(byte[] bytes) {
-            delegate.applyRecoverySnapshot(bytes);
+        public void applyRecoverySnapshot(byte[] bytes) {
+            cohortDelegate.applyRecoverySnapshot(bytes);
             try {
                 Object data = toObject(bytes);
                 if (data instanceof List) {
@@ -241,16 +250,16 @@ public class RaftActorTest extends AbstractActorTest {
 
         @Override protected void createSnapshot() {
             LOG.info("{}: createSnapshot called", persistenceId());
-            delegate.createSnapshot();
+            actorDelegate.createSnapshot();
         }
 
         @Override protected void applySnapshot(byte [] snapshot) {
             LOG.info("{}: applySnapshot called", persistenceId());
-            delegate.applySnapshot(snapshot);
+            actorDelegate.applySnapshot(snapshot);
         }
 
         @Override protected void onStateChanged() {
-            delegate.onStateChanged();
+            actorDelegate.onStateChanged();
         }
 
         @Override
@@ -516,7 +525,7 @@ public class RaftActorTest extends AbstractActorTest {
 
                 mockRaftActor.onReceiveRecover(new SnapshotOffer(new SnapshotMetadata(persistenceId, 100, 100), snapshot));
 
-                verify(mockRaftActor.delegate).applyRecoverySnapshot(eq(snapshotBytes.toByteArray()));
+                verify(mockRaftActor.cohortDelegate).applyRecoverySnapshot(eq(snapshotBytes.toByteArray()));
 
                 mockRaftActor.onReceiveRecover(new ReplicatedLogImplEntry(0, 1, new MockRaftActorContext.MockPayload("A")));
 
@@ -583,7 +592,7 @@ public class RaftActorTest extends AbstractActorTest {
 
                 mockRaftActor.onReceiveRecover(new SnapshotOffer(new SnapshotMetadata(persistenceId, 100, 100), snapshot));
 
-                verify(mockRaftActor.delegate, times(0)).applyRecoverySnapshot(any(byte[].class));
+                verify(mockRaftActor.cohortDelegate, times(0)).applyRecoverySnapshot(any(byte[].class));
 
                 mockRaftActor.onReceiveRecover(new ReplicatedLogImplEntry(0, 1, new MockRaftActorContext.MockPayload("A")));
 
@@ -810,7 +819,7 @@ public class RaftActorTest extends AbstractActorTest {
 
                 mockRaftActor.getRaftActorContext().getSnapshotManager().capture(lastEntry, replicatedToAllIndex);
 
-                verify(mockRaftActor.delegate).createSnapshot();
+                verify(mockRaftActor.actorDelegate).createSnapshot();
 
                 mockRaftActor.onReceiveCommand(new CaptureSnapshotReply(snapshotBytes.toByteArray()));
 
@@ -860,7 +869,7 @@ public class RaftActorTest extends AbstractActorTest {
 
                 mockRaftActor.onReceiveCommand(new ApplyState(mockActorRef, "apply-state", entry));
 
-                verify(mockRaftActor.delegate).applyState(eq(mockActorRef), eq("apply-state"), anyObject());
+                verify(mockRaftActor.actorDelegate).applyState(eq(mockActorRef), eq("apply-state"), anyObject());
 
             }
         };
@@ -907,7 +916,7 @@ public class RaftActorTest extends AbstractActorTest {
 
                 mockRaftActor.onReceiveCommand(new ApplySnapshot(snapshot));
 
-                verify(mockRaftActor.delegate).applySnapshot(eq(snapshot.getState()));
+                verify(mockRaftActor.actorDelegate).applySnapshot(eq(snapshot.getState()));
 
                 assertTrue("The replicatedLog should have changed",
                         oldReplicatedLog != mockRaftActor.getReplicatedLog());
@@ -1131,7 +1140,7 @@ public class RaftActorTest extends AbstractActorTest {
                         .capture(new MockRaftActorContext.MockReplicatedLogEntry(1, 6,
                                 new MockRaftActorContext.MockPayload("x")), 4);
 
-                verify(leaderActor.delegate).createSnapshot();
+                verify(leaderActor.actorDelegate).createSnapshot();
 
                 assertEquals(8, leaderActor.getReplicatedLog().size());
 
@@ -1230,7 +1239,7 @@ public class RaftActorTest extends AbstractActorTest {
                         new MockRaftActorContext.MockReplicatedLogEntry(1, 5,
                                 new MockRaftActorContext.MockPayload("D")), 4);
 
-                verify(followerActor.delegate).createSnapshot();
+                verify(followerActor.actorDelegate).createSnapshot();
 
                 assertEquals(6, followerActor.getReplicatedLog().size());
 
