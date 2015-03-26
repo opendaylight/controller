@@ -27,6 +27,7 @@ import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.runtime.AbstractFunction1;
 
@@ -117,45 +118,43 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
         if(LOG.isDebugEnabled()) {
             LOG.debug("Tx {} finishCanCommit", transactionId);
         }
-        // The last phase of canCommit is to invoke all the cohort actors asynchronously to perform
-        // their canCommit processing. If any one fails then we'll fail canCommit.
 
-        Future<Iterable<Object>> combinedFuture =
-                invokeCohorts(new CanCommitTransaction(transactionId).toSerializable());
+        Object message = new CanCommitTransaction(transactionId).toSerializable();
 
-        combinedFuture.onComplete(new OnComplete<Iterable<Object>>() {
-            @Override
-            public void onComplete(Throwable failure, Iterable<Object> responses) throws Throwable {
-                if(failure != null) {
-                    if(LOG.isDebugEnabled()) {
-                        LOG.debug("Tx {}: a canCommit cohort Future failed: {}", transactionId, failure);
+        for(ActorSelection cohort : cohorts) {
+            Future<Object> future = actorContext.executeOperationAsync(cohort, message, actorContext.getTransactionCommitOperationTimeout());
+
+            try {
+                Object response = Await.result(future, actorContext.getTransactionCommitOperationTimeout().duration());
+                if (response.getClass().equals(CanCommitTransactionReply.SERIALIZABLE_CLASS)) {
+                    CanCommitTransactionReply reply =
+                            CanCommitTransactionReply.fromSerializable(response);
+                    if (!reply.getCanCommit()) {
+                        LOG.debug("Tx {}: canCommit returning result: {}", transactionId, false);
+                        returnFuture.set(Boolean.FALSE);
+                        return;
                     }
-                    returnFuture.setException(failure);
+                } else {
+                    LOG.error("Unexpected response type {}", response.getClass());
+                    returnFuture.setException(new IllegalArgumentException(
+                            String.format("Unexpected response type %s", response.getClass())));
                     return;
                 }
 
-                boolean result = true;
-                for(Object response: responses) {
-                    if (response.getClass().equals(CanCommitTransactionReply.SERIALIZABLE_CLASS)) {
-                        CanCommitTransactionReply reply =
-                                CanCommitTransactionReply.fromSerializable(response);
-                        if (!reply.getCanCommit()) {
-                            result = false;
-                            break;
-                        }
-                    } else {
-                        LOG.error("Unexpected response type {}", response.getClass());
-                        returnFuture.setException(new IllegalArgumentException(
-                                String.format("Unexpected response type %s", response.getClass())));
-                        return;
-                    }
-                }
+            } catch (Exception failure){
                 if(LOG.isDebugEnabled()) {
-                    LOG.debug("Tx {}: canCommit returning result: {}", transactionId, result);
+                    LOG.debug("Tx {}: a canCommit cohort Future failed: {}", transactionId, failure);
                 }
-                returnFuture.set(Boolean.valueOf(result));
+                returnFuture.setException(failure);
+                return;
             }
-        }, actorContext.getClientDispatcher());
+        }
+
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Tx {}: canCommit returning result: {}", transactionId, true);
+        }
+        returnFuture.set(Boolean.TRUE);
+
     }
 
     private Future<Iterable<Object>> invokeCohorts(Object message) {
