@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.cluster.raft;
 
+import akka.japi.Procedure;
 import java.util.List;
 
 /**
@@ -84,6 +85,8 @@ public interface ReplicatedLog {
      * @param replicatedLogEntry
      */
     void appendAndPersist(final ReplicatedLogEntry replicatedLogEntry);
+
+    void appendAndPersist(ReplicatedLogEntry replicatedLogEntry, Procedure<ReplicatedLogEntry> callback);
 
     /**
      *

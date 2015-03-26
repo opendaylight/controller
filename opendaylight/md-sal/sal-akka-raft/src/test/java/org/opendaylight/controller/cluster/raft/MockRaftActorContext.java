@@ -12,7 +12,9 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
+import akka.japi.Procedure;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Supplier;
 import com.google.protobuf.GeneratedMessage;
 import java.io.Serializable;
 import java.util.HashMap;
@@ -203,6 +205,20 @@ public class MockRaftActorContext implements RaftActorContext {
         this.configParams = configParams;
     }
 
+    @Override
+    public long getTotalMemory() {
+        return Runtime.getRuntime().totalMemory();
+    }
+
+    @Override
+    public void setTotalMemoryRetriever(Supplier<Long> retriever) {
+    }
+
+    @Override
+    public boolean hasFollowers() {
+        return getPeerAddresses().keySet().size() > 0;
+    }
+
     public static class SimpleReplicatedLog extends AbstractReplicatedLogImpl {
         @Override public void appendAndPersist(
             ReplicatedLogEntry replicatedLogEntry) {
@@ -216,6 +232,19 @@ public class MockRaftActorContext implements RaftActorContext {
 
         @Override public void removeFromAndPersist(long index) {
             removeFrom(index);
+        }
+
+        @Override
+        public void appendAndPersist(ReplicatedLogEntry replicatedLogEntry, Procedure<ReplicatedLogEntry> callback) {
+            append(replicatedLogEntry);
+
+            if(callback != null) {
+                try {
+                    callback.apply(replicatedLogEntry);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
