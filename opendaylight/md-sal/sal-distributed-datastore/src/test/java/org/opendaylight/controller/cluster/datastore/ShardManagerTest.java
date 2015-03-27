@@ -639,7 +639,7 @@ public class ShardManagerTest extends AbstractActorTest {
     }
 
     @Test
-    public void testRoleChangeNotificationReleaseReady() throws Exception {
+    public void testRoleChangeNotificationAndLeaderStateChangedReleaseReady() throws Exception {
         new JavaTestKit(getSystem()) {
             {
                 TestActorRef<ShardManager> shardManager = TestActorRef.create(getSystem(), newShardMgrProps());
@@ -648,10 +648,34 @@ public class ShardManagerTest extends AbstractActorTest {
                 shardManager.underlyingActor().onReceiveCommand(new RoleChangeNotification(
                         memberId, RaftState.Candidate.name(), RaftState.Leader.name()));
 
+                verify(ready, never()).countDown();
+
+                shardManager.underlyingActor().onReceiveCommand(new LeaderStateChanged(memberId, memberId));
+
                 verify(ready, times(1)).countDown();
 
             }};
     }
+
+    @Test
+    public void testRoleChangeNotificationToFollowerWithLeaderStateChangedReleaseReady() throws Exception {
+        new JavaTestKit(getSystem()) {
+            {
+                TestActorRef<ShardManager> shardManager = TestActorRef.create(getSystem(), newShardMgrProps());
+
+                String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
+                shardManager.underlyingActor().onReceiveCommand(new RoleChangeNotification(
+                        memberId, null, RaftState.Follower.name()));
+
+                verify(ready, never()).countDown();
+
+                shardManager.underlyingActor().onReceiveCommand(new LeaderStateChanged(memberId, "member-2-shard-default-" + shardMrgIDSuffix));
+
+                verify(ready, times(1)).countDown();
+
+            }};
+    }
+
 
     @Test
     public void testRoleChangeNotificationDoNothingForUnknownShard() throws Exception {
