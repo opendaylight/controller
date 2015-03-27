@@ -28,4 +28,13 @@ public class RoleChanged {
     public String getNewRole() {
         return newRole;
     }
+
+    @Override
+    public String toString() {
+        return "RoleChanged{" +
+                "memberId='" + memberId + '\'' +
+                ", oldRole='" + oldRole + '\'' +
+                ", newRole='" + newRole + '\'' +
+                '}';
+    }
 }

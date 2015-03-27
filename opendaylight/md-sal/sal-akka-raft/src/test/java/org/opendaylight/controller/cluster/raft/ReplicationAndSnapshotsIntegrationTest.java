@@ -62,9 +62,11 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
         // Create the leader and 2 follower actors and verify initial syncing of the followers after leader
         // persistence recovery.
 
-        follower1Actor = newTestRaftActor(follower1Id, null, newFollowerConfigParams());
+        follower1Actor = newTestRaftActor(follower1Id, ImmutableMap.of(leaderId, testActorPath(leaderId),
+                follower2Id, testActorPath(follower2Id)), newFollowerConfigParams());
 
-        follower2Actor = newTestRaftActor(follower2Id, null, newFollowerConfigParams());
+        follower2Actor = newTestRaftActor(follower2Id, ImmutableMap.of(leaderId, testActorPath(leaderId),
+                follower1Id, testActorPath(follower1Id)), newFollowerConfigParams());
 
         peerAddresses = ImmutableMap.<String, String>builder().
                 put(follower1Id, follower1Actor.path().toString()).

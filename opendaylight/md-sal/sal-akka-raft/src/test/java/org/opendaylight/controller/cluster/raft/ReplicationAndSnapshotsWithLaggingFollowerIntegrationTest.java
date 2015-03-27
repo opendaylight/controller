@@ -56,10 +56,11 @@ public class ReplicationAndSnapshotsWithLaggingFollowerIntegrationTest extends A
         InMemoryJournal.addEntry(leaderId, 1, new UpdateElectionTerm(initialTerm, leaderId));
 
         // Create the leader and 2 follower actors.
+        follower1Actor = newTestRaftActor(follower1Id, ImmutableMap.of(leaderId, testActorPath(leaderId),
+                follower2Id, testActorPath(follower2Id)), newFollowerConfigParams());
 
-        follower1Actor = newTestRaftActor(follower1Id, null, newFollowerConfigParams());
-
-        follower2Actor = newTestRaftActor(follower2Id, null, newFollowerConfigParams());
+        follower2Actor = newTestRaftActor(follower2Id, ImmutableMap.of(leaderId, testActorPath(leaderId),
+                follower1Id, testActorPath(follower1Id)), newFollowerConfigParams());
 
         Map<String, String> peerAddresses = ImmutableMap.<String, String>builder().
                 put(follower1Id, follower1Actor.path().toString()).

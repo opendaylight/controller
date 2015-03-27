@@ -31,6 +31,7 @@ import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
 import akka.util.Timeout;
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.google.protobuf.ByteString;
@@ -158,6 +159,16 @@ public class RaftActorTest extends AbstractActorTest {
             }
         }
 
+
+        public void waitUntilLeader(){
+            for(int i = 0;i < 10; i++){
+                if(isLeader()){
+                    break;
+                }
+                Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
+            }
+        }
+
         public List<Object> getState() {
             return state;
         }
@@ -176,6 +187,13 @@ public class RaftActorTest extends AbstractActorTest {
             Optional<ConfigParams> config, ActorRef roleChangeNotifier){
             return Props.create(new MockRaftActorCreator(peerAddresses, id, config, null, roleChangeNotifier));
         }
+
+        public static Props props(final String id, final Map<String, String> peerAddresses,
+                                  Optional<ConfigParams> config, ActorRef roleChangeNotifier,
+                                  DataPersistenceProvider dataPersistenceProvider){
+            return Props.create(new MockRaftActorCreator(peerAddresses, id, config, dataPersistenceProvider, roleChangeNotifier));
+        }
+
 
         @Override protected void applyState(ActorRef clientActor, String identifier, Object data) {
             delegate.applyState(clientActor, identifier, data);
@@ -674,11 +692,13 @@ public class RaftActorTest extends AbstractActorTest {
 
                 mockRaftActor.waitForInitializeBehaviorComplete();
 
+                mockRaftActor.waitUntilLeader();
+
                 mockRaftActor.getReplicatedLog().appendAndPersist(new MockRaftActorContext.MockReplicatedLogEntry(1, 0, mock(Payload.class)));
 
                 mockRaftActor.getRaftActorContext().getReplicatedLog().removeFromAndPersist(0);
 
-                verify(dataPersistenceProvider, times(2)).persist(anyObject(), any(Procedure.class));
+                verify(dataPersistenceProvider, times(3)).persist(anyObject(), any(Procedure.class));
             }
         };
     }
@@ -702,9 +722,11 @@ public class RaftActorTest extends AbstractActorTest {
 
                 mockRaftActor.waitForInitializeBehaviorComplete();
 
+                mockRaftActor.waitUntilLeader();
+
                 mockRaftActor.onReceiveCommand(new ApplyJournalEntries(10));
 
-                verify(dataPersistenceProvider, times(1)).persist(anyObject(), any(Procedure.class));
+                verify(dataPersistenceProvider, times(2)).persist(anyObject(), any(Procedure.class));
 
             }
 
@@ -766,7 +788,7 @@ public class RaftActorTest extends AbstractActorTest {
                 DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
 
                 TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(MockRaftActor.props(persistenceId,
-                        Collections.<String, String>emptyMap(), Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
+                        ImmutableMap.of("leader", "fake/path"), Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
 
                 MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
 
@@ -949,7 +971,7 @@ public class RaftActorTest extends AbstractActorTest {
     }
 
     @Test
-    public void testRaftRoleChangeNotifier() throws Exception {
+    public void testRaftRoleChangeNotifierWhenRaftActorHasNoPeers() throws Exception {
         new JavaTestKit(getSystem()) {{
             TestActorRef<MessageCollectorActor> notifierActor = factory.createTestActor(
                     Props.create(MessageCollectorActor.class));
@@ -958,14 +980,16 @@ public class RaftActorTest extends AbstractActorTest {
             DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
             long heartBeatInterval = 100;
             config.setHeartBeatInterval(FiniteDuration.create(heartBeatInterval, TimeUnit.MILLISECONDS));
-            config.setElectionTimeoutFactor(1);
+            config.setElectionTimeoutFactor(20);
 
             String persistenceId = factory.generateActorId("notifier-");
 
             TestActorRef<MockRaftActor> raftActorRef = factory.createTestActor(MockRaftActor.props(persistenceId,
-                    Collections.<String, String>emptyMap(), Optional.<ConfigParams>of(config), notifierActor), persistenceId);
+                    Collections.<String, String>emptyMap(), Optional.<ConfigParams>of(config), notifierActor,
+                    new NonPersistentProvider()), persistenceId);
 
             List<RoleChanged> matches =  MessageCollectorActor.expectMatching(notifierActor, RoleChanged.class, 3);
+
 
             // check if the notifier got a role change from null to Follower
             RoleChanged raftRoleChanged = matches.get(0);
@@ -1019,6 +1043,49 @@ public class RaftActorTest extends AbstractActorTest {
             leaderStateChange = MessageCollectorActor.expectFirstMatching(notifierActor, LeaderStateChanged.class);
             assertEquals(persistenceId, leaderStateChange.getMemberId());
             assertEquals(newLeaderId, leaderStateChange.getLeaderId());
+        }};
+    }
+
+    @Test
+    public void testRaftRoleChangeNotifierWhenRaftActorHasPeers() throws Exception {
+        new JavaTestKit(getSystem()) {{
+            ActorRef notifierActor = factory.createActor(Props.create(MessageCollectorActor.class));
+            MessageCollectorActor.waitUntilReady(notifierActor);
+
+            DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+            long heartBeatInterval = 100;
+            config.setHeartBeatInterval(FiniteDuration.create(heartBeatInterval, TimeUnit.MILLISECONDS));
+            config.setElectionTimeoutFactor(1);
+
+            String persistenceId = factory.generateActorId("notifier-");
+
+            factory.createActor(MockRaftActor.props(persistenceId,
+                    ImmutableMap.of("leader", "fake/path"), Optional.<ConfigParams>of(config), notifierActor), persistenceId);
+
+            List<RoleChanged> matches =  null;
+            for(int i = 0; i < 5000 / heartBeatInterval; i++) {
+                matches = MessageCollectorActor.getAllMatching(notifierActor, RoleChanged.class);
+                assertNotNull(matches);
+                if(matches.size() == 3) {
+                    break;
+                }
+                Uninterruptibles.sleepUninterruptibly(heartBeatInterval, TimeUnit.MILLISECONDS);
+            }
+
+            assertEquals(2, matches.size());
+
+            // check if the notifier got a role change from null to Follower
+            RoleChanged raftRoleChanged = matches.get(0);
+            assertEquals(persistenceId, raftRoleChanged.getMemberId());
+            assertNull(raftRoleChanged.getOldRole());
+            assertEquals(RaftState.Follower.name(), raftRoleChanged.getNewRole());
+
+            // check if the notifier got a role change from Follower to Candidate
+            raftRoleChanged = matches.get(1);
+            assertEquals(persistenceId, raftRoleChanged.getMemberId());
+            assertEquals(RaftState.Follower.name(), raftRoleChanged.getOldRole());
+            assertEquals(RaftState.Candidate.name(), raftRoleChanged.getNewRole());
+
         }};
     }
 

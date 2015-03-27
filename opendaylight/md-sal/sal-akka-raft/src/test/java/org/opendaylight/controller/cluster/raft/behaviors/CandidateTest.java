@@ -1,12 +1,15 @@
 package org.opendaylight.controller.cluster.raft.behaviors;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.testkit.TestActorRef;
+import com.google.common.base.Stopwatch;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -184,6 +187,20 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest {
         assertEquals("getTerm", 1001, reply.getTerm());
     }
 
+    @Test
+    public void testCandidateSchedulesElectionTimeoutImmediatelyWhenItHasNoPeers(){
+        MockRaftActorContext context = createActorContext();
+
+        Stopwatch stopwatch = Stopwatch.createStarted();
+
+        candidate = createBehavior(context);
+
+        MessageCollectorActor.expectFirstMatching(candidateActor, ElectionTimeout.class);
+
+        long elapsed = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+
+        assertTrue(elapsed < context.getConfigParams().getElectionTimeOutInterval().toMillis());
+    }
 
 
     @Override
