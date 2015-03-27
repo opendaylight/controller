@@ -237,8 +237,8 @@ public class MockRaftActorContext implements RaftActorContext {
             this.size = size;
         }
 
-        @Override public  Map<GeneratedMessage.GeneratedExtension, String> encode() {
-            Map<GeneratedMessage.GeneratedExtension, String> map = new HashMap<GeneratedMessage.GeneratedExtension, String>();
+        @Override public Map<GeneratedMessage.GeneratedExtension<?, ?>, String> encode() {
+            Map<GeneratedMessage.GeneratedExtension<?, ?>, String> map = new HashMap<>();
             map.put(MockPayloadMessages.value, value);
             return map;
         }

@@ -467,7 +467,7 @@ public class NormalizedNodeSerializer {
             return builder.build();
         }
 
-        private NormalizedNode<?, ?> buildDataContainer(DataContainerNodeBuilder builder, NormalizedNodeMessages.Node node){
+        private NormalizedNode<?, ?> buildDataContainer(DataContainerNodeBuilder<?, ?> builder, NormalizedNodeMessages.Node node){
 
             for(NormalizedNodeMessages.Node child : node.getChildList()){
                 builder.withChild((DataContainerChild<?, ?>) deSerialize(child));

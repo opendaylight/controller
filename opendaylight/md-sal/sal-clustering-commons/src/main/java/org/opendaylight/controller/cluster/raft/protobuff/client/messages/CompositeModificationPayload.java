@@ -31,9 +31,9 @@ public class CompositeModificationPayload extends Payload implements
         this.modification = (PersistentMessages.CompositeModification) Preconditions.checkNotNull(modification, "modification should not be null");
     }
 
-    @Override public Map<GeneratedMessage.GeneratedExtension, PersistentMessages.CompositeModification> encode() {
+    @Override public Map<GeneratedMessage.GeneratedExtension<?, ?>, PersistentMessages.CompositeModification> encode() {
         Preconditions.checkState(modification!=null);
-        Map<GeneratedMessage.GeneratedExtension, PersistentMessages.CompositeModification> map = new HashMap<>();
+        Map<GeneratedMessage.GeneratedExtension<?, ?>, PersistentMessages.CompositeModification> map = new HashMap<>();
         map.put(
             org.opendaylight.controller.protobuff.messages.shard.CompositeModificationPayload.modification, this.modification);
         return map;
