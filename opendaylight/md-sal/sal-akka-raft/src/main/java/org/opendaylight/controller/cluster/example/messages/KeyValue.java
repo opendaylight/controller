@@ -53,8 +53,8 @@ public class KeyValue extends Payload implements Serializable {
     }
 
     // override this method to return  the protobuff related extension fields and their values
-    @Override public Map<GeneratedMessage.GeneratedExtension, String> encode() {
-        Map<GeneratedMessage.GeneratedExtension, String> map = new HashMap<>();
+    @Override public Map<GeneratedMessage.GeneratedExtension<?, ?>, String> encode() {
+        Map<GeneratedMessage.GeneratedExtension<?, ?>, String> map = new HashMap<>();
         map.put(KeyValueMessages.key, getKey());
         map.put(KeyValueMessages.value, getValue());
         return map;

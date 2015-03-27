@@ -51,7 +51,7 @@ public class MessageTracker {
 
     private static final Context NO_OP_CONTEXT = new NoOpContext();
 
-    private final Class expectedMessageClass;
+    private final Class<?> expectedMessageClass;
 
     private final long expectedArrivalInterval;
 
@@ -73,7 +73,7 @@ public class MessageTracker {
      * @param expectedArrivalIntervalInMillis The expected arrival interval between two instances of the expected
      *                                        message
      */
-    public MessageTracker(Class expectedMessageClass, long expectedArrivalIntervalInMillis){
+    public MessageTracker(Class<?> expectedMessageClass, long expectedArrivalIntervalInMillis){
         this.expectedMessageClass = expectedMessageClass;
         this.expectedArrivalInterval = expectedArrivalIntervalInMillis;
     }
@@ -120,10 +120,10 @@ public class MessageTracker {
     }
 
     public static class MessageProcessingTime {
-        private final Class messageClass;
+        private final Class<?> messageClass;
         private final long elapsedTimeInNanos;
 
-        MessageProcessingTime(Class messageClass, long elapsedTimeInNanos){
+        MessageProcessingTime(Class<?> messageClass, long elapsedTimeInNanos){
             this.messageClass = messageClass;
             this.elapsedTimeInNanos = elapsedTimeInNanos;
         }
@@ -136,7 +136,7 @@ public class MessageTracker {
                     '}';
         }
 
-        public Class getMessageClass() {
+        public Class<?> getMessageClass() {
             return messageClass;
         }
 

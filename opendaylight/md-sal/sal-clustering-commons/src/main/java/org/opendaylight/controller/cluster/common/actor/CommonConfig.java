@@ -89,7 +89,7 @@ public class CommonConfig extends AbstractConfig {
         return cachedMailBoxPushTimeout;
     }
 
-    public static class Builder<T extends Builder> extends AbstractConfig.Builder<T>{
+    public static class Builder<T extends Builder<T>> extends AbstractConfig.Builder<T>{
 
         public Builder(String actorSystemName) {
             super(actorSystemName);
