@@ -61,7 +61,7 @@ public class SSHTest {
     @AfterClass
     public static void tearDown() throws Exception {
         hashedWheelTimer.stop();
-        nettyGroup.shutdownGracefully().await();
+        nettyGroup.shutdownGracefully().await(5, TimeUnit.SECONDS);
         minaTimerEx.shutdownNow();
         nioExec.shutdownNow();
     }
