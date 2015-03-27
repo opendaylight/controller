@@ -10,21 +10,17 @@ package org.opendaylight.controller.cluster.raft;
 
 import com.google.common.base.Stopwatch;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 
 public class FollowerLogInformationImpl implements FollowerLogInformation {
-    private static final AtomicLongFieldUpdater<FollowerLogInformationImpl> NEXT_INDEX_UPDATER = AtomicLongFieldUpdater.newUpdater(FollowerLogInformationImpl.class, "nextIndex");
-    private static final AtomicLongFieldUpdater<FollowerLogInformationImpl> MATCH_INDEX_UPDATER = AtomicLongFieldUpdater.newUpdater(FollowerLogInformationImpl.class, "matchIndex");
-
     private final String id;
 
     private final Stopwatch stopwatch = Stopwatch.createUnstarted();
 
     private final RaftActorContext context;
 
-    private volatile long nextIndex;
+    private long nextIndex;
 
-    private volatile long matchIndex;
+    private long matchIndex;
 
     private long lastReplicatedIndex = -1L;
 
@@ -39,13 +35,13 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
     }
 
     @Override
-    public long incrNextIndex(){
-        return NEXT_INDEX_UPDATER.incrementAndGet(this);
+    public long incrNextIndex() {
+        return nextIndex++;
     }
 
     @Override
     public long decrNextIndex() {
-        return NEXT_INDEX_UPDATER.decrementAndGet(this);
+        return nextIndex--;
     }
 
     @Override
@@ -60,7 +56,7 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
 
     @Override
     public long incrMatchIndex(){
-        return MATCH_INDEX_UPDATER.incrementAndGet(this);
+        return matchIndex++;
     }
 
     @Override
