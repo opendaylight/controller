@@ -66,7 +66,6 @@ public class ModificationPayload extends Payload implements Externalizable {
         out.write(serializedPayload);
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     @Deprecated
     public <T> Map<GeneratedExtension, T> encode() {

@@ -20,7 +20,7 @@ public abstract class AbstractConfig implements UnifiedConfig {
         return config;
     }
 
-    public static abstract class Builder<T extends Builder>{
+    public static abstract class Builder<T extends Builder<T>> {
         protected Map<String, Object> configHolder;
         protected Config fallback;
 

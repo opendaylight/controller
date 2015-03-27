@@ -47,9 +47,9 @@ public class CompositeModificationByteStringPayload extends Payload implements
 
 
     @Override
-    public Map<GeneratedMessage.GeneratedExtension, PersistentMessages.CompositeModification> encode() {
+    public Map<GeneratedMessage.GeneratedExtension<?, ?>, PersistentMessages.CompositeModification> encode() {
         Preconditions.checkState(byteString!=null);
-        Map<GeneratedMessage.GeneratedExtension, PersistentMessages.CompositeModification> map = new HashMap<>();
+        Map<GeneratedMessage.GeneratedExtension<?, ?>, PersistentMessages.CompositeModification> map = new HashMap<>();
         map.put(org.opendaylight.controller.protobuff.messages.shard.CompositeModificationPayload.modification,
                 getModificationInternal());
         return map;
