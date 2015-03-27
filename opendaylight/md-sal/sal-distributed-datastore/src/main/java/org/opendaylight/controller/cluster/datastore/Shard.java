@@ -18,13 +18,11 @@ import akka.serialization.Serialization;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -51,12 +49,10 @@ import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionR
 import org.opendaylight.controller.cluster.datastore.messages.CreateSnapshot;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionReply;
-import org.opendaylight.controller.cluster.datastore.messages.EnableNotification;
 import org.opendaylight.controller.cluster.datastore.messages.ForwardedReadyTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.PeerAddressResolved;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListener;
-import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListenerReply;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeChangeListener;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
@@ -73,13 +69,11 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationByteStringPayload;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationPayload;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreFactory;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -108,11 +102,6 @@ public class Shard extends RaftActor {
     private final String name;
 
     private final ShardStats shardMBean;
-
-    private final List<ActorSelection> dataChangeListeners =  Lists.newArrayList();
-
-    private final List<DelayedListenerRegistration> delayedListenerRegistrations =
-                                                                       Lists.newArrayList();
 
     private DatastoreContext datastoreContext;
 
@@ -146,6 +135,7 @@ public class Shard extends RaftActor {
     private final String txnDispatcherPath;
 
     private final DataTreeChangeListenerSupport treeChangeSupport = new DataTreeChangeListenerSupport(this);
+    private final DataChangeListenerSupport changeSupport = new DataChangeListenerSupport(this);
 
     protected Shard(final ShardIdentifier name, final Map<String, String> peerAddresses,
             final DatastoreContext datastoreContext, final SchemaContext schemaContext) {
@@ -278,7 +268,7 @@ public class Shard extends RaftActor {
             } else if (CloseTransactionChain.SERIALIZABLE_CLASS.isInstance(message)) {
                 closeTransactionChain(CloseTransactionChain.fromSerializable(message));
             } else if (message instanceof RegisterChangeListener) {
-                registerChangeListener((RegisterChangeListener) message);
+                changeSupport.onMessage((RegisterChangeListener) message, isLeader());
             } else if (message instanceof RegisterDataTreeChangeListener) {
                 treeChangeSupport.onMessage((RegisterDataTreeChangeListener) message, isLeader());
             } else if (message instanceof UpdateSchemaContext) {
@@ -659,58 +649,7 @@ public class Shard extends RaftActor {
         store.onGlobalContextUpdated(schemaContext);
     }
 
-    private void registerChangeListener(final RegisterChangeListener registerChangeListener) {
-
-        LOG.debug("{}: registerDataChangeListener for {}", persistenceId(), registerChangeListener.getPath());
-
-        ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier,
-                                                     NormalizedNode<?, ?>>> registration;
-        if(isLeader()) {
-            registration = doChangeListenerRegistration(registerChangeListener);
-        } else {
-            LOG.debug("{}: Shard is not the leader - delaying registration", persistenceId());
-
-            DelayedListenerRegistration delayedReg =
-                    new DelayedListenerRegistration(registerChangeListener);
-            delayedListenerRegistrations.add(delayedReg);
-            registration = delayedReg;
-        }
-
-        ActorRef listenerRegistration = getContext().actorOf(
-                DataChangeListenerRegistration.props(registration));
-
-        LOG.debug("{}: registerDataChangeListener sending reply, listenerRegistrationPath = {} ",
-                persistenceId(), listenerRegistration.path());
-
-        getSender().tell(new RegisterChangeListenerReply(listenerRegistration), getSelf());
-    }
-
-    private ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier,
-                                               NormalizedNode<?, ?>>> doChangeListenerRegistration(
-            final RegisterChangeListener registerChangeListener) {
-
-        ActorSelection dataChangeListenerPath = getContext().system().actorSelection(
-                registerChangeListener.getDataChangeListenerPath());
-
-        // Notify the listener if notifications should be enabled or not
-        // If this shard is the leader then it will enable notifications else
-        // it will not
-        dataChangeListenerPath.tell(new EnableNotification(true), getSelf());
-
-        // Now store a reference to the data change listener so it can be notified
-        // at a later point if notifications should be enabled or disabled
-        dataChangeListeners.add(dataChangeListenerPath);
-
-        AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> listener =
-                new DataChangeListenerProxy(dataChangeListenerPath);
-
-        LOG.debug("{}: Registering for path {}", persistenceId(), registerChangeListener.getPath());
-
-        return store.registerChangeListener(registerChangeListener.getPath(), listener,
-                registerChangeListener.getScope());
-    }
-
-    private boolean isMetricsCaptureEnabled(){
+    private boolean isMetricsCaptureEnabled() {
         CommonConfig config = new CommonConfig(getContext().system().settings().config());
         return config.isMetricCaptureEnabled();
     }
@@ -837,24 +776,11 @@ public class Shard extends RaftActor {
     @Override
     protected void onStateChanged() {
         boolean isLeader = isLeader();
+        changeSupport.onLeadershipChange(isLeader);
         treeChangeSupport.onLeadershipChange(isLeader);
-        
-        for (ActorSelection dataChangeListener : dataChangeListeners) {
-            dataChangeListener.tell(new EnableNotification(isLeader), getSelf());
-        }
-
-        if(isLeader) {
-            for(DelayedListenerRegistration reg: delayedListenerRegistrations) {
-                if(!reg.isClosed()) {
-                    reg.setDelegate(doChangeListenerRegistration(reg.getRegisterChangeListener()));
-                }
-            }
-
-            delayedListenerRegistrations.clear();
-        }
 
         // If this actor is no longer the leader close all the transaction chains
-        if(!isLeader) {
+        if (!isLeader) {
             if(LOG.isDebugEnabled()) {
                 LOG.debug(
                     "{}: onStateChanged: Closing all transaction chains because shard {} is no longer the leader",
@@ -916,46 +842,5 @@ public class Shard extends RaftActor {
     @VisibleForTesting
     ShardStats getShardMBean() {
         return shardMBean;
-    }
-
-    private static class DelayedListenerRegistration implements
-        ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>> {
-
-        private volatile boolean closed;
-
-        private final RegisterChangeListener registerChangeListener;
-
-        private volatile ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier,
-                                                             NormalizedNode<?, ?>>> delegate;
-
-        DelayedListenerRegistration(final RegisterChangeListener registerChangeListener) {
-            this.registerChangeListener = registerChangeListener;
-        }
-
-        void setDelegate( final ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier,
-                                            NormalizedNode<?, ?>>> registration) {
-            this.delegate = registration;
-        }
-
-        boolean isClosed() {
-            return closed;
-        }
-
-        RegisterChangeListener getRegisterChangeListener() {
-            return registerChangeListener;
-        }
-
-        @Override
-        public AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> getInstance() {
-            return delegate != null ? delegate.getInstance() : null;
-        }
-
-        @Override
-        public void close() {
-            closed = true;
-            if(delegate != null) {
-                delegate.close();
-            }
-        }
     }
 }
