@@ -34,6 +34,24 @@
       "revId": "618ce5791408603871b35e7260ccdb5e9564dd4d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_e94e05c1",
+        "filename": "opendaylight/md-sal/sal-clustering-config/src/main/resources/initial/akka.conf",
+        "patchSetId": 1
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-27T12:51:55Z",
+      "side": 1,
+      "message": "Just wondering if it might useful to call that out. Also for relative - what it\u0027s relative to - I assume KARAF_HOME.",
+      "parentUuid": "5a93c517_9ebd396b",
+      "revId": "618ce5791408603871b35e7260ccdb5e9564dd4d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
