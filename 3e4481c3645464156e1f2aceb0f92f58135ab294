@@ -16,6 +16,41 @@
       "revId": "3e4481c3645464156e1f2aceb0f92f58135ab294",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_49913951",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/ElectionTermImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-27T12:08:12Z",
+      "side": 1,
+      "message": "Yeah eclipse adds that automatically. I can change it back to Cisco b/c I have never touched this code.",
+      "parentUuid": "5a93c517_be1cb578",
+      "revId": "3e4481c3645464156e1f2aceb0f92f58135ab294",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_6983d504",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/ElectionTermImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-27T12:08:12Z",
+      "side": 1,
+      "message": "I shouldn\u0027t be the author either.",
+      "revId": "3e4481c3645464156e1f2aceb0f92f58135ab294",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
