@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_4fd93982",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeChangeListenerActor.java",
+        "patchSetId": 21
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-03-27T17:59:28Z",
+      "side": 1,
+      "message": "Nope, that is a typo",
+      "parentUuid": "5a93c517_2403b443",
+      "revId": "1c7398cdcd432e0d6fa2989819d92621b820f609",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_e4938cf8",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeChangeListenerActor.java",
         "patchSetId": 21
@@ -47,6 +65,24 @@
       "writtenOn": "2015-03-27T16:28:59Z",
       "side": 1,
       "message": "Since we\u0027re moving towards good patterns - we could probably do away with this check if we used the become/unbecome akka pattern http://doc.akka.io/docs/akka/snapshot/scala/actors.html#become-unbecome",
+      "revId": "1c7398cdcd432e0d6fa2989819d92621b820f609",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_6ff435f2",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeChangeListenerActor.java",
+        "patchSetId": 21
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-03-27T17:59:28Z",
+      "side": 1,
+      "message": "Yeah, I suspect a lot of these things follow some sort of pattern/interaction in akka. Unfortunately I am unfamiliar with them :-(",
+      "parentUuid": "5a93c517_e4938cf8",
       "revId": "1c7398cdcd432e0d6fa2989819d92621b820f609",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -70,6 +106,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_2fc5cd8d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeChangeListenerRegistrationActor.java",
+        "patchSetId": 21
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-03-27T17:59:28Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_a4bd846a",
+      "revId": "1c7398cdcd432e0d6fa2989819d92621b820f609",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_24b1748f",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeChangeListenerSupport.java",
         "patchSetId": 21
@@ -81,6 +135,24 @@
       "writtenOn": "2015-03-27T16:28:59Z",
       "side": 1,
       "message": "@Override missing\n\nAlso could we just use the name isLeader for the argument to be consistent with onMessage and also because it seems more natural.",
+      "revId": "1c7398cdcd432e0d6fa2989819d92621b820f609",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_cfd46949",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeChangeListenerSupport.java",
+        "patchSetId": 21
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-03-27T17:59:28Z",
+      "side": 1,
+      "message": "I will add the override and change the name.",
+      "parentUuid": "5a93c517_24b1748f",
       "revId": "1c7398cdcd432e0d6fa2989819d92621b820f609",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -115,6 +187,24 @@
       "writtenOn": "2015-03-27T16:28:59Z",
       "side": 1,
       "message": "We should create the support instance using a factory method. This will make it easy to inject the support instance and make unit testing easy. If we do this then most of our tests will be for the **Support** classes instead of for Shard which is very complex to test today.",
+      "revId": "1c7398cdcd432e0d6fa2989819d92621b820f609",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_6fcbd5a5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 21
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-03-27T17:59:28Z",
+      "side": 1,
+      "message": "I was thinking about the relationship between Shard and the support classes. They only need messages routed to them and need to run in the context of the Shard, e.g. have access to the \u0027actorness\u0027 of Shard. Doesn\u0027t akka give us something we could use (slave actor or similar?).\n\nIn any case, the support classes can now be tested separately, so this should be better a bit anyway.",
+      "parentUuid": "5a93c517_042b1895",
       "revId": "1c7398cdcd432e0d6fa2989819d92621b820f609",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
