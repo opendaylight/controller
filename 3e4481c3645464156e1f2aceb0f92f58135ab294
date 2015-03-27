@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_be1cb578",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/ElectionTermImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-27T10:03:44Z",
+      "side": 1,
+      "message": "I think a lot of the code that is being refactored should have both the Brocade and Cisco copyrights. Thoughts?",
+      "revId": "3e4481c3645464156e1f2aceb0f92f58135ab294",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
