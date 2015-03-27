@@ -8,11 +8,16 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.osgi;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.PackageTranslator;
@@ -23,6 +28,7 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.IdentitySchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.parser.builder.impl.ModuleIdentifierImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,12 +105,31 @@ final class YangStoreSnapshot implements YangStoreContext {
 
     @Override
     public Set<Module> getModules() {
-        return schemaContext.getModules();
+        final Set<Module> modules = Sets.newHashSet(schemaContext.getModules());
+        for (final Module module : schemaContext.getModules()) {
+            modules.addAll(module.getSubmodules());
+        }
+        return modules;
     }
 
     @Override
     public String getModuleSource(final org.opendaylight.yangtools.yang.model.api.ModuleIdentifier moduleIdentifier) {
-        return schemaContext.getModuleSource(moduleIdentifier).get();
+        final Optional<String> moduleSource = schemaContext.getModuleSource(moduleIdentifier);
+        if(moduleSource.isPresent()) {
+            return moduleSource.get();
+        } else {
+            try {
+                return Iterables.find(getModules(), new Predicate<Module>() {
+                    @Override
+                    public boolean apply(final Module input) {
+                        final ModuleIdentifierImpl id = new ModuleIdentifierImpl(input.getName(), Optional.fromNullable(input.getNamespace()), Optional.fromNullable(input.getRevision()));
+                        return id.equals(moduleIdentifier);
+                    }
+                }).getSource();
+            } catch (final NoSuchElementException e) {
+                throw new IllegalArgumentException("Source for yang module " + moduleIdentifier + " not found", e);
+            }
+        }
     }
 
     @Override
