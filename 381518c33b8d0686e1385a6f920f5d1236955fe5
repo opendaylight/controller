@@ -1,0 +1,152 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_fe1b1dc8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DOMDataTreeChangeListenerProxy.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-27T06:39:18Z",
+      "side": 1,
+      "message": "This is named very similar to  DataTreeChangeListenerProxy but this is really a registration class so perhaps rename to DataTreeChangeListenerRegistrationProxy (I think we can drop the DOM prefix to be consistent with DataTreeChangeListenerProxy et al).",
+      "range": {
+        "startLine": 34,
+        "startChar": 12,
+        "endLine": 34,
+        "endChar": 42
+      },
+      "revId": "381518c33b8d0686e1385a6f920f5d1236955fe5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_9e7a19f0",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeChangeListenerRegistration.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-27T06:39:18Z",
+      "side": 1,
+      "message": "Perhaps suffix the class name with Actor as you did with DataTreeChangeListenerActor. This hasn\u0027t been done with other Actor classes but I kind of like the convention.",
+      "revId": "381518c33b8d0686e1385a6f920f5d1236955fe5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_5e8491d3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DelayedTreeListenerRegistration.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-27T06:39:18Z",
+      "side": 1,
+      "message": "Perhaps start the name with DelayedData for consistent naming.",
+      "range": {
+        "startLine": 21,
+        "startChar": 12,
+        "endLine": 21,
+        "endChar": 19
+      },
+      "revId": "381518c33b8d0686e1385a6f920f5d1236955fe5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_3e22e501",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 741,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-27T06:39:18Z",
+      "side": 1,
+      "message": "I think all this code can be moved into the TreeChangeListenerSupport along with delayedTreeListenerRegistrations. That way we won\u0027t be adding much code to Shard. We\u0027ve been slowly moving stuff out of Shard to make it smaller and more manageable.",
+      "revId": "381518c33b8d0686e1385a6f920f5d1236955fe5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_de20a1f9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 886,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-27T06:39:18Z",
+      "side": 1,
+      "message": "I think this could also be moved to TreeChangeListenerSupport.",
+      "revId": "381518c33b8d0686e1385a6f920f5d1236955fe5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_be7d95e9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TreeChangeListenerSupport.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-27T06:39:18Z",
+      "side": 1,
+      "message": "Perhaps prefix the name with Data to be consistent with the other DataTreeChange* classes.",
+      "revId": "381518c33b8d0686e1385a6f920f5d1236955fe5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_7e870dd8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/RegisterTreeChangeListener.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-27T06:39:18Z",
+      "side": 1,
+      "message": "Perhaps start the name with RegisterData for consistent naming.",
+      "revId": "381518c33b8d0686e1385a6f920f5d1236955fe5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_1e6e0930",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/RegisterTreeChangeListenerReply.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-27T06:39:18Z",
+      "side": 1,
+      "message": "Perhaps start the name with RegisterData for consistent naming.",
+      "revId": "381518c33b8d0686e1385a6f920f5d1236955fe5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
