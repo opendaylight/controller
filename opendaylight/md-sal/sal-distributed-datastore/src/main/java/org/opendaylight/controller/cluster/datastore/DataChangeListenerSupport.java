@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.List;
 import akka.actor.ActorRef;
@@ -26,16 +25,15 @@ final class DataChangeListenerSupport extends LeaderLocalDelegateFactory<Registe
     private static final Logger LOG = LoggerFactory.getLogger(DataChangeListenerSupport.class);
     private final List<DelayedListenerRegistration> delayedListenerRegistrations = new ArrayList<>();
     private final List<ActorSelection> dataChangeListeners =  new ArrayList<>();
-    private final Shard shard;
 
     DataChangeListenerSupport(final Shard shard) {
-        this.shard = Preconditions.checkNotNull(shard);
+        super(shard);
     }
 
     @Override
     void onLeadershipChange(final boolean isLeader) {
         for (ActorSelection dataChangeListener : dataChangeListeners) {
-            dataChangeListener.tell(new EnableNotification(isLeader), shard.getSelf());
+            dataChangeListener.tell(new EnableNotification(isLeader), getSelf());
         }
 
         if (isLeader) {
@@ -52,39 +50,37 @@ final class DataChangeListenerSupport extends LeaderLocalDelegateFactory<Registe
     @Override
     void onMessage(final RegisterChangeListener message, final boolean isLeader) {
 
-        LOG.debug("{}: registerDataChangeListener for {}, leader: {}", shard.persistenceId(), message.getPath(), isLeader);
+        LOG.debug("{}: registerDataChangeListener for {}, leader: {}", persistenceId(), message.getPath(), isLeader);
 
         ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier,
                                                      NormalizedNode<?, ?>>> registration;
         if (isLeader) {
             registration = createDelegate(message);
         } else {
-            LOG.debug("{}: Shard is not the leader - delaying registration", shard.persistenceId());
+            LOG.debug("{}: Shard is not the leader - delaying registration", persistenceId());
 
             DelayedListenerRegistration delayedReg = new DelayedListenerRegistration(message);
             delayedListenerRegistrations.add(delayedReg);
             registration = delayedReg;
         }
 
-        ActorRef listenerRegistration = shard.getContext().actorOf(
-                DataChangeListenerRegistration.props(registration));
+        ActorRef listenerRegistration = createActor(DataChangeListenerRegistration.props(registration));
 
         LOG.debug("{}: registerDataChangeListener sending reply, listenerRegistrationPath = {} ",
-                shard.persistenceId(), listenerRegistration.path());
+                persistenceId(), listenerRegistration.path());
 
-        shard.getSender().tell(new RegisterChangeListenerReply(listenerRegistration), shard.getSelf());
+        tellSender(new RegisterChangeListenerReply(listenerRegistration));
     }
 
     @Override
     ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>> createDelegate(
             final RegisterChangeListener message) {
-        ActorSelection dataChangeListenerPath = shard.getContext().system().actorSelection(
-                message.getDataChangeListenerPath());
+        ActorSelection dataChangeListenerPath = selectActor(message.getDataChangeListenerPath());
 
         // Notify the listener if notifications should be enabled or not
         // If this shard is the leader then it will enable notifications else
         // it will not
-        dataChangeListenerPath.tell(new EnableNotification(true), shard.getSelf());
+        dataChangeListenerPath.tell(new EnableNotification(true), getSelf());
 
         // Now store a reference to the data change listener so it can be notified
         // at a later point if notifications should be enabled or disabled
@@ -93,9 +89,9 @@ final class DataChangeListenerSupport extends LeaderLocalDelegateFactory<Registe
         AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> listener =
                 new DataChangeListenerProxy(dataChangeListenerPath);
 
-        LOG.debug("{}: Registering for path {}", shard.persistenceId(), message.getPath());
+        LOG.debug("{}: Registering for path {}", persistenceId(), message.getPath());
 
-        return shard.getDataStore().registerChangeListener(message.getPath(), listener,
+        return getShard().getDataStore().registerChangeListener(message.getPath(), listener,
                 message.getScope());
     }
 }
