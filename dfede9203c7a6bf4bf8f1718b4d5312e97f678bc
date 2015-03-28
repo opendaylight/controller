@@ -1,0 +1,129 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_0a1c7fc0",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/api/EventSource.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-28T18:03:54Z",
+      "side": 1,
+      "message": "There\u0027s parts of this that are a little confusing to me plus there\u0027s grammatical errors. It make references to an \"event source manager\", a \"node\", \"inventory\", \"topology\" but it\u0027s unclear how it all fits together.  \n\nYou mention an \"event source should be represented as a node\" but also that an \"Event Source Manager is (grammar) may or may not add this node into inventory or topology\".  I assume this refers to the md-sal data store tree. Why would an Event Source Manager add it to inventory or topology? And why wouldn\u0027t it? If it isn\u0027t added,  doesn\u0027t this contradict the statement that an \"event source should be represented as a node\"? \n\nI would suggest not referring to an \"event source manager\" - I think that\u0027s an implementation detail. Here\u0027s my suggested text based on my understanding:\n\n\"An interface for a class that publishes event notifications to topics provided via the joinTopic method defined in the base EventSourceService interface . \n\nAn EventSource implementation must be registered with an EventSourceRegistry via its {@link org.opendaylight.controller.messagebus.api.EventSourceRegistry#registerEventSource(Node, EventSource)()} method.\"\n\nThere\u0027s probably more detail to add but I\u0027m unclear at this point as to the correct text.",
+      "revId": "dfede9203c7a6bf4bf8f1718b4d5312e97f678bc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_6a13c366",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/api/EventSourceRegistry.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-28T18:03:54Z",
+      "side": 1,
+      "message": "What \"Event Source Manager\" are you referring to? That seems like an implementation detail.\n\nHow about:\n\n\"An interface for a service that maintains EventSource registrations and publishes them for consumption.\"\n\nNot much but it seems to capture what it does based on the methods. The rest about \"Event Source Manager\" seems better suited for the implementation javadocs.",
+      "revId": "dfede9203c7a6bf4bf8f1718b4d5312e97f678bc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_be003002",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/api/EventSourceRegistry.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-28T18:03:54Z",
+      "side": 1,
+      "message": "How about:\n\n\"Registers the given EventSource associated with the given node for public consumption. \"\n\nI\u0027m unclear as to why the Node param is needed. Isn\u0027t the NodeKey enough information needed for registration? If so, since that is supplied by the EventSource, the Node param isn\u0027t needed.",
+      "revId": "dfede9203c7a6bf4bf8f1718b4d5312e97f678bc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_4a912751",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/api/EventSourceRegistry.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-28T18:03:54Z",
+      "side": 1,
+      "message": "I\u0027m curious why this call needs to return a ListenableFuture. Other registrations methods in md-sal core simply return a registration instance. Even if the implementation performs it async, the caller really doesn\u0027t need or care to know that.",
+      "revId": "dfede9203c7a6bf4bf8f1718b4d5312e97f678bc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_ea9fd35d",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/api/EventSourceRegistry.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-28T18:03:54Z",
+      "side": 1,
+      "message": "Why is this method needed? The caller should only need to call close on the EventSourceRegistration instance. This is how other md-sal registration APIs work.",
+      "revId": "dfede9203c7a6bf4bf8f1718b4d5312e97f678bc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_caa537b6",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/eventsources/netconf/NetconfEventSource.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-28T18:03:54Z",
+      "side": 1,
+      "message": "What is the API contract for EventSourceService re: attempting to join a topic twice? Should it fail it or silently ignore it? EventSourceService interface is yang-generated with no documentation for this method.\n\nAlso if it should fail the request then I think you should utilize the RpcResult to propagate an error message rather than throwing an IllegalStateException.",
+      "revId": "dfede9203c7a6bf4bf8f1718b4d5312e97f678bc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_0ac47f5d",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/eventsources/netconf/NetconfEventSource.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-28T18:03:54Z",
+      "side": 1,
+      "message": "registerNotificationListener can return null - thus is not allowed by ConcurrentHashMap - it will throw an NPE.\n\nIf 2 threads call joinTopic simultaneously with the same topicId then 2 registrations will occur. To get atomicity, it seems this method needs to be synchronized and not registerNotificationListener.",
+      "range": {
+        "startLine": 110,
+        "startChar": 56,
+        "endLine": 110,
+        "endChar": 84
+      },
+      "revId": "dfede9203c7a6bf4bf8f1718b4d5312e97f678bc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
