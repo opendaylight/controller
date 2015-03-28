@@ -51,8 +51,9 @@ public interface ReplicatedLog {
      * information
      *
      * @param index the index of the log entry
+     * @return the adjusted index of the first log entry removed or -1 if log entry not found.
      */
-    void removeFrom(long index);
+    long removeFrom(long index);
 
 
     /**

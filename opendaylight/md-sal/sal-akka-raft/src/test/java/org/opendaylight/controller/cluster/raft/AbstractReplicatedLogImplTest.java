@@ -15,7 +15,6 @@ import akka.japi.Procedure;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,14 +39,6 @@ public class AbstractReplicatedLogImplTest {
 
     }
 
-    @After
-    public void tearDown() {
-        replicatedLogImpl.journal.clear();
-        replicatedLogImpl.setSnapshotIndex(-1);
-        replicatedLogImpl.setSnapshotTerm(-1);
-        replicatedLogImpl = null;
-    }
-
     @Test
     public void testIndexOperations() {
 
@@ -65,7 +56,7 @@ public class AbstractReplicatedLogImplTest {
         // now create a snapshot of 3 entries, with 1 unapplied entry left in the log
         // It removes the entries which have made it to snapshot
         // and updates the snapshot index and term
-        Map<Long, String> state = takeSnapshot(3);
+        takeSnapshot(3);
 
         // check the values after the snapshot.
         // each index value passed in the test is the logical index (log entry index)
@@ -101,7 +92,7 @@ public class AbstractReplicatedLogImplTest {
         assertEquals(2, replicatedLogImpl.getFrom(6).size());
 
         // take a second snapshot with 5 entries with 0 unapplied entries left in the log
-        state = takeSnapshot(5);
+        takeSnapshot(5);
 
         assertEquals(0, replicatedLogImpl.size());
         assertNull(replicatedLogImpl.last());
@@ -187,19 +178,45 @@ public class AbstractReplicatedLogImplTest {
         assertTrue(replicatedLogImpl.isPresent(5));
     }
 
+    @Test
+    public void testRemoveFrom() {
+
+        replicatedLogImpl.append(new MockReplicatedLogEntry(2, 4, new MockPayload("E", 2)));
+        replicatedLogImpl.append(new MockReplicatedLogEntry(2, 5, new MockPayload("F", 3)));
+
+        assertEquals("dataSize", 9, replicatedLogImpl.dataSize());
+
+        long adjusted = replicatedLogImpl.removeFrom(4);
+        assertEquals("removeFrom - adjusted", 4, adjusted);
+        assertEquals("size", 4, replicatedLogImpl.size());
+        assertEquals("dataSize", 4, replicatedLogImpl.dataSize());
+
+        takeSnapshot(1);
+
+        adjusted = replicatedLogImpl.removeFrom(2);
+        assertEquals("removeFrom - adjusted", 1, adjusted);
+        assertEquals("size", 1, replicatedLogImpl.size());
+        assertEquals("dataSize", 1, replicatedLogImpl.dataSize());
+
+        assertEquals("removeFrom - adjusted", -1, replicatedLogImpl.removeFrom(0));
+        assertEquals("removeFrom - adjusted", -1, replicatedLogImpl.removeFrom(100));
+    }
+
     // create a snapshot for test
     public Map<Long, String> takeSnapshot(final int numEntries) {
         Map<Long, String> map = new HashMap<>(numEntries);
-        List<ReplicatedLogEntry> entries = replicatedLogImpl.getEntriesTill(numEntries);
-        for (ReplicatedLogEntry entry : entries) {
+
+        long lastIndex = 0;
+        long lastTerm = 0;
+        for(int i = 0; i < numEntries; i++) {
+            ReplicatedLogEntry entry = replicatedLogImpl.getAtPhysicalIndex(i);
             map.put(entry.getIndex(), entry.getData().toString());
+            lastIndex = entry.getIndex();
+            lastTerm = entry.getTerm();
         }
 
-        int term = (int) replicatedLogImpl.lastTerm();
-        int lastIndex = (int) entries.get(entries.size() - 1).getIndex();
-        entries.clear();
-        replicatedLogImpl.setSnapshotTerm(term);
-        replicatedLogImpl.setSnapshotIndex(lastIndex);
+        replicatedLogImpl.snapshotPreCommit(lastIndex, lastTerm);
+        replicatedLogImpl.snapshotCommit();
 
         return map;
 
@@ -211,15 +228,6 @@ public class AbstractReplicatedLogImplTest {
 
         @Override
         public void removeFromAndPersist(final long index) {
-        }
-
-        @Override
-        public int dataSize() {
-            return -1;
-        }
-
-        public List<ReplicatedLogEntry> getEntriesTill(final int index) {
-            return journal.subList(0, index);
         }
 
         @Override
