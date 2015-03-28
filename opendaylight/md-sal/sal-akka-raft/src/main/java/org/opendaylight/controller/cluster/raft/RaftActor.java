@@ -152,8 +152,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     @Override
     public void handleRecover(Object message) {
         if(raftRecovery == null) {
-            raftRecovery = new RaftActorRecoverySupport(delegatingPersistenceProvider, context, currentBehavior,
-                    getRaftActorRecoveryCohort());
+            raftRecovery = newRaftActorRecoverySupport();
         }
 
         boolean recoveryComplete = raftRecovery.handleRecoveryMessage(message);
@@ -173,6 +172,11 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
             raftRecovery = null;
         }
+    }
+
+    protected RaftActorRecoverySupport newRaftActorRecoverySupport() {
+        return new RaftActorRecoverySupport(delegatingPersistenceProvider, context, currentBehavior,
+                getRaftActorRecoveryCohort());
     }
 
     protected void initializeBehavior(){
