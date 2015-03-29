@@ -35,14 +35,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.NonPersistentDataProvider;
-import org.opendaylight.controller.cluster.datastore.DataPersistenceProviderMonitor;
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.RoleChanged;
 import org.opendaylight.controller.cluster.raft.RaftActor.DeleteEntries;
@@ -297,34 +295,6 @@ public class RaftActorTest extends AbstractActorTest {
         verify(mockSupport).handleSnapshotMessage(same(saveSnapshotSuccess));
         verify(mockSupport).handleSnapshotMessage(same(saveSnapshotFailure));
         verify(mockSupport).handleSnapshotMessage(same(RaftActorSnapshotMessageSupport.COMMIT_SNAPSHOT));
-    }
-
-    @Test
-    public void testUpdatingElectionTermCallsDataPersistence() throws Exception {
-        new JavaTestKit(getSystem()) {
-            {
-                String persistenceId = factory.generateActorId("leader-");
-
-                DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
-
-                config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
-
-                CountDownLatch persistLatch = new CountDownLatch(1);
-                DataPersistenceProviderMonitor dataPersistenceProviderMonitor = new DataPersistenceProviderMonitor();
-                dataPersistenceProviderMonitor.setPersistLatch(persistLatch);
-
-                TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(MockRaftActor.props(persistenceId,
-                        Collections.<String, String>emptyMap(), Optional.<ConfigParams>of(config), dataPersistenceProviderMonitor), persistenceId);
-
-                MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
-
-                mockRaftActor.waitForInitializeBehaviorComplete();
-
-                mockRaftActor.getRaftActorContext().getTermInformation().updateAndPersist(10, "foobar");
-
-                assertEquals("Persist called", true, persistLatch.await(5, TimeUnit.SECONDS));
-            }
-        };
     }
 
     @Test
