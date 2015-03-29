@@ -37,6 +37,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     private ActorRef roleChangeNotifier;
     private final CountDownLatch initializeBehaviorComplete = new CountDownLatch(1);
     private RaftActorRecoverySupport raftActorRecoverySupport;
+    private RaftActorSnapshotMessageSupport snapshotMessageSupport;
 
     public static final class MockRaftActorCreator implements Creator<MockRaftActor> {
         private static final long serialVersionUID = 1L;
@@ -45,6 +46,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
         private final Optional<ConfigParams> config;
         private final DataPersistenceProvider dataPersistenceProvider;
         private final ActorRef roleChangeNotifier;
+        private RaftActorSnapshotMessageSupport snapshotMessageSupport;
 
         private MockRaftActorCreator(Map<String, String> peerAddresses, String id,
             Optional<ConfigParams> config, DataPersistenceProvider dataPersistenceProvider,
@@ -61,6 +63,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
             MockRaftActor mockRaftActor = new MockRaftActor(id, peerAddresses, config,
                 dataPersistenceProvider);
             mockRaftActor.roleChangeNotifier = this.roleChangeNotifier;
+            mockRaftActor.snapshotMessageSupport = snapshotMessageSupport;
             return mockRaftActor;
         }
     }
@@ -86,6 +89,11 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     @Override
     public RaftActorRecoverySupport newRaftActorRecoverySupport() {
         return raftActorRecoverySupport != null ? raftActorRecoverySupport : super.newRaftActorRecoverySupport();
+    }
+
+    @Override
+    protected RaftActorSnapshotMessageSupport newRaftActorSnapshotMessageSupport() {
+        return snapshotMessageSupport != null ? snapshotMessageSupport : super.newRaftActorSnapshotMessageSupport();
     }
 
     public void waitForRecoveryComplete() {
@@ -121,6 +129,13 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     public static Props props(final String id, final Map<String, String> peerAddresses,
             Optional<ConfigParams> config){
         return Props.create(new MockRaftActorCreator(peerAddresses, id, config, null, null));
+    }
+
+    public static Props props(final String id, final Map<String, String> peerAddresses,
+            Optional<ConfigParams> config, RaftActorSnapshotMessageSupport snapshotMessageSupport){
+        MockRaftActorCreator creator = new MockRaftActorCreator(peerAddresses, id, config, null, null);
+        creator.snapshotMessageSupport = snapshotMessageSupport;
+        return Props.create(creator);
     }
 
     public static Props props(final String id, final Map<String, String> peerAddresses,

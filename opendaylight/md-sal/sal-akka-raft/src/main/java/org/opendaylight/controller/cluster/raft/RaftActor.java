@@ -193,8 +193,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     @Override
     public void handleCommand(Object message) {
         if(snapshotSupport == null) {
-            snapshotSupport = new RaftActorSnapshotMessageSupport(delegatingPersistenceProvider, context,
-                    currentBehavior, getRaftActorSnapshotCohort(), self());
+            snapshotSupport = newRaftActorSnapshotMessageSupport();
         }
 
         boolean handled = snapshotSupport.handleSnapshotMessage(message);
@@ -242,6 +241,11 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
             handleBehaviorChange(reusableBehaviorStateHolder, getCurrentBehavior());
         }
+    }
+
+    protected RaftActorSnapshotMessageSupport newRaftActorSnapshotMessageSupport() {
+        return new RaftActorSnapshotMessageSupport(delegatingPersistenceProvider, context,
+                currentBehavior, getRaftActorSnapshotCohort());
     }
 
     private void onGetOnDemandRaftStats() {

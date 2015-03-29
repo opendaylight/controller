@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
@@ -22,7 +21,6 @@ import akka.persistence.SaveSnapshotFailure;
 import akka.persistence.SaveSnapshotSuccess;
 import akka.persistence.SnapshotMetadata;
 import akka.persistence.SnapshotOffer;
-import akka.persistence.SnapshotSelectionCriteria;
 import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
 import com.google.common.base.Optional;
@@ -53,6 +51,7 @@ import org.opendaylight.controller.cluster.raft.base.messages.ApplyJournalEntrie
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyLogEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
+import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.base.messages.SendHeartBeat;
 import org.opendaylight.controller.cluster.raft.behaviors.Follower;
@@ -253,6 +252,55 @@ public class RaftActorTest extends AbstractActorTest {
     }
 
     @Test
+    public void testRaftActorForwardsToRaftActorSnapshotMessageSupport() {
+        String persistenceId = factory.generateActorId("leader-");
+
+        DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+
+        config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
+
+        RaftActorSnapshotMessageSupport mockSupport = mock(RaftActorSnapshotMessageSupport.class);
+
+        TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(MockRaftActor.props(persistenceId,
+                Collections.<String, String>emptyMap(), Optional.<ConfigParams>of(config), mockSupport), persistenceId);
+
+        MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
+
+        // Wait for akka's recovery to complete so it doesn't interfere.
+        mockRaftActor.waitForRecoveryComplete();
+
+        ApplySnapshot applySnapshot = new ApplySnapshot(mock(Snapshot.class));
+        doReturn(true).when(mockSupport).handleSnapshotMessage(same(applySnapshot));
+        mockRaftActor.handleCommand(applySnapshot);
+
+        CaptureSnapshot captureSnapshot = new CaptureSnapshot(1, 1, 1, 1, 0, 1);
+        doReturn(true).when(mockSupport).handleSnapshotMessage(same(captureSnapshot));
+        mockRaftActor.handleCommand(captureSnapshot);
+
+        CaptureSnapshotReply captureSnapshotReply = new CaptureSnapshotReply(new byte[0]);
+        doReturn(true).when(mockSupport).handleSnapshotMessage(same(captureSnapshotReply));
+        mockRaftActor.handleCommand(captureSnapshotReply);
+
+        SaveSnapshotSuccess saveSnapshotSuccess = new SaveSnapshotSuccess(mock(SnapshotMetadata.class));
+        doReturn(true).when(mockSupport).handleSnapshotMessage(same(saveSnapshotSuccess));
+        mockRaftActor.handleCommand(saveSnapshotSuccess);
+
+        SaveSnapshotFailure saveSnapshotFailure = new SaveSnapshotFailure(mock(SnapshotMetadata.class), new Throwable());
+        doReturn(true).when(mockSupport).handleSnapshotMessage(same(saveSnapshotFailure));
+        mockRaftActor.handleCommand(saveSnapshotFailure);
+
+        doReturn(true).when(mockSupport).handleSnapshotMessage(same(RaftActorSnapshotMessageSupport.COMMIT_SNAPSHOT));
+        mockRaftActor.handleCommand(RaftActorSnapshotMessageSupport.COMMIT_SNAPSHOT);
+
+        verify(mockSupport).handleSnapshotMessage(same(applySnapshot));
+        verify(mockSupport).handleSnapshotMessage(same(captureSnapshot));
+        verify(mockSupport).handleSnapshotMessage(same(captureSnapshotReply));
+        verify(mockSupport).handleSnapshotMessage(same(saveSnapshotSuccess));
+        verify(mockSupport).handleSnapshotMessage(same(saveSnapshotFailure));
+        verify(mockSupport).handleSnapshotMessage(same(RaftActorSnapshotMessageSupport.COMMIT_SNAPSHOT));
+    }
+
+    @Test
     public void testUpdatingElectionTermCallsDataPersistence() throws Exception {
         new JavaTestKit(getSystem()) {
             {
@@ -369,112 +417,6 @@ public class RaftActorTest extends AbstractActorTest {
     }
 
     @Test
-    public void testCaptureSnapshotReplyCallsDataPersistence() throws Exception {
-        new JavaTestKit(getSystem()) {
-            {
-                String persistenceId = factory.generateActorId("leader-");
-
-                DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
-
-                config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
-
-                DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
-
-                TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(
-                        MockRaftActor.props(persistenceId, Collections.<String, String>emptyMap(),
-                                Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
-
-                MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
-
-                mockRaftActor.waitForInitializeBehaviorComplete();
-
-                ByteString snapshotBytes = fromObject(Arrays.asList(
-                        new MockRaftActorContext.MockPayload("A"),
-                        new MockRaftActorContext.MockPayload("B"),
-                        new MockRaftActorContext.MockPayload("C"),
-                        new MockRaftActorContext.MockPayload("D")));
-
-                RaftActorContext raftActorContext = mockRaftActor.getRaftActorContext();
-
-                raftActorContext.getSnapshotManager().capture(
-                        new MockRaftActorContext.MockReplicatedLogEntry(1, -1,
-                                new MockRaftActorContext.MockPayload("D")), -1);
-
-                mockRaftActor.setCurrentBehavior(new Leader(raftActorContext));
-
-                mockRaftActor.onReceiveCommand(new CaptureSnapshotReply(snapshotBytes.toByteArray()));
-
-                verify(dataPersistenceProvider).saveSnapshot(anyObject());
-
-            }
-        };
-    }
-
-    @Test
-    public void testSaveSnapshotSuccessCallsDataPersistence() throws Exception {
-        new JavaTestKit(getSystem()) {
-            {
-                String persistenceId = factory.generateActorId("leader-");
-
-                DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
-
-                config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
-
-                DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
-
-                TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(MockRaftActor.props(persistenceId,
-                        ImmutableMap.of("leader", "fake/path"), Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
-
-                MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
-
-                mockRaftActor.waitForInitializeBehaviorComplete();
-                MockRaftActorContext.MockReplicatedLogEntry lastEntry = new MockRaftActorContext.MockReplicatedLogEntry(1, 4, mock(Payload.class));
-
-                mockRaftActor.getReplicatedLog().append(new MockRaftActorContext.MockReplicatedLogEntry(1, 0, mock(Payload.class)));
-                mockRaftActor.getReplicatedLog().append(new MockRaftActorContext.MockReplicatedLogEntry(1, 1, mock(Payload.class)));
-                mockRaftActor.getReplicatedLog().append(new MockRaftActorContext.MockReplicatedLogEntry(1, 2, mock(Payload.class)));
-                mockRaftActor.getReplicatedLog().append(new MockRaftActorContext.MockReplicatedLogEntry(1, 3, mock(Payload.class)));
-                mockRaftActor.getReplicatedLog().append(lastEntry);
-
-                ByteString snapshotBytes = fromObject(Arrays.asList(
-                        new MockRaftActorContext.MockPayload("A"),
-                        new MockRaftActorContext.MockPayload("B"),
-                        new MockRaftActorContext.MockPayload("C"),
-                        new MockRaftActorContext.MockPayload("D")));
-
-                RaftActorContext raftActorContext = mockRaftActor.getRaftActorContext();
-                mockRaftActor.setCurrentBehavior(new Follower(raftActorContext));
-
-                long replicatedToAllIndex = 1;
-
-                mockRaftActor.getRaftActorContext().getSnapshotManager().capture(lastEntry, replicatedToAllIndex);
-
-                verify(mockRaftActor.snapshotCohortDelegate).createSnapshot(any(ActorRef.class));
-
-                mockRaftActor.onReceiveCommand(new CaptureSnapshotReply(snapshotBytes.toByteArray()));
-
-                mockRaftActor.onReceiveCommand(new SaveSnapshotSuccess(new SnapshotMetadata("foo", 100, 100)));
-
-                verify(dataPersistenceProvider).deleteSnapshots(any(SnapshotSelectionCriteria.class));
-
-                verify(dataPersistenceProvider).deleteMessages(100);
-
-                assertEquals(3, mockRaftActor.getReplicatedLog().size());
-                assertEquals(1, mockRaftActor.getCurrentBehavior().getReplicatedToAllIndex());
-
-                assertNotNull(mockRaftActor.getReplicatedLog().get(2));
-                assertNotNull(mockRaftActor.getReplicatedLog().get(3));
-                assertNotNull(mockRaftActor.getReplicatedLog().get(4));
-
-                // Index 2 will not be in the log because it was removed due to snapshotting
-                assertNull(mockRaftActor.getReplicatedLog().get(1));
-                assertNull(mockRaftActor.getReplicatedLog().get(0));
-
-            }
-        };
-    }
-
-    @Test
     public void testApplyState() throws Exception {
 
         new JavaTestKit(getSystem()) {
@@ -500,106 +442,6 @@ public class RaftActorTest extends AbstractActorTest {
                 mockRaftActor.onReceiveCommand(new ApplyState(mockActorRef, "apply-state", entry));
 
                 verify(mockRaftActor.actorDelegate).applyState(eq(mockActorRef), eq("apply-state"), anyObject());
-
-            }
-        };
-    }
-
-    @Test
-    public void testApplySnapshot() throws Exception {
-        new JavaTestKit(getSystem()) {
-            {
-                String persistenceId = factory.generateActorId("leader-");
-
-                DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
-
-                config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
-
-                DataPersistenceProviderMonitor dataPersistenceProviderMonitor = new DataPersistenceProviderMonitor();
-
-                TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(MockRaftActor.props(persistenceId,
-                        Collections.<String, String>emptyMap(), Optional.<ConfigParams>of(config), dataPersistenceProviderMonitor), persistenceId);
-
-                MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
-
-                mockRaftActor.waitForInitializeBehaviorComplete();
-
-                ReplicatedLog oldReplicatedLog = mockRaftActor.getReplicatedLog();
-
-                oldReplicatedLog.append(new MockRaftActorContext.MockReplicatedLogEntry(1, 0, mock(Payload.class)));
-                oldReplicatedLog.append(new MockRaftActorContext.MockReplicatedLogEntry(1, 1, mock(Payload.class)));
-                oldReplicatedLog.append(
-                        new MockRaftActorContext.MockReplicatedLogEntry(1, 2,
-                                mock(Payload.class)));
-
-                ByteString snapshotBytes = fromObject(Arrays.asList(
-                        new MockRaftActorContext.MockPayload("A"),
-                        new MockRaftActorContext.MockPayload("B"),
-                        new MockRaftActorContext.MockPayload("C"),
-                        new MockRaftActorContext.MockPayload("D")));
-
-                Snapshot snapshot = mock(Snapshot.class);
-
-                doReturn(snapshotBytes.toByteArray()).when(snapshot).getState();
-
-                doReturn(3L).when(snapshot).getLastAppliedIndex();
-
-                mockRaftActor.onReceiveCommand(new ApplySnapshot(snapshot));
-
-                verify(mockRaftActor.snapshotCohortDelegate).applySnapshot(eq(snapshot.getState()));
-
-                assertTrue("The replicatedLog should have changed",
-                        oldReplicatedLog != mockRaftActor.getReplicatedLog());
-
-                assertEquals("lastApplied should be same as in the snapshot",
-                        (Long) 3L, mockRaftActor.getLastApplied());
-
-                assertEquals(0, mockRaftActor.getReplicatedLog().size());
-
-            }
-        };
-    }
-
-    @Test
-    public void testSaveSnapshotFailure() throws Exception {
-        new JavaTestKit(getSystem()) {
-            {
-                String persistenceId = factory.generateActorId("leader-");
-
-                DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
-
-                config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
-
-                DataPersistenceProviderMonitor dataPersistenceProviderMonitor = new DataPersistenceProviderMonitor();
-
-                TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(MockRaftActor.props(persistenceId,
-                        Collections.<String, String>emptyMap(), Optional.<ConfigParams>of(config), dataPersistenceProviderMonitor), persistenceId);
-
-                MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
-
-                mockRaftActor.waitForInitializeBehaviorComplete();
-
-                ByteString snapshotBytes = fromObject(Arrays.asList(
-                        new MockRaftActorContext.MockPayload("A"),
-                        new MockRaftActorContext.MockPayload("B"),
-                        new MockRaftActorContext.MockPayload("C"),
-                        new MockRaftActorContext.MockPayload("D")));
-
-                RaftActorContext raftActorContext = mockRaftActor.getRaftActorContext();
-
-                mockRaftActor.setCurrentBehavior(new Leader(raftActorContext));
-
-                raftActorContext.getSnapshotManager().capture(
-                        new MockRaftActorContext.MockReplicatedLogEntry(1, 1,
-                                new MockRaftActorContext.MockPayload("D")), 1);
-
-                mockRaftActor.onReceiveCommand(new CaptureSnapshotReply(snapshotBytes.toByteArray()));
-
-                mockRaftActor.onReceiveCommand(new SaveSnapshotFailure(new SnapshotMetadata("foobar", 10L, 1234L),
-                        new Exception()));
-
-                assertEquals("Snapshot index should not have advanced because save snapshot failed", -1,
-                        mockRaftActor.getReplicatedLog().getSnapshotIndex());
 
             }
         };
