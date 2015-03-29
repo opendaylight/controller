@@ -209,7 +209,7 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
         List<ReplicatedLogEntry> snapshotJournalEntries = journal.subList(0, (int) (snapshotCapturedIndex - snapshotIndex));
 
         snapshottedJournal.addAll(snapshotJournalEntries);
-        clear(0, (int) (snapshotCapturedIndex - snapshotIndex));
+        snapshotJournalEntries.clear();
 
         previousSnapshotIndex = snapshotIndex;
         setSnapshotIndex(snapshotCapturedIndex);
