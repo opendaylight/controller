@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
-import akka.actor.ActorRef;
 import akka.japi.Procedure;
 import akka.persistence.SaveSnapshotFailure;
 import akka.persistence.SaveSnapshotSuccess;
@@ -30,23 +29,21 @@ class RaftActorSnapshotMessageSupport {
     private final RaftActorContext context;
     private final RaftActorBehavior currentBehavior;
     private final RaftActorSnapshotCohort cohort;
-    private final ActorRef raftActorRef;
     private final Logger log;
 
     private final Procedure<Void> createSnapshotProcedure = new Procedure<Void>() {
         @Override
         public void apply(Void notUsed) throws Exception {
-            cohort.createSnapshot(raftActorRef);
+            cohort.createSnapshot(context.getActor());
         }
     };
 
     RaftActorSnapshotMessageSupport(DataPersistenceProvider persistence, RaftActorContext context,
-            RaftActorBehavior currentBehavior, RaftActorSnapshotCohort cohort, ActorRef raftActorRef) {
+            RaftActorBehavior currentBehavior, RaftActorSnapshotCohort cohort) {
         this.persistence = persistence;
         this.context = context;
         this.currentBehavior = currentBehavior;
         this.cohort = cohort;
-        this.raftActorRef = raftActorRef;
         this.log = context.getLogger();
     }
 
