@@ -59,7 +59,6 @@ import org.opendaylight.controller.cluster.raft.behaviors.Leader;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
-import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
@@ -324,64 +323,6 @@ public class RaftActorTest extends AbstractActorTest {
                 mockRaftActor.getRaftActorContext().getTermInformation().updateAndPersist(10, "foobar");
 
                 assertEquals("Persist called", true, persistLatch.await(5, TimeUnit.SECONDS));
-            }
-        };
-    }
-
-    @Test
-    public void testAddingReplicatedLogEntryCallsDataPersistence() throws Exception {
-        new JavaTestKit(getSystem()) {
-            {
-                String persistenceId = factory.generateActorId("leader-");
-
-                DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
-
-                config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
-
-                DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
-
-                TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(MockRaftActor.props(persistenceId,
-                        Collections.<String, String>emptyMap(), Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
-
-                MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
-
-                mockRaftActor.waitForInitializeBehaviorComplete();
-
-                MockRaftActorContext.MockReplicatedLogEntry logEntry = new MockRaftActorContext.MockReplicatedLogEntry(10, 10, mock(Payload.class));
-
-                mockRaftActor.getRaftActorContext().getReplicatedLog().appendAndPersist(logEntry);
-
-                verify(dataPersistenceProvider).persist(eq(logEntry), any(Procedure.class));
-            }
-        };
-    }
-
-    @Test
-    public void testRemovingReplicatedLogEntryCallsDataPersistence() throws Exception {
-        new JavaTestKit(getSystem()) {
-            {
-                String persistenceId = factory.generateActorId("leader-");
-
-                DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
-
-                config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
-
-                DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
-
-                TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(MockRaftActor.props(persistenceId,
-                        Collections.<String, String>emptyMap(), Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
-
-                MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
-
-                mockRaftActor.waitForInitializeBehaviorComplete();
-
-                mockRaftActor.waitUntilLeader();
-
-                mockRaftActor.getReplicatedLog().appendAndPersist(new MockRaftActorContext.MockReplicatedLogEntry(1, 0, mock(Payload.class)));
-
-                mockRaftActor.getRaftActorContext().getReplicatedLog().removeFromAndPersist(0);
-
-                verify(dataPersistenceProvider, times(3)).persist(anyObject(), any(Procedure.class));
             }
         };
     }

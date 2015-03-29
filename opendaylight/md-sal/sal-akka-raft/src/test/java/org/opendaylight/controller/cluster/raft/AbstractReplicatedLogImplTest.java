@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015 Brocade Communications Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -37,6 +38,35 @@ public class AbstractReplicatedLogImplTest {
         replicatedLogImpl.append(new MockReplicatedLogEntry(1, 2, new MockPayload("C")));
         replicatedLogImpl.append(new MockReplicatedLogEntry(2, 3, new MockPayload("D")));
 
+    }
+
+    @Test
+    public void testEmptyLog() {
+        replicatedLogImpl = new MockAbstractReplicatedLogImpl();
+
+        assertEquals("size", 0, replicatedLogImpl.size());
+        assertEquals("dataSize", 0, replicatedLogImpl.dataSize());
+        assertEquals("getSnapshotIndex", -1, replicatedLogImpl.getSnapshotIndex());
+        assertEquals("getSnapshotTerm", -1, replicatedLogImpl.getSnapshotTerm());
+        assertEquals("lastIndex", -1, replicatedLogImpl.lastIndex());
+        assertEquals("lastTerm", -1, replicatedLogImpl.lastTerm());
+        assertEquals("isPresent", false, replicatedLogImpl.isPresent(0));
+        assertEquals("isInSnapshot", false, replicatedLogImpl.isInSnapshot(0));
+        Assert.assertNull("get(0)", replicatedLogImpl.get(0));
+        Assert.assertNull("last", replicatedLogImpl.last());
+
+        List<ReplicatedLogEntry> list = replicatedLogImpl.getFrom(0, 1);
+        assertEquals("getFrom size", 0, list.size());
+
+        assertEquals("removeFrom", -1, replicatedLogImpl.removeFrom(1));
+
+        replicatedLogImpl.setSnapshotIndex(2);
+        replicatedLogImpl.setSnapshotTerm(1);
+
+        assertEquals("getSnapshotIndex", 2, replicatedLogImpl.getSnapshotIndex());
+        assertEquals("getSnapshotTerm", 1, replicatedLogImpl.getSnapshotTerm());
+        assertEquals("lastIndex", 2, replicatedLogImpl.lastIndex());
+        assertEquals("lastTerm", 1, replicatedLogImpl.lastTerm());
     }
 
     @Test
@@ -133,24 +163,67 @@ public class AbstractReplicatedLogImplTest {
         replicatedLogImpl.snapshotPreCommit(-1, -1);
         assertEquals(8, replicatedLogImpl.size());
         assertEquals(-1, replicatedLogImpl.getSnapshotIndex());
+        assertEquals(-1, replicatedLogImpl.getSnapshotTerm());
 
-        replicatedLogImpl.snapshotPreCommit(4, 3);
+        replicatedLogImpl.snapshotPreCommit(4, 2);
         assertEquals(3, replicatedLogImpl.size());
         assertEquals(4, replicatedLogImpl.getSnapshotIndex());
+        assertEquals(2, replicatedLogImpl.getSnapshotTerm());
 
         replicatedLogImpl.snapshotPreCommit(6, 3);
         assertEquals(1, replicatedLogImpl.size());
         assertEquals(6, replicatedLogImpl.getSnapshotIndex());
+        assertEquals(3, replicatedLogImpl.getSnapshotTerm());
 
         replicatedLogImpl.snapshotPreCommit(7, 3);
         assertEquals(0, replicatedLogImpl.size());
         assertEquals(7, replicatedLogImpl.getSnapshotIndex());
+        assertEquals(3, replicatedLogImpl.getSnapshotTerm());
 
         //running it again on an empty list should not throw exception
         replicatedLogImpl.snapshotPreCommit(7, 3);
         assertEquals(0, replicatedLogImpl.size());
         assertEquals(7, replicatedLogImpl.getSnapshotIndex());
+        assertEquals(3, replicatedLogImpl.getSnapshotTerm());
+    }
 
+    @Test
+    public void testSnapshotCommit() {
+
+        replicatedLogImpl.snapshotPreCommit(1, 1);
+
+        replicatedLogImpl.snapshotCommit();
+
+        assertEquals("size", 2, replicatedLogImpl.size());
+        assertEquals("dataSize", 2, replicatedLogImpl.dataSize());
+        assertEquals("getSnapshotIndex", 1, replicatedLogImpl.getSnapshotIndex());
+        assertEquals("getSnapshotTerm", 1, replicatedLogImpl.getSnapshotTerm());
+        assertEquals("lastIndex", 3, replicatedLogImpl.lastIndex());
+        assertEquals("lastTerm", 2, replicatedLogImpl.lastTerm());
+
+        Assert.assertNull("get(0)", replicatedLogImpl.get(0));
+        Assert.assertNull("get(1)", replicatedLogImpl.get(1));
+        Assert.assertNotNull("get(2)", replicatedLogImpl.get(2));
+        Assert.assertNotNull("get(3)", replicatedLogImpl.get(3));
+    }
+
+    @Test
+    public void testSnapshotRollback() {
+
+        replicatedLogImpl.snapshotPreCommit(1, 1);
+
+        assertEquals("size", 2, replicatedLogImpl.size());
+        assertEquals("getSnapshotIndex", 1, replicatedLogImpl.getSnapshotIndex());
+        assertEquals("getSnapshotTerm", 1, replicatedLogImpl.getSnapshotTerm());
+
+        replicatedLogImpl.snapshotRollback();
+
+        assertEquals("size", 4, replicatedLogImpl.size());
+        assertEquals("dataSize", 4, replicatedLogImpl.dataSize());
+        assertEquals("getSnapshotIndex", -1, replicatedLogImpl.getSnapshotIndex());
+        assertEquals("getSnapshotTerm", -1, replicatedLogImpl.getSnapshotTerm());
+        Assert.assertNotNull("get(0)", replicatedLogImpl.get(0));
+        Assert.assertNotNull("get(3)", replicatedLogImpl.get(3));
     }
 
     @Test
