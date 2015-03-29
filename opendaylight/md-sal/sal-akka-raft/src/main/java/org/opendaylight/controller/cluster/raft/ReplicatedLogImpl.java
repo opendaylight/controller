@@ -11,7 +11,7 @@ import akka.japi.Procedure;
 import java.util.Collections;
 import java.util.List;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
-import org.opendaylight.controller.cluster.raft.RaftActor.DeleteEntries;
+import org.opendaylight.controller.cluster.raft.base.messages.DeleteEntries;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 
 /**
@@ -27,7 +27,7 @@ class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
 
     private final Procedure<DeleteEntries> deleteProcedure = new Procedure<DeleteEntries>() {
         @Override
-        public void apply(DeleteEntries param) {
+        public void apply(DeleteEntries notUsed) {
         }
     };
 
@@ -56,7 +56,7 @@ class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
         // FIXME: Maybe this should be done after the command is saved
         long adjustedIndex = removeFrom(logEntryIndex);
         if(adjustedIndex >= 0) {
-            persistence.persist(new DeleteEntries((int)adjustedIndex), deleteProcedure);
+            persistence.persist(new DeleteEntries(adjustedIndex), deleteProcedure);
         }
     }
 
