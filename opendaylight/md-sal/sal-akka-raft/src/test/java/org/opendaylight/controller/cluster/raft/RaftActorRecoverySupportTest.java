@@ -24,10 +24,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
-import org.opendaylight.controller.cluster.raft.RaftActor.DeleteEntries;
 import org.opendaylight.controller.cluster.raft.RaftActor.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyLogEntries;
+import org.opendaylight.controller.cluster.raft.base.messages.DeleteEntries;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -232,6 +232,22 @@ public class RaftActorRecoverySupportTest {
     }
 
     @Test
+    public void testOnDeprecatedDeleteEntries() {
+        ReplicatedLog replicatedLog = context.getReplicatedLog();
+        replicatedLog.append(new MockRaftActorContext.MockReplicatedLogEntry(1,
+                0, new MockRaftActorContext.MockPayload("0")));
+        replicatedLog.append(new MockRaftActorContext.MockReplicatedLogEntry(1,
+                1, new MockRaftActorContext.MockPayload("1")));
+        replicatedLog.append(new MockRaftActorContext.MockReplicatedLogEntry(1,
+                2, new MockRaftActorContext.MockPayload("2")));
+
+        sendMessageToSupport(new org.opendaylight.controller.cluster.raft.RaftActor.DeleteEntries(1));
+
+        assertEquals("Journal log size", 1, context.getReplicatedLog().size());
+        assertEquals("Last index", 0, context.getReplicatedLog().lastIndex());
+    }
+
+    @Test
     public void testOnDeleteEntries() {
         ReplicatedLog replicatedLog = context.getReplicatedLog();
         replicatedLog.append(new MockRaftActorContext.MockReplicatedLogEntry(1,
@@ -273,6 +289,8 @@ public class RaftActorRecoverySupportTest {
         sendMessageToSupport(new ApplyJournalEntries(4));
 
         sendMessageToSupport(new DeleteEntries(5));
+
+        sendMessageToSupport(new org.opendaylight.controller.cluster.raft.RaftActor.DeleteEntries(5));
 
         assertEquals("Journal log size", 0, context.getReplicatedLog().size());
         assertEquals("Last index", -1, context.getReplicatedLog().lastIndex());

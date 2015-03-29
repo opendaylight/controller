@@ -571,6 +571,12 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         return getRaftActorContext().hasFollowers();
     }
 
+    /**
+     * @deprecated Deprecated in favor of {@link org.opendaylight.controller.cluster.raft.base.messages.DeleteEntriesTest}
+     *             whose type for fromIndex is long instead of int. This class was kept for backwards
+     *             compatibility with Helium.
+     */
+    @Deprecated
     static class DeleteEntries implements Serializable {
         private static final long serialVersionUID = 1L;
         private final int fromIndex;
