@@ -366,7 +366,7 @@ public class SnapshotManager implements SnapshotState {
         long getTerm();
     }
 
-    private static class LastAppliedTermInformationReader implements TermInformationReader{
+    static class LastAppliedTermInformationReader implements TermInformationReader{
         private long index;
         private long term;
 
