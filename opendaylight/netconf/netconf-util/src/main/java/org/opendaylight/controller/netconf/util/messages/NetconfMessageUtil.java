@@ -9,6 +9,7 @@
 package org.opendaylight.controller.netconf.util.messages;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.collect.Collections2;
 import java.util.Collection;
 import java.util.List;
@@ -59,9 +60,13 @@ public final class NetconfMessageUtil {
 
     public static Collection<String> extractCapabilitiesFromHello(Document doc) throws NetconfDocumentedException {
         XmlElement responseElement = XmlElement.fromDomDocument(doc);
-        XmlElement capabilitiesElement = responseElement
-                .getOnlyChildElementWithSameNamespace(XmlNetconfConstants.CAPABILITIES);
-        List<XmlElement> caps = capabilitiesElement.getChildElements(XmlNetconfConstants.CAPABILITY);
+        // Extract child element <capabilities> from <hello> with or without(fallback) the same namespace
+        Optional<XmlElement> capabilitiesElement = responseElement
+                .getOnlyChildElementWithSameNamespaceOptionally(XmlNetconfConstants.CAPABILITIES)
+                .or(responseElement
+                        .getOnlyChildElementOptionally(XmlNetconfConstants.CAPABILITIES));
+
+        List<XmlElement> caps = capabilitiesElement.get().getChildElements(XmlNetconfConstants.CAPABILITY);
         return Collections2.transform(caps, new Function<XmlElement, String>() {
 
             @Override
