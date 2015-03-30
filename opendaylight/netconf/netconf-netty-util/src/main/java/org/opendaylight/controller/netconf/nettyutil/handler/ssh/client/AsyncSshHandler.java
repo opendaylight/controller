@@ -180,7 +180,7 @@ public class AsyncSshHandler extends ChannelOutboundHandlerAdapter {
 
     @Override
     public synchronized void connect(final ChannelHandlerContext ctx, final SocketAddress remoteAddress, final SocketAddress localAddress, final ChannelPromise promise) throws Exception {
-        LOG.debug("XXX session connecting on channel {}. promise: {} ", ctx.channel(), connectPromise);
+        LOG.debug("SSH session connecting on channel {}. promise: {} ", ctx.channel(), connectPromise);
         this.connectPromise = promise;
         startSsh(ctx, remoteAddress);
     }

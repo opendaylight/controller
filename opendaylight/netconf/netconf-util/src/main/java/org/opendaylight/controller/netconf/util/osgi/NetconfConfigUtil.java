@@ -11,6 +11,7 @@ package org.opendaylight.controller.netconf.util.osgi;
 import com.google.common.base.Optional;
 import io.netty.channel.local.LocalAddress;
 import java.net.InetSocketAddress;
+import java.util.concurrent.TimeUnit;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +33,7 @@ public final class NetconfConfigUtil {
     private static final String PRIVATE_KEY_PATH_PROP = ".pk.path";
 
     private static final String CONNECTION_TIMEOUT_MILLIS_PROP = "connectionTimeoutMillis";
-    private static final long DEFAULT_TIMEOUT_MILLIS = 5000;
+    public static final long DEFAULT_TIMEOUT_MILLIS = TimeUnit.SECONDS.toMillis(30);
     private static final LocalAddress netconfLocalAddress = new LocalAddress("netconf");
 
     public static LocalAddress getNetconfLocalAddress() {
