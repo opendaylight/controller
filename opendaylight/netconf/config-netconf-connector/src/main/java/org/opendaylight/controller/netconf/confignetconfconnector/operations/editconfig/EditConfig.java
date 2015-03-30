@@ -243,8 +243,6 @@ public class EditConfig extends AbstractConfigNetconfOperation {
             }
 
             Date revision = module.getRevision();
-            Preconditions.checkState(!revisionsByNamespace.containsKey(revision),
-                    "Duplicate revision %s for namespace %s", revision, namespace);
 
             IdentityMapping identityMapping = revisionsByNamespace.get(revision);
             if(identityMapping == null) {

@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.netconf.mdsal.connector;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import java.util.HashSet;
 import java.util.Set;
@@ -50,23 +51,37 @@ public class MdsalNetconfOperationServiceFactory implements NetconfOperationServ
         return transformCapabilities(currentSchemaContext.getCurrentContext());
     }
 
-    static Set<Capability> transformCapabilities(final SchemaContext currentContext1) {
+    static Set<Capability> transformCapabilities(final SchemaContext currentContext) {
         final Set<Capability> capabilities = new HashSet<>();
         // [RFC6241] 8.3.  Candidate Configuration Capability
         capabilities.add(new BasicCapability("urn:ietf:params:netconf:capability:candidate:1.0"));
 
-        final SchemaContext currentContext = currentContext1;
         final Set<Module> modules = currentContext.getModules();
         for (final Module module : modules) {
-            if(currentContext.getModuleSource(module).isPresent()) {
-                capabilities.add(new YangModuleCapability(module, currentContext.getModuleSource(module).get()));
-            } else {
-                LOG.warn("Missing source for module {}. This module will not be available from netconf server",
-                        module);
+            Optional<YangModuleCapability> cap = moduleToCapability(module);
+            if(cap.isPresent()) {
+                capabilities.add(cap.get());
+            }
+            for (final Module submodule : module.getSubmodules()) {
+                cap = moduleToCapability(submodule);
+                if(cap.isPresent()) {
+                    capabilities.add(cap.get());
+                }
             }
         }
 
         return capabilities;
+    }
+
+    private static Optional<YangModuleCapability> moduleToCapability(final Module module) {
+        final String source = module.getSource();
+        if(source !=null) {
+            return Optional.of(new YangModuleCapability(module, source));
+        } else {
+            LOG.warn("Missing source for module {}. This module will not be available from netconf server",
+                    module);
+        }
+        return Optional.absent();
     }
 
     @Override
