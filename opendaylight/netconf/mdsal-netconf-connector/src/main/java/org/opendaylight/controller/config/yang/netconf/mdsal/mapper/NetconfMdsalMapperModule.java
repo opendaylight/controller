@@ -10,7 +10,7 @@ package org.opendaylight.controller.config.yang.netconf.mdsal.mapper;
 
 import org.opendaylight.controller.netconf.mdsal.connector.MdsalNetconfOperationServiceFactory;
 
-public class NetconfMdsalMapperModule extends org.opendaylight.controller.config.yang.netconf.mdsal.mapper.AbstractNetconfMdsalMapperModule {
+public class NetconfMdsalMapperModule extends org.opendaylight.controller.config.yang.netconf.mdsal.mapper.AbstractNetconfMdsalMapperModule{
     public NetconfMdsalMapperModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
     }
@@ -26,13 +26,15 @@ public class NetconfMdsalMapperModule extends org.opendaylight.controller.config
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        final MdsalNetconfOperationServiceFactory mdsalNetconfOperationServiceFactory = new MdsalNetconfOperationServiceFactory(getRootSchemaServiceDependency(), getDomBrokerDependency()) {
-            @Override
-            public void close() throws Exception {
-                super.close();
-                getMapperAggregatorDependency().onRemoveNetconfOperationServiceFactory(this);
-            }
-        };
+        final MdsalNetconfOperationServiceFactory mdsalNetconfOperationServiceFactory =
+                new MdsalNetconfOperationServiceFactory(getRootSchemaServiceDependency()) {
+                    @Override
+                    public void close() throws Exception {
+                        super.close();
+                        getMapperAggregatorDependency().onRemoveNetconfOperationServiceFactory(this);
+                    }
+                };
+        getDomBrokerDependency().registerConsumer(mdsalNetconfOperationServiceFactory);
         getMapperAggregatorDependency().onAddNetconfOperationServiceFactory(mdsalNetconfOperationServiceFactory);
         return mdsalNetconfOperationServiceFactory;
     }

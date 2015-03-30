@@ -10,35 +10,42 @@ package org.opendaylight.controller.netconf.mdsal.connector;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 import org.opendaylight.controller.netconf.api.Capability;
 import org.opendaylight.controller.netconf.api.monitoring.CapabilityListener;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
 import org.opendaylight.controller.netconf.util.capability.BasicCapability;
 import org.opendaylight.controller.netconf.util.capability.YangModuleCapability;
+import org.opendaylight.controller.sal.core.api.Broker.ConsumerSession;
+import org.opendaylight.controller.sal.core.api.Consumer;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MdsalNetconfOperationServiceFactory implements NetconfOperationServiceFactory, AutoCloseable {
+public class MdsalNetconfOperationServiceFactory implements NetconfOperationServiceFactory, Consumer, AutoCloseable {
 
     private static final Logger LOG = LoggerFactory.getLogger(MdsalNetconfOperationServiceFactory.class);
 
-    private final DOMDataBroker dataBroker;
+    private ConsumerSession session = null;
+    private DOMDataBroker dataBroker = null;
+    private DOMRpcService rpcService = null;
     private final CurrentSchemaContext currentSchemaContext;
 
-    public MdsalNetconfOperationServiceFactory(final SchemaService schemaService, final DOMDataBroker domDataBroker) {
+    public MdsalNetconfOperationServiceFactory(final SchemaService schemaService) {
         this.currentSchemaContext = new CurrentSchemaContext(Preconditions.checkNotNull(schemaService));
-        this.dataBroker = Preconditions.checkNotNull(domDataBroker);
     }
 
     @Override
     public MdsalNetconfOperationService createService(final String netconfSessionIdForReporting) {
-        return new MdsalNetconfOperationService(currentSchemaContext, netconfSessionIdForReporting, dataBroker);
+        Preconditions.checkState(dataBroker != null, "MD-SAL provider not yet initialized");
+        return new MdsalNetconfOperationService(currentSchemaContext, netconfSessionIdForReporting, dataBroker, rpcService);
     }
 
     @Override
@@ -89,4 +96,15 @@ public class MdsalNetconfOperationServiceFactory implements NetconfOperationServ
         return currentSchemaContext.registerCapabilityListener(listener);
     }
 
+    @Override
+    public void onSessionInitiated(ConsumerSession session) {
+        this.session = Preconditions.checkNotNull(session);
+        this.dataBroker = this.session.getService(DOMDataBroker.class);
+        this.rpcService = this.session.getService(DOMRpcService.class);
+    }
+
+    @Override
+    public Collection<ConsumerFunctionality> getConsumerFunctionality() {
+        return Collections.emptySet();
+    }
 }

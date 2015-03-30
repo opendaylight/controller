@@ -29,7 +29,7 @@ import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorT
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.mdsal.connector.CurrentSchemaContext;
 import org.opendaylight.controller.netconf.mdsal.connector.ops.Datastore;
-import org.opendaylight.controller.netconf.util.mapping.AbstractLastNetconfOperation;
+import org.opendaylight.controller.netconf.util.mapping.AbstractSingletonNetconfOperation;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.sal.connect.netconf.util.InstanceIdToNodes;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -56,7 +56,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-public abstract class AbstractGet extends AbstractLastNetconfOperation {
+public abstract class AbstractGet extends AbstractSingletonNetconfOperation {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractGet.class);
 
