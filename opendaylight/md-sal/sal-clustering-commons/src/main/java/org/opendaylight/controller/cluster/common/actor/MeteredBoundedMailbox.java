@@ -26,9 +26,9 @@ public class MeteredBoundedMailbox implements MailboxType, ProducesMessageQueue<
     private final Logger LOG = LoggerFactory.getLogger(MeteredBoundedMailbox.class);
 
     private MeteredMessageQueue queue;
-    private Integer capacity;
-    private FiniteDuration pushTimeOut;
-    private MetricRegistry registry;
+    private final Integer capacity;
+    private final FiniteDuration pushTimeOut;
+    private final MetricRegistry registry;
 
     private final String QUEUE_SIZE = "q-size";
 
@@ -38,7 +38,7 @@ public class MeteredBoundedMailbox implements MailboxType, ProducesMessageQueue<
         this.capacity = commonConfig.getMailBoxCapacity();
         this.pushTimeOut = commonConfig.getMailBoxPushTimeout();
 
-        MetricsReporter reporter = MetricsReporter.getInstance();
+        MetricsReporter reporter = MetricsReporter.getInstance(MeteringBehavior.DOMAIN);
         registry = reporter.getMetricsRegistry();
     }
 
@@ -58,7 +58,9 @@ public class MeteredBoundedMailbox implements MailboxType, ProducesMessageQueue<
         String metricName = MetricRegistry.name(actorName, QUEUE_SIZE);
 
         if (registry.getMetrics().containsKey(metricName))
+        {
             return; //already registered
+        }
 
         Gauge<Integer> queueSize = getQueueSizeGuage(monitoredQueue);
         registerQueueSizeMetric(metricName, queueSize);
