@@ -113,6 +113,7 @@ public abstract class AbstractDispatcher<S extends ProtocolSession<?>, L extends
         if (LocalServerChannel.class.equals(channelClass) == false) {
             // makes no sense for LocalServer and produces warning
             b.childOption(ChannelOption.SO_KEEPALIVE, true);
+            b.childOption(ChannelOption.TCP_NODELAY , true);
         }
         b.childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
         customizeBootstrap(b);
