@@ -21,7 +21,6 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -325,31 +324,24 @@ public final class NetconfDevice implements RemoteDevice<NetconfSessionPreferenc
 
         @Override
         public DeviceSources call() throws Exception {
-
-            final Set<SourceIdentifier> requiredSources = Sets.newHashSet(Collections2.transform(
-                    remoteSessionCapabilities.getModuleBasedCaps(), QNAME_TO_SOURCE_ID_FUNCTION));
-
-            // If monitoring is not supported, we will still attempt to create schema, sources might be already provided
             final NetconfStateSchemas availableSchemas = stateSchemasResolver.resolve(deviceRpc, remoteSessionCapabilities, id);
             logger.debug("{}: Schemas exposed by ietf-netconf-monitoring: {}", id, availableSchemas.getAvailableYangSchemasQNames());
 
-            final Set<SourceIdentifier> providedSources = Sets.newHashSet(Collections2.transform(
-                    availableSchemas.getAvailableYangSchemasQNames(), QNAME_TO_SOURCE_ID_FUNCTION));
+            final Set<QName> requiredSources = Sets.newHashSet(remoteSessionCapabilities.getModuleBasedCaps());
+            final Set<QName> providedSources = availableSchemas.getAvailableYangSchemasQNames();
 
-            final Set<SourceIdentifier> requiredSourcesNotProvided = Sets.difference(requiredSources, providedSources);
-
+            final Set<QName> requiredSourcesNotProvided = Sets.difference(requiredSources, providedSources);
             if (!requiredSourcesNotProvided.isEmpty()) {
                 logger.warn("{}: Netconf device does not provide all yang models reported in hello message capabilities, required but not provided: {}",
                         id, requiredSourcesNotProvided);
                 logger.warn("{}: Attempting to build schema context from required sources", id);
             }
 
-
             // Here all the sources reported in netconf monitoring are merged with those reported in hello.
             // It is necessary to perform this since submodules are not mentioned in hello but still required.
             // This clashes with the option of a user to specify supported yang models manually in configuration for netconf-connector
             // and as a result one is not able to fully override yang models of a device. It is only possible to add additional models.
-            final Set<SourceIdentifier> providedSourcesNotRequired = Sets.difference(providedSources, requiredSources);
+            final Set<QName> providedSourcesNotRequired = Sets.difference(providedSources, requiredSources);
             if (!providedSourcesNotRequired.isEmpty()) {
                 logger.warn("{}: Netconf device provides additional yang models not reported in hello message capabilities: {}",
                         id, providedSourcesNotRequired);
@@ -366,20 +358,28 @@ public final class NetconfDevice implements RemoteDevice<NetconfSessionPreferenc
      * Contains RequiredSources - sources from capabilities.
      */
     private static final class DeviceSources {
-        private final Collection<SourceIdentifier> requiredSources;
-        private final Collection<SourceIdentifier> providedSources;
+        private final Set<QName> requiredSources;
+        private final Set<QName> providedSources;
 
-        public DeviceSources(final Collection<SourceIdentifier> requiredSources, final Collection<SourceIdentifier> providedSources) {
+        public DeviceSources(final Set<QName> requiredSources, final Set<QName> providedSources) {
             this.requiredSources = requiredSources;
             this.providedSources = providedSources;
         }
 
-        public Collection<SourceIdentifier> getRequiredSources() {
+        public Set<QName> getRequiredSourcesQName() {
             return requiredSources;
         }
 
-        public Collection<SourceIdentifier> getProvidedSources() {
+        public Set<QName> getProvidedSourcesQName() {
             return providedSources;
+        }
+
+        public Collection<SourceIdentifier> getRequiredSources() {
+            return Collections2.transform(requiredSources, QNAME_TO_SOURCE_ID_FUNCTION);
+        }
+
+        public Collection<SourceIdentifier> getProvidedSources() {
+            return Collections2.transform(providedSources, QNAME_TO_SOURCE_ID_FUNCTION);
         }
 
     }
@@ -427,7 +427,7 @@ public final class NetconfDevice implements RemoteDevice<NetconfSessionPreferenc
                 @Override
                 public void onSuccess(final SchemaContext result) {
                     logger.debug("{}: Schema context built successfully from {}", id, requiredSources);
-                    final Collection<QName> filteredQNames = Sets.difference(remoteSessionCapabilities.getModuleBasedCaps(), capabilities.getUnresolvedCapabilites().keySet());
+                    final Collection<QName> filteredQNames = Sets.difference(deviceSources.getProvidedSourcesQName(), capabilities.getUnresolvedCapabilites().keySet());
                     capabilities.addCapabilities(filteredQNames);
                     capabilities.addNonModuleBasedCapabilities(remoteSessionCapabilities.getNonModuleCaps());
                     handleSalInitializationSuccess(result, remoteSessionCapabilities, getDeviceSpecificRpc(result));
@@ -472,27 +472,36 @@ public final class NetconfDevice implements RemoteDevice<NetconfSessionPreferenc
         }
 
         private Collection<QName> getQNameFromSourceIdentifiers(final Collection<SourceIdentifier> identifiers) {
-            final Collection<QName> qNames = new HashSet<>();
-            for (final SourceIdentifier source : identifiers) {
-                final Optional<QName> qname = getQNameFromSourceIdentifier(source);
-                if (qname.isPresent()) {
-                    qNames.add(qname.get());
+            final Collection<QName> qNames = Collections2.transform(identifiers, new Function<SourceIdentifier, QName>() {
+                @Override
+                public QName apply(final SourceIdentifier sourceIdentifier) {
+                    return getQNameFromSourceIdentifier(sourceIdentifier);
                 }
-            }
+            });
+
             if (qNames.isEmpty()) {
                 logger.debug("Unable to map any source identfiers to a capability reported by device : " + identifiers);
             }
             return qNames;
         }
 
-        private Optional<QName> getQNameFromSourceIdentifier(final SourceIdentifier identifier) {
-            for (final QName qname : remoteSessionCapabilities.getModuleBasedCaps()) {
-                if (qname.getLocalName().equals(identifier.getName())
-                        && qname.getFormattedRevision().equals(identifier.getRevision())) {
-                    return Optional.of(qname);
+        private QName getQNameFromSourceIdentifier(final SourceIdentifier identifier) {
+            // Required sources are all required and provided merged in DeviceSourcesResolver
+            for (final QName qname : deviceSources.getRequiredSourcesQName()) {
+                if(qname.getLocalName().equals(identifier.getName()) == false) {
+                    continue;
+                }
+
+                if(identifier.getRevision().equals(SourceIdentifier.NOT_PRESENT_FORMATTED_REVISION) &&
+                        qname.getRevision() == null) {
+                    return qname;
+                }
+
+                if (qname.getFormattedRevision().equals(identifier.getRevision())) {
+                    return qname;
                 }
             }
-            throw new IllegalArgumentException("Unable to map identifier to a devices reported capability: " + identifier);
+            throw new IllegalArgumentException("Unable to map identifier to a devices reported capability: " + identifier + " Available: " + deviceSources.getRequiredSourcesQName());
         }
     }
 }
