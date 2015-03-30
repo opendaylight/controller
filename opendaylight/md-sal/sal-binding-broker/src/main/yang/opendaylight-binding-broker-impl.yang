@@ -70,6 +70,7 @@ module opendaylight-sal-binding-broker-impl {
         base config:module-type;
         config:provided-service binding-dom-mapping-service;
         config:provided-service sal:binding-codec-tree-factory;
+        config:provided-service sal:binding-normalized-node-serializer;
         config:java-name-prefix RuntimeMapping;
     }
 

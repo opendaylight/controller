@@ -19,17 +19,21 @@ import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizat
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizer;
 import org.opendaylight.yangtools.binding.data.codec.api.BindingCodecTree;
 import org.opendaylight.yangtools.binding.data.codec.api.BindingCodecTreeFactory;
+import org.opendaylight.yangtools.binding.data.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.yangtools.binding.data.codec.impl.BindingNormalizedNodeCodecRegistry;
 import org.opendaylight.yangtools.sal.binding.generator.impl.GeneratedClassLoadingStrategy;
 import org.opendaylight.yangtools.sal.binding.generator.util.BindingRuntimeContext;
 import org.opendaylight.yangtools.yang.binding.BindingMapping;
+import org.opendaylight.yangtools.yang.binding.DataContainer;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.binding.Notification;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 import org.opendaylight.yangtools.yang.common.QNameModule;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
 import org.opendaylight.yangtools.yang.model.api.Module;
@@ -38,7 +42,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
-public class BindingToNormalizedNodeCodec implements BindingCodecTreeFactory, SchemaContextListener, AutoCloseable {
+public class BindingToNormalizedNodeCodec implements BindingCodecTreeFactory, BindingNormalizedNodeSerializer, SchemaContextListener, AutoCloseable {
 
     private final BindingNormalizedNodeCodecRegistry codecRegistry;
     private DataNormalizer legacyToNormalized;
@@ -56,16 +60,52 @@ public class BindingToNormalizedNodeCodec implements BindingCodecTreeFactory, Sc
         return codecRegistry.toYangInstanceIdentifier(binding);
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    public Entry<YangInstanceIdentifier, NormalizedNode<?, ?>> toNormalizedNode(
-            final InstanceIdentifier<? extends DataObject> bindingPath, final DataObject bindingObject) {
-        return codecRegistry.toNormalizedNode((InstanceIdentifier) bindingPath, bindingObject);
-
+    @Override
+    public YangInstanceIdentifier toYangInstanceIdentifier(InstanceIdentifier<?> binding) {
+        return codecRegistry.toYangInstanceIdentifier(binding);
     }
 
+    @Override
+    public <T extends DataObject> Entry<YangInstanceIdentifier, NormalizedNode<?, ?>> toNormalizedNode(
+            InstanceIdentifier<T> path, T data) {
+        return codecRegistry.toNormalizedNode(path, data);
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public Entry<YangInstanceIdentifier, NormalizedNode<?, ?>> toNormalizedNode(
             final Entry<InstanceIdentifier<? extends DataObject>, DataObject> binding) {
-        return toNormalizedNode(binding.getKey(),binding.getValue());
+        return toNormalizedNode((InstanceIdentifier) binding.getKey(),binding.getValue());
+    }
+
+    @Override
+    public Entry<InstanceIdentifier<?>, DataObject> fromNormalizedNode(YangInstanceIdentifier path,
+            NormalizedNode<?, ?> data) {
+        return codecRegistry.fromNormalizedNode(path, data);
+    }
+
+    @Override
+    public Notification fromNormalizedNodeNotification(SchemaPath path, ContainerNode data) {
+        return codecRegistry.fromNormalizedNodeNotification(path, data);
+    }
+
+    @Override
+    public DataObject fromNormalizedNodeRpcData(SchemaPath path, ContainerNode data) {
+        return codecRegistry.fromNormalizedNodeRpcData(path, data);
+    }
+
+    @Override
+    public InstanceIdentifier<?> fromYangInstanceIdentifier(YangInstanceIdentifier dom) {
+        return codecRegistry.fromYangInstanceIdentifier(dom);
+    }
+
+    @Override
+    public ContainerNode toNormalizedNodeNotification(Notification data) {
+        return codecRegistry.toNormalizedNodeNotification(data);
+    }
+
+    @Override
+    public ContainerNode toNormalizedNodeRpcData(DataContainer data) {
+        return codecRegistry.toNormalizedNodeRpcData(data);
     }
 
     /**
