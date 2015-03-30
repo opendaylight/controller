@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_d4863d65",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/api/EventSource.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-30T15:40:42Z",
+      "side": 1,
+      "message": "What does does \"In this context\" mean here?",
+      "revId": "4a2eb261fa45ffd0b88b72a3dbea9b3bc5c35cd1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_b4ea910d",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/api/EventSource.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-30T15:40:42Z",
+      "side": 1,
+      "message": "What does \"should be represented as a node\" mean? What kind of node and represented where?",
+      "revId": "4a2eb261fa45ffd0b88b72a3dbea9b3bc5c35cd1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_94f755f5",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/api/EventSource.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-30T15:40:42Z",
+      "side": 1,
+      "message": "\"JointTopic\" ?",
+      "revId": "4a2eb261fa45ffd0b88b72a3dbea9b3bc5c35cd1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_d462bdac",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/api/EventSource.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-30T15:40:42Z",
+      "side": 1,
+      "message": "There\u0027s still many grammatical errors and some semantically incorrect and redundant wording. \n\nI think what I suggested is more clear and concise and captures the intent.\n\nI still think \"event source manager\" is an implementation detail and not pertinent to this interface. You don\u0027t need an explicit concept called \"event source manager\" to advertise an EventSource.",
+      "revId": "4a2eb261fa45ffd0b88b72a3dbea9b3bc5c35cd1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_34fa01be",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/api/EventSourceRegistry.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-30T15:40:42Z",
+      "side": 1,
+      "message": "Again an \"event source manager\" concept is not pertinent to the EventSourceRegistry interface. It doesn\u0027t care how or what specific concept is used to register EventSource implementations. \n\nI think my wording sufficiently captures the intent.",
+      "revId": "4a2eb261fa45ffd0b88b72a3dbea9b3bc5c35cd1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_14ffc5ab",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/api/EventSourceRegistry.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-30T15:40:42Z",
+      "side": 1,
+      "message": "This was changed to a concrete class. This is in an api package and thus should be an interface.\n\nI realize you did this b/c EventSourceRegistration needs access to the EventSourceRegistry implementation. Instead of doing it this way, you should make EventSourceRegistration an interface with an implementation residing with the EventSourceRegistry implementation.",
+      "revId": "4a2eb261fa45ffd0b88b72a3dbea9b3bc5c35cd1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_347d211d",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/api/EventSourceRegistry.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-03-30T15:40:42Z",
+      "side": 1,
+      "message": "Method javadoc is misplaced.\n\nThere\u0027s several grammatical/semantic errors. Also introduces a new concepts \"message bus\", \"event source topology\" and \"RpcService\" that haven\u0027t been defined/explained. Again they\u0027re implementation details. Also it was decided on the last public call that \"message bus\" isn\u0027t a good term. \n\nMy suggestion:\n\n/**\n  * Registers the given EventSource for public consumption. The EventSource is \n  * associated with the node identified via {@link \n  * EventSource#getSourceNodeKey}.\n  *\n  * @param eventSource  the EventSource instance to register\n  * @return an EventSourceRegistration instance that is used to unregister the EventSource via {@link EventSourceRegistration#close()}.\n  */",
+      "revId": "4a2eb261fa45ffd0b88b72a3dbea9b3bc5c35cd1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
