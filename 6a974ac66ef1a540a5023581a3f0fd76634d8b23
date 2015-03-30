@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_5e27b164",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/MeteredBoundedMailbox.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-30T16:30:36Z",
+      "side": 1,
+      "message": "code formatting issue",
+      "range": {
+        "startLine": 61,
+        "startChar": 9,
+        "endLine": 61,
+        "endChar": 10
+      },
+      "revId": "6a974ac66ef1a540a5023581a3f0fd76634d8b23",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_f7349bdf",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionRateLimitingCallback.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-30T16:30:36Z",
+      "side": 1,
+      "message": "Do you think we should do this or should we force the commitTimer to not be null?",
+      "revId": "6a974ac66ef1a540a5023581a3f0fd76634d8b23",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_77588b32",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionRateLimitingCallback.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-30T16:30:36Z",
+      "side": 1,
+      "message": "if(!actorContext().getDatastoreContext().getDatastoreType().equals(dataStoreType) then do another calculation",
+      "revId": "6a974ac66ef1a540a5023581a3f0fd76634d8b23",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
