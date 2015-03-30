@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_21d721ef",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/api/EventSource.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 2834
+      },
+      "writtenOn": "2015-03-30T13:57:38Z",
+      "side": 1,
+      "message": "I try to rewrite JavaDoc, please read and comment it.",
+      "parentUuid": "5a93c517_0a1c7fc0",
+      "revId": "dfede9203c7a6bf4bf8f1718b4d5312e97f678bc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_6a13c366",
         "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/api/EventSourceRegistry.java",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2015-03-28T18:03:54Z",
       "side": 1,
       "message": "What \"Event Source Manager\" are you referring to? That seems like an implementation detail.\n\nHow about:\n\n\"An interface for a service that maintains EventSource registrations and publishes them for consumption.\"\n\nNot much but it seems to capture what it does based on the methods. The rest about \"Event Source Manager\" seems better suited for the implementation javadocs.",
+      "revId": "dfede9203c7a6bf4bf8f1718b4d5312e97f678bc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_61cd295d",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/api/EventSourceRegistry.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 2834
+      },
+      "writtenOn": "2015-03-30T13:57:38Z",
+      "side": 1,
+      "message": "I rewrote JavaDoc. \nNotice: Event source manager is responsible to manage its event sources (see NetconfEventManager). We have no requirements to Event source manager, but we assume existence of it. Event source manager (or another entity) is responsible to identify of event source, register and unregister event source. Event source manager can be part of another component or another component can play role of event source manager, of course. We do not insist about name of \"event source manager\".",
+      "parentUuid": "5a93c517_6a13c366",
       "revId": "dfede9203c7a6bf4bf8f1718b4d5312e97f678bc",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_a19d715b",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/api/EventSourceRegistry.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 2834
+      },
+      "writtenOn": "2015-03-30T13:57:38Z",
+      "side": 1,
+      "message": "Node has been removed from parameters. EventSourceTopology has been modified, too. EventSourceTopology does not want of node to register event source into \"event source topology\".",
+      "parentUuid": "5a93c517_be003002",
+      "revId": "dfede9203c7a6bf4bf8f1718b4d5312e97f678bc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_4a912751",
         "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/api/EventSourceRegistry.java",
         "patchSetId": 5
@@ -64,6 +118,24 @@
       "writtenOn": "2015-03-28T18:03:54Z",
       "side": 1,
       "message": "I\u0027m curious why this call needs to return a ListenableFuture. Other registrations methods in md-sal core simply return a registration instance. Even if the implementation performs it async, the caller really doesn\u0027t need or care to know that.",
+      "revId": "dfede9203c7a6bf4bf8f1718b4d5312e97f678bc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_e1a5b9b5",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/api/EventSourceRegistry.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 2834
+      },
+      "writtenOn": "2015-03-30T13:57:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_4a912751",
       "revId": "dfede9203c7a6bf4bf8f1718b4d5312e97f678bc",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_a186d111",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/api/EventSourceRegistry.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 2834
+      },
+      "writtenOn": "2015-03-30T13:57:38Z",
+      "side": 1,
+      "message": "Interface has been removed. Class EventSourceRegistry has been created instead of it. Method unRegisterEventSource has been removed, unregister functionality was moved into EventSourceRegistration. \nEntities (event source manager) which hold  EventSourceRegistration instances can unregister event sources simple by EventSourceRegistration.close().",
+      "parentUuid": "5a93c517_ea9fd35d",
+      "revId": "dfede9203c7a6bf4bf8f1718b4d5312e97f678bc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_caa537b6",
         "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/eventsources/netconf/NetconfEventSource.java",
         "patchSetId": 5
@@ -104,6 +194,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_21e3a134",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/eventsources/netconf/NetconfEventSource.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 2834
+      },
+      "writtenOn": "2015-03-30T13:57:38Z",
+      "side": 1,
+      "message": "I preffer propagate error, Rpcresult.failed is used.",
+      "parentUuid": "5a93c517_caa537b6",
+      "revId": "dfede9203c7a6bf4bf8f1718b4d5312e97f678bc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_0ac47f5d",
         "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/eventsources/netconf/NetconfEventSource.java",
         "patchSetId": 5
@@ -115,6 +223,30 @@
       "writtenOn": "2015-03-28T18:03:54Z",
       "side": 1,
       "message": "registerNotificationListener can return null - thus is not allowed by ConcurrentHashMap - it will throw an NPE.\n\nIf 2 threads call joinTopic simultaneously with the same topicId then 2 registrations will occur. To get atomicity, it seems this method needs to be synchronized and not registerNotificationListener.",
+      "range": {
+        "startLine": 110,
+        "startChar": 56,
+        "endLine": 110,
+        "endChar": 84
+      },
+      "revId": "dfede9203c7a6bf4bf8f1718b4d5312e97f678bc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_21ff21ac",
+        "filename": "opendaylight/md-sal/messagebus-impl/src/main/java/org/opendaylight/controller/messagebus/eventsources/netconf/NetconfEventSource.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 2834
+      },
+      "writtenOn": "2015-03-30T13:57:38Z",
+      "side": 1,
+      "message": "I rewrote it, I created one method to do registration listener and store in map atomically.",
+      "parentUuid": "5a93c517_0ac47f5d",
       "range": {
         "startLine": 110,
         "startChar": 56,
