@@ -19,7 +19,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.Map;
-import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.example.messages.KeyValue;
 import org.opendaylight.controller.cluster.example.messages.KeyValueSaved;
 import org.opendaylight.controller.cluster.example.messages.PrintRole;
@@ -38,7 +37,6 @@ import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payloa
 public class ExampleActor extends RaftActor {
 
     private final Map<String, String> state = new HashMap();
-    private final DataPersistenceProvider dataPersistenceProvider;
 
     private long persistIdentifier = 1;
     private final Optional<ActorRef> roleChangeNotifier;
@@ -47,7 +45,7 @@ public class ExampleActor extends RaftActor {
     public ExampleActor(String id, Map<String, String> peerAddresses,
         Optional<ConfigParams> configParams) {
         super(id, peerAddresses, configParams);
-        this.dataPersistenceProvider = new PersistentDataProvider();
+        setPersistence(true);
         roleChangeNotifier = createRoleChangeNotifier(id);
     }
 
@@ -183,11 +181,6 @@ public class ExampleActor extends RaftActor {
 
     @Override protected void onStateChanged() {
 
-    }
-
-    @Override
-    protected DataPersistenceProvider persistence() {
-        return dataPersistenceProvider;
     }
 
     @Override public void onReceiveRecover(Object message)throws Exception {

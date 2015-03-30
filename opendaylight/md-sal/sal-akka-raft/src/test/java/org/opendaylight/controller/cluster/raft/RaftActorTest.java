@@ -54,9 +54,11 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
+import org.opendaylight.controller.cluster.NonPersistentDataProvider;
 import org.opendaylight.controller.cluster.datastore.DataPersistenceProviderMonitor;
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.RoleChanged;
+import org.opendaylight.controller.cluster.raft.RaftActor.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyLogEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
@@ -97,7 +99,6 @@ public class RaftActorTest extends AbstractActorTest {
 
     public static class MockRaftActor extends RaftActor {
 
-        protected DataPersistenceProvider dataPersistenceProvider;
         private final RaftActor delegate;
         private final CountDownLatch recoveryComplete = new CountDownLatch(1);
         private final List<Object> state;
@@ -137,9 +138,9 @@ public class RaftActorTest extends AbstractActorTest {
             state = new ArrayList<>();
             this.delegate = mock(RaftActor.class);
             if(dataPersistenceProvider == null){
-                this.dataPersistenceProvider = new PersistentDataProvider();
+                setPersistence(true);
             } else {
-                this.dataPersistenceProvider = dataPersistenceProvider;
+                setPersistence(dataPersistenceProvider);
             }
         }
 
@@ -250,11 +251,6 @@ public class RaftActorTest extends AbstractActorTest {
 
         @Override protected void onStateChanged() {
             delegate.onStateChanged();
-        }
-
-        @Override
-        protected DataPersistenceProvider persistence() {
-            return this.dataPersistenceProvider;
         }
 
         @Override
@@ -542,7 +538,7 @@ public class RaftActorTest extends AbstractActorTest {
 
                 assertEquals("remove log entries", 1, replicatedLog.size());
 
-                mockRaftActor.onReceiveRecover(new RaftActor.UpdateElectionTerm(10, "foobar"));
+                mockRaftActor.onReceiveRecover(new UpdateElectionTerm(10, "foobar"));
 
                 assertEquals("election term", 10, mockRaftActor.getRaftActorContext().getTermInformation().getCurrentTerm());
                 assertEquals("voted for", "foobar", mockRaftActor.getRaftActorContext().getTermInformation().getVotedFor());
@@ -607,7 +603,7 @@ public class RaftActorTest extends AbstractActorTest {
 
                 assertEquals("remove log entries", 0, replicatedLog.size());
 
-                mockRaftActor.onReceiveRecover(new RaftActor.UpdateElectionTerm(10, "foobar"));
+                mockRaftActor.onReceiveRecover(new UpdateElectionTerm(10, "foobar"));
 
                 assertNotEquals("election term", 10, mockRaftActor.getRaftActorContext().getTermInformation().getCurrentTerm());
                 assertNotEquals("voted for", "foobar", mockRaftActor.getRaftActorContext().getTermInformation().getVotedFor());
@@ -986,7 +982,7 @@ public class RaftActorTest extends AbstractActorTest {
 
             TestActorRef<MockRaftActor> raftActorRef = factory.createTestActor(MockRaftActor.props(persistenceId,
                     Collections.<String, String>emptyMap(), Optional.<ConfigParams>of(config), notifierActor,
-                    new NonPersistentProvider()), persistenceId);
+                    new NonPersistentDataProvider()), persistenceId);
 
             List<RoleChanged> matches =  MessageCollectorActor.expectMatching(notifierActor, RoleChanged.class, 3);
 
@@ -1161,13 +1157,13 @@ public class RaftActorTest extends AbstractActorTest {
                         new MockRaftActorContext.MockPayload("foo-3"),
                         new MockRaftActorContext.MockPayload("foo-4")));
 
-                leaderActor.getRaftActorContext().getSnapshotManager().persist(new NonPersistentProvider()
+                leaderActor.getRaftActorContext().getSnapshotManager().persist(new NonPersistentDataProvider()
                         , snapshotBytes.toByteArray(), leader, Runtime.getRuntime().totalMemory());
 
                 assertFalse(leaderActor.getRaftActorContext().getSnapshotManager().isCapturing());
 
                 // The commit is needed to complete the snapshot creation process
-                leaderActor.getRaftActorContext().getSnapshotManager().commit(new NonPersistentProvider(), -1);
+                leaderActor.getRaftActorContext().getSnapshotManager().commit(new NonPersistentDataProvider(), -1);
 
                 // capture snapshot reply should remove the snapshotted entries only
                 assertEquals(3, leaderActor.getReplicatedLog().size());
@@ -1271,7 +1267,7 @@ public class RaftActorTest extends AbstractActorTest {
                 assertFalse(followerActor.getRaftActorContext().getSnapshotManager().isCapturing());
 
                 // The commit is needed to complete the snapshot creation process
-                followerActor.getRaftActorContext().getSnapshotManager().commit(new NonPersistentProvider(), -1);
+                followerActor.getRaftActorContext().getSnapshotManager().commit(new NonPersistentDataProvider(), -1);
 
                 // capture snapshot reply should remove the snapshotted entries only till replicatedToAllIndex
                 assertEquals(3, followerActor.getReplicatedLog().size()); //indexes 5,6,7 left in the log
@@ -1380,38 +1376,6 @@ public class RaftActorTest extends AbstractActorTest {
         };
     }
 
-
-    private static class NonPersistentProvider implements DataPersistenceProvider {
-        @Override
-        public boolean isRecoveryApplicable() {
-            return false;
-        }
-
-        @Override
-        public <T> void persist(T o, Procedure<T> procedure) {
-            try {
-                procedure.apply(o);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        @Override
-        public void saveSnapshot(Object o) {
-
-        }
-
-        @Override
-        public void deleteSnapshots(SnapshotSelectionCriteria criteria) {
-
-        }
-
-        @Override
-        public void deleteMessages(long sequenceNumber) {
-
-        }
-    }
-
     @Test
     public void testRealSnapshotWhenReplicatedToAllIndexMinusOne() throws Exception {
         new JavaTestKit(getSystem()) {{
@@ -1421,7 +1385,7 @@ public class RaftActorTest extends AbstractActorTest {
             config.setIsolatedLeaderCheckInterval(new FiniteDuration(1, TimeUnit.DAYS));
             config.setSnapshotBatchCount(5);
 
-            DataPersistenceProvider dataPersistenceProvider = new NonPersistentProvider();
+            DataPersistenceProvider dataPersistenceProvider = new NonPersistentDataProvider();
 
             Map<String, String> peerAddresses = new HashMap<>();
 
@@ -1468,7 +1432,7 @@ public class RaftActorTest extends AbstractActorTest {
             config.setIsolatedLeaderCheckInterval(new FiniteDuration(1, TimeUnit.DAYS));
             config.setSnapshotBatchCount(5);
 
-            DataPersistenceProvider dataPersistenceProvider = new NonPersistentProvider();
+            DataPersistenceProvider dataPersistenceProvider = new NonPersistentDataProvider();
 
             Map<String, String> peerAddresses = new HashMap<>();
 

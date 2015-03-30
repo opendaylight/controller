@@ -8,10 +8,7 @@
 
 package org.opendaylight.controller.cluster.common.actor;
 
-import akka.japi.Procedure;
-import akka.persistence.SnapshotSelectionCriteria;
 import akka.persistence.UntypedPersistentActor;
-import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,72 +65,5 @@ public abstract class AbstractUntypedPersistentActor extends UntypedPersistentAc
             LOG.debug("Received unhandled message {}", message);
         }
         unhandled(message);
-    }
-
-    protected class PersistentDataProvider implements DataPersistenceProvider {
-
-        public PersistentDataProvider(){
-
-        }
-
-        @Override
-        public boolean isRecoveryApplicable() {
-            return true;
-        }
-
-        @Override
-        public <T> void persist(T o, Procedure<T> procedure) {
-            AbstractUntypedPersistentActor.this.persist(o, procedure);
-        }
-
-        @Override
-        public void saveSnapshot(Object o) {
-            AbstractUntypedPersistentActor.this.saveSnapshot(o);
-        }
-
-        @Override
-        public void deleteSnapshots(SnapshotSelectionCriteria criteria) {
-            AbstractUntypedPersistentActor.this.deleteSnapshots(criteria);
-        }
-
-        @Override
-        public void deleteMessages(long sequenceNumber) {
-            AbstractUntypedPersistentActor.this.deleteMessages(sequenceNumber);
-        }
-    }
-
-    protected class NonPersistentDataProvider implements DataPersistenceProvider {
-
-        public NonPersistentDataProvider(){
-
-        }
-
-        @Override
-        public boolean isRecoveryApplicable() {
-            return false;
-        }
-
-        @Override
-        public <T> void persist(T o, Procedure<T> procedure) {
-            try {
-                procedure.apply(o);
-            } catch (Exception e) {
-                LOG.error("An unexpected error occurred", e);
-            }
-        }
-
-        @Override
-        public void saveSnapshot(Object o) {
-        }
-
-        @Override
-        public void deleteSnapshots(SnapshotSelectionCriteria criteria) {
-
-        }
-
-        @Override
-        public void deleteMessages(long sequenceNumber) {
-
-        }
     }
 }
