@@ -2,8 +2,7 @@ package org.opendaylight.controller.config.yang.netconf.northbound.ssh;
 
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.local.LocalAddress;
-import io.netty.util.concurrent.GenericFutureListener;
-import java.io.IOException;
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
@@ -39,7 +38,14 @@ public class NetconfNorthboundSshModule extends org.opendaylight.controller.conf
         final NetconfServerDispatcher dispatch = getDispatcherDependency();
 
         final LocalAddress localAddress = new LocalAddress(getPort().toString());
-        final ChannelFuture localServer = dispatch.createLocalServer(localAddress);
+//        final ChannelFuture localServer = dispatch.createLocalServer(localAddress);
+        final ChannelFuture localServer;
+        try {
+            localServer = dispatch.createServer(new InetSocketAddress(Inet4Address.getByName("0.0.0.0"), getPort().getValue()));
+            return new NetconfServerCloseable(localServer);
+        } catch (UnknownHostException e) {
+            LOG.warn("Unknown host when creating tcp server for netcon nb", e);
+        }
 
         final SshProxyServer sshProxyServer = new SshProxyServer(Executors.newScheduledThreadPool(1), getWorkerThreadGroupDependency(), getEventExecutorDependency());
 
@@ -51,25 +57,25 @@ public class NetconfNorthboundSshModule extends org.opendaylight.controller.conf
         sshProxyServerConfigurationBuilder.setIdleTimeout(Integer.MAX_VALUE);
         sshProxyServerConfigurationBuilder.setKeyPairProvider(new PEMGeneratorHostKeyProvider());
 
-        localServer.addListener(new GenericFutureListener<ChannelFuture>() {
+//        localServer.addListener(new GenericFutureListener<ChannelFuture>() {
+//
+//            @Override
+//            public void operationComplete(final ChannelFuture future) {
+//                if(future.isDone() && !future.isCancelled()) {
+//                    try {
+//                        sshProxyServer.bind(sshProxyServerConfigurationBuilder.createSshProxyServerConfiguration());
+//                        LOG.info("Netconf SSH endpoint started successfully at {}", bindingAddress);
+//                    } catch (final IOException e) {
+//                        throw new RuntimeException("Unable to start SSH netconf server", e);
+//                    }
+//                } else {
+//                    LOG.warn("Unable to start SSH netconf server at {}", bindingAddress, future.cause());
+//                    throw new RuntimeException("Unable to start SSH netconf server", future.cause());
+//                }
+//            }
+//        });
 
-            @Override
-            public void operationComplete(final ChannelFuture future) {
-                if(future.isDone() && !future.isCancelled()) {
-                    try {
-                        sshProxyServer.bind(sshProxyServerConfigurationBuilder.createSshProxyServerConfiguration());
-                        LOG.info("Netconf SSH endpoint started successfully at {}", bindingAddress);
-                    } catch (final IOException e) {
-                        throw new RuntimeException("Unable to start SSH netconf server", e);
-                    }
-                } else {
-                    LOG.warn("Unable to start SSH netconf server at {}", bindingAddress, future.cause());
-                    throw new RuntimeException("Unable to start SSH netconf server", future.cause());
-                }
-            }
-        });
-
-        return new NetconfServerCloseable(localServer, sshProxyServer);
+        throw new IllegalStateException("Unable to create tcp server for netconf nb");
     }
 
     private InetSocketAddress getInetAddress() {
@@ -83,16 +89,13 @@ public class NetconfNorthboundSshModule extends org.opendaylight.controller.conf
 
     private static final class NetconfServerCloseable implements AutoCloseable {
         private final ChannelFuture localServer;
-        private final SshProxyServer sshProxyServer;
 
-        public NetconfServerCloseable(final ChannelFuture localServer, final SshProxyServer sshProxyServer) {
+        public NetconfServerCloseable(final ChannelFuture localServer) {
             this.localServer = localServer;
-            this.sshProxyServer = sshProxyServer;
         }
 
         @Override
         public void close() throws Exception {
-            sshProxyServer.close();
 
             if(localServer.isDone()) {
                 localServer.channel().close();
