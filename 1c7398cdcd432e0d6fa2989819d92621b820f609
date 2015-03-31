@@ -208,6 +208,24 @@
       "revId": "1c7398cdcd432e0d6fa2989819d92621b820f609",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_e3a3789c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 21
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-03-31T16:50:04Z",
+      "side": 1,
+      "message": "A \"slave\" actor works well for workers which do not share state. Here IMDS represents the state and sharing that amongst actors is not correct. The support class or a message processor class would have to be a non-actor which cannot be accessed outside the Shard.",
+      "parentUuid": "5a93c517_6fcbd5a5",
+      "revId": "1c7398cdcd432e0d6fa2989819d92621b820f609",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
