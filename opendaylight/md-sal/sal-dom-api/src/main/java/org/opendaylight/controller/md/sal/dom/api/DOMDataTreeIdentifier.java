@@ -6,6 +6,7 @@
  */
 package org.opendaylight.controller.md.sal.dom.api;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import java.io.Serializable;
 import java.util.Iterator;
@@ -101,5 +102,10 @@ public final class DOMDataTreeIdentifier implements Immutable, Path<DOMDataTreeI
         }
 
         return oi.hasNext() ? -1 : 0;
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this).add("datastore", datastoreType).add("root", rootIdentifier).toString();
     }
 }
