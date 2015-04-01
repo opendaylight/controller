@@ -664,7 +664,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
                 LOG.debug("Tx {} Creating NoOpTransaction because of error", getIdentifier(), failure);
 
                 localTransactionContext = new NoOpTransactionContext(failure, getIdentifier(), operationLimiter);
-            } else if (response.getClass().equals(CreateTransactionReply.SERIALIZABLE_CLASS)) {
+            } else if (CreateTransactionReply.SERIALIZABLE_CLASS.equals(response.getClass())) {
                 localTransactionContext = createValidTransactionContext(
                         CreateTransactionReply.fromSerializable(response));
             } else {
