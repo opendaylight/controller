@@ -9,9 +9,12 @@ package org.opendaylight.controller.md.sal.binding.impl;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableBiMap;
 import java.lang.reflect.Method;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Map.Entry;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationException;
@@ -19,6 +22,7 @@ import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizat
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizer;
 import org.opendaylight.yangtools.binding.data.codec.api.BindingCodecTree;
 import org.opendaylight.yangtools.binding.data.codec.api.BindingCodecTreeFactory;
+import org.opendaylight.yangtools.binding.data.codec.api.BindingCodecTreeNode;
 import org.opendaylight.yangtools.binding.data.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.yangtools.binding.data.codec.impl.BindingNormalizedNodeCodecRegistry;
 import org.opendaylight.yangtools.sal.binding.generator.impl.GeneratedClassLoadingStrategy;
@@ -61,13 +65,13 @@ public class BindingToNormalizedNodeCodec implements BindingCodecTreeFactory, Bi
     }
 
     @Override
-    public YangInstanceIdentifier toYangInstanceIdentifier(InstanceIdentifier<?> binding) {
+    public YangInstanceIdentifier toYangInstanceIdentifier(final InstanceIdentifier<?> binding) {
         return codecRegistry.toYangInstanceIdentifier(binding);
     }
 
     @Override
     public <T extends DataObject> Entry<YangInstanceIdentifier, NormalizedNode<?, ?>> toNormalizedNode(
-            InstanceIdentifier<T> path, T data) {
+            final InstanceIdentifier<T> path, final T data) {
         return codecRegistry.toNormalizedNode(path, data);
     }
 
@@ -78,33 +82,33 @@ public class BindingToNormalizedNodeCodec implements BindingCodecTreeFactory, Bi
     }
 
     @Override
-    public Entry<InstanceIdentifier<?>, DataObject> fromNormalizedNode(YangInstanceIdentifier path,
-            NormalizedNode<?, ?> data) {
+    public Entry<InstanceIdentifier<?>, DataObject> fromNormalizedNode(final YangInstanceIdentifier path,
+            final NormalizedNode<?, ?> data) {
         return codecRegistry.fromNormalizedNode(path, data);
     }
 
     @Override
-    public Notification fromNormalizedNodeNotification(SchemaPath path, ContainerNode data) {
+    public Notification fromNormalizedNodeNotification(final SchemaPath path, final ContainerNode data) {
         return codecRegistry.fromNormalizedNodeNotification(path, data);
     }
 
     @Override
-    public DataObject fromNormalizedNodeRpcData(SchemaPath path, ContainerNode data) {
+    public DataObject fromNormalizedNodeRpcData(final SchemaPath path, final ContainerNode data) {
         return codecRegistry.fromNormalizedNodeRpcData(path, data);
     }
 
     @Override
-    public InstanceIdentifier<?> fromYangInstanceIdentifier(YangInstanceIdentifier dom) {
+    public InstanceIdentifier<?> fromYangInstanceIdentifier(final YangInstanceIdentifier dom) {
         return codecRegistry.fromYangInstanceIdentifier(dom);
     }
 
     @Override
-    public ContainerNode toNormalizedNodeNotification(Notification data) {
+    public ContainerNode toNormalizedNodeNotification(final Notification data) {
         return codecRegistry.toNormalizedNodeNotification(data);
     }
 
     @Override
-    public ContainerNode toNormalizedNodeRpcData(DataContainer data) {
+    public ContainerNode toNormalizedNodeRpcData(final DataContainer data) {
         return codecRegistry.toNormalizedNodeRpcData(data);
     }
 
@@ -225,13 +229,27 @@ public class BindingToNormalizedNodeCodec implements BindingCodecTreeFactory, Bi
     }
 
     @Override
-    public BindingCodecTree create(BindingRuntimeContext context) {
+    public BindingCodecTree create(final BindingRuntimeContext context) {
         return codecRegistry.create(context);
     }
 
     @Override
-    public BindingCodecTree create(SchemaContext context, Class<?>... bindingClasses) {
+    public BindingCodecTree create(final SchemaContext context, final Class<?>... bindingClasses) {
         return codecRegistry.create(context, bindingClasses);
+    }
+
+    @Nonnull protected Map.Entry<InstanceIdentifier<?>, BindingCodecTreeNode<?>> getSubtreeCodec(
+            final YangInstanceIdentifier domIdentifier) {
+
+        final BindingCodecTree currentCodecTree = codecRegistry.getCodecContext();
+        final InstanceIdentifier<?> bindingPath = codecRegistry.fromYangInstanceIdentifier(domIdentifier);
+        Preconditions.checkArgument(bindingPath != null);
+        /**
+         * If we are able to deserialize YANG instance identifier, getSubtreeCodec must
+         * return non-null value.
+         */
+        final BindingCodecTreeNode<?> codecContext = currentCodecTree.getSubtreeCodec(bindingPath);
+        return new SimpleEntry<InstanceIdentifier<?>, BindingCodecTreeNode<?>>(bindingPath, codecContext);
     }
 
 }

@@ -13,14 +13,18 @@ import com.google.common.collect.ImmutableSet;
 import java.util.Set;
 import org.opendaylight.controller.md.sal.binding.api.BindingTransactionChain;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeListener;
+import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeService;
+import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.binding.impl.BindingDOMAdapterBuilder.Factory;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeService;
 import org.opendaylight.controller.md.sal.dom.api.DOMService;
-import org.opendaylight.controller.sal.core.api.model.SchemaService;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
 
 /**
  * The DataBrokerImpl simply defers to the DOMDataBroker for all its operations.
@@ -43,14 +47,16 @@ public class BindingDOMDataBrokerAdapter extends AbstractForwardedDataBroker imp
         }
 
     };
+    private final DataTreeChangeService treeChangeService;
 
     public BindingDOMDataBrokerAdapter(final DOMDataBroker domDataBroker, final BindingToNormalizedNodeCodec codec) {
         super(domDataBroker, codec);
-    }
-
-    @Deprecated
-    public BindingDOMDataBrokerAdapter(final DOMDataBroker domDataBroker, final BindingToNormalizedNodeCodec codec, final SchemaService schemaService) {
-        super(domDataBroker, codec,schemaService);
+        final DOMDataTreeChangeService domTreeChange = (DOMDataTreeChangeService) domDataBroker.getSupportedExtensions().get(DOMDataTreeChangeService.class);
+        if(domTreeChange != null) {
+            treeChangeService = BindingDOMDataTreeChangeServiceAdapter.create(codec, domTreeChange);
+        } else {
+            treeChangeService = null;
+        }
     }
 
     @Override
@@ -82,13 +88,20 @@ public class BindingDOMDataBrokerAdapter extends AbstractForwardedDataBroker imp
         }
 
         @Override
-        protected DataBroker createInstance(BindingToNormalizedNodeCodec codec,
-                ClassToInstanceMap<DOMService> delegates) {
-            DOMDataBroker domDataBroker = delegates.getInstance(DOMDataBroker.class);
+        protected DataBroker createInstance(final BindingToNormalizedNodeCodec codec,
+                final ClassToInstanceMap<DOMService> delegates) {
+            final DOMDataBroker domDataBroker = delegates.getInstance(DOMDataBroker.class);
             return new BindingDOMDataBrokerAdapter(domDataBroker, codec);
         }
 
-
-
     }
+
+    public <L extends DataTreeChangeListener> ListenerRegistration<L> registerDataTreeChangeListener(
+            final DataTreeIdentifier treeId, final L listener) {
+        if(treeChangeService == null) {
+            throw new UnsupportedOperationException("Underlying data broker does not expose DOMDataTreeChangeService.");
+        }
+        return treeChangeService.registerDataTreeChangeListener(treeId, listener);
+    }
+
 }
