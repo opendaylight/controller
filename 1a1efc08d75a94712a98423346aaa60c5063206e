@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_c9c3fb55",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataCommitCohort.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-04-01T11:27:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_24a50253",
+      "revId": "1a1efc08d75a94712a98423346aaa60c5063206e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_a49032ed",
         "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataCommitCoordinator.java",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2015-03-24T12:15:29Z",
       "side": 1,
       "message": "Is this comment stale? I don\u0027t see a DataCommitCohort#initialValidation method.",
+      "revId": "1a1efc08d75a94712a98423346aaa60c5063206e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_69a2e7af",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataCommitCoordinator.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-04-01T11:27:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_a49032ed",
       "revId": "1a1efc08d75a94712a98423346aaa60c5063206e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
