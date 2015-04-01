@@ -37,7 +37,8 @@ public class TestHelper {
                 mavenBundle(CONTROLLER, "sal-common-impl").versionAsInProject(), // //
 
                 mavenBundle("org.apache.commons", "commons-lang3").versionAsInProject(), //
-                mavenBundle("com.google.guava", "guava").versionAsInProject()
+                mavenBundle("com.google.guava", "guava").versionAsInProject(),
+                mavenBundle("com.github.romix", "java-concurrent-hash-trie-map").versionAsInProject()
         );
     }
 
