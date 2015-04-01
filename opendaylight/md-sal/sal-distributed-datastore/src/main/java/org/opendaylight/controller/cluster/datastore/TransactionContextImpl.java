@@ -86,7 +86,7 @@ public class TransactionContextImpl extends AbstractTransactionContext {
 
     @Override
     public void closeTransaction() {
-        LOG.debug("Tx {} closeTransaction called", identifier);
+        LOG.debug("Tx {} closeTransaction called", getIdentifier());
 
         actorContext.sendOperationAsync(getActor(), CloseTransaction.INSTANCE.toSerializable());
     }
@@ -94,7 +94,7 @@ public class TransactionContextImpl extends AbstractTransactionContext {
     @Override
     public Future<ActorSelection> readyTransaction() {
         LOG.debug("Tx {} readyTransaction called with {} previous recorded operations pending",
-                identifier, recordedOperationFutures.size());
+            getIdentifier(), recordedOperationCount());
 
         // Send the remaining batched modifications if any.
 
@@ -113,8 +113,8 @@ public class TransactionContextImpl extends AbstractTransactionContext {
         // Future will fail. We need all prior operations and the ready operation to succeed
         // in order to attempt commit.
 
-        List<Future<Object>> futureList = Lists.newArrayListWithCapacity(recordedOperationFutures.size() + 1);
-        futureList.addAll(recordedOperationFutures);
+        List<Future<Object>> futureList = Lists.newArrayListWithCapacity(recordedOperationCount() + 1);
+        copyRecordedOperationFutures(futureList);
         futureList.add(withLastReplyFuture);
 
         Future<Iterable<Object>> combinedFutures = akka.dispatch.Futures.sequence(futureList,
@@ -127,7 +127,7 @@ public class TransactionContextImpl extends AbstractTransactionContext {
             @Override
             public ActorSelection checkedApply(Iterable<Object> notUsed) {
                 LOG.debug("Tx {} readyTransaction: pending recorded operations succeeded",
-                        identifier);
+                    getIdentifier());
 
                 // At this point all the Futures succeeded and we need to extract the cohort
                 // actor path from the ReadyTransactionReply. For the recorded operations, they
@@ -149,7 +149,7 @@ public class TransactionContextImpl extends AbstractTransactionContext {
                 } else {
                     // Throwing an exception here will fail the Future.
                     throw new IllegalArgumentException(String.format("%s: Invalid reply type %s",
-                            identifier, serializedReadyReply.getClass()));
+                        getIdentifier(), serializedReadyReply.getClass()));
                 }
             }
         }, TransactionProxy.SAME_FAILURE_TRANSFORMER, actorContext.getClientDispatcher());
@@ -161,7 +161,7 @@ public class TransactionContextImpl extends AbstractTransactionContext {
 
     private void batchModification(Modification modification) {
         if(batchedModifications == null) {
-            batchedModifications = new BatchedModifications(identifier.toString(), remoteTransactionVersion,
+            batchedModifications = new BatchedModifications(getIdentifier().toString(), remoteTransactionVersion,
                     transactionChainId);
         }
 
@@ -176,7 +176,7 @@ public class TransactionContextImpl extends AbstractTransactionContext {
     private void sendAndRecordBatchedModifications() {
         Future<Object> sentFuture = sendBatchedModifications();
         if(sentFuture != null) {
-            recordedOperationFutures.add(sentFuture);
+            recordOperationFuture(sentFuture);
         }
     }
 
@@ -188,14 +188,14 @@ public class TransactionContextImpl extends AbstractTransactionContext {
         Future<Object> sent = null;
         if(batchedModifications != null) {
             if(LOG.isDebugEnabled()) {
-                LOG.debug("Tx {} sending {} batched modifications, ready: {}", identifier,
+                LOG.debug("Tx {} sending {} batched modifications, ready: {}", getIdentifier(),
                         batchedModifications.getModifications().size(), ready);
             }
 
             batchedModifications.setReady(ready);
             sent = executeOperationAsync(batchedModifications);
 
-            batchedModifications = new BatchedModifications(identifier.toString(), remoteTransactionVersion,
+            batchedModifications = new BatchedModifications(getIdentifier().toString(), remoteTransactionVersion,
                     transactionChainId);
         }
 
@@ -204,21 +204,21 @@ public class TransactionContextImpl extends AbstractTransactionContext {
 
     @Override
     public void deleteData(YangInstanceIdentifier path) {
-        LOG.debug("Tx {} deleteData called path = {}", identifier, path);
+        LOG.debug("Tx {} deleteData called path = {}", getIdentifier(), path);
 
         batchModification(new DeleteModification(path));
     }
 
     @Override
     public void mergeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
-        LOG.debug("Tx {} mergeData called path = {}", identifier, path);
+        LOG.debug("Tx {} mergeData called path = {}", getIdentifier(), path);
 
         batchModification(new MergeModification(path, data));
     }
 
     @Override
     public void writeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
-        LOG.debug("Tx {} writeData called path = {}", identifier, path);
+        LOG.debug("Tx {} writeData called path = {}", getIdentifier(), path);
 
         batchModification(new WriteModification(path, data));
     }
@@ -227,7 +227,7 @@ public class TransactionContextImpl extends AbstractTransactionContext {
     public void readData(
             final YangInstanceIdentifier path,final SettableFuture<Optional<NormalizedNode<?, ?>>> returnFuture ) {
 
-        LOG.debug("Tx {} readData called path = {}", identifier, path);
+        LOG.debug("Tx {} readData called path = {}", getIdentifier(), path);
 
         // Send the remaining batched modifications if any.
 
@@ -237,19 +237,18 @@ public class TransactionContextImpl extends AbstractTransactionContext {
         // must wait for them to successfully complete. This is necessary to honor the read
         // uncommitted semantics of the public API contract. If any one fails then fail the read.
 
-        if(recordedOperationFutures.isEmpty()) {
+        if(recordedOperationCount() == 0) {
             finishReadData(path, returnFuture);
         } else {
             LOG.debug("Tx {} readData: verifying {} previous recorded operations",
-                    identifier, recordedOperationFutures.size());
+                getIdentifier(), recordedOperationCount());
 
             // Note: we make a copy of recordedOperationFutures to be on the safe side in case
             // Futures#sequence accesses the passed List on a different thread, as
             // recordedOperationFutures is not synchronized.
 
             Future<Iterable<Object>> combinedFutures = akka.dispatch.Futures.sequence(
-                    Lists.newArrayList(recordedOperationFutures),
-                    actorContext.getClientDispatcher());
+                copyRecordedOperationFutures(), actorContext.getClientDispatcher());
 
             OnComplete<Iterable<Object>> onComplete = new OnComplete<Iterable<Object>>() {
                 @Override
@@ -257,7 +256,7 @@ public class TransactionContextImpl extends AbstractTransactionContext {
                         throws Throwable {
                     if(failure != null) {
                         LOG.debug("Tx {} readData: a recorded operation failed: {}",
-                                identifier, failure);
+                            getIdentifier(), failure);
                         returnFuture.setException(new ReadFailedException(
                                 "The read could not be performed because a previous put, merge,"
                                 + "or delete operation failed", failure));
@@ -275,18 +274,18 @@ public class TransactionContextImpl extends AbstractTransactionContext {
     private void finishReadData(final YangInstanceIdentifier path,
             final SettableFuture<Optional<NormalizedNode<?, ?>>> returnFuture) {
 
-        LOG.debug("Tx {} finishReadData called path = {}", identifier, path);
+        LOG.debug("Tx {} finishReadData called path = {}", getIdentifier(), path);
 
         OnComplete<Object> onComplete = new OnComplete<Object>() {
             @Override
             public void onComplete(Throwable failure, Object readResponse) throws Throwable {
                 if(failure != null) {
-                    LOG.debug("Tx {} read operation failed: {}", identifier, failure);
+                    LOG.debug("Tx {} read operation failed: {}", getIdentifier(), failure);
                     returnFuture.setException(new ReadFailedException(
                             "Error reading data for path " + path, failure));
 
                 } else {
-                    LOG.debug("Tx {} read operation succeeded", identifier, failure);
+                    LOG.debug("Tx {} read operation succeeded", getIdentifier(), failure);
 
                     if (readResponse instanceof ReadDataReply) {
                         ReadDataReply reply = (ReadDataReply) readResponse;
@@ -312,7 +311,7 @@ public class TransactionContextImpl extends AbstractTransactionContext {
     @Override
     public void dataExists(final YangInstanceIdentifier path, final SettableFuture<Boolean> returnFuture) {
 
-        LOG.debug("Tx {} dataExists called path = {}", identifier, path);
+        LOG.debug("Tx {} dataExists called path = {}", getIdentifier(), path);
 
         // Send the remaining batched modifications if any.
 
@@ -323,18 +322,18 @@ public class TransactionContextImpl extends AbstractTransactionContext {
         // uncommitted semantics of the public API contract. If any one fails then fail this
         // request.
 
-        if(recordedOperationFutures.isEmpty()) {
+        if(recordedOperationCount() == 0) {
             finishDataExists(path, returnFuture);
         } else {
             LOG.debug("Tx {} dataExists: verifying {} previous recorded operations",
-                    identifier, recordedOperationFutures.size());
+                getIdentifier(), recordedOperationCount());
 
             // Note: we make a copy of recordedOperationFutures to be on the safe side in case
             // Futures#sequence accesses the passed List on a different thread, as
             // recordedOperationFutures is not synchronized.
 
             Future<Iterable<Object>> combinedFutures = akka.dispatch.Futures.sequence(
-                    Lists.newArrayList(recordedOperationFutures),
+                    copyRecordedOperationFutures(),
                     actorContext.getClientDispatcher());
             OnComplete<Iterable<Object>> onComplete = new OnComplete<Iterable<Object>>() {
                 @Override
@@ -342,7 +341,7 @@ public class TransactionContextImpl extends AbstractTransactionContext {
                         throws Throwable {
                     if(failure != null) {
                         LOG.debug("Tx {} dataExists: a recorded operation failed: {}",
-                                identifier, failure);
+                            getIdentifier(), failure);
                         returnFuture.setException(new ReadFailedException(
                                 "The data exists could not be performed because a previous "
                                 + "put, merge, or delete operation failed", failure));
@@ -359,17 +358,17 @@ public class TransactionContextImpl extends AbstractTransactionContext {
     private void finishDataExists(final YangInstanceIdentifier path,
             final SettableFuture<Boolean> returnFuture) {
 
-        LOG.debug("Tx {} finishDataExists called path = {}", identifier, path);
+        LOG.debug("Tx {} finishDataExists called path = {}", getIdentifier(), path);
 
         OnComplete<Object> onComplete = new OnComplete<Object>() {
             @Override
             public void onComplete(Throwable failure, Object response) throws Throwable {
                 if(failure != null) {
-                    LOG.debug("Tx {} dataExists operation failed: {}", identifier, failure);
+                    LOG.debug("Tx {} dataExists operation failed: {}", getIdentifier(), failure);
                     returnFuture.setException(new ReadFailedException(
                             "Error checking data exists for path " + path, failure));
                 } else {
-                    LOG.debug("Tx {} dataExists operation succeeded", identifier, failure);
+                    LOG.debug("Tx {} dataExists operation succeeded", getIdentifier(), failure);
 
                     if (response instanceof DataExistsReply) {
                         returnFuture.set(Boolean.valueOf(((DataExistsReply) response).exists()));
