@@ -17,7 +17,7 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
  * @author Tony Tkacik &lt;ttkacik@cisco.com&gt;
  *
  */
-public interface DataTreeModification {
+public interface DataTreeModification<T extends DataObject> {
 
     /**
      * Get the modification root path. This is the path of the root node
@@ -25,13 +25,13 @@ public interface DataTreeModification {
      *
      * @return absolute path of the root node
      */
-    @Nonnull DataTreeIdentifier getRootPath();
+    @Nonnull DataTreeIdentifier<T> getRootPath();
 
     /**
      * Get the modification root node.
      *
      * @return modification root node
      */
-    @Nonnull DataObjectModification<? extends DataObject> getRootNode();
+    @Nonnull DataObjectModification<T> getRootNode();
 
 }

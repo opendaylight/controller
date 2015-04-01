@@ -13,6 +13,7 @@ import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeModification;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
+import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 
 /**
@@ -21,10 +22,10 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
  * to their Binding equivalent.
  *
  */
-final class BindingDOMDataTreeChangeListenerAdapter implements DOMDataTreeChangeListener {
+final class BindingDOMDataTreeChangeListenerAdapter<T extends DataObject> implements DOMDataTreeChangeListener {
 
     private final BindingToNormalizedNodeCodec codec;
-    private final DataTreeChangeListener listener;
+    private final DataTreeChangeListener<T> listener;
     private final LogicalDatastoreType store;
 
     BindingDOMDataTreeChangeListenerAdapter(final BindingToNormalizedNodeCodec codec, final DataTreeChangeListener listener,
@@ -36,7 +37,7 @@ final class BindingDOMDataTreeChangeListenerAdapter implements DOMDataTreeChange
 
     @Override
     public void onDataTreeChanged(final Collection<DataTreeCandidate> domChanges) {
-        final Collection<DataTreeModification> bindingChanges = LazyDataTreeModification.from(codec, domChanges, store);
+        final Collection<DataTreeModification<T>> bindingChanges = LazyDataTreeModification.from(codec, domChanges, store);
         listener.onDataTreeChanged(bindingChanges);
     }
 }

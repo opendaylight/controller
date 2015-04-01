@@ -28,38 +28,39 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
  * which are directly accessed by user of data object modification.
  *
  */
-class LazyDataTreeModification implements DataTreeModification {
+class LazyDataTreeModification<T extends DataObject> implements DataTreeModification<T> {
 
-    private final DataTreeIdentifier path;
-    private final DataObjectModification<?> rootNode;
+    private final DataTreeIdentifier<T> path;
+    private final DataObjectModification<T> rootNode;
 
-    LazyDataTreeModification(final LogicalDatastoreType datastoreType, final InstanceIdentifier<?> path, final BindingCodecTreeNode<?> codec, final DataTreeCandidate domChange) {
-        this.path = new DataTreeIdentifier(datastoreType, path);
+    LazyDataTreeModification(final LogicalDatastoreType datastoreType, final InstanceIdentifier<T> path, final BindingCodecTreeNode<T> codec, final DataTreeCandidate domChange) {
+        this.path = new DataTreeIdentifier<>(datastoreType, path);
         this.rootNode = LazyDataObjectModification.create(codec, domChange.getRootNode());
     }
 
     @Override
-    public DataObjectModification<? extends DataObject> getRootNode() {
+    public DataObjectModification<T> getRootNode() {
         return rootNode;
     }
 
     @Override
-    public DataTreeIdentifier getRootPath() {
+    public DataTreeIdentifier<T> getRootPath() {
         return path;
     }
 
-    static DataTreeModification create(final BindingToNormalizedNodeCodec codec, final DataTreeCandidate domChange,
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    static <T extends DataObject> DataTreeModification<T> create(final BindingToNormalizedNodeCodec codec, final DataTreeCandidate domChange,
             final LogicalDatastoreType datastoreType) {
         final Entry<InstanceIdentifier<?>, BindingCodecTreeNode<?>> codecCtx =
                 codec.getSubtreeCodec(domChange.getRootPath());
-        return new LazyDataTreeModification(datastoreType, codecCtx.getKey(), codecCtx.getValue(), domChange);
+        return (DataTreeModification<T>) new LazyDataTreeModification(datastoreType, codecCtx.getKey(), codecCtx.getValue(), domChange);
     }
 
-    static Collection<DataTreeModification> from(final BindingToNormalizedNodeCodec codec,
+    static <T extends DataObject> Collection<DataTreeModification<T>> from(final BindingToNormalizedNodeCodec codec,
             final Collection<DataTreeCandidate> domChanges, final LogicalDatastoreType datastoreType) {
-        final List<DataTreeModification> result = new ArrayList<>(domChanges.size());
+        final List<DataTreeModification<T>> result = new ArrayList<>(domChanges.size());
         for (final DataTreeCandidate domChange : domChanges) {
-            result.add(create(codec, domChange, datastoreType));
+            result.add(LazyDataTreeModification.<T>create(codec, domChange, datastoreType));
         }
         return result;
     }

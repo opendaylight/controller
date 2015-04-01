@@ -15,8 +15,11 @@ import java.util.Iterator;
 import java.util.List;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.yangtools.binding.data.codec.api.BindingCodecTreeNode;
+import org.opendaylight.yangtools.yang.binding.Augmentation;
 import org.opendaylight.yangtools.yang.binding.ChildOf;
 import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.yang.binding.Identifiable;
+import org.opendaylight.yangtools.yang.binding.Identifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -49,7 +52,7 @@ class LazyDataObjectModification<T extends DataObject> implements DataObjectModi
         this.identifier = codec.deserializePathArgument(domData.getIdentifier());
     }
 
-    static DataObjectModification<? extends DataObject> create(final BindingCodecTreeNode<?> codec,
+    static <T extends DataObject> DataObjectModification<T> create(final BindingCodecTreeNode<T> codec,
             final DataTreeCandidateNode domData) {
         return new LazyDataObjectModification<>(codec,domData);
     }
@@ -152,6 +155,7 @@ class LazyDataObjectModification<T extends DataObject> implements DataObjectModi
         return childNodesCache;
     }
 
+    @Override
     public DataObjectModification<? extends DataObject> getModifiedChild(final PathArgument arg) {
         final List<YangInstanceIdentifier.PathArgument> domArgumentList = new ArrayList<>();
         final BindingCodecTreeNode<?> childCodec = codec.bindingPathArgumentChild(arg, domArgumentList);
@@ -166,9 +170,24 @@ class LazyDataObjectModification<T extends DataObject> implements DataObjectModi
         return null;
     }
 
+    @Override
     @SuppressWarnings("unchecked")
-    public <C extends ChildOf<T>> DataObjectModification<C> getModifiedChild(final Class<C> arg) {
+    public <C extends Identifiable<K> & ChildOf<? super T>, K extends Identifier<C>> DataObjectModification<C> getModifiedChildListItem(
+            final Class<C> listItem, final K listKey) {
+        return (DataObjectModification<C>) getModifiedChild(new InstanceIdentifier.IdentifiableItem<>(listItem, listKey));
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <C extends ChildOf<? super T>> DataObjectModification<C> getModifiedChildContainer(final Class<C> arg) {
         return (DataObjectModification<C>) getModifiedChild(new InstanceIdentifier.Item<>(arg));
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <C extends Augmentation<T> & DataObject> DataObjectModification<C> getModifiedAugmentation(
+            final Class<C> augmentation) {
+        return (DataObjectModification<C>) getModifiedChild(new InstanceIdentifier.Item<>(augmentation));
     }
 
     private T deserialize(final Optional<NormalizedNode<?, ?>> dataAfter) {

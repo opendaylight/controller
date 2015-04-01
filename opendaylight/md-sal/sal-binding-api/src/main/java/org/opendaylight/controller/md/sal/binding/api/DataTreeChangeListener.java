@@ -10,6 +10,7 @@ package org.opendaylight.controller.md.sal.binding.api;
 import java.util.Collection;
 import java.util.EventListener;
 import javax.annotation.Nonnull;
+import org.opendaylight.yangtools.yang.binding.DataObject;
 
 /**
  * Interface implemented by classes interested in receiving notifications about
@@ -17,7 +18,7 @@ import javax.annotation.Nonnull;
  * in that it provides a cursor-based view of the change, which has potentially
  * lower overhead and allow more flexible consumption of change event.
  */
-public interface DataTreeChangeListener extends EventListener {
+public interface DataTreeChangeListener<T extends DataObject> extends EventListener {
     /**
      * Invoked when there was data change for the supplied path, which was used
      * to register this listener.
@@ -39,5 +40,5 @@ public interface DataTreeChangeListener extends EventListener {
      *
      * @param changes Collection of change events, may not be null or empty.
      */
-    void onDataTreeChanged(@Nonnull Collection<DataTreeModification> changes);
+    void onDataTreeChanged(@Nonnull Collection<DataTreeModification<T>> changes);
 }

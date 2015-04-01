@@ -2,6 +2,7 @@ package org.opendaylight.controller.md.sal.binding.impl.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.opendaylight.controller.md.sal.test.model.util.ListsBindingUtils.TOP_BAR_KEY;
 import static org.opendaylight.controller.md.sal.test.model.util.ListsBindingUtils.TOP_FOO_KEY;
 import static org.opendaylight.controller.md.sal.test.model.util.ListsBindingUtils.USES_ONE_KEY;
@@ -39,31 +40,32 @@ import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 public class DataTreeChangeListenerTest extends AbstractDataBrokerTest {
 
     private static final InstanceIdentifier<Top> TOP_PATH = InstanceIdentifier.create(Top.class);
+    private static final PathArgument TOP_ARGUMENT= TOP_PATH.getPathArguments().iterator().next();
     private static final InstanceIdentifier<TopLevelList> FOO_PATH = path(TOP_FOO_KEY);
     private static final PathArgument FOO_ARGUMENT = Iterables.getLast(FOO_PATH.getPathArguments());
     private static final TopLevelList FOO_DATA = topLevelList(TOP_FOO_KEY, complexUsesAugment(USES_ONE_KEY));
     private static final InstanceIdentifier<TopLevelList> BAR_PATH = path(TOP_BAR_KEY);
     private static final PathArgument BAR_ARGUMENT = Iterables.getLast(BAR_PATH.getPathArguments());
     private static final TopLevelList BAR_DATA = topLevelList(TOP_BAR_KEY);
-    private static final DataTreeIdentifier TOP_IDENTIFIER = new DataTreeIdentifier(LogicalDatastoreType.OPERATIONAL,
+private static final DataTreeIdentifier<Top> TOP_IDENTIFIER = new DataTreeIdentifier<Top>(LogicalDatastoreType.OPERATIONAL,
             TOP_PATH);
 
     private static final Top TOP_INITIAL_DATA = top(FOO_DATA);
 
     private BindingDOMDataBrokerAdapter dataBrokerImpl;
 
-    private static final class EventCapturingListener implements DataTreeChangeListener {
+    private static final class EventCapturingListener<T extends DataObject> implements DataTreeChangeListener<T> {
 
-        private SettableFuture<Collection<DataTreeModification>> changes = SettableFuture.create();
+        private SettableFuture<Collection<DataTreeModification<T>>> changes = SettableFuture.create();
 
         @Override
-        public void onDataTreeChanged(final Collection<DataTreeModification> changes) {
+        public void onDataTreeChanged(final Collection<DataTreeModification<T>> changes) {
             this.changes.set(changes);
 
         }
 
-        Collection<DataTreeModification> nextEvent() throws Exception {
-            final Collection<DataTreeModification> result = changes.get(200,TimeUnit.MILLISECONDS);
+        Collection<DataTreeModification<T>> nextEvent() throws Exception {
+            final Collection<DataTreeModification<T>> result = changes.get(200,TimeUnit.MILLISECONDS);
             changes = SettableFuture.create();
             return result;
         }
@@ -85,65 +87,59 @@ public class DataTreeChangeListenerTest extends AbstractDataBrokerTest {
 
     @Test
     public void testTopLevelListener() throws Exception {
-        final EventCapturingListener listener = new EventCapturingListener();
+        final EventCapturingListener<Top> listener = new EventCapturingListener<>();
         dataBrokerImpl.registerDataTreeChangeListener(TOP_IDENTIFIER, listener);
 
         createAndVerifyTop(listener);
 
         putTx(BAR_PATH, BAR_DATA).submit().checkedGet();
-        final DataTreeModification afterBarPutEvent = Iterables.getOnlyElement(listener.nextEvent());
-        final DataObjectModification<? extends DataObject> barPutMod =
-                getOnlyChildModification(afterBarPutEvent.getRootNode(), ModificationType.SUBTREE_MODIFIED);
+        final DataObjectModification<Top> afterBarPutEvent = Iterables.getOnlyElement(listener.nextEvent()).getRootNode();
+        verifyModification(afterBarPutEvent, TOP_ARGUMENT, ModificationType.SUBTREE_MODIFIED);
+        final DataObjectModification<TopLevelList> barPutMod = afterBarPutEvent.getModifiedChildListItem(TopLevelList.class, TOP_BAR_KEY);
+        assertNotNull(barPutMod);
         verifyModification(barPutMod, BAR_ARGUMENT, ModificationType.WRITE);
 
         deleteTx(BAR_PATH).submit().checkedGet();
-        final DataTreeModification afterBarDeleteEvent = Iterables.getOnlyElement(listener.nextEvent());
-        final DataObjectModification<? extends DataObject> barDeleteMod =
-                getOnlyChildModification(afterBarDeleteEvent.getRootNode(), ModificationType.SUBTREE_MODIFIED);
+        final DataObjectModification<Top> afterBarDeleteEvent = Iterables.getOnlyElement(listener.nextEvent()).getRootNode();
+        verifyModification(afterBarDeleteEvent, TOP_ARGUMENT, ModificationType.SUBTREE_MODIFIED);
+        final DataObjectModification<TopLevelList> barDeleteMod = afterBarDeleteEvent.getModifiedChildListItem(TopLevelList.class, TOP_BAR_KEY);
         verifyModification(barDeleteMod, BAR_ARGUMENT, ModificationType.DELETE);
     }
 
     @Test
     public void testWildcardedListListener() throws Exception {
-        final EventCapturingListener listener = new EventCapturingListener();
-        final DataTreeIdentifier wildcard = new DataTreeIdentifier(LogicalDatastoreType.OPERATIONAL, TOP_PATH.child(TopLevelList.class));
+        final EventCapturingListener<TopLevelList> listener = new EventCapturingListener<>();
+        final DataTreeIdentifier<TopLevelList> wildcard = new DataTreeIdentifier<>(LogicalDatastoreType.OPERATIONAL, TOP_PATH.child(TopLevelList.class));
         dataBrokerImpl.registerDataTreeChangeListener(wildcard, listener);
 
         putTx(TOP_PATH, TOP_INITIAL_DATA).submit().checkedGet();
 
-        final DataTreeModification fooWriteEvent = Iterables.getOnlyElement(listener.nextEvent());
+        final DataTreeModification<TopLevelList> fooWriteEvent = Iterables.getOnlyElement(listener.nextEvent());
         assertEquals(FOO_PATH, fooWriteEvent.getRootPath().getRootIdentifier());
         verifyModification(fooWriteEvent.getRootNode(), FOO_ARGUMENT, ModificationType.WRITE);
 
         putTx(BAR_PATH, BAR_DATA).submit().checkedGet();
-        final DataTreeModification barWriteEvent = Iterables.getOnlyElement(listener.nextEvent());
+        final DataTreeModification<TopLevelList> barWriteEvent = Iterables.getOnlyElement(listener.nextEvent());
         assertEquals(BAR_PATH, barWriteEvent.getRootPath().getRootIdentifier());
         verifyModification(barWriteEvent.getRootNode(), BAR_ARGUMENT, ModificationType.WRITE);
 
         deleteTx(BAR_PATH).submit().checkedGet();
-        final DataTreeModification barDeleteEvent = Iterables.getOnlyElement(listener.nextEvent());
+        final DataTreeModification<TopLevelList> barDeleteEvent = Iterables.getOnlyElement(listener.nextEvent());
         assertEquals(BAR_PATH, barDeleteEvent.getRootPath().getRootIdentifier());
         verifyModification(barDeleteEvent.getRootNode(), BAR_ARGUMENT, ModificationType.DELETE);
     }
 
 
 
-    private void createAndVerifyTop(final EventCapturingListener listener) throws Exception {
+    private void createAndVerifyTop(final EventCapturingListener<Top> listener) throws Exception {
         putTx(TOP_PATH,TOP_INITIAL_DATA).submit().checkedGet();
-        final Collection<DataTreeModification> events = listener.nextEvent();
+        final Collection<DataTreeModification<Top>> events = listener.nextEvent();
 
         assertFalse("Non empty collection should be received.",events.isEmpty());
-        final DataTreeModification initialWrite = Iterables.getOnlyElement(events);
+        final DataTreeModification<Top> initialWrite = Iterables.getOnlyElement(events);
         final DataObjectModification<? extends DataObject> initialNode = initialWrite.getRootNode();
         verifyModification(initialNode,TOP_PATH.getPathArguments().iterator().next(),ModificationType.WRITE);
         assertEquals(TOP_INITIAL_DATA, initialNode.getDataAfter());
-    }
-
-    private DataObjectModification<? extends DataObject> getOnlyChildModification(final DataObjectModification<? extends DataObject> parentMod,final DataObjectModification.ModificationType eventType) throws Exception {
-        assertEquals(eventType,parentMod.getModificationType());
-        final Collection<DataObjectModification<? extends DataObject>> childMod = parentMod.getModifiedChildren();
-        assertFalse("Non empty children modification",childMod.isEmpty());
-        return Iterables.getOnlyElement(childMod);
     }
 
     private void verifyModification(final DataObjectModification<? extends DataObject> barWrite, final PathArgument pathArg,
