@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_cc530938",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-01T15:35:56Z",
+      "side": 1,
+      "message": "Maybe we could refactor this to its own file as well.",
+      "revId": "0607819d70fe056fc4f56f0a59fd4d756fdeb2e0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
