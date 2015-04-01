@@ -36,7 +36,7 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
  *
 
  */
-public class BindingDOMDataBrokerAdapter extends AbstractForwardedDataBroker implements DataBroker {
+public class BindingDOMDataBrokerAdapter extends AbstractForwardedDataBroker implements DataBroker, DataTreeChangeService {
 
 
     static final Factory<DataBroker> BUILDER_FACTORY = new BindingDOMAdapterBuilder.Factory<DataBroker>() {
@@ -96,6 +96,7 @@ public class BindingDOMDataBrokerAdapter extends AbstractForwardedDataBroker imp
 
     }
 
+    @Override
     public <L extends DataTreeChangeListener> ListenerRegistration<L> registerDataTreeChangeListener(
             final DataTreeIdentifier treeId, final L listener) {
         if(treeChangeService == null) {
