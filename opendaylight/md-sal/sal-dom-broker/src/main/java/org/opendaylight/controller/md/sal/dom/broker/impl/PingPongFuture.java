@@ -7,22 +7,29 @@
  */
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
-import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.AbstractCheckedFuture;
 import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+
+import java.util.concurrent.ExecutionException;
 
 /**
  * A {@link Future} used to report the status of an future {@link java.util.concurrent.Future}.
  */
 final class PingPongFuture extends AbstractCheckedFuture<Void, TransactionCommitFailedException> {
-    protected PingPongFuture(final ListenableFuture<Void> delegate) {
-        super(delegate);
-    }
+  protected PingPongFuture(final ListenableFuture<Void> delegate) {
+    super(delegate);
+  }
 
-    @Override
-    protected TransactionCommitFailedException mapException(final Exception e) {
-        Preconditions.checkArgument(e instanceof TransactionCommitFailedException);
-        return (TransactionCommitFailedException) e;
+  @Override
+  protected TransactionCommitFailedException mapException(final Exception e) {
+    if ((e instanceof ExecutionException) &&
+        (e.getCause() != null) &&
+        (e.getCause() instanceof TransactionCommitFailedException)) {
+
+      return (TransactionCommitFailedException) e.getCause();
+    } else {
+      return new TransactionCommitFailedException(e.getMessage(), e.getCause(), null);
     }
+  }
 }
