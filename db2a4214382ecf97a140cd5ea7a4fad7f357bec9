@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_ccf78958",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-01T15:20:19Z",
+      "side": 1,
+      "message": "I specifically didn\u0027t use values() b/c it implicitly clones the internal array to prevent mutations. I wanted to avoid that overhead on each call. I figured a couple compares is less cycles than cloning. I should\u0027ve added a comment. Unless you think JIT can optimize away the clone since we don\u0027t modify it here (although probably no guarantees).",
+      "revId": "db2a4214382ecf97a140cd5ea7a4fad7f357bec9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
