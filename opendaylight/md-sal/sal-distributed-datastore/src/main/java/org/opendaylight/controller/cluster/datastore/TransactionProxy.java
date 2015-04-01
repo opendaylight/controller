@@ -73,16 +73,11 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
         WRITE_ONLY,
         READ_WRITE;
 
-        public static TransactionType fromInt(int type) {
-            if(type == WRITE_ONLY.ordinal()) {
-                return WRITE_ONLY;
-            } else if(type == READ_WRITE.ordinal()) {
-                return READ_WRITE;
-            } else if(type == READ_ONLY.ordinal()) {
-                return READ_ONLY;
-            } else {
-                throw new IllegalArgumentException("In TransactionType enum value" + type);
-            }
+        public static TransactionType fromInt(final int type) {
+            final TransactionType[] values = values();
+            Preconditions.checkArgument(type >= 0 && type < values.length, "In TransactionType enum value %s", type);
+
+            return values[type];
         }
     }
 
