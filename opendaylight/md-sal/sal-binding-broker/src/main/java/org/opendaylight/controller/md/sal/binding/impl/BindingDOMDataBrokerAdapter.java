@@ -25,6 +25,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeService;
 import org.opendaylight.controller.md.sal.dom.api.DOMService;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.yang.binding.DataObject;
 
 /**
  * The DataBrokerImpl simply defers to the DOMDataBroker for all its operations.
@@ -36,7 +37,7 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
  *
 
  */
-public class BindingDOMDataBrokerAdapter extends AbstractForwardedDataBroker implements DataBroker {
+public class BindingDOMDataBrokerAdapter extends AbstractForwardedDataBroker implements DataBroker, DataTreeChangeService {
 
 
     static final Factory<DataBroker> BUILDER_FACTORY = new BindingDOMAdapterBuilder.Factory<DataBroker>() {
@@ -96,8 +97,9 @@ public class BindingDOMDataBrokerAdapter extends AbstractForwardedDataBroker imp
 
     }
 
-    public <L extends DataTreeChangeListener> ListenerRegistration<L> registerDataTreeChangeListener(
-            final DataTreeIdentifier treeId, final L listener) {
+    @Override
+    public <T extends DataObject, L extends DataTreeChangeListener<T>> ListenerRegistration<L> registerDataTreeChangeListener(
+            final DataTreeIdentifier<T> treeId, final L listener) {
         if(treeChangeService == null) {
             throw new UnsupportedOperationException("Underlying data broker does not expose DOMDataTreeChangeService.");
         }

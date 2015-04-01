@@ -28,7 +28,7 @@ final class BindingDOMDataTreeChangeListenerAdapter<T extends DataObject> implem
     private final DataTreeChangeListener<T> listener;
     private final LogicalDatastoreType store;
 
-    BindingDOMDataTreeChangeListenerAdapter(final BindingToNormalizedNodeCodec codec, final DataTreeChangeListener listener,
+    BindingDOMDataTreeChangeListenerAdapter(final BindingToNormalizedNodeCodec codec, final DataTreeChangeListener<T> listener,
             final LogicalDatastoreType store) {
         this.codec = Preconditions.checkNotNull(codec);
         this.listener = Preconditions.checkNotNull(listener);
