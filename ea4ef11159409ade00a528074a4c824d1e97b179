@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_17425e10",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataObjectModification.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-04-01T16:27:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_0ccd715d",
+      "revId": "ea4ef11159409ade00a528074a4c824d1e97b179",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_4c393940",
         "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataObjectModification.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2015-04-01T15:06:29Z",
       "side": 1,
       "message": "\"type of child\" to be consistent with the method below. Also how about \"must be a container or augmentation type\"",
+      "revId": "ea4ef11159409ade00a528074a4c824d1e97b179",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_b7504ad5",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataObjectModification.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-04-01T16:27:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_4c393940",
       "revId": "ea4ef11159409ade00a528074a4c824d1e97b179",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_37e19afe",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataObjectModification.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-04-01T16:27:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_4c029970",
+      "revId": "ea4ef11159409ade00a528074a4c824d1e97b179",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_cc4469b9",
         "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataObjectModification.java",
         "patchSetId": 1
@@ -64,6 +118,24 @@
       "writtenOn": "2015-04-01T15:06:29Z",
       "side": 1,
       "message": "What if child type isn\u0027t a container or augmentation? Throw IllegalArgumentEx or return null? The former is probably too harsh - I think I\u0027d go with the latter.",
+      "revId": "ea4ef11159409ade00a528074a4c824d1e97b179",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_f76d729a",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataObjectModification.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-04-01T16:27:05Z",
+      "side": 1,
+      "message": "I would go with IllegalArgumentException probably - returning Null, will simple hide bug and make it seems MD-SAL did not returned data (e.g. specifying list item without key) and it was programming error that user did not specified list item.",
+      "parentUuid": "5a93c517_cc4469b9",
       "revId": "ea4ef11159409ade00a528074a4c824d1e97b179",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_572d4645",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataObjectModification.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-04-01T16:27:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_4c1059a8",
+      "revId": "ea4ef11159409ade00a528074a4c824d1e97b179",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_ec260516",
         "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataObjectModification.java",
         "patchSetId": 1
@@ -98,6 +188,24 @@
       "writtenOn": "2015-04-01T15:06:29Z",
       "side": 1,
       "message": "\"must be a list item type\"",
+      "revId": "ea4ef11159409ade00a528074a4c824d1e97b179",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_7730829e",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataObjectModification.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-04-01T16:27:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_ec260516",
       "revId": "ea4ef11159409ade00a528074a4c824d1e97b179",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_d720764b",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataObjectModification.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-04-01T16:27:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_0c69f124",
+      "revId": "ea4ef11159409ade00a528074a4c824d1e97b179",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_ac779d01",
         "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataObjectModification.java",
         "patchSetId": 1
@@ -132,6 +258,24 @@
       "writtenOn": "2015-04-01T15:06:29Z",
       "side": 1,
       "message": "How about \"modification of child identified by {@code childArgument} if one exists, ...\"?",
+      "revId": "ea4ef11159409ade00a528074a4c824d1e97b179",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_f71b321a",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataObjectModification.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-04-01T16:27:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_ac779d01",
       "revId": "ea4ef11159409ade00a528074a4c824d1e97b179",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_97f18ecf",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataObjectModification.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-04-01T16:27:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_6c7af5f2",
+      "revId": "ea4ef11159409ade00a528074a4c824d1e97b179",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_cc722911",
         "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/md/sal/binding/impl/LazyDataObjectModification.java",
         "patchSetId": 1
@@ -166,6 +328,24 @@
       "writtenOn": "2015-04-01T15:06:29Z",
       "side": 1,
       "message": "param spacing",
+      "revId": "ea4ef11159409ade00a528074a4c824d1e97b179",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_97c8ae75",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/md/sal/binding/impl/LazyDataObjectModification.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-04-01T16:27:05Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_cc722911",
       "revId": "ea4ef11159409ade00a528074a4c824d1e97b179",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
