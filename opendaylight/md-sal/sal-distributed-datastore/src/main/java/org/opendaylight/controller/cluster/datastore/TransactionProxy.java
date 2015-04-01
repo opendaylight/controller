@@ -225,8 +225,8 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
         List<Future<Object>> recordedOperationFutures = Lists.newArrayList();
         for(TransactionFutureCallback txFutureCallback : txFutureCallbackMap.values()) {
             TransactionContext transactionContext = txFutureCallback.getTransactionContext();
-            if(transactionContext != null) {
-                recordedOperationFutures.addAll(transactionContext.getRecordedOperationFutures());
+            if (transactionContext != null) {
+                transactionContext.copyRecordedOperationFutures(recordedOperationFutures);
             }
         }
 
