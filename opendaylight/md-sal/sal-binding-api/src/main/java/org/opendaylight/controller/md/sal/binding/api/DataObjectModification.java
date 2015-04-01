@@ -10,8 +10,10 @@ package org.opendaylight.controller.md.sal.binding.api;
 import java.util.Collection;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import org.opendaylight.yangtools.concepts.Identifiable;
+import org.opendaylight.yangtools.yang.binding.ChildOf;
 import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.yang.binding.Identifiable;
+import org.opendaylight.yangtools.yang.binding.Identifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.PathArgument;
 
 /**
@@ -20,7 +22,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.PathArgument;
  * Represents modification of Data Object.
  *
  */
-public interface DataObjectModification<T extends DataObject> extends Identifiable<PathArgument> {
+public interface DataObjectModification<T extends DataObject> extends org.opendaylight.yangtools.concepts.Identifiable<PathArgument> {
 
     enum ModificationType {
         /**
@@ -75,6 +77,32 @@ public interface DataObjectModification<T extends DataObject> extends Identifiab
      * @return unmodifiable collection of modified direct children.
      */
     @Nonnull Collection<DataObjectModification<? extends DataObject>> getModifiedChildren();
+
+    /**
+     * Returns child modification if {@code child} it was modified by this modification
+     * @param child Class of child (only for containers and augmentations)
+     * @return Modification of child if was modified, null otherwise.
+     */
+    @Nullable <C extends ChildOf<? super T>> DataObjectModification<C> getModifiedChild(Class<C> child);
+
+
+    /**
+     * Returns child modification if {@code child} it was modified by this modification
+     *
+     * @param listItem Type of list item
+     * @param listKey Type of list key
+     * @return  Modification of child if was modified, null otherwise.
+     */
+    <C extends Identifiable<K> & ChildOf<? super T>, K extends Identifier<C>> DataObjectModification<C> getModifiedChild(
+            Class<C> listItem, K listKey);
+
+    /**
+     * Returns child modification if {@code child} it was modified by this modification
+     * @param child Path Argument of child node
+     * @return Modification of child if was modified, null otherwise.
+     * @throws IllegalArgumentException If supplied path argument is not valid child of this data object.
+     */
+    @Nullable DataObjectModification<? extends DataObject> getModifiedChild(PathArgument child);
 
 
 }
