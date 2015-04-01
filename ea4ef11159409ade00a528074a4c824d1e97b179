@@ -1,0 +1,174 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_0ccd715d",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataObjectModification.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-01T15:06:29Z",
+      "side": 1,
+      "message": "remove \"it\". Also since child is a class, we should probably say \"if an instance of {@code child} was modified...\".  Also it seems this method is intended for containers or augmentations so maybe say \"Returns a container or augmentation child modification ...\"",
+      "revId": "ea4ef11159409ade00a528074a4c824d1e97b179",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_4c393940",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataObjectModification.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-01T15:06:29Z",
+      "side": 1,
+      "message": "\"type of child\" to be consistent with the method below. Also how about \"must be a container or augmentation type\"",
+      "revId": "ea4ef11159409ade00a528074a4c824d1e97b179",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_4c029970",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataObjectModification.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-01T15:06:29Z",
+      "side": 1,
+      "message": "How about \"a modification instance for type {@code child} if one exists, ...\"",
+      "revId": "ea4ef11159409ade00a528074a4c824d1e97b179",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_cc4469b9",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataObjectModification.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-01T15:06:29Z",
+      "side": 1,
+      "message": "What if child type isn\u0027t a container or augmentation? Throw IllegalArgumentEx or return null? The former is probably too harsh - I think I\u0027d go with the latter.",
+      "revId": "ea4ef11159409ade00a528074a4c824d1e97b179",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_4c1059a8",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataObjectModification.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-01T15:06:29Z",
+      "side": 1,
+      "message": "Similar comments as above, i.e. \"Returns child list item modification...\".",
+      "revId": "ea4ef11159409ade00a528074a4c824d1e97b179",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_ec260516",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataObjectModification.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-01T15:06:29Z",
+      "side": 1,
+      "message": "\"must be a list item type\"",
+      "revId": "ea4ef11159409ade00a528074a4c824d1e97b179",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_0c69f124",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataObjectModification.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-01T15:06:29Z",
+      "side": 1,
+      "message": "How about \"Returns a child modification if a node identified by {@code childArgument} was modified by this modification\"?",
+      "revId": "ea4ef11159409ade00a528074a4c824d1e97b179",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_ac779d01",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataObjectModification.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-01T15:06:29Z",
+      "side": 1,
+      "message": "How about \"modification of child identified by {@code childArgument} if one exists, ...\"?",
+      "revId": "ea4ef11159409ade00a528074a4c824d1e97b179",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_6c7af5f2",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/DataObjectModification.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-01T15:06:29Z",
+      "side": 1,
+      "message": "Rename to \"childArgument\"?",
+      "revId": "ea4ef11159409ade00a528074a4c824d1e97b179",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_cc722911",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/md/sal/binding/impl/LazyDataObjectModification.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-01T15:06:29Z",
+      "side": 1,
+      "message": "param spacing",
+      "revId": "ea4ef11159409ade00a528074a4c824d1e97b179",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
