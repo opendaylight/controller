@@ -33,7 +33,7 @@ public class WriteOnlyTransactionContextImpl extends TransactionContextImpl {
     @Override
     public Future<ActorSelection> readyTransaction() {
         LOG.debug("Tx {} readyTransaction called with {} previous recorded operations pending",
-                identifier, recordedOperationFutures.size());
+            getIdentifier(), recordedOperationCount());
 
         // Send the remaining batched modifications if any.
 

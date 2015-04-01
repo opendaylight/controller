@@ -45,26 +45,26 @@ public class PreLithiumTransactionContextImpl extends TransactionContextImpl {
 
     @Override
     public void deleteData(YangInstanceIdentifier path) {
-        recordedOperationFutures.add(executeOperationAsync(
+        recordOperationFuture(executeOperationAsync(
                 new DeleteData(path, getRemoteTransactionVersion())));
     }
 
     @Override
     public void mergeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
-        recordedOperationFutures.add(executeOperationAsync(
+        recordOperationFuture(executeOperationAsync(
                 new MergeData(path, data, getRemoteTransactionVersion())));
     }
 
     @Override
     public void writeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
-        recordedOperationFutures.add(executeOperationAsync(
+        recordOperationFuture(executeOperationAsync(
                 new WriteData(path, data, getRemoteTransactionVersion())));
     }
 
     @Override
     public Future<ActorSelection> readyTransaction() {
         LOG.debug("Tx {} readyTransaction called with {} previous recorded operations pending",
-                identifier, recordedOperationFutures.size());
+            getIdentifier(), recordedOperationCount());
 
         // Send the ReadyTransaction message to the Tx actor.
 
