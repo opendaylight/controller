@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_ac931df9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 667,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-01T15:22:08Z",
+      "side": 1,
+      "message": "I wonder if it\u0027s more efficient to do CreateTransactionReply.SERIALIZABLE_CLASS.isInstance(response) ...",
+      "revId": "65ddaf0aebd2aa4fcefe421b3733ffe07f5c96bb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
