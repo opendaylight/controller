@@ -18,7 +18,6 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.CheckedFuture;
-import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -758,38 +757,6 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
                 return new TransactionContextImpl(transactionActor, getIdentifier(), transactionChainId,
                         actorContext, schemaContext, isTxActorLocal, remoteTransactionVersion, operationCompleter);
             }
-        }
-    }
-
-    private static class NoOpDOMStoreThreePhaseCommitCohort implements DOMStoreThreePhaseCommitCohort {
-        static NoOpDOMStoreThreePhaseCommitCohort INSTANCE = new NoOpDOMStoreThreePhaseCommitCohort();
-
-        private static final ListenableFuture<Void> IMMEDIATE_VOID_SUCCESS =
-                com.google.common.util.concurrent.Futures.immediateFuture(null);
-        private static final ListenableFuture<Boolean> IMMEDIATE_BOOLEAN_SUCCESS =
-                com.google.common.util.concurrent.Futures.immediateFuture(Boolean.TRUE);
-
-        private NoOpDOMStoreThreePhaseCommitCohort() {
-        }
-
-        @Override
-        public ListenableFuture<Boolean> canCommit() {
-            return IMMEDIATE_BOOLEAN_SUCCESS;
-        }
-
-        @Override
-        public ListenableFuture<Void> preCommit() {
-            return IMMEDIATE_VOID_SUCCESS;
-        }
-
-        @Override
-        public ListenableFuture<Void> abort() {
-            return IMMEDIATE_VOID_SUCCESS;
-        }
-
-        @Override
-        public ListenableFuture<Void> commit() {
-            return IMMEDIATE_VOID_SUCCESS;
         }
     }
 }
