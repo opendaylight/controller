@@ -85,6 +85,7 @@
     <module>messagebus-api</module>
     <module>messagebus-impl</module>
     <module>messagebus-config</module>
+    <module>clustering-service</module>
   </modules>
 
   <build>

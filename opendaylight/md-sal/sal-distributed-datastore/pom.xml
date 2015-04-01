@@ -159,6 +159,11 @@
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>clustering-service</artifactId>
+      <version>${mdsal.version}</version>
+    </dependency>
 
   </dependencies>
 

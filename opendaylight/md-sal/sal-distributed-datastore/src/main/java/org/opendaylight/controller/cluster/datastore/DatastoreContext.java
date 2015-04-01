@@ -18,6 +18,7 @@ import org.opendaylight.controller.cluster.datastore.config.FileConfigurationRea
 import org.opendaylight.controller.cluster.raft.ConfigParams;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreConfigProperties;
+import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
 
@@ -64,6 +65,7 @@ public class DatastoreContext {
     private String dataStoreType = UNKNOWN_DATA_STORE_TYPE;
     private int shardBatchedModificationCount = DEFAULT_SHARD_BATCHED_MODIFICATION_COUNT;
     private boolean writeOnlyTransactionOptimizationsEnabled = false;
+    private RpcProviderRegistry rpcProviderRegistry;
 
     public static Set<String> getGlobalDatastoreTypes() {
         return globalDatastoreTypes;
@@ -93,6 +95,7 @@ public class DatastoreContext {
         this.dataStoreType = other.dataStoreType;
         this.shardBatchedModificationCount = other.shardBatchedModificationCount;
         this.writeOnlyTransactionOptimizationsEnabled = other.writeOnlyTransactionOptimizationsEnabled;
+        this.rpcProviderRegistry = other.rpcProviderRegistry;
 
         setShardJournalRecoveryLogBatchSize(other.raftConfig.getJournalRecoveryLogBatchSize());
         setSnapshotBatchCount(other.raftConfig.getSnapshotBatchCount());
@@ -199,6 +202,10 @@ public class DatastoreContext {
 
     public boolean isWriteOnlyTransactionOptimizationsEnabled() {
         return writeOnlyTransactionOptimizationsEnabled;
+    }
+
+    public RpcProviderRegistry getRpcProviderRegistry() {
+        return rpcProviderRegistry;
     }
 
     public static class Builder {
@@ -363,6 +370,11 @@ public class DatastoreContext {
 
         public Builder maxShardDataStoreExecutorQueueSize(int maxShardDataStoreExecutorQueueSize) {
             this.maxShardDataStoreExecutorQueueSize = maxShardDataStoreExecutorQueueSize;
+            return this;
+        }
+
+        public Builder rpcRegistry(RpcProviderRegistry rpcProviderRegistry) {
+            datastoreContext.rpcProviderRegistry = rpcProviderRegistry;
             return this;
         }
 
