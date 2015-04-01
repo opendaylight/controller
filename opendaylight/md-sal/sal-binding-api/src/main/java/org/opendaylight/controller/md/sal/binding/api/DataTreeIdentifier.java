@@ -13,18 +13,19 @@ import javax.annotation.Nonnull;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.yangtools.concepts.Immutable;
 import org.opendaylight.yangtools.concepts.Path;
+import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 /**
  * A unique identifier for a particular subtree. It is composed of the logical
  * data store type and the instance identifier of the root node.
  */
-public final class DataTreeIdentifier implements Immutable, Path<DataTreeIdentifier>, Serializable {
+public final class DataTreeIdentifier<T extends DataObject> implements Immutable, Path<DataTreeIdentifier<?>>, Serializable {
     private static final long serialVersionUID = 1L;
-    private final InstanceIdentifier<?> rootIdentifier;
+    private final InstanceIdentifier<T> rootIdentifier;
     private final LogicalDatastoreType datastoreType;
 
-    public DataTreeIdentifier(final LogicalDatastoreType datastoreType, final InstanceIdentifier<?> rootIdentifier) {
+    public DataTreeIdentifier(final LogicalDatastoreType datastoreType, final InstanceIdentifier<T> rootIdentifier) {
         this.datastoreType = Preconditions.checkNotNull(datastoreType);
         this.rootIdentifier = Preconditions.checkNotNull(rootIdentifier);
     }
@@ -48,7 +49,7 @@ public final class DataTreeIdentifier implements Immutable, Path<DataTreeIdentif
     }
 
     @Override
-    public boolean contains(final DataTreeIdentifier other) {
+    public boolean contains(final DataTreeIdentifier<?> other) {
         return datastoreType == other.datastoreType && rootIdentifier.contains(other.rootIdentifier);
     }
 
@@ -69,7 +70,7 @@ public final class DataTreeIdentifier implements Immutable, Path<DataTreeIdentif
         if (!(obj instanceof DataTreeIdentifier)) {
             return false;
         }
-        DataTreeIdentifier other = (DataTreeIdentifier) obj;
+        final DataTreeIdentifier<?> other = (DataTreeIdentifier<?>) obj;
         if (datastoreType != other.datastoreType) {
             return false;
         }

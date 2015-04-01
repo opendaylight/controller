@@ -9,6 +9,7 @@ package org.opendaylight.controller.md.sal.binding.api;
 
 import javax.annotation.Nonnull;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.yang.binding.DataObject;
 
 /**
  * A {@link DOMService} which allows users to register for changes to a
@@ -50,5 +51,5 @@ public interface DataTreeChangeService extends BindingService {
      *         your listener using {@link ListenerRegistration#close()} to stop
      *         delivery of change events.
      */
-    @Nonnull <L extends DataTreeChangeListener> ListenerRegistration<L> registerDataTreeChangeListener(@Nonnull DataTreeIdentifier treeId, @Nonnull L listener);
+    @Nonnull <T extends DataObject,L extends DataTreeChangeListener<T>> ListenerRegistration<L> registerDataTreeChangeListener(@Nonnull DataTreeIdentifier<T> treeId, @Nonnull L listener);
 }

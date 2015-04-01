@@ -14,6 +14,7 @@ import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeService;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 
@@ -44,15 +45,15 @@ final class BindingDOMDataTreeChangeServiceAdapter implements DataTreeChangeServ
     }
 
     @Override
-    public <L extends DataTreeChangeListener> ListenerRegistration<L> registerDataTreeChangeListener(
-            final DataTreeIdentifier treeId, final L listener) {
+    public <T extends DataObject, L extends DataTreeChangeListener<T>> ListenerRegistration<L> registerDataTreeChangeListener(
+            final DataTreeIdentifier<T> treeId, final L listener) {
         final DOMDataTreeIdentifier domIdentifier = toDomTreeIdentifier(treeId);
-        final BindingDOMDataTreeChangeListenerAdapter domListener = new BindingDOMDataTreeChangeListenerAdapter(codec,listener, treeId.getDatastoreType());
-        final ListenerRegistration<BindingDOMDataTreeChangeListenerAdapter> domReg = dataTreeChangeService.registerDataTreeChangeListener(domIdentifier, domListener);
+        final BindingDOMDataTreeChangeListenerAdapter<T> domListener = new BindingDOMDataTreeChangeListenerAdapter<>(codec,listener, treeId.getDatastoreType());
+        final ListenerRegistration<BindingDOMDataTreeChangeListenerAdapter<T>> domReg = dataTreeChangeService.registerDataTreeChangeListener(domIdentifier, domListener);
         return new BindingDataTreeChangeListenerRegistration<>(listener,domReg);
     }
 
-    private DOMDataTreeIdentifier toDomTreeIdentifier(final DataTreeIdentifier treeId) {
+    private DOMDataTreeIdentifier toDomTreeIdentifier(final DataTreeIdentifier<?> treeId) {
         final YangInstanceIdentifier domPath = codec.toYangInstanceIdentifier(treeId.getRootIdentifier());
         return new DOMDataTreeIdentifier(treeId.getDatastoreType(), domPath);
     }
