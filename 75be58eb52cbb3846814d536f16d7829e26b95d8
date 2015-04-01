@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_0969e324",
+        "filename": "features/mdsal/src/main/resources/features.xml",
+        "patchSetId": 7
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-01T12:23:25Z",
+      "side": 0,
+      "message": "It looks like this is redundant since odl-mdsal-clustering \u003d\u003d odl-mdsal-broker.",
+      "revId": "75be58eb52cbb3846814d536f16d7829e26b95d8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
