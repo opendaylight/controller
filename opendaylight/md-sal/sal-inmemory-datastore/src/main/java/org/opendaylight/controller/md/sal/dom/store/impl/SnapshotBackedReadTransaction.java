@@ -8,13 +8,12 @@
 package org.opendaylight.controller.md.sal.dom.store.impl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
-
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.controller.sal.core.spi.data.AbstractDOMStoreTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -30,7 +29,7 @@ import org.slf4j.LoggerFactory;
  * which delegates most of its calls to similar methods provided by underlying snapshot.
  *
  */
-final class SnapshotBackedReadTransaction extends AbstractDOMStoreTransaction
+final class SnapshotBackedReadTransaction extends AbstractDOMStoreTransaction<Object>
                                           implements DOMStoreReadTransaction {
 
     private static final Logger LOG = LoggerFactory.getLogger(SnapshotBackedReadTransaction.class);

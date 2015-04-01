@@ -41,6 +41,7 @@ import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionR
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
+import org.opendaylight.controller.sal.core.spi.data.AbstractDOMStoreTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.yangtools.util.concurrent.MappingCheckedFuture;
@@ -65,7 +66,7 @@ import scala.concurrent.duration.FiniteDuration;
  * shards will be executed.
  * </p>
  */
-public class TransactionProxy implements DOMStoreReadWriteTransaction {
+public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIdentifier> implements DOMStoreReadWriteTransaction {
 
     public static enum TransactionType {
         READ_ONLY,
@@ -147,7 +148,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
             remoteTransactionActors = referent.remoteTransactionActors;
             remoteTransactionActorsMB = referent.remoteTransactionActorsMB;
             actorContext = referent.actorContext;
-            identifier = referent.identifier;
+            identifier = referent.getIdentifier();
         }
 
         @Override
@@ -186,7 +187,6 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
 
     private final TransactionType transactionType;
     private final ActorContext actorContext;
-    private final TransactionIdentifier identifier;
     private final String transactionChainId;
     private final SchemaContext schemaContext;
     private boolean inReadyState;
@@ -199,8 +199,8 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         this(actorContext, transactionType, "");
     }
 
-    public TransactionProxy(ActorContext actorContext, TransactionType transactionType,
-            String transactionChainId) {
+    public TransactionProxy(ActorContext actorContext, TransactionType transactionType, String transactionChainId) {
+        super(createIdentifier(actorContext));
         this.actorContext = Preconditions.checkNotNull(actorContext,
             "actorContext should not be null");
         this.transactionType = Preconditions.checkNotNull(transactionType,
@@ -209,14 +209,16 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
             "schemaContext should not be null");
         this.transactionChainId = transactionChainId;
 
+        LOG.debug("Created txn {} of type {} on chain {}", getIdentifier(), transactionType, transactionChainId);
+    }
+
+    private static TransactionIdentifier createIdentifier(ActorContext actorContext) {
         String memberName = actorContext.getCurrentMemberName();
-        if(memberName == null){
+        if (memberName == null) {
             memberName = "UNKNOWN-MEMBER";
         }
 
-        this.identifier = new TransactionIdentifier(memberName, counter.getAndIncrement());
-
-        LOG.debug("Created txn {} of type {} on chain {}", identifier, transactionType, transactionChainId);
+        return new TransactionIdentifier(memberName, counter.getAndIncrement());
     }
 
     @VisibleForTesting
@@ -250,7 +252,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         Preconditions.checkState(transactionType != TransactionType.WRITE_ONLY,
                 "Read operation on write-only transaction is not allowed");
 
-        LOG.debug("Tx {} read {}", identifier, path);
+        LOG.debug("Tx {} read {}", getIdentifier(), path);
 
         throttleOperation();
 
@@ -273,7 +275,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         Preconditions.checkState(transactionType != TransactionType.WRITE_ONLY,
                 "Exists operation on write-only transaction is not allowed");
 
-        LOG.debug("Tx {} exists {}", identifier, path);
+        LOG.debug("Tx {} exists {}", getIdentifier(), path);
 
         throttleOperation();
 
@@ -332,7 +334,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
 
         checkModificationState();
 
-        LOG.debug("Tx {} write {}", identifier, path);
+        LOG.debug("Tx {} write {}", getIdentifier(), path);
 
         throttleOperation();
 
@@ -350,7 +352,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
 
         checkModificationState();
 
-        LOG.debug("Tx {} merge {}", identifier, path);
+        LOG.debug("Tx {} merge {}", getIdentifier(), path);
 
         throttleOperation();
 
@@ -368,7 +370,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
 
         checkModificationState();
 
-        LOG.debug("Tx {} delete {}", identifier, path);
+        LOG.debug("Tx {} delete {}", getIdentifier(), path);
 
         throttleOperation();
 
@@ -388,7 +390,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
 
         inReadyState = true;
 
-        LOG.debug("Tx {} Readying {} transactions for commit", identifier,
+        LOG.debug("Tx {} Readying {} transactions for commit", getIdentifier(),
                     txFutureCallbackMap.size());
 
         if(txFutureCallbackMap.size() == 0) {
@@ -403,7 +405,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
 
         for(TransactionFutureCallback txFutureCallback : txFutureCallbackMap.values()) {
 
-            LOG.debug("Tx {} Readying transaction for shard {} chain {}", identifier,
+            LOG.debug("Tx {} Readying transaction for shard {} chain {}", getIdentifier(),
                         txFutureCallback.getShardName(), transactionChainId);
 
             final TransactionContext transactionContext = txFutureCallback.getTransactionContext();
@@ -428,7 +430,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         onTransactionReady(cohortFutures);
 
         return new ThreePhaseCommitCohortProxy(actorContext, cohortFutures,
-                identifier.toString());
+            getIdentifier().toString());
     }
 
     /**
@@ -437,11 +439,6 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
      * @param cohortFutures the cohort Futures for each shard transaction.
      */
     protected void onTransactionReady(List<Future<ActorSelection>> cohortFutures) {
-    }
-
-    @Override
-    public Object getIdentifier() {
-        return this.identifier;
     }
 
     @Override
@@ -568,7 +565,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
             if(transactionType == TransactionType.WRITE_ONLY &&
                     actorContext.getDatastoreContext().isWriteOnlyTransactionOptimizationsEnabled()) {
                 LOG.debug("Tx {} Primary shard {} found - creating WRITE_ONLY transaction context",
-                        identifier, primaryShard);
+                    getIdentifier(), primaryShard);
 
                 // For write-only Tx's we prepare the transaction modifications directly on the shard actor
                 // to avoid the overhead of creating a separate transaction actor.
@@ -587,7 +584,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
             boolean invokeOperation = true;
             synchronized(txOperationsOnComplete) {
                 if(transactionContext == null) {
-                    LOG.debug("Tx {} Adding operation on complete", identifier);
+                    LOG.debug("Tx {} Adding operation on complete", getIdentifier());
 
                     invokeOperation = false;
                     txOperationsOnComplete.add(operation);
@@ -615,10 +612,10 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
          */
         private void tryCreateTransaction() {
             if(LOG.isDebugEnabled()) {
-                LOG.debug("Tx {} Primary shard {} found - trying create transaction", identifier, primaryShard);
+                LOG.debug("Tx {} Primary shard {} found - trying create transaction", getIdentifier(), primaryShard);
             }
 
-            Object serializedCreateMessage = new CreateTransaction(identifier.toString(),
+            Object serializedCreateMessage = new CreateTransaction(getIdentifier().toString(),
                     TransactionProxy.this.transactionType.ordinal(),
                     getTransactionChainId()).toSerializable();
 
@@ -636,7 +633,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
                 // is ok.
                 if(--createTxTries > 0) {
                     LOG.debug("Tx {} Shard {} has no leader yet - scheduling create Tx retry",
-                            identifier, shardName);
+                        getIdentifier(), shardName);
 
                     actorContext.getActorSystem().scheduler().scheduleOnce(CREATE_TX_TRY_INTERVAL,
                             new Runnable() {
@@ -668,9 +665,9 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
             // TransactionContext until after we've executed all cached TransactionOperations.
             TransactionContext localTransactionContext;
             if(failure != null) {
-                LOG.debug("Tx {} Creating NoOpTransaction because of error", identifier, failure);
+                LOG.debug("Tx {} Creating NoOpTransaction because of error", getIdentifier(), failure);
 
-                localTransactionContext = new NoOpTransactionContext(failure, identifier, operationLimiter);
+                localTransactionContext = new NoOpTransactionContext(failure, getIdentifier(), operationLimiter);
             } else if (response.getClass().equals(CreateTransactionReply.SERIALIZABLE_CLASS)) {
                 localTransactionContext = createValidTransactionContext(
                         CreateTransactionReply.fromSerializable(response));
@@ -678,7 +675,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
                 IllegalArgumentException exception = new IllegalArgumentException(String.format(
                         "Invalid reply type %s for CreateTransaction", response.getClass()));
 
-                localTransactionContext = new NoOpTransactionContext(exception, identifier, operationLimiter);
+                localTransactionContext = new NoOpTransactionContext(exception, getIdentifier(), operationLimiter);
             }
 
             executeTxOperatonsOnComplete(localTransactionContext);
@@ -718,7 +715,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
         }
 
         private TransactionContext createValidTransactionContext(CreateTransactionReply reply) {
-            LOG.debug("Tx {} Received {}", identifier, reply);
+            LOG.debug("Tx {} Received {}", getIdentifier(), reply);
 
             return createValidTransactionContext(actorContext.actorSelection(reply.getTransactionPath()),
                     reply.getTransactionPath(), reply.getVersion());
@@ -755,15 +752,15 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
             boolean isTxActorLocal = actorContext.isPathLocal(transactionPath);
 
             if(remoteTransactionVersion < DataStoreVersions.LITHIUM_VERSION) {
-                return new PreLithiumTransactionContextImpl(transactionPath, transactionActor, identifier,
+                return new PreLithiumTransactionContextImpl(transactionPath, transactionActor, getIdentifier(),
                         transactionChainId, actorContext, schemaContext, isTxActorLocal, remoteTransactionVersion,
                         operationCompleter);
             } else if (transactionType == TransactionType.WRITE_ONLY &&
                     actorContext.getDatastoreContext().isWriteOnlyTransactionOptimizationsEnabled()) {
-                return new WriteOnlyTransactionContextImpl(transactionActor, identifier, transactionChainId,
+                return new WriteOnlyTransactionContextImpl(transactionActor, getIdentifier(), transactionChainId,
                     actorContext, schemaContext, isTxActorLocal, remoteTransactionVersion, operationCompleter);
             } else {
-                return new TransactionContextImpl(transactionActor, identifier, transactionChainId,
+                return new TransactionContextImpl(transactionActor, getIdentifier(), transactionChainId,
                         actorContext, schemaContext, isTxActorLocal, remoteTransactionVersion, operationCompleter);
             }
         }

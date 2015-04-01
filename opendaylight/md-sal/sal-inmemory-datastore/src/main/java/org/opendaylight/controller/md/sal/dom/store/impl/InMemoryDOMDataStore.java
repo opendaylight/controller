@@ -22,6 +22,7 @@ import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFaile
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.controller.md.sal.dom.store.impl.SnapshotBackedWriteTransaction.TransactionReadyPrototype;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.ListenerTree;
+import org.opendaylight.controller.sal.core.spi.data.AbstractDOMStoreTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
@@ -223,6 +224,13 @@ public class InMemoryDOMDataStore extends TransactionReadyPrototype implements D
         return name + "-" + txCounter.getAndIncrement();
     }
 
+    private static void warnDebugContext(AbstractDOMStoreTransaction<?> transaction) {
+        final Throwable ctx = transaction.getDebugContext();
+        if (ctx != null) {
+            LOG.warn("Transaction {} has been allocated in the following context", transaction.getIdentifier(), ctx);
+        }
+    }
+
     private final class ThreePhaseCommitImpl implements DOMStoreThreePhaseCommitCohort {
         private final SnapshotBackedWriteTransaction transaction;
         private final DataTreeModification modification;
@@ -244,12 +252,12 @@ public class InMemoryDOMDataStore extends TransactionReadyPrototype implements D
             } catch (ConflictingModificationAppliedException e) {
                 LOG.warn("Store Tx: {} Conflicting modification for {}.", transaction.getIdentifier(),
                         e.getPath());
-                transaction.warnDebugContext(LOG);
+                warnDebugContext(transaction);
                 return Futures.immediateFailedFuture(new OptimisticLockFailedException("Optimistic lock failed.", e));
             } catch (DataValidationFailedException e) {
                 LOG.warn("Store Tx: {} Data Precondition failed for {}.", transaction.getIdentifier(),
                         e.getPath(), e);
-                transaction.warnDebugContext(LOG);
+                warnDebugContext(transaction);
 
                 // For debugging purposes, allow dumping of the modification. Coupled with the above
                 // precondition log, it should allow us to understand what went on.

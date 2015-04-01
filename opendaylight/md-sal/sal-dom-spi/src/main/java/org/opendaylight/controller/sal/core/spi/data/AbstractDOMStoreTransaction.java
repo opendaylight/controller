@@ -5,38 +5,52 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.md.sal.dom.store.impl;
+package org.opendaylight.controller.sal.core.spi.data;
 
+import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.base.Preconditions;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransaction;
-import org.slf4j.Logger;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
- * Abstract DOM Store Transaction
+ * Abstract DOM Store Transaction.
  *
  * Convenience super implementation of DOM Store transaction which provides
  * common implementation of {@link #toString()} and {@link #getIdentifier()}.
+ *
+ * It can optionally capture the context where it was allocated.
+ *
+ * <T> identifier type
  */
-abstract class AbstractDOMStoreTransaction implements DOMStoreTransaction {
+@Beta
+public abstract class AbstractDOMStoreTransaction<T> implements DOMStoreTransaction {
     private final Throwable debugContext;
-    private final Object identifier;
+    private final T identifier;
 
-    protected AbstractDOMStoreTransaction(final Object identifier, final boolean debug) {
+    protected AbstractDOMStoreTransaction(@Nonnull final T identifier) {
+        this(identifier, false);
+    }
+
+    protected AbstractDOMStoreTransaction(@Nonnull final T identifier, final boolean debug) {
         this.identifier = Preconditions.checkNotNull(identifier, "Identifier must not be null.");
         this.debugContext = debug ? new Throwable().fillInStackTrace() : null;
     }
 
     @Override
-    public final Object getIdentifier() {
+    public final T getIdentifier() {
         return identifier;
     }
 
-    protected final void warnDebugContext(final Logger logger) {
-        if (debugContext != null) {
-            logger.warn("Transaction {} has been allocated in the following context", identifier, debugContext);
-        }
+    /**
+     * Return the context in which this transaction was allocated.
+     *
+     * @return The context in which this transaction was allocated, or null
+     *         if the context was not recorded.
+     */
+    @Nullable public final Throwable getDebugContext() {
+        return debugContext;
     }
 
     @Override
@@ -51,7 +65,7 @@ abstract class AbstractDOMStoreTransaction implements DOMStoreTransaction {
      *            ToStringHelper instance
      * @return ToStringHelper instance which was passed in
      */
-    protected ToStringHelper addToStringAttributes(final ToStringHelper toStringHelper) {
+    protected ToStringHelper addToStringAttributes(@Nonnull final ToStringHelper toStringHelper) {
         return toStringHelper.add("id", identifier);
     }
 }
