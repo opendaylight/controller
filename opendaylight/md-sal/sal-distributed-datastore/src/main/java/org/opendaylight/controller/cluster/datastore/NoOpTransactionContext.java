@@ -33,44 +33,44 @@ final class NoOpTransactionContext extends AbstractTransactionContext {
 
     @Override
     public void closeTransaction() {
-        LOG.debug("NoOpTransactionContext {} closeTransaction called", identifier);
+        LOG.debug("NoOpTransactionContext {} closeTransaction called", getIdentifier());
     }
 
     @Override
     public Future<ActorSelection> readyTransaction() {
-        LOG.debug("Tx {} readyTransaction called", identifier);
+        LOG.debug("Tx {} readyTransaction called", getIdentifier());
         operationLimiter.release();
         return akka.dispatch.Futures.failed(failure);
     }
 
     @Override
     public void deleteData(YangInstanceIdentifier path) {
-        LOG.debug("Tx {} deleteData called path = {}", identifier, path);
+        LOG.debug("Tx {} deleteData called path = {}", getIdentifier(), path);
         operationLimiter.release();
     }
 
     @Override
     public void mergeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
-        LOG.debug("Tx {} mergeData called path = {}", identifier, path);
+        LOG.debug("Tx {} mergeData called path = {}", getIdentifier(), path);
         operationLimiter.release();
     }
 
     @Override
     public void writeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
-        LOG.debug("Tx {} writeData called path = {}", identifier, path);
+        LOG.debug("Tx {} writeData called path = {}", getIdentifier(), path);
         operationLimiter.release();
     }
 
     @Override
     public void readData(final YangInstanceIdentifier path, SettableFuture<Optional<NormalizedNode<?, ?>>> proxyFuture) {
-        LOG.debug("Tx {} readData called path = {}", identifier, path);
+        LOG.debug("Tx {} readData called path = {}", getIdentifier(), path);
         operationLimiter.release();
         proxyFuture.setException(new ReadFailedException("Error reading data for path " + path, failure));
     }
 
     @Override
     public void dataExists(YangInstanceIdentifier path, SettableFuture<Boolean> proxyFuture) {
-        LOG.debug("Tx {} dataExists called path = {}", identifier, path);
+        LOG.debug("Tx {} dataExists called path = {}", getIdentifier(), path);
         operationLimiter.release();
         proxyFuture.setException(new ReadFailedException("Error checking exists for path " + path, failure));
     }
