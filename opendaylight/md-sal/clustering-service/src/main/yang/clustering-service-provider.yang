@@ -1,0 +1,94 @@
+module clustering-service-provider {
+
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:config:clustering-service-provider";
+    prefix "clustering-service-provider";
+
+    import config { prefix config; revision-date 2013-04-05; }
+    import opendaylight-md-sal-binding { prefix mdsal; revision-date 2013-10-28; }
+
+    description
+        "This module contains the base YANG definitions for
+        the clustering service provider implementation";
+
+    revision "2015-03-16" {
+        description
+            "Initial revision.";
+    }
+
+    identity clustering-service-provider {
+        base config:module-type;
+        //config:provided-service clustering-api:clustering-service-change-registry;
+        // Specifies the prefix for generated java classes.
+        config:java-name-prefix ClusteringServiceProvider;
+    }
+
+    // Augments the 'configuration' choice node under modules/module.
+    augment "/config:modules/config:module/config:configuration" {
+        case clustering-service-provider {
+            when "/config:modules/config:module/config:type = 'clustering-service-provider'";
+                container rpc-registry {
+                    uses config:service-ref {
+                        refine type {
+                            mandatory true;
+                            config:required-identity mdsal:binding-rpc-registry;
+                        }
+                    }
+                }
+
+                container notification-service {
+                    uses config:service-ref {
+                        refine type {
+                            mandatory true;
+                            config:required-identity mdsal:binding-notification-service;
+                        }
+                    }
+                }
+
+        }
+    }
+
+    typedef shard-role-enum {
+        type enumeration {
+            enum FOLLOWER {
+                description "Follower role";
+            }
+            enum CANDIDATE {
+                description "Candidate role";
+            }
+            enum LEADER {
+                description "Leader role";
+            }
+            enum ISOLATED-LEADER {
+                description "Isolated Leader role";
+            }
+        }
+    }
+
+    grouping role-change {
+        leaf shard-id {
+            type string;
+        }
+
+        leaf shard-old-role {
+            type shard-role-enum;
+            description "Old role of the datastore shard";
+        }
+
+        leaf shard-new-role {
+            type shard-role-enum;
+            description "New role of the datastore shard";
+        }
+    }
+
+    rpc change-role {
+        input {
+           uses role-change;
+        }
+    }
+
+    notification role-changed {
+        uses role-change;
+    }
+
+}

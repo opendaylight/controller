@@ -24,6 +24,7 @@ import akka.persistence.RecoveryFailure;
 import akka.serialization.Serialization;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.base.Supplier;
@@ -116,6 +117,8 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
     private final CountDownLatch waitTillReadyCountdownLatch;
 
+    private Optional<ActorRef> shardRoleChangeListener;
+
     /**
      */
     protected ShardManager(ClusterWrapper cluster, Configuration configuration,
@@ -135,6 +138,8 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         cluster.subscribeToMemberEvents(getSelf());
 
         createLocalShards();
+
+        shardRoleChangeListener = createShardRoleChangeListenerActor();
     }
 
     protected DataPersistenceProvider createDataPersistenceProvider(boolean persistent) {
@@ -191,6 +196,16 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             unknownMessage(message);
         }
 
+    }
+
+    private Optional<ActorRef> createShardRoleChangeListenerActor() {
+        ActorRef shardRoleChangeNotifier = null;
+        if (datastoreContext.getRpcProviderRegistry() != null) {
+            shardRoleChangeNotifier = this.getContext().actorOf(
+                    ShardRoleChangeListener.getProps(datastoreContext.getRpcProviderRegistry()), "shard-role-change-listener");
+        }
+
+        return Optional.fromNullable(shardRoleChangeNotifier);
     }
 
     private void onLeaderStateChanged(LeaderStateChanged leaderStateChanged) {
@@ -318,7 +333,12 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             shardInformation.setActorInitialized();
 
             shardInformation.getActor().tell(new RegisterRoleChangeListener(), self());
+            if (shardRoleChangeListener.isPresent()) {
+                // register the shard role change listener to listen to role changes as well.
+                shardInformation.getActor().tell(new RegisterRoleChangeListener(), shardRoleChangeListener.get());
+            }
         }
+
     }
 
     @Override
