@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_327208ae",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/ForwardingDOMStoreThreePhaseCommitCohort.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-01T17:52:38Z",
+      "side": 1,
+      "message": "why not store the delegate here and pass in the constructor to be consistent with other Forwarding classes?",
+      "revId": "bd8b98048f7144a36f93d47a0b746e090d571eea",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
