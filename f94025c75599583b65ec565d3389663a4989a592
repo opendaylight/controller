@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_126eec01",
+        "filename": "opendaylight/md-sal/clustering-service/src/main/java/clusteringservice/ClusteringService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-04-01T19:21:04Z",
+      "side": 1,
+      "message": "Copyright",
+      "revId": "f94025c75599583b65ec565d3389663a4989a592",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_b27cd8b6",
+        "filename": "opendaylight/md-sal/clustering-service/src/main/java/clusteringservice/ClusteringService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-04-01T19:21:04Z",
+      "side": 1,
+      "message": "If you want to put in auto use the @author tag",
+      "revId": "f94025c75599583b65ec565d3389663a4989a592",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_12458c6f",
+        "filename": "opendaylight/md-sal/clustering-service/src/main/java/clusteringservice/ClusteringServiceFactory.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-04-01T19:21:04Z",
+      "side": 1,
+      "message": "Does this need to be part of this commit?",
+      "revId": "f94025c75599583b65ec565d3389663a4989a592",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_52323411",
+        "filename": "opendaylight/md-sal/clustering-service/src/main/yang/clustering-service-provider.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-04-01T19:21:04Z",
+      "side": 1,
+      "message": "I\u0027m wondering if we should have one-module for the change-role and another for the notification. To distinguish between what a consumer would use and what a producer would use.",
+      "revId": "f94025c75599583b65ec565d3389663a4989a592",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_d225e4c2",
+        "filename": "opendaylight/md-sal/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-04-01T19:21:04Z",
+      "side": 1,
+      "message": "Add a line between the message bus and clustering-service module",
+      "revId": "f94025c75599583b65ec565d3389663a4989a592",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
