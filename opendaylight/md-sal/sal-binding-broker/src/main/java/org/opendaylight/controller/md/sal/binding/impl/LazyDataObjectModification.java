@@ -17,6 +17,8 @@ import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.yangtools.binding.data.codec.api.BindingCodecTreeNode;
 import org.opendaylight.yangtools.yang.binding.ChildOf;
 import org.opendaylight.yangtools.yang.binding.DataObject;
+import org.opendaylight.yangtools.yang.binding.Identifiable;
+import org.opendaylight.yangtools.yang.binding.Identifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -130,6 +132,7 @@ class LazyDataObjectModification<T extends DataObject> implements DataObjectModi
         return childNodesCache;
     }
 
+    @Override
     public DataObjectModification<? extends DataObject> getModifiedChild(final PathArgument arg) {
         final List<YangInstanceIdentifier.PathArgument> domArgumentList = new ArrayList<>();
         final BindingCodecTreeNode<?> childCodec = codec.bindingPathArgumentChild(arg, domArgumentList);
@@ -145,7 +148,15 @@ class LazyDataObjectModification<T extends DataObject> implements DataObjectModi
     }
 
     @SuppressWarnings("unchecked")
-    public <C extends ChildOf<T>> DataObjectModification<C> getModifiedChild(final Class<C> arg) {
+    @Override
+    public <C extends Identifiable<K> & ChildOf<? super T>, K extends Identifier<C>> DataObjectModification<C> getModifiedChild(
+            final Class<C> listItem, final K listKey) {
+        return (DataObjectModification<C>) getModifiedChild(new InstanceIdentifier.IdentifiableItem<>(listItem, listKey));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <C extends ChildOf<? super T>> DataObjectModification<C> getModifiedChild(final Class<C> arg) {
         return (DataObjectModification<C>) getModifiedChild(new InstanceIdentifier.Item<>(arg));
     }
 
