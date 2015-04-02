@@ -224,57 +224,15 @@ public class TransactionContextImpl extends AbstractTransactionContext {
     }
 
     @Override
-    public void readData(
-            final YangInstanceIdentifier path,final SettableFuture<Optional<NormalizedNode<?, ?>>> returnFuture ) {
+    public void readData(final YangInstanceIdentifier path,
+            final SettableFuture<Optional<NormalizedNode<?, ?>>> returnFuture ) {
 
         LOG.debug("Tx {} readData called path = {}", getIdentifier(), path);
 
-        // Send the remaining batched modifications if any.
+        // Send any batched modifications. This is necessary to honor the read uncommitted semantics of the
+        // public API contract.
 
         sendAndRecordBatchedModifications();
-
-        // If there were any previous recorded put/merge/delete operation reply Futures then we
-        // must wait for them to successfully complete. This is necessary to honor the read
-        // uncommitted semantics of the public API contract. If any one fails then fail the read.
-
-        if(recordedOperationCount() == 0) {
-            finishReadData(path, returnFuture);
-        } else {
-            LOG.debug("Tx {} readData: verifying {} previous recorded operations",
-                getIdentifier(), recordedOperationCount());
-
-            // Note: we make a copy of recordedOperationFutures to be on the safe side in case
-            // Futures#sequence accesses the passed List on a different thread, as
-            // recordedOperationFutures is not synchronized.
-
-            Future<Iterable<Object>> combinedFutures = akka.dispatch.Futures.sequence(
-                copyRecordedOperationFutures(), actorContext.getClientDispatcher());
-
-            OnComplete<Iterable<Object>> onComplete = new OnComplete<Iterable<Object>>() {
-                @Override
-                public void onComplete(Throwable failure, Iterable<Object> notUsed)
-                        throws Throwable {
-                    if(failure != null) {
-                        LOG.debug("Tx {} readData: a recorded operation failed: {}",
-                            getIdentifier(), failure);
-                        returnFuture.setException(new ReadFailedException(
-                                "The read could not be performed because a previous put, merge,"
-                                + "or delete operation failed", failure));
-                    } else {
-                        finishReadData(path, returnFuture);
-                    }
-                }
-            };
-
-            combinedFutures.onComplete(onComplete, actorContext.getClientDispatcher());
-        }
-
-    }
-
-    private void finishReadData(final YangInstanceIdentifier path,
-            final SettableFuture<Optional<NormalizedNode<?, ?>>> returnFuture) {
-
-        LOG.debug("Tx {} finishReadData called path = {}", getIdentifier(), path);
 
         OnComplete<Object> onComplete = new OnComplete<Object>() {
             @Override
@@ -313,52 +271,10 @@ public class TransactionContextImpl extends AbstractTransactionContext {
 
         LOG.debug("Tx {} dataExists called path = {}", getIdentifier(), path);
 
-        // Send the remaining batched modifications if any.
+        // Send any batched modifications. This is necessary to honor the read uncommitted semantics of the
+        // public API contract.
 
         sendAndRecordBatchedModifications();
-
-        // If there were any previous recorded put/merge/delete operation reply Futures then we
-        // must wait for them to successfully complete. This is necessary to honor the read
-        // uncommitted semantics of the public API contract. If any one fails then fail this
-        // request.
-
-        if(recordedOperationCount() == 0) {
-            finishDataExists(path, returnFuture);
-        } else {
-            LOG.debug("Tx {} dataExists: verifying {} previous recorded operations",
-                getIdentifier(), recordedOperationCount());
-
-            // Note: we make a copy of recordedOperationFutures to be on the safe side in case
-            // Futures#sequence accesses the passed List on a different thread, as
-            // recordedOperationFutures is not synchronized.
-
-            Future<Iterable<Object>> combinedFutures = akka.dispatch.Futures.sequence(
-                    copyRecordedOperationFutures(),
-                    actorContext.getClientDispatcher());
-            OnComplete<Iterable<Object>> onComplete = new OnComplete<Iterable<Object>>() {
-                @Override
-                public void onComplete(Throwable failure, Iterable<Object> notUsed)
-                        throws Throwable {
-                    if(failure != null) {
-                        LOG.debug("Tx {} dataExists: a recorded operation failed: {}",
-                            getIdentifier(), failure);
-                        returnFuture.setException(new ReadFailedException(
-                                "The data exists could not be performed because a previous "
-                                + "put, merge, or delete operation failed", failure));
-                    } else {
-                        finishDataExists(path, returnFuture);
-                    }
-                }
-            };
-
-            combinedFutures.onComplete(onComplete, actorContext.getClientDispatcher());
-        }
-    }
-
-    private void finishDataExists(final YangInstanceIdentifier path,
-            final SettableFuture<Boolean> returnFuture) {
-
-        LOG.debug("Tx {} finishDataExists called path = {}", getIdentifier(), path);
 
         OnComplete<Object> onComplete = new OnComplete<Object>() {
             @Override

@@ -10,7 +10,6 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.opendaylight.controller.cluster.datastore.TransactionProxy.TransactionType.READ_ONLY;
 import static org.opendaylight.controller.cluster.datastore.TransactionProxy.TransactionType.READ_WRITE;
@@ -164,34 +163,6 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         testReadWithExceptionOnInitialCreateTransaction(new TestException());
     }
 
-    @Test(expected = TestException.class)
-    public void testReadWithPriorRecordingOperationFailure() throws Throwable {
-        doReturn(dataStoreContextBuilder.shardBatchedModificationCount(2).build()).
-                when(mockActorContext).getDatastoreContext();
-
-        ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_WRITE);
-
-        NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
-
-        expectFailedBatchedModifications(actorRef);
-
-        doReturn(readSerializedDataReply(null)).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedReadData());
-
-        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext, READ_WRITE);
-
-        transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
-
-        transactionProxy.delete(TestModel.TEST_PATH);
-
-        try {
-            propagateReadFailedExceptionCause(transactionProxy.read(TestModel.TEST_PATH));
-        } finally {
-            verify(mockActorContext, times(0)).executeOperationAsync(
-                    eq(actorSelection(actorRef)), eqSerializedReadData());
-        }
-    }
-
     @Test
     public void testReadWithPriorRecordingOperationSuccessful() throws Throwable {
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_WRITE);
@@ -299,35 +270,6 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         TransactionProxy transactionProxy = new TransactionProxy(mockActorContext, READ_ONLY);
 
         propagateReadFailedExceptionCause(transactionProxy.exists(TestModel.TEST_PATH));
-    }
-
-    @Test(expected = TestException.class)
-    public void testExistsWithPriorRecordingOperationFailure() throws Throwable {
-        doReturn(dataStoreContextBuilder.shardBatchedModificationCount(2).build()).
-                when(mockActorContext).getDatastoreContext();
-
-        ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_WRITE);
-
-        NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
-
-        expectFailedBatchedModifications(actorRef);
-
-        doReturn(dataExistsSerializedReply(false)).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), eqSerializedDataExists());
-
-        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext,
-                READ_WRITE);
-
-        transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
-
-        transactionProxy.delete(TestModel.TEST_PATH);
-
-        try {
-            propagateReadFailedExceptionCause(transactionProxy.exists(TestModel.TEST_PATH));
-        } finally {
-            verify(mockActorContext, times(0)).executeOperationAsync(
-                    eq(actorSelection(actorRef)), eqSerializedDataExists());
-        }
     }
 
     @Test
