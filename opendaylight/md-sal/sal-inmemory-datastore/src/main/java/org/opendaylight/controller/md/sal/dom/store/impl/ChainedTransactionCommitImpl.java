@@ -12,13 +12,14 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
+import org.opendaylight.controller.sal.core.spi.data.ForwardingDOMStoreThreePhaseCommitCohort;
 
-final class ChainedTransactionCommitImpl implements DOMStoreThreePhaseCommitCohort {
+final class ChainedTransactionCommitImpl extends ForwardingDOMStoreThreePhaseCommitCohort {
     private final SnapshotBackedWriteTransaction transaction;
     private final DOMStoreThreePhaseCommitCohort delegate;
     private final DOMStoreTransactionChainImpl txChain;
 
-    protected ChainedTransactionCommitImpl(final SnapshotBackedWriteTransaction transaction,
+    ChainedTransactionCommitImpl(final SnapshotBackedWriteTransaction transaction,
             final DOMStoreThreePhaseCommitCohort delegate, final DOMStoreTransactionChainImpl txChain) {
         this.transaction = Preconditions.checkNotNull(transaction);
         this.delegate = Preconditions.checkNotNull(delegate);
@@ -26,23 +27,13 @@ final class ChainedTransactionCommitImpl implements DOMStoreThreePhaseCommitCoho
     }
 
     @Override
-    public ListenableFuture<Boolean> canCommit() {
-        return delegate.canCommit();
-    }
-
-    @Override
-    public ListenableFuture<Void> preCommit() {
-        return delegate.preCommit();
-    }
-
-    @Override
-    public ListenableFuture<Void> abort() {
-        return delegate.abort();
+    protected DOMStoreThreePhaseCommitCohort delegate() {
+        return delegate;
     }
 
     @Override
     public ListenableFuture<Void> commit() {
-        ListenableFuture<Void> commitFuture = delegate.commit();
+        ListenableFuture<Void> commitFuture = super.commit();
         Futures.addCallback(commitFuture, new FutureCallback<Void>() {
             @Override
             public void onFailure(final Throwable t) {
@@ -56,4 +47,5 @@ final class ChainedTransactionCommitImpl implements DOMStoreThreePhaseCommitCoho
         });
         return commitFuture;
     }
+
 }
