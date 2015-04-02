@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_18ffeb68",
+        "filename": "opendaylight/commons/protocol-framework/src/main/java/org/opendaylight/protocol/framework/AbstractDispatcher.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-04-02T07:33:59Z",
+      "side": 1,
+      "message": "This is API breaking change, which in case of other projects such as bgpcep will result in compilation error.\n\nChange changed PipelineInitializer to less specific class,\nwhich will result in compilation error in bgpcep.\n\nTo merge this we will need to seek API-Freeze waiver and also\nbgpcep project to update their implementation.",
+      "range": {
+        "startLine": 57,
+        "startChar": 24,
+        "endLine": 57,
+        "endChar": 121
+      },
+      "revId": "6b89f61d0c5211f848cc61fa0232ce25a5b4d646",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
