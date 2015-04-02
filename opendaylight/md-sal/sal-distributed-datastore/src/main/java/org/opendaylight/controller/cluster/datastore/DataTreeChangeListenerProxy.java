@@ -11,6 +11,7 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.PoisonPill;
 import akka.dispatch.OnComplete;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.cluster.datastore.exceptions.LocalShardNotFoundException;
@@ -106,9 +107,19 @@ final class DataTreeChangeListenerProxy<T extends DOMDataTreeChangeListener> ext
                 } else {
                     RegisterDataTreeChangeListenerReply reply = (RegisterDataTreeChangeListenerReply) result;
                     setListenerRegistrationActor(actorContext.actorSelection(
-                            reply.getListenerRegistrationPath().path()));
+                            reply.getListenerRegistrationPath()));
                 }
             }
         }, actorContext.getClientDispatcher());
+    }
+
+    @VisibleForTesting
+    ActorSelection getListenerRegistrationActor() {
+        return listenerRegistrationActor;
+    }
+
+    @VisibleForTesting
+    ActorRef getDataChangeListenerActor() {
+        return dataChangeListenerActor;
     }
 }
