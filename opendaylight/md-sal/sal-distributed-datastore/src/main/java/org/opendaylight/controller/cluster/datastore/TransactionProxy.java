@@ -93,6 +93,9 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
     };
 
     private static final AtomicLong counter = new AtomicLong();
+    private static final int SEAL_OPEN = 0;
+    private static final int SEAL_READY = 1;
+    private static final int SEAL_CLOSED = 2;
 
     private static final Logger LOG = LoggerFactory.getLogger(TransactionProxy.class);
 
@@ -187,7 +190,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
     private final ActorContext actorContext;
     private final String transactionChainId;
     private final SchemaContext schemaContext;
-    private boolean inReadyState;
+    private int sealed = SEAL_OPEN;
 
     private volatile boolean initialized;
     private Semaphore operationLimiter;
@@ -293,7 +296,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
     private void checkModificationState() {
         Preconditions.checkState(transactionType != TransactionType.READ_ONLY,
                 "Modification operation on read-only transaction is not allowed");
-        Preconditions.checkState(!inReadyState,
+        Preconditions.checkState(sealed == SEAL_OPEN,
                 "Transaction is sealed - further modifications are not allowed");
     }
 
@@ -325,7 +328,6 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
             }
         }
     }
-
 
     @Override
     public void write(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
@@ -381,12 +383,37 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
         });
     }
 
+    private String sealName() {
+        switch (sealed) {
+        case SEAL_READY:
+            return "ready";
+        case SEAL_CLOSED:
+            return "closed";
+        case SEAL_OPEN:
+            return "open";
+        default:
+            return "UNKNOWN";
+        }
+    }
+
+    private boolean seal(final int type) {
+        if (sealed == SEAL_OPEN) {
+            sealed = type;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     @Override
     public DOMStoreThreePhaseCommitCohort ready() {
+        Preconditions.checkState(transactionType != TransactionType.READ_ONLY,
+                "Read-only transactions cannot be readied");
 
-        checkModificationState();
-
-        inReadyState = true;
+        if (!seal(SEAL_READY)) {
+            throw new IllegalStateException(String.format("Transaction %s is %s, it cannot be readied",
+                getIdentifier(), sealName()));
+        }
 
         LOG.debug("Tx {} Readying {} transactions for commit", getIdentifier(),
                     txFutureCallbackMap.size());
@@ -441,6 +468,16 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
 
     @Override
     public void close() {
+        if (!seal(SEAL_CLOSED)) {
+            if (sealed == SEAL_CLOSED) {
+                // Idempotent no-op as per AutoCloseable recommendation
+                return;
+            }
+
+            throw new IllegalStateException(String.format("Transaction %s is ready, it cannot be closed",
+                getIdentifier()));
+        }
+
         for (TransactionFutureCallback txFutureCallback : txFutureCallbackMap.values()) {
             txFutureCallback.enqueueTransactionOperation(new TransactionOperation() {
                 @Override
