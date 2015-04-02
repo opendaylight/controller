@@ -106,7 +106,7 @@ final class DataTreeChangeListenerProxy<T extends DOMDataTreeChangeListener> ext
                 } else {
                     RegisterDataTreeChangeListenerReply reply = (RegisterDataTreeChangeListenerReply) result;
                     setListenerRegistrationActor(actorContext.actorSelection(
-                            reply.getListenerRegistrationPath().path()));
+                            reply.getListenerRegistrationPath()));
                 }
             }
         }, actorContext.getClientDispatcher());
