@@ -114,13 +114,9 @@ public class DataTreeChangeListenerTest extends AbstractDataBrokerTest {
 
         putTx(TOP_PATH, TOP_INITIAL_DATA).submit().checkedGet();
 
-        /*
-         * FIXME: Bug 2939 - Data Tree: Data Tree Candidate does not expand WRITEs
-         *                   Once this is fixed, following code should be uncommented
-            final DataTreeModification fooWriteEvent = Iterables.getOnlyElement(listener.nextEvent());
-            assertEquals(FOO_PATH, fooWriteEvent.getRootPath().getRootIdentifier());
-            verifyModification(fooWriteEvent.getRootNode(), FOO_ARGUMENT, ModificationType.WRITE);
-         */
+        final DataTreeModification<TopLevelList> fooWriteEvent = Iterables.getOnlyElement(listener.nextEvent());
+        assertEquals(FOO_PATH, fooWriteEvent.getRootPath().getRootIdentifier());
+        verifyModification(fooWriteEvent.getRootNode(), FOO_ARGUMENT, ModificationType.WRITE);
 
         putTx(BAR_PATH, BAR_DATA).submit().checkedGet();
         final DataTreeModification<TopLevelList> barWriteEvent = Iterables.getOnlyElement(listener.nextEvent());
@@ -132,8 +128,6 @@ public class DataTreeChangeListenerTest extends AbstractDataBrokerTest {
         assertEquals(BAR_PATH, barDeleteEvent.getRootPath().getRootIdentifier());
         verifyModification(barDeleteEvent.getRootNode(), BAR_ARGUMENT, ModificationType.DELETE);
     }
-
-
 
     private void createAndVerifyTop(final EventCapturingListener<Top> listener) throws Exception {
         putTx(TOP_PATH,TOP_INITIAL_DATA).submit().checkedGet();
