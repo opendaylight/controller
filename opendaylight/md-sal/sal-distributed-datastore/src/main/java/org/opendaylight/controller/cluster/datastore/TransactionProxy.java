@@ -501,13 +501,6 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
     }
 
     /**
-     * Interfaces for transaction operations to be invoked later.
-     */
-    private static interface TransactionOperation {
-        void invoke(TransactionContext transactionContext);
-    }
-
-    /**
      * Implements a Future OnComplete callback for a CreateTransaction message. This class handles
      * retries, up to a limit, if the shard doesn't have a leader yet. This is done by scheduling a
      * retry task after a short delay.
