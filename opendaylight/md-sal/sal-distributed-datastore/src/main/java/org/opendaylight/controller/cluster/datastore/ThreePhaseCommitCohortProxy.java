@@ -209,7 +209,7 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
 
     @Override
     public ListenableFuture<Void> commit() {
-        OperationCallback operationCallback = (cohortFutures.size() == 0) ? NO_OP_CALLBACK :
+        OperationCallback operationCallback = cohortFutures.isEmpty() ? NO_OP_CALLBACK :
                 new TransactionRateLimitingCallback(actorContext);
 
         return voidOperation("commit", new CommitTransaction(transactionId).toSerializable(),
