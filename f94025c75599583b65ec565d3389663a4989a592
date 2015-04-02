@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_e54933b8",
+        "filename": "opendaylight/md-sal/clustering-service/src/main/java/clusteringservice/ClusteringService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-02T20:50:26Z",
+      "side": 1,
+      "message": "The package should be prefixed with org.opendaylight.controller.",
+      "parentUuid": "5a93c517_126eec01",
+      "revId": "f94025c75599583b65ec565d3389663a4989a592",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_b27cd8b6",
         "filename": "opendaylight/md-sal/clustering-service/src/main/java/clusteringservice/ClusteringService.java",
         "patchSetId": 2
@@ -53,6 +71,40 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_655e8378",
+        "filename": "opendaylight/md-sal/clustering-service/src/main/java/clusteringservice/ClusteringServiceImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-02T20:50:26Z",
+      "side": 1,
+      "message": "The package should be prefixed with org.opendaylight.controller. Also I would suggest to suffix it with impl so it isn\u0027t exported outside of the bundle.",
+      "revId": "f94025c75599583b65ec565d3389663a4989a592",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_25695b25",
+        "filename": "opendaylight/md-sal/clustering-service/src/main/java/clusteringservice/ClusteringServiceImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-02T20:50:26Z",
+      "side": 1,
+      "message": "You can simply do RpcResultBuilder.\u003cVoid\u003esuccess().buildFuture()",
+      "revId": "f94025c75599583b65ec565d3389663a4989a592",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_52323411",
         "filename": "opendaylight/md-sal/clustering-service/src/main/yang/clustering-service-provider.yang",
         "patchSetId": 2
@@ -81,6 +133,23 @@
       "writtenOn": "2015-04-01T19:21:04Z",
       "side": 1,
       "message": "Add a line between the message bus and clustering-service module",
+      "revId": "f94025c75599583b65ec565d3389663a4989a592",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_c5e517a9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardRoleChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-02T20:50:26Z",
+      "side": 1,
+      "message": "What\u0027s the purpose of having this implement AutoCloseable? Since this is an actor, the instance reference isn\u0027t exposed so close() can\u0027t be called.",
       "revId": "f94025c75599583b65ec565d3389663a4989a592",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
