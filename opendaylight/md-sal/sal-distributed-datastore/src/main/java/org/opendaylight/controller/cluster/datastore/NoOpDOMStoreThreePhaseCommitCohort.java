@@ -7,14 +7,18 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import akka.actor.ActorSelection;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
+import java.util.Collections;
+import java.util.List;
+import scala.concurrent.Future;
 
 /**
- * A {@link DOMStoreThreePhaseCommitCohort} instance given out for empty transactions.
+ * A {@link org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort}
+ * instance given out for empty transactions.
  */
-final class NoOpDOMStoreThreePhaseCommitCohort implements DOMStoreThreePhaseCommitCohort {
+final class NoOpDOMStoreThreePhaseCommitCohort extends AbstractThreePhaseCommitCohort {
     static final NoOpDOMStoreThreePhaseCommitCohort INSTANCE = new NoOpDOMStoreThreePhaseCommitCohort();
 
     private static final ListenableFuture<Void> IMMEDIATE_VOID_SUCCESS = Futures.immediateFuture(null);
@@ -42,5 +46,10 @@ final class NoOpDOMStoreThreePhaseCommitCohort implements DOMStoreThreePhaseComm
     @Override
     public ListenableFuture<Void> commit() {
         return IMMEDIATE_VOID_SUCCESS;
+    }
+
+    @Override
+    List<Future<ActorSelection>> getCohortFutures() {
+        return Collections.emptyList();
     }
 }
