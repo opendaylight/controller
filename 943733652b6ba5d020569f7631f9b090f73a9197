@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_1827eb65",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ChainedTransactionProxy.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-02T02:56:42Z",
+      "side": 1,
+      "message": "Not trying to nitpick but since I was the original author, technically  the copyright should say Brocade Communications Systems, Inc.",
+      "revId": "943733652b6ba5d020569f7631f9b090f73a9197",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
