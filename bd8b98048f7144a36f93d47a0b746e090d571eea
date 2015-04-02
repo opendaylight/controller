@@ -34,6 +34,24 @@
       "revId": "bd8b98048f7144a36f93d47a0b746e090d571eea",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_2c78682a",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/ForwardingDOMStoreThreePhaseCommitCohort.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-02T11:26:34Z",
+      "side": 1,
+      "message": "If you store it on construction then you could have a setter to swap it out. I\u0027m fine with it either way - just curious. It looks like this is the pattern for Forwarding classes in md-sal so it\u0027s consistent.",
+      "parentUuid": "5a93c517_38ebc7b1",
+      "revId": "bd8b98048f7144a36f93d47a0b746e090d571eea",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
