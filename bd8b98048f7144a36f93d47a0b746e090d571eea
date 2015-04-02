@@ -16,6 +16,24 @@
       "revId": "bd8b98048f7144a36f93d47a0b746e090d571eea",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_38ebc7b1",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/ForwardingDOMStoreThreePhaseCommitCohort.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-04-02T07:25:59Z",
+      "side": 1,
+      "message": "This is inspired by Guava Forwarding objects, which uses same pattern.\n\nAlso storing delegate would make this forwarding object only usable in use cases when you do not want to swap delegate.\n\nSo storing delegate will actually decrease usefulness of these classes, since you will start enforcing that delegate must be available during construction of object and may not be changed during lifecycle of this object.",
+      "parentUuid": "5a93c517_327208ae",
+      "revId": "bd8b98048f7144a36f93d47a0b746e090d571eea",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
