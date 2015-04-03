@@ -220,19 +220,6 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
     }
 
     @VisibleForTesting
-    List<Future<Object>> getRecordedOperationFutures() {
-        List<Future<Object>> recordedOperationFutures = Lists.newArrayList();
-        for(TransactionFutureCallback txFutureCallback : txFutureCallbackMap.values()) {
-            TransactionContext transactionContext = txFutureCallback.getTransactionContext();
-            if (transactionContext != null) {
-                transactionContext.copyRecordedOperationFutures(recordedOperationFutures);
-            }
-        }
-
-        return recordedOperationFutures;
-    }
-
-    @VisibleForTesting
     boolean hasTransactionContext() {
         for(TransactionFutureCallback txFutureCallback : txFutureCallbackMap.values()) {
             TransactionContext transactionContext = txFutureCallback.getTransactionContext();

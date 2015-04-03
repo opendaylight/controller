@@ -32,13 +32,12 @@ public class WriteOnlyTransactionContextImpl extends TransactionContextImpl {
 
     @Override
     public Future<ActorSelection> readyTransaction() {
-        LOG.debug("Tx {} readyTransaction called with {} previous recorded operations pending",
-            getIdentifier(), recordedOperationCount());
+        LOG.debug("Tx {} readyTransaction called", getIdentifier());
 
         // Send the remaining batched modifications if any.
 
         Future<Object> lastModificationsFuture = sendBatchedModifications(true);
 
-        return combineRecordedOperationsFutures(lastModificationsFuture);
+        return transformReadyReply(lastModificationsFuture);
     }
 }
