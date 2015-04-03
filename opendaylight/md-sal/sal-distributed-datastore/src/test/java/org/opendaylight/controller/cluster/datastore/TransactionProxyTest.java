@@ -3,7 +3,6 @@ package org.opendaylight.controller.cluster.datastore;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -41,7 +40,6 @@ import org.opendaylight.controller.cluster.datastore.exceptions.NotInitializedEx
 import org.opendaylight.controller.cluster.datastore.exceptions.PrimaryNotFoundException;
 import org.opendaylight.controller.cluster.datastore.exceptions.TimeoutException;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
-import org.opendaylight.controller.cluster.datastore.messages.BatchedModificationsReply;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyTransaction;
 import org.opendaylight.controller.cluster.datastore.modification.DeleteModification;
@@ -61,10 +59,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import scala.concurrent.Await;
-import scala.concurrent.Future;
 import scala.concurrent.Promise;
-import scala.concurrent.duration.Duration;
 
 @SuppressWarnings("resource")
 public class TransactionProxyTest extends AbstractTransactionProxyTest {
@@ -313,29 +308,6 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         transactionProxy.exists(TestModel.TEST_PATH);
     }
 
-    private void verifyRecordingOperationFutures(List<Future<Object>> futures,
-            Class<?>... expResultTypes) throws Exception {
-        assertEquals("getRecordingOperationFutures size", expResultTypes.length, futures.size());
-
-        int i = 0;
-        for( Future<Object> future: futures) {
-            assertNotNull("Recording operation Future is null", future);
-
-            Class<?> expResultType = expResultTypes[i++];
-            if(Throwable.class.isAssignableFrom(expResultType)) {
-                try {
-                    Await.result(future, Duration.create(5, TimeUnit.SECONDS));
-                    fail("Expected exception from recording operation Future");
-                } catch(Exception e) {
-                    // Expected
-                }
-            } else {
-                assertEquals(String.format("Recording operation %d Future result type", i +1 ), expResultType,
-                             Await.result(future, Duration.create(5, TimeUnit.SECONDS)).getClass());
-            }
-        }
-    }
-
     @Test
     public void testWrite() throws Exception {
         dataStoreContextBuilder.shardBatchedModificationCount(1);
@@ -405,9 +377,6 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         transactionProxy.ready();
 
         verifyOneBatchedModification(actorRef, new WriteModification(TestModel.TEST_PATH, nodeToWrite), false);
-
-        verifyRecordingOperationFutures(transactionProxy.getRecordedOperationFutures(),
-                BatchedModificationsReply.class);
     }
 
     @Test(expected=IllegalStateException.class)
@@ -479,9 +448,6 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         ThreePhaseCommitCohortProxy proxy = (ThreePhaseCommitCohortProxy) ready;
 
-        verifyRecordingOperationFutures(transactionProxy.getRecordedOperationFutures(),
-                BatchedModificationsReply.class);
-
         verifyCohortFutures(proxy, getSystem().actorSelection(actorRef.path()));
 
         verify(mockActorContext).executeOperationAsync(eq(actorSelection(actorRef)),
@@ -510,8 +476,6 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         assertTrue(ready instanceof ThreePhaseCommitCohortProxy);
 
         ThreePhaseCommitCohortProxy proxy = (ThreePhaseCommitCohortProxy) ready;
-
-        verifyRecordingOperationFutures(transactionProxy.getRecordedOperationFutures());
 
         verifyCohortFutures(proxy, getSystem().actorSelection(actorRef.path()));
 
@@ -544,9 +508,6 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         ThreePhaseCommitCohortProxy proxy = (ThreePhaseCommitCohortProxy) ready;
 
-        verifyRecordingOperationFutures(transactionProxy.getRecordedOperationFutures(),
-                BatchedModificationsReply.class);
-
         verifyCohortFutures(proxy, getSystem().actorSelection(actorRef.path()));
 
         List<BatchedModifications> batchedModifications = captureBatchedModifications(actorRef);
@@ -559,33 +520,6 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         verify(mockActorContext, never()).executeOperationAsync(eq(actorSelection(actorRef)),
                 isA(ReadyTransaction.SERIALIZABLE_CLASS));
-    }
-
-    @Test
-    public void testReadyWithRecordingOperationFailure() throws Exception {
-        dataStoreContextBuilder.shardBatchedModificationCount(1).writeOnlyTransactionOptimizationsEnabled(true);
-
-        ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), WRITE_ONLY);
-
-        NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
-
-        expectFailedBatchedModifications(actorRef);
-
-        doReturn(false).when(mockActorContext).isPathLocal(actorRef.path().toString());
-
-        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext, WRITE_ONLY);
-
-        transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
-
-        DOMStoreThreePhaseCommitCohort ready = transactionProxy.ready();
-
-        assertTrue(ready instanceof ThreePhaseCommitCohortProxy);
-
-        ThreePhaseCommitCohortProxy proxy = (ThreePhaseCommitCohortProxy) ready;
-
-        verifyCohortFutures(proxy, TestException.class);
-
-        verifyRecordingOperationFutures(transactionProxy.getRecordedOperationFutures(), TestException.class);
     }
 
     @Test
@@ -1245,14 +1179,6 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         boolean optimizedWriteOnly = type == WRITE_ONLY && dataStoreContextBuilder.build().isWriteOnlyTransactionOptimizationsEnabled();
         verifyBatchedModifications(batchedModifications.get(2), optimizedWriteOnly, new MergeModification(mergePath3, mergeNode3),
                 new DeleteModification(deletePath2));
-
-        if(optimizedWriteOnly) {
-            verifyRecordingOperationFutures(transactionProxy.getRecordedOperationFutures(),
-                    BatchedModificationsReply.class, BatchedModificationsReply.class);
-        } else {
-            verifyRecordingOperationFutures(transactionProxy.getRecordedOperationFutures(),
-                    BatchedModificationsReply.class, BatchedModificationsReply.class, BatchedModificationsReply.class);
-        }
     }
 
     @Test
@@ -1357,9 +1283,6 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         inOrder.verify(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef)), eqSerializedDataExists());
-
-        verifyRecordingOperationFutures(transactionProxy.getRecordedOperationFutures(),
-                BatchedModificationsReply.class, BatchedModificationsReply.class, BatchedModificationsReply.class);
     }
 
     @Test
