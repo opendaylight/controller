@@ -11,9 +11,7 @@ import akka.actor.ActorSelection;
 import akka.dispatch.Mapper;
 import akka.dispatch.OnComplete;
 import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.SettableFuture;
-import java.util.List;
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModificationsReply;
@@ -93,51 +91,30 @@ public class TransactionContextImpl extends AbstractTransactionContext {
 
     @Override
     public Future<ActorSelection> readyTransaction() {
-        LOG.debug("Tx {} readyTransaction called with {} previous recorded operations pending",
-            getIdentifier(), recordedOperationCount());
+        LOG.debug("Tx {} readyTransaction called", getIdentifier());
 
         // Send the remaining batched modifications if any.
 
-        sendAndRecordBatchedModifications();
+        sendBatchedModifications();
 
         // Send the ReadyTransaction message to the Tx actor.
 
         Future<Object> readyReplyFuture = executeOperationAsync(ReadyTransaction.INSTANCE);
 
-        return combineRecordedOperationsFutures(readyReplyFuture);
+        return transformReadyReply(readyReplyFuture);
     }
 
-    protected Future<ActorSelection> combineRecordedOperationsFutures(final Future<Object> withLastReplyFuture) {
-        // Combine all the previously recorded put/merge/delete operation reply Futures and the
-        // ReadyTransactionReply Future into one Future. If any one fails then the combined
-        // Future will fail. We need all prior operations and the ready operation to succeed
-        // in order to attempt commit.
+    protected Future<ActorSelection> transformReadyReply(final Future<Object> readyReplyFuture) {
+        // Transform the last reply Future into a Future that returns the cohort actor path from
+        // the last reply message. That's the end result of the ready operation.
 
-        List<Future<Object>> futureList = Lists.newArrayListWithCapacity(recordedOperationCount() + 1);
-        copyRecordedOperationFutures(futureList);
-        futureList.add(withLastReplyFuture);
-
-        Future<Iterable<Object>> combinedFutures = akka.dispatch.Futures.sequence(futureList,
-                actorContext.getClientDispatcher());
-
-        // Transform the combined Future into a Future that returns the cohort actor path from
-        // the ReadyTransactionReply. That's the end result of the ready operation.
-
-        return combinedFutures.transform(new Mapper<Iterable<Object>, ActorSelection>() {
+        return readyReplyFuture.transform(new Mapper<Object, ActorSelection>() {
             @Override
-            public ActorSelection checkedApply(Iterable<Object> notUsed) {
-                LOG.debug("Tx {} readyTransaction: pending recorded operations succeeded",
-                    getIdentifier());
+            public ActorSelection checkedApply(Object serializedReadyReply) {
+                LOG.debug("Tx {} readyTransaction", getIdentifier());
 
-                // At this point all the Futures succeeded and we need to extract the cohort
-                // actor path from the ReadyTransactionReply. For the recorded operations, they
-                // don't return any data so we're only interested that they completed
-                // successfully. We could be paranoid and verify the correct reply types but
-                // that really should never happen so it's not worth the overhead of
-                // de-serializing each reply.
-
-                // Note the Future get call here won't block as it's complete.
-                Object serializedReadyReply = withLastReplyFuture.value().get().get();
+                // At this point the rwady operation succeeded and we need to extract the cohort
+                // actor path from the reply.
                 if (serializedReadyReply instanceof ReadyTransactionReply) {
                     return actorContext.actorSelection(((ReadyTransactionReply)serializedReadyReply).getCohortPath());
                 } else if(serializedReadyReply instanceof BatchedModificationsReply) {
@@ -169,14 +146,7 @@ public class TransactionContextImpl extends AbstractTransactionContext {
 
         if(batchedModifications.getModifications().size() >=
                 actorContext.getDatastoreContext().getShardBatchedModificationCount()) {
-            sendAndRecordBatchedModifications();
-        }
-    }
-
-    private void sendAndRecordBatchedModifications() {
-        Future<Object> sentFuture = sendBatchedModifications();
-        if(sentFuture != null) {
-            recordOperationFuture(sentFuture);
+            sendBatchedModifications();
         }
     }
 
@@ -232,7 +202,7 @@ public class TransactionContextImpl extends AbstractTransactionContext {
         // Send any batched modifications. This is necessary to honor the read uncommitted semantics of the
         // public API contract.
 
-        sendAndRecordBatchedModifications();
+        sendBatchedModifications();
 
         OnComplete<Object> onComplete = new OnComplete<Object>() {
             @Override
@@ -274,7 +244,7 @@ public class TransactionContextImpl extends AbstractTransactionContext {
         // Send any batched modifications. This is necessary to honor the read uncommitted semantics of the
         // public API contract.
 
-        sendAndRecordBatchedModifications();
+        sendBatchedModifications();
 
         OnComplete<Object> onComplete = new OnComplete<Object>() {
             @Override
