@@ -66,6 +66,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         doReturn(10L).when(mockConfigParams).getSnapshotBatchCount();
         doReturn(mockReplicatedLog).when(mockRaftActorContext).getReplicatedLog();
         doReturn("123").when(mockRaftActorContext).getId();
+        doReturn(mockDataPersistenceProvider).when(mockRaftActorContext).getPersistenceProvider();
         doReturn("123").when(mockRaftActorBehavior).getLeaderId();
 
         snapshotManager = new SnapshotManager(mockRaftActorContext, LoggerFactory.getLogger(this.getClass()));
@@ -354,6 +355,8 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
     @Test
     public void testCommit(){
+        doReturn(50L).when(mockDataPersistenceProvider).getLastSequenceNumber();
+
         // when replicatedToAllIndex = -1
         snapshotManager.captureToInstall(new MockRaftActorContext.MockReplicatedLogEntry(6, 9,
                 new MockRaftActorContext.MockPayload()), -1, "follower-1");
@@ -367,7 +370,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         verify(mockReplicatedLog).snapshotCommit();
 
-        verify(mockDataPersistenceProvider).deleteMessages(100L);
+        verify(mockDataPersistenceProvider).deleteMessages(50L);
 
         ArgumentCaptor<SnapshotSelectionCriteria> criteriaCaptor = ArgumentCaptor.forClass(SnapshotSelectionCriteria.class);
 
@@ -408,6 +411,8 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
     @Test
     public void testCallingCommitMultipleTimesCausesNoHarm(){
+        doReturn(50L).when(mockDataPersistenceProvider).getLastSequenceNumber();
+
         // when replicatedToAllIndex = -1
         snapshotManager.captureToInstall(new MockRaftActorContext.MockReplicatedLogEntry(6, 9,
                 new MockRaftActorContext.MockPayload()), -1, "follower-1");
@@ -423,7 +428,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         verify(mockReplicatedLog, times(1)).snapshotCommit();
 
-        verify(mockDataPersistenceProvider, times(1)).deleteMessages(100L);
+        verify(mockDataPersistenceProvider, times(1)).deleteMessages(50L);
 
         verify(mockDataPersistenceProvider, times(1)).deleteSnapshots(any(SnapshotSelectionCriteria.class));
     }
