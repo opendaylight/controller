@@ -122,17 +122,28 @@ class RaftActorRecoverySupport {
     }
 
     private void onRecoveredApplyLogEntries(long toIndex) {
+        long lastUnappliedIndex = context.getLastApplied() + 1;
+
         if(log.isDebugEnabled()) {
-            log.debug("{}: Received ApplyLogEntries for recovery, applying to state: {} to {}",
-                    context.getId(), context.getLastApplied() + 1, toIndex);
+            log.debug("{}: Received apply journal entries for recovery, applying to state: {} to {}",
+                    context.getId(), lastUnappliedIndex, toIndex);
         }
 
-        for (long i = context.getLastApplied() + 1; i <= toIndex; i++) {
-            batchRecoveredLogEntry(replicatedLog().get(i));
+        long lastApplied = lastUnappliedIndex - 1;
+        for (long i = lastUnappliedIndex; i <= toIndex; i++) {
+            ReplicatedLogEntry logEntry = replicatedLog().get(i);
+            if(logEntry != null) {
+                lastApplied++;
+                batchRecoveredLogEntry(logEntry);
+            } else {
+                // Shouldn't happen but cover it anyway.
+                log.error("Log entry not found for index {}", i);
+                break;
+            }
         }
 
-        context.setLastApplied(toIndex);
-        context.setCommitIndex(toIndex);
+        context.setLastApplied(lastApplied);
+        context.setCommitIndex(lastApplied);
     }
 
     private void batchRecoveredLogEntry(ReplicatedLogEntry logEntry) {

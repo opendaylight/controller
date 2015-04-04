@@ -154,10 +154,11 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
         return Props.create(new MockRaftActorCreator(peerAddresses, id, config, dataPersistenceProvider, roleChangeNotifier));
     }
 
-
     @Override protected void applyState(ActorRef clientActor, String identifier, Object data) {
         actorDelegate.applyState(clientActor, identifier, data);
-        LOG.info("{}: applyState called", persistenceId());
+        LOG.info("{}: applyState called: {}", persistenceId(), data);
+
+        state.add(data);
     }
 
     @Override
@@ -235,7 +236,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
         return this.getId();
     }
 
-    private Object toObject(byte[] bs) throws ClassNotFoundException, IOException {
+    public static Object toObject(byte[] bs) throws ClassNotFoundException, IOException {
         Object obj = null;
         ByteArrayInputStream bis = null;
         ObjectInputStream ois = null;
