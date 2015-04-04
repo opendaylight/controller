@@ -52,4 +52,5 @@ public interface DataPersistenceProvider {
      */
     void deleteMessages(long sequenceNumber);
 
+    long getLastSequenceNumber();
 }
