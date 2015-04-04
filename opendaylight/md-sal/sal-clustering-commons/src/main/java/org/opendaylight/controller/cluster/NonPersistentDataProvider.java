@@ -43,4 +43,9 @@ public class NonPersistentDataProvider implements DataPersistenceProvider {
     @Override
     public void deleteMessages(long sequenceNumber) {
     }
+
+    @Override
+    public long getLastSequenceNumber() {
+        return -1;
+    }
 }
