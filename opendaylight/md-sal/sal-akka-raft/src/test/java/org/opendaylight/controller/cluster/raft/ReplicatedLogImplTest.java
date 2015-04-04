@@ -62,7 +62,7 @@ public class ReplicatedLogImplTest {
 
         context = new RaftActorContextImpl(null, null, "test",
                 new ElectionTermImpl(mockPersistence, "test", LOG),
-                -1, -1, Collections.<String,String>emptyMap(), configParams, LOG)  {
+                -1, -1, Collections.<String,String>emptyMap(), configParams, mockPersistence, LOG)  {
             @Override
             public SnapshotManager getSnapshotManager() {
                 return mockSnapshotManager;
