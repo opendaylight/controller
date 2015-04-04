@@ -124,7 +124,7 @@ public class RaftActorSnapshotMessageSupportTest {
     @Test
     public void testOnCaptureSnapshot() throws Exception {
 
-        sendMessageToSupport(new CaptureSnapshot(3, 1, 2, 1, 2, 1));
+        sendMessageToSupport(new CaptureSnapshot(3, 1, 2, 1, 2, 1, null));
 
         ArgumentCaptor<Procedure> procedure = ArgumentCaptor.forClass(Procedure.class);
         verify(mockSnapshotManager).create(procedure.capture());

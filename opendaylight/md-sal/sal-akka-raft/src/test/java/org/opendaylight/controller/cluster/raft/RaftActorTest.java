@@ -62,9 +62,13 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import scala.concurrent.duration.FiniteDuration;
 
 public class RaftActorTest extends AbstractActorTest {
+
+    static final Logger TEST_LOG = LoggerFactory.getLogger(RaftActorTest.class);
 
     private TestActorFactory factory;
 
@@ -93,6 +97,8 @@ public class RaftActorTest extends AbstractActorTest {
 
     @Test
     public void testRaftActorRecoveryWithPersistenceEnabled() throws Exception {
+        TEST_LOG.info("testRaftActorRecoveryWithPersistenceEnabled starting");
+
         new JavaTestKit(getSystem()) {{
             String persistenceId = factory.generateActorId("follower-");
 
@@ -103,9 +109,9 @@ public class RaftActorTest extends AbstractActorTest {
             // log entry.
             config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
 
+            ImmutableMap<String, String> peerAddresses = ImmutableMap.<String, String>builder().put("member1", "address").build();
             ActorRef followerActor = factory.createActor(MockRaftActor.props(persistenceId,
-                    ImmutableMap.<String, String>builder().put("member1", "address").build(),
-                    Optional.<ConfigParams>of(config)), persistenceId);
+                    peerAddresses, Optional.<ConfigParams>of(config)), persistenceId);
 
             watch(followerActor);
 
@@ -158,8 +164,7 @@ public class RaftActorTest extends AbstractActorTest {
 
             //reinstate the actor
             TestActorRef<MockRaftActor> ref = factory.createTestActor(
-                    MockRaftActor.props(persistenceId, Collections.<String, String>emptyMap(),
-                            Optional.<ConfigParams>of(config)));
+                    MockRaftActor.props(persistenceId, peerAddresses, Optional.<ConfigParams>of(config)));
 
             MockRaftActor mockRaftActor = ref.underlyingActor();
 
@@ -178,6 +183,8 @@ public class RaftActorTest extends AbstractActorTest {
 
             assertEquals("getRaftState", RaftState.Follower, mockRaftActor.getRaftState());
         }};
+
+        TEST_LOG.info("testRaftActorRecoveryWithPersistenceEnabled ending");
     }
 
     @Test
@@ -272,7 +279,7 @@ public class RaftActorTest extends AbstractActorTest {
         doReturn(true).when(mockSupport).handleSnapshotMessage(same(applySnapshot));
         mockRaftActor.handleCommand(applySnapshot);
 
-        CaptureSnapshot captureSnapshot = new CaptureSnapshot(1, 1, 1, 1, 0, 1);
+        CaptureSnapshot captureSnapshot = new CaptureSnapshot(1, 1, 1, 1, 0, 1, null);
         doReturn(true).when(mockSupport).handleSnapshotMessage(same(captureSnapshot));
         mockRaftActor.handleCommand(captureSnapshot);
 
@@ -888,7 +895,7 @@ public class RaftActorTest extends AbstractActorTest {
         }};
     }
 
-    private ByteString fromObject(Object snapshot) throws Exception {
+    public static ByteString fromObject(Object snapshot) throws Exception {
         ByteArrayOutputStream b = null;
         ObjectOutputStream o = null;
         try {
