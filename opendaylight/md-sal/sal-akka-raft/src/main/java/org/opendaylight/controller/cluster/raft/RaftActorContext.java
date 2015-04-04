@@ -15,6 +15,7 @@ import akka.actor.Props;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Supplier;
 import java.util.Map;
+import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.slf4j.Logger;
 
 /**
@@ -169,6 +170,8 @@ public interface RaftActorContext {
     ConfigParams getConfigParams();
 
     SnapshotManager getSnapshotManager();
+
+    DataPersistenceProvider getPersistenceProvider();
 
     boolean hasFollowers();
 
