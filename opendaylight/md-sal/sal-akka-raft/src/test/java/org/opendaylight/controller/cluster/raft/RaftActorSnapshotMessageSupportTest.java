@@ -69,7 +69,7 @@ public class RaftActorSnapshotMessageSupportTest {
 
         context = new RaftActorContextImpl(mockRaftActorRef, null, "test",
                 new ElectionTermImpl(mockPersistence, "test", LOG),
-                -1, -1, Collections.<String,String>emptyMap(), configParams, LOG) {
+                -1, -1, Collections.<String,String>emptyMap(), configParams, mockPersistence, LOG) {
             @Override
             public SnapshotManager getSnapshotManager() {
                 return mockSnapshotManager;
@@ -124,7 +124,7 @@ public class RaftActorSnapshotMessageSupportTest {
     @Test
     public void testOnCaptureSnapshot() throws Exception {
 
-        sendMessageToSupport(new CaptureSnapshot(3, 1, 2, 1, 2, 1));
+        sendMessageToSupport(new CaptureSnapshot(3, 1, 2, 1, 2, 1, null));
 
         ArgumentCaptor<Procedure> procedure = ArgumentCaptor.forClass(Procedure.class);
         verify(mockSnapshotManager).create(procedure.capture());
