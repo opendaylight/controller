@@ -54,4 +54,9 @@ public class DelegatingPersistentDataProvider implements DataPersistenceProvider
     public void deleteMessages(long sequenceNumber) {
         delegate.deleteMessages(sequenceNumber);
     }
+
+    @Override
+    public long getLastSequenceNumber() {
+        return delegate.getLastSequenceNumber();
+    }
 }

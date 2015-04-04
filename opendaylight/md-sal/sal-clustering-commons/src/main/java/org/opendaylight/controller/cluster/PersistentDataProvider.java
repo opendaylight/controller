@@ -47,4 +47,9 @@ public class PersistentDataProvider implements DataPersistenceProvider {
     public void deleteMessages(long sequenceNumber) {
         persistentActor.deleteMessages(sequenceNumber);
     }
+
+    @Override
+    public long getLastSequenceNumber() {
+        return persistentActor.lastSequenceNr();
+    }
 }
