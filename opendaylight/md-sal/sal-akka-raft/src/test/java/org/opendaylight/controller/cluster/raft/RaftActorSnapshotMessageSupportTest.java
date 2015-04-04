@@ -69,7 +69,7 @@ public class RaftActorSnapshotMessageSupportTest {
 
         context = new RaftActorContextImpl(mockRaftActorRef, null, "test",
                 new ElectionTermImpl(mockPersistence, "test", LOG),
-                -1, -1, Collections.<String,String>emptyMap(), configParams, LOG) {
+                -1, -1, Collections.<String,String>emptyMap(), configParams, mockPersistence, LOG) {
             @Override
             public SnapshotManager getSnapshotManager() {
                 return mockSnapshotManager;
