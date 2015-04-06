@@ -16,6 +16,24 @@
       "revId": "33409ff48cf94bd824555a08eb9facb57390db7e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_5f30ef55",
+        "filename": "features/mdsal/src/main/resources/features.xml",
+        "patchSetId": 8
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-04-06T22:52:49Z",
+      "side": 1,
+      "message": "Unfortunately we can\u0027t simply \u0027retire\u0027 odl-mdsal-broker, as most everything is *using* it.",
+      "parentUuid": "5a93c517_7d8ce135",
+      "revId": "33409ff48cf94bd824555a08eb9facb57390db7e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
