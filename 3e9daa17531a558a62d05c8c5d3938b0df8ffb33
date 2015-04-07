@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_e8781f2d",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/md/sal/binding/impl/BindingDOMDataBrokerAdapter.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-04-07T18:19:26Z",
+      "side": 1,
+      "message": "missing spaces mean checkstyle warnings.",
+      "revId": "3e9daa17531a558a62d05c8c5d3938b0df8ffb33",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_88771b3a",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/md/sal/binding/impl/BindingDOMDataBrokerAdapter.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-04-07T18:19:26Z",
+      "side": 1,
+      "message": "either missing @Override or javadoc.",
+      "revId": "3e9daa17531a558a62d05c8c5d3938b0df8ffb33",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_a8721747",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/md/sal/binding/impl/BindingStructuralType.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-04-07T18:19:26Z",
+      "side": 1,
+      "message": "emit a log message, please.",
+      "revId": "3e9daa17531a558a62d05c8c5d3938b0df8ffb33",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_68cc0f36",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/md/sal/binding/impl/LazyDataObjectModification.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-04-07T18:19:26Z",
+      "side": 1,
+      "message": "final List...",
+      "revId": "3e9daa17531a558a62d05c8c5d3938b0df8ffb33",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_4897d3ec",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/md/sal/binding/impl/LazyDataObjectModification.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-04-07T18:19:26Z",
+      "side": 1,
+      "message": "err ... why are indenting here?",
+      "revId": "3e9daa17531a558a62d05c8c5d3938b0df8ffb33",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
