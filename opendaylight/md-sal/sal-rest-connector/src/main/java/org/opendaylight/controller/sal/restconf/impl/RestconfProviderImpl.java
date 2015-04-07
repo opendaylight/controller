@@ -11,12 +11,16 @@ import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Collections;
 import org.opendaylight.controller.config.yang.md.sal.rest.connector.Config;
+import org.opendaylight.controller.config.yang.md.sal.rest.connector.Delete;
+import org.opendaylight.controller.config.yang.md.sal.rest.connector.Failure;
 import org.opendaylight.controller.config.yang.md.sal.rest.connector.Get;
 import org.opendaylight.controller.config.yang.md.sal.rest.connector.Operational;
 import org.opendaylight.controller.config.yang.md.sal.rest.connector.Post;
 import org.opendaylight.controller.config.yang.md.sal.rest.connector.Put;
+import org.opendaylight.controller.config.yang.md.sal.rest.connector.Success;
 import org.opendaylight.controller.config.yang.md.sal.rest.connector.RestConnectorRuntimeMXBean;
 import org.opendaylight.controller.config.yang.md.sal.rest.connector.Rpcs;
+import org.opendaylight.controller.config.yang.md.sal.rest.connector.ResponseStat;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
@@ -106,5 +110,36 @@ public class RestconfProviderImpl implements Provider, AutoCloseable, RestConnec
         final Rpcs rpcs = new Rpcs();
         rpcs.setReceivedRequests(rpcInvoke);
         return rpcs ;
+    }
+
+    @Override
+    public ResponseStat getResponseStat() {
+        final ResponseStat responseStat = new ResponseStat();
+        final Get get = new Get();
+        get.setReceivedRequests(stats.getResponseStatGet());
+        responseStat.setGet(get);
+        final Success success = new Success();
+        final Post postSuccess = new Post();
+        postSuccess.setReceivedRequests(stats.getResponseStatPostSuccess());
+        success.setPost(postSuccess);
+        final Put putSuccess = new Put();
+        putSuccess.setReceivedRequests(stats.getResponseStatPutSuccess());
+        success.setPut(putSuccess);
+        final Delete deleteSuccess = new Delete();
+        deleteSuccess.setReceivedRequests(stats.getResponseStatDeleteSuccess());
+        success.setDelete(deleteSuccess);
+        responseStat.setSuccess(success);
+        final Failure failure = new Failure();
+        final Post postFailure = new Post();
+        postFailure.setReceivedRequests(stats.getResponseStatPostFailure());
+        failure.setPost(postFailure);
+        final Put putFailure = new Put();
+        putFailure.setReceivedRequests(stats.getResponseStatPutFailure());
+        failure.setPut(putFailure);
+        final Delete deleteFailure = new Delete();
+        deleteFailure.setReceivedRequests(stats.getResponseStatDeleteFailure());
+        failure.setDelete(deleteFailure);
+        responseStat.setFailure(failure);
+        return responseStat;
     }
 }

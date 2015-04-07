@@ -77,6 +77,34 @@ module opendaylight-rest-connector {
                     uses statistics;
                 }
             }
+            
+            container responseStat {
+                    container get {
+                         uses statistics;
+                    }
+                    container success {
+                         container post {
+                              uses statistics;
+                         }
+                         container put {
+                              uses statistics;
+                         }
+                         container delete {
+                              uses statistics;
+                         }
+                    }
+                    container failure {     
+                         container post {
+                              uses statistics;
+                         }
+                         container put {
+                              uses statistics;
+                         }
+                         container delete {
+                              uses statistics;
+                         }
+                    }
+            }
         }
     }
 }

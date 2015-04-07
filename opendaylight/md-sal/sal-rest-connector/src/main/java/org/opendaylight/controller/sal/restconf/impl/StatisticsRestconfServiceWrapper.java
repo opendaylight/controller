@@ -10,6 +10,7 @@ package org.opendaylight.controller.sal.restconf.impl;
 import java.math.BigInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 import org.opendaylight.controller.sal.rest.api.RestconfService;
 
@@ -21,6 +22,13 @@ public class StatisticsRestconfServiceWrapper implements RestconfService {
     AtomicLong configPost = new AtomicLong();
     AtomicLong configPut = new AtomicLong();
     AtomicLong configDelete = new AtomicLong();
+    AtomicLong responseStatGet = new AtomicLong();
+    AtomicLong responseStatPostSuccess = new AtomicLong();
+    AtomicLong responseStatPutSuccess = new AtomicLong();
+    AtomicLong responseStatPostFailure = new AtomicLong();
+    AtomicLong responseStatPutFailure = new AtomicLong();
+    AtomicLong responseStatDeleteSuccess = new AtomicLong();
+    AtomicLong responseStatDeleteFailure = new AtomicLong();
 
     private static final StatisticsRestconfServiceWrapper INSTANCE = new StatisticsRestconfServiceWrapper(RestconfImpl.getInstance());
 
@@ -79,35 +87,63 @@ public class StatisticsRestconfServiceWrapper implements RestconfService {
     @Override
     public NormalizedNodeContext readConfigurationData(final String identifier, final UriInfo uriInfo) {
         configGet.incrementAndGet();
+        responseStatGet.incrementAndGet();
         return delegate.readConfigurationData(identifier, uriInfo);
     }
 
     @Override
     public NormalizedNodeContext readOperationalData(final String identifier, final UriInfo uriInfo) {
         operationalGet.incrementAndGet();
+        responseStatGet.incrementAndGet();
         return delegate.readOperationalData(identifier, uriInfo);
     }
 
     @Override
     public Response updateConfigurationData(final String identifier, final NormalizedNodeContext payload) {
         configPut.incrementAndGet();
+        responseStatPutFailure.incrementAndGet();
+        Response response = delegate.updateConfigurationData(identifier, payload);
+        if (response.getStatus() == Status.OK.getStatusCode()) {
+            responseStatPutSuccess.incrementAndGet();
+            responseStatPutFailure.decrementAndGet();
+        }
         return delegate.updateConfigurationData(identifier, payload);
     }
 
     @Override
     public Response createConfigurationData(final String identifier, final NormalizedNodeContext payload, final UriInfo uriInfo) {
         configPost.incrementAndGet();
+        responseStatPostFailure.incrementAndGet();
+        Response response = delegate.createConfigurationData(identifier, payload, uriInfo);
+        if (response.getStatus() == Status.OK.getStatusCode()) {
+            responseStatPostSuccess.incrementAndGet();
+            responseStatPostFailure.decrementAndGet();
+        }
         return delegate.createConfigurationData(identifier, payload, uriInfo);
     }
 
     @Override
     public Response createConfigurationData(final NormalizedNodeContext payload, final UriInfo uriInfo) {
         configPost.incrementAndGet();
+        responseStatPostFailure.incrementAndGet();
+        Response response = delegate.createConfigurationData(payload, uriInfo);
+        if(response.getStatus() == Status.OK.getStatusCode())
+        {
+            responseStatPostSuccess.incrementAndGet();
+            responseStatPostFailure.decrementAndGet();
+        }
         return delegate.createConfigurationData(payload, uriInfo);
     }
 
     @Override
     public Response deleteConfigurationData(final String identifier) {
+        responseStatDeleteFailure.incrementAndGet();
+        Response response = delegate.deleteConfigurationData(identifier);
+        if(response.getStatus() == Status.OK.getStatusCode())
+        {
+            responseStatDeleteSuccess.incrementAndGet();
+            responseStatDeleteFailure.decrementAndGet();
+        }
         return delegate.deleteConfigurationData(identifier);
     }
 
@@ -143,5 +179,33 @@ public class StatisticsRestconfServiceWrapper implements RestconfService {
 
     public BigInteger getRpc() {
         return BigInteger.valueOf(rpc.get());
+    }
+
+    public BigInteger getResponseStatGet() {
+        return BigInteger.valueOf(responseStatGet.get());
+    }
+
+    public BigInteger getResponseStatPostSuccess() {
+        return BigInteger.valueOf(responseStatPostSuccess.get());
+    }
+
+    public BigInteger getResponseStatPostFailure() {
+        return BigInteger.valueOf(responseStatPostFailure.get());
+    }
+
+    public BigInteger getResponseStatPutSuccess() {
+        return BigInteger.valueOf(responseStatPutSuccess.get());
+    }
+
+    public BigInteger getResponseStatPutFailure() {
+        return BigInteger.valueOf(responseStatPutFailure.get());
+    }
+
+    public BigInteger getResponseStatDeleteSuccess() {
+        return BigInteger.valueOf(responseStatDeleteSuccess.get());
+    }
+
+    public BigInteger getResponseStatDeleteFailure() {
+        return BigInteger.valueOf(responseStatDeleteFailure.get());
     }
 }
