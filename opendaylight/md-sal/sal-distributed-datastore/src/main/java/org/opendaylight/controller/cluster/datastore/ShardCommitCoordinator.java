@@ -22,7 +22,6 @@ import java.util.Queue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
-import org.opendaylight.controller.cluster.datastore.messages.BatchedModificationsReply;
 import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
@@ -119,7 +118,7 @@ public class ShardCommitCoordinator {
      *
      * @throws ExecutionException if an error occurs loading the cache
      */
-    public BatchedModificationsReply handleTransactionModifications(BatchedModifications batched)
+    public boolean handleTransactionModifications(BatchedModifications batched)
             throws ExecutionException {
         CohortEntry cohortEntry = cohortCache.getIfPresent(batched.getTransactionID());
         if(cohortEntry == null) {
@@ -137,7 +136,6 @@ public class ShardCommitCoordinator {
 
         cohortEntry.applyModifications(batched.getModifications());
 
-        String cohortPath = null;
         if(batched.isReady()) {
             if(log.isDebugEnabled()) {
                 log.debug("{}: Readying Tx {}, client version {}", name,
@@ -145,10 +143,9 @@ public class ShardCommitCoordinator {
             }
 
             cohortEntry.ready(cohortDecorator);
-            cohortPath = shardActorPath;
         }
 
-        return new BatchedModificationsReply(batched.getModifications().size(), cohortPath);
+        return batched.isReady();
     }
 
     /**
