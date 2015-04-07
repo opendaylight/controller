@@ -65,6 +65,22 @@ public final class XmlUtil {
         BUILDER_FACTORY = factory;
     }
 
+    private static final ThreadLocal<DocumentBuilder> DEFAULT_DOM_BUILDER = new ThreadLocal<DocumentBuilder>(){
+        @Override
+        protected DocumentBuilder initialValue() {
+            try {
+                return BUILDER_FACTORY.newDocumentBuilder();
+            } catch (ParserConfigurationException e) {
+                throw new IllegalStateException("Failed to create threadLocal dom builder", e);
+            }
+        }
+
+        @Override
+        public void set(DocumentBuilder value) {
+            throw new UnsupportedOperationException();
+        }
+    };
+
     private XmlUtil() {
         throw new UnsupportedOperationException("Utility class");
     }
@@ -87,12 +103,7 @@ public final class XmlUtil {
     // along with XmlElement
 
     public static Document readXmlToDocument(final InputStream xmlContent) throws SAXException, IOException {
-        DocumentBuilder dBuilder;
-        try {
-            dBuilder = BUILDER_FACTORY.newDocumentBuilder();
-        } catch (ParserConfigurationException e) {
-            throw new IllegalStateException("Failed to parse XML document", e);
-        }
+        DocumentBuilder dBuilder = DEFAULT_DOM_BUILDER.get();
         Document doc = dBuilder.parse(xmlContent);
 
         doc.getDocumentElement().normalize();
@@ -104,12 +115,7 @@ public final class XmlUtil {
     }
 
     public static Document newDocument() {
-        try {
-            DocumentBuilder builder = BUILDER_FACTORY.newDocumentBuilder();
-            return builder.newDocument();
-        } catch (ParserConfigurationException e) {
-            throw new IllegalStateException("Failed to create document", e);
-        }
+        return DEFAULT_DOM_BUILDER.get().newDocument();
     }
 
     public static Element createElement(final Document document, final String qName, final Optional<String> namespaceURI) {
