@@ -110,7 +110,7 @@ public class RuntimeRpc extends AbstractSingletonNetconfOperation {
 
     //this returns module with the newest revision if more then 1 module with same namespace is found
     private Optional<Module> getModule(final URI namespaceURI) {
-        return Optional.of(schemaContext.getCurrentContext().findModuleByNamespaceAndRevision(namespaceURI, null));
+        return Optional.fromNullable(schemaContext.getCurrentContext().findModuleByNamespaceAndRevision(namespaceURI, null));
     }
 
     private Optional<RpcDefinition> getRpcDefinitionFromModule(Module module, URI namespaceURI, String name) {
