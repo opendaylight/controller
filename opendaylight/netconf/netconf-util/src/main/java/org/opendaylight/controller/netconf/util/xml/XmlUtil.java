@@ -65,20 +65,63 @@ public final class XmlUtil {
         BUILDER_FACTORY = factory;
     }
 
+    private static final ThreadLocal<DocumentBuilder> DEFAULT_DOM_BUILDER = new ThreadLocal<DocumentBuilder>(){
+        @Override
+        protected DocumentBuilder initialValue() {
+            try {
+                return BUILDER_FACTORY.newDocumentBuilder();
+            } catch (ParserConfigurationException e) {
+                throw new IllegalStateException("Failed to create threadLocal dom builder", e);
+            }
+        }
+
+        @Override
+        public void set(DocumentBuilder value) {
+            throw new UnsupportedOperationException();
+        }
+    };
+
     private XmlUtil() {
         throw new UnsupportedOperationException("Utility class");
     }
 
+    /**
+     * This may pollute thread-local space of the calling thread,
+     * use {@link #removeThreadLocalBuilder() removeThreadLocalBuilder} method to clean up this thread local-variable
+     * once its no longer needed.
+     * @param xmlContent
+     * @return parsed content as domElement
+     * @throws SAXException
+     * @throws IOException
+     */
     public static Element readXmlToElement(final String xmlContent) throws SAXException, IOException {
         Document doc = readXmlToDocument(xmlContent);
         return doc.getDocumentElement();
     }
 
+    /**
+     * This may pollute thread-local space of the calling thread,
+     * use {@link #removeThreadLocalBuilder() removeThreadLocalBuilder} method to clean up this thread local-variable
+     * once its no longer needed.
+     * @param xmlContent
+     * @return parsed content as domElement
+     * @throws SAXException
+     * @throws IOException
+     */
     public static Element readXmlToElement(final InputStream xmlContent) throws SAXException, IOException {
         Document doc = readXmlToDocument(xmlContent);
         return doc.getDocumentElement();
     }
 
+    /**
+     * This may pollute thread-local space of the calling thread,
+     * use {@link #removeThreadLocalBuilder() removeThreadLocalBuilder} method to clean up this thread local-variable
+     * once its no longer needed.
+     * @param xmlContent
+     * @return parsed content as Document
+     * @throws SAXException
+     * @throws IOException
+     */
     public static Document readXmlToDocument(final String xmlContent) throws SAXException, IOException {
         return readXmlToDocument(new ByteArrayInputStream(xmlContent.getBytes(Charsets.UTF_8)));
     }
@@ -86,30 +129,50 @@ public final class XmlUtil {
     // TODO improve exceptions throwing
     // along with XmlElement
 
+    /**
+     * This may pollute thread-local space of the calling thread,
+     * use {@link #removeThreadLocalBuilder() removeThreadLocalBuilder} method to clean up this thread local-variable
+     * once its no longer needed.
+     * @param xmlContent
+     * @return parsed content as Document
+     * @throws SAXException
+     * @throws IOException
+     */
     public static Document readXmlToDocument(final InputStream xmlContent) throws SAXException, IOException {
-        DocumentBuilder dBuilder;
-        try {
-            dBuilder = BUILDER_FACTORY.newDocumentBuilder();
-        } catch (ParserConfigurationException e) {
-            throw new IllegalStateException("Failed to parse XML document", e);
-        }
-        Document doc = dBuilder.parse(xmlContent);
+        Document doc = DEFAULT_DOM_BUILDER.get().parse(xmlContent);
 
         doc.getDocumentElement().normalize();
         return doc;
     }
 
+    /**
+     * This may pollute thread-local space of the calling thread,
+     * use {@link #removeThreadLocalBuilder() removeThreadLocalBuilder} method to clean up this thread local-variable
+     * once its no longer needed.
+     * @param xmlFile
+     * @return parsed content as domElement
+     * @throws SAXException
+     * @throws IOException
+     */
     public static Element readXmlToElement(final File xmlFile) throws SAXException, IOException {
         return readXmlToDocument(new FileInputStream(xmlFile)).getDocumentElement();
     }
 
+    /**
+     * This may pollute thread-local space of the calling thread,
+     * use {@link #removeThreadLocalBuilder() removeThreadLocalBuilder} method to clean up this thread local-variable
+     * once its no longer needed.
+     * @return new empty document
+     */
     public static Document newDocument() {
-        try {
-            DocumentBuilder builder = BUILDER_FACTORY.newDocumentBuilder();
-            return builder.newDocument();
-        } catch (ParserConfigurationException e) {
-            throw new IllegalStateException("Failed to create document", e);
-        }
+        return DEFAULT_DOM_BUILDER.get().newDocument();
+    }
+
+    /**
+     * cleans up the thread local variable, use when DEFAULT_DOM_BUILDER is no longer needed
+     */
+    public static void removeThreadLocalBuilder() {
+        DEFAULT_DOM_BUILDER.remove();
     }
 
     public static Element createElement(final Document document, final String qName, final Optional<String> namespaceURI) {
