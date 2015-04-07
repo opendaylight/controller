@@ -31,14 +31,6 @@ public class SubtreeFilter {
     private static final Logger LOG = LoggerFactory.getLogger(SubtreeFilter.class);
 
     static Document applySubtreeFilter(Document requestDocument, Document rpcReply) throws NetconfDocumentedException {
-        // FIXME: rpcReply document must be reread otherwise some nodes do not inherit namespaces. (services/service)
-        try {
-            rpcReply = XmlUtil.readXmlToDocument(XmlUtil.toString(rpcReply, true));
-        } catch (SAXException | IOException e) {
-            LOG.error("Cannot transform document", e);
-            throw new NetconfDocumentedException("Cannot transform document");
-        }
-
         OperationNameAndNamespace operationNameAndNamespace = new OperationNameAndNamespace(requestDocument);
         if (XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0.equals(operationNameAndNamespace.getNamespace()) &&
                 XmlNetconfConstants.GET.equals(operationNameAndNamespace.getOperationName()) ||
@@ -47,16 +39,27 @@ public class SubtreeFilter {
             // not implement filtering.
             Optional<XmlElement> maybeFilter = operationNameAndNamespace.getOperationElement().getOnlyChildElementOptionally(
                     XmlNetconfConstants.FILTER, XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
+            if (!maybeFilter.isPresent()) {
+                return rpcReply;
+            }
+
+            // FIXME: rpcReply document must be reread otherwise some nodes do not inherit namespaces. (services/service)
+            try {
+                rpcReply = XmlUtil.readXmlToDocument(XmlUtil.toString(rpcReply, true));
+            } catch (SAXException | IOException e) {
+                LOG.error("Cannot transform document", e);
+                throw new NetconfDocumentedException("Cannot transform document");
+            }
             if (maybeFilter.isPresent() && (
                     "subtree".equals(maybeFilter.get().getAttribute("type"))||
                             "subtree".equals(maybeFilter.get().getAttribute("type", XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0)))
             ) {
 
-
                 // do
                 return filtered(maybeFilter.get(), rpcReply);
             }
         }
+
         return rpcReply; // return identical document
     }
 
