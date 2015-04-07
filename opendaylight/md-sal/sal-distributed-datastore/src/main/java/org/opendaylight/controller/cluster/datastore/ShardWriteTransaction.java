@@ -88,7 +88,11 @@ public class ShardWriteTransaction extends ShardTransaction {
                 modification.apply(transaction);
             }
 
-            getSender().tell(new BatchedModificationsReply(batched.getModifications().size()), getSelf());
+            if(batched.isReady()) {
+                readyTransaction(transaction, false);
+            } else {
+                getSender().tell(new BatchedModificationsReply(batched.getModifications().size()), getSelf());
+            }
         } catch (Exception e) {
             getSender().tell(new akka.actor.Status.Failure(e), getSelf());
         }
