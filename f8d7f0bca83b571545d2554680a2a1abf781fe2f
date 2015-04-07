@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_1f49078b",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/PingPongFuture.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-04-07T02:22:16Z",
+      "side": 1,
+      "message": "What if e was null? Should we protect against that?",
+      "revId": "f8d7f0bca83b571545d2554680a2a1abf781fe2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
