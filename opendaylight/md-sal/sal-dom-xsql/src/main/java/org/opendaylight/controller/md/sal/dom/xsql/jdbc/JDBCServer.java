@@ -46,8 +46,7 @@ public class JDBCServer extends Thread {
         }
     }
 
-    public static void execute(JDBCResultSet rs, XSQLAdapter adapter)
-            throws SQLException {
+    public static void execute(JDBCResultSet rs, XSQLAdapter adapter)throws SQLException {
         if(rs.getSQL().toLowerCase().trim().equals("select 1")){
             rs.setFinished(true);
             return;
