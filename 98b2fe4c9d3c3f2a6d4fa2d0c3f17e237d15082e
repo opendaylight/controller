@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_ed9fd14e",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/test/java/org/opendaylight/controller/md/sal/binding/impl/test/DataTreeChangeListenerTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-07T14:32:50Z",
+      "side": 1,
+      "message": "Indentation - can be cleaned up later - doesn\u0027t need to block this patch.",
+      "revId": "98b2fe4c9d3c3f2a6d4fa2d0c3f17e237d15082e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
