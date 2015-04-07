@@ -16,6 +16,24 @@
       "revId": "f8d7f0bca83b571545d2554680a2a1abf781fe2f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_c2cbc451",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/PingPongFuture.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-04-07T09:24:56Z",
+      "side": 1,
+      "message": "No need, really. The superclass calls this only from a catch block.",
+      "parentUuid": "5a93c517_1f49078b",
+      "revId": "f8d7f0bca83b571545d2554680a2a1abf781fe2f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
