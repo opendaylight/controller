@@ -44,10 +44,12 @@ final class ChainedTransactionProxy extends TransactionProxy {
     }
 
     @Override
-    protected void onTransactionReady(List<Future<ActorSelection>> readyFutures) {
+    public AbstractThreePhaseCommitCohort ready() {
+        final AbstractThreePhaseCommitCohort ret = super.ready();
+        readyFutures = ret.getCohortFutures();
         LOG.debug("onTransactionReady {} pending readyFutures size {} chain {}", getIdentifier(),
-                readyFutures.size(), getTransactionChainId());
-        this.readyFutures = readyFutures;
+            readyFutures.size(), getTransactionChainId());
+        return ret;
     }
 
     /**
