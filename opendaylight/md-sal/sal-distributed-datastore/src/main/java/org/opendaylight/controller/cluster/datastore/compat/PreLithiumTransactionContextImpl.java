@@ -15,6 +15,7 @@ import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIden
 import org.opendaylight.controller.cluster.datastore.messages.DeleteData;
 import org.opendaylight.controller.cluster.datastore.messages.MergeData;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyTransaction;
+import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.WriteData;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -70,7 +71,7 @@ public class PreLithiumTransactionContextImpl extends TransactionContextImpl {
     }
 
     @Override
-    protected String deserializeCohortPath(String cohortPath) {
+    protected String extractCohortPathFrom(ReadyTransactionReply readyTxReply) {
         // In base Helium we used to return the local path of the actor which represented
         // a remote ThreePhaseCommitCohort. The local path would then be converted to
         // a remote path using this resolvePath method. To maintain compatibility with
@@ -79,9 +80,9 @@ public class PreLithiumTransactionContextImpl extends TransactionContextImpl {
         // we could remove this code to resolvePath and just use the cohortPath as the
         // resolved cohortPath
         if(getRemoteTransactionVersion() < DataStoreVersions.HELIUM_1_VERSION) {
-            return getActorContext().resolvePath(transactionPath, cohortPath);
+            return getActorContext().resolvePath(transactionPath, readyTxReply.getCohortPath());
         }
 
-        return cohortPath;
+        return readyTxReply.getCohortPath();
     }
 }

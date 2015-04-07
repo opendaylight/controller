@@ -91,11 +91,5 @@ public class BatchedModificationsTest {
         BatchedModificationsReply clone = (BatchedModificationsReply) SerializationUtils.clone(
                 (Serializable) new BatchedModificationsReply(100).toSerializable());
         assertEquals("getNumBatched", 100, clone.getNumBatched());
-        assertEquals("getCohortPath", null, clone.getCohortPath());
-
-        clone = (BatchedModificationsReply) SerializationUtils.clone(
-                (Serializable) new BatchedModificationsReply(50, "cohort path").toSerializable());
-        assertEquals("getNumBatched", 50, clone.getNumBatched());
-        assertEquals("getCohortPath", "cohort path", clone.getCohortPath());
     }
 }
