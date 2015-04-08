@@ -7,7 +7,9 @@
  */
 package org.opendaylight.controller.config.yang.md.sal.binding.impl;
 
-import com.google.common.util.concurrent.ListeningExecutorService;
+import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService;
+import org.opendaylight.controller.md.sal.binding.api.NotificationService;
+import org.opendaylight.controller.md.sal.binding.compat.HeliumNotificationProviderServiceAdapter;
 import org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolder;
 import org.opendaylight.controller.sal.binding.impl.NotificationBrokerImpl;
 
@@ -17,14 +19,14 @@ import org.opendaylight.controller.sal.binding.impl.NotificationBrokerImpl;
 public final class NotificationBrokerImplModule extends
         org.opendaylight.controller.config.yang.md.sal.binding.impl.AbstractNotificationBrokerImplModule {
 
-    public NotificationBrokerImplModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier,
-            org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
+    public NotificationBrokerImplModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier,
+            final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
     }
 
-    public NotificationBrokerImplModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier,
-            org.opendaylight.controller.config.api.DependencyResolver dependencyResolver,
-            NotificationBrokerImplModule oldModule, java.lang.AutoCloseable oldInstance) {
+    public NotificationBrokerImplModule(final org.opendaylight.controller.config.api.ModuleIdentifier identifier,
+            final org.opendaylight.controller.config.api.DependencyResolver dependencyResolver,
+            final NotificationBrokerImplModule oldModule, final java.lang.AutoCloseable oldInstance) {
         super(identifier, dependencyResolver, oldModule, oldInstance);
     }
 
@@ -37,14 +39,20 @@ public final class NotificationBrokerImplModule extends
     @Override
     public java.lang.AutoCloseable createInstance() {
 
+        final NotificationPublishService notificationPublishService = getNotificationPublishAdapterDependency();
+        final NotificationService notificationService = getNotificationAdapterDependency();
+
+        if(notificationPublishService != null & notificationService != null) {
+            return new HeliumNotificationProviderServiceAdapter(notificationPublishService, notificationService);
+        }
+
         /*
          *  FIXME: Switch to new broker (which has different threading model)
          *  once this change is communicated with downstream users or
          *  we will have adapter implementation which will honor Helium
          *  threading model for notifications.
          */
-        ListeningExecutorService listeningExecutor = SingletonHolder.getDefaultNotificationExecutor();
-        NotificationBrokerImpl broker = new NotificationBrokerImpl(listeningExecutor);
-        return broker;
+
+        return new NotificationBrokerImpl(SingletonHolder.getDefaultNotificationExecutor());
     }
 }
