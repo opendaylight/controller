@@ -31,6 +31,7 @@ import javax.xml.transform.dom.DOMResult;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.md.sal.dom.spi.DefaultDOMRpcResult;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
+import org.opendaylight.controller.netconf.util.OrderedNormalizedNodeWriter;
 import org.opendaylight.controller.netconf.util.exception.MissingNameSpaceException;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
@@ -44,7 +45,6 @@ import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
-import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeWriter;
 import org.opendaylight.yangtools.yang.data.impl.codec.xml.XMLStreamNormalizedNodeStreamWriter;
 import org.opendaylight.yangtools.yang.data.impl.codec.xml.XmlUtils;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
@@ -206,17 +206,15 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
     }
 
     private void writeNormalizedRpc(final ContainerNode normalized, final DOMResult result, final SchemaPath schemaPath, final SchemaContext baseNetconfCtx) throws IOException, XMLStreamException {
-        final NormalizedNodeWriter normalizedNodeWriter;
+        final OrderedNormalizedNodeWriter normalizedNodeWriter;
         NormalizedNodeStreamWriter normalizedNodeStreamWriter = null;
         XMLStreamWriter writer = null;
         try {
             writer = NetconfMessageTransformUtil.XML_FACTORY.createXMLStreamWriter(result);
             normalizedNodeStreamWriter = XMLStreamNormalizedNodeStreamWriter.create(writer, baseNetconfCtx, schemaPath);
-            normalizedNodeWriter = NormalizedNodeWriter.forStreamWriter(normalizedNodeStreamWriter);
-
-            for (final DataContainerChild<? extends YangInstanceIdentifier.PathArgument, ?> editElement : normalized.getValue()) {
-                normalizedNodeWriter.write(editElement);
-            }
+            normalizedNodeWriter = new OrderedNormalizedNodeWriter(normalizedNodeStreamWriter, schemaContext, schemaPath);
+            Collection<DataContainerChild<?, ?>> value = (Collection) normalized.getValue();
+            normalizedNodeWriter.write(value);
             normalizedNodeWriter.flush();
         } finally {
             try {

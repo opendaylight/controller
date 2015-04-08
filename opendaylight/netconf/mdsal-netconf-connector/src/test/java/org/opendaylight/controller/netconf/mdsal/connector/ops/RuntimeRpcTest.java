@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.xml.transform.TransformerException;
 import org.custommonkey.xmlunit.DetailedDiff;
 import org.custommonkey.xmlunit.Diff;
 import org.custommonkey.xmlunit.XMLUnit;
@@ -202,6 +203,18 @@ public class RuntimeRpcTest {
     }
 
     @Test
+    public void testSuccesfullContainerInvocation() throws Exception {
+        RuntimeRpc rpc = new RuntimeRpc(sessionIdForReporting, currentSchemaContext, rpcServiceSuccesfullInvocation);
+
+        Document rpcDocument = XmlFileLoader.xmlFileToDocument("messages/mapping/rpcs/rpc-container.xml");
+        HandlingPriority priority = rpc.canHandle(rpcDocument);
+        Preconditions.checkState(priority != HandlingPriority.CANNOT_HANDLE);
+
+        Document response = rpc.handle(rpcDocument, NetconfOperationChainedExecution.EXECUTION_TERMINATION_POINT);
+        verifyResponse(response, XmlFileLoader.xmlFileToDocument("messages/mapping/rpcs/rpc-container-control.xml"));
+    }
+
+    @Test
     public void testFailedInvocation() throws Exception {
         RuntimeRpc rpc = new RuntimeRpc(sessionIdForReporting, currentSchemaContext, rpcServiceFailedInvocation);
 
@@ -232,10 +245,11 @@ public class RuntimeRpcTest {
         verifyResponse(response, RPC_REPLY_OK);
     }
 
-    private void verifyResponse(Document response, Document template) {
+    private void verifyResponse(Document response, Document template) throws IOException, TransformerException {
         DetailedDiff dd = new DetailedDiff(new Diff(response, template));
         dd.overrideElementQualifier(new RecursiveElementNameAndTextQualifier());
-        assertTrue(dd.similar());
+        //we care about order so response has to be identical
+        assertTrue(dd.identical());
     }
 
     private RpcDefinition getRpcDefinitionFromModule(Module module, URI namespaceURI, String name) {

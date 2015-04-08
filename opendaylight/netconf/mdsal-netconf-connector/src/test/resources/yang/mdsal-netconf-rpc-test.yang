@@ -40,5 +40,51 @@ module rpc-test {
             }
         }
     }
+
+    rpc container-rpc {
+        input {
+            container cont1 {
+                leaf test-string {
+                    type string;
+                }
+
+                leaf test-string2 {
+                    type string;
+                }
+            }
+
+            container cont2 {
+                leaf test-string {
+                    type string;
+                }
+
+                leaf test-string2 {
+                    type string;
+                }
+            }
+        }
+
+        output {
+            container cont1 {
+                leaf test-string {
+                    type string;
+                }
+
+                leaf test-string2 {
+                    type string;
+                }
+            }
+
+            container cont2 {
+                leaf test-string {
+                    type string;
+                }
+
+                leaf test-string2 {
+                    type string;
+                }
+            }
+        }
+    }
 }
 

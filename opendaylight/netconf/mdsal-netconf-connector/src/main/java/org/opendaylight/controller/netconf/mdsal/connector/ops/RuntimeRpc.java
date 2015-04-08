@@ -14,6 +14,7 @@ import com.google.common.util.concurrent.CheckedFuture;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import javax.annotation.Nullable;
@@ -32,16 +33,15 @@ import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedExecution;
 import org.opendaylight.controller.netconf.mdsal.connector.CurrentSchemaContext;
+import org.opendaylight.controller.netconf.util.OrderedNormalizedNodeWriter;
 import org.opendaylight.controller.netconf.util.exception.MissingNameSpaceException;
 import org.opendaylight.controller.netconf.util.mapping.AbstractSingletonNetconfOperation;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
-import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeWriter;
 import org.opendaylight.yangtools.yang.data.impl.codec.xml.XMLStreamNormalizedNodeStreamWriter;
 import org.opendaylight.yangtools.yang.data.impl.schema.transform.dom.DomUtils;
 import org.opendaylight.yangtools.yang.data.impl.schema.transform.dom.parser.DomToNormalizedNodeParserFactory;
@@ -211,7 +211,7 @@ public class RuntimeRpc extends AbstractSingletonNetconfOperation {
         final NormalizedNodeStreamWriter nnStreamWriter = XMLStreamNormalizedNodeStreamWriter.create(xmlWriter,
                 schemaContext.getCurrentContext(), rpcOutputPath);
 
-        final NormalizedNodeWriter nnWriter = NormalizedNodeWriter.forStreamWriter(nnStreamWriter);
+        final OrderedNormalizedNodeWriter nnWriter = new OrderedNormalizedNodeWriter(nnStreamWriter, schemaContext.getCurrentContext(), rpcOutputPath);
 
         writeRootElement(xmlWriter, nnWriter, (ContainerNode) data);
         try {
@@ -232,11 +232,10 @@ public class RuntimeRpc extends AbstractSingletonNetconfOperation {
         }
     }
 
-    private void writeRootElement(final XMLStreamWriter xmlWriter, final NormalizedNodeWriter nnWriter, final ContainerNode data) {
+    private void writeRootElement(final XMLStreamWriter xmlWriter, final OrderedNormalizedNodeWriter nnWriter, final ContainerNode data) {
         try {
-            for (final DataContainerChild<? extends PathArgument, ?> child : data.getValue()) {
-                nnWriter.write(child);
-            }
+            Collection<DataContainerChild<?, ?>> value = (Collection) data.getValue();
+            nnWriter.write(value);
             nnWriter.flush();
             xmlWriter.flush();
         } catch (XMLStreamException | IOException e) {
