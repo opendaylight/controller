@@ -12,7 +12,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.Nonnull;
 import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService;
 import org.opendaylight.controller.md.sal.binding.impl.BindingDOMAdapterBuilder.Factory;
 import org.opendaylight.controller.md.sal.dom.api.DOMNotification;
@@ -20,8 +19,6 @@ import org.opendaylight.controller.md.sal.dom.api.DOMNotificationPublishService;
 import org.opendaylight.controller.md.sal.dom.api.DOMService;
 import org.opendaylight.yangtools.binding.data.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.yangtools.yang.binding.Notification;
-import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
-import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
 public class BindingDOMNotificationPublishServiceAdapter implements NotificationPublishService, AutoCloseable {
 
@@ -37,7 +34,7 @@ public class BindingDOMNotificationPublishServiceAdapter implements Notification
     private final BindingNormalizedNodeSerializer codecRegistry;
     private final DOMNotificationPublishService domPublishService;
 
-    public BindingDOMNotificationPublishServiceAdapter(BindingNormalizedNodeSerializer codecRegistry, DOMNotificationPublishService domPublishService) {
+    public BindingDOMNotificationPublishServiceAdapter(final BindingNormalizedNodeSerializer codecRegistry, final DOMNotificationPublishService domPublishService) {
         this.codecRegistry = codecRegistry;
         this.domPublishService = domPublishService;
     }
@@ -61,36 +58,12 @@ public class BindingDOMNotificationPublishServiceAdapter implements Notification
     }
 
     private DOMNotification toDomNotification(final Notification notification) {
-        final ContainerNode domNotification = codecRegistry.toNormalizedNodeNotification(notification);
-        return new DOMNotificationImpl(domNotification);
+        return LazySerializedDOMNotification.create(codecRegistry, notification);
     }
 
     @Override
     public void close() throws Exception {
 
-    }
-
-    private static class DOMNotificationImpl implements DOMNotification {
-
-        private final SchemaPath type;
-        private final ContainerNode body;
-
-        public DOMNotificationImpl(final ContainerNode body) {
-            this.type = SchemaPath.create(true, body.getIdentifier().getNodeType());
-            this.body = body;
-        }
-
-        @Nonnull
-        @Override
-        public SchemaPath getType() {
-            return this.type;
-        }
-
-        @Nonnull
-        @Override
-        public ContainerNode getBody() {
-            return this.body;
-        }
     }
 
     protected static class Builder extends BindingDOMAdapterBuilder<NotificationPublishService> {
@@ -101,10 +74,10 @@ public class BindingDOMNotificationPublishServiceAdapter implements Notification
         }
 
         @Override
-        protected NotificationPublishService createInstance(BindingToNormalizedNodeCodec codec,
-                ClassToInstanceMap<DOMService> delegates) {
-            BindingNormalizedNodeSerializer codecReg = codec.getCodecRegistry();
-            DOMNotificationPublishService domPublish = delegates.getInstance(DOMNotificationPublishService.class);
+        protected NotificationPublishService createInstance(final BindingToNormalizedNodeCodec codec,
+                final ClassToInstanceMap<DOMService> delegates) {
+            final BindingNormalizedNodeSerializer codecReg = codec.getCodecRegistry();
+            final DOMNotificationPublishService domPublish = delegates.getInstance(DOMNotificationPublishService.class);
             return new BindingDOMNotificationPublishServiceAdapter(codecReg, domPublish);
         }
 
