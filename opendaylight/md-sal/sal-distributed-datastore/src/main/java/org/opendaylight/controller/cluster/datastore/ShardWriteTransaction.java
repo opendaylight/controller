@@ -1,6 +1,6 @@
 /*
- *
  *  Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
+ *  Copyright (c) 2015 Brocade Communications Systems, Inc. and others.  All rights reserved.
  *
  *  This program and the accompanying materials are made available under the
  *  terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -41,6 +41,8 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 public class ShardWriteTransaction extends ShardTransaction {
 
     private final MutableCompositeModification compositeModification = new MutableCompositeModification();
+    private int totalBatchedModificationsReceived;
+    private Exception lastBatchedModificationsException;
     private final DOMStoreWriteTransaction transaction;
 
     public ShardWriteTransaction(DOMStoreWriteTransaction transaction, ActorRef shardActor,
@@ -88,13 +90,29 @@ public class ShardWriteTransaction extends ShardTransaction {
                 modification.apply(transaction);
             }
 
+            totalBatchedModificationsReceived++;
             if(batched.isReady()) {
+                if(lastBatchedModificationsException != null) {
+                    throw lastBatchedModificationsException;
+                }
+
+                if(totalBatchedModificationsReceived != batched.getTotalMessagesSent()) {
+                    throw new IllegalStateException(String.format(
+                            "The total number of batched messages received %d does not match the number sent %d",
+                            totalBatchedModificationsReceived, batched.getTotalMessagesSent()));
+                }
+
                 readyTransaction(transaction, false);
             } else {
                 getSender().tell(new BatchedModificationsReply(batched.getModifications().size()), getSelf());
             }
         } catch (Exception e) {
+            lastBatchedModificationsException = e;
             getSender().tell(new akka.actor.Status.Failure(e), getSelf());
+
+            if(batched.isReady()) {
+                getSelf().tell(PoisonPill.getInstance(), getSelf());
+            }
         }
     }
 
