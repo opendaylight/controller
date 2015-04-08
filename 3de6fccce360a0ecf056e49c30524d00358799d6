@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_b8d7c4be",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/RestconfProviderImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-08T16:02:28Z",
+      "side": 1,
+      "message": "Can you add blank lines to logically separate sections for improved readabilty?",
+      "revId": "3de6fccce360a0ecf056e49c30524d00358799d6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_b83b4437",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/StatisticsRestconfServiceWrapper.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-08T16:02:28Z",
+      "side": 1,
+      "message": "We aren\u0027t tracking read failures?",
+      "revId": "3de6fccce360a0ecf056e49c30524d00358799d6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_d8365052",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/StatisticsRestconfServiceWrapper.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-08T16:02:28Z",
+      "side": 1,
+      "message": "Temporarily incrementing the failure count may leak a false count. I assume you did this to handle thrown exceptions. This is not a big deal but I think it would be cleaner to catch Exception, increment the failure count and re-throw.",
+      "revId": "3de6fccce360a0ecf056e49c30524d00358799d6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_f871cce0",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/yang/opendaylight-rest-connector.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-08T16:02:28Z",
+      "side": 1,
+      "message": "Why isn\u0027t there a stat for delete here?",
+      "revId": "3de6fccce360a0ecf056e49c30524d00358799d6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_d80df091",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/yang/opendaylight-rest-connector.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-08T16:02:28Z",
+      "side": 1,
+      "message": "Please remove trailing whitespace.",
+      "revId": "3de6fccce360a0ecf056e49c30524d00358799d6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_58824095",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/yang/opendaylight-rest-connector.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-08T16:02:28Z",
+      "side": 1,
+      "message": "Because these use the statistics grouping, the leaf is named received-requests which isn\u0027t accurate since these are response stats. It should be named sent-responses.\n\nHowever, I think it\u0027s more logical to group the stats by http method type with with leafs, successful-responses and failed-responses. To go further, I think the response stats should be grouped with the request stats. It seems inconsistent to separate requests stats by datastore type but combine the response stats. \n\nSo I would change statistics to:\n\n   grouping statistics {\n        leaf received-requests {\n           type uint64;\n        }\n\n        leaf successful-responses {\n           type uint64;\n        }\n \n        leaf failed-responses {\n           type uint64;\n        }\n    }\n\nand remove the responseStat container.",
+      "revId": "3de6fccce360a0ecf056e49c30524d00358799d6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
