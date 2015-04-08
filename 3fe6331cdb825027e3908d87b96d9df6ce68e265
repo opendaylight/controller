@@ -1,0 +1,197 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_1b283285",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DataTreeListenerProxyTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-08T16:34:45Z",
+      "side": 1,
+      "message": "This should be testing DataTreeListenerProxy.",
+      "revId": "3fe6331cdb825027e3908d87b96d9df6ce68e265",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_db0aca20",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DataTreeListenerRegistrationTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-08T16:34:45Z",
+      "side": 1,
+      "message": "A little easier to use a Mockito mock instead of noOpDataTreeChangeListener().",
+      "revId": "3fe6331cdb825027e3908d87b96d9df6ce68e265",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_fb0d4638",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DataTreeListenerRegistrationTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-08T16:34:45Z",
+      "side": 1,
+      "message": "You can remove the Within block - it\u0027s not necessary here.",
+      "revId": "3fe6331cdb825027e3908d87b96d9df6ce68e265",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_5b1eba64",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DataTreeListenerRegistrationTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-08T16:34:45Z",
+      "side": 1,
+      "message": "There\u0027s a much easier way to check the reply message using expMsgClass, i.e.\n\n expMsgClass(duration(\"5 seconds\", \n                  CloseDataTreeChangeListenerRegistrationReply.class);",
+      "revId": "3fe6331cdb825027e3908d87b96d9df6ce68e265",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_7b193678",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DataTreeListenerRegistrationTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-08T16:34:45Z",
+      "side": 1,
+      "message": "Don\u0027t need this.",
+      "range": {
+        "startLine": 61,
+        "startChar": 20,
+        "endLine": 61,
+        "endChar": 31
+      },
+      "revId": "3fe6331cdb825027e3908d87b96d9df6ce68e265",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_db216aa0",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DataTreeListenerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-08T16:34:45Z",
+      "side": 1,
+      "message": "\"DataTreeChangedReply\"",
+      "revId": "3fe6331cdb825027e3908d87b96d9df6ce68e265",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_bb36dee5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-08T16:34:45Z",
+      "side": 1,
+      "message": "These should not have been moved - please keep imports in alphabetical order with statics first.",
+      "revId": "3fe6331cdb825027e3908d87b96d9df6ce68e265",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_5b355ad8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 259,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-08T16:34:45Z",
+      "side": 1,
+      "message": "\"testRegisterDataTreeChangeListener\"",
+      "revId": "3fe6331cdb825027e3908d87b96d9df6ce68e265",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_fb5b062c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 317,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-08T16:34:45Z",
+      "side": 1,
+      "message": "\"testDataTreeChangeListenerNotifiedWhenNotTheLeaderOnRegistration\"",
+      "revId": "3fe6331cdb825027e3908d87b96d9df6ce68e265",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_9b42023d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 321,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-08T16:34:45Z",
+      "side": 1,
+      "message": "\"testDataTreeChangeListenerNotifiedWhenNotTheLeaderOnRegistration\"",
+      "revId": "3fe6331cdb825027e3908d87b96d9df6ce68e265",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_bb3d7ebd",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/utils/MockDataTreeChangeListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-08T16:34:45Z",
+      "side": 1,
+      "message": "Needs copyright header.",
+      "revId": "3fe6331cdb825027e3908d87b96d9df6ce68e265",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
