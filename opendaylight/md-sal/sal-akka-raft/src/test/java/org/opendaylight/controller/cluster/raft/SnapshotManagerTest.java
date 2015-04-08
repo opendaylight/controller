@@ -6,6 +6,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -17,7 +18,6 @@ import akka.persistence.SnapshotSelectionCriteria;
 import akka.testkit.TestActorRef;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -75,6 +75,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         actorRef = factory.createTestActor(MessageCollectorActor.props(), factory.generateActorId("test-"));
         doReturn(actorRef).when(mockRaftActorContext).getActor();
 
+        snapshotManager.setCreateSnapshotCallable(mockProcedure);
     }
 
     @After
@@ -88,7 +89,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
     }
 
     @Test
-    public void testCaptureToInstall(){
+    public void testCaptureToInstall() throws Exception {
 
         // Force capturing toInstall = true
         snapshotManager.captureToInstall(new MockRaftActorContext.MockReplicatedLogEntry(1, 0,
@@ -96,7 +97,9 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         assertEquals(true, snapshotManager.isCapturing());
 
-        CaptureSnapshot captureSnapshot = MessageCollectorActor.expectFirstMatching(actorRef, CaptureSnapshot.class);
+        verify(mockProcedure).apply(null);
+
+        CaptureSnapshot captureSnapshot = snapshotManager.getCaptureSnapshot();
 
         // LastIndex and LastTerm are picked up from the lastLogEntry
         assertEquals(0L, captureSnapshot.getLastIndex());
@@ -113,7 +116,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
     }
 
     @Test
-    public void testCapture(){
+    public void testCapture() throws Exception {
         boolean capture = snapshotManager.capture(new MockRaftActorContext.MockReplicatedLogEntry(1,9,
                 new MockRaftActorContext.MockPayload()), 9);
 
@@ -121,7 +124,10 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         assertEquals(true, snapshotManager.isCapturing());
 
-        CaptureSnapshot captureSnapshot = MessageCollectorActor.expectFirstMatching(actorRef, CaptureSnapshot.class);
+        verify(mockProcedure).apply(null);
+
+        CaptureSnapshot captureSnapshot = snapshotManager.getCaptureSnapshot();
+
         // LastIndex and LastTerm are picked up from the lastLogEntry
         assertEquals(9L, captureSnapshot.getLastIndex());
         assertEquals(1L, captureSnapshot.getLastTerm());
@@ -139,15 +145,29 @@ public class SnapshotManagerTest extends AbstractActorTest {
     }
 
     @Test
+    public void testCaptureWithCreateProcedureError () throws Exception {
+        doThrow(new Exception("mock")).when(mockProcedure).apply(null);
+
+        boolean capture = snapshotManager.capture(new MockRaftActorContext.MockReplicatedLogEntry(1,9,
+                new MockRaftActorContext.MockPayload()), 9);
+
+        assertFalse(capture);
+
+        assertEquals(false, snapshotManager.isCapturing());
+
+        verify(mockProcedure).apply(null);
+    }
+
+    @Test
     public void testIllegalCapture() throws Exception {
         boolean capture = snapshotManager.capture(new MockRaftActorContext.MockReplicatedLogEntry(1,9,
                 new MockRaftActorContext.MockPayload()), 9);
 
         assertTrue(capture);
 
-        List<CaptureSnapshot> allMatching = MessageCollectorActor.getAllMatching(actorRef, CaptureSnapshot.class);
+        verify(mockProcedure).apply(null);
 
-        assertEquals(1, allMatching.size());
+        reset(mockProcedure);
 
         // This will not cause snapshot capture to start again
         capture = snapshotManager.capture(new MockRaftActorContext.MockReplicatedLogEntry(1,9,
@@ -155,9 +175,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         assertFalse(capture);
 
-        allMatching = MessageCollectorActor.getAllMatching(actorRef, CaptureSnapshot.class);
-
-        assertEquals(1, allMatching.size());
+        verify(mockProcedure, never()).apply(null);
     }
 
     @Test
@@ -169,8 +187,6 @@ public class SnapshotManagerTest extends AbstractActorTest {
         // when replicatedToAllIndex = -1
         snapshotManager.capture(new MockRaftActorContext.MockReplicatedLogEntry(6,9,
                 new MockRaftActorContext.MockPayload()), -1);
-
-        snapshotManager.create(mockProcedure);
 
         byte[] bytes = new byte[] {1,2,3,4,5,6,7,8,9,10};
         snapshotManager.persist(mockDataPersistenceProvider, bytes, mockRaftActorBehavior
@@ -192,58 +208,6 @@ public class SnapshotManagerTest extends AbstractActorTest {
         verify(mockReplicatedLog).snapshotPreCommit(45L, 6L);
     }
 
-
-    @Test
-    public void testCreate() throws Exception {
-        // when replicatedToAllIndex = -1
-        snapshotManager.capture(new MockRaftActorContext.MockReplicatedLogEntry(6,9,
-                new MockRaftActorContext.MockPayload()), -1);
-
-        snapshotManager.create(mockProcedure);
-
-        verify(mockProcedure).apply(null);
-    }
-
-    @Test
-    public void testCallingCreateMultipleTimesCausesNoHarm() throws Exception {
-        // when replicatedToAllIndex = -1
-        snapshotManager.capture(new MockRaftActorContext.MockReplicatedLogEntry(6,9,
-                new MockRaftActorContext.MockPayload()), -1);
-
-        snapshotManager.create(mockProcedure);
-
-        snapshotManager.create(mockProcedure);
-
-        verify(mockProcedure, times(1)).apply(null);
-    }
-
-    @Test
-    public void testCallingCreateBeforeCapture() throws Exception {
-        snapshotManager.create(mockProcedure);
-
-        verify(mockProcedure, times(0)).apply(null);
-    }
-
-    @Test
-    public void testCallingCreateAfterPersist() throws Exception {
-        // when replicatedToAllIndex = -1
-        snapshotManager.capture(new MockRaftActorContext.MockReplicatedLogEntry(6,9,
-                new MockRaftActorContext.MockPayload()), -1);
-
-        snapshotManager.create(mockProcedure);
-
-        verify(mockProcedure, times(1)).apply(null);
-
-        snapshotManager.persist(mockDataPersistenceProvider, new byte[]{}, mockRaftActorBehavior
-                , Runtime.getRuntime().totalMemory());
-
-        reset(mockProcedure);
-
-        snapshotManager.create(mockProcedure);
-
-        verify(mockProcedure, never()).apply(null);
-    }
-
     @Test
     public void testPersistWhenReplicatedToAllIndexNotMinus(){
         doReturn(45L).when(mockReplicatedLog).getSnapshotIndex();
@@ -256,8 +220,6 @@ public class SnapshotManagerTest extends AbstractActorTest {
         // when replicatedToAllIndex != -1
         snapshotManager.capture(new MockRaftActorContext.MockReplicatedLogEntry(6,9,
                 new MockRaftActorContext.MockPayload()), 9);
-
-        snapshotManager.create(mockProcedure);
 
         snapshotManager.persist(mockDataPersistenceProvider, new byte[]{}, mockRaftActorBehavior
                 , Runtime.getRuntime().totalMemory());
@@ -278,8 +240,6 @@ public class SnapshotManagerTest extends AbstractActorTest {
         snapshotManager.capture(new MockRaftActorContext.MockReplicatedLogEntry(6,9,
                 new MockRaftActorContext.MockPayload()), -1);
 
-        snapshotManager.create(mockProcedure);
-
         snapshotManager.persist(mockDataPersistenceProvider, new byte[]{}, mockRaftActorBehavior
                 , Runtime.getRuntime().totalMemory());
 
@@ -297,8 +257,6 @@ public class SnapshotManagerTest extends AbstractActorTest {
                 new MockRaftActorContext.MockPayload()), -1, "follower-1");
 
         assertTrue(capture);
-
-        snapshotManager.create(mockProcedure);
 
         byte[] bytes = new byte[] {1,2,3,4,5,6,7,8,9,10};
 
@@ -338,8 +296,6 @@ public class SnapshotManagerTest extends AbstractActorTest {
         snapshotManager.captureToInstall(new MockRaftActorContext.MockReplicatedLogEntry(6, 9,
                 new MockRaftActorContext.MockPayload()), -1, "follower-1");
 
-        snapshotManager.create(mockProcedure);
-
         snapshotManager.persist(mockDataPersistenceProvider, new byte[]{}, mockRaftActorBehavior
                 , Runtime.getRuntime().totalMemory());
 
@@ -360,8 +316,6 @@ public class SnapshotManagerTest extends AbstractActorTest {
         // when replicatedToAllIndex = -1
         snapshotManager.captureToInstall(new MockRaftActorContext.MockReplicatedLogEntry(6, 9,
                 new MockRaftActorContext.MockPayload()), -1, "follower-1");
-
-        snapshotManager.create(mockProcedure);
 
         snapshotManager.persist(mockDataPersistenceProvider, new byte[]{}, mockRaftActorBehavior
                 , Runtime.getRuntime().totalMemory());
@@ -417,8 +371,6 @@ public class SnapshotManagerTest extends AbstractActorTest {
         snapshotManager.captureToInstall(new MockRaftActorContext.MockReplicatedLogEntry(6, 9,
                 new MockRaftActorContext.MockPayload()), -1, "follower-1");
 
-        snapshotManager.create(mockProcedure);
-
         snapshotManager.persist(mockDataPersistenceProvider, new byte[]{}, mockRaftActorBehavior
                 , Runtime.getRuntime().totalMemory());
 
@@ -438,8 +390,6 @@ public class SnapshotManagerTest extends AbstractActorTest {
         // when replicatedToAllIndex = -1
         snapshotManager.captureToInstall(new MockRaftActorContext.MockReplicatedLogEntry(6, 9,
                 new MockRaftActorContext.MockPayload()), -1, "follower-1");
-
-        snapshotManager.create(mockProcedure);
 
         snapshotManager.persist(mockDataPersistenceProvider, new byte[]{}, mockRaftActorBehavior
                 , Runtime.getRuntime().totalMemory());
@@ -473,8 +423,6 @@ public class SnapshotManagerTest extends AbstractActorTest {
         // when replicatedToAllIndex = -1
         snapshotManager.captureToInstall(new MockRaftActorContext.MockReplicatedLogEntry(6, 9,
                 new MockRaftActorContext.MockPayload()), -1, "follower-1");
-
-        snapshotManager.create(mockProcedure);
 
         snapshotManager.persist(mockDataPersistenceProvider, new byte[]{}, mockRaftActorBehavior
                 , Runtime.getRuntime().totalMemory());

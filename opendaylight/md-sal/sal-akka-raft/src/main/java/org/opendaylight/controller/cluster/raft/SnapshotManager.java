@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.raft;
 
 import akka.japi.Procedure;
 import akka.persistence.SnapshotSelectionCriteria;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.ByteString;
 import java.util.List;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
@@ -21,7 +22,6 @@ import org.slf4j.Logger;
 public class SnapshotManager implements SnapshotState {
 
     private final SnapshotState IDLE = new Idle();
-    private final SnapshotState CAPTURING = new Capturing();
     private final SnapshotState PERSISTING = new Persisting();
     private final SnapshotState CREATING = new Creating();
 
@@ -36,6 +36,8 @@ public class SnapshotManager implements SnapshotState {
     private SnapshotState currentState = IDLE;
     private CaptureSnapshot captureSnapshot;
     private long lastSequenceNumber = -1;
+
+    private Procedure<Void> createSnapshotProcedure;
 
     public SnapshotManager(RaftActorContext context, Logger logger) {
         this.context = context;
@@ -58,11 +60,6 @@ public class SnapshotManager implements SnapshotState {
     }
 
     @Override
-    public void create(Procedure<Void> callback) {
-        currentState.create(callback);
-    }
-
-    @Override
     public void persist(DataPersistenceProvider persistenceProvider, byte[] snapshotBytes,
                         RaftActorBehavior currentBehavior, long totalMemory) {
         currentState.persist(persistenceProvider, snapshotBytes, currentBehavior, totalMemory);
@@ -81,6 +78,15 @@ public class SnapshotManager implements SnapshotState {
     @Override
     public long trimLog(long desiredTrimIndex, RaftActorBehavior currentBehavior) {
         return currentState.trimLog(desiredTrimIndex, currentBehavior);
+    }
+
+    public void setCreateSnapshotCallable(Procedure<Void> createSnapshotProcedure) {
+        this.createSnapshotProcedure = createSnapshotProcedure;
+    }
+
+    @VisibleForTesting
+    public CaptureSnapshot getCaptureSnapshot() {
+        return captureSnapshot;
     }
 
     private boolean hasFollowers(){
@@ -108,11 +114,6 @@ public class SnapshotManager implements SnapshotState {
         public boolean captureToInstall(ReplicatedLogEntry lastLogEntry, long replicatedToAllIndex, String targetFollower) {
             LOG.debug("captureToInstall should not be called in state {}", this);
             return false;
-        }
-
-        @Override
-        public void create(Procedure<Void> callback) {
-            LOG.debug("create should not be called in state {}", this);
         }
 
         @Override
@@ -192,8 +193,6 @@ public class SnapshotManager implements SnapshotState {
                     lastLogEntry.getTerm(), lastAppliedIndex, lastAppliedTerm,
                     newReplicatedToAllIndex, newReplicatedToAllTerm, unAppliedEntries, targetFollower != null);
 
-            SnapshotManager.this.currentState = CAPTURING;
-
             if(captureSnapshot.isInstallSnapshotInitiated()) {
                 LOG.info("{}: Initiating snapshot capture {} to install on {}",
                         persistenceId(), captureSnapshot, targetFollower);
@@ -205,8 +204,14 @@ public class SnapshotManager implements SnapshotState {
 
             LOG.debug("lastSequenceNumber prior to capture: {}", lastSequenceNumber);
 
-            context.getActor().tell(captureSnapshot, context.getActor());
+            try {
+                createSnapshotProcedure.apply(null);
+            } catch (Exception e) {
+                LOG.error("Error creating snapshot", e);
+                return false;
+            }
 
+            SnapshotManager.this.currentState = CREATING;
             return true;
         }
 
@@ -229,30 +234,6 @@ public class SnapshotManager implements SnapshotState {
         public long trimLog(long desiredTrimIndex, RaftActorBehavior currentBehavior) {
             return doTrimLog(desiredTrimIndex, currentBehavior);
         }
-    }
-
-    private class Capturing extends AbstractSnapshotState {
-
-        @Override
-        public boolean isCapturing() {
-            return true;
-        }
-
-        @Override
-        public void create(Procedure<Void> callback) {
-            try {
-                callback.apply(null);
-                SnapshotManager.this.currentState = CREATING;
-            } catch (Exception e) {
-                LOG.error("Unexpected error occurred", e);
-            }
-        }
-
-        @Override
-        public String toString() {
-            return "Capturing";
-        }
-
     }
 
     private class Creating extends AbstractSnapshotState {
