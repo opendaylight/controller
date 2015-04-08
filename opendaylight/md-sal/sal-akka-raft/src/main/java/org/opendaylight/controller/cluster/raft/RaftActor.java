@@ -136,6 +136,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 context.getConfigParams().getJournalRecoveryLogBatchSize());
 
         super.preStart();
+
+        snapshotSupport = newRaftActorSnapshotMessageSupport();
     }
 
     @Override
@@ -193,10 +195,6 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     @Override
     public void handleCommand(Object message) {
-        if(snapshotSupport == null) {
-            snapshotSupport = newRaftActorSnapshotMessageSupport();
-        }
-
         boolean handled = snapshotSupport.handleSnapshotMessage(message);
         if(handled) {
             return;
