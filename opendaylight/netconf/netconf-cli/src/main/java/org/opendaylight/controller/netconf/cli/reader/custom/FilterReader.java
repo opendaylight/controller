@@ -31,9 +31,10 @@ import org.opendaylight.controller.netconf.cli.io.IOUtil;
 import org.opendaylight.controller.netconf.cli.reader.AbstractReader;
 import org.opendaylight.controller.netconf.cli.reader.ReadingException;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.Node;
-import org.opendaylight.yangtools.yang.data.impl.CompositeNodeTOImpl;
-import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
@@ -73,9 +74,9 @@ public class FilterReader extends AbstractReader<DataSchemaNode> {
     public static final String FILTER_TYPE_VALUE_DEFAULT = "subtree";
 
     @Override
-    protected List<Node<?>> readWithContext(final DataSchemaNode schemaNode) throws IOException, ReadingException {
+    protected List<NormalizedNode<?, ?>> readWithContext(final DataSchemaNode schemaNode) throws IOException, ReadingException {
         boolean redSuccessfuly = false;
-        Node<?> newNode = null;
+        DataContainerChild<?, ?> newNode = null;
         do {
             console.writeLn("Filter " + schemaNode.getQName().getLocalName());
             console.writeLn("Submit path of the data to retrieve. Use TAB for autocomplete");
@@ -95,18 +96,18 @@ public class FilterReader extends AbstractReader<DataSchemaNode> {
                     filterPartsQNames.add(qName);
                 }
 
-                Node<?> previous = null;
+                DataContainerChild<?, ?> previous = null;
 
                 for (final QName qName : Lists.reverse(filterPartsQNames)) {
-                    previous = new CompositeNodeTOImpl(qName, null,
-                            previous == null ? Collections.<Node<?>> emptyList()
-                                    : Collections.<Node<?>> singletonList(previous));
+                    previous = ImmutableContainerNodeBuilder.create().withNodeIdentifier(new NodeIdentifier(qName))
+                            .withValue(previous == null ? Collections.<DataContainerChild<?, ?>>emptyList()
+                                    : Collections.<DataContainerChild<?, ?>>singletonList(previous)).build();
                 }
 
                 final Map<QName, String> attributes = Collections.singletonMap(FILTER_TYPE_QNAME,
                         FILTER_TYPE_VALUE_DEFAULT);
-                newNode = previous == null ? null : ImmutableCompositeNode.create(schemaNode.getQName(), attributes,
-                        Collections.<Node<?>> singletonList(previous));
+                newNode = previous == null ? null : ImmutableContainerNodeBuilder.create()
+                        .withNodeIdentifier(new NodeIdentifier(schemaNode.getQName())).withChild(previous).build();
                 redSuccessfuly = true;
             } catch (final ReadingException e) {
                 final String message = "Specified filter path isn't correct.";
@@ -114,7 +115,7 @@ public class FilterReader extends AbstractReader<DataSchemaNode> {
                 console.writeLn(message);
             }
         } while (!redSuccessfuly);
-        return Collections.<Node<?>> singletonList(newNode);
+        return Collections.<NormalizedNode<?, ?>> singletonList(newNode);
     }
 
     @Override

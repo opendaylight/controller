@@ -12,7 +12,7 @@ import java.util.List;
 import org.opendaylight.controller.netconf.cli.io.ConsoleIO;
 import org.opendaylight.controller.netconf.cli.writer.WriteException;
 import org.opendaylight.controller.netconf.cli.writer.Writer;
-import org.opendaylight.yangtools.yang.data.api.Node;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 
 public abstract class AbstractWriter<T extends DataSchemaNode> implements Writer<T> {
@@ -24,7 +24,7 @@ public abstract class AbstractWriter<T extends DataSchemaNode> implements Writer
     }
 
     @Override
-    public void write(final T dataSchemaNode, final List<Node<?>> dataNodes) throws WriteException {
+    public void write(final T dataSchemaNode, final List<NormalizedNode<?, ?>> dataNodes) throws WriteException {
         try {
             writeInner(dataSchemaNode, dataNodes);
         } catch (final IOException e) {
@@ -32,6 +32,6 @@ public abstract class AbstractWriter<T extends DataSchemaNode> implements Writer
         }
     }
 
-    protected abstract void writeInner(final T dataSchemaNode, final List<Node<?>> dataNodes) throws IOException,
+    protected abstract void writeInner(final T dataSchemaNode, final List<NormalizedNode<?, ?>> dataNodes) throws IOException,
             WriteException;
 }

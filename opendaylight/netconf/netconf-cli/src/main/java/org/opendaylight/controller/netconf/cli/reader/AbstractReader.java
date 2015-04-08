@@ -16,7 +16,7 @@ import jline.console.completer.Completer;
 import jline.console.completer.NullCompleter;
 import org.opendaylight.controller.netconf.cli.io.ConsoleContext;
 import org.opendaylight.controller.netconf.cli.io.ConsoleIO;
-import org.opendaylight.yangtools.yang.data.api.Node;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.ChoiceSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
@@ -56,7 +56,7 @@ public abstract class AbstractReader<T extends DataSchemaNode> implements Reader
     }
 
     @Override
-    public List<Node<?>> read(final T schemaNode) throws ReadingException {
+    public List<NormalizedNode<?, ?>> read(final T schemaNode) throws ReadingException {
         if (isReadingWanted(schemaNode)) {
             final ConsoleContext ctx = getContext(schemaNode);
             console.enterContext(ctx);
@@ -80,7 +80,7 @@ public abstract class AbstractReader<T extends DataSchemaNode> implements Reader
 
     // TODO javadoc
 
-    protected abstract List<Node<?>> readWithContext(T schemaNode) throws IOException, ReadingException;
+    protected abstract List<NormalizedNode<?, ?>> readWithContext(T schemaNode) throws IOException, ReadingException;
 
     protected abstract ConsoleContext getContext(T schemaNode);
 

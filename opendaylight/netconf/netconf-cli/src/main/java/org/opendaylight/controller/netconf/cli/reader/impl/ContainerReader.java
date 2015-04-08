@@ -11,6 +11,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -21,9 +22,11 @@ import org.opendaylight.controller.netconf.cli.io.ConsoleContext;
 import org.opendaylight.controller.netconf.cli.io.ConsoleIO;
 import org.opendaylight.controller.netconf.cli.reader.AbstractReader;
 import org.opendaylight.controller.netconf.cli.reader.ReadingException;
-import org.opendaylight.yangtools.yang.data.api.Node;
-import org.opendaylight.yangtools.yang.data.impl.ImmutableCompositeNode;
-import org.opendaylight.yangtools.yang.data.impl.util.CompositeNodeBuilder;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeAttrBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -46,7 +49,7 @@ public class ContainerReader extends AbstractReader<ContainerSchemaNode> {
     }
 
     @Override
-    public List<Node<?>> readWithContext(final ContainerSchemaNode containerNode) throws IOException, ReadingException {
+    public List<NormalizedNode<?, ?>> readWithContext(final ContainerSchemaNode containerNode) throws IOException, ReadingException {
         console.formatLn("Submit child nodes for container: %s, %s", containerNode.getQName().getLocalName(),
                 Collections2.transform(containerNode.getChildNodes(), new Function<DataSchemaNode, String>() {
                     @Override
@@ -54,26 +57,27 @@ public class ContainerReader extends AbstractReader<ContainerSchemaNode> {
                         return input.getQName().getLocalName();
                     }
                 }));
+        final DataContainerNodeAttrBuilder<NodeIdentifier, ContainerNode> builder = ImmutableContainerNodeBuilder.create();
+        builder.withNodeIdentifier(new NodeIdentifier(containerNode.getQName()));
 
-        final CompositeNodeBuilder<ImmutableCompositeNode> compositeNodeBuilder = ImmutableCompositeNode.builder();
-        compositeNodeBuilder.setQName(containerNode.getQName());
+        final ArrayList<NormalizedNode<?, ?>> nodesToAdd = new ArrayList<>();
         final SeparatedNodes separatedNodes = SeparatedNodes.separateNodes(containerNode, getReadConfigNode());
         for (final DataSchemaNode childNode : sortChildren(separatedNodes.getMandatoryNotKey())) {
-            final List<Node<?>> redNodes = argumentHandlerRegistry.getGenericReader(getSchemaContext(),
+            final List<NormalizedNode<?, ?>> redNodes = argumentHandlerRegistry.getGenericReader(getSchemaContext(),
                     getReadConfigNode()).read(childNode);
             if (redNodes.isEmpty()) {
                 console.formatLn("No data specified for mandatory element %s.", childNode.getQName().getLocalName());
                 return Collections.emptyList();
             } else {
-                compositeNodeBuilder.addAll(redNodes);
+                nodesToAdd.addAll(redNodes);
             }
         }
 
         for (final DataSchemaNode childNode : sortChildren(separatedNodes.getOthers())) {
-            compositeNodeBuilder.addAll(argumentHandlerRegistry.getGenericReader(getSchemaContext(),
+            nodesToAdd.addAll(argumentHandlerRegistry.getGenericReader(getSchemaContext(),
                     getReadConfigNode()).read(childNode));
         }
-        return Collections.<Node<?>> singletonList(compositeNodeBuilder.toInstance());
+        return Collections.<NormalizedNode<?, ?>> singletonList(builder.withValue((ArrayList) nodesToAdd).build());
     }
 
     private List<DataSchemaNode> sortChildren(final Set<DataSchemaNode> unsortedNodes) {

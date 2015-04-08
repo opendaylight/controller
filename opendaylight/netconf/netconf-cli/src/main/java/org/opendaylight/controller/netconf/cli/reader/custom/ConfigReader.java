@@ -33,8 +33,10 @@ import org.opendaylight.controller.netconf.cli.io.IOUtil;
 import org.opendaylight.controller.netconf.cli.reader.AbstractReader;
 import org.opendaylight.controller.netconf.cli.reader.ReadingException;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.Node;
-import org.opendaylight.yangtools.yang.data.impl.CompositeNodeTOImpl;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
@@ -69,7 +71,7 @@ public class ConfigReader extends AbstractReader<DataSchemaNode> {
     // FIXME refactor + unite common code with FilterReader
 
     @Override
-    protected List<Node<?>> readWithContext(final DataSchemaNode schemaNode) throws IOException, ReadingException {
+    protected List<NormalizedNode<?, ?>> readWithContext(final DataSchemaNode schemaNode) throws IOException, ReadingException {
         console.writeLn("Config " + schemaNode.getQName().getLocalName());
         console.writeLn("Submit path of the data to edit. Use TAB for autocomplete");
 
@@ -87,20 +89,25 @@ public class ConfigReader extends AbstractReader<DataSchemaNode> {
             filterPartsQNames.add(qName);
         }
 
-        List<Node<?>> previous = readInnerNode(rawValue);
+        List<NormalizedNode<?, ?>> previous = readInnerNode(rawValue);
 
         for (final QName qName : Lists.reverse(filterPartsQNames).subList(1, filterPartsQNames.size())) {
-            previous = Collections.<Node<?>> singletonList(new CompositeNodeTOImpl(qName, null,
-                    previous == null ? Collections.<Node<?>> emptyList() : previous));
+            previous = Collections.<NormalizedNode<?, ?>>singletonList(
+                    ImmutableContainerNodeBuilder.create()
+                            .withNodeIdentifier(new NodeIdentifier(qName))
+                            .withValue(previous == null ? Collections.<DataContainerChild<?, ?>>emptyList() : (Collection) previous).build()
+            );
         }
 
-        final Node<?> newNode = previous == null ? null
-                : new CompositeNodeTOImpl(schemaNode.getQName(), null, previous);
+        final DataContainerChild<?, ?> newNode = previous == null ? null
+                : ImmutableContainerNodeBuilder.create()
+                        .withNodeIdentifier(new NodeIdentifier(schemaNode.getQName()))
+                        .withValue((Collection) previous).build();
 
-        return Collections.<Node<?>> singletonList(newNode);
+        return Collections.<NormalizedNode<?, ?>> singletonList(newNode);
     }
 
-    private List<Node<?>> readInnerNode(final String pathString) throws ReadingException {
+    private List<NormalizedNode<?, ?>> readInnerNode(final String pathString) throws ReadingException {
         final Optional<DataSchemaNode> schema = getCurrentNode(getSchemaContext(), pathString);
         Preconditions.checkState(schema.isPresent(), "Unable to find schema for %s", pathString);
         return commandArgHandlerRegistry.getGenericReader(getSchemaContext(), true).read(schema.get());

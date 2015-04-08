@@ -29,10 +29,15 @@ import org.opendaylight.controller.netconf.nettyutil.handler.ssh.authentication.
 import org.opendaylight.protocol.framework.NeverReconnectStrategy;
 import org.opendaylight.protocol.framework.ReconnectStrategy;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.Node;
-import org.opendaylight.yangtools.yang.data.api.SimpleNode;
-import org.opendaylight.yangtools.yang.data.impl.CompositeNodeTOImpl;
-import org.opendaylight.yangtools.yang.data.impl.SimpleNodeTOImpl;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithValue;
+import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
+import org.opendaylight.yangtools.yang.data.api.schema.LeafNode;
+import org.opendaylight.yangtools.yang.data.api.schema.LeafSetEntryNode;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafSetEntryNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafSetNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 
 /**
@@ -59,14 +64,21 @@ public class Connect extends AbstractCommand {
     private Output invoke(final NetconfClientConfigurationBuilder config, final String addressName, final Input inputArgs) {
         final Set<String> remoteCmds = connectManager.connectBlocking(addressName, getAdress(inputArgs), config);
 
-        final ArrayList<Node<?>> output = Lists.newArrayList();
-        output.add(new SimpleNodeTOImpl<>(QName.create(getCommandId(), "status"), null, "Connection initiated"));
+        final ArrayList<DataContainerChild<?, ?>> output = Lists.newArrayList();
+        output.add(ImmutableLeafNodeBuilder.create()
+                .withNodeIdentifier(new NodeIdentifier(QName.create(getCommandId(), "status")))
+                .withValue("Connection initiated").build());
 
+        final ArrayList<LeafSetEntryNode<Object>> leafListChildren = Lists.newArrayList();
         for (final String cmdId : remoteCmds) {
-            output.add(new SimpleNodeTOImpl<>(QName.create(getCommandId(), "remote-commands"), null, cmdId));
+            leafListChildren.add(ImmutableLeafSetEntryNodeBuilder.create()
+                    .withNodeIdentifier(new NodeWithValue(QName.create(getCommandId(), "remote-commands"), cmdId))
+                    .withValue(cmdId).build());
         }
 
-        return new Output(new CompositeNodeTOImpl(getCommandId(), null, output));
+        return new Output(ImmutableLeafSetNodeBuilder.create()
+                .withNodeIdentifier(new NodeIdentifier(QName.create(getCommandId(), "remote-commands")))
+                .withValue(leafListChildren).build());
     }
 
     private NetconfClientConfigurationBuilder getConfig(final Input inputArgs) {
@@ -105,11 +117,11 @@ public class Connect extends AbstractCommand {
 
     private <T> Optional<T> getArgumentOpt(final Input inputArgs, final String argName, final Class<T> type) {
         final QName argQName = QName.create(getCommandId(), argName);
-        final Node<?> argumentNode = inputArgs.getArg(argName);
+        final NormalizedNode<?, ?> argumentNode = inputArgs.getArg(argName);
         if (argumentNode == null) {
             return Optional.absent();
         }
-        Preconditions.checkArgument(argumentNode instanceof SimpleNode, "Only simple type argument supported, %s",
+        Preconditions.checkArgument(argumentNode instanceof LeafNode, "Only simple type argument supported, %s",
                 argQName);
 
         final Object value = argumentNode.getValue();

@@ -13,6 +13,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.Maps;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -25,8 +26,10 @@ import org.opendaylight.controller.netconf.cli.io.ConsoleContext;
 import org.opendaylight.controller.netconf.cli.io.ConsoleIO;
 import org.opendaylight.controller.netconf.cli.reader.AbstractReader;
 import org.opendaylight.controller.netconf.cli.reader.ReadingException;
-import org.opendaylight.yangtools.yang.data.api.Node;
-import org.opendaylight.yangtools.yang.data.impl.NodeFactory;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableChoiceNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.ChoiceCaseNode;
 import org.opendaylight.yangtools.yang.model.api.ChoiceSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
@@ -55,7 +58,7 @@ public class ChoiceReader extends AbstractReader<ChoiceSchemaNode> {
     }
 
     @Override
-    public List<Node<?>> readWithContext(final ChoiceSchemaNode choiceNode) throws IOException, ReadingException {
+    public List<NormalizedNode<?, ?>> readWithContext(final ChoiceSchemaNode choiceNode) throws IOException, ReadingException {
         final Map<String, ChoiceCaseNode> availableCases = collectAllCases(choiceNode);
         console.formatLn("Select case for choice %s from: %s", choiceNode.getQName().getLocalName(),
                 formatSet(availableCases.keySet()));
@@ -74,19 +77,22 @@ public class ChoiceReader extends AbstractReader<ChoiceSchemaNode> {
             throw new ReadingException(message);
         }
 
-        return readSelectedCase(selectedCase);
+        return Collections.<NormalizedNode<?, ?>>singletonList(
+                ImmutableChoiceNodeBuilder.create()
+                        .withNodeIdentifier(new NodeIdentifier(choiceNode.getQName()))
+                        .withValue(((Collection) readSelectedCase(selectedCase))).build());
     }
 
-    protected List<Node<?>> readSelectedCase(final ChoiceCaseNode selectedCase) throws ReadingException {
+    protected List<NormalizedNode<?, ?>> readSelectedCase(final ChoiceCaseNode selectedCase) throws ReadingException {
         // IF there is a case that contains only one Empty type leaf, create the
         // leaf without question, since the case was selected
         if (containsOnlyOneEmptyLeaf(selectedCase)) {
-            final Node<?> newNode = NodeFactory.createImmutableSimpleNode(selectedCase.getChildNodes().iterator()
-                    .next().getQName(), null, null);
-            return Collections.<Node<?>> singletonList(newNode);
+            final NormalizedNode<?, ?> newNode = ImmutableLeafNodeBuilder.create()
+                    .withNodeIdentifier(new NodeIdentifier(selectedCase.getChildNodes().iterator().next().getQName())).build();
+            return Collections.<NormalizedNode<?, ?>>singletonList(newNode);
         }
 
-        final List<Node<?>> newNodes = new ArrayList<>();
+        final List<NormalizedNode<?, ?>> newNodes = new ArrayList<>();
         for (final DataSchemaNode schemaNode : selectedCase.getChildNodes()) {
             newNodes.addAll(argumentHandlerRegistry.getGenericReader(getSchemaContext(), getReadConfigNode()).read(
                     schemaNode));
