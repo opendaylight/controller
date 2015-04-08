@@ -17,10 +17,8 @@ import org.opendaylight.controller.netconf.api.NetconfSessionListener;
 import org.opendaylight.controller.netconf.api.NetconfTerminationReason;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
-import org.opendaylight.controller.netconf.impl.mapping.operations.DefaultCloseSession;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationRouter;
 import org.opendaylight.controller.netconf.util.messages.SendErrorExceptionUtil;
-import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,11 +87,6 @@ public class NetconfServerSessionListener implements NetconfSessionListener<Netc
                     session);
             LOG.debug("Responding with message {}", message);
             session.sendMessage(message);
-
-            if (isCloseSession(netconfMessage)) {
-                closeNetconfSession(session);
-            }
-
         } catch (final RuntimeException e) {
             // TODO: should send generic error or close session?
             LOG.error("Unexpected exception", e);
@@ -106,14 +99,6 @@ public class NetconfServerSessionListener implements NetconfSessionListener<Netc
             SendErrorExceptionUtil.sendErrorMessage(session, e, netconfMessage);
         }
     }
-
-    private void closeNetconfSession(final NetconfServerSession session) {
-        // destroy NetconfOperationService
-        session.close();
-        LOG.info("Session {} closed successfully", session.getSessionId());
-    }
-
-
 
     private NetconfMessage processDocument(final NetconfMessage netconfMessage, final NetconfServerSession session)
             throws NetconfDocumentedException {
@@ -165,15 +150,5 @@ public class NetconfServerSessionListener implements NetconfSessionListener<Netc
                 NetconfDocumentedException.ErrorSeverity.error,
                 ImmutableMap.of(NetconfDocumentedException.ErrorTag.missing_attribute.toString(),
                         XmlNetconfConstants.MESSAGE_ID));
-    }
-
-    private static boolean isCloseSession(final NetconfMessage incomingDocument) {
-        final Document document = incomingDocument.getDocument();
-        XmlElement rpcElement = XmlElement.fromDomDocument(document);
-        if (rpcElement.getOnlyChildElementOptionally(DefaultCloseSession.CLOSE_SESSION).isPresent()) {
-            return true;
-        }
-
-        return false;
     }
 }

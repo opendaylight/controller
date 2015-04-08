@@ -10,6 +10,8 @@ package org.opendaylight.controller.netconf.impl;
 
 import com.google.common.base.Preconditions;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.handler.codec.MessageToByteEncoder;
 import java.text.SimpleDateFormat;
@@ -45,6 +47,7 @@ public final class NetconfServerSession extends AbstractNetconfSession<NetconfSe
 
     private Date loginTime;
     private long inRpcSuccess, inRpcFail, outRpcError;
+    private volatile boolean delayedClose;
 
     public NetconfServerSession(final NetconfServerSessionListener sessionListener, final Channel channel, final long sessionId,
             final NetconfHelloMessageAdditionalHeader header) {
@@ -58,6 +61,29 @@ public final class NetconfServerSession extends AbstractNetconfSession<NetconfSe
         Preconditions.checkState(loginTime == null, "Session is already up");
         this.loginTime = new Date();
         super.sessionUp();
+    }
+
+    /**
+     * Close this session after next message is sent.
+     * Suitable for close rpc that needs to send ok response before the session is closed.
+     */
+    public void delayedClose() {
+        this.delayedClose = true;
+    }
+
+    @Override
+    public ChannelFuture sendMessage(final NetconfMessage netconfMessage) {
+        final ChannelFuture channelFuture = super.sendMessage(netconfMessage);
+        // delayed close was set, close after the message was sent
+        if(delayedClose) {
+            channelFuture.addListener(new ChannelFutureListener() {
+                @Override
+                public void operationComplete(final ChannelFuture future) throws Exception {
+                    close();
+                }
+            });
+        }
+        return channelFuture;
     }
 
     public void onIncommingRpcSuccess() {
