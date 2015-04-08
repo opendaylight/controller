@@ -38,10 +38,16 @@ class BindingDOMNotificationListenerAdapter implements DOMNotificationListener {
 
     @Override
     public void onNotification(@Nonnull final DOMNotification notification) {
-        final Notification baNotification =
-                codec.fromNormalizedNodeNotification(notification.getType(), notification.getBody());
+        final Notification baNotification = deserialize(notification);
         final QName notificationQName = notification.getType().getLastComponent();
         getInvoker(notification.getType()).invokeNotification(delegate, notificationQName, baNotification);
+    }
+
+    private Notification deserialize(final DOMNotification notification) {
+        if(notification instanceof LazySerializedDOMNotification) {
+            return ((LazySerializedDOMNotification) notification).getBindingData();
+        }
+        return codec.fromNormalizedNodeNotification(notification.getType(), notification.getBody());
     }
 
     private NotificationListenerInvoker getInvoker(final SchemaPath type) {
