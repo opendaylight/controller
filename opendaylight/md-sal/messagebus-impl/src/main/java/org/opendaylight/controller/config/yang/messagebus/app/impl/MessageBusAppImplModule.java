@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
@@ -7,7 +7,9 @@
  */
 package org.opendaylight.controller.config.yang.messagebus.app.impl;
 
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
@@ -15,7 +17,10 @@ import org.opendaylight.controller.md.sal.binding.api.MountPointService;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
 import org.opendaylight.controller.md.sal.dom.api.DOMNotificationPublishService;
 import org.opendaylight.controller.messagebus.app.impl.EventSourceTopology;
-import org.opendaylight.controller.messagebus.app.impl.NetconfEventSourceManager;
+import org.opendaylight.controller.messagebus.eventsources.netconf.NetconfEventSourceManager;
+import org.opendaylight.controller.messagebus.spi.EventSource;
+import org.opendaylight.controller.messagebus.spi.EventSourceRegistration;
+import org.opendaylight.controller.messagebus.spi.EventSourceRegistry;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ProviderContext;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
@@ -23,8 +28,9 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MessageBusAppImplModule extends
-        org.opendaylight.controller.config.yang.messagebus.app.impl.AbstractMessageBusAppImplModule {
+import com.google.common.base.Preconditions;
+
+public class MessageBusAppImplModule extends org.opendaylight.controller.config.yang.messagebus.app.impl.AbstractMessageBusAppImplModule {
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageBusAppImplModule.class);
 
     private BundleContext bundleContext;
@@ -52,37 +58,50 @@ public class MessageBusAppImplModule extends
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        final List<NamespaceToStream> namespaceMapping = getNamespaceToStream();
 
         final ProviderContext bindingCtx = getBindingBrokerDependency().registerProvider(new Providers.BindingAware());
         final ProviderSession domCtx = getDomBrokerDependency().registerProvider(new Providers.BindingIndependent());
-
         final DataBroker dataBroker = bindingCtx.getSALService(DataBroker.class);
         final DOMNotificationPublishService domPublish = domCtx.getService(DOMNotificationPublishService.class);
         final DOMMountPointService domMount = domCtx.getService(DOMMountPointService.class);
         final MountPointService bindingMount = bindingCtx.getSALService(MountPointService.class);
         final RpcProviderRegistry rpcRegistry = bindingCtx.getSALService(RpcProviderRegistry.class);
 
-        final EventSourceTopology eventSourceTopology = new EventSourceTopology(dataBroker, rpcRegistry);
-        final NetconfEventSourceManager eventSourceManager = new NetconfEventSourceManager(dataBroker, domPublish,
-                domMount, bindingMount, eventSourceTopology, getNamespaceToStream());
+        final EventSourceRegistryWrapper eventSourceRegistryWrapper = new EventSourceRegistryWrapper(new EventSourceTopology(dataBroker, rpcRegistry));
+        final NetconfEventSourceManager netconfEventSourceManager = NetconfEventSourceManager.create(dataBroker, domPublish,domMount, bindingMount, eventSourceRegistryWrapper, getNamespaceToStream());
+        eventSourceRegistryWrapper.addAutoCloseable(netconfEventSourceManager);
+        LOGGER.info("Messagebus initialized");
+        return eventSourceRegistryWrapper;
 
-        final AutoCloseable closer = new AutoCloseable() {
-            @Override
-            public void close() {
-                eventSourceTopology.close();
-                eventSourceManager.close();
-            }
-        };
-
-        return closer;
     }
 
-    private void closeProvider(final AutoCloseable closable) {
-        try {
-            closable.close();
-        } catch (final Exception e) {
-            LOGGER.error("Exception while closing: {}\n Exception: {}", closable, e);
+    //TODO: separate NetconfEventSource into separate bundle, remove this wrapper, return EventSourceTopology directly as EventSourceRegistry
+    private class EventSourceRegistryWrapper implements EventSourceRegistry{
+
+        private final EventSourceRegistry baseEventSourceRegistry;
+        private final Set<AutoCloseable> autoCloseables = new HashSet<>();
+
+        public EventSourceRegistryWrapper(EventSourceRegistry baseEventSourceRegistry) {
+            this.baseEventSourceRegistry = baseEventSourceRegistry;
         }
+
+        public void addAutoCloseable(AutoCloseable ac){
+            Preconditions.checkNotNull(ac);
+            autoCloseables.add(ac);
+        }
+
+        @Override
+        public void close() throws Exception {
+            for(AutoCloseable ac : autoCloseables){
+                ac.close();
+            }
+            baseEventSourceRegistry.close();
+        }
+
+        @Override
+        public <T extends EventSource> EventSourceRegistration<T> registerEventSource(T eventSource) {
+            return this.baseEventSourceRegistry.registerEventSource(eventSource);
+        }
+
     }
 }
