@@ -14,8 +14,6 @@ import org.opendaylight.controller.md.sal.binding.api.NotificationService;
 import org.opendaylight.controller.md.sal.binding.impl.BindingDOMAdapterBuilder.Factory;
 import org.opendaylight.controller.md.sal.dom.api.DOMNotificationService;
 import org.opendaylight.controller.md.sal.dom.api.DOMService;
-import org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolder;
-import org.opendaylight.controller.sal.binding.spi.NotificationInvokerFactory;
 import org.opendaylight.yangtools.binding.data.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.yangtools.concepts.AbstractListenerRegistration;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
@@ -34,7 +32,7 @@ public class BindingDOMNotificationServiceAdapter implements NotificationService
     private final BindingNormalizedNodeSerializer codec;
     private final DOMNotificationService domNotifService;
 
-    public BindingDOMNotificationServiceAdapter(final BindingNormalizedNodeSerializer codec, final DOMNotificationService domNotifService, final NotificationInvokerFactory notificationInvokerFactory) {
+    public BindingDOMNotificationServiceAdapter(final BindingNormalizedNodeSerializer codec, final DOMNotificationService domNotifService) {
         this.codec = codec;
         this.domNotifService = domNotifService;
     }
@@ -72,8 +70,7 @@ public class BindingDOMNotificationServiceAdapter implements NotificationService
         protected NotificationService createInstance(final BindingToNormalizedNodeCodec codec,
                 final ClassToInstanceMap<DOMService> delegates) {
             final DOMNotificationService domNotification = delegates.getInstance(DOMNotificationService.class);
-            final NotificationInvokerFactory invokerFactory = SingletonHolder.INVOKER_FACTORY;
-            return new BindingDOMNotificationServiceAdapter(codec.getCodecRegistry(), domNotification, invokerFactory);
+            return new BindingDOMNotificationServiceAdapter(codec.getCodecRegistry(), domNotification);
         }
 
         @Override

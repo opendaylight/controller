@@ -217,6 +217,29 @@ module opendaylight-sal-binding-broker-impl {
         }
     }
 
+    augment "/config:modules/config:module/config:configuration" {
+        case binding-notification-broker {
+            when "/config:modules/config:module/config:type = 'binding-notification-broker'";
+            container notification-adapter {
+                uses config:service-ref {
+                    refine type {
+                        mandatory false;
+                        config:required-identity binding-new-notification-service;
+                    }
+                }
+            }
+
+            container notification-publish-adapter {
+                uses config:service-ref {
+                    refine type {
+                        mandatory false;
+                        config:required-identity binding-new-notification-publish-service;
+                    }
+                }
+            }
+        }
+    }
+
     augment "/config:modules/config:module/config:state" {
         case binding-notification-broker {
             when "/config:modules/config:module/config:type = 'binding-notification-broker'";
