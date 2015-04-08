@@ -77,6 +77,10 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
 
     private String statRetrievalTime;
 
+    private long leadershipChangeCount;
+
+    private long lastLeadershipChangeTime;
+
     public ShardStats(final String shardName, final String mxBeanType) {
         super(shardName, mxBeanType, JMX_CATEGORY_SHARD);
     }
@@ -365,5 +369,20 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
     public String getStatRetrievalError() {
         getOnDemandRaftState();
         return statRetrievalError;
+    }
+
+    @Override
+    public long getLeadershipChangeCount() {
+        return leadershipChangeCount;
+    }
+
+    public void incrementLeadershipChangeCount() {
+        leadershipChangeCount++;
+        lastLeadershipChangeTime = System.currentTimeMillis();
+    }
+
+    @Override
+    public String getLastLeadershipChangeTime() {
+        return DATE_FORMAT.format(new Date(lastLeadershipChangeTime));
     }
 }
