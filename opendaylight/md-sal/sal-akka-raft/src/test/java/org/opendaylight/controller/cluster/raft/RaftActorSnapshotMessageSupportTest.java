@@ -13,7 +13,6 @@ import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import akka.actor.ActorRef;
-import akka.japi.Procedure;
 import akka.persistence.SaveSnapshotFailure;
 import akka.persistence.SaveSnapshotSuccess;
 import akka.persistence.SnapshotMetadata;
@@ -21,14 +20,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
-import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.slf4j.Logger;
@@ -118,20 +115,6 @@ public class RaftActorSnapshotMessageSupportTest {
         assertEquals("Snapshot index", lastAppliedDuringSnapshotCapture, context.getReplicatedLog().getSnapshotIndex());
 
         verify(mockCohort).applySnapshot(snapshotBytes);
-    }
-
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    @Test
-    public void testOnCaptureSnapshot() throws Exception {
-
-        sendMessageToSupport(new CaptureSnapshot(3, 1, 2, 1, 2, 1, null));
-
-        ArgumentCaptor<Procedure> procedure = ArgumentCaptor.forClass(Procedure.class);
-        verify(mockSnapshotManager).create(procedure.capture());
-
-        procedure.getValue().apply(null);
-
-        verify(mockCohort).createSnapshot(same(mockRaftActorRef));
     }
 
     @Test
