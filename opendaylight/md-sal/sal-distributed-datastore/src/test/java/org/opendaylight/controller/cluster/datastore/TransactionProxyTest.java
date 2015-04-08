@@ -476,8 +476,13 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         verifyCohortFutures(proxy, getSystem().actorSelection(actorRef.path()));
 
-        verify(mockActorContext).executeOperationAsync(eq(actorSelection(actorRef)),
-                isA(BatchedModifications.class));
+        List<BatchedModifications> batchedModifications = captureBatchedModifications(actorRef);
+        assertEquals("Captured BatchedModifications count", 1, batchedModifications.size());
+
+        verifyBatchedModifications(batchedModifications.get(0), true,
+                new WriteModification(TestModel.TEST_PATH, nodeToWrite));
+
+        assertEquals("getTotalMessageCount", 1, batchedModifications.get(0).getTotalMessagesSent());
     }
 
     @Test
@@ -1221,6 +1226,8 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         verifyBatchedModifications(batchedModifications.get(2), true, new MergeModification(mergePath3, mergeNode3),
                 new DeleteModification(deletePath2));
+
+        assertEquals("getTotalMessageCount", 3, batchedModifications.get(2).getTotalMessagesSent());
     }
 
     @Test

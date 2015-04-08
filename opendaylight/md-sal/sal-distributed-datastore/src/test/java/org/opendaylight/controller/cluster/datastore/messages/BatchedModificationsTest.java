@@ -46,6 +46,7 @@ public class BatchedModificationsTest {
         batched.addModification(new MergeModification(mergePath, mergeData));
         batched.addModification(new DeleteModification(deletePath));
         batched.setReady(true);
+        batched.setTotalMessagesSent(5);
 
         BatchedModifications clone = (BatchedModifications) SerializationUtils.clone(
                 (Serializable) batched.toSerializable());
@@ -54,6 +55,7 @@ public class BatchedModificationsTest {
         assertEquals("getTransactionID", "tx1", clone.getTransactionID());
         assertEquals("getTransactionChainID", "txChain", clone.getTransactionChainID());
         assertEquals("isReady", true, clone.isReady());
+        assertEquals("getTotalMessagesSent", 5, clone.getTotalMessagesSent());
 
         assertEquals("getModifications size", 3, clone.getModifications().size());
 
