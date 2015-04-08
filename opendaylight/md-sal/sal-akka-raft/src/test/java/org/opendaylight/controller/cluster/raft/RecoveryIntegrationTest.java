@@ -15,7 +15,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyJournalEntries;
-import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
@@ -53,7 +52,6 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         send2InitialPayloads();
 
         // Block these messages initially so we can control the sequence.
-        leaderActor.underlyingActor().startDropMessages(CaptureSnapshot.class);
         leaderActor.underlyingActor().startDropMessages(CaptureSnapshotReply.class);
         follower1Actor.underlyingActor().startDropMessages(AppendEntries.class);
 
@@ -63,13 +61,6 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         MockPayload payload3 = sendPayloadData(leaderActor, "three");
 
         MessageCollectorActor.expectMatching(follower1CollectorActor, AppendEntries.class, 3);
-
-        CaptureSnapshot captureSnapshot = MessageCollectorActor.expectFirstMatching(
-                leaderCollectorActor, CaptureSnapshot.class);
-
-        // First, deliver the CaptureSnapshot to the leader.
-        leaderActor.underlyingActor().stopDropMessages(CaptureSnapshot.class);
-        leaderActor.tell(captureSnapshot, leaderActor);
 
         // Send another payload.
         MockPayload payload4 = sendPayloadData(leaderActor, "four");
@@ -102,60 +93,7 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
     }
 
     @Test
-    public void testStatePersistedBetweenInitiateSnapshotAndCapture() {
-
-        send2InitialPayloads();
-
-        // Block these messages initially so we can control the sequence.
-        leaderActor.underlyingActor().startDropMessages(CaptureSnapshot.class);
-        follower1Actor.underlyingActor().startDropMessages(AppendEntries.class);
-
-        MockPayload payload2 = sendPayloadData(leaderActor, "two");
-
-        // This should trigger a snapshot.
-        MockPayload payload3 = sendPayloadData(leaderActor, "three");
-
-        // Send another payload.
-        MockPayload payload4 = sendPayloadData(leaderActor, "four");
-
-        MessageCollectorActor.expectMatching(follower1CollectorActor, AppendEntries.class, 3);
-
-        CaptureSnapshot captureSnapshot = MessageCollectorActor.expectFirstMatching(
-                leaderCollectorActor, CaptureSnapshot.class);
-
-        // First, deliver the AppendEntries to the follower
-        follower1Actor.underlyingActor().stopDropMessages(AppendEntries.class);
-
-        MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyJournalEntries.class, 3);
-
-        // Now deliver the CaptureSnapshot to the leader.
-        leaderActor.underlyingActor().stopDropMessages(CaptureSnapshot.class);
-        leaderActor.tell(captureSnapshot, leaderActor);
-
-        // Wait for snapshot complete.
-        MessageCollectorActor.expectFirstMatching(leaderCollectorActor, SaveSnapshotSuccess.class);
-
-        reinstateLeaderActor();
-
-        assertEquals("Leader snapshot term", currentTerm, leaderContext.getReplicatedLog().getSnapshotTerm());
-        assertEquals("Leader snapshot index", 1, leaderContext.getReplicatedLog().getSnapshotIndex());
-        assertEquals("Leader journal log size", 3, leaderContext.getReplicatedLog().size());
-        assertEquals("Leader journal last index", 4, leaderContext.getReplicatedLog().lastIndex());
-        assertEquals("Leader commit index", 4, leaderContext.getCommitIndex());
-        assertEquals("Leader last applied", 4, leaderContext.getLastApplied());
-
-        // payloads 2, 3, and 4 were applied after the snapshot was initiated and before it was captured so
-        // were included in the snapshot. They were also included as unapplied entries in the snapshot as
-        // they weren't yet applied to the state at the time the snapshot was initiated. They were applied to the
-        // state on recovery by the ApplyJournalEntries messages which remained in the persisted log.
-        // This is a side effect of trimming the persisted log to the sequence number captured at the time
-        // the snapshot was initiated.
-        assertEquals("Leader state", Arrays.asList(payload0, payload1, payload2, payload3, payload4, payload2,
-                payload3, payload4), leaderActor.underlyingActor().getState());
-    }
-
-    @Test
-    public void testApplyJournalEntriesPersistedAfterSnapshotPersisted() {
+    public void testStatePersistedAfterSnapshotPersisted() {
 
         send2InitialPayloads();
 

@@ -8,7 +8,6 @@
 
 package org.opendaylight.controller.cluster.raft;
 
-import akka.japi.Procedure;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 
@@ -39,13 +38,6 @@ public interface SnapshotState {
      * @return true if capture was started
      */
     boolean captureToInstall(ReplicatedLogEntry lastLogEntry, long replicatedToAllIndex, String targetFollower);
-
-    /**
-     * Create the snapshot
-     *
-     * @param callback a procedure to be called which should create the snapshot
-     */
-    void create(Procedure<Void> callback);
 
     /**
      * Persist the snapshot
