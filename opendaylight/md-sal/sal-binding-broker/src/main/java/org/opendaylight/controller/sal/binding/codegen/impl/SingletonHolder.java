@@ -31,8 +31,6 @@ public class SingletonHolder {
 
     public static final ClassPool CLASS_POOL = ClassPool.getDefault();
     public static final JavassistUtils JAVASSIST = JavassistUtils.forClassPool(CLASS_POOL);
-    public static final org.opendaylight.controller.sal.binding.codegen.impl.DefaultRuntimeCodeGenerator RPC_GENERATOR_IMPL = new org.opendaylight.controller.sal.binding.codegen.impl.DefaultRuntimeCodeGenerator(
-            CLASS_POOL);
 
     public static final int CORE_NOTIFICATION_THREADS = 4;
     public static final int MAX_NOTIFICATION_THREADS = 32;
