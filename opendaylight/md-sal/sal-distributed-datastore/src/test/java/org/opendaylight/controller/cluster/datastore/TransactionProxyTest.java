@@ -9,6 +9,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.opendaylight.controller.cluster.datastore.TransactionProxy.TransactionType.READ_ONLY;
@@ -20,11 +21,14 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.dispatch.Futures;
 import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.Assert;
@@ -45,14 +49,18 @@ import org.opendaylight.controller.cluster.datastore.modification.MergeModificat
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.DefaultShardStrategy;
 import org.opendaylight.controller.cluster.datastore.utils.DoNothingActor;
+import org.opendaylight.controller.cluster.datastore.utils.NormalizedNodeAggregatorTest;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
+import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.CreateTransactionReply;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.Promise;
@@ -1352,5 +1360,80 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         verifyRecordingOperationFutures(transactionProxy.getRecordedOperationFutures(),
                 BatchedModificationsReply.class, BatchedModificationsReply.class, BatchedModificationsReply.class);
+    }
+
+    @Test
+    public void testReadRoot() throws ReadFailedException, InterruptedException, ExecutionException, java.util.concurrent.TimeoutException {
+
+        SchemaContext schemaContext = SchemaContextHelper.full();
+        Configuration configuration = mock(Configuration.class);
+        doReturn(configuration).when(mockActorContext).getConfiguration();
+        doReturn(schemaContext).when(mockActorContext).getSchemaContext();
+        doReturn(Sets.newHashSet("test", "cars")).when(configuration).getAllShardNames();
+
+        NormalizedNode<?, ?> expectedNode1 = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        NormalizedNode<?, ?> expectedNode2 = ImmutableNodes.containerNode(CarsModel.CARS_QNAME);
+
+        setUpReadData("test", NormalizedNodeAggregatorTest.getRootNode(expectedNode1, schemaContext));
+        setUpReadData("cars", NormalizedNodeAggregatorTest.getRootNode(expectedNode2, schemaContext));
+
+        doReturn(memberName).when(mockActorContext).getCurrentMemberName();
+
+        doReturn(10).when(mockActorContext).getTransactionOutstandingOperationLimit();
+
+        doReturn(getSystem().dispatchers().defaultGlobalDispatcher()).when(mockActorContext).getClientDispatcher();
+
+        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext, READ_ONLY);
+
+        Optional<NormalizedNode<?, ?>> readOptional = transactionProxy.read(
+                YangInstanceIdentifier.builder().build()).get(5, TimeUnit.SECONDS);
+
+        assertEquals("NormalizedNode isPresent", true, readOptional.isPresent());
+
+        NormalizedNode<?, ?> normalizedNode = readOptional.get();
+
+        assertTrue("Expect value to be a Collection", normalizedNode.getValue() instanceof Collection);
+
+        Collection<NormalizedNode<?,?>> collection = (Collection<NormalizedNode<?,?>>) normalizedNode.getValue();
+
+        for(NormalizedNode<?,?> node : collection){
+            assertTrue("Expected " + node + " to be a ContainerNode", node instanceof ContainerNode);
+        }
+
+        assertTrue("Child with QName = " + TestModel.TEST_QNAME + " not found",
+                NormalizedNodeAggregatorTest.findChildWithQName(collection, TestModel.TEST_QNAME) != null);
+
+        assertEquals(expectedNode1, NormalizedNodeAggregatorTest.findChildWithQName(collection, TestModel.TEST_QNAME));
+
+        assertTrue("Child with QName = " + CarsModel.BASE_QNAME + " not found",
+                NormalizedNodeAggregatorTest.findChildWithQName(collection, CarsModel.BASE_QNAME) != null);
+
+        assertEquals(expectedNode2, NormalizedNodeAggregatorTest.findChildWithQName(collection, CarsModel.BASE_QNAME));
+    }
+
+
+    private void setUpReadData(String shardName, NormalizedNode<?, ?> expectedNode) {
+        ActorSystem actorSystem = getSystem();
+        ActorRef shardActorRef = getSystem().actorOf(Props.create(DoNothingActor.class));
+
+        doReturn(getSystem().actorSelection(shardActorRef.path())).
+                when(mockActorContext).actorSelection(shardActorRef.path().toString());
+
+        doReturn(Futures.successful(getSystem().actorSelection(shardActorRef.path()))).
+                when(mockActorContext).findPrimaryShardAsync(eq(shardName));
+
+        doReturn(true).when(mockActorContext).isPathLocal(shardActorRef.path().toString());
+
+        ActorRef txActorRef = actorSystem.actorOf(Props.create(DoNothingActor.class));
+
+        doReturn(actorSystem.actorSelection(txActorRef.path())).
+                when(mockActorContext).actorSelection(txActorRef.path().toString());
+
+        doReturn(Futures.successful(createTransactionReply(txActorRef, DataStoreVersions.CURRENT_VERSION))).when(mockActorContext).
+                executeOperationAsync(eq(actorSystem.actorSelection(shardActorRef.path())),
+                        eqCreateTransaction(memberName, TransactionType.READ_ONLY));
+
+        doReturn(readSerializedDataReply(expectedNode)).when(mockActorContext).executeOperationAsync(
+                eq(actorSelection(txActorRef)), eqSerializedReadData(YangInstanceIdentifier.builder().build()));
     }
 }
