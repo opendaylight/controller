@@ -18,6 +18,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
+
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
@@ -156,7 +157,7 @@ public class InvokeRpcMethodTest {
         contNode.withChild(lfNode);
         container.withChild(contNode.build());
 
-        return new NormalizedNodeContext(new InstanceIdentifierContext(null, rpcInputSchemaNode, null, schema), container.build());
+        return new NormalizedNodeContext(new InstanceIdentifierContext<>(null, rpcInputSchemaNode, null, schema), container.build());
     }
 
     @Test
@@ -309,7 +310,7 @@ public class InvokeRpcMethodTest {
         final DataContainerNodeAttrBuilder<NodeIdentifier, ContainerNode> containerBuilder =
                 Builders.containerBuilder(rpcInputSchemaNode);
 
-        final NormalizedNodeContext payload = new NormalizedNodeContext(new InstanceIdentifierContext(null, rpcInputSchemaNode,
+        final NormalizedNodeContext payload = new NormalizedNodeContext(new InstanceIdentifierContext<>(null, rpcInputSchemaNode,
                 null, schemaContext), containerBuilder.build());
 
         final BrokerFacade brokerFacade = mock(BrokerFacade.class);

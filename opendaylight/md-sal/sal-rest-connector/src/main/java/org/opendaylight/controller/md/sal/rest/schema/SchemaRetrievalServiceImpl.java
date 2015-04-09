@@ -27,7 +27,6 @@ public class SchemaRetrievalServiceImpl implements SchemaRetrievalService {
     private final ControllerContext salContext;
 
     private static final Splitter SLASH_SPLITTER = Splitter.on("/");
-    private static final Splitter AT_SPLITTER = Splitter.on("@");
     private static final String MOUNT_ARG = ControllerContext.MOUNT;
 
     public SchemaRetrievalServiceImpl(final ControllerContext controllerContext) {
@@ -82,7 +81,7 @@ public class SchemaRetrievalServiceImpl implements SchemaRetrievalService {
     }
 
     private SchemaContext getMountSchemaContext(final String identifier) {
-        final InstanceIdentifierContext mountContext = salContext.toMountPointIdentifier(identifier);
+        final InstanceIdentifierContext<?> mountContext = salContext.toMountPointIdentifier(identifier);
         return mountContext.getSchemaContext();
     }
 

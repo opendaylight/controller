@@ -14,6 +14,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.opendaylight.controller.sal.restconf.impl.test.RestOperationUtils.XML;
+
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.CheckedFuture;
@@ -104,6 +105,7 @@ public class RestPostOperationTest extends JerseyTest {
         restconfImpl.setControllerContext(context);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     @Ignore /// xmlData* need netconf-yang
     public void postDataViaUrlMountPoint() throws UnsupportedEncodingException {
@@ -127,6 +129,7 @@ public class RestPostOperationTest extends JerseyTest {
         assertEquals(400, post(uri, MediaType.APPLICATION_JSON, ""));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     @Ignore //jenkins has problem with JerseyTest - we expecting problems with singletons ControllerContext as schemaContext holder
     public void createConfigurationDataTest() throws UnsupportedEncodingException, ParseException {
@@ -138,6 +141,7 @@ public class RestPostOperationTest extends JerseyTest {
                 .thenReturn(mock(CheckedFuture.class));
 
         final ArgumentCaptor<YangInstanceIdentifier> instanceIdCaptor = ArgumentCaptor.forClass(YangInstanceIdentifier.class);
+        @SuppressWarnings("rawtypes")
         final ArgumentCaptor<NormalizedNode> compNodeCaptor = ArgumentCaptor.forClass(NormalizedNode.class);
 
 

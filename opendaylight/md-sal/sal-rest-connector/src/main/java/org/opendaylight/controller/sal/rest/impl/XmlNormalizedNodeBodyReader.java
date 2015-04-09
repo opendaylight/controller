@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.sal.rest.impl;
 
-import com.google.common.base.Optional;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
@@ -83,11 +82,11 @@ public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPro
             final MultivaluedMap<String, String> httpHeaders, final InputStream entityStream) throws IOException,
             WebApplicationException {
         try {
-            final Optional<InstanceIdentifierContext> path = getIdentifierWithSchema();
+            final InstanceIdentifierContext<?> path = getInstanceIdentifierContext();
 
             if (entityStream.available() < 1) {
                 // represent empty nopayload input
-                return new NormalizedNodeContext(path.get(), null);
+                return new NormalizedNodeContext(path, null);
             }
 
             final DocumentBuilder dBuilder;
@@ -98,8 +97,8 @@ public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPro
             }
             final Document doc = dBuilder.parse(entityStream);
 
-            final NormalizedNode<?, ?> result = parse(path.get(),doc);
-            return new NormalizedNodeContext(path.get(),result);
+            final NormalizedNode<?, ?> result = parse(path,doc);
+            return new NormalizedNodeContext(path,result);
         } catch (final Exception e) {
             LOG.debug("Error parsing xml input", e);
 

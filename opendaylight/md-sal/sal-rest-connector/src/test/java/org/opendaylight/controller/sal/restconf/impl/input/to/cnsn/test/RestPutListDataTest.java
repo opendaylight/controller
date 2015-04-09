@@ -13,6 +13,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
 import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.CheckedFuture;
 import java.io.FileNotFoundException;
@@ -190,7 +191,7 @@ public class RestPutListDataTest {
             testNodeContainer.withChild(leafKey2.build());
         }
 
-        final NormalizedNodeContext testCompositeContext = new NormalizedNodeContext(new InstanceIdentifierContext(
+        final NormalizedNodeContext testCompositeContext = new NormalizedNodeContext(new InstanceIdentifierContext<>(
                 null, testNodeSchemaNode, null, schemaContextTestModule), testNodeContainer.build());
 
         restconfImpl.updateConfigurationData(toUri(uriKey1, uriKey2), testCompositeContext);

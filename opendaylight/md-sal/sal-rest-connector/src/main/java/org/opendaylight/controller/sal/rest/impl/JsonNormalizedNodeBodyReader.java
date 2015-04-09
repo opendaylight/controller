@@ -59,7 +59,7 @@ public class JsonNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPr
             final MultivaluedMap<String, String> httpHeaders, final InputStream entityStream) throws IOException,
             WebApplicationException {
         try {
-            final InstanceIdentifierContext<?> path = getIdentifierWithSchema().get();
+            final InstanceIdentifierContext<?> path = getInstanceIdentifierContext();
             if (entityStream.available() < 1) {
                 return new NormalizedNodeContext(path, null);
             }
