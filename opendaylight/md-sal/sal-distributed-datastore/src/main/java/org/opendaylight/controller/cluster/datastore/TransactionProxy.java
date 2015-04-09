@@ -10,20 +10,15 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorSelection;
 import akka.dispatch.Mapper;
-import akka.dispatch.OnComplete;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import org.opendaylight.controller.cluster.datastore.compat.PreLithiumTransactionContextImpl;
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
@@ -72,12 +67,6 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
         }
     }
 
-    private static enum TransactionState {
-        OPEN,
-        READY,
-        CLOSED,
-    }
-
     static final Mapper<Throwable, Throwable> SAME_FAILURE_TRANSFORMER =
                                                               new Mapper<Throwable, Throwable>() {
         @Override
@@ -90,26 +79,11 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
 
     private static final Logger LOG = LoggerFactory.getLogger(TransactionProxy.class);
 
-    /**
-     * Stores the remote Tx actors for each requested data store path to be used by the
-     * PhantomReference to close the remote Tx's. This is only used for read-only Tx's. The
-     * remoteTransactionActorsMB volatile serves as a memory barrier to publish updates to the
-     * remoteTransactionActors list so they will be visible to the thread accessing the
-     * PhantomReference.
-     */
-    List<ActorSelection> remoteTransactionActors;
-    volatile AtomicBoolean remoteTransactionActorsMB;
-
-    /**
-     * Stores the create transaction results per shard.
-     */
-    private final Map<String, TransactionFutureCallback> txFutureCallbackMap = new HashMap<>();
-
     private final TransactionType transactionType;
-    final ActorContext actorContext;
+    private final TransactionResources resources;
+    private final ActorContext actorContext;
     private final String transactionChainId;
     private final SchemaContext schemaContext;
-    private TransactionState state = TransactionState.OPEN;
 
     private volatile boolean initialized;
     private Semaphore operationLimiter;
@@ -129,6 +103,8 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
             "schemaContext should not be null");
         this.transactionChainId = transactionChainId;
 
+        this.resources = new TransactionResources(actorContext, getIdentifier());
+
         LOG.debug("Created txn {} of type {} on chain {}", getIdentifier(), transactionType, transactionChainId);
     }
 
@@ -139,18 +115,6 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
         }
 
         return new TransactionIdentifier(memberName, counter.getAndIncrement());
-    }
-
-    @VisibleForTesting
-    boolean hasTransactionContext() {
-        for(TransactionFutureCallback txFutureCallback : txFutureCallbackMap.values()) {
-            TransactionContext transactionContext = txFutureCallback.getTransactionContext();
-            if(transactionContext != null) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     @Override
@@ -202,8 +166,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
     private void checkModificationState() {
         Preconditions.checkState(transactionType != TransactionType.READ_ONLY,
                 "Modification operation on read-only transaction is not allowed");
-        Preconditions.checkState(state == TransactionState.OPEN,
-                "Transaction is sealed - further modifications are not allowed");
+        resources.ensureOpen();
     }
 
     private void throttleOperation() {
@@ -293,35 +256,23 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
         });
     }
 
-    private boolean seal(final TransactionState newState) {
-        if (state == TransactionState.OPEN) {
-            state = newState;
-            return true;
-        } else {
-            return false;
-        }
-    }
-
     @Override
     public AbstractThreePhaseCommitCohort ready() {
         Preconditions.checkState(transactionType != TransactionType.READ_ONLY,
                 "Read-only transactions cannot be readied");
 
-        final boolean success = seal(TransactionState.READY);
-        Preconditions.checkState(success, "Transaction %s is %s, it cannot be readied", getIdentifier(), state);
+        final Collection<TransactionFutureCallback> callbacks = resources.ready();
+        LOG.debug("Tx {} Readying {} transactions for commit", getIdentifier(), callbacks.size());
 
-        LOG.debug("Tx {} Readying {} transactions for commit", getIdentifier(),
-                    txFutureCallbackMap.size());
-
-        if (txFutureCallbackMap.isEmpty()) {
+        if (callbacks.isEmpty()) {
             TransactionRateLimitingCallback.adjustRateLimitForUnusedTransaction(actorContext);
             return NoOpDOMStoreThreePhaseCommitCohort.INSTANCE;
         }
 
-        throttleOperation(txFutureCallbackMap.size());
+        throttleOperation(callbacks.size());
 
-        List<Future<ActorSelection>> cohortFutures = new ArrayList<>(txFutureCallbackMap.size());
-        for(TransactionFutureCallback txFutureCallback : txFutureCallbackMap.values()) {
+        List<Future<ActorSelection>> cohortFutures = new ArrayList<>(callbacks.size());
+        for (TransactionFutureCallback txFutureCallback : callbacks) {
 
             LOG.debug("Tx {} Readying transaction for shard {} chain {}", getIdentifier(),
                         txFutureCallback.getShardName(), transactionChainId);
@@ -351,34 +302,10 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
 
     @Override
     public void close() {
-        if (!seal(TransactionState.CLOSED)) {
-            if (state == TransactionState.CLOSED) {
-                // Idempotent no-op as per AutoCloseable recommendation
-                return;
-            }
-
-            throw new IllegalStateException(String.format("Transaction %s is ready, it cannot be closed",
-                getIdentifier()));
-        }
-
-        for (TransactionFutureCallback txFutureCallback : txFutureCallbackMap.values()) {
-            txFutureCallback.enqueueTransactionOperation(new TransactionOperation() {
-                @Override
-                public void invoke(TransactionContext transactionContext) {
-                    transactionContext.closeTransaction();
-                }
-            });
-        }
-
-        txFutureCallbackMap.clear();
-
-        if(remoteTransactionActorsMB != null) {
-            remoteTransactionActors.clear();
-            remoteTransactionActorsMB.set(true);
-        }
+        resources.close();
     }
 
-    private String shardNameFromIdentifier(YangInstanceIdentifier path){
+    private String shardNameFromIdentifier(YangInstanceIdentifier path) {
         return ShardStrategyFactory.getStrategy(path).findShard(path);
     }
 
@@ -394,30 +321,12 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
         return operationLimiter;
     }
 
+    final TransactionResources getResources() {
+        return resources;
+    }
+
     private TransactionFutureCallback getOrCreateTxFutureCallback(YangInstanceIdentifier path) {
-        String shardName = shardNameFromIdentifier(path);
-        TransactionFutureCallback txFutureCallback = txFutureCallbackMap.get(shardName);
-        if(txFutureCallback == null) {
-            Future<ActorSelection> findPrimaryFuture = sendFindPrimaryShardAsync(shardName);
-
-            final TransactionFutureCallback newTxFutureCallback = new TransactionFutureCallback(this, shardName);
-
-            txFutureCallback = newTxFutureCallback;
-            txFutureCallbackMap.put(shardName, txFutureCallback);
-
-            findPrimaryFuture.onComplete(new OnComplete<ActorSelection>() {
-                @Override
-                public void onComplete(Throwable failure, ActorSelection primaryShard) {
-                    if(failure != null) {
-                        newTxFutureCallback.createTransactionContext(failure, null);
-                    } else {
-                        newTxFutureCallback.setPrimaryShard(primaryShard);
-                    }
-                }
-            }, actorContext.getClientDispatcher());
-        }
-
-        return txFutureCallback;
+        return resources.getTxFutureCallback(this, shardNameFromIdentifier(path));
     }
 
     String getTransactionChainId() {
@@ -435,21 +344,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
             // Read-only Tx's aren't explicitly closed by the client so we create a PhantomReference
             // to close the remote Tx's when this instance is no longer in use and is garbage
             // collected.
-
-            if(remoteTransactionActorsMB == null) {
-                remoteTransactionActors = Lists.newArrayList();
-                remoteTransactionActorsMB = new AtomicBoolean();
-
-                TransactionProxyCleanupPhantomReference.track(TransactionProxy.this);
-            }
-
-            // Add the actor to the remoteTransactionActors list for access by the
-            // cleanup PhantonReference.
-            remoteTransactionActors.add(transactionActor);
-
-            // Write to the memory barrier volatile to publish the above update to the
-            // remoteTransactionActors list for thread visibility.
-            remoteTransactionActorsMB.set(true);
+            resources.track(TransactionProxy.this, transactionActor);
         }
 
         // TxActor is always created where the leader of the shard is.
