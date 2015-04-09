@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_aa6e8194",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/NormalizedNodeAggregator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-04-09T20:19:44Z",
+      "side": 1,
+      "message": "sameThreadExecutor is deperecated http://docs.guava-libraries.googlecode.com/git/javadoc/com/google/common/util/concurrent/MoreExecutors.html#sameThreadExecutor()",
+      "parentUuid": "5a93c517_2a6351b2",
+      "revId": "d6d1ba77d3455dc873c3a8be4d95de4e8440a02d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_ca598dff",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/NormalizedNodeAggregator.java",
         "patchSetId": 1
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_4a6d7d97",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/NormalizedNodeAggregator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-04-09T20:19:44Z",
+      "side": 1,
+      "message": "If we want performance - we should just hope nobody calls read(\u0027/\") too often :)\n\nMerge is actually required over here so that we can use the same root to add all the subtrees.",
+      "parentUuid": "5a93c517_ca598dff",
+      "revId": "d6d1ba77d3455dc873c3a8be4d95de4e8440a02d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_6a5159d7",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/utils/NormalizedNodeAggregatorTest.java",
         "patchSetId": 1
@@ -47,6 +83,24 @@
       "writtenOn": "2015-04-09T20:08:45Z",
       "side": 1,
       "message": "Missing copyright",
+      "revId": "d6d1ba77d3455dc873c3a8be4d95de4e8440a02d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_0a0775cb",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/utils/NormalizedNodeAggregatorTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-04-09T20:19:44Z",
+      "side": 1,
+      "message": "To add",
+      "parentUuid": "5a93c517_6a5159d7",
       "revId": "d6d1ba77d3455dc873c3a8be4d95de4e8440a02d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
