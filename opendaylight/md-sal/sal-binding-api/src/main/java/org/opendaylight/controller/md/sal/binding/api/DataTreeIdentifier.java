@@ -44,7 +44,7 @@ public final class DataTreeIdentifier<T extends DataObject> implements Immutable
      *
      * @return Instance identifier corresponding to the root node.
      */
-    public @Nonnull InstanceIdentifier<?> getRootIdentifier() {
+    public @Nonnull InstanceIdentifier<T> getRootIdentifier() {
         return rootIdentifier;
     }
 
