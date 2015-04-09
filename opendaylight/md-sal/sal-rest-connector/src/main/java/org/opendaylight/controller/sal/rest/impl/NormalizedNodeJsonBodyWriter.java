@@ -21,6 +21,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
+import org.opendaylight.controller.md.sal.rest.common.RestconfContext;
 import org.opendaylight.controller.sal.rest.api.Draft02;
 import org.opendaylight.controller.sal.rest.api.RestconfService;
 import org.opendaylight.controller.sal.restconf.impl.InstanceIdentifierContext;
@@ -61,7 +62,7 @@ public class NormalizedNodeJsonBodyWriter implements MessageBodyWriter<Normalize
     public void writeTo(final NormalizedNodeContext t, final Class<?> type, final Type genericType, final Annotation[] annotations,
             final MediaType mediaType, final MultivaluedMap<String, Object> httpHeaders, final OutputStream entityStream)
                     throws IOException, WebApplicationException {
-        NormalizedNode<?, ?> data = t.getData();
+        final NormalizedNode<?, ?> data = t.getData();
         if (data == null) {
             return;
         }
@@ -69,7 +70,7 @@ public class NormalizedNodeJsonBodyWriter implements MessageBodyWriter<Normalize
         @SuppressWarnings("unchecked")
         final InstanceIdentifierContext<SchemaNode> context = (InstanceIdentifierContext<SchemaNode>) t.getInstanceIdentifierContext();
 
-        SchemaPath path = context.getSchemaNode().getPath();
+        final SchemaPath path = context.getSchemaNode().getPath();
         final JsonWriter jsonWriter = createJsonWriter(entityStream);
         jsonWriter.beginObject();
         writeNormalizedNode(jsonWriter,path,context,data);
@@ -77,8 +78,8 @@ public class NormalizedNodeJsonBodyWriter implements MessageBodyWriter<Normalize
         jsonWriter.flush();
     }
 
-    private void writeNormalizedNode(JsonWriter jsonWriter, SchemaPath path,
-            InstanceIdentifierContext<SchemaNode> context, NormalizedNode<?, ?> data) throws IOException {
+    private void writeNormalizedNode(final JsonWriter jsonWriter, SchemaPath path,
+            final InstanceIdentifierContext<SchemaNode> context, NormalizedNode<?, ?> data) throws IOException {
         final NormalizedNodeWriter nnWriter;
         if (SchemaPath.ROOT.equals(path)) {
             /*
@@ -143,8 +144,7 @@ public class NormalizedNodeJsonBodyWriter implements MessageBodyWriter<Normalize
     }
 
     private JSONCodecFactory getCodecFactory(final InstanceIdentifierContext<?> context) {
-        // TODO: Performance: Cache JSON Codec factory and schema context
-        return JSONCodecFactory.create(context.getSchemaContext());
+        return RestconfContext.from(context.getSchemaContext()).getJsonCodecFactory();
     }
 
 }
