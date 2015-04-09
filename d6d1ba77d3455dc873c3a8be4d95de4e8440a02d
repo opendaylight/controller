@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "5a93c517_8afaa5bb",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/NormalizedNodeAggregator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-09T20:27:51Z",
+      "side": 1,
+      "message": "It\u0027s still there - they just changed the name to newDirectExecutorService :)  This executor won\u0027t be used so we can save a bit by using a static newDirectExecutorService instance.",
+      "parentUuid": "5a93c517_aa6e8194",
+      "revId": "d6d1ba77d3455dc873c3a8be4d95de4e8440a02d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a93c517_ca598dff",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/NormalizedNodeAggregator.java",
         "patchSetId": 1
