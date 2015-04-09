@@ -1,6 +1,5 @@
 package org.opendaylight.controller.sal.rest.impl;
 
-import com.google.common.base.Optional;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.UriInfo;
@@ -22,11 +21,7 @@ public class AbstractIdentifierAwareJaxRsProvider {
         return uriInfo.getPathParameters(false).getFirst(RestconfConstants.IDENTIFIER);
     }
 
-    protected final Optional<InstanceIdentifierContext> getIdentifierWithSchema() {
-        return Optional.of(getInstanceIdentifierContext());
-    }
-
-    protected InstanceIdentifierContext getInstanceIdentifierContext() {
+    protected InstanceIdentifierContext<?> getInstanceIdentifierContext() {
         return ControllerContext.getInstance().toInstanceIdentifier(getIdentifier());
     }
 

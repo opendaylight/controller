@@ -24,8 +24,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -77,7 +75,6 @@ import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.CollectionNo
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeAttrBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.ListNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
-import org.opendaylight.yangtools.yang.model.api.AnyXmlSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
@@ -90,8 +87,6 @@ import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
-import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
-import org.opendaylight.yangtools.yang.model.util.ExtendedType;
 import org.opendaylight.yangtools.yang.model.util.SchemaContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,29 +109,19 @@ public class RestconfImpl implements RestconfService {
         }
     }
 
-    private static class TypeDef {
-        public final TypeDefinition<? extends Object> typedef;
-        public final QName qName;
-
-        TypeDef(final TypeDefinition<? extends Object> typedef, final QName qName) {
-            this.typedef = typedef;
-            this.qName = qName;
-        }
-    }
-
-    private final static RestconfImpl INSTANCE = new RestconfImpl();
+    private static final RestconfImpl INSTANCE = new RestconfImpl();
 
     private static final int NOTIFICATION_PORT = 8181;
 
     private static final int CHAR_NOT_FOUND = -1;
 
-    private final static String MOUNT_POINT_MODULE_NAME = "ietf-netconf";
+    private static final String MOUNT_POINT_MODULE_NAME = "ietf-netconf";
 
-    private final static SimpleDateFormat REVISION_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+    private static final SimpleDateFormat REVISION_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
-    private final static String SAL_REMOTE_NAMESPACE = "urn:opendaylight:params:xml:ns:yang:controller:md:sal:remote";
+    private static final String SAL_REMOTE_NAMESPACE = "urn:opendaylight:params:xml:ns:yang:controller:md:sal:remote";
 
-    private final static String SAL_REMOTE_RPC_SUBSRCIBE = "create-data-change-event-subscription";
+    private static final String SAL_REMOTE_RPC_SUBSRCIBE = "create-data-change-event-subscription";
 
     private BrokerFacade broker;
 
@@ -214,7 +199,7 @@ public class RestconfImpl implements RestconfService {
                 Builders.containerBuilder((ContainerSchemaNode) modulesSchemaNode);
         moduleContainerBuilder.withChild(allModuleMap);
 
-        return new NormalizedNodeContext(new InstanceIdentifierContext(null, modulesSchemaNode,
+        return new NormalizedNodeContext(new InstanceIdentifierContext<>(null, modulesSchemaNode,
                 null, schemaContext), moduleContainerBuilder.build());
     }
 
@@ -230,10 +215,9 @@ public class RestconfImpl implements RestconfService {
             throw new RestconfDocumentedException(errMsg, ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
         }
 
-        final InstanceIdentifierContext mountPointIdentifier = controllerContext.toMountPointIdentifier(identifier);
+        final InstanceIdentifierContext<?> mountPointIdentifier = controllerContext.toMountPointIdentifier(identifier);
         final DOMMountPoint mountPoint = mountPointIdentifier.getMountPoint();
         final Set<Module> modules = controllerContext.getAllModules(mountPoint);
-        final SchemaContext schemaContext = mountPoint.getSchemaContext();
         final MapNode mountPointModulesMap = makeModuleMapNode(modules);
 
         final Module restconfModule = getRestconfModule();
@@ -245,7 +229,7 @@ public class RestconfImpl implements RestconfService {
                 Builders.containerBuilder((ContainerSchemaNode) modulesSchemaNode);
         moduleContainerBuilder.withChild(mountPointModulesMap);
 
-        return new NormalizedNodeContext(new InstanceIdentifierContext(null, modulesSchemaNode,
+        return new NormalizedNodeContext(new InstanceIdentifierContext<>(null, modulesSchemaNode,
                 mountPoint, controllerContext.getGlobalSchema()), moduleContainerBuilder.build());
     }
 
@@ -257,7 +241,7 @@ public class RestconfImpl implements RestconfService {
         DOMMountPoint mountPoint = null;
         final SchemaContext schemaContext;
         if (identifier.contains(ControllerContext.MOUNT)) {
-            final InstanceIdentifierContext mountPointIdentifier = controllerContext.toMountPointIdentifier(identifier);
+            final InstanceIdentifierContext<?> mountPointIdentifier = controllerContext.toMountPointIdentifier(identifier);
             mountPoint = mountPointIdentifier.getMountPoint();
             module = controllerContext.findModuleByNameAndRevision(mountPoint, moduleNameAndRevision);
             schemaContext = mountPoint.getSchemaContext();
@@ -280,7 +264,7 @@ public class RestconfImpl implements RestconfService {
                 restconfModule, Draft02.RestConfModule.MODULE_LIST_SCHEMA_NODE);
         Preconditions.checkState(moduleSchemaNode instanceof ListSchemaNode);
 
-        return new NormalizedNodeContext(new InstanceIdentifierContext(null, moduleSchemaNode, mountPoint,
+        return new NormalizedNodeContext(new InstanceIdentifierContext<>(null, moduleSchemaNode, mountPoint,
                 schemaContext), moduleMap);
     }
 
@@ -309,7 +293,7 @@ public class RestconfImpl implements RestconfService {
         streamsContainerBuilder.withChild(listStreamsBuilder.build());
 
 
-        return new NormalizedNodeContext(new InstanceIdentifierContext(null, streamsContainerSchemaNode, null,
+        return new NormalizedNodeContext(new InstanceIdentifierContext<>(null, streamsContainerSchemaNode, null,
                 schemaContext), streamsContainerBuilder.build());
     }
 
@@ -324,7 +308,7 @@ public class RestconfImpl implements RestconfService {
         Set<Module> modules = null;
         DOMMountPoint mountPoint = null;
         if (identifier.contains(ControllerContext.MOUNT)) {
-            final InstanceIdentifierContext mountPointIdentifier = controllerContext.toMountPointIdentifier(identifier);
+            final InstanceIdentifierContext<?> mountPointIdentifier = controllerContext.toMountPointIdentifier(identifier);
             mountPoint = mountPointIdentifier.getMountPoint();
             modules = controllerContext.getAllModules(mountPoint);
 
@@ -540,7 +524,7 @@ public class RestconfImpl implements RestconfService {
         final SchemaContext schemaContext;
         if (identifier.contains(ControllerContext.MOUNT)) {
             // mounted RPC call - look up mount instance.
-            final InstanceIdentifierContext mountPointId = controllerContext.toMountPointIdentifier(identifier);
+            final InstanceIdentifierContext<?> mountPointId = controllerContext.toMountPointIdentifier(identifier);
             mountPoint = mountPointId.getMountPoint();
             schemaContext = mountPoint.getSchemaContext();
             final int startOfRemoteRpcName = identifier.lastIndexOf(ControllerContext.MOUNT)
@@ -597,7 +581,7 @@ public class RestconfImpl implements RestconfService {
             resultNodeSchema = rpcDataSchemaNode.getDataChildByName(result.getResult().getNodeType());
         }
 
-        return new NormalizedNodeContext(new InstanceIdentifierContext(null, resultNodeSchema, mountPoint,
+        return new NormalizedNodeContext(new InstanceIdentifierContext<>(null, resultNodeSchema, mountPoint,
                 schemaContext), resultData);
     }
 
@@ -622,7 +606,7 @@ public class RestconfImpl implements RestconfService {
 
     @Override
     public NormalizedNodeContext readConfigurationData(final String identifier, final UriInfo uriInfo) {
-        final InstanceIdentifierContext iiWithData = controllerContext.toInstanceIdentifier(identifier);
+        final InstanceIdentifierContext<?> iiWithData = controllerContext.toInstanceIdentifier(identifier);
         final DOMMountPoint mountPoint = iiWithData.getMountPoint();
         NormalizedNode<?, ?> data = null;
         final YangInstanceIdentifier normalizedII = iiWithData.getInstanceIdentifier();
@@ -639,6 +623,8 @@ public class RestconfImpl implements RestconfService {
         return new NormalizedNodeContext(iiWithData, data);
     }
 
+    // FIXME: Move this to proper place
+    @SuppressWarnings("unused")
     private Integer parseDepthParameter(final UriInfo info) {
         final String param = info.getQueryParameters(false).getFirst(UriParameters.DEPTH.toString());
         if (Strings.isNullOrEmpty(param) || "unbounded".equals(param)) {
@@ -663,7 +649,7 @@ public class RestconfImpl implements RestconfService {
 
     @Override
     public NormalizedNodeContext readOperationalData(final String identifier, final UriInfo info) {
-        final InstanceIdentifierContext iiWithData = controllerContext.toInstanceIdentifier(identifier);
+        final InstanceIdentifierContext<?> iiWithData = controllerContext.toInstanceIdentifier(identifier);
         final DOMMountPoint mountPoint = iiWithData.getMountPoint();
         NormalizedNode<?, ?> data = null;
         final YangInstanceIdentifier normalizedII = iiWithData.getInstanceIdentifier();
@@ -680,16 +666,10 @@ public class RestconfImpl implements RestconfService {
         return new NormalizedNodeContext(iiWithData, data);
     }
 
-    private boolean parsePrettyPrintParameter(final UriInfo info) {
-        final String param = info.getQueryParameters(false).getFirst(UriParameters.PRETTY_PRINT.toString());
-        return Boolean.parseBoolean(param);
-    }
-
     @Override
     public Response updateConfigurationData(final String identifier, final NormalizedNodeContext payload) {
         Preconditions.checkNotNull(identifier);
-        final InstanceIdentifierContext<DataSchemaNode> iiWithData =
-                (InstanceIdentifierContext<DataSchemaNode>) payload.getInstanceIdentifierContext();
+        final InstanceIdentifierContext<?> iiWithData = payload.getInstanceIdentifierContext();
 
         validateInput(iiWithData.getSchemaNode(), payload);
         validateTopLevelNodeName(payload, iiWithData.getInstanceIdentifier());
@@ -769,7 +749,7 @@ public class RestconfImpl implements RestconfService {
      *             if key values or key count in payload and URI isn't equal
      *
      */
-    private void validateListKeysEqualityInPayloadAndUri(final InstanceIdentifierContext<DataSchemaNode> iiWithData,
+    private void validateListKeysEqualityInPayloadAndUri(final InstanceIdentifierContext<?> iiWithData,
             final NormalizedNode<?, ?> payload) {
         if (iiWithData.getSchemaNode() instanceof ListSchemaNode) {
             final List<QName> keyDefinitions = ((ListSchemaNode) iiWithData.getSchemaNode()).getKeyDefinition();
@@ -825,7 +805,7 @@ public class RestconfImpl implements RestconfService {
         if (payloadNodeQname.compareTo(yangIdent.getLastPathArgument().getNodeType()) > 0) {
             return yangIdent;
         }
-        final InstanceIdentifierContext parentContext = payload.getInstanceIdentifierContext();
+        final InstanceIdentifierContext<?> parentContext = payload.getInstanceIdentifierContext();
         final SchemaNode parentSchemaNode = parentContext.getSchemaNode();
         if(parentSchemaNode instanceof DataNodeContainer) {
             final DataNodeContainer cast = (DataNodeContainer) parentSchemaNode;
@@ -856,9 +836,8 @@ public class RestconfImpl implements RestconfService {
         }
 
         final DOMMountPoint mountPoint = payload.getInstanceIdentifierContext().getMountPoint();
-        final InstanceIdentifierContext<DataSchemaNode> iiWithData = (InstanceIdentifierContext<DataSchemaNode>) payload.getInstanceIdentifierContext();
+        final InstanceIdentifierContext<?> iiWithData = payload.getInstanceIdentifierContext();
         final YangInstanceIdentifier normalizedII = iiWithData.getInstanceIdentifier();
-        final YangInstanceIdentifier resultII;
         try {
             if (mountPoint != null) {
                 broker.commitConfigurationDataPost(mountPoint, normalizedII, payload.getData()).checkedGet();
@@ -894,7 +873,7 @@ public class RestconfImpl implements RestconfService {
 
     @Override
     public Response deleteConfigurationData(final String identifier) {
-        final InstanceIdentifierContext<DataSchemaNode> iiWithData = controllerContext.toInstanceIdentifier(identifier);
+        final InstanceIdentifierContext<?> iiWithData = controllerContext.toInstanceIdentifier(identifier);
         final DOMMountPoint mountPoint = iiWithData.getMountPoint();
         final YangInstanceIdentifier normalizedII = iiWithData.getInstanceIdentifier();
 
@@ -1026,79 +1005,6 @@ public class RestconfImpl implements RestconfService {
             }
         }
         return result;
-    }
-
-    private boolean endsWithMountPoint(final String identifier) {
-        return identifier.endsWith(ControllerContext.MOUNT) || identifier.endsWith(ControllerContext.MOUNT + "/");
-    }
-
-    private String addMountPointIdentifier(final String identifier) {
-        final boolean endsWith = identifier.endsWith("/");
-        if (endsWith) {
-            return (identifier + ControllerContext.MOUNT);
-        }
-
-        return identifier + "/" + ControllerContext.MOUNT;
-    }
-
-    private TypeDef typeDefinition(final TypeDefinition<?> type, final QName nodeQName) {
-        TypeDefinition<?> baseType = type;
-        QName qName = nodeQName;
-        while (baseType.getBaseType() != null) {
-            if (baseType instanceof ExtendedType) {
-                qName = baseType.getQName();
-            }
-            baseType = baseType.getBaseType();
-        }
-
-        return new TypeDef(baseType, qName);
-
-    }
-
-    private TypeDef typeDefinition(final DataSchemaNode node) {
-        if (node instanceof LeafListSchemaNode) {
-            return typeDefinition(((LeafListSchemaNode)node).getType(), node.getQName());
-        } else if (node instanceof LeafSchemaNode) {
-            return typeDefinition(((LeafSchemaNode)node).getType(), node.getQName());
-        } else if (node instanceof AnyXmlSchemaNode) {
-            return null;
-        } else {
-            throw new IllegalArgumentException("Unhandled parameter types: " + Arrays.<Object> asList(node).toString());
-        }
-    }
-
-    private InstanceIdentifierContext normalizeInstanceIdentifierWithSchemaNode(
-            final InstanceIdentifierContext iiWithSchemaNode) {
-        return normalizeInstanceIdentifierWithSchemaNode(iiWithSchemaNode, false);
-    }
-
-    private InstanceIdentifierContext normalizeInstanceIdentifierWithSchemaNode(
-            final InstanceIdentifierContext iiWithSchemaNode, final boolean unwrapLastListNode) {
-        return new InstanceIdentifierContext(instanceIdentifierToReadableFormForNormalizeNode(
-                iiWithSchemaNode.getInstanceIdentifier(), unwrapLastListNode), iiWithSchemaNode.getSchemaNode(),
-                iiWithSchemaNode.getMountPoint(),iiWithSchemaNode.getSchemaContext());
-    }
-
-    private YangInstanceIdentifier instanceIdentifierToReadableFormForNormalizeNode(
-            final YangInstanceIdentifier instIdentifier, final boolean unwrapLastListNode) {
-        Preconditions.checkNotNull(instIdentifier, "Instance identifier can't be null");
-        final List<PathArgument> result = new ArrayList<PathArgument>();
-        final Iterator<PathArgument> iter = instIdentifier.getPathArguments().iterator();
-        while (iter.hasNext()) {
-            final PathArgument pathArgument = iter.next();
-            if (pathArgument instanceof NodeIdentifierWithPredicates && (iter.hasNext() || unwrapLastListNode)) {
-                result.add(new YangInstanceIdentifier.NodeIdentifier(pathArgument.getNodeType()));
-            }
-            result.add(pathArgument);
-        }
-        return YangInstanceIdentifier.create(result);
-    }
-
-    private boolean isDataContainerNode(final DataSchemaNode schemaNode) {
-        if (schemaNode instanceof ContainerSchemaNode || schemaNode instanceof ListSchemaNode) {
-            return true;
-        }
-        return false;
     }
 
     public BigInteger getOperationalReceived() {

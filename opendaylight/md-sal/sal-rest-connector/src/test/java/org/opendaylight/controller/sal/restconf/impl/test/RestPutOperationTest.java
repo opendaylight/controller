@@ -13,6 +13,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import java.io.FileNotFoundException;
@@ -112,6 +113,7 @@ public class RestPutOperationTest extends JerseyTest {
     @Test
     public void putConfigStatusCodesEmptyBody() throws UnsupportedEncodingException {
         final String uri = "/config/ietf-interfaces:interfaces/interface/eth0";
+        @SuppressWarnings("unused")
         final Response resp = target(uri).request(MediaType.APPLICATION_JSON).put(
                 Entity.entity("", MediaType.APPLICATION_JSON));
         assertEquals(400, put(uri, MediaType.APPLICATION_JSON, ""));
@@ -122,6 +124,7 @@ public class RestPutOperationTest extends JerseyTest {
     public void testRpcResultCommitedToStatusCodesWithMountPoint() throws UnsupportedEncodingException,
             FileNotFoundException, URISyntaxException {
 
+        @SuppressWarnings("unchecked")
         final CheckedFuture<Void, TransactionCommitFailedException> dummyFuture = mock(CheckedFuture.class);
 
         when(
@@ -144,6 +147,7 @@ public class RestPutOperationTest extends JerseyTest {
 
     @Test
     public void putDataMountPointIntoHighestElement() throws UnsupportedEncodingException, URISyntaxException {
+        @SuppressWarnings("unchecked")
         final CheckedFuture<Void, TransactionCommitFailedException> dummyFuture = mock(CheckedFuture.class);
         when(
                 brokerFacade.commitConfigurationDataPut(any(DOMMountPoint.class), any(YangInstanceIdentifier.class),

@@ -8,11 +8,8 @@
 package org.opendaylight.controller.sal.restconf.impl.test;
 
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+
 import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.CheckedFuture;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -25,7 +22,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.Date;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -42,9 +38,6 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
-import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
-import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
@@ -66,7 +59,7 @@ public final class TestUtils {
 
     private static final Logger LOG = LoggerFactory.getLogger(TestUtils.class);
 
-    private final static YangContextParser parser = new YangParserImpl();
+    private final static YangContextParser PARSER = new YangParserImpl();
 
     private static Set<Module> loadModules(final String resourceDirectory) throws FileNotFoundException {
         final File testDir = new File(resourceDirectory);
@@ -81,7 +74,7 @@ public final class TestUtils {
                 testFiles.add(new File(testDir, fileName));
             }
         }
-        return parser.parseYangModels(testFiles);
+        return PARSER.parseYangModels(testFiles);
     }
 
     public static Set<Module> loadModulesFrom(final String yangPath) {
@@ -95,11 +88,11 @@ public final class TestUtils {
     }
 
     public static SchemaContext loadSchemaContext(final Set<Module> modules) {
-        return parser.resolveSchemaContext(modules);
+        return PARSER.resolveSchemaContext(modules);
     }
 
     public static SchemaContext loadSchemaContext(final String resourceDirectory) throws FileNotFoundException {
-        return parser.resolveSchemaContext(loadModulesFrom(resourceDirectory));
+        return PARSER.resolveSchemaContext(loadModulesFrom(resourceDirectory));
     }
 
     public static Module findModule(final Set<Module> modules, final String moduleName) {
@@ -200,19 +193,6 @@ public final class TestUtils {
         return buildQName(name, "", null);
     }
 
-    private static void prepareMocksForRestconf(final Set<Module> modules, final RestconfImpl restconf) {
-        final ControllerContext controllerContext = ControllerContext.getInstance();
-        final BrokerFacade mockedBrokerFacade = mock(BrokerFacade.class);
-
-        controllerContext.setSchemas(TestUtils.loadSchemaContext(modules));
-
-        when(mockedBrokerFacade.commitConfigurationDataPut(any(YangInstanceIdentifier.class), any(NormalizedNode.class)))
-                .thenReturn(mock(CheckedFuture.class));
-
-        restconf.setControllerContext(controllerContext);
-        restconf.setBroker(mockedBrokerFacade);
-    }
-
     public static String loadTextFile(final String filePath) throws IOException {
         final FileReader fileReader = new FileReader(filePath);
         final BufferedReader bufReader = new BufferedReader(fileReader);
@@ -262,7 +242,6 @@ public final class TestUtils {
 
     public static YangInstanceIdentifier.NodeIdentifierWithPredicates getNodeIdentifierPredicate(final String localName,
             final String namespace, final String revision, final String... keysAndValues) throws ParseException {
-        final java.util.Date date = new SimpleDateFormat("yyyy-MM-dd").parse(revision);
         if (keysAndValues.length % 2 != 0) {
             new IllegalArgumentException("number of keys argument have to be divisible by 2 (map)");
         }

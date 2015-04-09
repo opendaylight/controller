@@ -18,6 +18,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
@@ -84,7 +85,7 @@ public class BrokerFacadeTest {
 
     SchemaPath type = SchemaPath.create(true, qname);
 
-    YangInstanceIdentifier instanceID = YangInstanceIdentifier.builder().node(qname).toInstance();
+    YangInstanceIdentifier instanceID = YangInstanceIdentifier.builder().node(qname).build();
 
     @Mock
     DOMDataReadOnlyTransaction rTransaction;
@@ -154,7 +155,6 @@ public class BrokerFacadeTest {
         brokerFacade.readOperationalData(instanceID);
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testInvokeRpc() throws Exception {
         final DOMRpcResult expResult = mock(DOMRpcResult.class);
@@ -176,6 +176,7 @@ public class BrokerFacadeTest {
     @Ignore
     @Test
     public void testCommitConfigurationDataPut() {
+        @SuppressWarnings("unchecked")
         final CheckedFuture<Void, TransactionCommitFailedException> expFuture = mock(CheckedFuture.class);
 
         when(wTransaction.submit()).thenReturn(expFuture);
@@ -192,6 +193,7 @@ public class BrokerFacadeTest {
 
     @Test
     public void testCommitConfigurationDataPost() {
+        @SuppressWarnings("unchecked")
         final CheckedFuture<Void, TransactionCommitFailedException> expFuture = mock(CheckedFuture.class);
 
         final NormalizedNode<?, ?> dummyNode2 = createDummyNode("dummy:namespace2", "2014-07-01", "dummy local name2");
@@ -230,12 +232,10 @@ public class BrokerFacadeTest {
 
     @Test
     public void testCommitConfigurationDataDelete() {
+        @SuppressWarnings("unchecked")
         final CheckedFuture<Void, TransactionCommitFailedException> expFuture = mock(CheckedFuture.class);
 
         when(wTransaction.submit()).thenReturn(expFuture);
-
-        final NormalizedNode<?, ?> dummyNode2 = createDummyNode("dummy:namespace2", "2014-07-01", "dummy local name2");
-
 
         final CheckedFuture<Void, TransactionCommitFailedException> actualFuture = brokerFacade
                 .commitConfigurationDataDelete(instanceID);

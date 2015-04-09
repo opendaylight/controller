@@ -119,7 +119,7 @@ public class ControllerContext implements SchemaContextListener {
         onGlobalContextUpdated(schemas);
     }
 
-    public InstanceIdentifierContext toInstanceIdentifier(final String restconfInstance) {
+    public InstanceIdentifierContext<?> toInstanceIdentifier(final String restconfInstance) {
         return toIdentifier(restconfInstance, false);
     }
 
@@ -127,11 +127,11 @@ public class ControllerContext implements SchemaContextListener {
         return globalSchema;
     }
 
-    public InstanceIdentifierContext toMountPointIdentifier(final String restconfInstance) {
+    public InstanceIdentifierContext<?> toMountPointIdentifier(final String restconfInstance) {
         return toIdentifier(restconfInstance, true);
     }
 
-    private InstanceIdentifierContext toIdentifier(final String restconfInstance, final boolean toMountPointIdentifier) {
+    private InstanceIdentifierContext<?> toIdentifier(final String restconfInstance, final boolean toMountPointIdentifier) {
         checkPreconditions();
 
         if(restconfInstance == null) {
@@ -153,7 +153,7 @@ public class ControllerContext implements SchemaContextListener {
 
         final InstanceIdentifierBuilder builder = YangInstanceIdentifier.builder();
         final Module latestModule = globalSchema.findModuleByName(startModule, null);
-        final InstanceIdentifierContext iiWithSchemaNode = collectPathArguments(builder, pathArgs, latestModule, null,
+        final InstanceIdentifierContext<?> iiWithSchemaNode = collectPathArguments(builder, pathArgs, latestModule, null,
                 toMountPointIdentifier);
 
         if (iiWithSchemaNode == null) {
@@ -494,7 +494,7 @@ public class ControllerContext implements SchemaContextListener {
         return object == null ? "" : URLEncoder.encode(codec.serialize(object).toString(), ControllerContext.URI_ENCODING_CHAR_SET);
     }
 
-    private InstanceIdentifierContext collectPathArguments(final InstanceIdentifierBuilder builder,
+    private InstanceIdentifierContext<?> collectPathArguments(final InstanceIdentifierBuilder builder,
             final List<String> strings, final DataNodeContainer parentNode, final DOMMountPoint mountPoint,
             final boolean returnJustMountPoint) {
         Preconditions.<List<String>> checkNotNull(strings);
@@ -543,7 +543,7 @@ public class ControllerContext implements SchemaContextListener {
 
                 if (returnJustMountPoint || strings.size() == 1) {
                     final YangInstanceIdentifier instance = YangInstanceIdentifier.builder().toInstance();
-                    return new InstanceIdentifierContext(instance, mountPointSchema, mount,mountPointSchema);
+                    return new InstanceIdentifierContext<>(instance, mountPointSchema, mount,mountPointSchema);
                 }
 
                 final String moduleNameBehindMountPoint = toModuleName(strings.get(1));
@@ -672,11 +672,11 @@ public class ControllerContext implements SchemaContextListener {
         return createContext(builder.build(), targetNode, mountPoint,mountPoint != null ? mountPoint.getSchemaContext() : globalSchema);
     }
 
-    private InstanceIdentifierContext createContext(final YangInstanceIdentifier instance, final DataSchemaNode dataSchemaNode,
+    private InstanceIdentifierContext<?> createContext(final YangInstanceIdentifier instance, final DataSchemaNode dataSchemaNode,
             final DOMMountPoint mountPoint, final SchemaContext schemaContext) {
 
         final YangInstanceIdentifier instanceIdentifier = new DataNormalizer(schemaContext).toNormalized(instance);
-        return new InstanceIdentifierContext(instanceIdentifier, dataSchemaNode, mountPoint,schemaContext);
+        return new InstanceIdentifierContext<>(instanceIdentifier, dataSchemaNode, mountPoint,schemaContext);
     }
 
     public static DataSchemaNode findInstanceDataChildByNameAndNamespace(final DataNodeContainer container, final String name,

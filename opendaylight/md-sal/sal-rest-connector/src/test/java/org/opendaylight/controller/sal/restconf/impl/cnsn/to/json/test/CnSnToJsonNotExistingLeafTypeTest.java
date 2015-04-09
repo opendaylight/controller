@@ -16,18 +16,15 @@ import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.opendaylight.yangtools.yang.parser.builder.impl.ContainerSchemaNodeBuilder;
 import org.opendaylight.yangtools.yang.parser.builder.impl.LeafSchemaNodeBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class CnSnToJsonNotExistingLeafTypeTest extends YangAndXmlAndDataSchemaLoader {
-
-    private static final Logger LOG = LoggerFactory.getLogger(CnSnToJsonNotExistingLeafTypeTest.class);
 
     @BeforeClass
     public static void initialize() {
         dataLoad("/cnsn-to-json/simple-data-types");
     }
 
+    @SuppressWarnings("unused")
     private DataSchemaNode prepareDataSchemaNode() {
         final ContainerSchemaNodeBuilder contBuild = new ContainerSchemaNodeBuilder("module", 1, TestUtils.buildQName("cont",
                 "simple:uri", "2012-12-17"), SchemaPath.create(true, QName.create("dummy")));
