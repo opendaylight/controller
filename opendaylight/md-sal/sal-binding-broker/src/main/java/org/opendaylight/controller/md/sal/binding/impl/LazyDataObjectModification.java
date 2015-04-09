@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  *
  * @param <T> Type of Binding Data Object
  */
-class LazyDataObjectModification<T extends DataObject> implements DataObjectModification<T> {
+final class LazyDataObjectModification<T extends DataObject> implements DataObjectModification<T> {
 
     private final static Logger LOG = LoggerFactory.getLogger(LazyDataObjectModification.class);
 
@@ -57,7 +57,7 @@ class LazyDataObjectModification<T extends DataObject> implements DataObjectModi
         return new LazyDataObjectModification<>(codec,domData);
     }
 
-    static Collection<DataObjectModification<? extends DataObject>> from(final BindingCodecTreeNode<?> parentCodec,
+    private static Collection<DataObjectModification<? extends DataObject>> from(final BindingCodecTreeNode<?> parentCodec,
             final Collection<DataTreeCandidateNode> domChildNodes) {
         final ArrayList<DataObjectModification<? extends DataObject>> result = new ArrayList<>(domChildNodes.size());
         populateList(result, parentCodec, domChildNodes);
@@ -79,7 +79,7 @@ class LazyDataObjectModification<T extends DataObject> implements DataObjectModi
                             parentCodec.yangPathArgumentChild(domChildNode.getIdentifier());
                     populateList(result,type, childCodec, domChildNode);
                 } catch (final IllegalArgumentException e) {
-                    if(type == BindingStructuralType.UNKNOWN) {
+                    if (type == BindingStructuralType.UNKNOWN) {
                         LOG.debug("Unable to deserialize unknown DOM node {}",domChildNode,e);
                     } else {
                         LOG.debug("Binding representation for DOM node {} was not found",domChildNode,e);
@@ -88,7 +88,6 @@ class LazyDataObjectModification<T extends DataObject> implements DataObjectModi
             }
         }
     }
-
 
     private static void populateList(final List<DataObjectModification<? extends DataObject>> result,
             final BindingStructuralType type, final BindingCodecTreeNode<?> childCodec,
@@ -114,6 +113,11 @@ class LazyDataObjectModification<T extends DataObject> implements DataObjectModi
         for (final DataTreeCandidateNode child : childNodes) {
             result.add(create(codec, child));
         }
+    }
+
+    @Override
+    public T getDataBefore() {
+        return deserialize(domData.getDataBefore());
     }
 
     @Override
@@ -149,8 +153,8 @@ class LazyDataObjectModification<T extends DataObject> implements DataObjectModi
 
     @Override
     public Collection<DataObjectModification<? extends DataObject>> getModifiedChildren() {
-        if(childNodesCache == null) {
-            childNodesCache = from(codec,domData.getChildNodes());
+        if (childNodesCache == null) {
+            childNodesCache = from(codec, domData.getChildNodes());
         }
         return childNodesCache;
     }
@@ -191,7 +195,7 @@ class LazyDataObjectModification<T extends DataObject> implements DataObjectModi
     }
 
     private T deserialize(final Optional<NormalizedNode<?, ?>> dataAfter) {
-        if(dataAfter.isPresent()) {
+        if (dataAfter.isPresent()) {
             return codec.deserialize(dataAfter.get());
         }
         return null;
