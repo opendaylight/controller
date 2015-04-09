@@ -7,18 +7,10 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import akka.actor.ActorSelection;
 import com.google.common.base.FinalizablePhantomReference;
 import com.google.common.base.FinalizableReferenceQueue;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
-import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
-import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * A PhantomReference that closes remote transactions for a TransactionProxy when it's
@@ -29,16 +21,13 @@ import org.slf4j.LoggerFactory;
  * to the old generation space and thus should be cleaned up in a timely manner as the GC
  * runs on the young generation (eden, swap1...) space much more frequently.
  */
-final class TransactionProxyCleanupPhantomReference
-                                       extends FinalizablePhantomReference<TransactionProxy> {
-    private static final Logger LOG = LoggerFactory.getLogger(TransactionProxyCleanupPhantomReference.class);
+final class TransactionProxyCleanupPhantomReference extends FinalizablePhantomReference<TransactionProxy> {
     /**
      * Used to enqueue the PhantomReferences for read-only TransactionProxy instances. The
      * FinalizableReferenceQueue is safe to use statically in an OSGi environment as it uses some
      * trickery to clean up its internal thread when the bundle is unloaded.
      */
-    private static final FinalizableReferenceQueue phantomReferenceQueue =
-                                                                  new FinalizableReferenceQueue();
+    private static final FinalizableReferenceQueue phantomReferenceQueue = new FinalizableReferenceQueue();
 
     /**
      * This stores the TransactionProxyCleanupPhantomReference instances statically, This is
@@ -50,43 +39,21 @@ final class TransactionProxyCleanupPhantomReference
                              TransactionProxyCleanupPhantomReference> phantomReferenceCache =
                                                                         new ConcurrentHashMap<>();
 
-    private final List<ActorSelection> remoteTransactionActors;
-    private final AtomicBoolean remoteTransactionActorsMB;
-    private final ActorContext actorContext;
-    private final TransactionIdentifier identifier;
+    private final TransactionResources resources;
 
-    private TransactionProxyCleanupPhantomReference(TransactionProxy referent) {
-        super(referent, phantomReferenceQueue);
-
-        // Note we need to cache the relevant fields from the TransactionProxy as we can't
-        // have a hard reference to the TransactionProxy instance itself.
-
-        remoteTransactionActors = referent.remoteTransactionActors;
-        remoteTransactionActorsMB = referent.remoteTransactionActorsMB;
-        actorContext = referent.actorContext;
-        identifier = referent.getIdentifier();
+    private TransactionProxyCleanupPhantomReference(final TransactionProxy proxy) {
+        super(proxy, phantomReferenceQueue);
+        this.resources = proxy.getResources();
     }
 
-    static void track(TransactionProxy referent) {
-        final TransactionProxyCleanupPhantomReference ret = new TransactionProxyCleanupPhantomReference(referent);
+    static void track(final TransactionProxy proxy) {
+        final TransactionProxyCleanupPhantomReference ret = new TransactionProxyCleanupPhantomReference(proxy);
         phantomReferenceCache.put(ret, ret);
     }
 
     @Override
     public void finalizeReferent() {
-        LOG.trace("Cleaning up {} Tx actors for TransactionProxy {}",
-                remoteTransactionActors.size(), identifier);
-
         phantomReferenceCache.remove(this);
-
-        // Access the memory barrier volatile to ensure all previous updates to the
-        // remoteTransactionActors list are visible to this thread.
-
-        if(remoteTransactionActorsMB.get()) {
-            for(ActorSelection actor : remoteTransactionActors) {
-                LOG.trace("Sending CloseTransaction to {}", actor);
-                actorContext.sendOperationAsync(actor, CloseTransaction.INSTANCE.toSerializable());
-            }
-        }
+        resources.cleanup();
     }
 }
