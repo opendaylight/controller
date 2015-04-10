@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_213cd492",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionFutureCallback.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-10T15:46:38Z",
+      "side": 1,
+      "message": "This actually should be Brocade as I wrote it originally. Not a big deal - can change it later.",
+      "revId": "42b44eaf035beeebb794277db8ede1db3caa9ab1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_814cc843",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 288,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-10T15:46:38Z",
+      "side": 1,
+      "message": "Misspelling - should be \"ensureInitialized\". Can be fixed in a follow-up patch.",
+      "revId": "42b44eaf035beeebb794277db8ede1db3caa9ab1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
