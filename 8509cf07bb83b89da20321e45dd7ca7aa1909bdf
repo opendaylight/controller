@@ -16,6 +16,24 @@
       "revId": "8509cf07bb83b89da20321e45dd7ca7aa1909bdf",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_6dff33ab",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionContextImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-10T04:33:41Z",
+      "side": 1,
+      "message": "I was thinking of deriving an immutable BatchedModificationsReady message. But that would mean creating a new instance and copying the modifications list. But I wanted to avoid the overhead. I opted for maximum efficiency - for that we need to squeeze every cycle we can out of it and sacrifice some \"cleanliness\". The code here immediately releases batchedModifications after it\u0027s sent so we\u0027re ok.",
+      "parentUuid": "5a93c517_edcee3b3",
+      "revId": "8509cf07bb83b89da20321e45dd7ca7aa1909bdf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
