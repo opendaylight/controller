@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore.messages;
 
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 
+@Deprecated
 public class ReadyTransaction implements SerializableMessage{
     public static final Class<ShardTransactionMessages.ReadyTransaction> SERIALIZABLE_CLASS =
             ShardTransactionMessages.ReadyTransaction.class;

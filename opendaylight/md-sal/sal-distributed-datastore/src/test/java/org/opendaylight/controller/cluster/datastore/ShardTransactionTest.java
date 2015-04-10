@@ -409,34 +409,58 @@ public class ShardTransactionTest extends AbstractActorTest {
     }
 
     @Test
-    public void testOnReceiveReadyTransaction() throws Exception {
+    public void testOnReceiveBatchedModificationsReady() throws Exception {
+        new JavaTestKit(getSystem()) {{
+
+            final ActorRef transaction = newTransactionActor(store.newWriteOnlyTransaction(),
+                    "testOnReceiveBatchedModificationsReady");
+
+            JavaTestKit watcher = new JavaTestKit(getSystem());
+            watcher.watch(transaction);
+
+            YangInstanceIdentifier writePath = TestModel.TEST_PATH;
+            NormalizedNode<?, ?> writeData = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
+                    new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME)).
+                    withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
+
+            BatchedModifications batched = new BatchedModifications("tx1", DataStoreVersions.CURRENT_VERSION, null);
+            batched.setReady(true);
+            batched.addModification(new WriteModification(writePath, writeData));
+
+            transaction.tell(batched, getRef());
+
+            expectMsgClass(duration("5 seconds"), ReadyTransactionReply.class);
+            watcher.expectMsgClass(duration("5 seconds"), Terminated.class);
+        }};
+    }
+
+    @Test
+    public void testOnReceivePreLithiumReadyTransaction() throws Exception {
         new JavaTestKit(getSystem()) {{
             final ActorRef transaction = newTransactionActor(store.newReadWriteTransaction(),
-                    "testReadyTransaction");
+                    "testReadyTransaction", DataStoreVersions.HELIUM_2_VERSION);
 
-            watch(transaction);
+            JavaTestKit watcher = new JavaTestKit(getSystem());
+            watcher.watch(transaction);
 
             transaction.tell(new ReadyTransaction().toSerializable(), getRef());
 
-            expectMsgAnyClassOf(duration("5 seconds"), ReadyTransactionReply.SERIALIZABLE_CLASS,
-                    Terminated.class);
-            expectMsgAnyClassOf(duration("5 seconds"), ReadyTransactionReply.SERIALIZABLE_CLASS,
-                    Terminated.class);
+            expectMsgClass(duration("5 seconds"), ReadyTransactionReply.SERIALIZABLE_CLASS);
+            watcher.expectMsgClass(duration("5 seconds"), Terminated.class);
         }};
 
         // test
         new JavaTestKit(getSystem()) {{
             final ActorRef transaction = newTransactionActor(store.newReadWriteTransaction(),
-                    "testReadyTransaction2");
+                    "testReadyTransaction2", DataStoreVersions.HELIUM_2_VERSION);
 
-            watch(transaction);
+            JavaTestKit watcher = new JavaTestKit(getSystem());
+            watcher.watch(transaction);
 
             transaction.tell(new ReadyTransaction(), getRef());
 
-            expectMsgAnyClassOf(duration("5 seconds"), ReadyTransactionReply.class,
-                    Terminated.class);
-            expectMsgAnyClassOf(duration("5 seconds"), ReadyTransactionReply.class,
-                    Terminated.class);
+            expectMsgClass(duration("5 seconds"), ReadyTransactionReply.class);
+            watcher.expectMsgClass(duration("5 seconds"), Terminated.class);
         }};
     }
 

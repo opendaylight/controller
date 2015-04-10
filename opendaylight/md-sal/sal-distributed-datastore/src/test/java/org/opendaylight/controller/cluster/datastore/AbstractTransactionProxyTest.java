@@ -50,7 +50,6 @@ import org.opendaylight.controller.cluster.datastore.messages.DataExists;
 import org.opendaylight.controller.cluster.datastore.messages.DataExistsReply;
 import org.opendaylight.controller.cluster.datastore.messages.ReadData;
 import org.opendaylight.controller.cluster.datastore.messages.ReadDataReply;
-import org.opendaylight.controller.cluster.datastore.messages.ReadyTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionReply;
 import org.opendaylight.controller.cluster.datastore.modification.AbstractModification;
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
@@ -204,10 +203,6 @@ public abstract class AbstractTransactionProxyTest {
         return argThat(matcher);
     }
 
-    protected Future<Object> readySerializedTxReply(String path) {
-        return Futures.successful((Object)new ReadyTransactionReply(path).toSerializable());
-    }
-
     protected Future<Object> readyTxReply(String path) {
         return Futures.successful((Object)new ReadyTransactionReply(path));
     }
@@ -250,10 +245,8 @@ public abstract class AbstractTransactionProxyTest {
                 eq(actorSelection(actorRef)), isA(BatchedModifications.class));
     }
 
-    protected void expectBatchedModificationsReady(ActorRef actorRef, int count) {
-        Future<BatchedModificationsReply> replyFuture = Futures.successful(
-                new BatchedModificationsReply(count, actorRef.path().toString()));
-        doReturn(replyFuture).when(mockActorContext).executeOperationAsync(
+    protected void expectBatchedModificationsReady(ActorRef actorRef) {
+        doReturn(readyTxReply(actorRef.path().toString())).when(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef)), isA(BatchedModifications.class));
     }
 
@@ -265,11 +258,6 @@ public abstract class AbstractTransactionProxyTest {
     protected void expectIncompleteBatchedModifications() {
         doReturn(incompleteFuture()).when(mockActorContext).executeOperationAsync(
                 any(ActorSelection.class), isA(BatchedModifications.class));
-    }
-
-    protected void expectReadyTransaction(ActorRef actorRef) {
-        doReturn(readySerializedTxReply(actorRef.path().toString())).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), isA(ReadyTransaction.SERIALIZABLE_CLASS));
     }
 
     protected void expectFailedBatchedModifications(ActorRef actorRef) {
