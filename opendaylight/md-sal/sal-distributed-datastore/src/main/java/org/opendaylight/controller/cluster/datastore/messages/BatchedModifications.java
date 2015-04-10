@@ -22,6 +22,7 @@ public class BatchedModifications extends MutableCompositeModification implement
     private static final long serialVersionUID = 1L;
 
     private boolean ready;
+    private int totalMessagesSent;
     private String transactionID;
     private String transactionChainID;
 
@@ -42,6 +43,14 @@ public class BatchedModifications extends MutableCompositeModification implement
         this.ready = ready;
     }
 
+    public int getTotalMessagesSent() {
+        return totalMessagesSent;
+    }
+
+    public void setTotalMessagesSent(int totalMessagesSent) {
+        this.totalMessagesSent = totalMessagesSent;
+    }
+
     public String getTransactionID() {
         return transactionID;
     }
@@ -56,6 +65,7 @@ public class BatchedModifications extends MutableCompositeModification implement
         transactionID = in.readUTF();
         transactionChainID = in.readUTF();
         ready = in.readBoolean();
+        totalMessagesSent = in.readInt();
     }
 
     @Override
@@ -64,6 +74,7 @@ public class BatchedModifications extends MutableCompositeModification implement
         out.writeUTF(transactionID);
         out.writeUTF(transactionChainID);
         out.writeBoolean(ready);
+        out.writeInt(totalMessagesSent);
     }
 
     @Override
@@ -74,8 +85,10 @@ public class BatchedModifications extends MutableCompositeModification implement
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("BatchedModifications [transactionID=").append(transactionID).append(", ready=").append(ready)
-                .append(", modifications size=").append(getModifications().size()).append("]");
+        builder.append("BatchedModifications [transactionID=").append(transactionID).append(", transactionChainID=")
+                .append(transactionChainID).append(", ready=").append(ready).append(", totalMessagesSent=")
+                .append(totalMessagesSent).append(", modifications size=").append(getModifications().size())
+                .append("]");
         return builder.toString();
     }
 }
