@@ -104,14 +104,15 @@ class RaftActorRecoverySupport {
         cohort.applyRecoverySnapshot(snapshot.getState());
 
         timer.stop();
-        log.info("Recovery snapshot applied for {} in {}: snapshotIndex={}, snapshotTerm={}, journal-size=" +
-                replicatedLog().size(), context.getId(), timer.toString(),
-                replicatedLog().getSnapshotIndex(), replicatedLog().getSnapshotTerm());
+        log.info("Recovery snapshot applied for {} in {}: snapshotIndex={}, snapshotTerm={}, journal-size={}",
+                context.getId(), timer.toString(), replicatedLog().getSnapshotIndex(),
+                replicatedLog().getSnapshotTerm(), replicatedLog().size());
     }
 
     private void onRecoveredJournalLogEntry(ReplicatedLogEntry logEntry) {
         if(log.isDebugEnabled()) {
-            log.debug("{}: Received ReplicatedLogEntry for recovery: {}", context.getId(), logEntry.getIndex());
+            log.debug("{}: Received ReplicatedLogEntry for recovery: index: {}, size: {}", context.getId(),
+                    logEntry.getIndex(), logEntry.size());
         }
 
         replicatedLog().append(logEntry);

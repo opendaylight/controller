@@ -100,7 +100,7 @@ public class ShardTransactionTest extends AbstractActorTest {
     private ActorRef newTransactionActor(DOMStoreTransaction transaction, ActorRef shard, String name,
             short version) {
         Props props = ShardTransaction.props(transaction, shard != null ? shard : createShard(),
-                testSchemaContext, datastoreContext, shardStats, "txn", version);
+                datastoreContext, shardStats, "txn", version);
         return getSystem().actorOf(props, name);
     }
 
@@ -611,8 +611,7 @@ public class ShardTransactionTest extends AbstractActorTest {
     public void testNegativePerformingWriteOperationOnReadTransaction() throws Exception {
         final ActorRef shard = createShard();
         final Props props = ShardTransaction.props(store.newReadOnlyTransaction(), shard,
-                testSchemaContext, datastoreContext, shardStats, "txn",
-                DataStoreVersions.CURRENT_VERSION);
+                datastoreContext, shardStats, "txn", DataStoreVersions.CURRENT_VERSION);
         final TestActorRef<ShardTransaction> transaction = TestActorRef.apply(props,getSystem());
 
         transaction.receive(new DeleteData(TestModel.TEST_PATH, DataStoreVersions.CURRENT_VERSION).

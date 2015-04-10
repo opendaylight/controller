@@ -28,10 +28,6 @@ class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
     private final Procedure<DeleteEntries> deleteProcedure = new Procedure<DeleteEntries>() {
         @Override
         public void apply(DeleteEntries param) {
-            dataSize = 0;
-            for (ReplicatedLogEntry entry : journal) {
-                dataSize += entry.size();
-            }
         }
     };
 
@@ -57,16 +53,11 @@ class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
 
     @Override
     public void removeFromAndPersist(long logEntryIndex) {
-        int adjustedIndex = adjustedIndex(logEntryIndex);
-
-        if (adjustedIndex < 0) {
-            return;
-        }
-
         // FIXME: Maybe this should be done after the command is saved
-        journal.subList(adjustedIndex , journal.size()).clear();
-
-        persistence.persist(new DeleteEntries(adjustedIndex), deleteProcedure);
+        long adjustedIndex = removeFrom(logEntryIndex);
+        if(adjustedIndex >= 0) {
+            persistence.persist(new DeleteEntries((int)adjustedIndex), deleteProcedure);
+        }
     }
 
     @Override
@@ -83,7 +74,7 @@ class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
         }
 
         // FIXME : By adding the replicated log entry to the in-memory journal we are not truly ensuring durability of the logs
-        journal.add(replicatedLogEntry);
+        append(replicatedLogEntry);
 
         // When persisting events with persist it is guaranteed that the
         // persistent actor will not receive further commands between the
@@ -96,8 +87,7 @@ class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
                 public void apply(ReplicatedLogEntry evt) throws Exception {
                     int logEntrySize = replicatedLogEntry.size();
 
-                    dataSize += logEntrySize;
-                    long dataSizeForCheck = dataSize;
+                    long dataSizeForCheck = dataSize();
 
                     dataSizeSinceLastSnapshot += logEntrySize;
 

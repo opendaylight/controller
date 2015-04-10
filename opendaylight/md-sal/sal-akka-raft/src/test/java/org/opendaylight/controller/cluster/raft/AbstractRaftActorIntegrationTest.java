@@ -112,7 +112,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         }
 
         @Override
-        protected void createSnapshot() {
+        public void createSnapshot(ActorRef actorRef) {
             if(snapshot != null) {
                 getSelf().tell(new CaptureSnapshotReply(snapshot), ActorRef.noSender());
             }

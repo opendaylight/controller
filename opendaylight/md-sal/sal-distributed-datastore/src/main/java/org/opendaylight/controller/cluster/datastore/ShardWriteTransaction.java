@@ -32,7 +32,6 @@ import org.opendaylight.controller.cluster.datastore.modification.WriteModificat
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 /**
  * @author: syedbahm
@@ -46,9 +45,8 @@ public class ShardWriteTransaction extends ShardTransaction {
     private final DOMStoreWriteTransaction transaction;
 
     public ShardWriteTransaction(DOMStoreWriteTransaction transaction, ActorRef shardActor,
-            SchemaContext schemaContext, ShardStats shardStats, String transactionID,
-            short clientTxVersion) {
-        super(shardActor, schemaContext, shardStats, transactionID, clientTxVersion);
+            ShardStats shardStats, String transactionID, short clientTxVersion) {
+        super(shardActor, shardStats, transactionID, clientTxVersion);
         this.transaction = transaction;
     }
 
