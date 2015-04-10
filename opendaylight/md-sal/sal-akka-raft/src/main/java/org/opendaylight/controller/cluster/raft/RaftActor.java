@@ -195,11 +195,6 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     @Override
     public void handleCommand(Object message) {
-        boolean handled = snapshotSupport.handleSnapshotMessage(message);
-        if(handled) {
-            return;
-        }
-
         if (message instanceof ApplyState){
             ApplyState applyState = (ApplyState) message;
 
@@ -233,7 +228,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             );
         } else if(message instanceof GetOnDemandRaftState) {
             onGetOnDemandRaftStats();
-        } else {
+        } else if(!snapshotSupport.handleSnapshotMessage(message)) {
             reusableBehaviorStateHolder.init(getCurrentBehavior());
 
             setCurrentBehavior(currentBehavior.handleMessage(getSender(), message));
