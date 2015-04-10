@@ -22,6 +22,30 @@
       "revId": "02808db46df1fcfe2fd58992d0cf0301f4ded548",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_ad1c5b14",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionContextImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-10T04:40:38Z",
+      "side": 1,
+      "message": "Yeah - I noticed that in a subsequent patch and fixed it.",
+      "parentUuid": "5a93c517_0d4f8f6c",
+      "range": {
+        "startLine": 116,
+        "startChar": 37,
+        "endLine": 116,
+        "endChar": 42
+      },
+      "revId": "02808db46df1fcfe2fd58992d0cf0301f4ded548",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
