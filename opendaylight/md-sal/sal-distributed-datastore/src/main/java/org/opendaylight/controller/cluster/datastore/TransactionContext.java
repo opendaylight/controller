@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.datastore;
 import akka.actor.ActorSelection;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.SettableFuture;
-import java.util.Collection;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import scala.concurrent.Future;
@@ -33,6 +32,4 @@ interface TransactionContext {
     void readData(final YangInstanceIdentifier path, SettableFuture<Optional<NormalizedNode<?, ?>>> proxyFuture);
 
     void dataExists(YangInstanceIdentifier path, SettableFuture<Boolean> proxyFuture);
-
-    void copyRecordedOperationFutures(Collection<Future<Object>> target);
 }
