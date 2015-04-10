@@ -39,7 +39,7 @@ import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payloa
  */
 public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, RaftActorSnapshotCohort {
 
-    private final Map<String, String> state = new HashMap();
+    private final Map<String, String> state = new HashMap<>();
 
     private long persistIdentifier = 1;
     private final Optional<ActorRef> roleChangeNotifier;
@@ -136,12 +136,12 @@ public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, 
     public void applySnapshot(byte [] snapshot) {
         state.clear();
         try {
-            state.putAll((HashMap) toObject(snapshot));
+            state.putAll((HashMap<String, String>) toObject(snapshot));
         } catch (Exception e) {
            LOG.error("Exception in applying snapshot", e);
         }
         if(LOG.isDebugEnabled()) {
-            LOG.debug("Snapshot applied to state : {}", ((HashMap) state).size());
+            LOG.debug("Snapshot applied to state : {}", ((HashMap<?, ?>) state).size());
         }
     }
 
