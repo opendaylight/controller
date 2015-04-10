@@ -1,9 +1,8 @@
 package org.opendaylight.controller.sal.binding.test.bugfix;
 
 import static org.junit.Assert.assertFalse;
-
+import com.google.common.util.concurrent.SettableFuture;
 import java.util.concurrent.ExecutionException;
-
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
 import org.opendaylight.controller.sal.binding.api.data.DataChangeListener;
@@ -23,9 +22,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
-import com.google.common.util.concurrent.SettableFuture;
-
-@SuppressWarnings("deprecation")
 public class DeleteNestedAugmentationListenParentTest extends AbstractDataServiceTest {
 
     private static final TopLevelListKey FOO_KEY = new TopLevelListKey("foo");
