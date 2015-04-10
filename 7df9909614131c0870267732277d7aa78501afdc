@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_f6d47421",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-04-10T13:23:30Z",
+      "side": 1,
+      "message": "We should check for the snapshot messages after we check for all the other messages in here. Move this to the else clause.",
+      "revId": "7df9909614131c0870267732277d7aa78501afdc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
