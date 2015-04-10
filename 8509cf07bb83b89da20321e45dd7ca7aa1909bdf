@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_edcee3b3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionContextImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-04-10T03:51:47Z",
+      "side": 1,
+      "message": "This mutability of BatchedModifications bothers me. I\u0027m wondering if we should perhaps create a MutableBatchedModifications from which we create BatchedModifications. It would be bad if we get into a situation where we have an actor accessing BatchedModifications while we\u0027re modifying it here.",
+      "revId": "8509cf07bb83b89da20321e45dd7ca7aa1909bdf",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
