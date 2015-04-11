@@ -79,4 +79,8 @@ public interface ShardStatsMXBean {
    List<FollowerInfo> getFollowerInfo();
 
    String getPeerAddresses();
+
+   long getLeadershipChangeCount();
+
+   String getLastLeadershipChangeTime();
 }

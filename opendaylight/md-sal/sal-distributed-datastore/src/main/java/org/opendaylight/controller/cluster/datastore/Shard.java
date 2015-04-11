@@ -702,6 +702,11 @@ public class Shard extends RaftActor {
     }
 
     @Override
+    protected void onLeaderChanged(String oldLeader, String newLeader) {
+        shardMBean.incrementLeadershipChangeCount();
+    }
+
+    @Override
     public String persistenceId() {
         return this.name;
     }
