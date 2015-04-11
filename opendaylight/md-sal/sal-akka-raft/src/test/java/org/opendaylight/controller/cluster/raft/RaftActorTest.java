@@ -43,7 +43,6 @@ import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.NonPersistentDataProvider;
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.RoleChanged;
-import org.opendaylight.controller.cluster.raft.RaftActor.DeleteEntries;
 import org.opendaylight.controller.cluster.raft.RaftActor.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyLogEntries;
@@ -51,6 +50,7 @@ import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
+import org.opendaylight.controller.cluster.raft.base.messages.DeleteEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.SendHeartBeat;
 import org.opendaylight.controller.cluster.raft.behaviors.Follower;
 import org.opendaylight.controller.cluster.raft.behaviors.Leader;
@@ -237,6 +237,10 @@ public class RaftActorTest extends AbstractActorTest {
         DeleteEntries deleteEntries = new DeleteEntries(1);
         mockRaftActor.handleRecover(deleteEntries);
 
+        org.opendaylight.controller.cluster.raft.RaftActor.DeleteEntries deprecatedDeleteEntries =
+                new org.opendaylight.controller.cluster.raft.RaftActor.DeleteEntries(1);
+        mockRaftActor.handleRecover(deprecatedDeleteEntries);
+
         UpdateElectionTerm updateElectionTerm = new UpdateElectionTerm(5, "member2");
         mockRaftActor.handleRecover(updateElectionTerm);
 
@@ -245,6 +249,7 @@ public class RaftActorTest extends AbstractActorTest {
         verify(mockSupport).handleRecoveryMessage(same(applyJournalEntries));
         verify(mockSupport).handleRecoveryMessage(same(applyLogEntries));
         verify(mockSupport).handleRecoveryMessage(same(deleteEntries));
+        verify(mockSupport).handleRecoveryMessage(same(deprecatedDeleteEntries));
         verify(mockSupport).handleRecoveryMessage(same(updateElectionTerm));
     }
 
