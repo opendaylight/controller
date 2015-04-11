@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.raft;
 import akka.japi.Procedure;
 import java.util.Collections;
 import java.util.List;
-import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.base.messages.DeleteEntries;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 
@@ -22,7 +21,6 @@ class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
 
     private long dataSizeSinceLastSnapshot = 0L;
     private final RaftActorContext context;
-    private final DataPersistenceProvider persistence;
     private final RaftActorBehavior currentBehavior;
 
     private final Procedure<DeleteEntries> deleteProcedure = new Procedure<DeleteEntries>() {
@@ -32,22 +30,20 @@ class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
     };
 
     static ReplicatedLog newInstance(Snapshot snapshot, RaftActorContext context,
-            DataPersistenceProvider persistence, RaftActorBehavior currentBehavior) {
+            RaftActorBehavior currentBehavior) {
         return new ReplicatedLogImpl(snapshot.getLastAppliedIndex(), snapshot.getLastAppliedTerm(),
-                snapshot.getUnAppliedEntries(), context, persistence, currentBehavior);
+                snapshot.getUnAppliedEntries(), context, currentBehavior);
     }
 
-    static ReplicatedLog newInstance(RaftActorContext context,
-            DataPersistenceProvider persistence, RaftActorBehavior currentBehavior) {
+    static ReplicatedLog newInstance(RaftActorContext context, RaftActorBehavior currentBehavior) {
         return new ReplicatedLogImpl(-1L, -1L, Collections.<ReplicatedLogEntry>emptyList(), context,
-                persistence, currentBehavior);
+                currentBehavior);
     }
 
     private ReplicatedLogImpl(long snapshotIndex, long snapshotTerm, List<ReplicatedLogEntry> unAppliedEntries,
-            RaftActorContext context, DataPersistenceProvider persistence, RaftActorBehavior currentBehavior) {
+            RaftActorContext context, RaftActorBehavior currentBehavior) {
         super(snapshotIndex, snapshotTerm, unAppliedEntries);
         this.context = context;
-        this.persistence = persistence;
         this.currentBehavior = currentBehavior;
     }
 
@@ -56,7 +52,7 @@ class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
         // FIXME: Maybe this should be done after the command is saved
         long adjustedIndex = removeFrom(logEntryIndex);
         if(adjustedIndex >= 0) {
-            persistence.persist(new DeleteEntries(adjustedIndex), deleteProcedure);
+            context.getPersistenceProvider().persist(new DeleteEntries(adjustedIndex), deleteProcedure);
         }
     }
 
@@ -81,7 +77,7 @@ class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
         // persist call and the execution(s) of the associated event
         // handler. This also holds for multiple persist calls in context
         // of a single command.
-        persistence.persist(replicatedLogEntry,
+        context.getPersistenceProvider().persist(replicatedLogEntry,
             new Procedure<ReplicatedLogEntry>() {
                 @Override
                 public void apply(ReplicatedLogEntry evt) throws Exception {

@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.raft;
 import akka.persistence.RecoveryCompleted;
 import akka.persistence.SnapshotOffer;
 import com.google.common.base.Stopwatch;
-import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.RaftActor.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyLogEntries;
@@ -24,7 +23,6 @@ import org.slf4j.Logger;
  * @author Thomas Pantelis
  */
 class RaftActorRecoverySupport {
-    private final DataPersistenceProvider persistence;
     private final RaftActorContext context;
     private final RaftActorBehavior currentBehavior;
     private final RaftActorRecoveryCohort cohort;
@@ -34,9 +32,8 @@ class RaftActorRecoverySupport {
     private Stopwatch recoveryTimer;
     private final Logger log;
 
-    RaftActorRecoverySupport(DataPersistenceProvider persistence, RaftActorContext context,
-            RaftActorBehavior currentBehavior, RaftActorRecoveryCohort cohort) {
-        this.persistence = persistence;
+    RaftActorRecoverySupport(RaftActorContext context, RaftActorBehavior currentBehavior,
+            RaftActorRecoveryCohort cohort) {
         this.context = context;
         this.currentBehavior = currentBehavior;
         this.cohort = cohort;
@@ -45,7 +42,7 @@ class RaftActorRecoverySupport {
 
     boolean handleRecoveryMessage(Object message) {
         boolean recoveryComplete = false;
-        if(persistence.isRecoveryApplicable()) {
+        if(context.getPersistenceProvider().isRecoveryApplicable()) {
             if (message instanceof SnapshotOffer) {
                 onRecoveredSnapshot((SnapshotOffer) message);
             } else if (message instanceof ReplicatedLogEntry) {
@@ -97,7 +94,7 @@ class RaftActorRecoverySupport {
         // The replicated log can be used later on to retrieve this snapshot
         // when we need to install it on a peer
 
-        context.setReplicatedLog(ReplicatedLogImpl.newInstance(snapshot, context, persistence, currentBehavior));
+        context.setReplicatedLog(ReplicatedLogImpl.newInstance(snapshot, context, currentBehavior));
         context.setLastApplied(snapshot.getLastAppliedIndex());
         context.setCommitIndex(snapshot.getLastAppliedIndex());
 

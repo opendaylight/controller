@@ -85,7 +85,7 @@ public class ReplicatedLogImplTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testAppendAndPersistExpectingNoCapture() throws Exception {
-        ReplicatedLog log = ReplicatedLogImpl.newInstance(context, mockPersistence, mockBehavior);
+        ReplicatedLog log = ReplicatedLogImpl.newInstance(context, mockBehavior);
 
         MockReplicatedLogEntry logEntry = new MockReplicatedLogEntry(1, 1, new MockPayload("1"));
 
@@ -114,7 +114,7 @@ public class ReplicatedLogImplTest {
 
         doReturn(1L).when(mockBehavior).getReplicatedToAllIndex();
 
-        ReplicatedLog log = ReplicatedLogImpl.newInstance(context, mockPersistence, mockBehavior);
+        ReplicatedLog log = ReplicatedLogImpl.newInstance(context, mockBehavior);
 
         MockReplicatedLogEntry logEntry1 = new MockReplicatedLogEntry(1, 2, new MockPayload("2"));
         MockReplicatedLogEntry logEntry2 = new MockReplicatedLogEntry(1, 3, new MockPayload("3"));
@@ -144,7 +144,7 @@ public class ReplicatedLogImplTest {
             }
         });
 
-        ReplicatedLog log = ReplicatedLogImpl.newInstance(context, mockPersistence, mockBehavior);
+        ReplicatedLog log = ReplicatedLogImpl.newInstance(context, mockBehavior);
 
         int dataSize = 600;
         MockReplicatedLogEntry logEntry = new MockReplicatedLogEntry(1, 2, new MockPayload("2", dataSize));
@@ -171,7 +171,7 @@ public class ReplicatedLogImplTest {
     @Test
     public void testRemoveFromAndPersist() throws Exception {
 
-        ReplicatedLog log = ReplicatedLogImpl.newInstance(context, mockPersistence, mockBehavior);
+        ReplicatedLog log = ReplicatedLogImpl.newInstance(context, mockBehavior);
 
         log.append(new MockReplicatedLogEntry(1, 0, new MockPayload("0")));
         log.append(new MockReplicatedLogEntry(1, 1, new MockPayload("1")));

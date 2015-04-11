@@ -127,7 +127,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             (configParams.isPresent() ? configParams.get(): new DefaultConfigParamsImpl()),
             delegatingPersistenceProvider, LOG);
 
-        context.setReplicatedLog(ReplicatedLogImpl.newInstance(context, delegatingPersistenceProvider, currentBehavior));
+        context.setReplicatedLog(ReplicatedLogImpl.newInstance(context, currentBehavior));
     }
 
     @Override
@@ -179,8 +179,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     protected RaftActorRecoverySupport newRaftActorRecoverySupport() {
-        return new RaftActorRecoverySupport(delegatingPersistenceProvider, context, currentBehavior,
-                getRaftActorRecoveryCohort());
+        return new RaftActorRecoverySupport(context, currentBehavior, getRaftActorRecoveryCohort());
     }
 
     protected void initializeBehavior(){
@@ -238,8 +237,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     protected RaftActorSnapshotMessageSupport newRaftActorSnapshotMessageSupport() {
-        return new RaftActorSnapshotMessageSupport(delegatingPersistenceProvider, context,
-                currentBehavior, getRaftActorSnapshotCohort());
+        return new RaftActorSnapshotMessageSupport(context, currentBehavior,
+                getRaftActorSnapshotCohort());
     }
 
     private void onGetOnDemandRaftStats() {
