@@ -8,7 +8,6 @@
 
 package org.opendaylight.controller.cluster.raft;
 
-import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 
 public interface SnapshotState {
@@ -42,21 +41,18 @@ public interface SnapshotState {
     /**
      * Persist the snapshot
      *
-     * @param persistenceProvider
      * @param snapshotBytes
      * @param currentBehavior
      * @param totalMemory
      */
-    void persist(DataPersistenceProvider persistenceProvider, byte[] snapshotBytes, RaftActorBehavior currentBehavior
-            ,long totalMemory);
+    void persist(byte[] snapshotBytes, RaftActorBehavior currentBehavior, long totalMemory);
 
     /**
      * Commit the snapshot by trimming the log
      *
-     * @param persistenceProvider
      * @param sequenceNumber
      */
-    void commit(DataPersistenceProvider persistenceProvider, long sequenceNumber);
+    void commit(long sequenceNumber);
 
     /**
      * Rollback the snapshot
