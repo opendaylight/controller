@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_09bbfac4",
+        "filename": "opendaylight/netconf/netconf-util/src/main/java/org/opendaylight/controller/netconf/util/xml/XmlUtil.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-04-13T09:25:23Z",
+      "side": 1,
+      "message": "I think the builder should be reset() after use to prevent state leakage.\n\nAdd method javadocs to warn that this may pollute thread-local space of the calling thread and provide a method for cleaning up the thread-local variable.",
+      "revId": "20e46fb7940f430db9b16e75b50dafc071d1b8be",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_a9b1a6e2",
+        "filename": "opendaylight/netconf/netconf-util/src/main/java/org/opendaylight/controller/netconf/util/xml/XmlUtil.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-04-13T09:25:23Z",
+      "side": 1,
+      "message": "same as above",
+      "revId": "20e46fb7940f430db9b16e75b50dafc071d1b8be",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
