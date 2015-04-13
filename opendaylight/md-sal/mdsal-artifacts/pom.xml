@@ -189,6 +189,11 @@
                 <type>test-jar</type>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>org.opendaylight.controller</groupId>
+                <artifactId>sal-akka-raft-example</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <!-- OpenFlow stuff -->
             <dependency>
