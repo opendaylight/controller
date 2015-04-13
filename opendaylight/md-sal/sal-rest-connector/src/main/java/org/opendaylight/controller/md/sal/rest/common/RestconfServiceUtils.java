@@ -47,26 +47,26 @@ public class RestconfServiceUtils {
         final DataContainerNodeAttrBuilder<NodeIdentifierWithPredicates, MapEntryNode> moduleNodeValues =
                 Builders.mapEntryBuilder(moduleSchemaNode);
 
-        final DataSchemaNode nameSchemaNode = RestconfSchemaUtils
+        final DataSchemaNode nameSchemaNode = RestconfSchemaNodeUtils
                 .findInstanceDataChildByName((moduleSchemaNode), "name");
         Preconditions.checkState(nameSchemaNode instanceof LeafSchemaNode);
         moduleNodeValues.withChild(Builders.leafBuilder((LeafSchemaNode) nameSchemaNode)
                 .withValue(module.getName()).build());
 
-        final DataSchemaNode revisionSchemaNode = RestconfSchemaUtils
+        final DataSchemaNode revisionSchemaNode = RestconfSchemaNodeUtils
                 .findInstanceDataChildByName((moduleSchemaNode), "revision");
         Preconditions.checkState(revisionSchemaNode instanceof LeafSchemaNode);
         final String revision = RestconfInternalConstants.REVISION_FORMAT.format(module.getRevision());
         moduleNodeValues.withChild(Builders.leafBuilder((LeafSchemaNode) revisionSchemaNode)
                 .withValue(revision).build());
 
-        final DataSchemaNode namespaceSchemaNode = RestconfSchemaUtils
+        final DataSchemaNode namespaceSchemaNode = RestconfSchemaNodeUtils
                 .findInstanceDataChildByName((moduleSchemaNode), "namespace");
         Preconditions.checkState(namespaceSchemaNode instanceof LeafSchemaNode);
         moduleNodeValues.withChild(Builders.leafBuilder((LeafSchemaNode) namespaceSchemaNode)
                 .withValue(module.getNamespace().toString()).build());
 
-        final DataSchemaNode featureSchemaNode = RestconfSchemaUtils
+        final DataSchemaNode featureSchemaNode = RestconfSchemaNodeUtils
                 .findInstanceDataChildByName((moduleSchemaNode), "feature");
         Preconditions.checkState(featureSchemaNode instanceof LeafListSchemaNode);
         final ListNodeBuilder<Object, LeafSetEntryNode<Object>> featuresBuilder = Builders
@@ -88,31 +88,31 @@ public class RestconfServiceUtils {
         final DataContainerNodeAttrBuilder<NodeIdentifierWithPredicates, MapEntryNode> streamNodeValues =
                 Builders.mapEntryBuilder(streamSchemaNode);
 
-        final DataSchemaNode nameSchemaNode = RestconfSchemaUtils
+        final DataSchemaNode nameSchemaNode = RestconfSchemaNodeUtils
                 .findInstanceDataChildByName((streamSchemaNode), "name");
         Preconditions.checkState(nameSchemaNode instanceof LeafSchemaNode);
         streamNodeValues.withChild(Builders.leafBuilder((LeafSchemaNode) nameSchemaNode)
                 .withValue(streamName).build());
 
-        final DataSchemaNode descriptionSchemaNode = RestconfSchemaUtils
+        final DataSchemaNode descriptionSchemaNode = RestconfSchemaNodeUtils
                 .findInstanceDataChildByName((streamSchemaNode), "description");
         Preconditions.checkState(descriptionSchemaNode instanceof LeafSchemaNode);
         streamNodeValues.withChild(Builders.leafBuilder((LeafSchemaNode) nameSchemaNode)
                 .withValue("DESCRIPTION_PLACEHOLDER").build());
 
-        final DataSchemaNode replaySupportSchemaNode = RestconfSchemaUtils
+        final DataSchemaNode replaySupportSchemaNode = RestconfSchemaNodeUtils
                 .findInstanceDataChildByName((streamSchemaNode), "replay-support");
         Preconditions.checkState(replaySupportSchemaNode instanceof LeafSchemaNode);
         streamNodeValues.withChild(Builders.leafBuilder((LeafSchemaNode) replaySupportSchemaNode)
                 .withValue(Boolean.valueOf(true)).build());
 
-        final DataSchemaNode replayLogCreationTimeSchemaNode = RestconfSchemaUtils
+        final DataSchemaNode replayLogCreationTimeSchemaNode = RestconfSchemaNodeUtils
                 .findInstanceDataChildByName((streamSchemaNode), "replay-log-creation-time");
         Preconditions.checkState(replayLogCreationTimeSchemaNode instanceof LeafSchemaNode);
         streamNodeValues.withChild(Builders.leafBuilder((LeafSchemaNode) replayLogCreationTimeSchemaNode)
                 .withValue("").build());
 
-        final DataSchemaNode eventsSchemaNode = RestconfSchemaUtils
+        final DataSchemaNode eventsSchemaNode = RestconfSchemaNodeUtils
                 .findInstanceDataChildByName((streamSchemaNode), "events");
         Preconditions.checkState(eventsSchemaNode instanceof LeafSchemaNode);
         streamNodeValues.withChild(Builders.leafBuilder((LeafSchemaNode) eventsSchemaNode)

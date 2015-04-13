@@ -13,8 +13,7 @@ import java.net.URI;
 import java.text.SimpleDateFormat;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 /**
  * sal-rest-connector
@@ -29,8 +28,6 @@ import org.slf4j.LoggerFactory;
  * Created: Feb 24, 2015
  */
 public final class RestconfInternalConstants {
-
-    private static final Logger LOG = LoggerFactory.getLogger(RestconfInternalConstants.class);
 
     // TODO : redirect all possible references
 
@@ -81,5 +78,7 @@ public final class RestconfInternalConstants {
     public static final String URI_PARAM_PRETTY_PRINT = "prettyPrint";
 
     public static final String URI_PARAM_DEPTH = "depth";
+
+    public static final YangInstanceIdentifier ROOT = YangInstanceIdentifier.builder().build();
 
 }
