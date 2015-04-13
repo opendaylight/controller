@@ -78,7 +78,7 @@ public class NormalizedNodeJsonBodyWriter implements MessageBodyWriter<Normalize
         jsonWriter.flush();
     }
 
-    private void writeNormalizedNode(final JsonWriter jsonWriter, SchemaPath path,
+    private static void writeNormalizedNode(final JsonWriter jsonWriter, SchemaPath path,
             final InstanceIdentifierContext<SchemaNode> context, NormalizedNode<?, ?> data) throws IOException {
         final NormalizedNodeWriter nnWriter;
         if (SchemaPath.ROOT.equals(path)) {
@@ -111,13 +111,13 @@ public class NormalizedNodeJsonBodyWriter implements MessageBodyWriter<Normalize
         nnWriter.flush();
     }
 
-    private void writeChildren(final NormalizedNodeWriter nnWriter, final ContainerNode data) throws IOException {
+    private static void writeChildren(final NormalizedNodeWriter nnWriter, final ContainerNode data) throws IOException {
         for(final DataContainerChild<? extends PathArgument, ?> child : data.getValue()) {
             nnWriter.write(child);
         }
     }
 
-    private NormalizedNodeWriter createNormalizedNodeWriter(final InstanceIdentifierContext<SchemaNode> context,
+    private static NormalizedNodeWriter createNormalizedNodeWriter(final InstanceIdentifierContext<SchemaNode> context,
             final SchemaPath path, final JsonWriter jsonWriter) {
 
         final SchemaNode schema = context.getSchemaNode();
@@ -137,13 +137,13 @@ public class NormalizedNodeJsonBodyWriter implements MessageBodyWriter<Normalize
         return NormalizedNodeWriter.forStreamWriter(streamWriter);
     }
 
-    private JsonWriter createJsonWriter(final OutputStream entityStream) {
+    private static JsonWriter createJsonWriter(final OutputStream entityStream) {
         // FIXME BUG-2153: Add pretty print support
         return JsonWriterFactory.createJsonWriter(new OutputStreamWriter(entityStream, Charsets.UTF_8));
 
     }
 
-    private JSONCodecFactory getCodecFactory(final InstanceIdentifierContext<?> context) {
+    private static JSONCodecFactory getCodecFactory(final InstanceIdentifierContext<?> context) {
         return RestconfContext.from(context.getSchemaContext()).getJsonCodecFactory();
     }
 
