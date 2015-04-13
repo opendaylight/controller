@@ -460,7 +460,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             long followerNextIndex = followerLogInformation.getNextIndex();
             boolean isFollowerActive = followerLogInformation.isFollowerActive();
             boolean sendAppendEntries = false;
-            List<ReplicatedLogEntry> entries = Collections.EMPTY_LIST;
+            List<ReplicatedLogEntry> entries = Collections.emptyList();
 
             if (mapFollowerToSnapshot.get(followerId) != null) {
                 // if install snapshot is in process , then sent next chunk if possible
