@@ -84,11 +84,11 @@ public class NetconfEventSourceManagerTest {
 
         netconfEventSourceManager =
                 NetconfEventSourceManager.create(dataBrokerMock,
-                                                 domNotificationPublishServiceMock,
-                                                 domMountPointServiceMock,
-                                                 mountPointServiceMock,
-                                                 eventSourceRegistry,
-                                                 namespaceToStreamList);
+                        domNotificationPublishServiceMock,
+                        domMountPointServiceMock,
+                        mountPointServiceMock,
+                        eventSourceRegistry,
+                        namespaceToStreamList);
     }
 
     @Test
@@ -125,12 +125,14 @@ public class NetconfEventSourceManagerTest {
         Map<InstanceIdentifier, DataObject> mapUpdate = new HashMap<>();
         InstanceIdentifier instanceIdentifierMock = mock(InstanceIdentifier.class);
         Node dataObjectMock = mock(Node.class);
+        
         if(create){
             mapCreate.put(instanceIdentifierMock, dataObjectMock);
         }
         if(update){
             mapUpdate.put(instanceIdentifierMock, dataObjectMock);
         }
+
         doReturn(mapCreate).when(asyncDataChangeEventMock).getCreatedData();
         doReturn(mapUpdate).when(asyncDataChangeEventMock).getUpdatedData();
         NetconfNode netconfNodeMock = mock(NetconfNode.class);

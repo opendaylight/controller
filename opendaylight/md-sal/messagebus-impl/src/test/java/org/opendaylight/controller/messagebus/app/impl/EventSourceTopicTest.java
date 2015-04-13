@@ -74,7 +74,7 @@ public class EventSourceTopicTest {
 
         nodeIdMock = mock(NodeId.class);
         doReturn(nodeIdMock).when(dataObjectMock).getId();
-        doReturn("0").when(nodeIdMock).getValue();
+        doReturn("nodeIdPattern1").when(nodeIdMock).getValue();
     }
 
     @Test
