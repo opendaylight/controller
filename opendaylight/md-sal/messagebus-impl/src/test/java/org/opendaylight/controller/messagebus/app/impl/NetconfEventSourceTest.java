@@ -7,22 +7,8 @@
  */
 package org.opendaylight.controller.messagebus.app.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-
-import java.lang.reflect.Field;
-import java.net.URI;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import com.google.common.base.Optional;
+import com.google.common.util.concurrent.CheckedFuture;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.binding.api.BindingService;
@@ -53,21 +39,32 @@ import org.opendaylight.yangtools.yang.model.api.NotificationDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
-import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
+import java.lang.reflect.Field;
+import java.net.URI;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 public class NetconfEventSourceTest {
 
     NetconfEventSource netconfEventSource;
     DOMMountPoint domMountPointMock;
     JoinTopicInput joinTopicInputMock;
-    AsyncDataChangeEvent asyncDataChangeEventMock;
-    Node dataObjectMock;
 
     @Before
     public void setUp() throws Exception {
         Map<String, String> streamMap = new HashMap<>();
-        streamMap.put("string1", "string2");
+        streamMap.put("uriStr1", "string2");
         domMountPointMock = mock(DOMMountPoint.class);
         DOMNotificationPublishService domNotificationPublishServiceMock = mock(DOMNotificationPublishService.class);
         MountPoint mountPointMock = mock(MountPoint.class);
@@ -80,9 +77,9 @@ public class NetconfEventSourceTest {
         doReturn(rpcConsumerRegistryMock).when(onlyOptionalMock).get();
         doReturn(notificationsServiceMock).when(rpcConsumerRegistryMock).getRpcService(NotificationsService.class);
         org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node node
-            = mock(org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node.class);
+                = mock(org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node.class);
         org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId nodeId
-            = new org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId("NodeId1");
+                = new org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId("NodeId1");
         doReturn(nodeId).when(node).getNodeId();
         netconfEventSource = new NetconfEventSource(node, streamMap, domMountPointMock, domNotificationPublishServiceMock, mountPointMock);
     }
@@ -143,7 +140,7 @@ public class NetconfEventSourceTest {
         doReturn(topicId).when(joinTopicInputMock).getTopicId();
         NotificationPattern notificationPatternMock = mock(NotificationPattern.class);
         doReturn(notificationPatternMock).when(joinTopicInputMock).getNotificationPattern();
-        doReturn("regexString1").when(notificationPatternMock).getValue();
+        doReturn("uriStr1").when(notificationPatternMock).getValue();
 
         SchemaContext schemaContextMock = mock(SchemaContext.class);
         doReturn(schemaContextMock).when(domMountPointMock).getSchemaContext();
@@ -165,6 +162,13 @@ public class NetconfEventSourceTest {
         doReturn(domNotificationServiceMock).when(domNotificationServiceOptionalMock).get();
         ListenerRegistration listenerRegistrationMock = mock(ListenerRegistration.class);
         doReturn(listenerRegistrationMock).when(domNotificationServiceMock).registerNotificationListener(any(NetconfEventSource.class), any(List.class));
+
+        Optional<DOMService> optionalMock = (Optional<DOMService>) mock(Optional.class);
+        doReturn(optionalMock).when(domMountPointMock).getService(DOMRpcService.class);
+        DOMRpcService domRpcServiceMock = mock(DOMRpcService.class);
+        doReturn(domRpcServiceMock).when(optionalMock).get();
+        CheckedFuture checkedFutureMock = mock(CheckedFuture.class);
+        doReturn(checkedFutureMock).when(domRpcServiceMock).invokeRpc(any(SchemaPath.class), any(ContainerNode.class));
     }
 
 //TODO: create Test for NetConfEventSource#onNotification
