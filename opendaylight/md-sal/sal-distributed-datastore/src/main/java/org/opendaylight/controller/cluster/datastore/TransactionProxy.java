@@ -40,6 +40,7 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransactio
 import org.opendaylight.yangtools.util.concurrent.MappingCheckedFuture;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -219,7 +220,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
                 try {
                     proxyFuture.set(NormalizedNodeAggregator.aggregate(YangInstanceIdentifier.builder().build(),
                             future.get(), actorContext.getSchemaContext()));
-                } catch (InterruptedException | ExecutionException e) {
+                } catch (DataValidationFailedException | InterruptedException | ExecutionException e) {
                     proxyFuture.setException(e);
                 }
             }
