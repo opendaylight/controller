@@ -17,6 +17,7 @@ import akka.actor.UntypedActorContext;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Supplier;
 import java.util.Map;
+import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.slf4j.Logger;
 
 public class RaftActorContextImpl implements RaftActorContext {
@@ -48,9 +49,11 @@ public class RaftActorContextImpl implements RaftActorContext {
     // be passed to it in the constructor
     private SnapshotManager snapshotManager;
 
+    private final DataPersistenceProvider persistenceProvider;
+
     public RaftActorContextImpl(ActorRef actor, UntypedActorContext context, String id,
             ElectionTerm termInformation, long commitIndex, long lastApplied, Map<String, String> peerAddresses,
-            ConfigParams configParams, Logger logger) {
+            ConfigParams configParams, DataPersistenceProvider persistenceProvider, Logger logger) {
         this.actor = actor;
         this.context = context;
         this.id = id;
@@ -59,6 +62,7 @@ public class RaftActorContextImpl implements RaftActorContext {
         this.lastApplied = lastApplied;
         this.peerAddresses = peerAddresses;
         this.configParams = configParams;
+        this.persistenceProvider = persistenceProvider;
         this.LOG = logger;
     }
 
@@ -181,5 +185,10 @@ public class RaftActorContextImpl implements RaftActorContext {
     @Override
     public boolean hasFollowers() {
         return getPeerAddresses().keySet().size() > 0;
+    }
+
+    @Override
+    public DataPersistenceProvider getPersistenceProvider() {
+        return persistenceProvider;
     }
 }

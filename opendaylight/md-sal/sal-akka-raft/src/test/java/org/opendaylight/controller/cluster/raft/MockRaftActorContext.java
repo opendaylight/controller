@@ -19,6 +19,8 @@ import com.google.protobuf.GeneratedMessage;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import org.opendaylight.controller.cluster.DataPersistenceProvider;
+import org.opendaylight.controller.cluster.NonPersistentDataProvider;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages;
 import org.opendaylight.controller.protobuff.messages.cluster.raft.test.MockPayloadMessages;
@@ -38,6 +40,7 @@ public class MockRaftActorContext implements RaftActorContext {
     private ConfigParams configParams;
     private boolean snapshotCaptureInitiated;
     private SnapshotManager snapshotManager;
+    private DataPersistenceProvider persistenceProvider = new NonPersistentDataProvider();
 
     public MockRaftActorContext(){
         electionTerm = new ElectionTerm() {
@@ -217,6 +220,15 @@ public class MockRaftActorContext implements RaftActorContext {
     @Override
     public boolean hasFollowers() {
         return getPeerAddresses().keySet().size() > 0;
+    }
+
+    @Override
+    public DataPersistenceProvider getPersistenceProvider() {
+        return persistenceProvider;
+    }
+
+    public void setPersistenceProvider(DataPersistenceProvider persistenceProvider) {
+        this.persistenceProvider = persistenceProvider;
     }
 
     public static class SimpleReplicatedLog extends AbstractReplicatedLogImpl {
