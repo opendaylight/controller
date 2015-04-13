@@ -237,7 +237,7 @@ public final class XmlElement {
     /**
      *
      * @param tagName tag name without prefix
-     * @return
+     * @return List of child elements
      */
     public List<XmlElement> getChildElements(final String tagName) {
         return getChildElementsInternal(new ElementFilteringStrategy() {
@@ -261,31 +261,47 @@ public final class XmlElement {
     }
 
     public Optional<XmlElement> getOnlyChildElementOptionally(String childName) {
-        try {
-            return Optional.of(getOnlyChildElement(childName));
-        } catch (Exception e) {
+        List<XmlElement> nameElements = getChildElements(childName);
+        if (nameElements.size() != 1) {
             return Optional.absent();
         }
+        return Optional.of(nameElements.get(0));
     }
 
-    public Optional<XmlElement> getOnlyChildElementOptionally(String childName, String namespace) {
-        try {
-            return Optional.of(getOnlyChildElement(childName, namespace));
-        } catch (Exception e) {
+    public Optional<XmlElement> getOnlyChildElementOptionally(final String childName, final String namespace) {
+        List<XmlElement> children = getChildElementsWithinNamespace(namespace);
+        children = Lists.newArrayList(Collections2.filter(children, new Predicate<XmlElement>() {
+            @Override
+            public boolean apply(XmlElement xmlElement) {
+                return xmlElement.getName().equals(childName);
+            }
+        }));
+        if (children.size() != 1){
             return Optional.absent();
         }
+        return Optional.of(children.get(0));
     }
 
     public XmlElement getOnlyChildElementWithSameNamespace(String childName) throws  NetconfDocumentedException {
         return getOnlyChildElement(childName, getNamespace());
     }
 
-    public Optional<XmlElement> getOnlyChildElementWithSameNamespaceOptionally(String childName) {
-        try {
-            return Optional.of(getOnlyChildElement(childName, getNamespace()));
-        } catch (Exception e) {
-            return Optional.absent();
+    public Optional<XmlElement> getOnlyChildElementWithSameNamespaceOptionally(final String childName) {
+        Optional<String> namespace = getNamespaceOptionally();
+        if (namespace.isPresent()) {
+            List<XmlElement> children = getChildElementsWithinNamespace(namespace.get());
+            children = Lists.newArrayList(Collections2.filter(children, new Predicate<XmlElement>() {
+                @Override
+                public boolean apply(XmlElement xmlElement) {
+                    return xmlElement.getName().equals(childName);
+                }
+            }));
+            if (children.size() != 1){
+                return Optional.absent();
+            }
+            return Optional.of(children.get(0));
         }
+        return Optional.absent();
     }
 
     public XmlElement getOnlyChildElementWithSameNamespace() throws NetconfDocumentedException {
@@ -295,13 +311,14 @@ public final class XmlElement {
     }
 
     public Optional<XmlElement> getOnlyChildElementWithSameNamespaceOptionally() {
-        try {
-            XmlElement childElement = getOnlyChildElement();
-            childElement.checkNamespace(getNamespace());
-            return Optional.of(childElement);
-        } catch (Exception e) {
-            return Optional.absent();
+        Optional<XmlElement> child = getOnlyChildElementOptionally();
+        if (child.isPresent()
+                && child.get().getNamespaceOptionally().isPresent()
+                && getNamespaceOptionally().isPresent()
+                && getNamespaceOptionally().get().equals(child.get().getNamespaceOptionally().get())) {
+            return child;
         }
+        return Optional.absent();
     }
 
     public XmlElement getOnlyChildElement(final String childName, String namespace) throws NetconfDocumentedException {
@@ -333,6 +350,14 @@ public final class XmlElement {
                     NetconfDocumentedException.ErrorSeverity.error);
         }
         return children.get(0);
+    }
+
+    public Optional<XmlElement> getOnlyChildElementOptionally() {
+        List<XmlElement> children = getChildElements();
+        if (children.size() != 1) {
+            return Optional.absent();
+        }
+        return Optional.of(children.get(0));
     }
 
     public String getTextContent() throws NetconfDocumentedException {
@@ -377,6 +402,14 @@ public final class XmlElement {
         return attribute;
     }
 
+    public Optional<String> getNamespaceAttributeOptionally(){
+        String attribute = element.getAttribute(XmlUtil.XMLNS_ATTRIBUTE_KEY);
+        if (attribute == null || attribute.equals(DEFAULT_NAMESPACE_PREFIX)){
+            return Optional.absent();
+        }
+        return Optional.of(attribute);
+    }
+
     public Optional<String> getNamespaceOptionally() {
         String namespaceURI = element.getNamespaceURI();
         if (Strings.isNullOrEmpty(namespaceURI)) {
@@ -388,7 +421,7 @@ public final class XmlElement {
 
     public String getNamespace() throws MissingNameSpaceException {
         Optional<String> namespaceURI = getNamespaceOptionally();
-        if (namespaceURI.isPresent() == false){
+        if (!namespaceURI.isPresent()){
             throw new MissingNameSpaceException(String.format("No namespace defined for %s", this),
                     NetconfDocumentedException.ErrorType.application,
                     NetconfDocumentedException.ErrorTag.operation_failed,
@@ -482,11 +515,8 @@ public final class XmlElement {
 
         XmlElement that = (XmlElement) o;
 
-        if (!element.isEqualNode(that.element)) {
-            return false;
-        }
+        return element.isEqualNode(that.element);
 
-        return true;
     }
 
     @Override
@@ -495,15 +525,10 @@ public final class XmlElement {
     }
 
     public boolean hasNamespace() {
-        try {
-            getNamespaceAttribute();
-        } catch (MissingNameSpaceException e) {
-            try {
-                getNamespace();
-            } catch (MissingNameSpaceException e1) {
+        if (!getNamespaceAttributeOptionally().isPresent()) {
+            if (!getNamespaceOptionally().isPresent()) {
                 return false;
             }
-            return true;
         }
         return true;
     }
