@@ -84,11 +84,11 @@ public class NetconfEventSourceManagerTest {
 
         netconfEventSourceManager =
                 NetconfEventSourceManager.create(dataBrokerMock,
-                                                 domNotificationPublishServiceMock,
-                                                 domMountPointServiceMock,
-                                                 mountPointServiceMock,
-                                                 eventSourceRegistry,
-                                                 namespaceToStreamList);
+                        domNotificationPublishServiceMock,
+                        domMountPointServiceMock,
+                        mountPointServiceMock,
+                        eventSourceRegistry,
+                        namespaceToStreamList);
     }
 
     @Test
