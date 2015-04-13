@@ -23,15 +23,13 @@ import org.opendaylight.yangtools.yang.model.api.Module;
  * sal-rest-connector
  * org.opendaylight.controller.md.sal.rest.common
  *
- *
+ * Utility class for parsing Strings inputs to specific path arguments.
  *
  * @author <a href="mailto:vdemcak@cisco.com">Vaclav Demcak</a>
  *
  * Created: Mar 8, 2015
  */
 public class RestconfParsingUtils {
-
-    private static final String URI_ENCODING_CHAR_SET = RestconfInternalConstants.URI_ENCODING_CHAR_SET;
 
     private RestconfParsingUtils () {
         throw new UnsupportedOperationException("Utility class");
@@ -41,10 +39,10 @@ public class RestconfParsingUtils {
         try {
             final List<String> decodedPathArgs = new ArrayList<>();
             for (final String pathArg : strings) {
-                final String _decode = URLDecoder.decode(pathArg, URI_ENCODING_CHAR_SET);
+                final String _decode = URLDecoder.decode(pathArg, RestconfInternalConstants.URI_ENCODING_CHAR_SET);
                 decodedPathArgs.add(_decode);
             }
-            return decodedPathArgs;
+            return omitFirstAndLastEmptyString(decodedPathArgs);
         } catch (final UnsupportedEncodingException e) {
             final String errMsg = "Invalid URL path '" + strings + "': " + e.getMessage();
             throw new RestconfDocumentedException(errMsg, ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
@@ -56,7 +54,7 @@ public class RestconfParsingUtils {
             return null;
         }
         try {
-            return URLDecoder.decode(pathArg, URI_ENCODING_CHAR_SET);
+            return URLDecoder.decode(pathArg, RestconfInternalConstants.URI_ENCODING_CHAR_SET);
         }
         catch (final UnsupportedEncodingException e) {
             final String errMsg = "Invalid URL path arg '" + pathArg + "': " + e.getMessage();

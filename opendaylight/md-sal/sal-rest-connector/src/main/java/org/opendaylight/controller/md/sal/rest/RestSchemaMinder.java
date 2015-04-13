@@ -9,6 +9,7 @@
 package org.opendaylight.controller.md.sal.rest;
 
 import javax.annotation.Nonnull;
+import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.controller.sal.restconf.impl.InstanceIdentifierContext;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
@@ -31,7 +32,9 @@ public interface RestSchemaMinder {
 
     void tell(@Nonnull final SchemaContext schemaContext);
 
-    public InstanceIdentifierContext<?> makeFrom(final String identifier);
+    DOMMountPoint parseUriRequestToMountPoint(final String requestUriIdentifier);
+
+    InstanceIdentifierContext<?> parseUriRequest(final String requestUriIdentifier);
 
     Module getRestconfModule();
 

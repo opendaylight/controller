@@ -13,9 +13,11 @@ import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.CheckForNull;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
@@ -39,10 +41,27 @@ import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
  *
  * Created: Feb 5, 2015
  */
-public class RestconfSchemaUtils {
+public class RestconfSchemaNodeUtils {
 
-    private RestconfSchemaUtils () {
+    private RestconfSchemaNodeUtils () {
         throw new UnsupportedOperationException("Utility class");
+    }
+
+    public static DataSchemaNode findInstanceDataChildByNameAndNamespace(final DataNodeContainer container, final String name,
+            @CheckForNull final URI namespace) {
+        Preconditions.<URI> checkNotNull(namespace);
+
+        final List<DataSchemaNode> potentialSchemaNodes = findInstanceDataChildrenByName(container, name);
+
+        final Predicate<DataSchemaNode> filter = new Predicate<DataSchemaNode>() {
+            @Override
+            public boolean apply(final DataSchemaNode node) {
+                return Objects.equal(node.getQName().getNamespace(), namespace);
+            }
+        };
+
+        final Iterable<DataSchemaNode> result = Iterables.filter(potentialSchemaNodes, filter);
+        return Iterables.getFirst(result, null);
     }
 
     public static DataSchemaNode findInstanceDataChildByName(final DataNodeContainer container, final String nodeName) {
@@ -75,6 +94,10 @@ public class RestconfSchemaUtils {
         final List<DataSchemaNode> instantiatedDataNodeContainers = new ArrayList<>();
         collectInstanceDataNodeContainers(instantiatedDataNodeContainers, container, name);
         return instantiatedDataNodeContainers;
+    }
+
+    public static boolean isListOrContainer(final DataSchemaNode node) {
+        return node instanceof ListSchemaNode || node instanceof ContainerSchemaNode;
     }
 
     public static boolean isInstantiatedDataSchema(final DataSchemaNode node) {
