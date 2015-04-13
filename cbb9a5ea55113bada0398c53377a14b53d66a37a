@@ -16,6 +16,24 @@
       "revId": "cbb9a5ea55113bada0398c53377a14b53d66a37a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a93c517_042be182",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/md/sal/binding/impl/BindingDOMNotificationListenerAdapter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-04-13T11:39:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a93c517_7ccb6353",
+      "revId": "cbb9a5ea55113bada0398c53377a14b53d66a37a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
