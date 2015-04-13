@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import io.netty.channel.Channel;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -94,12 +95,15 @@ import org.opendaylight.controller.netconf.confignetconfconnector.operations.run
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreContext;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreService;
 import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
+import org.opendaylight.controller.netconf.impl.NetconfServerSession;
+import org.opendaylight.controller.netconf.impl.NetconfServerSessionListener;
 import org.opendaylight.controller.netconf.impl.mapping.operations.DefaultCloseSession;
 import org.opendaylight.controller.netconf.impl.osgi.AggregatedNetconfOperationServiceFactory;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationRouter;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedExecution;
+import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessageAdditionalHeader;
 import org.opendaylight.controller.netconf.util.messages.NetconfMessageUtil;
 import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
@@ -387,7 +391,14 @@ public class NetconfMappingTest extends AbstractConfigTest {
 
     private void closeSession() throws NetconfDocumentedException, ParserConfigurationException, SAXException,
             IOException {
+        final Channel channel = mock(Channel.class);
+        doReturn("channel").when(channel).toString();
+        final NetconfServerSessionListener listener = mock(NetconfServerSessionListener.class);
+        final NetconfServerSession session =
+                new NetconfServerSession(listener, channel, 1L,
+                        NetconfHelloMessageAdditionalHeader.fromString("[netconf;10.12.0.102:48528;ssh;;;;;;]"));
         DefaultCloseSession closeOp = new DefaultCloseSession(NETCONF_SESSION_ID, sessionCloseable);
+        closeOp.setNetconfSession(session);
         executeOp(closeOp, "netconfMessages/closeSession.xml");
     }
 
