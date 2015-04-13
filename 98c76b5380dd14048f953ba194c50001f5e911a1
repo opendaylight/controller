@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a93c517_46a6d154",
+        "filename": "opendaylight/netconf/netconf-impl/src/main/java/org/opendaylight/controller/netconf/impl/SubtreeFilter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-04-13T07:23:01Z",
+      "side": 1,
+      "message": "maybeFilter.isPresent is guaranteed to be true and can be removed in this condition",
+      "revId": "98c76b5380dd14048f953ba194c50001f5e911a1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
