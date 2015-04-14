@@ -25,6 +25,8 @@ module config {
 
             list user {
 
+                key "name";
+
                 leaf name {
                     type string;
                 }
@@ -53,6 +55,8 @@ module config {
         container modules {
 
             list module {
+
+                key "id";
 
                 leaf id {
                     type string;
@@ -116,6 +120,23 @@ module config {
         container augmented-container{
             leaf identifier {
                 type string;
+            }
+        }
+    }
+
+    augment "/map:top" {
+        container mid-level {
+            container low-level {
+                container lowest-level {
+                    leaf-list note {
+                        type string;
+                    }
+                }
+            }
+            container low-level2 {
+                leaf-list note {
+                    type string;
+                }
             }
         }
     }
