@@ -54,15 +54,15 @@ public abstract class AbstractWriteTx implements DOMDataWriteTransaction {
         try {
             final DOMRpcResult compositeNodeRpcResult = op.apply(netOps).get(DEFAULT_REQUEST_TIMEOUT_MINUTES, TimeUnit.MINUTES);
             if(isSuccess(compositeNodeRpcResult) == false) {
-                throw new NetconfDocumentedException(id + ": " + msg + " failed: " + compositeNodeRpcResult.getErrors(), NetconfDocumentedException.ErrorType.application,
-                        NetconfDocumentedException.ErrorTag.operation_failed, NetconfDocumentedException.ErrorSeverity.warning);
+                throw new NetconfDocumentedException(id + ": " + msg + " failed: " + compositeNodeRpcResult.getErrors(), NetconfDocumentedException.ErrorType.APPLICATION,
+                        NetconfDocumentedException.ErrorTag.OPERATION_FAILED, NetconfDocumentedException.ErrorSeverity.WARNING);
             }
         } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         } catch (final ExecutionException | TimeoutException e) {
-            throw new NetconfDocumentedException(id + ": " + msg + " failed: " + e.getMessage(), e, NetconfDocumentedException.ErrorType.application,
-                    NetconfDocumentedException.ErrorTag.operation_failed, NetconfDocumentedException.ErrorSeverity.warning);
+            throw new NetconfDocumentedException(id + ": " + msg + " failed: " + e.getMessage(), e, NetconfDocumentedException.ErrorType.APPLICATION,
+                    NetconfDocumentedException.ErrorTag.OPERATION_FAILED, NetconfDocumentedException.ErrorSeverity.WARNING);
         }
     }
 

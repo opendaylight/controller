@@ -58,10 +58,10 @@ public class GetSchema extends AbstractSingletonNetconfOperation {
         } catch (final IllegalStateException e) {
             final Map<String, String> errorInfo = Maps.newHashMap();
             errorInfo.put(entry.identifier, e.getMessage());
-            LOG.warn("Rpc error: {}", NetconfDocumentedException.ErrorTag.operation_failed, e);
-            throw new NetconfDocumentedException(e.getMessage(), NetconfDocumentedException.ErrorType.application,
-                    NetconfDocumentedException.ErrorTag.operation_failed,
-                    NetconfDocumentedException.ErrorSeverity.error, errorInfo);
+            LOG.warn("Rpc error: {}", NetconfDocumentedException.ErrorTag.OPERATION_FAILED, e);
+            throw new NetconfDocumentedException(e.getMessage(), NetconfDocumentedException.ErrorType.APPLICATION,
+                    NetconfDocumentedException.ErrorTag.OPERATION_FAILED,
+                    NetconfDocumentedException.ErrorSeverity.ERROR, errorInfo);
         }
 
         final Element getSchemaResult;

@@ -54,10 +54,10 @@ public class DefaultCloseSession extends AbstractSingletonNetconfOperation imple
             LOG.info("Session {} closing", session.getSessionId());
         } catch (Exception e) {
             throw new NetconfDocumentedException("Unable to properly close session "
-                    + getNetconfSessionIdForReporting(), NetconfDocumentedException.ErrorType.application,
-                    NetconfDocumentedException.ErrorTag.operation_failed,
-                    NetconfDocumentedException.ErrorSeverity.error, Collections.singletonMap(
-                        NetconfDocumentedException.ErrorSeverity.error.toString(), e.getMessage()));
+                    + getNetconfSessionIdForReporting(), NetconfDocumentedException.ErrorType.APPLICATION,
+                    NetconfDocumentedException.ErrorTag.OPERATION_FAILED,
+                    NetconfDocumentedException.ErrorSeverity.ERROR, Collections.singletonMap(
+                        NetconfDocumentedException.ErrorSeverity.ERROR.toString(), e.getMessage()));
         }
         return XmlUtil.createElement(document, XmlNetconfConstants.OK, Optional.<String>absent());
     }
