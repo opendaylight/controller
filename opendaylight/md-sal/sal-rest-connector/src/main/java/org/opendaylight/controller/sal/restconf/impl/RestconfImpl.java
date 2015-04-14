@@ -87,7 +87,6 @@ import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
-import org.opendaylight.yangtools.yang.model.util.SchemaContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -570,13 +569,11 @@ public class RestconfImpl implements RestconfService {
 
         final DOMRpcResult result = checkRpcResponse(response);
 
-        DataSchemaNode resultNodeSchema = null;
+        RpcDefinition resultNodeSchema = null;
         NormalizedNode<?, ?> resultData = null;
         if (result != null && result.getResult() != null) {
             resultData = result.getResult();
-            final ContainerSchemaNode rpcDataSchemaNode =
-                    SchemaContextUtil.getRpcDataSchema(schemaContext, rpc.getOutput().getPath());
-            resultNodeSchema = rpcDataSchemaNode.getDataChildByName(result.getResult().getNodeType());
+            resultNodeSchema = rpc;
         }
 
         return new NormalizedNodeContext(new InstanceIdentifierContext<>(null, resultNodeSchema, mountPoint,
