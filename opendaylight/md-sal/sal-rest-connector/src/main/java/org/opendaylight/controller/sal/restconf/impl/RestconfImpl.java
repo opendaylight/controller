@@ -572,13 +572,11 @@ public class RestconfImpl implements RestconfService {
 
         final DOMRpcResult result = checkRpcResponse(response);
 
-        DataSchemaNode resultNodeSchema = null;
+        RpcDefinition resultNodeSchema = null;
         NormalizedNode<?, ?> resultData = null;
         if (result != null && result.getResult() != null) {
             resultData = result.getResult();
-            final ContainerSchemaNode rpcDataSchemaNode =
-                    SchemaContextUtil.getRpcDataSchema(schemaContext, rpc.getOutput().getPath());
-            resultNodeSchema = rpcDataSchemaNode.getDataChildByName(result.getResult().getNodeType());
+            resultNodeSchema = rpc;
         }
 
         return new NormalizedNodeContext(new InstanceIdentifierContext<>(null, resultNodeSchema, mountPoint,
