@@ -25,6 +25,8 @@ module config {
 
             list user {
 
+                key "name";
+
                 leaf name {
                     type string;
                 }
@@ -53,6 +55,8 @@ module config {
         container modules {
 
             list module {
+
+                key "id";
 
                 leaf id {
                     type string;
