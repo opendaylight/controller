@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_255a1484",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionResources.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-14T12:09:22Z",
+      "side": 1,
+      "message": "Does this need to be volatile? It wasn\u0027t before.",
+      "revId": "9eb18d4f9fe6d439f0a3cbecc999ac3d8737204c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
