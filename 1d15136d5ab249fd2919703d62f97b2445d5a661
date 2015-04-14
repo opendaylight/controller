@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_c5e1f09b",
+        "filename": "opendaylight/netconf/netconf-impl/src/main/java/org/opendaylight/controller/netconf/impl/SubtreeFilter.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-04-14T12:24:54Z",
+      "side": 1,
+      "message": "make sure we retain the exception as cause",
+      "revId": "1d15136d5ab249fd2919703d62f97b2445d5a661",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_25e8d47b",
+        "filename": "opendaylight/netconf/netconf-impl/src/main/java/org/opendaylight/controller/netconf/impl/SubtreeFilter.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-04-14T12:24:54Z",
+      "side": 1,
+      "message": "since we\u0027re here, get the filter into local variable",
+      "revId": "1d15136d5ab249fd2919703d62f97b2445d5a661",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
