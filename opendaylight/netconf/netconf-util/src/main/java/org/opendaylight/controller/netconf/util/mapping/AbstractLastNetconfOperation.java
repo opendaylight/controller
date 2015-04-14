@@ -25,9 +25,9 @@ public abstract class AbstractLastNetconfOperation extends AbstractNetconfOperat
             NetconfOperationChainedExecution subsequentOperation) throws NetconfDocumentedException {
         if (!subsequentOperation.isExecutionTermination()){
             throw new NetconfDocumentedException(String.format("No netconf operation expected to be subsequent to %s, but is %s", this, subsequentOperation),
-                    NetconfDocumentedException.ErrorType.application,
-                    NetconfDocumentedException.ErrorTag.malformed_message,
-                    NetconfDocumentedException.ErrorSeverity.error);
+                    NetconfDocumentedException.ErrorType.APPLICATION,
+                    NetconfDocumentedException.ErrorTag.MALFORMED_MESSAGE,
+                    NetconfDocumentedException.ErrorSeverity.ERROR);
         }
 
         return handleWithNoSubsequentOperations(document, operationElement);

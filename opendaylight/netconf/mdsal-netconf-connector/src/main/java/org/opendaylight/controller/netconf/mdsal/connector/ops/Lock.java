@@ -40,8 +40,8 @@ public class Lock extends AbstractSingletonNetconfOperation {
             return XmlUtil.createElement(document, XmlNetconfConstants.OK, Optional.<String>absent());
         }
 
-        throw new NetconfDocumentedException("Unable to lock " + targetDatastore + " datastore", NetconfDocumentedException.ErrorType.application,
-                NetconfDocumentedException.ErrorTag.operation_not_supported, NetconfDocumentedException.ErrorSeverity.error);
+        throw new NetconfDocumentedException("Unable to lock " + targetDatastore + " datastore", NetconfDocumentedException.ErrorType.APPLICATION,
+                NetconfDocumentedException.ErrorTag.OPERATION_NOT_SUPPORTED, NetconfDocumentedException.ErrorSeverity.ERROR);
     }
 
     static Datastore extractTargetParameter(final XmlElement operationElement) throws NetconfDocumentedException {

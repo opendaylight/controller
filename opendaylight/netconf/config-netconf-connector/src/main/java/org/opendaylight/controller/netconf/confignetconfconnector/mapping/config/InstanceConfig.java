@@ -214,9 +214,9 @@ public final class InstanceConfig {
             if (!foundWithoutNamespaceNodes.isEmpty()){
                 throw new NetconfDocumentedException(String.format("Element %s present multiple times with different namespaces: %s, %s", name, foundConfigNodes,
                         foundWithoutNamespaceNodes),
-                        NetconfDocumentedException.ErrorType.application,
-                        NetconfDocumentedException.ErrorTag.invalid_value,
-                        NetconfDocumentedException.ErrorSeverity.error);
+                        NetconfDocumentedException.ErrorType.APPLICATION,
+                        NetconfDocumentedException.ErrorTag.INVALID_VALUE,
+                        NetconfDocumentedException.ErrorSeverity.ERROR);
             }
         }
 

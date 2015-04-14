@@ -143,9 +143,9 @@ public abstract class AbstractGet extends AbstractSingletonNetconfOperation {
                     "namespace of an xml element is valid and if the xml was parsed then the URI should be as well");
         }
         throw new NetconfDocumentedException("Unable to find node with namespace: " + element.getNamespace() + "in schema context: " + schemaContext.getCurrentContext().toString(),
-                ErrorType.application,
-                ErrorTag.unknown_namespace,
-                ErrorSeverity.error);
+                ErrorType.APPLICATION,
+                ErrorTag.UNKNOWN_NAMESPACE,
+                ErrorSeverity.ERROR);
     }
 
     protected Element serializeNodeWithParentStructure(Document document, YangInstanceIdentifier dataRoot, NormalizedNode node) {
@@ -182,7 +182,7 @@ public abstract class AbstractGet extends AbstractSingletonNetconfOperation {
 
         if (filterElement.getChildElements().size() != 1) {
             throw new NetconfDocumentedException("Multiple filter roots not supported yet",
-                    ErrorType.application, ErrorTag.operation_not_supported, ErrorSeverity.error);
+                    ErrorType.APPLICATION, ErrorTag.OPERATION_NOT_SUPPORTED, ErrorSeverity.ERROR);
         }
 
         XmlElement element = filterElement.getOnlyChildElement();
@@ -214,7 +214,7 @@ public abstract class AbstractGet extends AbstractSingletonNetconfOperation {
             parsedNode = parserFactory.getMapNodeParser().parse(Collections.singletonList(element.getDomElement()), (ListSchemaNode) schemaNode);
         } else {
             throw new NetconfDocumentedException("Schema node of the top level element is not an instance of container or list",
-                    ErrorType.application, ErrorTag.unknown_element, ErrorSeverity.error);
+                    ErrorType.APPLICATION, ErrorTag.UNKNOWN_ELEMENT, ErrorSeverity.ERROR);
         }
         return parsedNode;
     }

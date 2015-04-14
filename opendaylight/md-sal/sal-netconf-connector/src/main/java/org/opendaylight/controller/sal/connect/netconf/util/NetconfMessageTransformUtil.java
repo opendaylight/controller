@@ -175,9 +175,9 @@ public class NetconfMessageTransformUtil {
                     .build();
 
             throw new NetconfDocumentedException( "Response message contained unknown \"message-id\"",
-                    null, NetconfDocumentedException.ErrorType.protocol,
-                    NetconfDocumentedException.ErrorTag.bad_attribute,
-                    NetconfDocumentedException.ErrorSeverity.error, errorInfo );
+                    null, NetconfDocumentedException.ErrorType.PROTOCOL,
+                    NetconfDocumentedException.ErrorTag.BAD_ATTRIBUTE,
+                    NetconfDocumentedException.ErrorSeverity.ERROR, errorInfo );
         }
     }
 
@@ -210,7 +210,7 @@ public class NetconfMessageTransformUtil {
 
     private static ErrorSeverity toRpcErrorSeverity( final NetconfDocumentedException.ErrorSeverity severity ) {
         switch( severity ) {
-        case warning:
+        case WARNING:
             return RpcError.ErrorSeverity.WARNING;
         default:
             return RpcError.ErrorSeverity.ERROR;
@@ -219,11 +219,11 @@ public class NetconfMessageTransformUtil {
 
     private static RpcError.ErrorType toRpcErrorType(final NetconfDocumentedException.ErrorType type) {
         switch( type ) {
-        case protocol:
+        case PROTOCOL:
             return RpcError.ErrorType.PROTOCOL;
-        case rpc:
+        case RPC:
             return RpcError.ErrorType.RPC;
-        case transport:
+        case TRANSPORT:
             return RpcError.ErrorType.TRANSPORT;
         default:
             return RpcError.ErrorType.APPLICATION;

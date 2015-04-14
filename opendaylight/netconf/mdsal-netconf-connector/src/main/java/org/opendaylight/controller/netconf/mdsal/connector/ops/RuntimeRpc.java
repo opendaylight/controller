@@ -133,7 +133,7 @@ public class RuntimeRpc extends AbstractSingletonNetconfOperation {
         } catch (MissingNameSpaceException e) {
             LOG.debug("Cannot retrieve netconf operation namespace from message due to ", e);
             throw new NetconfDocumentedException("Cannot retrieve netconf operation namespace from message",
-                    ErrorType.protocol, ErrorTag.unknown_namespace, ErrorSeverity.error);
+                    ErrorType.PROTOCOL, ErrorTag.UNKNOWN_NAMESPACE, ErrorSeverity.ERROR);
         }
 
         final URI namespaceURI = createNsUri(netconfOperationNamespace);
@@ -142,14 +142,14 @@ public class RuntimeRpc extends AbstractSingletonNetconfOperation {
         if (!moduleOptional.isPresent()) {
             throw new NetconfDocumentedException("Unable to find module in Schema Context with namespace and name : " +
                     namespaceURI + " " + netconfOperationName + schemaContext.getCurrentContext(),
-                    ErrorType.application, ErrorTag.bad_element, ErrorSeverity.error);
+                    ErrorType.APPLICATION, ErrorTag.BAD_ELEMENT, ErrorSeverity.ERROR);
         }
 
         final Optional<RpcDefinition> rpcDefinitionOptional = getRpcDefinitionFromModule(moduleOptional.get(), namespaceURI, netconfOperationName);
 
         if (!rpcDefinitionOptional.isPresent()) {
             throw new NetconfDocumentedException("Unable to find RpcDefinition with namespace and name : " + namespaceURI + " " + netconfOperationName,
-                    ErrorType.application, ErrorTag.bad_element, ErrorSeverity.error);
+                    ErrorType.APPLICATION, ErrorTag.BAD_ELEMENT, ErrorSeverity.ERROR);
         }
 
         final RpcDefinition rpcDefinition = rpcDefinitionOptional.get();

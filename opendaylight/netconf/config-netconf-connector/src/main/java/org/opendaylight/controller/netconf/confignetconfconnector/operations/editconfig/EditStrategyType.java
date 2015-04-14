@@ -49,9 +49,9 @@ public enum EditStrategyType {
                         + " as "
                         + EditConfigXmlParser.DEFAULT_OPERATION_KEY
                         + " operations on module elements are not permitted since the default option is restrictive"),
-                        NetconfDocumentedException.ErrorType.application,
-                        NetconfDocumentedException.ErrorTag.operation_failed,
-                        NetconfDocumentedException.ErrorSeverity.error);
+                        NetconfDocumentedException.ErrorType.APPLICATION,
+                        NetconfDocumentedException.ErrorTag.OPERATION_FAILED,
+                        NetconfDocumentedException.ErrorSeverity.ERROR);
             }
         }
 
