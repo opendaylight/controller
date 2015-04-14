@@ -73,7 +73,7 @@ public class Get extends AbstractGet {
         } else if (datastore == Datastore.running) {
             return transactionProvider.createRunningTransaction();
         }
-        throw new NetconfDocumentedException("Incorrect Datastore: ", ErrorType.protocol, ErrorTag.bad_element, ErrorSeverity.error);
+        throw new NetconfDocumentedException("Incorrect Datastore: ", ErrorType.PROTOCOL, ErrorTag.BAD_ELEMENT, ErrorSeverity.ERROR);
     }
 
     @Override

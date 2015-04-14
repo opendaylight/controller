@@ -173,7 +173,7 @@ public class NetconfDeviceCommunicator implements NetconfClientSessionListener, 
 
     private RpcResult<NetconfMessage> createErrorRpcResult( RpcError.ErrorType errorType, String message ) {
         return RpcResultBuilder.<NetconfMessage>failed()
-                .withError(errorType, NetconfDocumentedException.ErrorTag.operation_failed.getTagValue(), message).build();
+                .withError(errorType, NetconfDocumentedException.ErrorTag.OPERATION_FAILED.getTagValue(), message).build();
     }
 
     @Override

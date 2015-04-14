@@ -54,9 +54,9 @@ public class Get extends AbstractNetconfOperation {
             throws NetconfDocumentedException {
         if (subsequentOperation.isExecutionTermination()){
             throw new NetconfDocumentedException(String.format("Subsequent netconf operation expected by %s", this),
-                    NetconfDocumentedException.ErrorType.application,
-                    NetconfDocumentedException.ErrorTag.operation_failed,
-                    NetconfDocumentedException.ErrorSeverity.error);
+                    NetconfDocumentedException.ErrorType.APPLICATION,
+                    NetconfDocumentedException.ErrorTag.OPERATION_FAILED,
+                    NetconfDocumentedException.ErrorSeverity.ERROR);
         }
 
         try {
@@ -74,10 +74,10 @@ public class Get extends AbstractNetconfOperation {
             final String errorMessage = "Get operation for netconf-state subtree failed";
             LOG.warn(errorMessage, e);
 
-            throw new NetconfDocumentedException(errorMessage, NetconfDocumentedException.ErrorType.application,
-                    NetconfDocumentedException.ErrorTag.operation_failed,
-                    NetconfDocumentedException.ErrorSeverity.error,
-                    Collections.singletonMap(NetconfDocumentedException.ErrorSeverity.error.toString(), e.getMessage()));
+            throw new NetconfDocumentedException(errorMessage, NetconfDocumentedException.ErrorType.APPLICATION,
+                    NetconfDocumentedException.ErrorTag.OPERATION_FAILED,
+                    NetconfDocumentedException.ErrorSeverity.ERROR,
+                    Collections.singletonMap(NetconfDocumentedException.ErrorSeverity.ERROR.toString(), e.getMessage()));
         }
     }
 
