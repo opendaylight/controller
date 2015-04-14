@@ -16,6 +16,24 @@
       "revId": "a5f18d55d0fc21efe45d831f3b57f95c29dd46af",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_c2c48661",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-14T01:25:36Z",
+      "side": 1,
+      "message": "There\u0027s no blank line actually - just displays that way in the gerrit UI for some reason.",
+      "parentUuid": "3aa0d159_e240a237",
+      "revId": "a5f18d55d0fc21efe45d831f3b57f95c29dd46af",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
