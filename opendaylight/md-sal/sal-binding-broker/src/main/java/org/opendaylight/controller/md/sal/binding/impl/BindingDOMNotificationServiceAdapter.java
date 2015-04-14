@@ -13,10 +13,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import javax.annotation.Nonnull;
 import org.opendaylight.controller.md.sal.binding.api.NotificationService;
 import org.opendaylight.controller.md.sal.binding.impl.BindingDOMAdapterBuilder.Factory;
-import org.opendaylight.controller.md.sal.dom.api.DOMNotification;
 import org.opendaylight.controller.md.sal.dom.api.DOMNotificationListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMNotificationService;
 import org.opendaylight.controller.md.sal.dom.api.DOMService;
@@ -44,16 +42,16 @@ public class BindingDOMNotificationServiceAdapter implements NotificationService
     private final DOMNotificationService domNotifService;
     private final NotificationInvokerFactory notificationInvokerFactory;
 
-    public BindingDOMNotificationServiceAdapter(BindingNormalizedNodeSerializer codec, DOMNotificationService domNotifService, NotificationInvokerFactory notificationInvokerFactory) {
+    public BindingDOMNotificationServiceAdapter(final BindingNormalizedNodeSerializer codec, final DOMNotificationService domNotifService, final NotificationInvokerFactory notificationInvokerFactory) {
         this.codec = codec;
         this.domNotifService = domNotifService;
         this.notificationInvokerFactory = notificationInvokerFactory;
     }
 
     @Override
-    public <T extends NotificationListener> ListenerRegistration<T> registerNotificationListener(T listener) {
+    public <T extends NotificationListener> ListenerRegistration<T> registerNotificationListener(final T listener) {
         final NotificationInvokerFactory.NotificationInvoker invoker = notificationInvokerFactory.invokerFor(listener);
-        final DOMNotificationListener domListener = new NotificationInvokerImpl(invoker);
+        final DOMNotificationListener domListener = new BindingDOMNotificationListenerAdapter(codec, invoker);
         final Collection<SchemaPath> schemaPaths = convertNotifTypesToSchemaPath(invoker.getSupportedNotifications());
         final ListenerRegistration<DOMNotificationListener> domRegistration =
                 domNotifService.registerNotificationListener(domListener, schemaPaths);
@@ -62,9 +60,9 @@ public class BindingDOMNotificationServiceAdapter implements NotificationService
 
 
 
-    private Collection<SchemaPath> convertNotifTypesToSchemaPath(Set<Class<? extends Notification>> notificationTypes) {
+    private Collection<SchemaPath> convertNotifTypesToSchemaPath(final Set<Class<? extends Notification>> notificationTypes) {
         final List<SchemaPath> schemaPaths = new ArrayList<>();
-        for (Class<? extends Notification> notificationType : notificationTypes) {
+        for (final Class<? extends Notification> notificationType : notificationTypes) {
             schemaPaths.add(SchemaPath.create(true, BindingReflections.findQName(notificationType)));
         }
         return schemaPaths;
@@ -78,7 +76,7 @@ public class BindingDOMNotificationServiceAdapter implements NotificationService
     private static class ListenerRegistrationImpl<T extends NotificationListener> extends AbstractListenerRegistration<T> {
         private final ListenerRegistration<?> listenerRegistration;
 
-        public ListenerRegistrationImpl(T listener, ListenerRegistration<?> listenerRegistration) {
+        public ListenerRegistrationImpl(final T listener, final ListenerRegistration<?> listenerRegistration) {
             super(listener);
             this.listenerRegistration = listenerRegistration;
         }
@@ -89,30 +87,14 @@ public class BindingDOMNotificationServiceAdapter implements NotificationService
         }
     }
 
-    private class NotificationInvokerImpl implements DOMNotificationListener {
-        private final NotificationInvokerFactory.NotificationInvoker invoker;
-
-        public NotificationInvokerImpl(NotificationInvokerFactory.NotificationInvoker invoker) {
-            this.invoker = invoker;
-        }
-
-        @Override
-        public void onNotification(@Nonnull DOMNotification notification) {
-            final Notification baNotification =
-                    codec.fromNormalizedNodeNotification(notification.getType(), notification.getBody());
-            invoker.getInvocationProxy().onNotification(baNotification);
-
-        }
-    }
-
     private static class Builder extends BindingDOMAdapterBuilder<NotificationService> {
 
 
         @Override
-        protected NotificationService createInstance(BindingToNormalizedNodeCodec codec,
-                ClassToInstanceMap<DOMService> delegates) {
-            DOMNotificationService domNotification = delegates.getInstance(DOMNotificationService.class);
-            NotificationInvokerFactory invokerFactory = SingletonHolder.INVOKER_FACTORY;
+        protected NotificationService createInstance(final BindingToNormalizedNodeCodec codec,
+                final ClassToInstanceMap<DOMService> delegates) {
+            final DOMNotificationService domNotification = delegates.getInstance(DOMNotificationService.class);
+            final NotificationInvokerFactory invokerFactory = SingletonHolder.INVOKER_FACTORY;
             return new BindingDOMNotificationServiceAdapter(codec.getCodecRegistry(), domNotification, invokerFactory);
         }
 
