@@ -87,9 +87,9 @@ public final class XmlElement {
                 } else {
                     if (!attribKey.startsWith(XmlUtil.XMLNS_ATTRIBUTE_KEY + ":")){
                         throw new NetconfDocumentedException("Attribute doesn't start with :",
-                                NetconfDocumentedException.ErrorType.application,
-                                NetconfDocumentedException.ErrorTag.invalid_value,
-                                NetconfDocumentedException.ErrorSeverity.error);
+                                NetconfDocumentedException.ErrorType.APPLICATION,
+                                NetconfDocumentedException.ErrorTag.INVALID_VALUE,
+                                NetconfDocumentedException.ErrorSeverity.ERROR);
                     }
                     prefix = attribKey.substring(XmlUtil.XMLNS_ATTRIBUTE_KEY.length() + 1);
                 }
@@ -112,9 +112,9 @@ public final class XmlElement {
         if (!getName().equals(expectedName)){
             throw new UnexpectedElementException(String.format("Expected %s xml element but was %s", expectedName,
                     getName()),
-                    NetconfDocumentedException.ErrorType.application,
-                    NetconfDocumentedException.ErrorTag.operation_failed,
-                    NetconfDocumentedException.ErrorSeverity.error);
+                    NetconfDocumentedException.ErrorType.APPLICATION,
+                    NetconfDocumentedException.ErrorTag.OPERATION_FAILED,
+                    NetconfDocumentedException.ErrorSeverity.ERROR);
         }
     }
 
@@ -124,9 +124,9 @@ public final class XmlElement {
             throw new UnexpectedNamespaceException(String.format("Unexpected namespace %s should be %s",
                     getNamespaceAttribute(),
                     expectedNamespace),
-                    NetconfDocumentedException.ErrorType.application,
-                    NetconfDocumentedException.ErrorTag.operation_failed,
-                    NetconfDocumentedException.ErrorSeverity.error);
+                    NetconfDocumentedException.ErrorType.APPLICATION,
+                    NetconfDocumentedException.ErrorTag.OPERATION_FAILED,
+                    NetconfDocumentedException.ErrorSeverity.ERROR);
         }
     }
 
@@ -136,9 +136,9 @@ public final class XmlElement {
             throw new UnexpectedNamespaceException(String.format("Unexpected namespace %s should be %s",
                     getNamespace(),
                     expectedNamespace),
-                    NetconfDocumentedException.ErrorType.application,
-                    NetconfDocumentedException.ErrorTag.operation_failed,
-                    NetconfDocumentedException.ErrorSeverity.error);
+                    NetconfDocumentedException.ErrorType.APPLICATION,
+                    NetconfDocumentedException.ErrorTag.OPERATION_FAILED,
+                    NetconfDocumentedException.ErrorSeverity.ERROR);
         }
     }
 
@@ -253,9 +253,9 @@ public final class XmlElement {
         List<XmlElement> nameElements = getChildElements(childName);
         if (nameElements.size() != 1){
             throw new NetconfDocumentedException("One element " + childName + " expected in " + toString(),
-                    NetconfDocumentedException.ErrorType.application,
-                    NetconfDocumentedException.ErrorTag.invalid_value,
-                    NetconfDocumentedException.ErrorSeverity.error);
+                    NetconfDocumentedException.ErrorType.APPLICATION,
+                    NetconfDocumentedException.ErrorTag.INVALID_VALUE,
+                    NetconfDocumentedException.ErrorSeverity.ERROR);
         }
         return nameElements.get(0);
     }
@@ -332,9 +332,9 @@ public final class XmlElement {
         if (children.size() != 1){
             throw new NetconfDocumentedException(String.format("One element %s:%s expected in %s but was %s", namespace,
                     childName, toString(), children.size()),
-                    NetconfDocumentedException.ErrorType.application,
-                    NetconfDocumentedException.ErrorTag.invalid_value,
-                    NetconfDocumentedException.ErrorSeverity.error);
+                    NetconfDocumentedException.ErrorType.APPLICATION,
+                    NetconfDocumentedException.ErrorTag.INVALID_VALUE,
+                    NetconfDocumentedException.ErrorSeverity.ERROR);
         }
 
         return children.get(0);
@@ -345,9 +345,9 @@ public final class XmlElement {
         if (children.size() != 1){
             throw new NetconfDocumentedException(String.format( "One element expected in %s but was %s", toString(),
                     children.size()),
-                    NetconfDocumentedException.ErrorType.application,
-                    NetconfDocumentedException.ErrorTag.invalid_value,
-                    NetconfDocumentedException.ErrorSeverity.error);
+                    NetconfDocumentedException.ErrorType.APPLICATION,
+                    NetconfDocumentedException.ErrorTag.INVALID_VALUE,
+                    NetconfDocumentedException.ErrorSeverity.ERROR);
         }
         return children.get(0);
     }
@@ -373,9 +373,9 @@ public final class XmlElement {
             }
         }
         throw new NetconfDocumentedException(getName() + " should contain text.",
-                NetconfDocumentedException.ErrorType.application,
-                NetconfDocumentedException.ErrorTag.invalid_value,
-                NetconfDocumentedException.ErrorSeverity.error
+                NetconfDocumentedException.ErrorType.APPLICATION,
+                NetconfDocumentedException.ErrorTag.INVALID_VALUE,
+                NetconfDocumentedException.ErrorSeverity.ERROR
         );
     }
 
@@ -395,9 +395,9 @@ public final class XmlElement {
         if (attribute == null || attribute.equals(DEFAULT_NAMESPACE_PREFIX)){
             throw new MissingNameSpaceException(String.format("Element %s must specify namespace",
                     toString()),
-                    NetconfDocumentedException.ErrorType.application,
-                    NetconfDocumentedException.ErrorTag.operation_failed,
-                    NetconfDocumentedException.ErrorSeverity.error);
+                    NetconfDocumentedException.ErrorType.APPLICATION,
+                    NetconfDocumentedException.ErrorTag.OPERATION_FAILED,
+                    NetconfDocumentedException.ErrorSeverity.ERROR);
         }
         return attribute;
     }
@@ -423,9 +423,9 @@ public final class XmlElement {
         Optional<String> namespaceURI = getNamespaceOptionally();
         if (!namespaceURI.isPresent()){
             throw new MissingNameSpaceException(String.format("No namespace defined for %s", this),
-                    NetconfDocumentedException.ErrorType.application,
-                    NetconfDocumentedException.ErrorTag.operation_failed,
-                    NetconfDocumentedException.ErrorSeverity.error);
+                    NetconfDocumentedException.ErrorType.APPLICATION,
+                    NetconfDocumentedException.ErrorTag.OPERATION_FAILED,
+                    NetconfDocumentedException.ErrorSeverity.ERROR);
         }
         return namespaceURI.get();
     }
@@ -494,9 +494,9 @@ public final class XmlElement {
         }
         if (!childElements.isEmpty()){
             throw new NetconfDocumentedException(String.format("Unrecognised elements %s in %s", childElements, this),
-                    NetconfDocumentedException.ErrorType.application,
-                    NetconfDocumentedException.ErrorTag.invalid_value,
-                    NetconfDocumentedException.ErrorSeverity.error);
+                    NetconfDocumentedException.ErrorType.APPLICATION,
+                    NetconfDocumentedException.ErrorTag.INVALID_VALUE,
+                    NetconfDocumentedException.ErrorSeverity.ERROR);
         }
     }
 

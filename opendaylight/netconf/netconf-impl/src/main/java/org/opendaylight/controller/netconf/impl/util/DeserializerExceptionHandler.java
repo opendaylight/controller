@@ -42,8 +42,8 @@ public final class DeserializerExceptionHandler implements ChannelHandler {
         Map<String, String> info = Maps.newHashMap();
         info.put("cause", cause.getMessage());
         NetconfDocumentedException ex = new NetconfDocumentedException(cause.getMessage(),
-                NetconfDocumentedException.ErrorType.rpc, NetconfDocumentedException.ErrorTag.malformed_message,
-                NetconfDocumentedException.ErrorSeverity.error, info);
+                NetconfDocumentedException.ErrorType.RPC, NetconfDocumentedException.ErrorTag.MALFORMED_MESSAGE,
+                NetconfDocumentedException.ErrorSeverity.ERROR, info);
 
         SendErrorExceptionUtil.sendErrorMessage(ctx.channel(), ex);
     }
