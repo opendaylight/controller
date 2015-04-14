@@ -305,6 +305,12 @@ public class NetconfMDSalMappingTest {
     }
 
     @Test
+    public void testEditConfigWithMultipleOperations() throws Exception {
+        edit("messages/mapping/editConfigs/editConfig_merge_multiple_operations_setup.xml");
+        edit("messages/mapping/editConfigs/editConfig_merge_multiple_operations.xml");
+    }
+
+    @Test
     public void testFiltering() throws Exception {
 
         assertEmptyDatastore(getConfigCandidate());
