@@ -92,7 +92,6 @@ import org.opendaylight.yangtools.yang.model.api.SchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
 import org.opendaylight.yangtools.yang.model.util.ExtendedType;
-import org.opendaylight.yangtools.yang.model.util.SchemaContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -419,7 +418,7 @@ public class RestconfImpl implements RestconfService {
             resultNodeSchema = (RpcDefinition) payload.getInstanceIdentifierContext().getSchemaNode();
         }
 
-        return new NormalizedNodeContext(new InstanceIdentifierContext<RpcDefinition>(null,
+        return new NormalizedNodeContext(new InstanceIdentifierContext<>(null,
                 resultNodeSchema, mountPoint, schemaContext), resultData);
     }
 
@@ -588,16 +587,14 @@ public class RestconfImpl implements RestconfService {
 
         final DOMRpcResult result = checkRpcResponse(response);
 
-        DataSchemaNode resultNodeSchema = null;
+        RpcDefinition resultNodeSchema = null;
         NormalizedNode<?, ?> resultData = null;
         if (result != null && result.getResult() != null) {
             resultData = result.getResult();
-            final ContainerSchemaNode rpcDataSchemaNode =
-                    SchemaContextUtil.getRpcDataSchema(schemaContext, rpc.getOutput().getPath());
-            resultNodeSchema = rpcDataSchemaNode.getDataChildByName(result.getResult().getNodeType());
+            resultNodeSchema = rpc;
         }
 
-        return new NormalizedNodeContext(new InstanceIdentifierContext(null, resultNodeSchema, mountPoint,
+        return new NormalizedNodeContext(new InstanceIdentifierContext<>(null, resultNodeSchema, mountPoint,
                 schemaContext), resultData);
     }
 
