@@ -72,9 +72,9 @@ public class EditConfig extends AbstractSingletonNetconfOperation {
         final Datastore targetDatastore = extractTargetParameter(operationElement);
         if (targetDatastore == Datastore.running) {
             throw new NetconfDocumentedException("edit-config on running datastore is not supported",
-                    ErrorType.protocol,
-                    ErrorTag.operation_not_supported,
-                    ErrorSeverity.error);
+                    ErrorType.PROTOCOL,
+                    ErrorTag.OPERATION_NOT_SUPPORTED,
+                    ErrorSeverity.ERROR);
         }
 
         final ModifyAction defaultAction = getDefaultOperation(operationElement);
@@ -96,11 +96,11 @@ public class EditConfig extends AbstractSingletonNetconfOperation {
                     rwTx.delete(LogicalDatastoreType.CONFIGURATION, ident);
                 }
             } catch (final DataExistsException e) {
-                throw new NetconfDocumentedException(e.getMessage(), e, ErrorType.protocol, ErrorTag.data_exists, ErrorSeverity.error);
+                throw new NetconfDocumentedException(e.getMessage(), e, ErrorType.PROTOCOL, ErrorTag.DATA_EXISTS, ErrorSeverity.ERROR);
             } catch (final DataMissingException e) {
-                throw new NetconfDocumentedException(e.getMessage(), e, ErrorType.protocol, ErrorTag.data_missing, ErrorSeverity.error);
+                throw new NetconfDocumentedException(e.getMessage(), e, ErrorType.PROTOCOL, ErrorTag.DATA_MISSING, ErrorSeverity.ERROR);
             } catch (final DataModificationException e) {
-                throw new NetconfDocumentedException(e.getMessage(), e, ErrorType.protocol, ErrorTag.operation_failed, ErrorSeverity.error);
+                throw new NetconfDocumentedException(e.getMessage(), e, ErrorType.PROTOCOL, ErrorTag.OPERATION_FAILED, ErrorSeverity.ERROR);
             }
         }
 
@@ -136,9 +136,9 @@ public class EditConfig extends AbstractSingletonNetconfOperation {
                 dataSchemaNode = Optional.of(module.getDataChildByName(element.getName()));
             } else {
                 throw new NetconfDocumentedException("Unable to find node with namespace: " + namespace + "in module: " + module.toString(),
-                        ErrorType.application,
-                        ErrorTag.unknown_namespace,
-                        ErrorSeverity.error);
+                        ErrorType.APPLICATION,
+                        ErrorTag.UNKNOWN_NAMESPACE,
+                        ErrorSeverity.ERROR);
             }
 
         } catch (URISyntaxException e) {
@@ -202,9 +202,9 @@ public class EditConfig extends AbstractSingletonNetconfOperation {
         try {
             return ModifyAction.fromXmlValue(getElement(operationElement, DEFAULT_OPERATION_KEY).getTextContent());
         } catch (NetconfDocumentedException e) {
-            if (e.getErrorType() == ErrorType.protocol
-                    && e.getErrorSeverity() == ErrorSeverity.error
-                    && e.getErrorTag() == ErrorTag.missing_element) {
+            if (e.getErrorType() == ErrorType.PROTOCOL
+                    && e.getErrorSeverity() == ErrorSeverity.ERROR
+                    && e.getErrorTag() == ErrorTag.MISSING_ELEMENT) {
                 return ModifyAction.MERGE;
             }
             else {
@@ -217,9 +217,9 @@ public class EditConfig extends AbstractSingletonNetconfOperation {
         final Optional<XmlElement> childNode = operationElement.getOnlyChildElementOptionally(elementName);
         if (!childNode.isPresent()) {
             throw new NetconfDocumentedException(elementName + " element is missing",
-                    ErrorType.protocol,
-                    ErrorTag.missing_element,
-                    ErrorSeverity.error);
+                    ErrorType.PROTOCOL,
+                    ErrorTag.MISSING_ELEMENT,
+                    ErrorSeverity.ERROR);
         }
 
         return childNode.get();

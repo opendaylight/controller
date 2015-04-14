@@ -96,9 +96,9 @@ public class EditConfig extends AbstractConfigNetconfOperation {
         } catch (final ValidationException e) {
             LOG.warn("Test phase for {} failed", EditConfigXmlParser.EDIT_CONFIG, e);
             final Map<String, String> errorInfo = new HashMap<>();
-            errorInfo.put(ErrorTag.operation_failed.name(), e.getMessage());
-            throw new NetconfDocumentedException("Test phase: " + e.getMessage(), e, ErrorType.application,
-                    ErrorTag.operation_failed, ErrorSeverity.error, errorInfo);
+            errorInfo.put(ErrorTag.OPERATION_FAILED.name(), e.getMessage());
+            throw new NetconfDocumentedException("Test phase: " + e.getMessage(), e, ErrorType.APPLICATION,
+                    ErrorTag.OPERATION_FAILED, ErrorSeverity.ERROR, errorInfo);
         }
         LOG.debug("Test phase for {} operation successful", EditConfigXmlParser.EDIT_CONFIG);
     }
@@ -160,9 +160,9 @@ public class EditConfig extends AbstractConfigNetconfOperation {
                                 on, refNameToServiceEntry.getKey(), saved);
                     } catch (InstanceNotFoundException e) {
                         throw new NetconfDocumentedException(String.format("Unable to save ref name " + refNameToServiceEntry.getKey() + " for instance " + on, e),
-                                ErrorType.application,
-                                ErrorTag.operation_failed,
-                                ErrorSeverity.error);
+                                ErrorType.APPLICATION,
+                                ErrorTag.OPERATION_FAILED,
+                                ErrorSeverity.ERROR);
                     }
                 }
             }

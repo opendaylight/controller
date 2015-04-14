@@ -54,7 +54,7 @@ public class Validate extends AbstractConfigNetconfOperation {
 
         if (sourceDatastore != Datastore.candidate){
             throw new NetconfDocumentedException( "Only " + Datastore.candidate
-                    + " is supported as source for " + VALIDATE + " but was " + datastoreValue,ErrorType.application,ErrorTag.data_missing,ErrorSeverity.error);
+                    + " is supported as source for " + VALIDATE + " but was " + datastoreValue,ErrorType.APPLICATION,ErrorTag.DATA_MISSING,ErrorSeverity.ERROR);
         }
     }
 
@@ -75,10 +75,10 @@ public class Validate extends AbstractConfigNetconfOperation {
             LOG.warn("Validation failed", e);
             final Map<String, String> errorInfo = new HashMap<>();
             errorInfo
-                    .put(ErrorTag.operation_failed.name(),
+                    .put(ErrorTag.OPERATION_FAILED.name(),
                             "Datastore is not present. Use 'get-config' or 'edit-config' before triggering 'operations' operation");
-            throw new NetconfDocumentedException(e.getMessage(), e, ErrorType.application, ErrorTag.operation_failed,
-                    ErrorSeverity.error, errorInfo);
+            throw new NetconfDocumentedException(e.getMessage(), e, ErrorType.APPLICATION, ErrorTag.OPERATION_FAILED,
+                    ErrorSeverity.ERROR, errorInfo);
 
         }
 
