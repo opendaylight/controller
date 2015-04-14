@@ -148,9 +148,9 @@ public class NetconfMDSalMappingTest {
             edit("messages/mapping/editConfigs/editConfig_running.xml");
             fail("Should have failed - edit config on running datastore is not supported");
         } catch (NetconfDocumentedException e) {
-            assertTrue(e.getErrorSeverity() == ErrorSeverity.error);
-            assertTrue(e.getErrorTag() == ErrorTag.operation_not_supported);
-            assertTrue(e.getErrorType() == ErrorType.protocol);
+            assertTrue(e.getErrorSeverity() == ErrorSeverity.ERROR);
+            assertTrue(e.getErrorTag() == ErrorTag.OPERATION_NOT_SUPPORTED);
+            assertTrue(e.getErrorType() == ErrorType.PROTOCOL);
         }
 
     }
@@ -233,9 +233,9 @@ public class NetconfMDSalMappingTest {
             lock();
             fail("Should have failed - locking of running datastore is not supported");
         } catch (NetconfDocumentedException e) {
-            assertTrue(e.getErrorSeverity() == ErrorSeverity.error);
-            assertTrue(e.getErrorTag() == ErrorTag.operation_not_supported);
-            assertTrue(e.getErrorType() == ErrorType.application);
+            assertTrue(e.getErrorSeverity() == ErrorSeverity.ERROR);
+            assertTrue(e.getErrorTag() == ErrorTag.OPERATION_NOT_SUPPORTED);
+            assertTrue(e.getErrorType() == ErrorType.APPLICATION);
         }
     }
 
@@ -248,9 +248,9 @@ public class NetconfMDSalMappingTest {
             unlock();
             fail("Should have failed - unlocking of running datastore is not supported");
         } catch (NetconfDocumentedException e) {
-            assertTrue(e.getErrorSeverity() == ErrorSeverity.error);
-            assertTrue(e.getErrorTag() == ErrorTag.operation_not_supported);
-            assertTrue(e.getErrorType() == ErrorType.application);
+            assertTrue(e.getErrorSeverity() == ErrorSeverity.ERROR);
+            assertTrue(e.getErrorTag() == ErrorTag.OPERATION_NOT_SUPPORTED);
+            assertTrue(e.getErrorType() == ErrorType.APPLICATION);
         }
     }
 
@@ -265,9 +265,9 @@ public class NetconfMDSalMappingTest {
             edit("messages/mapping/editConfigs/editConfig_create.xml");
             fail("Create should have failed - data already exists");
         } catch (NetconfDocumentedException e) {
-            assertTrue(e.getErrorSeverity() == ErrorSeverity.error);
-            assertTrue(e.getErrorTag() == ErrorTag.data_exists);
-            assertTrue(e.getErrorType() == ErrorType.protocol);
+            assertTrue(e.getErrorSeverity() == ErrorSeverity.ERROR);
+            assertTrue(e.getErrorTag() == ErrorTag.DATA_EXISTS);
+            assertTrue(e.getErrorType() == ErrorType.PROTOCOL);
         }
 
         verifyResponse(discardChanges(), RPC_REPLY_OK);
@@ -284,9 +284,9 @@ public class NetconfMDSalMappingTest {
             edit("messages/mapping/editConfigs/editConfig_delete-root.xml");
             fail("Delete should have failed - data is missing");
         } catch (NetconfDocumentedException e) {
-            assertTrue(e.getErrorSeverity() == ErrorSeverity.error);
-            assertTrue(e.getErrorTag() == ErrorTag.data_missing);
-            assertTrue(e.getErrorType() == ErrorType.protocol);
+            assertTrue(e.getErrorSeverity() == ErrorSeverity.ERROR);
+            assertTrue(e.getErrorTag() == ErrorTag.DATA_MISSING);
+            assertTrue(e.getErrorType() == ErrorType.PROTOCOL);
         }
 
     }

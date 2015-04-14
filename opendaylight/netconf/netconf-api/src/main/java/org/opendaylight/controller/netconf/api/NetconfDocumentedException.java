@@ -61,7 +61,7 @@ public class NetconfDocumentedException extends Exception {
     }
 
     public enum ErrorType {
-        transport, rpc, protocol, application;
+        TRANSPORT, RPC, PROTOCOL, APPLICATION;
 
         public String getTagValue() {
             return name();
@@ -72,31 +72,31 @@ public class NetconfDocumentedException extends Exception {
                 return valueOf( text );
             }
             catch( Exception e ) {
-                return application;
+                return APPLICATION;
             }
         }
     }
 
     public enum ErrorTag {
-        access_denied("access-denied"),
-        bad_attribute("bad-attribute"),
-        bad_element("bad-element"),
-        data_exists("data-exists"),
-        data_missing("data-missing"),
-        in_use("in-use"),
-        invalid_value("invalid-value"),
-        lock_denied("lock-denied"),
-        malformed_message("malformed-message"),
-        missing_attribute("missing-attribute"),
-        missing_element("missing-element"),
-        operation_failed("operation-failed"),
-        operation_not_supported("operation-not-supported"),
-        resource_denied("resource-denied"),
-        rollback_failed("rollback-failed"),
-        too_big("too-big"),
-        unknown_attribute("unknown-attribute"),
-        unknown_element("unknown-element"),
-        unknown_namespace("unknown-namespace");
+        ACCESS_DENIED("access-denied"),
+        BAD_ATTRIBUTE("bad-attribute"),
+        BAD_ELEMENT("bad-element"),
+        DATA_EXISTS("data-exists"),
+        DATA_MISSING("data-missing"),
+        IN_USE("in-use"),
+        INVALID_VALUE("invalid-value"),
+        LOCK_DENIED("lock-denied"),
+        MALFORMED_MESSAGE("malformed-message"),
+        MISSING_ATTRIBUTE("missing-attribute"),
+        MISSING_ELEMENT("missing-element"),
+        OPERATION_FAILED("operation-failed"),
+        OPERATION_NOT_SUPPORTED("operation-not-supported"),
+        RESOURCE_DENIED("resource-denied"),
+        ROLLBACK_FAILED("rollback-failed"),
+        TOO_BIG("too-big"),
+        UNKNOWN_ATTRIBUTE("unknown-attribute"),
+        UNKNOWN_ELEMENT("unknown-element"),
+        UNKNOWN_NAMESPACE("unknown-namespace");
 
         private final String tagValue;
 
@@ -116,12 +116,12 @@ public class NetconfDocumentedException extends Exception {
                 }
             }
 
-            return operation_failed;
+            return OPERATION_FAILED;
         }
     }
 
     public enum ErrorSeverity {
-        error, warning;
+        ERROR, WARNING;
 
         public String getTagValue() {
             return name();
@@ -132,7 +132,7 @@ public class NetconfDocumentedException extends Exception {
                 return valueOf( text );
             }
             catch( Exception e ) {
-                return error;
+                return ERROR;
             }
         }
     }
@@ -144,9 +144,9 @@ public class NetconfDocumentedException extends Exception {
 
     public NetconfDocumentedException(String message) {
         this(message,
-                NetconfDocumentedException.ErrorType.application,
-                NetconfDocumentedException.ErrorTag.invalid_value,
-                NetconfDocumentedException.ErrorSeverity.error
+                NetconfDocumentedException.ErrorType.APPLICATION,
+                NetconfDocumentedException.ErrorTag.INVALID_VALUE,
+                NetconfDocumentedException.ErrorSeverity.ERROR
         );
     }
 
@@ -180,29 +180,29 @@ public class NetconfDocumentedException extends Exception {
 
     public static <E extends Exception> NetconfDocumentedException wrap(E exception) throws NetconfDocumentedException {
         final Map<String, String> errorInfo = new HashMap<>();
-        errorInfo.put(ErrorTag.operation_failed.name(), "Exception thrown");
-        throw new NetconfDocumentedException(exception.getMessage(), exception, ErrorType.application, ErrorTag.operation_failed,
-                ErrorSeverity.error, errorInfo);
+        errorInfo.put(ErrorTag.OPERATION_FAILED.name(), "Exception thrown");
+        throw new NetconfDocumentedException(exception.getMessage(), exception, ErrorType.APPLICATION, ErrorTag.OPERATION_FAILED,
+                ErrorSeverity.ERROR, errorInfo);
     }
     public static NetconfDocumentedException wrap(ValidationException e) throws NetconfDocumentedException {
         final Map<String, String> errorInfo = new HashMap<>();
-        errorInfo.put(ErrorTag.operation_failed.name(), "Validation failed");
-        throw new NetconfDocumentedException(e.getMessage(), e, ErrorType.application, ErrorTag.operation_failed,
-                ErrorSeverity.error, errorInfo);
+        errorInfo.put(ErrorTag.OPERATION_FAILED.name(), "Validation failed");
+        throw new NetconfDocumentedException(e.getMessage(), e, ErrorType.APPLICATION, ErrorTag.OPERATION_FAILED,
+                ErrorSeverity.ERROR, errorInfo);
     }
 
     public static NetconfDocumentedException wrap(ConflictingVersionException e) throws NetconfDocumentedException {
         final Map<String, String> errorInfo = new HashMap<>();
-        errorInfo.put(ErrorTag.operation_failed.name(), "Optimistic lock failed");
-        throw new NetconfDocumentedException(e.getMessage(), e, ErrorType.application, ErrorTag.operation_failed,
-                ErrorSeverity.error, errorInfo);
+        errorInfo.put(ErrorTag.OPERATION_FAILED.name(), "Optimistic lock failed");
+        throw new NetconfDocumentedException(e.getMessage(), e, ErrorType.APPLICATION, ErrorTag.OPERATION_FAILED,
+                ErrorSeverity.ERROR, errorInfo);
     }
 
     public static NetconfDocumentedException fromXMLDocument( Document fromDoc ) {
 
-        ErrorType errorType = ErrorType.application;
-        ErrorTag errorTag = ErrorTag.operation_failed;
-        ErrorSeverity errorSeverity = ErrorSeverity.error;
+        ErrorType errorType = ErrorType.APPLICATION;
+        ErrorTag errorTag = ErrorTag.OPERATION_FAILED;
+        ErrorSeverity errorSeverity = ErrorSeverity.ERROR;
         Map<String, String> errorInfo = null;
         String errorMessage = "";
 
