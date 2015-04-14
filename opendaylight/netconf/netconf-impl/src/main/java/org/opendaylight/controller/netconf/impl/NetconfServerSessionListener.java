@@ -127,8 +127,8 @@ public class NetconfServerSessionListener implements NetconfSessionListener<Netc
              */
             // TODO add message to error info
             throw new NetconfDocumentedException("Unknown tag " + rootNode.getNodeName(),
-                    NetconfDocumentedException.ErrorType.protocol, NetconfDocumentedException.ErrorTag.unknown_element,
-                    NetconfDocumentedException.ErrorSeverity.error, ImmutableMap.of("bad-element",
+                    NetconfDocumentedException.ErrorType.PROTOCOL, NetconfDocumentedException.ErrorTag.UNKNOWN_ELEMENT,
+                    NetconfDocumentedException.ErrorSeverity.ERROR, ImmutableMap.of("bad-element",
                             rootNode.getNodeName()));
         }
     }
@@ -146,9 +146,9 @@ public class NetconfServerSessionListener implements NetconfSessionListener<Netc
         }
 
         throw new NetconfDocumentedException("Missing attribute" + rootNode.getNodeName(),
-                NetconfDocumentedException.ErrorType.protocol, NetconfDocumentedException.ErrorTag.missing_attribute,
-                NetconfDocumentedException.ErrorSeverity.error,
-                ImmutableMap.of(NetconfDocumentedException.ErrorTag.missing_attribute.toString(),
+                NetconfDocumentedException.ErrorType.PROTOCOL, NetconfDocumentedException.ErrorTag.MISSING_ATTRIBUTE,
+                NetconfDocumentedException.ErrorSeverity.ERROR,
+                ImmutableMap.of(NetconfDocumentedException.ErrorTag.MISSING_ATTRIBUTE.toString(),
                         XmlNetconfConstants.MESSAGE_ID));
     }
 }

@@ -83,9 +83,9 @@ final class SimpleAttributeResolvingStrategy extends AbstractAttributeResolvingS
                 return parseObject(type, value);
             } catch (Exception e) {
                 throw new NetconfDocumentedException("Unable to resolve attribute " + attrName + " from " + value,
-                        NetconfDocumentedException.ErrorType.application,
-                        NetconfDocumentedException.ErrorTag.operation_failed,
-                        NetconfDocumentedException.ErrorSeverity.error);
+                        NetconfDocumentedException.ErrorType.APPLICATION,
+                        NetconfDocumentedException.ErrorTag.OPERATION_FAILED,
+                        NetconfDocumentedException.ErrorSeverity.ERROR);
             }
         }
 
@@ -97,9 +97,9 @@ final class SimpleAttributeResolvingStrategy extends AbstractAttributeResolvingS
             } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
                 LOG.trace("Error parsing object ",e);
                 throw new NetconfDocumentedException("Error parsing object.",
-                        NetconfDocumentedException.ErrorType.application,
-                        NetconfDocumentedException.ErrorTag.operation_failed,
-                        NetconfDocumentedException.ErrorSeverity.error);
+                        NetconfDocumentedException.ErrorType.APPLICATION,
+                        NetconfDocumentedException.ErrorTag.OPERATION_FAILED,
+                        NetconfDocumentedException.ErrorSeverity.ERROR);
             }
         }
     }
@@ -144,9 +144,9 @@ final class SimpleAttributeResolvingStrategy extends AbstractAttributeResolvingS
             } catch (ParseException e) {
                 LOG.trace("Unable parse value {} due to ",value, e);
                 throw new NetconfDocumentedException("Unable to parse value "+value+" as date.",
-                        NetconfDocumentedException.ErrorType.application,
-                        NetconfDocumentedException.ErrorTag.operation_failed,
-                        NetconfDocumentedException.ErrorSeverity.error);
+                        NetconfDocumentedException.ErrorType.APPLICATION,
+                        NetconfDocumentedException.ErrorTag.OPERATION_FAILED,
+                        NetconfDocumentedException.ErrorSeverity.ERROR);
             }
         }
     }

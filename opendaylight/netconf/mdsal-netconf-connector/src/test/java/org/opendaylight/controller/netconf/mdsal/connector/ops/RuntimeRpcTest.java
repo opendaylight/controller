@@ -226,9 +226,9 @@ public class RuntimeRpcTest {
             rpc.handle(rpcDocument, NetconfOperationChainedExecution.EXECUTION_TERMINATION_POINT);
             fail("should have failed with rpc invocation not implemented yet");
         } catch (NetconfDocumentedException e) {
-            assertTrue(e.getErrorType() == ErrorType.application);
-            assertTrue(e.getErrorSeverity() == ErrorSeverity.error);
-            assertTrue(e.getErrorTag() == ErrorTag.operation_failed);
+            assertTrue(e.getErrorType() == ErrorType.APPLICATION);
+            assertTrue(e.getErrorSeverity() == ErrorSeverity.ERROR);
+            assertTrue(e.getErrorTag() == ErrorTag.OPERATION_FAILED);
         }
     }
 

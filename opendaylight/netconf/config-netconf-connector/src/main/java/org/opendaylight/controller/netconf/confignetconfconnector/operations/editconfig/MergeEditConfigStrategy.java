@@ -39,9 +39,9 @@ public class MergeEditConfigStrategy extends AbstractEditConfigStrategy {
                 String.format("Unable to handle missing instance, no missing instances should appear at this point, missing: %s : %s ",
                         module,
                         instance),
-                NetconfDocumentedException.ErrorType.application,
-                NetconfDocumentedException.ErrorTag.operation_failed,
-                NetconfDocumentedException.ErrorSeverity.error);
+                NetconfDocumentedException.ErrorType.APPLICATION,
+                NetconfDocumentedException.ErrorTag.OPERATION_FAILED,
+                NetconfDocumentedException.ErrorSeverity.ERROR);
     }
 
     @Override
@@ -70,9 +70,9 @@ public class MergeEditConfigStrategy extends AbstractEditConfigStrategy {
                         on,
                         configAttributeEntry.getKey(),
                         configAttributeEntry.getValue()),
-                        NetconfDocumentedException.ErrorType.application,
-                        NetconfDocumentedException.ErrorTag.operation_failed,
-                        NetconfDocumentedException.ErrorSeverity.error);
+                        NetconfDocumentedException.ErrorType.APPLICATION,
+                        NetconfDocumentedException.ErrorTag.OPERATION_FAILED,
+                        NetconfDocumentedException.ErrorSeverity.ERROR);
             }
         }
     }

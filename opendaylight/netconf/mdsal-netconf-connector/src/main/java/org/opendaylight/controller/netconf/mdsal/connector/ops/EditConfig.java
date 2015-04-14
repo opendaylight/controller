@@ -65,9 +65,9 @@ public class EditConfig extends AbstractSingletonNetconfOperation {
         final Datastore targetDatastore = extractTargetParameter(operationElement);
         if (targetDatastore == Datastore.running) {
             throw new NetconfDocumentedException("edit-config on running datastore is not supported",
-                    ErrorType.protocol,
-                    ErrorTag.operation_not_supported,
-                    ErrorSeverity.error);
+                    ErrorType.PROTOCOL,
+                    ErrorTag.OPERATION_NOT_SUPPORTED,
+                    ErrorSeverity.ERROR);
         }
 
         final ModifyAction defaultAction = getDefaultOperation(operationElement);
@@ -110,7 +110,7 @@ public class EditConfig extends AbstractSingletonNetconfOperation {
             try {
                 final Optional<NormalizedNode<?, ?>> readResult = rwtx.read(LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.create(change.getPath())).checkedGet();
                 if (readResult.isPresent()) {
-                    throw new NetconfDocumentedException("Data already exists, cannot execute CREATE operation", ErrorType.protocol, ErrorTag.data_exists, ErrorSeverity.error);
+                    throw new NetconfDocumentedException("Data already exists, cannot execute CREATE operation", ErrorType.PROTOCOL, ErrorTag.DATA_EXISTS, ErrorSeverity.ERROR);
                 }
                 rwtx.put(LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.create(change.getPath()), change.getChangeRoot());
             } catch (ReadFailedException e) {
@@ -124,7 +124,7 @@ public class EditConfig extends AbstractSingletonNetconfOperation {
             try {
                 final Optional<NormalizedNode<?, ?>> readResult = rwtx.read(LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.create(change.getPath())).checkedGet();
                 if (!readResult.isPresent()) {
-                    throw new NetconfDocumentedException("Data is missing, cannot execute DELETE operation", ErrorType.protocol, ErrorTag.data_missing, ErrorSeverity.error);
+                    throw new NetconfDocumentedException("Data is missing, cannot execute DELETE operation", ErrorType.PROTOCOL, ErrorTag.DATA_MISSING, ErrorSeverity.ERROR);
                 }
                 rwtx.delete(LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.create(change.getPath()));
             } catch (ReadFailedException e) {
@@ -170,9 +170,9 @@ public class EditConfig extends AbstractSingletonNetconfOperation {
                 dataSchemaNode = Optional.of(module.getDataChildByName(element.getName()));
             } else {
                 throw new NetconfDocumentedException("Unable to find node with namespace: " + namespace + "in module: " + module.toString(),
-                        ErrorType.application,
-                        ErrorTag.unknown_namespace,
-                        ErrorSeverity.error);
+                        ErrorType.APPLICATION,
+                        ErrorTag.UNKNOWN_NAMESPACE,
+                        ErrorSeverity.ERROR);
             }
         } catch (URISyntaxException e) {
             LOG.debug("Unable to create URI for namespace : {}", namespace);
@@ -185,9 +185,9 @@ public class EditConfig extends AbstractSingletonNetconfOperation {
         final NodeList elementsByTagName = operationElement.getDomElement().getElementsByTagName(TARGET_KEY);
         // Direct lookup instead of using XmlElement class due to performance
         if (elementsByTagName.getLength() == 0) {
-            throw new NetconfDocumentedException("Missing target element", ErrorType.rpc, ErrorTag.missing_attribute, ErrorSeverity.error);
+            throw new NetconfDocumentedException("Missing target element", ErrorType.RPC, ErrorTag.MISSING_ATTRIBUTE, ErrorSeverity.ERROR);
         } else if (elementsByTagName.getLength() > 1) {
-            throw new NetconfDocumentedException("Multiple target elements", ErrorType.rpc, ErrorTag.unknown_attribute, ErrorSeverity.error);
+            throw new NetconfDocumentedException("Multiple target elements", ErrorType.RPC, ErrorTag.UNKNOWN_ATTRIBUTE, ErrorSeverity.ERROR);
         } else {
             final XmlElement targetChildNode = XmlElement.fromDomElement((Element) elementsByTagName.item(0)).getOnlyChildElement();
             return Datastore.valueOf(targetChildNode.getName());
@@ -200,7 +200,7 @@ public class EditConfig extends AbstractSingletonNetconfOperation {
             return ModifyAction.MERGE;
         } else if(elementsByTagName.getLength() > 1) {
             throw new NetconfDocumentedException("Multiple " + DEFAULT_OPERATION_KEY + " elements",
-                    ErrorType.rpc, ErrorTag.unknown_attribute, ErrorSeverity.error);
+                    ErrorType.RPC, ErrorTag.UNKNOWN_ATTRIBUTE, ErrorSeverity.ERROR);
         } else {
             return ModifyAction.fromXmlValue(elementsByTagName.item(0).getTextContent());
         }
@@ -211,9 +211,9 @@ public class EditConfig extends AbstractSingletonNetconfOperation {
         final Optional<XmlElement> childNode = operationElement.getOnlyChildElementOptionally(elementName);
         if (!childNode.isPresent()) {
             throw new NetconfDocumentedException(elementName + " element is missing",
-                    ErrorType.protocol,
-                    ErrorTag.missing_element,
-                    ErrorSeverity.error);
+                    ErrorType.PROTOCOL,
+                    ErrorTag.MISSING_ELEMENT,
+                    ErrorSeverity.ERROR);
         }
 
         return childNode.get();
