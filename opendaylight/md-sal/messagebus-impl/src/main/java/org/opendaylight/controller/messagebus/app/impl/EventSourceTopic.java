@@ -39,10 +39,7 @@ public class EventSourceTopic implements DataChangeListener {
     public EventSourceTopic(final NotificationPattern notificationPattern, final String nodeIdPattern, final EventSourceService eventSource) {
         this.notificationPattern = Preconditions.checkNotNull(notificationPattern);
         this.sourceService = eventSource;
-
-        // FIXME: regex should be the language of nodeIdPattern
-        final String regex = Util.wildcardToRegex(nodeIdPattern);
-        this.nodeIdPattern = Pattern.compile(regex);
+        this.nodeIdPattern = Pattern.compile(nodeIdPattern);
 
         this.topicId = new TopicId(Util.getUUIDIdent());
     }

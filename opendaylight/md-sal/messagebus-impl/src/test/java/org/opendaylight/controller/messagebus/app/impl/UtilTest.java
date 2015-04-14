@@ -26,30 +26,6 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 public class UtilTest {
 
     @Test
-    public void testWildcardToRegex() throws Exception {
-        // empty wildcard string
-        createAndAssertRegex("", "^$");
-
-        // wildcard string is a char to be replaced
-        createAndAssertRegex("*", "^.*$");
-        createAndAssertRegex("?", "^.$");
-        final String relevantChars = "()[]$^.{}|\\";
-        for (final char c : relevantChars.toCharArray()) {
-            final char oneChar[] = {c};
-            final String wildcardStr = new String(oneChar);
-            final String expectedRegex = "^\\" + c + "$";
-            createAndAssertRegex(wildcardStr, expectedRegex);
-        }
-
-        // wildcard string consists of more chars
-        createAndAssertRegex("a", "^a$");
-        createAndAssertRegex("aBc", "^aBc$");
-        createAndAssertRegex("a1b2C34", "^a1b2C34$");
-        createAndAssertRegex("*?()[]$^.{}|\\X", "^.*.\\(\\)\\[\\]\\$\\^\\.\\{\\}\\|\\\\X$");
-        createAndAssertRegex("a*BB?37|42$", "^a.*BB.37\\|42\\$$");
-    }
-
-    @Test
     public void testResultFor() throws Exception {
         {
             final String expectedResult = "dummy string";
@@ -103,10 +79,6 @@ public class UtilTest {
             assertTrue(matchingPaths.contains(paths.get(1)));
             assertEquals(1, matchingPaths.size());
         }
-    }
-
-    private static void createAndAssertRegex(final String wildcardStr, final String expectedRegex) {
-        assertEquals("Incorrect regex string.", expectedRegex, Util.wildcardToRegex(wildcardStr));
     }
 
     private static List<SchemaPath> createSchemaPathList() {
