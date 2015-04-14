@@ -74,7 +74,7 @@ public class TransactionProvider implements AutoCloseable{
     public synchronized boolean commitTransaction() throws NetconfDocumentedException {
         if (!getCandidateTransaction().isPresent()) {
             throw new NetconfDocumentedException(NO_TRANSACTION_FOUND_FOR_SESSION + netconfSessionIdForReporting,
-                    ErrorType.application, ErrorTag.operation_failed, ErrorSeverity.error);
+                    ErrorType.APPLICATION, ErrorTag.OPERATION_FAILED, ErrorSeverity.ERROR);
         }
 
         CheckedFuture<Void, TransactionCommitFailedException> future = candidateTransaction.submit();
@@ -83,7 +83,7 @@ public class TransactionProvider implements AutoCloseable{
         } catch (TransactionCommitFailedException e) {
             LOG.debug("Transaction {} failed on", candidateTransaction, e);
             throw new NetconfDocumentedException("Transaction commit failed on " + e.getMessage() + " " + netconfSessionIdForReporting,
-                    ErrorType.application, ErrorTag.operation_failed, ErrorSeverity.error);
+                    ErrorType.APPLICATION, ErrorTag.OPERATION_FAILED, ErrorSeverity.ERROR);
         }
         allOpenReadWriteTransactions.remove(candidateTransaction);
         candidateTransaction = null;
@@ -115,7 +115,7 @@ public class TransactionProvider implements AutoCloseable{
         } catch (TransactionCommitFailedException e) {
             LOG.debug("Transaction {} failed on", tx, e);
             throw new NetconfDocumentedException("Transaction commit failed on " + e.getMessage() + " " + netconfSessionIdForReporting,
-                    ErrorType.application, ErrorTag.operation_failed, ErrorSeverity.error);
+                    ErrorType.APPLICATION, ErrorTag.OPERATION_FAILED, ErrorSeverity.ERROR);
         }
 
         return true;

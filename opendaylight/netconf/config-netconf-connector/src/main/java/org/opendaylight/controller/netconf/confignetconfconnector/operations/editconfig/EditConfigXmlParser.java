@@ -72,9 +72,9 @@ public class EditConfigXmlParser {
                     "Only %s datastore supported for edit config but was: %s",
                     Datastore.candidate,
                     targetDatastore),
-                    NetconfDocumentedException.ErrorType.application,
-                    NetconfDocumentedException.ErrorTag.invalid_value,
-                    NetconfDocumentedException.ErrorSeverity.error);
+                    NetconfDocumentedException.ErrorType.APPLICATION,
+                    NetconfDocumentedException.ErrorTag.INVALID_VALUE,
+                    NetconfDocumentedException.ErrorSeverity.ERROR);
         }
 
         // Test option
