@@ -147,9 +147,9 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
         }};
     }
 
-    private void testTransactionWritesWithShardNotInitiallyReady(final boolean writeOnly) throws Exception {
+    private void testTransactionWritesWithShardNotInitiallyReady(final String testName,
+            final boolean writeOnly) throws Exception {
         new IntegrationTestKit(getSystem()) {{
-            String testName = "testTransactionWritesWithShardNotInitiallyReady";
             String shardName = "test-1";
 
             // Setup the InMemoryJournal to block shard recovery to ensure the shard isn't
@@ -241,12 +241,12 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
     @Test
     public void testWriteOnlyTransactionWithShardNotInitiallyReady() throws Exception {
         datastoreContextBuilder.writeOnlyTransactionOptimizationsEnabled(true);
-        testTransactionWritesWithShardNotInitiallyReady(true);
+        testTransactionWritesWithShardNotInitiallyReady("testWriteOnlyTransactionWithShardNotInitiallyReady", true);
     }
 
     @Test
     public void testReadWriteTransactionWithShardNotInitiallyReady() throws Exception {
-        testTransactionWritesWithShardNotInitiallyReady(false);
+        testTransactionWritesWithShardNotInitiallyReady("testReadWriteTransactionWithShardNotInitiallyReady", false);
     }
 
     @Test
@@ -873,7 +873,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
         }
 
         void doCommit(final DOMStoreThreePhaseCommitCohort cohort) throws Exception {
-            Boolean canCommit = cohort.canCommit().get(5, TimeUnit.SECONDS);
+            Boolean canCommit = cohort.canCommit().get(7, TimeUnit.SECONDS);
             assertEquals("canCommit", true, canCommit);
             cohort.preCommit().get(5, TimeUnit.SECONDS);
             cohort.commit().get(5, TimeUnit.SECONDS);

@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import akka.actor.ActorSelection;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import java.util.List;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import scala.concurrent.Future;
@@ -17,6 +18,9 @@ import scala.concurrent.Future;
  * implementation. In addition to the usual set of methods it also contains the list of actor
  * futures.
  */
-abstract class AbstractThreePhaseCommitCohort implements DOMStoreThreePhaseCommitCohort {
-    abstract List<Future<ActorSelection>> getCohortFutures();
+public abstract class AbstractThreePhaseCommitCohort<T> implements DOMStoreThreePhaseCommitCohort {
+    protected static final ListenableFuture<Void> IMMEDIATE_VOID_SUCCESS = Futures.immediateFuture(null);
+    protected static final ListenableFuture<Boolean> IMMEDIATE_BOOLEAN_SUCCESS = Futures.immediateFuture(Boolean.TRUE);
+
+    abstract List<Future<T>> getCohortFutures();
 }

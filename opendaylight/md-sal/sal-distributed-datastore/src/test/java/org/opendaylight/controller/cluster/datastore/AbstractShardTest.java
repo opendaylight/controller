@@ -222,7 +222,11 @@ public abstract class AbstractShardTest extends AbstractActorTest{
         doAnswer(new Answer<ListenableFuture<Void>>() {
             @Override
             public ListenableFuture<Void> answer(final InvocationOnMock invocation) throws Throwable {
-                return actual.preCommit();
+                if(preCommit != null) {
+                    return preCommit.apply(actual);
+                } else {
+                    return actual.preCommit();
+                }
             }
         }).when(cohort).preCommit();
 
