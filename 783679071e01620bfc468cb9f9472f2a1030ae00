@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_06027b3e",
+        "filename": "karaf/opendaylight-karaf-resources/src/main/resources/bin/instance.bat",
+        "patchSetId": 7
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-04-15T23:12:13Z",
+      "side": 1,
+      "message": "Why are the debug options changed? What does that have to do to migration to 3.0.3? Looks like supend was changed from y to n. It looks like in the bash script it was n by default.",
+      "revId": "783679071e01620bfc468cb9f9472f2a1030ae00",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_66ed7f8b",
+        "filename": "karaf/opendaylight-karaf-resources/src/main/resources/bin/instance.bat",
+        "patchSetId": 7
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-04-15T23:12:13Z",
+      "side": 1,
+      "message": "Would it be helpful to make variables for each version and use them in the CLASSPATH?",
+      "revId": "783679071e01620bfc468cb9f9472f2a1030ae00",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_a69aa712",
+        "filename": "karaf/opendaylight-karaf-resources/src/main/resources/etc/jre.properties",
+        "patchSetId": 7
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-04-15T23:12:13Z",
+      "side": 1,
+      "message": "Is this right? We set the javax.annotation.version to a lower version???",
+      "revId": "783679071e01620bfc468cb9f9472f2a1030ae00",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
