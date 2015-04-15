@@ -9,6 +9,7 @@
 package org.opendaylight.controller.md.sal.rest;
 
 import com.google.common.annotations.Beta;
+import com.google.common.base.Preconditions;
 import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Collections;
@@ -21,9 +22,11 @@ import org.opendaylight.controller.config.yang.md.sal.rest.connector.Put;
 import org.opendaylight.controller.config.yang.md.sal.rest.connector.RestConnectorRuntimeMXBean;
 import org.opendaylight.controller.config.yang.md.sal.rest.connector.Rpcs;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
+import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 import org.opendaylight.controller.md.sal.rest.common.RestconfValidationUtils;
 import org.opendaylight.controller.md.sal.rest.impl.RestBrokerFacadeImpl;
+import org.opendaylight.controller.md.sal.rest.impl.RestSchemaMinderImpl;
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 import org.opendaylight.controller.sal.core.api.Provider;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
@@ -56,6 +59,7 @@ public class RestConnectorProviderImpl implements Provider, RestConnector, Schem
 
     private static SchemaContext globalSchema;
     private static RestBrokerFacade restBroker;
+    private static RestSchemaMinder schemaMinder;
 
     private StatisticsRestconfServiceWrapper stats;
     private ListenerRegistration<SchemaContextListener> listenerRegistration;
@@ -68,8 +72,13 @@ public class RestConnectorProviderImpl implements Provider, RestConnector, Schem
     }
 
     public static RestBrokerFacade getRestBroker() {
-        RestconfValidationUtils.checkDocumentedError(globalSchema != null, Status.SERVICE_UNAVAILABLE);
+        RestconfValidationUtils.checkDocumentedError(restBroker != null, Status.SERVICE_UNAVAILABLE);
         return restBroker;
+    }
+
+    public static RestSchemaMinder getSchemaMinder() {
+        RestconfValidationUtils.checkDocumentedError(schemaMinder != null, Status.SERVICE_UNAVAILABLE);
+        return schemaMinder;
     }
 
     public void setWebsocketPort(final PortNumber port) {
@@ -78,15 +87,16 @@ public class RestConnectorProviderImpl implements Provider, RestConnector, Schem
 
     @Override
     public void onSessionInitiated(final ProviderSession session) {
+        final DOMMountPointService mountServ = session.getService(DOMMountPointService.class);
         final SchemaService schemaService = session.getService(SchemaService.class);
-        listenerRegistration = schemaService.registerSchemaContextListener(ControllerContext.getInstance());
-        globalSchema = schemaService.getGlobalContext();
 
         final DOMRpcService domRpcServices = session.getService(DOMRpcService.class);
         final DOMDataBroker domDataBroker = session.getService(DOMDataBroker.class);
         restBroker = new RestBrokerFacadeImpl(domDataBroker, domRpcServices);
 
-        // TODO : initialize RestContextHolder
+        schemaMinder = new RestSchemaMinderImpl(mountServ, schemaService.getGlobalContext());
+        listenerRegistration = schemaService.registerSchemaContextListener(ControllerContext.getInstance());
+
         // TODO : think about runtime initialization ResourceConfig with @ApplicationPath for web.xml remove
 
         webSocketServerThread = new Thread(WebSocketServer.createInstance(port.getValue().intValue()));
@@ -110,8 +120,8 @@ public class RestConnectorProviderImpl implements Provider, RestConnector, Schem
 
     @Override
     public void onGlobalContextUpdated(final SchemaContext context) {
-        globalSchema = context;
-        // TODO we have to provide new context to RestContextHolder too
+        globalSchema = Preconditions.checkNotNull(context);
+        schemaMinder.tell(context);
     }
 
     @Override
