@@ -12,6 +12,8 @@ package org.opendaylight.controller.arphandler;
 import java.net.InetAddress;
 import java.util.Arrays;
 
+import static java.util.Arrays.copyOf;
+
 import org.opendaylight.controller.sal.core.NodeConnector;
 import org.opendaylight.controller.sal.utils.HexEncode;
 /*
@@ -77,16 +79,16 @@ public class ARPReply extends ARPEvent {
 
     public ARPReply(NodeConnector port, InetAddress sIP, byte[] sMAC, InetAddress tIP, byte[] tMAC, short vlan) {
         super(tIP);
-        this.tMac = tMAC;
+        this.tMac = copyOf(tMAC, tMAC.length);
         this.sIP = sIP;
-        this.sMac = sMAC;
+        this.sMac = copyOf(sMAC, sMAC.length);
         this.port = port;
         this.vlan = vlan;
     }
 
     public ARPReply(InetAddress tIP, byte[] tMAC, short vlan) {
         super(tIP);
-        this.tMac = tMAC;
+        this.tMac = copyOf(tMAC, tMAC.length);
         this.sIP = null;
         this.sMac = null;
         this.port = null;
