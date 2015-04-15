@@ -18,12 +18,14 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationException;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationOperation;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataChangeListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
@@ -36,6 +38,8 @@ import org.opendaylight.controller.md.sal.rest.RestConnectorProviderImpl;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
+import org.opendaylight.controller.sal.streams.listeners.ListenerAdapter;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
@@ -156,6 +160,19 @@ public class RestBrokerFacadeImpl implements RestBrokerFacade {
         return domRpcService.invokeRpc(type, input);
     }
 
+    @Override
+    public void registerToListenDataChanges(final LogicalDatastoreType datastore,
+            final DataChangeScope scope, final ListenerAdapter listener) {
+
+        if (listener.isListening()) {
+            return;
+        }
+        final YangInstanceIdentifier path = listener.getPath();
+        final ListenerRegistration<DOMDataChangeListener> registration = domDataBroker.registerDataChangeListener(
+                datastore, path, listener, scope);
+
+        listener.setRegistration(registration);
+    }
 
     private static final NormalizedNode<?, ?> readDataViaTransaction(final DOMDataReadOnlyTransaction tx,
             final LogicalDatastoreType ds, final YangInstanceIdentifier path) {
