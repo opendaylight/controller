@@ -9,7 +9,6 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.argThat;
@@ -24,13 +23,17 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.dispatch.Futures;
 import akka.testkit.JavaTestKit;
+import com.google.common.base.Objects;
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -45,6 +48,7 @@ import org.opendaylight.controller.cluster.datastore.TransactionProxy.Transactio
 import org.opendaylight.controller.cluster.datastore.TransactionProxyTest.TestException;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModificationsReply;
+import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.DataExists;
 import org.opendaylight.controller.cluster.datastore.messages.DataExistsReply;
@@ -55,6 +59,7 @@ import org.opendaylight.controller.cluster.datastore.modification.AbstractModifi
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.DefaultShardStrategy;
+import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategy;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.cluster.datastore.utils.DoNothingActor;
@@ -81,7 +86,24 @@ public abstract class AbstractTransactionProxyTest {
 
     private static ActorSystem system;
 
-    private final Configuration configuration = new MockConfiguration();
+    private final Configuration configuration = new MockConfiguration() {
+        @Override
+        public Map<String, ShardStrategy> getModuleNameToShardStrategyMap() {
+            return ImmutableMap.<String, ShardStrategy>builder().put(
+                    "junk", new ShardStrategy() {
+                        @Override
+                        public String findShard(YangInstanceIdentifier path) {
+                            return "junk";
+                        }
+                    }).build();
+        }
+
+        @Override
+        public Optional<String> getModuleNameFromNameSpace(String nameSpace) {
+            return TestModel.JUNK_QNAME.getNamespace().toASCIIString().equals(nameSpace) ?
+                    Optional.of("junk") : Optional.<String>absent();
+        }
+    };
 
     @Mock
     protected ActorContext mockActorContext;
@@ -246,8 +268,13 @@ public abstract class AbstractTransactionProxyTest {
     }
 
     protected void expectBatchedModificationsReady(ActorRef actorRef) {
-        doReturn(readyTxReply(actorRef.path().toString())).when(mockActorContext).executeOperationAsync(
-                eq(actorSelection(actorRef)), isA(BatchedModifications.class));
+        expectBatchedModificationsReady(actorRef, false);
+    }
+
+    protected void expectBatchedModificationsReady(ActorRef actorRef, boolean doCommitOnReady) {
+        doReturn(doCommitOnReady ? Futures.successful(new CommitTransactionReply().toSerializable()) :
+            readyTxReply(actorRef.path().toString())).when(mockActorContext).executeOperationAsync(
+                    eq(actorSelection(actorRef)), isA(BatchedModifications.class));
     }
 
     protected void expectBatchedModifications(int count) {
@@ -274,6 +301,10 @@ public abstract class AbstractTransactionProxyTest {
     }
 
     protected ActorRef setupActorContextWithoutInitialCreateTransaction(ActorSystem actorSystem) {
+        return setupActorContextWithoutInitialCreateTransaction(actorSystem, DefaultShardStrategy.DEFAULT_SHARD);
+    }
+
+    protected ActorRef setupActorContextWithoutInitialCreateTransaction(ActorSystem actorSystem, String shardName) {
         ActorRef actorRef = actorSystem.actorOf(Props.create(DoNothingActor.class));
         log.info("Created mock shard actor {}", actorRef);
 
@@ -281,7 +312,7 @@ public abstract class AbstractTransactionProxyTest {
                 when(mockActorContext).actorSelection(actorRef.path().toString());
 
         doReturn(Futures.successful(actorSystem.actorSelection(actorRef.path()))).
-                when(mockActorContext).findPrimaryShardAsync(eq(DefaultShardStrategy.DEFAULT_SHARD));
+                when(mockActorContext).findPrimaryShardAsync(eq(shardName));
 
         doReturn(false).when(mockActorContext).isPathLocal(actorRef.path().toString());
 
@@ -291,8 +322,8 @@ public abstract class AbstractTransactionProxyTest {
     }
 
     protected ActorRef setupActorContextWithInitialCreateTransaction(ActorSystem actorSystem,
-            TransactionType type, int transactionVersion) {
-        ActorRef shardActorRef = setupActorContextWithoutInitialCreateTransaction(actorSystem);
+            TransactionType type, int transactionVersion, String shardName) {
+        ActorRef shardActorRef = setupActorContextWithoutInitialCreateTransaction(actorSystem, shardName);
 
         return setupActorContextWithInitialCreateTransaction(actorSystem, type, transactionVersion,
                 memberName, shardActorRef);
@@ -321,9 +352,15 @@ public abstract class AbstractTransactionProxyTest {
     }
 
     protected ActorRef setupActorContextWithInitialCreateTransaction(ActorSystem actorSystem, TransactionType type) {
-        return setupActorContextWithInitialCreateTransaction(actorSystem, type, DataStoreVersions.CURRENT_VERSION);
+        return setupActorContextWithInitialCreateTransaction(actorSystem, type, DataStoreVersions.CURRENT_VERSION,
+                DefaultShardStrategy.DEFAULT_SHARD);
     }
 
+    protected ActorRef setupActorContextWithInitialCreateTransaction(ActorSystem actorSystem, TransactionType type,
+            String shardName) {
+        return setupActorContextWithInitialCreateTransaction(actorSystem, type, DataStoreVersions.CURRENT_VERSION,
+                shardName);
+    }
 
     protected void propagateReadFailedExceptionCause(CheckedFuture<?, ReadFailedException> future)
             throws Throwable {
@@ -362,14 +399,20 @@ public abstract class AbstractTransactionProxyTest {
         List<BatchedModifications> batchedModifications = captureBatchedModifications(actorRef);
         assertEquals("Captured BatchedModifications count", 1, batchedModifications.size());
 
-        verifyBatchedModifications(batchedModifications.get(0), expIsReady, expected);
+        verifyBatchedModifications(batchedModifications.get(0), expIsReady, expIsReady, expected);
     }
 
     protected void verifyBatchedModifications(Object message, boolean expIsReady, Modification... expected) {
+        verifyBatchedModifications(message, expIsReady, false, expected);
+    }
+
+    protected void verifyBatchedModifications(Object message, boolean expIsReady, boolean expIsDoCommitOnReady,
+            Modification... expected) {
         assertEquals("Message type", BatchedModifications.class, message.getClass());
         BatchedModifications batchedModifications = (BatchedModifications)message;
         assertEquals("BatchedModifications size", expected.length, batchedModifications.getModifications().size());
         assertEquals("isReady", expIsReady, batchedModifications.isReady());
+        assertEquals("isDoCommitOnReady", expIsDoCommitOnReady, batchedModifications.isDoCommitOnReady());
         for(int i = 0; i < batchedModifications.getModifications().size(); i++) {
             Modification actual = batchedModifications.getModifications().get(i);
             assertEquals("Modification type", expected[i].getClass(), actual.getClass());
@@ -382,27 +425,44 @@ public abstract class AbstractTransactionProxyTest {
         }
     }
 
-    protected void verifyCohortFutures(ThreePhaseCommitCohortProxy proxy,
+    protected void verifyCohortFutures(AbstractThreePhaseCommitCohort<?> proxy,
             Object... expReplies) throws Exception {
             assertEquals("getReadyOperationFutures size", expReplies.length,
                     proxy.getCohortFutures().size());
 
-            int i = 0;
-            for( Future<ActorSelection> future: proxy.getCohortFutures()) {
+            List<Object> futureResults = new ArrayList<>();
+            for( Future<?> future: proxy.getCohortFutures()) {
                 assertNotNull("Ready operation Future is null", future);
+                try {
+                    futureResults.add(Await.result(future, Duration.create(5, TimeUnit.SECONDS)));
+                } catch(Exception e) {
+                    futureResults.add(e);
+                }
+            }
 
-                Object expReply = expReplies[i++];
-                if(expReply instanceof ActorSelection) {
-                    ActorSelection actual = Await.result(future, Duration.create(5, TimeUnit.SECONDS));
-                    assertEquals("Cohort actor path", expReply, actual);
-                } else {
-                    try {
-                        Await.result(future, Duration.create(5, TimeUnit.SECONDS));
-                        fail("Expected exception from ready operation Future");
-                    } catch(Exception e) {
-                        assertTrue(String.format("Expected exception type %s. Actual %s",
-                                expReply, e.getClass()), ((Class<?>)expReply).isInstance(e));
+            for(int i = 0; i < expReplies.length; i++) {
+                Object expReply = expReplies[i];
+                boolean found = false;
+                Iterator<Object> iter = futureResults.iterator();
+                while(iter.hasNext()) {
+                    Object actual = iter.next();
+                    if(CommitTransactionReply.SERIALIZABLE_CLASS.isInstance(expReply) &&
+                       CommitTransactionReply.SERIALIZABLE_CLASS.isInstance(actual)) {
+                        found = true;
+                    } else if(expReply instanceof ActorSelection && Objects.equal(expReply, actual)) {
+                        found = true;
+                    } else if(expReply instanceof Class && ((Class<?>)expReply).isInstance(actual)) {
+                        found = true;
                     }
+
+                    if(found) {
+                        iter.remove();
+                        break;
+                    }
+                }
+
+                if(!found) {
+                    fail(String.format("No cohort Future response found for %s. Actual: %s", expReply, futureResults));
                 }
             }
         }

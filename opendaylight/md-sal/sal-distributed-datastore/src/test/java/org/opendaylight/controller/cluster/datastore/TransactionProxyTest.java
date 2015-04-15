@@ -41,6 +41,7 @@ import org.opendaylight.controller.cluster.datastore.exceptions.PrimaryNotFoundE
 import org.opendaylight.controller.cluster.datastore.exceptions.TimeoutException;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
+import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyTransaction;
 import org.opendaylight.controller.cluster.datastore.modification.DeleteModification;
 import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
@@ -326,7 +327,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
     @Test
     public void testWriteAfterAsyncRead() throws Throwable {
-        ActorRef actorRef = setupActorContextWithoutInitialCreateTransaction(getSystem());
+        ActorRef actorRef = setupActorContextWithoutInitialCreateTransaction(getSystem(), DefaultShardStrategy.DEFAULT_SHARD);
 
         Promise<Object> createTxPromise = akka.dispatch.Futures.promise();
         doReturn(createTxPromise).when(mockActorContext).executeOperationAsync(
@@ -460,7 +461,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         doReturn(readSerializedDataReply(null)).when(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef)), eqSerializedReadData());
 
-        expectBatchedModificationsReady(actorRef);
+        expectBatchedModificationsReady(actorRef, true);
 
         TransactionProxy transactionProxy = new TransactionProxy(mockActorContext, READ_WRITE);
 
@@ -470,16 +471,14 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         DOMStoreThreePhaseCommitCohort ready = transactionProxy.ready();
 
-        assertTrue(ready instanceof ThreePhaseCommitCohortProxy);
+        assertTrue(ready instanceof SingleCommitCohortProxy);
 
-        ThreePhaseCommitCohortProxy proxy = (ThreePhaseCommitCohortProxy) ready;
-
-        verifyCohortFutures(proxy, getSystem().actorSelection(actorRef.path()));
+        verifyCohortFutures((SingleCommitCohortProxy)ready, new CommitTransactionReply().toSerializable());
 
         List<BatchedModifications> batchedModifications = captureBatchedModifications(actorRef);
         assertEquals("Captured BatchedModifications count", 1, batchedModifications.size());
 
-        verifyBatchedModifications(batchedModifications.get(0), true,
+        verifyBatchedModifications(batchedModifications.get(0), true, true,
                 new WriteModification(TestModel.TEST_PATH, nodeToWrite));
 
         assertEquals("getTotalMessageCount", 1, batchedModifications.get(0).getTotalMessagesSent());
@@ -492,7 +491,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         doReturn(readSerializedDataReply(null)).when(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef)), eqSerializedReadData());
 
-        expectBatchedModificationsReady(actorRef);
+        expectBatchedModificationsReady(actorRef, true);
 
         TransactionProxy transactionProxy = new TransactionProxy(mockActorContext, READ_WRITE);
 
@@ -500,16 +499,36 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         DOMStoreThreePhaseCommitCohort ready = transactionProxy.ready();
 
-        assertTrue(ready instanceof ThreePhaseCommitCohortProxy);
+        assertTrue(ready instanceof SingleCommitCohortProxy);
 
-        ThreePhaseCommitCohortProxy proxy = (ThreePhaseCommitCohortProxy) ready;
-
-        verifyCohortFutures(proxy, getSystem().actorSelection(actorRef.path()));
+        verifyCohortFutures((SingleCommitCohortProxy)ready, new CommitTransactionReply().toSerializable());
 
         List<BatchedModifications> batchedModifications = captureBatchedModifications(actorRef);
         assertEquals("Captured BatchedModifications count", 1, batchedModifications.size());
 
-        verifyBatchedModifications(batchedModifications.get(0), true);
+        verifyBatchedModifications(batchedModifications.get(0), true, true);
+    }
+
+    @Test
+    public void testReadyWithMultipleShardWrites() throws Exception {
+        ActorRef actorRef1 = setupActorContextWithInitialCreateTransaction(getSystem(), WRITE_ONLY);
+
+        ActorRef actorRef2 = setupActorContextWithInitialCreateTransaction(getSystem(), WRITE_ONLY, "junk");
+
+        expectBatchedModificationsReady(actorRef1);
+        expectBatchedModificationsReady(actorRef2);
+
+        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext, WRITE_ONLY);
+
+        transactionProxy.write(TestModel.JUNK_PATH, ImmutableNodes.containerNode(TestModel.JUNK_QNAME));
+        transactionProxy.write(TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+
+        DOMStoreThreePhaseCommitCohort ready = transactionProxy.ready();
+
+        assertTrue(ready instanceof ThreePhaseCommitCohortProxy);
+
+        verifyCohortFutures((ThreePhaseCommitCohortProxy)ready, actorSelection(actorRef1),
+                actorSelection(actorRef2));
     }
 
     @Test
@@ -520,7 +539,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
-        expectBatchedModificationsReady(actorRef);
+        expectBatchedModificationsReady(actorRef, true);
 
         TransactionProxy transactionProxy = new TransactionProxy(mockActorContext, WRITE_ONLY);
 
@@ -528,16 +547,14 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         DOMStoreThreePhaseCommitCohort ready = transactionProxy.ready();
 
-        assertTrue(ready instanceof ThreePhaseCommitCohortProxy);
+        assertTrue(ready instanceof SingleCommitCohortProxy);
 
-        ThreePhaseCommitCohortProxy proxy = (ThreePhaseCommitCohortProxy) ready;
-
-        verifyCohortFutures(proxy, getSystem().actorSelection(actorRef.path()));
+        verifyCohortFutures((SingleCommitCohortProxy)ready, new CommitTransactionReply().toSerializable());
 
         List<BatchedModifications> batchedModifications = captureBatchedModifications(actorRef);
         assertEquals("Captured BatchedModifications count", 1, batchedModifications.size());
 
-        verifyBatchedModifications(batchedModifications.get(0), true,
+        verifyBatchedModifications(batchedModifications.get(0), true, true,
                 new WriteModification(TestModel.TEST_PATH, nodeToWrite));
 
         verify(mockActorContext, never()).executeOperationAsync(eq(actorSelection(actorRef)),
@@ -551,7 +568,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
-        expectBatchedModificationsReady(actorRef);
+        expectBatchedModificationsReady(actorRef, true);
 
         TransactionProxy transactionProxy = new TransactionProxy(mockActorContext, WRITE_ONLY);
 
@@ -559,11 +576,9 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         DOMStoreThreePhaseCommitCohort ready = transactionProxy.ready();
 
-        assertTrue(ready instanceof ThreePhaseCommitCohortProxy);
+        assertTrue(ready instanceof SingleCommitCohortProxy);
 
-        ThreePhaseCommitCohortProxy proxy = (ThreePhaseCommitCohortProxy) ready;
-
-        verifyCohortFutures(proxy, getSystem().actorSelection(actorRef.path()));
+        verifyCohortFutures((SingleCommitCohortProxy)ready, new CommitTransactionReply().toSerializable());
 
         List<BatchedModifications> batchedModifications = captureBatchedModifications(actorRef);
         assertEquals("Captured BatchedModifications count", 2, batchedModifications.size());
@@ -571,7 +586,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         verifyBatchedModifications(batchedModifications.get(0), false,
                 new WriteModification(TestModel.TEST_PATH, nodeToWrite));
 
-        verifyBatchedModifications(batchedModifications.get(1), true);
+        verifyBatchedModifications(batchedModifications.get(1), true, true);
 
         verify(mockActorContext, never()).executeOperationAsync(eq(actorSelection(actorRef)),
                 isA(ReadyTransaction.SERIALIZABLE_CLASS));
@@ -593,11 +608,9 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         DOMStoreThreePhaseCommitCohort ready = transactionProxy.ready();
 
-        assertTrue(ready instanceof ThreePhaseCommitCohortProxy);
+        assertTrue(ready instanceof SingleCommitCohortProxy);
 
-        ThreePhaseCommitCohortProxy proxy = (ThreePhaseCommitCohortProxy) ready;
-
-        verifyCohortFutures(proxy, TestException.class);
+        verifyCohortFutures((SingleCommitCohortProxy)ready, TestException.class);
     }
 
     private void testWriteOnlyTxWithFindPrimaryShardFailure(Exception toThrow) throws Exception {
@@ -615,11 +628,9 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         DOMStoreThreePhaseCommitCohort ready = transactionProxy.ready();
 
-        assertTrue(ready instanceof ThreePhaseCommitCohortProxy);
+        assertTrue(ready instanceof SingleCommitCohortProxy);
 
-        ThreePhaseCommitCohortProxy proxy = (ThreePhaseCommitCohortProxy) ready;
-
-        verifyCohortFutures(proxy, toThrow.getClass());
+        verifyCohortFutures((SingleCommitCohortProxy)ready, toThrow.getClass());
     }
 
     @Test
@@ -640,27 +651,26 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     @Test
     public void testReadyWithInvalidReplyMessageType() throws Exception {
         dataStoreContextBuilder.writeOnlyTransactionOptimizationsEnabled(true);
-        ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), WRITE_ONLY);
+        ActorRef actorRef1 = setupActorContextWithInitialCreateTransaction(getSystem(), WRITE_ONLY);
 
-        NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
-
-        //expectBatchedModifications(actorRef, 1);
+        ActorRef actorRef2 = setupActorContextWithInitialCreateTransaction(getSystem(), WRITE_ONLY, "junk");
 
         doReturn(Futures.successful(new Object())).when(mockActorContext).
-                executeOperationAsync(eq(actorSelection(actorRef)),
-                        isA(BatchedModifications.class));
+                executeOperationAsync(eq(actorSelection(actorRef1)), isA(BatchedModifications.class));
+
+        expectBatchedModificationsReady(actorRef2);
 
         TransactionProxy transactionProxy = new TransactionProxy(mockActorContext, WRITE_ONLY);
 
-        transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
+        transactionProxy.write(TestModel.JUNK_PATH, ImmutableNodes.containerNode(TestModel.JUNK_QNAME));
+        transactionProxy.write(TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
 
         DOMStoreThreePhaseCommitCohort ready = transactionProxy.ready();
 
         assertTrue(ready instanceof ThreePhaseCommitCohortProxy);
 
-        ThreePhaseCommitCohortProxy proxy = (ThreePhaseCommitCohortProxy) ready;
-
-        verifyCohortFutures(proxy, IllegalArgumentException.class);
+        verifyCohortFutures((ThreePhaseCommitCohortProxy)ready, actorSelection(actorRef2),
+                IllegalArgumentException.class);
     }
 
     @Test
@@ -746,7 +756,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_WRITE);
         doReturn(true).when(mockActorContext).isPathLocal(anyString());
 
-        expectBatchedModificationsReady(actorRef);
+        expectBatchedModificationsReady(actorRef, true);
 
         TransactionProxy transactionProxy = new TransactionProxy(mockActorContext, READ_WRITE);
 
@@ -755,11 +765,9 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         DOMStoreThreePhaseCommitCohort ready = transactionProxy.ready();
 
-        assertTrue(ready instanceof ThreePhaseCommitCohortProxy);
+        assertTrue(ready instanceof SingleCommitCohortProxy);
 
-        ThreePhaseCommitCohortProxy proxy = (ThreePhaseCommitCohortProxy) ready;
-
-        verifyCohortFutures(proxy, getSystem().actorSelection(actorRef.path()));
+        verifyCohortFutures((SingleCommitCohortProxy)ready, new CommitTransactionReply().toSerializable());
     }
 
     private static interface TransactionProxyOperation {
@@ -1224,8 +1232,8 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         verifyBatchedModifications(batchedModifications.get(1), false, new MergeModification(mergePath1, mergeNode1),
                 new MergeModification(mergePath2, mergeNode2), new WriteModification(writePath3, writeNode3));
 
-        verifyBatchedModifications(batchedModifications.get(2), true, new MergeModification(mergePath3, mergeNode3),
-                new DeleteModification(deletePath2));
+        verifyBatchedModifications(batchedModifications.get(2), true, true,
+                new MergeModification(mergePath3, mergeNode3), new DeleteModification(deletePath2));
 
         assertEquals("getTotalMessageCount", 3, batchedModifications.get(2).getTotalMessagesSent());
     }
