@@ -598,8 +598,7 @@ public class ClusterManager implements IClusterServices {
 
     @Override
     public void tcommit() throws RollbackException, HeuristicMixedException,
-            HeuristicRollbackException, java.lang.SecurityException,
-            java.lang.IllegalStateException, SystemException {
+            HeuristicRollbackException, SystemException {
         EmbeddedCacheManager manager = this.cm;
         if (manager == null) {
             throw new IllegalStateException();
@@ -613,8 +612,7 @@ public class ClusterManager implements IClusterServices {
     }
 
     @Override
-    public void trollback() throws java.lang.IllegalStateException,
-            java.lang.SecurityException, SystemException {
+    public void trollback() throws SystemException {
         EmbeddedCacheManager manager = this.cm;
         if (manager == null) {
             throw new IllegalStateException();
