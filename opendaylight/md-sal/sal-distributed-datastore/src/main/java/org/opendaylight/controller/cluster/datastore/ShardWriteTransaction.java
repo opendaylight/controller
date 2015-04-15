@@ -61,9 +61,9 @@ public class ShardWriteTransaction extends ShardTransaction {
         if (message instanceof BatchedModifications) {
             batchedModifications((BatchedModifications)message);
         } else if (message instanceof ReadyTransaction) {
-            readyTransaction(transaction, !SERIALIZED_REPLY);
+            readyTransaction(transaction, !SERIALIZED_REPLY, false);
         } else if(ReadyTransaction.SERIALIZABLE_CLASS.equals(message.getClass())) {
-            readyTransaction(transaction, SERIALIZED_REPLY);
+            readyTransaction(transaction, SERIALIZED_REPLY, false);
         } else if(WriteData.isSerializedType(message)) {
             writeData(transaction, WriteData.fromSerializable(message), SERIALIZED_REPLY);
 
@@ -100,7 +100,7 @@ public class ShardWriteTransaction extends ShardTransaction {
                             totalBatchedModificationsReceived, batched.getTotalMessagesSent()));
                 }
 
-                readyTransaction(transaction, false);
+                readyTransaction(transaction, false, batched.isDoCommitOnReady());
             } else {
                 getSender().tell(new BatchedModificationsReply(batched.getModifications().size()), getSelf());
             }
@@ -162,7 +162,8 @@ public class ShardWriteTransaction extends ShardTransaction {
         }
     }
 
-    private void readyTransaction(DOMStoreWriteTransaction transaction, boolean returnSerialized) {
+    private void readyTransaction(DOMStoreWriteTransaction transaction, boolean returnSerialized,
+            boolean doImmediateCommit) {
         String transactionID = getTransactionID();
 
         LOG.debug("readyTransaction : {}", transactionID);
@@ -170,7 +171,7 @@ public class ShardWriteTransaction extends ShardTransaction {
         DOMStoreThreePhaseCommitCohort cohort =  transaction.ready();
 
         getShardActor().forward(new ForwardedReadyTransaction(transactionID, getClientTxVersion(),
-                cohort, compositeModification, returnSerialized), getContext());
+                cohort, compositeModification, returnSerialized, doImmediateCommit), getContext());
 
         // The shard will handle the commit from here so we're no longer needed - self-destruct.
         getSelf().tell(PoisonPill.getInstance(), getSelf());

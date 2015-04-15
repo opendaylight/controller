@@ -5,6 +5,7 @@ module clustering-it-provider {
     prefix "clustering-it-provider";
 
     import config { prefix config; revision-date 2013-04-05; }
+    import rpc-context { prefix rpcx; revision-date 2013-06-17; }
     import opendaylight-md-sal-binding { prefix mdsal; revision-date 2013-10-28; }
 
     description
@@ -53,6 +54,119 @@ module clustering-it-provider {
                         mandatory false;
                         config:required-identity mdsal:binding-async-data-broker;
                     }
+                }
+            }
+        }
+    }
+    
+    augment "/config:modules/config:module/config:state" {
+        case clustering-it-provider {
+            when "/config:modules/config:module/config:type = 'clustering-it-provider'";
+            
+            rpcx:rpc-context-instance "add-person-rpc";
+            rpcx:rpc-context-instance "add-car-rpc";
+            rpcx:rpc-context-instance "cars-stress-test-rpc";
+            rpcx:rpc-context-instance "chained-single-put-rpc";
+            rpcx:rpc-context-instance "chained-multi-put-rpc";
+        }
+    }
+    
+    identity add-person-rpc;
+
+    rpc add-person  {
+        input {
+            leaf index  {
+                type uint16;
+            }
+            
+            uses rpcx:rpc-context-ref {
+                refine context-instance {
+                    rpcx:rpc-context-instance add-person-rpc;
+                }
+            }
+        }
+    }
+    
+    identity add-car-rpc;
+    rpc add-car  {
+        input {
+            leaf index  {
+                type uint16;
+            }
+            
+            uses rpcx:rpc-context-ref {
+                refine context-instance {
+                    rpcx:rpc-context-instance add-car-rpc;
+                }
+            }
+        }
+    }
+    
+    identity cars-stress-test-rpc;
+    rpc cars-stress-test  {
+        input {
+            leaf numCars  {
+                type uint16;
+            }
+            
+            leaf numThreads  {
+                type uint16;
+            }
+            
+            leaf writeOnly  {
+                type boolean;
+            }
+            
+            uses rpcx:rpc-context-ref {
+                refine context-instance {
+                    rpcx:rpc-context-instance cars-stress-test-rpc;
+                }
+            }
+        }
+    }
+    
+    identity chained-single-put-rpc;
+    rpc chained-single-put-test  {
+        input {
+            leaf numCars  {
+                type uint16;
+                default 0;
+            }
+            
+            leaf writeOnly  {
+                type boolean;
+                default true;
+            }
+            
+            uses rpcx:rpc-context-ref {
+                refine context-instance {
+                    rpcx:rpc-context-instance chained-single-put-rpc;
+                }
+            }
+        }
+    }
+    
+    identity chained-multi-put-rpc;
+    rpc chained-multi-put-test  {
+        input {
+            leaf numCars  {
+                type uint16;
+                default 0;
+            }
+            
+            leaf writeOnly  {
+                type boolean;
+                default true;
+            }
+            
+            leaf times  {
+                type uint16;
+                default 1;
+            }
+            
+            uses rpcx:rpc-context-ref {
+                refine context-instance {
+                    rpcx:rpc-context-instance chained-multi-put-rpc;
                 }
             }
         }

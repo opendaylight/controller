@@ -85,4 +85,14 @@ public class PreLithiumTransactionContextImpl extends TransactionContextImpl {
 
         return readyTxReply.getCohortPath();
     }
+
+    @Override
+    public boolean supportsDirectCommit() {
+        return false;
+    }
+
+    @Override
+    public Future<Object> directCommit() {
+        throw new UnsupportedOperationException("directCommit is not supported for " + getClass());
+    }
 }

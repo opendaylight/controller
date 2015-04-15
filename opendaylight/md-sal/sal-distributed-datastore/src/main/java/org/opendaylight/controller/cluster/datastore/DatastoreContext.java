@@ -63,7 +63,7 @@ public class DatastoreContext {
     private final DefaultConfigParamsImpl raftConfig = new DefaultConfigParamsImpl();
     private String dataStoreType = UNKNOWN_DATA_STORE_TYPE;
     private int shardBatchedModificationCount = DEFAULT_SHARD_BATCHED_MODIFICATION_COUNT;
-    private boolean writeOnlyTransactionOptimizationsEnabled = false;
+    private boolean writeOnlyTransactionOptimizationsEnabled = true;
 
     public static Set<String> getGlobalDatastoreTypes() {
         return globalDatastoreTypes;

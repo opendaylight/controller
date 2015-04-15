@@ -20,16 +20,18 @@ public class ForwardedReadyTransaction {
     private final DOMStoreThreePhaseCommitCohort cohort;
     private final Modification modification;
     private final boolean returnSerialized;
+    private final boolean doImmediateCommit;
     private final short txnClientVersion;
 
     public ForwardedReadyTransaction(String transactionID, short txnClientVersion,
             DOMStoreThreePhaseCommitCohort cohort, Modification modification,
-            boolean returnSerialized) {
+            boolean returnSerialized, boolean doImmediateCommit) {
         this.transactionID = transactionID;
         this.cohort = cohort;
         this.modification = modification;
         this.returnSerialized = returnSerialized;
         this.txnClientVersion = txnClientVersion;
+        this.doImmediateCommit = doImmediateCommit;
     }
 
     public String getTransactionID() {
@@ -50,5 +52,9 @@ public class ForwardedReadyTransaction {
 
     public short getTxnClientVersion() {
         return txnClientVersion;
+    }
+
+    public boolean isDoImmediateCommit() {
+        return doImmediateCommit;
     }
 }

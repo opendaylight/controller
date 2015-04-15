@@ -9,6 +9,20 @@
 package org.opendaylight.controller.cluster.datastore;
 
 public interface OperationCallback {
+    OperationCallback NO_OP_CALLBACK = new OperationCallback() {
+        @Override
+        public void run() {
+        }
+
+        @Override
+        public void success() {
+        }
+
+        @Override
+        public void failure() {
+        }
+    };
+
     void run();
     void success();
     void failure();
