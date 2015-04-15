@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_66a49f57",
+        "filename": "karaf/opendaylight-karaf-resources/src/main/resources/bin/instance.bat",
+        "patchSetId": 7
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-04-15T23:17:46Z",
+      "side": 1,
+      "message": "I copied the instance.bat file from karaf 3.0.3 and made the changes to work around the upstream JMX bug (as we did for karaf 3.0.1).  So these changes come from upstream... I don\u0027t know why.",
+      "parentUuid": "3aa0d159_06027b3e",
+      "revId": "783679071e01620bfc468cb9f9472f2a1030ae00",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_66ed7f8b",
         "filename": "karaf/opendaylight-karaf-resources/src/main/resources/bin/instance.bat",
         "patchSetId": 7
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_06891bca",
+        "filename": "karaf/opendaylight-karaf-resources/src/main/resources/bin/instance.bat",
+        "patchSetId": 7
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-04-15T23:17:46Z",
+      "side": 1,
+      "message": "I copied the instance.bat file from karaf 3.0.3 and made the changes to work around the upstream JMX bug (as we did for karaf 3.0.1).  So these changes come from upstream... I don\u0027t know why.",
+      "parentUuid": "3aa0d159_66ed7f8b",
+      "revId": "783679071e01620bfc468cb9f9472f2a1030ae00",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_a69aa712",
         "filename": "karaf/opendaylight-karaf-resources/src/main/resources/etc/jre.properties",
         "patchSetId": 7
@@ -47,6 +83,24 @@
       "writtenOn": "2015-04-15T23:12:13Z",
       "side": 1,
       "message": "Is this right? We set the javax.annotation.version to a lower version???",
+      "revId": "783679071e01620bfc468cb9f9472f2a1030ae00",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_268697ba",
+        "filename": "karaf/opendaylight-karaf-resources/src/main/resources/etc/jre.properties",
+        "patchSetId": 7
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-04-15T23:17:46Z",
+      "side": 1,
+      "message": "I copied the instance.bat file from karaf 3.0.3 and made the changes we had made to",
+      "parentUuid": "3aa0d159_a69aa712",
       "revId": "783679071e01620bfc468cb9f9472f2a1030ae00",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
