@@ -9,10 +9,13 @@
 package org.opendaylight.controller.md.sal.rest;
 
 import com.google.common.util.concurrent.CheckedFuture;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
+import org.opendaylight.controller.sal.streams.listeners.ListenerAdapter;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
@@ -35,7 +38,7 @@ public interface RestBrokerFacade {
      * @param path
      * @return read configuration data
      */
-    public NormalizedNode<?, ?> readConfigurationData(final YangInstanceIdentifier path);
+    NormalizedNode<?, ?> readConfigurationData(YangInstanceIdentifier path);
 
     /**
      * Method reads Configuration DataStore for MountPoint by provided path.
@@ -43,14 +46,14 @@ public interface RestBrokerFacade {
      * @param path
      * @return read configuration data in mount point
      */
-    public NormalizedNode<?, ?> readConfigurationData(final DOMMountPoint mountPoint, final YangInstanceIdentifier path);
+    NormalizedNode<?, ?> readConfigurationData(DOMMountPoint mountPoint, YangInstanceIdentifier path);
 
     /**
      * Method reads Operational DataStore by provided path.
      * @param path
      * @return read operational data
      */
-    public NormalizedNode<?, ?> readOperationalData(final YangInstanceIdentifier path);
+    NormalizedNode<?, ?> readOperationalData(YangInstanceIdentifier path);
 
     /**
      * Method read Operational DataStore for MountPoint by provided path.
@@ -58,29 +61,30 @@ public interface RestBrokerFacade {
      * @param path
      * @return read operational data
      */
-    public NormalizedNode<?, ?> readOperationalData(final DOMMountPoint mountPoint, final YangInstanceIdentifier path);
+    NormalizedNode<?, ?> readOperationalData(DOMMountPoint mountPoint, YangInstanceIdentifier path);
 
     // PUT configuration
-    public CheckedFuture<Void, TransactionCommitFailedException> commitConfigurationDataPut(
-            final YangInstanceIdentifier path, final NormalizedNode<?, ?> payload);
+    CheckedFuture<Void, TransactionCommitFailedException> commitConfigurationDataPut(
+            YangInstanceIdentifier path, NormalizedNode<?, ?> payload);
 
-    public CheckedFuture<Void, TransactionCommitFailedException> commitConfigurationDataPut(
-            final DOMMountPoint mountPoint, final YangInstanceIdentifier path, final NormalizedNode<?, ?> payload);
+    CheckedFuture<Void, TransactionCommitFailedException> commitConfigurationDataPut(
+            DOMMountPoint mountPoint, YangInstanceIdentifier path, NormalizedNode<?, ?> payload);
 
     // POST configuration
-    public CheckedFuture<Void, TransactionCommitFailedException> commitConfigurationDataPost(
-            final YangInstanceIdentifier path, final NormalizedNode<?, ?> payload);
+    CheckedFuture<Void, TransactionCommitFailedException> commitConfigurationDataPost(
+            YangInstanceIdentifier path, NormalizedNode<?, ?> payload);
 
-    public CheckedFuture<Void, TransactionCommitFailedException> commitConfigurationDataPost(
-            final DOMMountPoint mountPoint, final YangInstanceIdentifier path, final NormalizedNode<?, ?> payload);
+    CheckedFuture<Void, TransactionCommitFailedException> commitConfigurationDataPost(
+            DOMMountPoint mountPoint, YangInstanceIdentifier path, NormalizedNode<?, ?> payload);
 
     // DELETE configuration
-    public CheckedFuture<Void, TransactionCommitFailedException> commitConfigurationDataDelete(
-            final YangInstanceIdentifier path);
+    CheckedFuture<Void, TransactionCommitFailedException> commitConfigurationDataDelete(YangInstanceIdentifier path);
 
-    public CheckedFuture<Void, TransactionCommitFailedException> commitConfigurationDataDelete(
-            final DOMMountPoint mountPoint, final YangInstanceIdentifier path);
+    CheckedFuture<Void, TransactionCommitFailedException> commitConfigurationDataDelete(
+            DOMMountPoint mountPoint, YangInstanceIdentifier path);
 
     // RPC
-    public CheckedFuture<DOMRpcResult, DOMRpcException> invokeRpc(final SchemaPath type, final NormalizedNode<?, ?> input);
+    CheckedFuture<DOMRpcResult, DOMRpcException> invokeRpc(SchemaPath type, NormalizedNode<?, ?> input);
+
+    void registerToListenDataChanges(LogicalDatastoreType datastore, DataChangeScope scope, ListenerAdapter listener);
 }
