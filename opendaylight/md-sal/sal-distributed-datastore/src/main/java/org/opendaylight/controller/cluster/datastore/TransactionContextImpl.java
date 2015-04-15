@@ -90,12 +90,26 @@ public class TransactionContextImpl extends AbstractTransactionContext {
     }
 
     @Override
+    public boolean supportsDirectCommit() {
+        return true;
+    }
+
+    @Override
+    public Future<Object> directCommit() {
+        LOG.debug("Tx {} directCommit called", getIdentifier());
+
+        // Send the remaining batched modifications, if any, with the ready flag set.
+
+        return sendBatchedModifications(true, true);
+    }
+
+    @Override
     public Future<ActorSelection> readyTransaction() {
         LOG.debug("Tx {} readyTransaction called", getIdentifier());
 
         // Send the remaining batched modifications, if any, with the ready flag set.
 
-        Future<Object> lastModificationsFuture = sendBatchedModifications(true);
+        Future<Object> lastModificationsFuture = sendBatchedModifications(true, false);
 
         return transformReadyReply(lastModificationsFuture);
     }
@@ -113,7 +127,8 @@ public class TransactionContextImpl extends AbstractTransactionContext {
                 // actor path from the reply.
                 if(ReadyTransactionReply.isSerializedType(serializedReadyReply)) {
                     ReadyTransactionReply readyTxReply = ReadyTransactionReply.fromSerializable(serializedReadyReply);
-                    return actorContext.actorSelection(extractCohortPathFrom(readyTxReply));
+                    String cohortPath = extractCohortPathFrom(readyTxReply);
+                    return cohortPath != null ? actorContext.actorSelection(cohortPath) : null;
                 }
 
                 // Throwing an exception here will fail the Future.
@@ -145,10 +160,10 @@ public class TransactionContextImpl extends AbstractTransactionContext {
     }
 
     protected Future<Object> sendBatchedModifications() {
-        return sendBatchedModifications(false);
+        return sendBatchedModifications(false, false);
     }
 
-    protected Future<Object> sendBatchedModifications(boolean ready) {
+    protected Future<Object> sendBatchedModifications(boolean ready, boolean doCommitOnReady) {
         Future<Object> sent = null;
         if(ready || (batchedModifications != null && !batchedModifications.getModifications().isEmpty())) {
             if(batchedModifications == null) {
@@ -161,6 +176,7 @@ public class TransactionContextImpl extends AbstractTransactionContext {
             }
 
             batchedModifications.setReady(ready);
+            batchedModifications.setDoCommitOnReady(doCommitOnReady);
             batchedModifications.setTotalMessagesSent(++totalBatchedModificationsSent);
             sent = executeOperationAsync(batchedModifications);
 

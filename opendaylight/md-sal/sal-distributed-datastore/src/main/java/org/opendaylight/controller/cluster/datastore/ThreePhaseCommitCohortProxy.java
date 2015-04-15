@@ -32,12 +32,9 @@ import scala.runtime.AbstractFunction1;
 /**
  * ThreePhaseCommitCohortProxy represents a set of remote cohort proxies
  */
-public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort {
+public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<ActorSelection> {
 
     private static final Logger LOG = LoggerFactory.getLogger(ThreePhaseCommitCohortProxy.class);
-
-    private static final ListenableFuture<Void> IMMEDIATE_SUCCESS =
-            com.google.common.util.concurrent.Futures.immediateFuture(null);
 
     private final ActorContext actorContext;
     private final List<Future<ActorSelection>> cohortFutures;
@@ -190,7 +187,7 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort 
     public ListenableFuture<Void> preCommit() {
         // We don't need to do anything here - preCommit is done atomically with the commit phase
         // by the shard.
-        return IMMEDIATE_SUCCESS;
+        return IMMEDIATE_VOID_SUCCESS;
     }
 
     @Override
