@@ -18,7 +18,6 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -29,11 +28,12 @@ import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
 import org.opendaylight.controller.md.sal.rest.RestSchemaMinder;
 import org.opendaylight.controller.md.sal.rest.common.RestconfInternalConstants;
 import org.opendaylight.controller.md.sal.rest.common.RestconfParsingUtils;
+import org.opendaylight.controller.md.sal.rest.common.RestconfSchemaUtils;
 import org.opendaylight.controller.md.sal.rest.common.RestconfValidationUtils;
+import org.opendaylight.controller.sal.rest.api.Draft02;
 import org.opendaylight.controller.sal.rest.impl.RestUtil;
 import org.opendaylight.controller.sal.restconf.impl.InstanceIdentifierContext;
 import org.opendaylight.controller.sal.restconf.impl.RestCodec;
-import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
 import org.opendaylight.yangtools.concepts.Codec;
@@ -46,6 +46,7 @@ import org.opendaylight.yangtools.yang.model.api.ChoiceSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.GroupingDefinition;
 import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
@@ -82,6 +83,47 @@ public class RestSchemaMinderImpl implements RestSchemaMinder {
     @Override
     public synchronized void tell(@Nonnull final SchemaContext schemaContext) {
         globalSchema = Preconditions.checkNotNull(schemaContext);
+    }
+
+    @Override
+    public Module getRestconfModule() {
+        final QName restQName = Draft02.RestConfModule.IETF_RESTCONF_QNAME;
+        final Module restconfModule = globalSchema.findModuleByName(restQName.getLocalName(), restQName.getRevision());
+        RestconfValidationUtils.checkDocumentedError(restconfModule != null, ErrorType.APPLICATION,
+                ErrorTag.OPERATION_NOT_SUPPORTED, "ietf-restconf module was not found.");
+        return restconfModule;
+    }
+
+    @Override
+    public ListSchemaNode getStreamListSchemaNode() {
+        final DataSchemaNode slsn = getRestconfModuleRestConfSchemaNode(Draft02.RestConfModule.STREAM_LIST_SCHEMA_NODE);
+        RestconfValidationUtils.checkDocumentedError(slsn instanceof ListSchemaNode, ErrorType.APPLICATION,
+                ErrorTag.OPERATION_NOT_SUPPORTED, "ietf-restconf module doesn't contain stream list schema node.");
+        return (ListSchemaNode) slsn;
+    }
+
+    @Override
+    public ContainerSchemaNode getStreamContainerSchemaNode() {
+        final DataSchemaNode scsn = getRestconfModuleRestConfSchemaNode(Draft02.RestConfModule.STREAMS_CONTAINER_SCHEMA_NODE);
+        RestconfValidationUtils.checkDocumentedError(scsn instanceof ContainerSchemaNode, ErrorType.APPLICATION,
+                ErrorTag.OPERATION_NOT_SUPPORTED, "ietf-restconf module doesn't contain stream container schema node.");
+        return (ContainerSchemaNode) scsn;
+    }
+
+    @Override
+    public ListSchemaNode getModuleListSchemaNode() {
+        final DataSchemaNode mlsn = getRestconfModuleRestConfSchemaNode(Draft02.RestConfModule.MODULE_LIST_SCHEMA_NODE);
+        RestconfValidationUtils.checkDocumentedError(mlsn instanceof ListSchemaNode, ErrorType.APPLICATION,
+                ErrorTag.OPERATION_NOT_SUPPORTED, "ietf-restconf module doesn't contain module list schema node.");
+        return (ListSchemaNode) mlsn;
+    }
+
+    @Override
+    public ContainerSchemaNode getModuleContainerSchemaNode() {
+        final DataSchemaNode mcsn = getRestconfModuleRestConfSchemaNode(Draft02.RestConfModule.MODULES_CONTAINER_SCHEMA_NODE);
+        RestconfValidationUtils.checkDocumentedError(mcsn instanceof ContainerSchemaNode, ErrorType.APPLICATION,
+                ErrorTag.OPERATION_NOT_SUPPORTED, "ietf-restconf module doesn't contain module container schema node.");
+        return (ContainerSchemaNode) mcsn;
     }
 
     @Override
@@ -134,7 +176,7 @@ public class RestSchemaMinderImpl implements RestSchemaMinder {
 
             targetNode = findInstanceDataChildByNameAndNamespace(latestModule, nodeName, module.getNamespace());
         } else {
-            final List<DataSchemaNode> potentialSchemaNodes = findInstanceDataChildrenByName(latestModule, nodeName);
+            final List<DataSchemaNode> potentialSchemaNodes = RestconfSchemaUtils.findInstanceDataChildrenByName(latestModule, nodeName);
             targetNode = potentialSchemaNodes.iterator().next();
         }
 
@@ -226,7 +268,7 @@ public class RestSchemaMinderImpl implements RestSchemaMinder {
             final URI namespace) {
         Preconditions.<URI> checkNotNull(namespace);
 
-        final List<DataSchemaNode> potentialSchemaNodes = findInstanceDataChildrenByName(container, name);
+        final List<DataSchemaNode> potentialSchemaNodes = RestconfSchemaUtils.findInstanceDataChildrenByName(container, name);
 
         final Predicate<DataSchemaNode> filter = new Predicate<DataSchemaNode>() {
             @Override
@@ -239,29 +281,6 @@ public class RestSchemaMinderImpl implements RestSchemaMinder {
         return Iterables.getFirst(result, null);
     }
 
-    // TODO find better place (? RestconfSchemaNodeUtils ?)
-    private static List<DataSchemaNode> findInstanceDataChildrenByName(final DataNodeContainer container, final String nodeName) {
-        Preconditions.<DataNodeContainer> checkNotNull(container);
-        Preconditions.<String> checkNotNull(nodeName);
-
-        final List<DataSchemaNode> instantiatedDataNodeContainers = new ArrayList<DataSchemaNode>();
-        collectInstanceDataNodeContainers(instantiatedDataNodeContainers, container, nodeName);
-
-        if (instantiatedDataNodeContainers.size() > 1) {
-            final StringBuilder errMsgBuilder = new StringBuilder("URI has bad format. Node \"");
-            errMsgBuilder.append(nodeName).append("\" is added as augment from more than one module. ")
-            .append("\" is added as augment from more than one module. ")
-            .append("Therefore the node must have module name and it has to be in format \"moduleName:nodeName\".")
-            .append("\nThe node is added as augment from modules with namespaces:\n");
-            for (final DataSchemaNode potentialNodeSchema : instantiatedDataNodeContainers) {
-                errMsgBuilder.append("   ").append(potentialNodeSchema.getQName().getNamespace()).append("\n");
-            }
-            throw new RestconfDocumentedException(errMsgBuilder.toString(), ErrorType.PROTOCOL, ErrorTag.UNKNOWN_ELEMENT);
-        }
-        RestconfValidationUtils.checkDocumentedError(instantiatedDataNodeContainers.isEmpty(), ErrorType.PROTOCOL,
-                ErrorTag.UNKNOWN_ELEMENT, "\"" + nodeName + "\" in URI was not found in parent data node");
-        return instantiatedDataNodeContainers;
-    }
 
     private static void collectInstanceDataNodeContainers(final List<DataSchemaNode> potentialSchemaNodes,
             final DataNodeContainer container, final String name) {
@@ -333,5 +352,49 @@ public class RestSchemaMinderImpl implements RestSchemaMinder {
 
         final List<String> subList = pathArgs.subList(1, pathArgs.size());
         return collectPathArguments(null, subList, moduleBehindMountPoint, mount, mount.getSchemaContext());
+    }
+
+    private static final Predicate<GroupingDefinition> GROUPING_FILTER = new Predicate<GroupingDefinition>() {
+        @Override
+        public boolean apply(final GroupingDefinition g) {
+            return Draft02.RestConfModule.RESTCONF_GROUPING_SCHEMA_NODE.equals(g.getQName().getLocalName());
+        }
+    };
+
+    private DataSchemaNode getRestconfModuleRestConfSchemaNode(final String schemaNodeName) {
+        final Module restconfModule = getRestconfModule();
+
+        final Set<GroupingDefinition> groupings = restconfModule.getGroupings();
+        final Iterable<GroupingDefinition> filteredGroups = Iterables.filter(groupings, GROUPING_FILTER);
+        final GroupingDefinition restconfGrouping = Iterables.getFirst(filteredGroups, null);
+
+        final DataSchemaNode restconfContainer = RestconfSchemaUtils.findInstanceDataChildByName(restconfGrouping,
+                Draft02.RestConfModule.RESTCONF_CONTAINER_SCHEMA_NODE);
+
+        if (Objects.equal(schemaNodeName, Draft02.RestConfModule.OPERATIONS_CONTAINER_SCHEMA_NODE)) {
+            return RestconfSchemaUtils.findInstanceDataChildByName(((DataNodeContainer) restconfContainer),
+                    Draft02.RestConfModule.OPERATIONS_CONTAINER_SCHEMA_NODE);
+        } else if (Objects.equal(schemaNodeName, Draft02.RestConfModule.STREAMS_CONTAINER_SCHEMA_NODE)) {
+            return RestconfSchemaUtils.findInstanceDataChildByName(((DataNodeContainer) restconfContainer),
+                    Draft02.RestConfModule.STREAMS_CONTAINER_SCHEMA_NODE);
+        } else if (Objects.equal(schemaNodeName, Draft02.RestConfModule.STREAM_LIST_SCHEMA_NODE)) {
+
+            final DataSchemaNode modules = RestconfSchemaUtils.findInstanceDataChildByName(
+                    ((DataNodeContainer) restconfContainer), Draft02.RestConfModule.STREAMS_CONTAINER_SCHEMA_NODE);
+            return RestconfSchemaUtils.findInstanceDataChildByName(((DataNodeContainer) modules),
+                    Draft02.RestConfModule.STREAM_LIST_SCHEMA_NODE);
+        } else if (Objects.equal(schemaNodeName, Draft02.RestConfModule.MODULES_CONTAINER_SCHEMA_NODE)) {
+            return RestconfSchemaUtils.findInstanceDataChildByName(((DataNodeContainer) restconfContainer),
+                    Draft02.RestConfModule.MODULES_CONTAINER_SCHEMA_NODE);
+        } else if (Objects.equal(schemaNodeName, Draft02.RestConfModule.MODULE_LIST_SCHEMA_NODE)) {
+            final DataSchemaNode modules = RestconfSchemaUtils.findInstanceDataChildByName(
+                    ((DataNodeContainer) restconfContainer), Draft02.RestConfModule.MODULES_CONTAINER_SCHEMA_NODE);
+            return RestconfSchemaUtils.findInstanceDataChildByName(((DataNodeContainer) modules),
+                    Draft02.RestConfModule.MODULE_LIST_SCHEMA_NODE);
+        } else if (Objects.equal(schemaNodeName, Draft02.RestConfModule.STREAMS_CONTAINER_SCHEMA_NODE)) {
+            return RestconfSchemaUtils.findInstanceDataChildByName(((DataNodeContainer) restconfContainer),
+                    Draft02.RestConfModule.STREAMS_CONTAINER_SCHEMA_NODE);
+        }
+        return null;
     }
 }

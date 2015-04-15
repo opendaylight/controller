@@ -10,13 +10,18 @@ package org.opendaylight.controller.md.sal.rest;
 
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.sal.restconf.impl.InstanceIdentifierContext;
+import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
+import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 /**
  * sal-rest-connector
  * org.opendaylight.controller.md.sal.rest
  *
- *
+ * Internal interface contains all needed {@link SchemaContext} methods which are
+ * referenced by {@link org.opendaylight.controller.sal.rest.api.Draft02} and which
+ * are used in REST services.
  *
  * @author <a href="mailto:vdemcak@cisco.com">Vaclav Demcak</a>
  *
@@ -27,4 +32,15 @@ public interface RestSchemaMinder {
     void tell(@Nonnull final SchemaContext schemaContext);
 
     public InstanceIdentifierContext<?> makeFrom(final String identifier);
+
+    Module getRestconfModule();
+
+    ListSchemaNode getModuleListSchemaNode();
+
+    ContainerSchemaNode getModuleContainerSchemaNode();
+
+    ListSchemaNode getStreamListSchemaNode();
+
+    ContainerSchemaNode getStreamContainerSchemaNode();
+
 }
