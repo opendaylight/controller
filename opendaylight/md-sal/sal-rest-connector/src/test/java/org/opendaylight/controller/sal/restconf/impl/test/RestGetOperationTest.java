@@ -17,8 +17,8 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
 import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
@@ -91,6 +91,7 @@ public class RestGetOperationTest extends JerseyTest {
     private static RestconfImpl restconfImpl;
     private static SchemaContext schemaContextYangsIetf;
     private static SchemaContext schemaContextTestModule;
+    @SuppressWarnings("rawtypes")
     private static NormalizedNode answerFromGet;
 
     private static SchemaContext schemaContextModules;
@@ -163,6 +164,7 @@ public class RestGetOperationTest extends JerseyTest {
     /**
      * MountPoint test. URI represents mount point.
      */
+    @SuppressWarnings("unchecked")
     @Test
     public void getDataWithUrlMountPoint() throws UnsupportedEncodingException, URISyntaxException, ParseException {
         when(brokerFacade.readConfigurationData(any(DOMMountPoint.class), any(YangInstanceIdentifier.class))).thenReturn(
@@ -187,7 +189,7 @@ public class RestGetOperationTest extends JerseyTest {
      * Slashes in URI behind mount point. lst1 element with key GigabitEthernet0%2F0%2F0%2F0 (GigabitEthernet0/0/0/0) is
      * requested via GET HTTP operation. It is tested whether %2F character is replaced with simple / in
      * InstanceIdentifier parameter in method
-     * {@link BrokerFacade#readConfigurationDataBehindMountPoint(MountInstance, YangInstanceIdentifier)} which is called in
+     * {@link BrokerFacade#readConfigurationData(DOMMountPoint, YangInstanceIdentifier)} which is called in
      * method {@link RestconfImpl#readConfigurationData}
      *
      * @throws ParseException
@@ -628,13 +630,6 @@ public class RestGetOperationTest extends JerseyTest {
     }
 
 
-    private void prepareMockForModulesTest(final ControllerContext mockedControllerContext)
-            throws FileNotFoundException {
-        final SchemaContext schemaContext = TestUtils.loadSchemaContext("/modules");
-        mockedControllerContext.setGlobalSchema(schemaContext);
-        // when(mockedControllerContext.getGlobalSchema()).thenReturn(schemaContext);
-    }
-
     private int get(final String uri, final String mediaType) {
         return target(uri).request(mediaType).get().getStatus();
     }
@@ -646,6 +641,7 @@ public class RestGetOperationTest extends JerseyTest {
                 type string;
             }
     */
+    @SuppressWarnings("rawtypes")
     private NormalizedNode prepareCnDataForMountPointTest(final boolean wrapToCont) throws URISyntaxException, ParseException {
         final String testModuleDate = "2014-01-09";
         final ContainerNode contChild = Builders
@@ -665,14 +661,17 @@ public class RestGetOperationTest extends JerseyTest {
 
     }
 
+    @SuppressWarnings("unchecked")
     private void mockReadOperationalDataMethod() {
         when(brokerFacade.readOperationalData(any(YangInstanceIdentifier.class))).thenReturn(answerFromGet);
     }
 
+    @SuppressWarnings("unchecked")
     private void mockReadConfigurationDataMethod() {
         when(brokerFacade.readConfigurationData(any(YangInstanceIdentifier.class))).thenReturn(answerFromGet);
     }
 
+    @SuppressWarnings("rawtypes")
     private NormalizedNode prepareCnDataForSlashesBehindMountPointTest() throws ParseException {
         return ImmutableMapEntryNodeBuilder
                 .create()
@@ -746,6 +745,7 @@ public class RestGetOperationTest extends JerseyTest {
         getDataWithInvalidDepthParameterTest(mockInfo);
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     private void getDataWithInvalidDepthParameterTest(final UriInfo uriInfo) {
         try {
             final QName qNameDepth1Cont = QName.create("urn:nested:module", "2014-06-3", "depth1-cont");
@@ -760,6 +760,7 @@ public class RestGetOperationTest extends JerseyTest {
         }
     }
 
+    @SuppressWarnings("unused")
     private void verifyXMLResponse(final Response response, final NodeData nodeData) {
         final Document doc = response.readEntity(Document.class);
 //        Document doc = TestUtils.loadDocumentFrom((InputStream) response.getEntity());
@@ -810,30 +811,6 @@ public class RestGetOperationTest extends JerseyTest {
         if (!expChildMap.isEmpty()) {
             fail("Missing elements for parent \"" + element.getLocalName() + "\": " + expChildMap.keySet());
         }
-    }
-
-    private NodeData expectContainer(final String name, final NodeData... childData) {
-        return new NodeData(name, Lists.newArrayList(childData));
-    }
-
-    private NodeData expectEmptyContainer(final String name) {
-        return new NodeData(name, null);
-    }
-
-    private NodeData expectLeaf(final String name, final Object value) {
-        return new NodeData(name, value);
-    }
-
-    private QName toNestedQName(final String localName) {
-        return QName.create("urn:nested:module", "2014-06-3", localName);
-    }
-
-    private NodeData toCompositeNodeData(final QName key, final NodeData... childData) {
-        return new NodeData(key, Lists.newArrayList(childData));
-    }
-
-    private NodeData toSimpleNodeData(final QName key, final Object value) {
-        return new NodeData(key, value);
     }
 
 }

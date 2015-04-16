@@ -13,6 +13,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
 import com.google.common.util.concurrent.CheckedFuture;
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
@@ -70,6 +71,7 @@ public class RestDeleteOperationTest extends JerseyTest {
         return resourceConfig;
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void deleteConfigStatusCodes() throws UnsupportedEncodingException {
         final String uri = "/config/test-interface:interfaces";

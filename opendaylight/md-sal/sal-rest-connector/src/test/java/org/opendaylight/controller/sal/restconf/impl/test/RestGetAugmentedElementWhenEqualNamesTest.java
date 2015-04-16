@@ -30,13 +30,13 @@ public class RestGetAugmentedElementWhenEqualNamesTest {
 
     @BeforeClass
     public static void init() throws FileNotFoundException {
-        SchemaContext schemaContextTestModule = TestUtils.loadSchemaContext("/common/augment/yang");
+        final SchemaContext schemaContextTestModule = TestUtils.loadSchemaContext("/common/augment/yang");
         controllerContext.setSchemas(schemaContextTestModule);
     }
 
     @Test
     public void augmentedNodesInUri() {
-        InstanceIdentifierContext iiWithData = controllerContext.toInstanceIdentifier("main:cont/augment-main-a:cont1");
+        InstanceIdentifierContext<?> iiWithData = controllerContext.toInstanceIdentifier("main:cont/augment-main-a:cont1");
         assertEquals("ns:augment:main:a", iiWithData.getSchemaNode().getQName().getNamespace().toString());
         iiWithData = controllerContext.toInstanceIdentifier("main:cont/augment-main-b:cont1");
         assertEquals("ns:augment:main:b", iiWithData.getSchemaNode().getQName().getNamespace().toString());
@@ -47,7 +47,7 @@ public class RestGetAugmentedElementWhenEqualNamesTest {
         try {
             controllerContext.toInstanceIdentifier("main:cont/cont1");
             fail("Expected exception");
-        } catch (RestconfDocumentedException e) {
+        } catch (final RestconfDocumentedException e) {
             assertTrue(e.getErrors().get(0).getErrorMessage().contains("is added as augment from more than one module"));
         }
     }

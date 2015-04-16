@@ -39,9 +39,9 @@ public class RestconfImplTest {
 
     @BeforeClass
     public static void init() throws FileNotFoundException {
-        Set<Module> allModules = TestUtils.loadModulesFrom("/full-versions/yangs");
+        final Set<Module> allModules = TestUtils.loadModulesFrom("/full-versions/yangs");
         assertNotNull(allModules);
-        SchemaContext schemaContext = TestUtils.loadSchemaContext(allModules);
+        final SchemaContext schemaContext = TestUtils.loadSchemaContext(allModules);
         controllerContext = spy(ControllerContext.getInstance());
         controllerContext.setSchemas(schemaContext);
 
@@ -53,10 +53,13 @@ public class RestconfImplTest {
         restconfImpl.setControllerContext(controllerContext);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testExample() throws FileNotFoundException, ParseException {
+        @SuppressWarnings("rawtypes")
+        final
         NormalizedNode normalizedNodeData = TestUtils.prepareNormalizedNodeWithIetfInterfacesInterfacesData();
-        BrokerFacade brokerFacade = mock(BrokerFacade.class);
+        final BrokerFacade brokerFacade = mock(BrokerFacade.class);
         when(brokerFacade.readOperationalData(any(YangInstanceIdentifier.class))).thenReturn(normalizedNodeData);
         assertEquals(normalizedNodeData,
                 brokerFacade.readOperationalData(null));
