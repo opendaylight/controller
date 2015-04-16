@@ -10,11 +10,11 @@ package org.opendaylight.controller.configpusherfeature.internal;
 import com.google.common.base.Preconditions;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import javax.xml.bind.JAXBException;
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Conditional;
 import org.apache.karaf.features.ConfigFileInfo;
+import org.apache.karaf.features.ConfigInfo;
 import org.apache.karaf.features.Dependency;
 import org.apache.karaf.features.Feature;
 import org.slf4j.Logger;
@@ -37,7 +37,7 @@ public class AbstractFeatureWrapper implements Feature {
     /*
      * @param f Feature to wrap
      */
-    public AbstractFeatureWrapper(Feature f) {
+    public AbstractFeatureWrapper(final Feature f) {
         Preconditions.checkNotNull(f,"FeatureWrapper requires non-null Feature in constructor");
         this.feature = f;
     }
@@ -47,11 +47,11 @@ public class AbstractFeatureWrapper implements Feature {
      * from the underlying Feature Config files
      */
     public LinkedHashSet<FeatureConfigSnapshotHolder> getFeatureConfigSnapshotHolders() throws Exception {
-        LinkedHashSet <FeatureConfigSnapshotHolder> snapShotHolders = new LinkedHashSet<FeatureConfigSnapshotHolder>();
-        for(ConfigFileInfo c: getConfigurationFiles()) {
+        final LinkedHashSet <FeatureConfigSnapshotHolder> snapShotHolders = new LinkedHashSet<FeatureConfigSnapshotHolder>();
+        for(final ConfigFileInfo c: getConfigurationFiles()) {
             try {
                 snapShotHolders.add(new FeatureConfigSnapshotHolder(c,this));
-            } catch (JAXBException e) {
+            } catch (final JAXBException e) {
                 LOG.debug("{} is not a config subsystem config file",c.getFinalname());
             }
         }
@@ -67,7 +67,7 @@ public class AbstractFeatureWrapper implements Feature {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
@@ -77,7 +77,7 @@ public class AbstractFeatureWrapper implements Feature {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        AbstractFeatureWrapper other = (AbstractFeatureWrapper) obj;
+        final AbstractFeatureWrapper other = (AbstractFeatureWrapper) obj;
         if (feature == null) {
             if (other.feature != null) {
                 return false;
@@ -97,6 +97,7 @@ public class AbstractFeatureWrapper implements Feature {
      * @return
      * @see org.apache.karaf.features.Feature#getId()
      */
+    @Override
     public String getId() {
         return feature.getId();
     }
@@ -105,6 +106,7 @@ public class AbstractFeatureWrapper implements Feature {
      * @return
      * @see org.apache.karaf.features.Feature#getName()
      */
+    @Override
     public String getName() {
         return feature.getName();
     }
@@ -113,6 +115,7 @@ public class AbstractFeatureWrapper implements Feature {
      * @return
      * @see org.apache.karaf.features.Feature#getDescription()
      */
+    @Override
     public String getDescription() {
         return feature.getDescription();
     }
@@ -121,6 +124,7 @@ public class AbstractFeatureWrapper implements Feature {
      * @return
      * @see org.apache.karaf.features.Feature#getDetails()
      */
+    @Override
     public String getDetails() {
         return feature.getDetails();
     }
@@ -129,6 +133,7 @@ public class AbstractFeatureWrapper implements Feature {
      * @return
      * @see org.apache.karaf.features.Feature#getVersion()
      */
+    @Override
     public String getVersion() {
         return feature.getVersion();
     }
@@ -137,6 +142,7 @@ public class AbstractFeatureWrapper implements Feature {
      * @return
      * @see org.apache.karaf.features.Feature#hasVersion()
      */
+    @Override
     public boolean hasVersion() {
         return feature.hasVersion();
     }
@@ -145,6 +151,7 @@ public class AbstractFeatureWrapper implements Feature {
      * @return
      * @see org.apache.karaf.features.Feature#getResolver()
      */
+    @Override
     public String getResolver() {
         return feature.getResolver();
     }
@@ -153,6 +160,7 @@ public class AbstractFeatureWrapper implements Feature {
      * @return
      * @see org.apache.karaf.features.Feature#getInstall()
      */
+    @Override
     public String getInstall() {
         return feature.getInstall();
     }
@@ -161,6 +169,7 @@ public class AbstractFeatureWrapper implements Feature {
      * @return
      * @see org.apache.karaf.features.Feature#getDependencies()
      */
+    @Override
     public List<Dependency> getDependencies() {
         return feature.getDependencies();
     }
@@ -169,6 +178,7 @@ public class AbstractFeatureWrapper implements Feature {
      * @return
      * @see org.apache.karaf.features.Feature#getBundles()
      */
+    @Override
     public List<BundleInfo> getBundles() {
         return feature.getBundles();
     }
@@ -177,7 +187,8 @@ public class AbstractFeatureWrapper implements Feature {
      * @return
      * @see org.apache.karaf.features.Feature#getConfigurations()
      */
-    public Map<String, Map<String, String>> getConfigurations() {
+    @Override
+    public List<ConfigInfo> getConfigurations() {
         return feature.getConfigurations();
     }
 
@@ -185,6 +196,7 @@ public class AbstractFeatureWrapper implements Feature {
      * @return
      * @see org.apache.karaf.features.Feature#getConfigurationFiles()
      */
+    @Override
     public List<ConfigFileInfo> getConfigurationFiles() {
         return feature.getConfigurationFiles();
     }
@@ -193,6 +205,7 @@ public class AbstractFeatureWrapper implements Feature {
      * @return
      * @see org.apache.karaf.features.Feature#getConditional()
      */
+    @Override
     public List<? extends Conditional> getConditional() {
         return feature.getConditional();
     }
@@ -201,6 +214,7 @@ public class AbstractFeatureWrapper implements Feature {
      * @return
      * @see org.apache.karaf.features.Feature#getStartLevel()
      */
+    @Override
     public int getStartLevel() {
         return feature.getStartLevel();
     }
@@ -209,6 +223,7 @@ public class AbstractFeatureWrapper implements Feature {
      * @return
      * @see org.apache.karaf.features.Feature#getRegion()
      */
+    @Override
     public String getRegion() {
         return feature.getRegion();
     }
