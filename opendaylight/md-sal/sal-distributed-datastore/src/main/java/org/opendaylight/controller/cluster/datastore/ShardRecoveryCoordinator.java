@@ -17,11 +17,10 @@ import org.opendaylight.controller.cluster.raft.RaftActorRecoveryCohort;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationByteStringPayload;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationPayload;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
-import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.slf4j.Logger;
 
 /**
@@ -31,16 +30,16 @@ import org.slf4j.Logger;
  * committed to the data store in the order the corresponding snapshot or log batch are received
  * to preserve data store integrity.
  *
- * @author Thomas Panetelis
+ * @author Thomas Pantelis
  */
 class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
 
-    private final InMemoryDOMDataStore store;
+    private final ShardDataTree store;
     private List<ModificationPayload> currentLogRecoveryBatch;
     private final String shardName;
     private final Logger log;
 
-    ShardRecoveryCoordinator(InMemoryDOMDataStore store, String shardName, Logger log) {
+    ShardRecoveryCoordinator(ShardDataTree store, String shardName, Logger log) {
         this.store = store;
         this.shardName = shardName;
         this.log = log;
@@ -73,8 +72,8 @@ class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
 
     }
 
-    private void commitTransaction(DOMStoreWriteTransaction transaction) {
-        DOMStoreThreePhaseCommitCohort commitCohort = transaction.ready();
+    private void commitTransaction(DataTreeModification transaction) {
+        DOMStoreThreePhaseCommitCohort commitCohort = store.finishTransaction(transaction);
         try {
             commitCohort.preCommit().get();
             commitCohort.commit().get();
@@ -90,8 +89,8 @@ class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
     public void applyCurrentLogRecoveryBatch() {
         log.debug("{}: Applying current log recovery batch with size {}", shardName, currentLogRecoveryBatch.size());
 
-        DOMStoreWriteTransaction writeTx = store.newWriteOnlyTransaction();
-        for(ModificationPayload payload: currentLogRecoveryBatch) {
+        DataTreeModification writeTx = store.newReadWriteTransaction(null, null).getSnapshot();
+        for (ModificationPayload payload : currentLogRecoveryBatch) {
             try {
                 MutableCompositeModification.fromSerializable(payload.getModification()).apply(writeTx);
             } catch (Exception e) {
@@ -113,7 +112,7 @@ class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
     public void applyRecoverySnapshot(final byte[] snapshotBytes) {
         log.debug("{}: Applyng recovered sbapshot", shardName);
 
-        DOMStoreWriteTransaction writeTx = store.newWriteOnlyTransaction();
+        DataTreeModification writeTx = store.newReadWriteTransaction(null, null).getSnapshot();
 
         NormalizedNode<?, ?> node = SerializationUtils.deserializeNormalizedNode(snapshotBytes);
 
