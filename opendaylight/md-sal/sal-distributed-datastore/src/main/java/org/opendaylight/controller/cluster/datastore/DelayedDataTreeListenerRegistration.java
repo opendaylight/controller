@@ -8,10 +8,13 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import com.google.common.base.Preconditions;
+import java.util.Collections;
+import java.util.Map.Entry;
 import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeChangeListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 
 /**
  * Intermediate proxy registration returned to the user when we cannot
@@ -28,9 +31,13 @@ final class DelayedDataTreeListenerRegistration implements ListenerRegistration<
         this.registerTreeChangeListener = Preconditions.checkNotNull(registerTreeChangeListener);
     }
 
-    synchronized void createDelegate(final DelegateFactory<RegisterDataTreeChangeListener, ListenerRegistration<DOMDataTreeChangeListener>> factory) {
+    synchronized void createDelegate(final DelegateFactory<RegisterDataTreeChangeListener, ListenerRegistration<DOMDataTreeChangeListener>, DataTreeCandidate> factory) {
         if (!closed) {
-            this.delegate = factory.createDelegate(registerTreeChangeListener);
+            final Entry<ListenerRegistration<DOMDataTreeChangeListener>, DataTreeCandidate> res = factory.createDelegate(registerTreeChangeListener);
+            this.delegate = res.getKey();
+            if (res.getValue() != null) {
+                delegate.getInstance().onDataTreeChanged(Collections.singletonList(res.getValue()));
+            }
         }
     }
 
