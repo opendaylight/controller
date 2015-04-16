@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore.modification;
 
 import java.io.Externalizable;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 
 /**
  * Represents a modification to the data store.
@@ -38,6 +39,13 @@ public interface Modification extends Externalizable {
      * @param transaction
      */
     void apply(DOMStoreWriteTransaction transaction);
+
+    /**
+     * Apply the modification to the specified transaction
+     *
+     * @param transaction
+     */
+    void apply(DataTreeModification transaction);
 
     byte getType();
 
