@@ -17,6 +17,7 @@ import org.opendaylight.controller.protobuff.messages.persistent.PersistentMessa
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 
 /**
  * MergeModification stores all the parameters required to merge data into the specified path
@@ -38,6 +39,11 @@ public class MergeModification extends WriteModification {
 
     @Override
     public void apply(final DOMStoreWriteTransaction transaction) {
+        transaction.merge(getPath(), getData());
+    }
+
+    @Override
+    public void apply(final DataTreeModification transaction) {
         transaction.merge(getPath(), getData());
     }
 
