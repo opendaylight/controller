@@ -7,15 +7,9 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import java.util.Map.Entry;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 
-/**
- * Base class for factories instantiating delegates.
- *
- * <D> delegate type
- * <M> message type
- * <I> initial state type
- */
-abstract class DelegateFactory<M, D, I> {
-    abstract Entry<D, I> createDelegate(M message);
+abstract class ShardDataTreeTransactionParent {
+    abstract void abortTransaction(AbstractShardDataTreeTransaction<?> transaction);
+    abstract DOMStoreThreePhaseCommitCohort finishTransaction(ReadWriteShardDataTreeTransaction transaction);
 }
