@@ -46,12 +46,16 @@ import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 /**
@@ -183,19 +187,19 @@ public abstract class AbstractShardTest extends AbstractActorTest{
     }
 
     protected DOMStoreThreePhaseCommitCohort setupMockWriteTransaction(final String cohortName,
-            final InMemoryDOMDataStore dataStore, final YangInstanceIdentifier path, final NormalizedNode<?, ?> data,
+            final ShardDataTree dataStore, final YangInstanceIdentifier path, final NormalizedNode<?, ?> data,
             final MutableCompositeModification modification) {
         return setupMockWriteTransaction(cohortName, dataStore, path, data, modification, null);
     }
 
     protected DOMStoreThreePhaseCommitCohort setupMockWriteTransaction(final String cohortName,
-            final InMemoryDOMDataStore dataStore, final YangInstanceIdentifier path, final NormalizedNode<?, ?> data,
+            final ShardDataTree dataStore, final YangInstanceIdentifier path, final NormalizedNode<?, ?> data,
             final MutableCompositeModification modification,
             final Function<DOMStoreThreePhaseCommitCohort,ListenableFuture<Void>> preCommit) {
 
-        DOMStoreWriteTransaction tx = dataStore.newWriteOnlyTransaction();
-        tx.write(path, data);
-        DOMStoreThreePhaseCommitCohort cohort = createDelegatingMockCohort(cohortName, tx.ready(), preCommit);
+        ReadWriteShardDataTreeTransaction tx = dataStore.newReadWriteTransaction(null, null);
+        tx.getSnapshot().write(path, data);
+        DOMStoreThreePhaseCommitCohort cohort = createDelegatingMockCohort(cohortName, dataStore.finishTransaction(tx), preCommit);
 
         modification.addModification(new WriteModification(path, data));
 
@@ -245,38 +249,32 @@ public abstract class AbstractShardTest extends AbstractActorTest{
 
     public static NormalizedNode<?,?> readStore(final TestActorRef<Shard> shard, final YangInstanceIdentifier id)
             throws ExecutionException, InterruptedException {
-        return readStore(shard.underlyingActor().getDataStore(), id);
+        return readStore(shard.underlyingActor().getDataStore().getDataTree(), id);
     }
 
-    public static NormalizedNode<?,?> readStore(final InMemoryDOMDataStore store, final YangInstanceIdentifier id)
-            throws ExecutionException, InterruptedException {
-        DOMStoreReadTransaction transaction = store.newReadOnlyTransaction();
+    public static NormalizedNode<?,?> readStore(final DataTree store, final YangInstanceIdentifier id) {
+        DataTreeSnapshot transaction = store.takeSnapshot();
 
-        CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> future =
-            transaction.read(id);
-
-        Optional<NormalizedNode<?, ?>> optional = future.get();
+        Optional<NormalizedNode<?, ?>> optional = transaction.readNode(id);
         NormalizedNode<?, ?> node = optional.isPresent()? optional.get() : null;
-
-        transaction.close();
 
         return node;
     }
 
     public static void writeToStore(final TestActorRef<Shard> shard, final YangInstanceIdentifier id,
-            final NormalizedNode<?,?> node) throws ExecutionException, InterruptedException {
-        writeToStore(shard.underlyingActor().getDataStore(), id, node);
+            final NormalizedNode<?,?> node) throws DataValidationFailedException {
+        writeToStore(shard.underlyingActor().getDataStore().getDataTree(), id, node);
     }
 
-    public static void writeToStore(final InMemoryDOMDataStore store, final YangInstanceIdentifier id,
-            final NormalizedNode<?,?> node) throws ExecutionException, InterruptedException {
-        DOMStoreWriteTransaction transaction = store.newWriteOnlyTransaction();
+    public static void writeToStore(final DataTree store, final YangInstanceIdentifier id,
+            final NormalizedNode<?,?> node) throws DataValidationFailedException {
+        DataTreeModification transaction = store.takeSnapshot().newModification();
 
         transaction.write(id, node);
 
-        DOMStoreThreePhaseCommitCohort commitCohort = transaction.ready();
-        commitCohort.preCommit().get();
-        commitCohort.commit().get();
+        store.validate(transaction);
+        final DataTreeCandidate candidate = store.prepare(transaction);
+        store.commit(candidate);
     }
 
     @SuppressWarnings("serial")
