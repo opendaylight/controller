@@ -26,9 +26,10 @@ public abstract class AbstractUntypedActor extends UntypedActor {
 
     }
 
-    @Override public void onReceive(Object message) throws Exception {
+    @Override
+    public final void onReceive(Object message) throws Exception {
         final String messageType = message.getClass().getSimpleName();
-        if(LOG.isDebugEnabled()) {
+        if (LOG.isDebugEnabled()) {
 //            LOG.debug("Received message {}", messageType);
         }
         handleReceive(message);
