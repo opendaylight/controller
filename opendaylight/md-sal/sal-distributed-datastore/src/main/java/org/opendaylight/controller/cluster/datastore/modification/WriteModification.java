@@ -21,6 +21,7 @@ import org.opendaylight.controller.protobuff.messages.persistent.PersistentMessa
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 
 /**
  * WriteModification stores all the parameters required to write data to the specified path
@@ -45,6 +46,11 @@ public class WriteModification extends AbstractModification {
 
     @Override
     public void apply(final DOMStoreWriteTransaction transaction) {
+        transaction.write(getPath(), data);
+    }
+
+    @Override
+    public void apply(final DataTreeModification transaction) {
         transaction.write(getPath(), data);
     }
 
