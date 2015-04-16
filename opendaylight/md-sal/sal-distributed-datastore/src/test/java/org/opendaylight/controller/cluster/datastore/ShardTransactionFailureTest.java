@@ -14,17 +14,15 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.pattern.AskTimeoutException;
 import akka.testkit.TestActorRef;
-import com.google.common.util.concurrent.MoreExecutors;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
-import org.junit.BeforeClass;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.datastore.TransactionProxy.TransactionType;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 import org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeSerializer;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
-import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -40,11 +38,13 @@ import scala.concurrent.duration.Duration;
  * @author Basheeruddin Ahmed <syedbahm@cisco.com>
  */
 public class ShardTransactionFailureTest extends AbstractActorTest {
-    private static final InMemoryDOMDataStore store =
-        new InMemoryDOMDataStore("OPER", MoreExecutors.sameThreadExecutor());
-
     private static final SchemaContext testSchemaContext =
-        TestModel.createTestContext();
+            TestModel.createTestContext();
+    private static final TransactionType RO = TransactionType.READ_ONLY;
+    private static final TransactionType RW = TransactionType.READ_WRITE;
+    private static final TransactionType WO = TransactionType.WRITE_ONLY;
+
+    private static final ShardDataTree store = new ShardDataTree(testSchemaContext);
 
     private static final ShardIdentifier SHARD_IDENTIFIER =
         ShardIdentifier.builder().memberName("member-1")
@@ -53,11 +53,6 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
     private final DatastoreContext datastoreContext = DatastoreContext.newBuilder().build();
 
     private final ShardStats shardStats = new ShardStats(SHARD_IDENTIFIER.toString(), "DataStore");
-
-    @BeforeClass
-    public static void staticSetup() {
-        store.onGlobalContextUpdated(testSchemaContext);
-    }
 
     private ActorRef createShard(){
         return getSystem().actorOf(Shard.props(SHARD_IDENTIFIER, Collections.<String, String>emptyMap(), datastoreContext,
@@ -69,7 +64,7 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
         throws Throwable {
 
         final ActorRef shard = createShard();
-        final Props props = ShardTransaction.props(store.newReadOnlyTransaction(), shard,
+        final Props props = ShardTransaction.props(RO, store.newReadOnlyTransaction("test-txn", null), shard,
                 datastoreContext, shardStats, "txn", DataStoreVersions.CURRENT_VERSION);
 
         final TestActorRef<ShardTransaction> subject = TestActorRef
@@ -86,7 +81,7 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
             akka.pattern.Patterns.ask(subject, readData, 3000);
         Await.result(future, Duration.create(3, TimeUnit.SECONDS));
 
-        subject.underlyingActor().getDOMStoreTransaction().close();
+        subject.underlyingActor().getDOMStoreTransaction().abort();
 
         future = akka.pattern.Patterns.ask(subject, readData, 3000);
         Await.result(future, Duration.create(3, TimeUnit.SECONDS));
@@ -98,7 +93,7 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
         throws Throwable {
 
         final ActorRef shard = createShard();
-        final Props props = ShardTransaction.props(store.newReadWriteTransaction(), shard,
+        final Props props = ShardTransaction.props(RW, store.newReadWriteTransaction("test-txn", null), shard,
                 datastoreContext, shardStats, "txn", DataStoreVersions.CURRENT_VERSION);
 
         final TestActorRef<ShardTransaction> subject = TestActorRef
@@ -116,7 +111,7 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
             akka.pattern.Patterns.ask(subject, readData, 3000);
         Await.result(future, Duration.create(3, TimeUnit.SECONDS));
 
-        subject.underlyingActor().getDOMStoreTransaction().close();
+        subject.underlyingActor().getDOMStoreTransaction().abort();
 
         future = akka.pattern.Patterns.ask(subject, readData, 3000);
         Await.result(future, Duration.create(3, TimeUnit.SECONDS));
@@ -127,7 +122,7 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
         throws Throwable {
 
         final ActorRef shard = createShard();
-        final Props props = ShardTransaction.props(store.newReadWriteTransaction(), shard,
+        final Props props = ShardTransaction.props(RW, store.newReadWriteTransaction("test-txn", null), shard,
                 datastoreContext, shardStats, "txn", DataStoreVersions.CURRENT_VERSION);
 
         final TestActorRef<ShardTransaction> subject = TestActorRef
@@ -145,7 +140,7 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
             akka.pattern.Patterns.ask(subject, dataExists, 3000);
         Await.result(future, Duration.create(3, TimeUnit.SECONDS));
 
-        subject.underlyingActor().getDOMStoreTransaction().close();
+        subject.underlyingActor().getDOMStoreTransaction().abort();
 
         future = akka.pattern.Patterns.ask(subject, dataExists, 3000);
         Await.result(future, Duration.create(3, TimeUnit.SECONDS));
@@ -156,7 +151,7 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
 
 
         final ActorRef shard = createShard();
-        final Props props = ShardTransaction.props(store.newWriteOnlyTransaction(), shard,
+        final Props props = ShardTransaction.props(WO, store.newReadWriteTransaction("test-txn", null), shard,
                 datastoreContext, shardStats, "txn", DataStoreVersions.CURRENT_VERSION);
 
         final TestActorRef<ShardTransaction> subject = TestActorRef
@@ -188,7 +183,7 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
 
 
         final ActorRef shard = createShard();
-        final Props props = ShardTransaction.props(store.newReadWriteTransaction(), shard,
+        final Props props = ShardTransaction.props(RW, store.newReadWriteTransaction("test-txn", null), shard,
                 datastoreContext, shardStats, "txn", DataStoreVersions.CURRENT_VERSION);
 
         final TestActorRef<ShardTransaction> subject = TestActorRef
@@ -225,7 +220,7 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
 
 
         final ActorRef shard = createShard();
-        final Props props = ShardTransaction.props(store.newReadWriteTransaction(), shard,
+        final Props props = ShardTransaction.props(RW, store.newReadWriteTransaction("test-txn", null), shard,
                 datastoreContext, shardStats, "txn", DataStoreVersions.CURRENT_VERSION);
 
         final TestActorRef<ShardTransaction> subject = TestActorRef
@@ -257,7 +252,7 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
 
 
         final ActorRef shard = createShard();
-        final Props props = ShardTransaction.props(store.newReadWriteTransaction(), shard,
+        final Props props = ShardTransaction.props(RW, store.newReadWriteTransaction("test-txn", null), shard,
                 datastoreContext, shardStats, "txn", DataStoreVersions.CURRENT_VERSION);
 
         final TestActorRef<ShardTransaction> subject = TestActorRef
