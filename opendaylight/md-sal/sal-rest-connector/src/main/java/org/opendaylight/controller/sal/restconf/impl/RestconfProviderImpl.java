@@ -11,10 +11,13 @@ import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Collections;
 import org.opendaylight.controller.config.yang.md.sal.rest.connector.Config;
+import org.opendaylight.controller.config.yang.md.sal.rest.connector.Delete;
+import org.opendaylight.controller.config.yang.md.sal.rest.connector.Failure;
 import org.opendaylight.controller.config.yang.md.sal.rest.connector.Get;
 import org.opendaylight.controller.config.yang.md.sal.rest.connector.Operational;
 import org.opendaylight.controller.config.yang.md.sal.rest.connector.Post;
 import org.opendaylight.controller.config.yang.md.sal.rest.connector.Put;
+import org.opendaylight.controller.config.yang.md.sal.rest.connector.Success;
 import org.opendaylight.controller.config.yang.md.sal.rest.connector.RestConnectorRuntimeMXBean;
 import org.opendaylight.controller.config.yang.md.sal.rest.connector.Rpcs;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
@@ -45,11 +48,10 @@ public class RestconfProviderImpl implements Provider, AutoCloseable, RestConnec
         final DOMDataBroker domDataBroker = session.getService(DOMDataBroker.class);
 
         BrokerFacade.getInstance().setContext(session);
-        BrokerFacade.getInstance().setDomDataBroker( domDataBroker);
+        BrokerFacade.getInstance().setDomDataBroker(domDataBroker);
         final SchemaService schemaService = session.getService(SchemaService.class);
         listenerRegistration = schemaService.registerSchemaContextListener(ControllerContext.getInstance());
         BrokerFacade.getInstance().setRpcService(session.getService(DOMRpcService.class));
-
 
         ControllerContext.getInstance().setSchemas(schemaService.getGlobalContext());
         ControllerContext.getInstance().setMountService(session.getService(DOMMountPointService.class));
@@ -87,6 +89,9 @@ public class RestconfProviderImpl implements Provider, AutoCloseable, RestConnec
         final Put put = new Put();
         put.setReceivedRequests(stats.getConfigPut());
         config.setPut(put);
+        final Delete delete = new Delete();
+        delete.setReceivedRequests(stats.getConfigDelete());
+        config.setDelete(delete);
         return config;
     }
 
@@ -105,6 +110,36 @@ public class RestconfProviderImpl implements Provider, AutoCloseable, RestConnec
         final BigInteger rpcInvoke = stats.getRpc();
         final Rpcs rpcs = new Rpcs();
         rpcs.setReceivedRequests(rpcInvoke);
-        return rpcs ;
+        return rpcs;
+    }
+
+    @Override
+    public Success getSuccess() {
+        final Success success = new Success();
+        final Post post = new Post();
+        post.setSuccessfulResponses(stats.getSuccessPost());
+        success.setPost(post);
+        final Put put = new Put();
+        put.setSuccessfulResponses(stats.getSuccessPut());
+        success.setPut(put);
+        final Delete delete = new Delete();
+        delete.setSuccessfulResponses(stats.getSuccessDelete());
+        success.setDelete(delete);
+        return success;
+    }
+
+    @Override
+    public Failure getFailure() {
+        final Failure failure = new Failure();
+        final Post post = new Post();
+        post.setFailedResponses(stats.getFailurePost());
+        failure.setPost(post);
+        final Put put = new Put();
+        put.setFailedResponses(stats.getFailurePut());
+        failure.setPut(put);
+        final Delete delete = new Delete();
+        delete.setFailedResponses(stats.getFailureDelete());
+        failure.setDelete(delete);
+        return failure;
     }
 }

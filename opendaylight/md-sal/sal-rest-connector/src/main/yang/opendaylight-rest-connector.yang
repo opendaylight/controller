@@ -31,6 +31,14 @@ module opendaylight-rest-connector {
         leaf received-requests {
            type uint64;
         }
+
+        leaf successful-responses {
+           type uint64;
+        }
+
+        leaf failed-responses {
+           type uint64;
+        }
     }
 
     augment "/config:modules/config:module/config:configuration" {
@@ -70,10 +78,42 @@ module opendaylight-rest-connector {
                 container put {
                     uses statistics;
                 }
+
+                container delete {
+                    uses statistics;
+                }
             }
 
             container operational {
                 container get {
+                    uses statistics;
+                }
+            }
+
+            container success {
+                container post {
+                    uses statistics;
+                }
+
+                container put {
+                    uses statistics;
+                }
+
+                container delete {
+                    uses statistics;
+                }
+            }
+
+            container failure {
+                container post {
+                    uses statistics;
+                }
+
+                container put {
+                    uses statistics;
+                }
+
+                container delete {
                     uses statistics;
                 }
             }
