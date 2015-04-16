@@ -12,6 +12,10 @@ import com.google.common.base.Strings;
 import java.util.HashMap;
 import java.util.Map;
 import javax.ws.rs.core.UriInfo;
+import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
+import org.opendaylight.controller.sal.restconf.impl.RestconfError;
+import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
+import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
 
 /**
  * sal-rest-connector
@@ -45,6 +49,24 @@ public class RestconfUriUtils {
         final String param = info.getQueryParameters(false)
                 .getFirst(RestconfInternalConstants.URI_PARAM_PRETTY_PRINT);
         return Boolean.parseBoolean(param);
+    }
+
+    public Integer parseDepthParameter(final UriInfo info) {
+        final String param = info.getQueryParameters(false).getFirst(RestconfInternalConstants.URI_PARAM_DEPTH);
+        if (Strings.isNullOrEmpty(param) || "unbounded".equals(param)) {
+            return null;
+        }
+
+        try {
+            final Integer depth = Integer.valueOf(param);
+            RestconfValidationUtils.checkDocumentedError(depth > 1, ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE,
+                    "The depth parameter must be an integer > 1 or \"unbounded\"");
+            return depth;
+        } catch (final NumberFormatException e) {
+            throw new RestconfDocumentedException(new RestconfError(ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE,
+                    "Invalid depth parameter: " + e.getMessage(), null,
+                    "The depth parameter must be an integer > 1 or \"unbounded\""));
+        }
     }
 
     /**
