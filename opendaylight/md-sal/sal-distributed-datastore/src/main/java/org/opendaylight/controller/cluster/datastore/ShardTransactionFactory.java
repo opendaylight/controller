@@ -7,11 +7,11 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import com.google.common.base.Preconditions;
 import akka.actor.ActorRef;
 import akka.actor.UntypedActorContext;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardTransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransaction;
 
 /**
  * A factory for creating ShardTransaction actors.
@@ -20,16 +20,16 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransaction;
  */
 class ShardTransactionActorFactory {
 
-    private final DOMTransactionFactory domTransactionFactory;
+    private final ShardDataTree dataTree;
     private final DatastoreContext datastoreContext;
     private final String txnDispatcherPath;
     private final ShardStats shardMBean;
     private final UntypedActorContext actorContext;
     private final ActorRef shardActor;
 
-    ShardTransactionActorFactory(DOMTransactionFactory domTransactionFactory, DatastoreContext datastoreContext,
+    ShardTransactionActorFactory(ShardDataTree dataTree, DatastoreContext datastoreContext,
             String txnDispatcherPath, ActorRef shardActor, UntypedActorContext actorContext, ShardStats shardMBean) {
-        this.domTransactionFactory = domTransactionFactory;
+        this.dataTree = Preconditions.checkNotNull(dataTree);
         this.datastoreContext = datastoreContext;
         this.txnDispatcherPath = txnDispatcherPath;
         this.shardMBean = shardMBean;
@@ -39,11 +39,20 @@ class ShardTransactionActorFactory {
 
     ActorRef newShardTransaction(TransactionProxy.TransactionType type, ShardTransactionIdentifier transactionID,
             String transactionChainID, short clientVersion) {
+        final AbstractShardDataTreeTransaction<?> transaction;
+        switch (type) {
+        case READ_ONLY:
+            transaction = dataTree.newReadOnlyTransaction(transactionID.toString(), transactionChainID);
+            break;
+        case READ_WRITE:
+        case WRITE_ONLY:
+            transaction = dataTree.newReadWriteTransaction(transactionID.toString(), transactionChainID);
+            break;
+        default:
+            throw new IllegalArgumentException("Unsupported transaction type " + type);
+        }
 
-        DOMStoreTransaction transaction = domTransactionFactory.newTransaction(type, transactionID.toString(),
-                transactionChainID);
-
-        return actorContext.actorOf(ShardTransaction.props(transaction, shardActor, datastoreContext, shardMBean,
+        return actorContext.actorOf(ShardTransaction.props(type, transaction, shardActor, datastoreContext, shardMBean,
                 transactionID.getRemoteTransactionId(), clientVersion).withDispatcher(txnDispatcherPath),
                 transactionID.toString());
     }

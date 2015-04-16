@@ -7,21 +7,24 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import java.util.ArrayList;
-import java.util.List;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map.Entry;
 import org.opendaylight.controller.cluster.datastore.messages.EnableNotification;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListener;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListenerReply;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
+import org.opendaylight.controller.md.sal.dom.store.impl.DOMImmutableDataChangeEvent;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class DataChangeListenerSupport extends LeaderLocalDelegateFactory<RegisterChangeListener, ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>>> {
+final class DataChangeListenerSupport extends LeaderLocalDelegateFactory<RegisterChangeListener, ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>>, DOMImmutableDataChangeEvent> {
     private static final Logger LOG = LoggerFactory.getLogger(DataChangeListenerSupport.class);
     private final List<DelayedListenerRegistration> delayedListenerRegistrations = new ArrayList<>();
     private final List<ActorSelection> dataChangeListeners =  new ArrayList<>();
@@ -39,7 +42,12 @@ final class DataChangeListenerSupport extends LeaderLocalDelegateFactory<Registe
         if (isLeader) {
             for (DelayedListenerRegistration reg: delayedListenerRegistrations) {
                 if(!reg.isClosed()) {
-                    reg.setDelegate(createDelegate(reg.getRegisterChangeListener()));
+                    final Entry<ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>>, DOMImmutableDataChangeEvent> res =
+                            createDelegate(reg.getRegisterChangeListener());
+                    reg.setDelegate(res.getKey());
+                    if (res.getValue() != null) {
+                        reg.getInstance().onDataChanged(res.getValue());
+                    }
                 }
             }
 
@@ -52,16 +60,21 @@ final class DataChangeListenerSupport extends LeaderLocalDelegateFactory<Registe
 
         LOG.debug("{}: registerDataChangeListener for {}, leader: {}", persistenceId(), message.getPath(), isLeader);
 
-        ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier,
+        final ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier,
                                                      NormalizedNode<?, ?>>> registration;
+        final AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> event;
         if (isLeader) {
-            registration = createDelegate(message);
+            final Entry<ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>>, DOMImmutableDataChangeEvent> res =
+                    createDelegate(message);
+            registration = res.getKey();
+            event = res.getValue();
         } else {
             LOG.debug("{}: Shard is not the leader - delaying registration", persistenceId());
 
             DelayedListenerRegistration delayedReg = new DelayedListenerRegistration(message);
             delayedListenerRegistrations.add(delayedReg);
             registration = delayedReg;
+            event = null;
         }
 
         ActorRef listenerRegistration = createActor(DataChangeListenerRegistration.props(registration));
@@ -70,10 +83,13 @@ final class DataChangeListenerSupport extends LeaderLocalDelegateFactory<Registe
                 persistenceId(), listenerRegistration.path());
 
         tellSender(new RegisterChangeListenerReply(listenerRegistration));
+        if (event != null) {
+            registration.getInstance().onDataChanged(event);
+        }
     }
 
     @Override
-    ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>> createDelegate(
+    Entry<ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>>, DOMImmutableDataChangeEvent> createDelegate(
             final RegisterChangeListener message) {
         ActorSelection dataChangeListenerPath = selectActor(message.getDataChangeListenerPath());
 
