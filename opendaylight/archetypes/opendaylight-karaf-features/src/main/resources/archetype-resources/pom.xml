@@ -26,7 +26,7 @@
             DependencyManagement section of your parent pom -->
       <branding.version>1.1.0-SNAPSHOT</branding.version>
       <karaf.resources.version>1.5.0-SNAPSHOT</karaf.resources.version>
-      <karaf.version>3.0.1</karaf.version>
+      <karaf.version>3.0.3</karaf.version>
       <feature.test.version>1.5.0-SNAPSHOT</feature.test.version>
       <karaf.empty.version>1.5.0-SNAPSHOT</karaf.empty.version>
       <surefire.version>2.16</surefire.version>

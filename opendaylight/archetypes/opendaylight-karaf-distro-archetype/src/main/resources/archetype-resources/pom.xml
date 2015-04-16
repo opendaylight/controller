@@ -21,7 +21,7 @@
             DependencyManagement section of your parent pom -->
     <branding.version>1.1.0-SNAPSHOT</branding.version>
     <karaf.resources.version>1.5.0-SNAPSHOT</karaf.resources.version>
-    <karaf.version>3.0.1</karaf.version>
+    <karaf.version>3.0.3</karaf.version>
   </properties>
 
   <dependencies>
