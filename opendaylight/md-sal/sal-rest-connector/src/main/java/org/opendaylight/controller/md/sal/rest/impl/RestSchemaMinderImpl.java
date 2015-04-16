@@ -88,6 +88,11 @@ public class RestSchemaMinderImpl implements RestSchemaMinder {
         qnameToRpc = ImmutableMap.copyOf(newMap);
     }
 
+    public RpcDefinition getRpcDefinition(final String name) {
+        final QName qname = RestconfParsingUtils.toQName(name);
+        return qname != null ? qnameToRpc.get(qname) : null;
+    }
+
     @Override
     public Module getRestconfModule() {
         final QName restQName = Draft02.RestConfModule.IETF_RESTCONF_QNAME;
@@ -218,7 +223,7 @@ public class RestSchemaMinderImpl implements RestSchemaMinder {
 
             targetNode = RestconfSchemaNodeUtils.findInstanceDataChildByNameAndNamespace(module, nodeName, module.getNamespace());
             if (targetNode == null) {
-                final RpcDefinition rpc = qnameToRpc.get(head);
+                final RpcDefinition rpc = getRpcDefinition(head);
                 if (rpc != null) {
                     // TODO do we want to add head to yiiBuilder
 //                    yiiBuilder.node(rpc.getQName());
