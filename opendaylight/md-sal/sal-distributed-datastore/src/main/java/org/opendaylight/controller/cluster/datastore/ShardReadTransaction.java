@@ -13,17 +13,12 @@ package org.opendaylight.controller.cluster.datastore;
 import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
 import com.google.common.base.Optional;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 import org.opendaylight.controller.cluster.datastore.messages.CreateSnapshot;
 import org.opendaylight.controller.cluster.datastore.messages.DataExists;
 import org.opendaylight.controller.cluster.datastore.messages.ReadData;
 import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
@@ -34,9 +29,9 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 public class ShardReadTransaction extends ShardTransaction {
     private static final YangInstanceIdentifier DATASTORE_ROOT = YangInstanceIdentifier.builder().build();
 
-    private final DOMStoreReadTransaction transaction;
+    private final AbstractShardDataTreeTransaction<?> transaction;
 
-    public ShardReadTransaction(DOMStoreReadTransaction transaction, ActorRef shardActor,
+    public ShardReadTransaction(AbstractShardDataTreeTransaction<?> transaction, ActorRef shardActor,
             ShardStats shardStats, String transactionID, short clientTxVersion) {
         super(shardActor, shardStats, transactionID, clientTxVersion);
         this.transaction = transaction;
@@ -70,28 +65,16 @@ public class ShardReadTransaction extends ShardTransaction {
 
         final ActorRef sender = getSender();
         final ActorRef self = getSelf();
-        final ListenableFuture<Optional<NormalizedNode<?, ?>>> future = transaction.read(DATASTORE_ROOT);
+        final Optional<NormalizedNode<?, ?>> result = transaction.getSnapshot().readNode(DATASTORE_ROOT);
 
-        Futures.addCallback(future, new FutureCallback<Optional<NormalizedNode<?, ?>>>() {
-            @Override
-            public void onSuccess(Optional<NormalizedNode<?, ?>> result) {
-                byte[] serialized = SerializationUtils.serializeNormalizedNode(result.get());
-                sender.tell(new CaptureSnapshotReply(serialized), self);
+        byte[] serialized = SerializationUtils.serializeNormalizedNode(result.get());
+        sender.tell(new CaptureSnapshotReply(serialized), self);
 
-                self.tell(PoisonPill.getInstance(), self);
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                sender.tell(new akka.actor.Status.Failure(t), self);
-
-                self.tell(PoisonPill.getInstance(), self);
-            }
-        });
+        self.tell(PoisonPill.getInstance(), self);
     }
 
     @Override
-    protected DOMStoreTransaction getDOMStoreTransaction() {
+    protected AbstractShardDataTreeTransaction<?> getDOMStoreTransaction() {
         return transaction;
     }
 
