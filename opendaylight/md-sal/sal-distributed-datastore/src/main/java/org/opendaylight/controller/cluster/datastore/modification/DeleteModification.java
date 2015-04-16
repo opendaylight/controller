@@ -17,6 +17,7 @@ import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils;
 import org.opendaylight.controller.protobuff.messages.persistent.PersistentMessages;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 
 /**
  * DeleteModification store all the parameters required to delete a path from the data tree
@@ -38,6 +39,11 @@ public class DeleteModification extends AbstractModification {
 
     @Override
     public void apply(DOMStoreWriteTransaction transaction) {
+        transaction.delete(getPath());
+    }
+
+    @Override
+    public void apply(DataTreeModification transaction) {
         transaction.delete(getPath());
     }
 
