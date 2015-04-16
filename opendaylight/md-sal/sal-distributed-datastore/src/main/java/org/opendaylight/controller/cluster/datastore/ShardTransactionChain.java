@@ -8,16 +8,17 @@
 
 package org.opendaylight.controller.cluster.datastore;
 
+import com.google.common.base.Preconditions;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.japi.Creator;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
+import org.opendaylight.controller.cluster.datastore.TransactionProxy.TransactionType;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionChain;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionChainReply;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionReply;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 /**
@@ -25,13 +26,13 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
  */
 public class ShardTransactionChain extends AbstractUntypedActor {
 
-    private final DOMStoreTransactionChain chain;
+    private final ShardDataTreeTransactionChain chain;
     private final DatastoreContext datastoreContext;
     private final ShardStats shardStats;
 
-    public ShardTransactionChain(DOMStoreTransactionChain chain, DatastoreContext datastoreContext,
+    public ShardTransactionChain(ShardDataTreeTransactionChain chain, DatastoreContext datastoreContext,
             ShardStats shardStats) {
-        this.chain = chain;
+        this.chain = Preconditions.checkNotNull(chain);
         this.datastoreContext = datastoreContext;
         this.shardStats = shardStats;
     }
@@ -55,29 +56,25 @@ public class ShardTransactionChain extends AbstractUntypedActor {
 
     private ActorRef createTypedTransactionActor(CreateTransaction createTransaction) {
         String transactionName = "shard-" + createTransaction.getTransactionId();
-        if(createTransaction.getTransactionType() ==
-                TransactionProxy.TransactionType.READ_ONLY.ordinal()) {
-            return getContext().actorOf(
-                    ShardTransaction.props( chain.newReadOnlyTransaction(), getShardActor(),
-                            datastoreContext, shardStats, createTransaction.getTransactionId(),
-                            createTransaction.getVersion()), transactionName);
-        } else if (createTransaction.getTransactionType() ==
-                TransactionProxy.TransactionType.READ_WRITE.ordinal()) {
-            return getContext().actorOf(
-                    ShardTransaction.props( chain.newReadWriteTransaction(), getShardActor(),
-                            datastoreContext, shardStats, createTransaction.getTransactionId(),
-                            createTransaction.getVersion()), transactionName);
-        } else if (createTransaction.getTransactionType() ==
-                TransactionProxy.TransactionType.WRITE_ONLY.ordinal()) {
-            return getContext().actorOf(
-                    ShardTransaction.props( chain.newWriteOnlyTransaction(), getShardActor(),
-                            datastoreContext, shardStats, createTransaction.getTransactionId(),
-                            createTransaction.getVersion()), transactionName);
-        } else {
-            throw new IllegalArgumentException (
-                    "CreateTransaction message has unidentified transaction type=" +
-                             createTransaction.getTransactionType());
+
+        final TransactionType type = TransactionType.fromInt(createTransaction.getTransactionType());
+        final AbstractShardDataTreeTransaction<?> transaction;
+        switch (type) {
+        case READ_ONLY:
+            transaction = chain.newReadOnlyTransaction(transactionName);
+            break;
+        case READ_WRITE:
+        case WRITE_ONLY:
+            transaction = chain.newReadWriteTransaction(transactionName);
+            break;
+        default:
+            throw new IllegalArgumentException("Unhandled transaction type " + type);
         }
+
+        return getContext().actorOf(
+            ShardTransaction.props(type, transaction, getShardActor(),
+                    datastoreContext, shardStats, createTransaction.getTransactionId(),
+                    createTransaction.getVersion()), transactionName);
     }
 
     private void createTransaction(CreateTransaction createTransaction) {
@@ -87,7 +84,7 @@ public class ShardTransactionChain extends AbstractUntypedActor {
                 createTransaction.getTransactionId()).toSerializable(), getSelf());
     }
 
-    public static Props props(DOMStoreTransactionChain chain, SchemaContext schemaContext,
+    public static Props props(ShardDataTreeTransactionChain chain, SchemaContext schemaContext,
         DatastoreContext datastoreContext, ShardStats shardStats) {
         return Props.create(new ShardTransactionChainCreator(chain, datastoreContext, shardStats));
     }
@@ -95,12 +92,11 @@ public class ShardTransactionChain extends AbstractUntypedActor {
     private static class ShardTransactionChainCreator implements Creator<ShardTransactionChain> {
         private static final long serialVersionUID = 1L;
 
-        final DOMStoreTransactionChain chain;
+        final ShardDataTreeTransactionChain chain;
         final DatastoreContext datastoreContext;
         final ShardStats shardStats;
 
-
-        ShardTransactionChainCreator(DOMStoreTransactionChain chain, DatastoreContext datastoreContext,
+        ShardTransactionChainCreator(ShardDataTreeTransactionChain chain, DatastoreContext datastoreContext,
                 ShardStats shardStats) {
             this.chain = chain;
             this.datastoreContext = datastoreContext;
