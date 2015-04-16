@@ -43,6 +43,8 @@
       <bundle>mvn:org.opendaylight.controller/configuration.implementation/${configuration.implementation.version}</bundle>
    </feature>
    <feature name="odl-adsal-thirdparty" description="OpenDaylight :: AD-SAL :: Third-Party Depenencies" version="${project.version}">
-      <bundle>mvn:org.opendaylight.controller/logging.bridge/${logging.bridge.version}</bundle>
+      <!-- Removed out - causes loop in loggers which polutes logs expotencially
+         <bundle>mvn:org.opendaylight.controller/logging.bridge/${logging.bridge.version}</bundle>
+       -->
    </feature>
 </features>
