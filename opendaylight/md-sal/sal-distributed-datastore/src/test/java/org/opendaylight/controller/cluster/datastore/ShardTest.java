@@ -89,7 +89,6 @@ import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
-import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreFactory;
 import org.opendaylight.controller.protobuff.messages.cohort3pc.ThreePhaseCommitCohortMessages;
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.CreateTransactionReply;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
@@ -100,7 +99,9 @@ import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
+import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
@@ -338,8 +339,8 @@ public class ShardTest extends AbstractShardTest {
         TestActorRef<Shard> shard = TestActorRef.create(getSystem(), newShardProps(),
                 "testApplySnapshot");
 
-        InMemoryDOMDataStore store = new InMemoryDOMDataStore("OPER", MoreExecutors.sameThreadExecutor());
-        store.onGlobalContextUpdated(SCHEMA_CONTEXT);
+        DataTree store = InMemoryDataTreeFactory.getInstance().create();
+        store.setSchemaContext(SCHEMA_CONTEXT);
 
         writeToStore(store, TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
 
@@ -382,8 +383,8 @@ public class ShardTest extends AbstractShardTest {
 
         // Set up the InMemorySnapshotStore.
 
-        InMemoryDOMDataStore testStore = InMemoryDOMDataStoreFactory.create("Test", null, null);
-        testStore.onGlobalContextUpdated(SCHEMA_CONTEXT);
+        DataTree testStore = InMemoryDataTreeFactory.getInstance().create();
+        testStore.setSchemaContext(SCHEMA_CONTEXT);
 
         writeToStore(testStore, TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
 
@@ -440,7 +441,7 @@ public class ShardTest extends AbstractShardTest {
 
          // Setup 3 simulated transactions with mock cohorts backed by real cohorts.
 
-            InMemoryDOMDataStore dataStore = shard.underlyingActor().getDataStore();
+            ShardDataTree dataStore = shard.underlyingActor().getDataStore();
 
             String transactionID1 = "tx1";
             MutableCompositeModification modification1 = new MutableCompositeModification();
@@ -901,7 +902,7 @@ public class ShardTest extends AbstractShardTest {
 
             waitUntilLeader(shard);
 
-            InMemoryDOMDataStore dataStore = shard.underlyingActor().getDataStore();
+            ShardDataTree dataStore = shard.underlyingActor().getDataStore();
 
             // Setup a simulated transactions with a mock cohort.
 
@@ -1400,7 +1401,7 @@ public class ShardTest extends AbstractShardTest {
             waitUntilLeader(shard);
 
             final FiniteDuration duration = duration("5 seconds");
-            InMemoryDOMDataStore dataStore = shard.underlyingActor().getDataStore();
+            ShardDataTree dataStore = shard.underlyingActor().getDataStore();
 
             final String transactionID = "tx1";
             Function<DOMStoreThreePhaseCommitCohort,ListenableFuture<Void>> preCommit =
@@ -1464,7 +1465,7 @@ public class ShardTest extends AbstractShardTest {
 
             final FiniteDuration duration = duration("5 seconds");
 
-            InMemoryDOMDataStore dataStore = shard.underlyingActor().getDataStore();
+            ShardDataTree dataStore = shard.underlyingActor().getDataStore();
 
             writeToStore(shard, TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
             writeToStore(shard, TestModel.OUTER_LIST_PATH,
@@ -1541,7 +1542,7 @@ public class ShardTest extends AbstractShardTest {
 
             final FiniteDuration duration = duration("5 seconds");
 
-            InMemoryDOMDataStore dataStore = shard.underlyingActor().getDataStore();
+            ShardDataTree dataStore = shard.underlyingActor().getDataStore();
 
             String transactionID1 = "tx1";
             MutableCompositeModification modification1 = new MutableCompositeModification();
