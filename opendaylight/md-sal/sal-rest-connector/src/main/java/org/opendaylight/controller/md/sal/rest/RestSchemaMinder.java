@@ -14,6 +14,7 @@ import org.opendaylight.controller.sal.restconf.impl.InstanceIdentifierContext;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
+import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 /**
@@ -31,6 +32,8 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 public interface RestSchemaMinder {
 
     void tell(@Nonnull final SchemaContext schemaContext);
+
+    RpcDefinition getRpcDefinition(final String name);
 
     DOMMountPoint parseUriRequestToMountPoint(final String requestUriIdentifier);
 
