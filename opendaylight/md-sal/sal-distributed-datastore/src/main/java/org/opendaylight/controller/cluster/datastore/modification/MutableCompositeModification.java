@@ -19,6 +19,7 @@ import org.opendaylight.controller.cluster.datastore.node.utils.stream.Normalize
 import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils;
 import org.opendaylight.controller.protobuff.messages.persistent.PersistentMessages;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 
 /**
  * MutableCompositeModification is just a mutable version of a
@@ -40,6 +41,13 @@ public class MutableCompositeModification implements CompositeModification {
 
     @Override
     public void apply(DOMStoreWriteTransaction transaction) {
+        for (Modification modification : modifications) {
+            modification.apply(transaction);
+        }
+    }
+
+    @Override
+    public void apply(DataTreeModification transaction) {
         for (Modification modification : modifications) {
             modification.apply(transaction);
         }
