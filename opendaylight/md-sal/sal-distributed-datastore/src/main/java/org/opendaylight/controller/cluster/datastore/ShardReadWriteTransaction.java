@@ -14,35 +14,30 @@ import akka.actor.ActorRef;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 import org.opendaylight.controller.cluster.datastore.messages.DataExists;
 import org.opendaylight.controller.cluster.datastore.messages.ReadData;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 
 /**
  * @author: syedbahm
  * Date: 8/6/14
  */
 public class ShardReadWriteTransaction extends ShardWriteTransaction {
-    private final DOMStoreReadWriteTransaction transaction;
-
-    public ShardReadWriteTransaction(DOMStoreReadWriteTransaction transaction, ActorRef shardActor,
+    public ShardReadWriteTransaction(ReadWriteShardDataTreeTransaction transaction, ActorRef shardActor,
             ShardStats shardStats, String transactionID, short clientTxVersion) {
         super(transaction, shardActor, shardStats, transactionID, clientTxVersion);
-        this.transaction = transaction;
     }
 
     @Override
     public void handleReceive(Object message) throws Exception {
         if (message instanceof ReadData) {
-            readData(transaction, (ReadData) message, !SERIALIZED_REPLY);
+            readData((ReadData) message, !SERIALIZED_REPLY);
 
         } else if (message instanceof DataExists) {
-            dataExists(transaction, (DataExists) message, !SERIALIZED_REPLY);
+            dataExists((DataExists) message, !SERIALIZED_REPLY);
 
         } else if(ReadData.SERIALIZABLE_CLASS.equals(message.getClass())) {
-            readData(transaction, ReadData.fromSerializable(message), SERIALIZED_REPLY);
+            readData(ReadData.fromSerializable(message), SERIALIZED_REPLY);
 
         } else if(DataExists.SERIALIZABLE_CLASS.equals(message.getClass())) {
-            dataExists(transaction, DataExists.fromSerializable(message), SERIALIZED_REPLY);
-
+            dataExists(DataExists.fromSerializable(message), SERIALIZED_REPLY);
         } else {
             super.handleReceive(message);
         }
