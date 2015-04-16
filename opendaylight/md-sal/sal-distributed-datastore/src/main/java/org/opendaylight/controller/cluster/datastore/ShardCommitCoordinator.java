@@ -27,7 +27,6 @@ import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransacti
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
 import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.slf4j.Logger;
 
 /**
@@ -46,7 +45,7 @@ public class ShardCommitCoordinator {
 
     private CohortEntry currentCohortEntry;
 
-    private final DOMTransactionFactory transactionFactory;
+    private final ShardDataTree dataTree;
 
     private final Queue<CohortEntry> queuedCohortEntries;
 
@@ -71,13 +70,13 @@ public class ShardCommitCoordinator {
     // This is a hook for unit tests to replace or decorate the DOMStoreThreePhaseCommitCohorts.
     private CohortDecorator cohortDecorator;
 
-    public ShardCommitCoordinator(DOMTransactionFactory transactionFactory,
+    public ShardCommitCoordinator(ShardDataTree dataTree,
             long cacheExpiryTimeoutInSec, int queueCapacity, ActorRef shardActor, Logger log, String name) {
 
         this.queueCapacity = queueCapacity;
         this.log = log;
         this.name = name;
-        this.transactionFactory = transactionFactory;
+        this.dataTree = Preconditions.checkNotNull(dataTree);
 
         shardActorPath = Serialization.serializedActorPath(shardActor);
 
@@ -123,8 +122,7 @@ public class ShardCommitCoordinator {
         CohortEntry cohortEntry = cohortCache.getIfPresent(batched.getTransactionID());
         if(cohortEntry == null) {
             cohortEntry = new CohortEntry(batched.getTransactionID(),
-                    transactionFactory.<DOMStoreWriteTransaction>newTransaction(
-                        TransactionProxy.TransactionType.WRITE_ONLY, batched.getTransactionID(),
+                    dataTree.newReadWriteTransaction(batched.getTransactionID(),
                         batched.getTransactionChainID()));
             cohortCache.put(batched.getTransactionID(), cohortEntry);
         }
@@ -301,14 +299,14 @@ public class ShardCommitCoordinator {
         private final String transactionID;
         private DOMStoreThreePhaseCommitCohort cohort;
         private final MutableCompositeModification compositeModification;
-        private final DOMStoreWriteTransaction transaction;
+        private final ReadWriteShardDataTreeTransaction transaction;
         private ActorRef canCommitSender;
         private ActorRef shard;
         private long lastAccessTime;
 
-        CohortEntry(String transactionID, DOMStoreWriteTransaction transaction) {
+        CohortEntry(String transactionID, ReadWriteShardDataTreeTransaction transaction) {
             this.compositeModification = new MutableCompositeModification();
-            this.transaction = transaction;
+            this.transaction = Preconditions.checkNotNull(transaction);
             this.transactionID = transactionID;
         }
 
@@ -343,7 +341,7 @@ public class ShardCommitCoordinator {
         void applyModifications(Iterable<Modification> modifications) {
             for(Modification modification: modifications) {
                 compositeModification.addModification(modification);
-                modification.apply(transaction);
+                modification.apply(transaction.getSnapshot());
             }
         }
 

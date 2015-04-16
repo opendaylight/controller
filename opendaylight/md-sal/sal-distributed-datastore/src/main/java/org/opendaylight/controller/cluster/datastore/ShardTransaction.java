@@ -14,8 +14,9 @@ import akka.actor.Props;
 import akka.actor.ReceiveTimeout;
 import akka.japi.Creator;
 import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActorWithMetering;
+import org.opendaylight.controller.cluster.datastore.TransactionProxy.TransactionType;
 import org.opendaylight.controller.cluster.datastore.exceptions.UnknownMessageException;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
@@ -25,10 +26,6 @@ import org.opendaylight.controller.cluster.datastore.messages.DataExistsReply;
 import org.opendaylight.controller.cluster.datastore.messages.ReadData;
 import org.opendaylight.controller.cluster.datastore.messages.ReadDataReply;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransaction;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
@@ -66,13 +63,13 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
         this.clientTxVersion = clientTxVersion;
     }
 
-    public static Props props(DOMStoreTransaction transaction, ActorRef shardActor,
+    public static Props props(TransactionType type, AbstractShardDataTreeTransaction<?> transaction, ActorRef shardActor,
             DatastoreContext datastoreContext, ShardStats shardStats, String transactionID, short txnClientVersion) {
-        return Props.create(new ShardTransactionCreator(transaction, shardActor,
+        return Props.create(new ShardTransactionCreator(type, transaction, shardActor,
            datastoreContext, shardStats, transactionID, txnClientVersion));
     }
 
-    protected abstract DOMStoreTransaction getDOMStoreTransaction();
+    protected abstract AbstractShardDataTreeTransaction<?> getDOMStoreTransaction();
 
     protected ActorRef getShardActor() {
         return shardActor;
@@ -105,7 +102,7 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
     }
 
     private void closeTransaction(boolean sendReply) {
-        getDOMStoreTransaction().close();
+        getDOMStoreTransaction().abort();
 
         if(sendReply && returnCloseTransactionReply()) {
             getSender().tell(CloseTransactionReply.INSTANCE.toSerializable(), getSelf());
@@ -114,71 +111,84 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
         getSelf().tell(PoisonPill.getInstance(), getSelf());
     }
 
-    protected void readData(DOMStoreReadTransaction transaction, ReadData message,
-            final boolean returnSerialized) {
-
-        final YangInstanceIdentifier path = message.getPath();
-        try {
-            final CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> future = transaction.read(path);
-            Optional<NormalizedNode<?, ?>> optional = future.checkedGet();
-            ReadDataReply readDataReply = new ReadDataReply(optional.orNull(), clientTxVersion);
-
-            sender().tell((returnSerialized ? readDataReply.toSerializable(): readDataReply), self());
-
-        } catch (Exception e) {
-            LOG.debug(String.format("Unexpected error reading path %s", path), e);
+    private boolean checkClosed(AbstractShardDataTreeTransaction<?> transaction) {
+        if (transaction.isClosed()) {
             shardStats.incrementFailedReadTransactionsCount();
-            sender().tell(new akka.actor.Status.Failure(e), self());
+            getSender().tell(new akka.actor.Status.Failure(new ReadFailedException("Transaction is closed")), getSelf());
+            return true;
+        } else {
+            return false;
         }
     }
 
-    protected void dataExists(DOMStoreReadTransaction transaction, DataExists message,
-        final boolean returnSerialized) {
-        final YangInstanceIdentifier path = message.getPath();
+    protected void readData(AbstractShardDataTreeTransaction<?> transaction, ReadData message,
+            final boolean returnSerialized) {
 
-        try {
-            boolean exists = transaction.exists(path).checkedGet();
-            DataExistsReply dataExistsReply = DataExistsReply.create(exists);
-            getSender().tell(returnSerialized ? dataExistsReply.toSerializable() :
-                dataExistsReply, getSelf());
-        } catch (ReadFailedException e) {
-            getSender().tell(new akka.actor.Status.Failure(e),getSelf());
+        if (checkClosed(transaction)) {
+            return;
         }
+
+        final YangInstanceIdentifier path = message.getPath();
+        Optional<NormalizedNode<?, ?>> optional = transaction.getSnapshot().readNode(path);
+        ReadDataReply readDataReply = new ReadDataReply(optional.orNull(), clientTxVersion);
+        sender().tell((returnSerialized ? readDataReply.toSerializable(): readDataReply), self());
+    }
+
+    protected void dataExists(AbstractShardDataTreeTransaction<?> transaction, DataExists message,
+        final boolean returnSerialized) {
+
+        if (checkClosed(transaction)) {
+            return;
+        }
+
+        final YangInstanceIdentifier path = message.getPath();
+        boolean exists = transaction.getSnapshot().readNode(path).isPresent();
+        DataExistsReply dataExistsReply = DataExistsReply.create(exists);
+        getSender().tell(returnSerialized ? dataExistsReply.toSerializable() :
+            dataExistsReply, getSelf());
     }
 
     private static class ShardTransactionCreator implements Creator<ShardTransaction> {
 
         private static final long serialVersionUID = 1L;
 
-        final DOMStoreTransaction transaction;
+        final AbstractShardDataTreeTransaction<?> transaction;
         final ActorRef shardActor;
         final DatastoreContext datastoreContext;
         final ShardStats shardStats;
         final String transactionID;
         final short txnClientVersion;
+        final TransactionType type;
 
-        ShardTransactionCreator(DOMStoreTransaction transaction, ActorRef shardActor,
+        ShardTransactionCreator(TransactionType type, AbstractShardDataTreeTransaction<?> transaction, ActorRef shardActor,
                 DatastoreContext datastoreContext, ShardStats shardStats, String transactionID, short txnClientVersion) {
-            this.transaction = transaction;
+            this.transaction = Preconditions.checkNotNull(transaction);
             this.shardActor = shardActor;
             this.shardStats = shardStats;
             this.datastoreContext = datastoreContext;
             this.transactionID = transactionID;
             this.txnClientVersion = txnClientVersion;
+            this.type = type;
         }
 
         @Override
         public ShardTransaction create() throws Exception {
-            ShardTransaction tx;
-            if(transaction instanceof DOMStoreReadWriteTransaction) {
-                tx = new ShardReadWriteTransaction((DOMStoreReadWriteTransaction)transaction,
-                        shardActor, shardStats, transactionID, txnClientVersion);
-            } else if(transaction instanceof DOMStoreReadTransaction) {
-                tx = new ShardReadTransaction((DOMStoreReadTransaction)transaction, shardActor,
-                        shardStats, transactionID, txnClientVersion);
-            } else {
-                tx = new ShardWriteTransaction((DOMStoreWriteTransaction)transaction,
-                        shardActor, shardStats, transactionID, txnClientVersion);
+            final ShardTransaction tx;
+            switch (type) {
+            case READ_ONLY:
+                tx = new ShardReadTransaction(transaction, shardActor,
+                    shardStats, transactionID, txnClientVersion);
+                break;
+            case READ_WRITE:
+                tx = new ShardReadWriteTransaction((ReadWriteShardDataTreeTransaction)transaction,
+                    shardActor, shardStats, transactionID, txnClientVersion);
+                break;
+            case WRITE_ONLY:
+                tx = new ShardWriteTransaction((ReadWriteShardDataTreeTransaction)transaction,
+                    shardActor, shardStats, transactionID, txnClientVersion);
+                break;
+            default:
+                throw new IllegalArgumentException("Unhandled transaction type " + type);
             }
 
             tx.getContext().setReceiveTimeout(datastoreContext.getShardTransactionIdleTimeout());
