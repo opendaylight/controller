@@ -1,0 +1,208 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_5cedb28a",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/RestconfProviderImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-16T13:21:04Z",
+      "side": 1,
+      "message": "Get, Post, Put and Delete also have fields for success and failure counts. You should be setting those as well.",
+      "revId": "34e70187f7d55235055003bb6a24c120f9f62e49",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_bc763605",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/StatisticsRestconfServiceWrapper.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-16T13:21:04Z",
+      "side": 1,
+      "message": "The counters for \"get\" are defined in the yang - shouldn\u0027t we be updating them here? Or am I missing something?",
+      "revId": "34e70187f7d55235055003bb6a24c120f9f62e49",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_dc730214",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/StatisticsRestconfServiceWrapper.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-16T13:21:04Z",
+      "side": 1,
+      "message": "See above comment re: counters for \"get\".",
+      "revId": "34e70187f7d55235055003bb6a24c120f9f62e49",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_3c5a2684",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/StatisticsRestconfServiceWrapper.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-16T13:21:04Z",
+      "side": 1,
+      "message": "If status is not success, should update failure count.",
+      "revId": "34e70187f7d55235055003bb6a24c120f9f62e49",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_5c1132ab",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/StatisticsRestconfServiceWrapper.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-16T13:21:04Z",
+      "side": 1,
+      "message": "You need to rethrow the exception. The code can only throw RuntimeException so catch that instead.",
+      "revId": "34e70187f7d55235055003bb6a24c120f9f62e49",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_5c5ff272",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/StatisticsRestconfServiceWrapper.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-16T13:21:04Z",
+      "side": 1,
+      "message": "If status is not success, should update failure count.",
+      "revId": "34e70187f7d55235055003bb6a24c120f9f62e49",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_fc259e0a",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/StatisticsRestconfServiceWrapper.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-16T13:21:04Z",
+      "side": 1,
+      "message": "Rethrow the exception.",
+      "revId": "34e70187f7d55235055003bb6a24c120f9f62e49",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_1c516a62",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/StatisticsRestconfServiceWrapper.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-16T13:21:04Z",
+      "side": 1,
+      "message": "If status is not success, should update failure count.",
+      "revId": "34e70187f7d55235055003bb6a24c120f9f62e49",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_1c23aa06",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/StatisticsRestconfServiceWrapper.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-16T13:21:04Z",
+      "side": 1,
+      "message": "Rethrow the exception.",
+      "revId": "34e70187f7d55235055003bb6a24c120f9f62e49",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_dc4a22ac",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/StatisticsRestconfServiceWrapper.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-16T13:21:04Z",
+      "side": 1,
+      "message": "If status is not success, should update failure count.",
+      "revId": "34e70187f7d55235055003bb6a24c120f9f62e49",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_dc1c62c4",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/StatisticsRestconfServiceWrapper.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-16T13:21:04Z",
+      "side": 1,
+      "message": "Rethrow the exception.",
+      "revId": "34e70187f7d55235055003bb6a24c120f9f62e49",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_1cff2a36",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/yang/opendaylight-rest-connector.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-16T13:21:04Z",
+      "side": 1,
+      "message": "It seems the intent here is to show total failure counts for each http method across config and operational. However you\u0027re using the statistics type which also includes success and received counts which don\u0027t apply here. You should just define a uint64 leaf for each.\n\nSimilar for success above.",
+      "revId": "34e70187f7d55235055003bb6a24c120f9f62e49",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
