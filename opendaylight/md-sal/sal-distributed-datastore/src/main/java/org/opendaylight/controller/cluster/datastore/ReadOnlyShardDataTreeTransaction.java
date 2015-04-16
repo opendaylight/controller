@@ -7,15 +7,15 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import java.util.Map.Entry;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
 
-/**
- * Base class for factories instantiating delegates.
- *
- * <D> delegate type
- * <M> message type
- * <I> initial state type
- */
-abstract class DelegateFactory<M, D, I> {
-    abstract Entry<D, I> createDelegate(M message);
+final class ReadOnlyShardDataTreeTransaction extends AbstractShardDataTreeTransaction<DataTreeSnapshot> {
+    ReadOnlyShardDataTreeTransaction(final String id, final DataTreeSnapshot snapshot) {
+        super(id, snapshot);
+    }
+
+    @Override
+    void abort() {
+        close();
+    }
 }
