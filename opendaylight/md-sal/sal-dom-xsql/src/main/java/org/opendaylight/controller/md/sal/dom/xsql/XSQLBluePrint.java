@@ -33,6 +33,12 @@ import java.util.Set;
 /**
  * @author Sharon Aicler(saichler@gmail.com)
  **/
+/*
+ * XSQLBluePrint is the container of blue print nodes, a blue print nodes represents a schema context model node in the yang
+ * model tree structure. XSQL is registered on schema context changes and whenever it get a notification
+ * it is introspect the schema module data stracture and creates XSQL Blue Print Nodes structure that
+ * describes the schema context in a way that XSQL can traverse the model up & down.
+ */
 public class XSQLBluePrint implements DatabaseMetaData, Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -119,10 +125,8 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
         return myProxy;
     }
 
-    public XSQLBluePrintNode[] getBluePrintNodeByODLTableName(
-            String odlTableName) {
-        Map<String, XSQLBluePrintNode> map = this.odlNameToBluePrint
-                .get(odlTableName);
+    public XSQLBluePrintNode[] getBluePrintNodeByODLTableName(String odlTableName) {
+        Map<String, XSQLBluePrintNode> map = this.odlNameToBluePrint.get(odlTableName);
         if (map == null) {
             return null;
         }
@@ -216,15 +220,27 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
         XSQLBluePrintNode existingNode = this.tableNameToBluePrint.get(blNode.getBluePrintNodeName());
         if(existingNode!=null){
             existingNode.mergeAugmentation(blNode);
+            String tableNames[] = blNode.getODLTableNames();
+            for(String tableName:tableNames){
+                Map<String, XSQLBluePrintNode> map = this.odlNameToBluePrint.get(tableName);
+                if (map == null) {
+                    map = new HashMap<String, XSQLBluePrintNode>();
+                    this.odlNameToBluePrint.put(tableName, map);
+                }
+                map.put(blNode.getBluePrintNodeName(), blNode);
+            }
             return existingNode;
         }else{
             this.tableNameToBluePrint.put(blNode.getBluePrintNodeName(), blNode);
-            Map<String, XSQLBluePrintNode> map = this.odlNameToBluePrint.get(blNode.getODLTableName());
-            if (map == null) {
-                map = new HashMap<String, XSQLBluePrintNode>();
-                this.odlNameToBluePrint.put(blNode.getODLTableName(), map);
+            String tableNames[] = blNode.getODLTableNames();
+            for(String tableName:tableNames){
+                Map<String, XSQLBluePrintNode> map = this.odlNameToBluePrint.get(tableName);
+                if (map == null) {
+                    map = new HashMap<String, XSQLBluePrintNode>();
+                    this.odlNameToBluePrint.put(tableName, map);
+                }
+                map.put(blNode.getBluePrintNodeName(), blNode);
             }
-            map.put(blNode.getBluePrintNodeName(), blNode);
             if(parent!=null)
                 parent.addChild(blNode);
             return blNode;
