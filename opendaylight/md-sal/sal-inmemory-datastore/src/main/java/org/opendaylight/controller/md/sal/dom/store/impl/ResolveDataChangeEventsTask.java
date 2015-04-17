@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.md.sal.dom.store.impl;
 
+import com.google.common.annotations.Beta;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;
@@ -34,7 +35,8 @@ import org.slf4j.LoggerFactory;
  * Computes data change events for all affected registered listeners in data
  * tree.
  */
-final class ResolveDataChangeEventsTask {
+@Beta
+public final class ResolveDataChangeEventsTask {
     private static final Logger LOG = LoggerFactory.getLogger(ResolveDataChangeEventsTask.class);
 
     private final DataTreeCandidate candidate;
@@ -42,7 +44,7 @@ final class ResolveDataChangeEventsTask {
 
     private Multimap<DataChangeListenerRegistration<?>, DOMImmutableDataChangeEvent> collectedEvents;
 
-    public ResolveDataChangeEventsTask(final DataTreeCandidate candidate, final ListenerTree listenerTree) {
+    private ResolveDataChangeEventsTask(final DataTreeCandidate candidate, final ListenerTree listenerTree) {
         this.candidate = Preconditions.checkNotNull(candidate);
         this.listenerRoot = Preconditions.checkNotNull(listenerTree);
     }
