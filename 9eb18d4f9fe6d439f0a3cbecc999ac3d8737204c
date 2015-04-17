@@ -16,6 +16,24 @@
       "revId": "9eb18d4f9fe6d439f0a3cbecc999ac3d8737204c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_0e17edee",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionResources.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-04-17T10:13:30Z",
+      "side": 1,
+      "message": "I think it does, as it acts as a safeguard between writers (close/ready) and state check (ensureOpen()). The latter is called from TransactionProxy.checkModificationState(), which is called from threads beyond our control -- unless there is some other guard which I have missed.",
+      "parentUuid": "3aa0d159_255a1484",
+      "revId": "9eb18d4f9fe6d439f0a3cbecc999ac3d8737204c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
