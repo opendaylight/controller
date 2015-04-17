@@ -8,59 +8,57 @@
 package org.opendaylight.controller.md.sal.dom.xsql;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.lang.reflect.Field;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataReadTransaction;
 import org.opendaylight.controller.md.sal.dom.xsql.jdbc.JDBCResultSet;
 import org.opendaylight.controller.md.sal.dom.xsql.jdbc.JDBCServer;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  * @author Sharon Aicler(saichler@gmail.com)
  **/
 public class XSQLAdapter extends Thread implements SchemaContextListener {
-
-    private static final int SLEEP = 10000;
-    private static XSQLAdapter a = new XSQLAdapter();
-    private static PrintStream l = null;
-    private static String tmpDir = null;
-    private static File xqlLog = null;
+    //The XSQL adapter instance
+    private static XSQLAdapter adapterInstance = new XSQLAdapter();
+    //Is the adapter stopped
     public boolean stopped = false;
-    private List<String> elementHosts = new ArrayList<String>();
-    private String username;
-    private String password;
-    private String transport = "tcp";
-    private int reconnectTimeout;
-    private int nThreads;
-    private int qsize;
-    private String applicationName = "NQL Adapter";
-    private Map<String, NEEntry> elements = new ConcurrentHashMap<String, XSQLAdapter.NEEntry>();
+    //The last input string in the console
     private StringBuffer lastInputString = new StringBuffer();
+    //The blue print container that was generated from the scenma context
     private XSQLBluePrint bluePrint = new XSQLBluePrint();
+    //Should the query output be forward to a comma delimited file format
     private boolean toCsv = false;
+    //The name of the csv file, if not define will be generated
     private String exportToFileName = null;
-    private XSQLThreadPool threadPool = new XSQLThreadPool(1, "Tasks", 2000);
+    //The thread pool to handle the seeks in the data store
+    private XSQLThreadPool threadPool = new XSQLThreadPool(10, "Tasks", 2000);
+    //The jdbc server listening for jdbc connections
     private JDBCServer jdbcServer = new JDBCServer(this);
-    private String pinningFile;
+    //The socket for the console connection
     private ServerSocket serverSocket = null;
+    //The Data Broker service
     private DOMDataBroker domDataBroker = null;
-    private static final String REFERENCE_FIELD_NAME = "reference";
+    //The Data Broker Binding Aware codec used to translate normalized node to POJOs
+    private Object codec = null;
+    //The logger
+    private static Logger logger = LoggerFactory.getLogger(XSQLAdapter.class);
 
     private XSQLAdapter() {
         XSQLAdapter.log("Starting Adapter");
@@ -75,6 +73,20 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
 
     }
 
+    //Used to extract the codec via reflection .
+    //When a dependency is added, i got some issues so just using reflection here.
+    private static Object extractCodec(Object dataBroker){
+        try{
+            Field field = XSQLODLUtils.findField(dataBroker.getClass(),"codec");
+            field.setAccessible(true);
+            return field.get(dataBroker);
+        }catch(Exception err){
+            err.printStackTrace();
+        }
+        return null;
+    }
+
+    //For testing purposes, i added this to load a generated blue print from file.
     public void loadBluePrint(){
         try{
             InputStream in = this.getClass().getClassLoader().getResourceAsStream("BluePrintCache.dat");
@@ -87,127 +99,75 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
         }
     }
 
+    //Returns an instance of the apater
     public static XSQLAdapter getInstance() {
-        return a;
+        return adapterInstance;
     }
 
-    public static File getXQLLogfile() {
-        tmpDir = System.getProperty("java.io.tmpdir");
-        xqlLog = new File(tmpDir + "/xql.log");
-        return xqlLog;
-    }
-
-    public static void main(String args[]) {
-        XSQLAdapter adapter = new XSQLAdapter();
-        adapter.start();
-    }
-
+    //logging everything under XSQLAdapter
     public static void log(String str) {
-        try {
-            if (l == null) {
-                synchronized (XSQLAdapter.class) {
-                    if (l == null) {
-                        l = new PrintStream(
-                                new FileOutputStream(getXQLLogfile()));
-                    }
-                }
-            }
-            l.print(Calendar.getInstance().getTime());
-            l.print(" - ");
-            l.println(str);
-        } catch (Exception err) {
-            err.printStackTrace();
+        if(logger==null){
+            logger = LoggerFactory.getLogger(XSQLAdapter.class);
         }
+        if(logger!=null)
+            logger.info(str);
     }
 
+    //logging everything under XSQLAdapter
     public static void log(Exception e) {
-        try {
-            if (l == null) {
-                synchronized (XSQLAdapter.class) {
-                    if (l == null) {
-                        l = new PrintStream(
-                                new FileOutputStream(getXQLLogfile()));
-                    }
-                }
-            }
-            l.print(Calendar.getInstance().getTime());
-            l.print(" - ");
-            e.printStackTrace(l);
-        } catch (Exception err) {
-            err.printStackTrace();
+        if(logger==null){
+            logger = LoggerFactory.getLogger(XSQLAdapter.class);
         }
+        if(logger!=null)
+            logger.error(e.getMessage(),e);
     }
-
+    //Activated when the scema context gets updated, e.g. a new feature was loaded
+    //so need to create a blue print for its yang model
     @Override
     public void onGlobalContextUpdated(SchemaContext context) {
         Set<Module> modules = context.getModules();
         for (Module m : modules) {
-            if (XSQLODLUtils.createOpenDaylightCache(this.bluePrint, m)) {
-                this.addRootElement(m);
-            }
+            XSQLODLUtils.createOpenDaylightCache(this.bluePrint, m);
         }
     }
 
-    public void setDataBroker(DOMDataBroker ddb) {
+    //Sets the data broker service
+    public void setDataBroker(DOMDataBroker ddb,DataBroker db) {
         this.domDataBroker = ddb;
+        this.codec = extractCodec(db);
     }
 
+    //Return the blue print container
     public XSQLBluePrint getBluePrint() {
         return this.bluePrint;
     }
 
-    public List<Object> collectModuleRoots(XSQLBluePrintNode table,LogicalDatastoreType type) {
-        if (table.getParent().isModule()) {
-            try {
-                List<Object> result = new LinkedList<Object>();
-                YangInstanceIdentifier instanceIdentifier = YangInstanceIdentifier
-                        .builder()
-                        .node(XSQLODLUtils.getPath(table.getFirstFromSchemaNodes()).get(0))
-                        .toInstance();
-                DOMDataReadTransaction t = this.domDataBroker
-                        .newReadOnlyTransaction();
-                Object node = t.read(type,
-                        instanceIdentifier).get();
-
-                node = XSQLODLUtils.get(node, REFERENCE_FIELD_NAME);
-                if (node == null) {
-                    return result;
-                }
-                result.add(node);
-                return result;
-            } catch (Exception err) {
-                XSQLAdapter.log(err);
-            }
-        } else {
-            return collectModuleRoots(table.getParent(),type);
-        }
-        return null;
-    }
-
+    //Execute a jdbc query
     public void execute(JDBCResultSet rs) {
         if(this.domDataBroker==null){
             rs.setFinished(true);
             return;
         }
         List<XSQLBluePrintNode> tables = rs.getTables();
-        List<Object> roots = collectModuleRoots(tables.get(0),LogicalDatastoreType.OPERATIONAL);
-        roots.addAll(collectModuleRoots(tables.get(0),LogicalDatastoreType.CONFIGURATION));
+        List<Object> roots = XSQLODLUtils.collectModuleRoots(tables.get(0),LogicalDatastoreType.OPERATIONAL,this.domDataBroker);
+        roots.addAll(XSQLODLUtils.collectModuleRoots(tables.get(0),LogicalDatastoreType.CONFIGURATION,this.domDataBroker));
         if(roots.isEmpty()){
             rs.setFinished(true);
         }
         XSQLBluePrintNode main = rs.getMainTable();
-        List<NETask> tasks = new LinkedList<XSQLAdapter.NETask>();
+        List<ModuleRootTask> tasks = new LinkedList<XSQLAdapter.ModuleRootTask>();
 
         for (Object entry : roots) {
-            NETask task = new NETask(rs, entry, main, bluePrint);
+            ModuleRootTask task = new ModuleRootTask(rs, entry, main, bluePrint);
             rs.numberOfTasks++;
             tasks.add(task);
         }
-        for (NETask task : tasks) {
+        for (ModuleRootTask task : tasks) {
             threadPool.addTask(task);
         }
     }
 
+    //The main run method for the accepting console connections
     public void run() {
         while (!stopped) {
             try {
@@ -224,12 +184,7 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
         }
     }
 
-    public void addRootElement(Object o) {
-        NEEntry entry = new NEEntry(o);
-        elements.put(o.toString(), entry);
-
-    }
-
+    //parse a console command
     public void processCommand(StringBuffer inputString, PrintStream sout) {
         if (inputString.toString().trim().equals("r")) {
             sout.println(lastInputString);
@@ -243,23 +198,6 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
                 // excelPath01 = substr;
             }
             // sout.println("Excel Path="+excelPath01);
-        } else if (input.startsWith("list vrel")) {
-            String substr = input.substring("list vrel".length()).trim();
-            XSQLBluePrintNode node = bluePrint
-                    .getBluePrintNodeByTableName(substr);
-            if (node == null) {
-                sout.println("Unknown Interface " + substr);
-                return;
-            }
-            List<String> fld = new ArrayList<String>();
-            for (XSQLBluePrintRelation r : node.getRelations()) {
-                fld.add(r.toString());
-            }
-            String p[] = (String[]) fld.toArray(new String[fld.size()]);
-            Arrays.sort(p);
-            for (int i = 0; i < p.length; i++) {
-                sout.println(p[i]);
-            }
         } else if (input.startsWith("list vfields")) {
             String substr = input.substring("list vfields".length()).trim();
             XSQLBluePrintNode node = bluePrint
@@ -346,6 +284,14 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
         sout.println();
     }
 
+    //execute an SQL query and returning a standard JDBC ResultSet object
+    public ResultSet executeQuery(String sql) throws SQLException{
+        JDBCResultSet rs = new JDBCResultSet(sql);
+        JDBCServer.execute(rs, this);
+        return rs;
+    }
+
+    //execute an SQL query and output the result either to the console or to a csv file
     public void executeSql(String sql, PrintStream out) {
         JDBCResultSet rs = new JDBCResultSet(sql);
         try {
@@ -354,6 +300,10 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
             boolean isFirst = true;
             int loc = rs.getFields().size() - 1;
             int totalWidth = 0;
+            if(rs.getFields().isEmpty()){
+                out.print("  Objects Instance Identifier  ");
+                totalWidth = 120;
+            }
             for (XSQLColumn c : rs.getFields()) {
                 if (isFirst) {
                     isFirst = false;
@@ -403,43 +353,49 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
 
             while (rs.next()) {
                 isFirst = true;
-                loc = rs.getFields().size() - 1;
-                for (XSQLColumn c : rs.getFields()) {
-                    if (isFirst) {
-                        isFirst = false;
-                        if (toCsv) {
-                            out.print("\"");
-                        }
-                    }
-
-                    if (!toCsv) {
-                        out.print("|");
-                    }
-
-                    Object sValue = rs.getObject(c.toString());
-                    if (sValue == null) {
-                        sValue = "";
-                    }
-                    out.print(sValue);
-
-                    int cw = c.getCharWidth();
-                    int vw = sValue.toString().length();
-                    int gap = cw - vw;
-                    for (int i = 0; i < gap; i++) {
-                        out.print(" ");
-                    }
-
-                    if (loc > 0) {
-                        if (toCsv) {
-                            out.print("\",\"");
-                        }
-                    }
-                    loc--;
-                }
-                if (toCsv) {
-                    out.println("\"");
-                } else {
+                if(rs.getFields().isEmpty()){
+                    DataObjectsPath objectPath = (DataObjectsPath)rs.getObject("Object");
+                    out.print(objectPath.getSelectedObject());
                     out.println("|");
+                }else{
+                    loc = rs.getFields().size() - 1;
+                    for (XSQLColumn c : rs.getFields()) {
+                        if (isFirst) {
+                            isFirst = false;
+                            if (toCsv) {
+                                out.print("\"");
+                            }
+                        }
+
+                        if (!toCsv) {
+                            out.print("|");
+                        }
+
+                        Object sValue = rs.getObject(c.toString());
+                        if (sValue == null) {
+                            sValue = "";
+                        }
+                        out.print(sValue);
+
+                        int cw = c.getCharWidth();
+                        int vw = sValue.toString().length();
+                        int gap = cw - vw;
+                        for (int i = 0; i < gap; i++) {
+                            out.print(" ");
+                        }
+
+                        if (loc > 0) {
+                            if (toCsv) {
+                                out.print("\",\"");
+                            }
+                        }
+                        loc--;
+                    }
+                    if (toCsv) {
+                        out.println("\"");
+                    } else {
+                        out.println("|");
+                    }
                 }
                 count++;
             }
@@ -449,47 +405,37 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
         }
     }
 
-    public static class NETask implements Runnable {
+    //Currently i assume there will only one but need to think of
+    //when to separate to multiple tasks
+    public static class ModuleRootTask implements Runnable {
 
-        private JDBCResultSet rs = null;
-        private Object modelRoot = null;
-        private XSQLBluePrintNode main = null;
+        private JDBCResultSet resultSet = null;
+        private Object moduleRootPOJO = null;
+        private XSQLBluePrintNode moduleRootBluePrintNode = null;
         private XSQLBluePrint bluePrint = null;
 
-        public NETask(JDBCResultSet _rs, Object _modelRoot,
+        public ModuleRootTask(JDBCResultSet _rs, Object _modelRoot,
                 XSQLBluePrintNode _main, XSQLBluePrint _bluePrint) {
-            this.rs = _rs;
-            this.modelRoot = _modelRoot;
-            this.main = _main;
+            this.resultSet = _rs;
+            this.moduleRootPOJO = _modelRoot;
+            this.moduleRootBluePrintNode = _main;
             this.bluePrint = _bluePrint;
         }
 
         public void run() {
-            rs.addRecords(modelRoot, main, true, main.getBluePrintNodeName(),
+            resultSet.addRecords(moduleRootPOJO, moduleRootBluePrintNode, true, moduleRootBluePrintNode.getBluePrintNodeName(),
                     bluePrint);
-            synchronized (rs) {
-                rs.numberOfTasks--;
-                if (rs.numberOfTasks == 0) {
-                    rs.setFinished(true);
-                    rs.notifyAll();
+            synchronized (resultSet) {
+                resultSet.numberOfTasks--;
+                if (resultSet.numberOfTasks == 0) {
+                    resultSet.setFinished(true);
+                    resultSet.notifyAll();
                 }
             }
         }
     }
 
-    private static class NEEntry {
-        private Object ne = null;
-
-        public NEEntry(Object _ne) {
-            this.ne = _ne;
-        }
-
-        public String toString() {
-            Module m = (Module) ne;
-            return m.getName() + "  [" + m.getNamespace().toString() + "]";
-        }
-    }
-
+    //A console connection
     private class TelnetConnection extends Thread {
 
         private Socket socket = null;
@@ -502,6 +448,16 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
             try {
                 this.in = s.getInputStream();
                 this.out = new PrintStream(s.getOutputStream());
+                byte seq1[] = new byte[]{(byte)255, (byte)253,(byte) 34};  /* IAC DO LINEMODE */
+                byte seq2[] = new byte[]{(byte)255, (byte)250, (byte)34,(byte) 1,(byte) 0,(byte) 255,(byte) 240}; /* IAC SB LINEMODE MODE 0 IAC SE */
+                byte seq3[] = new byte[]{(byte)255,(byte) 251,(byte) 1};    /* IAC WILL ECHO */
+
+                this.out.print(seq1);
+                this.out.flush();
+                this.out.print(seq2);
+                this.out.flush();
+                this.out.print(seq3);
+                this.out.flush();
                 this.start();
             } catch (Exception err) {
                 XSQLAdapter.log(err);
@@ -541,5 +497,9 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
                 }
             }
         }
+    }
+
+    public DataObjectsPath toBindingAwareObject(LinkedList<Object> objects){
+        return XSQLODLUtils.toBindingAwareObject(objects,this.codec);
     }
 }

@@ -27,17 +27,18 @@ import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Map;
 /**
  * @author Sharon Aicler(saichler@gmail.com)
  **/
 public class TablesResultSet implements ResultSet {
 
-    private String tables[] = null;
+    private List<String> tables = null;
     private int pos = -1;
 
     public TablesResultSet(XSQLBluePrint cache) {
-        //tables = cache.getInterfaceNames();
+        this.tables = cache.getAllTableNames();
     }
 
     @Override
@@ -58,7 +59,7 @@ public class TablesResultSet implements ResultSet {
             return false;
         }
         pos++;
-        if (pos >= tables.length) {
+        if (pos >= tables.size()) {
             return false;
         }
         return true;
@@ -78,7 +79,7 @@ public class TablesResultSet implements ResultSet {
 
     @Override
     public String getString(int columnIndex) throws SQLException {
-        return tables[pos];
+        return tables.get(pos);
     }
 
     @Override
@@ -174,7 +175,7 @@ public class TablesResultSet implements ResultSet {
 
     @Override
     public String getString(String columnLabel) throws SQLException {
-        return tables[pos];
+        return tables.get(pos);
     }
 
     @Override

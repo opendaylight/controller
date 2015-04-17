@@ -8,6 +8,8 @@
 package org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.xsql.rev140626;
 
 import org.opendaylight.controller.md.sal.dom.xsql.XSQLAdapter;
+import org.opendaylight.controller.md.sal.dom.xsql.XSQLServiceImpl;
+import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.xsql.XSQLProvider;
 /**
  * @author Sharon Aicler(saichler@gmail.com)
@@ -31,8 +33,9 @@ public class XSQLModule extends org.opendaylight.yang.gen.v1.http.netconfcentral
     public java.lang.AutoCloseable createInstance() {
         XSQLAdapter xsqlAdapter = XSQLAdapter.getInstance();
         getSchemaServiceDependency().registerSchemaContextListener(xsqlAdapter);
-        xsqlAdapter.setDataBroker(getAsyncDataBrokerDependency());
+        xsqlAdapter.setDataBroker(getAsyncDataBrokerDependency(),getDataBrokerDependency());
         final XSQLProvider p = new XSQLProvider();
+        final BindingAwareBroker.RpcRegistration<XSQLService> rpcRegistration = getRpcRegistryDependency().addRpcImplementation(XSQLService.class, new XSQLServiceImpl());
         Runnable runthis = new Runnable() {
             @Override
             public void run() {

@@ -18,31 +18,45 @@ import java.util.Set;
 /**
  * @author Sharon Aicler(saichler@gmail.com)
  **/
+/* Blue print node represents a schema node in the scema context of ODL
+ * It maps the relation to the parent schema node and to the children as
+ * well as the normalize name of the schema context
+ */
 public class XSQLBluePrintNode implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    private Class<?> myInterface = null;
-    private String myInterfaceString = null;
-    private Set<XSQLBluePrintRelation> relations = new HashSet<XSQLBluePrintRelation>();
-    private Set<XSQLBluePrintNode> inheritingNodes = new HashSet<XSQLBluePrintNode>();
+    //Known augmentation for this node
+    private Set<XSQLBluePrintNode> augmetations = new HashSet<XSQLBluePrintNode>();
+    //the children in the model
     private Set<XSQLBluePrintNode> children = new HashSet<XSQLBluePrintNode>();
+    //The parent in the model
     private XSQLBluePrintNode parent = null;
-
+    //Depth level of this node in the tree model
     private int level = -1;
-    private transient Set<String> parentHierarchySet = null;
-    private String myInterfaceName = null;
+    //The columns/attribute as identified in the scema context for this node
     private Set<XSQLColumn> columns = new HashSet<XSQLColumn>();
+    //When there are augmentation, we need to keep the original method name to
+    //extract it from the augmentation
     private Map<String, XSQLColumn> origNameToColumn = new HashMap<String, XSQLColumn>();
-
+    //The scema nodes that are mapped to this table
+    //There can be more than one if there are augmentations or two version of the same
+    //model loaded
     private transient Object[] odlSchemaNodes = null;
+    //If this is a root module in the schema context that this
+    //will indicate that
     private boolean module = false;
+    //The name of the table for sql queries
     private String bluePrintTableName = null;
-    private String odlTableName = null;
+    //The different names in ODL for this table
+    private String odlTableNames[] = null;
+    //In sql you can create logical names when you do somehting like "as <some name>", this is to support
+    //that
     private String origName = null;
 
+    //Merge two blue print nodes that were identified to be either one augmentation of the other
+    //or the same model but different versions
     public void mergeAugmentation(XSQLBluePrintNode aug) {
-        this.relations.addAll(aug.relations);
-        this.inheritingNodes.addAll(aug.inheritingNodes);
+        this.augmetations.addAll(aug.augmetations);
         this.children.addAll(aug.children);
         this.columns.addAll(aug.columns);
         this.origNameToColumn.putAll(aug.origNameToColumn);
@@ -55,46 +69,45 @@ public class XSQLBluePrintNode implements Serializable {
 
     public XSQLBluePrintNode(String name, String _origName, int _level) {
         this.level = _level;
-        this.odlTableName = name;
+        this.odlTableNames = new String[]{name};
         this.bluePrintTableName = name;
         this.origName = _origName;
     }
 
-    public XSQLBluePrintNode(Class<?> _myInterface, int _level) {
-        this.myInterface = _myInterface;
-        this.myInterfaceString = _myInterface.getName();
-        this.myInterfaceName = myInterface.getSimpleName();
-        this.level = _level;
-    }
-
-    public XSQLBluePrintNode(Object _odlNode, int _level,
-            XSQLBluePrintNode _parent) {
+    public XSQLBluePrintNode(Object _odlNode, int _level,XSQLBluePrintNode _parent) {
         addToSchemaNodes(_odlNode);
         this.level = _level;
         this.module = XSQLODLUtils.isModule(_odlNode);
         this.parent = _parent;
         this.bluePrintTableName = XSQLODLUtils.getBluePrintName(_odlNode);
-        this.odlTableName = XSQLODLUtils
-                .getODLNodeName(getFirstFromSchemaNodes());
     }
 
+    //Add the schema node to the list of nodes
+    //make sure the same node isn't added twice, only augmentations and
+    //different model versions
     private void addToSchemaNodes(Object schemaObject) {
-        if (this.odlSchemaNodes == null)
+        if (this.odlSchemaNodes == null){
             this.odlSchemaNodes = new Object[1];
-        else {
+            this.odlTableNames = new String[1];
+        }else {
+            //Check if already have this model schema node.
+            //Same model schema node can come from different modules
+            //We need to keep those that are same model but different version
+            //as some modules can use version x of the model
+            //and some can use version y of the same model.
+            for(Object so:this.odlSchemaNodes){
+                if(so.toString().equals(schemaObject.toString()))
+                    return;
+            }
             Object[] temp = new Object[this.odlSchemaNodes.length + 1];
-            System.arraycopy(this.odlSchemaNodes, 0, temp, 0,
-                    this.odlSchemaNodes.length);
+            System.arraycopy(this.odlSchemaNodes, 0, temp, 0,this.odlSchemaNodes.length);
             this.odlSchemaNodes = temp;
+            String[] tempS = new String[this.odlTableNames.length + 1];
+            System.arraycopy(this.odlTableNames,0, tempS, 0, this.odlTableNames.length);
+            this.odlTableNames = tempS;
         }
+        this.odlTableNames[this.odlTableNames.length - 1] = XSQLODLUtils.getODLNodeName(schemaObject);
         this.odlSchemaNodes[this.odlSchemaNodes.length - 1] = schemaObject;
-    }
-
-    public Object getFirstFromSchemaNodes() {
-        if (this.odlSchemaNodes == null) {
-            return null;
-        }
-        return this.odlSchemaNodes[0];
     }
 
     public String getOrigName() {
@@ -113,54 +126,41 @@ public class XSQLBluePrintNode implements Serializable {
         return this.children;
     }
 
-    public String getODLTableName() {
-        if (this.odlTableName == null) {
-            this.odlTableName = XSQLODLUtils
-                    .getODLNodeName(getFirstFromSchemaNodes());
+    public Object[] getODLSchemaNodes(){
+        return this.odlSchemaNodes;
+    }
+
+    public String[] getODLTableNames() {
+        if (this.odlTableNames == null) {
+            for(int i=0;i<this.odlSchemaNodes.length;i++){
+                if(this.odlSchemaNodes[i]!=null){
+                    this.odlTableNames[i] = XSQLODLUtils.getODLNodeName(this.odlSchemaNodes[i]);
+                }
+            }
         }
-        return this.odlTableName;
+        return this.odlTableNames;
+    }
+
+    public boolean containTableName(String name){
+        if(this.odlTableNames!=null){
+            for(String tName:this.odlTableNames){
+                if(tName.equals(name))
+                    return true;
+            }
+        }
+        return false;
     }
 
     public void addChild(XSQLBluePrintNode ch) {
         this.children.add(ch);
     }
 
-    public boolean isModelChild(Class<?> p) {
-        if (this.relations.size() == 0) {
-            return false;
-        }
-        for (XSQLBluePrintRelation parentRelation : this.relations) {
-            if (parentRelation.getParent().getInterface().equals(p)) {
-                return true;
-            }
-        }
-        for (XSQLBluePrintRelation dtr : this.relations) {
-            XSQLBluePrintNode parent = dtr.getParent();
-            if (!parent.getInterface().equals(this.getInterface())
-                    && !parent.getInterface().isAssignableFrom(
-                            this.getInterface())
-                    && this.getInterface().isAssignableFrom(
-                            parent.getInterface()) && parent.isModelChild(p)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public Set<XSQLBluePrintRelation> getRelations() {
-        return this.relations;
-    }
-
-    public String getClassName() {
-        return this.myInterfaceString;
-    }
-
     public void addInheritingNode(XSQLBluePrintNode node) {
-        this.inheritingNodes.add(node);
+        this.augmetations.add(node);
     }
 
     public Set<XSQLBluePrintNode> getInheritingNodes() {
-        return this.inheritingNodes;
+        return this.augmetations;
     }
 
     public void addColumn(Object node, String tableName) {
@@ -168,22 +168,11 @@ public class XSQLBluePrintNode implements Serializable {
         this.columns.add(c);
     }
 
-    public XSQLColumn addColumn(String name, String tableName, String origName,
-            String origTableName) {
+    public XSQLColumn addColumn(String name, String tableName, String origName,String origTableName) {
         XSQLColumn c = new XSQLColumn(name, tableName, origName, origTableName);
         this.columns.add(c);
         this.origNameToColumn.put(origName, c);
         return c;
-    }
-
-    public void addColumn(String methodName) {
-        if (methodName.startsWith("get")) {
-            methodName = methodName.substring(3);
-        } else if (methodName.startsWith("is")) {
-            methodName = methodName.substring(2);
-        }
-        XSQLColumn c = new XSQLColumn(methodName, myInterfaceName, null);
-        this.columns.add(c);
     }
 
     public Collection<XSQLColumn> getColumns() {
@@ -228,47 +217,18 @@ public class XSQLBluePrintNode implements Serializable {
         throw new SQLException("Unknown field name '" + name + "'");
     }
 
-    public void addParent(XSQLBluePrintNode parent, String property) {
-        try {
-            if (property.equals("ContainingTPs")) {
-                return;
-            }
-            // Method m = parent.getInterface().getMethod("get"+property, null);
-            // if(!m.getDeclaringClass().equals(parent.getInterface()))
-            // return;
-            XSQLBluePrintRelation rel = new XSQLBluePrintRelation(parent,
-                    property, myInterface);
-            relations.add(rel);
-        } catch (Exception err) {
-            err.printStackTrace();
-        }
-    }
-
     public XSQLBluePrintNode getParent() {
         return this.parent;
     }
 
-    public Set<XSQLBluePrintRelation> getClonedParents() {
-        Set<XSQLBluePrintRelation> result = new HashSet<XSQLBluePrintRelation>();
-        result.addAll(this.relations);
-        return result;
-    }
-
     public String toString() {
-        if (myInterfaceName != null) {
-            return myInterfaceName;
-        }
         if (this.odlSchemaNodes != null) {
             return getBluePrintNodeName();
         }
-        if (odlTableName != null) {
-            return odlTableName;
+        if (odlTableNames != null) {
+            return odlTableNames[0];
         }
         return "Unknown";
-    }
-
-    public Class<?> getInterface() {
-        return this.myInterface;
     }
 
     public int getLevel() {
@@ -280,24 +240,27 @@ public class XSQLBluePrintNode implements Serializable {
         XSQLBluePrintNode other = (XSQLBluePrintNode) obj;
         if (this.odlSchemaNodes != null) {
             return getBluePrintNodeName().equals(other.getBluePrintNodeName());
-        } else if (this.odlTableName == null && other.odlTableName != null) {
+        } else if (this.odlTableNames == null && other.odlTableNames != null) {
             return false;
         }
-        if (this.odlTableName != null && other.odlTableName == null) {
+        if (this.odlTableNames != null && other.odlTableNames == null) {
             return false;
         } else {
-            return this.odlTableName.equals(other.odlTableName);
+            if(this.odlTableNames.length!=other.odlTableNames.length)
+                return false;
+            for(int i=0;i<this.odlTableNames.length;i++){
+                if(!this.odlTableNames[i].equals(other.odlTableNames[i]))
+                    return false;
+            }
         }
+        return true;
     }
 
     @Override
     public int hashCode() {
-        if (myInterfaceString != null) {
-            return myInterfaceString.hashCode();
-        } else if (this.odlSchemaNodes != null) {
+        if (this.odlSchemaNodes != null) {
             return bluePrintTableName.hashCode();
         }
         return 0;
     }
-
 }
