@@ -32,30 +32,14 @@ import scala.runtime.AbstractFunction1;
 /**
  * ThreePhaseCommitCohortProxy represents a set of remote cohort proxies
  */
-public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort {
+public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<ActorSelection> {
 
     private static final Logger LOG = LoggerFactory.getLogger(ThreePhaseCommitCohortProxy.class);
-
-    private static final ListenableFuture<Void> IMMEDIATE_SUCCESS =
-            com.google.common.util.concurrent.Futures.immediateFuture(null);
 
     private final ActorContext actorContext;
     private final List<Future<ActorSelection>> cohortFutures;
     private volatile List<ActorSelection> cohorts;
     private final String transactionId;
-    private static final OperationCallback NO_OP_CALLBACK = new OperationCallback() {
-        @Override
-        public void run() {
-        }
-
-        @Override
-        public void success() {
-        }
-
-        @Override
-        public void failure() {
-        }
-    };
 
     public ThreePhaseCommitCohortProxy(ActorContext actorContext,
             List<Future<ActorSelection>> cohortFutures, String transactionId) {
@@ -190,7 +174,7 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort 
     public ListenableFuture<Void> preCommit() {
         // We don't need to do anything here - preCommit is done atomically with the commit phase
         // by the shard.
-        return IMMEDIATE_SUCCESS;
+        return IMMEDIATE_VOID_SUCCESS;
     }
 
     @Override
@@ -207,7 +191,7 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort 
 
     @Override
     public ListenableFuture<Void> commit() {
-        OperationCallback operationCallback = cohortFutures.isEmpty() ? NO_OP_CALLBACK :
+        OperationCallback operationCallback = cohortFutures.isEmpty() ? OperationCallback.NO_OP_CALLBACK :
                 new TransactionRateLimitingCallback(actorContext);
 
         return voidOperation("commit", new CommitTransaction(transactionId).toSerializable(),
@@ -216,7 +200,8 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort 
 
     private ListenableFuture<Void> voidOperation(final String operationName, final Object message,
                                                  final Class<?> expectedResponseClass, final boolean propagateException) {
-        return voidOperation(operationName, message, expectedResponseClass, propagateException, NO_OP_CALLBACK);
+        return voidOperation(operationName, message, expectedResponseClass, propagateException,
+                OperationCallback.NO_OP_CALLBACK);
     }
 
     private ListenableFuture<Void> voidOperation(final String operationName, final Object message,

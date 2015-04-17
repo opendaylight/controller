@@ -26,6 +26,7 @@ import org.opendaylight.controller.cluster.datastore.messages.BatchedModificatio
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModificationsReply;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransactionReply;
+import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.CreateSnapshot;
 import org.opendaylight.controller.cluster.datastore.messages.DataExists;
 import org.opendaylight.controller.cluster.datastore.messages.DataExistsReply;
@@ -412,11 +413,11 @@ public class ShardTransactionTest extends AbstractActorTest {
     }
 
     @Test
-    public void testOnReceiveBatchedModificationsReady() throws Exception {
+    public void testOnReceiveBatchedModificationsReadyWithoutImmediateCommit() throws Exception {
         new JavaTestKit(getSystem()) {{
 
             final ActorRef transaction = newTransactionActor(store.newWriteOnlyTransaction(),
-                    "testOnReceiveBatchedModificationsReady");
+                    "testOnReceiveBatchedModificationsReadyWithoutImmediateCommit");
 
             JavaTestKit watcher = new JavaTestKit(getSystem());
             watcher.watch(transaction);
@@ -439,6 +440,33 @@ public class ShardTransactionTest extends AbstractActorTest {
 
             transaction.tell(batched, getRef());
             expectMsgClass(duration("5 seconds"), ReadyTransactionReply.class);
+            watcher.expectMsgClass(duration("5 seconds"), Terminated.class);
+        }};
+    }
+
+    @Test
+    public void testOnReceiveBatchedModificationsReadyWithImmediateCommit() throws Exception {
+        new JavaTestKit(getSystem()) {{
+
+            final ActorRef transaction = newTransactionActor(store.newWriteOnlyTransaction(),
+                    "testOnReceiveBatchedModificationsReadyWithImmediateCommit");
+
+            JavaTestKit watcher = new JavaTestKit(getSystem());
+            watcher.watch(transaction);
+
+            YangInstanceIdentifier writePath = TestModel.TEST_PATH;
+            NormalizedNode<?, ?> writeData = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
+                    new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME)).
+                    withChild(ImmutableNodes.leafNode(TestModel.DESC_QNAME, "foo")).build();
+
+            BatchedModifications batched = new BatchedModifications("tx1", DataStoreVersions.CURRENT_VERSION, null);
+            batched.addModification(new WriteModification(writePath, writeData));
+            batched.setReady(true);
+            batched.setDoCommitOnReady(true);
+            batched.setTotalMessagesSent(1);
+
+            transaction.tell(batched, getRef());
+            expectMsgClass(duration("5 seconds"), CommitTransactionReply.SERIALIZABLE_CLASS);
             watcher.expectMsgClass(duration("5 seconds"), Terminated.class);
         }};
     }
