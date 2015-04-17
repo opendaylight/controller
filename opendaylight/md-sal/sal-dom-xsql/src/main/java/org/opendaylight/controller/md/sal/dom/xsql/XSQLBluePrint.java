@@ -119,10 +119,8 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
         return myProxy;
     }
 
-    public XSQLBluePrintNode[] getBluePrintNodeByODLTableName(
-            String odlTableName) {
-        Map<String, XSQLBluePrintNode> map = this.odlNameToBluePrint
-                .get(odlTableName);
+    public XSQLBluePrintNode[] getBluePrintNodeByODLTableName(String odlTableName) {
+        Map<String, XSQLBluePrintNode> map = this.odlNameToBluePrint.get(odlTableName);
         if (map == null) {
             return null;
         }
@@ -216,15 +214,27 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
         XSQLBluePrintNode existingNode = this.tableNameToBluePrint.get(blNode.getBluePrintNodeName());
         if(existingNode!=null){
             existingNode.mergeAugmentation(blNode);
+            String tableNames[] = blNode.getODLTableNames();
+            for(String tableName:tableNames){
+                Map<String, XSQLBluePrintNode> map = this.odlNameToBluePrint.get(tableName);
+                if (map == null) {
+                    map = new HashMap<String, XSQLBluePrintNode>();
+                    this.odlNameToBluePrint.put(tableName, map);
+                }
+                map.put(blNode.getBluePrintNodeName(), blNode);
+            }
             return existingNode;
         }else{
             this.tableNameToBluePrint.put(blNode.getBluePrintNodeName(), blNode);
-            Map<String, XSQLBluePrintNode> map = this.odlNameToBluePrint.get(blNode.getODLTableName());
-            if (map == null) {
-                map = new HashMap<String, XSQLBluePrintNode>();
-                this.odlNameToBluePrint.put(blNode.getODLTableName(), map);
+            String tableNames[] = blNode.getODLTableNames();
+            for(String tableName:tableNames){
+                Map<String, XSQLBluePrintNode> map = this.odlNameToBluePrint.get(tableName);
+                if (map == null) {
+                    map = new HashMap<String, XSQLBluePrintNode>();
+                    this.odlNameToBluePrint.put(tableName, map);
+                }
+                map.put(blNode.getBluePrintNodeName(), blNode);
             }
-            map.put(blNode.getBluePrintNodeName(), blNode);
             if(parent!=null)
                 parent.addChild(blNode);
             return blNode;
