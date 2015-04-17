@@ -89,6 +89,20 @@ public final class ToasterProviderModule extends
             }
         }
 
+        //XSQL Bind Aware Example retrieving inventory nodes via JDBC
+        /*
+        try{
+            ResultSet rs = XSQLAdapter.getInstance().executeQuery("select Objects from nodes/node;");
+            while(rs.next()){
+                DataObjectsPath dataObjectPath = (DataObjectsPath)rs.getObject("Object");
+                Node node = (Node)dataObjectPath.getSelectedObject();
+                System.out.println("Received Node = "+node.getId());
+            }
+        }catch(SQLException err){
+            log.error(err.getMessage(),err);
+        }*/
+        //End XSQL Example
+
         AutoCloseable ret = new AutoCloseableToaster();
         log.info("Toaster provider (instance {}) initialized.", ret);
         return ret;

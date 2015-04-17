@@ -16,9 +16,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Proxy;
-import java.lang.reflect.Type;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -26,27 +24,38 @@ import java.sql.RowIdLifetime;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 /**
  * @author Sharon Aicler(saichler@gmail.com)
  **/
+/*
+ * XSQLBluePrint is the container of blue print nodes, a blue print nodes represents a schema context model node in the yang
+ * model tree structure. XSQL is registered on schema context changes and whenever it get a notification
+ * it is introspect the schema module data stracture and creates XSQL Blue Print Nodes structure that
+ * describes the schema context in a way that XSQL can traverse the model up & down.
+ */
 public class XSQLBluePrint implements DatabaseMetaData, Serializable {
-
+    //this file is serialized when a JDBC connection is connected so the
+    //other side could get the schema description of the virtual database
     private static final long serialVersionUID = 1L;
-
+    //For testing puposes, the XSQL can export the blue print to a file to
+    //be loaded by tests.
     public static final String CACHE_FILE_NAME = "./BluePrintCache.dat";
 
+    //Short table name to blue print node map for query parsing
     private Map<String, XSQLBluePrintNode> tableNameToBluePrint = new HashMap<String, XSQLBluePrintNode>();
+    //full odl table path name to node map
     private Map<String, Map<String, XSQLBluePrintNode>> odlNameToBluePrint = new HashMap<String, Map<String, XSQLBluePrintNode>>();
 
     private boolean cacheLoadedSuccessfuly = false;
+    //A proxy object to print out method call
+    //when debugging a third party tool using the xsql JDBC
     private DatabaseMetaData myProxy = null;
 
-    public static final String replaceAll(String source, String toReplace,
-            String withThis) {
+    //A static method to replace a string with another inside a string
+    //without regular expression escaping
+    public static final String replaceAll(String source, String toReplace,String withThis) {
         int index = source.indexOf(toReplace);
         int index2 = 0;
         StringBuffer result = new StringBuffer();
@@ -65,6 +74,7 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
     public XSQLBluePrint() {
     }
 
+    //Saves the blue print to a file
     public static void save(XSQLBluePrint bp) {
         ObjectOutputStream out = null;
         try {
@@ -81,6 +91,7 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
         }
     }
 
+    //Loads the blue print from a file
     public static XSQLBluePrint load(InputStream ins) {
         ObjectInputStream in = null;
         try {
@@ -97,7 +108,9 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
         return null;
     }
 
-    private class NQLBluePrintProxy implements InvocationHandler {
+    //The proxy file to printout the method name that was called
+    //used for debugging a third party connection via JDBC
+    private class XSQLBluePrintProxy implements InvocationHandler {
         public Object invoke(Object proxy, Method method, Object[] args)
                 throws Throwable {
             System.out.println("Method " + method);
@@ -105,13 +118,14 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
         }
     }
 
+    //return an instance of a proxy
     public DatabaseMetaData getProxy() {
         if (myProxy == null) {
             try {
                 myProxy = (DatabaseMetaData) Proxy.newProxyInstance(getClass()
                         .getClassLoader(),
                         new Class[] { DatabaseMetaData.class },
-                        new NQLBluePrintProxy());
+                        new XSQLBluePrintProxy());
             } catch (Exception err) {
                 err.printStackTrace();
             }
@@ -119,16 +133,16 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
         return myProxy;
     }
 
-    public XSQLBluePrintNode[] getBluePrintNodeByODLTableName(
-            String odlTableName) {
-        Map<String, XSQLBluePrintNode> map = this.odlNameToBluePrint
-                .get(odlTableName);
+    //return a list of tables that their odl simple table name is identical but their table name is not
+    public XSQLBluePrintNode[] getBluePrintNodeByODLTableName(String odlTableName) {
+        Map<String, XSQLBluePrintNode> map = this.odlNameToBluePrint.get(odlTableName);
         if (map == null) {
             return null;
         }
         return map.values().toArray(new XSQLBluePrintNode[map.size()]);
     }
 
+    //Finds the table according to a substring of its name
     public XSQLBluePrintNode getBluePrintNodeByTableName(String tableName) {
         if (tableName.indexOf(".") != -1) {
             tableName = tableName.substring(tableName.lastIndexOf(".") + 1);
@@ -173,85 +187,47 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
         return cacheLoadedSuccessfuly;
     }
 
-    private static Map<Class<?>, Set<Class<?>>> superClassMap = new HashMap<>();
-
-    public static Set<Class<?>> getInheritance(Class<?> myObjectClass,
-            Class<?> returnType) {
-
-        if (returnType != null && myObjectClass.equals(returnType)) {
-            return new HashSet<>();
-        }
-        Set<Class<?>> result = superClassMap.get(myObjectClass);
-        if (result != null) {
-            return result;
-        }
-        result = new HashSet<>();
-        superClassMap.put(myObjectClass, result);
-        if (returnType != null) {
-            if (!returnType.equals(myObjectClass)) {
-                Class<?> mySuperClass = myObjectClass.getSuperclass();
-                while (mySuperClass != null) {
-                    result.add(mySuperClass);
-                    mySuperClass = mySuperClass.getSuperclass();
-                }
-                result.addAll(collectInterfaces(myObjectClass));
-            }
-        }
-        return result;
-    }
-
-    public static Set<Class<?>> collectInterfaces(Class<?> cls) {
-        Set<Class<?>> result = new HashSet<>();
-        Class<?> myInterfaces[] = cls.getInterfaces();
-        if (myInterfaces != null) {
-            for (Class<?> in : myInterfaces) {
-                result.add(in);
-                result.addAll(collectInterfaces(in));
-            }
-        }
-        return result;
-    }
-
+    //Adds a node to the blueprint and connect it
+    //to a parent node
     public XSQLBluePrintNode addToBluePrintCache(XSQLBluePrintNode blNode,XSQLBluePrintNode parent) {
         XSQLBluePrintNode existingNode = this.tableNameToBluePrint.get(blNode.getBluePrintNodeName());
+        //if the node already exist
         if(existingNode!=null){
+            //It might be that this is an augmentation of the node
+            //or it is the same node but from a different model version
+            //so merge the node to the existing one.
             existingNode.mergeAugmentation(blNode);
+            //Need to make sure the table exist in the table name to node map
+            String tableNames[] = blNode.getODLTableNames();
+            for(String tableName:tableNames){
+                Map<String, XSQLBluePrintNode> map = this.odlNameToBluePrint.get(tableName);
+                if (map == null) {
+                    map = new HashMap<String, XSQLBluePrintNode>();
+                    this.odlNameToBluePrint.put(tableName, map);
+                }
+                map.put(blNode.getBluePrintNodeName(), blNode);
+            }
             return existingNode;
         }else{
+            //insert the node and update the table name to node map
             this.tableNameToBluePrint.put(blNode.getBluePrintNodeName(), blNode);
-            Map<String, XSQLBluePrintNode> map = this.odlNameToBluePrint.get(blNode.getODLTableName());
-            if (map == null) {
-                map = new HashMap<String, XSQLBluePrintNode>();
-                this.odlNameToBluePrint.put(blNode.getODLTableName(), map);
+            String tableNames[] = blNode.getODLTableNames();
+            for(String tableName:tableNames){
+                Map<String, XSQLBluePrintNode> map = this.odlNameToBluePrint.get(tableName);
+                if (map == null) {
+                    map = new HashMap<String, XSQLBluePrintNode>();
+                    this.odlNameToBluePrint.put(tableName, map);
+                }
+                map.put(blNode.getBluePrintNodeName(), blNode);
             }
-            map.put(blNode.getBluePrintNodeName(), blNode);
+            //Attach this node to its parent
             if(parent!=null)
                 parent.addChild(blNode);
             return blNode;
         }
     }
 
-    public Class<?> getGenericType(ParameterizedType type) {
-        Type[] typeArguments = type.getActualTypeArguments();
-        for (Type typeArgument : typeArguments) {
-            if (typeArgument instanceof ParameterizedType) {
-                ParameterizedType pType = (ParameterizedType) typeArgument;
-                return (Class<?>) pType.getRawType();
-            } else if (typeArgument instanceof Class) {
-                return (Class<?>) typeArgument;
-            }
-        }
-        return null;
-    }
-
-    public Class<?> getMethodReturnTypeFromGeneric(Method m) {
-        Type rType = m.getGenericReturnType();
-        if (rType instanceof ParameterizedType) {
-            return getGenericType((ParameterizedType) rType);
-        }
-        return null;
-    }
-
+    //Return a list of all table names
     public List<String> getAllTableNames() {
         List<String> names = new ArrayList<String>();
         for (XSQLBluePrintNode n : this.tableNameToBluePrint.values()) {
@@ -263,17 +239,10 @@ public class XSQLBluePrint implements DatabaseMetaData, Serializable {
 
     }
 
-    public List<String> getInterfaceNames(XSQLBluePrintNode node) {
-        Set<XSQLBluePrintNode> children = node.getChildren();
-        List<String> names = new ArrayList<String>();
-        for (XSQLBluePrintNode n : children) {
-            if (!n.isModule() && !n.getColumns().isEmpty()) {
-                names.add(n.toString());
-            }
-            names.addAll(getInterfaceNames(n));
-        }
-        return names;
-    }
+    /*
+     * From this point onwards this is the implementation of the JDBC Meta data.(non-Javadoc)
+     *
+     */
 
     @Override
     public boolean allProceduresAreCallable() throws SQLException {

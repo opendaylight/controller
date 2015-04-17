@@ -65,7 +65,31 @@ module XSQL{
                 }
 
             }
+            
+            container rpc-registry {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity mdsal:binding-rpc-registry;
+                    }
+                }
+            }            
+        }
+    }
 
+    rpc execute-query  {
+        description
+          "JMX call to execute an SQL query ";          
+        input {
+            leaf sql {
+              type string;
+              description "query to execute";
+            }
+        }
+        output {
+            leaf result{
+            	type string;
+            }
         }
     }
 
