@@ -32,4 +32,8 @@ interface TransactionContext {
     void readData(final YangInstanceIdentifier path, SettableFuture<Optional<NormalizedNode<?, ?>>> proxyFuture);
 
     void dataExists(YangInstanceIdentifier path, SettableFuture<Boolean> proxyFuture);
+
+    boolean supportsDirectCommit();
+
+    Future<Object> directCommit();
 }
