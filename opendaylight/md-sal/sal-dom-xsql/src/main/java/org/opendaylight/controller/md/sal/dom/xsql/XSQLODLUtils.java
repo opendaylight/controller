@@ -8,6 +8,7 @@
 package org.opendaylight.controller.md.sal.dom.xsql;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -19,6 +20,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.model.api.AugmentationSchema;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
@@ -37,8 +39,8 @@ import org.opendaylight.yangtools.yang.model.util.Uint8;
  **/
 public class XSQLODLUtils {
 
-    private static Map<Class<?>, Class<?>> types =
-        new ConcurrentHashMap<Class<?>, Class<?>>();
+    private static Map<Class<?>, Class<?>> types = new ConcurrentHashMap<Class<?>, Class<?>>();
+    private static Method codecBindingAwareMethod = null;
 
     static {
         types.put(QName.class, QName.class);
@@ -282,4 +284,46 @@ public class XSQLODLUtils {
         return String.class;
     }
 
+    public static Object toBindingAwareObject(LinkedList<Object> objects,Object bindingToNormalizedNodeCodec){
+        List<PathArgument> paths = new LinkedList<>();
+        for(Object element:objects){
+            try{
+                Method m = element.getClass().getMethod("getIdentifier",null);
+                m.setAccessible(true);
+                PathArgument p = (PathArgument)m.invoke(element, null);
+                paths.add(p);
+            }catch(Exception err){
+                XSQLAdapter.log(err);
+            }
+        }
+        YangInstanceIdentifier id = YangInstanceIdentifier.create(paths);
+        Object element = objects.getLast();
+        Method toBindingCodecMethod = getCodecBindingAwareMethod(bindingToNormalizedNodeCodec);
+        try{
+            Map map = new HashMap();
+            map.put(id, element);
+            Object optional = toBindingCodecMethod.invoke(bindingToNormalizedNodeCodec, new Object[]{map.entrySet().iterator().next()});
+            Method optionalGetMethod = optional.getClass().getMethod("get",null);
+            optionalGetMethod.setAccessible(true);
+            Map.Entry entry = (Map.Entry)optionalGetMethod.invoke(optional, null);
+            return entry.getValue();
+        }catch(Exception err){
+            XSQLAdapter.log(err);
+        }
+        return null;
+    }
+
+    public static final Method getCodecBindingAwareMethod(Object codec){
+        if(codecBindingAwareMethod!=null)
+            return codecBindingAwareMethod;
+        Method methods[] = codec.getClass().getMethods();
+        for(Method m:methods){
+            if(m.getName().equals("toBinding")){
+                if(m.getParameterTypes()[0].equals(Map.Entry.class)){
+                    codecBindingAwareMethod=m;
+                }
+            }
+        }
+        return codecBindingAwareMethod;
+    }
 }

@@ -8,14 +8,13 @@
 package org.opendaylight.controller.md.sal.dom.xsql;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.lang.reflect.Field;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +30,8 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  * @author Sharon Aicler(saichler@gmail.com)
  **/
@@ -38,18 +39,8 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
 
     private static final int SLEEP = 10000;
     private static XSQLAdapter a = new XSQLAdapter();
-    private static PrintStream l = null;
     private static String tmpDir = null;
-    private static File xqlLog = null;
     public boolean stopped = false;
-    private List<String> elementHosts = new ArrayList<String>();
-    private String username;
-    private String password;
-    private String transport = "tcp";
-    private int reconnectTimeout;
-    private int nThreads;
-    private int qsize;
-    private String applicationName = "NQL Adapter";
     private Map<String, NEEntry> elements = new ConcurrentHashMap<String, XSQLAdapter.NEEntry>();
     private StringBuffer lastInputString = new StringBuffer();
     private XSQLBluePrint bluePrint = new XSQLBluePrint();
@@ -57,10 +48,11 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
     private String exportToFileName = null;
     private XSQLThreadPool threadPool = new XSQLThreadPool(1, "Tasks", 2000);
     private JDBCServer jdbcServer = new JDBCServer(this);
-    private String pinningFile;
     private ServerSocket serverSocket = null;
     private DOMDataBroker domDataBroker = null;
     private static final String REFERENCE_FIELD_NAME = "reference";
+    private Object codec = null;
+    private static Logger logger = LoggerFactory.getLogger(XSQLAdapter.class);
 
     private XSQLAdapter() {
         XSQLAdapter.log("Starting Adapter");
@@ -73,6 +65,16 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
         this.start();
         XSQLAdapter.log("Adapter Started!");
 
+    }
+
+    public void extractCodec(Object dataBroker){
+        try{
+            Field field = XSQLODLUtils.findField(dataBroker.getClass(),"codec");
+            field.setAccessible(true);
+            this.codec = field.get(dataBroker);
+        }catch(Exception err){
+            err.printStackTrace();
+        }
     }
 
     public void loadBluePrint(){
@@ -91,51 +93,25 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
         return a;
     }
 
-    public static File getXQLLogfile() {
-        tmpDir = System.getProperty("java.io.tmpdir");
-        xqlLog = new File(tmpDir + "/xql.log");
-        return xqlLog;
-    }
-
     public static void main(String args[]) {
         XSQLAdapter adapter = new XSQLAdapter();
         adapter.start();
     }
 
     public static void log(String str) {
-        try {
-            if (l == null) {
-                synchronized (XSQLAdapter.class) {
-                    if (l == null) {
-                        l = new PrintStream(
-                                new FileOutputStream(getXQLLogfile()));
-                    }
-                }
-            }
-            l.print(Calendar.getInstance().getTime());
-            l.print(" - ");
-            l.println(str);
-        } catch (Exception err) {
-            err.printStackTrace();
+        if(logger==null){
+            logger = LoggerFactory.getLogger(XSQLAdapter.class);
         }
+        if(logger!=null)
+            logger.info(str);
     }
 
     public static void log(Exception e) {
-        try {
-            if (l == null) {
-                synchronized (XSQLAdapter.class) {
-                    if (l == null) {
-                        l = new PrintStream(
-                                new FileOutputStream(getXQLLogfile()));
-                    }
-                }
-            }
-            l.print(Calendar.getInstance().getTime());
-            l.print(" - ");
-            e.printStackTrace(l);
-        } catch (Exception err) {
-            err.printStackTrace();
+        if(logger==null){
+            logger = LoggerFactory.getLogger(XSQLAdapter.class);
         }
+        if(logger!=null)
+            logger.error(e.getMessage(),e);
     }
 
     @Override
@@ -160,20 +136,20 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
         if (table.getParent().isModule()) {
             try {
                 List<Object> result = new LinkedList<Object>();
-                YangInstanceIdentifier instanceIdentifier = YangInstanceIdentifier
-                        .builder()
-                        .node(XSQLODLUtils.getPath(table.getFirstFromSchemaNodes()).get(0))
-                        .toInstance();
-                DOMDataReadTransaction t = this.domDataBroker
-                        .newReadOnlyTransaction();
-                Object node = t.read(type,
-                        instanceIdentifier).get();
-
-                node = XSQLODLUtils.get(node, REFERENCE_FIELD_NAME);
-                if (node == null) {
-                    return result;
+                Object node = null;
+                for(Object odlSchemaNode:table.getODLSchemaNodes()){
+                    YangInstanceIdentifier instanceIdentifier = YangInstanceIdentifier
+                            .builder()
+                            .node(XSQLODLUtils.getPath(odlSchemaNode).get(0))
+                            .toInstance();
+                    DOMDataReadTransaction t = this.domDataBroker.newReadOnlyTransaction();
+                    node = t.read(type,instanceIdentifier).get();
+                    node = XSQLODLUtils.get(node, REFERENCE_FIELD_NAME);
+                    if(node!=null){
+                        result.add(node);
+                        break;
+                    }
                 }
-                result.add(node);
                 return result;
             } catch (Exception err) {
                 XSQLAdapter.log(err);
@@ -541,5 +517,9 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
                 }
             }
         }
+    }
+
+    public Object toBindingAwareObject(LinkedList<Object> objects){
+        return XSQLODLUtils.toBindingAwareObject(objects,this.codec);
     }
 }
