@@ -221,6 +221,24 @@
       "revId": "34e70187f7d55235055003bb6a24c120f9f62e49",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_ae31190d",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/yang/opendaylight-rest-connector.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-17T13:09:57Z",
+      "side": 1,
+      "message": "In patch set 1, success and failure uses statistics and my comment was \"the leaf is named received-requests which isn\u0027t accurate since these are response stats.\". So it was ResponseStats-\u003eSuccess-\u003eReceivedRequests\". I guess ReceivedRequests couple apply depending on how you look at it but it looked confusing to me at first glance.\n\nIf you look at the JMX stats in JConsole, each nested container adds another drill down so I\u0027m trying to simplify it. I prefer the way it is now except:\n \nSuccess\n  Put\n      ReceivedRequests\n      SuccessfulResponses\n      FailedResponses\n\ndoesn\u0027t really fit, especially FailedResponses. Also, to me, Success implies requests that completed successfully - ReceivedRequests is total so would also include failed requests.\n\nI would expect to see, e.g.:\n\nTotalSuccessful\n  Put\n      Count\n\nor further simplified further:\n\nTotalSuccessful\n   Get\n   Put\n   Post\n   Delete\n\nThis isn\u0027t just about what I want or think - we should get others opinions on this too. Jan created the original bug - what does he want to see?",
+      "parentUuid": "3aa0d159_6ed1d1cc",
+      "revId": "34e70187f7d55235055003bb6a24c120f9f62e49",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
