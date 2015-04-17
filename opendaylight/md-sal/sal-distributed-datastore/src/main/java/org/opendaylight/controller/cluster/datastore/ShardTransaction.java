@@ -137,14 +137,13 @@ public abstract class ShardTransaction extends AbstractUntypedActorWithMetering 
         final YangInstanceIdentifier path = message.getPath();
 
         try {
-            Boolean exists = transaction.exists(path).checkedGet();
-            DataExistsReply dataExistsReply = new DataExistsReply(exists);
+            boolean exists = transaction.exists(path).checkedGet();
+            DataExistsReply dataExistsReply = DataExistsReply.create(exists);
             getSender().tell(returnSerialized ? dataExistsReply.toSerializable() :
                 dataExistsReply, getSelf());
         } catch (ReadFailedException e) {
             getSender().tell(new akka.actor.Status.Failure(e),getSelf());
         }
-
     }
 
     private static class ShardTransactionCreator implements Creator<ShardTransaction> {
