@@ -32,14 +32,15 @@
       <version>${project.version}</version>
     </dependency>
 
-    <!-- scope is not runtime so the feature repo is pulled into the local
-    repo on build and thus you actually run.  Failure to do so can lead
-    to very confusing errors for devs -->
+    <!-- scope is changed to runtime in order to not install
+         everything as boot feature.
+     -->
     <dependency>
       <groupId>org.apache.karaf.features</groupId>
       <artifactId>standard</artifactId>
       <version>${karaf.version}</version>
       <classifier>features</classifier>
+      <scope>runtime</scope>
       <type>xml</type>
     </dependency>
 
