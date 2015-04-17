@@ -221,18 +221,18 @@ public abstract class AbstractTransactionProxyTest {
     }
 
     protected Future<Object> dataExistsSerializedReply(boolean exists) {
-        return Futures.successful(new DataExistsReply(exists).toSerializable());
+        return Futures.successful(DataExistsReply.create(exists).toSerializable());
     }
 
     protected Future<DataExistsReply> dataExistsReply(boolean exists) {
-        return Futures.successful(new DataExistsReply(exists));
+        return Futures.successful(DataExistsReply.create(exists));
     }
 
     protected Future<BatchedModificationsReply> batchedModificationsReply(int count) {
         return Futures.successful(new BatchedModificationsReply(count));
     }
 
-    protected Future<Object> incompleteFuture(){
+    protected Future<Object> incompleteFuture() {
         return mock(Future.class);
     }
 

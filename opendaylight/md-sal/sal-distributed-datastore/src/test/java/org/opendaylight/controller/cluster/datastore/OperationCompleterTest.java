@@ -29,10 +29,10 @@ public class OperationCompleterTest {
 
         OperationCompleter completer = new OperationCompleter(operationLimiter );
 
-        completer.onComplete(null, new DataExistsReply(true));
+        completer.onComplete(null, DataExistsReply.create(true));
         assertEquals("availablePermits", ++availablePermits, operationLimiter.availablePermits());
 
-        completer.onComplete(null, new DataExistsReply(true));
+        completer.onComplete(null, DataExistsReply.create(true));
         assertEquals("availablePermits", ++availablePermits, operationLimiter.availablePermits());
 
         completer.onComplete(null, new IllegalArgumentException());
