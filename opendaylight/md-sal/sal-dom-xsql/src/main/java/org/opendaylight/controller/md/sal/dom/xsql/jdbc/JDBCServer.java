@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.opendaylight.controller.md.sal.dom.xsql.jdbc;
 
 import java.net.ServerSocket;
@@ -9,12 +16,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.concurrent.ConcurrentHashMap;
+
 import org.opendaylight.controller.md.sal.dom.xsql.XSQLAdapter;
 import org.opendaylight.controller.md.sal.dom.xsql.XSQLBluePrint;
 import org.opendaylight.controller.md.sal.dom.xsql.XSQLBluePrintNode;
 import org.opendaylight.controller.md.sal.dom.xsql.XSQLColumn;
 import org.opendaylight.controller.md.sal.dom.xsql.XSQLCriteria;
-
+/**
+ * @author Sharon Aicler(saichler@gmail.com)
+ **/
 public class JDBCServer extends Thread {
     private ServerSocket socket = null;
     private XSQLAdapter adapter = null;
@@ -91,7 +101,7 @@ public class JDBCServer extends Thread {
                     Map<String, Object> rec = entry.getValue().getCurrent();
                     Map<String, Object> newRec = new HashMap<>();
                     newRec.putAll(rec);
-                    rs.addRecord(newRec);
+                    rs.addRecord(newRec,null);
                 }
             }
             rs.setFinished(true);
@@ -125,7 +135,7 @@ public class JDBCServer extends Thread {
                         newRec.put(logicalKey, value);
                     }
                 }
-                rs.addRecord(newRec);
+                rs.addRecord(newRec,null);
             }
         }
         rs.setFinished(true);
@@ -286,6 +296,10 @@ public class JDBCServer extends Thread {
         StringTokenizer tokens = new StringTokenizer(fields, ",");
         while (tokens.hasMoreTokens()) {
             String token = tokens.nextToken().trim();
+            if(token.toLowerCase().equals("objects")){
+                rs.toggleOnSelectObjects();
+                return;
+            }
             if (token.equals("*")) {
                 for (XSQLBluePrintNode table : rs.getTables()) {
                     rs.getFields().addAll(table.getColumns());
