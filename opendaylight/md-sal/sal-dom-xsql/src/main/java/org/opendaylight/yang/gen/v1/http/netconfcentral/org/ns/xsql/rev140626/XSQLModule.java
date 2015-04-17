@@ -31,7 +31,7 @@ public class XSQLModule extends org.opendaylight.yang.gen.v1.http.netconfcentral
     public java.lang.AutoCloseable createInstance() {
         XSQLAdapter xsqlAdapter = XSQLAdapter.getInstance();
         getSchemaServiceDependency().registerSchemaContextListener(xsqlAdapter);
-        xsqlAdapter.setDataBroker(getAsyncDataBrokerDependency());
+        xsqlAdapter.setDataBroker(getAsyncDataBrokerDependency(),getDataBrokerDependency());
         final XSQLProvider p = new XSQLProvider();
         Runnable runthis = new Runnable() {
             @Override
