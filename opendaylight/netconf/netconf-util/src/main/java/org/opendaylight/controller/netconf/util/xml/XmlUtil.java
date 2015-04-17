@@ -55,6 +55,9 @@ public final class XmlUtil {
             factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
             factory.setXIncludeAware(false);
             factory.setExpandEntityReferences(false);
+            // Performance improvement for messages with size <10k according to
+            // https://xerces.apache.org/xerces2-j/faq-performance.html
+            factory.setFeature("http://apache.org/xml/features/dom/defer-node-expansion", false);
         } catch (ParserConfigurationException e) {
             throw new ExceptionInInitializerError(e);
         }
