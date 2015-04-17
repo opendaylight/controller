@@ -223,7 +223,7 @@ public class JDBCConnection implements Connection, Runnable {
             break;
         case JDBCCommand.TYPE_QUERY_RECORD:
             JDBCResultSet rs2 = JDBCStatement.getQuery(cmd.getRSID());
-            rs2.addRecord(cmd.getRecord());
+            rs2.addRecord(cmd.getRecord(),null);
             break;
         case JDBCCommand.TYPE_QUERY_FINISH:
             JDBCResultSet rs3 = JDBCStatement.removeQuery(cmd.getRSID());

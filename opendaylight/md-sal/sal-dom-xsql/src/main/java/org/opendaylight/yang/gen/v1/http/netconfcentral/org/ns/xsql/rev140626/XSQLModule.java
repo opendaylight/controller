@@ -7,6 +7,11 @@
  */
 package org.opendaylight.yang.gen.v1.http.netconfcentral.org.ns.xsql.rev140626;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Proxy;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 import org.opendaylight.controller.md.sal.dom.xsql.XSQLAdapter;
 import org.opendaylight.xsql.XSQLProvider;
 /**
@@ -40,6 +45,32 @@ public class XSQLModule extends org.opendaylight.yang.gen.v1.http.netconfcentral
                 p.buildXSQL(getDataBrokerDependency());
             }
         };
+
+        Runnable run = new Runnable() {
+            @Override
+            public void run() {
+                try{
+                    try{Thread.sleep(10000);}catch(Exception e){}
+                    ResultSet rs = XSQLAdapter.getInstance().executeQuery("select Objects from nodes/node;");
+                    while(rs.next()){
+                        Object obj = rs.getObject("Object");
+                        InvocationHandler h = null;
+                        Class objectClass = null;
+                        try{
+                            h = Proxy.getInvocationHandler(obj);
+                        }catch(Exception err){}
+                        if(h!=null){
+                            objectClass = obj.getClass().getInterfaces()[0];
+                        }else
+                            objectClass = obj.getClass();
+                        System.out.println("Object Type="+objectClass);
+                    }
+                }catch(SQLException err){
+                    err.printStackTrace();
+                }
+            }
+        };
+        new Thread(run).start();
         return p;
     }
 }
