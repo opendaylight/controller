@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.concurrent.ConcurrentHashMap;
+
 import org.opendaylight.controller.md.sal.dom.xsql.XSQLAdapter;
 import org.opendaylight.controller.md.sal.dom.xsql.XSQLBluePrint;
 import org.opendaylight.controller.md.sal.dom.xsql.XSQLBluePrintNode;
@@ -91,7 +92,7 @@ public class JDBCServer extends Thread {
                     Map<String, Object> rec = entry.getValue().getCurrent();
                     Map<String, Object> newRec = new HashMap<>();
                     newRec.putAll(rec);
-                    rs.addRecord(newRec);
+                    rs.addRecord(newRec,null);
                 }
             }
             rs.setFinished(true);
@@ -125,7 +126,7 @@ public class JDBCServer extends Thread {
                         newRec.put(logicalKey, value);
                     }
                 }
-                rs.addRecord(newRec);
+                rs.addRecord(newRec,null);
             }
         }
         rs.setFinished(true);
@@ -286,6 +287,10 @@ public class JDBCServer extends Thread {
         StringTokenizer tokens = new StringTokenizer(fields, ",");
         while (tokens.hasMoreTokens()) {
             String token = tokens.nextToken().trim();
+            if(token.toLowerCase().equals("objects")){
+                rs.toggleOnSelectObjects();
+                return;
+            }
             if (token.equals("*")) {
                 for (XSQLBluePrintNode table : rs.getTables()) {
                     rs.getFields().addAll(table.getColumns());

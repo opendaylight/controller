@@ -143,7 +143,7 @@ public class XSQLTest {
                 log("Fields="+rs.getFields().size());
                 Assert.assertEquals(rs.getFields().size(), 3);
                 Assert.assertEquals(rs.getTables().size(), 1);
-                Assert.assertEquals(rs.getTables().get(0).getODLTableName(), "LOGICAL_TABLE_1");
+                Assert.assertEquals(rs.getTables().get(0).getODLTableNames()[0], "LOGICAL_TABLE_1");
 
                 JDBCResultSet subRS = rs.getSubQueries().values().iterator().next();
                 parseTables(sql,bluePrint, subRS);
