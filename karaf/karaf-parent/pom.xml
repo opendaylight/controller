@@ -66,6 +66,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <version>${karaf.version}</version>
       <type>xml</type>
       <classifier>features</classifier>
+      <scope>runtime</scope>
     </dependency>
     <!-- karaf region dependency -->
     <dependency>
@@ -211,6 +212,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
             <!-- no startupFeatures -->
             <bootFeatures>
               <feature>standard</feature>
+              <feature>eventadmin</feature>
               <feature>${karaf.localFeature}</feature>
             </bootFeatures>
             <!-- no installedFeatures -->
