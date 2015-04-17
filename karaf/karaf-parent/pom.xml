@@ -59,13 +59,17 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     </dependencies>
   </dependencyManagement>
   <dependencies>
-    <!-- karaf standard features -->
+    <!-- karaf standard features - scope is runtime so the feature repo is listed in the
+         features cfg file but the features aren't all installed by default via the
+         startup.properties. The features may be installed using the karaf-maven-plugin
+         configuration. -->
     <dependency>
       <groupId>org.apache.karaf.features</groupId>
       <artifactId>standard</artifactId>
       <version>${karaf.version}</version>
       <type>xml</type>
       <classifier>features</classifier>
+      <scope>runtime</scope>
     </dependency>
     <!-- karaf region dependency -->
     <dependency>
@@ -208,7 +212,12 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
           <version>${karaf.maven.version}</version>
           <extensions>true</extensions>
           <configuration>
-            <!-- no startupFeatures -->
+            <startupFeatures>
+              <!-- For some reason, the eventadmin bundle works fine when installed via the
+                   startup.properties but doesn't work properly when installed via the
+                   boot features.  -->
+              <feature>eventadmin</feature>
+            </startupFeatures>
             <bootFeatures>
               <feature>standard</feature>
               <feature>${karaf.localFeature}</feature>
