@@ -203,6 +203,24 @@
       "revId": "34e70187f7d55235055003bb6a24c120f9f62e49",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_6ed1d1cc",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/yang/opendaylight-rest-connector.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 3212
+      },
+      "writtenOn": "2015-04-17T12:28:36Z",
+      "side": 1,
+      "message": "Can you please take a look into the opendaylight-rest-connector.yang of Patch Set 1.\n\nMaybe I\u0027m confusing, but I think in the patch set 1, the grouping statistics has only one leaf \"received-requests\" and the yang structure for the success and failure container were the same as you want here.",
+      "parentUuid": "3aa0d159_1cff2a36",
+      "revId": "34e70187f7d55235055003bb6a24c120f9f62e49",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
