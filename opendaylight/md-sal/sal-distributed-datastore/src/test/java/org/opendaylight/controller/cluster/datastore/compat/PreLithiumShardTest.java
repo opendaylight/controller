@@ -247,7 +247,7 @@ public class PreLithiumShardTest extends AbstractShardTest {
             // by the ShardTransaction.
 
             shard.tell(new ForwardedReadyTransaction(transactionID1, HELIUM_2_VERSION,
-                    cohort1, modification1, true), getRef());
+                    cohort1, modification1, true, false), getRef());
             ReadyTransactionReply readyReply = ReadyTransactionReply.fromSerializable(
                     expectMsgClass(duration, ReadyTransactionReply.SERIALIZABLE_CLASS));
             assertEquals("Cohort path", shard.path().toString(), readyReply.getCohortPath());
@@ -262,11 +262,11 @@ public class PreLithiumShardTest extends AbstractShardTest {
             // Send the ForwardedReadyTransaction for the next 2 Tx's.
 
             shard.tell(new ForwardedReadyTransaction(transactionID2, HELIUM_2_VERSION,
-                    cohort2, modification2, true), getRef());
+                    cohort2, modification2, true, false), getRef());
             expectMsgClass(duration, ReadyTransactionReply.SERIALIZABLE_CLASS);
 
             shard.tell(new ForwardedReadyTransaction(transactionID3, HELIUM_2_VERSION,
-                    cohort3, modification3, true), getRef());
+                    cohort3, modification3, true, false), getRef());
             expectMsgClass(duration, ReadyTransactionReply.SERIALIZABLE_CLASS);
 
             // Send the CanCommitTransaction message for the next 2 Tx's. These should get queued and

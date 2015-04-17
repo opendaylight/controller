@@ -8,7 +8,6 @@
 
 package org.opendaylight.controller.cluster.datastore;
 
-import akka.actor.ActorSelection;
 import com.google.common.base.Preconditions;
 import java.util.Collections;
 import java.util.List;
@@ -30,7 +29,7 @@ public class TransactionChainProxy implements DOMStoreTransactionChain {
     private interface State {
         boolean isReady();
 
-        List<Future<ActorSelection>> getPreviousReadyFutures();
+        List<Future<Object>> getPreviousReadyFutures();
     }
 
     private static class Allocated implements State {
@@ -46,14 +45,14 @@ public class TransactionChainProxy implements DOMStoreTransactionChain {
         }
 
         @Override
-        public List<Future<ActorSelection>> getPreviousReadyFutures() {
+        public List<Future<Object>> getPreviousReadyFutures() {
             return transaction.getReadyFutures();
         }
     }
 
     private static abstract class AbstractDefaultState implements State {
         @Override
-        public List<Future<ActorSelection>> getPreviousReadyFutures() {
+        public List<Future<Object>> getPreviousReadyFutures() {
             return Collections.emptyList();
         }
     }
