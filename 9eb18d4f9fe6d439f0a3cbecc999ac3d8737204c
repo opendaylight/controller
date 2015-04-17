@@ -34,6 +34,24 @@
       "revId": "9eb18d4f9fe6d439f0a3cbecc999ac3d8737204c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_eedac116",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionResources.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-17T11:14:00Z",
+      "side": 1,
+      "message": "Technically it should be volatile as a caller could call close/ready and put on multiple threads. \n\nIn fact, updates to other fields like txFutureCallbackMap and the fields in TransactionContextImpl should technically also be synchronized to ensure visibility as one could call read on one thread and process the response on another thread via a future callback and call put/submit.  \nThe likelihood that the second thread could see stale data is very small but it is theoretically possible. We don\u0027t need to support concurrent access though so we could use a single volatile to piggy-back synchronize all updates. But this would be beyond the scope of this patch.",
+      "parentUuid": "3aa0d159_0e17edee",
+      "revId": "9eb18d4f9fe6d439f0a3cbecc999ac3d8737204c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
