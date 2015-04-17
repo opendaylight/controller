@@ -9,13 +9,9 @@ package org.opendaylight.controller.md.sal.binding.impl;
 
 import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.ImmutableSet;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 import org.opendaylight.controller.md.sal.binding.api.NotificationService;
 import org.opendaylight.controller.md.sal.binding.impl.BindingDOMAdapterBuilder.Factory;
-import org.opendaylight.controller.md.sal.dom.api.DOMNotificationListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMNotificationService;
 import org.opendaylight.controller.md.sal.dom.api.DOMService;
 import org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolder;
@@ -23,10 +19,7 @@ import org.opendaylight.controller.sal.binding.spi.NotificationInvokerFactory;
 import org.opendaylight.yangtools.binding.data.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.yangtools.concepts.AbstractListenerRegistration;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
-import org.opendaylight.yangtools.yang.binding.Notification;
 import org.opendaylight.yangtools.yang.binding.NotificationListener;
-import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
-import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
 public class BindingDOMNotificationServiceAdapter implements NotificationService, AutoCloseable {
 
@@ -40,32 +33,18 @@ public class BindingDOMNotificationServiceAdapter implements NotificationService
     };
     private final BindingNormalizedNodeSerializer codec;
     private final DOMNotificationService domNotifService;
-    private final NotificationInvokerFactory notificationInvokerFactory;
 
     public BindingDOMNotificationServiceAdapter(final BindingNormalizedNodeSerializer codec, final DOMNotificationService domNotifService, final NotificationInvokerFactory notificationInvokerFactory) {
         this.codec = codec;
         this.domNotifService = domNotifService;
-        this.notificationInvokerFactory = notificationInvokerFactory;
     }
 
     @Override
     public <T extends NotificationListener> ListenerRegistration<T> registerNotificationListener(final T listener) {
-        final NotificationInvokerFactory.NotificationInvoker invoker = notificationInvokerFactory.invokerFor(listener);
-        final DOMNotificationListener domListener = new BindingDOMNotificationListenerAdapter(codec, invoker);
-        final Collection<SchemaPath> schemaPaths = convertNotifTypesToSchemaPath(invoker.getSupportedNotifications());
-        final ListenerRegistration<DOMNotificationListener> domRegistration =
-                domNotifService.registerNotificationListener(domListener, schemaPaths);
+        final BindingDOMNotificationListenerAdapter domListener = new BindingDOMNotificationListenerAdapter(codec, listener);
+        final ListenerRegistration<BindingDOMNotificationListenerAdapter> domRegistration =
+                domNotifService.registerNotificationListener(domListener, domListener.getSupportedNotifications());
         return new ListenerRegistrationImpl<>(listener, domRegistration);
-    }
-
-
-
-    private Collection<SchemaPath> convertNotifTypesToSchemaPath(final Set<Class<? extends Notification>> notificationTypes) {
-        final List<SchemaPath> schemaPaths = new ArrayList<>();
-        for (final Class<? extends Notification> notificationType : notificationTypes) {
-            schemaPaths.add(SchemaPath.create(true, BindingReflections.findQName(notificationType)));
-        }
-        return schemaPaths;
     }
 
     @Override
@@ -89,7 +68,6 @@ public class BindingDOMNotificationServiceAdapter implements NotificationService
 
     private static class Builder extends BindingDOMAdapterBuilder<NotificationService> {
 
-
         @Override
         protected NotificationService createInstance(final BindingToNormalizedNodeCodec codec,
                 final ClassToInstanceMap<DOMService> delegates) {
@@ -102,8 +80,5 @@ public class BindingDOMNotificationServiceAdapter implements NotificationService
         public Set<? extends Class<? extends DOMService>> getRequiredDelegates() {
             return ImmutableSet.of(DOMNotificationService.class);
         }
-
-
-
     }
 }
