@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import com.google.common.base.Preconditions;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 
 final class ReadWriteShardDataTreeTransaction extends AbstractShardDataTreeTransaction<DataTreeModification> {
@@ -26,7 +25,7 @@ final class ReadWriteShardDataTreeTransaction extends AbstractShardDataTreeTrans
         parent.abortTransaction(this);
     }
 
-    DOMStoreThreePhaseCommitCohort ready() {
+    ShardDataTreeCohort ready() {
         Preconditions.checkState(close(), "Transaction is already closed");
 
         return parent.finishTransaction(this);
