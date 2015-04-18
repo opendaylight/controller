@@ -14,7 +14,6 @@ import org.opendaylight.controller.cluster.datastore.identifiers.ShardTransactio
 import org.opendaylight.controller.cluster.datastore.messages.CreateSnapshot;
 import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils;
 import org.opendaylight.controller.cluster.raft.RaftActorSnapshotCohort;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
@@ -86,7 +85,7 @@ class ShardSnapshotCohort implements RaftActorSnapshotCohort {
 
     void syncCommitTransaction(final ReadWriteShardDataTreeTransaction transaction)
             throws ExecutionException, InterruptedException {
-        DOMStoreThreePhaseCommitCohort commitCohort = store.finishTransaction(transaction);
+        ShardDataTreeCohort commitCohort = store.finishTransaction(transaction);
         commitCohort.preCommit().get();
         commitCohort.commit().get();
     }
