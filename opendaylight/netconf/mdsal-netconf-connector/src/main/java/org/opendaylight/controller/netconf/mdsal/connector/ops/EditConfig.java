@@ -23,8 +23,6 @@ import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorT
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.mdsal.connector.CurrentSchemaContext;
 import org.opendaylight.controller.netconf.mdsal.connector.TransactionProvider;
-import org.opendaylight.controller.netconf.util.exception.MissingNameSpaceException;
-import org.opendaylight.controller.netconf.util.exception.UnexpectedNamespaceException;
 import org.opendaylight.controller.netconf.util.mapping.AbstractSingletonNetconfOperation;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
@@ -47,6 +45,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 public class EditConfig extends AbstractSingletonNetconfOperation {
 
@@ -182,34 +181,28 @@ public class EditConfig extends AbstractSingletonNetconfOperation {
             LOG.debug("DataNode from module is not ContainerSchemaNode nor ListSchemaNode, aborting..");
             return Optional.absent();
         }
-
     }
 
     private Datastore extractTargetParameter(final XmlElement operationElement) throws NetconfDocumentedException {
-        final XmlElement targetChildNode;
-        try {
-            final XmlElement targetElement = operationElement.getOnlyChildElementWithSameNamespace(TARGET_KEY);
-            targetChildNode = targetElement.getOnlyChildElementWithSameNamespace();
-        } catch (final MissingNameSpaceException | UnexpectedNamespaceException e) {
-            LOG.trace("Can't get only child element with same namespace", e);
-            throw NetconfDocumentedException.wrap(e);
+        final NodeList elementsByTagName = operationElement.getDomElement().getElementsByTagName(TARGET_KEY);
+        // Direct lookup instead of using XmlElement class due to performance
+        if (elementsByTagName.getLength() == 0) {
+            throw new NetconfDocumentedException("Missing target element", ErrorType.rpc, ErrorTag.missing_attribute, ErrorSeverity.error);
+        } else if (elementsByTagName.getLength() > 1) {
+            throw new NetconfDocumentedException("Multiple target elements", ErrorType.rpc, ErrorTag.unknown_attribute, ErrorSeverity.error);
+        } else {
+            final XmlElement targetChildNode = XmlElement.fromDomElement((Element) elementsByTagName.item(0)).getOnlyChildElement();
+            return Datastore.valueOf(targetChildNode.getName());
         }
-
-        return Datastore.valueOf(targetChildNode.getName());
     }
 
-    private ModifyAction getDefaultOperation(final XmlElement operationElement) throws NetconfDocumentedException{
-        try {
-            return ModifyAction.fromXmlValue(getElement(operationElement, DEFAULT_OPERATION_KEY).getTextContent());
-        } catch (NetconfDocumentedException e) {
-            if (e.getErrorType() == ErrorType.protocol
-                    && e.getErrorSeverity() == ErrorSeverity.error
-                    && e.getErrorTag() == ErrorTag.missing_element) {
-                return ModifyAction.MERGE;
-            }
-            else {
-                throw e;
-            }
+    private ModifyAction getDefaultOperation(final XmlElement operationElement) throws NetconfDocumentedException {
+        // TODO use direct lookup, not XmlElement. It is slow
+        final Optional<XmlElement> childNode = operationElement.getOnlyChildElementOptionally(DEFAULT_OPERATION_KEY);
+        if (childNode.isPresent()) {
+            return ModifyAction.fromXmlValue(childNode.get().getTextContent());
+        } else {
+            return ModifyAction.MERGE;
         }
     }
 
