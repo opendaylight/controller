@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_77e760e5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTreeTransactionChain.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-18T17:56:04Z",
+      "side": 1,
+      "message": "The enclosing class is annotated with NotThreadSafe meaning it shouldn\u0027t be used in an unsafe manner however this async callback can modify state unsafely in the enclosing instance if the Future was async and notified by another thread. In looking at ShardDataTree it only returns immediate Futures so that isn\u0027t an issue now. \n\nTo be safe it should block on the Future.\n\nHowever, do we really need the DOMStoreThreePhaseCommit API here that returns ListenableFutures? Since all Shard processing should be done on akka\u0027s message queue threads, we really don\u0027t want any async processing in Shard that doesn\u0027t go thru akka. Therefore all ListenableFutures used internally by the Shard should really be immediate. Going a step further, why don\u0027t we just remove ListenableFutures from the methods?",
+      "revId": "7e29f78ed7588981f767bc2bb09fdf19a5e4f4d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_b731680d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTreeTransactionParent.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-18T17:56:04Z",
+      "side": 1,
+      "message": "Why not interface here?",
+      "revId": "7e29f78ed7588981f767bc2bb09fdf19a5e4f4d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_62ca40a3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardRecoveryCoordinator.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-18T17:56:04Z",
+      "side": 1,
+      "message": "Applying",
+      "revId": "7e29f78ed7588981f767bc2bb09fdf19a5e4f4d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_82cf4cb0",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardRecoveryCoordinator.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-18T17:56:04Z",
+      "side": 1,
+      "message": "Why is this different than the modification code above? Ie, above, we create a ReadWriteShardDataTreeTransaction and commit thru that but here we don\u0027t.",
+      "revId": "7e29f78ed7588981f767bc2bb09fdf19a5e4f4d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_22c43891",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardWriteTransaction.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-18T17:56:04Z",
+      "side": 1,
+      "message": "Can\u0027t we re-use the checkClosed method from the base class? The base method can throw IllegalStateException instead of ReadFailedEx.",
+      "revId": "7e29f78ed7588981f767bc2bb09fdf19a5e4f4d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_e2bdf003",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/modification/Modification.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-18T17:56:04Z",
+      "side": 1,
+      "message": "Do we need this method anymore?",
+      "revId": "7e29f78ed7588981f767bc2bb09fdf19a5e4f4d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_6241e00a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTransactionFailureTest.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-18T17:56:04Z",
+      "side": 1,
+      "message": "Do we really need 2-letter shortcuts?",
+      "revId": "7e29f78ed7588981f767bc2bb09fdf19a5e4f4d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_82466c22",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTransactionTest.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-18T17:56:04Z",
+      "side": 1,
+      "message": "Do we really need 2-letter shortcuts?",
+      "revId": "7e29f78ed7588981f767bc2bb09fdf19a5e4f4d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
