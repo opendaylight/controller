@@ -7,72 +7,14 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateTip;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-final class ShardDataTreeCohort implements DOMStoreThreePhaseCommitCohort {
-    private static final Logger LOG = LoggerFactory.getLogger(ShardDataTreeCohort.class);
-    private static final ListenableFuture<Boolean> TRUE_FUTURE = Futures.immediateFuture(Boolean.TRUE);
-    private static final ListenableFuture<Void> VOID_FUTURE = Futures.immediateFuture(null);
-    private final DataTreeModification transaction;
-    private final ShardDataTree dataTree;
-    private DataTreeCandidateTip candidate;
-
-    ShardDataTreeCohort(final ShardDataTree dataTree, final DataTreeModification transaction) {
-        this.dataTree = Preconditions.checkNotNull(dataTree);
-        this.transaction = Preconditions.checkNotNull(transaction);
+// FIXME: remove DOMStoreThreePhaseCommitCohort
+public abstract class ShardDataTreeCohort implements DOMStoreThreePhaseCommitCohort {
+    ShardDataTreeCohort() {
+        // Prevent foreign instantiation
     }
 
-    @Override
-    public ListenableFuture<Boolean> canCommit() {
-        try {
-            dataTree.getDataTree().validate(transaction);
-            LOG.debug("Transaction {} validated", transaction);
-            return TRUE_FUTURE;
-        } catch (Exception e) {
-            return Futures.immediateFailedFuture(e);
-        }
-    }
-
-    @Override
-    public ListenableFuture<Void> preCommit() {
-        try {
-            candidate = dataTree.getDataTree().prepare(transaction);
-            /*
-             * FIXME: this is the place where we should be interacting with persistence, specifically by invoking
-             *        persist on the candidate (which gives us a Future).
-             */
-            LOG.debug("Transaction {} prepared candidate {}", transaction, candidate);
-            return VOID_FUTURE;
-        } catch (Exception e) {
-            LOG.debug("Transaction {} failed to prepare", transaction, e);
-            return Futures.immediateFailedFuture(e);
-        }
-    }
-
-    @Override
-    public ListenableFuture<Void> abort() {
-        // No-op, really
-        return VOID_FUTURE;
-    }
-
-    @Override
-    public ListenableFuture<Void> commit() {
-        try {
-            dataTree.getDataTree().commit(candidate);
-        } catch (Exception e) {
-            LOG.error("Transaction {} failed to commit", transaction, e);
-            return Futures.immediateFailedFuture(e);
-        }
-
-        LOG.debug("Transaction {} committed, proceeding to notify", transaction);
-        dataTree.notifyListeners(candidate);
-        return VOID_FUTURE;
-    }
+    abstract DataTreeCandidateTip getCandidate();
 }
