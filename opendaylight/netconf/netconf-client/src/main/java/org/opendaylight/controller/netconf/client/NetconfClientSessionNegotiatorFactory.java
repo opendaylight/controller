@@ -33,10 +33,21 @@ import org.slf4j.LoggerFactory;
 
 public class NetconfClientSessionNegotiatorFactory implements SessionNegotiatorFactory<NetconfMessage, NetconfClientSession, NetconfClientSessionListener> {
 
-    public static final Set<String> CLIENT_CAPABILITIES = ImmutableSet.of(
+    public static final Set<String> EXI_CLIENT_CAPABILITIES = ImmutableSet.of(
             XmlNetconfConstants.URN_IETF_PARAMS_NETCONF_BASE_1_0,
             XmlNetconfConstants.URN_IETF_PARAMS_NETCONF_BASE_1_1,
             XmlNetconfConstants.URN_IETF_PARAMS_NETCONF_CAPABILITY_EXI_1_0);
+
+    public static final Set<String> LEGACY_EXI_CLIENT_CAPABILITIES = ImmutableSet.of(
+            XmlNetconfConstants.URN_IETF_PARAMS_NETCONF_BASE_1_0,
+            XmlNetconfConstants.URN_IETF_PARAMS_NETCONF_CAPABILITY_EXI_1_0);
+
+    public static final Set<String> DEFAULT_CLIENT_CAPABILITIES = ImmutableSet.of(
+            XmlNetconfConstants.URN_IETF_PARAMS_NETCONF_BASE_1_0,
+            XmlNetconfConstants.URN_IETF_PARAMS_NETCONF_BASE_1_1);
+
+    public static final Set<String> LEGACY_FRAMING_CLIENT_CAPABILITIES = ImmutableSet.of(
+            XmlNetconfConstants.URN_IETF_PARAMS_NETCONF_BASE_1_0);
 
     private static final Logger LOG = LoggerFactory.getLogger(NetconfClientSessionNegotiatorFactory.class);
     private static final String START_EXI_MESSAGE_ID = "default-start-exi";
@@ -61,6 +72,8 @@ public class NetconfClientSessionNegotiatorFactory implements SessionNegotiatorF
         DEFAULT_OPTIONS = opts;
     }
 
+    private final Set<String> clientCapabilities;
+
     public NetconfClientSessionNegotiatorFactory(final Timer timer,
                                                  final Optional<NetconfHelloMessageAdditionalHeader> additionalHeader,
                                                  final long connectionTimeoutMillis) {
@@ -69,11 +82,25 @@ public class NetconfClientSessionNegotiatorFactory implements SessionNegotiatorF
 
     public NetconfClientSessionNegotiatorFactory(final Timer timer,
                                                  final Optional<NetconfHelloMessageAdditionalHeader> additionalHeader,
+                                                 final long connectionTimeoutMillis, final Set<String> capabilities) {
+        this(timer, additionalHeader, connectionTimeoutMillis, DEFAULT_OPTIONS, capabilities);
+
+    }
+
+    public NetconfClientSessionNegotiatorFactory(final Timer timer,
+                                                 final Optional<NetconfHelloMessageAdditionalHeader> additionalHeader,
                                                  final long connectionTimeoutMillis, final EXIOptions exiOptions) {
+        this(timer, additionalHeader, connectionTimeoutMillis, exiOptions, EXI_CLIENT_CAPABILITIES);
+    }
+
+    public NetconfClientSessionNegotiatorFactory(final Timer timer,
+                                                 final Optional<NetconfHelloMessageAdditionalHeader> additionalHeader,
+                                                 final long connectionTimeoutMillis, final EXIOptions exiOptions, final Set<String> capabilities) {
         this.timer = Preconditions.checkNotNull(timer);
         this.additionalHeader = additionalHeader;
         this.connectionTimeoutMillis = connectionTimeoutMillis;
         this.options = exiOptions;
+        this.clientCapabilities = capabilities;
     }
 
     @Override
@@ -84,9 +111,9 @@ public class NetconfClientSessionNegotiatorFactory implements SessionNegotiatorF
         NetconfMessage startExiMessage = NetconfStartExiMessage.create(options, START_EXI_MESSAGE_ID);
         NetconfHelloMessage helloMessage = null;
         try {
-            helloMessage = NetconfHelloMessage.createClientHello(CLIENT_CAPABILITIES, additionalHeader);
+            helloMessage = NetconfHelloMessage.createClientHello(clientCapabilities, additionalHeader);
         } catch (NetconfDocumentedException e) {
-            LOG.error("Unable to create client hello message with capabilities {} and additional handler {}",CLIENT_CAPABILITIES,additionalHeader);
+            LOG.error("Unable to create client hello message with capabilities {} and additional handler {}", clientCapabilities,additionalHeader);
             throw new IllegalStateException(e);
         }
 

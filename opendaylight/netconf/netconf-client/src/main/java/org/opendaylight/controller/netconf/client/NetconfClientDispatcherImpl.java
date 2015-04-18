@@ -32,6 +32,10 @@ public class NetconfClientDispatcherImpl extends AbstractDispatcher<NetconfClien
         this.timer = timer;
     }
 
+    protected Timer getTimer() {
+        return timer;
+    }
+
     @Override
     public Future<NetconfClientSession> createClient(final NetconfClientConfiguration clientConfiguration) {
         switch (clientConfiguration.getProtocol()) {
