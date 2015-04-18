@@ -8,7 +8,7 @@
 package org.opendaylight.controller.cluster.datastore.modification;
 
 import static org.junit.Assert.assertEquals;
-import org.apache.commons.lang.SerializationUtils;
+import org.apache.commons.lang3.SerializationUtils;
 import org.junit.Test;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -43,8 +43,7 @@ public class ModificationPayloadTest {
         assertEquals("getPath", writePath, write.getPath());
         assertEquals("getData", writeData, write.getData());
 
-        ModificationPayload cloned =
-                (ModificationPayload) SerializationUtils.clone(payload);
+        ModificationPayload cloned = SerializationUtils.clone(payload);
 
         deserialized = (MutableCompositeModification) payload.getModification();
 
