@@ -143,8 +143,9 @@ public final class XmlElement {
     }
 
     public String getName() {
-        if (element.getLocalName()!=null && !element.getLocalName().equals(DEFAULT_NAMESPACE_PREFIX)){
-            return element.getLocalName();
+        final String localName = element.getLocalName();
+        if (!Strings.isNullOrEmpty(localName)){
+            return localName;
         }
         return element.getTagName();
     }
