@@ -7,9 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
-
 abstract class ShardDataTreeTransactionParent {
     abstract void abortTransaction(AbstractShardDataTreeTransaction<?> transaction);
-    abstract DOMStoreThreePhaseCommitCohort finishTransaction(ReadWriteShardDataTreeTransaction transaction);
+    abstract ShardDataTreeCohort finishTransaction(ReadWriteShardDataTreeTransaction transaction);
 }

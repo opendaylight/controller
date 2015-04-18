@@ -21,14 +21,14 @@ import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.controller.md.sal.dom.store.impl.DOMImmutableDataChangeEvent;
 import org.opendaylight.controller.md.sal.dom.store.impl.ResolveDataChangeEventsTask;
 import org.opendaylight.controller.md.sal.dom.store.impl.tree.ListenerTree;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateTip;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidates;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.TipProducingDataTree;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -93,7 +93,7 @@ public final class ShardDataTree extends ShardDataTreeTransactionParent {
         return ensureTransactionChain(chainId).newReadWriteTransaction(txId);
     }
 
-    void notifyListeners(final DataTreeCandidateTip candidate) {
+    void notifyListeners(final DataTreeCandidate candidate) {
         LOG.debug("Notifying listeners on candidate {}", candidate);
 
         // DataTreeChanges first, as they are more light-weight
@@ -152,15 +152,50 @@ public final class ShardDataTree extends ShardDataTreeTransactionParent {
         return new SimpleEntry<>(reg, event);
     }
 
+    private static void applyNode(final DataTreeModification mod, final YangInstanceIdentifier path, final DataTreeCandidateNode node) {
+        switch (node.getModificationType()) {
+        case DELETE:
+            mod.delete(path);
+            break;
+        case SUBTREE_MODIFIED:
+            for (DataTreeCandidateNode child : node.getChildNodes()) {
+                applyNode(mod, path.node(child.getIdentifier()), child);
+            }
+            break;
+        case UNMODIFIED:
+            // No-op
+            break;
+        case WRITE:
+            mod.write(path, node.getDataAfter().get());
+            break;
+        default:
+            throw new IllegalArgumentException("Unsupported modification " + node.getModificationType());
+        }
+    }
+
+    void applyForeignCandidate(final String identifier, final DataTreeCandidate foreign) throws DataValidationFailedException {
+        LOG.debug("Applying foreign transaction {}", identifier);
+
+        final DataTreeModification mod = dataTree.takeSnapshot().newModification();
+        applyNode(mod, foreign.getRootPath(), foreign.getRootNode());
+        mod.ready();
+
+        dataTree.validate(mod);
+        final DataTreeCandidate candidate = dataTree.prepare(mod);
+        dataTree.commit(candidate);
+        notifyListeners(candidate);
+    }
+
     @Override
     void abortTransaction(final AbstractShardDataTreeTransaction<?> transaction) {
         // Intentional no-op
     }
 
     @Override
-    DOMStoreThreePhaseCommitCohort finishTransaction(final ReadWriteShardDataTreeTransaction transaction) {
+    ShardDataTreeCohort finishTransaction(final ReadWriteShardDataTreeTransaction transaction) {
         final DataTreeModification snapshot = transaction.getSnapshot();
         snapshot.ready();
-        return new ShardDataTreeCohort(this, snapshot);
+        return new SimpleShardDataTreeCohort(this, snapshot);
     }
+
 }
