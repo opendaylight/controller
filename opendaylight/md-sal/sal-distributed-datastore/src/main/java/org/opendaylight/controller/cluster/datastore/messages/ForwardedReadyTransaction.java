@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore.messages;
 
+import org.opendaylight.controller.cluster.datastore.ShardDataTreeCohort;
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 
 /**
  * Transaction ReadyTransaction message that is forwarded to the local Shard from the ShardTransaction.
@@ -17,13 +17,13 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCoh
  */
 public class ForwardedReadyTransaction {
     private final String transactionID;
-    private final DOMStoreThreePhaseCommitCohort cohort;
+    private final ShardDataTreeCohort cohort;
     private final Modification modification;
     private final boolean returnSerialized;
     private final short txnClientVersion;
 
     public ForwardedReadyTransaction(String transactionID, short txnClientVersion,
-            DOMStoreThreePhaseCommitCohort cohort, Modification modification,
+            ShardDataTreeCohort cohort, Modification modification,
             boolean returnSerialized) {
         this.transactionID = transactionID;
         this.cohort = cohort;
@@ -36,7 +36,7 @@ public class ForwardedReadyTransaction {
         return transactionID;
     }
 
-    public DOMStoreThreePhaseCommitCohort getCohort() {
+    public ShardDataTreeCohort getCohort() {
         return cohort;
     }
 
