@@ -63,6 +63,9 @@ import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyn
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationByteStringPayload;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationPayload;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.ModificationType;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
@@ -99,9 +102,6 @@ public class Shard extends RaftActor {
     private final Optional<ActorRef> roleChangeNotifier;
 
     private final MessageTracker appendEntriesReplyTracker;
-
-    private final ReadyTransactionReply READY_TRANSACTION_REPLY = new ReadyTransactionReply(
-            Serialization.serializedActorPath(getSelf()));
 
     private final ShardTransactionActorFactory transactionActorFactory;
 
@@ -294,15 +294,21 @@ public class Shard extends RaftActor {
         }
     }
 
+    private static boolean isEmptyCommit(final DataTreeCandidate candidate) {
+        return ModificationType.UNMODIFIED.equals(candidate.getRootNode().getModificationType());
+    }
+
     void continueCommit(final CohortEntry cohortEntry) throws Exception {
+        final DataTreeCandidate candidate = cohortEntry.getCohort().getCandidate();
+
         // If we do not have any followers and we are not using persistence
         // or if cohortEntry has no modifications
         // we can apply modification to the state immediately
-        if((!hasFollowers() && !persistence().isRecoveryApplicable()) || (!cohortEntry.hasModifications())){
-            applyModificationToState(getSender(), cohortEntry.getTransactionID(), cohortEntry.getModification());
+        if ((!hasFollowers() && !persistence().isRecoveryApplicable()) || isEmptyCommit(candidate)) {
+            applyModificationToState(getSender(), cohortEntry.getTransactionID(), candidate);
         } else {
             Shard.this.persistData(getSender(), cohortEntry.getTransactionID(),
-                    new ModificationPayload(cohortEntry.getModification()));
+                DataTreeCandidatePayload.create(candidate));
         }
     }
 
@@ -312,35 +318,7 @@ public class Shard extends RaftActor {
         }
     }
 
-    private void finishCommit(@Nonnull final ActorRef sender, final @Nonnull String transactionID) {
-        // With persistence enabled, this method is called via applyState by the leader strategy
-        // after the commit has been replicated to a majority of the followers.
-
-        CohortEntry cohortEntry = commitCoordinator.getCohortEntryIfCurrent(transactionID);
-        if(cohortEntry == null) {
-            // The transaction is no longer the current commit. This can happen if the transaction
-            // was aborted prior, most likely due to timeout in the front-end. We need to finish
-            // committing the transaction though since it was successfully persisted and replicated
-            // however we can't use the original cohort b/c it was already preCommitted and may
-            // conflict with the current commit or may have been aborted so we commit with a new
-            // transaction.
-            cohortEntry = commitCoordinator.getAndRemoveCohortEntry(transactionID);
-            if(cohortEntry != null) {
-                commitWithNewTransaction(cohortEntry.getModification());
-                sender.tell(CommitTransactionReply.INSTANCE.toSerializable(), getSelf());
-            } else {
-                // This really shouldn't happen - it likely means that persistence or replication
-                // took so long to complete such that the cohort entry was expired from the cache.
-                IllegalStateException ex = new IllegalStateException(
-                        String.format("%s: Could not finish committing transaction %s - no CohortEntry found",
-                                persistenceId(), transactionID));
-                LOG.error(ex.getMessage());
-                sender.tell(new akka.actor.Status.Failure(ex), getSelf());
-            }
-
-            return;
-        }
-
+    private void finishCommit(@Nonnull final ActorRef sender, @Nonnull final String transactionID, @Nonnull final CohortEntry cohortEntry) {
         LOG.debug("{}: Finishing commit for transaction {}", persistenceId(), cohortEntry.getTransactionID());
 
         try {
@@ -362,6 +340,42 @@ public class Shard extends RaftActor {
             shardMBean.incrementFailedTransactionsCount();
         } finally {
             commitCoordinator.currentTransactionComplete(transactionID, true);
+        }
+    }
+
+    private void finishCommit(@Nonnull final ActorRef sender, final @Nonnull String transactionID) {
+        // With persistence enabled, this method is called via applyState by the leader strategy
+        // after the commit has been replicated to a majority of the followers.
+
+        CohortEntry cohortEntry = commitCoordinator.getCohortEntryIfCurrent(transactionID);
+        if (cohortEntry == null) {
+            // The transaction is no longer the current commit. This can happen if the transaction
+            // was aborted prior, most likely due to timeout in the front-end. We need to finish
+            // committing the transaction though since it was successfully persisted and replicated
+            // however we can't use the original cohort b/c it was already preCommitted and may
+            // conflict with the current commit or may have been aborted so we commit with a new
+            // transaction.
+            cohortEntry = commitCoordinator.getAndRemoveCohortEntry(transactionID);
+            if(cohortEntry != null) {
+                try {
+                    store.applyForeignCandidate(transactionID, cohortEntry.getCohort().getCandidate());
+                } catch (DataValidationFailedException e) {
+                    shardMBean.incrementFailedTransactionsCount();
+                    LOG.error("{}: Failed to re-apply transaction {}", persistenceId(), transactionID, e);
+                }
+
+                sender.tell(CommitTransactionReply.INSTANCE.toSerializable(), getSelf());
+            } else {
+                // This really shouldn't happen - it likely means that persistence or replication
+                // took so long to complete such that the cohort entry was expired from the cache.
+                IllegalStateException ex = new IllegalStateException(
+                        String.format("%s: Could not finish committing transaction %s - no CohortEntry found",
+                                persistenceId(), transactionID));
+                LOG.error(ex.getMessage());
+                sender.tell(new akka.actor.Status.Failure(ex), getSelf());
+            }
+        } else {
+            finishCommit(sender, transactionID, cohortEntry);
         }
     }
 
@@ -559,15 +573,25 @@ public class Shard extends RaftActor {
 
     @Override
     protected void applyState(final ActorRef clientActor, final String identifier, final Object data) {
-
-        if(data instanceof ModificationPayload) {
+        if (data instanceof DataTreeCandidatePayload) {
+            if (clientActor == null) {
+                // No clientActor indicates a replica coming from the leader
+                try {
+                    store.applyForeignCandidate(identifier, ((DataTreeCandidatePayload)data).getCandidate());
+                } catch (DataValidationFailedException | IOException e) {
+                    LOG.error("{}: Error applying replica {}", persistenceId(), identifier, e);
+                }
+            } else {
+                // Replication consensus reached, proceed to commit
+                finishCommit(clientActor, identifier);
+            }
+        } else if (data instanceof ModificationPayload) {
             try {
                 applyModificationToState(clientActor, identifier, ((ModificationPayload) data).getModification());
             } catch (ClassNotFoundException | IOException e) {
                 LOG.error("{}: Error extracting ModificationPayload", persistenceId(), e);
             }
-        }
-        else if (data instanceof CompositeModificationPayload) {
+        } else if (data instanceof CompositeModificationPayload) {
             Object modification = ((CompositeModificationPayload) data).getModification();
 
             applyModificationToState(clientActor, identifier, modification);

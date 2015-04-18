@@ -454,7 +454,7 @@ public class ShardTransactionTest extends AbstractActorTest {
     public void testOnReceiveBatchedModificationsReadyWithImmediateCommit() throws Exception {
         new JavaTestKit(getSystem()) {{
 
-            final ActorRef transaction = newTransactionActor(store.newWriteOnlyTransaction(),
+            final ActorRef transaction = newTransactionActor(WO, store.newReadWriteTransaction("test", null),
                     "testOnReceiveBatchedModificationsReadyWithImmediateCommit");
 
             JavaTestKit watcher = new JavaTestKit(getSystem());
