@@ -17,7 +17,6 @@ import org.opendaylight.controller.cluster.raft.RaftActorRecoveryCohort;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationByteStringPayload;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationPayload;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
@@ -75,7 +74,7 @@ class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
     }
 
     private void commitTransaction(ReadWriteShardDataTreeTransaction transaction) {
-        DOMStoreThreePhaseCommitCohort commitCohort = store.finishTransaction(transaction);
+        ShardDataTreeCohort commitCohort = store.finishTransaction(transaction);
         try {
             commitCohort.preCommit().get();
             commitCohort.commit().get();
