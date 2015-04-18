@@ -31,7 +31,6 @@ import org.opendaylight.controller.cluster.datastore.modification.MergeModificat
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
 import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 
 /**
  * @author: syedbahm
@@ -196,7 +195,7 @@ public class ShardWriteTransaction extends ShardTransaction {
 
         LOG.debug("readyTransaction : {}", transactionID);
 
-        DOMStoreThreePhaseCommitCohort cohort =  transaction.ready();
+        ShardDataTreeCohort cohort =  transaction.ready();
 
         getShardActor().forward(new ForwardedReadyTransaction(transactionID, getClientTxVersion(),
                 cohort, compositeModification, returnSerialized, doImmediateCommit), getContext());
