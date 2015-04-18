@@ -16,7 +16,6 @@ import org.opendaylight.controller.md.sal.dom.spi.AbstractDOMDataTreeChangeListe
 import org.opendaylight.controller.md.sal.dom.spi.AbstractRegistrationTree;
 import org.opendaylight.controller.md.sal.dom.spi.RegistrationTreeNode;
 import org.opendaylight.controller.md.sal.dom.spi.RegistrationTreeSnapshot;
-import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
@@ -43,7 +42,7 @@ public abstract class AbstractDOMStoreTreeChangePublisher extends AbstractRegist
 
     /**
      * Callback notifying the subclass that the specified registration is being closed and it's user no longer
-     * wishes to receive notifications. This notification is invoked while the {@link ListenerRegistration#close()}
+     * wishes to receive notifications. This notification is invoked while the {@link org.opendaylight.yangtools.concepts.ListenerRegistration#close()}
      * method is executing. Subclasses can use this callback to properly remove any delayed notifications pending
      * towards the registration.
      *
@@ -70,7 +69,7 @@ public abstract class AbstractDOMStoreTreeChangePublisher extends AbstractRegist
     }
 
     @Override
-    public final <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerTreeChangeListener(final YangInstanceIdentifier treeId, final L listener) {
+    public final <L extends DOMDataTreeChangeListener> AbstractDOMDataTreeChangeListenerRegistration<L> registerTreeChangeListener(final YangInstanceIdentifier treeId, final L listener) {
         // Take the write lock
         takeLock();
         try {
