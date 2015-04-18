@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_a204c87e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTreeTransactionChain.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-18T22:18:19Z",
+      "side": 1,
+      "message": "OK - we can refactor that later.",
+      "parentUuid": "3aa0d159_e2c73063",
+      "revId": "7e29f78ed7588981f767bc2bb09fdf19a5e4f4d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_b731680d",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTreeTransactionParent.java",
         "patchSetId": 16
@@ -66,6 +84,24 @@
       "side": 1,
       "message": "This is non-public, so we are in control of the two implementations.\n\nAn abstract class defines in which slots its methods are, hence the virtual call overhead should be very slightly lower.",
       "parentUuid": "3aa0d159_b731680d",
+      "revId": "7e29f78ed7588981f767bc2bb09fdf19a5e4f4d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_c209d496",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTreeTransactionParent.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-18T22:18:19Z",
+      "side": 1,
+      "message": "Fair enough - either way works - just wondering.",
+      "parentUuid": "3aa0d159_02c57c5a",
       "revId": "7e29f78ed7588981f767bc2bb09fdf19a5e4f4d9",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -142,6 +178,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_62fec06d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardRecoveryCoordinator.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-18T22:18:19Z",
+      "side": 1,
+      "message": "Both call sites end up with a DataTreeModification so it seems like the other one could side step 3PC as well.  Neither site wants listener notifications or replication/persistence callouts as we\u0027re recovering from persistence (no listeners could be registered at this point - in fact the Shard is not ready/able to accept \"normal\" messages until akka is done with persistence recovery).\n\nIt doesn\u0027t matter either way at this point except for consistency.",
+      "parentUuid": "3aa0d159_82b0acf5",
+      "revId": "7e29f78ed7588981f767bc2bb09fdf19a5e4f4d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_22c43891",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardWriteTransaction.java",
         "patchSetId": 16
@@ -212,6 +266,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_8203cc72",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/modification/Modification.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-18T22:18:19Z",
+      "side": 1,
+      "message": "It\u0027s public only b/c it\u0027s in a separate package - it\u0027s only used in this bundle/project. We can clean this up later.",
+      "parentUuid": "3aa0d159_4292a458",
+      "revId": "7e29f78ed7588981f767bc2bb09fdf19a5e4f4d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_6241e00a",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTransactionFailureTest.java",
         "patchSetId": 16
@@ -241,6 +313,24 @@
       "side": 1,
       "message": "Not really, but they are used quite a lot below. I can change them to static imports, if you like.",
       "parentUuid": "3aa0d159_6241e00a",
+      "revId": "7e29f78ed7588981f767bc2bb09fdf19a5e4f4d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_22f8b87b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTransactionFailureTest.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-18T22:18:19Z",
+      "side": 1,
+      "message": "No - it\u0027s fine - not a big deal.",
+      "parentUuid": "3aa0d159_e29e5063",
       "revId": "7e29f78ed7588981f767bc2bb09fdf19a5e4f4d9",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
