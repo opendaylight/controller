@@ -205,8 +205,12 @@ public class InMemoryDOMDataStore extends TransactionReadyPrototype implements D
     }
 
     @Override
-    public <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerTreeChangeListener(final YangInstanceIdentifier treeId, final L listener) {
-        return changePublisher.registerTreeChangeListener(treeId, listener);
+    public synchronized <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerTreeChangeListener(final YangInstanceIdentifier treeId, final L listener) {
+        /*
+         * Make sure commit is not occurring right now. Listener has to be
+         * registered and its state capture enqueued at a consistent point.
+         */
+        return changePublisher.registerTreeChangeListener(treeId, listener, dataTree.takeSnapshot());
     }
 
     @Override
@@ -224,7 +228,7 @@ public class InMemoryDOMDataStore extends TransactionReadyPrototype implements D
         return name + "-" + txCounter.getAndIncrement();
     }
 
-    private static void warnDebugContext(AbstractDOMStoreTransaction<?> transaction) {
+    private static void warnDebugContext(final AbstractDOMStoreTransaction<?> transaction) {
         final Throwable ctx = transaction.getDebugContext();
         if (ctx != null) {
             LOG.warn("Transaction {} has been allocated in the following context", transaction.getIdentifier(), ctx);

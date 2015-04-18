@@ -70,7 +70,7 @@ public abstract class AbstractDOMStoreTreeChangePublisher extends AbstractRegist
     }
 
     @Override
-    public final <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerTreeChangeListener(final YangInstanceIdentifier treeId, final L listener) {
+    public final <L extends DOMDataTreeChangeListener> AbstractDOMDataTreeChangeListenerRegistration<L> registerTreeChangeListener(final YangInstanceIdentifier treeId, final L listener) {
         // Take the write lock
         takeLock();
         try {
