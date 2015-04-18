@@ -9,12 +9,7 @@ package org.opendaylight.controller.cluster.datastore;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import javax.annotation.concurrent.NotThreadSafe;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
-import org.opendaylight.controller.sal.core.spi.data.ForwardingDOMStoreThreePhaseCommitCohort;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,17 +72,17 @@ final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent
     }
 
     @Override
-    protected DOMStoreThreePhaseCommitCohort finishTransaction(final ReadWriteShardDataTreeTransaction transaction) {
+    protected ShardDataTreeCohort finishTransaction(final ReadWriteShardDataTreeTransaction transaction) {
         Preconditions.checkState(openTransaction != null, "Attempted to finish transaction %s while none is outstanding", transaction);
 
         // dataTree is finalizing ready the transaction, we just record it for the next
         // transaction in chain
-        final DOMStoreThreePhaseCommitCohort delegate = dataTree.finishTransaction(transaction);
+        final ShardDataTreeCohort delegate = dataTree.finishTransaction(transaction);
         openTransaction = null;
         previousTx = transaction;
         LOG.debug("Committing transaction {}", transaction);
 
-        return new CommitCohort(transaction, delegate);
+        return new ChainedCommitCohort(this, transaction, delegate);
     }
 
     @Override
@@ -95,40 +90,9 @@ final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent
         return MoreObjects.toStringHelper(this).add("id", chainId).toString();
     }
 
-    private final class CommitCohort extends ForwardingDOMStoreThreePhaseCommitCohort {
-        private final ReadWriteShardDataTreeTransaction transaction;
-        private final DOMStoreThreePhaseCommitCohort delegate;
-
-        CommitCohort(final ReadWriteShardDataTreeTransaction transaction, final DOMStoreThreePhaseCommitCohort delegate) {
-            this.transaction = Preconditions.checkNotNull(transaction);
-            this.delegate = Preconditions.checkNotNull(delegate);
-        }
-
-        @Override
-        protected DOMStoreThreePhaseCommitCohort delegate() {
-            return delegate;
-        }
-
-        @Override
-        public ListenableFuture<Void> commit() {
-            final ListenableFuture<Void> ret = super.commit();
-
-            Futures.addCallback(ret, new FutureCallback<Void>() {
-                @Override
-                public void onSuccess(Void result) {
-                    if (transaction.equals(previousTx)) {
-                        previousTx = null;
-                    }
-                    LOG.debug("Committed transaction {}", transaction);
-                }
-
-                @Override
-                public void onFailure(Throwable t) {
-                    LOG.error("Transaction {} commit failed, cannot recover", transaction, t);
-                }
-            });
-
-            return ret;
+    void clearTransaction(ReadWriteShardDataTreeTransaction transaction) {
+        if (transaction.equals(previousTx)) {
+            previousTx = null;
         }
     }
 }
