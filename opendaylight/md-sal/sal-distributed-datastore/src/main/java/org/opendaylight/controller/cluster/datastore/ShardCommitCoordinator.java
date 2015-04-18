@@ -30,7 +30,6 @@ import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionRe
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
 import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.slf4j.Logger;
 
 /**
@@ -42,7 +41,7 @@ public class ShardCommitCoordinator {
 
     // Interface hook for unit tests to replace or decorate the DOMStoreThreePhaseCommitCohorts.
     public interface CohortDecorator {
-        DOMStoreThreePhaseCommitCohort decorate(String transactionID, DOMStoreThreePhaseCommitCohort actual);
+        ShardDataTreeCohort decorate(String transactionID, ShardDataTreeCohort actual);
     }
 
     private final Cache<String, CohortEntry> cohortCache;
@@ -411,8 +410,7 @@ public class ShardCommitCoordinator {
 
     static class CohortEntry {
         private final String transactionID;
-        private DOMStoreThreePhaseCommitCohort cohort;
-        private final MutableCompositeModification compositeModification;
+        private ShardDataTreeCohort cohort;
         private final ReadWriteShardDataTreeTransaction transaction;
         private ActorRef replySender;
         private Shard shard;
@@ -420,16 +418,14 @@ public class ShardCommitCoordinator {
         private boolean doImmediateCommit;
 
         CohortEntry(String transactionID, ReadWriteShardDataTreeTransaction transaction) {
-            this.compositeModification = new MutableCompositeModification();
             this.transaction = Preconditions.checkNotNull(transaction);
             this.transactionID = transactionID;
         }
 
-        CohortEntry(String transactionID, DOMStoreThreePhaseCommitCohort cohort,
+        CohortEntry(String transactionID, ShardDataTreeCohort cohort,
                 MutableCompositeModification compositeModification) {
             this.transactionID = transactionID;
             this.cohort = cohort;
-            this.compositeModification = compositeModification;
             this.transaction = null;
         }
 
@@ -445,17 +441,12 @@ public class ShardCommitCoordinator {
             return transactionID;
         }
 
-        DOMStoreThreePhaseCommitCohort getCohort() {
+        ShardDataTreeCohort getCohort() {
             return cohort;
         }
 
-        MutableCompositeModification getModification() {
-            return compositeModification;
-        }
-
         void applyModifications(Iterable<Modification> modifications) {
-            for(Modification modification: modifications) {
-                compositeModification.addModification(modification);
+            for (Modification modification : modifications) {
                 modification.apply(transaction.getSnapshot());
             }
         }
@@ -495,10 +486,6 @@ public class ShardCommitCoordinator {
 
         void setShard(Shard shard) {
             this.shard = shard;
-        }
-
-        boolean hasModifications(){
-            return compositeModification.getModifications().size() > 0;
         }
     }
 }
