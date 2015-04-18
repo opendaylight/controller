@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_e2c73063",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTreeTransactionChain.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-04-18T20:04:34Z",
+      "side": 1,
+      "message": "Removing three-phase commit is the intent (as well as the use of futures unless persistence requires them). I kept DOMStoreTreePhaseCommit to minimize the churn in tests and inside the component.",
+      "parentUuid": "3aa0d159_77e760e5",
+      "revId": "7e29f78ed7588981f767bc2bb09fdf19a5e4f4d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_b731680d",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTreeTransactionParent.java",
         "patchSetId": 16
@@ -30,6 +48,24 @@
       "writtenOn": "2015-04-18T17:56:04Z",
       "side": 1,
       "message": "Why not interface here?",
+      "revId": "7e29f78ed7588981f767bc2bb09fdf19a5e4f4d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_02c57c5a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTreeTransactionParent.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-04-18T20:04:34Z",
+      "side": 1,
+      "message": "This is non-public, so we are in control of the two implementations.\n\nAn abstract class defines in which slots its methods are, hence the virtual call overhead should be very slightly lower.",
+      "parentUuid": "3aa0d159_b731680d",
       "revId": "7e29f78ed7588981f767bc2bb09fdf19a5e4f4d9",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_c2a6b4c1",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardRecoveryCoordinator.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-04-18T20:04:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3aa0d159_62ca40a3",
+      "revId": "7e29f78ed7588981f767bc2bb09fdf19a5e4f4d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_82cf4cb0",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardRecoveryCoordinator.java",
         "patchSetId": 16
@@ -64,6 +118,24 @@
       "writtenOn": "2015-04-18T17:56:04Z",
       "side": 1,
       "message": "Why is this different than the modification code above? Ie, above, we create a ReadWriteShardDataTreeTransaction and commit thru that but here we don\u0027t.",
+      "revId": "7e29f78ed7588981f767bc2bb09fdf19a5e4f4d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_82b0acf5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardRecoveryCoordinator.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-04-18T20:04:34Z",
+      "side": 1,
+      "message": "I am not sure what the difference between the callsite above and here is. This side-steps the futures, but more importantly also listener notification, and replication/persistence callouts (once they are in).",
+      "parentUuid": "3aa0d159_82cf4cb0",
       "revId": "7e29f78ed7588981f767bc2bb09fdf19a5e4f4d9",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_22951840",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardWriteTransaction.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-04-18T20:04:34Z",
+      "side": 1,
+      "message": "It could, but that would change the current behavior. I thought of that and it failed in UTs ;-)",
+      "parentUuid": "3aa0d159_22c43891",
+      "revId": "7e29f78ed7588981f767bc2bb09fdf19a5e4f4d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_e2bdf003",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/modification/Modification.java",
         "patchSetId": 16
@@ -98,6 +188,24 @@
       "writtenOn": "2015-04-18T17:56:04Z",
       "side": 1,
       "message": "Do we need this method anymore?",
+      "revId": "7e29f78ed7588981f767bc2bb09fdf19a5e4f4d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_4292a458",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/modification/Modification.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-04-18T20:04:34Z",
+      "side": 1,
+      "message": "Not really, but I did not want to break backwards compatibility (public interface).",
+      "parentUuid": "3aa0d159_e2bdf003",
       "revId": "7e29f78ed7588981f767bc2bb09fdf19a5e4f4d9",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_e29e5063",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTransactionFailureTest.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-04-18T20:04:34Z",
+      "side": 1,
+      "message": "Not really, but they are used quite a lot below. I can change them to static imports, if you like.",
+      "parentUuid": "3aa0d159_6241e00a",
+      "revId": "7e29f78ed7588981f767bc2bb09fdf19a5e4f4d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_82466c22",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTransactionTest.java",
         "patchSetId": 16
@@ -132,6 +258,24 @@
       "writtenOn": "2015-04-18T17:56:04Z",
       "side": 1,
       "message": "Do we really need 2-letter shortcuts?",
+      "revId": "7e29f78ed7588981f767bc2bb09fdf19a5e4f4d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_029c9c68",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTransactionTest.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-04-18T20:04:34Z",
+      "side": 1,
+      "message": "Same as in other file, and as you can see I failed to shorten a few instances below...",
+      "parentUuid": "3aa0d159_82466c22",
       "revId": "7e29f78ed7588981f767bc2bb09fdf19a5e4f4d9",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
