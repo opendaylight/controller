@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_e2f17096",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTree.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-18T22:35:14Z",
+      "side": 1,
+      "message": "Would this currently break anything w/o a recursive node? Do this need to be addressed this in this patch or a follow-up? FIXME\u0027s look ominous (especially when I don\u0027t understand it :)).",
+      "revId": "e50e16fcedd6091b5f27da81d9d1861792422595",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
