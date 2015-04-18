@@ -27,9 +27,9 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateTip;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidates;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.TipProducingDataTree;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.spi.DefaultDataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
@@ -145,8 +145,7 @@ public final class ShardDataTree extends ShardDataTreeTransactionParent {
         final Optional<NormalizedNode<?, ?>> currentState = dataTree.takeSnapshot().readNode(path);
         final DataTreeCandidate event;
         if (currentState.isPresent()) {
-            // FIXME: we need a recursive candidate node
-            event = new DefaultDataTreeCandidate(path, null);
+            event = DataTreeCandidates.fromNormalizedNode(path, currentState.get());
         } else {
             event = null;
         }
