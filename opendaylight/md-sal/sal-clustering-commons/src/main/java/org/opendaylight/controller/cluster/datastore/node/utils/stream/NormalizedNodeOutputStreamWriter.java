@@ -203,6 +203,7 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
 
     @Override
     public void close() throws IOException {
+        flush();
     }
 
     @Override
@@ -278,7 +279,7 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
         }
     }
 
-    private void writePathArgument(YangInstanceIdentifier.PathArgument pathArgument) throws IOException {
+    public void writePathArgument(YangInstanceIdentifier.PathArgument pathArgument) throws IOException {
 
         byte type = PathArgumentTypes.getSerializablePathArgumentType(pathArgument);
 
