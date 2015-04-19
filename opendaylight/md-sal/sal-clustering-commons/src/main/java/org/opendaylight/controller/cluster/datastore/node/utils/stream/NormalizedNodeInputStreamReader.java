@@ -337,7 +337,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
         return children;
     }
 
-    private PathArgument readPathArgument() throws IOException {
+    public PathArgument readPathArgument() throws IOException {
         // read Type
         int type = input.readByte();
 
