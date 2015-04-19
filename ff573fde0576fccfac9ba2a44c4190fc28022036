@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_fdffd1a8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ChainedTransactionProxy.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-04-19T11:46:34Z",
+      "side": 1,
+      "message": "Future\u003c?\u003e is more concise, but can we perhaps make the type of the object a generic argument?",
+      "revId": "ff573fde0576fccfac9ba2a44c4190fc28022036",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_9d2c8d4c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/OperationCallback.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-04-19T11:46:34Z",
+      "side": 1,
+      "message": "can we make this interface package-private?",
+      "revId": "ff573fde0576fccfac9ba2a44c4190fc28022036",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_7d2bc130",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 379,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-04-19T11:46:34Z",
+      "side": 1,
+      "message": "I think this could be done in a type-safe way",
+      "revId": "ff573fde0576fccfac9ba2a44c4190fc28022036",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_1d207d48",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 386,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-04-19T11:46:34Z",
+      "side": 1,
+      "message": "Can we encapsulate this reference into an explicit class? It looks like a backchannel between multiple users, all of whom need to do the right thing. Having that \u0027right thing\u0027 as a class would help clarity -- it is not easy to hunt for AtomicReference.get() callers.",
+      "revId": "ff573fde0576fccfac9ba2a44c4190fc28022036",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_5d26056a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/AbstractTransactionProxyTest.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 451,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-04-19T11:46:34Z",
+      "side": 1,
+      "message": "Iterator\u003c?\u003e ?",
+      "revId": "ff573fde0576fccfac9ba2a44c4190fc28022036",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
