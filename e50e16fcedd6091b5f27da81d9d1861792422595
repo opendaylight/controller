@@ -16,6 +16,24 @@
       "revId": "e50e16fcedd6091b5f27da81d9d1861792422595",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_3d6f7994",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTree.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-04-19T08:25:26Z",
+      "side": 1,
+      "message": "Addressed in https://git.opendaylight.org/gerrit/#/c/18587/, but has a YT dependency -- that\u0027s why I kept it separate.",
+      "parentUuid": "3aa0d159_e2f17096",
+      "revId": "e50e16fcedd6091b5f27da81d9d1861792422595",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
