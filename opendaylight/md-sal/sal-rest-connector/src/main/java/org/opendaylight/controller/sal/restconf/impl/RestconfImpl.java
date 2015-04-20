@@ -62,8 +62,10 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdent
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.AugmentationNode;
+import org.opendaylight.yangtools.yang.data.api.schema.ChoiceNode;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
+import org.opendaylight.yangtools.yang.data.api.schema.DataContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafSetEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
@@ -672,8 +674,9 @@ public class RestconfImpl implements RestconfService {
         final InstanceIdentifierContext<?> iiWithData = payload.getInstanceIdentifierContext();
 
         validateInput(iiWithData.getSchemaNode(), payload);
-        validateTopLevelNodeName(payload, iiWithData.getInstanceIdentifier());
-        validateListKeysEqualityInPayloadAndUri(iiWithData, payload.getData());
+        final NormalizedNode<?, ?> topLevelNode = findTopLevelNode(payload.getData());
+        validateTopLevelNodeName(topLevelNode, iiWithData.getInstanceIdentifier());
+        validateListKeysEqualityInPayloadAndUri(iiWithData, topLevelNode);
 
         final DOMMountPoint mountPoint = iiWithData.getMountPoint();
         final YangInstanceIdentifier normalizedII = iiWithData.getInstanceIdentifier();
@@ -718,16 +721,30 @@ public class RestconfImpl implements RestconfService {
         return Response.status(Status.OK).build();
     }
 
-    private void validateTopLevelNodeName(final NormalizedNodeContext node,
+    private NormalizedNode<?, ?> findTopLevelNode(NormalizedNode<?, ?> node) {
+        NormalizedNode<?, ?> result = node;
+        if (result instanceof AugmentationNode || result instanceof ChoiceNode) {
+            final Iterator<DataContainerChild<? extends PathArgument, ?>>childrenIter =
+                    ((DataContainerNode<?>) result).getValue().iterator();
+            if (!childrenIter.hasNext()) {
+                throw new RestconfDocumentedException("Augmentation or choice has no children, " +
+                        "cannot proceed to find top level node", ErrorType.APPLICATION, ErrorTag.MALFORMED_MESSAGE);
+            }
+            result = findTopLevelNode(childrenIter.next());
+        }
+        return result;
+    }
+
+    private void validateTopLevelNodeName(final NormalizedNode<?, ?> node,
             final YangInstanceIdentifier identifier) {
 
-        final String payloadName = node.getData().getNodeType().getLocalName();
         final Iterator<PathArgument> pathArguments = identifier.getReversePathArguments().iterator();
+        final String payloadName = node.getNodeType().getLocalName();
 
         //no arguments
         if ( ! pathArguments.hasNext()) {
             //no "data" payload
-            if ( ! node.getData().getNodeType().equals(NETCONF_BASE_QNAME)) {
+            if ( ! node.getNodeType().equals(NETCONF_BASE_QNAME)) {
                 throw new RestconfDocumentedException("Instance identifier has to contain at least one path argument",
                         ErrorType.PROTOCOL, ErrorTag.MALFORMED_MESSAGE);
             }
