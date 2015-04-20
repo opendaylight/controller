@@ -8,7 +8,6 @@
 package org.opendaylight.controller.netconf.cli.reader.custom;
 
 import static org.opendaylight.controller.netconf.cli.io.IOUtil.isSkipInput;
-
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -34,8 +33,10 @@ import org.opendaylight.controller.netconf.cli.reader.AbstractReader;
 import org.opendaylight.controller.netconf.cli.reader.ReadingException;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeAttrBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
@@ -89,7 +90,7 @@ public class ConfigReader extends AbstractReader<DataSchemaNode> {
             filterPartsQNames.add(qName);
         }
 
-        List<NormalizedNode<?, ?>> previous = readInnerNode(rawValue);
+        List<? extends NormalizedNode<?, ?>> previous = readInnerNode(rawValue);
 
         for (final QName qName : Lists.reverse(filterPartsQNames).subList(1, filterPartsQNames.size())) {
             previous = Collections.<NormalizedNode<?, ?>>singletonList(
@@ -99,12 +100,15 @@ public class ConfigReader extends AbstractReader<DataSchemaNode> {
             );
         }
 
-        final DataContainerChild<?, ?> newNode = previous == null ? null
-                : ImmutableContainerNodeBuilder.create()
-                        .withNodeIdentifier(new NodeIdentifier(schemaNode.getQName()))
-                        .withValue((Collection) previous).build();
+        if (previous == null) {
+            return Collections.singletonList(null);
+        }
 
-        return Collections.<NormalizedNode<?, ?>> singletonList(newNode);
+        final DataContainerNodeAttrBuilder<NodeIdentifier, ContainerNode> builder = ImmutableContainerNodeBuilder.create();
+        builder.withNodeIdentifier(new NodeIdentifier(schemaNode.getQName()));
+        builder.withValue((Collection<DataContainerChild<?, ?>>) previous);
+
+        return Collections.<NormalizedNode<?, ?>> singletonList(builder.build());
     }
 
     private List<NormalizedNode<?, ?>> readInnerNode(final String pathString) throws ReadingException {
