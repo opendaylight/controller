@@ -24,7 +24,8 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
  * @see AsyncDataBroker
  * @see TransactionChainFactory
  */
-public interface DataBroker extends TransactionFactory, AsyncDataBroker<InstanceIdentifier<?>, DataObject, DataChangeListener>, BindingService, TransactionChainFactory<InstanceIdentifier<?>, DataObject> {
+public interface DataBroker extends  AsyncDataBroker<InstanceIdentifier<?>, DataObject, DataChangeListener>,
+    TransactionChainFactory<InstanceIdentifier<?>, DataObject>, TransactionFactory, BindingService, DataTreeChangeService {
     /**
      * {@inheritDoc}
      */
