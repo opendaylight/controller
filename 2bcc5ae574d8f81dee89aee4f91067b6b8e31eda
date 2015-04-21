@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_e9d87055",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCandidatePayload.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-21T12:11:41Z",
+      "side": 1,
+      "message": "The reason I used Externalizable in the other payload class is b/c it has a smaller footprint and less overhead then Serializable. Serializable serializes all the class info while Externalizable serializes just the class name. With Externalizable you lose some of the automatic compatibility conversions that Serializable provides but that comes at a cost. Since this class basically wraps another serialized instance and just serializes a byte[], we don\u0027t really need the sophisticated compatibility functionality that Serializable provides. Since instances of this class will be heavy hitters in persistence and replication, we should optimize the ser/der as much as possible so I think we should use Externalizable here.\n\nWith either way we should handle the ser/der ourselves (i.e. readObject/writeObject with Serializable) so we can write the bytes directly to the stream instead of serializing a byte[] instance which, again, will add all the class info as well.",
+      "revId": "2bcc5ae574d8f81dee89aee4f91067b6b8e31eda",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_6948e02d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DeletedDataTreeCandidateNode.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-21T12:11:41Z",
+      "side": 1,
+      "message": "oops",
+      "revId": "2bcc5ae574d8f81dee89aee4f91067b6b8e31eda",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_09559cc5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ModifiedDataTreeCandidateNode.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-21T12:11:41Z",
+      "side": 1,
+      "message": "oops",
+      "revId": "2bcc5ae574d8f81dee89aee4f91067b6b8e31eda",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
