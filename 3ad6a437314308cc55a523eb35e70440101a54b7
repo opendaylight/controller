@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_ceb6dadc",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ChildDataTreeCandidateNode.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-04-21T11:32:56Z",
+      "side": 1,
+      "message": "I am not sure what you mean",
+      "parentUuid": "3aa0d159_b59e3d55",
+      "revId": "3ad6a437314308cc55a523eb35e70440101a54b7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_75a0b590",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCandidatePayload.java",
         "patchSetId": 10
@@ -47,6 +65,30 @@
       "writtenOn": "2015-04-20T18:42:07Z",
       "side": 1,
       "message": "Need serializedVersionUID",
+      "range": {
+        "startLine": 34,
+        "startChar": 64,
+        "endLine": 34,
+        "endChar": 78
+      },
+      "revId": "3ad6a437314308cc55a523eb35e70440101a54b7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_0e77e203",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCandidatePayload.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-04-21T11:32:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3aa0d159_75a0b590",
       "range": {
         "startLine": 34,
         "startChar": 64,
@@ -76,6 +118,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_8e445275",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCandidatePayload.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-04-21T11:32:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3aa0d159_b53abd34",
+      "revId": "3ad6a437314308cc55a523eb35e70440101a54b7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_d5b669dc",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCandidatePayload.java",
         "patchSetId": 10
@@ -87,6 +147,24 @@
       "writtenOn": "2015-04-20T18:42:07Z",
       "side": 1,
       "message": "Add version field for future compatibility (see MutableCompositeModification).",
+      "revId": "3ad6a437314308cc55a523eb35e70440101a54b7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_ce4a5a83",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCandidatePayload.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-04-21T11:32:56Z",
+      "side": 1,
+      "message": "The combination of this class and its serialversion is sufficient to capture the serialization format in Java world. I am not sure why we would like to reuse this (package-protected) class with a different format.",
+      "parentUuid": "3aa0d159_d5b669dc",
       "revId": "3ad6a437314308cc55a523eb35e70440101a54b7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -110,6 +188,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_4e0c0a43",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCandidatePayload.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-04-21T11:32:56Z",
+      "side": 1,
+      "message": "Switched to Serializable, as that is completely sufficient.",
+      "parentUuid": "3aa0d159_35aa2d71",
+      "revId": "3ad6a437314308cc55a523eb35e70440101a54b7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_f5bb65c2",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCandidatePayload.java",
         "patchSetId": 10
@@ -127,6 +223,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_0e060221",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCandidatePayload.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-04-21T11:32:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3aa0d159_f5bb65c2",
+      "revId": "3ad6a437314308cc55a523eb35e70440101a54b7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_35c1cd2e",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCandidatePayload.java",
         "patchSetId": 10
@@ -138,6 +252,24 @@
       "writtenOn": "2015-04-20T18:42:07Z",
       "side": 1,
       "message": "We shouldn\u0027t de-serialize here - see above comment.",
+      "revId": "3ad6a437314308cc55a523eb35e70440101a54b7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_2e03be10",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCandidatePayload.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 191,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-04-21T11:32:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3aa0d159_35c1cd2e",
       "revId": "3ad6a437314308cc55a523eb35e70440101a54b7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -184,6 +316,30 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_0edb621c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/RootDataTreeCandidateNode.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-04-21T11:32:56Z",
+      "side": 1,
+      "message": "Corrected in ChildDataTreeCandidateNode.",
+      "parentUuid": "3aa0d159_756af51b",
+      "range": {
+        "startLine": 36,
+        "startChar": 26,
+        "endLine": 36,
+        "endChar": 55
+      },
+      "revId": "3ad6a437314308cc55a523eb35e70440101a54b7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_3546adc0",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/RootDataTreeCandidateNode.java",
         "patchSetId": 10
@@ -195,6 +351,24 @@
       "writtenOn": "2015-04-20T18:42:07Z",
       "side": 1,
       "message": "This could be static.",
+      "revId": "3ad6a437314308cc55a523eb35e70440101a54b7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_6ecea65c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/RootDataTreeCandidateNode.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-04-21T11:32:56Z",
+      "side": 1,
+      "message": "Again, I am not sure what you are referring to.",
+      "parentUuid": "3aa0d159_3546adc0",
       "revId": "3ad6a437314308cc55a523eb35e70440101a54b7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
