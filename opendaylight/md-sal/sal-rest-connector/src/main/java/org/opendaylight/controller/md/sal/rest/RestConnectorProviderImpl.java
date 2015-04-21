@@ -130,6 +130,10 @@ public class RestConnectorProviderImpl implements Provider, RestConnector, Schem
             listenerRegistration = null;
         }
 
+        globalSchema = null;
+        schemaMinder = null;
+        restBroker = null;
+
         WebSocketServer.destroyInstance();
         webSocketServerThread.interrupt();
         webSocketServerThread = null;
