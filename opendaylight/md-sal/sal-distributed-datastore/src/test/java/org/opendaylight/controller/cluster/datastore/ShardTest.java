@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.inOrder;
@@ -29,7 +30,6 @@ import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
@@ -59,6 +59,7 @@ import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeList
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListenerReply;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeChangeListener;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeChangeListenerReply;
+import org.opendaylight.controller.cluster.datastore.messages.ShardLeaderStateChanged;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
 import org.opendaylight.controller.cluster.datastore.modification.DeleteModification;
 import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
@@ -2092,14 +2093,16 @@ public class ShardTest extends AbstractShardTest {
 
                 shard.tell(new RegisterRoleChangeListener(), listener);
 
-                // TODO: MessageCollectorActor exists as a test util in both the akka-raft and distributed-datastore
-                // projects. Need to move it to commons as a regular utility and then we can get rid of this arbitrary
-                // sleep.
-                Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
+                MessageCollectorActor.expectFirstMatching(listener, RegisterRoleChangeListenerReply.class);
 
-                List<Object> allMatching = MessageCollectorActor.getAllMatching(listener, RegisterRoleChangeListenerReply.class);
+                ShardLeaderStateChanged leaderStateChanged = MessageCollectorActor.expectFirstMatching(listener,
+                        ShardLeaderStateChanged.class);
+                assertEquals("getLocalShardDataTree present", true,
+                        leaderStateChanged.getLocalShardDataTree().isPresent());
+                assertSame("getLocalShardDataTree", shard.underlyingActor().getDataStore().getDataTree(),
+                        leaderStateChanged.getLocalShardDataTree().get());
 
-                assertEquals(1, allMatching.size());
+                shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
             }
         };
     }
