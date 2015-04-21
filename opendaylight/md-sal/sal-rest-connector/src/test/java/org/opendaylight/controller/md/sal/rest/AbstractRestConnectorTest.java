@@ -33,7 +33,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
  */
 public abstract class AbstractRestConnectorTest {
 
-    protected static RestConnectorProviderImpl restConnector = new RestConnectorProviderImpl();
+    protected static RestConnectorProviderImpl restConnector = RestConnectorProviderImpl.getInstance();
 
     /**
      * Method overwrite actual global schema from RestConnectorImpl
