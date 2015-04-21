@@ -70,11 +70,51 @@ module opendaylight-rest-connector {
                 container put {
                     uses statistics;
                 }
+
+                container delete {
+                    uses statistics;
+                }
             }
 
             container operational {
                 container get {
                     uses statistics;
+                }
+            }
+
+            container success {
+                leaf get {
+                    type uint64;
+                }
+                
+                leaf post {
+                    type uint64;
+                }
+
+                leaf put {
+                    type uint64;
+                }
+
+                leaf delete {
+                    type uint64;
+                }
+            }
+
+            container failure {
+                leaf get {
+                    type uint64;
+                }
+                
+                leaf post {
+                    type uint64;
+                }
+
+                leaf put {
+                    type uint64;
+                }
+
+                leaf delete {
+                    type uint64;
                 }
             }
         }
