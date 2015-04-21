@@ -20,13 +20,19 @@ public class FindPrimary implements Serializable {
 
     private final String shardName;
     private final boolean waitUntilReady;
+    private final boolean canReturnLocalShardState;
 
-    public FindPrimary(String shardName, boolean waitUntilReady){
+    public FindPrimary(String shardName, boolean waitUntilReady) {
+        this(shardName, waitUntilReady, true);
+    }
+
+    public FindPrimary(String shardName, boolean waitUntilReady, boolean canReturnLocalShardState) {
 
         Preconditions.checkNotNull(shardName, "shardName should not be null");
 
         this.shardName = shardName;
         this.waitUntilReady = waitUntilReady;
+        this.canReturnLocalShardState = canReturnLocalShardState;
     }
 
     public String getShardName() {
@@ -37,11 +43,15 @@ public class FindPrimary implements Serializable {
         return waitUntilReady;
     }
 
+    public boolean isCanReturnLocalShardState() {
+        return canReturnLocalShardState;
+    }
+
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("FindPrimary [shardName=").append(shardName).append(", waitUntilReady=").append(waitUntilReady)
-                .append("]");
+                .append(", canReturnLocalShardState=").append(canReturnLocalShardState).append("]");
         return builder.toString();
     }
 }

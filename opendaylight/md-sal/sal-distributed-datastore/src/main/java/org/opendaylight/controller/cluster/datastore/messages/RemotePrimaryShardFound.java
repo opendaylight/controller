@@ -10,12 +10,15 @@ package org.opendaylight.controller.cluster.datastore.messages;
 
 import java.io.Serializable;
 
-public class PrimaryFound implements Serializable {
+/**
+ * Local or remote message sent in reply to FindPrimaryShard to indicate the primary shard is remote to the caller.
+ */
+public class RemotePrimaryShardFound implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final String primaryPath;
 
-    public PrimaryFound(final String primaryPath) {
+    public RemotePrimaryShardFound(final String primaryPath) {
         this.primaryPath = primaryPath;
     }
 
@@ -24,32 +27,9 @@ public class PrimaryFound implements Serializable {
     }
 
     @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
-        PrimaryFound that = (PrimaryFound) o;
-
-        if (!primaryPath.equals(that.primaryPath)) {
-            return false;
-        }
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        return primaryPath.hashCode();
-    }
-
-    @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("PrimaryFound [primaryPath=").append(primaryPath).append("]");
+        builder.append("RemotePrimaryShardFound [primaryPath=").append(primaryPath).append("]");
         return builder.toString();
     }
 }
