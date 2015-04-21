@@ -34,6 +34,8 @@ import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.codec.xml.XmlUtils;
 import org.opendaylight.yangtools.yang.data.impl.schema.transform.dom.parser.DomToNormalizedNodeParserFactory;
+import org.opendaylight.yangtools.yang.model.api.AugmentationSchema;
+import org.opendaylight.yangtools.yang.model.api.AugmentationTarget;
 import org.opendaylight.yangtools.yang.model.api.ChoiceCaseNode;
 import org.opendaylight.yangtools.yang.model.api.ChoiceSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
@@ -126,18 +128,26 @@ public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPro
         final String docRootElm = doc.getDocumentElement().getLocalName();
         final String schemaNodeName = pathContext.getSchemaNode().getQName().getLocalName();
 
+        final DomToNormalizedNodeParserFactory parserFactory =
+                DomToNormalizedNodeParserFactory.getInstance(XmlUtils.DEFAULT_XML_CODEC_PROVIDER, pathContext.getSchemaContext());
+
         if (!schemaNodeName.equalsIgnoreCase(docRootElm)) {
             final DataSchemaNode foundSchemaNode = findSchemaNodeOrParentChoiceByName(schemaNode, docRootElm);
             if (foundSchemaNode != null) {
+                if (schemaNode instanceof AugmentationTarget) {
+                    final AugmentationSchema augmentSchemaNode = findCorrespondingAugment(schemaNode, foundSchemaNode);
+                    if (augmentSchemaNode != null) {
+                        return parserFactory.getAugmentationNodeParser().parse(elements, augmentSchemaNode);
+                    }
+                }
                 schemaNode = foundSchemaNode;
             }
         }
 
         // FIXME the factory instance should be cached if the schema context is the same
-        final DomToNormalizedNodeParserFactory parserFactory =
-                DomToNormalizedNodeParserFactory.getInstance(XmlUtils.DEFAULT_XML_CODEC_PROVIDER, pathContext.getSchemaContext());
 
         NormalizedNode<?, ?> parsed = null;
+
         if(schemaNode instanceof ContainerSchemaNode) {
             return parserFactory.getContainerNodeParser().parse(Collections.singletonList(doc.getDocumentElement()), (ContainerSchemaNode) schemaNode);
         } else if(schemaNode instanceof ListSchemaNode) {
@@ -147,7 +157,6 @@ public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPro
             final ChoiceSchemaNode casted = (ChoiceSchemaNode) schemaNode;
             return parserFactory.getChoiceNodeParser().parse(elements, casted);
         }
-
         // FIXME : add another DataSchemaNode extensions e.g. LeafSchemaNode
 
         return parsed;
@@ -170,6 +179,18 @@ public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPro
                 if (resultFromRecursion != null) {
                     // this returns top choice node in which child element is found
                     return choiceNode;
+                }
+            }
+        }
+        return null;
+    }
+
+    private static AugmentationSchema findCorrespondingAugment(final DataSchemaNode parent, final DataSchemaNode child) {
+        if (parent instanceof AugmentationTarget && !((parent instanceof ChoiceCaseNode) || (parent instanceof ChoiceSchemaNode))) {
+            for (AugmentationSchema augmentation : ((AugmentationTarget) parent).getAvailableAugmentations()) {
+                DataSchemaNode childInAugmentation = augmentation.getDataChildByName(child.getQName());
+                if (childInAugmentation != null) {
+                    return augmentation;
                 }
             }
         }
