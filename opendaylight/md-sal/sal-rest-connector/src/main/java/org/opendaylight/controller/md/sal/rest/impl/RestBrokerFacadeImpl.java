@@ -42,7 +42,6 @@ import org.opendaylight.controller.sal.streams.listeners.ListenerAdapter;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
-import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
@@ -160,6 +159,7 @@ public class RestBrokerFacadeImpl implements RestBrokerFacade {
         return domRpcService.invokeRpc(type, input);
     }
 
+    // Notification
     @Override
     public void registerToListenDataChanges(final LogicalDatastoreType datastore,
             final DataChangeScope scope, final ListenerAdapter listener) {
@@ -198,16 +198,8 @@ public class RestBrokerFacadeImpl implements RestBrokerFacade {
     }
 
     private static final CheckedFuture<Void, TransactionCommitFailedException> postDataViaTransaction(
-            final DOMDataReadWriteTransaction tx, final LogicalDatastoreType ds, final YangInstanceIdentifier parentPath,
+            final DOMDataReadWriteTransaction tx, final LogicalDatastoreType ds, final YangInstanceIdentifier path,
             final NormalizedNode<?, ?> payload, final SchemaContext context) {
-        // FIXME: This is doing correct post for container and list children
-        //        not sure if this will work for choice case
-        final YangInstanceIdentifier path;
-        if(payload instanceof MapEntryNode) {
-            path = parentPath.node(payload.getNodeType()).node(payload.getIdentifier());
-        } else {
-            path = parentPath.node(payload.getIdentifier());
-        }
 
         final ListenableFuture<Optional<NormalizedNode<?, ?>>> futureDatastoreData = tx.read(ds, path);
         try {
@@ -233,7 +225,7 @@ public class RestBrokerFacadeImpl implements RestBrokerFacade {
             final NormalizedNode<?, ?> payload, final SchemaContext context) {
         LOG.trace("Put " + ds.name() + " via Restconf: {}", path);
         ensureParentsByMerge(ds, path, tx, context);
-        tx.put(ds, path, payload);
+        tx.merge(ds, path, payload);
         return tx.submit();
     }
 
