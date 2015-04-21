@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_fff1fe95",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCandidatePayload.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 191,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-04-21T22:46:39Z",
+      "side": 1,
+      "message": "Should we throw UnsupportedOperation here?",
+      "revId": "dc7094927ac1ba2ffa072e9a62ffb322559ed37e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_bf2b76ea",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DeletedDataTreeCandidateNode.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-04-21T22:46:39Z",
+      "side": 1,
+      "message": "Is this the final implementation for this method?",
+      "revId": "dc7094927ac1ba2ffa072e9a62ffb322559ed37e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
