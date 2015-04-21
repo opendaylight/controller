@@ -54,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_298df87b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ChildDataTreeCandidateNode.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-21T14:07:13Z",
+      "side": 1,
+      "message": "I meant that you could define a static ChildDataTreeCandidateNode instance for re-use. However I now see that it takes identifier as a ctor arg so can\u0027t define a static.",
+      "parentUuid": "3aa0d159_ceb6dadc",
+      "revId": "3ad6a437314308cc55a523eb35e70440101a54b7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_75a0b590",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCandidatePayload.java",
         "patchSetId": 10
@@ -369,6 +387,24 @@
       "side": 1,
       "message": "Again, I am not sure what you are referring to.",
       "parentUuid": "3aa0d159_3546adc0",
+      "revId": "3ad6a437314308cc55a523eb35e70440101a54b7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_69da207a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/RootDataTreeCandidateNode.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-21T14:07:13Z",
+      "side": 1,
+      "message": "Creating a static RootDataTreeCandidateNode instance for reuse.",
+      "parentUuid": "3aa0d159_6ecea65c",
       "revId": "3ad6a437314308cc55a523eb35e70440101a54b7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
