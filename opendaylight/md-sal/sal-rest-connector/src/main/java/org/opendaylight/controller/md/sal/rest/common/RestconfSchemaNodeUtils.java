@@ -82,7 +82,7 @@ public class RestconfSchemaNodeUtils {
             }
             throw new RestconfDocumentedException(errMsgBuilder.toString(), ErrorType.PROTOCOL, ErrorTag.UNKNOWN_ELEMENT);
         }
-        RestconfValidationUtils.checkDocumentedError(instantiatedDataNodeContainers.isEmpty(), ErrorType.PROTOCOL,
+        RestconfValidationUtils.checkDocumentedError(( ! instantiatedDataNodeContainers.isEmpty()), ErrorType.PROTOCOL,
                 ErrorTag.UNKNOWN_ELEMENT, "\"" + nodeName + "\" in URI was not found in parent data node");
         return instantiatedDataNodeContainers.get(0);
     }

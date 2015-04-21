@@ -8,7 +8,9 @@
 
 package org.opendaylight.controller.md.sal.rest.common;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -16,12 +18,12 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.Module;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 /**
  * sal-rest-connector
@@ -108,10 +110,13 @@ public class RestconfParsingUtils {
         return list;
     }
 
-    public static QName toQName(final String name) {
+    public static QName toQName(final String name, final SchemaContext schemaContext) {
+        Preconditions.checkArgument(schemaContext != null);
+        Preconditions.checkArgument(( ! Strings.isNullOrEmpty(name)));
+
         final String module = RestconfParsingUtils.toModuleName(name);
         final String node = RestconfParsingUtils.toNodeName(name);
-        final Module m = ControllerContext.getInstance().findModuleByName(module);
+        final Module m = schemaContext.findModuleByName(module, null);
         return m == null ? null : QName.create(m.getQNameModule(), node);
     }
 
