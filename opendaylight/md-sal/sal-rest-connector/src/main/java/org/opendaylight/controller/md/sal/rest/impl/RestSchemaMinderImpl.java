@@ -71,8 +71,7 @@ public class RestSchemaMinderImpl implements RestSchemaMinder {
     private volatile SchemaContext globalSchema;
     private volatile Map<QName, RpcDefinition> qnameToRpc;
 
-    public RestSchemaMinderImpl(@Nonnull final DOMMountPointService mountServ,
-            @Nonnull final SchemaContext schemaContext) {
+    public RestSchemaMinderImpl(@Nonnull final DOMMountPointService mountServ, @Nonnull final SchemaContext schemaContext) {
         mountService = Preconditions.checkNotNull(mountServ);
         tell(schemaContext);
     }
@@ -88,8 +87,9 @@ public class RestSchemaMinderImpl implements RestSchemaMinder {
         qnameToRpc = ImmutableMap.copyOf(newMap);
     }
 
+    @Override
     public RpcDefinition getRpcDefinition(final String name) {
-        final QName qname = RestconfParsingUtils.toQName(name);
+        final QName qname = RestconfParsingUtils.toQName(name, globalSchema);
         return qname != null ? qnameToRpc.get(qname) : null;
     }
 
@@ -138,16 +138,14 @@ public class RestSchemaMinderImpl implements RestSchemaMinder {
     public DOMMountPoint parseUriRequestToMountPoint(final String requestUriIdentifier) {
         RestconfValidationUtils.checkDocumentedError(requestUriIdentifier != null, ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE,
                 "Nullable mountpoint navigation URL");
-        RestconfValidationUtils.checkDocumentedError(( ! requestUriIdentifier.contains(RestconfInternalConstants.MOUNT)),
+        RestconfValidationUtils.checkDocumentedError(requestUriIdentifier.contains(RestconfInternalConstants.MOUNT),
                 ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE, "Missing mountpoint marker in navigation URL");
         RestconfValidationUtils.checkDocumentedError(mountService != null, ErrorType.APPLICATION, ErrorTag.OPERATION_NOT_SUPPORTED,
                 "MountService was not found. Finding behind mount points does not work.");
 
         final String uriToMountpoint = requestUriIdentifier.substring(
                 0, requestUriIdentifier.indexOf(RestconfInternalConstants.MOUNT));
-        final List<String> listPathArg = RestconfParsingUtils.urlPathArgsDecode(
-                RestconfInternalConstants.SLASH_SPLITTER.split(uriToMountpoint));
-        final InstanceIdentifierContext<?> identCx = parseUriRequest(listPathArg, null, globalSchema, YangInstanceIdentifier.builder());
+        final InstanceIdentifierContext<?> identCx = parseUriRequest(uriToMountpoint);
 
         final Optional<DOMMountPoint> mountOpt = mountService.getMountPoint(identCx.getInstanceIdentifier());
         RestconfValidationUtils.checkDocumentedError(mountOpt.isPresent(), ErrorType.PROTOCOL,
@@ -204,10 +202,10 @@ public class RestSchemaMinderImpl implements RestSchemaMinder {
         Preconditions.checkArgument(parentNode != null);
         Preconditions.checkArgument(yiiBuilder != null);
 
-        final SchemaContext schemaContext = mountPoint != null ? mountPoint.getSchemaContext() : globalSchema;
+        final SchemaContext schemaCx = mountPoint != null ? mountPoint.getSchemaContext() : globalSchema;
 
         if (pathArgs.isEmpty()) {
-            return new InstanceIdentifierContext<>(yiiBuilder.build(), (DataSchemaNode)parentNode, mountPoint, schemaContext);
+            return new InstanceIdentifierContext<>(yiiBuilder.build(), (DataSchemaNode)parentNode, mountPoint, schemaCx);
         }
 
         final String head = pathArgs.iterator().next();
@@ -216,8 +214,8 @@ public class RestSchemaMinderImpl implements RestSchemaMinder {
 
         final DataSchemaNode targetNode;
 
-        if (Strings.isNullOrEmpty(moduleName)) {
-            final Module module = schemaContext.findModuleByName(moduleName, null);
+        if ( ! Strings.isNullOrEmpty(moduleName)) {
+            final Module module = schemaCx.findModuleByName(moduleName, null);
             RestconfValidationUtils.checkDocumentedError(module != null, ErrorType.PROTOCOL, ErrorTag.UNKNOWN_ELEMENT,
                     "\"" + moduleName + "\" module does not exist.");
 
@@ -225,11 +223,10 @@ public class RestSchemaMinderImpl implements RestSchemaMinder {
             if (targetNode == null) {
                 final RpcDefinition rpc = getRpcDefinition(head);
                 if (rpc != null) {
-                    // TODO do we want to add head to yiiBuilder
-//                    yiiBuilder.node(rpc.getQName());
+                    yiiBuilder.node(rpc.getQName());
                     // TODO do we need still YangInstanceIdentifier Normalization ?
 //                  new DataNormalizer(schemaContext).toNormalized(yiiBuilder.build());
-                    return new InstanceIdentifierContext<>(yiiBuilder.build(), rpc, mountPoint, schemaContext);
+                    return new InstanceIdentifierContext<>(yiiBuilder.build(), rpc, mountPoint, schemaCx);
                 }
             }
 
@@ -292,13 +289,14 @@ public class RestSchemaMinderImpl implements RestSchemaMinder {
         // TODO do we need still YangInstanceIdentifier Normalization ?
 //        new DataNormalizer(schemaContext).toNormalized(yiiBuilder.build());
 
-        return new InstanceIdentifierContext<SchemaNode>(yiiBuilder.build(), targetNode, mountPoint, schemaContext);
+        return new InstanceIdentifierContext<SchemaNode>(yiiBuilder.build(), targetNode, mountPoint, schemaCx);
     }
 
-    private static void addKeyValue(final HashMap<QName, Object> map, final DataSchemaNode node, final String uriValue,
+    private void addKeyValue(final HashMap<QName, Object> map, final DataSchemaNode node, final String uriValue,
             final DOMMountPoint mountPoint) {
         Preconditions.<String> checkNotNull(uriValue);
         Preconditions.checkArgument((node instanceof LeafSchemaNode));
+        final SchemaContext schemaCx = mountPoint != null ? mountPoint.getSchemaContext() : globalSchema;
 
         final String urlDecoded = RestconfParsingUtils.urlPathArgDecode(uriValue);
         final TypeDefinition<? extends Object> typedef = ((LeafSchemaNode) node).getType();
@@ -309,7 +307,7 @@ public class RestSchemaMinderImpl implements RestSchemaMinder {
         if (decoded == null) {
             final TypeDefinition<? extends Object> baseType = RestUtil.resolveBaseTypeFrom(typedef);
             if ((baseType instanceof IdentityrefTypeDefinition)) {
-                decoded = RestconfParsingUtils.toQName(urlDecoded);
+                decoded = RestconfParsingUtils.toQName(urlDecoded, schemaCx);
                 additionalInfo = "For key which is of type identityref it should be in format module_name:identity_name.";
             }
         }

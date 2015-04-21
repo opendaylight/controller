@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.md.sal.rest;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.controller.sal.restconf.impl.InstanceIdentifierContext;
@@ -33,11 +34,19 @@ public interface RestSchemaMinder {
 
     void tell(@Nonnull final SchemaContext schemaContext);
 
-    RpcDefinition getRpcDefinition(final String name);
+    /**
+     * Method returns RpcDefinition for Rpc LocalName with moduleName.
+     * So input name has to have next form module:rpc-name.
+     * Module name is important for building correct QName.
+     *
+     * @param name
+     * @return
+     */
+    RpcDefinition getRpcDefinition(@CheckForNull String name);
 
-    DOMMountPoint parseUriRequestToMountPoint(final String requestUriIdentifier);
+    DOMMountPoint parseUriRequestToMountPoint(String requestUriIdentifier);
 
-    InstanceIdentifierContext<?> parseUriRequest(final String requestUriIdentifier);
+    InstanceIdentifierContext<?> parseUriRequest(String requestUriIdentifier);
 
     Module getRestconfModule();
 
