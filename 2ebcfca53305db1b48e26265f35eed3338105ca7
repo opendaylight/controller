@@ -16,6 +16,24 @@
       "revId": "2ebcfca53305db1b48e26265f35eed3338105ca7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_7f416e0a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardCommitCoordinator.java",
+        "patchSetId": 26
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-04-21T21:11:22Z",
+      "side": 0,
+      "message": "Thanks, will fix it up.",
+      "parentUuid": "3aa0d159_1fe4ea39",
+      "revId": "2ebcfca53305db1b48e26265f35eed3338105ca7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
