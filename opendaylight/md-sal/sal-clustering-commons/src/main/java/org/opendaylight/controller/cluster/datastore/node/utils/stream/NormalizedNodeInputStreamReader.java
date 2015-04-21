@@ -76,7 +76,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
         input = new DataInputStream(stream);
     }
 
-    public NormalizedNodeInputStreamReader(DataInput input) throws IOException {
+    public NormalizedNodeInputStreamReader(DataInput input) {
         this.input = Preconditions.checkNotNull(input);
     }
 
