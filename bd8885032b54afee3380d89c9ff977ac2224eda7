@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_ffe6de43",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 26
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-21T20:51:37Z",
+      "side": 1,
+      "message": "Looks like this was accidentally added back during rebase with my patch. It\u0027s unused now - we can clean it up later.",
+      "revId": "bd8885032b54afee3380d89c9ff977ac2224eda7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
