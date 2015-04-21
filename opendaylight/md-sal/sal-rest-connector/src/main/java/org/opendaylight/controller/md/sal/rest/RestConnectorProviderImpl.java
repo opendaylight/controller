@@ -31,7 +31,6 @@ import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 import org.opendaylight.controller.sal.core.api.Provider;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.controller.sal.rest.api.RestConnector;
-import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.StatisticsRestconfServiceWrapper;
 import org.opendaylight.controller.sal.streams.websockets.WebSocketServer;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
@@ -55,30 +54,49 @@ import org.slf4j.LoggerFactory;
 @Beta
 public class RestConnectorProviderImpl implements Provider, RestConnector, SchemaContextListener, AutoCloseable, RestConnectorRuntimeMXBean {
 
-    private final static Logger LOG = LoggerFactory.getLogger(RestConnectorProviderImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RestConnectorProviderImpl.class);
+    private static final Object LOCK = new Object();
 
-    private static SchemaContext globalSchema;
-    private static RestBrokerFacade restBroker;
-    private static RestSchemaMinder schemaMinder;
+    private static RestConnectorProviderImpl connectorProvider;
+
+    private SchemaContext globalSchema;
+    private RestBrokerFacade restBroker;
+    private RestSchemaMinder schemaMinder;
 
     private StatisticsRestconfServiceWrapper stats;
     private ListenerRegistration<SchemaContextListener> listenerRegistration;
     private Thread webSocketServerThread;
     private PortNumber port;
 
+    private RestConnectorProviderImpl() {}
+
+    public static RestConnectorProviderImpl getInstance() {
+        if (connectorProvider == null) {
+            synchronized (LOCK) {
+                if (connectorProvider == null) {
+                    connectorProvider = new RestConnectorProviderImpl();
+                }
+            }
+        }
+        return connectorProvider;
+    }
+
     public static SchemaContext getSchemaContext() {
-        RestconfValidationUtils.checkDocumentedError(globalSchema != null, Status.SERVICE_UNAVAILABLE);
-        return globalSchema;
+        RestconfValidationUtils.checkDocumentedError(connectorProvider != null, Status.SERVICE_UNAVAILABLE);
+        RestconfValidationUtils.checkDocumentedError(connectorProvider.globalSchema != null, Status.SERVICE_UNAVAILABLE);
+        return connectorProvider.globalSchema;
     }
 
     public static RestBrokerFacade getRestBroker() {
-        RestconfValidationUtils.checkDocumentedError(restBroker != null, Status.SERVICE_UNAVAILABLE);
-        return restBroker;
+        RestconfValidationUtils.checkDocumentedError(connectorProvider != null, Status.SERVICE_UNAVAILABLE);
+        RestconfValidationUtils.checkDocumentedError(connectorProvider.restBroker != null, Status.SERVICE_UNAVAILABLE);
+        return connectorProvider.restBroker;
     }
 
     public static RestSchemaMinder getSchemaMinder() {
-        RestconfValidationUtils.checkDocumentedError(schemaMinder != null, Status.SERVICE_UNAVAILABLE);
-        return schemaMinder;
+        RestconfValidationUtils.checkDocumentedError(connectorProvider != null, Status.SERVICE_UNAVAILABLE);
+        RestconfValidationUtils.checkDocumentedError(connectorProvider.schemaMinder != null, Status.SERVICE_UNAVAILABLE);
+        return connectorProvider.schemaMinder;
     }
 
     public void setWebsocketPort(final PortNumber port) {
@@ -94,10 +112,9 @@ public class RestConnectorProviderImpl implements Provider, RestConnector, Schem
         final DOMDataBroker domDataBroker = session.getService(DOMDataBroker.class);
         restBroker = new RestBrokerFacadeImpl(domDataBroker, domRpcServices);
 
-        schemaMinder = new RestSchemaMinderImpl(mountServ, schemaService.getGlobalContext());
-        listenerRegistration = schemaService.registerSchemaContextListener(ControllerContext.getInstance());
-
-        // TODO : think about runtime initialization ResourceConfig with @ApplicationPath for web.xml remove
+        globalSchema = schemaService.getGlobalContext();
+        schemaMinder = new RestSchemaMinderImpl(mountServ, globalSchema);
+        listenerRegistration = schemaService.registerSchemaContextListener(RestConnectorProviderImpl.this);
 
         webSocketServerThread = new Thread(WebSocketServer.createInstance(port.getValue().intValue()));
         webSocketServerThread.setName("Web socket server on port " + port);

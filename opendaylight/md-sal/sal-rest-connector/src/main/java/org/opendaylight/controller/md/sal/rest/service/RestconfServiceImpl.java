@@ -102,7 +102,7 @@ public class RestconfServiceImpl implements RestconfService {
     @Override
     public NormalizedNodeContext getModules(final String identifier, final UriInfo uriInfo) {
         Preconditions.checkNotNull(identifier);
-        RestconfValidationUtils.checkDocumentedError(( ! identifier.contains(RestconfInternalConstants.MOUNT)),
+        RestconfValidationUtils.checkDocumentedError(identifier.contains(RestconfInternalConstants.MOUNT),
                 ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE, "URI has bad format. If modules behind mount point"
                         + " should be showed, URI has to end with " +RestconfInternalConstants.MOUNT);
 
