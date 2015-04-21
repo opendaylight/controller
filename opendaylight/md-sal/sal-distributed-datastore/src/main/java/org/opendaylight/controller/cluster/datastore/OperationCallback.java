@@ -8,7 +8,31 @@
 
 package org.opendaylight.controller.cluster.datastore;
 
-public interface OperationCallback {
+import java.util.concurrent.atomic.AtomicReference;
+
+interface OperationCallback {
+    OperationCallback NO_OP_CALLBACK = new OperationCallback() {
+        @Override
+        public void run() {
+        }
+
+        @Override
+        public void success() {
+        }
+
+        @Override
+        public void failure() {
+        }
+    };
+
+    class Reference extends AtomicReference<OperationCallback> {
+        private static final long serialVersionUID = 1L;
+
+        public Reference(OperationCallback initialValue) {
+            super(initialValue);
+        }
+    }
+
     void run();
     void success();
     void failure();

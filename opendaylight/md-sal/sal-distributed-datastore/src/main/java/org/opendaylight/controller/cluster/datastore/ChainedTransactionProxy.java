@@ -22,20 +22,20 @@ final class ChainedTransactionProxy extends TransactionProxy {
     /**
      * Stores the ready Futures from the previous Tx in the chain.
      */
-    private final List<Future<ActorSelection>> previousReadyFutures;
+    private final List<Future<Object>> previousReadyFutures;
 
     /**
      * Stores the ready Futures from this transaction when it is readied.
      */
-    private volatile List<Future<ActorSelection>> readyFutures;
+    private volatile List<Future<Object>> readyFutures;
 
     ChainedTransactionProxy(ActorContext actorContext, TransactionType transactionType,
-            String transactionChainId, List<Future<ActorSelection>> previousReadyFutures) {
+            String transactionChainId, List<Future<Object>> previousReadyFutures) {
         super(actorContext, transactionType, transactionChainId);
         this.previousReadyFutures = previousReadyFutures;
     }
 
-    List<Future<ActorSelection>> getReadyFutures() {
+    List<Future<Object>> getReadyFutures() {
         return readyFutures;
     }
 
@@ -43,10 +43,11 @@ final class ChainedTransactionProxy extends TransactionProxy {
         return readyFutures != null;
     }
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    public AbstractThreePhaseCommitCohort ready() {
-        final AbstractThreePhaseCommitCohort ret = super.ready();
-        readyFutures = ret.getCohortFutures();
+    public AbstractThreePhaseCommitCohort<?> ready() {
+        final AbstractThreePhaseCommitCohort<?> ret = super.ready();
+        readyFutures = (List)ret.getCohortFutures();
         LOG.debug("onTransactionReady {} pending readyFutures size {} chain {}", getIdentifier(),
             readyFutures.size(), getTransactionChainId());
         return ret;
@@ -70,14 +71,14 @@ final class ChainedTransactionProxy extends TransactionProxy {
         }
 
         // Combine the ready Futures into 1.
-        Future<Iterable<ActorSelection>> combinedFutures = akka.dispatch.Futures.sequence(
+        Future<Iterable<Object>> combinedFutures = akka.dispatch.Futures.sequence(
                 previousReadyFutures, getActorContext().getClientDispatcher());
 
         // Add a callback for completion of the combined Futures.
         final Promise<ActorSelection> returnPromise = akka.dispatch.Futures.promise();
-        OnComplete<Iterable<ActorSelection>> onComplete = new OnComplete<Iterable<ActorSelection>>() {
+        OnComplete<Iterable<Object>> onComplete = new OnComplete<Iterable<Object>>() {
             @Override
-            public void onComplete(Throwable failure, Iterable<ActorSelection> notUsed) {
+            public void onComplete(Throwable failure, Iterable<Object> notUsed) {
                 if(failure != null) {
                     // A Ready Future failed so fail the returned Promise.
                     returnPromise.failure(failure);

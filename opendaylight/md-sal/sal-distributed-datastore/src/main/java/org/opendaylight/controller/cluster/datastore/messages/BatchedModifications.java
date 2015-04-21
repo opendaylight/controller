@@ -22,6 +22,7 @@ public class BatchedModifications extends MutableCompositeModification implement
     private static final long serialVersionUID = 1L;
 
     private boolean ready;
+    private boolean doCommitOnReady;
     private int totalMessagesSent;
     private String transactionID;
     private String transactionChainID;
@@ -41,6 +42,14 @@ public class BatchedModifications extends MutableCompositeModification implement
 
     public void setReady(boolean ready) {
         this.ready = ready;
+    }
+
+    public boolean isDoCommitOnReady() {
+        return doCommitOnReady;
+    }
+
+    public void setDoCommitOnReady(boolean doCommitOnReady) {
+        this.doCommitOnReady = doCommitOnReady;
     }
 
     public int getTotalMessagesSent() {
@@ -66,6 +75,7 @@ public class BatchedModifications extends MutableCompositeModification implement
         transactionChainID = in.readUTF();
         ready = in.readBoolean();
         totalMessagesSent = in.readInt();
+        doCommitOnReady = in.readBoolean();
     }
 
     @Override
@@ -75,6 +85,7 @@ public class BatchedModifications extends MutableCompositeModification implement
         out.writeUTF(transactionChainID);
         out.writeBoolean(ready);
         out.writeInt(totalMessagesSent);
+        out.writeBoolean(doCommitOnReady);
     }
 
     @Override
