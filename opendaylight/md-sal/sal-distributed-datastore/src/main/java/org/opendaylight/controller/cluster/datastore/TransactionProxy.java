@@ -31,6 +31,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import org.opendaylight.controller.cluster.datastore.compat.PreLithiumTransactionContextImpl;
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
+import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.cluster.datastore.utils.NormalizedNodeAggregator;
@@ -477,7 +478,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
         return ShardStrategyFactory.getStrategy(path).findShard(path);
     }
 
-    protected Future<ActorSelection> sendFindPrimaryShardAsync(String shardName) {
+    protected Future<PrimaryShardInfo> sendFindPrimaryShardAsync(String shardName) {
         return actorContext.findPrimaryShardAsync(shardName);
     }
 
@@ -497,20 +498,20 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
     private TransactionFutureCallback getOrCreateTxFutureCallback(String shardName) {
         TransactionFutureCallback txFutureCallback = txFutureCallbackMap.get(shardName);
         if(txFutureCallback == null) {
-            Future<ActorSelection> findPrimaryFuture = sendFindPrimaryShardAsync(shardName);
+            Future<PrimaryShardInfo> findPrimaryFuture = sendFindPrimaryShardAsync(shardName);
 
             final TransactionFutureCallback newTxFutureCallback = new TransactionFutureCallback(this, shardName);
 
             txFutureCallback = newTxFutureCallback;
             txFutureCallbackMap.put(shardName, txFutureCallback);
 
-            findPrimaryFuture.onComplete(new OnComplete<ActorSelection>() {
+            findPrimaryFuture.onComplete(new OnComplete<PrimaryShardInfo>() {
                 @Override
-                public void onComplete(Throwable failure, ActorSelection primaryShard) {
+                public void onComplete(Throwable failure, PrimaryShardInfo primaryShardInfo) {
                     if(failure != null) {
                         newTxFutureCallback.createTransactionContext(failure, null);
                     } else {
-                        newTxFutureCallback.setPrimaryShard(primaryShard);
+                        newTxFutureCallback.setPrimaryShard(primaryShardInfo.getPrimaryShardActor());
                     }
                 }
             }, actorContext.getClientDispatcher());

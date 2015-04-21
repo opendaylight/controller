@@ -130,7 +130,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         if (exToThrow instanceof PrimaryNotFoundException) {
             doReturn(Futures.failed(exToThrow)).when(mockActorContext).findPrimaryShardAsync(anyString());
         } else {
-            doReturn(Futures.successful(getSystem().actorSelection(actorRef.path()))).
+            doReturn(primaryShardInfoReply(getSystem(), actorRef)).
                     when(mockActorContext).findPrimaryShardAsync(anyString());
         }
 
@@ -209,7 +209,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         doReturn(getSystem().actorSelection(actorRef.path())).when(mockActorContext).
             actorSelection(actorRef.path().toString());
 
-        doReturn(Futures.successful(getSystem().actorSelection(actorRef.path()))).
+        doReturn(primaryShardInfoReply(getSystem(), actorRef)).
             when(mockActorContext).findPrimaryShardAsync(eq(DefaultShardStrategy.DEFAULT_SHARD));
 
         doReturn(Futures.successful(new Object())).when(mockActorContext).executeOperationAsync(
@@ -834,7 +834,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
                 when(mockActorContext).actorSelection(shardActorRef.path().toString());
 
         if(shardFound) {
-            doReturn(Futures.successful(actorSystem.actorSelection(shardActorRef.path()))).
+            doReturn(primaryShardInfoReply(actorSystem, shardActorRef)).
                     when(mockActorContext).findPrimaryShardAsync(eq(DefaultShardStrategy.DEFAULT_SHARD));
         } else {
             doReturn(Futures.failed(new PrimaryNotFoundException("test")))
@@ -1399,7 +1399,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         doReturn(getSystem().actorSelection(shardActorRef.path())).
                 when(mockActorContext).actorSelection(shardActorRef.path().toString());
 
-        doReturn(Futures.successful(getSystem().actorSelection(shardActorRef.path()))).
+        doReturn(primaryShardInfoReply(getSystem(), shardActorRef)).
                 when(mockActorContext).findPrimaryShardAsync(eq(shardName));
 
         doReturn(true).when(mockActorContext).isPathLocal(shardActorRef.path().toString());

@@ -42,6 +42,7 @@ import org.opendaylight.controller.cluster.datastore.messages.FindPrimary;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardFound;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardNotFound;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryFound;
+import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Await;
@@ -411,32 +412,36 @@ public class ActorContextTest extends AbstractActorTest{
             DatastoreContext dataStoreContext = DatastoreContext.newBuilder().dataStoreType("config").
                     shardLeaderElectionTimeout(100, TimeUnit.MILLISECONDS).build();
 
+            final String expPrimaryPath = "akka://test-system/find-primary-shard";
             ActorContext actorContext =
                     new ActorContext(getSystem(), shardManager, mock(ClusterWrapper.class),
                             mock(Configuration.class), dataStoreContext) {
                         @Override
                         protected Future<Object> doAsk(ActorRef actorRef, Object message, Timeout timeout) {
-                            return Futures.successful((Object) new PrimaryFound("akka://test-system/test"));
+                            return Futures.successful((Object) new PrimaryFound(expPrimaryPath));
                         }
                     };
 
 
-            Future<ActorSelection> foobar = actorContext.findPrimaryShardAsync("foobar");
-            ActorSelection actual = Await.result(foobar, Duration.apply(5000, TimeUnit.MILLISECONDS));
+            Future<PrimaryShardInfo> foobar = actorContext.findPrimaryShardAsync("foobar");
+            PrimaryShardInfo actual = Await.result(foobar, Duration.apply(5000, TimeUnit.MILLISECONDS));
 
             assertNotNull(actual);
+            assertEquals("LocalShardDataTree present", false, actual.getLocalShardDataTree().isPresent());
+            assertTrue("Unexpected PrimaryShardActor path " + actual.getPrimaryShardActor().path(),
+                    expPrimaryPath.endsWith(actual.getPrimaryShardActor().pathString()));
 
-            Future<ActorSelection> cached = actorContext.getPrimaryShardActorSelectionCache().getIfPresent("foobar");
+            Future<PrimaryShardInfo> cached = actorContext.getPrimaryShardInfoCache().getIfPresent("foobar");
 
-            ActorSelection cachedSelection = Await.result(cached, FiniteDuration.apply(1, TimeUnit.MILLISECONDS));
+            PrimaryShardInfo cachedInfo = Await.result(cached, FiniteDuration.apply(1, TimeUnit.MILLISECONDS));
 
-            assertEquals(cachedSelection, actual);
+            assertEquals(cachedInfo, actual);
 
             // Wait for 200 Milliseconds. The cached entry should have been removed.
 
             Uninterruptibles.sleepUninterruptibly(200, TimeUnit.MILLISECONDS);
 
-            cached = actorContext.getPrimaryShardActorSelectionCache().getIfPresent("foobar");
+            cached = actorContext.getPrimaryShardInfoCache().getIfPresent("foobar");
 
             assertNull(cached);
 
@@ -461,7 +466,7 @@ public class ActorContextTest extends AbstractActorTest{
                     };
 
 
-            Future<ActorSelection> foobar = actorContext.findPrimaryShardAsync("foobar");
+            Future<PrimaryShardInfo> foobar = actorContext.findPrimaryShardAsync("foobar");
 
             try {
                 Await.result(foobar, Duration.apply(100, TimeUnit.MILLISECONDS));
@@ -470,7 +475,7 @@ public class ActorContextTest extends AbstractActorTest{
 
             }
 
-            Future<ActorSelection> cached = actorContext.getPrimaryShardActorSelectionCache().getIfPresent("foobar");
+            Future<PrimaryShardInfo> cached = actorContext.getPrimaryShardInfoCache().getIfPresent("foobar");
 
             assertNull(cached);
     }
@@ -494,7 +499,7 @@ public class ActorContextTest extends AbstractActorTest{
                     };
 
 
-            Future<ActorSelection> foobar = actorContext.findPrimaryShardAsync("foobar");
+            Future<PrimaryShardInfo> foobar = actorContext.findPrimaryShardAsync("foobar");
 
             try {
                 Await.result(foobar, Duration.apply(100, TimeUnit.MILLISECONDS));
@@ -503,7 +508,7 @@ public class ActorContextTest extends AbstractActorTest{
 
             }
 
-            Future<ActorSelection> cached = actorContext.getPrimaryShardActorSelectionCache().getIfPresent("foobar");
+            Future<PrimaryShardInfo> cached = actorContext.getPrimaryShardInfoCache().getIfPresent("foobar");
 
             assertNull(cached);
     }
