@@ -7,29 +7,30 @@
  */
 package org.opendaylight.controller.cluster.notifications;
 
-import java.io.Serializable;
+import com.google.common.base.Preconditions;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 
 /**
- * A message initiated internally from the RaftActor when some state of a leader has changed
+ * A local message initiated internally from the RaftActor when some state of a leader has changed.
  *
  * @author Thomas Pantelis
  */
-public class LeaderStateChanged implements Serializable {
-    private static final long serialVersionUID = 1L;
-
+public class LeaderStateChanged {
     private final String memberId;
     private final String leaderId;
 
-    public LeaderStateChanged(String memberId, String leaderId) {
-        this.memberId = memberId;
+    public LeaderStateChanged(@Nonnull String memberId, @Nullable String leaderId) {
+        this.memberId = Preconditions.checkNotNull(memberId);
         this.leaderId = leaderId;
     }
 
-    public String getMemberId() {
+    public @Nonnull String getMemberId() {
         return memberId;
     }
 
-    public String getLeaderId() {
+    public @Nullable String getLeaderId() {
         return leaderId;
     }
 

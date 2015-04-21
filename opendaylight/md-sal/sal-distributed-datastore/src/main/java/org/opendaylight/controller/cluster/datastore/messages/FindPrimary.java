@@ -21,7 +21,7 @@ public class FindPrimary implements Serializable {
     private final String shardName;
     private final boolean waitUntilReady;
 
-    public FindPrimary(String shardName, boolean waitUntilReady){
+    public FindPrimary(String shardName, boolean waitUntilReady) {
 
         Preconditions.checkNotNull(shardName, "shardName should not be null");
 
@@ -40,8 +40,8 @@ public class FindPrimary implements Serializable {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("FindPrimary [shardName=").append(shardName).append(", waitUntilReady=").append(waitUntilReady)
-                .append("]");
+        builder.append(getClass().getName()).append(" [shardName=").append(shardName).append(", waitUntilReady=")
+               .append(waitUntilReady).append("]");
         return builder.toString();
     }
 }
