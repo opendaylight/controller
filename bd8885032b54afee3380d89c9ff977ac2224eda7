@@ -2,6 +2,40 @@
   "comments": [
     {
       "key": {
+        "uuid": "3aa0d159_bf2cd64b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/AbstractShardDataTreeTransaction.java",
+        "patchSetId": 26
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-04-21T22:27:31Z",
+      "side": 1,
+      "message": "may be cleaner to just return closed.",
+      "revId": "bd8885032b54afee3380d89c9ff977ac2224eda7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_df31a2a3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/AbstractShardDataTreeTransaction.java",
+        "patchSetId": 26
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-04-21T22:27:31Z",
+      "side": 1,
+      "message": "We should choose one way to do toStrings. Currently we have variations where we use normal string concatenation and StringBuilder. This is the third way :)",
+      "revId": "bd8885032b54afee3380d89c9ff977ac2224eda7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_ffe6de43",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
         "patchSetId": 26
@@ -31,6 +65,125 @@
       "side": 1,
       "message": "yup, I have probably mis-merged it. these two are just a first cut -- I just wanted to put it out there as soon as possible.",
       "parentUuid": "3aa0d159_ffe6de43",
+      "revId": "bd8885032b54afee3380d89c9ff977ac2224eda7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_5fe4b20c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 26
+      },
+      "lineNbr": 513,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-04-21T22:27:31Z",
+      "side": 1,
+      "message": "Why catch Exception here? Wouldn\u0027t it be better to catch specific exceptions to avoid runtime exceptions.",
+      "revId": "bd8885032b54afee3380d89c9ff977ac2224eda7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_7f82ce01",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTreeTransactionChain.java",
+        "patchSetId": 26
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-04-21T22:27:31Z",
+      "side": 1,
+      "message": "I\u0027m finding this state check a little confusing. Why should I have an openTransaction when I am finishing some other transaction? Not clear.",
+      "revId": "bd8885032b54afee3380d89c9ff977ac2224eda7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_bfddb616",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardTransaction.java",
+        "patchSetId": 26
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-04-21T22:27:31Z",
+      "side": 1,
+      "message": "I am guessing abort is the equivalent to close or is this a mistake?",
+      "revId": "bd8885032b54afee3380d89c9ff977ac2224eda7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_ffc33e36",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardTransaction.java",
+        "patchSetId": 26
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-04-21T22:27:31Z",
+      "side": 1,
+      "message": "We should add transactionId to the exception message. \n\nAlso it looks like checkClosed was an attempt to put some common code in one method but the method lacks cohesion because it also sends a ReadFailedException to the sender. Just thinking aloud.",
+      "revId": "bd8885032b54afee3380d89c9ff977ac2224eda7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_ffac9e8e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardTransaction.java",
+        "patchSetId": 26
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-04-21T22:27:31Z",
+      "side": 1,
+      "message": "Single return transaction.isClosed();",
+      "revId": "bd8885032b54afee3380d89c9ff977ac2224eda7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_5fcef25b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardWriteTransaction.java",
+        "patchSetId": 26
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-04-21T22:27:31Z",
+      "side": 1,
+      "message": "Is this right? We send a poison pill to self and then continue with processing? Technically this should be fine because the PoisonPill will be queued but we\u0027ll be scratching our heads about this later. \n\nOr this could be a merge issue....",
+      "revId": "bd8885032b54afee3380d89c9ff977ac2224eda7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_bf04d67e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardWriteTransaction.java",
+        "patchSetId": 26
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-04-21T22:27:31Z",
+      "side": 1,
+      "message": "return transaction.isClosed()",
       "revId": "bd8885032b54afee3380d89c9ff977ac2224eda7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
