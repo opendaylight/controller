@@ -472,6 +472,7 @@ public class RaftActorTest extends AbstractActorTest {
                 Uninterruptibles.sleepUninterruptibly(heartBeatInterval, TimeUnit.MILLISECONDS);
             }
 
+            assertNotNull(matches);
             assertEquals(2, matches.size());
 
             // check if the notifier got a role change from null to Follower
