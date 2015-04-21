@@ -12,7 +12,6 @@ import akka.persistence.SaveSnapshotFailure;
 import akka.persistence.SaveSnapshotSuccess;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
-import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.slf4j.Logger;
@@ -45,6 +44,8 @@ class RaftActorSnapshotMessageSupport {
         this.currentBehavior = currentBehavior;
         this.cohort = cohort;
         this.log = context.getLogger();
+
+        context.getSnapshotManager().setCreateSnapshotCallable(createSnapshotProcedure);
     }
 
     boolean handleSnapshotMessage(Object message) {
@@ -56,9 +57,6 @@ class RaftActorSnapshotMessageSupport {
             return true;
         } else if (message instanceof SaveSnapshotFailure) {
             onSaveSnapshotFailure((SaveSnapshotFailure) message);
-            return true;
-        } else if (message instanceof CaptureSnapshot) {
-            onCaptureSnapshot(message);
             return true;
         } else if (message instanceof CaptureSnapshotReply) {
             onCaptureSnapshotReply(((CaptureSnapshotReply) message).getSnapshot());
@@ -75,12 +73,6 @@ class RaftActorSnapshotMessageSupport {
         log.debug("{}: CaptureSnapshotReply received by actor: snapshot size {}", context.getId(), snapshotBytes.length);
 
         context.getSnapshotManager().persist(persistence, snapshotBytes, currentBehavior, context.getTotalMemory());
-    }
-
-    private void onCaptureSnapshot(Object message) {
-        log.debug("{}: CaptureSnapshot received by actor: {}", context.getId(), message);
-
-        context.getSnapshotManager().create(createSnapshotProcedure);
     }
 
     private void onSaveSnapshotFailure(SaveSnapshotFailure saveSnapshotFailure) {

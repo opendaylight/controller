@@ -200,6 +200,7 @@ public class MockRaftActorContext implements RaftActorContext {
     public SnapshotManager getSnapshotManager() {
         if(this.snapshotManager == null){
             this.snapshotManager = new SnapshotManager(this, getLogger());
+            this.snapshotManager.setCreateSnapshotCallable(NoopProcedure.<Void>instance());
         }
         return this.snapshotManager;
     }

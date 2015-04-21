@@ -16,7 +16,6 @@ import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload
 import org.opendaylight.controller.cluster.raft.RaftActor.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
-import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
@@ -300,14 +299,14 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
         expSnapshotState.add(payload6);
 
         // Delay the CaptureSnapshot message to the leader actor.
-        leaderActor.underlyingActor().startDropMessages(CaptureSnapshot.class);
+        leaderActor.underlyingActor().startDropMessages(CaptureSnapshotReply.class);
 
         // Send the payload.
         payload7 = sendPayloadData(leaderActor, "seven");
 
-        // Capture the CaptureSnapshot message so we can send it later.
-        CaptureSnapshot captureSnapshot = MessageCollectorActor.expectFirstMatching(
-                leaderCollectorActor, CaptureSnapshot.class);
+        // Capture the CaptureSnapshotReply message so we can send it later.
+        CaptureSnapshotReply captureSnapshotReply = MessageCollectorActor.expectFirstMatching(leaderCollectorActor,
+                CaptureSnapshotReply.class);
 
         // Wait for the state to be applied in the leader.
         ApplyState applyState = MessageCollectorActor.expectFirstMatching(leaderCollectorActor, ApplyState.class);
@@ -327,12 +326,9 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
         assertEquals("Leader last applied", 7, leaderContext.getLastApplied());
         assertEquals("Leader replicatedToAllIndex", 5, leader.getReplicatedToAllIndex());
 
-        // Now deliver the CaptureSnapshot.
-        leaderActor.underlyingActor().stopDropMessages(CaptureSnapshot.class);
-        leaderActor.tell(captureSnapshot, leaderActor);
-
-        // Wait for CaptureSnapshotReply to complete.
-        MessageCollectorActor.expectFirstMatching(leaderCollectorActor, CaptureSnapshotReply.class);
+        // Now deliver the CaptureSnapshotReply.
+        leaderActor.underlyingActor().stopDropMessages(CaptureSnapshotReply.class);
+        leaderActor.tell(captureSnapshotReply, leaderActor);
 
         // Wait for snapshot complete.
         MessageCollectorActor.expectFirstMatching(leaderCollectorActor, SaveSnapshotSuccess.class);
@@ -346,8 +342,6 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
         assertEquals("Leader journal log size", 1, leaderContext.getReplicatedLog().size());
         assertEquals("Leader journal last index", 7, leaderContext.getReplicatedLog().lastIndex());
         assertEquals("Leader commit index", 7, leaderContext.getCommitIndex());
-
-        expSnapshotState.add(payload7);
 
         // Verify the persisted snapshot. This should reflect the snapshot index as the last applied
         // log entry (7) and shouldn't contain any unapplied entries as we capture persisted the snapshot data
@@ -397,6 +391,8 @@ public class ReplicationAndSnapshotsIntegrationTest extends AbstractRaftActorInt
         assertEquals("Follower 2 journal log size", 1, follower2Context.getReplicatedLog().size());
         assertEquals("Follower 2 journal last index", 7, follower2Context.getReplicatedLog().lastIndex());
         assertEquals("Follower 2 commit index", 7, follower2Context.getCommitIndex());
+
+        expSnapshotState.add(payload7);
 
         testLog.info("testSecondSnapshot ending");
     }
