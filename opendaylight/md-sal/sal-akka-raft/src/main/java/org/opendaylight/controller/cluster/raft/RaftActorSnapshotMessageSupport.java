@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.raft;
 import akka.japi.Procedure;
 import akka.persistence.SaveSnapshotFailure;
 import akka.persistence.SaveSnapshotSuccess;
-import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
@@ -24,7 +23,6 @@ import org.slf4j.Logger;
 class RaftActorSnapshotMessageSupport {
     static final String COMMIT_SNAPSHOT = "commit_snapshot";
 
-    private final DataPersistenceProvider persistence;
     private final RaftActorContext context;
     private final RaftActorBehavior currentBehavior;
     private final RaftActorSnapshotCohort cohort;
@@ -37,9 +35,8 @@ class RaftActorSnapshotMessageSupport {
         }
     };
 
-    RaftActorSnapshotMessageSupport(DataPersistenceProvider persistence, RaftActorContext context,
-            RaftActorBehavior currentBehavior, RaftActorSnapshotCohort cohort) {
-        this.persistence = persistence;
+    RaftActorSnapshotMessageSupport(RaftActorContext context, RaftActorBehavior currentBehavior,
+            RaftActorSnapshotCohort cohort) {
         this.context = context;
         this.currentBehavior = currentBehavior;
         this.cohort = cohort;
@@ -62,7 +59,7 @@ class RaftActorSnapshotMessageSupport {
             onCaptureSnapshotReply(((CaptureSnapshotReply) message).getSnapshot());
             return true;
         } else if (message.equals(COMMIT_SNAPSHOT)) {
-            context.getSnapshotManager().commit(persistence, -1);
+            context.getSnapshotManager().commit(-1);
             return true;
         } else {
             return false;
@@ -72,7 +69,7 @@ class RaftActorSnapshotMessageSupport {
     private void onCaptureSnapshotReply(byte[] snapshotBytes) {
         log.debug("{}: CaptureSnapshotReply received by actor: snapshot size {}", context.getId(), snapshotBytes.length);
 
-        context.getSnapshotManager().persist(persistence, snapshotBytes, currentBehavior, context.getTotalMemory());
+        context.getSnapshotManager().persist(snapshotBytes, currentBehavior, context.getTotalMemory());
     }
 
     private void onSaveSnapshotFailure(SaveSnapshotFailure saveSnapshotFailure) {
@@ -87,7 +84,7 @@ class RaftActorSnapshotMessageSupport {
 
         long sequenceNumber = success.metadata().sequenceNr();
 
-        context.getSnapshotManager().commit(persistence, sequenceNumber);
+        context.getSnapshotManager().commit(sequenceNumber);
     }
 
     private void onApplySnapshot(Snapshot snapshot) {
@@ -100,8 +97,7 @@ class RaftActorSnapshotMessageSupport {
         cohort.applySnapshot(snapshot.getState());
 
         //clears the followers log, sets the snapshot index to ensure adjusted-index works
-        context.setReplicatedLog(ReplicatedLogImpl.newInstance(snapshot, context, persistence,
-                currentBehavior));
+        context.setReplicatedLog(ReplicatedLogImpl.newInstance(snapshot, context, currentBehavior));
         context.setLastApplied(snapshot.getLastAppliedIndex());
     }
 }

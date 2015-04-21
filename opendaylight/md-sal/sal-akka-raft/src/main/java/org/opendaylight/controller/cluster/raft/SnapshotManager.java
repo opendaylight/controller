@@ -13,7 +13,6 @@ import akka.persistence.SnapshotSelectionCriteria;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.ByteString;
 import java.util.List;
-import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.SendInstallSnapshot;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
@@ -60,14 +59,13 @@ public class SnapshotManager implements SnapshotState {
     }
 
     @Override
-    public void persist(DataPersistenceProvider persistenceProvider, byte[] snapshotBytes,
-                        RaftActorBehavior currentBehavior, long totalMemory) {
-        currentState.persist(persistenceProvider, snapshotBytes, currentBehavior, totalMemory);
+    public void persist(byte[] snapshotBytes, RaftActorBehavior currentBehavior, long totalMemory) {
+        currentState.persist(snapshotBytes, currentBehavior, totalMemory);
     }
 
     @Override
-    public void commit(DataPersistenceProvider persistenceProvider, long sequenceNumber) {
-        currentState.commit(persistenceProvider, sequenceNumber);
+    public void commit(long sequenceNumber) {
+        currentState.commit(sequenceNumber);
     }
 
     @Override
@@ -117,13 +115,12 @@ public class SnapshotManager implements SnapshotState {
         }
 
         @Override
-        public void persist(DataPersistenceProvider persistenceProvider, byte[] snapshotBytes,
-                            RaftActorBehavior currentBehavior, long totalMemory) {
+        public void persist(byte[] snapshotBytes, RaftActorBehavior currentBehavior, long totalMemory) {
             LOG.debug("persist should not be called in state {}", this);
         }
 
         @Override
-        public void commit(DataPersistenceProvider persistenceProvider, long sequenceNumber) {
+        public void commit(long sequenceNumber) {
             LOG.debug("commit should not be called in state {}", this);
         }
 
@@ -244,8 +241,7 @@ public class SnapshotManager implements SnapshotState {
         }
 
         @Override
-        public void persist(DataPersistenceProvider persistenceProvider, byte[] snapshotBytes,
-                            RaftActorBehavior currentBehavior, long totalMemory) {
+        public void persist(byte[] snapshotBytes, RaftActorBehavior currentBehavior, long totalMemory) {
             // create a snapshot object from the state provided and save it
             // when snapshot is saved async, SaveSnapshotSuccess is raised.
 
@@ -254,7 +250,7 @@ public class SnapshotManager implements SnapshotState {
                     captureSnapshot.getLastIndex(), captureSnapshot.getLastTerm(),
                     captureSnapshot.getLastAppliedIndex(), captureSnapshot.getLastAppliedTerm());
 
-            persistenceProvider.saveSnapshot(sn);
+            context.getPersistenceProvider().saveSnapshot(sn);
 
             LOG.info("{}: Persisting of snapshot done:{}", persistenceId(), sn.getLogMessage());
 
@@ -320,12 +316,12 @@ public class SnapshotManager implements SnapshotState {
     private class Persisting extends AbstractSnapshotState {
 
         @Override
-        public void commit(DataPersistenceProvider persistenceProvider, long sequenceNumber) {
+        public void commit(long sequenceNumber) {
             context.getReplicatedLog().snapshotCommit();
-            persistenceProvider.deleteSnapshots(new SnapshotSelectionCriteria(
+            context.getPersistenceProvider().deleteSnapshots(new SnapshotSelectionCriteria(
                     sequenceNumber - context.getConfigParams().getSnapshotBatchCount(), 43200000));
 
-            persistenceProvider.deleteMessages(lastSequenceNumber);
+            context.getPersistenceProvider().deleteMessages(lastSequenceNumber);
 
             lastSequenceNumber = -1;
             SnapshotManager.this.currentState = IDLE;

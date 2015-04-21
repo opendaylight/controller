@@ -62,11 +62,11 @@ public class RaftActorRecoverySupportTest {
         context = new RaftActorContextImpl(null, null, "test", new ElectionTermImpl(mockPersistence, "test", LOG),
                 -1, -1, Collections.<String,String>emptyMap(), configParams, mockPersistence, LOG);
 
-        support = new RaftActorRecoverySupport(mockPersistence, context , mockBehavior, mockCohort);
+        support = new RaftActorRecoverySupport(context, mockBehavior , mockCohort);
 
         doReturn(true).when(mockPersistence).isRecoveryApplicable();
 
-        context.setReplicatedLog(ReplicatedLogImpl.newInstance(context, mockPersistence, mockBehavior));
+        context.setReplicatedLog(ReplicatedLogImpl.newInstance(context, mockBehavior));
     }
 
     private void sendMessageToSupport(Object message) {

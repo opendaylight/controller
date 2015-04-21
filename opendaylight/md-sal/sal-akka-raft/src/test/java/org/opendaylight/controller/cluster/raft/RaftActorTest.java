@@ -561,13 +561,13 @@ public class RaftActorTest extends AbstractActorTest {
                         new MockRaftActorContext.MockPayload("foo-3"),
                         new MockRaftActorContext.MockPayload("foo-4")));
 
-                leaderActor.getRaftActorContext().getSnapshotManager().persist(new NonPersistentDataProvider()
-                        , snapshotBytes.toByteArray(), leader, Runtime.getRuntime().totalMemory());
+                leaderActor.getRaftActorContext().getSnapshotManager().persist(snapshotBytes.toByteArray(),
+                        leader, Runtime.getRuntime().totalMemory());
 
                 assertFalse(leaderActor.getRaftActorContext().getSnapshotManager().isCapturing());
 
                 // The commit is needed to complete the snapshot creation process
-                leaderActor.getRaftActorContext().getSnapshotManager().commit(new NonPersistentDataProvider(), -1);
+                leaderActor.getRaftActorContext().getSnapshotManager().commit(-1);
 
                 // capture snapshot reply should remove the snapshotted entries only
                 assertEquals(3, leaderActor.getReplicatedLog().size());
@@ -671,7 +671,7 @@ public class RaftActorTest extends AbstractActorTest {
                 assertFalse(followerActor.getRaftActorContext().getSnapshotManager().isCapturing());
 
                 // The commit is needed to complete the snapshot creation process
-                followerActor.getRaftActorContext().getSnapshotManager().commit(new NonPersistentDataProvider(), -1);
+                followerActor.getRaftActorContext().getSnapshotManager().commit(-1);
 
                 // capture snapshot reply should remove the snapshotted entries only till replicatedToAllIndex
                 assertEquals(3, followerActor.getReplicatedLog().size()); //indexes 5,6,7 left in the log
