@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_c979f4fd",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DataTreeListenerProxyTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-21T13:50:58Z",
+      "side": 1,
+      "message": "There\u0027s a slight disconnect as to the name of this test class and what it\u0027s actually testing. It seems the original purpose of this class was to test the data tree equivalent of DataChangeListenerProxy. This would be the ForwardingDataTreeChangeListener. So you can rename this class to ForwardingDataTreeChangeListenerTest and pattern it after DataChangeListenerProxyTest.\n\nThe DataTreeListenerRegistrationTest tests the DataTreeChangeListenerRegistrationActor so that\u0027s covered there.\n\nFinally, we need a DataTreeChangeListenerProxyTest class patterned after DataChangeListenerRegistrationProxyTest to test the DataTreeChangeListenerProxy which is the equivalent of DataChangeListenerRegistrationProxy.\n\nA little confusing as some of the new data tree classes were named a little different than the previous data change classes. Maybe DataTreeChangeListenerProxy should be named DataTreeChangeListenerRegistrationProxy to be consistent but we can change that later is need be.",
+      "revId": "a65a598f132c619f6853cd17ab389cd80e3d89aa",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_696a201c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DataTreeListenerRegistrationTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-21T13:50:58Z",
+      "side": 1,
+      "message": "Since this class tests DataTreeChangeListenerRegistrationActor please rename to DataTreeChangeListenerRegistrationActorTest.",
+      "revId": "a65a598f132c619f6853cd17ab389cd80e3d89aa",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_895a0c82",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/DataTreeListenerTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-21T13:50:58Z",
+      "side": 1,
+      "message": "Since the class under test is called DataTreeChangeListenerActor, this class should be named DataTreeChangeListenerActorTest.",
+      "revId": "a65a598f132c619f6853cd17ab389cd80e3d89aa",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
