@@ -173,6 +173,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_5f235205",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardWriteTransaction.java",
+        "patchSetId": 26
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-21T23:07:04Z",
+      "side": 1,
+      "message": "We should return here. Also checkClosed should send the PoisonPill if closed.",
+      "parentUuid": "3aa0d159_5fcef25b",
+      "revId": "bd8885032b54afee3380d89c9ff977ac2224eda7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_bf04d67e",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardWriteTransaction.java",
         "patchSetId": 26
