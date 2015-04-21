@@ -13,7 +13,6 @@
 
   <properties>
     <features.file>features.xml</features.file>
-    <org.json.version>20131018</org.json.version>
   </properties>
 
   <dependencies>
