@@ -7,9 +7,9 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import akka.actor.ActorSelection;
 import akka.dispatch.OnComplete;
 import java.util.List;
+import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,7 +59,7 @@ final class ChainedTransactionProxy extends TransactionProxy {
      * previous Tx's ready operations haven't completed yet.
      */
     @Override
-    protected Future<ActorSelection> sendFindPrimaryShardAsync(final String shardName) {
+    protected Future<PrimaryShardInfo> sendFindPrimaryShardAsync(final String shardName) {
         // Check if there are any previous ready Futures, otherwise let the super class handle it.
         if(previousReadyFutures.isEmpty()) {
             return super.sendFindPrimaryShardAsync(shardName);
@@ -75,7 +75,7 @@ final class ChainedTransactionProxy extends TransactionProxy {
                 previousReadyFutures, getActorContext().getClientDispatcher());
 
         // Add a callback for completion of the combined Futures.
-        final Promise<ActorSelection> returnPromise = akka.dispatch.Futures.promise();
+        final Promise<PrimaryShardInfo> returnPromise = akka.dispatch.Futures.promise();
         OnComplete<Iterable<Object>> onComplete = new OnComplete<Iterable<Object>>() {
             @Override
             public void onComplete(Throwable failure, Iterable<Object> notUsed) {
