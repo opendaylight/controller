@@ -1,0 +1,78 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_c9181487",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContext.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-04-21T20:24:51Z",
+      "side": 1,
+      "message": "Do we really need this flag now?",
+      "revId": "c6c9b43923bbe8bc6d586ce09649324949e6b092",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_7f572e03",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 385,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-04-21T20:24:51Z",
+      "side": 1,
+      "message": "small typo in comment \"modificationsa\"",
+      "revId": "c6c9b43923bbe8bc6d586ce09649324949e6b092",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_ff4a5e54",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardCommitCoordinator.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-04-21T20:24:51Z",
+      "side": 1,
+      "message": "Doc needs to be updated",
+      "range": {
+        "startLine": 156,
+        "startChar": 14,
+        "endLine": 156,
+        "endChar": 24
+      },
+      "revId": "c6c9b43923bbe8bc6d586ce09649324949e6b092",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_5f6592df",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardCommitCoordinator.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-04-21T20:24:51Z",
+      "side": 1,
+      "message": "Fix doc",
+      "revId": "c6c9b43923bbe8bc6d586ce09649324949e6b092",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
