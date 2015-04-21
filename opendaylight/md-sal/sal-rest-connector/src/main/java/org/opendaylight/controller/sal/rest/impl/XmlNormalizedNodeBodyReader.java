@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -33,6 +34,8 @@ import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.codec.xml.XmlUtils;
 import org.opendaylight.yangtools.yang.data.impl.schema.transform.dom.parser.DomToNormalizedNodeParserFactory;
+import org.opendaylight.yangtools.yang.model.api.ChoiceCaseNode;
+import org.opendaylight.yangtools.yang.model.api.ChoiceSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
@@ -111,7 +114,7 @@ public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPro
 
         final List<Element> elements = Collections.singletonList(doc.getDocumentElement());
         final SchemaNode schemaNodeContext = pathContext.getSchemaNode();
-        DataSchemaNode schemaNode = null;
+        DataSchemaNode schemaNode;
         if (schemaNodeContext instanceof RpcDefinition) {
             schemaNode = ((RpcDefinition) schemaNodeContext).getInput();
         } else if (schemaNodeContext instanceof DataSchemaNode) {
@@ -124,12 +127,9 @@ public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPro
         final String schemaNodeName = pathContext.getSchemaNode().getQName().getLocalName();
 
         if (!schemaNodeName.equalsIgnoreCase(docRootElm)) {
-            final Collection<DataSchemaNode> children = ((DataNodeContainer) schemaNode).getChildNodes();
-            for (final DataSchemaNode child : children) {
-                if (child.getQName().getLocalName().equalsIgnoreCase(docRootElm)) {
-                    schemaNode = child;
-                    break;
-                }
+            final DataSchemaNode foundSchemaNode = findSchemaNodeOrParentChoiceByName(schemaNode, docRootElm);
+            if (foundSchemaNode != null) {
+                schemaNode = foundSchemaNode;
             }
         }
 
@@ -137,12 +137,42 @@ public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPro
         final DomToNormalizedNodeParserFactory parserFactory =
                 DomToNormalizedNodeParserFactory.getInstance(XmlUtils.DEFAULT_XML_CODEC_PROVIDER, pathContext.getSchemaContext());
 
+        NormalizedNode<?, ?> parsed = null;
         if(schemaNode instanceof ContainerSchemaNode) {
             return parserFactory.getContainerNodeParser().parse(Collections.singletonList(doc.getDocumentElement()), (ContainerSchemaNode) schemaNode);
         } else if(schemaNode instanceof ListSchemaNode) {
             final ListSchemaNode casted = (ListSchemaNode) schemaNode;
             return parserFactory.getMapEntryNodeParser().parse(elements, casted);
-        } // FIXME : add another DataSchemaNode extensions e.g. LeafSchemaNode
+        } else if (schemaNode instanceof ChoiceSchemaNode) {
+            final ChoiceSchemaNode casted = (ChoiceSchemaNode) schemaNode;
+            return parserFactory.getChoiceNodeParser().parse(elements, casted);
+        }
+
+        // FIXME : add another DataSchemaNode extensions e.g. LeafSchemaNode
+
+        return parsed;
+    }
+
+    private static DataSchemaNode findSchemaNodeOrParentChoiceByName(DataSchemaNode schemaNode, String elementName) {
+        final ArrayList<ChoiceSchemaNode> choiceSchemaNodes = new ArrayList<>();
+        final Collection<DataSchemaNode> children = ((DataNodeContainer) schemaNode).getChildNodes();
+        for (final DataSchemaNode child : children) {
+            if (child instanceof ChoiceSchemaNode) {
+                choiceSchemaNodes.add((ChoiceSchemaNode) child);
+            } else if (child.getQName().getLocalName().equalsIgnoreCase(elementName)) {
+                return child;
+            }
+        }
+
+        for (final ChoiceSchemaNode choiceNode : choiceSchemaNodes) {
+            for (final ChoiceCaseNode caseNode : choiceNode.getCases()) {
+                final DataSchemaNode resultFromRecursion = findSchemaNodeOrParentChoiceByName(caseNode, elementName);
+                if (resultFromRecursion != null) {
+                    // this returns top choice node in which child element is found
+                    return choiceNode;
+                }
+            }
+        }
         return null;
     }
 }
