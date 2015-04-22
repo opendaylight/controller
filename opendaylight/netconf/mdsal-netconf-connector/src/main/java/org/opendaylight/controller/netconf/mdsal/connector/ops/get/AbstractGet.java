@@ -31,7 +31,6 @@ import org.opendaylight.controller.netconf.mdsal.connector.CurrentSchemaContext;
 import org.opendaylight.controller.netconf.mdsal.connector.ops.Datastore;
 import org.opendaylight.controller.netconf.util.mapping.AbstractSingletonNetconfOperation;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
-import org.opendaylight.controller.sal.connect.netconf.util.InstanceIdToNodes;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
@@ -42,6 +41,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeWriter;
 import org.opendaylight.yangtools.yang.data.impl.codec.xml.XMLStreamNormalizedNodeStreamWriter;
+import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.transform.dom.DomUtils;
 import org.opendaylight.yangtools.yang.data.impl.schema.transform.dom.parser.DomToNormalizedNodeParserFactory;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
@@ -151,7 +151,7 @@ public abstract class AbstractGet extends AbstractSingletonNetconfOperation {
     protected Element serializeNodeWithParentStructure(Document document, YangInstanceIdentifier dataRoot, NormalizedNode node) {
         if (!dataRoot.equals(ROOT)) {
             return (Element) transformNormalizedNode(document,
-                    InstanceIdToNodes.serialize(schemaContext.getCurrentContext(), dataRoot, node),
+                    ImmutableNodes.fromInstanceId(schemaContext.getCurrentContext(), dataRoot, node),
                     ROOT);
         }
         return  (Element) transformNormalizedNode(document, node, ROOT);
