@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_807c1a22",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/StatisticsRestconfServiceWrapper.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 3212
+      },
+      "writtenOn": "2015-04-22T09:07:20Z",
+      "side": 1,
+      "message": "getData() \u003d\u003dnull means it doesn\u0027t contain any data.\nIt\u0027s my mistake, I\u0027ll make changes as per this.",
+      "parentUuid": "3aa0d159_dff3e271",
+      "revId": "1b2b34508d46f5ea1a0eb7104bdc135ee993a758",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_5fffd234",
         "filename": "opendaylight/md-sal/sal-rest-connector/src/main/yang/opendaylight-rest-connector.yang",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2015-04-22T00:15:15Z",
       "side": 1,
       "message": "Why did you remove the success and failure counts added by the previous patch set? I think it\u0027s useful to see the complete stats for Get, Put etc.",
+      "revId": "1b2b34508d46f5ea1a0eb7104bdc135ee993a758",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_faacac8e",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/yang/opendaylight-rest-connector.yang",
+        "patchSetId": 3
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 3212
+      },
+      "writtenOn": "2015-04-22T09:07:20Z",
+      "side": 1,
+      "message": "Removed the success and failure counts, since I have made indivisual leafs for Get, Put, Post and Delete for Success and Failure.\nWith the current implementation, we can see the complete stats for Get, Post, Put and delete of config, Success and failure as well as for the Get of Operational.",
+      "parentUuid": "3aa0d159_5fffd234",
       "revId": "1b2b34508d46f5ea1a0eb7104bdc135ee993a758",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
