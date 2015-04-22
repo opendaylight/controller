@@ -112,7 +112,7 @@ public class TransactionChainProxy implements DOMStoreTransactionChain {
         currentState = CLOSED_STATE;
 
         // Send a close transaction chain request to each and every shard
-        actorContext.broadcast(new CloseTransactionChain(transactionChainId));
+        actorContext.broadcast(new CloseTransactionChain(transactionChainId).toSerializable());
     }
 
     private ChainedTransactionProxy allocateWriteTransaction(TransactionProxy.TransactionType type) {
