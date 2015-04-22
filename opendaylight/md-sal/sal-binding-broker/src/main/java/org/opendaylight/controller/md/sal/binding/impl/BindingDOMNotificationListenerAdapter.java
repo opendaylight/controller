@@ -58,7 +58,7 @@ class BindingDOMNotificationListenerAdapter implements DOMNotificationListener {
         return invokers.keySet();
     }
 
-    private static Map<SchemaPath, NotificationListenerInvoker> createInvokerMapFor(final Class<? extends NotificationListener> implClz) {
+    public static Map<SchemaPath, NotificationListenerInvoker> createInvokerMapFor(final Class<? extends NotificationListener> implClz) {
         final Map<SchemaPath, NotificationListenerInvoker> builder = new HashMap<>();
         for(final Class<?> iface : implClz.getInterfaces()) {
             if(NotificationListener.class.isAssignableFrom(iface) && BindingReflections.isBindingClass(iface)) {
