@@ -13,13 +13,14 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.ForwardingDOMStoreThreePhaseCommitCohort;
+import org.opendaylight.controller.sal.core.spi.data.SnapshotBackedWriteTransaction;
 
 final class ChainedTransactionCommitImpl extends ForwardingDOMStoreThreePhaseCommitCohort {
-    private final SnapshotBackedWriteTransaction transaction;
+    private final SnapshotBackedWriteTransaction<String> transaction;
     private final DOMStoreThreePhaseCommitCohort delegate;
     private final DOMStoreTransactionChainImpl txChain;
 
-    ChainedTransactionCommitImpl(final SnapshotBackedWriteTransaction transaction,
+    ChainedTransactionCommitImpl(final SnapshotBackedWriteTransaction<String> transaction,
             final DOMStoreThreePhaseCommitCohort delegate, final DOMStoreTransactionChainImpl txChain) {
         this.transaction = Preconditions.checkNotNull(transaction);
         this.delegate = Preconditions.checkNotNull(delegate);
@@ -37,12 +38,12 @@ final class ChainedTransactionCommitImpl extends ForwardingDOMStoreThreePhaseCom
         Futures.addCallback(commitFuture, new FutureCallback<Void>() {
             @Override
             public void onFailure(final Throwable t) {
-                txChain.onTransactionFailed(transaction, t);
+                txChain.transactionFailed(transaction, t);
             }
 
             @Override
             public void onSuccess(final Void result) {
-                txChain.onTransactionCommited(transaction);
+                txChain.transactionCommited(transaction);
             }
         });
         return commitFuture;
