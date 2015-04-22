@@ -126,15 +126,29 @@
         <module>commons/httpclient</module>
       </modules>
     </profile>
+
+
     <profile>
       <id>docs</id>
       <activation>
         <activeByDefault>false</activeByDefault>
       </activation>
       <modules>
-        <module>northbound/java-client</module>
         <module>northbound/swagger-ui</module>
       </modules>
     </profile>
+
+    <profile>
+      <id>docs-enunciate</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <jdk>1.7</jdk>
+      </activation>
+      <modules>
+        <module>northbound/java-client</module>
+      </modules>
+    </profile>
+
+
   </profiles>
 </project>
