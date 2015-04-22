@@ -22,8 +22,8 @@ final class DOMStoreTransactionChainImpl extends AbstractSnapshotBackedTransacti
     }
 
     @Override
-    protected DOMStoreThreePhaseCommitCohort createCohort(final SnapshotBackedWriteTransaction<String> tx, final DataTreeModification tree) {
-        return new ChainedTransactionCommitImpl(tx, store.transactionReady(tx, tree), this);
+    protected DOMStoreThreePhaseCommitCohort createCohort(final SnapshotBackedWriteTransaction<String> tx, final DataTreeModification modification) {
+        return new ChainedTransactionCommitImpl(store, tx, modification, this);
     }
 
     @Override
@@ -39,10 +39,6 @@ final class DOMStoreTransactionChainImpl extends AbstractSnapshotBackedTransacti
     @Override
     protected boolean getDebugTransactions() {
         return store.getDebugTransactions();
-    }
-
-    void transactionFailed(final SnapshotBackedWriteTransaction<String> transaction, final Throwable cause) {
-        super.onTransactionFailed(transaction, cause);
     }
 
     void transactionCommited(final SnapshotBackedWriteTransaction<String> transaction) {
