@@ -9,16 +9,14 @@
 package org.opendaylight.controller.messagebus.eventsources.netconf;
 
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
 import org.opendaylight.controller.config.yang.messagebus.app.impl.NamespaceToStream;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
-import org.opendaylight.controller.md.sal.binding.api.MountPoint;
 import org.opendaylight.controller.md.sal.binding.api.MountPointService;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
@@ -45,9 +43,12 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+
 public final class NetconfEventSourceManager implements DataChangeListener, AutoCloseable {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NetconfEventSourceManager.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NetconfEventSourceManager.class);
     private static final TopologyKey NETCONF_TOPOLOGY_KEY = new TopologyKey(new TopologyId(TopologyNetconf.QNAME.getLocalName()));
     private static final InstanceIdentifier<Node> NETCONF_DEVICE_PATH = InstanceIdentifier.create(NetworkTopology.class)
                 .child(Topology.class, NETCONF_TOPOLOGY_KEY)
@@ -106,7 +107,7 @@ public final class NetconfEventSourceManager implements DataChangeListener, Auto
     private void initialize(final DataBroker dataBroker){
         Preconditions.checkNotNull(dataBroker);
         listenerRegistration = dataBroker.registerDataChangeListener(LogicalDatastoreType.OPERATIONAL, NETCONF_DEVICE_PATH, this, DataChangeScope.SUBTREE);
-        LOGGER.info("NetconfEventSourceManager initialized.");
+        LOG.info("NetconfEventSourceManager initialized.");
     }
 
     private Map<String,String> namespaceToStreamMapping(final List<NamespaceToStream> namespaceMapping) {
@@ -122,7 +123,7 @@ public final class NetconfEventSourceManager implements DataChangeListener, Auto
     @Override
     public void onDataChanged(final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> event) {
 
-        LOGGER.debug("[DataChangeEvent<InstanceIdentifier<?>, DataObject>: {}]", event);
+        LOG.debug("[DataChangeEvent<InstanceIdentifier<?>, DataObject>: {}]", event);
         for (final Map.Entry<InstanceIdentifier<?>, DataObject> changeEntry : event.getCreatedData().entrySet()) {
             if (changeEntry.getValue() instanceof Node) {
                 nodeUpdated(changeEntry.getKey(),(Node) changeEntry.getValue());
@@ -144,11 +145,11 @@ public final class NetconfEventSourceManager implements DataChangeListener, Auto
             throw new IllegalStateException("Node is null");
         }
         if ( isNetconfNode(node) == false ) {
-            LOGGER.debug("OnDataChanged Event. Not a Netconf node.");
+            LOG.debug("OnDataChanged Event. Not a Netconf node.");
             return;
         }
         if ( isEventSource(node) == false ) {
-            LOGGER.debug("OnDataChanged Event. Node an EventSource node.");
+            LOG.debug("OnDataChanged Event. Node an EventSource node.");
             return;
         }
         if(node.getAugmentation(NetconfNode.class).getConnectionStatus() != ConnectionStatus.Connected ) {
@@ -162,13 +163,12 @@ public final class NetconfEventSourceManager implements DataChangeListener, Auto
 
     private void createEventSource(final InstanceIdentifier<?> key, final Node node) {
         final Optional<DOMMountPoint> netconfMount = domMounts.getMountPoint(domMountPath(node.getNodeId()));
-        final Optional<MountPoint> bindingMount = bindingMounts.getMountPoint(key);
 
-        if(netconfMount.isPresent() && bindingMount.isPresent()) {
-
+        if(netconfMount.isPresent()) {
             final NetconfEventSource netconfEventSource =
-                    new NetconfEventSource(node, streamMap, netconfMount.get(), publishService, bindingMount.get());
+                    new NetconfEventSource(node, streamMap, netconfMount.get(), publishService);
             final EventSourceRegistration<NetconfEventSource> registration = eventSourceRegistry.registerEventSource(netconfEventSource);
+            LOG.info("Event source {} has been registered",node.getNodeId().getValue());
             eventSourceRegistration.putIfAbsent(key, registration);
 
         }
