@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_c36eacc9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/AbstractShardDataTreeTransaction.java",
+        "patchSetId": 26
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-04-22T11:45:23Z",
+      "side": 1,
+      "message": "the returned value is true only if we went from closed\u003dfalse to closed\u003dtrue. If",
+      "parentUuid": "3aa0d159_bf2cd64b",
+      "revId": "bd8885032b54afee3380d89c9ff977ac2224eda7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_df31a2a3",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/AbstractShardDataTreeTransaction.java",
         "patchSetId": 26
@@ -30,6 +48,24 @@
       "writtenOn": "2015-04-21T22:27:31Z",
       "side": 1,
       "message": "We should choose one way to do toStrings. Currently we have variations where we use normal string concatenation and StringBuilder. This is the third way :)",
+      "revId": "bd8885032b54afee3380d89c9ff977ac2224eda7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_e373a8af",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/AbstractShardDataTreeTransaction.java",
+        "patchSetId": 26
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-04-22T11:45:23Z",
+      "side": 1,
+      "message": "I like this the best, as it allows to add protected method which subclasses can use to add more attributes, but not override toString() itself -- thus forcing uniform toString() for all classes derived from a certain class.",
+      "parentUuid": "3aa0d159_df31a2a3",
       "revId": "bd8885032b54afee3380d89c9ff977ac2224eda7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -88,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_60030e10",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 26
+      },
+      "lineNbr": 513,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-04-22T11:45:23Z",
+      "side": 1,
+      "message": "This essentially keeps the same logic as before, as RuntimeExceptions were wrapped in ExecutionException before -- now we do not have Future in between, hence noone is wrapping it.",
+      "parentUuid": "3aa0d159_5fe4b20c",
+      "revId": "bd8885032b54afee3380d89c9ff977ac2224eda7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_7f82ce01",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTreeTransactionChain.java",
         "patchSetId": 26
@@ -99,6 +153,24 @@
       "writtenOn": "2015-04-21T22:27:31Z",
       "side": 1,
       "message": "I\u0027m finding this state check a little confusing. Why should I have an openTransaction when I am finishing some other transaction? Not clear.",
+      "revId": "bd8885032b54afee3380d89c9ff977ac2224eda7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_e35c0828",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTreeTransactionChain.java",
+        "patchSetId": 26
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-04-22T11:45:23Z",
+      "side": 1,
+      "message": "We want to catch any wrong-use by other classes, so this is just a state cross-check. We could even run transaction.equals(openTransaction) to be even more paranoid.",
+      "parentUuid": "3aa0d159_7f82ce01",
       "revId": "bd8885032b54afee3380d89c9ff977ac2224eda7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -122,6 +194,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_a310404f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardTransaction.java",
+        "patchSetId": 26
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-04-22T11:45:23Z",
+      "side": 1,
+      "message": "abort is equivalent to close, but it has different behavior than then recommended. For read-only transactions it is a no-op, for read-write it is the alternative to commit() (therefore its name)",
+      "parentUuid": "3aa0d159_bfddb616",
+      "revId": "bd8885032b54afee3380d89c9ff977ac2224eda7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_ffc33e36",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardTransaction.java",
         "patchSetId": 26
@@ -139,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_631a3870",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardTransaction.java",
+        "patchSetId": 26
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-04-22T11:45:23Z",
+      "side": 1,
+      "message": "it is used only for the read-only case, as that has specified ReadFailedException for then a read()/exists() is attempted while the transaction is closed.",
+      "parentUuid": "3aa0d159_ffc33e36",
+      "revId": "bd8885032b54afee3380d89c9ff977ac2224eda7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_ffac9e8e",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardTransaction.java",
         "patchSetId": 26
@@ -150,6 +258,24 @@
       "writtenOn": "2015-04-21T22:27:31Z",
       "side": 1,
       "message": "Single return transaction.isClosed();",
+      "revId": "bd8885032b54afee3380d89c9ff977ac2224eda7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_0327b4b7",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardTransaction.java",
+        "patchSetId": 26
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-04-22T11:45:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3aa0d159_ffac9e8e",
       "revId": "bd8885032b54afee3380d89c9ff977ac2224eda7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -185,6 +311,24 @@
       "side": 1,
       "message": "We should return here. Also checkClosed should send the PoisonPill if closed.",
       "parentUuid": "3aa0d159_5fcef25b",
+      "revId": "bd8885032b54afee3380d89c9ff977ac2224eda7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_03001400",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardWriteTransaction.java",
+        "patchSetId": 26
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-04-22T11:45:23Z",
+      "side": 1,
+      "message": "I have added the return, but the poison pill should not be sent, I think. Unless I am mistaken the pill does not take precedence and will be enqueued to the end of the mailbox and hence we can see client requests sent closing the transaction before we see the pill.",
+      "parentUuid": "3aa0d159_5f235205",
       "revId": "bd8885032b54afee3380d89c9ff977ac2224eda7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
