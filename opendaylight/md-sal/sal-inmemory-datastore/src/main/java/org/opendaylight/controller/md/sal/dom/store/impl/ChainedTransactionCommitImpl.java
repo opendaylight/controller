@@ -8,45 +8,24 @@
 package org.opendaylight.controller.md.sal.dom.store.impl;
 
 import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
-import org.opendaylight.controller.sal.core.spi.data.ForwardingDOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.SnapshotBackedWriteTransaction;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 
-final class ChainedTransactionCommitImpl extends ForwardingDOMStoreThreePhaseCommitCohort {
-    private final SnapshotBackedWriteTransaction<String> transaction;
-    private final DOMStoreThreePhaseCommitCohort delegate;
+final class ChainedTransactionCommitImpl extends InMemoryDOMStoreThreePhaseCommitCohort {
     private final DOMStoreTransactionChainImpl txChain;
 
-    ChainedTransactionCommitImpl(final SnapshotBackedWriteTransaction<String> transaction,
-            final DOMStoreThreePhaseCommitCohort delegate, final DOMStoreTransactionChainImpl txChain) {
-        this.transaction = Preconditions.checkNotNull(transaction);
-        this.delegate = Preconditions.checkNotNull(delegate);
+    ChainedTransactionCommitImpl(final InMemoryDOMDataStore store, final SnapshotBackedWriteTransaction<String> transaction,
+        final DataTreeModification modification, final DOMStoreTransactionChainImpl txChain) {
+        super(store, transaction, modification);
         this.txChain = Preconditions.checkNotNull(txChain);
     }
 
     @Override
-    protected DOMStoreThreePhaseCommitCohort delegate() {
-        return delegate;
-    }
-
-    @Override
     public ListenableFuture<Void> commit() {
-        ListenableFuture<Void> commitFuture = super.commit();
-        Futures.addCallback(commitFuture, new FutureCallback<Void>() {
-            @Override
-            public void onFailure(final Throwable t) {
-                txChain.transactionFailed(transaction, t);
-            }
-
-            @Override
-            public void onSuccess(final Void result) {
-                txChain.transactionCommited(transaction);
-            }
-        });
-        return commitFuture;
+        ListenableFuture<Void> ret = super.commit();
+        txChain.transactionCommited(getTransaction());
+        return ret;
     }
 
 }
