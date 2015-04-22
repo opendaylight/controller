@@ -137,7 +137,7 @@ public class RestPostOperationTest extends JerseyTest {
         final RpcResult<TransactionStatus> rpcResult = new DummyRpcResult.Builder<TransactionStatus>().result(
                 TransactionStatus.COMMITED).build();
 
-        when(brokerFacade.commitConfigurationDataPost(any(YangInstanceIdentifier.class), any(NormalizedNode.class)))
+        when(brokerFacade.commitConfigurationDataPost((SchemaContext)null, any(YangInstanceIdentifier.class), any(NormalizedNode.class)))
                 .thenReturn(mock(CheckedFuture.class));
 
         final ArgumentCaptor<YangInstanceIdentifier> instanceIdCaptor = ArgumentCaptor.forClass(YangInstanceIdentifier.class);
@@ -157,7 +157,7 @@ public class RestPostOperationTest extends JerseyTest {
         // FIXME : NEVER test a nr. of call some service in complex test suite
 //        verify(brokerFacade, times(2))
         verify(brokerFacade, times(1))
-                .commitConfigurationDataPost(instanceIdCaptor.capture(), compNodeCaptor.capture());
+                .commitConfigurationDataPost((SchemaContext)null, instanceIdCaptor.capture(), compNodeCaptor.capture());
 //        identifier = "[(urn:ietf:params:xml:ns:yang:test-interface?revision=2014-07-01)interfaces, (urn:ietf:params:xml:ns:yang:test-interface?revision=2014-07-01)block]";
         assertEquals(identifier, ImmutableList.copyOf(instanceIdCaptor.getValue().getPathArguments()).toString());
     }
@@ -166,7 +166,7 @@ public class RestPostOperationTest extends JerseyTest {
     public void createConfigurationDataNullTest() throws UnsupportedEncodingException {
         initMocking();
 
-        when(brokerFacade.commitConfigurationDataPost(any(YangInstanceIdentifier.class),any(NormalizedNode.class)))
+        when(brokerFacade.commitConfigurationDataPost(any(SchemaContext.class), any(YangInstanceIdentifier.class),any(NormalizedNode.class)))
                 .thenReturn(Futures.<Void, TransactionCommitFailedException>immediateCheckedFuture(null));
 
         //FIXME : find who is set schemaContext
