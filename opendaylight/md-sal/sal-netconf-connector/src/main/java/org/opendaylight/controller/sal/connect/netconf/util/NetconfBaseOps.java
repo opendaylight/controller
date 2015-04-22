@@ -235,7 +235,8 @@ public final class NetconfBaseOps {
 
         // Default operation
         if(defaultOperation.isPresent()) {
-            editBuilder.withChild(Builders.leafBuilder().withNodeIdentifier(toId(NETCONF_DEFAULT_OPERATION_QNAME)).withValue(NetconfMessageTransformUtil.modifyOperationToXmlString(defaultOperation.get())).build());
+            final String opString = defaultOperation.get().name().toLowerCase();
+            editBuilder.withChild(Builders.leafBuilder().withNodeIdentifier(toId(NETCONF_DEFAULT_OPERATION_QNAME)).withValue(opString).build());
         }
 
         // Error option
