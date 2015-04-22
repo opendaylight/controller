@@ -9,7 +9,6 @@ package org.opendaylight.controller.sal.restconf.impl;
 
 import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION;
 import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.OPERATIONAL;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
@@ -226,7 +225,7 @@ public class BrokerFacade {
         }
 
         ensureParentsByMerge(datastore, path, rWTransaction, schemaContext);
-        rWTransaction.merge(datastore, path, payload);
+        rWTransaction.put(datastore, path, payload);
         LOG.trace("Post " + datastore.name() + " via Restconf: {}", path);
         return rWTransaction.submit();
     }
@@ -236,7 +235,7 @@ public class BrokerFacade {
             final YangInstanceIdentifier path, final NormalizedNode<?, ?> payload, final SchemaContext schemaContext) {
         LOG.trace("Put " + datastore.name() + " via Restconf: {}", path);
         ensureParentsByMerge(datastore, path, writeTransaction, schemaContext);
-        writeTransaction.put(datastore, path, payload);
+        writeTransaction.merge(datastore, path, payload);
         return writeTransaction.submit();
     }
 
