@@ -10,9 +10,14 @@ package org.opendaylight.controller.md.sal.rest.common;
 
 import com.google.common.base.Splitter;
 import java.net.URI;
-import java.text.SimpleDateFormat;
+import java.net.URISyntaxException;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
+import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
+import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
+import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.common.QNameModule;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 /**
@@ -35,7 +40,7 @@ public final class RestconfInternalConstants {
         throw new UnsupportedOperationException("Utility class");
     }
 
-    public static final SimpleDateFormat REVISION_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+    public static final ThreadSafeDateFormat REVISION_FORMAT = new ThreadSafeDateFormat();
 
     public static final Splitter SLASH_SPLITTER = Splitter.on('/');
 
@@ -80,5 +85,17 @@ public final class RestconfInternalConstants {
     public static final String URI_PARAM_DEPTH = "depth";
 
     public static final YangInstanceIdentifier ROOT = YangInstanceIdentifier.builder().build();
+
+    public static final QName NETCONF_BASE_QNAME;
+
+    static {
+        try {
+            NETCONF_BASE_QNAME = QName.create(QNameModule.create(new URI(NETCONF_BASE), null), NETCONF_BASE_PAYLOAD_NAME);
+        }
+        catch (final URISyntaxException e) {
+            final String errMsg = "It wasn't possible to create instance of URI class with "+NETCONF_BASE+" URI";
+            throw new RestconfDocumentedException(errMsg, ErrorType.APPLICATION, ErrorTag.OPERATION_FAILED);
+        }
+    }
 
 }
