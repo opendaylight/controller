@@ -22,8 +22,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import javassist.ClassPool;
 import org.apache.commons.lang3.StringUtils;
-import org.opendaylight.controller.sal.binding.codegen.RuntimeCodeGenerator;
-import org.opendaylight.controller.sal.binding.spi.NotificationInvokerFactory;
 import org.opendaylight.yangtools.sal.binding.generator.util.JavassistUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,8 +33,6 @@ public class SingletonHolder {
     public static final JavassistUtils JAVASSIST = JavassistUtils.forClassPool(CLASS_POOL);
     public static final org.opendaylight.controller.sal.binding.codegen.impl.DefaultRuntimeCodeGenerator RPC_GENERATOR_IMPL = new org.opendaylight.controller.sal.binding.codegen.impl.DefaultRuntimeCodeGenerator(
             CLASS_POOL);
-    public static final RuntimeCodeGenerator RPC_GENERATOR = RPC_GENERATOR_IMPL;
-    public static final NotificationInvokerFactory INVOKER_FACTORY = RPC_GENERATOR_IMPL.getInvokerFactory();
 
     public static final int CORE_NOTIFICATION_THREADS = 4;
     public static final int MAX_NOTIFICATION_THREADS = 32;
@@ -58,12 +54,12 @@ public class SingletonHolder {
 
         if (NOTIFICATION_EXECUTOR == null) {
             int queueSize = MAX_NOTIFICATION_QUEUE_SIZE;
-            String queueValue = System.getProperty(NOTIFICATION_QUEUE_SIZE_PROPERTY);
+            final String queueValue = System.getProperty(NOTIFICATION_QUEUE_SIZE_PROPERTY);
             if (StringUtils.isNotBlank(queueValue)) {
                 try {
                     queueSize = Integer.parseInt(queueValue);
                     logger.trace("Queue size was set to {}", queueSize);
-                } catch (NumberFormatException e) {
+                } catch (final NumberFormatException e) {
                     logger.warn("Cannot parse {} as set by {}, using default {}", queueValue,
                             NOTIFICATION_QUEUE_SIZE_PROPERTY, queueSize);
                 }
@@ -101,7 +97,7 @@ public class SingletonHolder {
                 public void rejectedExecution(final Runnable r, final ThreadPoolExecutor executor) {
                     try {
                         executor.getQueue().put(r);
-                    } catch (InterruptedException e) {
+                    } catch (final InterruptedException e) {
                         throw new RejectedExecutionException("Interrupted while waiting on the queue", e);
                     }
                 }
@@ -120,7 +116,7 @@ public class SingletonHolder {
     @Deprecated
     public static synchronized ListeningExecutorService getDefaultCommitExecutor() {
         if (COMMIT_EXECUTOR == null) {
-            ThreadFactory factory = new ThreadFactoryBuilder().setDaemon(true).setNameFormat("md-sal-binding-commit-%d").build();
+            final ThreadFactory factory = new ThreadFactoryBuilder().setDaemon(true).setNameFormat("md-sal-binding-commit-%d").build();
             /*
              * FIXME: this used to be newCacheThreadPool(), but MD-SAL does not have transaction
              *        ordering guarantees, which means that using a concurrent threadpool results
@@ -128,7 +124,7 @@ public class SingletonHolder {
              *        in inconsistent data being present. Once proper primitives are introduced,
              *        concurrency can be reintroduced.
              */
-            ExecutorService executor = Executors.newSingleThreadExecutor(factory);
+            final ExecutorService executor = Executors.newSingleThreadExecutor(factory);
             COMMIT_EXECUTOR = MoreExecutors.listeningDecorator(executor);
         }
 
@@ -137,7 +133,7 @@ public class SingletonHolder {
 
     public static ExecutorService getDefaultChangeEventExecutor() {
         if (CHANGE_EVENT_EXECUTOR == null) {
-            ThreadFactory factory = new ThreadFactoryBuilder().setDaemon(true).setNameFormat("md-sal-binding-change-%d").build();
+            final ThreadFactory factory = new ThreadFactoryBuilder().setDaemon(true).setNameFormat("md-sal-binding-change-%d").build();
             /*
              * FIXME: this used to be newCacheThreadPool(), but MD-SAL does not have transaction
              *        ordering guarantees, which means that using a concurrent threadpool results
@@ -145,7 +141,7 @@ public class SingletonHolder {
              *        in inconsistent data being present. Once proper primitives are introduced,
              *        concurrency can be reintroduced.
              */
-            ExecutorService executor = Executors.newSingleThreadExecutor(factory);
+            final ExecutorService executor = Executors.newSingleThreadExecutor(factory);
             CHANGE_EVENT_EXECUTOR  = MoreExecutors.listeningDecorator(executor);
         }
 
