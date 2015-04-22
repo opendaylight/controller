@@ -71,7 +71,7 @@ public class RestPutListDataTest {
         restconfImpl = RestconfImpl.getInstance();
         restconfImpl.setBroker(brokerFacade);
         restconfImpl.setControllerContext(controllerContext);
-        when(brokerFacade.commitConfigurationDataPut(any(YangInstanceIdentifier.class), any(NormalizedNode.class)))
+        when(brokerFacade.commitConfigurationDataPut(any(SchemaContext.class), any(YangInstanceIdentifier.class), any(NormalizedNode.class)))
                 .thenReturn(mock(CheckedFuture.class));
     }
 
