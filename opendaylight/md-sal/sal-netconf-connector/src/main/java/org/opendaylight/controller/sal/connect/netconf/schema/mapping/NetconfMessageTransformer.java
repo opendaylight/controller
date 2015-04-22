@@ -101,10 +101,10 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
     private final Multimap<QName, NotificationDefinition> mappedNotifications;
     private final DomToNormalizedNodeParserFactory parserFactory;
 
-    public NetconfMessageTransformer(final SchemaContext schemaContext) {
+    public NetconfMessageTransformer(final SchemaContext schemaContext, final boolean strictParsing) {
         this.counter = new MessageCounter();
         this.schemaContext = schemaContext;
-        parserFactory = DomToNormalizedNodeParserFactory.getInstance(XmlUtils.DEFAULT_XML_CODEC_PROVIDER, schemaContext);
+        parserFactory = DomToNormalizedNodeParserFactory.getInstance(XmlUtils.DEFAULT_XML_CODEC_PROVIDER, schemaContext, strictParsing);
 
         mappedRpcs = Maps.uniqueIndex(schemaContext.getOperations(), QNAME_FUNCTION);
         mappedNotifications = Multimaps.index(schemaContext.getNotifications(), QNAME_NOREV_FUNCTION);

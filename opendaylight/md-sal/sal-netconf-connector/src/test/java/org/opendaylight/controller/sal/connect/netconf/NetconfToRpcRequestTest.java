@@ -69,7 +69,7 @@ public class NetconfToRpcRequestTest {
         cfgCtx = parser.resolveSchemaContext(Sets.union(configModules, notifModules));
         assertNotNull(cfgCtx);
 
-        messageTransformer = new NetconfMessageTransformer(cfgCtx);
+        messageTransformer = new NetconfMessageTransformer(cfgCtx, true);
     }
 
     private LeafNode<Object> buildLeaf(final QName running, final Object value) {
