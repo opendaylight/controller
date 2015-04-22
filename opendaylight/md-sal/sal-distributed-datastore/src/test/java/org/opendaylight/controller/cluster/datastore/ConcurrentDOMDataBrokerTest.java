@@ -9,11 +9,15 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
@@ -22,7 +26,10 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -36,11 +43,18 @@ import org.mockito.InOrder;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
+import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 /**
  * Unit tests for DOMConcurrentDataCommitCoordinator.
@@ -266,4 +280,175 @@ public class ConcurrentDOMDataBrokerTest {
 
         assertFailure(future, cause, mockCohort1, mockCohort2);
     }
+
+    @Test
+    public void testCreateReadWriteTransaction(){
+        DOMStore domStore = mock(DOMStore.class);
+        ConcurrentDOMDataBroker dataBroker = new ConcurrentDOMDataBroker(ImmutableMap.of(LogicalDatastoreType.OPERATIONAL,
+                domStore, LogicalDatastoreType.CONFIGURATION, domStore), futureExecutor);
+        dataBroker.newReadWriteTransaction();
+
+        verify(domStore, never()).newReadWriteTransaction();
+    }
+
+
+    @Test
+    public void testCreateWriteOnlyTransaction(){
+        DOMStore domStore = mock(DOMStore.class);
+        ConcurrentDOMDataBroker dataBroker = new ConcurrentDOMDataBroker(ImmutableMap.of(LogicalDatastoreType.OPERATIONAL,
+                domStore, LogicalDatastoreType.CONFIGURATION, domStore), futureExecutor);
+        dataBroker.newWriteOnlyTransaction();
+
+        verify(domStore, never()).newWriteOnlyTransaction();
+    }
+
+    @Test
+    public void testCreateReadOnlyTransaction(){
+        DOMStore domStore = mock(DOMStore.class);
+        ConcurrentDOMDataBroker dataBroker = new ConcurrentDOMDataBroker(ImmutableMap.of(LogicalDatastoreType.OPERATIONAL,
+                domStore, LogicalDatastoreType.CONFIGURATION, domStore), futureExecutor);
+        dataBroker.newReadOnlyTransaction();
+
+        verify(domStore, never()).newReadOnlyTransaction();
+    }
+
+    @Test
+    public void testLazySubTransactionCreation(){
+        DOMStore configDomStore = mock(DOMStore.class);
+        DOMStore operationalDomStore = mock(DOMStore.class);
+        DOMStoreReadWriteTransaction mockStoreReadWriteTransaction = mock(DOMStoreReadWriteTransaction.class);
+
+        doReturn(mockStoreReadWriteTransaction).when(operationalDomStore).newReadWriteTransaction();
+        doReturn(mockStoreReadWriteTransaction).when(configDomStore).newReadWriteTransaction();
+
+        ConcurrentDOMDataBroker dataBroker = new ConcurrentDOMDataBroker(ImmutableMap.of(LogicalDatastoreType.OPERATIONAL,
+                operationalDomStore, LogicalDatastoreType.CONFIGURATION, configDomStore), futureExecutor);
+        DOMDataReadWriteTransaction domDataReadWriteTransaction = dataBroker.newReadWriteTransaction();
+
+        domDataReadWriteTransaction.put(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.builder().build(), mock(NormalizedNode.class));
+        domDataReadWriteTransaction.put(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.builder().build(), mock(NormalizedNode.class));
+
+        verify(configDomStore, never()).newReadWriteTransaction();
+        verify(operationalDomStore, times(1)).newReadWriteTransaction();
+
+        domDataReadWriteTransaction.put(LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.builder().build(), mock(NormalizedNode.class));
+
+        verify(configDomStore, times(1)).newReadWriteTransaction();
+        verify(operationalDomStore, times(1)).newReadWriteTransaction();
+
+    }
+
+    @Test
+    public void testSubmitWithOnlyOneSubTransaction() throws InterruptedException {
+        DOMStore configDomStore = mock(DOMStore.class);
+        DOMStore operationalDomStore = mock(DOMStore.class);
+        DOMStoreReadWriteTransaction mockStoreReadWriteTransaction = mock(DOMStoreReadWriteTransaction.class);
+        DOMStoreThreePhaseCommitCohort mockCohort = mock(DOMStoreThreePhaseCommitCohort.class);
+
+        doReturn(mockStoreReadWriteTransaction).when(operationalDomStore).newReadWriteTransaction();
+        doReturn(mockCohort).when(mockStoreReadWriteTransaction).ready();
+        doReturn(Futures.immediateFuture(false)).when(mockCohort).canCommit();
+        doReturn(Futures.immediateFuture(null)).when(mockCohort).abort();
+
+        final CountDownLatch latch = new CountDownLatch(1);
+        final List<DOMStoreThreePhaseCommitCohort> commitCohorts = new ArrayList();
+
+        ConcurrentDOMDataBroker dataBroker = new ConcurrentDOMDataBroker(ImmutableMap.of(LogicalDatastoreType.OPERATIONAL,
+                operationalDomStore, LogicalDatastoreType.CONFIGURATION, configDomStore), futureExecutor) {
+            @Override
+            public CheckedFuture<Void, TransactionCommitFailedException> submit(DOMDataWriteTransaction transaction, Collection<DOMStoreThreePhaseCommitCohort> cohorts) {
+                commitCohorts.addAll(cohorts);
+                latch.countDown();
+                return super.submit(transaction, cohorts);
+            }
+        };
+        DOMDataReadWriteTransaction domDataReadWriteTransaction = dataBroker.newReadWriteTransaction();
+
+        domDataReadWriteTransaction.delete(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.builder().build());
+
+        domDataReadWriteTransaction.submit();
+
+        latch.await(10, TimeUnit.SECONDS);
+
+        assertTrue(commitCohorts.size() == 1);
+    }
+
+    @Test
+    public void testSubmitWithOnlyTwoSubTransactions() throws InterruptedException {
+        DOMStore configDomStore = mock(DOMStore.class);
+        DOMStore operationalDomStore = mock(DOMStore.class);
+        DOMStoreReadWriteTransaction operationalTransaction = mock(DOMStoreReadWriteTransaction.class);
+        DOMStoreReadWriteTransaction configTransaction = mock(DOMStoreReadWriteTransaction.class);
+        DOMStoreThreePhaseCommitCohort mockCohortOperational = mock(DOMStoreThreePhaseCommitCohort.class);
+        DOMStoreThreePhaseCommitCohort mockCohortConfig = mock(DOMStoreThreePhaseCommitCohort.class);
+
+        doReturn(operationalTransaction).when(operationalDomStore).newReadWriteTransaction();
+        doReturn(configTransaction).when(configDomStore).newReadWriteTransaction();
+
+        doReturn(mockCohortOperational).when(operationalTransaction).ready();
+        doReturn(Futures.immediateFuture(false)).when(mockCohortOperational).canCommit();
+        doReturn(Futures.immediateFuture(null)).when(mockCohortOperational).abort();
+
+        doReturn(mockCohortConfig).when(configTransaction).ready();
+        doReturn(Futures.immediateFuture(false)).when(mockCohortConfig).canCommit();
+        doReturn(Futures.immediateFuture(null)).when(mockCohortConfig).abort();
+
+
+        final CountDownLatch latch = new CountDownLatch(1);
+        final List<DOMStoreThreePhaseCommitCohort> commitCohorts = new ArrayList();
+
+        ConcurrentDOMDataBroker dataBroker = new ConcurrentDOMDataBroker(ImmutableMap.of(LogicalDatastoreType.OPERATIONAL,
+                operationalDomStore, LogicalDatastoreType.CONFIGURATION, configDomStore), futureExecutor) {
+            @Override
+            public CheckedFuture<Void, TransactionCommitFailedException> submit(DOMDataWriteTransaction transaction, Collection<DOMStoreThreePhaseCommitCohort> cohorts) {
+                commitCohorts.addAll(cohorts);
+                latch.countDown();
+                return super.submit(transaction, cohorts);
+            }
+        };
+        DOMDataReadWriteTransaction domDataReadWriteTransaction = dataBroker.newReadWriteTransaction();
+
+        domDataReadWriteTransaction.put(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.builder().build(), mock(NormalizedNode.class));
+        domDataReadWriteTransaction.merge(LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.builder().build(), mock(NormalizedNode.class));
+
+        domDataReadWriteTransaction.submit();
+
+        latch.await(10, TimeUnit.SECONDS);
+
+        assertTrue(commitCohorts.size() == 2);
+    }
+
+    @Test
+    public void testCreateTransactionChain(){
+        DOMStore domStore = mock(DOMStore.class);
+        ConcurrentDOMDataBroker dataBroker = new ConcurrentDOMDataBroker(ImmutableMap.of(LogicalDatastoreType.OPERATIONAL,
+                domStore, LogicalDatastoreType.CONFIGURATION, domStore), futureExecutor);
+
+        dataBroker.createTransactionChain(mock(TransactionChainListener.class));
+
+        verify(domStore, times(2)).createTransactionChain();
+
+    }
+
+    @Test
+    public void testCreateTransactionOnChain(){
+        DOMStore domStore = mock(DOMStore.class);
+        ConcurrentDOMDataBroker dataBroker = new ConcurrentDOMDataBroker(ImmutableMap.of(LogicalDatastoreType.OPERATIONAL,
+                domStore, LogicalDatastoreType.CONFIGURATION, domStore), futureExecutor);
+
+        DOMStoreReadWriteTransaction operationalTransaction = mock(DOMStoreReadWriteTransaction.class);
+        DOMStoreTransactionChain mockChain = mock(DOMStoreTransactionChain.class);
+
+        doReturn(mockChain).when(domStore).createTransactionChain();
+        doReturn(operationalTransaction).when(mockChain).newWriteOnlyTransaction();
+
+        DOMTransactionChain transactionChain = dataBroker.createTransactionChain(mock(TransactionChainListener.class));
+
+        DOMDataWriteTransaction domDataWriteTransaction = transactionChain.newWriteOnlyTransaction();
+
+        verify(mockChain, never()).newWriteOnlyTransaction();
+
+        domDataWriteTransaction.put(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.builder().build(), mock(NormalizedNode.class));
+    }
+
 }
