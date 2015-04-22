@@ -43,8 +43,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableMap;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -173,7 +173,7 @@ public class NetconfDeviceSimulator implements Closeable {
                 return input.getKey().getAST();
             }
         });
-        final Map<String, TreeMap<Date, URI>> namespaceContext = BuilderUtils.createYangNamespaceContext(
+        final Map<String, NavigableMap<Date, URI>> namespaceContext = BuilderUtils.createYangNamespaceContext(
                 asts.values(), Optional.<SchemaContext>absent());
 
         final ParseTreeWalker walker = new ParseTreeWalker();
