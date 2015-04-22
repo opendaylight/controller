@@ -7,16 +7,15 @@
  */
 package org.opendaylight.controller.md.sal.binding.compat;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
-
 import javax.annotation.concurrent.GuardedBy;
-
 import org.opendaylight.controller.sal.binding.api.NotificationListener;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
-import org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolder;
-import org.opendaylight.controller.sal.binding.spi.NotificationInvokerFactory.NotificationInvoker;
 import org.opendaylight.yangtools.concepts.AbstractListenerRegistration;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.util.ListenerRegistry;
@@ -24,10 +23,7 @@ import org.opendaylight.yangtools.yang.binding.Notification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
-
+@Deprecated
 public class HydrogenNotificationBrokerImpl implements NotificationProviderService, AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(HydrogenNotificationBrokerImpl.class);
 
@@ -47,7 +43,7 @@ public class HydrogenNotificationBrokerImpl implements NotificationProviderServi
 
     @Override
     public void publish(final Notification notification, final ExecutorService service) {
-        for (NotificationListenerRegistration<?> r : listeners.get().listenersFor(notification)) {
+        for (final NotificationListenerRegistration<?> r : listeners.get().listenersFor(notification)) {
             service.submit(new NotifyTask(r, notification));
         }
     }
@@ -61,7 +57,7 @@ public class HydrogenNotificationBrokerImpl implements NotificationProviderServi
         synchronized (this) {
             final Multimap<Class<? extends Notification>, NotificationListenerRegistration<?>> newListeners =
                     mutableListeners();
-            for (NotificationListenerRegistration<?> reg : registrations) {
+            for (final NotificationListenerRegistration<?> reg : registrations) {
                 newListeners.put(reg.getType(), reg);
             }
 
@@ -69,7 +65,7 @@ public class HydrogenNotificationBrokerImpl implements NotificationProviderServi
         }
 
         // Notifications are dispatched out of lock...
-        for (NotificationListenerRegistration<?> reg : registrations) {
+        for (final NotificationListenerRegistration<?> reg : registrations) {
             announceNotificationSubscription(reg.getType());
         }
     }
@@ -78,7 +74,7 @@ public class HydrogenNotificationBrokerImpl implements NotificationProviderServi
         final Multimap<Class<? extends Notification>, NotificationListenerRegistration<?>> newListeners =
                 mutableListeners();
 
-        for (NotificationListenerRegistration<?> reg : registrations) {
+        for (final NotificationListenerRegistration<?> reg : registrations) {
             newListeners.remove(reg.getType(), reg);
         }
 
@@ -89,7 +85,7 @@ public class HydrogenNotificationBrokerImpl implements NotificationProviderServi
         for (final ListenerRegistration<NotificationInterestListener> listener : interestListeners) {
             try {
                 listener.getInstance().onNotificationSubscribtion(notification);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 LOG.warn("Listener {} reported unexpected error on notification {}",
                         listener.getInstance(), notification, e);
             }
@@ -121,14 +117,14 @@ public class HydrogenNotificationBrokerImpl implements NotificationProviderServi
 
     @Override
     public ListenerRegistration<org.opendaylight.yangtools.yang.binding.NotificationListener> registerNotificationListener(final org.opendaylight.yangtools.yang.binding.NotificationListener listener) {
-        final NotificationInvoker invoker = SingletonHolder.INVOKER_FACTORY.invokerFor(listener);
+        final NotificationInvoker invoker = NotificationInvoker.invokerFor(listener);
         final Set<Class<? extends Notification>> types = invoker.getSupportedNotifications();
         final NotificationListenerRegistration<?>[] regs = new NotificationListenerRegistration<?>[types.size()];
 
         // Populate the registrations...
         int i = 0;
-        for (Class<? extends Notification> type : types) {
-            regs[i] = new AggregatedNotificationListenerRegistration<Notification, Object>(type, invoker.getInvocationProxy(), regs) {
+        for (final Class<? extends Notification> type : types) {
+            regs[i] = new AggregatedNotificationListenerRegistration<Notification, Object>(type, invoker, regs) {
                 @Override
                 protected void removeRegistration() {
                     // Nothing to do, will be cleaned up by parent (below)
@@ -145,7 +141,7 @@ public class HydrogenNotificationBrokerImpl implements NotificationProviderServi
             @Override
             protected void removeRegistration() {
                 removeRegistrations(regs);
-                for (ListenerRegistration<?> reg : regs) {
+                for (final ListenerRegistration<?> reg : regs) {
                     reg.close();
                 }
             }

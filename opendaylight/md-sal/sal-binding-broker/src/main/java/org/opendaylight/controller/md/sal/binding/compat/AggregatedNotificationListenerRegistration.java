@@ -7,10 +7,9 @@
  */
 package org.opendaylight.controller.md.sal.binding.compat;
 
+import com.google.common.base.Preconditions;
 import org.opendaylight.controller.sal.binding.api.NotificationListener;
 import org.opendaylight.yangtools.yang.binding.Notification;
-
-import com.google.common.base.Preconditions;
 
 /**
  * An aggregated listener registration. This is a result of registering an invoker which can handle multiple
