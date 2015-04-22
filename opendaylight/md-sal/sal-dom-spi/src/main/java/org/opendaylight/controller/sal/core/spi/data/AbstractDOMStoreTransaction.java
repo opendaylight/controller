@@ -49,7 +49,8 @@ public abstract class AbstractDOMStoreTransaction<T> implements DOMStoreTransact
      * @return The context in which this transaction was allocated, or null
      *         if the context was not recorded.
      */
-    @Nullable public final Throwable getDebugContext() {
+    @Nullable
+    public final Throwable getDebugContext() {
         return debugContext;
     }
 
