@@ -201,6 +201,8 @@ public class SnapshotManager implements SnapshotState {
 
             LOG.debug("lastSequenceNumber prior to capture: {}", lastSequenceNumber);
 
+            SnapshotManager.this.currentState = CREATING;
+
             try {
                 createSnapshotProcedure.apply(null);
             } catch (Exception e) {
@@ -208,7 +210,6 @@ public class SnapshotManager implements SnapshotState {
                 return false;
             }
 
-            SnapshotManager.this.currentState = CREATING;
             return true;
         }
 
