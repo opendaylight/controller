@@ -54,9 +54,7 @@ import org.opendaylight.controller.sal.streams.websockets.WebSocketServer;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
-import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -181,10 +179,10 @@ public class RestconfServiceImpl implements RestconfService {
         Preconditions.checkArgument(payload != null);
         final SchemaPath type = payload.getInstanceIdentifierContext().getSchemaNode().getPath();
         final URI namespace = payload.getInstanceIdentifierContext().getSchemaNode().getQName().getNamespace();
-        final CheckedFuture<DOMRpcResult, DOMRpcException> response;
         final DOMMountPoint mountPoint = payload.getInstanceIdentifierContext().getMountPoint();
+        final CheckedFuture<DOMRpcResult, DOMRpcException> response;
         final SchemaContext schemaContext;
-        if (identifier.contains(RestconfInternalConstants.MOUNT_POINT_MODULE_NAME) && mountPoint != null) {
+        if (mountPoint != null) {
             final Optional<DOMRpcService> mountRpcServices = mountPoint.getService(DOMRpcService.class);
             RestconfValidationUtils.checkDocumentedError(mountRpcServices.isPresent(), ErrorType.PROTOCOL,
                     ErrorTag.MISSING_ATTRIBUTE, "Rpc service is missing.");
@@ -192,7 +190,7 @@ public class RestconfServiceImpl implements RestconfService {
             response = mountRpcServices.get().invokeRpc(type, payload.getData());
         } else {
             if (namespace.toString().equals(RestconfInternalConstants.SAL_REMOTE_NAMESPACE)) {
-                response = invokeSalRemoteRpcSubscribeRPC(payload);
+                response = invokeSalRemoteRpcSubscribeRPC(identifier, payload);
             } else {
                 response = RestConnectorProviderImpl.getRestBroker().invokeRpc(type, payload.getData());
             }
@@ -201,62 +199,29 @@ public class RestconfServiceImpl implements RestconfService {
 
         final DOMRpcResult result = checkRpcResponse(response);
 
-        RpcDefinition resultNodeSchema = null;
+        final RpcDefinition resultNodeSchema = (RpcDefinition) payload.getInstanceIdentifierContext().getSchemaNode();
         final NormalizedNode<?, ?> resultData = result.getResult();
-        if (result != null && result.getResult() != null) {
-            resultNodeSchema = (RpcDefinition) payload.getInstanceIdentifierContext().getSchemaNode();
-        }
 
         return new NormalizedNodeContext(new InstanceIdentifierContext<>(
                 null, resultNodeSchema, mountPoint, schemaContext), resultData);
     }
 
-    // FIXME
-    private static CheckedFuture<DOMRpcResult, DOMRpcException> invokeSalRemoteRpcSubscribeRPC(final NormalizedNodeContext payload) {
-        final ContainerNode value = (ContainerNode) payload.getData();
-        final QName rpcQName = payload.getInstanceIdentifierContext().getSchemaNode().getQName();
-        final Optional<DataContainerChild<? extends PathArgument, ?>> path = value.getChild(new NodeIdentifier(
-                QName.create(payload.getInstanceIdentifierContext().getSchemaNode().getQName(), "path")));
-        final Object pathValue = path.isPresent() ? path.get().getValue() : null;
+    private static CheckedFuture<DOMRpcResult, DOMRpcException> invokeSalRemoteRpcSubscribeRPC(
+            final String identifier, final NormalizedNodeContext payload) {
+        final RpcDefinition rpc = (RpcDefinition) payload.getInstanceIdentifierContext().getSchemaNode();
+        final QName outputQname = QName.create(rpc.getQName(), "output");
+        final QName streamNameQname = QName.create(rpc.getQName(), "stream-name");
 
-        if (!(pathValue instanceof YangInstanceIdentifier)) {
-            throw new RestconfDocumentedException("Instance identifier was not normalized correctly.",
-                    ErrorType.APPLICATION, ErrorTag.OPERATION_FAILED);
+        final String streamName = Notificator.createStreamNameFromUri(identifier);
+        RestconfValidationUtils.checkDocumentedError(( ! Strings.isNullOrEmpty(streamName)), ErrorType.PROTOCOL,
+                ErrorTag.INVALID_VALUE, "Path is empty or contains value node which is not Container or List build-in type.");
+
+        if ( ! Notificator.existListenerFor(streamName)) {
+            Notificator.createListener(payload.getInstanceIdentifierContext().getInstanceIdentifier(), streamName);
         }
-
-        final YangInstanceIdentifier pathIdentifier = ((YangInstanceIdentifier) pathValue);
-        final String streamName = null;
-        if (!Iterables.isEmpty(pathIdentifier.getPathArguments())) {
-            final String fullRestconfIdentifier = pathIdentifier.toString();
-//            final String fullRestconfIdentifier = controllerContext.toFullRestconfIdentifier(pathIdentifier, null);
-
-//            LogicalDatastoreType datastore = parseEnumTypeParameter(value, LogicalDatastoreType.class,
-//                    RestconfInternalConstants.DATASTORE_PARAM_NAME);
-//            datastore = datastore == null ? RestconfInternalConstants.DEFAULT_DATASTORE : datastore;
-//
-//            DataChangeScope scope = parseEnumTypeParameter(value, DataChangeScope.class, RestconfInternalConstants.SCOPE_PARAM_NAME);
-//            scope = scope == null ? RestconfInternalConstants.DEFAULT_SCOPE : scope;
-//
-//            streamName = Notificator.createStreamNameFromUri(fullRestconfIdentifier + "/datastore=" + datastore
-//                    + "/scope=" + scope);
-        }
-
-        if (Strings.isNullOrEmpty(streamName)) {
-            throw new RestconfDocumentedException(
-                    "Path is empty or contains value node which is not Container or List build-in type.",
-                    ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
-        }
-
-        final QName outputQname = QName.create(rpcQName, "output");
-        final QName streamNameQname = QName.create(rpcQName, "stream-name");
 
         final ContainerNode output = ImmutableContainerNodeBuilder.create().withNodeIdentifier(new NodeIdentifier(outputQname))
-                .withChild(ImmutableNodes.leafNode(streamNameQname, streamName)).build();
-
-//        if (!Notificator.existListenerFor(streamName)) {
-//            final YangInstanceIdentifier normalizedPathIdentifier = controllerContext.toNormalized(pathIdentifier);
-//            Notificator.createListener(normalizedPathIdentifier, streamName);
-//        }
+                .withChild(ImmutableNodes.leafNode(streamNameQname, identifier)).build();
 
         final DOMRpcResult defaultDOMRpcResult = new DefaultDOMRpcResult(output);
 
@@ -270,43 +235,16 @@ public class RestconfServiceImpl implements RestconfService {
                 "Content must be empty.");
         final InstanceIdentifierContext<?> yiiCx = RestConnectorProviderImpl.getSchemaMinder().parseUriRequest(identifier);
         Preconditions.checkState(yiiCx.getSchemaNode() instanceof RpcDefinition);
-        final YangInstanceIdentifier yii = yiiCx.getInstanceIdentifier();
-        final DOMMountPoint mountPoint = yiiCx.getMountPoint();
         final RpcDefinition rpc = (RpcDefinition) yiiCx.getSchemaNode();
         // TODO check error in specification
         RestconfValidationUtils.checkDocumentedError(rpc.getInput() == null, ErrorType.PROTOCOL, ErrorTag.MISSING_ATTRIBUTE,
                 "RPC " + rpc + " expect input value.");
-
-        final SchemaPath type = yiiCx.getSchemaNode().getPath();
-        final CheckedFuture<DOMRpcResult, DOMRpcException> response;
-        final SchemaContext schemaContext;
-        if (identifier.contains(RestconfInternalConstants.MOUNT_POINT_MODULE_NAME) && mountPoint != null) {
-            final Optional<DOMRpcService> mountRpcServices = mountPoint.getService(DOMRpcService.class);
-            RestconfValidationUtils.checkDocumentedError(mountRpcServices.isPresent(), ErrorType.PROTOCOL,
-                    ErrorTag.MISSING_ATTRIBUTE, "Rpc service is missing.");
-            schemaContext = mountPoint.getSchemaContext();
-            response = mountRpcServices.get().invokeRpc(type, null);
-        } else {
-            response = RestConnectorProviderImpl.getRestBroker().invokeRpc(type, null);
-            schemaContext = RestConnectorProviderImpl.getSchemaContext();
-        }
-
-        final DOMRpcResult result = checkRpcResponse(response);
-
-        RpcDefinition resultNodeSchema = null;
-        final NormalizedNode<?, ?> resultData = result.getResult();
-        if (result != null && result.getResult() != null) {
-            resultNodeSchema = (RpcDefinition) yiiCx.getSchemaNode();
-        }
-
-        return new NormalizedNodeContext(new InstanceIdentifierContext<>(
-                null, resultNodeSchema, mountPoint, schemaContext), resultData);
+        final NormalizedNodeContext nnCx = new NormalizedNodeContext(yiiCx, null);
+        return invokeRpc(identifier, nnCx, uriInfo);
     }
 
     private static DOMRpcResult checkRpcResponse(final CheckedFuture<DOMRpcResult, DOMRpcException> response) {
-        if (response == null) {
-            return null;
-        }
+        RestconfValidationUtils.checkDocumentedError(response != null, ErrorType.RPC, ErrorTag.OPERATION_FAILED, "Rpc response was null.");
         try {
             final DOMRpcResult retValue = response.get();
             if (retValue.getErrors() == null || retValue.getErrors().isEmpty()) {
