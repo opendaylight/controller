@@ -36,7 +36,7 @@ public class NetconfToNotificationTest {
     public void setup() throws Exception {
         final SchemaContext schemaContext = getNotificationSchemaContext(getClass());
 
-        messageTransformer = new NetconfMessageTransformer(schemaContext);
+        messageTransformer = new NetconfMessageTransformer(schemaContext, true);
 
         final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);

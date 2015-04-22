@@ -118,7 +118,7 @@ public final class NetconfDevice implements RemoteDevice<NetconfSessionPreferenc
      * Create rpc implementation capable of handling RPC for monitoring and notifications even before the schemas of remote device are downloaded
      */
     static NetconfDeviceRpc getRpcForInitialization(final NetconfDeviceCommunicator listener) {
-        return new NetconfDeviceRpc(INIT_SCHEMA_CTX, listener, new NetconfMessageTransformer(INIT_SCHEMA_CTX));
+        return new NetconfDeviceRpc(INIT_SCHEMA_CTX, listener, new NetconfMessageTransformer(INIT_SCHEMA_CTX, false));
     }
 
 
@@ -216,7 +216,7 @@ public final class NetconfDevice implements RemoteDevice<NetconfSessionPreferenc
 
     @VisibleForTesting
     void handleSalInitializationSuccess(final SchemaContext result, final NetconfSessionPreferences remoteSessionCapabilities, final DOMRpcService deviceRpc) {
-        messageTransformer = new NetconfMessageTransformer(result);
+        messageTransformer = new NetconfMessageTransformer(result, true);
 
         updateTransformer(messageTransformer);
         // salFacade.onDeviceConnected has to be called before the notification handler is initialized
@@ -461,7 +461,7 @@ public final class NetconfDevice implements RemoteDevice<NetconfSessionPreferenc
         }
 
         private NetconfDeviceRpc getDeviceSpecificRpc(final SchemaContext result) {
-            return new NetconfDeviceRpc(result, listener, new NetconfMessageTransformer(result));
+            return new NetconfDeviceRpc(result, listener, new NetconfMessageTransformer(result, true));
         }
 
         private Collection<SourceIdentifier> stripMissingSource(final Collection<SourceIdentifier> requiredSources, final SourceIdentifier sIdToRemove) {
