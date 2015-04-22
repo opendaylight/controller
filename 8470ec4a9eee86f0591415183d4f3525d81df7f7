@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_54f1f0cb",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/AbstractDOMBroker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-22T23:47:53Z",
+      "side": 1,
+      "message": "Indentation ...",
+      "revId": "8470ec4a9eee86f0591415183d4f3525d81df7f7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
