@@ -5,7 +5,7 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.sal.binding.impl;
+package org.opendaylight.controller.md.sal.binding.compat;
 
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -28,15 +28,15 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
-public class NotificationBrokerImpl implements NotificationProviderService, AutoCloseable {
-    private static final Logger LOG = LoggerFactory.getLogger(NotificationBrokerImpl.class);
+public class HydrogenNotificationBrokerImpl implements NotificationProviderService, AutoCloseable {
+    private static final Logger LOG = LoggerFactory.getLogger(HydrogenNotificationBrokerImpl.class);
 
     private final ListenerRegistry<NotificationInterestListener> interestListeners =
             ListenerRegistry.create();
     private final AtomicReference<ListenerMapGeneration> listeners = new AtomicReference<>(new ListenerMapGeneration());
     private final ExecutorService executor;
 
-    public NotificationBrokerImpl(final ExecutorService executor) {
+    public HydrogenNotificationBrokerImpl(final ExecutorService executor) {
         this.executor = Preconditions.checkNotNull(executor);
     }
 
