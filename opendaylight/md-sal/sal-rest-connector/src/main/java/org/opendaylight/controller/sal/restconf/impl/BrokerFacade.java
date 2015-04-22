@@ -11,6 +11,7 @@ import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastor
 import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.OPERATIONAL;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.ArrayList;
@@ -20,11 +21,7 @@ import java.util.concurrent.ExecutionException;
 import javax.ws.rs.core.Response.Status;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
-import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationException;
-import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationOperation;
-import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizer;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataChangeListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadTransaction;
@@ -43,6 +40,8 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -106,38 +105,34 @@ public class BrokerFacade {
 
     // PUT configuration
     public CheckedFuture<Void, TransactionCommitFailedException> commitConfigurationDataPut(
-            final YangInstanceIdentifier path, final NormalizedNode<?, ?> payload) {
+            final SchemaContext globalSchema, final YangInstanceIdentifier path, final NormalizedNode<?, ?> payload) {
         checkPreconditions();
-        final DataNormalizationOperation<?> rootOp = ControllerContext.getInstance().getRootOperation();
-        return putDataViaTransaction(domDataBroker.newReadWriteTransaction(), CONFIGURATION, path, payload, rootOp);
+        return putDataViaTransaction(domDataBroker.newReadWriteTransaction(), CONFIGURATION, path, payload, globalSchema);
     }
 
     public CheckedFuture<Void, TransactionCommitFailedException> commitConfigurationDataPut(
             final DOMMountPoint mountPoint, final YangInstanceIdentifier path, final NormalizedNode<?, ?> payload) {
         final Optional<DOMDataBroker> domDataBrokerService = mountPoint.getService(DOMDataBroker.class);
         if (domDataBrokerService.isPresent()) {
-            final DataNormalizationOperation<?> rootOp = new DataNormalizer(mountPoint.getSchemaContext()).getRootOperation();
             return putDataViaTransaction(domDataBrokerService.get().newReadWriteTransaction(), CONFIGURATION, path,
-                    payload, rootOp);
+                    payload, mountPoint.getSchemaContext());
         }
         throw new RestconfDocumentedException("DOM data broker service isn't available for mount point.");
     }
 
     // POST configuration
     public CheckedFuture<Void, TransactionCommitFailedException> commitConfigurationDataPost(
-            final YangInstanceIdentifier path, final NormalizedNode<?, ?> payload) {
+            final SchemaContext globalSchema, final YangInstanceIdentifier path, final NormalizedNode<?, ?> payload) {
         checkPreconditions();
-        final DataNormalizationOperation<?> rootOp = ControllerContext.getInstance().getRootOperation();
-        return postDataViaTransaction(domDataBroker.newReadWriteTransaction(), CONFIGURATION, path, payload, rootOp);
+        return postDataViaTransaction(domDataBroker.newReadWriteTransaction(), CONFIGURATION, path, payload, globalSchema);
     }
 
     public CheckedFuture<Void, TransactionCommitFailedException> commitConfigurationDataPost(
             final DOMMountPoint mountPoint, final YangInstanceIdentifier path, final NormalizedNode<?, ?> payload) {
         final Optional<DOMDataBroker> domDataBrokerService = mountPoint.getService(DOMDataBroker.class);
         if (domDataBrokerService.isPresent()) {
-            final DataNormalizationOperation<?> rootOp = new DataNormalizer(mountPoint.getSchemaContext()).getRootOperation();
             return postDataViaTransaction(domDataBrokerService.get().newReadWriteTransaction(), CONFIGURATION, path,
-                    payload, rootOp);
+                    payload, mountPoint.getSchemaContext());
         }
         throw new RestconfDocumentedException("DOM data broker service isn't available for mount point.");
     }
@@ -206,7 +201,7 @@ public class BrokerFacade {
 
     private CheckedFuture<Void, TransactionCommitFailedException> postDataViaTransaction(
             final DOMDataReadWriteTransaction rWTransaction, final LogicalDatastoreType datastore,
-            final YangInstanceIdentifier parentPath, final NormalizedNode<?, ?> payload, final DataNormalizationOperation<?> root) {
+            final YangInstanceIdentifier parentPath, final NormalizedNode<?, ?> payload, final SchemaContext schemaContext) {
         // FIXME: This is doing correct post for container and list children
         //        not sure if this will work for choice case
         final YangInstanceIdentifier path;
@@ -230,7 +225,7 @@ public class BrokerFacade {
             LOG.trace("It wasn't possible to get data loaded from datastore at path " + path);
         }
 
-        ensureParentsByMerge(datastore, path, rWTransaction, root);
+        ensureParentsByMerge(datastore, path, rWTransaction, schemaContext);
         rWTransaction.merge(datastore, path, payload);
         LOG.trace("Post " + datastore.name() + " via Restconf: {}", path);
         return rWTransaction.submit();
@@ -238,9 +233,9 @@ public class BrokerFacade {
 
     private CheckedFuture<Void, TransactionCommitFailedException> putDataViaTransaction(
             final DOMDataReadWriteTransaction writeTransaction, final LogicalDatastoreType datastore,
-            final YangInstanceIdentifier path, final NormalizedNode<?, ?> payload, final DataNormalizationOperation<?> root) {
+            final YangInstanceIdentifier path, final NormalizedNode<?, ?> payload, final SchemaContext schemaContext) {
         LOG.trace("Put " + datastore.name() + " via Restconf: {}", path);
-        ensureParentsByMerge(datastore, path, writeTransaction, root);
+        ensureParentsByMerge(datastore, path, writeTransaction, schemaContext);
         writeTransaction.put(datastore, path, payload);
         return writeTransaction.submit();
     }
@@ -257,39 +252,34 @@ public class BrokerFacade {
         this.domDataBroker = domDataBroker;
     }
 
-    private final void ensureParentsByMerge(final LogicalDatastoreType store,
-            final YangInstanceIdentifier normalizedPath, final DOMDataReadWriteTransaction rwTx,
-            final DataNormalizationOperation<?> root) {
-        final List<PathArgument> currentArguments = new ArrayList<>();
-        final Iterator<PathArgument> iterator = normalizedPath.getPathArguments().iterator();
-        DataNormalizationOperation<?> currentOp = root;
-        while (iterator.hasNext()) {
-            final PathArgument currentArg = iterator.next();
-            try {
-                currentOp = currentOp.getChild(currentArg);
-            } catch (final DataNormalizationException e) {
-                rwTx.cancel();
-                throw new IllegalArgumentException(
-                        String.format("Invalid child encountered in path %s", normalizedPath), e);
-            }
-            currentArguments.add(currentArg);
-            final YangInstanceIdentifier currentPath = YangInstanceIdentifier.create(currentArguments);
+    private void ensureParentsByMerge(final LogicalDatastoreType store,
+                                      final YangInstanceIdentifier normalizedPath, final DOMDataReadWriteTransaction rwTx, final SchemaContext schemaContext) {
+        final List<PathArgument> normalizedPathWithoutChildArgs = new ArrayList<>();
+        YangInstanceIdentifier rootNormalizedPath = null;
 
-            final Boolean exists;
+        final Iterator<PathArgument> it = normalizedPath.getPathArguments().iterator();
 
-            try {
-
-                final CheckedFuture<Boolean, ReadFailedException> future = rwTx.exists(store, currentPath);
-                exists = future.checkedGet();
-            } catch (final ReadFailedException e) {
-                LOG.error("Failed to read pre-existing data from store {} path {}", store, currentPath, e);
-                rwTx.cancel();
-                throw new IllegalStateException("Failed to read pre-existing data", e);
+        while(it.hasNext()) {
+            final PathArgument pathArgument = it.next();
+            if(rootNormalizedPath == null) {
+                rootNormalizedPath = YangInstanceIdentifier.create(pathArgument);
             }
 
-            if (!exists && iterator.hasNext()) {
-                rwTx.merge(store, currentPath, currentOp.createDefault(currentArg));
+            // Skip last element, its not a parent
+            if(it.hasNext()) {
+                normalizedPathWithoutChildArgs.add(pathArgument);
             }
         }
+
+        // No parent structure involved, no need to ensure parents
+        if(normalizedPathWithoutChildArgs.isEmpty()) {
+            return;
+        }
+
+        Preconditions.checkArgument(rootNormalizedPath != null, "Empty path received");
+
+        final NormalizedNode<?, ?> parentStructure =
+                ImmutableNodes.fromInstanceId(schemaContext, YangInstanceIdentifier.create(normalizedPathWithoutChildArgs));
+        rwTx.merge(store, rootNormalizedPath, parentStructure);
     }
 }

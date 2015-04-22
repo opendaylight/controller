@@ -697,7 +697,7 @@ public class RestconfImpl implements RestconfService {
                 if (mountPoint != null) {
                     broker.commitConfigurationDataPut(mountPoint, normalizedII, payload.getData()).checkedGet();
                 } else {
-                    broker.commitConfigurationDataPut(normalizedII, payload.getData()).checkedGet();
+                    broker.commitConfigurationDataPut(controllerContext.getGlobalSchema(), normalizedII, payload.getData()).checkedGet();
                 }
 
                 break;
@@ -842,7 +842,7 @@ public class RestconfImpl implements RestconfService {
             if (mountPoint != null) {
                 broker.commitConfigurationDataPost(mountPoint, normalizedII, payload.getData()).checkedGet();
             } else {
-                broker.commitConfigurationDataPost(normalizedII, payload.getData()).checkedGet();
+                broker.commitConfigurationDataPost(controllerContext.getGlobalSchema(), normalizedII, payload.getData()).checkedGet();
             }
         } catch(final RestconfDocumentedException e) {
             throw e;
