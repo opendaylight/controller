@@ -18,7 +18,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
@@ -214,7 +213,7 @@ public class BrokerFacadeTest {
 
         final InOrder inOrder = inOrder(domDataBroker, rwTransaction);
         inOrder.verify(domDataBroker).newReadWriteTransaction();
-        inOrder.verify(rwTransaction).merge(LogicalDatastoreType.CONFIGURATION, instanceID, dummyNode);
+        inOrder.verify(rwTransaction).put(LogicalDatastoreType.CONFIGURATION, instanceID, dummyNode);
         inOrder.verify(rwTransaction).submit();
     }
 
