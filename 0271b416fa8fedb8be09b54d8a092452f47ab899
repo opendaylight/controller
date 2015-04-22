@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_86e75212",
+        "filename": "opendaylight/netconf/mdsal-netconf-connector/src/main/java/org/opendaylight/controller/netconf/mdsal/connector/ops/DataTreeChangeTracker.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-04-22T15:01:56Z",
+      "side": 1,
+      "message": "Could be replaced with QName.create(EditConfigInput.QName, XmlNetconfCOnstants.OPERATION_ATTR_KEY);",
+      "revId": "0271b416fa8fedb8be09b54d8a092452f47ab899",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
