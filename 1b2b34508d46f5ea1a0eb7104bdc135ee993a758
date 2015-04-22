@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_dff3e271",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/StatisticsRestconfServiceWrapper.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-22T00:15:15Z",
+      "side": 1,
+      "message": "Is getData() \u003d\u003d null a failure case or does it mean there\u0027s no data? If the latter then we shouldn\u0027t count it as a failure.",
+      "revId": "1b2b34508d46f5ea1a0eb7104bdc135ee993a758",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_5fffd234",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/yang/opendaylight-rest-connector.yang",
+        "patchSetId": 3
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-22T00:15:15Z",
+      "side": 1,
+      "message": "Why did you remove the success and failure counts added by the previous patch set? I think it\u0027s useful to see the complete stats for Get, Put etc.",
+      "revId": "1b2b34508d46f5ea1a0eb7104bdc135ee993a758",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
