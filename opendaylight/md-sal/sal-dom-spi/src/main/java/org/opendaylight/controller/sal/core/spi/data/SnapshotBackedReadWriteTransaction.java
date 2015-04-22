@@ -5,14 +5,15 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.md.sal.dom.store.impl;
+package org.opendaylight.controller.sal.core.spi.data;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.common.annotations.Beta;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
+import org.opendaylight.controller.sal.core.spi.data.SnapshotBackedWriteTransaction.TransactionReadyPrototype;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
@@ -23,20 +24,15 @@ import org.slf4j.LoggerFactory;
  * Implementation of Read-Write transaction which is backed by {@link DataTreeSnapshot}
  * and executed according to {@link TransactionReadyPrototype}.
  *
+ * @param <T> identifier type
  */
-final class SnapshotBackedReadWriteTransaction extends SnapshotBackedWriteTransaction implements DOMStoreReadWriteTransaction {
+@Beta
+public final class SnapshotBackedReadWriteTransaction<T> extends SnapshotBackedWriteTransaction<T> implements DOMStoreReadWriteTransaction {
     private static final Logger LOG = LoggerFactory.getLogger(SnapshotBackedReadWriteTransaction.class);
 
-    /**
-     * Creates new read-write transaction.
-     *
-     * @param identifier transaction Identifier
-     * @param snapshot Snapshot which will be modified.
-     * @param readyImpl Implementation of ready method.
-     */
-    protected SnapshotBackedReadWriteTransaction(final Object identifier, final boolean debug,
-            final DataTreeSnapshot snapshot, final TransactionReadyPrototype store) {
-        super(identifier, debug, snapshot, store);
+    SnapshotBackedReadWriteTransaction(final T identifier, final boolean debug,
+            final DataTreeSnapshot snapshot, final TransactionReadyPrototype<T> readyImpl) {
+        super(identifier, debug, snapshot, readyImpl);
     }
 
     @Override

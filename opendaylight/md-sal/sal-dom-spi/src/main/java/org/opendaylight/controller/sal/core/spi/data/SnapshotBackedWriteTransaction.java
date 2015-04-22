@@ -5,17 +5,15 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.md.sal.dom.store.impl;
+package org.opendaylight.controller.sal.core.spi.data;
 
 import static com.google.common.base.Preconditions.checkState;
+import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
-import org.opendaylight.controller.sal.core.spi.data.AbstractDOMStoreTransaction;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
@@ -26,33 +24,27 @@ import org.slf4j.LoggerFactory;
 /**
  * Implementation of Write transaction which is backed by
  * {@link DataTreeSnapshot} and executed according to
- * {@link org.opendaylight.controller.md.sal.dom.store.impl.SnapshotBackedWriteTransaction.TransactionReadyPrototype}.
+ * {@link org.opendaylight.controller.sal.core.spi.data.SnapshotBackedWriteTransaction.TransactionReadyPrototype}.
  *
+ * @param <T> Identifier type
  */
-class SnapshotBackedWriteTransaction extends AbstractDOMStoreTransaction<Object> implements DOMStoreWriteTransaction {
+@Beta
+public class SnapshotBackedWriteTransaction<T> extends AbstractDOMStoreTransaction<T> implements DOMStoreWriteTransaction {
     private static final Logger LOG = LoggerFactory.getLogger(SnapshotBackedWriteTransaction.class);
+    @SuppressWarnings("rawtypes")
     private static final AtomicReferenceFieldUpdater<SnapshotBackedWriteTransaction, TransactionReadyPrototype> READY_UPDATER =
             AtomicReferenceFieldUpdater.newUpdater(SnapshotBackedWriteTransaction.class, TransactionReadyPrototype.class, "readyImpl");
+    @SuppressWarnings("rawtypes")
     private static final AtomicReferenceFieldUpdater<SnapshotBackedWriteTransaction, DataTreeModification> TREE_UPDATER =
             AtomicReferenceFieldUpdater.newUpdater(SnapshotBackedWriteTransaction.class, DataTreeModification.class, "mutableTree");
 
     // non-null when not ready
-    private volatile TransactionReadyPrototype readyImpl;
+    private volatile TransactionReadyPrototype<T> readyImpl;
     // non-null when not committed/closed
     private volatile DataTreeModification mutableTree;
 
-    /**
-     * Creates new write-only transaction.
-     *
-     * @param identifier
-     *            transaction Identifier
-     * @param snapshot
-     *            Snapshot which will be modified.
-     * @param readyImpl
-     *            Implementation of ready method.
-     */
-    public SnapshotBackedWriteTransaction(final Object identifier, final boolean debug,
-            final DataTreeSnapshot snapshot, final TransactionReadyPrototype readyImpl) {
+    SnapshotBackedWriteTransaction(final T identifier, final boolean debug,
+            final DataTreeSnapshot snapshot, final TransactionReadyPrototype<T> readyImpl) {
         super(identifier, debug);
         this.readyImpl = Preconditions.checkNotNull(readyImpl, "readyImpl must not be null.");
         mutableTree = snapshot.newModification();
@@ -126,7 +118,7 @@ class SnapshotBackedWriteTransaction extends AbstractDOMStoreTransaction<Object>
      * @param path Path to read
      * @return null if the the transaction has been closed;
      */
-    protected final Optional<NormalizedNode<?, ?>> readSnapshotNode(final YangInstanceIdentifier path) {
+    final Optional<NormalizedNode<?, ?>> readSnapshotNode(final YangInstanceIdentifier path) {
         return readyImpl == null ? null : mutableTree.readNode(path);
     }
 
@@ -136,7 +128,8 @@ class SnapshotBackedWriteTransaction extends AbstractDOMStoreTransaction<Object>
 
     @Override
     public DOMStoreThreePhaseCommitCohort ready() {
-        final TransactionReadyPrototype wasReady = READY_UPDATER.getAndSet(this, null);
+        @SuppressWarnings("unchecked")
+        final TransactionReadyPrototype<T> wasReady = READY_UPDATER.getAndSet(this, null);
         checkState(wasReady != null, "Transaction %s is no longer open", getIdentifier());
 
         LOG.debug("Store transaction: {} : Ready", getIdentifier());
@@ -149,7 +142,8 @@ class SnapshotBackedWriteTransaction extends AbstractDOMStoreTransaction<Object>
 
     @Override
     public void close() {
-        final TransactionReadyPrototype wasReady = READY_UPDATER.getAndSet(this, null);
+        @SuppressWarnings("unchecked")
+        final TransactionReadyPrototype<T> wasReady = READY_UPDATER.getAndSet(this, null);
         if (wasReady != null) {
             LOG.debug("Store transaction: {} : Closed", getIdentifier());
             TREE_UPDATER.lazySet(this, null);
@@ -166,21 +160,22 @@ class SnapshotBackedWriteTransaction extends AbstractDOMStoreTransaction<Object>
 
     /**
      * Prototype implementation of
-     * {@link #ready(org.opendaylight.controller.md.sal.dom.store.impl.SnapshotBackedWriteTransaction)}
+     * {@link #ready(org.opendaylight.controller.sal.core.spi.data.SnapshotBackedWriteTransaction)}
      *
      * This class is intended to be implemented by Transaction factories
-     * responsible for allocation of {@link org.opendaylight.controller.md.sal.dom.store.impl.SnapshotBackedWriteTransaction} and
+     * responsible for allocation of {@link org.opendaylight.controller.sal.core.spi.data.SnapshotBackedWriteTransaction} and
      * providing underlying logic for applying implementation.
      *
+     * @param <T> identifier type
      */
-    abstract static class TransactionReadyPrototype {
+    public abstract static class TransactionReadyPrototype<T> {
         /**
          * Called when a transaction is closed without being readied. This is not invoked for
          * transactions which are ready.
          *
          * @param tx Transaction which got aborted.
          */
-        protected abstract void transactionAborted(final SnapshotBackedWriteTransaction tx);
+        protected abstract void transactionAborted(final SnapshotBackedWriteTransaction<T> tx);
 
         /**
          * Returns a commit coordinator associated with supplied transactions.
@@ -193,6 +188,6 @@ class SnapshotBackedWriteTransaction extends AbstractDOMStoreTransaction<Object>
          *            Modified data tree which has been constructed.
          * @return DOMStoreThreePhaseCommitCohort associated with transaction
          */
-        protected abstract DOMStoreThreePhaseCommitCohort transactionReady(SnapshotBackedWriteTransaction tx, DataTreeModification tree);
+        protected abstract DOMStoreThreePhaseCommitCohort transactionReady(SnapshotBackedWriteTransaction<T> tx, DataTreeModification tree);
     }
 }

@@ -21,12 +21,13 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
-import org.opendaylight.controller.md.sal.dom.store.impl.SnapshotBackedWriteTransaction.TransactionReadyPrototype;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
+import org.opendaylight.controller.sal.core.spi.data.SnapshotBackedTransactions;
+import org.opendaylight.controller.sal.core.spi.data.SnapshotBackedWriteTransaction.TransactionReadyPrototype;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
@@ -36,7 +37,6 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-
 
 public class InMemoryDataStoreTest {
 
@@ -268,7 +268,7 @@ public class InMemoryDataStoreTest {
         Mockito.doThrow( new RuntimeException( "mock ex" ) ).when( mockSnapshot )
         .readNode( Mockito.any( YangInstanceIdentifier.class ) );
 
-        DOMStoreReadTransaction readTx = new SnapshotBackedReadTransaction("1", true, mockSnapshot);
+        DOMStoreReadTransaction readTx = SnapshotBackedTransactions.newReadTransaction("1", true, mockSnapshot);
 
         doReadAndThrowEx( readTx );
     }
@@ -292,14 +292,14 @@ public class InMemoryDataStoreTest {
         Mockito.doThrow( new RuntimeException( "mock ex" ) ).when( mockModification )
         .readNode( Mockito.any( YangInstanceIdentifier.class ) );
         Mockito.doReturn( mockModification ).when( mockSnapshot ).newModification();
-        TransactionReadyPrototype mockReady = Mockito.mock( TransactionReadyPrototype.class );
-        DOMStoreReadTransaction readTx = new SnapshotBackedReadWriteTransaction("1", false, mockSnapshot, mockReady);
+        @SuppressWarnings("unchecked")
+        TransactionReadyPrototype<String> mockReady = Mockito.mock( TransactionReadyPrototype.class );
+        DOMStoreReadTransaction readTx = SnapshotBackedTransactions.newReadWriteTransaction("1", false, mockSnapshot, mockReady);
 
         doReadAndThrowEx( readTx );
     }
 
-    private void doReadAndThrowEx( final DOMStoreReadTransaction readTx ) throws Throwable {
-
+    private static void doReadAndThrowEx( final DOMStoreReadTransaction readTx ) throws Throwable {
         try {
             readTx.read(TestModel.TEST_PATH).get();
         } catch( ExecutionException e ) {
