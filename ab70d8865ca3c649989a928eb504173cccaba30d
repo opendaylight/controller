@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_ba31440d",
+        "filename": "opendaylight/netconf/config-netconf-connector/src/main/java/org/opendaylight/controller/netconf/confignetconfconnector/osgi/YangStoreService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-04-22T07:57:47Z",
+      "side": 1,
+      "message": "What if ref.get() is null ?",
+      "revId": "ab70d8865ca3c649989a928eb504173cccaba30d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
