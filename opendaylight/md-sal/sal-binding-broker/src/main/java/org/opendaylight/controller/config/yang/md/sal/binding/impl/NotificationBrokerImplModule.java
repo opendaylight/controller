@@ -7,11 +7,12 @@
  */
 package org.opendaylight.controller.config.yang.md.sal.binding.impl;
 
+import org.opendaylight.controller.md.sal.binding.compat.HydrogenNotificationBrokerImpl;
+
 import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService;
 import org.opendaylight.controller.md.sal.binding.api.NotificationService;
 import org.opendaylight.controller.md.sal.binding.compat.HeliumNotificationProviderServiceAdapter;
 import org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolder;
-import org.opendaylight.controller.sal.binding.impl.NotificationBrokerImpl;
 
 /**
 *
@@ -53,6 +54,6 @@ public final class NotificationBrokerImplModule extends
          *  threading model for notifications.
          */
 
-        return new NotificationBrokerImpl(SingletonHolder.getDefaultNotificationExecutor());
+        return new HydrogenNotificationBrokerImpl(SingletonHolder.getDefaultNotificationExecutor());
     }
 }
