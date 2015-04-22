@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_c6831acb",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/AbstractSnapshotBackedTransactionChain.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-22T16:13:07Z",
+      "side": 1,
+      "message": "Should this be debug? Either way I think it needs more context, e.g. \"Transaction {} aborted but State already transitioned from {} to {}\"",
+      "revId": "93fbe73478c92434f3e26f4b9efa3beb51fecc39",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_a6512e64",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/AbstractSnapshotBackedTransactionChain.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-22T16:13:07Z",
+      "side": 1,
+      "message": "Should this be an illegal state if already closed? I can see ignoring if it failed previously.",
+      "revId": "93fbe73478c92434f3e26f4b9efa3beb51fecc39",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_86dbd2ec",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/AbstractSnapshotBackedTransactionChain.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 211,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-22T16:13:07Z",
+      "side": 1,
+      "message": "Illegal state?",
+      "revId": "93fbe73478c92434f3e26f4b9efa3beb51fecc39",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_a6860eb8",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/SnapshotBackedReadWriteTransaction.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-22T16:13:07Z",
+      "side": 1,
+      "message": "Why was this changed to delegate to a SnapshotBackedWriteTransaction instead of deriving from it? This incurs an extra object creation.",
+      "revId": "93fbe73478c92434f3e26f4b9efa3beb51fecc39",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
