@@ -115,7 +115,7 @@ public final class ShardDataTree extends ShardDataTreeTransactionParent {
         if (chain != null) {
             chain.close();
         } else {
-            LOG.warn("Closing non-existent transaction chain {}", transactionChainId);
+            LOG.debug("Closing non-existent transaction chain {}", transactionChainId);
         }
     }
 
