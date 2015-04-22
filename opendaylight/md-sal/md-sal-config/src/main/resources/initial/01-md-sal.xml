@@ -50,6 +50,14 @@
                 <module>
                     <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">prefix:binding-notification-broker</type>
                     <name>binding-notification-broker</name>
+                    <notification-adapter xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">
+                         <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">prefix:binding-new-notification-service</type>
+                         <name>binding-notification-adapter</name>
+                    </notification-adapter>
+                    <notification-publish-adapter xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">
+                         <type  xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">prefix:binding-new-notification-publish-service</type>
+                         <name>binding-notification-publish-adapter</name>
+                    </notification-publish-adapter>
                 </module>
                 <module>
                     <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">prefix:binding-broker-impl</type>
