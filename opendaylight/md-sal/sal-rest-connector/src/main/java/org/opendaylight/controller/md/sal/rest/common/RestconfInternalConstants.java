@@ -10,7 +10,6 @@ package org.opendaylight.controller.md.sal.rest.common;
 
 import com.google.common.base.Splitter;
 import java.net.URI;
-import java.text.SimpleDateFormat;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -35,7 +34,7 @@ public final class RestconfInternalConstants {
         throw new UnsupportedOperationException("Utility class");
     }
 
-    public static final SimpleDateFormat REVISION_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+    public static final ThreadSafeDateFormat REVISION_FORMAT = new ThreadSafeDateFormat();
 
     public static final Splitter SLASH_SPLITTER = Splitter.on('/');
 
@@ -80,5 +79,7 @@ public final class RestconfInternalConstants {
     public static final String URI_PARAM_DEPTH = "depth";
 
     public static final YangInstanceIdentifier ROOT = YangInstanceIdentifier.builder().build();
+
+
 
 }
