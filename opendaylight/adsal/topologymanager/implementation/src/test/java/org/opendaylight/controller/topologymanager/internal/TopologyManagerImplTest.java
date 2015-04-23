@@ -8,8 +8,18 @@
 
 package org.opendaylight.controller.topologymanager.internal;
 
-import org.junit.Assert;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentMap;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.sal.core.Bandwidth;
@@ -39,17 +49,6 @@ import org.opendaylight.controller.switchmanager.SubnetConfig;
 import org.opendaylight.controller.switchmanager.Switch;
 import org.opendaylight.controller.switchmanager.SwitchConfig;
 import org.opendaylight.controller.topologymanager.TopologyUserLinkConfig;
-
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentMap;
 
 public class TopologyManagerImplTest {
     private TopologyManagerImpl topoManagerImpl;
@@ -783,15 +782,26 @@ public class TopologyManagerImplTest {
         }
 
         Assert.assertTrue(topoManagerImpl.flushUpdateQueue(5000));
-        // Give TopologyManger time to update its edges DB.
-        Thread.sleep(1000);
-        Assert.assertEquals(1, topoManagerImpl.getEdges().size());
+        verifyEdgesSize(1);
         Assert.assertNotNull(topoManagerImpl.getEdges().get(edge));
     }
 
+    private void verifyEdgesSize(int expSize) throws InterruptedException {
+        int timeout = 5000;
+        for(int i = 0; i < timeout / 50; i++) {
+            if(topoManagerImpl.getEdges().size() == expSize) {
+                return;
+            }
+
+            Thread.sleep(50);
+        }
+
+        Assert.fail(String.format("Expected edges size %d. Actual was %d",
+                topoManagerImpl.getEdges().size(), expSize));
+    }
+
     @Test
-    public void testNotifyNodeConnector() throws ConstructionException,
-           InterruptedException {
+    public void testNotifyNodeConnector() throws Exception {
         TestSwitchManager swMgr = new TestSwitchManager();
         topoManagerImpl.setSwitchManager(swMgr);
         topoManagerImpl.nonClusterObjectCreate();
@@ -803,14 +813,14 @@ public class TopologyManagerImplTest {
         Map<String, Property> propMap = new HashMap<>();
         swMgr.addNodeConnectors(nc1);
         topoManagerImpl.notifyNodeConnector(nc1, UpdateType.ADDED, propMap);
-        Assert.assertEquals(0, topoManagerImpl.getEdges().size());
+        verifyEdgesSize(0);
 
         topoManagerImpl.notifyNodeConnector(nc1, UpdateType.CHANGED, propMap);
-        Assert.assertEquals(0, topoManagerImpl.getEdges().size());
+        verifyEdgesSize(0);
 
         swMgr.clear();
         topoManagerImpl.notifyNodeConnector(nc1, UpdateType.REMOVED, propMap);
-        Assert.assertEquals(0, topoManagerImpl.getEdges().size());
+        verifyEdgesSize(0);
 
         // Test NodeConnector notification in the case that there is a related
         // edge update just before the notification.
@@ -830,9 +840,7 @@ public class TopologyManagerImplTest {
         swMgr.addNodeConnectors(nc2);
         topoManagerImpl.notifyNodeConnector(nc2, UpdateType.CHANGED, propMap);
         Assert.assertTrue(topoManagerImpl.flushUpdateQueue(5000));
-        // Give TopologyManger time to update its edges DB.
-        Thread.sleep(1000);
-        Assert.assertEquals(2, topoManagerImpl.getEdges().size());
+        verifyEdgesSize(2);
 
         teu1 = new TopoEdgeUpdate(edge1, props, UpdateType.REMOVED);
         teu2 = new TopoEdgeUpdate(edge2, props, UpdateType.REMOVED);
@@ -841,9 +849,7 @@ public class TopologyManagerImplTest {
         topoedgeupdateList.add(teu2);
         topoManagerImpl.edgeUpdate(topoedgeupdateList);
         Assert.assertTrue(topoManagerImpl.flushUpdateQueue(5000));
-        // Give TopologyManger time to update its edges DB.
-        Thread.sleep(1000);
-        Assert.assertEquals(0, topoManagerImpl.getEdges().size());
+        verifyEdgesSize(0);
         topoManagerImpl.notifyNodeConnector(nc1, UpdateType.REMOVED, propMap);
         topoManagerImpl.notifyNodeConnector(nc2, UpdateType.REMOVED, propMap);
 
@@ -870,14 +876,10 @@ public class TopologyManagerImplTest {
         swMgr.addNodeConnectors(nc2);
         topoManagerImpl.notifyNodeConnector(nc2, UpdateType.CHANGED, propMap);
         Assert.assertTrue(topoManagerImpl.flushUpdateQueue(5000));
-        // Give TopologyManger time to update its edges DB.
-        Thread.sleep(1000);
-        Assert.assertEquals(0, topoManagerImpl.getEdges().size());
+        verifyEdgesSize(0);
         topoManagerImpl.notifyNodeConnector(nc1, UpdateType.REMOVED, propMap);
         topoManagerImpl.notifyNodeConnector(nc2, UpdateType.REMOVED, propMap);
         Assert.assertTrue(topoManagerImpl.flushUpdateQueue(5000));
-        // Give TopologyManger time to update its edges DB.
-        Thread.sleep(1000);
-        Assert.assertEquals(0, topoManagerImpl.getEdges().size());
+        verifyEdgesSize(0);
     }
 }
