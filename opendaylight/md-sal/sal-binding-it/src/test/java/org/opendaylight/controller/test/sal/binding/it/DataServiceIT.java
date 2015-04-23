@@ -34,7 +34,7 @@ import com.google.inject.Inject;
 /**
  * covers creating, reading and deleting of an item in dataStore
  */
-public class DataServiceTest extends AbstractTest {
+public class DataServiceIT extends AbstractIT {
 
     protected DataBrokerService consumerDataService;
 

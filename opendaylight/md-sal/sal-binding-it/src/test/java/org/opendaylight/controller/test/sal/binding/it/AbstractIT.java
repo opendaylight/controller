@@ -7,6 +7,18 @@
  */
 package org.opendaylight.controller.test.sal.binding.it;
 
+import static org.opendaylight.controller.test.sal.binding.it.TestHelper.baseModelBundles;
+import static org.opendaylight.controller.test.sal.binding.it.TestHelper.bindingAwareSalBundles;
+import static org.opendaylight.controller.test.sal.binding.it.TestHelper.configMinumumBundles;
+import static org.opendaylight.controller.test.sal.binding.it.TestHelper.junitAndMockitoBundles;
+import static org.opendaylight.controller.test.sal.binding.it.TestHelper.mdSalCoreBundles;
+import static org.opendaylight.controller.test.sal.binding.it.TestHelper.salTestModelBundles;
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+import static org.ops4j.pax.exam.CoreOptions.options;
+import static org.ops4j.pax.exam.CoreOptions.systemPackages;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
+
+import javax.inject.Inject;
 import org.junit.runner.RunWith;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.ops4j.pax.exam.Configuration;
@@ -15,21 +27,8 @@ import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.util.Filter;
 import org.osgi.framework.BundleContext;
 
-import javax.inject.Inject;
-
-import static org.opendaylight.controller.test.sal.binding.it.TestHelper.baseModelBundles;
-import static org.opendaylight.controller.test.sal.binding.it.TestHelper.bindingAwareSalBundles;
-import static org.opendaylight.controller.test.sal.binding.it.TestHelper.configMinumumBundles;
-import static org.opendaylight.controller.test.sal.binding.it.TestHelper.salTestModelBundles;
-import static org.opendaylight.controller.test.sal.binding.it.TestHelper.junitAndMockitoBundles;
-import static org.opendaylight.controller.test.sal.binding.it.TestHelper.mdSalCoreBundles;
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.CoreOptions.options;
-import static org.ops4j.pax.exam.CoreOptions.systemPackages;
-import static org.ops4j.pax.exam.CoreOptions.systemProperty;
-
 @RunWith(PaxExam.class)
-public abstract class AbstractTest {
+public abstract class AbstractIT {
 
     public static final String CONTROLLER = "org.opendaylight.controller";
     public static final String YANGTOOLS = "org.opendaylight.yangtools";
@@ -48,7 +47,7 @@ public abstract class AbstractTest {
         return broker;
     }
 
-    public void setBroker(BindingAwareBroker broker) {
+    public void setBroker(final BindingAwareBroker broker) {
         this.broker = broker;
     }
 
@@ -56,7 +55,7 @@ public abstract class AbstractTest {
         return bundleContext;
     }
 
-    public void setBundleContext(BundleContext bundleContext) {
+    public void setBundleContext(final BundleContext bundleContext) {
         this.bundleContext = bundleContext;
     }
 
@@ -64,9 +63,6 @@ public abstract class AbstractTest {
     public Option[] config() {
         return options(systemProperty("osgi.console").value("2401"), mavenBundle("org.slf4j", "slf4j-api")
                 .versionAsInProject(), //
-//                systemProperty("logback.configurationFile").value(
-//                        "file:" + PathUtils.getBaseDir()
-//                                + "/src/test/resources/logback.xml"),
                 mavenBundle("org.slf4j", "log4j-over-slf4j").versionAsInProject(), //
                 mavenBundle("ch.qos.logback", "logback-core").versionAsInProject(), //
                 mavenBundle("ch.qos.logback", "logback-classic").versionAsInProject(),
@@ -77,9 +73,9 @@ public abstract class AbstractTest {
                 systemPackages("sun.nio.ch"),
 
                 mdSalCoreBundles(),
-
-                bindingAwareSalBundles(),
                 configMinumumBundles(),
+                bindingAwareSalBundles(),
+
                 // BASE Models
                 baseModelBundles(),
                 salTestModelBundles(),
