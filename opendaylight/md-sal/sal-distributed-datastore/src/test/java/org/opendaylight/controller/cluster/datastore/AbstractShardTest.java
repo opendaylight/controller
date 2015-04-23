@@ -21,7 +21,6 @@ import akka.japi.Creator;
 import akka.testkit.TestActorRef;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
-import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.Collections;
@@ -42,10 +41,6 @@ import org.opendaylight.controller.cluster.datastore.modification.WriteModificat
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
-import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
-import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
@@ -53,6 +48,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateTip;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
@@ -172,49 +168,35 @@ public abstract class AbstractShardTest extends AbstractActorTest{
         Assert.fail(String.format("Expected last applied: %d, Actual: %d", expectedValue, lastApplied));
     }
 
-    protected NormalizedNode<?, ?> readStore(final InMemoryDOMDataStore store) throws ReadFailedException {
-        DOMStoreReadTransaction transaction = store.newReadOnlyTransaction();
-        CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read =
-            transaction.read(YangInstanceIdentifier.builder().build());
-
-        Optional<NormalizedNode<?, ?>> optional = read.checkedGet();
-
-        NormalizedNode<?, ?> normalizedNode = optional.get();
-
-        transaction.close();
-
-        return normalizedNode;
-    }
-
-    protected DOMStoreThreePhaseCommitCohort setupMockWriteTransaction(final String cohortName,
+    protected ShardDataTreeCohort setupMockWriteTransaction(final String cohortName,
             final ShardDataTree dataStore, final YangInstanceIdentifier path, final NormalizedNode<?, ?> data,
             final MutableCompositeModification modification) {
         return setupMockWriteTransaction(cohortName, dataStore, path, data, modification, null);
     }
 
-    protected DOMStoreThreePhaseCommitCohort setupMockWriteTransaction(final String cohortName,
+    protected ShardDataTreeCohort setupMockWriteTransaction(final String cohortName,
             final ShardDataTree dataStore, final YangInstanceIdentifier path, final NormalizedNode<?, ?> data,
             final MutableCompositeModification modification,
-            final Function<DOMStoreThreePhaseCommitCohort,ListenableFuture<Void>> preCommit) {
+            final Function<ShardDataTreeCohort, ListenableFuture<Void>> preCommit) {
 
         ReadWriteShardDataTreeTransaction tx = dataStore.newReadWriteTransaction("setup-mock-" + cohortName, null);
         tx.getSnapshot().write(path, data);
-        DOMStoreThreePhaseCommitCohort cohort = createDelegatingMockCohort(cohortName, dataStore.finishTransaction(tx), preCommit);
+        ShardDataTreeCohort cohort = createDelegatingMockCohort(cohortName, dataStore.finishTransaction(tx), preCommit);
 
         modification.addModification(new WriteModification(path, data));
 
         return cohort;
     }
 
-    protected DOMStoreThreePhaseCommitCohort createDelegatingMockCohort(final String cohortName,
-            final DOMStoreThreePhaseCommitCohort actual) {
+    protected ShardDataTreeCohort createDelegatingMockCohort(final String cohortName,
+            final ShardDataTreeCohort actual) {
         return createDelegatingMockCohort(cohortName, actual, null);
     }
 
-    protected DOMStoreThreePhaseCommitCohort createDelegatingMockCohort(final String cohortName,
-            final DOMStoreThreePhaseCommitCohort actual,
-            final Function<DOMStoreThreePhaseCommitCohort,ListenableFuture<Void>> preCommit) {
-        DOMStoreThreePhaseCommitCohort cohort = mock(DOMStoreThreePhaseCommitCohort.class, cohortName);
+    protected ShardDataTreeCohort createDelegatingMockCohort(final String cohortName,
+            final ShardDataTreeCohort actual,
+            final Function<ShardDataTreeCohort, ListenableFuture<Void>> preCommit) {
+        ShardDataTreeCohort cohort = mock(ShardDataTreeCohort.class, cohortName);
 
         doAnswer(new Answer<ListenableFuture<Boolean>>() {
             @Override
@@ -248,6 +230,13 @@ public abstract class AbstractShardTest extends AbstractActorTest{
             }
         }).when(cohort).abort();
 
+        doAnswer(new Answer<DataTreeCandidateTip>() {
+            @Override
+            public DataTreeCandidateTip answer(final InvocationOnMock invocation) {
+                return actual.getCandidate();
+            }
+        }).when(cohort).getCandidate();
+
         return cohort;
     }
 
@@ -275,7 +264,7 @@ public abstract class AbstractShardTest extends AbstractActorTest{
         ReadWriteShardDataTreeTransaction transaction = store.newReadWriteTransaction("writeToStore", null);
 
         transaction.getSnapshot().write(id, node);
-        DOMStoreThreePhaseCommitCohort cohort = transaction.ready();
+        ShardDataTreeCohort cohort = transaction.ready();
         cohort.canCommit().get();
         cohort.preCommit().get();
         cohort.commit();
