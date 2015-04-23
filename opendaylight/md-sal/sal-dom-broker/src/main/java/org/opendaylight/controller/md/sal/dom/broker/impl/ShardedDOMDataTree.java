@@ -95,7 +95,7 @@ public final class ShardedDOMDataTree implements DOMDataTreeService, DOMDataTree
             final ShardingTableEntry parent = lookupShard(prefix);
             parentReg = parent.getRegistration();
             if (parentReg != null && prefix.equals(parentReg.getPrefix())) {
-                throw new DOMDataTreeShardingConflictException(String.format("Prefix %s is already occupied by shard {}", prefix, parentReg.getInstance()));
+                throw new DOMDataTreeShardingConflictException(String.format("Prefix %s is already occupied by shard %s", prefix, parentReg.getInstance()));
             }
 
             // FIXME: wrap the shard in a proper adaptor based on implemented interface
@@ -117,7 +117,7 @@ public final class ShardedDOMDataTree implements DOMDataTreeService, DOMDataTree
 
     @GuardedBy("this")
     private DOMDataTreeProducer findProducer(final DOMDataTreeIdentifier subtree) {
-        for (Entry<DOMDataTreeIdentifier, DOMDataTreeProducer> e : idToProducer.entrySet()) {
+        for (final Entry<DOMDataTreeIdentifier, DOMDataTreeProducer> e : idToProducer.entrySet()) {
             if (e.getKey().contains(subtree)) {
                 return e.getValue();
             }
@@ -127,8 +127,8 @@ public final class ShardedDOMDataTree implements DOMDataTreeService, DOMDataTree
     }
 
     synchronized void destroyProducer(final ShardedDOMDataTreeProducer producer) {
-        for (DOMDataTreeIdentifier s : producer.getSubtrees()) {
-            DOMDataTreeProducer r = idToProducer.remove(s);
+        for (final DOMDataTreeIdentifier s : producer.getSubtrees()) {
+            final DOMDataTreeProducer r = idToProducer.remove(s);
             if (!producer.equals(r)) {
                 LOG.error("Removed producer %s on subtree %s while removing %s", r, s, producer);
             }
@@ -139,7 +139,7 @@ public final class ShardedDOMDataTree implements DOMDataTreeService, DOMDataTree
     private DOMDataTreeProducer createProducer(final Map<DOMDataTreeIdentifier, DOMDataTreeShard> shardMap) {
         // Record the producer's attachment points
         final DOMDataTreeProducer ret = ShardedDOMDataTreeProducer.create(this, shardMap);
-        for (DOMDataTreeIdentifier s : shardMap.keySet()) {
+        for (final DOMDataTreeIdentifier s : shardMap.keySet()) {
             idToProducer.put(s, ret);
         }
 
@@ -151,7 +151,7 @@ public final class ShardedDOMDataTree implements DOMDataTreeService, DOMDataTree
         Preconditions.checkArgument(!subtrees.isEmpty(), "Subtrees may not be empty");
 
         final Map<DOMDataTreeIdentifier, DOMDataTreeShard> shardMap = new HashMap<>();
-        for (DOMDataTreeIdentifier s : subtrees) {
+        for (final DOMDataTreeIdentifier s : subtrees) {
             // Attempting to create a disconnected producer -- all subtrees have to be unclaimed
             final DOMDataTreeProducer producer = findProducer(s);
             Preconditions.checkArgument(producer == null, "Subtree %s is attached to producer %s", s, producer);
@@ -166,7 +166,7 @@ public final class ShardedDOMDataTree implements DOMDataTreeService, DOMDataTree
         Preconditions.checkNotNull(parent);
 
         final Map<DOMDataTreeIdentifier, DOMDataTreeShard> shardMap = new HashMap<>();
-        for (DOMDataTreeIdentifier s : subtrees) {
+        for (final DOMDataTreeIdentifier s : subtrees) {
             shardMap.put(s, lookupShard(s).getRegistration().getInstance());
         }
 
@@ -175,7 +175,7 @@ public final class ShardedDOMDataTree implements DOMDataTreeService, DOMDataTree
 
     @Override
     public synchronized <T extends DOMDataTreeListener> ListenerRegistration<T> registerListener(final T listener, final Collection<DOMDataTreeIdentifier> subtrees, final boolean allowRxMerges, final Collection<DOMDataTreeProducer> producers) {
-        // TODO Auto-generated method stub
-        return null;
+        // FIXME Implement this.
+        throw new UnsupportedOperationException("Not implemented yet.");
     }
 }
