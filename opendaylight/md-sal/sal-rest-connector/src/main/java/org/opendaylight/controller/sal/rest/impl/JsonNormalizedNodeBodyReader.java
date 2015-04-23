@@ -36,6 +36,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStre
 import org.opendaylight.yangtools.yang.data.codec.gson.JsonParserStream;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNormalizedNodeStreamWriter;
 import org.opendaylight.yangtools.yang.data.impl.schema.NormalizedNodeResult;
+import org.opendaylight.yangtools.yang.data.impl.schema.ResultAlreadySetException;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
@@ -106,6 +107,11 @@ public class JsonNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPr
             return new NormalizedNodeContext(path,result);
         } catch (final RestconfDocumentedException e) {
             throw e;
+        } catch (final ResultAlreadySetException e) {
+            LOG.debug("Error parsing json input:", e);
+
+            throw new RestconfDocumentedException("Error parsing json input: Failed to create new parse result data. " +
+                    "Are you creating multiple resources/subresources in POST request?");
         } catch (final Exception e) {
             LOG.debug("Error parsing json input", e);
 
