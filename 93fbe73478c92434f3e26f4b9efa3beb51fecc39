@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_af926155",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/AbstractSnapshotBackedTransactionChain.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-04-23T09:48:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3aa0d159_c6831acb",
+      "revId": "93fbe73478c92434f3e26f4b9efa3beb51fecc39",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_a6512e64",
         "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/AbstractSnapshotBackedTransactionChain.java",
         "patchSetId": 3
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_6f9c596a",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/AbstractSnapshotBackedTransactionChain.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-04-23T09:48:13Z",
+      "side": 1,
+      "message": "This may happen if the chain is closed before the last transaction is readied. Also when the chain fails asynchronously. I do not think its a user error and we can recover easily.",
+      "parentUuid": "3aa0d159_a6512e64",
+      "revId": "93fbe73478c92434f3e26f4b9efa3beb51fecc39",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_86dbd2ec",
         "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/AbstractSnapshotBackedTransactionChain.java",
         "patchSetId": 3
@@ -47,6 +83,24 @@
       "writtenOn": "2015-04-22T16:13:07Z",
       "side": 1,
       "message": "Illegal state?",
+      "revId": "93fbe73478c92434f3e26f4b9efa3beb51fecc39",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_efb069f6",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/AbstractSnapshotBackedTransactionChain.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 211,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-04-23T09:48:13Z",
+      "side": 1,
+      "message": "No, as this can legally happen when state is Shutdown.",
+      "parentUuid": "3aa0d159_86dbd2ec",
       "revId": "93fbe73478c92434f3e26f4b9efa3beb51fecc39",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
