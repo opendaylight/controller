@@ -31,10 +31,10 @@ import org.slf4j.LoggerFactory;
 /**
  * covers registering of notification listener, publishing of notification and receiving of notification.
  */
-public class NotificationTest extends AbstractTest {
+public class NotificationIT extends AbstractIT {
 
     private static final Logger LOG = LoggerFactory
-            .getLogger(NotificationTest.class);
+            .getLogger(NotificationIT.class);
 
     protected final NotificationTestListener listener1 = new NotificationTestListener();
     protected final NotificationTestListener listener2 = new NotificationTestListener();
