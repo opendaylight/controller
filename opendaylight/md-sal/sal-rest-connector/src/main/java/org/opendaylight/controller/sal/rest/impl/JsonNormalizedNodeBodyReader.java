@@ -27,6 +27,9 @@ import org.opendaylight.controller.sal.restconf.impl.NormalizedNodeContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
+import org.opendaylight.yangtools.yang.data.api.schema.AugmentationNode;
+import org.opendaylight.yangtools.yang.data.api.schema.ChoiceNode;
+import org.opendaylight.yangtools.yang.data.api.schema.DataContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
@@ -84,9 +87,18 @@ public class JsonNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPr
             final JsonReader reader = new JsonReader(new InputStreamReader(entityStream));
             jsonParser.parse(reader);
 
-            final NormalizedNode<?, ?> partialResult = resultHolder.getResult();
+            NormalizedNode<?, ?> partialResult = resultHolder.getResult();
             final NormalizedNode<?, ?> result;
-            if(partialResult instanceof MapNode) {
+
+            // unwrap result from augmentation and choice nodes on PUT
+            if (!isPost()) {
+                while (partialResult instanceof AugmentationNode || partialResult instanceof ChoiceNode) {
+                    final Object childNode = ((DataContainerNode) partialResult).getValue().iterator().next();
+                    partialResult = (NormalizedNode<?, ?>) childNode;
+                }
+            }
+
+            if (partialResult instanceof MapNode) {
                 result = Iterables.getOnlyElement(((MapNode) partialResult).getValue());
             } else {
                 result = partialResult;

@@ -828,12 +828,13 @@ public class RestconfImpl implements RestconfService {
             throw new RestconfDocumentedException("Input is required.", ErrorType.PROTOCOL, ErrorTag.MALFORMED_MESSAGE);
         }
 
-        final URI payloadNS = payload.getData().getNodeType().getNamespace();
-        if (payloadNS == null) {
-            throw new RestconfDocumentedException(
-                    "Data has bad format. Root element node must have namespace (XML format) or module name(JSON format)",
-                    ErrorType.PROTOCOL, ErrorTag.UNKNOWN_NAMESPACE);
-        }
+        // FIXME: move this to parsing stage (we can have augmentation nodes here which do not have namespace)
+//        final URI payloadNS = payload.getData().getNodeType().getNamespace();
+//        if (payloadNS == null) {
+//            throw new RestconfDocumentedException(
+//                    "Data has bad format. Root element node must have namespace (XML format) or module name(JSON format)",
+//                    ErrorType.PROTOCOL, ErrorTag.UNKNOWN_NAMESPACE);
+//        }
 
         final DOMMountPoint mountPoint = payload.getInstanceIdentifierContext().getMountPoint();
         final InstanceIdentifierContext<?> iiWithData = payload.getInstanceIdentifierContext();
