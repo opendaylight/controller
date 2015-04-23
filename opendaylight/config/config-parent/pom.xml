@@ -11,20 +11,20 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <parent>
     <groupId>org.opendaylight.yangtools</groupId>
     <artifactId>binding-parent</artifactId>
-    <version>0.7.0-SNAPSHOT</version>
+    <version>0.8.0-SNAPSHOT</version>
     <relativePath/>
   </parent>
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>config-parent</artifactId>
-  <version>0.3.0-SNAPSHOT</version>
+  <version>0.4.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <properties>
-    <config.version>0.3.0-SNAPSHOT</config.version>
-    <mdsal.version>1.2.0-SNAPSHOT</mdsal.version>
-    <yangtools.version>0.7.0-SNAPSHOT</yangtools.version>
+    <config.version>0.4.0-SNAPSHOT</config.version>
+    <mdsal.version>1.3.0-SNAPSHOT</mdsal.version>
+    <yangtools.version>0.8.0-SNAPSHOT</yangtools.version>
     <jmxGeneratorPath>src/main/yang-gen-config</jmxGeneratorPath>
     <config.file>src/main/config/default-config.xml</config.file>
   </properties>
