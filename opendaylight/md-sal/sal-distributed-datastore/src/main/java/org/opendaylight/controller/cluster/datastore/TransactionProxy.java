@@ -159,7 +159,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
         return false;
     }
 
-    private boolean isRootPath(YangInstanceIdentifier path){
+    private static boolean isRootPath(YangInstanceIdentifier path) {
         return !path.getPathArguments().iterator().hasNext();
     }
 
