@@ -7,10 +7,12 @@
     </encoder>
   </appender>
 
-
-  <logger name="org.opendaylight.yangtools.yang.parser.util.ModuleDependencySort" level="ERROR"/>
-
-  <root level="info">
+  <root level="INFO">
     <appender-ref ref="STDOUT" />
   </root>
+  <logger name="org.opendaylight.yangtools" level="INFO"/>
+  <logger name="org.opendaylight.controller" level="INFO"/>
+  <logger name="org.opendaylight.config" level="DEBUG"/>
+  <logger name="org.opendaylight.yangtools.objcache" level="ERROR"/>
+  <logger name="org.opendaylight.yangtools.yang.parser.util.ModuleDependencySort" level="ERROR"/>
 </configuration>

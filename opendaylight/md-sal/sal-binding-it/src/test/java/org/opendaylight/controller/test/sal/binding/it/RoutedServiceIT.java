@@ -39,10 +39,10 @@ import org.slf4j.LoggerFactory;
 /**
  * covers routed rpc creation, registration, invocation, unregistration
  */
-public class RoutedServiceTest extends AbstractTest {
+public class RoutedServiceIT extends AbstractIT {
 
     private static final Logger LOG = LoggerFactory
-            .getLogger(RoutedServiceTest.class);
+            .getLogger(RoutedServiceIT.class);
 
     protected OpendaylightTestRoutedRpcService odlRoutedService1;
     protected OpendaylightTestRoutedRpcService odlRoutedService2;

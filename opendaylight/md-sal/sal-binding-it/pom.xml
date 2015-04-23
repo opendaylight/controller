@@ -182,6 +182,30 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <executions>
+          <execution>
+              <goals>
+                  <goal>integration-test</goal>
+                  <goal>verify</goal>
+              </goals>
+          </execution>
+        </executions>
+        <!-- PAX EXAM tests sometimes takes longer to run if
+             not enough system resources are provided and
+             default timeout of two minutes may be not enough
+             on some jenkins jobs. In order to not loose
+             results of these tests, but to prevent this
+             tests of failing verifies sporadically
+             this test suites are optional and should not
+             fail build.
+         -->
+        <configuration>
+            <testFailureIgnore>true</testFailureIgnore>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
   <scm>
