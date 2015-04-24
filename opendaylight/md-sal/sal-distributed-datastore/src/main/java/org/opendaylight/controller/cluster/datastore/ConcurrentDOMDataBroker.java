@@ -76,6 +76,10 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
         Preconditions.checkArgument(cohorts != null, "Cohorts must not be null.");
         LOG.debug("Tx: {} is submitted for execution.", transaction.getIdentifier());
 
+        if(cohorts.isEmpty()){
+            return Futures.immediateCheckedFuture(null);
+        }
+
         final AsyncNotifyingSettableFuture clientSubmitFuture =
                 new AsyncNotifyingSettableFuture(clientFutureCallbackExecutor);
 
