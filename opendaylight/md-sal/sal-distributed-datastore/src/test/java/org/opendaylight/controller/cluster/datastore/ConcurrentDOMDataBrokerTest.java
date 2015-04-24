@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -31,6 +32,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -506,6 +508,30 @@ public class ConcurrentDOMDataBrokerTest {
         verify(mockChain, never()).newWriteOnlyTransaction();
 
         domDataWriteTransaction.put(LogicalDatastoreType.OPERATIONAL, YangInstanceIdentifier.builder().build(), mock(NormalizedNode.class));
+    }
+
+    @Test
+    public void testEmptyTransactionChain(){
+
+    }
+
+    @Test
+    public void testEmptyTransactionSubmitSucceeds() throws ExecutionException, InterruptedException {
+        DOMStore domStore = mock(DOMStore.class);
+        ConcurrentDOMDataBroker dataBroker = new ConcurrentDOMDataBroker(ImmutableMap.of(LogicalDatastoreType.OPERATIONAL,
+                domStore, LogicalDatastoreType.CONFIGURATION, domStore), futureExecutor);
+
+        CheckedFuture<Void, TransactionCommitFailedException> submit1 = dataBroker.newWriteOnlyTransaction().submit();
+
+        assertNotNull(submit1);
+
+        submit1.get();
+
+        CheckedFuture<Void, TransactionCommitFailedException> submit2 = dataBroker.newReadWriteTransaction().submit();
+
+        submit2.get();
+
+        assertNotNull(submit2);
     }
 
 }
