@@ -9,7 +9,6 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorSelection;
-import akka.dispatch.Mapper;
 import akka.dispatch.OnComplete;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.SettableFuture;
@@ -20,7 +19,6 @@ import org.opendaylight.controller.cluster.datastore.messages.DataExists;
 import org.opendaylight.controller.cluster.datastore.messages.DataExistsReply;
 import org.opendaylight.controller.cluster.datastore.messages.ReadData;
 import org.opendaylight.controller.cluster.datastore.messages.ReadDataReply;
-import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.SerializableMessage;
 import org.opendaylight.controller.cluster.datastore.modification.DeleteModification;
 import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
@@ -82,6 +80,7 @@ public class TransactionContextImpl extends AbstractTransactionContext {
     @Override
     public void closeTransaction() {
         LOG.debug("Tx {} closeTransaction called", getIdentifier());
+        TransactionContextCleanup.untrack(this);
 
         actorContext.sendOperationAsync(getActor(), CloseTransaction.INSTANCE.toSerializable());
     }
@@ -115,27 +114,7 @@ public class TransactionContextImpl extends AbstractTransactionContext {
         // Transform the last reply Future into a Future that returns the cohort actor path from
         // the last reply message. That's the end result of the ready operation.
 
-        return readyReplyFuture.transform(new Mapper<Object, ActorSelection>() {
-            @Override
-            public ActorSelection checkedApply(Object serializedReadyReply) {
-                LOG.debug("Tx {} readyTransaction", getIdentifier());
-
-                // At this point the ready operation succeeded and we need to extract the cohort
-                // actor path from the reply.
-                if(ReadyTransactionReply.isSerializedType(serializedReadyReply)) {
-                    ReadyTransactionReply readyTxReply = ReadyTransactionReply.fromSerializable(serializedReadyReply);
-                    return actorContext.actorSelection(extractCohortPathFrom(readyTxReply));
-                }
-
-                // Throwing an exception here will fail the Future.
-                throw new IllegalArgumentException(String.format("%s: Invalid reply type %s",
-                        getIdentifier(), serializedReadyReply.getClass()));
-            }
-        }, TransactionProxy.SAME_FAILURE_TRANSFORMER, actorContext.getClientDispatcher());
-    }
-
-    protected String extractCohortPathFrom(ReadyTransactionReply readyTxReply) {
-        return readyTxReply.getCohortPath();
+        return TransactionReadyReplyMapper.transform(readyReplyFuture, actorContext, getIdentifier());
     }
 
     private BatchedModifications newBatchedModifications() {
