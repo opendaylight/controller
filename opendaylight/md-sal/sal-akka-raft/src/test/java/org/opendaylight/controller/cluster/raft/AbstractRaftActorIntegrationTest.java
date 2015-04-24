@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
 import akka.actor.ActorRef;
+import akka.actor.InvalidActorNameException;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.actor.Terminated;
@@ -19,6 +20,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -186,9 +188,20 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         TestActorRef<MessageCollectorActor> collectorActor = factory.createTestActor(
                 MessageCollectorActor.props().withDispatcher(Dispatchers.DefaultDispatcherId()),
                         factory.generateActorId(id + "-collector"));
-        return factory.createTestActor(TestRaftActor.props(id,
-                peerAddresses != null ? peerAddresses : Collections.<String, String>emptyMap(),
-                        configParams, collectorActor), id);
+
+        InvalidActorNameException lastEx = null;
+        for(int i = 0; i < 10; i++) {
+            try {
+                return factory.createTestActor(TestRaftActor.props(id,
+                        peerAddresses != null ? peerAddresses : Collections.<String, String>emptyMap(),
+                                configParams, collectorActor), id);
+            } catch (InvalidActorNameException e) {
+                lastEx = e;
+                Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
+            }
+        }
+
+        throw lastEx;
     }
 
     protected void killActor(TestActorRef<TestRaftActor> leaderActor) {
