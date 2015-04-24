@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.concurrent.GuardedBy;
+import org.opendaylight.controller.cluster.datastore.compat.PreLithiumTransactionContextImpl;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
@@ -50,7 +51,7 @@ final class TransactionFutureCallback extends OnComplete<Object> {
      */
     @GuardedBy("txOperationsOnComplete")
     private final List<TransactionOperation> txOperationsOnComplete = Lists.newArrayList();
-    private final TransactionProxy proxy;
+    private final TransactionProxy parent;
     private final String shardName;
 
     /**
@@ -64,10 +65,10 @@ final class TransactionFutureCallback extends OnComplete<Object> {
     private volatile ActorSelection primaryShard;
     private volatile int createTxTries;
 
-    TransactionFutureCallback(final TransactionProxy proxy, final String shardName) {
-        this.proxy = Preconditions.checkNotNull(proxy);
+    TransactionFutureCallback(final TransactionProxy parent, final String shardName) {
+        this.parent = Preconditions.checkNotNull(parent);
         this.shardName = shardName;
-        createTxTries = (int) (proxy.getActorContext().getDatastoreContext().
+        createTxTries = (int) (parent.getActorContext().getDatastoreContext().
                 getShardLeaderElectionTimeout().duration().toMillis() /
                 CREATE_TX_TRY_INTERVAL.toMillis());
     }
@@ -81,19 +82,19 @@ final class TransactionFutureCallback extends OnComplete<Object> {
     }
 
     private TransactionType getTransactionType() {
-        return proxy.getTransactionType();
+        return parent.getType();
     }
 
     private TransactionIdentifier getIdentifier() {
-        return proxy.getIdentifier();
+        return parent.getIdentifier();
     }
 
     private ActorContext getActorContext() {
-        return proxy.getActorContext();
+        return parent.getActorContext();
     }
 
     private Semaphore getOperationLimiter() {
-        return proxy.getOperationLimiter();
+        return parent.getLimiter();
     }
 
     /**
@@ -110,7 +111,7 @@ final class TransactionFutureCallback extends OnComplete<Object> {
             // For write-only Tx's we prepare the transaction modifications directly on the shard actor
             // to avoid the overhead of creating a separate transaction actor.
             // FIXME: can't assume the shard version is LITHIUM_VERSION - need to obtain it somehow.
-            executeTxOperatonsOnComplete(proxy.createValidTransactionContext(this.primaryShard,
+            executeTxOperatonsOnComplete(createValidTransactionContext(this.primaryShard,
                     this.primaryShard.path().toString(), DataStoreVersions.LITHIUM_VERSION));
         } else {
             tryCreateTransaction();
@@ -156,7 +157,7 @@ final class TransactionFutureCallback extends OnComplete<Object> {
         }
 
         Object serializedCreateMessage = new CreateTransaction(getIdentifier().toString(),
-            getTransactionType().ordinal(), proxy.getTransactionChainId()).toSerializable();
+            getTransactionType().ordinal(), getIdentifier().getChainId()).toSerializable();
 
         Future<Object> createTxFuture = getActorContext().executeOperationAsync(primaryShard, serializedCreateMessage);
 
@@ -189,11 +190,6 @@ final class TransactionFutureCallback extends OnComplete<Object> {
     }
 
     void createTransactionContext(Throwable failure, Object response) {
-        // Mainly checking for state violation here to perform a volatile read of "initialized" to
-        // ensure updates to operationLimter et al are visible to this thread (ie we're doing
-        // "piggy-back" synchronization here).
-        proxy.ensureInitializied();
-
         // Create the TransactionContext from the response or failure. Store the new
         // TransactionContext locally until we've completed invoking the
         // TransactionOperations. This avoids thread timing issues which could cause
@@ -256,8 +252,25 @@ final class TransactionFutureCallback extends OnComplete<Object> {
     private TransactionContext createValidTransactionContext(CreateTransactionReply reply) {
         LOG.debug("Tx {} Received {}", getIdentifier(), reply);
 
-        return proxy.createValidTransactionContext(getActorContext().actorSelection(reply.getTransactionPath()),
+        return createValidTransactionContext(getActorContext().actorSelection(reply.getTransactionPath()),
                 reply.getTransactionPath(), reply.getVersion());
     }
 
+    private TransactionContext createValidTransactionContext(ActorSelection transactionActor, String transactionPath, short remoteTransactionVersion) {
+        // TxActor is always created where the leader of the shard is.
+        // Check if TxActor is created in the same node
+        boolean isTxActorLocal = getActorContext().isPathLocal(transactionPath);
+        final TransactionContext ret;
+
+        if (remoteTransactionVersion < DataStoreVersions.LITHIUM_VERSION) {
+            ret = new PreLithiumTransactionContextImpl(transactionPath, transactionActor, getIdentifier(),
+                getActorContext(), isTxActorLocal, remoteTransactionVersion, parent.getCompleter());
+        } else {
+            ret = new TransactionContextImpl(transactionActor, getIdentifier(), getActorContext(),
+                isTxActorLocal, remoteTransactionVersion, parent.getCompleter());
+        }
+
+        TransactionContextCleanup.track(this, ret);
+        return ret;
+    }
 }
