@@ -76,6 +76,14 @@
                 <module>
                             <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">prefix:binding-notification-broker</type>
                             <name>binding-notification-broker</name>
+                    <notification-adapter xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">
+                         <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">prefix:binding-new-notification-service</type>
+                         <name>binding-notification-adapter</name>
+                    </notification-adapter>
+                    <notification-publish-adapter xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">
+                         <type  xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">prefix:binding-new-notification-publish-service</type>
+                         <name>binding-notification-publish-adapter</name>
+                    </notification-publish-adapter>
                         </module>
                         <module>
                             <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">prefix:binding-broker-impl</type>
@@ -162,10 +170,21 @@
                         <module>
                             <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:impl">prefix:dom-inmemory-data-broker</type>
                             <name>inmemory-data-broker</name>
+
                             <schema-service>
                                 <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:schema-service</type>
                                 <name>yang-schema-service</name>
                             </schema-service>
+
+                   <config-data-store>
+                        <type xmlns:config-dom-store-spi="urn:opendaylight:params:xml:ns:yang:controller:md:sal:core:spi:config-dom-store">config-dom-store-spi:config-dom-datastore</type>
+                        <name>config-store-service</name>
+                    </config-data-store>
+
+                    <operational-data-store>
+                        <type xmlns:operational-dom-store-spi="urn:opendaylight:params:xml:ns:yang:controller:md:sal:core:spi:operational-dom-store">operational-dom-store-spi:operational-dom-datastore</type>
+                        <name>operational-store-service</name>
+                    </operational-data-store>
                         </module>
                         <module>
                             <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:impl">prefix:dom-broker-impl</type>

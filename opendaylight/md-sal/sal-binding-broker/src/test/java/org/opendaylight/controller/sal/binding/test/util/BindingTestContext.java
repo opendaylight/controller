@@ -20,19 +20,27 @@ import com.google.common.util.concurrent.MoreExecutors;
 import javassist.ClassPool;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.MountPointService;
+import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService;
+import org.opendaylight.controller.md.sal.binding.api.NotificationService;
+import org.opendaylight.controller.md.sal.binding.compat.HeliumNotificationProviderServiceAdapter;
 import org.opendaylight.controller.md.sal.binding.compat.HeliumRpcProviderRegistry;
 import org.opendaylight.controller.md.sal.binding.compat.HydrogenDataBrokerAdapter;
 import org.opendaylight.controller.md.sal.binding.compat.HydrogenMountProvisionServiceAdapter;
 import org.opendaylight.controller.md.sal.binding.impl.BindingDOMDataBrokerAdapter;
 import org.opendaylight.controller.md.sal.binding.impl.BindingDOMMountPointServiceAdapter;
+import org.opendaylight.controller.md.sal.binding.impl.BindingDOMNotificationPublishServiceAdapter;
+import org.opendaylight.controller.md.sal.binding.impl.BindingDOMNotificationServiceAdapter;
 import org.opendaylight.controller.md.sal.binding.impl.BindingDOMRpcProviderServiceAdapter;
 import org.opendaylight.controller.md.sal.binding.impl.BindingDOMRpcServiceAdapter;
 import org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodec;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
+import org.opendaylight.controller.md.sal.dom.api.DOMNotificationPublishService;
+import org.opendaylight.controller.md.sal.dom.api.DOMNotificationService;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
+import org.opendaylight.controller.md.sal.dom.broker.impl.DOMNotificationRouter;
 import org.opendaylight.controller.md.sal.dom.broker.impl.DOMRpcRouter;
 import org.opendaylight.controller.md.sal.dom.broker.impl.SerializedDOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.broker.impl.mount.DOMMountPointServiceImpl;
@@ -41,7 +49,6 @@ import org.opendaylight.controller.sal.binding.api.RpcConsumerRegistry;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.opendaylight.controller.sal.binding.api.mount.MountProviderService;
-import org.opendaylight.controller.sal.binding.impl.NotificationBrokerImpl;
 import org.opendaylight.controller.sal.binding.impl.RootBindingAwareBroker;
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 import org.opendaylight.controller.sal.core.api.BrokerService;
@@ -65,7 +72,7 @@ public class BindingTestContext implements AutoCloseable {
 
     private RootBindingAwareBroker baBrokerImpl;
 
-    private NotificationBrokerImpl baNotifyImpl;
+    private HeliumNotificationProviderServiceAdapter baNotifyImpl;
 
 
     private BrokerImpl biBrokerImpl;
@@ -92,6 +99,14 @@ public class BindingTestContext implements AutoCloseable {
 
     private BindingDOMRpcProviderServiceAdapter baProviderRpc;
     private DOMRpcRouter domRouter;
+
+    private NotificationPublishService publishService;
+
+    private NotificationService listenService;
+
+    private DOMNotificationPublishService domPublishService;
+
+    private DOMNotificationService domListenService;
 
 
 
@@ -249,7 +264,12 @@ public class BindingTestContext implements AutoCloseable {
 
     public void startBindingNotificationBroker() {
         checkState(executor != null);
-        baNotifyImpl = new NotificationBrokerImpl(executor);
+        final DOMNotificationRouter router = DOMNotificationRouter.create(16);
+        domPublishService = router;
+        domListenService = router;
+        publishService = new BindingDOMNotificationPublishServiceAdapter(codec, domPublishService);
+        listenService = new BindingDOMNotificationServiceAdapter(codec, domListenService);
+        baNotifyImpl = new HeliumNotificationProviderServiceAdapter(publishService,listenService);
 
     }
 
