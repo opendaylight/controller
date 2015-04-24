@@ -16,6 +16,24 @@
       "revId": "1c91ed67125164add71cc110a0ac5050dd7514ae",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_5ddd906f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/PrimaryShardInfo.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-24T00:51:18Z",
+      "side": 1,
+      "message": "The only caller won\u0027t know if it should be present or absent so it will do Optional.fromNullable(...).  So passing the Optional will be easier on the lone caller.",
+      "parentUuid": "3aa0d159_2fc2d1e9",
+      "revId": "1c91ed67125164add71cc110a0ac5050dd7514ae",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
