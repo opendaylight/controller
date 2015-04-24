@@ -61,6 +61,8 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
 
     private final String type;
 
+    private final ComponentFactory componentFactory;
+
     public DistributedDataStore(ActorSystem actorSystem, ClusterWrapper cluster,
             Configuration configuration, DatastoreContext datastoreContext) {
         Preconditions.checkNotNull(actorSystem, "actorSystem should not be null");
@@ -85,6 +87,7 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
         this.waitTillReadyTimeInMillis =
                 actorContext.getDatastoreContext().getShardLeaderElectionTimeout().duration().toMillis() * READY_WAIT_FACTOR;
 
+        this.componentFactory = new SimpleComponentFactory(actorContext);
 
         datastoreConfigMXBean = new DatastoreConfigurationMXBeanImpl(datastoreContext.getDataStoreMXBeanType());
         datastoreConfigMXBean.setContext(datastoreContext);
@@ -96,6 +99,7 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
 
     public DistributedDataStore(ActorContext actorContext) {
         this.actorContext = Preconditions.checkNotNull(actorContext, "actorContext should not be null");
+        this.componentFactory = new SimpleComponentFactory(actorContext);
         this.type = UNKNOWN_TYPE;
         this.waitTillReadyTimeInMillis =
                 actorContext.getDatastoreContext().getShardLeaderElectionTimeout().duration().toMillis() * READY_WAIT_FACTOR;
@@ -144,24 +148,24 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
 
     @Override
     public DOMStoreTransactionChain createTransactionChain() {
-        return new TransactionChainProxy(actorContext);
+        return new ShardedTransactionChain(componentFactory);
     }
 
     @Override
     public DOMStoreReadTransaction newReadOnlyTransaction() {
-        return new TransactionProxy(actorContext, TransactionType.READ_ONLY);
+        return new TransactionProxy(componentFactory, TransactionType.READ_ONLY);
     }
 
     @Override
     public DOMStoreWriteTransaction newWriteOnlyTransaction() {
         actorContext.acquireTxCreationPermit();
-        return new TransactionProxy(actorContext, TransactionType.WRITE_ONLY);
+        return new TransactionProxy(componentFactory, TransactionType.WRITE_ONLY);
     }
 
     @Override
     public DOMStoreReadWriteTransaction newReadWriteTransaction() {
         actorContext.acquireTxCreationPermit();
-        return new TransactionProxy(actorContext, TransactionType.READ_WRITE);
+        return new TransactionProxy(componentFactory, TransactionType.READ_WRITE);
     }
 
     @Override
