@@ -23,13 +23,13 @@ public class CarsModel {
     public static final QName BASE_QNAME = QName.create("urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test:cars", "2014-03-13",
         "cars");
 
-    public static final YangInstanceIdentifier BASE_PATH = YangInstanceIdentifier.of(BASE_QNAME);
-
     public static final QName CARS_QNAME = QName.create(BASE_QNAME, "cars");
     public static final QName CAR_QNAME = QName.create(CARS_QNAME, "car");
     public static final QName CAR_NAME_QNAME = QName.create(CAR_QNAME, "name");
     public static final QName CAR_PRICE_QNAME = QName.create(CAR_QNAME, "price");
 
+    public static final YangInstanceIdentifier BASE_PATH = YangInstanceIdentifier.of(BASE_QNAME);
+    public static final YangInstanceIdentifier CAR_LIST_PATH = BASE_PATH.node(CAR_QNAME);
 
     public static NormalizedNode<?, ?> create(){
 
@@ -69,4 +69,17 @@ public class CarsModel {
             .build();
     }
 
+    public static NormalizedNode<?, ?> newCarMapNode() {
+        return ImmutableNodes.mapNodeBuilder(CAR_QNAME).build();
+    }
+
+    public static MapEntryNode newCarEntry(String name, BigInteger price) {
+        return ImmutableNodes.mapEntryBuilder(CAR_QNAME, CAR_NAME_QNAME, name)
+                .withChild(ImmutableNodes.leafNode(CAR_NAME_QNAME, name))
+                .withChild(ImmutableNodes.leafNode(CAR_PRICE_QNAME, price)).build();
+    }
+
+    public static YangInstanceIdentifier newCarPath(String name) {
+        return YangInstanceIdentifier.builder(CAR_LIST_PATH).nodeWithKey(CAR_QNAME, CAR_NAME_QNAME, name).build();
+    }
 }
