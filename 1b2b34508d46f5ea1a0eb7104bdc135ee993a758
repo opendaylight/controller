@@ -69,6 +69,24 @@
       "revId": "1b2b34508d46f5ea1a0eb7104bdc135ee993a758",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_fdd57c43",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/yang/opendaylight-rest-connector.yang",
+        "patchSetId": 3
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-24T01:16:30Z",
+      "side": 1,
+      "message": "There\u0027s different ways to do this. With the current patch, you can see received request counts separately for config and operational but the success and failure counts aren\u0027t separated - they\u0027re both combined for config and operational. I know this is only for GET but it seems a little inconsistent. If I can see separate received request counts for config GET and operational GET then why can\u0027t I see separate success/failure counts for config GET and operational GET? \n\nThe way I would do this is basically what you originally had except without the grouped success and failure counts - these were redundant. So group received-requests, successful-responses and failed-responses together in statistics. To me it seems more natural to see all 3 grouped together per GET, PUT etc rather than having them all spread out, So\n\nConfig\n  Get\n     ReceivedRequests\n     SuccessfulResponses\n     FailedResponses\n  Put\n     ReceivedRequests\n     SuccessfulResponses\n     FailedResponses\n  ..\n\nOperational\n  Get\n     ReceivedRequests\n     SuccessfulResponses\n     FailedResponses",
+      "parentUuid": "3aa0d159_faacac8e",
+      "revId": "1b2b34508d46f5ea1a0eb7104bdc135ee993a758",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
