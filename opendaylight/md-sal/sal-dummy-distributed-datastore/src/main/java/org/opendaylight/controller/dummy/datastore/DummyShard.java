@@ -13,6 +13,7 @@ import akka.actor.UntypedActor;
 import akka.japi.Creator;
 import com.google.common.base.Stopwatch;
 import java.util.concurrent.TimeUnit;
+import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
@@ -101,10 +102,12 @@ public class DummyShard extends UntypedActor{
             if (!ignore) {
                 LOG.info("{} - Randomizing delay : {}", followerId, delay);
                 Thread.sleep(delay);
-                sender().tell(new AppendEntriesReply(followerId, req.getTerm(), true, lastIndex, req.getTerm()), self());
+                sender().tell(new AppendEntriesReply(followerId, req.getTerm(), true, lastIndex, req.getTerm(),
+                        DataStoreVersions.CURRENT_VERSION), self());
             }
         } else {
-            sender().tell(new AppendEntriesReply(followerId, req.getTerm(), true, lastIndex, req.getTerm()), self());
+            sender().tell(new AppendEntriesReply(followerId, req.getTerm(), true, lastIndex, req.getTerm(),
+                    DataStoreVersions.CURRENT_VERSION), self());
         }
     }
 

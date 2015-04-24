@@ -114,12 +114,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     private final BehaviorStateHolder reusableBehaviorStateHolder = new BehaviorStateHolder();
 
-    public RaftActor(String id, Map<String, String> peerAddresses) {
-        this(id, peerAddresses, Optional.<ConfigParams>absent());
-    }
-
     public RaftActor(String id, Map<String, String> peerAddresses,
-         Optional<ConfigParams> configParams) {
+         Optional<ConfigParams> configParams, short payloadVersion) {
 
         context = new RaftActorContextImpl(this.getSelf(),
             this.getContext(), id, new ElectionTermImpl(delegatingPersistenceProvider, id, LOG),
@@ -127,6 +123,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             (configParams.isPresent() ? configParams.get(): new DefaultConfigParamsImpl()),
             delegatingPersistenceProvider, LOG);
 
+        context.setPayloadVersion(payloadVersion);
         context.setReplicatedLog(ReplicatedLogImpl.newInstance(context, currentBehavior));
     }
 
