@@ -25,8 +25,8 @@ public class ShardLeaderStateChanged extends LeaderStateChanged {
     private final Optional<DataTree> localShardDataTree;
 
     public ShardLeaderStateChanged(@Nonnull String memberId, @Nonnull String leaderId,
-            @Nonnull Optional<DataTree> localShardDataTree) {
-        super(memberId, leaderId);
+            @Nonnull Optional<DataTree> localShardDataTree, short leaderPayloadVersion) {
+        super(memberId, leaderId, leaderPayloadVersion);
         this.localShardDataTree = Preconditions.checkNotNull(localShardDataTree);
     }
 
