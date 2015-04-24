@@ -58,6 +58,7 @@ public class LeaderTest extends AbstractLeaderTest {
             Props.create(ForwardMessageToBehaviorActor.class), actorFactory.generateActorId("follower"));
 
     private Leader leader;
+    private final short payloadVersion = 5;
 
     @Override
     @After
@@ -971,6 +972,7 @@ public class LeaderTest extends AbstractLeaderTest {
         configParams.setElectionTimeoutFactor(100000);
         MockRaftActorContext context = new MockRaftActorContext(id, getSystem(), actorRef);
         context.setConfigParams(configParams);
+        context.setPayloadVersion(payloadVersion);
         return context;
     }
 
@@ -1336,6 +1338,8 @@ public class LeaderTest extends AbstractLeaderTest {
         leaderActorContext.getTermInformation().update(1, "leader");
 
         leader = new Leader(leaderActorContext);
+
+        assertEquals(payloadVersion, leader.getLeaderPayloadVersion());
 
         short payloadVersion = 5;
         AppendEntriesReply reply = new AppendEntriesReply(FOLLOWER_ID, 1, true, 2, 1, payloadVersion);
