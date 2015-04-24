@@ -9,6 +9,7 @@ import akka.actor.PoisonPill;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -37,6 +38,7 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
@@ -72,40 +74,52 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
             DOMStoreWriteTransaction writeTx = dataStore.newWriteOnlyTransaction();
             assertNotNull("newWriteOnlyTransaction returned null", writeTx);
 
-            YangInstanceIdentifier nodePath1 = CarsModel.BASE_PATH;
-            NormalizedNode<?, ?> nodeToWrite1 = CarsModel.emptyContainer();
-            writeTx.write(nodePath1, nodeToWrite1);
+            writeTx.write(CarsModel.BASE_PATH, CarsModel.emptyContainer());
+            writeTx.write(PeopleModel.BASE_PATH, PeopleModel.emptyContainer());
 
-            YangInstanceIdentifier nodePath2 = PeopleModel.BASE_PATH;
-            NormalizedNode<?, ?> nodeToWrite2 = PeopleModel.emptyContainer();
-            writeTx.write(nodePath2, nodeToWrite2);
+            doCommit(writeTx.ready());
 
-            DOMStoreThreePhaseCommitCohort cohort = writeTx.ready();
+            writeTx = dataStore.newWriteOnlyTransaction();
 
-            doCommit(cohort);
+            writeTx.write(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode());
+            writeTx.write(PeopleModel.PERSON_LIST_PATH, PeopleModel.newPersonMapNode());
+
+            doCommit(writeTx.ready());
+
+            writeTx = dataStore.newWriteOnlyTransaction();
+
+            MapEntryNode car = CarsModel.newCarEntry("optima", BigInteger.valueOf(20000));
+            YangInstanceIdentifier carPath = CarsModel.newCarPath("optima");
+            writeTx.write(carPath, car);
+
+            MapEntryNode person = PeopleModel.newPersonEntry("jack");
+            YangInstanceIdentifier personPath = PeopleModel.newPersonPath("jack");
+            writeTx.write(personPath, person);
+
+            doCommit(writeTx.ready());
 
             // Verify the data in the store
 
             DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
 
-            Optional<NormalizedNode<?, ?>> optional = readTx.read(nodePath1).get();
+            Optional<NormalizedNode<?, ?>> optional = readTx.read(carPath).get(5, TimeUnit.SECONDS);
             assertEquals("isPresent", true, optional.isPresent());
-            assertEquals("Data node", nodeToWrite1, optional.get());
+            assertEquals("Data node", car, optional.get());
 
-            optional = readTx.read(nodePath2).get();
+            optional = readTx.read(personPath).get(5, TimeUnit.SECONDS);
             assertEquals("isPresent", true, optional.isPresent());
-            assertEquals("Data node", nodeToWrite2, optional.get());
+            assertEquals("Data node", person, optional.get());
 
             cleanup(dataStore);
         }};
     }
 
     @Test
-    public void testReadWriteTransaction() throws Exception{
+    public void testReadWriteTransactionWithSingleShard() throws Exception{
         System.setProperty("shard.persistent", "true");
         new IntegrationTestKit(getSystem()) {{
             DistributedDataStore dataStore =
-                    setupDistributedDataStore("testReadWriteTransaction", "test-1");
+                    setupDistributedDataStore("testReadWriteTransactionWithSingleShard", "test-1");
 
             // 1. Create a read-write Tx
 
@@ -142,6 +156,62 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
             optional = readTx.read(nodePath).get(5, TimeUnit.SECONDS);
             assertEquals("isPresent", true, optional.isPresent());
             assertEquals("Data node", nodeToWrite, optional.get());
+
+            cleanup(dataStore);
+        }};
+    }
+
+    @Test
+    public void testReadWriteTransactionWithMultipleShards() throws Exception{
+        new IntegrationTestKit(getSystem()) {{
+            DistributedDataStore dataStore =
+                    setupDistributedDataStore("testReadWriteTransactionWithMultipleShards", "cars-1", "people-1");
+
+            DOMStoreReadWriteTransaction readWriteTx = dataStore.newReadWriteTransaction();
+            assertNotNull("newReadWriteTransaction returned null", readWriteTx);
+
+            readWriteTx.write(CarsModel.BASE_PATH, CarsModel.emptyContainer());
+            readWriteTx.write(PeopleModel.BASE_PATH, PeopleModel.emptyContainer());
+
+            doCommit(readWriteTx.ready());
+
+            readWriteTx = dataStore.newReadWriteTransaction();
+
+            readWriteTx.write(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode());
+            readWriteTx.write(PeopleModel.PERSON_LIST_PATH, PeopleModel.newPersonMapNode());
+
+            doCommit(readWriteTx.ready());
+
+            readWriteTx = dataStore.newReadWriteTransaction();
+
+            MapEntryNode car = CarsModel.newCarEntry("optima", BigInteger.valueOf(20000));
+            YangInstanceIdentifier carPath = CarsModel.newCarPath("optima");
+            readWriteTx.write(carPath, car);
+
+            MapEntryNode person = PeopleModel.newPersonEntry("jack");
+            YangInstanceIdentifier personPath = PeopleModel.newPersonPath("jack");
+            readWriteTx.write(personPath, person);
+
+            Boolean exists = readWriteTx.exists(carPath).checkedGet(5, TimeUnit.SECONDS);
+            assertEquals("exists", true, exists);
+
+            Optional<NormalizedNode<?, ?>> optional = readWriteTx.read(carPath).get(5, TimeUnit.SECONDS);
+            assertEquals("isPresent", true, optional.isPresent());
+            assertEquals("Data node", car, optional.get());
+
+            doCommit(readWriteTx.ready());
+
+            // Verify the data in the store
+
+            DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
+
+            optional = readTx.read(carPath).get(5, TimeUnit.SECONDS);
+            assertEquals("isPresent", true, optional.isPresent());
+            assertEquals("Data node", car, optional.get());
+
+            optional = readTx.read(personPath).get(5, TimeUnit.SECONDS);
+            assertEquals("isPresent", true, optional.isPresent());
+            assertEquals("Data node", person, optional.get());
 
             cleanup(dataStore);
         }};
@@ -571,9 +641,9 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
     }
 
     @Test
-    public void testTransactionChain() throws Exception{
+    public void testTransactionChainWithSingleShard() throws Exception{
         new IntegrationTestKit(getSystem()) {{
-            DistributedDataStore dataStore = setupDistributedDataStore("testTransactionChain", "test-1");
+            DistributedDataStore dataStore = setupDistributedDataStore("testTransactionChainWithSingleShard", "test-1");
 
             // 1. Create a Tx chain and write-only Tx
 
@@ -653,6 +723,71 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
             optional = readTx.read(TestModel.OUTER_LIST_PATH).get(5, TimeUnit.SECONDS);
             assertEquals("isPresent", true, optional.isPresent());
             assertEquals("Data node", outerNode, optional.get());
+
+            cleanup(dataStore);
+        }};
+    }
+
+    @Test
+    public void testTransactionChainWithMultipleShards() throws Exception{
+        new IntegrationTestKit(getSystem()) {{
+            DistributedDataStore dataStore = setupDistributedDataStore("testTransactionChainWithMultipleShards",
+                    "cars-1", "people-1");
+
+            DOMStoreTransactionChain txChain = dataStore.createTransactionChain();
+
+            DOMStoreWriteTransaction writeTx = txChain.newWriteOnlyTransaction();
+            assertNotNull("newWriteOnlyTransaction returned null", writeTx);
+
+            writeTx.write(CarsModel.BASE_PATH, CarsModel.emptyContainer());
+            writeTx.write(PeopleModel.BASE_PATH, PeopleModel.emptyContainer());
+
+            writeTx.write(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode());
+            writeTx.write(PeopleModel.PERSON_LIST_PATH, PeopleModel.newPersonMapNode());
+
+            DOMStoreThreePhaseCommitCohort cohort1 = writeTx.ready();
+
+            DOMStoreReadWriteTransaction readWriteTx = txChain.newReadWriteTransaction();
+
+            MapEntryNode car = CarsModel.newCarEntry("optima", BigInteger.valueOf(20000));
+            YangInstanceIdentifier carPath = CarsModel.newCarPath("optima");
+            readWriteTx.write(carPath, car);
+
+            MapEntryNode person = PeopleModel.newPersonEntry("jack");
+            YangInstanceIdentifier personPath = PeopleModel.newPersonPath("jack");
+            readWriteTx.merge(personPath, person);
+
+            Optional<NormalizedNode<?, ?>> optional = readWriteTx.read(carPath).get(5, TimeUnit.SECONDS);
+            assertEquals("isPresent", true, optional.isPresent());
+            assertEquals("Data node", car, optional.get());
+
+            optional = readWriteTx.read(personPath).get(5, TimeUnit.SECONDS);
+            assertEquals("isPresent", true, optional.isPresent());
+            assertEquals("Data node", person, optional.get());
+
+            DOMStoreThreePhaseCommitCohort cohort2 = readWriteTx.ready();
+
+            writeTx = txChain.newWriteOnlyTransaction();
+
+            //writeTx.delete(personPath);
+
+            DOMStoreThreePhaseCommitCohort cohort3 = writeTx.ready();
+
+            doCommit(cohort1);
+            doCommit(cohort2);
+            doCommit(cohort3);
+
+            txChain.close();
+
+            DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
+
+            optional = readTx.read(carPath).get(5, TimeUnit.SECONDS);
+            assertEquals("isPresent", true, optional.isPresent());
+            assertEquals("Data node", car, optional.get());
+
+            optional = readTx.read(personPath).get(5, TimeUnit.SECONDS);
+            //assertEquals("isPresent", false, optional.isPresent());
+            assertEquals("isPresent", true, optional.isPresent());
 
             cleanup(dataStore);
         }};

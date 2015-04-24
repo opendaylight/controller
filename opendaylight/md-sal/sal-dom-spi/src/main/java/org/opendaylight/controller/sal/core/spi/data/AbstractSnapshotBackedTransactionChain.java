@@ -120,19 +120,26 @@ public abstract class AbstractSnapshotBackedTransactionChain<T> extends Transact
 
     @Override
     public final DOMStoreReadTransaction newReadOnlyTransaction() {
+        return newReadOnlyTransaction(nextTransactionIdentifier());
+    }
+
+    protected DOMStoreReadTransaction newReadOnlyTransaction(T transactionId) {
         final Entry<State, DataTreeSnapshot> entry = getSnapshot();
-        return SnapshotBackedTransactions.newReadTransaction(nextTransactionIdentifier(), getDebugTransactions(), entry.getValue());
+        return SnapshotBackedTransactions.newReadTransaction(transactionId, getDebugTransactions(), entry.getValue());
     }
 
     @Override
     public final DOMStoreReadWriteTransaction newReadWriteTransaction() {
+        return newReadWriteTransaction(nextTransactionIdentifier());
+    }
+
+    protected DOMStoreReadWriteTransaction newReadWriteTransaction(T transactionId) {
         Entry<State, DataTreeSnapshot> entry;
         DOMStoreReadWriteTransaction ret;
 
         do {
             entry = getSnapshot();
-            ret = new SnapshotBackedReadWriteTransaction<T>(nextTransactionIdentifier(),
-                getDebugTransactions(), entry.getValue(), this);
+            ret = new SnapshotBackedReadWriteTransaction<T>(transactionId, getDebugTransactions(), entry.getValue(), this);
         } while (!recordTransaction(entry.getKey(), ret));
 
         return ret;
@@ -140,13 +147,16 @@ public abstract class AbstractSnapshotBackedTransactionChain<T> extends Transact
 
     @Override
     public final DOMStoreWriteTransaction newWriteOnlyTransaction() {
+        return newWriteOnlyTransaction(nextTransactionIdentifier());
+    }
+
+    protected DOMStoreWriteTransaction newWriteOnlyTransaction(T transactionId) {
         Entry<State, DataTreeSnapshot> entry;
         DOMStoreWriteTransaction ret;
 
         do {
             entry = getSnapshot();
-            ret = new SnapshotBackedWriteTransaction<T>(nextTransactionIdentifier(),
-                getDebugTransactions(), entry.getValue(), this);
+            ret = new SnapshotBackedWriteTransaction<T>(transactionId, getDebugTransactions(), entry.getValue(), this);
         } while (!recordTransaction(entry.getKey(), ret));
 
         return ret;

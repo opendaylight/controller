@@ -22,13 +22,13 @@ public class PeopleModel {
     public static final QName BASE_QNAME = QName.create("urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test:people", "2014-03-13",
         "people");
 
-    public static final YangInstanceIdentifier BASE_PATH = YangInstanceIdentifier.of(BASE_QNAME);
     public static final QName PEOPLE_QNAME = QName.create(BASE_QNAME, "people");
     public static final QName PERSON_QNAME = QName.create(PEOPLE_QNAME, "person");
     public static final QName PERSON_NAME_QNAME = QName.create(PERSON_QNAME, "name");
     public static final QName PERSON_AGE_QNAME = QName.create(PERSON_QNAME, "age");
 
-
+    public static final YangInstanceIdentifier BASE_PATH = YangInstanceIdentifier.of(BASE_QNAME);
+    public static final YangInstanceIdentifier PERSON_LIST_PATH = BASE_PATH.node(PERSON_QNAME);
 
     public static NormalizedNode<?, ?> create(){
 
@@ -69,4 +69,16 @@ public class PeopleModel {
             .build();
     }
 
+    public static NormalizedNode<?, ?> newPersonMapNode() {
+        return ImmutableNodes.mapNodeBuilder(PERSON_QNAME).build();
+    }
+
+    public static MapEntryNode newPersonEntry(String name) {
+        return ImmutableNodes.mapEntryBuilder(PERSON_QNAME, PERSON_NAME_QNAME, name)
+                .withChild(ImmutableNodes.leafNode(PERSON_NAME_QNAME, name)).build();
+    }
+
+    public static YangInstanceIdentifier newPersonPath(String name) {
+        return YangInstanceIdentifier.builder(PERSON_LIST_PATH).nodeWithKey(PERSON_QNAME, PERSON_NAME_QNAME, name).build();
+    }
 }
