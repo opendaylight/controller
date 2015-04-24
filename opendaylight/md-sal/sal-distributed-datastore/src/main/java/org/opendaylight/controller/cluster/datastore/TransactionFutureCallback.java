@@ -16,8 +16,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.annotation.concurrent.GuardedBy;
-import org.opendaylight.controller.cluster.datastore.TransactionProxy.TransactionType;
+import org.opendaylight.controller.cluster.datastore.compat.PreLithiumTransactionContextImpl;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
@@ -51,7 +52,7 @@ final class TransactionFutureCallback extends OnComplete<Object> {
      */
     @GuardedBy("txOperationsOnComplete")
     private final List<TransactionOperation> txOperationsOnComplete = Lists.newArrayList();
-    private final TransactionProxy proxy;
+    private final Throttler proxy;
     private final String shardName;
 
     /**
@@ -65,7 +66,7 @@ final class TransactionFutureCallback extends OnComplete<Object> {
     private volatile ActorSelection primaryShard;
     private volatile int createTxTries;
 
-    TransactionFutureCallback(final TransactionProxy proxy, final String shardName) {
+    TransactionFutureCallback(final Throttler proxy, final String shardName) {
         this.proxy = Preconditions.checkNotNull(proxy);
         this.shardName = shardName;
         createTxTries = (int) (proxy.getActorContext().getDatastoreContext().
@@ -111,7 +112,7 @@ final class TransactionFutureCallback extends OnComplete<Object> {
             // For write-only Tx's we prepare the transaction modifications directly on the shard actor
             // to avoid the overhead of creating a separate transaction actor.
             // FIXME: can't assume the shard version is LITHIUM_VERSION - need to obtain it somehow.
-            executeTxOperatonsOnComplete(proxy.createValidTransactionContext(this.primaryShard,
+            executeTxOperatonsOnComplete(createValidTransactionContext(this.primaryShard,
                     this.primaryShard.path().toString(), DataStoreVersions.LITHIUM_VERSION));
         } else {
             tryCreateTransaction();
@@ -257,8 +258,45 @@ final class TransactionFutureCallback extends OnComplete<Object> {
     private TransactionContext createValidTransactionContext(CreateTransactionReply reply) {
         LOG.debug("Tx {} Received {}", getIdentifier(), reply);
 
-        return proxy.createValidTransactionContext(getActorContext().actorSelection(reply.getTransactionPath()),
+        return createValidTransactionContext(getActorContext().actorSelection(reply.getTransactionPath()),
                 reply.getTransactionPath(), reply.getVersion());
+    }
+
+    private TransactionContext createValidTransactionContext(ActorSelection transactionActor, String transactionPath, short remoteTransactionVersion) {
+
+        if (transactionType == TransactionType.READ_ONLY) {
+            // Read-only Tx's aren't explicitly closed by the client so we create a PhantomReference
+            // to close the remote Tx's when this instance is no longer in use and is garbage
+            // collected.
+
+            if(remoteTransactionActorsMB == null) {
+                remoteTransactionActors = Lists.newArrayList();
+                remoteTransactionActorsMB = new AtomicBoolean();
+
+                TransactionProxyCleanupPhantomReference.track(TransactionProxy.this);
+            }
+
+            // Add the actor to the remoteTransactionActors list for access by the
+            // cleanup PhantonReference.
+            remoteTransactionActors.add(transactionActor);
+
+            // Write to the memory barrier volatile to publish the above update to the
+            // remoteTransactionActors list for thread visibility.
+            remoteTransactionActorsMB.set(true);
+        }
+
+        // TxActor is always created where the leader of the shard is.
+        // Check if TxActor is created in the same node
+        boolean isTxActorLocal = getActorContext().isPathLocal(transactionPath);
+
+        if(remoteTransactionVersion < DataStoreVersions.LITHIUM_VERSION) {
+            return new PreLithiumTransactionContextImpl(transactionPath, transactionActor, getIdentifier(),
+                    transactionChainId, getActorContext(), schemaContext, isTxActorLocal, remoteTransactionVersion,
+                    operationCompleter);
+        } else {
+            return new TransactionContextImpl(transactionActor, getIdentifier(), transactionChainId,
+                getActorContext(), schemaContext, isTxActorLocal, remoteTransactionVersion, operationCompleter);
+        }
     }
 
 }
