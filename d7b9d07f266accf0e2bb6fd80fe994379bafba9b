@@ -16,6 +16,24 @@
       "revId": "d7b9d07f266accf0e2bb6fd80fe994379bafba9b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_3b20ccf6",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/md/sal/binding/compat/NotificationInvoker.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-04-24T13:39:52Z",
+      "side": 1,
+      "message": "return null can not happen - this listener is registered only for notifications (invokers.keySet()) and getImplementedInterface() require to return model interface class (effectivelly it means in order for null to be there\nother notification than one for which registered is delivered).\n\nThis class is used only in this package where Broker which created this objects also registers it and invokes onNotification.",
+      "parentUuid": "3aa0d159_a03b4bea",
+      "revId": "d7b9d07f266accf0e2bb6fd80fe994379bafba9b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
