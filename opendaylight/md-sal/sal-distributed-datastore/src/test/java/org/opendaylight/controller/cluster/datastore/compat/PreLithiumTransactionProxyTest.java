@@ -15,8 +15,8 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
-import static org.opendaylight.controller.cluster.datastore.TransactionProxy.TransactionType.READ_WRITE;
-import static org.opendaylight.controller.cluster.datastore.TransactionProxy.TransactionType.WRITE_ONLY;
+import static org.opendaylight.controller.cluster.datastore.TransactionType.READ_WRITE;
+import static org.opendaylight.controller.cluster.datastore.TransactionType.WRITE_ONLY;
 import akka.actor.ActorRef;
 import akka.dispatch.Futures;
 import akka.util.Timeout;
@@ -156,7 +156,7 @@ public class PreLithiumTransactionProxyTest extends AbstractTransactionProxyTest
         doReturn(actorRef.path().toString()).when(mockActorContext).resolvePath(eq(actorRef.path().toString()),
                 eq(actorRef.path().toString()));
 
-        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext, READ_WRITE);
+        TransactionProxy transactionProxy = new TransactionProxy(mockComponentFactory, READ_WRITE);
 
         Optional<NormalizedNode<?, ?>> readOptional = transactionProxy.read(TestModel.TEST_PATH).
                 get(5, TimeUnit.SECONDS);
@@ -228,7 +228,7 @@ public class PreLithiumTransactionProxyTest extends AbstractTransactionProxyTest
         doReturn(actorRef.path().toString()).when(mockActorContext).resolvePath(eq(actorRef.path().toString()),
                 eq(actorRef.path().toString()));
 
-        TransactionProxy transactionProxy = new TransactionProxy(mockActorContext, WRITE_ONLY);
+        TransactionProxy transactionProxy = new TransactionProxy(mockComponentFactory, WRITE_ONLY);
 
         transactionProxy.write(TestModel.TEST_PATH, testNode);
 
