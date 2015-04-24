@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_3b1d2c67",
+        "filename": "opendaylight/netconf/netconf-tcp/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2015-04-24T12:27:44Z",
+      "side": 1,
+      "message": "Do we need the version here? Isn\u0027t it inherited from parent?",
+      "range": {
+        "startLine": 37,
+        "startChar": 10,
+        "endLine": 37,
+        "endChar": 43
+      },
+      "revId": "0ac63059bcff9b654f0abcc9f49fd93a1049b093",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_5b1a786f",
+        "filename": "opendaylight/netconf/netconf-tcp/src/main/yang/netconf-northbound-ssh.yang",
+        "patchSetId": 4
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2015-04-24T12:27:44Z",
+      "side": 1,
+      "message": "Filename should be netconf-northbound-tcp.yang",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 31
+      },
+      "revId": "0ac63059bcff9b654f0abcc9f49fd93a1049b093",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
