@@ -26,6 +26,7 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
 
     private final Stopwatch lastReplicatedStopwatch = Stopwatch.createUnstarted();
 
+    private short payloadVersion = -1;
 
     public FollowerLogInformationImpl(String id, long matchIndex, RaftActorContext context) {
         this.id = id;
@@ -142,5 +143,15 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
                 .append(", followerTimeoutMillis=")
                 .append(context.getConfigParams().getElectionTimeOutInterval().toMillis()).append("]");
         return builder.toString();
+    }
+
+    @Override
+    public short getPayloadVersion() {
+        return payloadVersion;
+    }
+
+    @Override
+    public void setPayloadVersion(short payloadVersion) {
+        this.payloadVersion = payloadVersion;
     }
 }

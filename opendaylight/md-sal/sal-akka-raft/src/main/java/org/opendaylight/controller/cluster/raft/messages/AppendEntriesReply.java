@@ -29,13 +29,17 @@ public class AppendEntriesReply extends AbstractRaftRPC {
     // responding
     private final String followerId;
 
-    public AppendEntriesReply(String followerId, long term, boolean success, long logLastIndex, long logLastTerm) {
+    private final short payloadVersion;
+
+    public AppendEntriesReply(String followerId, long term, boolean success, long logLastIndex, long logLastTerm,
+            short payloadVersion) {
         super(term);
 
         this.followerId = followerId;
         this.success = success;
         this.logLastIndex = logLastIndex;
         this.logLastTerm = logLastTerm;
+        this.payloadVersion = payloadVersion;
     }
 
     @Override
@@ -59,12 +63,16 @@ public class AppendEntriesReply extends AbstractRaftRPC {
         return followerId;
     }
 
+    public short getPayloadVersion() {
+        return payloadVersion;
+    }
+
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("AppendEntriesReply [term=").append(term).append(", success=").append(success)
-                .append(", logLastIndex=").append(logLastIndex).append(", logLastTerm=").append(logLastTerm)
-                .append(", followerId=").append(followerId).append("]");
+        builder.append("AppendEntriesReply [success=").append(success).append(", logLastIndex=").append(logLastIndex)
+                .append(", logLastTerm=").append(logLastTerm).append(", followerId=").append(followerId)
+                .append(", payloadVersion=").append(payloadVersion).append("]");
         return builder.toString();
     }
 }

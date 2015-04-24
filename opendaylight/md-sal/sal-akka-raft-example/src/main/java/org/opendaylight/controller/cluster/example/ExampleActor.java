@@ -47,7 +47,7 @@ public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, 
 
     public ExampleActor(String id, Map<String, String> peerAddresses,
         Optional<ConfigParams> configParams) {
-        super(id, peerAddresses, configParams);
+        super(id, peerAddresses, configParams, (short)0);
         setPersistence(true);
         roleChangeNotifier = createRoleChangeNotifier(id);
     }
