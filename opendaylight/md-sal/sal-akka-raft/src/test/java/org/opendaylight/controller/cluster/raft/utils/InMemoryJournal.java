@@ -36,13 +36,23 @@ import scala.concurrent.Future;
  */
 public class InMemoryJournal extends AsyncWriteJournal {
 
+    private static class WriteMessagesComplete {
+        final CountDownLatch latch;
+        final Class<?> ofType;
+
+        public WriteMessagesComplete(int count, Class<?> ofType) {
+            this.latch = new CountDownLatch(count);
+            this.ofType = ofType;
+        }
+    }
+
     static final Logger LOG = LoggerFactory.getLogger(InMemoryJournal.class);
 
     private static final Map<String, Map<Long, Object>> journals = new ConcurrentHashMap<>();
 
     private static final Map<String, CountDownLatch> deleteMessagesCompleteLatches = new ConcurrentHashMap<>();
 
-    private static final Map<String, CountDownLatch> writeMessagesCompleteLatches = new ConcurrentHashMap<>();
+    private static final Map<String, WriteMessagesComplete> writeMessagesComplete = new ConcurrentHashMap<>();
 
     private static final Map<String, CountDownLatch> blockReadMessagesLatches = new ConcurrentHashMap<>();
 
@@ -107,7 +117,7 @@ public class InMemoryJournal extends AsyncWriteJournal {
     }
 
     public static void waitForWriteMessagesComplete(String persistenceId) {
-        if(!Uninterruptibles.awaitUninterruptibly(writeMessagesCompleteLatches.get(persistenceId), 5, TimeUnit.SECONDS)) {
+        if(!Uninterruptibles.awaitUninterruptibly(writeMessagesComplete.get(persistenceId).latch, 5, TimeUnit.SECONDS)) {
             throw new AssertionError("Journal write messages did not complete");
         }
     }
@@ -117,7 +127,11 @@ public class InMemoryJournal extends AsyncWriteJournal {
     }
 
     public static void addWriteMessagesCompleteLatch(String persistenceId, int count) {
-        writeMessagesCompleteLatches.put(persistenceId, new CountDownLatch(count));
+        writeMessagesComplete.put(persistenceId, new WriteMessagesComplete(count, null));
+    }
+
+    public static void addWriteMessagesCompleteLatch(String persistenceId, int count, Class<?> ofType) {
+        writeMessagesComplete.put(persistenceId, new WriteMessagesComplete(count, ofType));
     }
 
     public static void addBlockReadMessagesLatch(String persistenceId, CountDownLatch latch) {
@@ -193,9 +207,11 @@ public class InMemoryJournal extends AsyncWriteJournal {
                         journal.put(repr.sequenceNr(), repr.payload());
                     }
 
-                    CountDownLatch latch = writeMessagesCompleteLatches.get(repr.persistenceId());
-                    if(latch != null) {
-                        latch.countDown();
+                    WriteMessagesComplete complete = writeMessagesComplete.get(repr.persistenceId());
+                    if(complete != null) {
+                        if(complete.ofType == null || complete.ofType.equals(repr.payload().getClass())) {
+                            complete.latch.countDown();
+                        }
                     }
                 }
 
