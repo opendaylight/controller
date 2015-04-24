@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_a03b4bea",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/md/sal/binding/compat/NotificationInvoker.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-24T12:06:39Z",
+      "side": 1,
+      "message": "What if getContext returns null (could happen)? We probably should protect against this and emit a warning.",
+      "revId": "d7b9d07f266accf0e2bb6fd80fe994379bafba9b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
