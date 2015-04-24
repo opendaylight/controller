@@ -46,7 +46,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
-import org.opendaylight.controller.cluster.datastore.TransactionProxy.TransactionType;
 import org.opendaylight.controller.cluster.datastore.TransactionProxyTest.TestException;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModificationsReply;
@@ -111,6 +110,9 @@ public abstract class AbstractTransactionProxyTest {
 
     @Mock
     protected ActorContext mockActorContext;
+
+    @Mock
+    protected ComponentFactory mockComponentFactory;
 
     private SchemaContext schemaContext;
 
