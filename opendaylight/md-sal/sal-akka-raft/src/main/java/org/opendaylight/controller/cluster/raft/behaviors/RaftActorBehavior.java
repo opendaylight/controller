@@ -62,4 +62,9 @@ public interface RaftActorBehavior extends AutoCloseable{
      * @return
      */
     long getReplicatedToAllIndex();
+
+    /**
+     * Returns the leader's payload data version.
+     */
+    short getLeaderPayloadVersion();
 }

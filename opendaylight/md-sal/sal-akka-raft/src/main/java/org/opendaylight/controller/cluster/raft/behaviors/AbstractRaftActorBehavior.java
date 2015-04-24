@@ -61,6 +61,8 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      */
     protected String leaderId = null;
 
+    private short leaderPayloadVersion = -1;
+
     private long replicatedToAllIndex = -1;
 
     private final String logName;
@@ -418,6 +420,15 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
 
     @Override public String getLeaderId() {
         return leaderId;
+    }
+
+    @Override
+    public short getLeaderPayloadVersion() {
+        return leaderPayloadVersion;
+    }
+
+    public void setLeaderPayloadVersion(short leaderPayloadVersion) {
+        this.leaderPayloadVersion = leaderPayloadVersion;
     }
 
     protected RaftActorBehavior switchBehavior(RaftActorBehavior behavior) {
