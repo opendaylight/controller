@@ -303,9 +303,11 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
         // it can happen that the state has not changed but the leader has changed.
         Optional<ActorRef> roleChangeNotifier = getRoleChangeNotifier();
-        if(!Objects.equal(oldBehaviorLeaderId, currentBehavior.getLeaderId())) {
+        if(!Objects.equal(oldBehaviorLeaderId, currentBehavior.getLeaderId()) ||
+           oldBehaviorState.getLeaderPayloadVersion() != currentBehavior.getLeaderPayloadVersion()) {
             if(roleChangeNotifier.isPresent()) {
-                roleChangeNotifier.get().tell(newLeaderStateChanged(getId(), currentBehavior.getLeaderId()), getSelf());
+                roleChangeNotifier.get().tell(newLeaderStateChanged(getId(), currentBehavior.getLeaderId(),
+                        currentBehavior.getLeaderPayloadVersion()), getSelf());
             }
 
             onLeaderChanged(oldBehaviorLeaderId, currentBehavior.getLeaderId());
@@ -318,8 +320,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         }
     }
 
-    protected LeaderStateChanged newLeaderStateChanged(String memberId, String leaderId) {
-        return new LeaderStateChanged(memberId, leaderId);
+    protected LeaderStateChanged newLeaderStateChanged(String memberId, String leaderId, short leaderPayloadVersion) {
+        return new LeaderStateChanged(memberId, leaderId, leaderPayloadVersion);
     }
 
     @Override
@@ -633,10 +635,12 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     private static class BehaviorStateHolder {
         private RaftActorBehavior behavior;
         private String leaderId;
+        private short leaderPayloadVersion;
 
         void init(RaftActorBehavior behavior) {
             this.behavior = behavior;
             this.leaderId = behavior != null ? behavior.getLeaderId() : null;
+            this.leaderPayloadVersion = behavior != null ? behavior.getLeaderPayloadVersion() : -1;
         }
 
         RaftActorBehavior getBehavior() {
@@ -645,6 +649,10 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
         String getLeaderId() {
             return leaderId;
+        }
+
+        short getLeaderPayloadVersion() {
+            return leaderPayloadVersion;
         }
     }
 }

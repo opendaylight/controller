@@ -55,4 +55,9 @@ public class DelegatingRaftActorBehavior implements RaftActorBehavior {
     public long getReplicatedToAllIndex() {
         return delegate.getReplicatedToAllIndex();
     }
+
+    @Override
+    public short getLeaderPayloadVersion() {
+        return delegate.getLeaderPayloadVersion();
+    }
 }
