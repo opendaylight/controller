@@ -111,6 +111,9 @@ public abstract class AbstractTransactionProxyTest {
     @Mock
     protected ActorContext mockActorContext;
 
+    @Mock
+    protected ComponentFactory mockComponentFactory;
+
     private SchemaContext schemaContext;
 
     @Mock
