@@ -69,6 +69,7 @@ import org.opendaylight.controller.cluster.datastore.utils.MockConfiguration;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.CreateTransactionReply;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionFactory;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
@@ -111,6 +112,8 @@ public abstract class AbstractTransactionProxyTest {
     @Mock
     protected ActorContext mockActorContext;
 
+    protected TransactionComponentFactory mockComponentFactory;
+
     private SchemaContext schemaContext;
 
     @Mock
@@ -150,6 +153,23 @@ public abstract class AbstractTransactionProxyTest {
         doReturn(mockClusterWrapper).when(mockActorContext).getClusterWrapper();
         doReturn(dataStoreContextBuilder.build()).when(mockActorContext).getDatastoreContext();
         doReturn(10).when(mockActorContext).getTransactionOutstandingOperationLimit();
+
+        mockComponentFactory = new TransactionComponentFactory(mockActorContext) {
+            @Override
+            protected <T> void onTransactionReady(List<Future<T>> cohortFutures) {
+
+            }
+
+            @Override
+            protected Future<PrimaryShardInfo> findPrimaryShard(String shardName) {
+                return mockActorContext.findPrimaryShardAsync(shardName);
+            }
+
+            @Override
+            protected DOMStoreTransactionFactory factoryForShard(String shardName, ActorSelection shardLeader, DataTree dataTree) {
+                return null;
+            }
+        };
 
         Timer timer = new MetricRegistry().timer("test");
         doReturn(timer).when(mockActorContext).getOperationTimer(any(String.class));
