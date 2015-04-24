@@ -39,6 +39,7 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
+import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -204,19 +205,36 @@ public class BrokerFacade {
             final YangInstanceIdentifier parentPath, final NormalizedNode<?, ?> payload, final SchemaContext schemaContext) {
         // FIXME: This is doing correct post for container and list children
         //        not sure if this will work for choice case
-        final YangInstanceIdentifier path;
-        if(payload instanceof MapEntryNode) {
-            path = parentPath.node(payload.getNodeType()).node(payload.getIdentifier());
+        if(payload instanceof MapNode) {
+            final YangInstanceIdentifier mapPath = parentPath.node(payload.getIdentifier());
+            final NormalizedNode<?, ?> emptySubtree = ImmutableNodes.fromInstanceId(schemaContext, mapPath);
+            rWTransaction.merge(datastore, YangInstanceIdentifier.create(emptySubtree.getIdentifier()), emptySubtree);
+            ensureParentsByMerge(datastore, mapPath, rWTransaction, schemaContext);
+            for(final MapEntryNode child : ((MapNode) payload).getValue()) {
+                final YangInstanceIdentifier childPath = mapPath.node(child.getIdentifier());
+                checkItemDoesNotExists(rWTransaction, datastore, childPath);
+                rWTransaction.put(datastore, childPath, child);
+            }
         } else {
-            path = parentPath.node(payload.getIdentifier());
+            final YangInstanceIdentifier path;
+            if(payload instanceof MapEntryNode) {
+                path = parentPath.node(payload.getNodeType()).node(payload.getIdentifier());
+            } else {
+                path = parentPath.node(payload.getIdentifier());
+            }
+            checkItemDoesNotExists(rWTransaction,datastore, path);
+            ensureParentsByMerge(datastore, path, rWTransaction, schemaContext);
+            rWTransaction.put(datastore, path, payload);
         }
+        return rWTransaction.submit();
+    }
 
-        final ListenableFuture<Optional<NormalizedNode<?, ?>>> futureDatastoreData = rWTransaction.read(datastore, path);
+    private void checkItemDoesNotExists(final DOMDataReadWriteTransaction rWTransaction,final LogicalDatastoreType store, final YangInstanceIdentifier path) {
+        final ListenableFuture<Boolean> futureDatastoreData = rWTransaction.exists(store, path);
         try {
-            final Optional<NormalizedNode<?, ?>> optionalDatastoreData = futureDatastoreData.get();
-            if (optionalDatastoreData.isPresent() && payload.equals(optionalDatastoreData.get())) {
+            if (futureDatastoreData.get()) {
                 final String errMsg = "Post Configuration via Restconf was not executed because data already exists";
-                LOG.trace(errMsg + ":{}", path);
+                LOG.debug(errMsg + ":{}", path);
                 rWTransaction.cancel();
                 throw new RestconfDocumentedException("Data already exists for path: " + path, ErrorType.PROTOCOL,
                         ErrorTag.DATA_EXISTS);
@@ -225,10 +243,6 @@ public class BrokerFacade {
             LOG.trace("It wasn't possible to get data loaded from datastore at path " + path);
         }
 
-        ensureParentsByMerge(datastore, path, rWTransaction, schemaContext);
-        rWTransaction.merge(datastore, path, payload);
-        LOG.trace("Post " + datastore.name() + " via Restconf: {}", path);
-        return rWTransaction.submit();
     }
 
     private CheckedFuture<Void, TransactionCommitFailedException> putDataViaTransaction(
