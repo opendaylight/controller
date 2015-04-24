@@ -285,7 +285,7 @@ public class NetconfMessageTransformerTest {
     }
 
     private NetconfMessageTransformer getTransformer(final SchemaContext schema) {
-        return new NetconfMessageTransformer(schema);
+        return new NetconfMessageTransformer(schema, true);
     }
 
     @Test
