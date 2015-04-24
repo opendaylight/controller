@@ -13,7 +13,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufOutputStream;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -50,7 +49,10 @@ public class NetconfMessageToXMLEncoder extends MessageToByteEncoder<NetconfMess
 
         try (OutputStream os = new ByteBufOutputStream(out)) {
             // Wrap OutputStreamWriter with BufferedWriter as suggested in javadoc for OutputStreamWriter
-            StreamResult result = new StreamResult(new BufferedWriter(new OutputStreamWriter(os)));
+
+            // Using custom BufferedWriter that does not provide newLine method as performance improvement
+            // see javadoc for org.opendaylight.controller.netconf.nettyutil.handler.BufferedWriter
+            StreamResult result = new StreamResult(new org.opendaylight.controller.netconf.nettyutil.handler.BufferedWriter(new OutputStreamWriter(os)));
             DOMSource source = new DOMSource(msg.getDocument());
             ThreadLocalTransformers.getPrettyTransformer().transform(source, result);
         }
