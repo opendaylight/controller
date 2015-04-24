@@ -63,6 +63,8 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
 
     private final String type;
 
+    private final SingleTransactionContextFactory componentFactory;
+
     public DistributedDataStore(ActorSystem actorSystem, ClusterWrapper cluster,
             Configuration configuration, DatastoreContext datastoreContext) {
         Preconditions.checkNotNull(actorSystem, "actorSystem should not be null");
@@ -85,6 +87,7 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
         this.waitTillReadyTimeInMillis =
                 actorContext.getDatastoreContext().getShardLeaderElectionTimeout().duration().toMillis() * READY_WAIT_FACTOR;
 
+        this.componentFactory = SingleTransactionContextFactory.create(actorContext);
 
         datastoreConfigMXBean = new DatastoreConfigurationMXBeanImpl(datastoreContext.getDataStoreMXBeanType());
         datastoreConfigMXBean.setContext(datastoreContext);
@@ -96,10 +99,10 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
 
     public DistributedDataStore(ActorContext actorContext) {
         this.actorContext = Preconditions.checkNotNull(actorContext, "actorContext should not be null");
+        this.componentFactory = SingleTransactionContextFactory.create(actorContext);
         this.type = UNKNOWN_TYPE;
         this.waitTillReadyTimeInMillis =
                 actorContext.getDatastoreContext().getShardLeaderElectionTimeout().duration().toMillis() * READY_WAIT_FACTOR;
-
     }
 
     public void setCloseable(AutoCloseable closeable) {
@@ -144,24 +147,24 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
 
     @Override
     public DOMStoreTransactionChain createTransactionChain() {
-        return new TransactionChainProxy(actorContext);
+        return componentFactory.createTransactionChain();
     }
 
     @Override
     public DOMStoreReadTransaction newReadOnlyTransaction() {
-        return new TransactionProxy(actorContext, TransactionType.READ_ONLY);
+       return new TransactionProxy(componentFactory, TransactionType.READ_ONLY);
     }
 
     @Override
     public DOMStoreWriteTransaction newWriteOnlyTransaction() {
         actorContext.acquireTxCreationPermit();
-        return new TransactionProxy(actorContext, TransactionType.WRITE_ONLY);
+        return new TransactionProxy(componentFactory, TransactionType.WRITE_ONLY);
     }
 
     @Override
     public DOMStoreReadWriteTransaction newReadWriteTransaction() {
         actorContext.acquireTxCreationPermit();
-        return new TransactionProxy(actorContext, TransactionType.READ_WRITE);
+        return new TransactionProxy(componentFactory, TransactionType.READ_WRITE);
     }
 
     @Override
@@ -182,7 +185,7 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
         datastoreConfigMXBean.unregisterMBean();
         datastoreInfoMXBean.unregisterMBean();
 
-        if(closeable != null) {
+        if (closeable != null) {
             try {
                 closeable.close();
             } catch (Exception e) {
@@ -190,6 +193,7 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
             }
         }
 
+        componentFactory.close();
         actorContext.shutdown();
         DistributedDataStoreFactory.destroyInstance(this);
     }
