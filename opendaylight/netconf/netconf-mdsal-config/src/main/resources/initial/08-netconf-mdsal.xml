@@ -112,6 +112,30 @@
               <password>admin</password>
           </module>
 
+
+          <!--TCP endpoint for MD-SAL netconf server -->
+          <!--<module>-->
+              <!--<type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:netconf:northbound:tcp">prefix:netconf-northbound-tcp</type>-->
+              <!--<name>netconf-mdsal-tcp-server</name>-->
+
+              <!--<event-executor xmlns="urn:opendaylight:params:xml:ns:yang:controller:netconf:northbound:tcp">-->
+                  <!--<type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:netty">prefix:netty-event-executor</type>-->
+                  <!--<name>global-event-executor</name>-->
+              <!--</event-executor>-->
+              <!--<worker-thread-group xmlns="urn:opendaylight:params:xml:ns:yang:controller:netconf:northbound:tcp">-->
+                  <!--<type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:netty">prefix:netty-threadgroup</type>-->
+                  <!--<name>global-worker-group</name>-->
+              <!--</worker-thread-group>-->
+              <!--<processing-executor xmlns="urn:opendaylight:params:xml:ns:yang:controller:netconf:northbound:tcp">-->
+                  <!--<type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:threadpool">prefix:threadpool</type>-->
+                  <!--<name>global-netconf-tcp-scheduled-executor</name>-->
+              <!--</processing-executor>-->
+              <!--<dispatcher xmlns="urn:opendaylight:params:xml:ns:yang:controller:netconf:northbound:tcp">-->
+                  <!--<type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:config:netconf:northbound">prefix:netconf-server-dispatcher</type>-->
+                  <!--<name>netconf-mdsal-server-dispatcher</name>-->
+              <!--</dispatcher>-->
+          <!--</module>-->
+
       </modules>
 
         <services xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
