@@ -28,7 +28,10 @@ import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.UnknownSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.UsesNode;
 
-class NodeContainerProxy implements ContainerSchemaNode {
+/**
+ * Simple proxy for container like schema nodes, where user provides a collection of children schema nodes
+ */
+public final class NodeContainerProxy implements ContainerSchemaNode {
 
     private final Map<QName, DataSchemaNode> childNodes;
     private final QName qName;

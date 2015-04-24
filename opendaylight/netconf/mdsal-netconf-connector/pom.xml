@@ -92,13 +92,6 @@
           <artifactId>xmlunit</artifactId>
           <scope>test</scope>
       </dependency>
-      <dependency>
-          <!--TODO remove this dependency on sal-netconf-connector - move InstanceIdToNodes to netconf-util,
-          remove odl-yangtools-models, sal-netconf-connector, model-inventory dependency from the odl-netconf-mdsal feature in mdsal features with this-->
-          <groupId>org.opendaylight.controller</groupId>
-          <artifactId>sal-netconf-connector</artifactId>
-      </dependency>
-
   </dependencies>
 
   <build>

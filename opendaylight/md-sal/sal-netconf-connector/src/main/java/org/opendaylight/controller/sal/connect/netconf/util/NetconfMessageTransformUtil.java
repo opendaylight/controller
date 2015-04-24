@@ -14,6 +14,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.net.URI;
+import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -44,6 +45,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStre
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeWriter;
 import org.opendaylight.yangtools.yang.data.impl.codec.xml.XMLStreamNormalizedNodeStreamWriter;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
+import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.NormalizedNodeAttrBuilder;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.NotificationDefinition;
@@ -145,7 +147,7 @@ public class NetconfMessageTransformUtil {
         final NormalizedNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier, DOMSource, AnyXmlNode> anyXmlBuilder = Builders.anyXmlBuilder().withNodeIdentifier(toId(NETCONF_FILTER_QNAME));
         anyXmlBuilder.withAttributes(Collections.singletonMap(NETCONF_TYPE_QNAME, SUBTREE));
 
-        final NormalizedNode<?, ?> filterContent = InstanceIdToNodes.serialize(ctx, identifier);
+        final NormalizedNode<?, ?> filterContent = ImmutableNodes.fromInstanceId(ctx, identifier);
 
         final Element element = XmlUtil.createElement(BLANK_DOCUMENT, NETCONF_FILTER_QNAME.getLocalName(), Optional.of(NETCONF_FILTER_QNAME.getNamespace().toString()));
         element.setAttributeNS(NETCONF_FILTER_QNAME.getNamespace().toString(), NETCONF_TYPE_QNAME.getLocalName(), "subtree");
@@ -268,7 +270,9 @@ public class NetconfMessageTransformUtil {
                     "Data has to be either container or a list node when creating structure for top level element, but was: %s", lastChildOverride.get());
             configContent = lastChildOverride.get();
         } else {
-            configContent = InstanceIdToNodes.serialize(ctx, dataPath, lastChildOverride, operation);
+            final Entry<QName, ModifyAction> modifyOperation =
+                    operation.isPresent() ? new AbstractMap.SimpleEntry<>(NETCONF_OPERATION_QNAME, operation.get()) : null;
+            configContent = ImmutableNodes.fromInstanceId(ctx, dataPath, lastChildOverride, Optional.fromNullable(modifyOperation));
         }
 
         final Element element = XmlUtil.createElement(BLANK_DOCUMENT, NETCONF_CONFIG_QNAME.getLocalName(), Optional.of(NETCONF_CONFIG_QNAME.getNamespace().toString()));
@@ -285,10 +289,6 @@ public class NetconfMessageTransformUtil {
 
     public static SchemaPath toPath(final QName rpc) {
         return SchemaPath.create(true, rpc);
-    }
-
-    public static String modifyOperationToXmlString(final ModifyAction operation) {
-        return operation.name().toLowerCase();
     }
 
     // FIXME similar code is in netconf-notifications-impl , DRY
