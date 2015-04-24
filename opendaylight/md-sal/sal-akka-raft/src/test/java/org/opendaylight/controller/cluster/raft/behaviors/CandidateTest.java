@@ -127,7 +127,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest {
 
         setupPeers(1);
         candidate.handleMessage(peerActors[0], new AppendEntries(1, "test", 0, 0,
-                Collections.<ReplicatedLogEntry>emptyList(), 0, -1));
+                Collections.<ReplicatedLogEntry>emptyList(), 0, -1, (short)0));
 
         AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(
                 peerActors[0], AppendEntriesReply.class);

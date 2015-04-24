@@ -53,8 +53,10 @@ public class AppendEntries extends AbstractRaftRPC {
     // index which has been replicated successfully to all followers, -1 if none
     private final long replicatedToAllIndex;
 
-    public AppendEntries(long term, String leaderId, long prevLogIndex,
-        long prevLogTerm, List<ReplicatedLogEntry> entries, long leaderCommit, long replicatedToAllIndex) {
+    private final short payloadVersion;
+
+    public AppendEntries(long term, String leaderId, long prevLogIndex, long prevLogTerm,
+            List<ReplicatedLogEntry> entries, long leaderCommit, long replicatedToAllIndex, short payloadVersion) {
         super(term);
         this.leaderId = leaderId;
         this.prevLogIndex = prevLogIndex;
@@ -62,6 +64,7 @@ public class AppendEntries extends AbstractRaftRPC {
         this.entries = entries;
         this.leaderCommit = leaderCommit;
         this.replicatedToAllIndex = replicatedToAllIndex;
+        this.payloadVersion = payloadVersion;
     }
 
     private void writeObject(ObjectOutputStream out) throws IOException {
@@ -75,7 +78,7 @@ public class AppendEntries extends AbstractRaftRPC {
     }
 
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        in.readShort(); // version
+        in.readShort(); // raft version
 
         in.defaultReadObject();
 
@@ -110,14 +113,17 @@ public class AppendEntries extends AbstractRaftRPC {
         return replicatedToAllIndex;
     }
 
+    public short getPayloadVersion() {
+        return payloadVersion;
+    }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("AppendEntries [term=").append(term).append(", leaderId=").append(leaderId)
-                .append(", prevLogIndex=").append(prevLogIndex).append(", prevLogTerm=").append(prevLogTerm)
-                .append(", entries=").append(entries).append(", leaderCommit=").append(leaderCommit)
-                .append(", replicatedToAllIndex=").append(replicatedToAllIndex).append("]");
+        builder.append("AppendEntries [leaderId=").append(leaderId).append(", prevLogIndex=").append(prevLogIndex)
+                .append(", prevLogTerm=").append(prevLogTerm).append(", leaderCommit=").append(leaderCommit)
+                .append(", replicatedToAllIndex=").append(replicatedToAllIndex).append(", payloadVersion=")
+                .append(payloadVersion).append("]");
         return builder.toString();
     }
 
@@ -208,7 +214,7 @@ public class AppendEntries extends AbstractRaftRPC {
             from.getPrevLogIndex(),
             from.getPrevLogTerm(),
             logEntryList,
-            from.getLeaderCommit(), -1);
+            from.getLeaderCommit(), -1, (short)0);
 
         return to;
     }

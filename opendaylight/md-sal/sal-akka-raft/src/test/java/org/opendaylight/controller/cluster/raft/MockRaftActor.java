@@ -70,7 +70,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
 
     public MockRaftActor(String id, Map<String, String> peerAddresses, Optional<ConfigParams> config,
                          DataPersistenceProvider dataPersistenceProvider) {
-        super(id, peerAddresses, config);
+        super(id, peerAddresses, config, (short) 0);
         state = new ArrayList<>();
         this.actorDelegate = mock(RaftActor.class);
         this.recoveryCohortDelegate = mock(RaftActorRecoveryCohort.class);

@@ -41,6 +41,7 @@ public class MockRaftActorContext implements RaftActorContext {
     private boolean snapshotCaptureInitiated;
     private SnapshotManager snapshotManager;
     private DataPersistenceProvider persistenceProvider = new NonPersistentDataProvider();
+    private short payloadVersion;
 
     public MockRaftActorContext(){
         electionTerm = new ElectionTerm() {
@@ -230,6 +231,15 @@ public class MockRaftActorContext implements RaftActorContext {
 
     public void setPersistenceProvider(DataPersistenceProvider persistenceProvider) {
         this.persistenceProvider = persistenceProvider;
+    }
+
+    @Override
+    public short getPayloadVersion() {
+        return payloadVersion;
+    }
+
+    public void setPayloadVersion(short payloadVersion) {
+        this.payloadVersion = payloadVersion;
     }
 
     public static class SimpleReplicatedLog extends AbstractReplicatedLogImpl {
