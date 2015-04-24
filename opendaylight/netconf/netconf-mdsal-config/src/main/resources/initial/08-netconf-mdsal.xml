@@ -112,6 +112,17 @@
               <password>admin</password>
           </module>
 
+
+          <!--TCP endpoint for MD-SAL netconf server -->
+          <!--<module>-->
+              <!--<type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:netconf:northbound:tcp">prefix:netconf-northbound-tcp</type>-->
+              <!--<name>netconf-mdsal-tcp-server</name>-->
+              <!--<dispatcher xmlns="urn:opendaylight:params:xml:ns:yang:controller:netconf:northbound:tcp">-->
+                  <!--<type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:config:netconf:northbound">prefix:netconf-server-dispatcher</type>-->
+                  <!--<name>netconf-mdsal-server-dispatcher</name>-->
+              <!--</dispatcher>-->
+          <!--</module>-->
+
       </modules>
 
         <services xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">

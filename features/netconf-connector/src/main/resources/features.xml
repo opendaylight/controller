@@ -114,6 +114,7 @@
       </feature>
       <feature name='odl-netconf-tcp' version='${netconf.version}' description="OpenDaylight :: Netconf Connector :: TCP">
         <feature version='${netconf.version}'>odl-netconf-impl</feature>
+        <feature version='${config.version}'>odl-config-netty</feature>
         <bundle>mvn:org.opendaylight.controller/netconf-tcp/${netconf.version}</bundle>
       </feature>
 
