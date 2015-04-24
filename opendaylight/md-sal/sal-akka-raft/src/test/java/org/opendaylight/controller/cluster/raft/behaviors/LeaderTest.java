@@ -85,6 +85,8 @@ public class LeaderTest extends AbstractLeaderTest {
         logStart("testThatLeaderSendsAHeartbeatMessageToAllFollowers");
 
         MockRaftActorContext actorContext = createActorContextWithFollower();
+        short payloadVersion = (short)5;
+        actorContext.setPayloadVersion(payloadVersion);
 
         long term = 1;
         actorContext.getTermInformation().update(term, "");
@@ -98,10 +100,11 @@ public class LeaderTest extends AbstractLeaderTest {
         assertEquals("getPrevLogIndex", -1, appendEntries.getPrevLogIndex());
         assertEquals("getPrevLogTerm", -1, appendEntries.getPrevLogTerm());
         assertEquals("Entries size", 0, appendEntries.getEntries().size());
+        assertEquals("getPayloadVersion", payloadVersion, appendEntries.getPayloadVersion());
 
         // The follower would normally reply - simulate that explicitly here.
         leader.handleMessage(followerActor, new AppendEntriesReply(
-                FOLLOWER_ID, term, true, lastIndex - 1, term));
+                FOLLOWER_ID, term, true, lastIndex - 1, term, (short)0));
         assertEquals("isFollowerActive", true, leader.getFollower(FOLLOWER_ID).isFollowerActive());
 
         followerActor.underlyingActor().clear();
@@ -118,6 +121,7 @@ public class LeaderTest extends AbstractLeaderTest {
         assertEquals("Entries size", 1, appendEntries.getEntries().size());
         assertEquals("Entry getIndex", lastIndex, appendEntries.getEntries().get(0).getIndex());
         assertEquals("Entry getTerm", term, appendEntries.getEntries().get(0).getTerm());
+        assertEquals("getPayloadVersion", payloadVersion, appendEntries.getPayloadVersion());
     }
 
 
@@ -146,7 +150,7 @@ public class LeaderTest extends AbstractLeaderTest {
         // The follower would normally reply - simulate that explicitly here.
         long lastIndex = actorContext.getReplicatedLog().lastIndex();
         leader.handleMessage(followerActor, new AppendEntriesReply(
-                FOLLOWER_ID, term, true, lastIndex, term));
+                FOLLOWER_ID, term, true, lastIndex, term, (short)0));
         assertEquals("isFollowerActive", true, leader.getFollower(FOLLOWER_ID).isFollowerActive());
 
         followerActor.underlyingActor().clear();
@@ -192,7 +196,7 @@ public class LeaderTest extends AbstractLeaderTest {
         // The follower would normally reply - simulate that explicitly here.
         long lastIndex = actorContext.getReplicatedLog().lastIndex();
         leader.handleMessage(followerActor, new AppendEntriesReply(
-                FOLLOWER_ID, term, true, lastIndex, term));
+                FOLLOWER_ID, term, true, lastIndex, term, (short)0));
         assertEquals("isFollowerActive", true, leader.getFollower(FOLLOWER_ID).isFollowerActive());
 
         followerActor.underlyingActor().clear();
@@ -232,7 +236,7 @@ public class LeaderTest extends AbstractLeaderTest {
         // The follower would normally reply - simulate that explicitly here.
         long lastIndex = actorContext.getReplicatedLog().lastIndex();
         leader.handleMessage(followerActor, new AppendEntriesReply(
-                FOLLOWER_ID, term, true, lastIndex, term));
+                FOLLOWER_ID, term, true, lastIndex, term, (short)0));
         assertEquals("isFollowerActive", true, leader.getFollower(FOLLOWER_ID).isFollowerActive());
 
         followerActor.underlyingActor().clear();
@@ -240,7 +244,7 @@ public class LeaderTest extends AbstractLeaderTest {
         for(int i=0;i<3;i++) {
             sendReplicate(actorContext, lastIndex+i+1);
             leader.handleMessage(followerActor, new AppendEntriesReply(
-                    FOLLOWER_ID, term, true, lastIndex + i + 1, term));
+                    FOLLOWER_ID, term, true, lastIndex + i + 1, term, (short)0));
 
         }
 
@@ -282,7 +286,7 @@ public class LeaderTest extends AbstractLeaderTest {
         // The follower would normally reply - simulate that explicitly here.
         long lastIndex = actorContext.getReplicatedLog().lastIndex();
         leader.handleMessage(followerActor, new AppendEntriesReply(
-                FOLLOWER_ID, term, true, lastIndex, term));
+                FOLLOWER_ID, term, true, lastIndex, term, (short)0));
         assertEquals("isFollowerActive", true, leader.getFollower(FOLLOWER_ID).isFollowerActive());
 
         followerActor.underlyingActor().clear();
@@ -327,7 +331,7 @@ public class LeaderTest extends AbstractLeaderTest {
         // The follower would normally reply - simulate that explicitly here.
         long lastIndex = actorContext.getReplicatedLog().lastIndex();
         leader.handleMessage(followerActor, new AppendEntriesReply(
-                FOLLOWER_ID, term, true, lastIndex, term));
+                FOLLOWER_ID, term, true, lastIndex, term, (short)0));
         assertEquals("isFollowerActive", true, leader.getFollower(FOLLOWER_ID).isFollowerActive());
 
         followerActor.underlyingActor().clear();
@@ -364,7 +368,7 @@ public class LeaderTest extends AbstractLeaderTest {
         // The follower would normally reply - simulate that explicitly here.
         long lastIndex = actorContext.getReplicatedLog().lastIndex();
         leader.handleMessage(followerActor, new AppendEntriesReply(
-                FOLLOWER_ID, term, true, lastIndex, term));
+                FOLLOWER_ID, term, true, lastIndex, term, (short)0));
         assertEquals("isFollowerActive", true, leader.getFollower(FOLLOWER_ID).isFollowerActive());
 
         followerActor.underlyingActor().clear();
@@ -1105,12 +1109,12 @@ public class LeaderTest extends AbstractLeaderTest {
         leader = new Leader(leaderActorContext);
 
         // Send initial heartbeat reply with last index.
-        leader.handleAppendEntriesReply(followerActor, new AppendEntriesReply(FOLLOWER_ID, 1, true, 10, 1));
+        leader.handleAppendEntriesReply(followerActor, new AppendEntriesReply(FOLLOWER_ID, 1, true, 10, 1, (short)0));
 
         FollowerLogInformation followerInfo = leader.getFollower(FOLLOWER_ID);
         assertEquals("getNextIndex", 11, followerInfo.getNextIndex());
 
-        AppendEntriesReply reply = new AppendEntriesReply(FOLLOWER_ID, 1, false, 10, 1);
+        AppendEntriesReply reply = new AppendEntriesReply(FOLLOWER_ID, 1, false, 10, 1, (short)0);
 
         RaftActorBehavior raftActorBehavior = leader.handleAppendEntriesReply(followerActor, reply);
 
@@ -1134,7 +1138,8 @@ public class LeaderTest extends AbstractLeaderTest {
 
         leader = new Leader(leaderActorContext);
 
-        AppendEntriesReply reply = new AppendEntriesReply(FOLLOWER_ID, 1, true, 2, 1);
+        short payloadVersion = 5;
+        AppendEntriesReply reply = new AppendEntriesReply(FOLLOWER_ID, 1, true, 2, 1, payloadVersion);
 
         RaftActorBehavior raftActorBehavior = leader.handleAppendEntriesReply(followerActor, reply);
 
@@ -1157,6 +1162,9 @@ public class LeaderTest extends AbstractLeaderTest {
         ApplyState applyState = applyStateList.get(0);
 
         assertEquals(2, applyState.getReplicatedLogEntry().getIndex());
+
+        FollowerLogInformation followerInfo = leader.getFollower(FOLLOWER_ID);
+        assertEquals(payloadVersion, followerInfo.getPayloadVersion());
     }
 
     @Test
@@ -1167,7 +1175,7 @@ public class LeaderTest extends AbstractLeaderTest {
 
         leader = new Leader(leaderActorContext);
 
-        AppendEntriesReply reply = new AppendEntriesReply("unkown-follower", 1, false, 10, 1);
+        AppendEntriesReply reply = new AppendEntriesReply("unkown-follower", 1, false, 10, 1, (short)0);
 
         RaftActorBehavior raftActorBehavior = leader.handleAppendEntriesReply(followerActor, reply);
 
@@ -1373,7 +1381,7 @@ public class LeaderTest extends AbstractLeaderTest {
 
             for(int i=1;i<6;i++) {
                 // Each AppendEntriesReply could end up rescheduling the heartbeat (without the fix for bug 2733)
-                RaftActorBehavior newBehavior = leader.handleMessage(follower1Actor, new AppendEntriesReply(follower1ActorId, 1, true, i, 1));
+                RaftActorBehavior newBehavior = leader.handleMessage(follower1Actor, new AppendEntriesReply(follower1ActorId, 1, true, i, 1, (short)0));
                 assertTrue(newBehavior == leader);
                 Uninterruptibles.sleepUninterruptibly(200, TimeUnit.MILLISECONDS);
             }

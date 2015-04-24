@@ -51,6 +51,8 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     private final DataPersistenceProvider persistenceProvider;
 
+    private short payloadVersion;
+
     public RaftActorContextImpl(ActorRef actor, UntypedActorContext context, String id,
             ElectionTerm termInformation, long commitIndex, long lastApplied, Map<String, String> peerAddresses,
             ConfigParams configParams, DataPersistenceProvider persistenceProvider, Logger logger) {
@@ -64,6 +66,15 @@ public class RaftActorContextImpl implements RaftActorContext {
         this.configParams = configParams;
         this.persistenceProvider = persistenceProvider;
         this.LOG = logger;
+    }
+
+    void setPayloadVersion(short payloadVersion) {
+        this.payloadVersion = payloadVersion;
+    }
+
+    @Override
+    public short getPayloadVersion() {
+        return payloadVersion;
     }
 
     void setConfigParams(ConfigParams configParams) {

@@ -178,6 +178,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         }
 
         followerLogInformation.markFollowerActive();
+        followerLogInformation.setPayloadVersion(appendEntriesReply.getPayloadVersion());
 
         boolean updated = false;
         if (appendEntriesReply.isSuccess()) {
@@ -526,7 +527,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         AppendEntries appendEntries = new AppendEntries(currentTerm(), context.getId(),
             prevLogIndex(followerNextIndex),
             prevLogTerm(followerNextIndex), entries,
-            context.getCommitIndex(), super.getReplicatedToAllIndex());
+            context.getCommitIndex(), super.getReplicatedToAllIndex(), context.getPayloadVersion());
 
         if(!entries.isEmpty() || LOG.isTraceEnabled()) {
             LOG.debug("{}: Sending AppendEntries to follower {}: {}", logName(), followerId,

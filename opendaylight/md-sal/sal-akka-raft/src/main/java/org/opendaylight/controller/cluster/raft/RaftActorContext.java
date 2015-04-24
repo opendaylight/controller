@@ -180,4 +180,5 @@ public interface RaftActorContext {
     @VisibleForTesting
     void setTotalMemoryRetriever(Supplier<Long> retriever);
 
+    short getPayloadVersion();
 }
