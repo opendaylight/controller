@@ -112,7 +112,8 @@ public class Shard extends RaftActor {
 
     protected Shard(final ShardIdentifier name, final Map<String, String> peerAddresses,
             final DatastoreContext datastoreContext, final SchemaContext schemaContext) {
-        super(name.toString(), new HashMap<>(peerAddresses), Optional.of(datastoreContext.getShardRaftConfig()));
+        super(name.toString(), new HashMap<>(peerAddresses), Optional.of(datastoreContext.getShardRaftConfig()),
+                DataStoreVersions.CURRENT_VERSION);
 
         this.name = name.toString();
         this.datastoreContext = datastoreContext;

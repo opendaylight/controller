@@ -104,7 +104,7 @@ public class Follower extends AbstractRaftActorBehavior {
         if (snapshotTracker != null) {
             // if snapshot install is in progress, follower should just acknowledge append entries with a reply.
             AppendEntriesReply reply = new AppendEntriesReply(context.getId(), currentTerm(), true,
-                    lastIndex(), lastTerm());
+                    lastIndex(), lastTerm(), context.getPayloadVersion());
 
             if(LOG.isDebugEnabled()) {
                 LOG.debug("{}: snapshot install is in progress, replying immediately with {}", logName(), reply);
@@ -168,7 +168,7 @@ public class Follower extends AbstractRaftActorBehavior {
                         logName(), lastIndex, lastTerm());
 
             sender.tell(new AppendEntriesReply(context.getId(), currentTerm(), false, lastIndex,
-                    lastTerm()), actor());
+                    lastTerm(), context.getPayloadVersion()), actor());
             return this;
         }
 
@@ -250,7 +250,7 @@ public class Follower extends AbstractRaftActorBehavior {
         }
 
         AppendEntriesReply reply = new AppendEntriesReply(context.getId(), currentTerm(), true,
-            lastIndex, lastTerm());
+            lastIndex, lastTerm(), context.getPayloadVersion());
 
         if(LOG.isTraceEnabled()) {
             LOG.trace("{}: handleAppendEntries returning : {}", logName(), reply);
