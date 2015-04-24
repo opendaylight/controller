@@ -197,13 +197,8 @@ public class BrokerFacadeTest {
         @SuppressWarnings("unchecked")
         final CheckedFuture<Void, TransactionCommitFailedException> expFuture = mock(CheckedFuture.class);
 
-        final NormalizedNode<?, ?> dummyNode2 = createDummyNode("dummy:namespace2", "2014-07-01", "dummy local name2");
-
-        when(rwTransaction.read(eq(LogicalDatastoreType.CONFIGURATION), any(YangInstanceIdentifier.class))).thenReturn(
-                wrapDummyNode(dummyNode2));
-
         when(rwTransaction.exists(eq(LogicalDatastoreType.CONFIGURATION), any(YangInstanceIdentifier.class))).thenReturn(
-            wrapExistence(true));
+            wrapExistence(false));
 
 
         when(rwTransaction.submit()).thenReturn(expFuture);
@@ -215,14 +210,16 @@ public class BrokerFacadeTest {
 
         final InOrder inOrder = inOrder(domDataBroker, rwTransaction);
         inOrder.verify(domDataBroker).newReadWriteTransaction();
-        inOrder.verify(rwTransaction).merge(LogicalDatastoreType.CONFIGURATION, instanceID, dummyNode);
+        inOrder.verify(rwTransaction).exists(LogicalDatastoreType.CONFIGURATION, instanceID);
+        inOrder.verify(rwTransaction).put(LogicalDatastoreType.CONFIGURATION, instanceID, dummyNode);
         inOrder.verify(rwTransaction).submit();
     }
 
     @Test(expected = RestconfDocumentedException.class)
     public void testCommitConfigurationDataPostAlreadyExists() {
-        when(rwTransaction.read(eq(LogicalDatastoreType.CONFIGURATION), any(YangInstanceIdentifier.class))).thenReturn(
-                dummyNodeInFuture);
+        final CheckedFuture<Boolean, ReadFailedException> successFuture = Futures.immediateCheckedFuture(Boolean.TRUE);
+        when(rwTransaction.exists(eq(LogicalDatastoreType.CONFIGURATION), any(YangInstanceIdentifier.class))).thenReturn(
+                successFuture);
         try {
             // Schema context is only necessary for ensuring parent structure
             brokerFacade.commitConfigurationDataPost((SchemaContext)null, instanceID, dummyNode);
