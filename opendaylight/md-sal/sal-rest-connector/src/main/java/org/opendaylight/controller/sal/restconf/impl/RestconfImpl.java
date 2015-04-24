@@ -673,7 +673,7 @@ public class RestconfImpl implements RestconfService {
 
         validateInput(iiWithData.getSchemaNode(), payload);
         validateTopLevelNodeName(payload, iiWithData.getInstanceIdentifier());
-        validateListKeysEqualityInPayloadAndUri(iiWithData, payload.getData());
+        validateListKeysEqualityInPayloadAndUri(payload);
 
         final DOMMountPoint mountPoint = iiWithData.getMountPoint();
         final YangInstanceIdentifier normalizedII = iiWithData.getInstanceIdentifier();
@@ -749,21 +749,21 @@ public class RestconfImpl implements RestconfService {
      *             if key values or key count in payload and URI isn't equal
      *
      */
-    private void validateListKeysEqualityInPayloadAndUri(final InstanceIdentifierContext<?> iiWithData,
-            final NormalizedNode<?, ?> payload) {
+    private static void validateListKeysEqualityInPayloadAndUri(final NormalizedNodeContext payload) {
+        final InstanceIdentifierContext<?> iiWithData = payload.getInstanceIdentifierContext();
         if (iiWithData.getSchemaNode() instanceof ListSchemaNode) {
             final List<QName> keyDefinitions = ((ListSchemaNode) iiWithData.getSchemaNode()).getKeyDefinition();
             final PathArgument lastPathArgument = iiWithData.getInstanceIdentifier().getLastPathArgument();
-            if (lastPathArgument instanceof NodeIdentifierWithPredicates) {
-                final Map<QName, Object> uriKeyValues = ((NodeIdentifierWithPredicates) lastPathArgument)
-                        .getKeyValues();
-                isEqualUriAndPayloadKeyValues(uriKeyValues, payload, keyDefinitions);
+            if (lastPathArgument instanceof NodeIdentifierWithPredicates && payload.getData() instanceof MapEntryNode) {
+                final Map<QName, Object> uriKeyValues = ((NodeIdentifierWithPredicates) lastPathArgument).getKeyValues();
+                isEqualUriAndPayloadKeyValues(uriKeyValues, (MapEntryNode) payload.getData(), keyDefinitions);
             }
         }
     }
 
-    private void isEqualUriAndPayloadKeyValues(final Map<QName, Object> uriKeyValues, final NormalizedNode<?, ?> payload,
-            final List<QName> keyDefinitions) {
+    private static void isEqualUriAndPayloadKeyValues(final Map<QName, Object> uriKeyValues,
+            final MapEntryNode payload, final List<QName> keyDefinitions) {
+
         for (final QName keyDefinition : keyDefinitions) {
             final Object uriKeyValue = uriKeyValues.get(keyDefinition);
             // should be caught during parsing URI to InstanceIdentifier
@@ -771,19 +771,16 @@ public class RestconfImpl implements RestconfService {
                 final String errMsg = "Missing key " + keyDefinition + " in URI.";
                 throw new RestconfDocumentedException(errMsg, ErrorType.PROTOCOL, ErrorTag.DATA_MISSING);
             }
-            // TODO thing about the possibility to fix
-//            final List<SimpleNode<?>> payloadKeyValues = payload.getSimpleNodesByName(keyDefinition.getLocalName());
-//            if (payloadKeyValues.isEmpty()) {
-//                final String errMsg = "Missing key " + keyDefinition.getLocalName() + " in the message body.";
-//                throw new RestconfDocumentedException(errMsg, ErrorType.PROTOCOL, ErrorTag.DATA_MISSING);
-//            }
-//
-//            final Object payloadKeyValue = payloadKeyValues.iterator().next().getValue();
-//            if (!uriKeyValue.equals(payloadKeyValue)) {
-//                final String errMsg = "The value '" + uriKeyValue + "' for key '" + keyDefinition.getLocalName() +
-//                        "' specified in the URI doesn't match the value '" + payloadKeyValue + "' specified in the message body. ";
-//                throw new RestconfDocumentedException(errMsg, ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
-//            }
+            final Object dataKeyValue = payload.getAttributeValue(keyDefinition);
+            if (dataKeyValue == null) {
+                final String errMsg = "Missing key " + keyDefinition.getLocalName() + " in the message body.";
+                throw new RestconfDocumentedException(errMsg, ErrorType.PROTOCOL, ErrorTag.DATA_MISSING);
+            }
+            if ( ! uriKeyValues.remove(keyDefinition).equals(dataKeyValue)) {
+                final String errMsg = "The value '" + uriKeyValue + "' for key '" + keyDefinition.getLocalName() +
+                        "' specified in the URI doesn't match the value '" + dataKeyValue + "' specified in the message body. ";
+                throw new RestconfDocumentedException(errMsg, ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
+            }
         }
     }
 
