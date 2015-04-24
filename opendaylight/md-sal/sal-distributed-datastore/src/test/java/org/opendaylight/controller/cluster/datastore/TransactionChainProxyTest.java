@@ -32,7 +32,6 @@ import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.DefaultShardStrategy;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
@@ -48,7 +47,7 @@ public class TransactionChainProxyTest extends AbstractTransactionProxyTest {
     @Test
     public void testNewReadOnlyTransaction() throws Exception {
 
-     DOMStoreTransaction dst = new TransactionChainProxy(mockActorContext).newReadOnlyTransaction();
+     DOMStoreTransaction dst = new ShardedTransactionChain(mockComponentFactory).newReadOnlyTransaction();
          Assert.assertTrue(dst instanceof DOMStoreReadTransaction);
 
     }
@@ -56,7 +55,7 @@ public class TransactionChainProxyTest extends AbstractTransactionProxyTest {
     @SuppressWarnings("resource")
     @Test
     public void testNewReadWriteTransaction() throws Exception {
-        DOMStoreTransaction dst = new TransactionChainProxy(mockActorContext).newReadWriteTransaction();
+        DOMStoreTransaction dst = new ShardedTransactionChain(mockComponentFactory).newReadWriteTransaction();
         Assert.assertTrue(dst instanceof DOMStoreReadWriteTransaction);
 
     }
@@ -64,29 +63,29 @@ public class TransactionChainProxyTest extends AbstractTransactionProxyTest {
     @SuppressWarnings("resource")
     @Test
     public void testNewWriteOnlyTransaction() throws Exception {
-        DOMStoreTransaction dst = new TransactionChainProxy(mockActorContext).newWriteOnlyTransaction();
+        DOMStoreTransaction dst = new ShardedTransactionChain(mockComponentFactory).newWriteOnlyTransaction();
         Assert.assertTrue(dst instanceof DOMStoreWriteTransaction);
 
     }
 
     @Test
     public void testClose() throws Exception {
-        new TransactionChainProxy(mockActorContext).close();
+        new ShardedTransactionChain(mockComponentFactory).close();
 
         verify(mockActorContext, times(1)).broadcast(anyObject());
     }
 
     @Test
     public void testTransactionChainsHaveUniqueId(){
-        TransactionChainProxy one = new TransactionChainProxy(mock(ActorContext.class));
-        TransactionChainProxy two = new TransactionChainProxy(mock(ActorContext.class));
+        ShardedTransactionChain one = new ShardedTransactionChain(mock(ComponentFactory.class));
+        ShardedTransactionChain two = new ShardedTransactionChain(mock(ComponentFactory.class));
 
         Assert.assertNotEquals(one.getTransactionChainId(), two.getTransactionChainId());
     }
 
     @Test
     public void testRateLimitingUsedInReadWriteTxCreation(){
-        TransactionChainProxy txChainProxy = new TransactionChainProxy(mockActorContext);
+        ShardedTransactionChain txChainProxy = new ShardedTransactionChain(mockComponentFactory);
 
         txChainProxy.newReadWriteTransaction();
 
@@ -95,7 +94,7 @@ public class TransactionChainProxyTest extends AbstractTransactionProxyTest {
 
     @Test
     public void testRateLimitingUsedInWriteOnlyTxCreation(){
-        TransactionChainProxy txChainProxy = new TransactionChainProxy(mockActorContext);
+        ShardedTransactionChain txChainProxy = new ShardedTransactionChain(mockComponentFactory);
 
         txChainProxy.newWriteOnlyTransaction();
 
@@ -105,7 +104,7 @@ public class TransactionChainProxyTest extends AbstractTransactionProxyTest {
 
     @Test
     public void testRateLimitingNotUsedInReadOnlyTxCreation(){
-        TransactionChainProxy txChainProxy = new TransactionChainProxy(mockActorContext);
+        ShardedTransactionChain txChainProxy = new ShardedTransactionChain(mockComponentFactory);
 
         txChainProxy.newReadOnlyTransaction();
 
@@ -120,7 +119,7 @@ public class TransactionChainProxyTest extends AbstractTransactionProxyTest {
     public void testChainedWriteOnlyTransactions() throws Exception {
         dataStoreContextBuilder.writeOnlyTransactionOptimizationsEnabled(true);
 
-        TransactionChainProxy txChainProxy = new TransactionChainProxy(mockActorContext);
+        ShardedTransactionChain txChainProxy = new ShardedTransactionChain(mockComponentFactory);
 
         ActorRef txActorRef1 = setupActorContextWithoutInitialCreateTransaction(getSystem());
 
@@ -186,7 +185,7 @@ public class TransactionChainProxyTest extends AbstractTransactionProxyTest {
      */
     @Test
     public void testChainedReadWriteTransactions() throws Exception {
-        TransactionChainProxy txChainProxy = new TransactionChainProxy(mockActorContext);
+        ShardedTransactionChain txChainProxy = new ShardedTransactionChain(mockComponentFactory);
 
         ActorRef txActorRef1 = setupActorContextWithInitialCreateTransaction(getSystem(), READ_WRITE);
 
@@ -257,7 +256,7 @@ public class TransactionChainProxyTest extends AbstractTransactionProxyTest {
 
         expectBatchedModifications(actorRef, 1);
 
-        TransactionChainProxy txChainProxy = new TransactionChainProxy(mockActorContext);
+        ShardedTransactionChain txChainProxy = new ShardedTransactionChain(mockComponentFactory);
 
         DOMStoreWriteTransaction writeTx1 = txChainProxy.newWriteOnlyTransaction();
 
