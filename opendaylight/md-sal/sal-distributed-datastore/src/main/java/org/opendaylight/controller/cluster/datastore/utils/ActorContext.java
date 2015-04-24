@@ -28,8 +28,13 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.RemovalListener;
+import com.google.common.cache.RemovalNotification;
 import com.google.common.util.concurrent.RateLimiter;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.concurrent.TimeUnit;
+import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.cluster.common.actor.CommonConfig;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.Configuration;
@@ -65,7 +70,7 @@ import scala.concurrent.duration.FiniteDuration;
  * easily. An ActorContext can be freely passed around to local object instances
  * but should not be passed to actors especially remote actors
  */
-public class ActorContext {
+public class ActorContext implements RemovalListener<String, Future<PrimaryShardInfo>> {
     private static final Logger LOG = LoggerFactory.getLogger(ActorContext.class);
     private static final String DISTRIBUTED_DATA_STORE_METRIC_REGISTRY = "distributed-data-store";
     private static final String METRIC_RATE = "rate";
@@ -104,6 +109,8 @@ public class ActorContext {
     private volatile SchemaContext schemaContext;
     private volatile boolean updated;
     private final MetricRegistry metricRegistry = MetricsReporter.getInstance(DatastoreContext.METRICS_DOMAIN).getMetricsRegistry();
+    @GuardedBy("this")
+    private final Collection<ShardInfoListenerRegistration<?>> shardInfoListeners = new ArrayList<>();
 
     public ActorContext(ActorSystem actorSystem, ActorRef shardManager,
             ClusterWrapper clusterWrapper, Configuration configuration) {
@@ -146,6 +153,7 @@ public class ActorContext {
 
         primaryShardInfoCache = CacheBuilder.newBuilder()
                 .expireAfterWrite(datastoreContext.getShardLeaderElectionTimeout().duration().toMillis(), TimeUnit.MILLISECONDS)
+                .removalListener(this)
                 .build();
     }
 
@@ -231,11 +239,14 @@ public class ActorContext {
         }, FIND_PRIMARY_FAILURE_TRANSFORMER, getClientDispatcher());
     }
 
-    private PrimaryShardInfo onPrimaryShardFound(String shardName, String primaryActorPath,
+    private synchronized PrimaryShardInfo onPrimaryShardFound(String shardName, String primaryActorPath,
             DataTree localShardDataTree) {
         ActorSelection actorSelection = actorSystem.actorSelection(primaryActorPath);
         PrimaryShardInfo info = new PrimaryShardInfo(actorSelection, Optional.fromNullable(localShardDataTree));
         primaryShardInfoCache.put(shardName, Futures.successful(info));
+        for (ShardInfoListenerRegistration<?> reg : shardInfoListeners) {
+            reg.getInstance().onShardInfoUpdated(shardName, info);
+        }
         return info;
     }
 
@@ -566,5 +577,22 @@ public class ActorContext {
     @VisibleForTesting
     Cache<String, Future<PrimaryShardInfo>> getPrimaryShardInfoCache() {
         return primaryShardInfoCache;
+    }
+
+    public synchronized <T extends ShardInfoListener> ShardInfoListenerRegistration<T> registerShardInfoListener(final T listener) {
+        final ShardInfoListenerRegistration<T> reg = new ShardInfoListenerRegistration<T>(listener, this);
+        shardInfoListeners.add(reg);
+        return reg;
+    }
+
+    protected synchronized void removeShardInfoListener(final ShardInfoListenerRegistration<?> registration) {
+        shardInfoListeners.remove(registration);
+    }
+
+    @Override
+    public synchronized void onRemoval(final RemovalNotification<String, Future<PrimaryShardInfo>> notification) {
+        for (ShardInfoListenerRegistration<?> reg : shardInfoListeners) {
+            reg.getInstance().onShardInfoUpdated(notification.getKey(), null);
+        }
     }
 }

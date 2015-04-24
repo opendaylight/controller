@@ -111,6 +111,8 @@ public abstract class AbstractTransactionProxyTest {
     @Mock
     protected ActorContext mockActorContext;
 
+    protected SimpleTransactionComponentFactory mockComponentFactory;
+
     private SchemaContext schemaContext;
 
     @Mock
@@ -150,6 +152,8 @@ public abstract class AbstractTransactionProxyTest {
         doReturn(mockClusterWrapper).when(mockActorContext).getClusterWrapper();
         doReturn(dataStoreContextBuilder.build()).when(mockActorContext).getDatastoreContext();
         doReturn(10).when(mockActorContext).getTransactionOutstandingOperationLimit();
+
+        mockComponentFactory = new SimpleTransactionComponentFactory(mockActorContext);
 
         Timer timer = new MetricRegistry().timer("test");
         doReturn(timer).when(mockActorContext).getOperationTimer(any(String.class));
@@ -260,6 +264,7 @@ public abstract class AbstractTransactionProxyTest {
         return Futures.successful(new BatchedModificationsReply(count));
     }
 
+    @SuppressWarnings("unchecked")
     protected Future<Object> incompleteFuture() {
         return mock(Future.class);
     }
