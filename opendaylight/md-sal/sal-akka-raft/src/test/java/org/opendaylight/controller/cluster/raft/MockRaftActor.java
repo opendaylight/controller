@@ -29,6 +29,8 @@ import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payloa
 
 public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort, RaftActorSnapshotCohort {
 
+    public static final short PAYLOAD_VERSION = 5;
+
     final RaftActor actorDelegate;
     final RaftActorRecoveryCohort recoveryCohortDelegate;
     final RaftActorSnapshotCohort snapshotCohortDelegate;
@@ -70,7 +72,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
 
     public MockRaftActor(String id, Map<String, String> peerAddresses, Optional<ConfigParams> config,
                          DataPersistenceProvider dataPersistenceProvider) {
-        super(id, peerAddresses, config, (short) 0);
+        super(id, peerAddresses, config, PAYLOAD_VERSION);
         state = new ArrayList<>();
         this.actorDelegate = mock(RaftActor.class);
         this.recoveryCohortDelegate = mock(RaftActorRecoveryCohort.class);

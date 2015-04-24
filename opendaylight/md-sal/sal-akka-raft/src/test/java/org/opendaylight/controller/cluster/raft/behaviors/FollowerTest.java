@@ -401,7 +401,9 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
         // before the new behavior was created (1 in this case)
         // This will not work for a Candidate because as soon as a Candidate
         // is created it increments the term
-        AppendEntries appendEntries = new AppendEntries(1, "leader-1", 2, 1, entries, 4, -1, (short)0);
+        short leaderPayloadVersion = 10;
+        String leaderId = "leader-1";
+        AppendEntries appendEntries = new AppendEntries(1, leaderId, 2, 1, entries, 4, -1, leaderPayloadVersion);
 
         follower = createBehavior(context);
 
@@ -412,6 +414,9 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
         assertEquals("Next index", 5, log.last().getIndex() + 1);
         assertEquals("Entry 3", entries.get(0), log.get(3));
         assertEquals("Entry 4", entries.get(1), log.get(4));
+
+        assertEquals("getLeaderPayloadVersion", leaderPayloadVersion, newBehavior.getLeaderPayloadVersion());
+        assertEquals("getLeaderId", leaderId, newBehavior.getLeaderId());
 
         expectAndVerifyAppendEntriesReply(1, true, context.getId(), 1, 4);
     }

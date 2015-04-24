@@ -413,15 +413,18 @@ public class RaftActorTest extends AbstractActorTest {
                     notifierActor, LeaderStateChanged.class);
 
             assertEquals(raftRoleChanged.getMemberId(), leaderStateChange.getLeaderId());
+            assertEquals(MockRaftActor.PAYLOAD_VERSION, leaderStateChange.getLeaderPayloadVersion());
 
             notifierActor.underlyingActor().clear();
 
             MockRaftActor raftActor = raftActorRef.underlyingActor();
             final String newLeaderId = "new-leader";
+            final short newLeaderVersion = 6;
             Follower follower = new Follower(raftActor.getRaftActorContext()) {
                 @Override
                 public RaftActorBehavior handleMessage(ActorRef sender, Object message) {
                     leaderId = newLeaderId;
+                    setLeaderPayloadVersion(newLeaderVersion);
                     return this;
                 }
             };
@@ -443,6 +446,15 @@ public class RaftActorTest extends AbstractActorTest {
             leaderStateChange = MessageCollectorActor.expectFirstMatching(notifierActor, LeaderStateChanged.class);
             assertEquals(persistenceId, leaderStateChange.getMemberId());
             assertEquals(newLeaderId, leaderStateChange.getLeaderId());
+            assertEquals(newLeaderVersion, leaderStateChange.getLeaderPayloadVersion());
+
+            notifierActor.underlyingActor().clear();
+
+            raftActor.handleCommand("any");
+
+            Uninterruptibles.sleepUninterruptibly(505, TimeUnit.MILLISECONDS);
+            leaderStateChange = MessageCollectorActor.getFirstMatching(notifierActor, LeaderStateChanged.class);
+            assertNull(leaderStateChange);
         }};
     }
 

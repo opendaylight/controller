@@ -81,7 +81,7 @@ public class RoleChangeNotifierTest extends AbstractActorTest  {
             TestActorRef<RoleChangeNotifier> notifierTestActorRef = TestActorRef.create(
                 getSystem(), RoleChangeNotifier.getProps(actorId), actorId);
 
-            notifierTestActorRef.tell(new LeaderStateChanged("member1", "leader1"), ActorRef.noSender());
+            notifierTestActorRef.tell(new LeaderStateChanged("member1", "leader1", (short)5), ActorRef.noSender());
 
             // listener registers after the sate has been changed, ensure we sent the latest state change after a reply
             notifierTestActorRef.tell(new RegisterRoleChangeListener(), getRef());
@@ -91,12 +91,14 @@ public class RoleChangeNotifierTest extends AbstractActorTest  {
             LeaderStateChanged leaderStateChanged = expectMsgClass(LeaderStateChanged.class);
             assertEquals("getMemberId", "member1", leaderStateChanged.getMemberId());
             assertEquals("getLeaderId", "leader1", leaderStateChanged.getLeaderId());
+            assertEquals("getLeaderPayloadVersion", 5, leaderStateChanged.getLeaderPayloadVersion());
 
-            notifierTestActorRef.tell(new LeaderStateChanged("member1", "leader2"), ActorRef.noSender());
+            notifierTestActorRef.tell(new LeaderStateChanged("member1", "leader2", (short)6), ActorRef.noSender());
 
             leaderStateChanged = expectMsgClass(LeaderStateChanged.class);
             assertEquals("getMemberId", "member1", leaderStateChanged.getMemberId());
             assertEquals("getLeaderId", "leader2", leaderStateChanged.getLeaderId());
+            assertEquals("getLeaderPayloadVersion", 6, leaderStateChanged.getLeaderPayloadVersion());
         }};
     }
 }

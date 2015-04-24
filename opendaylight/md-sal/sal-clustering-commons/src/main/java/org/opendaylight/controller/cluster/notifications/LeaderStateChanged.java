@@ -20,10 +20,12 @@ import javax.annotation.Nullable;
 public class LeaderStateChanged {
     private final String memberId;
     private final String leaderId;
+    private final short leaderPayloadVersion;
 
-    public LeaderStateChanged(@Nonnull String memberId, @Nullable String leaderId) {
+    public LeaderStateChanged(@Nonnull String memberId, @Nullable String leaderId, short leaderPayloadVersion) {
         this.memberId = Preconditions.checkNotNull(memberId);
         this.leaderId = leaderId;
+        this.leaderPayloadVersion = leaderPayloadVersion;
     }
 
     public @Nonnull String getMemberId() {
@@ -34,11 +36,15 @@ public class LeaderStateChanged {
         return leaderId;
     }
 
+    public short getLeaderPayloadVersion() {
+        return leaderPayloadVersion;
+    }
+
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("LeaderStateChanged [memberId=").append(memberId).append(", leaderId=").append(leaderId)
-                .append("]");
+                .append(", leaderPayloadVersion=").append(leaderPayloadVersion).append("]");
         return builder.toString();
     }
 }

@@ -120,6 +120,8 @@ public class Follower extends AbstractRaftActorBehavior {
         // If we got here then we do appear to be talking to the leader
         leaderId = appendEntries.getLeaderId();
 
+        setLeaderPayloadVersion(appendEntries.getPayloadVersion());
+
         // 2. Reply false if log doesn’t contain an entry at prevLogIndex
         // whose term matches prevLogTerm (§5.3)
 
