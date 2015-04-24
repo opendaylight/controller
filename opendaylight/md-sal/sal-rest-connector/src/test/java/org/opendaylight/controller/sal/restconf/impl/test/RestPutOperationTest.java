@@ -171,13 +171,13 @@ public class RestPutOperationTest extends JerseyTest {
 
         doThrow(OptimisticLockFailedException.class).
             when(brokerFacade).commitConfigurationDataPut(
-                any(YangInstanceIdentifier.class), any(NormalizedNode.class));
+                any(SchemaContext.class), any(YangInstanceIdentifier.class), any(NormalizedNode.class));
 
         assertEquals(500, put(uri, MediaType.APPLICATION_XML, xmlData));
 
         doThrow(OptimisticLockFailedException.class).doReturn(mock(CheckedFuture.class)).
             when(brokerFacade).commitConfigurationDataPut(
-                any(YangInstanceIdentifier.class), any(NormalizedNode.class));
+                any(SchemaContext.class), any(YangInstanceIdentifier.class), any(NormalizedNode.class));
 
         assertEquals(200, put(uri, MediaType.APPLICATION_XML, xmlData));
     }
@@ -190,7 +190,7 @@ public class RestPutOperationTest extends JerseyTest {
 
         doThrow(TransactionCommitFailedException.class).
             when(brokerFacade).commitConfigurationDataPut(
-                any(YangInstanceIdentifier.class), any(NormalizedNode.class));
+                (SchemaContext)null, any(YangInstanceIdentifier.class), any(NormalizedNode.class));
 
         assertEquals(500, put(uri, MediaType.APPLICATION_XML, xmlData));
     }
@@ -202,10 +202,10 @@ public class RestPutOperationTest extends JerseyTest {
     private void mockCommitConfigurationDataPutMethod(final boolean noErrors) {
         if (noErrors) {
             doReturn(mock(CheckedFuture.class)).when(brokerFacade).commitConfigurationDataPut(
-                    any(YangInstanceIdentifier.class), any(NormalizedNode.class));
+                    any(SchemaContext.class), any(YangInstanceIdentifier.class), any(NormalizedNode.class));
         } else {
             doThrow(RestconfDocumentedException.class).when(brokerFacade).commitConfigurationDataPut(
-                    any(YangInstanceIdentifier.class), any(NormalizedNode.class));
+                    any(SchemaContext.class), any(YangInstanceIdentifier.class), any(NormalizedNode.class));
         }
     }
 

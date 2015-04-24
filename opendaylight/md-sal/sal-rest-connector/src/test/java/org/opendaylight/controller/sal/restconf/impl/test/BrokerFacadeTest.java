@@ -55,6 +55,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
 /**
@@ -181,7 +182,7 @@ public class BrokerFacadeTest {
 
         when(wTransaction.submit()).thenReturn(expFuture);
 
-        final Future<Void> actualFuture = brokerFacade.commitConfigurationDataPut(instanceID, dummyNode);
+        final Future<Void> actualFuture = brokerFacade.commitConfigurationDataPut((SchemaContext)null, instanceID, dummyNode);
 
         assertSame("commitConfigurationDataPut", expFuture, actualFuture);
 
@@ -208,7 +209,7 @@ public class BrokerFacadeTest {
         when(rwTransaction.submit()).thenReturn(expFuture);
 
         final CheckedFuture<Void, TransactionCommitFailedException> actualFuture = brokerFacade.commitConfigurationDataPost(
-                YangInstanceIdentifier.builder().build(), dummyNode);
+                (SchemaContext)null, YangInstanceIdentifier.builder().build(), dummyNode);
 
         assertSame("commitConfigurationDataPost", expFuture, actualFuture);
 
@@ -223,7 +224,8 @@ public class BrokerFacadeTest {
         when(rwTransaction.read(eq(LogicalDatastoreType.CONFIGURATION), any(YangInstanceIdentifier.class))).thenReturn(
                 dummyNodeInFuture);
         try {
-            brokerFacade.commitConfigurationDataPost(instanceID, dummyNode);
+            // Schema context is only necessary for ensuring parent structure
+            brokerFacade.commitConfigurationDataPost((SchemaContext)null, instanceID, dummyNode);
         } catch (final RestconfDocumentedException e) {
             assertEquals("getErrorTag", RestconfError.ErrorTag.DATA_EXISTS, e.getErrors().get(0).getErrorTag());
             throw e;
