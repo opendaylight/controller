@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_4003670f",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/StatisticsRestconfServiceWrapper.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 3212
+      },
+      "writtenOn": "2015-04-24T12:21:51Z",
+      "side": 1,
+      "message": "getData() \u003d\u003d null will be the failure case as it is already implemented in RestConfImpl.",
+      "parentUuid": "3aa0d159_807c1a22",
+      "revId": "1b2b34508d46f5ea1a0eb7104bdc135ee993a758",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_5fffd234",
         "filename": "opendaylight/md-sal/sal-rest-connector/src/main/yang/opendaylight-rest-connector.yang",
         "patchSetId": 3
