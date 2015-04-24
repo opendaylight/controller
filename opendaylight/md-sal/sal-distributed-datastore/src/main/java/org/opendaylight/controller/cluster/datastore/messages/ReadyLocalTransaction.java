@@ -13,14 +13,16 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification
 /**
  * Message notifying the shard leader to apply modifications which have been
  * prepared locally against its DataTree. This message is not directly serializable,
- * simply because the leader and sender need to be on the same system.
+ * simply because the leader and sender need to be on the same system. When it needs
+ * to be sent out to a remote system, it needs to be intercepted by {@link ReadyLocalTransactionSerializer}
+ * and turned into {@link BatchedModifications}.
  */
 public final class ReadyLocalTransaction {
     private final DataTreeModification modification;
     private final String transactionID;
     private final boolean doCommitOnReady;
 
-    public ReadyLocalTransaction(final String transactionID, DataTreeModification modification, boolean doCommitOnReady) {
+    public ReadyLocalTransaction(final String transactionID, final DataTreeModification modification, final boolean doCommitOnReady) {
         this.transactionID = Preconditions.checkNotNull(transactionID);
         this.modification = Preconditions.checkNotNull(modification);
         this.doCommitOnReady = doCommitOnReady;
