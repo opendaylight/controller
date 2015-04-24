@@ -35,6 +35,12 @@ import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
 
 public class TransactionContextImpl extends AbstractTransactionContext {
+    static final Mapper<Throwable, Throwable> SAME_FAILURE_TRANSFORMER = new Mapper<Throwable, Throwable>() {
+        @Override
+        public Throwable apply(Throwable failure) {
+            return failure;
+        }
+    };
     private static final Logger LOG = LoggerFactory.getLogger(TransactionContextImpl.class);
 
     private final String transactionChainId;
@@ -48,7 +54,7 @@ public class TransactionContextImpl extends AbstractTransactionContext {
     private int totalBatchedModificationsSent;
 
     protected TransactionContextImpl(ActorSelection actor, TransactionIdentifier identifier,
-            String transactionChainId, ActorContext actorContext, boolean isTxActorLocal,
+            ActorContext actorContext, boolean isTxActorLocal,
             short remoteTransactionVersion, OperationCompleter operationCompleter) {
         super(identifier);
         this.actor = actor;
@@ -83,6 +89,7 @@ public class TransactionContextImpl extends AbstractTransactionContext {
 
     @Override
     public void closeTransaction() {
+        // FIXME: this is also called for cleanup, so we need to check if we have closed this context.
         LOG.debug("Tx {} closeTransaction called", getIdentifier());
 
         actorContext.sendOperationAsync(getActor(), CloseTransaction.INSTANCE.toSerializable());
@@ -133,7 +140,7 @@ public class TransactionContextImpl extends AbstractTransactionContext {
                 throw new IllegalArgumentException(String.format("%s: Invalid reply type %s",
                         getIdentifier(), serializedReadyReply.getClass()));
             }
-        }, TransactionProxy.SAME_FAILURE_TRANSFORMER, actorContext.getClientDispatcher());
+        }, SAME_FAILURE_TRANSFORMER, actorContext.getClientDispatcher());
     }
 
     protected String extractCohortPathFrom(ReadyTransactionReply readyTxReply) {

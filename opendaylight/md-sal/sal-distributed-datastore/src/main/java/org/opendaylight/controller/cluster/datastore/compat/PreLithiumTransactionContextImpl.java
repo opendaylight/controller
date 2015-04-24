@@ -36,7 +36,7 @@ public class PreLithiumTransactionContextImpl extends TransactionContextImpl {
     private final String transactionPath;
 
     public PreLithiumTransactionContextImpl(String transactionPath, ActorSelection actor, TransactionIdentifier identifier,
-            String transactionChainId, ActorContext actorContext, boolean isTxActorLocal,
+            ActorContext actorContext, boolean isTxActorLocal,
             short remoteTransactionVersion, OperationCompleter operationCompleter) {
         super(actor, identifier, transactionChainId, actorContext, isTxActorLocal,
                 remoteTransactionVersion, operationCompleter);
