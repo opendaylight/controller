@@ -97,4 +97,14 @@ public interface FollowerLogInformation {
      * @return true if it is ok to replicate
      */
     boolean okToReplicate();
+
+    /**
+     * Returns the payload data version of the follower.
+     */
+    short getPayloadVersion();
+
+    /**
+     * Sets the payload data version of the follower.
+     */
+    void setPayloadVersion(short payloadVersion);
 }

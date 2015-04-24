@@ -81,28 +81,31 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
      */
     @Test
     public void testHandleAppendEntriesSenderTermLessThanReceiverTerm() throws Exception {
-            MockRaftActorContext context = createActorContext();
+        MockRaftActorContext context = createActorContext();
+        short payloadVersion = 5;
+        context.setPayloadVersion(payloadVersion);
 
-            // First set the receivers term to a high number (1000)
-            context.getTermInformation().update(1000, "test");
+        // First set the receivers term to a high number (1000)
+        context.getTermInformation().update(1000, "test");
 
-            AppendEntries appendEntries = new AppendEntries(100, "leader-1", 0, 0, null, 101, -1);
+        AppendEntries appendEntries = new AppendEntries(100, "leader-1", 0, 0, null, 101, -1, (short)4);
 
-            behavior = createBehavior(context);
+        behavior = createBehavior(context);
 
-            // Send an unknown message so that the state of the RaftActor remains unchanged
-            RaftActorBehavior expected = behavior.handleMessage(behaviorActor, "unknown");
+        // Send an unknown message so that the state of the RaftActor remains unchanged
+        RaftActorBehavior expected = behavior.handleMessage(behaviorActor, "unknown");
 
-            RaftActorBehavior raftBehavior = behavior.handleMessage(behaviorActor, appendEntries);
+        RaftActorBehavior raftBehavior = behavior.handleMessage(behaviorActor, appendEntries);
 
-            assertEquals("Raft state", expected.state(), raftBehavior.state());
+        assertEquals("Raft state", expected.state(), raftBehavior.state());
 
-            // Also expect an AppendEntriesReply to be sent where success is false
+        // Also expect an AppendEntriesReply to be sent where success is false
 
-            AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(
-                    behaviorActor, AppendEntriesReply.class);
+        AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(
+                behaviorActor, AppendEntriesReply.class);
 
-            assertEquals("isSuccess", false, reply.isSuccess());
+        assertEquals("isSuccess", false, reply.isSuccess());
+        assertEquals("getPayloadVersion", payloadVersion, reply.getPayloadVersion());
     }
 
 
@@ -119,7 +122,7 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
         List<ReplicatedLogEntry> entries = new ArrayList<>();
         entries.add(new MockRaftActorContext.MockReplicatedLogEntry(2, 0, payload));
 
-        AppendEntries appendEntries = new AppendEntries(2, "leader-1", -1, -1, entries, 2, -1);
+        AppendEntries appendEntries = new AppendEntries(2, "leader-1", -1, -1, entries, 2, -1, (short)0);
 
         behavior = createBehavior(context);
 
@@ -314,11 +317,11 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
     }
 
     protected AppendEntries createAppendEntriesWithNewerTerm() {
-        return new AppendEntries(100, "leader-1", 0, 0, null, 1, -1);
+        return new AppendEntries(100, "leader-1", 0, 0, null, 1, -1, (short)0);
     }
 
     protected AppendEntriesReply createAppendEntriesReplyWithNewerTerm() {
-        return new AppendEntriesReply("follower-1", 100, false, 100, 100);
+        return new AppendEntriesReply("follower-1", 100, false, 100, 100, (short)0);
     }
 
     protected RequestVote createRequestVoteWithNewerTerm() {
