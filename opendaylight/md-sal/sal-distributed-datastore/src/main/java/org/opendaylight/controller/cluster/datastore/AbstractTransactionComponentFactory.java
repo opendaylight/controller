@@ -1,0 +1,158 @@
+/*
+ * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+package org.opendaylight.controller.cluster.datastore;
+
+import akka.actor.ActorSelection;
+import akka.dispatch.OnComplete;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import java.util.Collection;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import javax.annotation.Nonnull;
+import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
+import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
+import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.ShardInfoListener;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionFactory;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import scala.concurrent.Future;
+
+/**
+ * Factory for creating components to a transaction. Maintains a cache of known
+ * local transaction factories.
+ */
+abstract class AbstractTransactionComponentFactory<F extends DOMStoreTransactionFactory> implements ShardInfoListener {
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractTransactionComponentFactory.class);
+    private final ConcurrentMap<String, F> knownLocal = new ConcurrentHashMap<>();
+    private final ActorContext actorContext;
+
+    protected AbstractTransactionComponentFactory(final ActorContext actorContext) {
+        this.actorContext = Preconditions.checkNotNull(actorContext);
+    }
+
+    final ActorContext getActorContext() {
+        return actorContext;
+    }
+
+    final AbstractTransactionComponent newTransactionComponent(final TransactionProxy parent, final String shardName) {
+        final DOMStoreTransactionFactory local = knownLocal.get(shardName);
+        if (local != null) {
+            LOG.debug("Creating local component for shard {} transaction {} using factory {}", shardName, parent, local);
+            return createLocalComponent(local, parent.getType());
+        }
+
+        Future<PrimaryShardInfo> findPrimaryFuture = findPrimaryShard(shardName);
+        final TransactionFutureCallback callback = new TransactionFutureCallback(parent, shardName);
+        LOG.debug("Allocated callback {} for shard {} transaction {}", callback, shardName, parent);
+        findPrimaryFuture.onComplete(new OnComplete<PrimaryShardInfo>() {
+            @Override
+            public void onComplete(final Throwable failure, final PrimaryShardInfo primaryShardInfo) {
+                if (failure == null) {
+                    callback.setPrimaryShard(primaryShardInfo.getPrimaryShardActor());
+                    updateShardInfo(shardName, primaryShardInfo);
+                } else {
+                    callback.createTransactionContext(failure, null);
+                }
+                LOG.debug("Completed callback {} for shard {} transaction {}", callback, shardName, parent);
+            }
+        }, actorContext.getClientDispatcher());
+
+        return new RemoteTransactionComponent(callback, parent);
+    }
+
+    void updateShardInfo(final String shardName, final PrimaryShardInfo primaryShardInfo) {
+        final Optional<DataTree> maybeDataTree = primaryShardInfo.getLocalShardDataTree();
+        if (maybeDataTree.isPresent()) {
+            knownLocal.put(shardName, factoryForShard(shardName, primaryShardInfo.getPrimaryShardActor(), maybeDataTree.get()));
+            LOG.debug("Shard {} resolved to local data tree {}", shardName, maybeDataTree.get());
+        }
+    }
+
+    @Override
+    public void onShardInfoUpdated(final String shardName, final PrimaryShardInfo primaryShardInfo) {
+        final F existing = knownLocal.get(shardName);
+        if (existing != null) {
+            if (primaryShardInfo != null) {
+                final Optional<DataTree> maybeDataTree = primaryShardInfo.getLocalShardDataTree();
+                if (maybeDataTree.isPresent()) {
+                    final DataTree newDataTree = maybeDataTree.get();
+                    final DataTree oldDataTree = dataTreeForFactory(existing);
+                    if (!oldDataTree.equals(newDataTree)) {
+                        final F newChain = factoryForShard(shardName, primaryShardInfo.getPrimaryShardActor(), newDataTree);
+                        knownLocal.replace(shardName, existing, newChain);
+                        LOG.debug("Replaced shard {} local data tree to {}", shardName, newDataTree);
+                        return;
+                    }
+                }
+            }
+            if (knownLocal.remove(shardName, existing)) {
+                LOG.debug("Shard {} invalidated data tree {}", shardName, existing);
+            } else {
+                LOG.debug("Shard {} failed to invalidate data tree {} ... strange", shardName, existing);
+            }
+        }
+    }
+
+    /**
+     * Create an identifier for the next TransactionProxy attached to this component
+     * factory.
+     * @return Transaction identifier, may not be null.
+     */
+    protected abstract TransactionIdentifier nextIdentifier();
+
+    /**
+     * Find the primary shard actor.
+     *
+     * @param shardName Shard name
+     * @return Future containing shard information.
+     */
+    protected abstract Future<PrimaryShardInfo> findPrimaryShard(String shardName);
+
+    /**
+     * Create local transaction factory for specified shard, backed by specified shard leader
+     * and data tree instance.
+     *
+     * @param shardName
+     * @param shardLeader
+     * @param dataTree Backing data tree instance. The data tree may only be accessed in
+     *                 read-only manner.
+     * @return Transaction factory for local use.
+     */
+    protected abstract F factoryForShard(String shardName, ActorSelection shardLeader, DataTree dataTree);
+
+    /**
+     * Extract the backing data tree from a particular factory.
+     *
+     * @param factory Transaction factory
+     * @return Backing data tree
+     */
+    protected abstract DataTree dataTreeForFactory(F factory);
+
+    /**
+     * Callback invoked from child transactions to push any futures, which need to
+     * be waited for before the next transaction is allocated.
+     * @param cohortFutures Collection of futures
+     */
+    protected abstract <T> void onTransactionReady(@Nonnull TransactionIdentifier transaction, @Nonnull Collection<Future<T>> cohortFutures);
+
+    private static AbstractTransactionComponent createLocalComponent(final DOMStoreTransactionFactory factory, final TransactionType type) {
+        switch (type) {
+        case READ_ONLY:
+            return new LocalReadTransactionComponent(factory.newReadOnlyTransaction());
+        case READ_WRITE:
+            return new LocalReadWriteTransactionComponent(factory.newReadWriteTransaction());
+        case WRITE_ONLY:
+            return new LocalWriteTransactionComponent(factory.newWriteOnlyTransaction());
+        default:
+          throw new IllegalArgumentException("Unhandled transaction type " + type);
+        }
+    }
+}
