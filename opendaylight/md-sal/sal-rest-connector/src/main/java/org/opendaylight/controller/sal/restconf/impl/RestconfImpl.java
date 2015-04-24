@@ -16,6 +16,7 @@ import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
@@ -48,6 +49,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 import org.opendaylight.controller.md.sal.dom.spi.DefaultDOMRpcResult;
+import org.opendaylight.controller.md.sal.rest.common.RestconfValidationUtils;
 import org.opendaylight.controller.sal.rest.api.Draft02;
 import org.opendaylight.controller.sal.rest.api.RestconfService;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
@@ -671,7 +673,7 @@ public class RestconfImpl implements RestconfService {
 
         validateInput(iiWithData.getSchemaNode(), payload);
         validateTopLevelNodeName(payload, iiWithData.getInstanceIdentifier());
-        validateListKeysEqualityInPayloadAndUri(iiWithData, payload.getData());
+        validateListKeysEqualityInPayloadAndUri(payload);
 
         final DOMMountPoint mountPoint = iiWithData.getMountPoint();
         final YangInstanceIdentifier normalizedII = iiWithData.getInstanceIdentifier();
@@ -747,41 +749,41 @@ public class RestconfImpl implements RestconfService {
      *             if key values or key count in payload and URI isn't equal
      *
      */
-    private void validateListKeysEqualityInPayloadAndUri(final InstanceIdentifierContext<?> iiWithData,
-            final NormalizedNode<?, ?> payload) {
-        if (iiWithData.getSchemaNode() instanceof ListSchemaNode) {
-            final List<QName> keyDefinitions = ((ListSchemaNode) iiWithData.getSchemaNode()).getKeyDefinition();
-            final PathArgument lastPathArgument = iiWithData.getInstanceIdentifier().getLastPathArgument();
-            if (lastPathArgument instanceof NodeIdentifierWithPredicates) {
-                final Map<QName, Object> uriKeyValues = ((NodeIdentifierWithPredicates) lastPathArgument)
-                        .getKeyValues();
-                isEqualUriAndPayloadKeyValues(uriKeyValues, payload, keyDefinitions);
+    private static void validateListKeysEqualityInPayloadAndUri(final NormalizedNodeContext payload) {
+        Preconditions.checkArgument(payload != null);
+        final InstanceIdentifierContext<?> iiWithData = payload.getInstanceIdentifierContext();
+        final PathArgument lastPathArgument = iiWithData.getInstanceIdentifier().getLastPathArgument();
+        final SchemaNode schemaNode = iiWithData.getSchemaNode();
+        final NormalizedNode<?, ?> data = payload.getData();
+        if (schemaNode instanceof ListSchemaNode) {
+            final List<QName> keyDefinitions = ((ListSchemaNode) schemaNode).getKeyDefinition();
+            if (lastPathArgument instanceof NodeIdentifierWithPredicates && data instanceof MapEntryNode) {
+                final Map<QName, Object> uriKeyValues = ((NodeIdentifierWithPredicates) lastPathArgument).getKeyValues();
+                isEqualUriAndPayloadKeyValues(uriKeyValues, (MapEntryNode) data, keyDefinitions);
             }
         }
     }
 
-    private void isEqualUriAndPayloadKeyValues(final Map<QName, Object> uriKeyValues, final NormalizedNode<?, ?> payload,
-            final List<QName> keyDefinitions) {
+    private static void isEqualUriAndPayloadKeyValues(final Map<QName, Object> uriKeyValues,
+            final MapEntryNode payload, final List<QName> keyDefinitions) {
+
+        final Map<QName, Object> mutableCopyUriKeyValues = Maps.newHashMap(uriKeyValues);
         for (final QName keyDefinition : keyDefinitions) {
-            final Object uriKeyValue = uriKeyValues.get(keyDefinition);
+            final Object uriKeyValue = mutableCopyUriKeyValues.remove(keyDefinition);
             // should be caught during parsing URI to InstanceIdentifier
-            if (uriKeyValue == null) {
-                final String errMsg = "Missing key " + keyDefinition + " in URI.";
-                throw new RestconfDocumentedException(errMsg, ErrorType.PROTOCOL, ErrorTag.DATA_MISSING);
+            RestconfValidationUtils.checkDocumentedError(uriKeyValue != null, ErrorType.PROTOCOL, ErrorTag.DATA_MISSING,
+                    "Missing key " + keyDefinition + " in URI.");
+
+            final Object dataKeyValue = payload.getAttributeValue(keyDefinition);
+            RestconfValidationUtils.checkDocumentedError(dataKeyValue != null, ErrorType.PROTOCOL, ErrorTag.DATA_MISSING,
+                    "Missing key " + keyDefinition.getLocalName() + " in the message body.");
+
+
+            if ( ! uriKeyValue.equals(dataKeyValue)) {
+                final String errMsg = "The value '" + uriKeyValue + "' for key '" + keyDefinition.getLocalName() +
+                        "' specified in the URI doesn't match the value '" + dataKeyValue + "' specified in the message body. ";
+                throw new RestconfDocumentedException(errMsg, ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
             }
-            // TODO thing about the possibility to fix
-//            final List<SimpleNode<?>> payloadKeyValues = payload.getSimpleNodesByName(keyDefinition.getLocalName());
-//            if (payloadKeyValues.isEmpty()) {
-//                final String errMsg = "Missing key " + keyDefinition.getLocalName() + " in the message body.";
-//                throw new RestconfDocumentedException(errMsg, ErrorType.PROTOCOL, ErrorTag.DATA_MISSING);
-//            }
-//
-//            final Object payloadKeyValue = payloadKeyValues.iterator().next().getValue();
-//            if (!uriKeyValue.equals(payloadKeyValue)) {
-//                final String errMsg = "The value '" + uriKeyValue + "' for key '" + keyDefinition.getLocalName() +
-//                        "' specified in the URI doesn't match the value '" + payloadKeyValue + "' specified in the message body. ";
-//                throw new RestconfDocumentedException(errMsg, ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
-//            }
         }
     }
 
