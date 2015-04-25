@@ -54,6 +54,7 @@ import org.opendaylight.controller.cluster.datastore.messages.ForwardedReadyTran
 import org.opendaylight.controller.cluster.datastore.messages.PeerAddressResolved;
 import org.opendaylight.controller.cluster.datastore.messages.ReadData;
 import org.opendaylight.controller.cluster.datastore.messages.ReadDataReply;
+import org.opendaylight.controller.cluster.datastore.messages.ReadyLocalTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListener;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListenerReply;
@@ -99,6 +100,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgum
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
+import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
@@ -1065,6 +1067,82 @@ public class ShardTest extends AbstractShardTest {
 
             NormalizedNode<?, ?> actualNode = readStore(shard, TestModel.TEST_PATH);
             assertEquals(TestModel.TEST_QNAME.getLocalName(), containerNode, actualNode);
+
+            shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
+        }};
+    }
+
+    @Test
+    public void testReadyLocalTransactionWithImmediateCommit() throws Exception{
+        new ShardTestKit(getSystem()) {{
+            final TestActorRef<Shard> shard = TestActorRef.create(getSystem(),
+                    newShardProps().withDispatcher(Dispatchers.DefaultDispatcherId()),
+                    "testReadyLocalTransactionWithImmediateCommit");
+
+            waitUntilLeader(shard);
+
+            ShardDataTree dataStore = shard.underlyingActor().getDataStore();
+
+            DataTreeModification modification = dataStore.getDataTree().takeSnapshot().newModification();
+
+            ContainerNode writeData = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+            new WriteModification(TestModel.TEST_PATH, writeData).apply(modification);
+            MapNode mergeData = ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build();
+            new MergeModification(TestModel.OUTER_LIST_PATH, mergeData).apply(modification);
+
+            String txId = "tx1";
+            ReadyLocalTransaction readyMessage = new ReadyLocalTransaction(txId, modification, true);
+
+            shard.tell(readyMessage, getRef());
+
+            expectMsgClass(CommitTransactionReply.SERIALIZABLE_CLASS);
+
+            NormalizedNode<?, ?> actualNode = readStore(shard, TestModel.OUTER_LIST_PATH);
+            assertEquals(TestModel.OUTER_LIST_QNAME.getLocalName(), mergeData, actualNode);
+
+            shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
+        }};
+    }
+
+    @Test
+    public void testReadyLocalTransactionWithThreePhaseCommit() throws Exception{
+        new ShardTestKit(getSystem()) {{
+            final TestActorRef<Shard> shard = TestActorRef.create(getSystem(),
+                    newShardProps().withDispatcher(Dispatchers.DefaultDispatcherId()),
+                    "testReadyLocalTransactionWithThreePhaseCommit");
+
+            waitUntilLeader(shard);
+
+            ShardDataTree dataStore = shard.underlyingActor().getDataStore();
+
+            DataTreeModification modification = dataStore.getDataTree().takeSnapshot().newModification();
+
+            ContainerNode writeData = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+            new WriteModification(TestModel.TEST_PATH, writeData).apply(modification);
+            MapNode mergeData = ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build();
+            new MergeModification(TestModel.OUTER_LIST_PATH, mergeData).apply(modification);
+
+            String txId = "tx1";
+            ReadyLocalTransaction readyMessage = new ReadyLocalTransaction(txId, modification, false);
+
+            shard.tell(readyMessage, getRef());
+
+            expectMsgClass(ReadyTransactionReply.class);
+
+            // Send the CanCommitTransaction message.
+
+            shard.tell(new CanCommitTransaction(txId).toSerializable(), getRef());
+            CanCommitTransactionReply canCommitReply = CanCommitTransactionReply.fromSerializable(
+                    expectMsgClass(CanCommitTransactionReply.SERIALIZABLE_CLASS));
+            assertEquals("Can commit", true, canCommitReply.getCanCommit());
+
+            // Send the CanCommitTransaction message.
+
+            shard.tell(new CommitTransaction(txId).toSerializable(), getRef());
+            expectMsgClass(CommitTransactionReply.SERIALIZABLE_CLASS);
+
+            NormalizedNode<?, ?> actualNode = readStore(shard, TestModel.OUTER_LIST_PATH);
+            assertEquals(TestModel.OUTER_LIST_QNAME.getLocalName(), mergeData, actualNode);
 
             shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
         }};
