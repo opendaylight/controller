@@ -22,7 +22,7 @@ import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.Shard;
 import org.opendaylight.controller.cluster.datastore.ShardTest;
 import org.opendaylight.controller.cluster.datastore.ShardTestKit;
-import org.opendaylight.controller.cluster.datastore.TransactionProxy;
+import org.opendaylight.controller.cluster.datastore.TransactionType;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransactionReply;
@@ -73,7 +73,7 @@ public class ShardTransactionHeliumBackwardsCompatibilityTest extends AbstractAc
             String transactionID = "txn-1";
             shard.tell(ShardTransactionMessages.CreateTransaction.newBuilder()
                     .setTransactionId(transactionID)
-                    .setTransactionType(TransactionProxy.TransactionType.WRITE_ONLY.ordinal())
+                    .setTransactionType(TransactionType.WRITE_ONLY.ordinal())
                     .setTransactionChainId("").build(), getRef());
 
             final FiniteDuration duration = duration("5 seconds");
@@ -147,7 +147,7 @@ public class ShardTransactionHeliumBackwardsCompatibilityTest extends AbstractAc
             String transactionID = "txn-1";
             shard.tell(ShardTransactionMessages.CreateTransaction.newBuilder()
                     .setTransactionId(transactionID)
-                    .setTransactionType(TransactionProxy.TransactionType.WRITE_ONLY.ordinal())
+                    .setTransactionType(TransactionType.WRITE_ONLY.ordinal())
                     .setTransactionChainId("").build(), getRef());
 
             final FiniteDuration duration = duration("5 seconds");

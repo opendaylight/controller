@@ -149,19 +149,19 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
 
     @Override
     public DOMStoreReadTransaction newReadOnlyTransaction() {
-        return new TransactionProxy(actorContext, TransactionProxy.TransactionType.READ_ONLY);
+        return new TransactionProxy(actorContext, TransactionType.READ_ONLY);
     }
 
     @Override
     public DOMStoreWriteTransaction newWriteOnlyTransaction() {
         actorContext.acquireTxCreationPermit();
-        return new TransactionProxy(actorContext, TransactionProxy.TransactionType.WRITE_ONLY);
+        return new TransactionProxy(actorContext, TransactionType.WRITE_ONLY);
     }
 
     @Override
     public DOMStoreReadWriteTransaction newReadWriteTransaction() {
         actorContext.acquireTxCreationPermit();
-        return new TransactionProxy(actorContext, TransactionProxy.TransactionType.READ_WRITE);
+        return new TransactionProxy(actorContext, TransactionType.READ_WRITE);
     }
 
     @Override

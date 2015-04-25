@@ -520,7 +520,7 @@ public class Shard extends RaftActor {
             ShardTransactionIdentifier transactionId, String transactionChainId,
             short clientVersion ) {
 
-        return transactionActorFactory.newShardTransaction(TransactionProxy.TransactionType.fromInt(transactionType),
+        return transactionActorFactory.newShardTransaction(TransactionType.fromInt(transactionType),
                 transactionId, transactionChainId, clientVersion);
     }
 
