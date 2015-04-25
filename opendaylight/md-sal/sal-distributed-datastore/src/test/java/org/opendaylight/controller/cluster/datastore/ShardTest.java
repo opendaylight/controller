@@ -365,7 +365,7 @@ public class ShardTest extends AbstractShardTest {
             shard.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
 
             shard.tell(new CreateTransaction("txn-1",
-                    TransactionProxy.TransactionType.READ_ONLY.ordinal() ).toSerializable(), getRef());
+                    TransactionType.READ_ONLY.ordinal() ).toSerializable(), getRef());
 
             CreateTransactionReply reply = expectMsgClass(duration("3 seconds"),
                     CreateTransactionReply.class);
@@ -386,7 +386,7 @@ public class ShardTest extends AbstractShardTest {
             waitUntilLeader(shard);
 
             shard.tell(new CreateTransaction("txn-1",
-                    TransactionProxy.TransactionType.READ_ONLY.ordinal() , "foobar").toSerializable(),
+                    TransactionType.READ_ONLY.ordinal() , "foobar").toSerializable(),
                     getRef());
 
             CreateTransactionReply reply = expectMsgClass(duration("3 seconds"),
@@ -961,7 +961,7 @@ public class ShardTest extends AbstractShardTest {
 
             // Create a read Tx on the same chain.
 
-            shard.tell(new CreateTransaction(transactionID2, TransactionProxy.TransactionType.READ_ONLY.ordinal() ,
+            shard.tell(new CreateTransaction(transactionID2, TransactionType.READ_ONLY.ordinal() ,
                     transactionChainID).toSerializable(), getRef());
 
             CreateTransactionReply createReply = expectMsgClass(duration("3 seconds"), CreateTransactionReply.class);
