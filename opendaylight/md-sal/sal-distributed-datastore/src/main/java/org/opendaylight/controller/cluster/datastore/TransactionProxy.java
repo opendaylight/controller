@@ -62,23 +62,6 @@ import scala.concurrent.Promise;
  */
 public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIdentifier> implements DOMStoreReadWriteTransaction {
 
-    public static enum TransactionType {
-        READ_ONLY,
-        WRITE_ONLY,
-        READ_WRITE;
-
-        // Cache all values
-        private static final TransactionType[] VALUES = values();
-
-        public static TransactionType fromInt(final int type) {
-            try {
-                return VALUES[type];
-            } catch (IndexOutOfBoundsException e) {
-                throw new IllegalArgumentException("In TransactionType enum value " + type, e);
-            }
-        }
-    }
-
     private static enum TransactionState {
         OPEN,
         READY,
