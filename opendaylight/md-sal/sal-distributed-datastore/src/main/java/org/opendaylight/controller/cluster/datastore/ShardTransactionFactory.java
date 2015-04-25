@@ -37,7 +37,7 @@ class ShardTransactionActorFactory {
         this.shardActor = shardActor;
     }
 
-    ActorRef newShardTransaction(TransactionProxy.TransactionType type, ShardTransactionIdentifier transactionID,
+    ActorRef newShardTransaction(TransactionType type, ShardTransactionIdentifier transactionID,
             String transactionChainID, short clientVersion) {
         final AbstractShardDataTreeTransaction<?> transaction;
         switch (type) {
