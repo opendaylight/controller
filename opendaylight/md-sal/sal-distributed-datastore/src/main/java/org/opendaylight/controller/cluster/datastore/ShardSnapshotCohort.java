@@ -51,7 +51,7 @@ class ShardSnapshotCohort implements RaftActorSnapshotCohort {
                 "createSnapshot" + ++createSnapshotTransactionCounter);
 
         ActorRef createSnapshotTransaction = transactionActorFactory.newShardTransaction(
-                TransactionProxy.TransactionType.READ_ONLY, transactionID, "", DataStoreVersions.CURRENT_VERSION);
+                TransactionType.READ_ONLY, transactionID, "", DataStoreVersions.CURRENT_VERSION);
 
         createSnapshotTransaction.tell(CreateSnapshot.INSTANCE, actorRef);
     }
