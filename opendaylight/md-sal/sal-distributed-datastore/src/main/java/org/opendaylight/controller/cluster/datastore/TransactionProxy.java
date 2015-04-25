@@ -558,11 +558,11 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
 
         if(remoteTransactionVersion < DataStoreVersions.LITHIUM_VERSION) {
             return new PreLithiumTransactionContextImpl(transactionPath, transactionActor, getIdentifier(),
-                    transactionChainId, actorContext, schemaContext, isTxActorLocal, remoteTransactionVersion,
+                    transactionChainId, actorContext, isTxActorLocal, remoteTransactionVersion,
                     operationCompleter);
         } else {
             return new TransactionContextImpl(transactionActor, getIdentifier(), transactionChainId,
-                    actorContext, schemaContext, isTxActorLocal, remoteTransactionVersion, operationCompleter);
+                    actorContext, isTxActorLocal, remoteTransactionVersion, operationCompleter);
         }
     }
 }
