@@ -91,20 +91,20 @@ public class TransactionChainProxy implements DOMStoreTransactionChain {
         State localState = currentState;
         checkReadyState(localState);
 
-        return new ChainedTransactionProxy(actorContext, TransactionProxy.TransactionType.READ_ONLY,
+        return new ChainedTransactionProxy(actorContext, TransactionType.READ_ONLY,
                 transactionChainId, localState.getPreviousReadyFutures());
     }
 
     @Override
     public DOMStoreReadWriteTransaction newReadWriteTransaction() {
         actorContext.acquireTxCreationPermit();
-        return allocateWriteTransaction(TransactionProxy.TransactionType.READ_WRITE);
+        return allocateWriteTransaction(TransactionType.READ_WRITE);
     }
 
     @Override
     public DOMStoreWriteTransaction newWriteOnlyTransaction() {
         actorContext.acquireTxCreationPermit();
-        return allocateWriteTransaction(TransactionProxy.TransactionType.WRITE_ONLY);
+        return allocateWriteTransaction(TransactionType.WRITE_ONLY);
     }
 
     @Override
@@ -115,7 +115,7 @@ public class TransactionChainProxy implements DOMStoreTransactionChain {
         actorContext.broadcast(new CloseTransactionChain(transactionChainId).toSerializable());
     }
 
-    private ChainedTransactionProxy allocateWriteTransaction(TransactionProxy.TransactionType type) {
+    private ChainedTransactionProxy allocateWriteTransaction(TransactionType type) {
         State localState = currentState;
 
         checkReadyState(localState);
