@@ -26,6 +26,7 @@ import org.opendaylight.controller.cluster.datastore.messages.BatchedModificatio
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModificationsReply;
 import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.ForwardedReadyTransaction;
+import org.opendaylight.controller.cluster.datastore.messages.ReadyLocalTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionReply;
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
 import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
@@ -192,6 +193,30 @@ public class ShardCommitCoordinator {
         }
 
         return batched.isReady();
+    }
+
+    /**
+     * This method handles {@link ReadyLocalTransaction} message. All transaction modifications have
+     * been prepared beforehand by the sender and we just need to drive them through into the dataTree.
+     *
+     * @param message
+     * @param sender
+     * @param shard
+     */
+    void handleReadyLocalTransaction(ReadyLocalTransaction message, ActorRef sender, Shard shard) {
+        final ShardDataTreeCohort cohort = new SimpleShardDataTreeCohort(dataTree, message.getModification());
+        final CohortEntry cohortEntry = new CohortEntry(message.getTransactionID(), cohort);
+        cohortCache.put(message.getTransactionID(), cohortEntry);
+        cohortEntry.setDoImmediateCommit(message.isDoCommitOnReady());
+        log.debug("{}: Applying local modifications for Tx {}", name, message.getTransactionID());
+
+        if (message.isDoCommitOnReady()) {
+            cohortEntry.setReplySender(sender);
+            cohortEntry.setShard(shard);
+            handleCanCommit(cohortEntry);
+        } else {
+            sender.tell(readyTransactionReply(shard), shard.self());
+        }
     }
 
     private void handleCanCommit(CohortEntry cohortEntry) {
@@ -426,6 +451,12 @@ public class ShardCommitCoordinator {
 
         CohortEntry(String transactionID, ShardDataTreeCohort cohort,
                 MutableCompositeModification compositeModification) {
+            this.transactionID = transactionID;
+            this.cohort = cohort;
+            this.transaction = null;
+        }
+
+        CohortEntry(String transactionID, ShardDataTreeCohort cohort) {
             this.transactionID = transactionID;
             this.cohort = cohort;
             this.transaction = null;
