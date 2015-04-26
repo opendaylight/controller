@@ -8,6 +8,7 @@
 package org.opendaylight.controller.md.sal.binding.compat;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.reflect.TypeToken;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,7 +29,8 @@ final class NotificationInvoker implements org.opendaylight.controller.sal.bindi
     private NotificationInvoker(final NotificationListener listener) {
         delegate = listener;
         final Map<Class<? extends Notification>, InvokerContext> builder = new HashMap<>();
-        for(final Class<?> iface : listener.getClass().getInterfaces()) {
+        for(final TypeToken<?> ifaceToken : TypeToken.of(listener.getClass()).getTypes().interfaces()) {
+            Class<?> iface = ifaceToken.getRawType();
             if(NotificationListener.class.isAssignableFrom(iface) && BindingReflections.isBindingClass(iface)) {
                 @SuppressWarnings("unchecked")
                 final Class<? extends NotificationListener> listenerType = (Class<? extends NotificationListener>) iface;
