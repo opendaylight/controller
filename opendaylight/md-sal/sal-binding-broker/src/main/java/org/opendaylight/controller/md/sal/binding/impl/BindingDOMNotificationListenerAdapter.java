@@ -8,6 +8,7 @@
 package org.opendaylight.controller.md.sal.binding.impl;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.reflect.TypeToken;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -60,7 +61,8 @@ class BindingDOMNotificationListenerAdapter implements DOMNotificationListener {
 
     public static Map<SchemaPath, NotificationListenerInvoker> createInvokerMapFor(final Class<? extends NotificationListener> implClz) {
         final Map<SchemaPath, NotificationListenerInvoker> builder = new HashMap<>();
-        for(final Class<?> iface : implClz.getInterfaces()) {
+        for(final TypeToken<?> ifaceToken : TypeToken.of(implClz).getTypes().interfaces()) {
+            Class<?> iface = ifaceToken.getRawType();
             if(NotificationListener.class.isAssignableFrom(iface) && BindingReflections.isBindingClass(iface)) {
                 @SuppressWarnings("unchecked")
                 final Class<? extends NotificationListener> listenerType = (Class<? extends NotificationListener>) iface;

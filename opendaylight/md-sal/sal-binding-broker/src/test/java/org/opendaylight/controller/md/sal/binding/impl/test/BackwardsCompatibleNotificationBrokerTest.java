@@ -10,6 +10,7 @@ package org.opendaylight.controller.md.sal.binding.impl.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.md.sal.binding.compat.HeliumNotificationProviderServiceAdapter;
 
 import com.google.common.collect.ImmutableList;
@@ -52,17 +53,23 @@ public class BackwardsCompatibleNotificationBrokerTest extends AbstractNotificat
         final CountDownLatch latch = new CountDownLatch(1);
         final TwoLevelListChanged testData = createTestData();
 
-        final NotifTestListener testNotifListener = new NotifTestListener(latch);
+        final NotifTestListenerChild testNotifListener = new NotifTestListenerChild(latch);
         final ListenerRegistration<NotificationListener> listenerRegistration =
                 notificationProviderService.registerNotificationListener(testNotifListener);
         notificationProviderService.publish(testData);
 
-        latch.await();
+        latch.await(500L, TimeUnit.MILLISECONDS);
         assertTrue(testNotifListener.getReceivedNotifications().size() == 1);
         assertEquals(testData, testNotifListener.getReceivedNotifications().get(0));
         listenerRegistration.close();
     }
 
+    private static class NotifTestListenerChild extends  NotifTestListener {
+
+        public NotifTestListenerChild(final CountDownLatch latch) {
+            super(latch);
+        }
+    }
     private static class NotifTestListener implements OpendaylightMdsalListTestListener {
         private List<TwoLevelListChanged> receivedNotifications = new ArrayList<>();
         private CountDownLatch latch;
