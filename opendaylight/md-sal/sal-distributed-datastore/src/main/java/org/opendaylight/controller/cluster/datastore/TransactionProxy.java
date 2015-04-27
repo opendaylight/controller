@@ -97,7 +97,6 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
 
     private final TransactionType transactionType;
     final ActorContext actorContext;
-    private final String transactionChainId;
     private final SchemaContext schemaContext;
     private TransactionState state = TransactionState.OPEN;
 
@@ -110,25 +109,24 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
     }
 
     public TransactionProxy(ActorContext actorContext, TransactionType transactionType, String transactionChainId) {
-        super(createIdentifier(actorContext));
+        super(createIdentifier(actorContext, transactionChainId));
         this.actorContext = Preconditions.checkNotNull(actorContext,
             "actorContext should not be null");
         this.transactionType = Preconditions.checkNotNull(transactionType,
             "transactionType should not be null");
         this.schemaContext = Preconditions.checkNotNull(actorContext.getSchemaContext(),
             "schemaContext should not be null");
-        this.transactionChainId = transactionChainId;
 
         LOG.debug("Created txn {} of type {} on chain {}", getIdentifier(), transactionType, transactionChainId);
     }
 
-    private static TransactionIdentifier createIdentifier(ActorContext actorContext) {
+    private static TransactionIdentifier createIdentifier(ActorContext actorContext, String transactionChainId) {
         String memberName = actorContext.getCurrentMemberName();
         if (memberName == null) {
             memberName = "UNKNOWN-MEMBER";
         }
 
-        return new TransactionIdentifier(memberName, counter.getAndIncrement());
+        return TransactionIdentifier.create(memberName, counter.getAndIncrement(), transactionChainId);
     }
 
     @VisibleForTesting
@@ -364,7 +362,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
         TransactionFutureCallback txFutureCallback = txFutureCallbackMap.values().iterator().next();
 
         LOG.debug("Tx {} Readying transaction for shard {} on chain {}", getIdentifier(),
-                txFutureCallback.getShardName(), transactionChainId);
+                txFutureCallback.getShardName(), getTransactionChainId());
 
         final OperationCallback.Reference operationCallbackRef =
                 new OperationCallback.Reference(OperationCallback.NO_OP_CALLBACK);
@@ -404,7 +402,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
         for(TransactionFutureCallback txFutureCallback : txFutureCallbackMap.values()) {
 
             LOG.debug("Tx {} Readying transaction for shard {} on chain {}", getIdentifier(),
-                        txFutureCallback.getShardName(), transactionChainId);
+                        txFutureCallback.getShardName(), getTransactionChainId());
 
             final TransactionContext transactionContext = txFutureCallback.getTransactionContext();
             final Future<ActorSelection> future;
@@ -504,7 +502,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
     }
 
     String getTransactionChainId() {
-        return transactionChainId;
+        return getIdentifier().getChainId();
     }
 
     protected ActorContext getActorContext() {
@@ -541,10 +539,10 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
 
         if(remoteTransactionVersion < DataStoreVersions.LITHIUM_VERSION) {
             return new PreLithiumTransactionContextImpl(transactionPath, transactionActor, getIdentifier(),
-                    transactionChainId, actorContext, isTxActorLocal, remoteTransactionVersion,
+                    actorContext, isTxActorLocal, remoteTransactionVersion,
                     operationCompleter);
         } else {
-            return new TransactionContextImpl(transactionActor, getIdentifier(), transactionChainId,
+            return new TransactionContextImpl(transactionActor, getIdentifier(),
                     actorContext, isTxActorLocal, remoteTransactionVersion, operationCompleter);
         }
     }

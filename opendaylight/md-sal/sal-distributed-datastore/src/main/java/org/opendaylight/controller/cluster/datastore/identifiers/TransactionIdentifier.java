@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.datastore.identifiers;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 
 public class TransactionIdentifier {
     private static final String TX_SEPARATOR = "-txn-";
@@ -20,6 +21,18 @@ public class TransactionIdentifier {
     public TransactionIdentifier(String memberName, long counter) {
         this.memberName = Preconditions.checkNotNull(memberName, "memberName should not be null");
         this.counter = counter;
+    }
+
+    public String getChainId() {
+        return "";
+    }
+
+    public static TransactionIdentifier create(String memberName, long counter, String chainId) {
+        if (Strings.isNullOrEmpty(chainId)) {
+            return new TransactionIdentifier(memberName, counter);
+        } else {
+            return new ChainedTransactionIdentifier(memberName, counter, chainId);
+        }
     }
 
     @Override
