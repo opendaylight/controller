@@ -37,7 +37,6 @@ import scala.concurrent.Future;
 public class TransactionContextImpl extends AbstractTransactionContext {
     private static final Logger LOG = LoggerFactory.getLogger(TransactionContextImpl.class);
 
-    private final String transactionChainId;
     private final ActorContext actorContext;
     private final ActorSelection actor;
     private final boolean isTxActorLocal;
@@ -48,11 +47,10 @@ public class TransactionContextImpl extends AbstractTransactionContext {
     private int totalBatchedModificationsSent;
 
     protected TransactionContextImpl(ActorSelection actor, TransactionIdentifier identifier,
-            String transactionChainId, ActorContext actorContext, boolean isTxActorLocal,
+            ActorContext actorContext, boolean isTxActorLocal,
             short remoteTransactionVersion, OperationCompleter operationCompleter) {
         super(identifier);
         this.actor = actor;
-        this.transactionChainId = transactionChainId;
         this.actorContext = actorContext;
         this.isTxActorLocal = isTxActorLocal;
         this.remoteTransactionVersion = remoteTransactionVersion;
@@ -141,7 +139,7 @@ public class TransactionContextImpl extends AbstractTransactionContext {
     }
 
     private BatchedModifications newBatchedModifications() {
-        return new BatchedModifications(getIdentifier().toString(), remoteTransactionVersion, transactionChainId);
+        return new BatchedModifications(getIdentifier().toString(), remoteTransactionVersion, getIdentifier().getChainId());
     }
 
     private void batchModification(Modification modification) {
