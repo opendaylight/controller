@@ -13,6 +13,7 @@ import akka.dispatch.Mapper;
 import akka.dispatch.OnComplete;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.SettableFuture;
+import org.opendaylight.controller.cluster.datastore.identifiers.ChainedTransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
@@ -52,11 +53,16 @@ public class TransactionContextImpl extends AbstractTransactionContext {
             short remoteTransactionVersion, OperationCompleter operationCompleter) {
         super(identifier);
         this.actor = actor;
-        this.transactionChainId = transactionChainId;
         this.actorContext = actorContext;
         this.isTxActorLocal = isTxActorLocal;
         this.remoteTransactionVersion = remoteTransactionVersion;
         this.operationCompleter = operationCompleter;
+
+        if (identifier instanceof ChainedTransactionIdentifier) {
+            this.transactionChainId = ((ChainedTransactionIdentifier)identifier).getChainId();
+        } else {
+            this.transactionChainId = null;
+        }
     }
 
     private Future<Object> completeOperation(Future<Object> operationFuture){
