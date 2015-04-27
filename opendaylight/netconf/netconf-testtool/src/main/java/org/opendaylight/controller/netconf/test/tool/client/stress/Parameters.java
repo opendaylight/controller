@@ -52,6 +52,9 @@ public class Parameters {
     @Arg(dest = "msg-timeout")
     public long msgTimeout;
 
+    @Arg(dest = "tcp-header")
+    public String tcpHeader;
+
     static ArgumentParser getParser() {
         final ArgumentParser parser = ArgumentParsers.newArgumentParser("netconf stress client");
 
@@ -121,6 +124,11 @@ public class Parameters {
                 .type(Boolean.class)
                 .setDefault(false)
                 .dest("ssh");
+
+        parser.addArgument("--tcp-header")
+                .type(String.class)
+                .required(false)
+                .dest("tcp-header");
 
         // TODO add get-config option instead of edit + commit
         // TODO different edit config content

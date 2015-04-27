@@ -10,7 +10,11 @@ package org.opendaylight.controller.netconf.test.tool.client.stress;
 
 import ch.qos.logback.classic.Level;
 import com.google.common.base.Charsets;
+import com.google.common.base.Function;
+import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -19,6 +23,7 @@ import io.netty.util.Timer;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -30,6 +35,7 @@ import org.opendaylight.controller.netconf.client.NetconfClientDispatcherImpl;
 import org.opendaylight.controller.netconf.client.NetconfClientSession;
 import org.opendaylight.controller.netconf.client.conf.NetconfClientConfiguration;
 import org.opendaylight.controller.netconf.client.conf.NetconfClientConfigurationBuilder;
+import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessageAdditionalHeader;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.controller.sal.connect.api.RemoteDevice;
 import org.opendaylight.controller.sal.connect.netconf.listener.NetconfDeviceCommunicator;
@@ -82,18 +88,18 @@ public final class StressClient {
         }
     }
 
-    private static final String MSG_ID_PLACEHOLDER = "{MSG_ID}";
     private static final String MSG_ID_PLACEHOLDER_REGEX = "\\{MSG_ID\\}";
+    private static final String PHYS_ADDR_PLACEHOLDER_REGEX = "\\{PHYS_ADDR\\}";
 
     public static void main(final String[] args) {
         final Parameters params = parseArgs(args, Parameters.getParser());
         params.validate();
 
-        // TODO remove
+        // Wait 5 seconds to allow for debugging/profiling
         try {
-            Thread.sleep(10000);
+            Thread.sleep(5000);
         } catch (final InterruptedException e) {
-//            e.printStackTrace();
+            throw new RuntimeException(e);
         }
 
         final ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
@@ -104,12 +110,8 @@ public final class StressClient {
         final List<NetconfMessage> preparedMessages = Lists.newArrayListWithCapacity(params.editCount);
 
         final String editContentString;
-        boolean needsModification = false;
         try {
             editContentString = Files.toString(params.editContent, Charsets.UTF_8);
-            if(editContentString.contains(MSG_ID_PLACEHOLDER)) {
-                needsModification = true;
-            };
         } catch (IOException e) {
             throw new IllegalArgumentException("Cannot read content of " + params.editContent);
         }
@@ -122,9 +124,12 @@ public final class StressClient {
             final Element editContentElement;
             try {
                 // Insert message id where needed
-                final String specificEditContent = needsModification ?
-                        editContentString.replaceAll(MSG_ID_PLACEHOLDER_REGEX, Integer.toString(i)) :
-                        editContentString;
+                String specificEditContent =
+                        editContentString.replaceAll(MSG_ID_PLACEHOLDER_REGEX, Integer.toString(i));
+
+                // Insert physical address where needed
+                specificEditContent =
+                        specificEditContent.replaceAll(PHYS_ADDR_PLACEHOLDER_REGEX, getMac(i));
 
                 editContentElement = XmlUtil.readXmlToElement(specificEditContent);
                 final Node config = ((Element) msg.getDocumentElement().getElementsByTagName("edit-config").item(0)).
@@ -176,6 +181,23 @@ public final class StressClient {
         }
     }
 
+    private static String getMac(final int i) {
+        final String hex = Integer.toHexString(i);
+        final Iterable<String> macGroups = Splitter.fixedLength(2).split(hex);
+
+        final int additional = 6 - Iterables.size(macGroups);
+        final ArrayList<String> additionalGroups = Lists.newArrayListWithCapacity(additional);
+        for (int j = 0; j < additional; j++) {
+            additionalGroups.add("00");
+        }
+        return Joiner.on(':').join(Iterables.concat(Iterables.transform(macGroups, new Function<String, String>() {
+            @Override
+            public String apply(final String input) {
+                return input.length() == 1 ? input + "0" : input;
+            }
+        }), additionalGroups));
+    }
+
     private static ExecutionStrategy getExecutionStrategy(final Parameters params, final List<NetconfMessage> preparedMessages, final NetconfDeviceCommunicator sessionListener) {
         if(params.async) {
             return new AsyncExecutionStrategy(params, preparedMessages, sessionListener);
@@ -206,6 +228,16 @@ public final class StressClient {
         final NetconfClientConfigurationBuilder netconfClientConfigurationBuilder = NetconfClientConfigurationBuilder.create();
         netconfClientConfigurationBuilder.withSessionListener(sessionListener);
         netconfClientConfigurationBuilder.withAddress(params.getInetAddress());
+        if(params.tcpHeader != null) {
+            final String header = params.tcpHeader.replaceAll("\"", "").trim() + "\n";
+            netconfClientConfigurationBuilder.withAdditionalHeader(new NetconfHelloMessageAdditionalHeader(null, null, null, null, null) {
+                @Override
+                public String toFormattedString() {
+                    LOG.debug("Sending TCP header {}", header);
+                    return header;
+                }
+            });
+        }
         netconfClientConfigurationBuilder.withProtocol(params.ssh ? NetconfClientConfiguration.NetconfClientProtocol.SSH : NetconfClientConfiguration.NetconfClientProtocol.TCP);
         netconfClientConfigurationBuilder.withConnectionTimeoutMillis(20000L);
         netconfClientConfigurationBuilder.withReconnectStrategy(new NeverReconnectStrategy(GlobalEventExecutor.INSTANCE, 5000));
