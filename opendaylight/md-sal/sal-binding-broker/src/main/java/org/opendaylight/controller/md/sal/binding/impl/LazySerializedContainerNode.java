@@ -1,9 +1,9 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015 Cisco Systems, Inc. and others. All rights reserved.
  *
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License v1.0 which accompanies this distribution,
- * and is available at http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made available under the terms of the Eclipse
+ * Public License v1.0 which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  */
 package org.opendaylight.controller.md.sal.binding.impl;
 
@@ -17,6 +17,9 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdent
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
+import org.opendaylight.yangtools.yang.data.api.schema.LeafNode;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
 /**
  *
@@ -31,12 +34,22 @@ class LazySerializedContainerNode implements ContainerNode {
     private BindingNormalizedNodeCodecRegistry registry;
     private ContainerNode domData;
 
-    LazySerializedContainerNode(QName identifier, DataObject binding,
-            BindingNormalizedNodeCodecRegistry registry) {
+    private LazySerializedContainerNode(final QName identifier, final DataObject binding,
+            final BindingNormalizedNodeCodecRegistry registry) {
         this.identifier = new NodeIdentifier(identifier);
         this.bindingData = binding;
         this.registry = registry;
         this.domData = null;
+    }
+
+    static NormalizedNode<?, ?> create(final SchemaPath rpcName, final DataObject data,
+            final BindingNormalizedNodeCodecRegistry codec) {
+        return new LazySerializedContainerNode(rpcName.getLastComponent(), data, codec);
+    }
+
+    static NormalizedNode<?, ?> withContextRef(final SchemaPath rpcName, final DataObject data,
+            final LeafNode<?> contextRef, final BindingNormalizedNodeCodecRegistry codec) {
+        return new WithContextRef(rpcName.getLastComponent(), data, contextRef, codec);
     }
 
     @Override
@@ -45,7 +58,7 @@ class LazySerializedContainerNode implements ContainerNode {
     }
 
     private ContainerNode delegate() {
-        if(domData == null) {
+        if (domData == null) {
             domData = registry.toNormalizedNodeRpcData(bindingData);
             registry = null;
         }
@@ -53,32 +66,59 @@ class LazySerializedContainerNode implements ContainerNode {
     }
 
     @Override
-    public QName getNodeType() {
-        return delegate().getNodeType();
+    public final QName getNodeType() {
+        return identifier.getNodeType();
     }
 
     @Override
-    public Collection<DataContainerChild<? extends PathArgument, ?>> getValue() {
+    public final Collection<DataContainerChild<? extends PathArgument, ?>> getValue() {
         return delegate().getValue();
     }
 
     @Override
-    public NodeIdentifier getIdentifier() {
+    public final NodeIdentifier getIdentifier() {
         return identifier;
     }
 
     @Override
-    public Optional<DataContainerChild<? extends PathArgument, ?>> getChild(PathArgument child) {
+    public Optional<DataContainerChild<? extends PathArgument, ?>> getChild(final PathArgument child) {
         return delegate().getChild(child);
     }
 
     @Override
-    public Object getAttributeValue(QName name) {
+    public final Object getAttributeValue(final QName name) {
         return delegate().getAttributeValue(name);
     }
 
-    public DataObject bindingData() {
+    final DataObject bindingData() {
         return bindingData;
+    }
+
+    /**
+     * Lazy Serialized Node with pre-cached serialized leaf holding routing information.
+     *
+     */
+    private static final class WithContextRef extends LazySerializedContainerNode {
+
+        private final LeafNode<?> contextRef;
+
+        protected WithContextRef(final QName identifier, final DataObject binding, final LeafNode<?> contextRef,
+                final BindingNormalizedNodeCodecRegistry registry) {
+            super(identifier, binding, registry);
+            this.contextRef = contextRef;
+        }
+
+        @Override
+        public Optional<DataContainerChild<? extends PathArgument, ?>> getChild(final PathArgument child) {
+            /*
+             * Use precached value of routing field and do not run full serialization if we are
+             * accessing it.
+             */
+            if (contextRef.getIdentifier().equals(child)) {
+                return Optional.<DataContainerChild<? extends PathArgument, ?>>of(contextRef);
+            }
+            return super.getChild(child);
+        }
     }
 
 }

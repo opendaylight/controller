@@ -7,38 +7,21 @@
  */
 package org.opendaylight.controller.md.sal.binding.impl;
 
-import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ClassToInstanceMap;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.util.concurrent.CheckedFuture;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import java.lang.reflect.Method;
 import java.util.Set;
 import org.opendaylight.controller.md.sal.binding.impl.BindingDOMAdapterBuilder.Factory;
-import org.opendaylight.controller.md.sal.binding.impl.RpcServiceAdapter.InvocationDelegate;
-import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
-import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 import org.opendaylight.controller.md.sal.dom.api.DOMService;
 import org.opendaylight.controller.sal.binding.api.RpcConsumerRegistry;
-import org.opendaylight.yangtools.binding.data.codec.impl.BindingNormalizedNodeCodecRegistry;
-import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
-import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.common.RpcResult;
-import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
-import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
-public class BindingDOMRpcServiceAdapter implements RpcConsumerRegistry, InvocationDelegate {
+public class BindingDOMRpcServiceAdapter implements RpcConsumerRegistry {
 
     protected static final Factory<RpcConsumerRegistry> BUILDER_FACTORY = new Factory<RpcConsumerRegistry>() {
 
@@ -78,45 +61,10 @@ public class BindingDOMRpcServiceAdapter implements RpcConsumerRegistry, Invocat
         return proxy;
     }
 
-    @Override
-    public ListenableFuture<RpcResult<?>> invoke(final SchemaPath rpc, final DataObject input) {
-        final CheckedFuture<DOMRpcResult, DOMRpcException> domFuture = domService.invokeRpc(rpc, serialize(rpc,input));
-        return transformFuture(rpc,domFuture,codec.getCodecRegistry());
-    }
-
     private RpcServiceAdapter createProxy(final Class<? extends RpcService> key) {
         Preconditions.checkArgument(BindingReflections.isBindingClass(key));
         Preconditions.checkArgument(key.isInterface(), "Supplied RPC service type must be interface.");
-        final ImmutableMap<Method, SchemaPath> rpcNames = codec.getRpcMethodToSchemaPath(key);
-        return new RpcServiceAdapter(key, rpcNames, this);
-    }
-
-    private NormalizedNode<?, ?> serialize(final SchemaPath rpc,final DataObject input) {
-        if(input == null) {
-            return null;
-        }
-        final QName rpcInputIdentifier = QName.create(rpc.getLastComponent(),"input");
-        return new LazySerializedContainerNode(rpcInputIdentifier, input, codec.getCodecRegistry());
-    }
-
-    private static ListenableFuture<RpcResult<?>> transformFuture(final SchemaPath rpc,final ListenableFuture<DOMRpcResult> domFuture, final BindingNormalizedNodeCodecRegistry codec) {
-        return Futures.transform(domFuture, new Function<DOMRpcResult, RpcResult<?>>() {
-            @Override
-            public RpcResult<?> apply(final DOMRpcResult input) {
-                if(input instanceof LazySerializedDOMRpcResult) {
-                    return ((LazySerializedDOMRpcResult) input).bidningRpcResult();
-                }
-                final NormalizedNode<?, ?> domData = input.getResult();
-                final DataObject bindingResult;
-                if(domData != null) {
-                    final SchemaPath rpcOutput = rpc.createChild(QName.create(rpc.getLastComponent(),"output"));
-                    bindingResult = codec.fromNormalizedNodeRpcData(rpcOutput, (ContainerNode) domData);
-                } else {
-                    bindingResult = null;
-                }
-                return RpcResult.class.cast(RpcResultBuilder.success(bindingResult).build());
-            }
-        });
+        return new RpcServiceAdapter(key, codec, domService);
     }
 
     private static final class Builder extends BindingDOMAdapterBuilder<RpcConsumerRegistry> {
