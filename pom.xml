@@ -23,9 +23,6 @@
     <!-- netconf -->
     <module>opendaylight/netconf</module>
 
-    <!-- adsal -->
-    <module>opendaylight/adsal</module>
-
     <!-- Parents -->
     <module>opendaylight/commons/concepts</module>
     <module>opendaylight/commons/protocol-framework</module>
