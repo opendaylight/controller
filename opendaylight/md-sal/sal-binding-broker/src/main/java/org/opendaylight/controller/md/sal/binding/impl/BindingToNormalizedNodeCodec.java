@@ -10,6 +10,9 @@ package org.opendaylight.controller.md.sal.binding.impl;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableBiMap;
 import java.lang.reflect.Method;
 import java.util.AbstractMap.SimpleEntry;
@@ -46,12 +49,21 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
-public class BindingToNormalizedNodeCodec implements BindingCodecTreeFactory, BindingNormalizedNodeSerializer, SchemaContextListener, AutoCloseable {
+public final class BindingToNormalizedNodeCodec implements BindingCodecTreeFactory, BindingNormalizedNodeSerializer, SchemaContextListener, AutoCloseable {
 
     private final BindingNormalizedNodeCodecRegistry codecRegistry;
     private DataNormalizer legacyToNormalized;
     private final GeneratedClassLoadingStrategy classLoadingStrategy;
     private BindingRuntimeContext runtimeContext;
+    private final LoadingCache<InstanceIdentifier<?>, YangInstanceIdentifier> iiCache = CacheBuilder.newBuilder()
+            .softValues().build(new CacheLoader<InstanceIdentifier<?>, YangInstanceIdentifier>() {
+
+                @Override
+                public YangInstanceIdentifier load(final InstanceIdentifier<?> key) throws Exception {
+                    return toYangInstanceIdentifier(key);
+                }
+
+            });
 
     public BindingToNormalizedNodeCodec(final GeneratedClassLoadingStrategy classLoadingStrategy,
             final BindingNormalizedNodeCodecRegistry codecRegistry) {
@@ -67,6 +79,11 @@ public class BindingToNormalizedNodeCodec implements BindingCodecTreeFactory, Bi
     @Override
     public YangInstanceIdentifier toYangInstanceIdentifier(final InstanceIdentifier<?> binding) {
         return codecRegistry.toYangInstanceIdentifier(binding);
+    }
+
+
+    YangInstanceIdentifier toYangInstanceIdentifierCached(final InstanceIdentifier<?> binding) {
+        return iiCache .getUnchecked(binding);
     }
 
     @Override
@@ -212,6 +229,21 @@ public class BindingToNormalizedNodeCodec implements BindingCodecTreeFactory, Bi
             for (final RpcDefinition rpcDef : module.getRpcs()) {
                 final Method method = findRpcMethod(key, rpcDef);
                 ret.put(method, rpcDef.getPath());
+            }
+        } catch (final NoSuchMethodException e) {
+            throw new IllegalStateException("Rpc defined in model does not have representation in generated class.", e);
+        }
+        return ret.build();
+    }
+
+    protected ImmutableBiMap<Method, RpcDefinition> getRpcMethodToSchema(final Class<? extends RpcService> key) {
+        final QNameModule moduleName = BindingReflections.getQNameModule(key);
+        final Module module = runtimeContext.getSchemaContext().findModuleByNamespaceAndRevision(moduleName.getNamespace(), moduleName.getRevision());
+        final ImmutableBiMap.Builder<Method, RpcDefinition> ret = ImmutableBiMap.builder();
+        try {
+            for (final RpcDefinition rpcDef : module.getRpcs()) {
+                final Method method = findRpcMethod(key, rpcDef);
+                ret.put(method, rpcDef);
             }
         } catch (final NoSuchMethodException e) {
             throw new IllegalStateException("Rpc defined in model does not have representation in generated class.", e);
