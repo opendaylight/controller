@@ -52,11 +52,11 @@ public class TransactionContextImpl extends AbstractTransactionContext {
             short remoteTransactionVersion, OperationCompleter operationCompleter) {
         super(identifier);
         this.actor = actor;
-        this.transactionChainId = transactionChainId;
         this.actorContext = actorContext;
         this.isTxActorLocal = isTxActorLocal;
         this.remoteTransactionVersion = remoteTransactionVersion;
         this.operationCompleter = operationCompleter;
+        this.transactionChainId = transactionChainId;
     }
 
     private Future<Object> completeOperation(Future<Object> operationFuture){
