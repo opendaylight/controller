@@ -168,7 +168,7 @@ public class EventSourceTopology implements EventAggregatorService, EventSourceR
 
         final NotificationPattern notificationPattern = new NotificationPattern(input.getNotificationPattern());
         final String nodeIdPattern = input.getNodeIdPattern().getValue();
-        final Pattern nodeIdPatternRegex = Pattern.compile(Util.wildcardToRegex(nodeIdPattern));
+        final Pattern nodeIdPatternRegex = Pattern.compile(nodeIdPattern);
         final EventSourceTopic eventSourceTopic = new EventSourceTopic(notificationPattern, nodeIdPattern, eventSourceService);
 
         registerTopic(eventSourceTopic);
