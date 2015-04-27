@@ -11,6 +11,7 @@ import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Collections;
 import org.opendaylight.controller.config.yang.md.sal.rest.connector.Config;
+import org.opendaylight.controller.config.yang.md.sal.rest.connector.Delete;
 import org.opendaylight.controller.config.yang.md.sal.rest.connector.Get;
 import org.opendaylight.controller.config.yang.md.sal.rest.connector.Operational;
 import org.opendaylight.controller.config.yang.md.sal.rest.connector.Post;
@@ -78,15 +79,31 @@ public class RestconfProviderImpl implements Provider, AutoCloseable, RestConnec
     @Override
     public Config getConfig() {
         final Config config = new Config();
+
         final Get get = new Get();
         get.setReceivedRequests(stats.getConfigGet());
+        get.setSuccessfulResponses(stats.getSuccessGetConfig());
+        get.setFailedResponses(stats.getFailureGetConfig());
         config.setGet(get);
+
         final Post post = new Post();
         post.setReceivedRequests(stats.getConfigPost());
+        post.setSuccessfulResponses(stats.getSuccessPost());
+        post.setFailedResponses(stats.getFailurePost());
         config.setPost(post);
+
         final Put put = new Put();
         put.setReceivedRequests(stats.getConfigPut());
+        put.setSuccessfulResponses(stats.getSuccessPut());
+        put.setFailedResponses(stats.getFailurePut());
         config.setPut(put);
+
+        final Delete delete = new Delete();
+        delete.setReceivedRequests(stats.getConfigDelete());
+        delete.setSuccessfulResponses(stats.getSuccessDelete());
+        delete.setFailedResponses(stats.getFailureDelete());
+        config.setDelete(delete);
+
         return config;
     }
 
@@ -96,6 +113,8 @@ public class RestconfProviderImpl implements Provider, AutoCloseable, RestConnec
         final Operational operational = new Operational();
         final Get get = new Get();
         get.setReceivedRequests(opGet);
+        get.setSuccessfulResponses(stats.getSuccessGetOperational());
+        get.setFailedResponses(stats.getFailureGetOperational());
         operational.setGet(get);
         return operational;
     }
@@ -105,6 +124,6 @@ public class RestconfProviderImpl implements Provider, AutoCloseable, RestConnec
         final BigInteger rpcInvoke = stats.getRpc();
         final Rpcs rpcs = new Rpcs();
         rpcs.setReceivedRequests(rpcInvoke);
-        return rpcs ;
+        return rpcs;
     }
 }
