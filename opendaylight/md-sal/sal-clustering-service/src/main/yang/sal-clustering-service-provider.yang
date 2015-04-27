@@ -1,0 +1,46 @@
+module sal-clustering-service-provider {
+
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:config:sal-clustering-service-provider";
+    prefix "sal-clustering-service-provider";
+
+    import config { prefix config; revision-date 2013-04-05; }
+    import opendaylight-md-sal-binding { prefix mdsal; revision-date 2013-10-28; }
+    import sal-clustering-api { prefix sal-clustering-api; revision-date 2015-04-07; }
+
+    description
+        "This module contains the base YANG definitions for
+        the sal-clustering service provider implementation";
+
+    revision "2015-04-07" {
+        description "Initial revision.";
+    }
+
+    identity sal-clustering-service-provider {
+        base config:module-type;
+        config:provided-service sal-clustering-api:sal-clustering-role-service;
+        // Specifies the prefix for generated java classes.
+        config:java-name-prefix SalClusteringServiceProvider;
+    }
+
+    // Augments the 'configuration' choice node under modules/module.
+    augment "/config:modules/config:module/config:configuration" {
+        case clustering-service-provider {
+            when "/config:modules/config:module/config:type = 'sal-clustering-service-provider'";
+                container notification-service {
+                    uses config:service-ref {
+                        refine type {
+                            mandatory true;
+                            config:required-identity mdsal:binding-notification-service;
+                        }
+                    }
+                }
+
+        }
+    }
+
+    notification shard-role-changed {
+        uses sal-clustering-api:shard-role-change;
+    }
+
+}
