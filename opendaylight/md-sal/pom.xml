@@ -81,6 +81,8 @@
 
     <!-- Clustering -->
     <module>sal-remoterpc-connector</module>
+    <module>sal-clustering-api</module>
+    <module>sal-clustering-service</module>
 
     <!-- Message Bus -->
     <module>messagebus-api</module>

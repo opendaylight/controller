@@ -1,0 +1,71 @@
+module clustering-api {
+
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:config:clustering-api";
+    prefix "clustering-api";
+
+    import config { prefix config; revision-date 2013-04-05; }
+
+    description
+        "This module contains the base YANG definitions for the clustering api
+         Copyright (c)2015 Cisco Systems, Inc. All rights reserved.
+
+         This program and the accompanying materials are made available
+         under the terms of the Eclipse Public License v1.0 which
+         accompanies this distribution, and is available at
+         http://www.eclipse.org/legal/epl-v10.html";
+
+    revision "2015-04-07" {
+        description "Initial revision.";
+    }
+
+    identity clustering-role-service {
+        base config:service-type;
+        config:java-class "org.opendaylight.controller.cluster.api.ClusteringRoleService";
+    }
+
+    typedef shard-role {
+        type enumeration {
+            enum NONE {
+                description "No role";
+            }
+            enum FOLLOWER {
+                description "Follower role";
+            }
+            enum CANDIDATE {
+                description "Candidate role";
+            }
+            enum LEADER {
+                description "Leader role";
+            }
+            enum ISOLATED-LEADER {
+                description "Isolated Leader role";
+            }
+        }
+    }
+
+    grouping shard-role-change {
+        leaf member-id {
+            type string;
+        }
+
+        leaf shard-id {
+            type string;
+        }
+
+        leaf old-role {
+            type shard-role;
+            description "Old role of the datastore shard";
+        }
+
+        leaf new-role {
+            type shard-role;
+            description "New role of the datastore shard";
+        }
+    }
+
+    notification shard-role-changed {
+        uses shard-role-change;
+    }
+
+}

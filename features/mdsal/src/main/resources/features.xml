@@ -79,6 +79,13 @@
         <bundle>mvn:org.opendaylight.controller/sal-akka-raft/${project.version}</bundle>
         <bundle>mvn:com.codahale.metrics/metrics-core/3.0.1</bundle>
     </feature>
+    <feature name ='odl-sal-clustering-service' version='${project.version}'>
+        <feature version='${config.version}'>odl-config-startup</feature>
+        <feature version='${project.version}'>odl-mdsal-broker-local</feature>
+        <bundle>mvn:org.opendaylight.controller/sal-clustering-api/${project.version}</bundle>
+        <bundle>mvn:org.opendaylight.controller/sal-clustering-service/${project.version}</bundle>
+        <configfile finalname="${config.configfile.directory}/${config.clustering.service.configfile}">mvn:org.opendaylight.controller/sal-clustering-service/${project.version}/xml/config</configfile>
+    </feature>
     <feature name ='odl-mdsal-distributed-datastore' version='${project.version}'>
         <feature version='${project.version}'>odl-mdsal-broker-local</feature>
         <feature version='${project.version}'>odl-mdsal-clustering-commons</feature>
