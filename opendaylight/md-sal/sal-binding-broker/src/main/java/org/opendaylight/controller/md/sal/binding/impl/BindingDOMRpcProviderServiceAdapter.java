@@ -63,7 +63,7 @@ public class BindingDOMRpcProviderServiceAdapter {
     private Set<YangInstanceIdentifier> toYangInstanceIdentifiers(final Set<InstanceIdentifier<?>> identifiers) {
         final Set<YangInstanceIdentifier> ret = new HashSet<>();
         for(final InstanceIdentifier<?> binding: identifiers) {
-            ret.add(codec.toNormalized(binding));
+            ret.add(codec.toYangInstanceIdentifierCached(binding));
         }
         return ret;
     }
