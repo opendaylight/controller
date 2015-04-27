@@ -64,6 +64,8 @@ import org.opendaylight.controller.sal.utils.ServiceHelper;
 
 @Path("/routers")
 public class NeutronRoutersNorthbound {
+    static final String ROUTER_INTERFACE_STR = "network:router_interface";
+    static final String ROUTER_GATEWAY_STR = "network:router_gateway";
 
     private NeutronRouter extractFields(NeutronRouter o, List<String> fields) {
         return o.extractFields(fields);
@@ -433,9 +435,12 @@ public class NeutronRoutersNorthbound {
 
         if (targetPort.getFixedIPs().size() != 1)
             throw new BadRequestException("Port id must have a single fixedIP address");
-        if (targetPort.getDeviceID() != null ||
-                targetPort.getDeviceOwner() != null)
-            throw new ResourceConflictException("Target Port already allocated");
+        if (targetPort.getDeviceID() != null && !targetPort.getDeviceID().equals(routerUUID))
+            throw new ResourceConflictException("Target Port already allocated to a different device id");
+        if (targetPort.getDeviceOwner() != null &&
+                !targetPort.getDeviceOwner().equalsIgnoreCase(ROUTER_INTERFACE_STR) &&
+                !targetPort.getDeviceOwner().equalsIgnoreCase(ROUTER_GATEWAY_STR))
+            throw new ResourceConflictException("Target Port already allocated to non-router interface");
         Object[] instances = ServiceHelper.getGlobalInstances(INeutronRouterAware.class, this, null);
         if (instances != null) {
             if (instances.length > 0) {
@@ -453,7 +458,8 @@ public class NeutronRoutersNorthbound {
         }
 
         //mark the port device id and device owner fields
-        targetPort.setDeviceOwner("network:router_interface");
+        if (targetPort.getDeviceOwner() == null || targetPort.getDeviceOwner().isEmpty())
+            targetPort.setDeviceOwner(ROUTER_INTERFACE_STR);
         targetPort.setDeviceID(routerUUID);
 
         target.addInterface(input.getPortUUID(), input);
