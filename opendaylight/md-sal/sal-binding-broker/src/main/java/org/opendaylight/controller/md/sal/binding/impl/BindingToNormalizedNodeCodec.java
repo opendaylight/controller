@@ -94,7 +94,7 @@ public final class BindingToNormalizedNodeCodec implements BindingCodecTreeFacto
         this.futureSchema = waitForSchema ? new FutureSchema(WAIT_DURATION_SEC, TimeUnit.SECONDS) : null;
     }
 
-    final YangInstanceIdentifier toYangInstanceIdentifierBlocking(final InstanceIdentifier<? extends DataObject> binding) {
+    YangInstanceIdentifier toYangInstanceIdentifierBlocking(final InstanceIdentifier<? extends DataObject> binding) {
         try {
             return codecRegistry.toYangInstanceIdentifier(binding);
         } catch (final MissingSchemaException e) {
@@ -202,7 +202,7 @@ public final class BindingToNormalizedNodeCodec implements BindingCodecTreeFacto
     }
 
     public Optional<Entry<InstanceIdentifier<? extends DataObject>, DataObject>> toBinding(
-            final @Nonnull Entry<YangInstanceIdentifier, ? extends NormalizedNode<?, ?>> normalized)
+            @Nonnull final Entry<YangInstanceIdentifier, ? extends NormalizedNode<?, ?>> normalized)
                     throws DeserializationException {
         try {
             /*
@@ -218,7 +218,7 @@ public final class BindingToNormalizedNodeCodec implements BindingCodecTreeFacto
              * It is safe to  loose generic information and cast it to other generic signature.
              *
              */
-            @SuppressWarnings({ "unchecked", "rawtypes" })
+            @SuppressWarnings("unchecked")
             final Entry<InstanceIdentifier<? extends DataObject>, DataObject> binding = Entry.class.cast(codecRegistry.fromNormalizedNode(normalized.getKey(), normalized.getValue()));
             return Optional.fromNullable(binding);
         } catch (final IllegalArgumentException e) {
@@ -228,7 +228,7 @@ public final class BindingToNormalizedNodeCodec implements BindingCodecTreeFacto
 
     @Override
     public void onGlobalContextUpdated(final SchemaContext arg0) {
-        legacyToNormalized = new DataNormalizer (arg0);
+        legacyToNormalized = new DataNormalizer(arg0);
         runtimeContext = BindingRuntimeContext.create(classLoadingStrategy, arg0);
         codecRegistry.onBindingRuntimeContextUpdated(runtimeContext);
         if(futureSchema != null) {

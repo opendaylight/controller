@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadWriteTransaction;
@@ -57,7 +58,8 @@ public class HydrogenDataBrokerAdapter implements DataProviderService, AutoClose
 
     private static final Logger LOG = LoggerFactory.getLogger(HydrogenDataBrokerAdapter.class);
 
-    private final ConcurrentHashMap<InstanceIdentifier<?>, CommitHandlerRegistrationImpl> commitHandlers = new ConcurrentHashMap<>();
+    private final ConcurrentMap<InstanceIdentifier<?>, CommitHandlerRegistrationImpl> commitHandlers =
+            new ConcurrentHashMap<>();
     private final ListeningExecutorService executorService = SingletonHolder.getDefaultCommitExecutor();
 
     private final DataBroker delegate;
@@ -74,13 +76,13 @@ public class HydrogenDataBrokerAdapter implements DataProviderService, AutoClose
 
     @Override
     public DataObject readConfigurationData(final InstanceIdentifier<? extends DataObject> path) {
-        DataModificationTransaction tx = beginTransaction();
+        final DataModificationTransaction tx = beginTransaction();
         return tx.readConfigurationData(path);
     }
 
     @Override
     public DataObject readOperationalData(final InstanceIdentifier<? extends DataObject> path) {
-        DataModificationTransaction tx = beginTransaction();
+        final DataModificationTransaction tx = beginTransaction();
         return tx.readOperationalData(path);
     }
 
@@ -88,7 +90,7 @@ public class HydrogenDataBrokerAdapter implements DataProviderService, AutoClose
     public Registration registerCommitHandler(
             final InstanceIdentifier<? extends DataObject> path,
             final DataCommitHandler<InstanceIdentifier<? extends DataObject>, DataObject> commitHandler) {
-        CommitHandlerRegistrationImpl reg = new CommitHandlerRegistrationImpl(path, commitHandler);
+        final CommitHandlerRegistrationImpl reg = new CommitHandlerRegistrationImpl(path, commitHandler);
         commitHandlers.put(path, reg);
         return reg;
     }
@@ -105,11 +107,11 @@ public class HydrogenDataBrokerAdapter implements DataProviderService, AutoClose
             final InstanceIdentifier<? extends DataObject> path, final DataChangeListener listener) {
 
 
-        org.opendaylight.controller.md.sal.binding.api.DataChangeListener asyncOperListener = new BackwardsCompatibleOperationalDataChangeInvoker(listener);
-        org.opendaylight.controller.md.sal.binding.api.DataChangeListener asyncCfgListener = new BackwardsCompatibleConfigurationDataChangeInvoker(listener);
+        final org.opendaylight.controller.md.sal.binding.api.DataChangeListener asyncOperListener = new BackwardsCompatibleOperationalDataChangeInvoker(listener);
+        final org.opendaylight.controller.md.sal.binding.api.DataChangeListener asyncCfgListener = new BackwardsCompatibleConfigurationDataChangeInvoker(listener);
 
-        ListenerRegistration<org.opendaylight.controller.md.sal.binding.api.DataChangeListener> cfgReg = delegate.registerDataChangeListener(LogicalDatastoreType.CONFIGURATION, path, asyncCfgListener, DataChangeScope.SUBTREE);
-        ListenerRegistration<org.opendaylight.controller.md.sal.binding.api.DataChangeListener> operReg = delegate.registerDataChangeListener(LogicalDatastoreType.OPERATIONAL, path, asyncOperListener, DataChangeScope.SUBTREE);
+        final ListenerRegistration<org.opendaylight.controller.md.sal.binding.api.DataChangeListener> cfgReg = delegate.registerDataChangeListener(LogicalDatastoreType.CONFIGURATION, path, asyncCfgListener, DataChangeScope.SUBTREE);
+        final ListenerRegistration<org.opendaylight.controller.md.sal.binding.api.DataChangeListener> operReg = delegate.registerDataChangeListener(LogicalDatastoreType.OPERATIONAL, path, asyncOperListener, DataChangeScope.SUBTREE);
 
         return new LegacyListenerRegistration(listener,cfgReg,operReg);
     }
@@ -125,20 +127,20 @@ public class HydrogenDataBrokerAdapter implements DataProviderService, AutoClose
 
         final List<DataCommitTransaction<InstanceIdentifier<? extends DataObject>, DataObject>> subTrans = new ArrayList<>();
         LOG.debug("Tx: {} Submitted.",tx.getIdentifier());
-        ListenableFuture<Boolean> requestCommit = executorService.submit(new Callable<Boolean>() {
+        final ListenableFuture<Boolean> requestCommit = executorService.submit(new Callable<Boolean>() {
 
             @Override
             public Boolean call() throws Exception {
                 try {
-                    for (CommitHandlerRegistrationImpl handler : commitHandlers.values()) {
+                    for (final CommitHandlerRegistrationImpl handler : commitHandlers.values()) {
 
-                        DataCommitTransaction<InstanceIdentifier<? extends DataObject>, DataObject> subTx = handler
+                        final DataCommitTransaction<InstanceIdentifier<? extends DataObject>, DataObject> subTx = handler
                                 .getInstance().requestCommit(tx);
                         subTrans.add(subTx);
                     }
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     LOG.error("Tx: {} Rollback.",tx.getIdentifier(),e);
-                    for (DataCommitTransaction<InstanceIdentifier<? extends DataObject>, DataObject> subTx : subTrans) {
+                    for (final DataCommitTransaction<InstanceIdentifier<? extends DataObject>, DataObject> subTx : subTrans) {
                         subTx.rollback();
                     }
                     return false;
@@ -149,7 +151,7 @@ public class HydrogenDataBrokerAdapter implements DataProviderService, AutoClose
 
         });
 
-        ListenableFuture<RpcResult<TransactionStatus>> dataStoreCommit = Futures.transform(requestCommit, new AsyncFunction<Boolean, RpcResult<TransactionStatus>>() {
+        final ListenableFuture<RpcResult<TransactionStatus>> dataStoreCommit = Futures.transform(requestCommit, new AsyncFunction<Boolean, RpcResult<TransactionStatus>>() {
 
             @Override
             public ListenableFuture<RpcResult<TransactionStatus>> apply(final Boolean requestCommitSuccess) throws Exception {
@@ -164,12 +166,12 @@ public class HydrogenDataBrokerAdapter implements DataProviderService, AutoClose
             @Override
             public RpcResult<TransactionStatus> apply(final RpcResult<TransactionStatus> input) {
                 if(input.isSuccessful()) {
-                    for(DataCommitTransaction<InstanceIdentifier<? extends DataObject>, DataObject> subTx : subTrans ) {
+                    for(final DataCommitTransaction<InstanceIdentifier<? extends DataObject>, DataObject> subTx : subTrans ) {
                         subTx.finish();
                     }
                 } else {
                     LOG.error("Tx: {} Rollback - Datastore commit failed.",tx.getIdentifier());
-                    for(DataCommitTransaction<InstanceIdentifier<? extends DataObject>, DataObject> subTx : subTrans ) {
+                    for(final DataCommitTransaction<InstanceIdentifier<? extends DataObject>, DataObject> subTx : subTrans ) {
                         subTx.rollback();
                     }
                 }
@@ -206,7 +208,7 @@ public class HydrogenDataBrokerAdapter implements DataProviderService, AutoClose
 
         @Override
         public void putOperationalData(final InstanceIdentifier<? extends DataObject> path, final DataObject data) {
-            boolean previouslyRemoved = posponedRemovedOperational.remove(path);
+            final boolean previouslyRemoved = posponedRemovedOperational.remove(path);
 
             @SuppressWarnings({ "rawtypes", "unchecked" })
             final InstanceIdentifier<DataObject> castedPath = (InstanceIdentifier) path;
@@ -219,8 +221,8 @@ public class HydrogenDataBrokerAdapter implements DataProviderService, AutoClose
 
         @Override
         public void putConfigurationData(final InstanceIdentifier<? extends DataObject> path, final DataObject data) {
-            boolean previouslyRemoved = posponedRemovedConfiguration.remove(path);
-            DataObject originalObj = readConfigurationData(path);
+            final boolean previouslyRemoved = posponedRemovedConfiguration.remove(path);
+            final DataObject originalObj = readConfigurationData(path);
             if (originalObj != null) {
                 original.put(path, originalObj);
 
@@ -311,10 +313,10 @@ public class HydrogenDataBrokerAdapter implements DataProviderService, AutoClose
             LOG.trace("Transaction {} changed status to {}", getIdentifier(), status);
             this.status = status;
 
-            for(ListenerRegistration<DataTransactionListener> listener : listeners) {
+            for(final ListenerRegistration<DataTransactionListener> listener : listeners) {
                 try {
                     listener.getInstance().onStatusUpdated(this, status);
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     LOG.error("Error during invoking transaction listener {}",listener.getInstance(),e);
                 }
             }
@@ -323,11 +325,11 @@ public class HydrogenDataBrokerAdapter implements DataProviderService, AutoClose
         @Override
         public ListenableFuture<RpcResult<TransactionStatus>> commit() {
 
-            for(InstanceIdentifier<? extends DataObject> path : posponedRemovedConfiguration) {
+            for(final InstanceIdentifier<? extends DataObject> path : posponedRemovedConfiguration) {
                 delegate.delete(LogicalDatastoreType.CONFIGURATION, path);
             }
 
-            for(InstanceIdentifier<? extends DataObject> path : posponedRemovedOperational) {
+            for(final InstanceIdentifier<? extends DataObject> path : posponedRemovedOperational) {
                 delegate.delete(LogicalDatastoreType.OPERATIONAL, path);
             }
 
@@ -423,7 +425,7 @@ public class HydrogenDataBrokerAdapter implements DataProviderService, AutoClose
         @Override
         public void onDataChanged(final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
 
-            DataChangeEvent legacyChange = HydrogenDataChangeEvent.createOperational(change);
+            final DataChangeEvent legacyChange = HydrogenDataChangeEvent.createOperational(change);
             delegate.onDataChanged(legacyChange);
 
         }
@@ -446,7 +448,7 @@ public class HydrogenDataBrokerAdapter implements DataProviderService, AutoClose
         @Override
         public void onDataChanged(final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> change) {
 
-            DataChangeEvent legacyChange = HydrogenDataChangeEvent.createConfiguration(change);
+            final DataChangeEvent legacyChange = HydrogenDataChangeEvent.createConfiguration(change);
 
             delegate.onDataChanged(legacyChange);
 

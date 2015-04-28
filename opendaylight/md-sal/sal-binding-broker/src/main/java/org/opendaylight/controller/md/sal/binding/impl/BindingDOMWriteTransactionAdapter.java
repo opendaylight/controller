@@ -41,8 +41,8 @@ class BindingDOMWriteTransactionAdapter<T extends DOMDataWriteTransaction> exten
     }
 
     @Override
-    public <T extends DataObject> void merge(final LogicalDatastoreType store, final InstanceIdentifier<T> path,
-                                             final T data) {
+    public <D extends DataObject> void merge(final LogicalDatastoreType store, final InstanceIdentifier<D> path,
+                                             final D data) {
         merge(store, path, data,false);
     }
 

@@ -177,7 +177,6 @@ public class BindingTestContext implements AutoCloseable {
 
     private ProviderSession createMockContext() {
 
-        @SuppressWarnings("deprecation")
         final ClassToInstanceMap<BrokerService> domBrokerServices = ImmutableClassToInstanceMap
                 .<BrokerService> builder()
                 //
