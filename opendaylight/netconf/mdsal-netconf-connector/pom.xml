@@ -73,6 +73,10 @@
       </dependency>
       <dependency>
           <groupId>org.opendaylight.controller</groupId>
+          <artifactId>ietf-netconf</artifactId>
+      </dependency>
+      <dependency>
+          <groupId>org.opendaylight.controller</groupId>
           <artifactId>sal-broker-impl</artifactId>
           <scope>test</scope>
       </dependency>
