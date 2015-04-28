@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.Map;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.NonPersistentDataProvider;
+import org.opendaylight.controller.cluster.raft.election.DefaultElectionStrategy;
+import org.opendaylight.controller.cluster.raft.election.ElectionStrategy;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages;
 import org.opendaylight.controller.protobuff.messages.cluster.raft.test.MockPayloadMessages;
@@ -216,6 +218,11 @@ public class MockRaftActorContext implements RaftActorContext {
 
     @Override
     public void setTotalMemoryRetriever(Supplier<Long> retriever) {
+    }
+
+    @Override
+    public ElectionStrategy getElectionStrategy() {
+        return new DefaultElectionStrategy();
     }
 
     @Override

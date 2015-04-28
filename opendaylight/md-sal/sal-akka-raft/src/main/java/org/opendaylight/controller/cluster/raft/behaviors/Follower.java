@@ -51,7 +51,9 @@ public class Follower extends AbstractRaftActorBehavior {
         if(context.getPeerAddresses().isEmpty()){
             actor().tell(ELECTION_TIMEOUT, actor());
         } else {
-            scheduleElection(electionDuration());
+            if(context.getElectionStrategy().isAllowedToBecomeLeader(this.getId())) {
+                scheduleElection(electionDuration());
+            }
         }
 
     }
