@@ -10,12 +10,7 @@ package org.opendaylight.controller.netconf.test.tool.client.stress;
 
 import ch.qos.logback.classic.Level;
 import com.google.common.base.Charsets;
-import com.google.common.base.Function;
-import com.google.common.base.Joiner;
-import com.google.common.base.Splitter;
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.util.HashedWheelTimer;
@@ -85,28 +80,22 @@ public final class StressClient {
     }
 
     private static final String MSG_ID_PLACEHOLDER_REGEX = "\\{MSG_ID\\}";
-    private static final String PHYS_ADDR_PLACEHOLDER_REGEX = "\\{PHYS_ADDR\\}";
-    private static long idCounter = 0;
+    private static final String PHYS_ADDR_PLACEHOLDER = "{PHYS_ADDR}";
+
+    private static long macStart = 0xAABBCCDD0000L;
 
     public static void main(final String[] args) {
         final Parameters params = parseArgs(args, Parameters.getParser());
         params.validate();
 
-        // TODO remove
-//        try {
-//            Thread.sleep(10000);
-//        } catch (final InterruptedException e) {
-//            e.printStackTrace();
-//        }
-
         final ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
         root.setLevel(params.debug ? Level.DEBUG : Level.INFO);
 
-        int threadAmount = params.threadAmount;
+        final int threadAmount = params.threadAmount;
         LOG.info("thread amount: " + threadAmount);
-        int requestsPerThread = params.editCount / params.threadAmount;
+        final int requestsPerThread = params.editCount / params.threadAmount;
         LOG.info("requestsPerThread: " + requestsPerThread);
-        int leftoverRequests = params.editCount % params.threadAmount;
+        final int leftoverRequests = params.editCount % params.threadAmount;
         LOG.info("leftoverRequests: " + leftoverRequests);
 
 
@@ -125,7 +114,7 @@ public final class StressClient {
         final String editContentString;
         try {
             editContentString = Files.toString(params.editContent, Charsets.UTF_8);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new IllegalArgumentException("Cannot read content of " + params.editContent);
         }
 
@@ -147,7 +136,7 @@ public final class StressClient {
         final NetconfClientDispatcherImpl netconfClientDispatcher = configureClientDispatcher(params, nioGroup, timer);
 
         final List<StressClientCallable> callables = new ArrayList<>(threadAmount);
-        for (List<NetconfMessage> messages : allPreparedMessages) {
+        for (final List<NetconfMessage> messages : allPreparedMessages) {
             callables.add(new StressClientCallable(params, netconfClientDispatcher, messages));
         }
 
@@ -157,7 +146,7 @@ public final class StressClient {
         final Stopwatch started = Stopwatch.createStarted();
         try {
             final List<Future<Boolean>> futures = executorService.invokeAll(callables);
-            for (Future<Boolean> future : futures) {
+            for (final Future<Boolean> future : futures) {
                 try {
                     future.get(4L, TimeUnit.MINUTES);
                 } catch (ExecutionException | TimeoutException e) {
@@ -165,7 +154,7 @@ public final class StressClient {
                 }
             }
             executorService.shutdownNow();
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             throw new RuntimeException("Unable to execute requests", e);
         }
         started.stop();
@@ -182,7 +171,7 @@ public final class StressClient {
         }
     }
 
-    private static NetconfMessage prepareMessage(final int id, final String editContentString) {
+    static NetconfMessage prepareMessage(final int id, final String editContentString) {
         final Document msg = XmlUtil.createDocumentCopy(editBlueprint);
         msg.getDocumentElement().setAttribute("message-id", Integer.toString(id));
         final NetconfMessage netconfMessage = new NetconfMessage(msg);
@@ -192,11 +181,13 @@ public final class StressClient {
             // Insert message id where needed
             String specificEditContent = editContentString.replaceAll(MSG_ID_PLACEHOLDER_REGEX, Integer.toString(id));
 
-            while (specificEditContent.contains("{PHYS_ADDR}")) {
-                specificEditContent =
-                        specificEditContent.replaceFirst(PHYS_ADDR_PLACEHOLDER_REGEX, getMac(idCounter));
-                idCounter++;
+            final StringBuilder stringBuilder = new StringBuilder(specificEditContent);
+            int idx = stringBuilder.indexOf(PHYS_ADDR_PLACEHOLDER);
+            while (idx!= -1) {
+                stringBuilder.replace(idx, idx + PHYS_ADDR_PLACEHOLDER.length(), getMac(macStart++));
+                idx = stringBuilder.indexOf(PHYS_ADDR_PLACEHOLDER);
             }
+            specificEditContent = stringBuilder.toString();
 
             editContentElement = XmlUtil.readXmlToElement(specificEditContent);
             final Node config = ((Element) msg.getDocumentElement().getElementsByTagName("edit-config").item(0)).
@@ -227,21 +218,18 @@ public final class StressClient {
         return netconfClientDispatcher;
     }
 
-    private static String getMac(final long i) {
-        final String hex = Long.toHexString(i);
-        final Iterable<String> macGroups = Splitter.fixedLength(2).split(hex);
+    public static String getMac(long mac) {
+        StringBuilder m = new StringBuilder(Long.toString(mac, 16));
 
-        final int additional = 6 - Iterables.size(macGroups);
-        final ArrayList<String> additionalGroups = Lists.newArrayListWithCapacity(additional);
-        for (int j = 0; j < additional; j++) {
-            additionalGroups.add("00");
+        for (int i = m.length(); i < 12; i++) {
+            m.insert(0, "0");
         }
-        return Joiner.on(':').join(Iterables.concat(Iterables.transform(macGroups, new Function<String, String>() {
-            @Override
-            public String apply(final String input) {
-                return input.length() == 1 ? input + "0" : input;
-            }
-        }), additionalGroups));
+
+        for (int j = m.length() - 2; j >= 2; j-=2) {
+            m.insert(j, ":");
+        }
+
+        return m.toString();
     }
 
     private static Parameters parseArgs(final String[] args, final ArgumentParser parser) {
