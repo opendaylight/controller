@@ -44,6 +44,8 @@ import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
 import org.opendaylight.controller.cluster.raft.client.messages.FollowerInfo;
 import org.opendaylight.controller.cluster.raft.client.messages.GetOnDemandRaftState;
 import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
+import org.opendaylight.controller.cluster.raft.election.DefaultElectionStrategy;
+import org.opendaylight.controller.cluster.raft.election.ElectionStrategy;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -115,17 +117,22 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     private final BehaviorStateHolder reusableBehaviorStateHolder = new BehaviorStateHolder();
 
     public RaftActor(String id, Map<String, String> peerAddresses) {
-        this(id, peerAddresses, Optional.<ConfigParams>absent());
+        this(id, peerAddresses, Optional.<ConfigParams>absent(), new DefaultElectionStrategy());
     }
 
     public RaftActor(String id, Map<String, String> peerAddresses,
-         Optional<ConfigParams> configParams) {
+                     Optional<ConfigParams> configParams) {
+        this(id, peerAddresses, configParams, new DefaultElectionStrategy());
+    }
+
+    public RaftActor(String id, Map<String, String> peerAddresses,
+         Optional<ConfigParams> configParams, ElectionStrategy electionStrategy) {
 
         context = new RaftActorContextImpl(this.getSelf(),
             this.getContext(), id, new ElectionTermImpl(delegatingPersistenceProvider, id, LOG),
             -1, -1, peerAddresses,
             (configParams.isPresent() ? configParams.get(): new DefaultConfigParamsImpl()),
-            delegatingPersistenceProvider, LOG);
+            delegatingPersistenceProvider, electionStrategy, LOG);
 
         context.setReplicatedLog(ReplicatedLogImpl.newInstance(context, currentBehavior));
     }
@@ -565,7 +572,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     /**
-     * @deprecated Deprecated in favor of {@link org.opendaylight.controller.cluster.raft.base.messages.DeleteEntriesTest}
+     * @deprecated Deprecated in favor of {@link org.opendaylight.controller.cluster.raft.base.messages.DeleteEntries}
      *             whose type for fromIndex is long instead of int. This class was kept for backwards
      *             compatibility with Helium.
      */

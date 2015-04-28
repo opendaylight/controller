@@ -18,6 +18,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Supplier;
 import java.util.Map;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
+import org.opendaylight.controller.cluster.raft.election.DefaultElectionStrategy;
+import org.opendaylight.controller.cluster.raft.election.ElectionStrategy;
 import org.slf4j.Logger;
 
 public class RaftActorContextImpl implements RaftActorContext {
@@ -51,9 +53,19 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     private final DataPersistenceProvider persistenceProvider;
 
+    private final ElectionStrategy electionStrategy;
+
+    public RaftActorContextImpl(ActorRef actor, UntypedActorContext context, String id,
+                                ElectionTerm termInformation, long commitIndex, long lastApplied, Map<String, String> peerAddresses,
+                                ConfigParams configParams, DataPersistenceProvider persistenceProvider, Logger logger) {
+        this(actor, context, id, termInformation, commitIndex, lastApplied, peerAddresses, configParams,
+                persistenceProvider, new DefaultElectionStrategy(), logger);
+    }
+
     public RaftActorContextImpl(ActorRef actor, UntypedActorContext context, String id,
             ElectionTerm termInformation, long commitIndex, long lastApplied, Map<String, String> peerAddresses,
-            ConfigParams configParams, DataPersistenceProvider persistenceProvider, Logger logger) {
+            ConfigParams configParams, DataPersistenceProvider persistenceProvider, ElectionStrategy electionStrategy,
+            Logger logger) {
         this.actor = actor;
         this.context = context;
         this.id = id;
@@ -63,6 +75,7 @@ public class RaftActorContextImpl implements RaftActorContext {
         this.peerAddresses = peerAddresses;
         this.configParams = configParams;
         this.persistenceProvider = persistenceProvider;
+        this.electionStrategy = electionStrategy;
         this.LOG = logger;
     }
 
@@ -190,5 +203,10 @@ public class RaftActorContextImpl implements RaftActorContext {
     @Override
     public DataPersistenceProvider getPersistenceProvider() {
         return persistenceProvider;
+    }
+
+    @Override
+    public ElectionStrategy getElectionStrategy() {
+        return electionStrategy;
     }
 }

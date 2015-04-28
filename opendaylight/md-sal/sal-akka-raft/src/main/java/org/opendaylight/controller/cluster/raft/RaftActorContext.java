@@ -16,6 +16,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Supplier;
 import java.util.Map;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
+import org.opendaylight.controller.cluster.raft.election.ElectionStrategy;
 import org.slf4j.Logger;
 
 /**
@@ -179,5 +180,7 @@ public interface RaftActorContext {
 
     @VisibleForTesting
     void setTotalMemoryRetriever(Supplier<Long> retriever);
+
+    ElectionStrategy getElectionStrategy();
 
 }
