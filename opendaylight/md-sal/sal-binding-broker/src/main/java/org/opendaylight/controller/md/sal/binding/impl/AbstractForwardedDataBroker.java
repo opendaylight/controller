@@ -108,6 +108,7 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
         return hashSet;
     }
 
+    @SuppressWarnings("unchecked")
     protected Optional<DataObject> toBindingData(final InstanceIdentifier<?> path, final NormalizedNode<?, ?> data) {
         if (path.isWildcarded()) {
             return Optional.absent();
@@ -117,16 +118,12 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
 
     private class TranslatingDataChangeInvoker implements DOMDataChangeListener {
         private final DataChangeListener bindingDataChangeListener;
-        private final LogicalDatastoreType store;
         private final InstanceIdentifier<?> path;
-        private final DataChangeScope triggeringScope;
 
         public TranslatingDataChangeInvoker(final LogicalDatastoreType store, final InstanceIdentifier<?> path,
                 final DataChangeListener bindingDataChangeListener, final DataChangeScope triggeringScope) {
-            this.store = store;
             this.path = path;
             this.bindingDataChangeListener = bindingDataChangeListener;
-            this.triggeringScope = triggeringScope;
         }
 
         @Override
@@ -218,11 +215,10 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
 
         @Override
         public String toString() {
-            return MoreObjects.toStringHelper(TranslatedDataChangeEvent.class) //
-                    .add("created", getCreatedData()) //
-                    .add("updated", getUpdatedData()) //
-                    .add("removed", getRemovedPaths()) //
-                    .add("dom", domEvent) //
+            return MoreObjects.toStringHelper(TranslatedDataChangeEvent.class).add("created", getCreatedData())
+                    .add("updated", getUpdatedData())
+                    .add("removed", getRemovedPaths())
+                    .add("dom", domEvent)
                     .toString();
         }
     }
