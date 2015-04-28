@@ -13,6 +13,7 @@ import akka.osgi.BundleDelegatingClassLoader;
 import com.typesafe.config.ConfigFactory;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationReader;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
+import org.opendaylight.controller.cluster.datastore.utils.ElectionStrategyFactory;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.osgi.framework.BundleContext;
 
@@ -28,6 +29,8 @@ public class DistributedDataStoreFactory {
         DatastoreContextIntrospector introspector = new DatastoreContextIntrospector(datastoreContext);
         DatastoreContextConfigAdminOverlay overlay = new DatastoreContextConfigAdminOverlay(
                 introspector, bundleContext);
+
+        ElectionStrategyFactory.setBundleContext(bundleContext);
 
         ActorSystem actorSystem = getOrCreateInstance(bundleContext, datastoreContext.getConfigurationReader());
         Configuration config = new ConfigurationImpl("module-shards.conf", "modules.conf");
