@@ -37,10 +37,8 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RootBindingAwareBroker implements //
-        Mutable, //
-        Identifiable<String>, //
-        BindingAwareBroker, AutoCloseable, RpcProviderRegistry {
+public class RootBindingAwareBroker implements Mutable, Identifiable<String>, BindingAwareBroker, AutoCloseable,
+        RpcProviderRegistry {
 
     private final static Logger LOG = LoggerFactory.getLogger(RootBindingAwareBroker.class);
 

@@ -30,7 +30,7 @@ final class NotificationInvoker implements org.opendaylight.controller.sal.bindi
         delegate = listener;
         final Map<Class<? extends Notification>, InvokerContext> builder = new HashMap<>();
         for(final TypeToken<?> ifaceToken : TypeToken.of(listener.getClass()).getTypes().interfaces()) {
-            Class<?> iface = ifaceToken.getRawType();
+            final Class<?> iface = ifaceToken.getRawType();
             if(NotificationListener.class.isAssignableFrom(iface) && BindingReflections.isBindingClass(iface)) {
                 @SuppressWarnings("unchecked")
                 final Class<? extends NotificationListener> listenerType = (Class<? extends NotificationListener>) iface;
@@ -54,7 +54,7 @@ final class NotificationInvoker implements org.opendaylight.controller.sal.bindi
     @Override
     public void onNotification(final Notification notification) {
         getContext(notification.getImplementedInterface()).invoke(notification);
-    };
+    }
 
     private InvokerContext getContext(final Class<?> type) {
         return invokers.get(type);
@@ -74,7 +74,7 @@ final class NotificationInvoker implements org.opendaylight.controller.sal.bindi
         return ret;
     }
 
-    private class InvokerContext {
+    private final class InvokerContext {
 
         private final QName name;
         private final NotificationListenerInvoker invoker;

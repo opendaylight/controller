@@ -29,8 +29,10 @@ public abstract class AdapterLoader<T, D> extends CacheLoader<Class<? extends T>
         return  Optional.<T>of(builder.build());
     }
 
-    protected abstract @Nullable D getDelegate(Class<? extends D> reqDeleg);
+    @Nullable
+    protected abstract D getDelegate(Class<? extends D> reqDeleg);
 
-    protected abstract @Nonnull AdapterBuilder<? extends T, D> createBuilder(Class<? extends T> key) throws IllegalArgumentException;
+    @Nonnull
+    protected abstract AdapterBuilder<? extends T, D> createBuilder(Class<? extends T> key);
 
 }

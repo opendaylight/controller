@@ -61,7 +61,7 @@ class RpcServiceAdapter implements InvocationHandler {
         proxy = (RpcService) Proxy.newProxyInstance(type.getClassLoader(), new Class[] {type}, this);
     }
 
-    private final ListenableFuture<RpcResult<?>> invoke0(final SchemaPath schemaPath, final NormalizedNode<?, ?> input) {
+    private ListenableFuture<RpcResult<?>> invoke0(final SchemaPath schemaPath, final NormalizedNode<?, ?> input) {
         final CheckedFuture<DOMRpcResult, DOMRpcException> result = delegate.invokeRpc(schemaPath, input);
         if(result instanceof LazyDOMRpcResultFuture) {
             return ((LazyDOMRpcResultFuture) result).getBindingFuture();
@@ -105,14 +105,15 @@ class RpcServiceAdapter implements InvocationHandler {
     private static boolean isObjectMethod(final Method m) {
         switch (m.getName()) {
             case "toString":
-                return (m.getReturnType() == String.class && m.getParameterTypes().length == 0);
+                return (m.getReturnType().equals(String.class) && m.getParameterTypes().length == 0);
             case "hashCode":
-                return (m.getReturnType() == int.class && m.getParameterTypes().length == 0);
+                return (m.getReturnType().equals(int.class) && m.getParameterTypes().length == 0);
             case "equals":
-                return (m.getReturnType() == boolean.class && m.getParameterTypes().length == 1 && m
+                return (m.getReturnType().equals(boolean.class) && m.getParameterTypes().length == 1 && m
                         .getParameterTypes()[0] == Object.class);
+            default:
+                return false;
         }
-        return false;
     }
 
     private Object callObjectMethod(final Object self, final Method m, final Object[] args) {
@@ -123,8 +124,9 @@ class RpcServiceAdapter implements InvocationHandler {
                 return System.identityHashCode(self);
             case "equals":
                 return (self == args[0]);
+            default:
+                return null;
         }
-        return null;
     }
 
     private static ListenableFuture<RpcResult<?>> transformFuture(final SchemaPath rpc,
