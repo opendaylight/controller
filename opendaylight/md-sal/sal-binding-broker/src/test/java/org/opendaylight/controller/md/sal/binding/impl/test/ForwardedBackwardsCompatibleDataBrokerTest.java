@@ -10,15 +10,13 @@ package org.opendaylight.controller.md.sal.binding.impl.test;
 
 import static junit.framework.TestCase.assertNotNull;
 
-import org.opendaylight.controller.md.sal.binding.compat.HydrogenDataBrokerAdapter;
-
 import com.google.common.collect.ImmutableSet;
 import java.util.concurrent.ExecutionException;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
+import org.opendaylight.controller.md.sal.binding.compat.HydrogenDataBrokerAdapter;
 import org.opendaylight.controller.md.sal.binding.test.AbstractDataBrokerTest;
 import org.opendaylight.controller.md.sal.binding.test.DataBrokerTestCustomizer;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.Top;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelList;
@@ -33,10 +31,7 @@ import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 public class ForwardedBackwardsCompatibleDataBrokerTest extends
     AbstractDataBrokerTest {
 
-    private DataBrokerTestCustomizer testCustomizer;
     private HydrogenDataBrokerAdapter dataBroker;
-    private DOMDataBroker domBroker;
-
     private static final InstanceIdentifier<Top> TOP_PATH = InstanceIdentifier.create(Top.class);
     private static final TopLevelListKey TOP_LIST_KEY = new TopLevelListKey("foo");
     private static final InstanceIdentifier<TopLevelList> NODE_PATH = TOP_PATH.child(TopLevelList.class, TOP_LIST_KEY);

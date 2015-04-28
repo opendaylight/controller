@@ -63,8 +63,7 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
 
     public ListenerRegistration<DataChangeListener> registerDataChangeListener(final LogicalDatastoreType store,
             final InstanceIdentifier<?> path, final DataChangeListener listener, final DataChangeScope triggeringScope) {
-        final DOMDataChangeListener domDataChangeListener = new TranslatingDataChangeInvoker(store, path, listener,
-                triggeringScope);
+        final DOMDataChangeListener domDataChangeListener = new TranslatingDataChangeInvoker(path, listener);
         final YangInstanceIdentifier domPath = codec.toYangInstanceIdentifierBlocking(path);
         final ListenerRegistration<DOMDataChangeListener> domRegistration = domDataBroker.registerDataChangeListener(store,
                 domPath, domDataChangeListener, triggeringScope);
@@ -108,6 +107,7 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
         return hashSet;
     }
 
+    @SuppressWarnings("unchecked")
     protected Optional<DataObject> toBindingData(final InstanceIdentifier<?> path, final NormalizedNode<?, ?> data) {
         if (path.isWildcarded()) {
             return Optional.absent();
@@ -117,16 +117,12 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
 
     private class TranslatingDataChangeInvoker implements DOMDataChangeListener {
         private final DataChangeListener bindingDataChangeListener;
-        private final LogicalDatastoreType store;
         private final InstanceIdentifier<?> path;
-        private final DataChangeScope triggeringScope;
 
-        public TranslatingDataChangeInvoker(final LogicalDatastoreType store, final InstanceIdentifier<?> path,
-                final DataChangeListener bindingDataChangeListener, final DataChangeScope triggeringScope) {
-            this.store = store;
+        public TranslatingDataChangeInvoker(final InstanceIdentifier<?> path,
+                final DataChangeListener bindingDataChangeListener) {
             this.path = path;
             this.bindingDataChangeListener = bindingDataChangeListener;
-            this.triggeringScope = triggeringScope;
         }
 
         @Override
@@ -218,8 +214,7 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
 
         @Override
         public String toString() {
-            return MoreObjects.toStringHelper(TranslatedDataChangeEvent.class) //
-                    .add("created", getCreatedData()) //
+            return MoreObjects.toStringHelper(TranslatedDataChangeEvent.class).add("created", getCreatedData()) //
                     .add("updated", getUpdatedData()) //
                     .add("removed", getRemovedPaths()) //
                     .add("dom", domEvent) //
