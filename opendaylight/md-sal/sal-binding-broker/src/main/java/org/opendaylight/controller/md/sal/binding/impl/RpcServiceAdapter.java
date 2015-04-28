@@ -30,7 +30,7 @@ class RpcServiceAdapter implements InvocationHandler {
     private final Class<? extends RpcService> type;
     private final InvocationDelegate delegate;
 
-    RpcServiceAdapter(Class<? extends RpcService> type, ImmutableMap<Method, SchemaPath> rpcNames, InvocationDelegate delegate) {
+    RpcServiceAdapter(final Class<? extends RpcService> type, final ImmutableMap<Method, SchemaPath> rpcNames, final InvocationDelegate delegate) {
         this.rpcNames = rpcNames;
         this.type = type;
         this.delegate = delegate;
@@ -42,9 +42,9 @@ class RpcServiceAdapter implements InvocationHandler {
     }
 
     @Override
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+    public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
 
-        SchemaPath rpc = rpcNames.get(method);
+        final SchemaPath rpc = rpcNames.get(method);
         if(rpc != null) {
             if(method.getParameterTypes().length == 0) {
                 return delegate.invoke(rpc, null);
@@ -61,27 +61,29 @@ class RpcServiceAdapter implements InvocationHandler {
         throw new UnsupportedOperationException("Method " + method.toString() + "is unsupported.");
     }
 
-    private static boolean isObjectMethod(Method m) {
+    private static boolean isObjectMethod(final Method m) {
         switch (m.getName()) {
-        case "toString":
-            return (m.getReturnType() == String.class && m.getParameterTypes().length == 0);
-        case "hashCode":
-            return (m.getReturnType() == int.class && m.getParameterTypes().length == 0);
-        case "equals":
-            return (m.getReturnType() == boolean.class && m.getParameterTypes().length == 1 && m.getParameterTypes()[0] == Object.class);
+            case "toString":
+                return (String.class.equals(m.getReturnType()) && m.getParameterTypes().length == 0);
+            case "hashCode":
+                return (int.class.equals(m.getReturnType()) && m.getParameterTypes().length == 0);
+            case "equals":
+                return (boolean.class.equals(m.getReturnType()) && m.getParameterTypes().length == 1 && Object.class.equals(m.getParameterTypes()[0]));
+            default:
+                return false;
         }
-        return false;
     }
 
-    private Object callObjectMethod(Object self, Method m, Object[] args) {
+    private Object callObjectMethod(final Object self, final Method m, final Object[] args) {
         switch (m.getName()) {
-        case "toString":
-            return type.getName() + "$Adapter{delegate=" + delegate.toString()+"}";
-        case "hashCode":
-            return System.identityHashCode(self);
-        case "equals":
-            return (self == args[0]);
+            case "toString":
+                return type.getName() + "$Adapter{delegate=" + delegate.toString()+"}";
+            case "hashCode":
+                return System.identityHashCode(self);
+            case "equals":
+                return (self == args[0]);
+            default:
+                return null;
         }
-        return null;
     }
 }
