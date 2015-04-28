@@ -16,8 +16,10 @@
     </test-option>
     <default-operation>none</default-operation>
     <config>
-        <mapping-nodes xmlns="urn:opendaylight:mdsal:mapping:test" xmlns:a="urn:ietf:params:xml:ns:netconf:base:1.0" a:operation="delete">
+        <mapping-nodes xmlns="urn:opendaylight:mdsal:mapping:test" xmlns:a="urn:ietf:params:xml:ns:netconf:base:1.0" a:operation="remove">
         </mapping-nodes>
+        <top xmlns="urn:opendaylight:mdsal:mapping:test" xmlns:a="urn:ietf:params:xml:ns:netconf:base:1.0" a:operation="remove">
+        </top>
     </config>
 </edit-config>
 </rpc>
