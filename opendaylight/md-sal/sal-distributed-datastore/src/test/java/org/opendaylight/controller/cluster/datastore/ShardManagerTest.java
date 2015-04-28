@@ -169,6 +169,26 @@ public class ShardManagerTest extends AbstractActorTest {
     }
 
     @Test
+    public void testOnReceiveFindPrimaryForNonLocalLeaderShardBeforeMemberUp() throws Exception {
+        new JavaTestKit(getSystem()) {{
+            final ActorRef shardManager = getSystem().actorOf(newPropsShardMgrWithMockShardActor());
+
+            shardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
+            shardManager.tell(new ActorInitialized(), mockShardActor);
+
+            String memberId2 = "member-2-shard-default-" + shardMrgIDSuffix;
+            String memberId1 = "member-1-shard-default-" + shardMrgIDSuffix;
+            shardManager.tell(new RoleChangeNotification(memberId1,
+                    RaftState.Candidate.name(), RaftState.Follower.name()), mockShardActor);
+            shardManager.tell(new LeaderStateChanged(memberId1, memberId2), mockShardActor);
+
+            shardManager.tell(new FindPrimary(Shard.DEFAULT_NAME, false), getRef());
+
+            expectMsgClass(duration("5 seconds"), NoShardLeaderException.class);
+        }};
+    }
+
+    @Test
     public void testOnReceiveFindPrimaryForNonLocalLeaderShard() throws Exception {
         new JavaTestKit(getSystem()) {{
             final ActorRef shardManager = getSystem().actorOf(newPropsShardMgrWithMockShardActor());
@@ -669,6 +689,8 @@ public class ShardManagerTest extends AbstractActorTest {
 
                 verify(ready, never()).countDown();
 
+                shardManager.underlyingActor().onReceiveCommand(MockClusterWrapper.createMemberUp("member-2", getRef().path().toString()));
+
                 shardManager.underlyingActor().onReceiveCommand(new LeaderStateChanged(memberId, "member-2-shard-default-" + shardMrgIDSuffix));
 
                 verify(ready, times(1)).countDown();
@@ -676,6 +698,26 @@ public class ShardManagerTest extends AbstractActorTest {
             }};
     }
 
+    @Test
+    public void testReadyCountDownForMemberUpAfterLeaderStateChanged() throws Exception {
+        new JavaTestKit(getSystem()) {
+            {
+                TestActorRef<ShardManager> shardManager = TestActorRef.create(getSystem(), newShardMgrProps());
+
+                String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
+                shardManager.underlyingActor().onReceiveCommand(new RoleChangeNotification(
+                        memberId, null, RaftState.Follower.name()));
+
+                verify(ready, never()).countDown();
+
+                shardManager.underlyingActor().onReceiveCommand(new LeaderStateChanged(memberId, "member-2-shard-default-" + shardMrgIDSuffix));
+
+                shardManager.underlyingActor().onReceiveCommand(MockClusterWrapper.createMemberUp("member-2", getRef().path().toString()));
+
+                verify(ready, times(1)).countDown();
+
+            }};
+    }
 
     @Test
     public void testRoleChangeNotificationDoNothingForUnknownShard() throws Exception {

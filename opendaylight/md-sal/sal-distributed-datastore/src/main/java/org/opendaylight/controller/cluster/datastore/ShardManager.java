@@ -435,6 +435,8 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             info.updatePeerAddress(getShardIdentifier(memberName, shardName).toString(),
                 getShardActorPath(shardName, memberName), getSelf());
         }
+
+        checkReady();
     }
 
     private void onDatastoreContext(DatastoreContext context) {
@@ -727,7 +729,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         }
 
         boolean isShardReadyWithLeaderId() {
-            return isShardReady() && (isLeader() || peerAddresses.containsKey(leaderId));
+            return isShardReady() && (isLeader() || peerAddresses.get(leaderId) != null);
         }
 
         boolean isShardInitialized() {
