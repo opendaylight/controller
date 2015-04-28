@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_599b5618",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/FindPrimary.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-04-28T18:46:39Z",
+      "side": 1,
+      "message": "I see your point. However the flag confused me. For me it would have been more intuitive to actually look at the sender actor/path and determine if it was local/remote. How about doing that instead by using ActorContext.isPathLocal?",
+      "parentUuid": "3aa0d159_8c20c1f8",
+      "revId": "4b76c6643235aa4ff96a4ac54dec9d46c6777497",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_cc13295b",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/FindPrimary.java",
         "patchSetId": 3
