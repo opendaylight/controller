@@ -74,7 +74,7 @@ public class MockClusterWrapper implements ClusterWrapper{
     }
 
 
-    private static ClusterEvent.MemberUp createMemberUp(String memberName, String address) {
+    public static ClusterEvent.MemberUp createMemberUp(String memberName, String address) {
         akka.cluster.UniqueAddress uniqueAddress = new UniqueAddress(
             AddressFromURIString.parse(address), 55);
 
