@@ -7,12 +7,11 @@
  */
 package org.opendaylight.controller.md.sal.binding.compat;
 
+import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
 import org.opendaylight.yangtools.yang.binding.Notification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Objects;
-import com.google.common.base.Preconditions;
 
 class NotifyTask implements Runnable {
     private static final Logger LOG = LoggerFactory.getLogger(NotifyTask.class);
@@ -62,23 +61,30 @@ class NotifyTask implements Runnable {
 
     @Override
     public boolean equals(final Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
-        NotifyTask other = (NotifyTask) obj;
+        }
+        final NotifyTask other = (NotifyTask) obj;
         if (registration == null) {
-            if (other.registration != null)
+            if (other.registration != null) {
                 return false;
-        } else if (!registration.equals(other.registration))
+            }
+        } else if (!registration.equals(other.registration)) {
             return false;
+        }
         if (notification == null) {
-            if (other.notification != null)
+            if (other.notification != null) {
                 return false;
-        } else if (!notification.equals(other.notification))
+            }
+        } else if (!notification.equals(other.notification)) {
             return false;
+        }
         return true;
     }
 

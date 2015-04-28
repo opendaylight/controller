@@ -38,8 +38,7 @@ public abstract class BindingDOMAdapterLoader extends AdapterLoader<BindingServi
     }
 
     @Override
-    protected final AdapterBuilder<? extends BindingService, DOMService> createBuilder(final Class<? extends BindingService> key)
-            throws IllegalArgumentException {
+    protected final AdapterBuilder<? extends BindingService, DOMService> createBuilder(final Class<? extends BindingService> key) {
         final Factory<?> factory = FACTORIES.get(key);
         Preconditions.checkArgument(factory != null, "Unsupported service type %s", key);
         final BindingDOMAdapterBuilder<?> builder = factory.newBuilder();
