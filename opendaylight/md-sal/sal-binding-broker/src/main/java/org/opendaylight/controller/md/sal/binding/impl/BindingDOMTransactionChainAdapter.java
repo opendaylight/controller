@@ -53,15 +53,14 @@ final class BindingDOMTransactionChainAdapter implements BindingTransactionChain
 
     @Override
     public ReadOnlyTransaction newReadOnlyTransaction() {
-        DOMDataReadOnlyTransaction delegateTx = delegate.newReadOnlyTransaction();
-        ReadOnlyTransaction bindingTx = new BindingDOMReadTransactionAdapter(delegateTx, codec);
-        return bindingTx;
+        final DOMDataReadOnlyTransaction delegateTx = delegate.newReadOnlyTransaction();
+        return new BindingDOMReadTransactionAdapter(delegateTx, codec);
     }
 
     @Override
     public ReadWriteTransaction newReadWriteTransaction() {
-        DOMDataReadWriteTransaction delegateTx = delegate.newReadWriteTransaction();
-        ReadWriteTransaction bindingTx = new BindingDOMReadWriteTransactionAdapter(delegateTx, codec) {
+        final DOMDataReadWriteTransaction delegateTx = delegate.newReadWriteTransaction();
+        return new BindingDOMReadWriteTransactionAdapter(delegateTx, codec) {
 
             @Override
             public CheckedFuture<Void, TransactionCommitFailedException> submit() {
@@ -69,33 +68,31 @@ final class BindingDOMTransactionChainAdapter implements BindingTransactionChain
             }
 
         };
-        return bindingTx;
     }
 
     @Override
     public WriteTransaction newWriteOnlyTransaction() {
         final DOMDataWriteTransaction delegateTx = delegate.newWriteOnlyTransaction();
-        WriteTransaction bindingTx = new BindingDOMWriteTransactionAdapter<DOMDataWriteTransaction>(delegateTx, codec) {
+        return new BindingDOMWriteTransactionAdapter<DOMDataWriteTransaction>(delegateTx, codec) {
 
             @Override
             public CheckedFuture<Void,TransactionCommitFailedException> submit() {
                 return listenForFailure(this,super.submit());
-            };
+            }
 
         };
-        return bindingTx;
     }
 
     private CheckedFuture<Void, TransactionCommitFailedException> listenForFailure(
-            final WriteTransaction tx, CheckedFuture<Void, TransactionCommitFailedException> future) {
+            final WriteTransaction tx, final CheckedFuture<Void, TransactionCommitFailedException> future) {
         Futures.addCallback(future, new FutureCallback<Void>() {
             @Override
-            public void onFailure(Throwable t) {
+            public void onFailure(final Throwable t) {
                 failTransactionChain(tx,t);
             }
 
             @Override
-            public void onSuccess(Void result) {
+            public void onSuccess(final Void result) {
                 // Intentionally NOOP
             }
         });
@@ -103,7 +100,7 @@ final class BindingDOMTransactionChainAdapter implements BindingTransactionChain
         return future;
     }
 
-    private void failTransactionChain(WriteTransaction tx, Throwable t) {
+    private void failTransactionChain(final WriteTransaction tx, final Throwable t) {
         /*
          *  We asume correct state change for underlaying transaction
          *

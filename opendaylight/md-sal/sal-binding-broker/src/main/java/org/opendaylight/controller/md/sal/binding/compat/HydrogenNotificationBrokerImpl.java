@@ -53,7 +53,7 @@ public class HydrogenNotificationBrokerImpl implements NotificationProviderServi
         return HashMultimap.create(listeners.get().getListeners());
     }
 
-    private final void addRegistrations(final NotificationListenerRegistration<?>... registrations) {
+    private void addRegistrations(final NotificationListenerRegistration<?>... registrations) {
         synchronized (this) {
             final Multimap<Class<? extends Notification>, NotificationListenerRegistration<?>> newListeners =
                     mutableListeners();

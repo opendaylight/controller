@@ -11,7 +11,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.DataChangeEvent;
 import org.opendaylight.yangtools.yang.binding.DataObject;
@@ -95,7 +94,7 @@ public abstract class HydrogenDataChangeEvent implements
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private final static class OperationalChangeEvent extends HydrogenDataChangeEvent {
+    private static final class OperationalChangeEvent extends HydrogenDataChangeEvent {
 
         private final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> delegate;
         private Map<InstanceIdentifier<?>, DataObject> updatedCache;
@@ -132,9 +131,10 @@ public abstract class HydrogenDataChangeEvent implements
         @Override
         public Map<InstanceIdentifier<?>, DataObject> getUpdatedOperationalData() {
             if(updatedCache == null) {
-                Map<InstanceIdentifier<?>, DataObject> created = delegate.getCreatedData();
-                Map<InstanceIdentifier<?>, DataObject> updated = delegate.getUpdatedData();
-                HashMap<InstanceIdentifier<?>, DataObject> updatedComposite = new HashMap<>(created.size() + updated.size());
+                final Map<InstanceIdentifier<?>, DataObject> created = delegate.getCreatedData();
+                final Map<InstanceIdentifier<?>, DataObject> updated = delegate.getUpdatedData();
+                final Map<InstanceIdentifier<?>, DataObject> updatedComposite =
+                        new HashMap<>(created.size() + updated.size());
                 updatedComposite.putAll(created);
                 updatedComposite.putAll(updated);
                 updatedCache = Collections.unmodifiableMap(updatedComposite);
@@ -150,7 +150,7 @@ public abstract class HydrogenDataChangeEvent implements
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private final static class ConfigurationChangeEvent extends HydrogenDataChangeEvent {
+    private static final class ConfigurationChangeEvent extends HydrogenDataChangeEvent {
 
         private final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> delegate;
         private Map<InstanceIdentifier<?>, DataObject> updatedCache;
@@ -187,9 +187,10 @@ public abstract class HydrogenDataChangeEvent implements
         @Override
         public Map<InstanceIdentifier<?>, DataObject> getUpdatedConfigurationData() {
             if(updatedCache == null) {
-                Map<InstanceIdentifier<?>, DataObject> created = delegate.getCreatedData();
-                Map<InstanceIdentifier<?>, DataObject> updated = delegate.getUpdatedData();
-                HashMap<InstanceIdentifier<?>, DataObject> updatedComposite = new HashMap<>(created.size() + updated.size());
+                final Map<InstanceIdentifier<?>, DataObject> created = delegate.getCreatedData();
+                final Map<InstanceIdentifier<?>, DataObject> updated = delegate.getUpdatedData();
+                final Map<InstanceIdentifier<?>, DataObject> updatedComposite =
+                        new HashMap<>(created.size() + updated.size());
                 updatedComposite.putAll(created);
                 updatedComposite.putAll(updated);
                 updatedCache = Collections.unmodifiableMap(updatedComposite);
