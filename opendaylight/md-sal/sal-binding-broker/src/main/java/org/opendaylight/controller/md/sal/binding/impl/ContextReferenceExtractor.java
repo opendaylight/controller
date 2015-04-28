@@ -60,7 +60,8 @@ abstract class ContextReferenceExtractor {
      */
     abstract @Nullable InstanceIdentifier<?> extract(DataObject obj);
 
-    private static @Nonnull ContextReferenceExtractor create(final Class<?> key) {
+    @Nonnull
+    private static ContextReferenceExtractor create(final Class<?> key) {
         final Method contextGetter = getContextGetter(key);
         if (contextGetter == null) {
             return NULL_EXTRACTOR;
@@ -82,7 +83,8 @@ abstract class ContextReferenceExtractor {
         return NULL_EXTRACTOR;
     }
 
-    private static @Nullable Method findGetValueMethod(final Class<?> type, final Class<?> returnType) {
+    @Nullable
+    private static Method findGetValueMethod(final Class<?> type, final Class<?> returnType) {
         try {
             final Method method = type.getMethod(GET_VALUE_NAME);
             if(returnType.equals(method.getReturnType())) {

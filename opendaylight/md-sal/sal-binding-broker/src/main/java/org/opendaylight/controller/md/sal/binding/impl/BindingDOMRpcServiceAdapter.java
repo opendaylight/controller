@@ -52,13 +52,11 @@ public class BindingDOMRpcServiceAdapter implements RpcConsumerRegistry {
         this.codec = codec;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <T extends RpcService> T getRpcService(final Class<T> rpcService) {
         Preconditions.checkArgument(rpcService != null, "Rpc Service needs to be specied.");
-        @SuppressWarnings("unchecked")
-        final
-        T proxy = (T) proxies.getUnchecked(rpcService).getProxy();
-        return proxy;
+        return (T) proxies.getUnchecked(rpcService).getProxy();
     }
 
     private RpcServiceAdapter createProxy(final Class<? extends RpcService> key) {
