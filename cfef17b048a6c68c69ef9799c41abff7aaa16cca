@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_67646eb9",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/md/sal/binding/impl/ContextReferenceExtractor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-04-28T14:54:09Z",
+      "side": 1,
+      "message": "Returning NULL_EXTRACTOR will defer Rpc to classic LazySerialization, which means DOM Broker is still able to read whole RPC  and extract information needed.\n\nother extractors are there to speed-up serialization of just\none routed field.",
+      "parentUuid": "3aa0d159_2188961e",
+      "revId": "cfef17b048a6c68c69ef9799c41abff7aaa16cca",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_41904243",
         "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/md/sal/binding/impl/DirectGetterRouteContextExtractor.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2015-04-28T06:20:33Z",
       "side": 1,
       "message": "Why do you use invoke instead of invokeExact?",
+      "revId": "cfef17b048a6c68c69ef9799c41abff7aaa16cca",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_e76f1e91",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/md/sal/binding/impl/DirectGetterRouteContextExtractor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-04-28T14:54:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3aa0d159_41904243",
       "revId": "cfef17b048a6c68c69ef9799c41abff7aaa16cca",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_c7f9c2c9",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/md/sal/binding/impl/LazySerializedContainerNode.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-04-28T14:54:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3aa0d159_c17c5223",
+      "revId": "cfef17b048a6c68c69ef9799c41abff7aaa16cca",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_41bb62e5",
         "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/md/sal/binding/impl/RpcServiceAdapter.java",
         "patchSetId": 1
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_8703bab7",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/md/sal/binding/impl/RpcServiceAdapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-04-28T14:54:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3aa0d159_41bb62e5",
+      "revId": "cfef17b048a6c68c69ef9799c41abff7aaa16cca",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_41892225",
         "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/md/sal/binding/impl/RpcServiceAdapter.java",
         "patchSetId": 1
@@ -81,6 +153,24 @@
       "writtenOn": "2015-04-28T06:20:33Z",
       "side": 1,
       "message": "Is it valid for a routed rpc to have no context IID (either no appropriate extractor method found or it returns null)? Or is that checked for and failed downstream?",
+      "revId": "cfef17b048a6c68c69ef9799c41abff7aaa16cca",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_a70036ab",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/md/sal/binding/impl/RpcServiceAdapter.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-04-28T14:54:09Z",
+      "side": 1,
+      "message": "That is checked at actual implementation which is DOM RPC Broker.",
+      "parentUuid": "3aa0d159_41892225",
       "revId": "cfef17b048a6c68c69ef9799c41abff7aaa16cca",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
