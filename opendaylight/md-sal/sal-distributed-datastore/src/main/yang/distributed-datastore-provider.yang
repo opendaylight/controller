@@ -10,6 +10,7 @@ module distributed-datastore-provider {
     import opendaylight-config-dom-datastore {prefix config-dom-store-spi;}
     import opendaylight-operational-dom-datastore {prefix operational-dom-store-spi;}
     import opendaylight-md-sal-dom {prefix sal;}
+    import sal-clustering-api { prefix sal-clustering-api; revision-date 2015-04-07; }
 
     description
         "This module contains the base YANG definitions for
@@ -212,6 +213,15 @@ module distributed-datastore-provider {
                     }
                 }
 
+                container config-clustering-service { 
+                    uses config:service-ref {
+                        refine type {
+                            mandatory false;
+                            config:required-identity sal-clustering-api:sal-clustering-role-service;
+                        } 
+                    }
+                }
+
                 container config-properties {
                     uses data-store-properties;
                 }
@@ -229,6 +239,15 @@ module distributed-datastore-provider {
                             config:required-identity sal:schema-service;
                         }
                     }
+                }
+
+                container operational-clustering-service { 
+                    uses config:service-ref { 
+                        refine type {
+                            mandatory false; 
+                            config:required-identity sal-clustering-api:sal-clustering-role-service;
+                        } 
+                    } 
                 }
 
                 container operational-properties {

@@ -17,6 +17,7 @@ import org.opendaylight.controller.cluster.datastore.config.ConfigurationReader;
 import org.opendaylight.controller.cluster.datastore.config.FileConfigurationReader;
 import org.opendaylight.controller.cluster.raft.ConfigParams;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
+import org.opendaylight.controller.md.sal.clustering.api.ClusteringRoleService;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreConfigProperties;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
@@ -64,6 +65,7 @@ public class DatastoreContext {
     private String dataStoreType = UNKNOWN_DATA_STORE_TYPE;
     private int shardBatchedModificationCount = DEFAULT_SHARD_BATCHED_MODIFICATION_COUNT;
     private boolean writeOnlyTransactionOptimizationsEnabled = true;
+    private ClusteringRoleService clusteringRoleService;
 
     public static Set<String> getGlobalDatastoreTypes() {
         return globalDatastoreTypes;
@@ -93,6 +95,7 @@ public class DatastoreContext {
         this.dataStoreType = other.dataStoreType;
         this.shardBatchedModificationCount = other.shardBatchedModificationCount;
         this.writeOnlyTransactionOptimizationsEnabled = other.writeOnlyTransactionOptimizationsEnabled;
+        this.clusteringRoleService = other.clusteringRoleService;
 
         setShardJournalRecoveryLogBatchSize(other.raftConfig.getJournalRecoveryLogBatchSize());
         setSnapshotBatchCount(other.raftConfig.getSnapshotBatchCount());
@@ -199,6 +202,10 @@ public class DatastoreContext {
 
     public boolean isWriteOnlyTransactionOptimizationsEnabled() {
         return writeOnlyTransactionOptimizationsEnabled;
+    }
+
+    public ClusteringRoleService getClusteringRoleService() {
+        return clusteringRoleService;
     }
 
     public static class Builder {
@@ -365,6 +372,12 @@ public class DatastoreContext {
             this.maxShardDataStoreExecutorQueueSize = maxShardDataStoreExecutorQueueSize;
             return this;
         }
+
+        public Builder clusteringRoleService(ClusteringRoleService clusteringService) {
+            datastoreContext.clusteringRoleService = clusteringService;
+            return this;
+        }
+
 
         public DatastoreContext build() {
             datastoreContext.dataStoreProperties = InMemoryDOMDataStoreConfigProperties.create(
