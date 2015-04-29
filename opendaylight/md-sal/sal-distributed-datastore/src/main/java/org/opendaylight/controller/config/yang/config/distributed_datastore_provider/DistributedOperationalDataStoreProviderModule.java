@@ -56,10 +56,11 @@ public class DistributedOperationalDataStoreProviderModule extends
                         props.getShardTransactionCommitQueueCapacity().getValue().intValue())
                 .persistent(props.getPersistent().booleanValue())
                 .shardIsolatedLeaderCheckIntervalInMillis(
-                    props.getShardIsolatedLeaderCheckIntervalInMillis().getValue())
+                        props.getShardIsolatedLeaderCheckIntervalInMillis().getValue())
                 .shardElectionTimeoutFactor(props.getShardElectionTimeoutFactor().getValue())
                 .transactionCreationInitialRateLimit(props.getTransactionCreationInitialRateLimit().getValue())
                 .shardBatchedModificationCount(props.getShardBatchedModificationCount().getValue().intValue())
+                .clusteringRoleService(getOperationalClusteringServiceDependency())
                 .build();
 
         return DistributedDataStoreFactory.createInstance(getOperationalSchemaServiceDependency(),

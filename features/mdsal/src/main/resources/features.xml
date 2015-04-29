@@ -91,6 +91,7 @@
     </feature>
     <feature name ='odl-mdsal-distributed-datastore' version='${project.version}'>
         <feature version='${project.version}'>odl-mdsal-broker-local</feature>
+        <feature version='${project.version}'>odl-sal-clustering-service</feature>
         <feature version='${project.version}'>odl-mdsal-clustering-commons</feature>
         <feature version='${akka.version}'>odl-akka-clustering</feature>
         <bundle>mvn:org.opendaylight.controller/sal-distributed-datastore/${project.version}</bundle>

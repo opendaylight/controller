@@ -139,6 +139,12 @@
     </dependency>
 
     <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-clustering-api</artifactId>
+      <version>${mdsal.version}</version>
+    </dependency>
+
+    <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>concepts</artifactId>
     </dependency>
