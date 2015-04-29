@@ -86,6 +86,7 @@ public final class StressClient {
 
     private static final String MSG_ID_PLACEHOLDER_REGEX = "\\{MSG_ID\\}";
     private static final String PHYS_ADDR_PLACEHOLDER_REGEX = "\\{PHYS_ADDR\\}";
+    private static long idCounter = 0;
 
     public static void main(final String[] args) {
         final Parameters params = parseArgs(args, Parameters.getParser());
@@ -191,8 +192,11 @@ public final class StressClient {
             // Insert message id where needed
             String specificEditContent = editContentString.replaceAll(MSG_ID_PLACEHOLDER_REGEX, Integer.toString(id));
 
-            specificEditContent =
-                    specificEditContent.replaceAll(PHYS_ADDR_PLACEHOLDER_REGEX, getMac(id));
+            while (specificEditContent.contains("{PHYS_ADDR}")) {
+                specificEditContent =
+                        specificEditContent.replaceFirst(PHYS_ADDR_PLACEHOLDER_REGEX, getMac(idCounter));
+                idCounter++;
+            }
 
             editContentElement = XmlUtil.readXmlToElement(specificEditContent);
             final Node config = ((Element) msg.getDocumentElement().getElementsByTagName("edit-config").item(0)).
@@ -223,8 +227,8 @@ public final class StressClient {
         return netconfClientDispatcher;
     }
 
-    private static String getMac(final int i) {
-        final String hex = Integer.toHexString(i);
+    private static String getMac(final long i) {
+        final String hex = Long.toHexString(i);
         final Iterable<String> macGroups = Splitter.fixedLength(2).split(hex);
 
         final int additional = 6 - Iterables.size(macGroups);
