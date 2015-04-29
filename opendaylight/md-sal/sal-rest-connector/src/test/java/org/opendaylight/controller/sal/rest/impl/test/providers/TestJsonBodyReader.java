@@ -10,9 +10,11 @@ package org.opendaylight.controller.sal.rest.impl.test.providers;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import com.google.common.base.Optional;
+
 import java.io.InputStream;
+
 import javax.ws.rs.core.MediaType;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.JsonNormalizedNodeBodyReader;
@@ -27,34 +29,37 @@ import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
+import com.google.common.base.Optional;
+
 /**
- * sal-rest-connector
- * org.opendaylight.controller.sal.rest.impl.test.providers
+ * sal-rest-connector org.opendaylight.controller.sal.rest.impl.test.providers
  *
  *
  *
  * @author <a href="mailto:vdemcak@cisco.com">Vaclav Demcak</a>
  *
- * Created: Mar 11, 2015
+ *         Created: Mar 11, 2015
  */
 public class TestJsonBodyReader extends AbstractBodyReaderTest {
 
     private final JsonNormalizedNodeBodyReader jsonBodyReader;
     private static SchemaContext schemaContext;
 
-    public TestJsonBodyReader () throws NoSuchFieldException, SecurityException {
+    public TestJsonBodyReader() throws NoSuchFieldException, SecurityException {
         super();
         jsonBodyReader = new JsonNormalizedNodeBodyReader();
     }
 
     @Override
-    MediaType getMediaType() {
+    protected MediaType getMediaType() {
         return new MediaType(MediaType.APPLICATION_XML, null);
     }
 
     @BeforeClass
-    public static void initialization() throws NoSuchFieldException, SecurityException {
-        schemaContext = schemaContextLoader("/instanceidentifier/yang", schemaContext);
+    public static void initialization() throws NoSuchFieldException,
+            SecurityException {
+        schemaContext = schemaContextLoader("/instanceidentifier/yang",
+                schemaContext);
         schemaContext = schemaContextLoader("/modules", schemaContext);
         schemaContext = schemaContextLoader("/invoke-rpc", schemaContext);
         controllerContext.setSchemas(schemaContext);
@@ -62,39 +67,43 @@ public class TestJsonBodyReader extends AbstractBodyReaderTest {
 
     @Test
     public void moduleDataTest() throws Exception {
-        final DataSchemaNode dataSchemaNode = schemaContext.getDataChildByName("cont");
+        final DataSchemaNode dataSchemaNode = schemaContext
+                .getDataChildByName("cont");
         final String uri = "instance-identifier-module:cont";
         mockBodyReader(uri, jsonBodyReader, false);
         final InputStream inputStream = TestJsonBodyReader.class
                 .getResourceAsStream("/instanceidentifier/json/jsondata.json");
-        final NormalizedNodeContext returnValue = jsonBodyReader
-                .readFrom(null, null, null, mediaType, null, inputStream);
+        final NormalizedNodeContext returnValue = jsonBodyReader.readFrom(null,
+                null, null, mediaType, null, inputStream);
         checkNormalizedNodeContext(returnValue);
         checkExpectValueNormalizeNodeContext(dataSchemaNode, returnValue);
     }
 
     @Test
     public void moduleSubContainerDataPutTest() throws Exception {
-        final DataSchemaNode dataSchemaNode = schemaContext.getDataChildByName("cont");
+        final DataSchemaNode dataSchemaNode = schemaContext
+                .getDataChildByName("cont");
         final String uri = "instance-identifier-module:cont/cont1";
         mockBodyReader(uri, jsonBodyReader, false);
         final InputStream inputStream = TestJsonBodyReader.class
                 .getResourceAsStream("/instanceidentifier/json/json_sub_container.json");
-        final NormalizedNodeContext returnValue = jsonBodyReader
-                .readFrom(null, null, null, mediaType, null, inputStream);
+        final NormalizedNodeContext returnValue = jsonBodyReader.readFrom(null,
+                null, null, mediaType, null, inputStream);
         checkNormalizedNodeContext(returnValue);
-        checkExpectValueNormalizeNodeContext(dataSchemaNode, returnValue, "cont1");
+        checkExpectValueNormalizeNodeContext(dataSchemaNode, returnValue,
+                "cont1");
     }
 
     @Test
     public void moduleSubContainerDataPostTest() throws Exception {
-        final DataSchemaNode dataSchemaNode = schemaContext.getDataChildByName("cont");
+        final DataSchemaNode dataSchemaNode = schemaContext
+                .getDataChildByName("cont");
         final String uri = "instance-identifier-module:cont";
         mockBodyReader(uri, jsonBodyReader, true);
         final InputStream inputStream = TestJsonBodyReader.class
                 .getResourceAsStream("/instanceidentifier/json/json_sub_container.json");
-        final NormalizedNodeContext returnValue = jsonBodyReader
-                .readFrom(null, null, null, mediaType, null, inputStream);
+        final NormalizedNodeContext returnValue = jsonBodyReader.readFrom(null,
+                null, null, mediaType, null, inputStream);
         checkNormalizedNodeContext(returnValue);
         checkExpectValueNormalizeNodeContext(dataSchemaNode, returnValue);
     }
@@ -105,37 +114,51 @@ public class TestJsonBodyReader extends AbstractBodyReaderTest {
         mockBodyReader(uri, jsonBodyReader, true);
         final InputStream inputStream = TestJsonBodyReader.class
                 .getResourceAsStream("/invoke-rpc/json/rpc-input.json");
-        final NormalizedNodeContext returnValue = jsonBodyReader
-                .readFrom(null, null, null, mediaType, null, inputStream);
+        final NormalizedNodeContext returnValue = jsonBodyReader.readFrom(null,
+                null, null, mediaType, null, inputStream);
         checkNormalizedNodeContext(returnValue);
         final ContainerNode inputNode = (ContainerNode) returnValue.getData();
-        final YangInstanceIdentifier yangCont = YangInstanceIdentifier.of(QName.create(inputNode.getNodeType(), "cont"));
-        final Optional<DataContainerChild<? extends PathArgument, ?>> contDataNode = inputNode.getChild(yangCont.getLastPathArgument());
+        final YangInstanceIdentifier yangCont = YangInstanceIdentifier.of(QName
+                .create(inputNode.getNodeType(), "cont"));
+        final Optional<DataContainerChild<? extends PathArgument, ?>> contDataNode = inputNode
+                .getChild(yangCont.getLastPathArgument());
         assertTrue(contDataNode.isPresent());
         assertTrue(contDataNode.get() instanceof ContainerNode);
-        final YangInstanceIdentifier yangleaf = YangInstanceIdentifier.of(QName.create(inputNode.getNodeType(), "lf"));
-        final Optional<DataContainerChild<? extends PathArgument, ?>> leafDataNode = ((ContainerNode)contDataNode.get()).getChild(yangleaf.getLastPathArgument());
+        final YangInstanceIdentifier yangleaf = YangInstanceIdentifier.of(QName
+                .create(inputNode.getNodeType(), "lf"));
+        final Optional<DataContainerChild<? extends PathArgument, ?>> leafDataNode = ((ContainerNode) contDataNode
+                .get()).getChild(yangleaf.getLastPathArgument());
         assertTrue(leafDataNode.isPresent());
-        assertTrue("lf-test".equalsIgnoreCase(leafDataNode.get().getValue().toString()));
+        assertTrue("lf-test".equalsIgnoreCase(leafDataNode.get().getValue()
+                .toString()));
     }
 
-    private void checkExpectValueNormalizeNodeContext(final DataSchemaNode dataSchemaNode,
+    private void checkExpectValueNormalizeNodeContext(
+            final DataSchemaNode dataSchemaNode,
             final NormalizedNodeContext nnContext) {
         checkExpectValueNormalizeNodeContext(dataSchemaNode, nnContext, null);
     }
 
-    private void checkExpectValueNormalizeNodeContext(final DataSchemaNode dataSchemaNode,
+    private void checkExpectValueNormalizeNodeContext(
+            final DataSchemaNode dataSchemaNode,
             final NormalizedNodeContext nnContext, final String localQname) {
-        YangInstanceIdentifier dataNodeIdent = YangInstanceIdentifier.of(dataSchemaNode.getQName());
+        YangInstanceIdentifier dataNodeIdent = YangInstanceIdentifier
+                .of(dataSchemaNode.getQName());
 
         if (localQname != null && dataSchemaNode instanceof DataNodeContainer) {
-            final DataSchemaNode child = ((DataNodeContainer) dataSchemaNode).getDataChildByName(localQname);
-            dataNodeIdent = YangInstanceIdentifier.builder(dataNodeIdent).node(child.getQName()).build();
-            assertTrue(nnContext.getInstanceIdentifierContext().getSchemaNode().equals(child));
+            final DataSchemaNode child = ((DataNodeContainer) dataSchemaNode)
+                    .getDataChildByName(localQname);
+            dataNodeIdent = YangInstanceIdentifier.builder(dataNodeIdent)
+                    .node(child.getQName()).build();
+            assertTrue(nnContext.getInstanceIdentifierContext().getSchemaNode()
+                    .equals(child));
         } else {
-            assertTrue(nnContext.getInstanceIdentifierContext().getSchemaNode().equals(dataSchemaNode));
+            assertTrue(nnContext.getInstanceIdentifierContext().getSchemaNode()
+                    .equals(dataSchemaNode));
         }
-        assertTrue(nnContext.getInstanceIdentifierContext().getInstanceIdentifier().equals(dataNodeIdent));
-        assertNotNull(NormalizedNodes.findNode(nnContext.getData(), dataNodeIdent));
+        assertTrue(nnContext.getInstanceIdentifierContext()
+                .getInstanceIdentifier().equals(dataNodeIdent));
+        assertNotNull(NormalizedNodes.findNode(nnContext.getData(),
+                dataNodeIdent));
     }
 }
