@@ -137,15 +137,15 @@ public class YangStoreService implements YangStoreContext {
     }
 
     public AutoCloseable registerCapabilityListener(final CapabilityListener listener) {
-        final SoftReference<YangStoreSnapshot> yangStoreSnapshotSoftReference = ref.get();
 
-        YangStoreContext ret = yangStoreSnapshotSoftReference != null ? yangStoreSnapshotSoftReference.get() : null;
-        if(ret == null) {
-            ret = getYangStoreSnapshot();
+        YangStoreContext context = ref.get().get();
+
+        if(context == null) {
+            context = getYangStoreSnapshot();
         }
 
         this.listeners.add(listener);
-        listener.onCapabilitiesAdded(NetconfOperationServiceFactoryImpl.setupCapabilities(ret));
+        listener.onCapabilitiesAdded(NetconfOperationServiceFactoryImpl.setupCapabilities(context));
 
         return new AutoCloseable() {
             @Override
