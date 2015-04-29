@@ -1,0 +1,10 @@
+{
+    "identityref:cont":{
+        "cont1":{
+            "lf11":"identity-module:iden",
+            "lf12":"identityref-module:iden_local",              
+            "identityref-module:lf13":"identityref-module:iden_local",
+            "identityref-module:lf14":"identity-module:iden"  
+        }
+    }
+}
