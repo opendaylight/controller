@@ -31,24 +31,26 @@ class SyncExecutionStrategy implements ExecutionStrategy {
     private final List<NetconfMessage> preparedMessages;
     private final NetconfDeviceCommunicator sessionListener;
     private final List<Integer> editBatches;
+    private final int editAmount;
 
     public SyncExecutionStrategy(final Parameters params, final List<NetconfMessage> preparedMessages, final NetconfDeviceCommunicator sessionListener) {
         this.params = params;
         this.preparedMessages = preparedMessages;
         this.sessionListener = sessionListener;
-        editBatches = countEditBatchSizes(params);
+        this.editBatches = countEditBatchSizes(params, preparedMessages.size());
+        editAmount = preparedMessages.size();
     }
 
-    private static List<Integer> countEditBatchSizes(final Parameters params) {
+    private static List<Integer> countEditBatchSizes(final Parameters params, final int amount) {
         final List<Integer> editBatches = Lists.newArrayList();
-        if (params.editBatchSize != params.editCount) {
-            final int fullBatches = params.editCount / params.editBatchSize;
+        if (params.editBatchSize != amount) {
+            final int fullBatches = amount / params.editBatchSize;
             for (int i = 0; i < fullBatches; i++) {
                 editBatches.add(params.editBatchSize);
             }
 
-            if (params.editCount % params.editBatchSize != 0) {
-                editBatches.add(params.editCount % params.editBatchSize);
+            if (amount % params.editBatchSize != 0) {
+                editBatches.add(amount % params.editBatchSize);
             }
         } else {
             editBatches.add(params.editBatchSize);
@@ -82,7 +84,7 @@ class SyncExecutionStrategy implements ExecutionStrategy {
                     sessionListener.sendRequest(StressClient.COMMIT_MSG, StressClient.COMMIT_QNAME));
         }
 
-        Preconditions.checkState(responseCounter.get() == params.editCount + editBatches.size(), "Not all responses were received, only %s from %s", responseCounter.get(), params.editCount + editBatches.size());
+        Preconditions.checkState(responseCounter.get() == editAmount + editBatches.size(), "Not all responses were received, only %s from %s", responseCounter.get(), params.editCount + editBatches.size());
     }
 
     private void waitForResponse(AtomicInteger responseCounter, final ListenableFuture<RpcResult<NetconfMessage>> netconfMessageFuture) {

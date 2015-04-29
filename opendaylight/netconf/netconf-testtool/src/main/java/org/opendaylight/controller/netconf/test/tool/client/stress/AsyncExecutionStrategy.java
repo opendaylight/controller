@@ -30,24 +30,26 @@ class AsyncExecutionStrategy implements ExecutionStrategy {
     private final List<NetconfMessage> preparedMessages;
     private final NetconfDeviceCommunicator sessionListener;
     private final List<Integer> editBatches;
+    private final int editAmount;
 
     public AsyncExecutionStrategy(final Parameters params, final List<NetconfMessage> editConfigMsgs, final NetconfDeviceCommunicator sessionListener) {
         this.params = params;
         this.preparedMessages = editConfigMsgs;
         this.sessionListener = sessionListener;
-        this.editBatches = countEditBatchSizes(params);
+        this.editBatches = countEditBatchSizes(params, editConfigMsgs.size());
+        editAmount = editConfigMsgs.size();
     }
 
-    private static List<Integer> countEditBatchSizes(final Parameters params) {
+    private static List<Integer> countEditBatchSizes(final Parameters params, final int amount) {
         final List<Integer> editBatches = Lists.newArrayList();
-        if (params.editBatchSize != params.editCount) {
-            final int fullBatches = params.editCount / params.editBatchSize;
+        if (params.editBatchSize != amount) {
+            final int fullBatches = amount / params.editBatchSize;
             for (int i = 0; i < fullBatches; i++) {
                 editBatches.add(params.editBatchSize);
             }
 
-            if (params.editCount % params.editBatchSize != 0) {
-                editBatches.add(params.editCount % params.editBatchSize);
+            if (amount % params.editBatchSize != 0) {
+                editBatches.add(amount % params.editBatchSize);
             }
         } else {
             editBatches.add(params.editBatchSize);
@@ -96,6 +98,6 @@ class AsyncExecutionStrategy implements ExecutionStrategy {
             }
         }
 
-        Preconditions.checkState(responseCounter.get() == params.editCount + editBatches.size(), "Not all responses were received, only %s from %s", responseCounter.get(), params.editCount + editBatches.size());
+        Preconditions.checkState(responseCounter.get() == editAmount + editBatches.size(), "Not all responses were received, only %s from %s", responseCounter.get(), params.editCount + editBatches.size());
     }
 }
