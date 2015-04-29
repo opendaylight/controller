@@ -1,0 +1,26 @@
+module array-with-null-yang {
+  namespace "array:with:null:yang";  
+
+  prefix "arwnlyn";
+  revision 2013-11-12 {    
+  }
+  
+  container cont{
+      leaf lf{
+          type empty;
+      }
+      leaf lf1{
+          type string;
+      }
+      leaf lf2{
+          type string;
+      }
+      leaf-list lflst1{
+          type empty;
+      }
+      
+      leaf-list lflst2{
+          type string;
+      }
+  }
+}
