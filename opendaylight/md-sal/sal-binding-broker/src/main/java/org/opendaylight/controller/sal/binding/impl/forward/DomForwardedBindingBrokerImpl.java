@@ -116,9 +116,6 @@ public class DomForwardedBindingBrokerImpl extends RootBindingAwareBroker implem
         try {
             baPath = connector.getMappingService().fromDataDom(domPath);
             BindingIndependentConnector potentialConnector = connectors.get(baPath);
-            if (potentialConnector != null) {
-                return;
-            }
             tryToDeployConnector(baPath, domPath);
         } catch (DeserializationException e) {
 
