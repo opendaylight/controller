@@ -34,8 +34,8 @@ public abstract class AbstractYangTest {
     protected Map<String, Module> namesToModules; // are module names globally
                                                   // unique?
     protected Module configModule, rpcContextModule, threadsModule,
-    threadsJavaModule, bgpListenerJavaModule, ietfInetTypesModule,
-    jmxModule, jmxImplModule, testFilesModule, testFiles1Module;
+            threadsJavaModule, bgpListenerJavaModule, ietfInetTypesModule,
+            jmxModule, jmxImplModule, testFilesModule, testFiles1Module;
 
     public static final String EVENTBUS_MXB_NAME = "eventbus";
     public static final String ASYNC_EVENTBUS_MXB_NAME = "async-eventbus";

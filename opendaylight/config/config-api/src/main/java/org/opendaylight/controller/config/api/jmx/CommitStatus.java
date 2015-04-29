@@ -16,7 +16,7 @@ import javax.management.ObjectName;
 @Immutable
 public class CommitStatus {
     private final List<ObjectName> newInstances, reusedInstances,
-    recreatedInstances;
+        recreatedInstances;
 
     /**
      * @param newInstances       newly created instances

@@ -37,7 +37,7 @@ final class YangStoreSnapshot implements YangStoreContext {
 
 
     private final Map<String /* Namespace from yang file */,
-    Map<String /* Name of module entry from yang file */, ModuleMXBeanEntry>> moduleMXBeanEntryMap;
+        Map<String /* Name of module entry from yang file */, ModuleMXBeanEntry>> moduleMXBeanEntryMap;
 
 
     private final Map<QName, Map<String, ModuleMXBeanEntry>> qNamesToIdentitiesToModuleMXBeanEntries;

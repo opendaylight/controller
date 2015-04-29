@@ -260,9 +260,9 @@ public class EditConfig extends AbstractConfigNetconfOperation {
     }
 
     public static Map<String/* Namespace from yang file */,
-            Map<String /* Name of module entry from yang file */, ModuleConfig>> transformMbeToModuleConfigs
-    (final BeanReader configRegistryClient, Map<String/* Namespace from yang file */,
-                    Map<String /* Name of module entry from yang file */, ModuleMXBeanEntry>> mBeanEntries) {
+        Map<String /* Name of module entry from yang file */, ModuleConfig>> transformMbeToModuleConfigs (
+            final BeanReader configRegistryClient, Map<String/* Namespace from yang file */,
+            Map<String /* Name of module entry from yang file */, ModuleMXBeanEntry>> mBeanEntries) {
 
         Map<String, Map<String, ModuleConfig>> namespaceToModuleNameToModuleConfig = Maps.newHashMap();
 

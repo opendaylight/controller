@@ -27,13 +27,13 @@ public class NetconfMdsalMapperModule extends org.opendaylight.controller.config
     @Override
     public java.lang.AutoCloseable createInstance() {
         final MdsalNetconfOperationServiceFactory mdsalNetconfOperationServiceFactory =
-                new MdsalNetconfOperationServiceFactory(getRootSchemaServiceDependency()) {
-                    @Override
-                    public void close() throws Exception {
-                        super.close();
-                        getMapperAggregatorDependency().onRemoveNetconfOperationServiceFactory(this);
-                    }
-                };
+            new MdsalNetconfOperationServiceFactory(getRootSchemaServiceDependency()) {
+                @Override
+                public void close() throws Exception {
+                    super.close();
+                    getMapperAggregatorDependency().onRemoveNetconfOperationServiceFactory(this);
+                }
+            };
         getDomBrokerDependency().registerConsumer(mdsalNetconfOperationServiceFactory);
         getMapperAggregatorDependency().onAddNetconfOperationServiceFactory(mdsalNetconfOperationServiceFactory);
         return mdsalNetconfOperationServiceFactory;
