@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_cf5b1853",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/md/sal/binding/impl/BindingToNormalizedNodeCodec.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-04-29T08:39:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3aa0d159_3c00b800",
+      "revId": "79ab74313b4b978b078a05a2fa7c54df52d3e506",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_fc09f02c",
         "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/md/sal/binding/impl/BindingToNormalizedNodeCodec.java",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2015-04-28T19:20:34Z",
       "side": 1,
       "message": "since we are touching this class, can we add javadocs to public methods?",
+      "revId": "79ab74313b4b978b078a05a2fa7c54df52d3e506",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_af5ecc43",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/md/sal/binding/impl/BindingToNormalizedNodeCodec.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-04-29T08:39:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3aa0d159_fc09f02c",
       "revId": "79ab74313b4b978b078a05a2fa7c54df52d3e506",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_0f41005a",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/md/sal/binding/impl/ContextReferenceExtractor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-04-29T08:39:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3aa0d159_7c1de065",
+      "revId": "79ab74313b4b978b078a05a2fa7c54df52d3e506",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_dc10b450",
         "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/md/sal/binding/impl/ContextReferenceExtractor.java",
         "patchSetId": 2
@@ -64,6 +118,24 @@
       "writtenOn": "2015-04-28T19:20:34Z",
       "side": 1,
       "message": "checkstyle will emit warnings for missing spaces :-)",
+      "revId": "79ab74313b4b978b078a05a2fa7c54df52d3e506",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_af256cc3",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/md/sal/binding/impl/ContextReferenceExtractor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-04-29T08:39:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3aa0d159_dc10b450",
       "revId": "79ab74313b4b978b078a05a2fa7c54df52d3e506",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_8f2c30ad",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/md/sal/binding/impl/DirectGetterRouteContextExtractor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-04-29T08:39:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3aa0d159_fc20109d",
+      "revId": "79ab74313b4b978b078a05a2fa7c54df52d3e506",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_bc3a88cb",
         "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/md/sal/binding/impl/LazySerializedContainerNode.java",
         "patchSetId": 2
@@ -104,6 +194,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_0f182080",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/md/sal/binding/impl/LazySerializedContainerNode.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-04-29T08:39:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3aa0d159_bc3a88cb",
+      "revId": "79ab74313b4b978b078a05a2fa7c54df52d3e506",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_dc3754e2",
         "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/md/sal/binding/impl/RpcServiceAdapter.java",
         "patchSetId": 2
@@ -115,6 +223,24 @@
       "writtenOn": "2015-04-28T19:20:34Z",
       "side": 1,
       "message": "coding style: are we offseting case statements? just wondering",
+      "revId": "79ab74313b4b978b078a05a2fa7c54df52d3e506",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_af0c8c43",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/md/sal/binding/impl/RpcServiceAdapter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-04-29T08:39:27Z",
+      "side": 1,
+      "message": "Yes, google style requires to ofset case statements.",
+      "parentUuid": "3aa0d159_dc3754e2",
       "revId": "79ab74313b4b978b078a05a2fa7c54df52d3e506",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
