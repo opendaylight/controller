@@ -1,5 +1,5 @@
 {
-    "moduleName:cont":{
+    "cont":{
     	"lf1":"module<Name:value lf1",
     	"lf2":"module>Name:value lf2"
 	}
