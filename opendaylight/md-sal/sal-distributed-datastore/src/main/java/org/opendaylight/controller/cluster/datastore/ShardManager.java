@@ -24,6 +24,7 @@ import akka.persistence.RecoveryFailure;
 import akka.serialization.Serialization;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.base.Supplier;
@@ -115,6 +116,8 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     private final DataPersistenceProvider dataPersistenceProvider;
 
     private final CountDownLatch waitTillReadyCountdownLatch;
+
+    private Optional<ActorRef> shardRoleChangeListener;
 
     /**
      */
@@ -318,6 +321,11 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             shardInformation.setActorInitialized();
 
             shardInformation.getActor().tell(new RegisterRoleChangeListener(), self());
+        }
+
+        if (shardRoleChangeListener.isPresent()) {
+            // register the shard role change listener to listen to role changes as well.
+            shardInformation.getActor().tell(new RegisterRoleChangeListener(), shardRoleChangeListener.get());
         }
     }
 
@@ -597,6 +605,8 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
         mBean = ShardManagerInfo.createShardManagerMBean("shard-manager-" + this.type,
                     datastoreContext.getDataStoreMXBeanType(), localShardActorNames);
+
+        shardRoleChangeListener = createShardRoleChangeListenerActor();
     }
 
     /**
@@ -621,6 +631,20 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             }
         }
         return peerAddresses;
+    }
+
+    private Optional<ActorRef> createShardRoleChangeListenerActor() {
+        ActorRef shardRoleChangeNotifier = null;
+        if (datastoreContext.getClusteringRoleService() != null) {
+            shardRoleChangeNotifier = this.getContext().actorOf(
+                ShardRoleChangeListener.getProps(datastoreContext.getClusteringRoleService()), "shard-role-change-listener");
+            LOG.info("ShardRoleChangeListener created by ShardManager:{}", shardRoleChangeNotifier.path());
+        } else {
+            LOG.error("Clustering Service dependency not found and is null in Datastore context for {} datastore. " +
+                    "ShardRoleChangeListener cannot be created.", datastoreContext.getDataStoreType(
+            ));
+        }
+        return Optional.fromNullable(shardRoleChangeNotifier);
     }
 
     @Override
