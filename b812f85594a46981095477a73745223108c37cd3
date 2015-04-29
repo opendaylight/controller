@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_ed9ffc01",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionContextImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-04-29T16:33:11Z",
+      "side": 1,
+      "message": "transactionChainId parameter is unused and should be removed. This was pointed out by Tom in a previous review.",
+      "revId": "b812f85594a46981095477a73745223108c37cd3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
