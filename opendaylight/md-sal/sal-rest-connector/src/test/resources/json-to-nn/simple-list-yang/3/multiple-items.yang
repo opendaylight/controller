@@ -1,0 +1,24 @@
+module multiple-items-yang {
+  namespace "multiple:items:yang";  
+
+  prefix "mltitmsyg";
+  revision 2013-11-12 {    
+  }
+  
+  list lst {
+    list lst1 {
+        leaf lf11{
+            type string;
+        }
+        leaf-list lflst11{
+            type string;
+        }
+        container cont11{
+            
+        }
+        list lst11{
+            
+        }
+    }
+  }
+}
