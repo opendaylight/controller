@@ -90,10 +90,6 @@ public class DomForwardedBindingBrokerImpl extends RootBindingAwareBroker implem
 
     private void tryToDeployConnector(InstanceIdentifier<?> baPath,
             org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier biPath) {
-        org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier previous = forwarded.putIfAbsent(baPath, biPath);
-        if (previous != null) {
-            return;
-        }
         MountProviderInstance baMountPoint = getMountManager().createOrGetMountPoint(baPath);
         MountProvisionInstance domMountPoint = domMountService.createOrGetMountPoint(biPath);
         BindingIndependentConnector connector = createForwarder(baPath, baMountPoint, domMountPoint);
@@ -115,10 +111,6 @@ public class DomForwardedBindingBrokerImpl extends RootBindingAwareBroker implem
         InstanceIdentifier<?> baPath;
         try {
             baPath = connector.getMappingService().fromDataDom(domPath);
-            BindingIndependentConnector potentialConnector = connectors.get(baPath);
-            if (potentialConnector != null) {
-                return;
-            }
             tryToDeployConnector(baPath, domPath);
         } catch (DeserializationException e) {
 
@@ -126,10 +118,6 @@ public class DomForwardedBindingBrokerImpl extends RootBindingAwareBroker implem
     }
 
     public synchronized void tryToDeployBindingForwarder(InstanceIdentifier<?> baPath) {
-        BindingIndependentConnector potentialConnector = connectors.get(baPath);
-        if (potentialConnector != null) {
-            return;
-        }
         org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier domPath = connector.getMappingService().toDataDom(baPath);
         tryToDeployConnector(baPath, domPath);
     }
