@@ -90,7 +90,7 @@ public class JsonNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPr
             NormalizedNode<?, ?> partialResult = resultHolder.getResult();
             final NormalizedNode<?, ?> result;
 
-            // unwrap result from augmentation and choice nodes on PUT
+            // FIXME: Also II should be updated unwrap result from augmentation and choice nodes on PUT
             if (!isPost()) {
                 while (partialResult instanceof AugmentationNode || partialResult instanceof ChoiceNode) {
                     final Object childNode = ((DataContainerNode) partialResult).getValue().iterator().next();
@@ -98,7 +98,7 @@ public class JsonNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPr
                 }
             }
 
-            if (partialResult instanceof MapNode) {
+            if (partialResult instanceof MapNode && !isPost()) {
                 result = Iterables.getOnlyElement(((MapNode) partialResult).getValue());
             } else {
                 result = partialResult;
