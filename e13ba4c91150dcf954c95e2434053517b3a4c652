@@ -16,6 +16,24 @@
       "revId": "e13ba4c91150dcf954c95e2434053517b3a4c652",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_570a3622",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 455,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-30T16:07:32Z",
+      "side": 1,
+      "message": "Good point. Even if it was Serializable, would it be correct to try to apply a DataTreeModification on a remote shard that was created from this local shard\u0027s DataTree?\n\nPerhaps we could throw back a transient exception to convey to the front end to retry from scratch, i.e. create a new TransactionProxy/TransactionComponent. It may have to revert the DataTreeModification back to the original write/merge/delete operations if that\u0027s possible. Or something like that.",
+      "parentUuid": "3aa0d159_b42ff8f5",
+      "revId": "e13ba4c91150dcf954c95e2434053517b3a4c652",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
