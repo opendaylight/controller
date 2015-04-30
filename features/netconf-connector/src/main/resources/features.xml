@@ -112,11 +112,6 @@
         <feature version='${aaa.version}'>odl-aaa-netconf-plugin</feature>
         <bundle>mvn:org.opendaylight.controller/netconf-ssh/${netconf.version}</bundle>
       </feature>
-      <feature name='odl-netconf-tcp' version='${netconf.version}' description="OpenDaylight :: Netconf Connector :: TCP">
-        <feature version='${netconf.version}'>odl-netconf-impl</feature>
-        <feature version='${config.version}'>odl-config-netty</feature>
-        <bundle>mvn:org.opendaylight.controller/netconf-tcp/${netconf.version}</bundle>
-      </feature>
 
     <feature name='odl-message-bus' version='${project.version}'>
         <feature version='${project.version}'>odl-netconf-connector</feature>

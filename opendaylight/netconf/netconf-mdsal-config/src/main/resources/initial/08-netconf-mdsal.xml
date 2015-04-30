@@ -169,6 +169,7 @@
       <capability>urn:opendaylight:params:xml:ns:yang:controller:netconf:mdsal:mapper?module=netconf-mdsal-mapper&amp;revision=2015-01-14</capability>
       <capability>urn:opendaylight:params:xml:ns:yang:controller:netconf:mdsal:monitoring?module=netconf-mdsal-monitoring&amp;revision=2015-02-18</capability>
       <capability>urn:opendaylight:params:xml:ns:yang:controller:netconf:northbound:ssh?module=netconf-northbound-ssh&amp;revision=2015-01-14</capability>
+      <capability>urn:opendaylight:params:xml:ns:yang:controller:netconf:northbound:tcp?module=netconf-northbound-tcp&amp;revision=2015-04-23</capability>
       <capability>urn:opendaylight:params:xml:ns:yang:controller:config:netconf:northbound:impl?module=netconf-northbound-impl&amp;revision=2015-01-12</capability>
       <capability>urn:opendaylight:params:xml:ns:yang:controller:threadpool:impl:scheduled?module=threadpool-impl-scheduled&amp;revision=2013-12-01</capability>
   </required-capabilities>
