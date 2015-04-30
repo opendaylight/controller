@@ -1,12 +1,18 @@
 package org.opendaylight.controller.config.yang.netconf.northbound.tcp;
 
 import io.netty.channel.ChannelFuture;
+import io.netty.util.concurrent.GenericFutureListener;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import org.opendaylight.controller.netconf.api.NetconfServerDispatcher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class NetconfNorthboundTcpModule extends org.opendaylight.controller.config.yang.netconf.northbound.tcp.AbstractNetconfNorthboundTcpModule {
+
+    private static final Logger LOG = LoggerFactory.getLogger(NetconfNorthboundTcpModule.class);
+
     public NetconfNorthboundTcpModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
     }
@@ -24,6 +30,18 @@ public class NetconfNorthboundTcpModule extends org.opendaylight.controller.conf
     public java.lang.AutoCloseable createInstance() {
         final NetconfServerDispatcher dispatch = getDispatcherDependency();
         final ChannelFuture tcpServer = dispatch.createServer(getInetAddress());
+
+        tcpServer.addListener(new GenericFutureListener<ChannelFuture>() {
+            @Override
+            public void operationComplete(ChannelFuture future) throws Exception {
+                if (future.isDone() && future.isSuccess()) {
+                    LOG.info("Netconf TCP endpoint started successfully at {}", getInetAddress());
+                } else {
+                    LOG.warn("Unable to start TCP netconf server at {}", getInetAddress(), future.cause());
+                    throw new RuntimeException("Unable to start TCP netconf server", future.cause());
+                }
+            }
+        });
         return new NetconfServerCloseable(tcpServer);
     }
 
