@@ -70,6 +70,24 @@
       "revId": "e13ba4c91150dcf954c95e2434053517b3a4c652",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_77489287",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 455,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-04-30T21:45:36Z",
+      "side": 1,
+      "message": "For this commit atleast let\u0027s return an exception - what do you say?",
+      "parentUuid": "3aa0d159_17734e81",
+      "revId": "e13ba4c91150dcf954c95e2434053517b3a4c652",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
