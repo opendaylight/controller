@@ -2,6 +2,7 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -21,6 +22,7 @@ import akka.persistence.RecoveryCompleted;
 import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
 import akka.util.Timeout;
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
@@ -49,9 +51,11 @@ import org.opendaylight.controller.cluster.datastore.identifiers.ShardManagerIde
 import org.opendaylight.controller.cluster.datastore.messages.ActorInitialized;
 import org.opendaylight.controller.cluster.datastore.messages.FindLocalShard;
 import org.opendaylight.controller.cluster.datastore.messages.FindPrimary;
+import org.opendaylight.controller.cluster.datastore.messages.LocalPrimaryShardFound;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardFound;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardNotFound;
-import org.opendaylight.controller.cluster.datastore.messages.PrimaryFound;
+import org.opendaylight.controller.cluster.datastore.messages.RemotePrimaryShardFound;
+import org.opendaylight.controller.cluster.datastore.messages.ShardLeaderStateChanged;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
 import org.opendaylight.controller.cluster.datastore.utils.MessageCollectorActor;
 import org.opendaylight.controller.cluster.datastore.utils.MockClusterWrapper;
@@ -63,6 +67,7 @@ import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyncUpStatus;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.model.api.ModuleIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.Await;
@@ -154,7 +159,8 @@ public class ShardManagerTest extends AbstractActorTest {
             shardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
             shardManager.tell(new ActorInitialized(), mockShardActor);
 
-            shardManager.tell(new LeaderStateChanged(memberId, memberId), getRef());
+            DataTree mockDataTree = mock(DataTree.class);
+            shardManager.tell(new ShardLeaderStateChanged(memberId, memberId, Optional.of(mockDataTree)), getRef());
 
             MessageCollectorActor.expectFirstMatching(mockShardActor, RegisterRoleChangeListener.class);
             shardManager.tell((new RoleChangeNotification(memberId, RaftState.Candidate.name(),
@@ -162,9 +168,10 @@ public class ShardManagerTest extends AbstractActorTest {
 
             shardManager.tell(new FindPrimary(Shard.DEFAULT_NAME, false), getRef());
 
-            PrimaryFound primaryFound = expectMsgClass(duration("5 seconds"), PrimaryFound.class);
+            LocalPrimaryShardFound primaryFound = expectMsgClass(duration("5 seconds"), LocalPrimaryShardFound.class);
             assertTrue("Unexpected primary path " +  primaryFound.getPrimaryPath(),
                     primaryFound.getPrimaryPath().contains("member-1-shard-default"));
+            assertSame("getLocalShardDataTree", mockDataTree, primaryFound.getLocalShardDataTree() );
         }};
     }
 
@@ -202,11 +209,11 @@ public class ShardManagerTest extends AbstractActorTest {
             String memberId1 = "member-1-shard-default-" + shardMrgIDSuffix;
             shardManager.tell(new RoleChangeNotification(memberId1,
                     RaftState.Candidate.name(), RaftState.Follower.name()), mockShardActor);
-            shardManager.tell(new LeaderStateChanged(memberId1, memberId2), mockShardActor);
+            shardManager.tell(new ShardLeaderStateChanged(memberId1, memberId2, Optional.<DataTree>absent()), mockShardActor);
 
             shardManager.tell(new FindPrimary(Shard.DEFAULT_NAME, false), getRef());
 
-            PrimaryFound primaryFound = expectMsgClass(duration("5 seconds"), PrimaryFound.class);
+            RemotePrimaryShardFound primaryFound = expectMsgClass(duration("5 seconds"), RemotePrimaryShardFound.class);
             assertTrue("Unexpected primary path " +  primaryFound.getPrimaryPath(),
                     primaryFound.getPrimaryPath().contains("member-2-shard-default"));
         }};
@@ -253,13 +260,15 @@ public class ShardManagerTest extends AbstractActorTest {
 
             expectMsgClass(duration("5 seconds"), NoShardLeaderException.class);
 
-            shardManager.tell(new LeaderStateChanged(memberId, memberId), mockShardActor);
+            DataTree mockDataTree = mock(DataTree.class);
+            shardManager.tell(new ShardLeaderStateChanged(memberId, memberId, Optional.of(mockDataTree)), mockShardActor);
 
             shardManager.tell(new FindPrimary(Shard.DEFAULT_NAME, false), getRef());
 
-            PrimaryFound primaryFound = expectMsgClass(duration("5 seconds"), PrimaryFound.class);
+            LocalPrimaryShardFound primaryFound = expectMsgClass(duration("5 seconds"), LocalPrimaryShardFound.class);
             assertTrue("Unexpected primary path " +  primaryFound.getPrimaryPath(),
                     primaryFound.getPrimaryPath().contains("member-1-shard-default"));
+            assertSame("getLocalShardDataTree", mockDataTree, primaryFound.getLocalShardDataTree() );
         }};
     }
 
@@ -286,11 +295,13 @@ public class ShardManagerTest extends AbstractActorTest {
 
             expectNoMsg(FiniteDuration.create(150, TimeUnit.MILLISECONDS));
 
-            shardManager.tell(new LeaderStateChanged(memberId, memberId), mockShardActor);
+            DataTree mockDataTree = mock(DataTree.class);
+            shardManager.tell(new ShardLeaderStateChanged(memberId, memberId, Optional.of(mockDataTree)), mockShardActor);
 
-            PrimaryFound primaryFound = expectMsgClass(duration("5 seconds"), PrimaryFound.class);
+            LocalPrimaryShardFound primaryFound = expectMsgClass(duration("5 seconds"), LocalPrimaryShardFound.class);
             assertTrue("Unexpected primary path " +  primaryFound.getPrimaryPath(),
                     primaryFound.getPrimaryPath().contains("member-1-shard-default"));
+            assertSame("getLocalShardDataTree", mockDataTree, primaryFound.getLocalShardDataTree() );
 
             expectNoMsg(FiniteDuration.create(200, TimeUnit.MILLISECONDS));
         }};
@@ -382,7 +393,8 @@ public class ShardManagerTest extends AbstractActorTest {
             shardManager2.tell(new ActorInitialized(), mockShardActor2);
 
             String memberId2 = "member-2-shard-astronauts-" + shardMrgIDSuffix;
-            shardManager2.tell(new LeaderStateChanged(memberId2, memberId2), mockShardActor2);
+            shardManager2.tell(new ShardLeaderStateChanged(memberId2, memberId2,
+                    Optional.of(mock(DataTree.class))), mockShardActor2);
             shardManager2.tell(new RoleChangeNotification(memberId2,
                     RaftState.Candidate.name(), RaftState.Leader.name()), mockShardActor2);
 
@@ -390,7 +402,7 @@ public class ShardManagerTest extends AbstractActorTest {
 
             shardManager1.tell(new FindPrimary("astronauts", false), getRef());
 
-            PrimaryFound found = expectMsgClass(duration("5 seconds"), PrimaryFound.class);
+            RemotePrimaryShardFound found = expectMsgClass(duration("5 seconds"), RemotePrimaryShardFound.class);
             String path = found.getPrimaryPath();
             assertTrue("Unexpected primary path " + path, path.contains("member-2-shard-astronauts-config"));
 
@@ -659,7 +671,7 @@ public class ShardManagerTest extends AbstractActorTest {
     }
 
     @Test
-    public void testRoleChangeNotificationAndLeaderStateChangedReleaseReady() throws Exception {
+    public void testRoleChangeNotificationAndShardLeaderStateChangedReleaseReady() throws Exception {
         new JavaTestKit(getSystem()) {
             {
                 TestActorRef<ShardManager> shardManager = TestActorRef.create(getSystem(), newShardMgrProps());
@@ -670,7 +682,8 @@ public class ShardManagerTest extends AbstractActorTest {
 
                 verify(ready, never()).countDown();
 
-                shardManager.underlyingActor().onReceiveCommand(new LeaderStateChanged(memberId, memberId));
+                shardManager.underlyingActor().onReceiveCommand(new ShardLeaderStateChanged(memberId, memberId,
+                        Optional.of(mock(DataTree.class))));
 
                 verify(ready, times(1)).countDown();
 
@@ -678,7 +691,7 @@ public class ShardManagerTest extends AbstractActorTest {
     }
 
     @Test
-    public void testRoleChangeNotificationToFollowerWithLeaderStateChangedReleaseReady() throws Exception {
+    public void testRoleChangeNotificationToFollowerWithShardLeaderStateChangedReleaseReady() throws Exception {
         new JavaTestKit(getSystem()) {
             {
                 TestActorRef<ShardManager> shardManager = TestActorRef.create(getSystem(), newShardMgrProps());
@@ -691,7 +704,8 @@ public class ShardManagerTest extends AbstractActorTest {
 
                 shardManager.underlyingActor().onReceiveCommand(MockClusterWrapper.createMemberUp("member-2", getRef().path().toString()));
 
-                shardManager.underlyingActor().onReceiveCommand(new LeaderStateChanged(memberId, "member-2-shard-default-" + shardMrgIDSuffix));
+                shardManager.underlyingActor().onReceiveCommand(new ShardLeaderStateChanged(memberId,
+                        "member-2-shard-default-" + shardMrgIDSuffix, Optional.of(mock(DataTree.class))));
 
                 verify(ready, times(1)).countDown();
 
@@ -710,7 +724,8 @@ public class ShardManagerTest extends AbstractActorTest {
 
                 verify(ready, never()).countDown();
 
-                shardManager.underlyingActor().onReceiveCommand(new LeaderStateChanged(memberId, "member-2-shard-default-" + shardMrgIDSuffix));
+                shardManager.underlyingActor().onReceiveCommand(new ShardLeaderStateChanged(memberId,
+                        "member-2-shard-default-" + shardMrgIDSuffix, Optional.of(mock(DataTree.class))));
 
                 shardManager.underlyingActor().onReceiveCommand(MockClusterWrapper.createMemberUp("member-2", getRef().path().toString()));
 

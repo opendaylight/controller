@@ -298,7 +298,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         Optional<ActorRef> roleChangeNotifier = getRoleChangeNotifier();
         if(!Objects.equal(oldBehaviorLeaderId, currentBehavior.getLeaderId())) {
             if(roleChangeNotifier.isPresent()) {
-                roleChangeNotifier.get().tell(new LeaderStateChanged(getId(), currentBehavior.getLeaderId()), getSelf());
+                roleChangeNotifier.get().tell(newLeaderStateChanged(getId(), currentBehavior.getLeaderId()), getSelf());
             }
 
             onLeaderChanged(oldBehaviorLeaderId, currentBehavior.getLeaderId());
@@ -309,6 +309,10 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             roleChangeNotifier.get().tell(new RoleChanged(getId(), oldBehaviorStateName ,
                     currentBehavior.state().name()), getSelf());
         }
+    }
+
+    protected LeaderStateChanged newLeaderStateChanged(String memberId, String leaderId) {
+        return new LeaderStateChanged(memberId, leaderId);
     }
 
     /**
