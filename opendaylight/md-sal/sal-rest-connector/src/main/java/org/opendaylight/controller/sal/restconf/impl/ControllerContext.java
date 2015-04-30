@@ -153,6 +153,11 @@ public class ControllerContext implements SchemaContextListener {
 
         final InstanceIdentifierBuilder builder = YangInstanceIdentifier.builder();
         final Module latestModule = globalSchema.findModuleByName(startModule, null);
+
+        if (latestModule == null) {
+            throw new RestconfDocumentedException("The module named '" + startModule + "' does not exist.", ErrorType.PROTOCOL, ErrorTag.UNKNOWN_ELEMENT);
+        }
+
         final InstanceIdentifierContext<?> iiWithSchemaNode = collectPathArguments(builder, pathArgs, latestModule, null,
                 toMountPointIdentifier);
 

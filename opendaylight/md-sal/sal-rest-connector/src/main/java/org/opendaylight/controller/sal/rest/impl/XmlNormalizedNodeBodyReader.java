@@ -104,6 +104,8 @@ public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPro
 
             final NormalizedNode<?, ?> result = parse(path,doc);
             return new NormalizedNodeContext(path,result);
+        } catch (final RestconfDocumentedException e){
+            throw e;
         } catch (final Exception e) {
             LOG.debug("Error parsing xml input", e);
 
