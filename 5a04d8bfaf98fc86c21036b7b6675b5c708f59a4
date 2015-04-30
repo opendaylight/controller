@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_e3ab8b87",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/LocalTransactionFactory.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-30T03:04:54Z",
+      "side": 1,
+      "message": "Can reference just TransactionComponentFactory. However it only needs to access the TransactionComponentFactory to get the next ID. We could decouple this class from TransactionComponentFactory by passing a TransactionIdentifierFactory.",
+      "revId": "5a04d8bfaf98fc86c21036b7b6675b5c708f59a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_03ba37de",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardedTransactionChain.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-30T03:04:54Z",
+      "side": 1,
+      "message": "Also needs visibility synchronization as it could be accessed across threads. Google cache seems like a good candidate.",
+      "revId": "5a04d8bfaf98fc86c21036b7b6675b5c708f59a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_63f1bbcc",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/SimpleTransactionComponentFactory.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-30T03:04:54Z",
+      "side": 1,
+      "message": "\"fiend\"?  Did you mean \"friend\"? :)   +1 on not using AtomicFieldUpdaters here. They have their place but they reduce readability somewhat and are a bit awkward so only use when you really need to reduce memory.",
+      "revId": "5a04d8bfaf98fc86c21036b7b6675b5c708f59a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_23b733da",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionComponentFactory.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-30T03:04:54Z",
+      "side": 1,
+      "message": "Can use google cache and time out entries as the ActorContext does. We really should use the LeaderStateChange messages to invalidate the cache but that can come later. We can also remove the caching in ActorContext but in another patch.",
+      "revId": "5a04d8bfaf98fc86c21036b7b6675b5c708f59a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_4366ff52",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionComponentFactory.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-30T03:04:54Z",
+      "side": 1,
+      "message": "Indentation",
+      "revId": "5a04d8bfaf98fc86c21036b7b6675b5c708f59a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_a37ca321",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionContextImpl.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-30T03:04:54Z",
+      "side": 1,
+      "message": "This method can be removed from here.",
+      "revId": "5a04d8bfaf98fc86c21036b7b6675b5c708f59a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_a3a3439d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-30T03:04:54Z",
+      "side": 1,
+      "message": "This should be indented.",
+      "revId": "5a04d8bfaf98fc86c21036b7b6675b5c708f59a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_0388f71d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionReadyReplyMapper.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-30T03:04:54Z",
+      "side": 1,
+      "message": "Missing the extractCohortPathFrom call here which the PreLithium code overrode. We could derive a PerLithumTransactionReadyReplyMapper. The other option is we leave out that hook (and remove the unit test) as this was put in for base He compatibility. I\u0027d say there\u0027s pretty much 0 chance anyone would be upgrading from base He to Li and also doing it via rolling upgrade.",
+      "revId": "5a04d8bfaf98fc86c21036b7b6675b5c708f59a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
