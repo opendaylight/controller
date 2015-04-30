@@ -34,6 +34,24 @@
       "revId": "e13ba4c91150dcf954c95e2434053517b3a4c652",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_37d9aa83",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 455,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-04-30T16:42:15Z",
+      "side": 1,
+      "message": "I think our only option here is to throw some meaningful exception and maybe the front end can retry the whole transaction.",
+      "parentUuid": "3aa0d159_570a3622",
+      "revId": "e13ba4c91150dcf954c95e2434053517b3a4c652",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
