@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_da4bcd57",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/rest/impl/JsonNormalizedNodeBodyReader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-30T22:29:04Z",
+      "side": 1,
+      "message": "Maybe we should include the underlying exception with the RestconfDocumentedException?",
+      "revId": "01f4df3df04a83326b40eb02145be80e0a1f75c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_fa46c94e",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/rest/impl/XmlNormalizedNodeBodyReader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-04-30T22:29:04Z",
+      "side": 1,
+      "message": "Include underlying exception with the RestconfDocumentedException?",
+      "revId": "01f4df3df04a83326b40eb02145be80e0a1f75c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
