@@ -34,6 +34,24 @@
       "revId": "cd3a8d169f392558178a3a9f58c8a270aae8e302",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_6358d432",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 225,
+      "author": {
+        "id": 3576
+      },
+      "writtenOn": "2015-05-01T21:58:29Z",
+      "side": 1,
+      "message": "Yes, line 226 is what I referred to as \"the next line\".  The clarity is debatable, but it\u0027s clearly a little better by switching the order to remove one addition (it\u0027s not a performance problem).",
+      "parentUuid": "3aa0d159_4885b7ab",
+      "revId": "cd3a8d169f392558178a3a9f58c8a270aae8e302",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
