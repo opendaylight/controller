@@ -1,5 +1,17 @@
 package org.opendaylight.controller.cluster.raft;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.PoisonPill;
@@ -57,18 +69,6 @@ import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 public class RaftActorTest extends AbstractActorTest {
 
@@ -432,19 +432,20 @@ public class RaftActorTest extends AbstractActorTest {
 
                 verify(mockRaftActor.delegate).applyRecoverySnapshot(eq(snapshotBytes));
 
-                mockRaftActor.onReceiveRecover(new ReplicatedLogImplEntry(0, 1, new MockRaftActorContext.MockPayload("A")));
+                mockRaftActor.onReceiveRecover(new ReplicatedLogImplEntry(4, 1, new MockRaftActorContext.MockPayload("A")));
 
                 ReplicatedLog replicatedLog = mockRaftActor.getReplicatedLog();
 
                 assertEquals("add replicated log entry", 1, replicatedLog.size());
 
-                mockRaftActor.onReceiveRecover(new ReplicatedLogImplEntry(1, 1, new MockRaftActorContext.MockPayload("A")));
+                mockRaftActor.onReceiveRecover(new ReplicatedLogImplEntry(5, 1, new MockRaftActorContext.MockPayload("A")));
 
                 assertEquals("add replicated log entry", 2, replicatedLog.size());
 
-                mockRaftActor.onReceiveRecover(new ApplyLogEntries(1));
+                mockRaftActor.onReceiveRecover(new ApplyLogEntries(4));
+                mockRaftActor.onReceiveRecover(new ApplyLogEntries(5));
 
-                assertEquals("commit index 1", 1, mockRaftActor.getRaftActorContext().getCommitIndex());
+                assertEquals("commit index 1", 5, mockRaftActor.getRaftActorContext().getCommitIndex());
 
                 // The snapshot had 4 items + we added 2 more items during the test
                 // We start removing from 5 and we should get 1 item in the replicated log
