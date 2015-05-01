@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_084a4fac",
+        "filename": "opendaylight/md-sal/sal-clustering-service/src/test/java/org/opendaylight/controller/cluster/service/ClusteringServiceTest.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 3576
+      },
+      "writtenOn": "2015-05-01T21:04:31Z",
+      "side": 1,
+      "message": "It would be better to define these strings as constants in the class, so this requires less modification if these ever have to change.",
+      "revId": "c18ad3a8a3a3027228b52b55d17ee40bd0735ad5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
