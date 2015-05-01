@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_1afa95bd",
+        "filename": "features/mdsal/src/main/resources/features.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-05-01T20:11:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3aa0d159_e3d14bce",
+      "revId": "f83ad155d59b9a16f41763da04d3c5b8071c5a9a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_03d797c2",
         "filename": "opendaylight/md-sal/sal-clustering-api/src/main/java/org/opendaylight/controller/md/sal/clustering/api/ClusteringRoleService.java",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2015-04-30T05:11:25Z",
       "side": 1,
       "message": "Please add class and method javadocs.",
+      "revId": "f83ad155d59b9a16f41763da04d3c5b8071c5a9a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_fafec9ad",
+        "filename": "opendaylight/md-sal/sal-clustering-api/src/main/java/org/opendaylight/controller/md/sal/clustering/api/ClusteringRoleService.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-05-01T20:11:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3aa0d159_03d797c2",
       "revId": "f83ad155d59b9a16f41763da04d3c5b8071c5a9a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_1a96154d",
+        "filename": "opendaylight/md-sal/sal-clustering-api/src/main/yang/sal-clustering-api.yang",
+        "patchSetId": 5
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-05-01T20:11:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3aa0d159_63e53ba7",
+      "revId": "f83ad155d59b9a16f41763da04d3c5b8071c5a9a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_a32583c3",
         "filename": "opendaylight/md-sal/sal-clustering-api/src/main/yang/sal-clustering-api.yang",
         "patchSetId": 5
@@ -64,6 +118,24 @@
       "writtenOn": "2015-04-30T05:11:25Z",
       "side": 1,
       "message": "File needs copyright header.",
+      "revId": "f83ad155d59b9a16f41763da04d3c5b8071c5a9a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_3a919152",
+        "filename": "opendaylight/md-sal/sal-clustering-api/src/main/yang/sal-clustering-api.yang",
+        "patchSetId": 5
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-05-01T20:11:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3aa0d159_a32583c3",
       "revId": "f83ad155d59b9a16f41763da04d3c5b8071c5a9a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_6821939e",
+        "filename": "opendaylight/md-sal/sal-clustering-api/src/main/yang/sal-clustering-api.yang",
+        "patchSetId": 5
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-05-01T20:11:22Z",
+      "side": 1,
+      "message": "I didnt understand why this has to be in the service provider. \n\nWe are \u0027defining\u0027 the service here. The provider of this service is an other module (clustering-service).\n\nTomorrow there can be other services which will be defined here and they will be provided by other such modules. \nFor e.g  there can be a clustering-shard-service which would be defined here and provided by the distributed-datastore-provider \n\nThe clients will have a dependency only to clustering-api, abstracted by the actual provider of a service.",
+      "parentUuid": "3aa0d159_a30ca343",
+      "revId": "f83ad155d59b9a16f41763da04d3c5b8071c5a9a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_e312ab61",
         "filename": "opendaylight/md-sal/sal-clustering-api/src/main/yang/sal-clustering-api.yang",
         "patchSetId": 5
@@ -98,6 +188,24 @@
       "writtenOn": "2015-04-30T05:11:25Z",
       "side": 1,
       "message": "Too much indentation - keep it to 4.",
+      "revId": "f83ad155d59b9a16f41763da04d3c5b8071c5a9a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_1acb7554",
+        "filename": "opendaylight/md-sal/sal-clustering-api/src/main/yang/sal-clustering-api.yang",
+        "patchSetId": 5
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-05-01T20:11:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3aa0d159_e312ab61",
       "revId": "f83ad155d59b9a16f41763da04d3c5b8071c5a9a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_3ac6714a",
+        "filename": "opendaylight/md-sal/sal-clustering-api/src/main/yang/sal-clustering-api.yang",
+        "patchSetId": 5
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-05-01T20:11:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3aa0d159_0318f77f",
+      "revId": "f83ad155d59b9a16f41763da04d3c5b8071c5a9a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_c3220fb9",
         "filename": "opendaylight/md-sal/sal-clustering-service/pom.xml",
         "patchSetId": 5
@@ -132,6 +258,24 @@
       "writtenOn": "2015-04-30T05:11:25Z",
       "side": 1,
       "message": "File needs copyright header.",
+      "revId": "f83ad155d59b9a16f41763da04d3c5b8071c5a9a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_2814eb42",
+        "filename": "opendaylight/md-sal/sal-clustering-service/pom.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-05-01T20:11:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3aa0d159_c3220fb9",
       "revId": "f83ad155d59b9a16f41763da04d3c5b8071c5a9a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_680af322",
+        "filename": "opendaylight/md-sal/sal-clustering-service/src/main/java/org/opendaylight/controller/config/yang/config/sal_clustering_service_provider/SalClusteringServiceProviderModule.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-05-01T20:11:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3aa0d159_632f7ba2",
+      "revId": "f83ad155d59b9a16f41763da04d3c5b8071c5a9a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_43f4bf5a",
         "filename": "opendaylight/md-sal/sal-clustering-service/src/main/java/org/opendaylight/controller/md/sal/clustering/service/ClusteringService.java",
         "patchSetId": 5
@@ -166,6 +328,24 @@
       "writtenOn": "2015-04-30T05:11:25Z",
       "side": 1,
       "message": "I think it would be good to keep the package naming consistent with the other cluster projects. So I would suggest org.opendaylight.controller.cluster.api and org.opendaylight.controller.cluster.service.",
+      "revId": "f83ad155d59b9a16f41763da04d3c5b8071c5a9a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_5a0d7d8f",
+        "filename": "opendaylight/md-sal/sal-clustering-service/src/main/java/org/opendaylight/controller/md/sal/clustering/service/ClusteringService.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-05-01T20:11:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3aa0d159_43f4bf5a",
       "revId": "f83ad155d59b9a16f41763da04d3c5b8071c5a9a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -189,6 +369,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_7a1079a8",
+        "filename": "opendaylight/md-sal/sal-clustering-service/src/main/java/org/opendaylight/controller/md/sal/clustering/service/ClusteringService.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-05-01T20:11:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3aa0d159_4337dfff",
+      "revId": "f83ad155d59b9a16f41763da04d3c5b8071c5a9a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_03eeb788",
         "filename": "opendaylight/md-sal/sal-clustering-service/src/main/java/org/opendaylight/controller/md/sal/clustering/service/ClusteringServiceFactory.java",
         "patchSetId": 5
@@ -200,6 +398,24 @@
       "writtenOn": "2015-04-30T05:11:25Z",
       "side": 1,
       "message": "I\u0027m not a fan of double-checked locking here. While it works correctly if the field is volatile, it\u0027s a legacy way of creating a singleton - there are better patterns for doing this now.\n\nHowever, is this factory really needed? It seems a bit of overkill. It is only accessed by SalClusteringServiceProviderModule which is itself a singleton  factory. So SalClusteringServiceProviderModule could just create the ClusteringServiceImpl instance w/o needing any singleton pattern.",
+      "revId": "f83ad155d59b9a16f41763da04d3c5b8071c5a9a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_3af43186",
+        "filename": "opendaylight/md-sal/sal-clustering-service/src/main/java/org/opendaylight/controller/md/sal/clustering/service/ClusteringServiceFactory.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-05-01T20:11:22Z",
+      "side": 1,
+      "message": "Me neither. The reason i opted for it was that i need to pass in a non-static variable during the instantiation of the ClusteringService object.\n\nAnyway i have taken out the factory.",
+      "parentUuid": "3aa0d159_03eeb788",
       "revId": "f83ad155d59b9a16f41763da04d3c5b8071c5a9a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -223,6 +439,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_da498dd1",
+        "filename": "opendaylight/md-sal/sal-clustering-service/src/main/java/org/opendaylight/controller/md/sal/clustering/service/ClusteringServiceImpl.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-05-01T20:11:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3aa0d159_3e050811",
+      "revId": "f83ad155d59b9a16f41763da04d3c5b8071c5a9a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_9e3a1ccc",
         "filename": "opendaylight/md-sal/sal-clustering-service/src/main/java/org/opendaylight/controller/md/sal/clustering/service/ClusteringServiceImpl.java",
         "patchSetId": 5
@@ -234,6 +468,24 @@
       "writtenOn": "2015-04-30T05:11:25Z",
       "side": 1,
       "message": "Seems this should be created locally instead of passed in as this class essentially owns the LastRoleChangeListener. Also since this class relies on the lastRoleChangeListener being notified, this class should be responsible for registering the lastRoleChangeListener.\n\nHowever, I don\u0027t see the advantage of registering a LastRoleChangeListener to keep the last state. Why not just maintain the ConcurrentMap in this class and populate it in changeShardRole? That would simplify the code and save the overhead of a notification. Also, it would ensure this class returns the most up-to-date last state when queried as the notification service could incur latencies. What if a notification listener queried this class for the latest state for some reason? It might not get it since you can\u0027t rely on the order of listener triggers.",
+      "revId": "f83ad155d59b9a16f41763da04d3c5b8071c5a9a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_fa4489b8",
+        "filename": "opendaylight/md-sal/sal-clustering-service/src/main/java/org/opendaylight/controller/md/sal/clustering/service/ClusteringServiceImpl.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-05-01T20:11:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3aa0d159_9e3a1ccc",
       "revId": "f83ad155d59b9a16f41763da04d3c5b8071c5a9a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -257,6 +509,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_3d08ab2c",
+        "filename": "opendaylight/md-sal/sal-clustering-service/src/main/java/org/opendaylight/controller/md/sal/clustering/service/ClusteringServiceImpl.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-05-01T20:11:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3aa0d159_a35ee343",
+      "revId": "f83ad155d59b9a16f41763da04d3c5b8071c5a9a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_0341d759",
         "filename": "opendaylight/md-sal/sal-clustering-service/src/main/java/org/opendaylight/controller/md/sal/clustering/service/listener/LastRoleChangeListener.java",
         "patchSetId": 5
@@ -268,6 +538,24 @@
       "writtenOn": "2015-04-30T05:11:25Z",
       "side": 1,
       "message": "Please add class javadoc.",
+      "revId": "f83ad155d59b9a16f41763da04d3c5b8071c5a9a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_3a22f101",
+        "filename": "opendaylight/md-sal/sal-clustering-service/src/main/java/org/opendaylight/controller/md/sal/clustering/service/listener/LastRoleChangeListener.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-05-01T20:11:22Z",
+      "side": 1,
+      "message": "Removed file",
+      "parentUuid": "3aa0d159_0341d759",
       "revId": "f83ad155d59b9a16f41763da04d3c5b8071c5a9a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -291,6 +579,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_da20adf9",
+        "filename": "opendaylight/md-sal/sal-clustering-service/src/main/java/org/opendaylight/controller/md/sal/clustering/service/listener/LastRoleChangeListener.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-05-01T20:11:22Z",
+      "side": 1,
+      "message": "Removed file",
+      "parentUuid": "3aa0d159_6358db56",
+      "revId": "f83ad155d59b9a16f41763da04d3c5b8071c5a9a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_8355e71e",
         "filename": "opendaylight/md-sal/sal-clustering-service/src/main/resources/initial/69-sal-clustering-service.xml",
         "patchSetId": 5
@@ -302,6 +608,24 @@
       "writtenOn": "2015-04-30T05:11:25Z",
       "side": 1,
       "message": "Is this comment intentional?",
+      "revId": "f83ad155d59b9a16f41763da04d3c5b8071c5a9a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_fa1b29c8",
+        "filename": "opendaylight/md-sal/sal-clustering-service/src/main/resources/initial/69-sal-clustering-service.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-05-01T20:11:22Z",
+      "side": 1,
+      "message": "removed",
+      "parentUuid": "3aa0d159_8355e71e",
       "revId": "f83ad155d59b9a16f41763da04d3c5b8071c5a9a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -325,6 +649,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_bd4efb94",
+        "filename": "opendaylight/md-sal/sal-clustering-service/src/main/resources/initial/69-sal-clustering-service.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-05-01T20:11:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3aa0d159_2332d310",
+      "revId": "f83ad155d59b9a16f41763da04d3c5b8071c5a9a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_832c07ad",
         "filename": "opendaylight/md-sal/sal-clustering-service/src/main/yang/sal-clustering-service-provider.yang",
         "patchSetId": 5
@@ -336,6 +678,24 @@
       "writtenOn": "2015-04-30T05:11:25Z",
       "side": 1,
       "message": "File needs copyright header.",
+      "revId": "f83ad155d59b9a16f41763da04d3c5b8071c5a9a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_a84ebb6d",
+        "filename": "opendaylight/md-sal/sal-clustering-service/src/main/yang/sal-clustering-service-provider.yang",
+        "patchSetId": 5
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-05-01T20:11:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3aa0d159_832c07ad",
       "revId": "f83ad155d59b9a16f41763da04d3c5b8071c5a9a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -359,6 +719,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_9d4bff86",
+        "filename": "opendaylight/md-sal/sal-clustering-service/src/main/yang/sal-clustering-service-provider.yang",
+        "patchSetId": 5
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-05-01T20:11:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3aa0d159_23197388",
+      "revId": "f83ad155d59b9a16f41763da04d3c5b8071c5a9a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_7e1ab06f",
         "filename": "opendaylight/md-sal/sal-clustering-service/src/test/java/org/opendaylight/controller/md/sal/clustering/service/ClusteringServiceTest.java",
         "patchSetId": 5
@@ -376,6 +754,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_fd7c83b7",
+        "filename": "opendaylight/md-sal/sal-clustering-service/src/test/java/org/opendaylight/controller/md/sal/clustering/service/ClusteringServiceTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-05-01T20:11:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3aa0d159_7e1ab06f",
+      "revId": "f83ad155d59b9a16f41763da04d3c5b8071c5a9a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_be10384f",
         "filename": "opendaylight/md-sal/sal-clustering-service/src/test/java/org/opendaylight/controller/md/sal/clustering/service/ClusteringServiceTest.java",
         "patchSetId": 5
@@ -387,6 +783,24 @@
       "writtenOn": "2015-04-30T05:11:25Z",
       "side": 1,
       "message": "Should call the method on ClusteringService.\n\nShould at least verify the keySet. To be complete, you would verify all the expected ShardRole instances.",
+      "revId": "f83ad155d59b9a16f41763da04d3c5b8071c5a9a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_dd818790",
+        "filename": "opendaylight/md-sal/sal-clustering-service/src/test/java/org/opendaylight/controller/md/sal/clustering/service/ClusteringServiceTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-05-01T20:11:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3aa0d159_be10384f",
       "revId": "f83ad155d59b9a16f41763da04d3c5b8071c5a9a",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
