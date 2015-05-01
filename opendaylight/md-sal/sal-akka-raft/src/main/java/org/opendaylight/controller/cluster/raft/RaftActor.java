@@ -221,12 +221,22 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                     context.getLastApplied() + 1, ale.getToIndex());
         }
 
-        for (long i = context.getLastApplied() + 1; i <= ale.getToIndex(); i++) {
-            batchRecoveredLogEntry(replicatedLog.get(i));
+        long lastUnappliedIndex = context.getLastApplied() + 1;
+        long lastApplied = lastUnappliedIndex - 1;
+        for (long i = lastUnappliedIndex; i <= ale.getToIndex(); i++) {
+            ReplicatedLogEntry logEntry = replicatedLog.get(i);
+            if(logEntry != null) {
+                lastApplied++;
+                batchRecoveredLogEntry(logEntry);
+            } else {
+                // Shouldn't happen but cover it anyway.
+                LOG.debug("Log entry not found for index {}", i);
+                break;
+            }
         }
 
-        context.setLastApplied(ale.getToIndex());
-        context.setCommitIndex(ale.getToIndex());
+        context.setLastApplied(lastApplied);
+        context.setCommitIndex(lastApplied);
     }
 
     private void batchRecoveredLogEntry(ReplicatedLogEntry logEntry) {
