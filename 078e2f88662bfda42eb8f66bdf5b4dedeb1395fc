@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_bacb611d",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-01T03:58:50Z",
+      "side": 1,
+      "message": "I think we may potentially break the raft algorithm by not letting it play out the election. This could potentially let a node with an older log become leader. It seems we should check this strategy in requestVote, i.e. if the last log term and index are equal, then check the strategy to bias one over the other.",
+      "revId": "078e2f88662bfda42eb8f66bdf5b4dedeb1395fc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
