@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import akka.actor.ActorRef;
 import akka.actor.InvalidActorNameException;
 import akka.actor.PoisonPill;
@@ -201,6 +202,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
             }
         }
 
+        assertNotNull(lastEx);
         throw lastEx;
     }
 
