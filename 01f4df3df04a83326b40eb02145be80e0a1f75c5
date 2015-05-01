@@ -51,6 +51,24 @@
       "revId": "01f4df3df04a83326b40eb02145be80e0a1f75c5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_fae00998",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/rest/impl/XmlNormalizedNodeBodyReader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-01T04:21:16Z",
+      "side": 1,
+      "message": "You can also pass a Throwable cause to RestconfDocumentedException which will include the stack trace in the error-info tag. It might be useful to see the underlying exception trace for \u0027e\u0027. Not a big deal - we can change it later if need be.",
+      "parentUuid": "3aa0d159_5a7d7d6d",
+      "revId": "01f4df3df04a83326b40eb02145be80e0a1f75c5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
