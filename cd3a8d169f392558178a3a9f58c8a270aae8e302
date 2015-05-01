@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_48693724",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 225,
+      "author": {
+        "id": 3576
+      },
+      "writtenOn": "2015-05-01T21:01:19Z",
+      "side": 1,
+      "message": "Wouldn\u0027t this pair of lines be better as:\n\nlong lastApplied \u003d context.getLastApplied();\nlong lastUnappliedIndex \u003d lastApplied + 1\n\nor even remove the \"lastUnappliedIndex\" variable entirely, as it\u0027s only referenced in the next line, which you can just replace with \"lastApplied + 1\".",
+      "revId": "cd3a8d169f392558178a3a9f58c8a270aae8e302",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
