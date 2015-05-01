@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_c816a7a7",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/AbstractRaftActorIntegrationTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-01T20:51:09Z",
+      "side": 1,
+      "message": "The assertion is fine but I don\u0027t see how it could be null here. Loop goes 0-10 so will get in. If createTestActor succeeds, it will return inline. If InvalidActorNameException is thrown, we set lastEx. If an unchecked ex is thrown from createTestActor, it will throw out of the method. Am I missing something here?",
+      "revId": "55f6c3822c80db7616eb5ef359502bac20ed2747",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
