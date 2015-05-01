@@ -52,6 +52,24 @@
       "revId": "cd3a8d169f392558178a3a9f58c8a270aae8e302",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_c3868865",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 225,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-01T22:13:56Z",
+      "side": 1,
+      "message": "It doesn\u0027t matter either way but I changed it",
+      "parentUuid": "3aa0d159_6358d432",
+      "revId": "cd3a8d169f392558178a3a9f58c8a270aae8e302",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
