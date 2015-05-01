@@ -13,7 +13,6 @@ import akka.actor.ActorRefProvider;
 import akka.actor.Address;
 import akka.actor.Props;
 import akka.cluster.ClusterActorRefProvider;
-import com.google.common.annotations.VisibleForTesting;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -230,7 +229,7 @@ public class BucketStore<T extends Copier<T>> extends AbstractUntypedActorWithMe
         }
     }
 
-    protected BucketImpl<T> getLocalBucket() {
+    public BucketImpl<T> getLocalBucket() {
         return localBucket;
     }
 
@@ -239,12 +238,11 @@ public class BucketStore<T extends Copier<T>> extends AbstractUntypedActorWithMe
         versions.put(selfAddress, localBucket.getVersion());
     }
 
-    protected Map<Address, Bucket<T>> getRemoteBuckets() {
+    public Map<Address, Bucket<T>> getRemoteBuckets() {
         return remoteBuckets;
     }
 
-    @VisibleForTesting
-    Map<Address, Long> getVersions() {
+    public Map<Address, Long> getVersions() {
         return versions;
     }
 }

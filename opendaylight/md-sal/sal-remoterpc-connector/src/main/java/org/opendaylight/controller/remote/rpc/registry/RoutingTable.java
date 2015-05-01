@@ -13,6 +13,8 @@ import akka.japi.Pair;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+
 import org.opendaylight.controller.remote.rpc.registry.gossip.Copier;
 import org.opendaylight.controller.sal.connector.api.RpcRouter;
 
@@ -39,6 +41,10 @@ public class RoutingTable implements Copier<RoutingTable>, Serializable {
         } else {
             return Option.option(new Pair<>(router, updatedTime));
         }
+    }
+
+    public Set<RpcRouter.RouteIdentifier<?, ?, ?>> getRoutes() {
+        return table.keySet();
     }
 
     public void addRoute(RpcRouter.RouteIdentifier<?,?,?> routeId){

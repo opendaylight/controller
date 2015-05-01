@@ -75,7 +75,7 @@ public class RpcManager extends AbstractUntypedActor {
         LOG.debug("Create rpc registry and broker actors");
 
         rpcRegistry =
-                getContext().actorOf(Props.create(RpcRegistry.class).
+                getContext().actorOf(RpcRegistry.props().
                     withMailbox(config.getMailBoxName()), config.getRpcRegistryName());
 
         rpcBroker =
