@@ -2,31 +2,32 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
-import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
-import akka.actor.PoisonPill;
+import akka.actor.Address;
+import akka.actor.AddressFromURIString;
+import akka.cluster.Cluster;
+import akka.testkit.JavaTestKit;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Uninterruptibles;
+import com.typesafe.config.ConfigFactory;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.exceptions.NotInitializedException;
-import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
-import org.opendaylight.controller.cluster.datastore.utils.MockClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.utils.MockDataChangeListener;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.PeopleModel;
-import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
@@ -42,16 +43,34 @@ import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
-public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
+public class DistributedDataStoreIntegrationTest {
+
+    private static ActorSystem system;
 
     private final DatastoreContext.Builder datastoreContextBuilder =
             DatastoreContext.newBuilder().shardHeartbeatIntervalInMillis(100);
 
+    @BeforeClass
+    public static void setUpClass() throws IOException {
+        system = ActorSystem.create("cluster-test", ConfigFactory.load().getConfig("Member1"));
+        Address member1Address = AddressFromURIString.parse("akka.tcp://cluster-test@127.0.0.1:2558");
+        Cluster.get(system).join(member1Address);
+    }
+
+    @AfterClass
+    public static void tearDownClass() throws IOException {
+        JavaTestKit.shutdownActorSystem(system);
+        system = null;
+    }
+
+    protected ActorSystem getSystem() {
+        return system;
+    }
+
     @Test
     public void testWriteTransactionWithSingleShard() throws Exception{
-        new IntegrationTestKit(getSystem()) {{
+        new IntegrationTestKit(getSystem(), datastoreContextBuilder) {{
             DistributedDataStore dataStore =
                     setupDistributedDataStore("transactionIntegrationTest", "test-1");
 
@@ -67,7 +86,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
 
     @Test
     public void testWriteTransactionWithMultipleShards() throws Exception{
-        new IntegrationTestKit(getSystem()) {{
+        new IntegrationTestKit(getSystem(), datastoreContextBuilder) {{
             DistributedDataStore dataStore =
                     setupDistributedDataStore("testWriteTransactionWithMultipleShards", "cars-1", "people-1");
 
@@ -117,7 +136,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
     @Test
     public void testReadWriteTransactionWithSingleShard() throws Exception{
         System.setProperty("shard.persistent", "true");
-        new IntegrationTestKit(getSystem()) {{
+        new IntegrationTestKit(getSystem(), datastoreContextBuilder) {{
             DistributedDataStore dataStore =
                     setupDistributedDataStore("testReadWriteTransactionWithSingleShard", "test-1");
 
@@ -163,7 +182,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
 
     @Test
     public void testReadWriteTransactionWithMultipleShards() throws Exception{
-        new IntegrationTestKit(getSystem()) {{
+        new IntegrationTestKit(getSystem(), datastoreContextBuilder) {{
             DistributedDataStore dataStore =
                     setupDistributedDataStore("testReadWriteTransactionWithMultipleShards", "cars-1", "people-1");
 
@@ -219,7 +238,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
 
     private void testTransactionWritesWithShardNotInitiallyReady(final String testName,
             final boolean writeOnly) throws Exception {
-        new IntegrationTestKit(getSystem()) {{
+        new IntegrationTestKit(getSystem(), datastoreContextBuilder) {{
             String shardName = "test-1";
 
             // Setup the InMemoryJournal to block shard recovery to ensure the shard isn't
@@ -321,7 +340,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
 
     @Test
     public void testTransactionReadsWithShardNotInitiallyReady() throws Exception {
-        new IntegrationTestKit(getSystem()) {{
+        new IntegrationTestKit(getSystem(), datastoreContextBuilder) {{
             String testName = "testTransactionReadsWithShardNotInitiallyReady";
             String shardName = "test-1";
 
@@ -394,7 +413,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
 
     @Test(expected=NotInitializedException.class)
     public void testTransactionCommitFailureWithShardNotInitialized() throws Throwable{
-        new IntegrationTestKit(getSystem()) {{
+        new IntegrationTestKit(getSystem(), datastoreContextBuilder) {{
             String testName = "testTransactionCommitFailureWithShardNotInitialized";
             String shardName = "test-1";
 
@@ -464,7 +483,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
 
     @Test(expected=NotInitializedException.class)
     public void testTransactionReadFailureWithShardNotInitialized() throws Throwable{
-        new IntegrationTestKit(getSystem()) {{
+        new IntegrationTestKit(getSystem(), datastoreContextBuilder) {{
             String testName = "testTransactionReadFailureWithShardNotInitialized";
             String shardName = "test-1";
 
@@ -536,7 +555,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
     }
 
     private void testTransactionCommitFailureWithNoShardLeader(final boolean writeOnly) throws Throwable {
-        new IntegrationTestKit(getSystem()) {{
+        new IntegrationTestKit(getSystem(), datastoreContextBuilder) {{
             String testName = "testTransactionCommitFailureWithNoShardLeader";
             String shardName = "default";
 
@@ -618,7 +637,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
     @Test
     public void testTransactionAbort() throws Exception{
         System.setProperty("shard.persistent", "true");
-        new IntegrationTestKit(getSystem()) {{
+        new IntegrationTestKit(getSystem(), datastoreContextBuilder) {{
             DistributedDataStore dataStore =
                     setupDistributedDataStore("transactionAbortIntegrationTest", "test-1");
 
@@ -642,7 +661,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
 
     @Test
     public void testTransactionChainWithSingleShard() throws Exception{
-        new IntegrationTestKit(getSystem()) {{
+        new IntegrationTestKit(getSystem(), datastoreContextBuilder) {{
             DistributedDataStore dataStore = setupDistributedDataStore("testTransactionChainWithSingleShard", "test-1");
 
             // 1. Create a Tx chain and write-only Tx
@@ -730,7 +749,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
 
     @Test
     public void testTransactionChainWithMultipleShards() throws Exception{
-        new IntegrationTestKit(getSystem()) {{
+        new IntegrationTestKit(getSystem(), datastoreContextBuilder) {{
             DistributedDataStore dataStore = setupDistributedDataStore("testTransactionChainWithMultipleShards",
                     "cars-1", "people-1");
 
@@ -795,7 +814,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
 
     @Test
     public void testCreateChainedTransactionsInQuickSuccession() throws Exception{
-        new IntegrationTestKit(getSystem()) {{
+        new IntegrationTestKit(getSystem(), datastoreContextBuilder) {{
             DistributedDataStore dataStore = setupDistributedDataStore(
                     "testCreateChainedTransactionsInQuickSuccession", "test-1");
 
@@ -826,7 +845,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
 
     @Test
     public void testCreateChainedTransactionAfterEmptyTxReadied() throws Exception{
-        new IntegrationTestKit(getSystem()) {{
+        new IntegrationTestKit(getSystem(), datastoreContextBuilder) {{
             DistributedDataStore dataStore = setupDistributedDataStore(
                     "testCreateChainedTransactionAfterEmptyTxReadied", "test-1");
 
@@ -849,7 +868,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
 
     @Test
     public void testCreateChainedTransactionWhenPreviousNotReady() throws Throwable {
-        new IntegrationTestKit(getSystem()) {{
+        new IntegrationTestKit(getSystem(), datastoreContextBuilder) {{
             DistributedDataStore dataStore = setupDistributedDataStore(
                     "testCreateChainedTransactionWhenPreviousNotReady", "test-1");
 
@@ -869,7 +888,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
 
     @Test
     public void testCreateChainedTransactionAfterClose() throws Throwable {
-        new IntegrationTestKit(getSystem()) {{
+        new IntegrationTestKit(getSystem(), datastoreContextBuilder) {{
             DistributedDataStore dataStore = setupDistributedDataStore(
                     "testCreateChainedTransactionAfterClose", "test-1");
 
@@ -885,7 +904,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
 
     @Test
     public void testChangeListenerRegistration() throws Exception{
-        new IntegrationTestKit(getSystem()) {{
+        new IntegrationTestKit(getSystem(), datastoreContextBuilder) {{
             DistributedDataStore dataStore =
                     setupDistributedDataStore("testChangeListenerRegistration", "test-1");
 
@@ -931,129 +950,4 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
             cleanup(dataStore);
         }};
     }
-
-    class IntegrationTestKit extends ShardTestKit {
-
-        IntegrationTestKit(ActorSystem actorSystem) {
-            super(actorSystem);
-        }
-
-        DistributedDataStore setupDistributedDataStore(String typeName, String... shardNames) {
-            return setupDistributedDataStore(typeName, true, shardNames);
-        }
-
-        DistributedDataStore setupDistributedDataStore(String typeName, boolean waitUntilLeader,
-                String... shardNames) {
-            MockClusterWrapper cluster = new MockClusterWrapper();
-            Configuration config = new ConfigurationImpl("module-shards.conf", "modules.conf");
-            ShardStrategyFactory.setConfiguration(config);
-
-            datastoreContextBuilder.dataStoreType(typeName);
-
-            DatastoreContext datastoreContext = datastoreContextBuilder.build();
-
-            DistributedDataStore dataStore = new DistributedDataStore(getSystem(), cluster,
-                    config, datastoreContext);
-
-            SchemaContext schemaContext = SchemaContextHelper.full();
-            dataStore.onGlobalContextUpdated(schemaContext);
-
-            if(waitUntilLeader) {
-                for(String shardName: shardNames) {
-                    ActorRef shard = null;
-                    for(int i = 0; i < 20 * 5 && shard == null; i++) {
-                        Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
-                        Optional<ActorRef> shardReply = dataStore.getActorContext().findLocalShard(shardName);
-                        if(shardReply.isPresent()) {
-                            shard = shardReply.get();
-                        }
-                    }
-
-                    assertNotNull("Shard was not created", shard);
-
-                    waitUntilLeader(shard);
-                }
-            }
-
-            return dataStore;
-        }
-
-        void testWriteTransaction(DistributedDataStore dataStore, YangInstanceIdentifier nodePath,
-                NormalizedNode<?, ?> nodeToWrite) throws Exception {
-
-            // 1. Create a write-only Tx
-
-            DOMStoreWriteTransaction writeTx = dataStore.newWriteOnlyTransaction();
-            assertNotNull("newWriteOnlyTransaction returned null", writeTx);
-
-            // 2. Write some data
-
-            writeTx.write(nodePath, nodeToWrite);
-
-            // 3. Ready the Tx for commit
-
-            DOMStoreThreePhaseCommitCohort cohort = writeTx.ready();
-
-            // 4. Commit the Tx
-
-            doCommit(cohort);
-
-            // 5. Verify the data in the store
-
-            DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
-
-            Optional<NormalizedNode<?, ?>> optional = readTx.read(nodePath).get(5, TimeUnit.SECONDS);
-            assertEquals("isPresent", true, optional.isPresent());
-            assertEquals("Data node", nodeToWrite, optional.get());
-        }
-
-        void doCommit(final DOMStoreThreePhaseCommitCohort cohort) throws Exception {
-            Boolean canCommit = cohort.canCommit().get(7, TimeUnit.SECONDS);
-            assertEquals("canCommit", true, canCommit);
-            cohort.preCommit().get(5, TimeUnit.SECONDS);
-            cohort.commit().get(5, TimeUnit.SECONDS);
-        }
-
-        void cleanup(DistributedDataStore dataStore) {
-            dataStore.getActorContext().getShardManager().tell(PoisonPill.getInstance(), null);
-        }
-
-        void assertExceptionOnCall(Callable<Void> callable, Class<? extends Exception> expType)
-                throws Exception {
-            try {
-                callable.call();
-                fail("Expected " + expType.getSimpleName());
-            } catch(Exception e) {
-                assertEquals("Exception type", expType, e.getClass());
-            }
-        }
-
-        void assertExceptionOnTxChainCreates(final DOMStoreTransactionChain txChain,
-                Class<? extends Exception> expType) throws Exception {
-            assertExceptionOnCall(new Callable<Void>() {
-                @Override
-                public Void call() throws Exception {
-                    txChain.newWriteOnlyTransaction();
-                    return null;
-                }
-            }, expType);
-
-            assertExceptionOnCall(new Callable<Void>() {
-                @Override
-                public Void call() throws Exception {
-                    txChain.newReadWriteTransaction();
-                    return null;
-                }
-            }, expType);
-
-            assertExceptionOnCall(new Callable<Void>() {
-                @Override
-                public Void call() throws Exception {
-                    txChain.newReadOnlyTransaction();
-                    return null;
-                }
-            }, expType);
-        }
-    }
-
 }
