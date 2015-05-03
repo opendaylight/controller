@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_2ecf1381",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCandidatePayload.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-03T14:35:42Z",
+      "side": 1,
+      "message": "I\u0027m curious why this is better than a recursive method as this way incurs object creation and GC overhead which could be significant for a large/deep tree.",
+      "revId": "588457a3839acb2d226d76f6651ad760971267fc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_8eb8a7e6",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCandidatePayload.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 233,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-03T14:35:42Z",
+      "side": 1,
+      "message": "Is the ODL style for switch to not indent the cases statements? Seems inconsistent  to me b/c switch is a code block and we indent for every other type of block.",
+      "revId": "588457a3839acb2d226d76f6651ad760971267fc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_4eca9f6f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCandidatePayload.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 236,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-03T14:35:42Z",
+      "side": 1,
+      "message": "This code is never hit via DataTreeCandidatePayloadTest. We need to add test  coverage for each type. Also readChildren and readNode need test coverage.",
+      "revId": "588457a3839acb2d226d76f6651ad760971267fc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
