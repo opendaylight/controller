@@ -106,6 +106,24 @@
       "revId": "e13ba4c91150dcf954c95e2434053517b3a4c652",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_ce930f4e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 455,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-05-03T17:47:16Z",
+      "side": 1,
+      "message": "A DataTreeModification can be applied to a different DataTree. I will make the message serializable, which will solve this particular problem.",
+      "parentUuid": "3aa0d159_7a0dd936",
+      "revId": "e13ba4c91150dcf954c95e2434053517b3a4c652",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
