@@ -21,6 +21,7 @@ import java.io.ObjectOutput;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.Map;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputStreamReader;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeOutputStreamWriter;
@@ -53,38 +54,7 @@ final class DataTreeCandidatePayload extends Payload implements Externalizable {
         this.serialized = Preconditions.checkNotNull(serialized);
     }
 
-    private static void writeChildren(final NormalizedNodeOutputStreamWriter writer, final DataOutput out,
-            final Collection<DataTreeCandidateNode> children) throws IOException {
-        out.writeInt(children.size());
-        for (DataTreeCandidateNode child : children) {
-            writeNode(writer, out, child);
-        }
-    }
-
-    private static void writeNode(final NormalizedNodeOutputStreamWriter writer, final DataOutput out,
-            final DataTreeCandidateNode node) throws IOException {
-        switch (node.getModificationType()) {
-        case DELETE:
-            out.writeByte(DELETE);
-            writer.writePathArgument(node.getIdentifier());
-            break;
-        case SUBTREE_MODIFIED:
-            out.writeByte(SUBTREE_MODIFIED);
-            writer.writePathArgument(node.getIdentifier());
-            writeChildren(writer, out, node.getChildNodes());
-            break;
-        case WRITE:
-            out.writeByte(WRITE);
-            writer.writeNormalizedNode(node.getDataAfter().get());
-            break;
-        case UNMODIFIED:
-            throw new IllegalArgumentException("Unmodified candidate should never be in the payload");
-        default:
-            throw new IllegalArgumentException("Unhandled node type " + node.getModificationType());
-        }
-    }
-
-    static DataTreeCandidatePayload create(DataTreeCandidate candidate) {
+    static DataTreeCandidatePayload create(final DataTreeCandidate candidate) {
         final ByteArrayDataOutput out = ByteStreams.newDataOutput();
         try (final NormalizedNodeOutputStreamWriter writer = new NormalizedNodeOutputStreamWriter(out)) {
             writer.writeYangInstanceIdentifier(candidate.getRootPath());
@@ -96,7 +66,12 @@ final class DataTreeCandidatePayload extends Payload implements Externalizable {
                 break;
             case SUBTREE_MODIFIED:
                 out.writeByte(SUBTREE_MODIFIED);
-                writeChildren(writer, out, node.getChildNodes());
+                out.writeInt(node.getChildNodes().size());
+
+                NodeIterator iterator = new NodeIterator(null, node.getChildNodes().iterator());
+                do {
+                    iterator = iterator.next(writer, out);
+                } while (iterator != null);
                 break;
             case UNMODIFIED:
                 out.writeByte(UNMODIFIED);
@@ -204,19 +179,62 @@ final class DataTreeCandidatePayload extends Payload implements Externalizable {
     }
 
     @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
+    public void writeExternal(final ObjectOutput out) throws IOException {
         out.writeByte((byte)serialVersionUID);
         out.writeInt(serialized.length);
         out.write(serialized);
     }
 
     @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+    public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
         final long version = in.readByte();
         Preconditions.checkArgument(version == serialVersionUID, "Unsupported serialization version %s", version);
 
         final int length = in.readInt();
         serialized = new byte[length];
         in.readFully(serialized);
+    }
+
+    private static final class NodeIterator {
+        private final Iterator<DataTreeCandidateNode> iterator;
+        private final NodeIterator parent;
+
+        public NodeIterator(final NodeIterator parent, final Iterator<DataTreeCandidateNode> iterator) {
+            this.iterator = Preconditions.checkNotNull(iterator);
+            this.parent = Preconditions.checkNotNull(parent);
+        }
+
+        public NodeIterator next(final NormalizedNodeOutputStreamWriter writer, final DataOutput out) throws IOException {
+            while (iterator.hasNext()) {
+                final DataTreeCandidateNode node = iterator.next();
+
+                switch (node.getModificationType()) {
+                case DELETE:
+                    out.writeByte(DELETE);
+                    writer.writePathArgument(node.getIdentifier());
+                    break;
+                case SUBTREE_MODIFIED:
+                    final Collection<DataTreeCandidateNode> children = node.getChildNodes();
+                    if (!children.isEmpty()) {
+                        out.writeByte(SUBTREE_MODIFIED);
+                        writer.writePathArgument(node.getIdentifier());
+                        out.writeInt(children.size());
+                        return new NodeIterator(this, children.iterator());
+                    }
+                    break;
+                case WRITE:
+                    out.writeByte(WRITE);
+                    writer.writeNormalizedNode(node.getDataAfter().get());
+                    break;
+                case UNMODIFIED:
+                    throw new IllegalArgumentException("Unmodified candidate should never be in the payload");
+                default:
+                    throw new IllegalArgumentException("Unhandled node type " + node.getModificationType());
+                }
+            }
+
+            return parent;
+        }
+
     }
 }
