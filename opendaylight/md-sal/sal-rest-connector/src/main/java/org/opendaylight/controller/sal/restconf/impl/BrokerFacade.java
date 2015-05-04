@@ -9,7 +9,6 @@ package org.opendaylight.controller.sal.restconf.impl;
 
 import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION;
 import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.OPERATIONAL;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
@@ -202,26 +201,19 @@ public class BrokerFacade {
 
     private CheckedFuture<Void, TransactionCommitFailedException> postDataViaTransaction(
             final DOMDataReadWriteTransaction rWTransaction, final LogicalDatastoreType datastore,
-            final YangInstanceIdentifier parentPath, final NormalizedNode<?, ?> payload, final SchemaContext schemaContext) {
+            final YangInstanceIdentifier path, final NormalizedNode<?, ?> payload, final SchemaContext schemaContext) {
         // FIXME: This is doing correct post for container and list children
         //        not sure if this will work for choice case
         if(payload instanceof MapNode) {
-            final YangInstanceIdentifier mapPath = parentPath.node(payload.getIdentifier());
-            final NormalizedNode<?, ?> emptySubtree = ImmutableNodes.fromInstanceId(schemaContext, mapPath);
+            final NormalizedNode<?, ?> emptySubtree = ImmutableNodes.fromInstanceId(schemaContext, path);
             rWTransaction.merge(datastore, YangInstanceIdentifier.create(emptySubtree.getIdentifier()), emptySubtree);
-            ensureParentsByMerge(datastore, mapPath, rWTransaction, schemaContext);
+            ensureParentsByMerge(datastore, path, rWTransaction, schemaContext);
             for(final MapEntryNode child : ((MapNode) payload).getValue()) {
-                final YangInstanceIdentifier childPath = mapPath.node(child.getIdentifier());
+                final YangInstanceIdentifier childPath = path.node(child.getIdentifier());
                 checkItemDoesNotExists(rWTransaction, datastore, childPath);
                 rWTransaction.put(datastore, childPath, child);
             }
         } else {
-            final YangInstanceIdentifier path;
-            if(payload instanceof MapEntryNode) {
-                path = parentPath.node(payload.getNodeType()).node(payload.getIdentifier());
-            } else {
-                path = parentPath.node(payload.getIdentifier());
-            }
             checkItemDoesNotExists(rWTransaction,datastore, path);
             ensureParentsByMerge(datastore, path, rWTransaction, schemaContext);
             rWTransaction.put(datastore, path, payload);
