@@ -61,19 +61,12 @@ final class MonitoringToMdsalWriter implements AutoCloseable, NetconfMonitoringS
         tx.put(LogicalDatastoreType.OPERATIONAL, InstanceIdentifier.create(NetconfState.class), state);
         // FIXME first attempt (right after we register to binding broker) always fails
         // Is it due to the fact that we are writing from the onSessionInitiated callback ?
-        final CheckedFuture<Void, TransactionCommitFailedException> submit = tx.submit();
-
-        Futures.addCallback(submit, new FutureCallback<Void>() {
-            @Override
-            public void onSuccess(final Void aVoid) {
-                LOG.debug("Netconf state updated successfully");
-            }
-
-            @Override
-            public void onFailure(final Throwable throwable) {
-                LOG.warn("Unable to update netconf state", throwable);
-            }
-        });
+        try {
+            tx.submit().checkedGet();
+            LOG.debug("Netconf state updated successfully");
+        } catch (TransactionCommitFailedException e) {
+            LOG.warn("Unable to update netconf state", e);
+        }
     }
 
     @Override
