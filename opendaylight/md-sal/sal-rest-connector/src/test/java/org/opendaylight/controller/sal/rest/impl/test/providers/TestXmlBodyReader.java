@@ -96,7 +96,7 @@ public class TestXmlBodyReader extends AbstractBodyReaderTest {
         final NormalizedNodeContext returnValue = xmlBodyReader
                 .readFrom(null, null, null, mediaType, null, inputStream);
         checkNormalizedNodeContext(returnValue);
-        checkExpectValueNormalizeNodeContext(dataSchemaNode, returnValue);
+        checkExpectValueNormalizeNodeContext(dataSchemaNode, returnValue, "cont1");
     }
 
     @Test
@@ -127,9 +127,6 @@ public class TestXmlBodyReader extends AbstractBodyReaderTest {
         if (localQname != null && dataSchemaNode instanceof DataNodeContainer) {
             final DataSchemaNode child = ((DataNodeContainer) dataSchemaNode).getDataChildByName(localQname);
             dataNodeIdent = YangInstanceIdentifier.builder(dataNodeIdent).node(child.getQName()).build();
-            assertTrue(nnContext.getInstanceIdentifierContext().getSchemaNode().equals(child));
-        } else {
-            assertTrue(nnContext.getInstanceIdentifierContext().getSchemaNode().equals(dataSchemaNode));
         }
         assertTrue(nnContext.getInstanceIdentifierContext().getInstanceIdentifier().equals(dataNodeIdent));
         assertNotNull(NormalizedNodes.findNode(nnContext.getData(), dataNodeIdent));
