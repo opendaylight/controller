@@ -16,6 +16,23 @@
       "revId": "078e2f88662bfda42eb8f66bdf5b4dedeb1395fc",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_be326e0e",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/election/ElectionStrategy.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-05-04T22:37:48Z",
+      "side": 1,
+      "message": "A javadoc comment for the method would be helpful.",
+      "revId": "078e2f88662bfda42eb8f66bdf5b4dedeb1395fc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
