@@ -25,10 +25,8 @@ import org.opendaylight.controller.cluster.raft.client.messages.GetOnDemandRaftS
 import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
 import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
 import org.opendaylight.controller.md.sal.common.util.jmx.QueuedNotificationManagerMXBeanImpl;
-import org.opendaylight.controller.md.sal.common.util.jmx.ThreadExecutorStats;
 import org.opendaylight.controller.md.sal.common.util.jmx.ThreadExecutorStatsMXBeanImpl;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
-import org.opendaylight.yangtools.util.concurrent.ListenerNotificationQueueStats;
 import org.opendaylight.yangtools.util.concurrent.QueuedNotificationManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -280,27 +278,6 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
     @Override
     public long getInMemoryJournalLogSize() {
         return getOnDemandRaftState().getInMemoryJournalLogSize();
-    }
-
-    @Override
-    public ThreadExecutorStats getDataStoreExecutorStats() {
-        // FIXME: this particular thing does not work, as it really is DS-specific
-        return null;
-    }
-
-    @Override
-    public ThreadExecutorStats getNotificationMgrExecutorStats() {
-        return notificationExecutorStatsBean.toThreadExecutorStats();
-    }
-
-    @Override
-    public List<ListenerNotificationQueueStats> getCurrentNotificationMgrListenerQueueStats() {
-        return notificationManagerStatsBean.getCurrentListenerQueueStats();
-    }
-
-    @Override
-    public int getMaxNotificationMgrListenerQueueSize() {
-        return notificationManagerStatsBean.getMaxListenerQueueSize();
     }
 
     /**
