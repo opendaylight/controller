@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_a9323d0e",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/RestconfImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 754,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-05-04T12:11:47Z",
+      "side": 1,
+      "message": "Should be extracted to separate variable at start",
+      "range": {
+        "startLine": 754,
+        "startChar": 12,
+        "endLine": 754,
+        "endChar": 38
+      },
+      "revId": "32b2ca030846563ad8af57e51f71ff7d236b4163",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_e9584558",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/RestconfImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 757,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-05-04T12:11:47Z",
+      "side": 1,
+      "message": "Should be extracted to separate variable at start",
+      "range": {
+        "startLine": 757,
+        "startChar": 76,
+        "endLine": 757,
+        "endChar": 93
+      },
+      "revId": "32b2ca030846563ad8af57e51f71ff7d236b4163",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_c93549f8",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/RestconfImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 779,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-05-04T12:11:47Z",
+      "side": 1,
+      "message": "Do not modify keyValues which were returned from InstanceIdentifier, this keyValues are to be immutable, so this may fail with UnsupportedOperationException.\n\nBetter way is to copy uriKeyValues and do modifications on copy.\n\nAlso uriKeyValues.remove(keyDefinition) may return null if keyDefinition did not have value and this may result in NPE.\n\nBEtter way is just to do uriKeyValue.equals(dataKeyValue)\nsince previous checks already determined uriKeyValue and dataKeyValue are non-nulls and already extracted them from underlying data structures.",
+      "range": {
+        "startLine": 779,
+        "startChar": 19,
+        "endLine": 779,
+        "endChar": 53
+      },
+      "revId": "32b2ca030846563ad8af57e51f71ff7d236b4163",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
