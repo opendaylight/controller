@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_de1c1a7a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/identifiers/ShardIdentifier.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-05-04T23:01:03Z",
+      "side": 1,
+      "message": "whats the change here?",
+      "revId": "87aec448934336f59a3162f6e32e8c0979c8357f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_1e02820b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ElectionStrategyFactory.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-05-04T23:01:03Z",
+      "side": 1,
+      "message": "setBundleContext() method seems to do a lot more than just \u0027setting\u0027 the bundlecontext. \nSeeems proper to rename this method or move this logic out to getElectionStrategy.",
+      "revId": "87aec448934336f59a3162f6e32e8c0979c8357f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_9e169254",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ElectionStrategyFactory.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-05-04T23:01:03Z",
+      "side": 1,
+      "message": "Pls log the exception. If  we try to attempt and it fails, the log should help to troubleshoot.",
+      "revId": "87aec448934336f59a3162f6e32e8c0979c8357f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_7121779e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/FixedLeaderElectionStrategy.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-05-04T23:01:03Z",
+      "side": 1,
+      "message": "can this be private and final. Also we can do with a Hashset too i guess.",
+      "revId": "87aec448934336f59a3162f6e32e8c0979c8357f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_31420f3f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/FixedLeaderElectionStrategy.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-05-04T23:01:03Z",
+      "side": 1,
+      "message": "I think by default it should return true for all except for those shard types which are mentioned in the config-file.\nThe elections should happen for the rest of the shards like its the default strategy for them.",
+      "revId": "87aec448934336f59a3162f6e32e8c0979c8357f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_b175bf99",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/utils/FixedLeaderElectionStrategyTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-05-04T23:01:03Z",
+      "side": 1,
+      "message": "good to have one case for {member-1, inventory, config} and/or {member-2, inventory, config}",
+      "revId": "87aec448934336f59a3162f6e32e8c0979c8357f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
