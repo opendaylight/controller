@@ -31,6 +31,11 @@ import org.opendaylight.controller.sal.restconf.impl.NormalizedNodeContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.AugmentationNode;
+import org.opendaylight.yangtools.yang.data.api.schema.ChoiceNode;
+import org.opendaylight.yangtools.yang.data.api.schema.DataContainerNode;
+import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.codec.xml.XmlUtils;
 import org.opendaylight.yangtools.yang.data.impl.schema.transform.dom.parser.DomToNormalizedNodeParserFactory;
@@ -102,8 +107,27 @@ public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPro
             }
             final Document doc = dBuilder.parse(entityStream);
 
-            final NormalizedNode<?, ?> result = parse(path,doc);
-            return new NormalizedNodeContext(path,result);
+            NormalizedNode<?, ?> result = parse(path,doc);
+            YangInstanceIdentifier iiToData = path.getInstanceIdentifier();
+            InstanceIdentifierContext<SchemaNode> newIIContext;
+
+            if (isPost()) {
+                while (result instanceof AugmentationNode || result instanceof ChoiceNode) {
+                    final Object childNode = ((DataContainerNode) result).getValue().iterator().next();
+                    iiToData = iiToData.node(result.getIdentifier());
+                    result = (NormalizedNode<?, ?>) childNode;
+                }
+                if (result instanceof MapEntryNode) {
+                    iiToData = iiToData.node(result.getNodeType()).node(result.getIdentifier());
+                } else {
+                    iiToData = iiToData.node(result.getIdentifier());
+                }
+            }
+
+            newIIContext = new InstanceIdentifierContext<>(iiToData, path.getSchemaNode(), path.getMountPoint(),
+                    path.getSchemaContext());
+
+            return new NormalizedNodeContext(newIIContext,result);
         } catch (final RestconfDocumentedException e){
             throw e;
         } catch (final Exception e) {
