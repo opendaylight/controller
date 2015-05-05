@@ -49,6 +49,12 @@ public class Parameters {
     @Arg(dest = "ssh")
     public boolean ssh;
 
+    @Arg(dest = "username")
+    public String username;
+
+    @Arg(dest = "password")
+    public String password;
+
     @Arg(dest = "msg-timeout")
     public long msgTimeout;
 
@@ -127,6 +133,16 @@ public class Parameters {
                 .type(Boolean.class)
                 .setDefault(false)
                 .dest("ssh");
+
+        parser.addArgument("--username")
+                .type(String.class)
+                .setDefault("admin")
+                .dest("username");
+
+        parser.addArgument("--password")
+                .type(String.class)
+                .setDefault("admin")
+                .dest("password");
 
         parser.addArgument("--tcp-header")
                 .type(String.class)
