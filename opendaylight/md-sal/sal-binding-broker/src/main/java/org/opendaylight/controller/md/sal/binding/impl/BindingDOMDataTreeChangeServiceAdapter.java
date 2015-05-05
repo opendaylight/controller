@@ -54,7 +54,7 @@ final class BindingDOMDataTreeChangeServiceAdapter implements DataTreeChangeServ
     }
 
     private DOMDataTreeIdentifier toDomTreeIdentifier(final DataTreeIdentifier<?> treeId) {
-        final YangInstanceIdentifier domPath = codec.toYangInstanceIdentifier(treeId.getRootIdentifier());
+        final YangInstanceIdentifier domPath = codec.toYangInstanceIdentifierBlocking(treeId.getRootIdentifier());
         return new DOMDataTreeIdentifier(treeId.getDatastoreType(), domPath);
     }
 }
