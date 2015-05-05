@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_0fa00e9e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 443,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-05T13:36:21Z",
+      "side": 1,
+      "message": "Can we rename this method handleReadyLocalTransaction to be consistent with other handle* methods?",
+      "revId": "65ea8e84b3b80bbbcb26c64588be95b203da5098",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_cf89c627",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 446,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-05T13:36:21Z",
+      "side": 1,
+      "message": "Also rename this to handleReadyLocalTransaction.",
+      "revId": "65ea8e84b3b80bbbcb26c64588be95b203da5098",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_8f83be03",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardCommitCoordinator.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 438,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-05T13:36:21Z",
+      "side": 1,
+      "message": "This class is getting too overloaded - we should break the various usages into subclasses. Not in this patch though...",
+      "revId": "65ea8e84b3b80bbbcb26c64588be95b203da5098",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_2fedcaef",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/ReadyLocalTransactionSerializer.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-05T13:36:21Z",
+      "side": 1,
+      "message": "What is this magic number?",
+      "revId": "65ea8e84b3b80bbbcb26c64588be95b203da5098",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_efbe02d4",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/ReadyLocalTransactionSerializer.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-05T13:36:21Z",
+      "side": 1,
+      "message": "This really should be the version of the remote shard leader. However, we don\u0027t have that info yet - I\u0027m adding that in another patch. In lieu of that, it should be CURRENT_VERSION.",
+      "revId": "65ea8e84b3b80bbbcb26c64588be95b203da5098",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_afb47ad1",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/ReadyLocalTransactionSerializer.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-05T13:36:21Z",
+      "side": 1,
+      "message": "Since we\u0027re batching all the mods in one message, it could exceed akka\u0027s message size limit. But it doesn\u0027t look like there\u0027s any way we could batch it with this interface so we\u0027ll have to live with it. It should be uncommon to hit this case anyway.",
+      "revId": "65ea8e84b3b80bbbcb26c64588be95b203da5098",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
