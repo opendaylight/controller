@@ -41,6 +41,7 @@ import org.opendaylight.controller.cluster.datastore.exceptions.TimeoutException
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
+import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyTransaction;
 import org.opendaylight.controller.cluster.datastore.modification.DeleteModification;
 import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
@@ -57,6 +58,7 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCoh
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.Promise;
@@ -777,6 +779,10 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         throttleOperation(operation, 1, true);
     }
 
+    private PrimaryShardInfo newPrimaryShardInfo(ActorRef actorRef){
+        return new PrimaryShardInfo(getSystem().actorSelection(actorRef.path()), Optional.<DataTree>absent());
+    }
+
     private void throttleOperation(TransactionProxyOperation operation, int outstandingOpsLimit, boolean shardFound){
         ActorSystem actorSystem = getSystem();
         ActorRef shardActorRef = actorSystem.actorOf(Props.create(DoNothingActor.class));
@@ -787,7 +793,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
                 when(mockActorContext).actorSelection(shardActorRef.path().toString());
 
         if(shardFound) {
-            doReturn(Futures.successful(actorSystem.actorSelection(shardActorRef.path()))).
+            doReturn(Futures.successful(newPrimaryShardInfo(shardActorRef))).
                     when(mockActorContext).findPrimaryShardAsync(eq(DefaultShardStrategy.DEFAULT_SHARD));
         } else {
             doReturn(Futures.failed(new Exception("not found")))
@@ -833,7 +839,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
                 when(mockActorContext).actorSelection(shardActorRef.path().toString());
 
         if(shardFound) {
-            doReturn(primaryShardInfoReply(actorSystem, shardActorRef)).
+            doReturn(Futures.successful(newPrimaryShardInfo(shardActorRef))).
                     when(mockActorContext).findPrimaryShardAsync(eq(DefaultShardStrategy.DEFAULT_SHARD));
         } else {
             doReturn(Futures.failed(new PrimaryNotFoundException("test")))
@@ -865,22 +871,6 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         long expected = TimeUnit.SECONDS.toNanos(mockActorContext.getDatastoreContext().getOperationTimeoutInSeconds());
         Assert.assertTrue(String.format("Expected elapsed time: %s. Actual: %s",
                 expected, (end-start)), (end - start) <= expected);
-    }
-
-    public void testWriteThrottling(boolean shardFound){
-
-        throttleOperation(new TransactionProxyOperation() {
-            @Override
-            public void run(TransactionProxy transactionProxy) {
-                NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
-
-                expectBatchedModifications(2);
-
-                transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
-
-                transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
-            }
-        }, 1, shardFound);
     }
 
     @Test
