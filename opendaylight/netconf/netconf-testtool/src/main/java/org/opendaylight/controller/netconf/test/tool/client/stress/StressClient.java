@@ -16,6 +16,8 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.Timer;
 import java.io.IOException;
+import java.security.Provider;
+import java.security.Security;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -26,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcherImpl;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
@@ -85,6 +88,16 @@ public final class StressClient {
     private static long macStart = 0xAABBCCDD0000L;
 
     public static void main(final String[] args) {
+        //register bouncy castle as JCEProvider since the registration from mina-sshd seems to fail on oracleJDK
+        Security.addProvider(new BouncyCastleProvider());
+
+//        for (Provider provider : Security.getProviders()) {
+//            System.out.println("Provider: " + provider.getName());
+//            for (Provider.Service service : provider.getServices()) {
+//                System.out.println("  Algorithm: " + service.getAlgorithm());
+//            }
+//        }
+
         final Parameters params = parseArgs(args, Parameters.getParser());
         params.validate();
 
@@ -169,6 +182,7 @@ public final class StressClient {
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             LOG.warn("Unable to close executor properly", e);
         }
+        Runtime.getRuntime().halt(0);
     }
 
     static NetconfMessage prepareMessage(final int id, final String editContentString) {
