@@ -194,7 +194,7 @@ module opendaylight-sal-binding-broker-impl {
                 container schema-service {
                     uses config:service-ref {
                         refine type {
-                            mandatory false;
+                            mandatory true;
                             config:required-identity dom:schema-service;
                         }
                     }
@@ -204,9 +204,13 @@ module opendaylight-sal-binding-broker-impl {
     }
 
 
-    augment "/config:modules/config:module/config:state" {
+    augment "/config:modules/config:module/config:configuration" {
         case runtime-generated-mapping {
             when "/config:modules/config:module/config:type = 'runtime-generated-mapping'";
+            leaf wait-for-schema {
+                default "false";
+                type boolean;
+            }
         }
     }
 

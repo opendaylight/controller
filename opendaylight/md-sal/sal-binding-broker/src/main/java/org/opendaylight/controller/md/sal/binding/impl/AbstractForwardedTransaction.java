@@ -61,7 +61,7 @@ abstract class AbstractForwardedTransaction<T extends AsyncTransaction<YangInsta
         Preconditions.checkArgument(!path.isWildcarded(), "Invalid read of wildcarded path %s", path);
 
         return MappingCheckedFuture.create(
-                    Futures.transform(readTx.read(store, codec.toNormalized(path)),
+                    Futures.transform(readTx.read(store, codec.toYangInstanceIdentifierBlocking(path)),
                                       codec.deserializeFunction(path)),
                     ReadFailedException.MAPPER);
     }
