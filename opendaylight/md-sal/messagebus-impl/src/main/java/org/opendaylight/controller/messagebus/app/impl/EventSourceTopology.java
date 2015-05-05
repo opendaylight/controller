@@ -78,10 +78,10 @@ public class EventSourceTopology implements EventAggregatorService, EventSourceR
                     .child(TopologyTypes.class)
                     .augmentation(TopologyTypes1.class);
 
-    private final Map<DataChangeListener, ListenerRegistration<DataChangeListener>> topicListenerRegistrations =
+    private final Map<EventSourceTopic, ListenerRegistration<DataChangeListener>> topicListenerRegistrations =
             new ConcurrentHashMap<>();
     private final Map<NodeKey, RoutedRpcRegistration<EventSourceService>> routedRpcRegistrations =
-            new ConcurrentHashMap<>();;
+            new ConcurrentHashMap<>();
 
     private final DataBroker dataBroker;
     private final RpcRegistration<EventAggregatorService> aggregatorRpcReg;
@@ -205,12 +205,16 @@ public class EventSourceTopology implements EventAggregatorService, EventSourceR
     }
 
     public void register(final EventSource eventSource){
-    NodeKey nodeKey = eventSource.getSourceNodeKey();
+        NodeKey nodeKey = eventSource.getSourceNodeKey();
         final KeyedInstanceIdentifier<Node, NodeKey> sourcePath = EVENT_SOURCE_TOPOLOGY_PATH.child(Node.class, nodeKey);
         RoutedRpcRegistration<EventSourceService> reg = rpcRegistry.addRoutedRpcImplementation(EventSourceService.class, eventSource);
         reg.registerPath(NodeContext.class, sourcePath);
         routedRpcRegistrations.put(nodeKey,reg);
         insert(sourcePath);
+
+        for(EventSourceTopic est : topicListenerRegistrations.keySet()){
+            est.notifyNode(EVENT_SOURCE_TOPOLOGY_PATH.child(Node.class, nodeKey));
+        }
     }
 
     public void unRegister(final EventSource eventSource){
