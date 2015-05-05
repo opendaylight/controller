@@ -45,7 +45,7 @@ public class BindingDOMMountPointServiceAdapter implements MountPointService {
     @Override
     public Optional<MountPoint> getMountPoint(InstanceIdentifier<?> mountPoint) {
 
-        YangInstanceIdentifier domPath = codec.toNormalized(mountPoint);
+        YangInstanceIdentifier domPath = codec.toYangInstanceIdentifierBlocking(mountPoint);
         Optional<DOMMountPoint> domMount = mountService.getMountPoint(domPath);
         if(domMount.isPresent()) {
             return Optional.<MountPoint>fromNullable(bindingMountpoints.getUnchecked(domMount.get()));

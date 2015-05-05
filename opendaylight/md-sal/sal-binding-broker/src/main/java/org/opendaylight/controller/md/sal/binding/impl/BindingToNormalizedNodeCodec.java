@@ -12,10 +12,16 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableBiMap;
 import java.lang.reflect.Method;
+import java.net.URI;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationException;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationOperation;
@@ -25,6 +31,7 @@ import org.opendaylight.yangtools.binding.data.codec.api.BindingCodecTreeFactory
 import org.opendaylight.yangtools.binding.data.codec.api.BindingCodecTreeNode;
 import org.opendaylight.yangtools.binding.data.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.yangtools.binding.data.codec.impl.BindingNormalizedNodeCodecRegistry;
+import org.opendaylight.yangtools.binding.data.codec.impl.MissingSchemaException;
 import org.opendaylight.yangtools.sal.binding.generator.impl.GeneratedClassLoadingStrategy;
 import org.opendaylight.yangtools.sal.binding.generator.util.BindingRuntimeContext;
 import org.opendaylight.yangtools.yang.binding.BindingMapping;
@@ -45,21 +52,54 @@ import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class BindingToNormalizedNodeCodec implements BindingCodecTreeFactory, BindingNormalizedNodeSerializer, SchemaContextListener, AutoCloseable {
 
+    private static final Logger LOG = LoggerFactory.getLogger(BindingToNormalizedNodeCodec.class);
+    private static final long WAIT_DURATION_SEC = 5;
     private final BindingNormalizedNodeCodecRegistry codecRegistry;
-    private DataNormalizer legacyToNormalized;
     private final GeneratedClassLoadingStrategy classLoadingStrategy;
+    private final FutureSchema futureSchema;
+
     private BindingRuntimeContext runtimeContext;
+    private DataNormalizer legacyToNormalized;
+
 
     public BindingToNormalizedNodeCodec(final GeneratedClassLoadingStrategy classLoadingStrategy,
             final BindingNormalizedNodeCodecRegistry codecRegistry) {
-        this.classLoadingStrategy = classLoadingStrategy;
-        this.codecRegistry = codecRegistry;
+        this(classLoadingStrategy,codecRegistry,false);
 
     }
 
+    public BindingToNormalizedNodeCodec(final GeneratedClassLoadingStrategy classLoadingStrategy,
+            final BindingNormalizedNodeCodecRegistry codecRegistry, final boolean waitForSchema) {
+        this.classLoadingStrategy = classLoadingStrategy;
+        this.codecRegistry = codecRegistry;
+        this.futureSchema = waitForSchema ? new FutureSchema(WAIT_DURATION_SEC, TimeUnit.SECONDS) : null;
+    }
+
+    final YangInstanceIdentifier toYangInstanceIdentifierBlocking(final InstanceIdentifier<? extends DataObject> binding) {
+        try {
+            return codecRegistry.toYangInstanceIdentifier(binding);
+        } catch (final MissingSchemaException e) {
+            waitForSchema(decompose(binding),e);
+            return codecRegistry.toYangInstanceIdentifier(binding);
+        }
+    }
+
+    private void waitForSchema(final Collection<Class<?>> binding, final MissingSchemaException e) {
+        if(futureSchema != null) {
+            LOG.warn("Blocking thread to wait for schema convergence updates for {} {}",futureSchema.getDuration(), futureSchema.getUnit());
+            if(!futureSchema.waitForSchema(binding)) {
+                return;
+            }
+        }
+        throw e;
+    }
+
+    @Deprecated
     public YangInstanceIdentifier toNormalized(final InstanceIdentifier<? extends DataObject> binding) {
         return codecRegistry.toYangInstanceIdentifier(binding);
     }
@@ -164,6 +204,11 @@ public class BindingToNormalizedNodeCodec implements BindingCodecTreeFactory, Bi
         legacyToNormalized = new DataNormalizer (arg0);
         runtimeContext = BindingRuntimeContext.create(classLoadingStrategy, arg0);
         codecRegistry.onBindingRuntimeContextUpdated(runtimeContext);
+        if(futureSchema != null) {
+            futureSchema.onRuntimeContextUpdated(runtimeContext);
+        }
+
+
     }
 
     public <T extends DataObject> Function<Optional<NormalizedNode<?, ?>>, Optional<T>>  deserializeFunction(final InstanceIdentifier<T> path) {
@@ -206,7 +251,8 @@ public class BindingToNormalizedNodeCodec implements BindingCodecTreeFactory, Bi
     // FIXME: This should be probably part of Binding Runtime context
     public ImmutableBiMap<Method, SchemaPath> getRpcMethodToSchemaPath(final Class<? extends RpcService> key) {
         final QNameModule moduleName = BindingReflections.getQNameModule(key);
-        final Module module = runtimeContext.getSchemaContext().findModuleByNamespaceAndRevision(moduleName.getNamespace(), moduleName.getRevision());
+        final Module module = getModuleBlocking(moduleName.getNamespace(),moduleName.getRevision());
+        Preconditions.checkState(module != null, "Schema for %s is not available.", key);
         final ImmutableBiMap.Builder<Method, SchemaPath> ret = ImmutableBiMap.<Method, SchemaPath>builder();
         try {
             for (final RpcDefinition rpcDef : module.getRpcs()) {
@@ -217,6 +263,14 @@ public class BindingToNormalizedNodeCodec implements BindingCodecTreeFactory, Bi
             throw new IllegalStateException("Rpc defined in model does not have representation in generated class.", e);
         }
         return ret.build();
+    }
+
+    private Module getModuleBlocking(final URI namespace, final Date revision) {
+        Module module = runtimeContext.getSchemaContext().findModuleByNamespaceAndRevision(namespace, revision);
+        if(module == null && futureSchema != null && futureSchema.waitForSchema(namespace,revision)) {
+            module = runtimeContext.getSchemaContext().findModuleByNamespaceAndRevision(namespace, revision);
+        }
+        return module;
     }
 
     private Method findRpcMethod(final Class<? extends RpcService> key, final RpcDefinition rpcDef) throws NoSuchMethodException {
@@ -250,6 +304,14 @@ public class BindingToNormalizedNodeCodec implements BindingCodecTreeFactory, Bi
          */
         final BindingCodecTreeNode<?> codecContext = currentCodecTree.getSubtreeCodec(bindingPath);
         return new SimpleEntry<InstanceIdentifier<?>, BindingCodecTreeNode<?>>(bindingPath, codecContext);
+    }
+
+    private static Collection<Class<?>> decompose(final InstanceIdentifier<?> path) {
+        final Set<Class<?>> clazzes = new HashSet<>();
+        for(final InstanceIdentifier.PathArgument arg : path.getPathArguments()) {
+            clazzes.add(arg.getType());
+        }
+        return clazzes;
     }
 
 }

@@ -45,7 +45,7 @@ public class BindingNormalizedCodecTest extends AbstractSchemaAwareTest {
     @Test
     public void testComplexAugmentationSerialization() {
 
-        PathArgument lastArg = codec.toNormalized(BA_TREE_COMPLEX_USES).getLastPathArgument();
+        PathArgument lastArg = codec.toYangInstanceIdentifierBlocking(BA_TREE_COMPLEX_USES).getLastPathArgument();
         assertTrue(lastArg instanceof AugmentationIdentifier);
     }
 
@@ -53,7 +53,7 @@ public class BindingNormalizedCodecTest extends AbstractSchemaAwareTest {
     @Test
     public void testLeafOnlyAugmentationSerialization() {
 
-        PathArgument leafOnlyLastArg = codec.toNormalized(BA_TREE_LEAF_ONLY).getLastPathArgument();
+        PathArgument leafOnlyLastArg = codec.toYangInstanceIdentifierBlocking(BA_TREE_LEAF_ONLY).getLastPathArgument();
         assertTrue(leafOnlyLastArg instanceof AugmentationIdentifier);
         assertTrue(((AugmentationIdentifier) leafOnlyLastArg).getPossibleChildNames().contains(SIMPLE_VALUE_QNAME));
     }
