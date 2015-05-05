@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_651c5114",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-05T20:47:46Z",
+      "side": 1,
+      "message": "As Kamal pointed out the purpose of this strategy is to determine if a Follower can ever become a Leader. If you used the FixedLeaderElectionStrategy you cannot violate Raft because the Leader will always remain the same. So there is no chance of a different replica having a log that is more uptodate than the leader. \n\nThe cfg file is specific to the FixedLeaderElectionStrategy.",
+      "parentUuid": "3aa0d159_bacb611d",
+      "revId": "078e2f88662bfda42eb8f66bdf5b4dedeb1395fc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_be326e0e",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/election/ElectionStrategy.java",
         "patchSetId": 2
