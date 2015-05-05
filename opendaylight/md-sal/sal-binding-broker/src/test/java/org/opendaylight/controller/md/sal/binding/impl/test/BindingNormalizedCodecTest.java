@@ -36,8 +36,8 @@ public class BindingNormalizedCodecTest extends AbstractSchemaAwareTest {
 
     @Override
     protected void setupWithSchema(final SchemaContext context) {
-        DataObjectSerializerGenerator streamWriter = StreamWriterGenerator.create(JavassistUtils.forClassPool(ClassPool.getDefault()));
-        BindingNormalizedNodeCodecRegistry registry = new BindingNormalizedNodeCodecRegistry(streamWriter);
+        final DataObjectSerializerGenerator streamWriter = StreamWriterGenerator.create(JavassistUtils.forClassPool(ClassPool.getDefault()));
+        final BindingNormalizedNodeCodecRegistry registry = new BindingNormalizedNodeCodecRegistry(streamWriter);
         codec = new BindingToNormalizedNodeCodec(GeneratedClassLoadingStrategy.getTCCLClassLoadingStrategy(), registry);
         codec.onGlobalContextUpdated(context);
     };
@@ -45,7 +45,7 @@ public class BindingNormalizedCodecTest extends AbstractSchemaAwareTest {
     @Test
     public void testComplexAugmentationSerialization() {
 
-        PathArgument lastArg = codec.toNormalized(BA_TREE_COMPLEX_USES).getLastPathArgument();
+        final PathArgument lastArg = codec.toYangInstanceIdentifier(BA_TREE_COMPLEX_USES).getLastPathArgument();
         assertTrue(lastArg instanceof AugmentationIdentifier);
     }
 
@@ -53,7 +53,7 @@ public class BindingNormalizedCodecTest extends AbstractSchemaAwareTest {
     @Test
     public void testLeafOnlyAugmentationSerialization() {
 
-        PathArgument leafOnlyLastArg = codec.toNormalized(BA_TREE_LEAF_ONLY).getLastPathArgument();
+        final PathArgument leafOnlyLastArg = codec.toYangInstanceIdentifier(BA_TREE_LEAF_ONLY).getLastPathArgument();
         assertTrue(leafOnlyLastArg instanceof AugmentationIdentifier);
         assertTrue(((AugmentationIdentifier) leafOnlyLastArg).getPossibleChildNames().contains(SIMPLE_VALUE_QNAME));
     }

@@ -51,14 +51,14 @@ public final class RuntimeMappingModule extends AbstractRuntimeMappingModule {
     @Override
     public java.lang.AutoCloseable createInstance() {
         final GeneratedClassLoadingStrategy classLoading = getGlobalClassLoadingStrategy();
-        BindingNormalizedNodeCodecRegistry codecRegistry = new BindingNormalizedNodeCodecRegistry(StreamWriterGenerator.create(SingletonHolder.JAVASSIST));
-        BindingToNormalizedNodeCodec instance = new BindingToNormalizedNodeCodec(classLoading, codecRegistry);
+        final BindingNormalizedNodeCodecRegistry codecRegistry = new BindingNormalizedNodeCodecRegistry(StreamWriterGenerator.create(SingletonHolder.JAVASSIST));
+        final BindingToNormalizedNodeCodec instance = new BindingToNormalizedNodeCodec(classLoading, codecRegistry,getWaitForSchema());
         bundleContext.registerService(SchemaContextListener.class, instance, new Hashtable<String,String>());
         return instance;
     }
 
     private GeneratedClassLoadingStrategy getGlobalClassLoadingStrategy() {
-        ServiceReference<GeneratedClassLoadingStrategy> ref = bundleContext.getServiceReference(GeneratedClassLoadingStrategy.class);
+        final ServiceReference<GeneratedClassLoadingStrategy> ref = bundleContext.getServiceReference(GeneratedClassLoadingStrategy.class);
         return bundleContext.getService(ref);
     }
 
