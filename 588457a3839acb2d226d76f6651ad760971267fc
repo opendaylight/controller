@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_5491c950",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCandidatePayload.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-05-05T09:23:56Z",
+      "side": 1,
+      "message": "It ensures we do not run out of stack even when a malicious model is loaded. The GC overhead should be minimal, as the objects are small and extremely short-lived.",
+      "parentUuid": "3aa0d159_2ecf1381",
+      "revId": "588457a3839acb2d226d76f6651ad760971267fc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_8eb8a7e6",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCandidatePayload.java",
         "patchSetId": 3
