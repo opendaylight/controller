@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
+import org.opendaylight.controller.md.sal.dom.api.DOMNotification;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
@@ -47,7 +48,6 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.not
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.topology.rev150114.netconf.node.fields.unavailable.capabilities.UnavailableCapability;
 import org.opendaylight.yangtools.sal.binding.generator.impl.ModuleInfoBackedContext;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.repo.api.MissingSchemaSourceException;
 import org.opendaylight.yangtools.yang.model.repo.api.SchemaContextFactory;
@@ -182,18 +182,18 @@ public final class NetconfDevice implements RemoteDevice<NetconfSessionPreferenc
 
         final NotificationHandler.NotificationFilter filter = new NotificationHandler.NotificationFilter() {
             @Override
-            public Optional<NormalizedNode<?, ?>> filterNotification(final NormalizedNode<?, ?> notification) {
+            public Optional<DOMNotification> filterNotification(final DOMNotification notification) {
                 if (isCapabilityChanged(notification)) {
                     logger.info("{}: Schemas change detected, reconnecting", id);
                     // Only disconnect is enough, the reconnecting nature of the connector will take care of reconnecting
                     listener.disconnect();
                     return Optional.absent();
                 }
-                return Optional.<NormalizedNode<?, ?>>of(notification);
+                return Optional.of(notification);
             }
 
-            private boolean isCapabilityChanged(final NormalizedNode<?, ?> notification) {
-                return notification.getNodeType().equals(NetconfCapabilityChange.QNAME);
+            private boolean isCapabilityChanged(final DOMNotification notification) {
+                return notification.getBody().getNodeType().equals(NetconfCapabilityChange.QNAME);
             }
         };
 

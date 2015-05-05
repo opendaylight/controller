@@ -35,6 +35,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.opendaylight.controller.md.sal.dom.api.DOMNotification;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 import org.opendaylight.controller.md.sal.dom.spi.DefaultDOMRpcResult;
@@ -193,7 +194,7 @@ public class NetconfDeviceTest {
         device.onNotification(notification);
         device.onNotification(notification);
 
-        verify(facade, times(0)).onNotification(any(ContainerNode.class));
+        verify(facade, times(0)).onNotification(any(DOMNotification.class));
 
         final NetconfSessionPreferences sessionCaps = getSessionCaps(true,
                 Lists.newArrayList(TEST_CAPABILITY));
@@ -202,10 +203,10 @@ public class NetconfDeviceTest {
 
         device.handleSalInitializationSuccess(NetconfToNotificationTest.getNotificationSchemaContext(getClass()), sessionCaps, deviceRpc);
 
-        verify(facade, timeout(10000).times(2)).onNotification(any(ContainerNode.class));
+        verify(facade, timeout(10000).times(2)).onNotification(any(DOMNotification.class));
 
         device.onNotification(notification);
-        verify(facade, timeout(10000).times(3)).onNotification(any(ContainerNode.class));
+        verify(facade, timeout(10000).times(3)).onNotification(any(DOMNotification.class));
     }
 
     @Test
@@ -253,7 +254,7 @@ public class NetconfDeviceTest {
         final RemoteDeviceHandler<NetconfSessionPreferences> remoteDeviceHandler = mockCloseableClass(RemoteDeviceHandler.class);
         doNothing().when(remoteDeviceHandler).onDeviceConnected(any(SchemaContext.class), any(NetconfSessionPreferences.class), any(NetconfDeviceRpc.class));
         doNothing().when(remoteDeviceHandler).onDeviceDisconnected();
-        doNothing().when(remoteDeviceHandler).onNotification(any(ContainerNode.class));
+        doNothing().when(remoteDeviceHandler).onNotification(any(DOMNotification.class));
         return remoteDeviceHandler;
     }
 

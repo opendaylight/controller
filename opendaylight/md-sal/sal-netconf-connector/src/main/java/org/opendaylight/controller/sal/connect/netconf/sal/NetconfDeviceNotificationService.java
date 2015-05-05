@@ -8,8 +8,6 @@
 
 package org.opendaylight.controller.sal.connect.netconf.sal;
 
-import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.toPath;
-
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
@@ -19,7 +17,6 @@ import org.opendaylight.controller.md.sal.dom.api.DOMNotification;
 import org.opendaylight.controller.md.sal.dom.api.DOMNotificationListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMNotificationService;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
-import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
 class NetconfDeviceNotificationService implements DOMNotificationService {
@@ -28,22 +25,9 @@ class NetconfDeviceNotificationService implements DOMNotificationService {
 
     // Notification publish is very simple and hijacks the thread of the caller
     // TODO shouldnt we reuse the implementation for notification router from sal-broker-impl ?
-    public synchronized void publishNotification(final ContainerNode notification) {
-        final SchemaPath schemaPath = toPath(notification.getNodeType());
-        for (final DOMNotificationListener domNotificationListener : listeners.get(schemaPath)) {
-            domNotificationListener.onNotification(new DOMNotification() {
-                @Nonnull
-                @Override
-                public SchemaPath getType() {
-                    return schemaPath;
-                }
-
-                @Nonnull
-                @Override
-                public ContainerNode getBody() {
-                    return notification;
-                }
-            });
+    public synchronized void publishNotification(final DOMNotification notification) {
+        for (final DOMNotificationListener domNotificationListener : listeners.get(notification.getType())) {
+            domNotificationListener.onNotification(notification);
         }
     }
 
