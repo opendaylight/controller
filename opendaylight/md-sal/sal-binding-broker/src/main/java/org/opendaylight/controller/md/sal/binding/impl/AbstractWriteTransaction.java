@@ -126,7 +126,7 @@ public abstract class AbstractWriteTransaction<T extends DOMDataWriteTransaction
             final InstanceIdentifier<?> path) {
         Preconditions.checkArgument(!path.isWildcarded(), "Cannot delete wildcarded path %s", path);
 
-        final YangInstanceIdentifier normalized = getCodec().toNormalized(path);
+        final YangInstanceIdentifier normalized = getCodec().toYangInstanceIdentifierBlocking(path);
         getDelegate().delete(store, normalized);
     }
 
