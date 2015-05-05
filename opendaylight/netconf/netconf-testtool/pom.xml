@@ -138,6 +138,36 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>stress-client dependency copy</id>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.bouncycastle</groupId>
+                                    <artifactId>bcpkix-jdk15on</artifactId>
+                                    <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                                    <overWrite>true</overWrite>
+                                    <destFileName>bcpkix-jdk15on.jar</destFileName>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.bouncycastle</groupId>
+                                    <artifactId>bcprov-jdk15on</artifactId>
+                                    <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                                    <overWrite>true</overWrite>
+                                    <destFileName>bcprov-jdk15on.jar</destFileName>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
                 <configuration></configuration>
                 <executions>
@@ -187,10 +217,18 @@
                                     </excludes>
                                 </filter>
                             </filters>
+                            <artifactSet>
+                                <excludes>
+                                    <exclude>org.bouncycastle:*</exclude>
+                                </excludes>
+                            </artifactSet>
                             <transformers>
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>org.opendaylight.controller.netconf.test.tool.client.stress.StressClient</mainClass>
+                                    <manifestEntries>
+                                        <Main-Class>org.opendaylight.controller.netconf.test.tool.client.stress.StressClient</Main-Class>
+                                        <Class-Path>. lib lib/bcprov-jdk15on.jar lib/bcpkix-jdk15on.jar</Class-Path>
+                                    </manifestEntries>
                                 </transformer>
                             </transformers>
                             <shadedArtifactAttached>true</shadedArtifactAttached>
