@@ -417,18 +417,13 @@ public class RestconfImpl implements RestconfService {
                 return retValue;
             }
             throw new RestconfDocumentedException("RpcError message", null, retValue.getErrors());
-        }
-        catch (final InterruptedException e) {
+        } catch (final InterruptedException e) {
             throw new RestconfDocumentedException(
                     "The operation was interrupted while executing and did not complete.", ErrorType.RPC,
                     ErrorTag.PARTIAL_OPERATION);
-        }
-        catch (final ExecutionException e) {
+        } catch (final ExecutionException e) {
             Throwable cause = e.getCause();
-            if (cause instanceof CancellationException) {
-                throw new RestconfDocumentedException("The operation was cancelled while executing.", ErrorType.RPC,
-                        ErrorTag.PARTIAL_OPERATION);
-            } else if (cause != null) {
+            if (cause != null) {
                 while (cause.getCause() != null) {
                     cause = cause.getCause();
                 }
@@ -444,6 +439,9 @@ public class RestconfImpl implements RestconfService {
                 throw new RestconfDocumentedException("The operation encountered an unexpected error while executing.",
                         e);
             }
+        } catch (final CancellationException e) {
+            throw new RestconfDocumentedException("The operation was cancelled while executing.", ErrorType.RPC,
+                    ErrorTag.PARTIAL_OPERATION);
         }
     }
 
