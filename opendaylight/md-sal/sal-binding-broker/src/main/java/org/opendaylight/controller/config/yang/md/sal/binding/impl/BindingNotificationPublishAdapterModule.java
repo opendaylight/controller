@@ -9,17 +9,17 @@ package org.opendaylight.controller.config.yang.md.sal.binding.impl;
 
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
-import org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodec;
 import org.opendaylight.controller.md.sal.binding.impl.BindingDOMNotificationPublishServiceAdapter;
+import org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodec;
 import org.opendaylight.controller.md.sal.dom.api.DOMNotificationPublishService;
 import org.opendaylight.controller.sal.core.api.Broker;
 
 public class BindingNotificationPublishAdapterModule extends AbstractBindingNotificationPublishAdapterModule {
-    public BindingNotificationPublishAdapterModule(ModuleIdentifier identifier, DependencyResolver dependencyResolver) {
+    public BindingNotificationPublishAdapterModule(final ModuleIdentifier identifier, final DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
     }
 
-    public BindingNotificationPublishAdapterModule(ModuleIdentifier identifier, DependencyResolver dependencyResolver, BindingNotificationPublishAdapterModule oldModule, java.lang.AutoCloseable oldInstance) {
+    public BindingNotificationPublishAdapterModule(final ModuleIdentifier identifier, final DependencyResolver dependencyResolver, final BindingNotificationPublishAdapterModule oldModule, final java.lang.AutoCloseable oldInstance) {
         super(identifier, dependencyResolver, oldModule, oldInstance);
     }
 
@@ -33,7 +33,7 @@ public class BindingNotificationPublishAdapterModule extends AbstractBindingNoti
         final BindingToNormalizedNodeCodec codec = getBindingMappingServiceDependency();
         final Broker.ProviderSession session = getDomAsyncBrokerDependency().registerProvider(new DummyDOMProvider());
         final DOMNotificationPublishService publishService = session.getService(DOMNotificationPublishService.class);
-        return new BindingDOMNotificationPublishServiceAdapter(codec.getCodecRegistry(), publishService);
+        return new BindingDOMNotificationPublishServiceAdapter(codec, publishService);
     }
 
 }
