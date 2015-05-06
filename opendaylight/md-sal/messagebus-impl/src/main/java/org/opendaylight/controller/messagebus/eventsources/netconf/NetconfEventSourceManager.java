@@ -8,7 +8,6 @@
 
 package org.opendaylight.controller.messagebus.eventsources.netconf;
 
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,16 +20,12 @@ import org.opendaylight.controller.md.sal.binding.api.MountPointService;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
 import org.opendaylight.controller.md.sal.dom.api.DOMNotificationPublishService;
-import org.opendaylight.controller.messagebus.spi.EventSourceRegistration;
 import org.opendaylight.controller.messagebus.spi.EventSourceRegistry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.topology.rev150114.NetconfNode;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.topology.rev150114.NetconfNodeFields.ConnectionStatus;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.topology.rev150114.network.topology.topology.topology.types.TopologyNetconf;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
-import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.TopologyId;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.Topology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.TopologyKey;
@@ -38,12 +33,9 @@ import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
-import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 
 public final class NetconfEventSourceManager implements DataChangeListener, AutoCloseable {
@@ -54,19 +46,11 @@ public final class NetconfEventSourceManager implements DataChangeListener, Auto
                 .child(Topology.class, NETCONF_TOPOLOGY_KEY)
                 .child(Node.class);
 
-    private static final YangInstanceIdentifier NETCONF_DEVICE_DOM_PATH = YangInstanceIdentifier.builder()
-            .node(NetworkTopology.QNAME)
-            .node(Topology.QNAME)
-            .nodeWithKey(Topology.QNAME, QName.create(Topology.QNAME, "topology-id"),TopologyNetconf.QNAME.getLocalName())
-            .node(Node.QNAME)
-            .build();
-    private static final QName NODE_ID_QNAME = QName.create(Node.QNAME,"node-id");
-
     private final Map<String, String> streamMap;
-    private final ConcurrentHashMap<InstanceIdentifier<?>, EventSourceRegistration<NetconfEventSource>> eventSourceRegistration = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<InstanceIdentifier<?>, NetconfEventSourceRegistration> registrationMap = new ConcurrentHashMap<>();
     private final DOMNotificationPublishService publishService;
     private final DOMMountPointService domMounts;
-    private final MountPointService bindingMounts;
+    private final MountPointService mountPointService;
     private ListenerRegistration<DataChangeListener> listenerRegistration;
     private final EventSourceRegistry eventSourceRegistry;
 
@@ -78,7 +62,7 @@ public final class NetconfEventSourceManager implements DataChangeListener, Auto
             final List<NamespaceToStream> namespaceMapping){
 
         final NetconfEventSourceManager eventSourceManager =
-                new NetconfEventSourceManager(domPublish, domMount, bindingMount, eventSourceRegistry, namespaceMapping);
+                new NetconfEventSourceManager(domPublish, domMount,bindingMount, eventSourceRegistry, namespaceMapping);
 
         eventSourceManager.initialize(dataBroker);
 
@@ -99,7 +83,7 @@ public final class NetconfEventSourceManager implements DataChangeListener, Auto
         Preconditions.checkNotNull(namespaceMapping);
         this.streamMap = namespaceToStreamMapping(namespaceMapping);
         this.domMounts = domMount;
-        this.bindingMounts = bindingMount;
+        this.mountPointService = bindingMount;
         this.publishService = domPublish;
         this.eventSourceRegistry = eventSourceRegistry;
     }
@@ -123,10 +107,10 @@ public final class NetconfEventSourceManager implements DataChangeListener, Auto
     @Override
     public void onDataChanged(final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> event) {
 
-        LOG.debug("[DataChangeEvent<InstanceIdentifier<?>, DataObject>: {}]", event);
+        LOG.info("[DataChangeEvent<InstanceIdentifier<?>, DataObject>: {}]", event);
         for (final Map.Entry<InstanceIdentifier<?>, DataObject> changeEntry : event.getCreatedData().entrySet()) {
             if (changeEntry.getValue() instanceof Node) {
-                nodeUpdated(changeEntry.getKey(),(Node) changeEntry.getValue());
+                nodeCreated(changeEntry.getKey(),(Node) changeEntry.getValue());
             }
         }
 
@@ -136,82 +120,94 @@ public final class NetconfEventSourceManager implements DataChangeListener, Auto
             }
         }
 
+        for(InstanceIdentifier<?> removePath : event.getRemovedPaths()){
+            DataObject removeObject = event.getOriginalData().get(removePath);
+            if(removeObject instanceof Node){
+                nodeRemoved(removePath);
+            }
+        }
+
     }
 
-    private void nodeUpdated(final InstanceIdentifier<?> key, final Node node) {
-
-        // we listen on node tree, therefore we should rather throw IllegalStateException when node is null
-        if ( node == null ) {
-            throw new IllegalStateException("Node is null");
-        }
-        if ( isNetconfNode(node) == false ) {
-            LOG.debug("OnDataChanged Event. Not a Netconf node.");
+    private void nodeCreated(final InstanceIdentifier<?> key, final Node node){
+        Preconditions.checkNotNull(key);
+        if(validateNode(node) == false){
+            LOG.warn("NodeCreated event : Node [{}] is null or not valid.", key.toString());
             return;
         }
-        if ( isEventSource(node) == false ) {
-            LOG.debug("OnDataChanged Event. Node an EventSource node.");
-            return;
-        }
-        if(node.getAugmentation(NetconfNode.class).getConnectionStatus() != ConnectionStatus.Connected ) {
-            return;
-        }
-
-        if(!eventSourceRegistration.containsKey(key)) {
-            createEventSource(key,node);
-        }
-    }
-
-    private void createEventSource(final InstanceIdentifier<?> key, final Node node) {
-        final Optional<DOMMountPoint> netconfMount = domMounts.getMountPoint(domMountPath(node.getNodeId()));
-
-        if(netconfMount.isPresent()) {
-            final NetconfEventSource netconfEventSource =
-                    new NetconfEventSource(node, streamMap, netconfMount.get(), publishService);
-            final EventSourceRegistration<NetconfEventSource> registration = eventSourceRegistry.registerEventSource(netconfEventSource);
-            LOG.info("Event source {} has been registered",node.getNodeId().getValue());
-            eventSourceRegistration.putIfAbsent(key, registration);
-
+        LOG.info("Netconf event source [{}] is creating...", key.toString());
+        NetconfEventSourceRegistration nesr = NetconfEventSourceRegistration.create(key, node, this);
+        if(nesr != null){
+            NetconfEventSourceRegistration nesrOld = registrationMap.put(key, nesr);
+            if(nesrOld != null){
+                nesrOld.close();
+            }
         }
     }
 
-    private YangInstanceIdentifier domMountPath(final NodeId nodeId) {
-        return YangInstanceIdentifier.builder(NETCONF_DEVICE_DOM_PATH).nodeWithKey(Node.QNAME, NODE_ID_QNAME, nodeId.getValue()).build();
+    private void nodeUpdated(final InstanceIdentifier<?> key, final Node node){
+        Preconditions.checkNotNull(key);
+        if(validateNode(node) == false){
+            LOG.warn("NodeUpdated event : Node [{}] is null or not valid.", key.toString());
+            return;
+        }
+
+        LOG.info("Netconf event source [{}] is updating...", key.toString());
+        NetconfEventSourceRegistration nesr = registrationMap.get(key);
+        if(nesr != null){
+            nesr.updateStatus();
+        } else {
+            nodeCreated(key, node);
+        }
+    }
+
+    private void nodeRemoved(final InstanceIdentifier<?> key){
+        Preconditions.checkNotNull(key);
+        LOG.info("Netconf event source [{}] is removing...", key.toString());
+        NetconfEventSourceRegistration nesr = registrationMap.remove(key);
+        if(nesr != null){
+            nesr.close();
+        }
+    }
+
+    private boolean validateNode(final Node node){
+        if(node == null){
+            return false;
+        }
+        return isNetconfNode(node);
+    }
+
+    Map<String, String> getStreamMap() {
+        return streamMap;
+    }
+
+    DOMNotificationPublishService getPublishService() {
+        return publishService;
+    }
+
+    DOMMountPointService getDomMounts() {
+        return domMounts;
+    }
+
+    EventSourceRegistry getEventSourceRegistry() {
+        return eventSourceRegistry;
+    }
+
+    MountPointService getMountPointService() {
+        return mountPointService;
     }
 
     private boolean isNetconfNode(final Node node)  {
         return node.getAugmentation(NetconfNode.class) != null ;
     }
 
-    private boolean isEventSource(final Node node) {
-
-        final NetconfNode netconfNode = node.getAugmentation(NetconfNode.class);
-        return isEventSource(netconfNode);
-
-    }
-
-    private boolean isEventSource(final NetconfNode node) {
-        if (node.getAvailableCapabilities() == null) {
-            return false;
-        }
-        final List<String> capabilities = node.getAvailableCapabilities().getAvailableCapability();
-        if(capabilities == null) {
-             return false;
-        }
-        for (final String capability : node.getAvailableCapabilities().getAvailableCapability()) {
-            if(capability.startsWith("(urn:ietf:params:xml:ns:netconf:notification")) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     @Override
     public void close() {
-        for(final EventSourceRegistration<NetconfEventSource> reg : eventSourceRegistration.values()){
+        listenerRegistration.close();
+        for(final NetconfEventSourceRegistration reg : registrationMap.values()){
             reg.close();
         }
-        listenerRegistration.close();
+        registrationMap.clear();
     }
 
 }

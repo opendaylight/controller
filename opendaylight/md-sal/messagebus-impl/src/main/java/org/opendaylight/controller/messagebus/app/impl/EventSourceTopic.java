@@ -53,7 +53,7 @@ public class EventSourceTopic implements DataChangeListener {
                 for (final Map.Entry<InstanceIdentifier<?>, DataObject> changeEntry : event.getUpdatedData().entrySet()) {
             if (changeEntry.getValue() instanceof Node) {
                 final Node node = (Node) changeEntry.getValue();
-                if (nodeIdPattern.matcher(node.getId().getValue()).matches()) {
+                if (getNodeIdRegexPattern().matcher(node.getId().getValue()).matches()) {
                     notifyNode(changeEntry.getKey());
                 }
             }
@@ -83,6 +83,10 @@ public class EventSourceTopic implements DataChangeListener {
                         .setNotificationPattern(notificationPattern)
                         .build();
         return jti;
+    }
+
+    public Pattern getNodeIdRegexPattern() {
+        return nodeIdPattern;
     }
 
 }

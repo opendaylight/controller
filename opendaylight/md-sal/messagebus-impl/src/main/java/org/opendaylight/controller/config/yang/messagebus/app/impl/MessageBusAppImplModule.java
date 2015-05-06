@@ -64,11 +64,16 @@ public class MessageBusAppImplModule extends org.opendaylight.controller.config.
         final DataBroker dataBroker = bindingCtx.getSALService(DataBroker.class);
         final DOMNotificationPublishService domPublish = domCtx.getService(DOMNotificationPublishService.class);
         final DOMMountPointService domMount = domCtx.getService(DOMMountPointService.class);
-        final MountPointService bindingMount = bindingCtx.getSALService(MountPointService.class);
         final RpcProviderRegistry rpcRegistry = bindingCtx.getSALService(RpcProviderRegistry.class);
-
+        final MountPointService mountPointService = bindingCtx.getSALService(MountPointService.class);
         final EventSourceRegistryWrapper eventSourceRegistryWrapper = new EventSourceRegistryWrapper(new EventSourceTopology(dataBroker, rpcRegistry));
-        final NetconfEventSourceManager netconfEventSourceManager = NetconfEventSourceManager.create(dataBroker, domPublish,domMount, bindingMount, eventSourceRegistryWrapper, getNamespaceToStream());
+        final NetconfEventSourceManager netconfEventSourceManager
+                = NetconfEventSourceManager.create(dataBroker,
+                        domPublish,
+                        domMount,
+                        mountPointService,
+                        eventSourceRegistryWrapper,
+                        getNamespaceToStream());
         eventSourceRegistryWrapper.addAutoCloseable(netconfEventSourceManager);
         LOGGER.info("Messagebus initialized");
         return eventSourceRegistryWrapper;

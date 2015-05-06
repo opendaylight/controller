@@ -129,7 +129,7 @@ public class EventSourceTopology implements EventAggregatorService, EventSourceR
         deleteData(OPERATIONAL, augmentPath);
     }
 
-    private void notifyExistingNodes(final Pattern nodeIdPatternRegex, final EventSourceTopic eventSourceTopic){
+    private void notifyExistingNodes(final EventSourceTopic eventSourceTopic){
 
         final ReadOnlyTransaction tx = dataBroker.newReadOnlyTransaction();
 
@@ -140,11 +140,18 @@ public class EventSourceTopology implements EventAggregatorService, EventSourceR
             @Override
             public void onSuccess(Optional<Topology> data) {
                 if(data.isPresent()) {
+                    LOG.info("Topology data are present...");
                      final List<Node> nodes = data.get().getNode();
+                     if(nodes != null){
+                         LOG.info("List of nodes is not null...");
+                         final Pattern nodeIdPatternRegex = eventSourceTopic.getNodeIdRegexPattern();
                      for (final Node node : nodes) {
                          if (nodeIdPatternRegex.matcher(node.getNodeId().getValue()).matches()) {
                              eventSourceTopic.notifyNode(EVENT_SOURCE_TOPOLOGY_PATH.child(Node.class, node.getKey()));
                          }
+                     }
+                     } else {
+                         LOG.info("List of nodes is NULL...");
                      }
                 }
                 tx.close();
@@ -168,12 +175,11 @@ public class EventSourceTopology implements EventAggregatorService, EventSourceR
 
         final NotificationPattern notificationPattern = new NotificationPattern(input.getNotificationPattern());
         final String nodeIdPattern = input.getNodeIdPattern().getValue();
-        final Pattern nodeIdPatternRegex = Pattern.compile(nodeIdPattern);
         final EventSourceTopic eventSourceTopic = new EventSourceTopic(notificationPattern, nodeIdPattern, eventSourceService);
 
         registerTopic(eventSourceTopic);
 
-        notifyExistingNodes(nodeIdPatternRegex, eventSourceTopic);
+        notifyExistingNodes(eventSourceTopic);
 
         final CreateTopicOutput cto = new CreateTopicOutputBuilder()
                 .setTopicId(eventSourceTopic.getTopicId())
@@ -213,7 +219,9 @@ public class EventSourceTopology implements EventAggregatorService, EventSourceR
         insert(sourcePath);
 
         for(EventSourceTopic est : topicListenerRegistrations.keySet()){
-            est.notifyNode(EVENT_SOURCE_TOPOLOGY_PATH.child(Node.class, nodeKey));
+            if(est.getNodeIdRegexPattern().matcher(nodeKey.getNodeId().getValue()).matches()){
+                est.notifyNode(EVENT_SOURCE_TOPOLOGY_PATH.child(Node.class, nodeKey));
+            }
         }
     }
 
