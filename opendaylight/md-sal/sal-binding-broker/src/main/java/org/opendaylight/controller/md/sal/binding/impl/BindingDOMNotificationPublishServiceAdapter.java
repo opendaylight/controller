@@ -17,7 +17,6 @@ import org.opendaylight.controller.md.sal.binding.impl.BindingDOMAdapterBuilder.
 import org.opendaylight.controller.md.sal.dom.api.DOMNotification;
 import org.opendaylight.controller.md.sal.dom.api.DOMNotificationPublishService;
 import org.opendaylight.controller.md.sal.dom.api.DOMService;
-import org.opendaylight.yangtools.binding.data.codec.api.BindingNormalizedNodeSerializer;
 import org.opendaylight.yangtools.yang.binding.Notification;
 
 public class BindingDOMNotificationPublishServiceAdapter implements NotificationPublishService, AutoCloseable {
@@ -31,12 +30,20 @@ public class BindingDOMNotificationPublishServiceAdapter implements Notification
 
     };
 
-    private final BindingNormalizedNodeSerializer codecRegistry;
+    private final BindingToNormalizedNodeCodec codecRegistry;
     private final DOMNotificationPublishService domPublishService;
 
-    public BindingDOMNotificationPublishServiceAdapter(final BindingNormalizedNodeSerializer codecRegistry, final DOMNotificationPublishService domPublishService) {
-        this.codecRegistry = codecRegistry;
+    public BindingDOMNotificationPublishServiceAdapter(final BindingToNormalizedNodeCodec codec, final DOMNotificationPublishService domPublishService) {
+        this.codecRegistry = codec;
         this.domPublishService = domPublishService;
+    }
+
+    public BindingToNormalizedNodeCodec getCodecRegistry() {
+        return codecRegistry;
+    }
+
+    public DOMNotificationPublishService getDomPublishService() {
+        return domPublishService;
     }
 
     @Override
@@ -76,9 +83,8 @@ public class BindingDOMNotificationPublishServiceAdapter implements Notification
         @Override
         protected NotificationPublishService createInstance(final BindingToNormalizedNodeCodec codec,
                 final ClassToInstanceMap<DOMService> delegates) {
-            final BindingNormalizedNodeSerializer codecReg = codec.getCodecRegistry();
             final DOMNotificationPublishService domPublish = delegates.getInstance(DOMNotificationPublishService.class);
-            return new BindingDOMNotificationPublishServiceAdapter(codecReg, domPublish);
+            return new BindingDOMNotificationPublishServiceAdapter(codec, domPublish);
         }
 
     }
