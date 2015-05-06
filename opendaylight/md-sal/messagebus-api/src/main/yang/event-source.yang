@@ -43,6 +43,18 @@ module event-source {
         }
     }
 
+    typedef event-source-status {
+        type enumeration {
+            enum active;
+            enum inactive;
+            enum deactive;
+        }
+        description "Status of event source
+                       - active: event source is publishing notification,
+                       - inactive: event source stopped publishing of notifications temporarily
+                       - deactive: event source stopped publishing of notifications permanently" ;
+    }
+
     grouping topology-event-source-type {
         container topology-event-source {
             presence "indicates an event source-aware topology";
@@ -70,6 +82,19 @@ module event-source {
                 type join-topic-status;
             }
         }
+    }
+
+    notification event-source-status-notification {
+
+        description
+            "Notification of change event source status.";
+
+        leaf status {
+            type event-source-status;
+            mandatory true;
+            description "Current status of event source.";
+        }
+
     }
 
     augment "/nt:network-topology/nt:topology/nt:topology-types" {
