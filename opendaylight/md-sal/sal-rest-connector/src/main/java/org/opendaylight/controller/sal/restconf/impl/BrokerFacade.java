@@ -9,7 +9,6 @@ package org.opendaylight.controller.sal.restconf.impl;
 
 import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION;
 import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.OPERATIONAL;
-
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
@@ -87,7 +86,9 @@ public class BrokerFacade {
         if (domDataBrokerService.isPresent()) {
             return readDataViaTransaction(domDataBrokerService.get().newReadOnlyTransaction(), CONFIGURATION, path);
         }
-        throw new RestconfDocumentedException("DOM data broker service isn't available for mount point.");
+        final String errMsg = "DOM data broker service isn't available for mount point " + path;
+        LOG.info(errMsg);
+        throw new RestconfDocumentedException(errMsg);
     }
 
     // READ operational
@@ -101,7 +102,9 @@ public class BrokerFacade {
         if (domDataBrokerService.isPresent()) {
             return readDataViaTransaction(domDataBrokerService.get().newReadOnlyTransaction(), OPERATIONAL, path);
         }
-        throw new RestconfDocumentedException("DOM data broker service isn't available for mount point.");
+        final String errMsg = "DOM data broker service isn't available for mount point ";
+        LOG.info(errMsg + path);
+        throw new RestconfDocumentedException(errMsg);
     }
 
     // PUT configuration
@@ -118,7 +121,9 @@ public class BrokerFacade {
             return putDataViaTransaction(domDataBrokerService.get().newReadWriteTransaction(), CONFIGURATION, path,
                     payload, mountPoint.getSchemaContext());
         }
-        throw new RestconfDocumentedException("DOM data broker service isn't available for mount point.");
+        final String errMsg = "DOM data broker service isn't available for mount point ";
+        LOG.info(errMsg + path);
+        throw new RestconfDocumentedException(errMsg);
     }
 
     // POST configuration
@@ -135,7 +140,9 @@ public class BrokerFacade {
             return postDataViaTransaction(domDataBrokerService.get().newReadWriteTransaction(), CONFIGURATION, path,
                     payload, mountPoint.getSchemaContext());
         }
-        throw new RestconfDocumentedException("DOM data broker service isn't available for mount point.");
+        final String errMsg = "DOM data broker service isn't available for mount point " + path;
+        LOG.info(errMsg);
+        throw new RestconfDocumentedException(errMsg);
     }
 
     // DELETE configuration
@@ -151,7 +158,9 @@ public class BrokerFacade {
         if (domDataBrokerService.isPresent()) {
             return deleteDataViaTransaction(domDataBrokerService.get().newWriteOnlyTransaction(), CONFIGURATION, path);
         }
-        throw new RestconfDocumentedException("DOM data broker service isn't available for mount point.");
+        final String errMsg = "DOM data broker service isn't available for mount point ";
+        LOG.info(errMsg + path);
+        throw new RestconfDocumentedException(errMsg);
     }
 
     // RPC
@@ -188,6 +197,7 @@ public class BrokerFacade {
                 LOG.debug("Reading result data from transaction.");
                 optional = listenableFuture.get();
             } catch (InterruptedException | ExecutionException e) {
+                LOG.warn("Exception by reading " + datastore.name() + " via Restconf: {}", path, e);
                 throw new RestconfDocumentedException("Problem to get data from transaction.", e.getCause());
 
             }
@@ -234,13 +244,13 @@ public class BrokerFacade {
         try {
             if (futureDatastoreData.get()) {
                 final String errMsg = "Post Configuration via Restconf was not executed because data already exists";
-                LOG.debug(errMsg + ":{}", path);
+                LOG.trace(errMsg + ":{}", path);
                 rWTransaction.cancel();
                 throw new RestconfDocumentedException("Data already exists for path: " + path, ErrorType.PROTOCOL,
                         ErrorTag.DATA_EXISTS);
             }
         } catch (InterruptedException | ExecutionException e) {
-            LOG.trace("It wasn't possible to get data loaded from datastore at path " + path);
+            LOG.warn("It wasn't possible to get data loaded from datastore at path " + path, e);
         }
 
     }
