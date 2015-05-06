@@ -16,9 +16,11 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableBiMap;
 import java.lang.reflect.Method;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationException;
 import org.opendaylight.controller.md.sal.common.impl.util.compat.DataNormalizationOperation;
@@ -44,6 +46,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.codec.DeserializationException;
 import org.opendaylight.yangtools.yang.model.api.Module;
+import org.opendaylight.yangtools.yang.model.api.NotificationDefinition;
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
@@ -302,6 +305,21 @@ public final class BindingToNormalizedNodeCodec implements BindingCodecTreeFacto
          */
         final BindingCodecTreeNode<?> codecContext = currentCodecTree.getSubtreeCodec(bindingPath);
         return new SimpleEntry<InstanceIdentifier<?>, BindingCodecTreeNode<?>>(bindingPath, codecContext);
+    }
+
+    public Set<Class<? extends Notification>> getNotificationClasses(final Set<SchemaPath> interested) {
+        final Set<Class<? extends Notification>> result = new HashSet<>();
+        final Set<NotificationDefinition> knownNotifications = runtimeContext.getSchemaContext().getNotifications();
+        for (final NotificationDefinition notification : knownNotifications) {
+            if (interested.contains(notification.getPath())) {
+                try {
+                    result.add((Class<? extends Notification>) runtimeContext.getClassForSchema(notification));
+                } catch (final IllegalStateException e) {
+                    // Ignore
+                }
+            }
+        }
+        return result;
     }
 
 }
