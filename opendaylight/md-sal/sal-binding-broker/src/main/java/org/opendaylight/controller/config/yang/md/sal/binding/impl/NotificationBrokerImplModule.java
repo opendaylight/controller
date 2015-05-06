@@ -7,11 +7,14 @@
  */
 package org.opendaylight.controller.config.yang.md.sal.binding.impl;
 
-import org.opendaylight.controller.md.sal.binding.compat.HydrogenNotificationBrokerImpl;
-
 import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService;
 import org.opendaylight.controller.md.sal.binding.api.NotificationService;
 import org.opendaylight.controller.md.sal.binding.compat.HeliumNotificationProviderServiceAdapter;
+import org.opendaylight.controller.md.sal.binding.compat.HeliumNotificationProviderServiceWithInterestListeners;
+import org.opendaylight.controller.md.sal.binding.compat.HydrogenNotificationBrokerImpl;
+import org.opendaylight.controller.md.sal.binding.impl.BindingDOMNotificationPublishServiceAdapter;
+import org.opendaylight.controller.md.sal.dom.api.DOMNotificationPublishService;
+import org.opendaylight.controller.md.sal.dom.spi.DOMNotificationSubscriptionListenerRegistry;
 import org.opendaylight.controller.sal.binding.codegen.impl.SingletonHolder;
 
 /**
@@ -44,7 +47,7 @@ public final class NotificationBrokerImplModule extends
         final NotificationService notificationService = getNotificationAdapterDependency();
 
         if(notificationPublishService != null & notificationService != null) {
-            return new HeliumNotificationProviderServiceAdapter(notificationPublishService, notificationService);
+            return createHeliumAdapter(notificationPublishService,notificationService);
         }
 
         /*
@@ -53,7 +56,19 @@ public final class NotificationBrokerImplModule extends
          *  we will have adapter implementation which will honor Helium
          *  threading model for notifications.
          */
-
         return new HydrogenNotificationBrokerImpl(SingletonHolder.getDefaultNotificationExecutor());
+    }
+
+    private static AutoCloseable createHeliumAdapter(final NotificationPublishService publishService,
+            final NotificationService listenService) {
+        if(publishService instanceof BindingDOMNotificationPublishServiceAdapter) {
+            final BindingDOMNotificationPublishServiceAdapter casted = (BindingDOMNotificationPublishServiceAdapter) publishService;
+            final DOMNotificationPublishService domService = casted.getDomPublishService();
+            if(domService instanceof DOMNotificationSubscriptionListenerRegistry) {
+                final DOMNotificationSubscriptionListenerRegistry subsRegistry = (DOMNotificationSubscriptionListenerRegistry) domService;
+                return new HeliumNotificationProviderServiceWithInterestListeners(publishService, listenService, casted.getCodecRegistry(), subsRegistry);
+            }
+        }
+        return new HeliumNotificationProviderServiceAdapter(publishService, listenService);
     }
 }

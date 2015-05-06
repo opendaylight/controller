@@ -80,7 +80,7 @@ public class DataBrokerTestCustomizer {
     }
 
     public NotificationPublishService createNotificationPublishService() {
-        return new BindingDOMNotificationPublishServiceAdapter(bindingToNormalized.getCodecRegistry(), domNotificationRouter);
+        return new BindingDOMNotificationPublishServiceAdapter(bindingToNormalized, domNotificationRouter);
     }
 
 
