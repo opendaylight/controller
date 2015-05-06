@@ -1,0 +1,208 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_eff2826e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DirectCommitCohort.java",
+        "patchSetId": 22
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-06T04:35:04Z",
+      "side": 1,
+      "message": "I think we should set the exception on canCommit as well so we propagate the failure to the front-end. Otherwise the front-end will see FALSE and not proceed to preCommit/commit so the backend failure won\u0027t be reported. Also if canCommit fails, the front-end will try to abort so we might want to return a successful future from abort so we don\u0027t report an unnecessary failure.",
+      "revId": "a569e0dc994624b35c6ac3fda024d9634dd7e941",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_afba3a6c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/LocalThreePhaseCommitCohort.java",
+        "patchSetId": 22
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-06T04:35:04Z",
+      "side": 1,
+      "message": "Why don\u0027t we return the messageFuture?",
+      "revId": "a569e0dc994624b35c6ac3fda024d9634dd7e941",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_c000b303",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/PreLithiumTransactionReadyReplyMapper.java",
+        "patchSetId": 22
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-06T04:35:04Z",
+      "side": 1,
+      "message": "This should be in the compat package.",
+      "revId": "a569e0dc994624b35c6ac3fda024d9634dd7e941",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_6f73d2e7",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/SimpleTransactionComponentFactory.java",
+        "patchSetId": 22
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-06T04:35:04Z",
+      "side": 1,
+      "message": "\"Simple\"  - what would be a \"Complex\" one? :)  This reminds me of a guy I used to work with that called just about every impl class Simple even if it had hundreds of lines of code - we got a kick out of that.  Anyway - could call it Default but it\u0027s fine either way.",
+      "revId": "a569e0dc994624b35c6ac3fda024d9634dd7e941",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_0f824e94",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/SimpleTransactionComponentFactory.java",
+        "patchSetId": 22
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-06T04:35:04Z",
+      "side": 1,
+      "message": "I recall you meant \"field\".",
+      "revId": "a569e0dc994624b35c6ac3fda024d9634dd7e941",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_af3f9ad5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/SimpleTransactionComponentFactory.java",
+        "patchSetId": 22
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-06T04:35:04Z",
+      "side": 1,
+      "message": "I\u0027m usually not a fan of synchronized methods. They inherently increase the amount of unneeded code in the sync block, particularly if more code is added in the future. Plus it isn\u0027t clear exactly what you\u0027re trying to guard. Plus callers could synchronize on it as well as other methods in this class for different purposed causing unwanted contention . I\u0027d prefer to synchronize childChains.",
+      "revId": "a569e0dc994624b35c6ac3fda024d9634dd7e941",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_6f2192b3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/SimpleTransactionComponentFactory.java",
+        "patchSetId": 22
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-06T04:35:04Z",
+      "side": 1,
+      "message": "This is a case where a synchronized method casts too broad a net. We don\u0027t need nor want super.onShardInfoUpdated synchronized.",
+      "revId": "a569e0dc994624b35c6ac3fda024d9634dd7e941",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_cf19c689",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionComponentFactory.java",
+        "patchSetId": 22
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-06T04:35:04Z",
+      "side": 1,
+      "message": "Since this is abstract we should prepend Abstract to keep it consistent with other classes.",
+      "revId": "a569e0dc994624b35c6ac3fda024d9634dd7e941",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_2502c90b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 22
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-06T04:35:04Z",
+      "side": 1,
+      "message": "This along with primaryShardInfoCache should be in another class but we can refactor that later.",
+      "revId": "a569e0dc994624b35c6ac3fda024d9634dd7e941",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_85139d65",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 22
+      },
+      "lineNbr": 248,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-06T04:35:04Z",
+      "side": 1,
+      "message": "Synchronize shardInfoListeners instead of this.",
+      "revId": "a569e0dc994624b35c6ac3fda024d9634dd7e941",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_a516d953",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 22
+      },
+      "lineNbr": 250,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-06T04:35:04Z",
+      "side": 1,
+      "message": "Would be better to gather the listener list inside the sync block and notify outside of it.",
+      "revId": "a569e0dc994624b35c6ac3fda024d9634dd7e941",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_05078d1d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 22
+      },
+      "lineNbr": 599,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-06T04:35:04Z",
+      "side": 1,
+      "message": "Should notify listeners outside the sync block.",
+      "revId": "a569e0dc994624b35c6ac3fda024d9634dd7e941",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
