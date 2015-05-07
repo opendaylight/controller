@@ -11,14 +11,18 @@ import com.google.common.collect.Sets;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
-import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService;
-import org.opendaylight.controller.md.sal.binding.api.NotificationService;
+import org.opendaylight.controller.md.sal.binding.impl.BindingDOMNotificationPublishServiceAdapter;
+import org.opendaylight.controller.md.sal.binding.impl.BindingDOMNotificationServiceAdapter;
 import org.opendaylight.controller.md.sal.binding.impl.BindingToNormalizedNodeCodec;
+import org.opendaylight.controller.md.sal.dom.api.DOMNotificationService;
 import org.opendaylight.controller.md.sal.dom.spi.DOMNotificationSubscriptionListener;
 import org.opendaylight.controller.md.sal.dom.spi.DOMNotificationSubscriptionListenerRegistry;
+import org.opendaylight.controller.sal.binding.api.NotificationListener;
+import org.opendaylight.yangtools.concepts.AbstractListenerRegistration;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.util.ListenerRegistry;
 import org.opendaylight.yangtools.yang.binding.Notification;
+import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,13 +33,15 @@ public class HeliumNotificationProviderServiceWithInterestListeners extends Heli
 
     private final ListenerRegistry<NotificationInterestListener> interestListeners = ListenerRegistry.create();
     private final ListenerRegistration<Listener> domListener;
+    private final DOMNotificationService domService;
     private final BindingToNormalizedNodeCodec codec;
 
     public HeliumNotificationProviderServiceWithInterestListeners(
-            final NotificationPublishService publishService, final NotificationService listenService, final BindingToNormalizedNodeCodec codec, final DOMNotificationSubscriptionListenerRegistry registry) {
+            final BindingDOMNotificationPublishServiceAdapter publishService, final BindingDOMNotificationServiceAdapter listenService, final DOMNotificationSubscriptionListenerRegistry registry) {
         super(publishService, listenService);
-        this.codec = codec;
+        this.codec = publishService.getCodecRegistry();
         this.domListener = registry.registerSubscriptionListener(new Listener());
+        this.domService = listenService.getDomService();
     }
 
     @Override
@@ -62,6 +68,22 @@ public class HeliumNotificationProviderServiceWithInterestListeners extends Heli
                 }
             }
         }
+    }
+
+    @Override
+    public <T extends Notification> ListenerRegistration<NotificationListener<T>> registerNotificationListener(
+            final Class<T> type, final NotificationListener<T> listener) {
+
+        final FunctionalNotificationListenerAdapter<T> adapter = new FunctionalNotificationListenerAdapter<>(codec, type, listener);
+        final SchemaPath domType = SchemaPath.create(true, BindingReflections.findQName(type));
+        final ListenerRegistration<?> domReg = domService.registerNotificationListener(adapter, domType);
+        return new AbstractListenerRegistration<NotificationListener<T>>(listener) {
+            @Override
+            protected void removeRegistration() {
+                domReg.close();
+            }
+
+        };
     }
 
     private void notifyListener(final NotificationInterestListener listener, final Set<Class<? extends Notification>> baEvent) {
