@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_ec02893d",
+        "filename": "opendaylight/netconf/netconf-testtool/src/main/java/org/opendaylight/controller/netconf/test/tool/client/stress/Parameters.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-05-07T07:15:46Z",
+      "side": 1,
+      "message": "Username/password should be validated ... if ssh is set to true, both should be non null.",
+      "revId": "995a0caf6dbb04c673d858e527ae30b0fc13621a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_2ce95180",
+        "filename": "opendaylight/netconf/netconf-testtool/src/main/java/org/opendaylight/controller/netconf/test/tool/client/stress/StressClient.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-05-07T07:15:46Z",
+      "side": 1,
+      "message": "Is this still necessary ?",
+      "revId": "995a0caf6dbb04c673d858e527ae30b0fc13621a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_4cecdd8f",
+        "filename": "opendaylight/netconf/netconf-testtool/src/main/java/org/opendaylight/controller/netconf/test/tool/client/stress/StressClientCallable.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-05-07T07:15:46Z",
+      "side": 1,
+      "message": "Could this cause null pointer in LoginPassword if tcp is configured and no username/password is ?",
+      "revId": "995a0caf6dbb04c673d858e527ae30b0fc13621a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
