@@ -21,7 +21,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
  * of notification actually accessed data from notification.
  *
  */
-class LazySerializedDOMNotification implements DOMNotification {
+public final class LazySerializedDOMNotification implements DOMNotification {
 
     private final BindingNormalizedNodeSerializer codec;
     private final Notification data;
@@ -54,7 +54,7 @@ class LazySerializedDOMNotification implements DOMNotification {
         return domBody;
     }
 
-    protected Notification getBindingData() {
+    public Notification getBindingData() {
         return data;
     }
 }
