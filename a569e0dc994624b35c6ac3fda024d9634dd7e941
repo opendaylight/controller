@@ -89,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_7a62a7ae",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/PreLithiumTransactionReadyReplyMapper.java",
+        "patchSetId": 22
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-07T12:22:56Z",
+      "side": 1,
+      "message": "That\u0027s fine. Doesn\u0027t hurt anything. It\u0027s a reasonable trade-off - I\u0027d rather the pre-lithium classes be in compat - that\u0027s what we\u0027ve been doing and would make it consistent with the other ones.",
+      "parentUuid": "3aa0d159_0f7327e8",
+      "revId": "a569e0dc994624b35c6ac3fda024d9634dd7e941",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_6f73d2e7",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/SimpleTransactionComponentFactory.java",
         "patchSetId": 22
