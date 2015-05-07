@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_2ff4e3f0",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/LocalThreePhaseCommitCohort.java",
+        "patchSetId": 22
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-05-07T11:01:03Z",
+      "side": 1,
+      "message": "Because that would be used by the frontend chain code to actually wait for response from the shard leader, which is completely unnecessary.\n\nLocal transactions do not have any remote state associated while they are open. This codepath (unlike initiateCoordinatedCommit()) does not create any remote state during the commit process.",
+      "parentUuid": "3aa0d159_afba3a6c",
+      "revId": "a569e0dc994624b35c6ac3fda024d9634dd7e941",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_c000b303",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/PreLithiumTransactionReadyReplyMapper.java",
         "patchSetId": 22
@@ -47,6 +65,24 @@
       "writtenOn": "2015-05-06T04:35:04Z",
       "side": 1,
       "message": "This should be in the compat package.",
+      "revId": "a569e0dc994624b35c6ac3fda024d9634dd7e941",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_0f7327e8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/PreLithiumTransactionReadyReplyMapper.java",
+        "patchSetId": 22
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-05-07T11:01:03Z",
+      "side": 1,
+      "message": "That will force TransactionReadyMapper to become public, though.",
+      "parentUuid": "3aa0d159_c000b303",
       "revId": "a569e0dc994624b35c6ac3fda024d9634dd7e941",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
