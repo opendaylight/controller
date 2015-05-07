@@ -78,4 +78,8 @@ public class BindingDOMNotificationServiceAdapter implements NotificationService
             return ImmutableSet.of(DOMNotificationService.class);
         }
     }
+
+    public DOMNotificationService getDomService() {
+        return domNotifService;
+    }
 }
