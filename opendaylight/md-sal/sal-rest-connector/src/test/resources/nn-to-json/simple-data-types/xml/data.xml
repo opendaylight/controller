@@ -1,0 +1,71 @@
+<cont xmlns="simple:data:types">
+    <lfnint8Min>-128</lfnint8Min>
+    <lfnint8Max>127</lfnint8Max>
+    <lfnint16Min>-32768</lfnint16Min>
+    <lfnint16Max>32767</lfnint16Max>
+    <lfnint32Min>-2147483648</lfnint32Min>
+    <lfnint32Max>2147483647</lfnint32Max>
+    <lfnint64Min>-9223372036854775808</lfnint64Min>
+    <lfnint64Max>9223372036854775807</lfnint64Max>
+    <lfnuint8Max>255</lfnuint8Max>
+    <lfnuint16Max>65535</lfnuint16Max>
+    <lfnuint32Max>4294967295</lfnuint32Max>
+    <lfstr>lfstr</lfstr>
+    <lfstr1></lfstr1>
+    <lfbool1>true</lfbool1>
+    <lfbool2>false</lfbool2>
+    <lfbool3>bla</lfbool3>
+    <lfdecimal1>43.32</lfdecimal1>
+    <lfdecimal2>-0.43</lfdecimal2>
+    <lfdecimal3>43</lfdecimal3>
+    <lfdecimal4>43E3</lfdecimal4>
+    <lfdecimal6>33.12345</lfdecimal6>
+    <lfenum>enum3</lfenum>
+    <lfbits>bit3 bit2</lfbits>
+    <lfbinary>ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz</lfbinary>
+    <lfunion1>324</lfunion1>
+    <lfunion2>33.3</lfunion2>
+    <lfunion3>55</lfunion3>
+    <lfunion4>true</lfunion4>
+    <lfunion5>true</lfunion5>
+    <lfunion6>10</lfunion6>
+    <lfunion7></lfunion7>
+    <lfunion8></lfunion8>
+    <lfunion9></lfunion9>
+    <lfunion10>bt1</lfunion10>
+    <lfunion11>33</lfunion11>
+    <lfunion12>false</lfunion12>
+    <lfunion13>b1</lfunion13>
+    <lfunion14>zero</lfunion14>
+    <lfempty></lfempty>
+    <identityref1 xmlns:x="simple:data:types">x:iden</identityref1>
+    <complex-any>
+      <data>
+        <leaf1>leaf1-value</leaf1>
+        <leaf2>leaf2-value</leaf2>
+
+        <leaf-list>leaf-list-value1</leaf-list>
+        <leaf-list>leaf-list-value2</leaf-list>
+
+        <list>
+            <nested-list>
+                <nested-leaf>nested-value1</nested-leaf>
+            </nested-list>
+            <nested-list>
+                <nested-leaf>nested-value2</nested-leaf>
+            </nested-list>
+        </list>
+
+         <list>
+            <nested-list>
+                <nested-leaf>nested-value3</nested-leaf>
+            </nested-list>
+            <nested-list>
+                <nested-leaf>nested-value4</nested-leaf>
+            </nested-list>
+        </list>
+      </data>
+    </complex-any>
+    <simple-any>simple</simple-any>
+    <empty-any></empty-any>
+</cont>
