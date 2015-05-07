@@ -1,5 +1,5 @@
 <notification xmlns="urn:ietf:params:xml:ns:netconf:notification:1.0">
-<eventTime>2014-07-08T11:20:48UTC</eventTime>
+<eventTime>2007-07-08T00:01:00Z</eventTime>
 <user-visited-page xmlns="org:opendaylight:notification:test:ns:yang:user-notification">
   <ui:incoming-user xmlns:ui="org:opendaylight:notification:test:ns:yang:user-notification">ui:public-user</ui:incoming-user>
   <ip-address>172.23.29.104</ip-address>

@@ -10,13 +10,13 @@ package org.opendaylight.controller.netconf.cli;
 import com.google.common.base.Optional;
 import jline.console.completer.Completer;
 import jline.console.completer.NullCompleter;
+import org.opendaylight.controller.md.sal.dom.api.DOMNotification;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 import org.opendaylight.controller.netconf.cli.commands.CommandDispatcher;
 import org.opendaylight.controller.netconf.cli.io.ConsoleContext;
 import org.opendaylight.controller.netconf.cli.io.ConsoleIO;
 import org.opendaylight.controller.sal.connect.api.RemoteDeviceHandler;
 import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionPreferences;
-import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 /**
@@ -87,7 +87,7 @@ public class NetconfDeviceConnectionHandler implements RemoteDeviceHandler<Netco
     }
 
     @Override
-    public void onNotification(ContainerNode domNotification) {
+    public void onNotification(DOMNotification domNotification) {
 
     }
 
