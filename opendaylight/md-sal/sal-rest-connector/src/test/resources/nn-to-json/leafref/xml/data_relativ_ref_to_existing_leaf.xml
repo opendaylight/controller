@@ -1,0 +1,5 @@
+<cont xmlns="main:module"
+      xmlns:cont-augment-module="cont:augment:module">
+    <lf1>121</lf1>
+    <lf2>121</lf2>
+</cont>

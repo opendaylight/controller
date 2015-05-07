@@ -1,0 +1,6 @@
+<cont xmlns="main:module"
+      xmlns:cont-augment-module="cont:augment:module">
+      <cont-augment-module:lflst1>345</cont-augment-module:lflst1>
+      <cont-augment-module:lflst1>346</cont-augment-module:lflst1>
+      <cont-augment-module:lflst1>347</cont-augment-module:lflst1>
+</cont>
