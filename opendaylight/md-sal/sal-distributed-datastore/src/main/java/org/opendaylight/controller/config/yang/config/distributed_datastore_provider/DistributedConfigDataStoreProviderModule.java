@@ -28,8 +28,12 @@ public class DistributedConfigDataStoreProviderModule extends
     }
 
     @Override
-    public java.lang.AutoCloseable createInstance() {
+    public boolean canReuseInstance(AbstractDistributedConfigDataStoreProviderModule oldModule) {
+        return true;
+    }
 
+    @Override
+    public java.lang.AutoCloseable createInstance() {
         ConfigProperties props = getConfigProperties();
         if(props == null) {
             props = new ConfigProperties();
