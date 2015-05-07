@@ -28,6 +28,11 @@ public class DistributedOperationalDataStoreProviderModule extends
     }
 
     @Override
+    public boolean canReuseInstance(AbstractDistributedOperationalDataStoreProviderModule oldModule) {
+        return true;
+    }
+
+    @Override
     public java.lang.AutoCloseable createInstance() {
 
         OperationalProperties props = getOperationalProperties();
