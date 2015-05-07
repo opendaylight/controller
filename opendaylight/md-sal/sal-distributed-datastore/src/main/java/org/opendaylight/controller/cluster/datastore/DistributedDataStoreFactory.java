@@ -10,26 +10,34 @@ package org.opendaylight.controller.cluster.datastore;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.osgi.BundleDelegatingClassLoader;
+import com.google.common.base.Preconditions;
 import com.typesafe.config.ConfigFactory;
+import java.util.HashSet;
+import java.util.Set;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationReader;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.osgi.framework.BundleContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DistributedDataStoreFactory {
     private static final String ACTOR_SYSTEM_NAME = "opendaylight-cluster-data";
     private static final String CONFIGURATION_NAME = "odl-cluster-data";
+    private static ActorSystem actorSystem = null;
+    private static final Set<DistributedDataStore> createdInstances = new HashSet<>(2);
+    private static final Logger LOG = LoggerFactory.getLogger(DistributedDataStoreFactory.class);
 
-    private static volatile ActorSystem persistentActorSystem = null;
-
-    public static DistributedDataStore createInstance(SchemaService schemaService,
+    public static synchronized DistributedDataStore createInstance(SchemaService schemaService,
             DatastoreContext datastoreContext, BundleContext bundleContext) {
+
+        LOG.info("Create data store instance of type : {}", datastoreContext.getDataStoreType());
 
         DatastoreContextIntrospector introspector = new DatastoreContextIntrospector(datastoreContext);
         DatastoreContextConfigAdminOverlay overlay = new DatastoreContextConfigAdminOverlay(
                 introspector, bundleContext);
 
-        ActorSystem actorSystem = getOrCreateInstance(bundleContext, datastoreContext.getConfigurationReader());
+        ActorSystem actorSystem = getActorSystem(bundleContext, datastoreContext.getConfigurationReader());
         Configuration config = new ConfigurationImpl("module-shards.conf", "modules.conf");
         final DistributedDataStore dataStore = new DistributedDataStore(actorSystem,
                 new ClusterWrapperImpl(actorSystem), config, introspector.getContext());
@@ -41,28 +49,39 @@ public class DistributedDataStoreFactory {
 
         dataStore.setCloseable(overlay);
         dataStore.waitTillReady();
+
+        createdInstances.add(dataStore);
         return dataStore;
     }
 
-    private static final ActorSystem getOrCreateInstance(final BundleContext bundleContext, ConfigurationReader configurationReader) {
-        ActorSystem ret = persistentActorSystem;
-        if (ret == null) {
-            synchronized (DistributedDataStoreFactory.class) {
-                ret = persistentActorSystem;
-                if (ret == null) {
-                    // Create an OSGi bundle classloader for actor system
-                    BundleDelegatingClassLoader classLoader = new BundleDelegatingClassLoader(bundleContext.getBundle(),
-                        Thread.currentThread().getContextClassLoader());
+    private static synchronized final ActorSystem getActorSystem(final BundleContext bundleContext,
+                                                                 ConfigurationReader configurationReader) {
+        if (actorSystem == null) {
+            // Create an OSGi bundle classloader for actor system
+            BundleDelegatingClassLoader classLoader = new BundleDelegatingClassLoader(bundleContext.getBundle(),
+                Thread.currentThread().getContextClassLoader());
 
-                    ret = ActorSystem.create(ACTOR_SYSTEM_NAME,
-                        ConfigFactory.load(configurationReader.read()).getConfig(CONFIGURATION_NAME), classLoader);
-                    ret.actorOf(Props.create(TerminationMonitor.class), "termination-monitor");
+            actorSystem = ActorSystem.create(ACTOR_SYSTEM_NAME,
+                ConfigFactory.load(configurationReader.read()).getConfig(CONFIGURATION_NAME), classLoader);
+            actorSystem.actorOf(Props.create(TerminationMonitor.class), "termination-monitor");
+        }
 
-                    persistentActorSystem = ret;
+        return actorSystem;
+    }
+
+    public static synchronized void destroyInstance(DistributedDataStore dataStore){
+        Preconditions.checkNotNull(dataStore, "dataStore should not be null");
+
+        LOG.info("Destroy data store instance of type : {}", dataStore.getActorContext().getDataStoreType());
+
+        if(createdInstances.remove(dataStore)){
+            if(createdInstances.size() == 0){
+                if(actorSystem != null) {
+                    actorSystem.shutdown();
+                    actorSystem = null;
                 }
             }
         }
-
-        return ret;
     }
+
 }

@@ -8,9 +8,11 @@
 
 package org.opendaylight.controller.cluster.datastore;
 
+import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardManagerIdentifier;
@@ -77,10 +79,8 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
         String shardDispatcher =
                 new Dispatchers(actorSystem.dispatchers()).getDispatcherPath(Dispatchers.DispatcherType.Shard);
 
-        actorContext = new ActorContext(actorSystem, actorSystem.actorOf(
-                ShardManager.props(cluster, configuration, datastoreContext, waitTillReadyCountDownLatch)
-                        .withDispatcher(shardDispatcher).withMailbox(ActorContext.MAILBOX), shardManagerId ),
-                cluster, configuration, datastoreContext);
+        actorContext = new ActorContext(actorSystem, createShardManager(actorSystem, cluster, configuration,
+                datastoreContext, shardDispatcher, shardManagerId ), cluster, configuration, datastoreContext);
 
         this.waitTillReadyTimeInMillis =
                 actorContext.getDatastoreContext().getShardLeaderElectionTimeout().duration().toMillis() * READY_WAIT_FACTOR;
@@ -186,11 +186,12 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
             try {
                 closeable.close();
             } catch (Exception e) {
-                LOG.debug("Error closing insance", e);
+                LOG.debug("Error closing instance", e);
             }
         }
 
         actorContext.shutdown();
+        DistributedDataStoreFactory.destroyInstance(this);
     }
 
     @VisibleForTesting
@@ -210,6 +211,25 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
         } catch (InterruptedException e) {
             LOG.error("Interrupted while waiting for shards to settle", e);
         }
+    }
+
+    private ActorRef createShardManager(ActorSystem actorSystem, ClusterWrapper cluster, Configuration configuration,
+                                        DatastoreContext datastoreContext, String shardDispatcher, String shardManagerId){
+        Exception lastException = null;
+
+        for(int i=0;i<100;i++) {
+            try {
+                return actorSystem.actorOf(
+                        ShardManager.props(cluster, configuration, datastoreContext, waitTillReadyCountDownLatch)
+                                .withDispatcher(shardDispatcher).withMailbox(ActorContext.MAILBOX), shardManagerId);
+            } catch (Exception e){
+                lastException = e;
+                Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
+                LOG.error(String.format("Could not create actor %s because of %s - waiting for sometime before retrying (retry count = %d)", shardManagerId, e.getMessage(), i));
+            }
+        }
+
+        throw new IllegalStateException("Failed to create Shard Manager", lastException);
     }
 
     @VisibleForTesting
