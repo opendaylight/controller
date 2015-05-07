@@ -107,6 +107,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_fa59d75b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/PreLithiumTransactionReadyReplyMapper.java",
+        "patchSetId": 22
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-05-07T15:01:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3aa0d159_7a62a7ae",
+      "revId": "a569e0dc994624b35c6ac3fda024d9634dd7e941",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_6f73d2e7",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/SimpleTransactionComponentFactory.java",
         "patchSetId": 22
@@ -118,6 +136,24 @@
       "writtenOn": "2015-05-06T04:35:04Z",
       "side": 1,
       "message": "\"Simple\"  - what would be a \"Complex\" one? :)  This reminds me of a guy I used to work with that called just about every impl class Simple even if it had hundreds of lines of code - we got a kick out of that.  Anyway - could call it Default but it\u0027s fine either way.",
+      "revId": "a569e0dc994624b35c6ac3fda024d9634dd7e941",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_7a670726",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/SimpleTransactionComponentFactory.java",
+        "patchSetId": 22
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-05-07T15:01:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3aa0d159_6f73d2e7",
       "revId": "a569e0dc994624b35c6ac3fda024d9634dd7e941",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -141,6 +177,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_1a6e0302",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/SimpleTransactionComponentFactory.java",
+        "patchSetId": 22
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-05-07T15:01:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3aa0d159_0f824e94",
+      "revId": "a569e0dc994624b35c6ac3fda024d9634dd7e941",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_af3f9ad5",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/SimpleTransactionComponentFactory.java",
         "patchSetId": 22
@@ -152,6 +206,24 @@
       "writtenOn": "2015-05-06T04:35:04Z",
       "side": 1,
       "message": "I\u0027m usually not a fan of synchronized methods. They inherently increase the amount of unneeded code in the sync block, particularly if more code is added in the future. Plus it isn\u0027t clear exactly what you\u0027re trying to guard. Plus callers could synchronize on it as well as other methods in this class for different purposed causing unwanted contention . I\u0027d prefer to synchronize childChains.",
+      "revId": "a569e0dc994624b35c6ac3fda024d9634dd7e941",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_7a4e2798",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/SimpleTransactionComponentFactory.java",
+        "patchSetId": 22
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-05-07T15:01:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3aa0d159_af3f9ad5",
       "revId": "a569e0dc994624b35c6ac3fda024d9634dd7e941",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -175,6 +247,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_9a81b391",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/SimpleTransactionComponentFactory.java",
+        "patchSetId": 22
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-05-07T15:01:06Z",
+      "side": 1,
+      "message": "Unfortunately we do. The reason is that otherwise the order of operations reported to the users (via onShardInfoUpdated()) and how they are applied to the cache (via the call here) could be reordered.\n\nIf we synchronized just the for-loop, thread scheduling after could cause this line to be executed after a different thread would run through.",
+      "parentUuid": "3aa0d159_6f2192b3",
+      "revId": "a569e0dc994624b35c6ac3fda024d9634dd7e941",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_cf19c689",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionComponentFactory.java",
         "patchSetId": 22
@@ -186,6 +276,24 @@
       "writtenOn": "2015-05-06T04:35:04Z",
       "side": 1,
       "message": "Since this is abstract we should prepend Abstract to keep it consistent with other classes.",
+      "revId": "a569e0dc994624b35c6ac3fda024d9634dd7e941",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_9a58d357",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionComponentFactory.java",
+        "patchSetId": 22
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-05-07T15:01:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3aa0d159_cf19c689",
       "revId": "a569e0dc994624b35c6ac3fda024d9634dd7e941",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -226,6 +334,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_da25fbc2",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 22
+      },
+      "lineNbr": 248,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-05-07T15:01:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3aa0d159_85139d65",
+      "revId": "a569e0dc994624b35c6ac3fda024d9634dd7e941",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_a516d953",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
         "patchSetId": 22
@@ -237,6 +363,24 @@
       "writtenOn": "2015-05-06T04:35:04Z",
       "side": 1,
       "message": "Would be better to gather the listener list inside the sync block and notify outside of it.",
+      "revId": "a569e0dc994624b35c6ac3fda024d9634dd7e941",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_9a2f73a1",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/ActorContext.java",
+        "patchSetId": 22
+      },
+      "lineNbr": 250,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-05-07T15:01:06Z",
+      "side": 1,
+      "message": "I do not want to over-engineer this at right now. The problem is that notification has to be synchronized with both register and unregister operations, as we rely on this with cache coherence. The unregister part is relatively straightforward, it\u0027s the register part which is hard -- we do not want the registration to succeed in while another thread is dispatching events, as that could cause missed shootdowns.",
+      "parentUuid": "3aa0d159_a516d953",
       "revId": "a569e0dc994624b35c6ac3fda024d9634dd7e941",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
