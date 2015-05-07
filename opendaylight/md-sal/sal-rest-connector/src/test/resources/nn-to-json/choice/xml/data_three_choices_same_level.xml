@@ -1,0 +1,13 @@
+<cont xmlns="choice:case:test">
+    <lf1aaa>lf1aaa value</lf1aaa>
+    <lf2b>lf2b value</lf2b>
+    <lst4a>
+        <lf4ab>33</lf4ab>
+    </lst4a>
+    <lst4a>
+        <lf4ab>33</lf4ab>
+    </lst4a>
+    <lst4a>
+        <lf4ab>37</lf4ab>
+    </lst4a>
+</cont>
