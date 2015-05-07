@@ -16,6 +16,24 @@
       "revId": "24195b3f9343a941d4842e9a3be6fd68fb964539",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_6f2d0b46",
+        "filename": "opendaylight/netconf/netconf-netty-util/src/main/java/org/opendaylight/controller/netconf/nettyutil/handler/NetconfXMLToMessageDecoder.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-05-07T09:24:10Z",
+      "side": 1,
+      "message": "I would also suggest check for white space only characters.",
+      "parentUuid": "5a93c517_96697027",
+      "revId": "24195b3f9343a941d4842e9a3be6fd68fb964539",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
