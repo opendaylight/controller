@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.sal.connect.api;
 
+import org.opendaylight.controller.md.sal.dom.api.DOMNotification;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
-import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public interface RemoteDeviceHandler<PREF> extends AutoCloseable {
@@ -20,7 +20,7 @@ public interface RemoteDeviceHandler<PREF> extends AutoCloseable {
 
     void onDeviceFailed(Throwable throwable);
 
-    void onNotification(ContainerNode domNotification);
+    void onNotification(DOMNotification domNotification);
 
     void close();
 }

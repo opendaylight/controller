@@ -7,30 +7,38 @@
  */
 package org.opendaylight.controller.sal.connect.netconf.schema.mapping;
 
+import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.EVENT_TIME;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_RPC_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_URI;
+import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.toPath;
 
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Set;
+import javax.annotation.Nonnull;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.dom.DOMResult;
+import org.opendaylight.controller.md.sal.dom.api.DOMEvent;
+import org.opendaylight.controller.md.sal.dom.api.DOMNotification;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.md.sal.dom.spi.DefaultDOMRpcResult;
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
+import org.opendaylight.controller.netconf.notifications.NetconfNotification;
 import org.opendaylight.controller.netconf.util.OrderedNormalizedNodeWriter;
 import org.opendaylight.controller.netconf.util.exception.MissingNameSpaceException;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
@@ -111,12 +119,12 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
     }
 
     @Override
-    public synchronized ContainerNode toNotification(final NetconfMessage message) {
-        final XmlElement stripped = stripNotification(message);
+    public synchronized DOMNotification toNotification(final NetconfMessage message) {
+        final Map.Entry<Date, XmlElement> stripped = stripNotification(message);
         final QName notificationNoRev;
         try {
             // How to construct QName with no revision ?
-            notificationNoRev = QName.cachedReference(QName.create(stripped.getNamespace(), "0000-00-00", stripped.getName()).withoutRevision());
+            notificationNoRev = QName.cachedReference(QName.create(stripped.getValue().getNamespace(), "0000-00-00", stripped.getValue().getName()).withoutRevision());
         } catch (final MissingNameSpaceException e) {
             throw new IllegalArgumentException("Unable to parse notification " + message + ", cannot find namespace", e);
         }
@@ -131,23 +139,43 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
 
         // We wrap the notification as a container node in order to reuse the parsers and builders for container node
         final ContainerSchemaNode notificationAsContainerSchemaNode = NetconfMessageTransformUtil.createSchemaForNotification(next);
-        return parserFactory.getContainerNodeParser().parse(Collections.singleton(stripped.getDomElement()), notificationAsContainerSchemaNode);
+        final ContainerNode content = parserFactory.getContainerNodeParser().parse(Collections.singleton(stripped.getValue().getDomElement()),
+                notificationAsContainerSchemaNode);
+        return new NetconfDeviceNotification(content, stripped.getKey());
     }
 
     // FIXME move somewhere to util
-    private static XmlElement stripNotification(final NetconfMessage message) {
+    private static Map.Entry<Date, XmlElement> stripNotification(final NetconfMessage message) {
         final XmlElement xmlElement = XmlElement.fromDomDocument(message.getDocument());
         final List<XmlElement> childElements = xmlElement.getChildElements();
         Preconditions.checkArgument(childElements.size() == 2, "Unable to parse notification %s, unexpected format", message);
+
+        final XmlElement eventTimeElement;
+        final XmlElement notificationElement;
+
+        if (childElements.get(0).getName().equals(EVENT_TIME)) {
+            eventTimeElement = childElements.get(0);
+            notificationElement = childElements.get(1);
+        }
+        else if(childElements.get(1).getName().equals(EVENT_TIME)) {
+            eventTimeElement = childElements.get(1);
+            notificationElement = childElements.get(0);
+        } else {
+            throw new IllegalArgumentException("Notification payload does not contain " + EVENT_TIME + " " + message);
+        }
+
         try {
-            return Iterables.find(childElements, new Predicate<XmlElement>() {
-                @Override
-                public boolean apply(final XmlElement xmlElement) {
-                    return !xmlElement.getName().equals("eventTime");
-                }
-            });
-        } catch (final NoSuchElementException e) {
-            throw new IllegalArgumentException("Unable to parse notification " + message + ", cannot strip notification metadata", e);
+            return new AbstractMap.SimpleEntry<>(parseEventTime(eventTimeElement.getTextContent()), notificationElement);
+        } catch (NetconfDocumentedException e) {
+            throw new IllegalArgumentException("Notification payload does not contain " + EVENT_TIME + " " + message);
+        }
+    }
+
+    private static Date parseEventTime(final String eventTime) {
+        try {
+            return new SimpleDateFormat(NetconfNotification.RFC3339_DATE_FORMAT_BLUEPRINT).parse(eventTime);
+        } catch (ParseException e) {
+            throw new IllegalArgumentException("Unable to parse event time from " + eventTime, e);
         }
     }
 
@@ -268,4 +296,33 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
         return new DefaultDOMRpcResult(normalizedNode);
     }
 
+    private static class NetconfDeviceNotification implements DOMNotification, DOMEvent {
+        private final ContainerNode content;
+        private final SchemaPath schemaPath;
+        private final Date eventTime;
+
+        NetconfDeviceNotification(final ContainerNode content, final Date eventTime) {
+            this.content = content;
+            this.eventTime = eventTime;
+            this.schemaPath = toPath(content.getNodeType());
+        }
+
+        @Nonnull
+        @Override
+        public SchemaPath getType() {
+            return schemaPath;
+
+        }
+
+        @Nonnull
+        @Override
+        public ContainerNode getBody() {
+            return content;
+        }
+
+        @Override
+        public Date getEventTime() {
+            return eventTime;
+        }
+    }
 }

@@ -11,13 +11,12 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import java.util.LinkedList;
 import java.util.List;
+import org.opendaylight.controller.md.sal.dom.api.DOMNotification;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.controller.sal.connect.api.MessageTransformer;
 import org.opendaylight.controller.sal.connect.api.RemoteDeviceHandler;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
-import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,8 +64,8 @@ final class NotificationHandler {
         queue.clear();
     }
 
-    private ContainerNode transformNotification(final NetconfMessage cachedNotification) {
-        final ContainerNode parsedNotification = messageTransformer.toNotification(cachedNotification);
+    private DOMNotification transformNotification(final NetconfMessage cachedNotification) {
+        final DOMNotification parsedNotification = messageTransformer.toNotification(cachedNotification);
         Preconditions.checkNotNull(parsedNotification, "%s: Unable to parse received notification: %s", id, cachedNotification);
         return parsedNotification;
     }
@@ -82,7 +81,7 @@ final class NotificationHandler {
         queue.add(notification);
     }
 
-    private synchronized void passNotification(final ContainerNode parsedNotification) {
+    private synchronized void passNotification(final DOMNotification parsedNotification) {
         logger.debug("{}: Forwarding notification {}", id, parsedNotification);
 
         if(filter == null || filter.filterNotification(parsedNotification).isPresent()) {
@@ -102,6 +101,6 @@ final class NotificationHandler {
 
     static interface NotificationFilter {
 
-        Optional<NormalizedNode<?, ?>> filterNotification(NormalizedNode<?, ?> notification);
+        Optional<DOMNotification> filterNotification(DOMNotification notification);
     }
 }

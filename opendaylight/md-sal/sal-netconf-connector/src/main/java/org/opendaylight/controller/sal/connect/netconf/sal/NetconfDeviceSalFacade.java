@@ -11,6 +11,7 @@ import com.google.common.collect.Lists;
 import java.util.Collections;
 import java.util.List;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
+import org.opendaylight.controller.md.sal.dom.api.DOMNotification;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sal.connect.api.RemoteDeviceHandler;
@@ -19,7 +20,6 @@ import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionPr
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
 import org.opendaylight.controller.sal.core.api.Broker;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
@@ -46,7 +46,7 @@ public final class NetconfDeviceSalFacade implements AutoCloseable, RemoteDevice
     }
 
     @Override
-    public synchronized void onNotification(final ContainerNode domNotification) {
+    public synchronized void onNotification(final DOMNotification domNotification) {
         salProvider.getMountInstance().publish(domNotification);
     }
 

@@ -7,14 +7,14 @@
  */
 package org.opendaylight.controller.sal.connect.api;
 
+import org.opendaylight.controller.md.sal.dom.api.DOMNotification;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
-import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
 public interface MessageTransformer<M> {
 
-    ContainerNode toNotification(M message);
+    DOMNotification toNotification(M message);
 
     M toRpcRequest(SchemaPath rpc, NormalizedNode<?, ?> node);
 

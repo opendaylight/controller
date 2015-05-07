@@ -6,13 +6,17 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.Iterables;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.junit.Before;
 import org.junit.Test;
+import org.opendaylight.controller.md.sal.dom.api.DOMEvent;
+import org.opendaylight.controller.md.sal.dom.api.DOMNotification;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
+import org.opendaylight.controller.netconf.notifications.NetconfNotification;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.controller.sal.connect.netconf.schema.mapping.NetconfMessageTransformer;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
@@ -60,9 +64,12 @@ public class NetconfToNotificationTest {
 
     @Test
     public void test() throws Exception {
-        final ContainerNode root = messageTransformer.toNotification(userNotification);
+        final DOMNotification domNotification = messageTransformer.toNotification(userNotification);
+        final ContainerNode root = domNotification.getBody();
         assertNotNull(root);
         assertEquals(6, Iterables.size(root.getValue()));
         assertEquals("user-visited-page", root.getNodeType().getLocalName());
+        assertEquals(new SimpleDateFormat(NetconfNotification.RFC3339_DATE_FORMAT_BLUEPRINT).parse("2007-07-08T00:01:00Z"),
+                ((DOMEvent) domNotification).getEventTime());
     }
 }
