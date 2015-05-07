@@ -1,0 +1,50 @@
+module main-module {
+    namespace "main:module";
+
+    prefix "mainmod";
+    revision 2013-12-2 {
+    }
+
+    container cont {
+        leaf lf1 {
+           /*
+            *FIX ME
+            * If is this leaf lf1 called from cont-augment-module.yang 
+            * from lf4, type that will be returned to the lf1 is string.
+            * Than there are failing tests because of we have string, 
+            * do not number(uint32) 
+            */
+//            type uint32;
+            type string;
+        }
+
+        container cont1 {
+            leaf lf11 {
+            	/*
+            	 * FIX ME TOO WITH BAD PARSING
+            	 */
+//            	type boolean;
+                type string;
+            }
+        }
+
+        leaf lf2 {
+            type leafref {
+                path "../lf1";
+            }
+        }
+
+        leaf lf3 {
+            type leafref {
+                path "/cont/cont1/lf11";
+            }
+        }
+
+        /* reference to nonexisting leaf */
+        leaf lf5 {
+            type leafref {
+                path "/cont/lf";
+            }
+        }
+    }
+}
