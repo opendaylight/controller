@@ -22,6 +22,11 @@ public class RemoteRPCBrokerModule extends org.opendaylight.controller.config.ya
   }
 
   @Override
+  public boolean canReuseInstance(AbstractRemoteRPCBrokerModule oldModule) {
+      return true;
+  }
+
+  @Override
   public java.lang.AutoCloseable createInstance() {
     Broker broker = getDomBrokerDependency();
 
