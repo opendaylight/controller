@@ -1,0 +1,4 @@
+<cont xmlns="choice:case:test">
+    <lflst1d>lflst1d_1 val</lflst1d>
+    <lflst1d>lflst1d_2 val</lflst1d>
+</cont>
