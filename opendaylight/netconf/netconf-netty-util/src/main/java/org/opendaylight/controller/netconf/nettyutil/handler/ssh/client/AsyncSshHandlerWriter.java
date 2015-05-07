@@ -68,7 +68,7 @@ public final class AsyncSshHandlerWriter implements AutoCloseable {
 
     //sending message with pending
     //if resending message not succesfull, then attribute wasPending is true
-    private void writeWithPendingDetection(final ChannelHandlerContext ctx, final ChannelPromise promise, final ByteBuf byteBufMsg, boolean wasPending) {
+    private void writeWithPendingDetection(final ChannelHandlerContext ctx, final ChannelPromise promise, final ByteBuf byteBufMsg, final boolean wasPending) {
         try {
 
             if (LOG.isTraceEnabled()) {
@@ -80,7 +80,7 @@ public final class AsyncSshHandlerWriter implements AutoCloseable {
                 public void operationComplete(final IoWriteFuture future) {
                     if (LOG.isTraceEnabled()) {
                         LOG.trace("Ssh write request finished on channel: {} with result: {}: and ex:{}, message: {}",
-                            ctx.channel(), future.isWritten(), future.getException(), byteBufToString(byteBufMsg));
+                                ctx.channel(), future.isWritten(), future.getException(), byteBufToString(byteBufMsg));
                     }
 
                     // Notify success or failure
@@ -94,18 +94,20 @@ public final class AsyncSshHandlerWriter implements AutoCloseable {
                     // Not needed anymore, release
                     byteBufMsg.release();
 
+                    synchronized (AsyncSshHandlerWriter.this) {
+                        //rescheduling message from queue after successfully sent
+                        if (wasPending) {
+                            byteBufMsg.resetReaderIndex();
+                            pending.remove();
+                        }
+                    }
+
                     // Check pending queue and schedule next
                     // At this time we are guaranteed that we are not in pending state anymore so the next request should succeed
                     writePendingIfAny();
 
                 }
             });
-
-            //rescheduling message from queue after successfully sent
-            if(wasPending){
-                byteBufMsg.resetReaderIndex();
-                pending.remove();
-            }
 
         } catch (final WritePendingException e) {
 
