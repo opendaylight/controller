@@ -24,10 +24,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
-import org.opendaylight.controller.cluster.raft.RaftActor.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyLogEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.DeleteEntries;
+import org.opendaylight.controller.cluster.raft.base.messages.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -267,6 +267,15 @@ public class RaftActorRecoverySupportTest {
     public void testUpdateElectionTerm() {
 
         sendMessageToSupport(new UpdateElectionTerm(5, "member2"));
+
+        assertEquals("Current term", 5, context.getTermInformation().getCurrentTerm());
+        assertEquals("Voted For", "member2", context.getTermInformation().getVotedFor());
+    }
+
+    @Test
+    public void testDeprecatedUpdateElectionTerm() {
+
+        sendMessageToSupport(new org.opendaylight.controller.cluster.raft.RaftActor.UpdateElectionTerm(5, "member2"));
 
         assertEquals("Current term", 5, context.getTermInformation().getCurrentTerm());
         assertEquals("Voted For", "member2", context.getTermInformation().getVotedFor());

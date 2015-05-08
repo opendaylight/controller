@@ -10,10 +10,10 @@ package org.opendaylight.controller.cluster.raft;
 import akka.persistence.RecoveryCompleted;
 import akka.persistence.SnapshotOffer;
 import com.google.common.base.Stopwatch;
-import org.opendaylight.controller.cluster.raft.RaftActor.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyLogEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.DeleteEntries;
+import org.opendaylight.controller.cluster.raft.base.messages.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.slf4j.Logger;
 
@@ -57,7 +57,13 @@ class RaftActorRecoverySupport {
             } else if (message instanceof org.opendaylight.controller.cluster.raft.RaftActor.DeleteEntries) {
                 // Handle this message for backwards compatibility with pre-Lithium versions.
                 replicatedLog().removeFrom(((org.opendaylight.controller.cluster.raft.RaftActor.DeleteEntries) message).getFromIndex());
+            } else if (message instanceof org.opendaylight.controller.cluster.raft.RaftActor.UpdateElectionTerm) {
+                org.opendaylight.controller.cluster.raft.RaftActor.UpdateElectionTerm update =
+                        (org.opendaylight.controller.cluster.raft.RaftActor.UpdateElectionTerm)message;
+                log.info("Recovered deprecated UpdateElectionTerm: {}, {}",update.getCurrentTerm(), update.getVotedFor());
+                context.getTermInformation().update(update.getCurrentTerm(), update.getVotedFor());
             } else if (message instanceof UpdateElectionTerm) {
+                log.info("Recovered new UpdateElectionTerm: {}"+message);
                 context.getTermInformation().update(((UpdateElectionTerm) message).getCurrentTerm(),
                         ((UpdateElectionTerm) message).getVotedFor());
             } else if (message instanceof RecoveryCompleted) {
