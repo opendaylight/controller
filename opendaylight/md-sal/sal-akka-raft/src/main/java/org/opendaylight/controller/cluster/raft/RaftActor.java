@@ -573,9 +573,10 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
      *             whose type for fromIndex is long instead of int. This class was kept for backwards
      *             compatibility with Helium.
      */
+    // Suppressing this warning as we can't set serialVersionUID to maintain backwards compatibility.
+    @SuppressWarnings("serial")
     @Deprecated
     static class DeleteEntries implements Serializable {
-        private static final long serialVersionUID = 1L;
         private final int fromIndex;
 
         public DeleteEntries(int fromIndex) {
@@ -587,8 +588,9 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         }
     }
 
+    // Suppressing this warning as we can't set serialVersionUID to maintain backwards compatibility.
+    @SuppressWarnings("serial")
     static class UpdateElectionTerm implements Serializable {
-        private static final long serialVersionUID = 1L;
         private final long currentTerm;
         private final String votedFor;
 
