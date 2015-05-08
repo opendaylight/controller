@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import java.io.IOException;
 import org.opendaylight.controller.cluster.datastore.modification.ModificationPayload;
 import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
 import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils;
@@ -48,34 +47,44 @@ class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
 
     @Override
     public void startLogRecoveryBatch(int maxBatchSize) {
-        log.debug("{}: starting log recovery batch with max size {}", shardName, maxBatchSize);
-        transaction = store.takeSnapshot().newModification();
-        size = 0;
+//        log.debug("{}: starting log recovery batch with max size {}", shardName, maxBatchSize);
+//        transaction = store.takeSnapshot().newModification();
+//        size = 0;
     }
 
     @Override
     public void appendRecoveredLogEntry(Payload payload) {
+        final DataTreeModification tx = store.takeSnapshot().newModification();
         try {
             if (payload instanceof DataTreeCandidatePayload) {
-                DataTreeCandidates.applyToModification(transaction, ((DataTreeCandidatePayload)payload).getCandidate());
+                DataTreeCandidates.applyToModification(tx, ((DataTreeCandidatePayload)payload).getCandidate());
                 size++;
             } else if (payload instanceof ModificationPayload) {
                 MutableCompositeModification.fromSerializable(
-                    ((ModificationPayload) payload).getModification()).apply(transaction);
+                    ((ModificationPayload) payload).getModification()).apply(tx);
                 size++;
             } else if (payload instanceof CompositeModificationPayload) {
                 MutableCompositeModification.fromSerializable(
-                    ((CompositeModificationPayload) payload).getModification()).apply(transaction);
+                    ((CompositeModificationPayload) payload).getModification()).apply(tx);
                 size++;
             } else if (payload instanceof CompositeModificationByteStringPayload) {
                 MutableCompositeModification.fromSerializable(
-                        ((CompositeModificationByteStringPayload) payload).getModification()).apply(transaction);
+                        ((CompositeModificationByteStringPayload) payload).getModification()).apply(tx);
                 size++;
             } else {
                 log.error("{}: Unknown payload {} received during recovery", shardName, payload);
+                return;
             }
-        } catch (IOException | ClassNotFoundException e) {
+        } catch (Exception e) {
             log.error("{}: Error extracting ModificationPayload", shardName, e);
+            return;
+        }
+
+        log.debug("{}: Applying current log recovery batch with size {}", shardName, size);
+        try {
+            commitTransaction(tx);
+        } catch (DataValidationFailedException e) {
+            log.error("{}: Failed to apply recovery batch", shardName, e);
         }
     }
 
@@ -90,13 +99,13 @@ class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
      */
     @Override
     public void applyCurrentLogRecoveryBatch() {
-        log.debug("{}: Applying current log recovery batch with size {}", shardName, size);
-        try {
-            commitTransaction(transaction);
-        } catch (DataValidationFailedException e) {
-            log.error("{}: Failed to apply recovery batch", shardName, e);
-        }
-        transaction = null;
+//        log.debug("{}: Applying current log recovery batch with size {}", shardName, size);
+//        try {
+//            commitTransaction(transaction);
+//        } catch (DataValidationFailedException e) {
+//            log.error("{}: Failed to apply recovery batch", shardName, e);
+//        }
+//        transaction = null;
     }
 
     /**
