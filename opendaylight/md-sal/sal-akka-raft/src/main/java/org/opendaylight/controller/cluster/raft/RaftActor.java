@@ -569,7 +569,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     /**
-     * @deprecated Deprecated in favor of {@link org.opendaylight.controller.cluster.raft.base.messages.DeleteEntriesTest}
+     * @deprecated Deprecated in favor of {@link org.opendaylight.controller.cluster.raft.base.messages.DeleteEntries}
      *             whose type for fromIndex is long instead of int. This class was kept for backwards
      *             compatibility with Helium.
      */
@@ -588,8 +588,13 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         }
     }
 
+    /**
+     * @deprecated Deprecated in favor of non-inner class {@link org.opendaylight.controller.cluster.raft.base.messages.UpdateElectionTerm}
+     *             which has serialVersionUID set. This class was kept for backwards compatibility with Helium.
+     */
     // Suppressing this warning as we can't set serialVersionUID to maintain backwards compatibility.
     @SuppressWarnings("serial")
+    @Deprecated
     static class UpdateElectionTerm implements Serializable {
         private final long currentTerm;
         private final String votedFor;
