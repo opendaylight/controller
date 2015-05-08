@@ -43,7 +43,6 @@ import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.NonPersistentDataProvider;
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.RoleChanged;
-import org.opendaylight.controller.cluster.raft.RaftActor.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyLogEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
@@ -52,6 +51,7 @@ import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.base.messages.DeleteEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.SendHeartBeat;
+import org.opendaylight.controller.cluster.raft.base.messages.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.behaviors.Follower;
 import org.opendaylight.controller.cluster.raft.behaviors.Leader;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
@@ -251,6 +251,10 @@ public class RaftActorTest extends AbstractActorTest {
         UpdateElectionTerm updateElectionTerm = new UpdateElectionTerm(5, "member2");
         mockRaftActor.handleRecover(updateElectionTerm);
 
+        org.opendaylight.controller.cluster.raft.RaftActor.UpdateElectionTerm deprecatedUpdateElectionTerm =
+                new org.opendaylight.controller.cluster.raft.RaftActor.UpdateElectionTerm(6, "member3");
+        mockRaftActor.handleRecover(deprecatedUpdateElectionTerm);
+
         verify(mockSupport).handleRecoveryMessage(same(snapshotOffer));
         verify(mockSupport).handleRecoveryMessage(same(logEntry));
         verify(mockSupport).handleRecoveryMessage(same(applyJournalEntries));
@@ -258,6 +262,7 @@ public class RaftActorTest extends AbstractActorTest {
         verify(mockSupport).handleRecoveryMessage(same(deleteEntries));
         verify(mockSupport).handleRecoveryMessage(same(deprecatedDeleteEntries));
         verify(mockSupport).handleRecoveryMessage(same(updateElectionTerm));
+        verify(mockSupport).handleRecoveryMessage(same(deprecatedUpdateElectionTerm));
     }
 
     @Test
