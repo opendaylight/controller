@@ -14,7 +14,6 @@ import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.systemPackages;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -23,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.inject.Inject;
-
 import org.apache.commons.codec.binary.Base64;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -69,7 +67,7 @@ public class NorthboundIT {
     private IUserManager userManager = null;
     private IInventoryListener invtoryListener = null;
     private IListenTopoUpdates topoUpdates = null;
-    private static final String baseUrlPrefix = "http://127.0.0.1:8080/controller/nb/v2/";
+    private static final String baseUrlPrefix = "http://127.0.0.1:8180/controller/nb/v2/";
     private final Boolean debugMsg = false;
 
     private String stateToString(int state) {
