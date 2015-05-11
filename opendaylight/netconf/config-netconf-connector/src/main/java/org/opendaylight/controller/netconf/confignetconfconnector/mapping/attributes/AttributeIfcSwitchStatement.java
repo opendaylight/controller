@@ -38,6 +38,8 @@ public abstract class AttributeIfcSwitchStatement<T> {
                     return caseJavaUnionAttribute(openType);
                 } else if(((JavaAttribute)attributeIfc).isIdentityRef()) {
                     return caseJavaIdentityRefAttribute(openType);
+                } else if(((JavaAttribute)attributeIfc).isEnum()) {
+                    return caseJavaEnumAttribute(openType);
                 } else {
                     return caseJavaAttribute(openType);
                 }
@@ -67,6 +69,10 @@ public abstract class AttributeIfcSwitchStatement<T> {
     }
 
     protected T caseJavaUnionAttribute(OpenType<?> openType) {
+        return caseJavaAttribute(openType);
+    }
+
+    protected T caseJavaEnumAttribute(OpenType<?> openType) {
         return caseJavaAttribute(openType);
     }
 

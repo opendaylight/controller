@@ -14,6 +14,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import org.opendaylight.controller.netconf.api.util.NetconfConstants;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
+import org.opendaylight.yangtools.sal.binding.generator.util.BindingRuntimeContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -53,7 +54,9 @@ public class Activator implements BundleActivator {
             @Override
             public void modifiedService(ServiceReference<SchemaContextProvider> reference, ConfigRegistryLookupThread configRegistryLookup) {
                 LOG.debug("Got modifiedService(SchemaContextProvider) event");
-                configRegistryLookup.yangStoreService.refresh();
+                final BindingRuntimeContext runtimeContext = (BindingRuntimeContext) reference.getProperty(BindingRuntimeContext.class.getName());
+                LOG.debug("BindingRuntimeContext retrieved as {}", runtimeContext);
+                configRegistryLookup.yangStoreService.refresh(runtimeContext);
 
             }
 
