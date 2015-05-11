@@ -3,10 +3,8 @@ package org.opendaylight.controller.cluster.datastore;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import akka.actor.ActorPath;
@@ -312,7 +310,6 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
             propagateExecutionExceptionCause(proxy.commit());
         } finally {
 
-            verify(actorContext, never()).setTxCreationLimit(anyLong());
             verifyCohortInvocations(0, CommitTransaction.SERIALIZABLE_CLASS);
         }
 
@@ -354,6 +351,5 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
         proxy.preCommit().get(5, TimeUnit.SECONDS);
         proxy.commit().get(5, TimeUnit.SECONDS);
 
-        verify(actorContext, never()).setTxCreationLimit(anyLong());
     }
 }
