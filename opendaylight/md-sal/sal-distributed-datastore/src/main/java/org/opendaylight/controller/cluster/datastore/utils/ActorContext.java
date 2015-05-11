@@ -20,6 +20,8 @@ import akka.dispatch.Mapper;
 import akka.dispatch.OnComplete;
 import akka.pattern.AskTimeoutException;
 import akka.util.Timeout;
+import com.codahale.metrics.Metric;
+import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.annotations.VisibleForTesting;
@@ -85,6 +87,7 @@ public class ActorContext {
         }
     };
     public static final String MAILBOX = "bounded-mailbox";
+    public static final String COMMIT = "commit";
 
     private final ActorSystem actorSystem;
     private final ActorRef shardManager;
@@ -94,7 +97,7 @@ public class ActorContext {
     private FiniteDuration operationDuration;
     private Timeout operationTimeout;
     private final String selfAddressHostPort;
-    private RateLimiter txRateLimiter;
+    private TransactionRateLimiter txRateLimiter;
     private final int transactionOutstandingOperationLimit;
     private Timeout transactionCommitOperationTimeout;
     private Timeout shardInitializationTimeout;
@@ -134,7 +137,7 @@ public class ActorContext {
     }
 
     private void setCachedProperties() {
-        txRateLimiter = RateLimiter.create(datastoreContext.getTransactionCreationInitialRateLimit());
+        txRateLimiter = new TransactionRateLimiter(this);
 
         operationDuration = Duration.create(datastoreContext.getOperationTimeoutInSeconds(), TimeUnit.SECONDS);
         operationTimeout = new Timeout(operationDuration);
@@ -497,6 +500,16 @@ public class ActorContext {
         return metricRegistry.timer(rate);
     }
 
+    @VisibleForTesting
+    void removeTimers(){
+        metricRegistry.removeMatching(new MetricFilter() {
+            @Override
+            public boolean matches(String s, Metric metric) {
+                return s.contains(DISTRIBUTED_DATA_STORE_METRIC_REGISTRY);
+            }
+        });
+    }
+
     /**
      * Get the type of the data store to which this ActorContext belongs
      *
@@ -507,20 +520,11 @@ public class ActorContext {
     }
 
     /**
-     * Set the number of transaction creation permits that are to be allowed
-     *
-     * @param permitsPerSecond
-     */
-    public void setTxCreationLimit(double permitsPerSecond){
-        txRateLimiter.setRate(permitsPerSecond);
-    }
-
-    /**
      * Get the current transaction creation rate limit
      * @return
      */
     public double getTxCreationLimit(){
-        return txRateLimiter.getRate();
+        return txRateLimiter.getTxCreationLimit();
     }
 
     /**
@@ -567,4 +571,11 @@ public class ActorContext {
     Cache<String, Future<PrimaryShardInfo>> getPrimaryShardInfoCache() {
         return primaryShardInfoCache;
     }
+
+
+    @VisibleForTesting
+    RateLimiter getTxRateLimiter() {
+        return txRateLimiter.getRateLimiter();
+    }
+
 }
