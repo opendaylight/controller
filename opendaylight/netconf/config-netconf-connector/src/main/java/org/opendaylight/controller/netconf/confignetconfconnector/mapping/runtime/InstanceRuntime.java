@@ -17,6 +17,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import javax.management.ObjectName;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.InstanceConfig;
+import org.opendaylight.controller.netconf.confignetconfconnector.osgi.EnumResolver;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -84,13 +85,13 @@ public class InstanceRuntime {
         }));
     }
 
-    public Element toXml(ObjectName rootOn, Set<ObjectName> childRbeOns, Document document, Element parentElement, String namespace) {
-        return toXml(rootOn, childRbeOns, document, null, parentElement, namespace);
+    public Element toXml(ObjectName rootOn, Set<ObjectName> childRbeOns, Document document, Element parentElement, String namespace, final EnumResolver enumResolver) {
+        return toXml(rootOn, childRbeOns, document, null, parentElement, namespace, enumResolver);
     }
 
     public Element toXml(ObjectName rootOn, Set<ObjectName> childRbeOns, Document document, String instanceIndex,
-                         Element parentElement, String namespace) {
-        Element xml = instanceMapping.toXml(rootOn, namespace, document, parentElement);
+                         Element parentElement, String namespace, final EnumResolver enumResolver) {
+        Element xml = instanceMapping.toXml(rootOn, namespace, document, parentElement, enumResolver);
 
         if (instanceIndex != null) {
             xml.setAttribute(KEY_ATTRIBUTE_KEY, instanceIndex);
@@ -108,7 +109,7 @@ public class InstanceRuntime {
 
                 Element innerXml = XmlUtil.createElement(document, elementName, Optional.of(namespace));
                 childMappingEntry.getValue().toXml(objectName, innerChildRbeOns, document,
-                        runtimeInstanceIndex, innerXml, namespace);
+                        runtimeInstanceIndex, innerXml, namespace, enumResolver);
                 xml.appendChild(innerXml);
             }
         }

@@ -57,6 +57,11 @@ public class ObjectXmlWriter extends AttributeIfcSwitchStatement<AttributeWritin
     }
 
     @Override
+    protected AttributeWritingStrategy caseJavaEnumAttribute(final OpenType<?> openType) {
+        return new SimpleAttributeWritingStrategy(document, key);
+    }
+
+    @Override
     protected AttributeWritingStrategy caseJavaSimpleAttribute(SimpleType<?> openType) {
         return new SimpleAttributeWritingStrategy(document, key);
     }

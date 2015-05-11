@@ -9,7 +9,9 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.osgi;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
+import com.google.common.collect.BiMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -23,6 +25,7 @@ import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.PackageTranslator;
 import org.opendaylight.controller.config.yangjmxgenerator.ServiceInterfaceEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.TypeProviderWrapper;
+import org.opendaylight.yangtools.sal.binding.generator.util.BindingRuntimeContext;
 import org.opendaylight.yangtools.sal.binding.yang.types.TypeProviderImpl;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.IdentitySchemaNode;
@@ -32,7 +35,7 @@ import org.opendaylight.yangtools.yang.parser.builder.impl.ModuleIdentifierImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class YangStoreSnapshot implements YangStoreContext {
+final class YangStoreSnapshot implements YangStoreContext, EnumResolver {
     private static final Logger LOG = LoggerFactory.getLogger(YangStoreSnapshot.class);
 
 
@@ -43,8 +46,10 @@ final class YangStoreSnapshot implements YangStoreContext {
     private final Map<QName, Map<String, ModuleMXBeanEntry>> qNamesToIdentitiesToModuleMXBeanEntries;
 
     private final SchemaContext schemaContext;
+    private final BindingRuntimeContext bindingContextProvider;
 
-    public YangStoreSnapshot(final SchemaContext resolveSchemaContext) {
+    public YangStoreSnapshot(final SchemaContext resolveSchemaContext, final BindingRuntimeContext bindingContextProvider) {
+        this.bindingContextProvider = bindingContextProvider;
         LOG.trace("Resolved modules:{}", resolveSchemaContext.getModules());
         this.schemaContext = resolveSchemaContext;
         // JMX generator
@@ -133,6 +138,11 @@ final class YangStoreSnapshot implements YangStoreContext {
     }
 
     @Override
+    public EnumResolver getEnumResolver() {
+        return this;
+    }
+
+    @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -148,5 +158,22 @@ final class YangStoreSnapshot implements YangStoreContext {
     @Override
     public int hashCode() {
         return schemaContext != null ? schemaContext.hashCode() : 0;
+    }
+
+    @Override
+    public String fromYang(final String enumClass, final String enumYangValue) {
+        Preconditions.checkState(bindingContextProvider != null, "Binding context provider was not set yet");
+        final BiMap<String, String> enumMapping = bindingContextProvider.getEnumMapping(enumClass);
+        final String javaName = enumMapping.get(enumYangValue);
+        return Preconditions.checkNotNull(javaName, "Unable to resolve enum value %s for enum class %s with assumed enum mapping: %s", enumYangValue, enumClass, enumMapping);
+    }
+
+    @Override
+    public String toYang(final String enumClass, final String enumJavaValue) {
+        Preconditions.checkState(bindingContextProvider != null, "Binding context provider was not set yet");
+        final BiMap<String, String> enumMapping = bindingContextProvider.getEnumMapping(enumClass);
+        final String javaName = enumMapping.inverse().get(enumJavaValue);
+        return Preconditions.checkNotNull(javaName, "Unable to map enumcd .." +
+                "cd  value %s for enum class %s with assumed enum mapping: %s", enumJavaValue, enumClass, enumMapping.inverse());
     }
 }

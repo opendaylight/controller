@@ -20,8 +20,8 @@ module test-types {
 
     typedef extend-enum {
         type enumeration {
-            enum "ONE";
-            enum "TWO";
+            enum "one";
+            enum "two";
         }
     }
 
