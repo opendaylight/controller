@@ -89,7 +89,7 @@ public class GetConfig extends AbstractConfigNetconfOperation {
                     .queryInstances(configRegistryClient);
 
             final Config configMapping = new Config(EditConfig.transformMbeToModuleConfigs(registryClient,
-                    yangStoreSnapshot.getModuleMXBeanEntryMap()));
+                    yangStoreSnapshot.getModuleMXBeanEntryMap()), yangStoreSnapshot.getEnumResolver());
 
             ServiceRegistryWrapper serviceTracker = new ServiceRegistryWrapper(registryClient);
             dataElement = configMapping.toXml(instances, this.maybeNamespace, document, dataElement, serviceTracker);

@@ -136,7 +136,7 @@ public class Get extends AbstractConfigNetconfOperation {
 
             final Runtime runtime = new Runtime(moduleRuntimes, moduleConfigs);
 
-            final Element element = runtime.toXml(runtimeBeans, configBeans, document);
+            final Element element = runtime.toXml(runtimeBeans, configBeans, document, yangStoreSnapshot.getEnumResolver());
 
             LOG.trace("{} operation successful", XmlNetconfConstants.GET);
 
