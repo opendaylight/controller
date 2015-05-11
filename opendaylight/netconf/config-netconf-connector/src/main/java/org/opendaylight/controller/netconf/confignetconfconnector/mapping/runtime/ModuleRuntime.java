@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.Set;
 import javax.management.ObjectName;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ModuleConfig;
+import org.opendaylight.controller.netconf.confignetconfconnector.osgi.EnumResolver;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -34,9 +35,9 @@ public class ModuleRuntime {
     }
 
     public Element toXml(String namespace, Collection<ObjectName> runtimeBeanOns,
-                         Document document, ModuleConfig moduleConfig, ObjectName configBeanON) {
+                         Document document, ModuleConfig moduleConfig, ObjectName configBeanON, final EnumResolver enumResolver) {
 
-        Element moduleElement = moduleConfig.toXml(configBeanON, document, namespace);
+        Element moduleElement = moduleConfig.toXml(configBeanON, document, namespace, enumResolver);
 
         ObjectName rootName = findRoot(runtimeBeanOns);
 
@@ -44,7 +45,7 @@ public class ModuleRuntime {
         childrenRuntimeBeans.remove(rootName);
 
         // FIXME: why is this called and not used?
-        instanceRuntime.toXml(rootName, childrenRuntimeBeans, document, moduleElement, namespace);
+        instanceRuntime.toXml(rootName, childrenRuntimeBeans, document, moduleElement, namespace, enumResolver);
 
         return moduleElement;
     }
