@@ -13,11 +13,17 @@ import com.google.common.collect.Maps;
 import java.util.Map;
 import org.opendaylight.controller.config.yangjmxgenerator.RuntimeBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.RuntimeBeanEntry.Rpc;
+import org.opendaylight.controller.netconf.confignetconfconnector.osgi.EnumResolver;
 
 public final class ModuleRpcs {
 
     private final Map<String, String> yangToJavaNames = Maps.newHashMap();
     private final Map<String, Map<String, InstanceRuntimeRpc>> rpcMapping = Maps.newHashMap();
+    private final EnumResolver enumResolver;
+
+    public ModuleRpcs(final EnumResolver enumResolver) {
+        this.enumResolver = enumResolver;
+    }
 
     public void addNameMapping(RuntimeBeanEntry runtimeEntry) {
         String yangName = runtimeEntry.getYangName();
@@ -36,7 +42,7 @@ public final class ModuleRpcs {
 
         Preconditions.checkState(!map.containsKey(rpc.getYangName()), "Rpc %s for runtime bean %s added twice",
                 rpc.getYangName(), yangName);
-        map.put(rpc.getYangName(), new InstanceRuntimeRpc(rpc));
+        map.put(rpc.getYangName(), new InstanceRuntimeRpc(rpc, enumResolver));
     }
 
     public String getRbeJavaName(String yangName) {

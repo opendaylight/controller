@@ -17,6 +17,7 @@ import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfig;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditStrategyType;
+import org.opendaylight.controller.netconf.confignetconfconnector.osgi.EnumResolver;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.w3c.dom.Document;
@@ -32,7 +33,7 @@ public class ModuleConfig {
         this.instanceConfig = mbeanMapping;
     }
 
-    public Element toXml(ObjectName instanceON, Document document, String namespace) {
+    public Element toXml(ObjectName instanceON, Document document, String namespace, final EnumResolver enumResolver) {
         Element root = XmlUtil.createElement(document, XmlNetconfConstants.MODULE_KEY, Optional.<String>absent());
 
         // type belongs to config.yang namespace, but needs to be <type prefix:moduleNS>prefix:moduleName</type>
@@ -47,15 +48,15 @@ public class ModuleConfig {
 
         root.appendChild(nameElement);
 
-        root = instanceConfig.toXml(instanceON, namespace, document, root);
+        root = instanceConfig.toXml(instanceON, namespace, document, root, enumResolver);
 
         return root;
     }
 
     public ModuleElementResolved fromXml(XmlElement moduleElement, ServiceRegistryWrapper depTracker, String instanceName,
-                                         String moduleNamespace, EditStrategyType defaultStrategy, Map<String, Map<Date,EditConfig.IdentityMapping>> identityMap) throws NetconfDocumentedException {
+                                         String moduleNamespace, EditStrategyType defaultStrategy, Map<String, Map<Date, EditConfig.IdentityMapping>> identityMap, final EnumResolver enumResolver) throws NetconfDocumentedException {
 
-        InstanceConfigElementResolved ice = instanceConfig.fromXml(moduleElement, depTracker, moduleNamespace, defaultStrategy, identityMap);
+        InstanceConfigElementResolved ice = instanceConfig.fromXml(moduleElement, depTracker, moduleNamespace, defaultStrategy, identityMap, enumResolver);
         return new ModuleElementResolved(instanceName, ice);
     }
 

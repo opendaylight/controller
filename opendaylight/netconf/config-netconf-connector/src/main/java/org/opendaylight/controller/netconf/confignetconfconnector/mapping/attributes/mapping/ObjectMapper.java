@@ -22,12 +22,15 @@ import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListAttribu
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListDependenciesAttribute;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.TOAttribute;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.AttributeIfcSwitchStatement;
+import org.opendaylight.controller.netconf.confignetconfconnector.osgi.EnumResolver;
 
 public class ObjectMapper extends AttributeIfcSwitchStatement<AttributeMappingStrategy<?, ? extends OpenType<?>>> {
 
+    private EnumResolver enumResolver;
 
     public Map<String, AttributeMappingStrategy<?, ? extends OpenType<?>>> prepareMapping(
-            Map<String, AttributeIfc> configDefinition) {
+            Map<String, AttributeIfc> configDefinition, EnumResolver enumResolver) {
+        this.enumResolver = Preconditions.checkNotNull(enumResolver);
         Map<String, AttributeMappingStrategy<?, ? extends OpenType<?>>> strategies = Maps.newHashMap();
 
         for (Entry<String, AttributeIfc> attrEntry : configDefinition.entrySet()) {
@@ -61,6 +64,11 @@ public class ObjectMapper extends AttributeIfcSwitchStatement<AttributeMappingSt
     @Override
     protected AttributeMappingStrategy<?, ? extends OpenType<?>> caseJavaSimpleAttribute(SimpleType<?> openType) {
         return new SimpleAttributeMappingStrategy(openType);
+    }
+
+    @Override
+    protected AttributeMappingStrategy<?, ? extends OpenType<?>> caseJavaEnumAttribute(final OpenType<?> openType) {
+        return new EnumAttributeMappingStrategy(((CompositeType) openType), enumResolver);
     }
 
     @Override
