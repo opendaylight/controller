@@ -90,6 +90,7 @@ public class ActorContext implements RemovalListener<String, Future<PrimaryShard
         }
     };
     public static final String MAILBOX = "bounded-mailbox";
+    public static final String COMMIT = "commit";
 
     private final ActorSystem actorSystem;
     private final ActorRef shardManager;
@@ -99,7 +100,7 @@ public class ActorContext implements RemovalListener<String, Future<PrimaryShard
     private FiniteDuration operationDuration;
     private Timeout operationTimeout;
     private final String selfAddressHostPort;
-    private RateLimiter txRateLimiter;
+    private TransactionRateLimiter txRateLimiter;
     private final int transactionOutstandingOperationLimit;
     private Timeout transactionCommitOperationTimeout;
     private Timeout shardInitializationTimeout;
@@ -141,7 +142,7 @@ public class ActorContext implements RemovalListener<String, Future<PrimaryShard
     }
 
     private void setCachedProperties() {
-        txRateLimiter = RateLimiter.create(datastoreContext.getTransactionCreationInitialRateLimit());
+        txRateLimiter = new TransactionRateLimiter(this);
 
         operationDuration = Duration.create(datastoreContext.getOperationTimeoutInSeconds(), TimeUnit.SECONDS);
         operationTimeout = new Timeout(operationDuration);
@@ -520,20 +521,11 @@ public class ActorContext implements RemovalListener<String, Future<PrimaryShard
     }
 
     /**
-     * Set the number of transaction creation permits that are to be allowed
-     *
-     * @param permitsPerSecond
-     */
-    public void setTxCreationLimit(double permitsPerSecond){
-        txRateLimiter.setRate(permitsPerSecond);
-    }
-
-    /**
      * Get the current transaction creation rate limit
      * @return
      */
     public double getTxCreationLimit(){
-        return txRateLimiter.getRate();
+        return txRateLimiter.getTxCreationLimit();
     }
 
     /**
