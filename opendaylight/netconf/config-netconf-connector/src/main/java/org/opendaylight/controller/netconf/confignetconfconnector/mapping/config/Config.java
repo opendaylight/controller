@@ -29,6 +29,7 @@ import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfig;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditStrategyType;
+import org.opendaylight.controller.netconf.confignetconfconnector.osgi.EnumResolver;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.w3c.dom.Document;
@@ -42,13 +43,16 @@ public class Config {
 
     private final Map<String, Map<Date, EditConfig.IdentityMapping>> identityMap;
 
-    public Config(Map<String, Map<String, ModuleConfig>> moduleConfigs) {
-        this(moduleConfigs, Collections.<String, Map<Date, EditConfig.IdentityMapping>>emptyMap());
+    private final EnumResolver enumResolver;
+
+    public Config(Map<String, Map<String, ModuleConfig>> moduleConfigs, final EnumResolver enumResolver) {
+        this(moduleConfigs, Collections.<String, Map<Date, EditConfig.IdentityMapping>>emptyMap(), enumResolver);
     }
 
-    public Config(Map<String, Map<String, ModuleConfig>> moduleConfigs, Map<String, Map<Date,EditConfig.IdentityMapping>> identityMap) {
+    public Config(Map<String, Map<String, ModuleConfig>> moduleConfigs, Map<String, Map<Date, EditConfig.IdentityMapping>> identityMap, final EnumResolver enumResolver) {
         this.moduleConfigs = moduleConfigs;
         this.identityMap = identityMap;
+        this.enumResolver = enumResolver;
     }
 
     public static Map<String, Map<String, Collection<ObjectName>>> getMappedInstances(Set<ObjectName> instancesToMap,
@@ -115,7 +119,7 @@ public class Config {
                 }
 
                 for (ObjectName objectName : moduleMappingEntry.getValue()) {
-                    modulesElement.appendChild(mapping.toXml(objectName, document, moduleToInstanceEntry.getKey()));
+                    modulesElement.appendChild(mapping.toXml(objectName, document, moduleToInstanceEntry.getKey(), enumResolver));
                 }
 
             }
@@ -141,7 +145,7 @@ public class Config {
                 @Override
                 public ModuleElementResolved resolveElement(ModuleConfig moduleMapping, XmlElement moduleElement, ServiceRegistryWrapper serviceTracker, String instanceName, String moduleNamespace, EditStrategyType defaultStrategy) throws NetconfDocumentedException {
                     return moduleMapping.fromXml(moduleElement, serviceTracker,
-                            instanceName, moduleNamespace, defaultStrategy, identityMap);
+                            instanceName, moduleNamespace, defaultStrategy, identityMap, enumResolver);
                 }
             };
 
