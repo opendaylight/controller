@@ -22,17 +22,21 @@ import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListDepende
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.TOAttribute;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.AttributeIfcSwitchStatement;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ServiceRegistryWrapper;
+import org.opendaylight.controller.netconf.confignetconfconnector.osgi.EnumResolver;
 
 public class ObjectResolver extends AttributeIfcSwitchStatement<AttributeResolvingStrategy<?, ? extends OpenType<?>>> {
 
     private final ServiceRegistryWrapper serviceTracker;
+    private EnumResolver enumResolver;
 
     public ObjectResolver(ServiceRegistryWrapper serviceTracker) {
         this.serviceTracker = serviceTracker;
     }
 
     public Map<String, AttributeResolvingStrategy<?, ? extends OpenType<?>>> prepareResolving(
-            Map<String, AttributeIfc> configDefinition) {
+            Map<String, AttributeIfc> configDefinition, final EnumResolver enumResolver) {
+        this.enumResolver = enumResolver;
+
         Map<String, AttributeResolvingStrategy<?, ? extends OpenType<?>>> strategies = Maps.newHashMap();
 
         for (Entry<String, AttributeIfc> attrEntry : configDefinition.entrySet()) {
@@ -54,6 +58,11 @@ public class ObjectResolver extends AttributeIfcSwitchStatement<AttributeResolvi
             retVal.put(entry.getKey(), (entry.getValue()).getLowerCaseCammelCase());
         }
         return retVal;
+    }
+
+    @Override
+    protected AttributeResolvingStrategy<?, ? extends OpenType<?>> caseJavaEnumAttribute(final OpenType<?> openType) {
+        return new EnumAttributeResolvingStrategy((SimpleType<?>) openType, enumResolver);
     }
 
     @Override

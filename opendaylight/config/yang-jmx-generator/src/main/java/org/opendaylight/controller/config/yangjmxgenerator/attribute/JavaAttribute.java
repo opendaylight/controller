@@ -21,6 +21,7 @@ import org.opendaylight.yangtools.sal.binding.model.api.Type;
 import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
+import org.opendaylight.yangtools.yang.model.api.type.EnumTypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.type.IdentityrefTypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.type.UnionTypeDefinition;
 
@@ -58,6 +59,11 @@ public class JavaAttribute extends AbstractAttribute implements TypedAttribute {
     public boolean isUnion() {
         TypeDefinition<?> base = getBaseType(typeProviderWrapper, typeDefinition);
         return base instanceof UnionTypeDefinition;
+    }
+
+    public boolean isEnum() {
+        TypeDefinition<?> base = getBaseType(typeProviderWrapper, typeDefinition);
+        return base instanceof EnumTypeDefinition;
     }
 
     public TypeDefinition<?> getTypeDefinition() {
