@@ -86,6 +86,10 @@ final class AuthProviderTracker implements ServiceTrackerCustomizer<AuthProvider
 
     @Override
     public boolean authenticate(final String username, final String password, final ServerSession session) {
-        return authProvider == null ? false : authProvider.authenticated(username, password);
+        if (authProvider == null) {
+            LOG.warn("AuthProvider is missing, failing authentication");
+            return false;
+        }
+        return authProvider.authenticated(username, password);
     }
 }
