@@ -244,7 +244,6 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
         final AbstractThreePhaseCommitCohort<?> ret;
         switch (txContextAdapters.size()) {
         case 0:
-            TransactionRateLimitingCallback.adjustRateLimitForUnusedTransaction(txContextFactory.getActorContext());
             ret = NoOpDOMStoreThreePhaseCommitCohort.INSTANCE;
             break;
         case 1:
