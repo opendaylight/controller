@@ -50,6 +50,7 @@ import org.opendaylight.controller.netconf.client.NetconfClientDispatcherImpl;
 import org.opendaylight.controller.netconf.client.SimpleNetconfClientSessionListener;
 import org.opendaylight.controller.netconf.client.conf.NetconfClientConfiguration;
 import org.opendaylight.controller.netconf.client.conf.NetconfClientConfigurationBuilder;
+import org.opendaylight.controller.netconf.confignetconfconnector.osgi.EnumResolver;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.NetconfOperationServiceFactoryImpl;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreService;
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
@@ -65,6 +66,7 @@ import org.opendaylight.controller.netconf.notifications.BaseNetconfNotification
 import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
 import org.opendaylight.protocol.framework.NeverReconnectStrategy;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.notifications.rev120206.NetconfCapabilityChange;
+import org.opendaylight.yangtools.yang.binding.BindingMapping;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
 import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
@@ -279,6 +281,21 @@ public abstract class AbstractNetconfConfigTest extends AbstractConfigTest {
 
             final YangParserImpl yangParser = new YangParserImpl();
             return yangParser.resolveSchemaContext(new HashSet<>(yangParser.parseYangModelsFromStreamsMapped(byteArrayInputStreams).values()));
+        }
+
+        @Override
+        public EnumResolver getEnumResolver() {
+            return new EnumResolver() {
+                @Override
+                public String fromYang(final String enumType, final String enumYangValue) {
+                    return BindingMapping.getClassName(enumYangValue);
+                }
+
+                @Override
+                public String toYang(final String enumType, final String enumJavaValue) {
+                    return enumJavaValue.toLowerCase();
+                }
+            };
         }
     }
 }

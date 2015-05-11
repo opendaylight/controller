@@ -21,6 +21,7 @@ import org.opendaylight.yangtools.sal.binding.model.api.Type;
 import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
+import org.opendaylight.yangtools.yang.model.api.type.EnumTypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.type.IdentityrefTypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.type.UnionTypeDefinition;
 
@@ -58,6 +59,11 @@ public class JavaAttribute extends AbstractAttribute implements TypedAttribute {
     public boolean isUnion() {
         TypeDefinition<?> base = getBaseType(typeProviderWrapper, typeDefinition);
         return base instanceof UnionTypeDefinition;
+    }
+
+    public boolean isEnum() {
+        TypeDefinition<?> base = getBaseType(typeProviderWrapper, typeDefinition);
+        return base instanceof EnumTypeDefinition;
     }
 
     public TypeDefinition<?> getTypeDefinition() {
@@ -149,8 +155,8 @@ public class JavaAttribute extends AbstractAttribute implements TypedAttribute {
 
         if (isArray()) {
             return getArrayType();
-        } else if (isEnum(baseType)) {
-            return getSimpleType(baseType);
+        } else if (isEnum()) {
+            return getEnumType(baseTypeDefinition);
         } else if (isUnion()) {
             return getCompositeTypeForUnion(baseTypeDefinition);
         } else if (isDerivedType(baseType, getType())) {
@@ -160,6 +166,18 @@ public class JavaAttribute extends AbstractAttribute implements TypedAttribute {
         }
 
         return getSimpleType(getType());
+    }
+
+    private OpenType<?> getEnumType(final TypeDefinition<?> baseType) {
+        final String fullyQualifiedName = typeProviderWrapper.getType(node, getTypeDefinition()).getFullyQualifiedName();
+        final String[] items = {"instance"};
+        String description = getNullableDescription() == null ? getAttributeYangName() : getNullableDescription();
+
+        try {
+            return new CompositeType(fullyQualifiedName, description, items, items, new OpenType[]{SimpleType.STRING});
+        } catch (OpenDataException e) {
+            throw new RuntimeException("Unable to create enum type" + fullyQualifiedName + " as open type", e);
+        }
     }
 
     public boolean isIdentityRef() {
@@ -221,10 +239,6 @@ public class JavaAttribute extends AbstractAttribute implements TypedAttribute {
         OpenType<?> artificialPropertyType = getArrayOpenTypeForSimpleType(TYPE_OF_ARTIFICIAL_UNION_PROPERTY.getName(),
                 SimpleTypeResolver.getSimpleType(TYPE_OF_ARTIFICIAL_UNION_PROPERTY.getName()));
         itemTypes[0] = artificialPropertyType;
-    }
-
-    private boolean isEnum(Type baseType) {
-        return baseType.getFullyQualifiedName().equals(Enum.class.getName());
     }
 
     private OpenType<?> getSimpleType(Type type) {
