@@ -33,6 +33,7 @@ import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attrib
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.toxml.ObjectXmlWriter;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfig;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditStrategyType;
+import org.opendaylight.controller.netconf.confignetconfconnector.osgi.EnumResolver;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.slf4j.Logger;
@@ -57,11 +58,11 @@ public final class InstanceConfig {
         this.configRegistryClient = configRegistryClient;
     }
 
-    private Map<String, Object> getMappedConfiguration(ObjectName on) {
+    private Map<String, Object> getMappedConfiguration(ObjectName on, final EnumResolver enumResolver) {
 
         // TODO make field, mappingStrategies can be instantiated only once
         Map<String, AttributeMappingStrategy<?, ? extends OpenType<?>>> mappingStrategies = new ObjectMapper()
-                .prepareMapping(jmxToAttrConfig);
+                .prepareMapping(jmxToAttrConfig, enumResolver);
 
         Map<String, Object> toXml = Maps.newHashMap();
 
@@ -87,9 +88,9 @@ public final class InstanceConfig {
         return toXml;
     }
 
-    public Element toXml(ObjectName on, String namespace, Document document, Element rootElement) {
+    public Element toXml(ObjectName on, String namespace, Document document, Element rootElement, final EnumResolver enumResolver) {
         Map<String, AttributeWritingStrategy> strats = new ObjectXmlWriter().prepareWriting(yangToAttrConfig, document);
-        Map<String, Object> mappedConfig = getMappedConfiguration(on);
+        Map<String, Object> mappedConfig = getMappedConfiguration(on, enumResolver);
         Element parentElement;
         if (nullableDummyContainerName != null) {
             Element dummyElement = XmlUtil.createElement(document, nullableDummyContainerName, Optional.of(namespace));
@@ -109,11 +110,11 @@ public final class InstanceConfig {
         return rootElement;
     }
 
-    private void resolveConfiguration(InstanceConfigElementResolved mappedConfig, ServiceRegistryWrapper depTracker) {
+    private void resolveConfiguration(InstanceConfigElementResolved mappedConfig, ServiceRegistryWrapper depTracker, final EnumResolver enumResolver) {
 
         // TODO make field, resolvingStrategies can be instantiated only once
         Map<String, AttributeResolvingStrategy<?, ? extends OpenType<?>>> resolvingStrategies = new ObjectResolver(
-                depTracker).prepareResolving(yangToAttrConfig);
+                depTracker).prepareResolving(yangToAttrConfig, enumResolver);
 
         for (Entry<String, AttributeConfigElement> configDefEntry : mappedConfig.getConfiguration().entrySet()) {
             AttributeConfigElement value = configDefEntry.getValue();
@@ -135,7 +136,7 @@ public final class InstanceConfig {
 
     public InstanceConfigElementResolved fromXml(XmlElement moduleElement, ServiceRegistryWrapper services, String moduleNamespace,
                                                  EditStrategyType defaultStrategy,
-                                                 Map<String, Map<Date,EditConfig.IdentityMapping>> identityMap) throws NetconfDocumentedException {
+                                                 Map<String, Map<Date, EditConfig.IdentityMapping>> identityMap, final EnumResolver enumResolver) throws NetconfDocumentedException {
         Map<String, AttributeConfigElement> retVal = Maps.newHashMap();
 
         Map<String, AttributeReadingStrategy> strats = new ObjectXmlReader().prepareReading(yangToAttrConfig, identityMap);
@@ -188,7 +189,7 @@ public final class InstanceConfig {
         InstanceConfigElementResolved instanceConfigElementResolved = perInstanceEditStrategy.equals("") ? new InstanceConfigElementResolved(
                 retVal, defaultStrategy) : new InstanceConfigElementResolved(perInstanceEditStrategy, retVal, defaultStrategy);
 
-        resolveConfiguration(instanceConfigElementResolved, services);
+        resolveConfiguration(instanceConfigElementResolved, services, enumResolver);
         return instanceConfigElementResolved;
     }
 

@@ -22,17 +22,21 @@ import org.opendaylight.controller.config.yangjmxgenerator.attribute.ListDepende
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.TOAttribute;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.AttributeIfcSwitchStatement;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ServiceRegistryWrapper;
+import org.opendaylight.controller.netconf.confignetconfconnector.osgi.EnumResolver;
 
 public class ObjectResolver extends AttributeIfcSwitchStatement<AttributeResolvingStrategy<?, ? extends OpenType<?>>> {
 
     private final ServiceRegistryWrapper serviceTracker;
+    private EnumResolver enumResolver;
 
     public ObjectResolver(ServiceRegistryWrapper serviceTracker) {
         this.serviceTracker = serviceTracker;
     }
 
     public Map<String, AttributeResolvingStrategy<?, ? extends OpenType<?>>> prepareResolving(
-            Map<String, AttributeIfc> configDefinition) {
+            Map<String, AttributeIfc> configDefinition, final EnumResolver enumResolver) {
+        this.enumResolver = enumResolver;
+
         Map<String, AttributeResolvingStrategy<?, ? extends OpenType<?>>> strategies = Maps.newHashMap();
 
         for (Entry<String, AttributeIfc> attrEntry : configDefinition.entrySet()) {
@@ -44,7 +48,6 @@ public class ObjectResolver extends AttributeIfcSwitchStatement<AttributeResolvi
     }
 
     private AttributeResolvingStrategy<?, ? extends OpenType<?>> prepareStrategy(AttributeIfc attributeIfc) {
-
         return switchAttribute(attributeIfc);
     }
 
@@ -57,12 +60,18 @@ public class ObjectResolver extends AttributeIfcSwitchStatement<AttributeResolvi
     }
 
     @Override
+    protected AttributeResolvingStrategy<?, ? extends OpenType<?>> caseJavaEnumAttribute(final OpenType<?> openType) {
+        return new EnumAttributeResolvingStrategy((CompositeType) openType, enumResolver);
+    }
+
+    @Override
     protected AttributeResolvingStrategy<?, ? extends OpenType<?>>  caseJavaSimpleAttribute(SimpleType<?> openType) {
         return new SimpleAttributeResolvingStrategy(openType);
     }
 
     @Override
     protected AttributeResolvingStrategy<?, ? extends OpenType<?>>  caseJavaArrayAttribute(ArrayType<?> openType) {
+
         SimpleType<?> innerType = (SimpleType<?>) openType.getElementOpenType();
         AttributeResolvingStrategy<?, ? extends OpenType<?>> strat = new SimpleAttributeResolvingStrategy(innerType);
         return new ArrayAttributeResolvingStrategy(strat, openType);

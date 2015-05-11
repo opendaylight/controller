@@ -12,6 +12,7 @@ import java.util.Hashtable;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.sal.binding.generator.api.ClassLoadingStrategy;
 import org.opendaylight.yangtools.sal.binding.generator.api.ModuleInfoRegistry;
+import org.opendaylight.yangtools.sal.binding.generator.util.BindingRuntimeContext;
 import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
 import org.osgi.framework.BundleContext;
@@ -40,7 +41,10 @@ public class RefreshingSCPModuleInfoRegistry implements ModuleInfoRegistry, Auto
 
     private void updateService() {
         bindingContextProvider.update(classLoadingStrat, schemaContextProvider);
-        osgiReg.setProperties(null); // send modifiedService event
+        osgiReg.setProperties(new Hashtable<String, Object>() {{
+                put(BindingRuntimeContext.class.getName(), bindingContextProvider.getBindingContext());
+            }
+        }); // send modifiedService event
     }
 
     @Override

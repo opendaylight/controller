@@ -209,7 +209,7 @@ public class EditConfig extends AbstractConfigNetconfOperation {
         Map<String, Map<String, ModuleConfig>> factories = transformMbeToModuleConfigs(configRegistryClient,
                 yangStoreSnapshot.getModuleMXBeanEntryMap());
         Map<String, Map<Date, IdentityMapping>> identitiesMap = transformIdentities(yangStoreSnapshot.getModules());
-        return new Config(factories, identitiesMap);
+        return new Config(factories, identitiesMap, yangStoreSnapshot.getEnumResolver());
     }
 
 
