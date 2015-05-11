@@ -20,7 +20,10 @@ import akka.dispatch.Mapper;
 import akka.dispatch.OnComplete;
 import akka.pattern.AskTimeoutException;
 import akka.util.Timeout;
+import com.codahale.metrics.Metric;
+import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.Timer;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
@@ -85,6 +88,7 @@ public class ActorContext {
         }
     };
     public static final String MAILBOX = "bounded-mailbox";
+    public static final String COMMIT = "commit";
 
     private final ActorSystem actorSystem;
     private final ActorRef shardManager;
@@ -497,6 +501,16 @@ public class ActorContext {
         return metricRegistry.timer(rate);
     }
 
+    @VisibleForTesting
+    void removeTimers(){
+        metricRegistry.removeMatching(new MetricFilter() {
+            @Override
+            public boolean matches(String s, Metric metric) {
+                return s.contains(DISTRIBUTED_DATA_STORE_METRIC_REGISTRY);
+            }
+        });
+    }
+
     /**
      * Get the type of the data store to which this ActorContext belongs
      *
@@ -527,6 +541,18 @@ public class ActorContext {
      * Try to acquire a transaction creation permit. Will block if no permits are available.
      */
     public void acquireTxCreationPermit(){
+        double newRateLimit = calculateNewRateLimit(getOperationTimer(COMMIT), getDatastoreContext());
+        if(newRateLimit < 1.0){
+            double otherRateLimit = getRateLimitFromOtherDataStores(this);
+            if(otherRateLimit > 0.0){
+                newRateLimit = otherRateLimit;
+            }
+        }
+
+        if(newRateLimit > 1.0){
+            setTxCreationLimit(newRateLimit);
+        }
+
         txRateLimiter.acquire();
     }
 
@@ -566,5 +592,63 @@ public class ActorContext {
     @VisibleForTesting
     Cache<String, Future<PrimaryShardInfo>> getPrimaryShardInfoCache() {
         return primaryShardInfoCache;
+    }
+
+
+    @VisibleForTesting
+    RateLimiter getTxRateLimiter() {
+        return txRateLimiter;
+    }
+
+    public static double calculateNewRateLimit(Timer commitTimer, DatastoreContext context) {
+        if(commitTimer == null) {
+            // This can happen in unit tests.
+            return 0;
+        }
+
+        Snapshot timerSnapshot = commitTimer.getSnapshot();
+        double newRateLimit = 0;
+
+        long commitTimeoutInSeconds = context.getShardTransactionCommitTimeoutInSeconds();
+        long commitTimeoutInNanos = TimeUnit.SECONDS.toNanos(commitTimeoutInSeconds);
+
+        // Find the time that it takes for transactions to get executed in every 10th percentile
+        // Compute the rate limit for that percentile and sum it up
+        for(int i=1;i<=10;i++){
+            // Get the amount of time transactions take in the i*10th percentile
+            double percentileTimeInNanos = timerSnapshot.getValue(i * 0.1D);
+
+            if(percentileTimeInNanos > 0) {
+                // Figure out the rate limit for the i*10th percentile in nanos
+                double percentileRateLimit = (commitTimeoutInNanos / percentileTimeInNanos);
+
+                // Add the percentileRateLimit to the total rate limit
+                newRateLimit += percentileRateLimit;
+            }
+        }
+
+        // Compute the rate limit per second
+        return newRateLimit/(commitTimeoutInSeconds*10);
+    }
+
+    private static double getRateLimitFromOtherDataStores(ActorContext actorContext){
+        // Since we have no rate data for unused Tx's data store, adjust to the rate from another
+        // data store that does have rate data.
+        for(String datastoreType: DatastoreContext.getGlobalDatastoreTypes()) {
+            if(datastoreType.equals(actorContext.getDataStoreType())) {
+                continue;
+            }
+
+            double newRateLimit = calculateNewRateLimit(actorContext.getOperationTimer(datastoreType, COMMIT),
+                    actorContext.getDatastoreContext());
+            if(newRateLimit > 0.0) {
+                LOG.debug("On unused Tx - data Store {} commit rateLimit adjusted to {}",
+                        actorContext.getDataStoreType(), newRateLimit);
+
+                return newRateLimit;
+            }
+        }
+
+        return -1.0D;
     }
 }

@@ -8,11 +8,10 @@
 
 package org.opendaylight.controller.cluster.datastore;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.anyDouble;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.Timer;
 import java.util.concurrent.TimeUnit;
@@ -21,13 +20,13 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Matchers;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 
 public class TransactionRateLimitingCommitCallbackTest {
+
+    private static final double DELTA = 1e-15;
 
     @Mock
     public ActorContext actorContext;
@@ -44,6 +43,8 @@ public class TransactionRateLimitingCommitCallbackTest {
     @Mock
     private Snapshot commitSnapshot;
 
+    private double oldRateLimit;
+
     @Before
     public void setUp(){
         MockitoAnnotations.initMocks(this);
@@ -52,6 +53,9 @@ public class TransactionRateLimitingCommitCallbackTest {
         doReturn(commitTimer).when(actorContext).getOperationTimer("commit");
         doReturn(commitTimerContext).when(commitTimer).time();
         doReturn(commitSnapshot).when(commitTimer).getSnapshot();
+
+        oldRateLimit = newRateLimit();
+
     }
 
     @Test
@@ -68,7 +72,7 @@ public class TransactionRateLimitingCommitCallbackTest {
         commitCallback.run();
         commitCallback.success();
 
-        verify(actorContext).setTxCreationLimit(Matchers.doubleThat(approximately(292)));
+        assertThat(newRateLimit(), approximately(292));
     }
 
     @Test
@@ -86,7 +90,7 @@ public class TransactionRateLimitingCommitCallbackTest {
         commitCallback.run();
         commitCallback.success();
 
-        verify(actorContext).setTxCreationLimit(Matchers.doubleThat(approximately(192)));
+        assertThat(newRateLimit(), approximately(192));
     }
 
     @Test
@@ -105,7 +109,7 @@ public class TransactionRateLimitingCommitCallbackTest {
         commitCallback.run();
         commitCallback.success();
 
-        verify(actorContext).setTxCreationLimit(Matchers.doubleThat(approximately(282)));
+        assertThat(newRateLimit(), approximately(282));
     }
 
     @Test
@@ -121,7 +125,7 @@ public class TransactionRateLimitingCommitCallbackTest {
         commitCallback.run();
         commitCallback.success();
 
-        verify(actorContext).setTxCreationLimit(Matchers.doubleThat(approximately(0)));
+        assertThat(newRateLimit(), approximately(0));
     }
 
     @Test
@@ -141,7 +145,7 @@ public class TransactionRateLimitingCommitCallbackTest {
         commitCallback.run();
         commitCallback.success();
 
-        verify(actorContext).setTxCreationLimit(Matchers.doubleThat(approximately(101)));
+        assertThat(newRateLimit(), approximately(101));
     }
 
 
@@ -156,7 +160,7 @@ public class TransactionRateLimitingCommitCallbackTest {
 
         }
 
-        verify(actorContext, never()).setTxCreationLimit(anyDouble());
+        assertEquals(oldRateLimit, newRateLimit(), DELTA);
 
     }
 
@@ -167,44 +171,7 @@ public class TransactionRateLimitingCommitCallbackTest {
         commitCallback.run();
         commitCallback.failure();
 
-        verify(actorContext, never()).setTxCreationLimit(anyDouble());
-
-    }
-
-    @Test
-    public void testAdjustRateLimitForUnusedTransaction() {
-        doReturn(commitTimer).when(actorContext).getOperationTimer("one", "commit");
-        doReturn("one").when(actorContext).getDataStoreType();
-
-        Timer commitTimer2 = Mockito.mock(Timer.class);
-        Snapshot commitSnapshot2 = Mockito.mock(Snapshot.class);
-
-        doReturn(commitSnapshot2).when(commitTimer2).getSnapshot();
-
-        doReturn(commitTimer2).when(actorContext).getOperationTimer("two", "commit");
-
-        DatastoreContext.newBuilder().dataStoreType("one").build();
-        DatastoreContext.newBuilder().dataStoreType("two").build();
-
-        doReturn(TimeUnit.MICROSECONDS.toNanos(500) * 1D).when(commitSnapshot).getValue(1 * 0.1);
-
-        TransactionRateLimitingCallback.adjustRateLimitForUnusedTransaction(actorContext);
-
-        verify(actorContext, never()).setTxCreationLimit(anyDouble());
-
-        Mockito.reset(commitSnapshot);
-
-        TransactionRateLimitingCallback.adjustRateLimitForUnusedTransaction(actorContext);
-
-        verify(actorContext, never()).setTxCreationLimit(anyDouble());
-
-        System.out.println(""+TimeUnit.SECONDS.toNanos(30)/TimeUnit.MICROSECONDS.toNanos(100));
-
-        doReturn(TimeUnit.MICROSECONDS.toNanos(100) * 1D).when(commitSnapshot2).getValue(1 * 0.1);
-
-        TransactionRateLimitingCallback.adjustRateLimitForUnusedTransaction(actorContext);
-
-        verify(actorContext).setTxCreationLimit(Matchers.doubleThat(approximately(1000)));
+        assertEquals(oldRateLimit, newRateLimit(), DELTA);
     }
 
     public Matcher<Double> approximately(final double val){
@@ -222,5 +189,8 @@ public class TransactionRateLimitingCommitCallbackTest {
         };
     }
 
+    public double newRateLimit(){
+        return ActorContext.calculateNewRateLimit(actorContext.getOperationTimer(ActorContext.COMMIT), actorContext.getDatastoreContext());
+    }
 
 }

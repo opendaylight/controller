@@ -20,6 +20,7 @@ import akka.japi.Creator;
 import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
 import akka.util.Timeout;
+import com.codahale.metrics.Timer;
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -330,19 +331,20 @@ public class ActorContextTest extends AbstractActorTest{
     @Test
     public void testRateLimiting(){
         DatastoreContext dataStoreContext = DatastoreContext.newBuilder().dataStoreType("config").
-                transactionCreationInitialRateLimit(155L).build();
+                transactionCreationInitialRateLimit(1).build();
 
         ActorContext actorContext =
                 new ActorContext(getSystem(), mock(ActorRef.class), mock(ClusterWrapper.class),
                         mock(Configuration.class), dataStoreContext);
 
+        actorContext.removeTimers();
+
+        completeCommit(actorContext, 1000000000);
+
         // Check that the initial value is being picked up from DataStoreContext
         assertEquals(dataStoreContext.getTransactionCreationInitialRateLimit(), actorContext.getTxCreationLimit(), 1e-15);
 
-        actorContext.setTxCreationLimit(1.0);
-
         assertEquals(1.0, actorContext.getTxCreationLimit(), 1e-15);
-
 
         StopWatch watch = new StopWatch();
 
@@ -354,7 +356,103 @@ public class ActorContextTest extends AbstractActorTest{
 
         watch.stop();
 
-        assertTrue("did not take as much time as expected", watch.getTime() > 1000);
+        assertTrue("did not take as much time as expected rate limit : " + actorContext.getTxRateLimiter().getRate(),
+                watch.getTime() > 1000);
+    }
+
+    @Test
+    public void testAcquiringTxCreationPermitSetsRate(){
+
+        DatastoreContext dataStoreContext = DatastoreContext.newBuilder().dataStoreType("config").
+                transactionCreationInitialRateLimit(155L).build();
+
+        ActorContext actorContext =
+                new ActorContext(getSystem(), mock(ActorRef.class), mock(ClusterWrapper.class),
+                        mock(Configuration.class), dataStoreContext);
+
+        actorContext.removeTimers();
+
+        completeCommit(actorContext, 100);
+
+        // Check that the initial value is being picked up from DataStoreContext
+        assertEquals(dataStoreContext.getTransactionCreationInitialRateLimit(), actorContext.getTxCreationLimit(), 1e-15);
+
+        double before = actorContext.getTxRateLimiter().getRate();
+
+        actorContext.acquireTxCreationPermit();
+
+        double after = actorContext.getTxRateLimiter().getRate();
+
+        assertTrue("before : " + before + ", after : " + after, before != after);
+    }
+
+    @Test
+    public void testAcquiringTxCreationPermitDoesNotSetRateWhenCalculatedRateLimitIsLessThanOne(){
+        DatastoreContext dataStoreContext = DatastoreContext.newBuilder().dataStoreType("config").
+                transactionCreationInitialRateLimit(1).build();
+
+        ActorContext actorContext =
+                new ActorContext(getSystem(), mock(ActorRef.class), mock(ClusterWrapper.class),
+                        mock(Configuration.class), dataStoreContext);
+
+        actorContext.removeTimers();
+
+        completeCommit(actorContext, 1000000000);
+
+        // Check that the initial value is being picked up from DataStoreContext
+        assertEquals(dataStoreContext.getTransactionCreationInitialRateLimit(), actorContext.getTxCreationLimit(), 1e-15);
+
+        double before = actorContext.getTxRateLimiter().getRate();
+
+        actorContext.acquireTxCreationPermit();
+
+        double after = actorContext.getTxRateLimiter().getRate();
+
+        assertTrue("before : " + before + ", after : " + after, before == after);
+    }
+
+    @Test
+    public void testBorrowingRateLimitFromOtherDataStore(){
+        DatastoreContext dataStoreContextConfig = DatastoreContext.newBuilder().dataStoreType("config").
+                transactionCreationInitialRateLimit(1).build();
+
+        DatastoreContext dataStoreContextOperational = DatastoreContext.newBuilder().dataStoreType("operational").
+                transactionCreationInitialRateLimit(1000).build();
+
+
+        ActorContext actorContextConfig =
+                new ActorContext(getSystem(), mock(ActorRef.class), mock(ClusterWrapper.class),
+                        mock(Configuration.class), dataStoreContextConfig);
+
+
+        ActorContext actorContextOperational =
+                new ActorContext(getSystem(), mock(ActorRef.class), mock(ClusterWrapper.class),
+                        mock(Configuration.class), dataStoreContextOperational);
+
+        actorContextConfig.removeTimers();
+
+        completeCommit(actorContextConfig, 1000000000);
+
+        for(int i=0;i<1000;i++) {
+            completeCommit(actorContextOperational, 10);
+        }
+
+        double operationalRateLimit =
+                ActorContext.calculateNewRateLimit(actorContextOperational.getOperationTimer(ActorContext.COMMIT),
+                        actorContextOperational.getDatastoreContext());
+
+        // Check that the initial value is being picked up from DataStoreContext
+        assertEquals(dataStoreContextConfig.getTransactionCreationInitialRateLimit(), actorContextConfig.getTxCreationLimit(), 1e-15);
+
+        actorContextConfig.acquireTxCreationPermit();
+
+        assertEquals(operationalRateLimit, actorContextConfig.getTxRateLimiter().getRate(), 1e-15);
+    }
+
+
+    private void completeCommit(ActorContext actorContext, long timeInMillis) {
+        Timer commitTimer = actorContext.getOperationTimer(ActorContext.COMMIT);
+        commitTimer.update(timeInMillis, TimeUnit.MILLISECONDS);
     }
 
     @Test
