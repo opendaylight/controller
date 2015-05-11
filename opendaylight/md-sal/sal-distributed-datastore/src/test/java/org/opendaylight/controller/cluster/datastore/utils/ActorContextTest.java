@@ -28,7 +28,6 @@ import com.typesafe.config.ConfigFactory;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.lang.time.StopWatch;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -327,35 +326,6 @@ public class ActorContextTest extends AbstractActorTest{
         assertEquals(expected, actual);
     }
 
-    @Test
-    public void testRateLimiting(){
-        DatastoreContext dataStoreContext = DatastoreContext.newBuilder().dataStoreType("config").
-                transactionCreationInitialRateLimit(155L).build();
-
-        ActorContext actorContext =
-                new ActorContext(getSystem(), mock(ActorRef.class), mock(ClusterWrapper.class),
-                        mock(Configuration.class), dataStoreContext);
-
-        // Check that the initial value is being picked up from DataStoreContext
-        assertEquals(dataStoreContext.getTransactionCreationInitialRateLimit(), actorContext.getTxCreationLimit(), 1e-15);
-
-        actorContext.setTxCreationLimit(1.0);
-
-        assertEquals(1.0, actorContext.getTxCreationLimit(), 1e-15);
-
-
-        StopWatch watch = new StopWatch();
-
-        watch.start();
-
-        actorContext.acquireTxCreationPermit();
-        actorContext.acquireTxCreationPermit();
-        actorContext.acquireTxCreationPermit();
-
-        watch.stop();
-
-        assertTrue("did not take as much time as expected", watch.getTime() > 1000);
-    }
 
     @Test
     public void testClientDispatcherIsGlobalDispatcher(){
