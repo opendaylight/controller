@@ -25,14 +25,17 @@ import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attrib
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.resolving.AttributeResolvingStrategy;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.resolving.ObjectResolver;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfig;
+import org.opendaylight.controller.netconf.confignetconfconnector.osgi.EnumResolver;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 
 public final class InstanceRuntimeRpc {
 
     private final Map<String, AttributeIfc> yangToAttrConfig;
     private final Rpc rpc;
+    private final EnumResolver enumResolver;
 
-    public InstanceRuntimeRpc(Rpc rpc) {
+    public InstanceRuntimeRpc(Rpc rpc, final EnumResolver enumResolver) {
+        this.enumResolver = enumResolver;
         this.yangToAttrConfig = map(rpc.getParameters());
         this.rpc = rpc;
     }
@@ -49,7 +52,7 @@ public final class InstanceRuntimeRpc {
 
         // TODO make field, resolvingStrategies can be instantiated only once
         Map<String, AttributeResolvingStrategy<?, ? extends OpenType<?>>> resolvingStrategies = new ObjectResolver(null)
-                .prepareResolving(yangToAttrConfig);
+                .prepareResolving(yangToAttrConfig, enumResolver);
         // TODO make constructor for object resolver without service tracker
         for (Entry<String, AttributeConfigElement> configDefEntry : mappedConfig.entrySet()) {
             try {

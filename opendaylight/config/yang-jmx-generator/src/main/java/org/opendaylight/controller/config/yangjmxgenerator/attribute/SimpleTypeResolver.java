@@ -51,7 +51,6 @@ public class SimpleTypeResolver {
         JAVA_TYPE_TO_SIMPLE_TYPE.put(Long.class.getName(), SimpleType.LONG);
         JAVA_TYPE_TO_SIMPLE_TYPE.put(long.class.getName(), SimpleType.LONG);
         JAVA_TYPE_TO_SIMPLE_TYPE.put(String.class.getName(), SimpleType.STRING);
-        JAVA_TYPE_TO_SIMPLE_TYPE.put(Enum.class.getName(), SimpleType.STRING);
         JAVA_TYPE_TO_SIMPLE_TYPE.put(Boolean.class.getName(), SimpleType.BOOLEAN);
         JAVA_TYPE_TO_SIMPLE_TYPE.put(boolean.class.getName(), SimpleType.BOOLEAN);
         JAVA_TYPE_TO_SIMPLE_TYPE.put(BigInteger.class.getName(), SimpleType.BIGINTEGER);
@@ -61,7 +60,6 @@ public class SimpleTypeResolver {
         JAVA_TYPE_TO_SIMPLE_TYPE.put(Date.class.getName(), SimpleType.DATE);
         JAVA_TYPE_TO_SIMPLE_TYPE.put(Double.class.getName(), SimpleType.DOUBLE);
         JAVA_TYPE_TO_SIMPLE_TYPE.put(double.class.getName(), SimpleType.DOUBLE);
-
         JAVA_TYPE_TO_SIMPLE_TYPE.put(char.class.getName(), SimpleType.CHARACTER);
     }
 
