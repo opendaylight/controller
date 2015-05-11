@@ -30,6 +30,7 @@ import org.opendaylight.controller.netconf.confignetconfconnector.mapping.rpc.In
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.rpc.ModuleRpcs;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.rpc.Rpcs;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.AbstractConfigNetconfOperation;
+import org.opendaylight.controller.netconf.confignetconfconnector.osgi.EnumResolver;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreContext;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
 import org.opendaylight.controller.netconf.util.exception.MissingNameSpaceException;
@@ -103,7 +104,7 @@ public class RuntimeRpc extends AbstractConfigNetconfOperation {
         final RuntimeRpcElementResolved id = RuntimeRpcElementResolved.fromXpath(
                 contextInstanceElement.getTextContent(), operationName, namespace);
 
-        final Rpcs rpcs = mapRpcs(yangStoreSnapshot.getModuleMXBeanEntryMap());
+        final Rpcs rpcs = mapRpcs(yangStoreSnapshot.getModuleMXBeanEntryMap(), yangStoreSnapshot.getEnumResolver());
 
         final ModuleRpcs rpcMapping = rpcs.getRpcMapping(id);
         final InstanceRuntimeRpc instanceRuntimeRpc = rpcMapping.getRpc(id.getRuntimeBeanName(), operationName);
@@ -144,7 +145,7 @@ public class RuntimeRpc extends AbstractConfigNetconfOperation {
                 .getTextContent(), netconfOperationName, netconfOperationNamespace);
 
         // TODO reuse rpcs instance in fromXml method
-        final Rpcs rpcs = mapRpcs(yangStoreSnapshot.getModuleMXBeanEntryMap());
+        final Rpcs rpcs = mapRpcs(yangStoreSnapshot.getModuleMXBeanEntryMap(), yangStoreSnapshot.getEnumResolver());
 
         try {
 
@@ -239,7 +240,7 @@ public class RuntimeRpc extends AbstractConfigNetconfOperation {
         return sorted;
     }
 
-    private static Rpcs mapRpcs(final Map<String, Map<String, ModuleMXBeanEntry>> mBeanEntries) {
+    private static Rpcs mapRpcs(final Map<String, Map<String, ModuleMXBeanEntry>> mBeanEntries, final EnumResolver enumResolver) {
 
         final Map<String, Map<String, ModuleRpcs>> map = Maps.newHashMap();
 
@@ -255,7 +256,7 @@ public class RuntimeRpc extends AbstractConfigNetconfOperation {
 
                 ModuleRpcs rpcMapping = namespaceToModules.get(moduleEntry.getKey());
                 if (rpcMapping == null) {
-                    rpcMapping = new ModuleRpcs();
+                    rpcMapping = new ModuleRpcs(enumResolver);
                     namespaceToModules.put(moduleEntry.getKey(), rpcMapping);
                 }
 
