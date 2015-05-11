@@ -35,4 +35,6 @@ public interface YangStoreContext {
 
     String getModuleSource(ModuleIdentifier moduleIdentifier);
 
+    EnumResolver getEnumResolver();
+
 }

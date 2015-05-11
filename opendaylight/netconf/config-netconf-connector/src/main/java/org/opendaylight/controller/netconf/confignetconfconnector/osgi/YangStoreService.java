@@ -33,6 +33,7 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.not
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.notifications.rev120206.NetconfCapabilityChangeBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.notifications.rev120206.changed.by.parms.ChangedByBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.notifications.rev120206.changed.by.parms.changed.by.server.or.user.ServerBuilder;
+import org.opendaylight.yangtools.sal.binding.generator.util.BindingRuntimeContext;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.ModuleIdentifier;
@@ -58,7 +59,7 @@ public class YangStoreService implements YangStoreContext {
      *
      * We synchronize with GC as usual, using a SoftReference.
      *
-     * The atomic reference is used to synchronize with {@link #refresh()}, e.g. when
+     * The atomic reference is used to synchronize with {@link #refresh(org.opendaylight.yangtools.sal.binding.generator.util.BindingRuntimeContext)}, e.g. when
      * refresh happens, it will push a SoftReference(null), e.g. simulate the GC. Now
      * that may happen while the getter is already busy acting on the old schema context,
      * so it needs to understand that a refresh has happened and retry. To do that, it
@@ -70,6 +71,9 @@ public class YangStoreService implements YangStoreContext {
      */
     private final AtomicReference<SoftReference<YangStoreSnapshot>> ref =
             new AtomicReference<>(new SoftReference<YangStoreSnapshot>(null));
+
+    private final AtomicReference<SoftReference<BindingRuntimeContext>> refBindingContext =
+            new AtomicReference<>(new SoftReference<BindingRuntimeContext>(null));
 
     private final SchemaContextProvider schemaContextProvider;
     private final BaseNetconfNotificationListener notificationPublisher;
@@ -98,7 +102,7 @@ public class YangStoreService implements YangStoreContext {
 
         while (ret == null) {
             // We need to be compute a new value
-            ret = new YangStoreSnapshot(schemaContextProvider.getSchemaContext());
+            ret = new YangStoreSnapshot(schemaContextProvider.getSchemaContext(), refBindingContext.get().get());
 
             if (!ref.compareAndSet(r, new SoftReference<>(ret))) {
                 LOG.debug("Concurrent refresh detected, recomputing snapshot");
@@ -130,9 +134,15 @@ public class YangStoreService implements YangStoreContext {
         return getYangStoreSnapshot().getModuleSource(moduleIdentifier);
     }
 
-    public void refresh() {
+    @Override
+    public EnumResolver getEnumResolver() {
+        return getYangStoreSnapshot().getEnumResolver();
+    }
+
+    public void refresh(final BindingRuntimeContext runtimeContext) {
         final YangStoreSnapshot previous = ref.get().get();
         ref.set(new SoftReference<YangStoreSnapshot>(null));
+        refBindingContext.set(new SoftReference<>(runtimeContext));
         notificationExecutor.submit(new CapabilityChangeNotifier(previous));
     }
 
