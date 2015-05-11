@@ -26,6 +26,8 @@ import static org.opendaylight.controller.netconf.util.xml.XmlUtil.readXmlToElem
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -92,6 +94,7 @@ import org.opendaylight.controller.netconf.confignetconfconnector.operations.edi
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.get.Get;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.getconfig.GetConfig;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.runtimerpc.RuntimeRpc;
+import org.opendaylight.controller.netconf.confignetconfconnector.osgi.EnumResolver;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreContext;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreService;
 import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
@@ -162,6 +165,19 @@ public class NetconfMappingTest extends AbstractConfigTest {
 
         doReturn(getMbes()).when(this.yangStoreSnapshot).getModuleMXBeanEntryMap();
         doReturn(getModules()).when(this.yangStoreSnapshot).getModules();
+        doReturn(new EnumResolver() {
+            @Override
+            public String fromYang(final String enumType, final String enumYangValue) {
+                return Preconditions.checkNotNull(getEnumMapping().get(enumYangValue),
+                        "Unable to resolve enum value %s, for enum %s with mappings %s", enumYangValue, enumType, getEnumMapping());
+            }
+
+            @Override
+            public String toYang(final String enumType, final String enumYangValue) {
+                return Preconditions.checkNotNull(getEnumMapping().inverse().get(enumYangValue),
+                        "Unable to resolve enum value %s, for enum %s with mappings %s", enumYangValue, enumType, getEnumMapping().inverse());
+            }
+        }).when(this.yangStoreSnapshot).getEnumResolver();
 
         this.factory = new NetconfTestImplModuleFactory();
         this.factory2 = new DepTestImplModuleFactory();
@@ -601,9 +617,9 @@ public class NetconfMappingTest extends AbstractConfigTest {
         // Default
         assertContainsElement(response, readXmlToElement("<extended-twice xmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">2</extended-twice>"));
 
-        assertContainsElement(response, readXmlToElement("<extended-enum xmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">TWO</extended-enum>"));
+        assertContainsElement(response, readXmlToElement("<extended-enum xmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">two</extended-enum>"));
         // Default
-        assertContainsElement(response, readXmlToElement("<extended-enum xmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">ONE</extended-enum>"));
+        assertContainsElement(response, readXmlToElement("<extended-enum xmlns=\"urn:opendaylight:params:xml:ns:yang:controller:test:impl\">one</extended-enum>"));
     }
 
     private void assertContainsString(String string, String substring) {
@@ -612,7 +628,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
 
     private void checkEnum(final Document response) throws Exception {
 
-        String expectedEnumContent = "TWO";
+        String expectedEnumContent = "two";
 
         XMLAssert.assertXpathEvaluatesTo(expectedEnumContent,
                 getXpathForNetconfImplSubnode(INSTANCE_NAME,"extended-enum"),
@@ -657,9 +673,20 @@ public class NetconfMappingTest extends AbstractConfigTest {
                 return schemaContext ;
             }
         }, mockedContext);
+        final BindingRuntimeContext bindingRuntimeContext = mock(BindingRuntimeContext.class);
+        doReturn(getEnumMapping()).when(bindingRuntimeContext).getEnumMapping(any(Class.class));
+        yangStoreService.refresh(bindingRuntimeContext);
         mBeanEntries.putAll(yangStoreService.getModuleMXBeanEntryMap());
 
         return mBeanEntries;
+    }
+
+    private BiMap<String, String> getEnumMapping() {
+        final HashBiMap<String, String> enumBiMap = HashBiMap.create();
+        // Enum constants mapping from yang -> Java and back
+        enumBiMap.put("one", "One");
+        enumBiMap.put("two", "Two");
+        return enumBiMap;
     }
 
     private Set<org.opendaylight.yangtools.yang.model.api.Module> getModules() throws Exception {
