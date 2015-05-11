@@ -347,7 +347,6 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
                     txFutureCallbackMap.size());
 
         if (txFutureCallbackMap.isEmpty()) {
-            TransactionRateLimitingCallback.adjustRateLimitForUnusedTransaction(actorContext);
             return NoOpDOMStoreThreePhaseCommitCohort.INSTANCE;
         }
 
