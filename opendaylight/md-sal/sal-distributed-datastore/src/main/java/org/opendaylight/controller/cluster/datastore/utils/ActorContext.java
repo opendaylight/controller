@@ -28,7 +28,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.util.concurrent.RateLimiter;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.common.actor.CommonConfig;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
@@ -85,6 +84,7 @@ public class ActorContext {
         }
     };
     public static final String MAILBOX = "bounded-mailbox";
+    public static final String COMMIT = "commit";
 
     private final ActorSystem actorSystem;
     private final ActorRef shardManager;
@@ -94,7 +94,7 @@ public class ActorContext {
     private FiniteDuration operationDuration;
     private Timeout operationTimeout;
     private final String selfAddressHostPort;
-    private RateLimiter txRateLimiter;
+    private TransactionRateLimiter txRateLimiter;
     private final int transactionOutstandingOperationLimit;
     private Timeout transactionCommitOperationTimeout;
     private Timeout shardInitializationTimeout;
@@ -134,7 +134,7 @@ public class ActorContext {
     }
 
     private void setCachedProperties() {
-        txRateLimiter = RateLimiter.create(datastoreContext.getTransactionCreationInitialRateLimit());
+        txRateLimiter = new TransactionRateLimiter(this);
 
         operationDuration = Duration.create(datastoreContext.getOperationTimeoutInSeconds(), TimeUnit.SECONDS);
         operationTimeout = new Timeout(operationDuration);
@@ -506,20 +506,11 @@ public class ActorContext {
     }
 
     /**
-     * Set the number of transaction creation permits that are to be allowed
-     *
-     * @param permitsPerSecond
-     */
-    public void setTxCreationLimit(double permitsPerSecond){
-        txRateLimiter.setRate(permitsPerSecond);
-    }
-
-    /**
      * Get the current transaction creation rate limit
      * @return
      */
     public double getTxCreationLimit(){
-        return txRateLimiter.getRate();
+        return txRateLimiter.getTxCreationLimit();
     }
 
     /**
