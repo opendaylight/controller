@@ -107,7 +107,7 @@ public final class NetconfEventSourceManager implements DataChangeListener, Auto
     @Override
     public void onDataChanged(final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> event) {
 
-        LOG.info("[DataChangeEvent<InstanceIdentifier<?>, DataObject>: {}]", event);
+        LOG.debug("[DataChangeEvent<InstanceIdentifier<?>, DataObject>: {}]", event);
         for (final Map.Entry<InstanceIdentifier<?>, DataObject> changeEntry : event.getCreatedData().entrySet()) {
             if (changeEntry.getValue() instanceof Node) {
                 nodeCreated(changeEntry.getKey(),(Node) changeEntry.getValue());

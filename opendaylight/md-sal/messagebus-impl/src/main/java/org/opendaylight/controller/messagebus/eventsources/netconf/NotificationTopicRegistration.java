@@ -11,9 +11,13 @@ import java.util.ArrayList;
 
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventaggregator.rev141202.TopicId;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public abstract class NotificationTopicRegistration implements AutoCloseable {
+
+    private static final Logger LOG = LoggerFactory.getLogger(NotificationTopicRegistration.class);
 
     public enum NotificationSourceType{
         NetconfDeviceStream,
@@ -54,6 +58,14 @@ public abstract class NotificationTopicRegistration implements AutoCloseable {
         return notificationUrnPrefix;
     }
 
+    public boolean checkNotificationPath(SchemaPath notificationPath){
+        if(notificationPath == null){
+            return false;
+        }
+        String nameSpace = notificationPath.getLastComponent().toString();
+        LOG.debug("CheckNotification - name space {} - NotificationUrnPrefix {}", nameSpace, getNotificationUrnPrefix());
+        return nameSpace.startsWith(getNotificationUrnPrefix());
+    }
     abstract void activateNotificationSource();
 
     abstract void deActivateNotificationSource();
