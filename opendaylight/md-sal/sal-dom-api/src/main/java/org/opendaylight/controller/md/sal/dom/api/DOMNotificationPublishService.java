@@ -29,7 +29,7 @@ public interface DOMNotificationPublishService extends DOMService, BrokerService
      * Well-known value indicating that the implementation is currently not
      * able to accept a notification.
      */
-    ListenableFuture<Object> REJECTED = Futures.immediateFailedFuture(new Throwable("Unacceptable blocking conditions encountered"));
+    ListenableFuture<Object> REJECTED = Futures.immediateFailedFuture(new DOMNotificationRejectedException("Unacceptable blocking conditions encountered"));
 
     /**
      * Publish a notification. The result of this method is a {@link ListenableFuture}
