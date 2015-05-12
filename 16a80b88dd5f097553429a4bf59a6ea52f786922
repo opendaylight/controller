@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_ac022f09",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/TransactionRateLimiter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-12T06:48:43Z",
+      "side": 1,
+      "message": "Instead of calculating the new rate on the fast path, could we still calculate it after the commit and set a volatile that we pass to setTxCreationLimit here?",
+      "revId": "16a80b88dd5f097553429a4bf59a6ea52f786922",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
