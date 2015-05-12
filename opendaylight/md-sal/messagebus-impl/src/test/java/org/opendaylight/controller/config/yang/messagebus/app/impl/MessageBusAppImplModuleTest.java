@@ -28,6 +28,8 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.osgi.framework.BundleContext;
 
+import com.google.common.util.concurrent.CheckedFuture;
+
 import javax.management.ObjectName;
 
 import static org.junit.Assert.assertEquals;
@@ -101,7 +103,8 @@ public class MessageBusAppImplModuleTest {
         WriteTransaction writeTransactionMock = mock(WriteTransaction.class);
         doReturn(writeTransactionMock).when(dataBrokerMock).newWriteOnlyTransaction();
         doNothing().when(writeTransactionMock).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(DataObject.class), eq(true));
-
+        CheckedFuture checkedFutureMock = mock(CheckedFuture.class);
+        doReturn(checkedFutureMock).when(writeTransactionMock).submit();
         assertNotNull("EventSourceRegistryWrapper has not been created correctly.", messageBusAppImplModule.createInstance());
     }
 
