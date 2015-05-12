@@ -10,6 +10,7 @@ package org.opendaylight.controller.sal.restconf.impl;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
@@ -25,6 +26,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -66,6 +68,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgum
 import org.opendaylight.yangtools.yang.data.api.schema.AugmentationNode;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
+import org.opendaylight.yangtools.yang.data.api.schema.LeafNode;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafSetEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
@@ -89,7 +92,13 @@ import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
+import org.opendaylight.yangtools.yang.model.util.EmptyType;
 import org.opendaylight.yangtools.yang.model.util.SchemaContextUtil;
+import org.opendaylight.yangtools.yang.parser.builder.api.GroupingBuilder;
+import org.opendaylight.yangtools.yang.parser.builder.impl.ContainerSchemaNodeBuilder;
+import org.opendaylight.yangtools.yang.parser.builder.impl.LeafSchemaNodeBuilder;
+import org.opendaylight.yangtools.yang.parser.builder.impl.ModuleBuilder;
+import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -322,12 +331,67 @@ public class RestconfImpl implements RestconfService {
         return operationsFromModulesToNormalizedContext(modules, mountPoint);
     }
 
+    private static final Predicate<GroupingBuilder> GROUPING_FILTER = new Predicate<GroupingBuilder>() {
+        @Override
+        public boolean apply(final GroupingBuilder g) {
+            return Draft02.RestConfModule.RESTCONF_GROUPING_SCHEMA_NODE.equals(g.getQName().getLocalName());
+        }
+    };
+
     private NormalizedNodeContext operationsFromModulesToNormalizedContext(final Set<Module> modules,
             final DOMMountPoint mountPoint) {
 
-        // FIXME find best way to change restconf-netconf yang schema for provide this functionality
-        final String errMsg = "We are not able support view operations functionality yet.";
-        throw new RestconfDocumentedException(errMsg, ErrorType.APPLICATION, ErrorTag.OPERATION_NOT_SUPPORTED);
+        final Module restconfModule = getRestconfModule();
+        final ModuleBuilder restConfModuleBuilder = new ModuleBuilder(restconfModule);
+        final Set<GroupingBuilder> gropingBuilders = restConfModuleBuilder.getGroupingBuilders();
+        final Iterable<GroupingBuilder> filteredGroups = Iterables.filter(gropingBuilders, GROUPING_FILTER);
+        final GroupingBuilder restconfGroupingBuilder = Iterables.getFirst(filteredGroups, null);
+        final ContainerSchemaNodeBuilder restContainerSchemaNodeBuilder = (ContainerSchemaNodeBuilder) restconfGroupingBuilder
+                .getDataChildByName(Draft02.RestConfModule.RESTCONF_CONTAINER_SCHEMA_NODE);
+        final ContainerSchemaNodeBuilder containerSchemaNodeBuilder = (ContainerSchemaNodeBuilder) restContainerSchemaNodeBuilder
+                .getDataChildByName(Draft02.RestConfModule.OPERATIONS_CONTAINER_SCHEMA_NODE);
+
+        final ContainerSchemaNodeBuilder fakeOperationsSchemaNodeBuilder = containerSchemaNodeBuilder;
+        final SchemaPath fakeSchemaPath = fakeOperationsSchemaNodeBuilder.getPath().createChild(QName.create("dummy"));
+
+        final List<LeafNode<Object>> operationsAsData = new ArrayList<>();
+
+        for (final Module module : modules) {
+            final Set<RpcDefinition> rpcs = module.getRpcs();
+            for (final RpcDefinition rpc : rpcs) {
+                final QName rpcQName = rpc.getQName();
+                final String name = module.getName();
+
+                final QName qName = QName.create(restconfModule.getQNameModule(), rpcQName.getLocalName());
+                final LeafSchemaNodeBuilder leafSchemaNodeBuilder = new LeafSchemaNodeBuilder(name, 0, qName, fakeSchemaPath);
+                final LeafSchemaNodeBuilder fakeRpcSchemaNodeBuilder = leafSchemaNodeBuilder;
+                fakeRpcSchemaNodeBuilder.setAugmenting(true);
+
+                final EmptyType instance = EmptyType.getInstance();
+                fakeRpcSchemaNodeBuilder.setType(instance);
+                final LeafSchemaNode fakeRpcSchemaNode = fakeRpcSchemaNodeBuilder.build();
+                fakeOperationsSchemaNodeBuilder.addChildNode(fakeRpcSchemaNode);
+
+                final LeafNode<Object> leaf = Builders.leafBuilder(fakeRpcSchemaNode).build();
+                operationsAsData.add(leaf);
+            }
+        }
+
+        final ContainerSchemaNode operContainerSchemaNode = fakeOperationsSchemaNodeBuilder.build();
+        final DataContainerNodeAttrBuilder<NodeIdentifier, ContainerNode> operContainerNode = Builders.containerBuilder(operContainerSchemaNode);
+
+        for (final LeafNode<Object> oper : operationsAsData) {
+            operContainerNode.withChild(oper);
+        }
+
+        final Set<Module> fakeRpcModules = Collections.singleton(restConfModuleBuilder.build());
+
+        final YangParserImpl yangParser = new YangParserImpl();
+        final SchemaContext fakeSchemaCx = yangParser.resolveSchemaContext(fakeRpcModules);
+
+        final InstanceIdentifierContext<?> fakeIICx = new InstanceIdentifierContext<>(null, operContainerSchemaNode, mountPoint, fakeSchemaCx);
+
+        return new NormalizedNodeContext(fakeIICx, operContainerNode.build());
     }
 
     private Module getRestconfModule() {
