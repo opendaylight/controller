@@ -5,23 +5,25 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.md.sal.binding.api;
 
 /**
- * <p/>
+ * <p>
  * This exception indicates that given notification can not be processed by corresponding mechanism.
  * More info can be provided in message.
- * <p/>
+ * </p>
  * <p>
  * Expected use: {@link NotificationPublishService}
  * </p>
  */
 public class NotificationRejectedException extends Exception {
+    private static final long serialVersionUID = 1L;
 
-    private static final long serialVersionUID = 3722954527834860394L;
-
-    public NotificationRejectedException(String message) {
+    public NotificationRejectedException(final String message) {
         super(message);
+    }
+
+    public NotificationRejectedException(final String message, final Throwable cause) {
+        super(message, cause);
     }
 }
