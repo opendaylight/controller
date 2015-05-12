@@ -8,6 +8,7 @@
 package org.opendaylight.controller.md.sal.binding.impl.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableList;
@@ -15,8 +16,12 @@ import com.google.common.collect.ImmutableSet;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import org.junit.Assert;
 import org.junit.Test;
+import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService;
 import org.opendaylight.controller.md.sal.binding.test.AbstractNotificationBrokerTest;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.OpendaylightMdsalListTestListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.TwoLevelListChanged;
@@ -26,8 +31,12 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
 import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ForwardedNotificationAdapterTest extends AbstractNotificationBrokerTest {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ForwardedNotificationAdapterTest.class);
 
     @Override
     protected Iterable<YangModuleInfo> getModuleInfos() throws Exception {
@@ -66,7 +75,12 @@ public class ForwardedNotificationAdapterTest extends AbstractNotificationBroker
         final TestNotifListener testNotifListener = new TestNotifListener(latch);
         final ListenerRegistration<TestNotifListener> listenerRegistration = getNotificationService()
                 .registerNotificationListener(testNotifListener);
-        assertTrue(getNotificationPublishService().offerNotification(testData));
+        try {
+            getNotificationPublishService().offerNotification(testData).get(1, TimeUnit.SECONDS);
+        } catch (ExecutionException | TimeoutException e) {
+            LOG.error("Notification delivery failed", e);
+            Assert.fail("notification should be delivered");
+        }
 
         latch.await();
         assertTrue(testNotifListener.getReceivedNotifications().size() == 1);
@@ -83,7 +97,8 @@ public class ForwardedNotificationAdapterTest extends AbstractNotificationBroker
         final TestNotifListener testNotifListener = new TestNotifListener(latch);
         final ListenerRegistration<TestNotifListener> listenerRegistration = getNotificationService()
                 .registerNotificationListener(testNotifListener);
-        assertTrue(getNotificationPublishService().offerNotification(testData, 5, TimeUnit.SECONDS));
+        assertNotSame(NotificationPublishService.REJECTED,
+                getNotificationPublishService().offerNotification(testData, 5, TimeUnit.SECONDS));
 
         latch.await();
         assertTrue(testNotifListener.getReceivedNotifications().size() == 1);

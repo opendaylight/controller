@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.md.sal.binding.api;
 
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.yangtools.yang.binding.Notification;
 
@@ -26,6 +28,13 @@ import org.opendaylight.yangtools.yang.binding.Notification;
  * notification has or has not been seen.
  */
 public interface NotificationPublishService extends BindingService {
+
+    /**
+     * Well-known value indicating that the binding-aware implementation is currently not
+     * able to accept a notification.
+     */
+    ListenableFuture<Object> REJECTED = Futures.immediateFailedFuture(new NotificationRejectedException("Rejected due to resource constraints."));
+
     /**
      * Publishes a notification to subscribed listeners. This initiates
      * the process of sending the notification, but delivery to the
@@ -47,14 +56,16 @@ public interface NotificationPublishService extends BindingService {
      * listeners can happen asynchronously, potentially after a call to
      * this method returns.
      *
-     * This method is guaranteed not to block.
+     * Still guaranteed not to block. Returns Listenable Future which will complete once.
      *
      * @param notification
      *            the notification to publish.
-     * @return true if the notification was accepted for processing, false otherwise
+     * @return A listenable future which will report completion when the service has finished
+     * propagating the notification to its immediate registrants, or {@value #REJECTED} if resource
+     * constraints prevent
      * @throws NullPointerException if the notification is null
      */
-    boolean offerNotification(Notification notification);
+    ListenableFuture<? extends Object> offerNotification(Notification notification);
 
     /**
      * Publishes a notification to subscribed listeners. This initiates
@@ -68,11 +79,14 @@ public interface NotificationPublishService extends BindingService {
      * @param timeout how long to wait before giving up, in units of unit
      * @param unit a TimeUnit determining how to interpret the
      *             timeout parameter
-     * @return true if the notification was accepted for processing, false otherwise
+     * @return A listenable future which will report completion when the service has finished
+     * propagating the notification to its immediate registrants, or {@value #REJECTED} if resource
+     * constraints prevent
      * @throws InterruptedException if interrupted while waiting
      * @throws NullPointerException if the notification or unit is null
      * @throws IllegalArgumentException if timeout is negative.
      */
-    boolean offerNotification(Notification notification, int timeout, TimeUnit unit)
-        throws InterruptedException;
+    ListenableFuture<? extends Object> offerNotification(Notification notification, int timeout, TimeUnit unit)
+            throws InterruptedException;
+
 }
