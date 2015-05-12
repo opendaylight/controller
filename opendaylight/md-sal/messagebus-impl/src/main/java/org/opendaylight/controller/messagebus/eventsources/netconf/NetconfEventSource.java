@@ -47,6 +47,7 @@ import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.even
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventsource.rev141202.JoinTopicOutput;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventsource.rev141202.JoinTopicOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventsource.rev141202.JoinTopicStatus;
+import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventsource.rev141202.DisJoinTopicInput;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netmod.notification.rev080714.Netconf;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netmod.notification.rev080714.netconf.Streams;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netmod.notification.rev080714.netconf.streams.Stream;
@@ -157,24 +158,33 @@ public class NetconfEventSource implements EventSource, DOMNotificationListener 
 
     }
 
+    @Override
+    public Future<RpcResult<Void>> disJoinTopic(DisJoinTopicInput input) {
+         for(NotificationTopicRegistration reg : notificationTopicRegistrationList){
+             reg.unRegisterNotificationTopic(input.getTopicId());
+         }
+        return Util.resultRpcSuccessFor((Void) null) ;
+    }
+
     private synchronized Future<RpcResult<JoinTopicOutput>> registerTopic(final TopicId topicId, final List<SchemaPath> notificationsToSubscribe){
 
         JoinTopicStatus joinTopicStatus = JoinTopicStatus.Down;
         if(notificationsToSubscribe != null && notificationsToSubscribe.isEmpty() == false){
             final Optional<DOMNotificationService> notifyService = getDOMMountPoint().getService(DOMNotificationService.class);
             if(notifyService.isPresent()){
-                int subscribedStreams = 0;
+                int registeredNotificationCount = 0;
                 for(SchemaPath schemaNotification : notificationsToSubscribe){
                    for(NotificationTopicRegistration reg : notificationTopicRegistrationList){
-                      LOG.info("Source of notification {} is activating, TopicId {}", reg.getSourceName(), topicId.getValue() );
-                      reg.activateNotificationSource();
-                      boolean regSuccess = reg.registerNotificationTopic(schemaNotification, topicId);
-                      if(regSuccess){
-                         subscribedStreams = subscribedStreams +1;
-                      }
+                       if(reg.checkNotificationPath(schemaNotification)){
+                           LOG.info("Source of notification {} is activating, TopicId {}", reg.getSourceName(), topicId.getValue() );
+                           boolean regSuccess = reg.registerNotificationTopic(schemaNotification, topicId);
+                           if(regSuccess){
+                              registeredNotificationCount = registeredNotificationCount +1;
+                           }
+                       }
                    }
                 }
-                if(subscribedStreams > 0){
+                if(registeredNotificationCount > 0){
                     joinTopicStatus = JoinTopicStatus.Up;
                 }
             }
@@ -195,13 +205,12 @@ public class NetconfEventSource implements EventSource, DOMNotificationListener 
     public void deActivateStreams(){
         for (NotificationTopicRegistration reg : notificationTopicRegistrationList) {
            LOG.info("Source of notification {} is deactivating on node {}", reg.getSourceName(), this.nodeId);
-            reg.deActivateNotificationSource();
+           reg.deActivateNotificationSource();
         }
     }
 
     @Override
     public void onNotification(final DOMNotification notification) {
-        LOG.info("Notification {} has been arrived...",notification.getType());
         SchemaPath notificationPath = notification.getType();
         Date notificationEventTime = null;
         if(notification instanceof DOMEvent){
@@ -218,7 +227,7 @@ public class NetconfEventSource implements EventSource, DOMNotificationListener 
 
                 for(TopicId topicId : topicIdsForNotification){
                     publishNotification(notification, topicId);
-                    LOG.info("Notification {} has been published for TopicId {}",notification.getType(), topicId.getValue());
+                    LOG.debug("Notification {} has been published for TopicId {}",notification.getType(), topicId.getValue());
                 }
 
             }

@@ -54,6 +54,13 @@ public abstract class NotificationTopicRegistration implements AutoCloseable {
         return notificationUrnPrefix;
     }
 
+    public boolean checkNotificationPath(SchemaPath notificationPath){
+        if(notificationPath == null){
+            return false;
+        }
+        String nameSpace = notificationPath.getLastComponent().toString();
+        return nameSpace.startsWith(getNotificationUrnPrefix());
+    }
     abstract void activateNotificationSource();
 
     abstract void deActivateNotificationSource();
