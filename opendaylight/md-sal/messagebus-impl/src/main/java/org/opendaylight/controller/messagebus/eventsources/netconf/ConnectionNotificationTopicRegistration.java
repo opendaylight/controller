@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.messagebus.eventsources.netconf;
 
-import java.net.URI;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -51,40 +51,42 @@ public class ConnectionNotificationTopicRegistration extends NotificationTopicRe
     public ConnectionNotificationTopicRegistration(String SourceName, DOMNotificationListener domNotificationListener) {
         super(NotificationSourceType.ConnectionStatusChange, SourceName, EVENT_SOURCE_STATUS_PATH.getLastComponent().getNamespace().toString());
         this.domNotificationListener = Preconditions.checkNotNull(domNotificationListener);
-        LOG.info("Connection notification source has been initialized...");
+        LOG.info("Connection notification source has been initialized.");
         setActive(true);
         setReplaySupported(false);
     }
 
     @Override
     public void close() throws Exception {
-        LOG.info("Connection notification - publish Deactive");
-        publishNotification(EventSourceStatus.Deactive);
-        notificationTopicMap.clear();
-        setActive(false);
+        if(isActive()){
+            LOG.debug("Connection notification - publish Deactive");
+            publishNotification(EventSourceStatus.Deactive);
+            notificationTopicMap.clear();
+            setActive(false);
+        }
     }
 
     @Override
     void activateNotificationSource() {
-        LOG.info("Connection notification - publish Active");
+        LOG.debug("Connection notification - publish Active");
         publishNotification(EventSourceStatus.Active);
     }
 
     @Override
     void deActivateNotificationSource() {
-        LOG.info("Connection notification - publish Inactive");
+        LOG.debug("Connection notification - publish Inactive");
         publishNotification(EventSourceStatus.Inactive);
     }
 
     @Override
     void reActivateNotificationSource() {
-        LOG.info("Connection notification - reactivate - publish active");
+        LOG.debug("Connection notification - reactivate - publish active");
         publishNotification(EventSourceStatus.Active);
     }
 
     @Override
     boolean registerNotificationTopic(SchemaPath notificationPath, TopicId topicId) {
-        if(validateNotifactionSchemaPath(notificationPath) == false){
+        if(checkNotificationPath(notificationPath) == false){
             LOG.debug("Bad SchemaPath for notification try to register");
             return false;
         }
@@ -107,16 +109,20 @@ public class ConnectionNotificationTopicRegistration extends NotificationTopicRe
     }
 
     @Override
-    void unRegisterNotificationTopic(TopicId topicId) {
-        // TODO: need code when EventAggregator.destroyTopic will be implemented
-    }
-
-    private boolean validateNotifactionSchemaPath(SchemaPath notificationPath){
-        if(notificationPath == null){
-            return false;
+    synchronized void unRegisterNotificationTopic(TopicId topicId) {
+        List<SchemaPath> notificationPathToRemove = new ArrayList<>();
+        for(SchemaPath notifKey : notificationTopicMap.keySet()){
+            ArrayList<TopicId> topicList = notificationTopicMap.get(notifKey);
+            if(topicList != null){
+                topicList.remove(topicId);
+                if(topicList.isEmpty()){
+                    notificationPathToRemove.add(notifKey);
+                }
+            }
         }
-        URI notificationNameSpace = notificationPath.getLastComponent().getNamespace();
-        return getNotificationUrnPrefix().startsWith(notificationNameSpace.toString());
+        for(SchemaPath notifKey : notificationPathToRemove){
+            notificationTopicMap.remove(notifKey);
+        }
     }
 
     private void publishNotification(EventSourceStatus eventSourceStatus){

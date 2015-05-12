@@ -10,7 +10,6 @@ package org.opendaylight.controller.messagebus.app.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.regex.Pattern;
 
@@ -22,11 +21,6 @@ import com.google.common.util.concurrent.Futures;
 
 
 public final class Util {
-
-    public static String getUUIDIdent(){
-        UUID uuid = UUID.randomUUID();
-        return uuid.toString();
-    }
 
     public static <T> Future<RpcResult<T>> resultRpcSuccessFor(final T output) {
         final RpcResult<T> result = RpcResultBuilder.success(output).build();

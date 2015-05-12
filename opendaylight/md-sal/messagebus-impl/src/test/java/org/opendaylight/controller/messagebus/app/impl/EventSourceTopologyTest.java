@@ -22,10 +22,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
-import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.ReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -35,9 +33,11 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RpcRegistr
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventaggregator.rev141202.CreateTopicInput;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventaggregator.rev141202.DestroyTopicInput;
+import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventaggregator.rev141202.DestroyTopicInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventaggregator.rev141202.EventAggregatorService;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventaggregator.rev141202.NotificationPattern;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventaggregator.rev141202.Pattern;
+import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventaggregator.rev141202.TopicId;
 import org.opendaylight.yang.gen.v1.urn.cisco.params.xml.ns.yang.messagebus.eventsource.rev141202.EventSourceService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.inventory.rev130819.NodeContext;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
@@ -61,10 +61,6 @@ public class EventSourceTopologyTest {
     ListenerRegistration listenerRegistrationMock;
     NodeKey nodeKey;
     RpcRegistration<EventAggregatorService> aggregatorRpcReg;
-
-    @BeforeClass
-    public static void initTestClass() throws IllegalAccessException, InstantiationException {
-    }
 
     @Before
     public void setUp() throws Exception {
@@ -95,6 +91,18 @@ public class EventSourceTopologyTest {
     public void createTopicTest() throws Exception{
         topicTestHelper();
         assertNotNull("Topic has not been created correctly.", eventSourceTopology.createTopic(createTopicInputMock));
+    }
+
+    @Test
+    public void destroyTopicTest() throws Exception{
+        topicTestHelper();
+        TopicId topicId = new TopicId("topic-id-007");
+        Map<TopicId,EventSourceTopic> localMap = getEventSourceTopicMap();
+        EventSourceTopic eventSourceTopicMock = mock(EventSourceTopic.class);
+        localMap.put(topicId, eventSourceTopicMock);
+        DestroyTopicInput input = new DestroyTopicInputBuilder().setTopicId(topicId).build();
+        eventSourceTopology.destroyTopic(input);
+        verify(eventSourceTopicMock, times(1)).close();
     }
 
     private void topicTestHelper() throws Exception{
@@ -135,24 +143,16 @@ public class EventSourceTopologyTest {
     }
 
     @Test
-    public void destroyTopicTest() throws Exception{
-        topicTestHelper();
-        //TODO: modify test when destroyTopic will be implemented
-        DestroyTopicInput destroyTopicInput = null;
-        assertNotNull("Instance has not been created correctly.", eventSourceTopology.destroyTopic(destroyTopicInput));
-    }
-
-    @Test
     public void closeTest() throws Exception{
         constructorTestHelper();
         topicTestHelper();
-        Map<DataChangeListener, ListenerRegistration<DataChangeListener>> localMap = getTopicListenerRegistrations();
-        DataChangeListener dataChangeListenerMock = mock(DataChangeListener.class);
-        ListenerRegistration<DataChangeListener> listenerListenerRegistrationMock = (ListenerRegistration<DataChangeListener>) mock(ListenerRegistration.class);
-        localMap.put(dataChangeListenerMock, listenerListenerRegistrationMock);
+        Map<TopicId,EventSourceTopic> localMap = getEventSourceTopicMap();
+        TopicId topicIdMock = mock(TopicId.class);
+        EventSourceTopic eventSourceTopicMock = mock(EventSourceTopic.class);
+        localMap.put(topicIdMock, eventSourceTopicMock);
         eventSourceTopology.close();
         verify(aggregatorRpcReg, times(1)).close();
-        verify(listenerListenerRegistrationMock, times(1)).close();
+        verify(eventSourceTopicMock, times(1)).close();
     }
 
     @Test
@@ -201,8 +201,8 @@ public class EventSourceTopologyTest {
         assertNotNull("Return value has not been created correctly.", eventSourceTopology.registerEventSource(eventSourceMock));
     }
 
-    private Map getTopicListenerRegistrations() throws Exception{
-        Field nesField = EventSourceTopology.class.getDeclaredField("topicListenerRegistrations");
+    private Map getEventSourceTopicMap() throws Exception{
+        Field nesField = EventSourceTopology.class.getDeclaredField("eventSourceTopicMap");
         nesField.setAccessible(true);
         return (Map) nesField.get(eventSourceTopology);
     }
