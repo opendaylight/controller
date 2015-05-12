@@ -52,16 +52,13 @@ public class BindingDOMNotificationPublishServiceAdapter implements Notification
     }
 
     @Override
-    public boolean offerNotification(final Notification notification) {
-        final ListenableFuture<?> listenableFuture = domPublishService.offerNotification(toDomNotification(notification));
-        return !DOMNotificationPublishService.REJECTED.equals(listenableFuture);
+    public ListenableFuture<? extends Object> offerNotification(final Notification notification) {
+        return domPublishService.offerNotification(toDomNotification(notification));
     }
 
     @Override
-    public boolean offerNotification(final Notification notification, final int timeout, final TimeUnit unit) throws InterruptedException {
-        final ListenableFuture<?> listenableFuture =
-                domPublishService.offerNotification(toDomNotification(notification), timeout, unit);
-        return !DOMNotificationPublishService.REJECTED.equals(listenableFuture);
+    public ListenableFuture<? extends Object> offerNotification(final Notification notification, final int timeout, final TimeUnit unit) throws InterruptedException {
+        return domPublishService.offerNotification(toDomNotification(notification), timeout, unit);
     }
 
     private DOMNotification toDomNotification(final Notification notification) {
