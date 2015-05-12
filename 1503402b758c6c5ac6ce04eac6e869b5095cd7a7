@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "3aa0d159_c7b19490",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/NotificationPublishService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-05-12T10:10:59Z",
+      "side": 1,
+      "message": "ListenableFuture\u003c? extends Object\u003e",
+      "range": {
+        "startLine": 58,
+        "startChar": 4,
+        "endLine": 58,
+        "endChar": 23
+      },
+      "revId": "1503402b758c6c5ac6ce04eac6e869b5095cd7a7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_c703d440",
         "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/NotificationPublishService.java",
         "patchSetId": 2
@@ -13,6 +36,52 @@
       "writtenOn": "2015-05-12T09:36:42Z",
       "side": 1,
       "message": "ListenableFuture\u003c? extends Object\u003e",
+      "revId": "1503402b758c6c5ac6ce04eac6e869b5095cd7a7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_67c1a0e3",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/md/sal/binding/impl/BindingDOMNotificationPublishServiceAdapter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-05-12T10:10:59Z",
+      "side": 1,
+      "message": "Remove unnecessary variable.",
+      "range": {
+        "startLine": 56,
+        "startChar": 7,
+        "endLine": 57,
+        "endChar": 32
+      },
+      "revId": "1503402b758c6c5ac6ce04eac6e869b5095cd7a7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_07b8dc74",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/md/sal/binding/impl/BindingDOMNotificationPublishServiceAdapter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-05-12T10:10:59Z",
+      "side": 1,
+      "message": "Remove unnecessary variable.",
+      "range": {
+        "startLine": 63,
+        "startChar": 8,
+        "endLine": 64,
+        "endChar": 32
+      },
       "revId": "1503402b758c6c5ac6ce04eac6e869b5095cd7a7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
