@@ -60,7 +60,7 @@ public class NetconfEventSourceRegistration implements AutoCloseable{
         }
         NetconfEventSourceRegistration nesr = new NetconfEventSourceRegistration(instanceIdent, node, netconfEventSourceManager);
         nesr.updateStatus();
-        LOG.info("NetconfEventSourceRegistration for node {} has been initialized...",node.getNodeId().getValue());
+        LOG.debug("NetconfEventSourceRegistration for node {} has been initialized...",node.getNodeId().getValue());
         return nesr;
     }
 
