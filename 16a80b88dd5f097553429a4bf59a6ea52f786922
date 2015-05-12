@@ -16,6 +16,24 @@
       "revId": "16a80b88dd5f097553429a4bf59a6ea52f786922",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_a747a84a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/TransactionRateLimiter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-12T07:03:05Z",
+      "side": 1,
+      "message": "Look at a later patchset. I have minimized the number of times we do the rate limit calculation.",
+      "parentUuid": "3aa0d159_ac022f09",
+      "revId": "16a80b88dd5f097553429a4bf59a6ea52f786922",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
