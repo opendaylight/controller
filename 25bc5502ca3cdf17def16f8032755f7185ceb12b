@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_154c7f9d",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/BrokerFacade.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-12T23:39:30Z",
+      "side": 1,
+      "message": "When throwing the exception how about including the path as well. Also the logging should be at the debug level.",
+      "revId": "25bc5502ca3cdf17def16f8032755f7185ceb12b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_955f2f41",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/BrokerFacade.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-12T23:39:30Z",
+      "side": 1,
+      "message": "ok here you have the path in the errMsg. Best thing would be to create a private method which logs the message and throws the exception so that you can do it consistently in all the scenarios.",
+      "revId": "25bc5502ca3cdf17def16f8032755f7185ceb12b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_b55a6b4e",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/BrokerFacade.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-12T23:39:30Z",
+      "side": 1,
+      "message": "Why log at info and not error?",
+      "revId": "25bc5502ca3cdf17def16f8032755f7185ceb12b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_d53cd7e4",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/BrokerFacade.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 253,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-12T23:39:30Z",
+      "side": 1,
+      "message": "error level logging",
+      "revId": "25bc5502ca3cdf17def16f8032755f7185ceb12b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
