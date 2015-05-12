@@ -7,11 +7,15 @@
  */
 package org.opendaylight.controller.md.sal.binding.impl;
 
+import com.google.common.base.Function;
 import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.Set;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import javax.annotation.Nullable;
 import org.opendaylight.controller.md.sal.binding.api.NotificationPublishService;
 import org.opendaylight.controller.md.sal.binding.impl.BindingDOMAdapterBuilder.Factory;
 import org.opendaylight.controller.md.sal.dom.api.DOMNotification;
@@ -62,6 +66,19 @@ public class BindingDOMNotificationPublishServiceAdapter implements Notification
         final ListenableFuture<?> listenableFuture =
                 domPublishService.offerNotification(toDomNotification(notification), timeout, unit);
         return !DOMNotificationPublishService.REJECTED.equals(listenableFuture);
+    }
+
+    @Override
+    public Future<Void> putNotificationAsync(Notification notification) {
+        final ListenableFuture<?> listenableFuture =
+                domPublishService.offerNotification(toDomNotification(notification));
+        return Futures.transform(listenableFuture, new Function<Object, Void>() {
+            @Nullable
+            @Override
+            public Void apply(Object input) {
+                return null;
+            }
+        });
     }
 
     private DOMNotification toDomNotification(final Notification notification) {

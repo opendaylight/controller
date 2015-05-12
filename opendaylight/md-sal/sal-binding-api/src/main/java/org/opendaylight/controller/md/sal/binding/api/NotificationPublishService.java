@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.md.sal.binding.api;
 
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.yangtools.yang.binding.Notification;
 
@@ -74,5 +75,17 @@ public interface NotificationPublishService extends BindingService {
      * @throws IllegalArgumentException if timeout is negative.
      */
     boolean offerNotification(Notification notification, int timeout, TimeUnit unit)
-        throws InterruptedException;
+            throws InterruptedException;
+
+    /**
+     * Publishes a notification to subscribed listeners. This initiates
+     * asynchronous process of sending the notification.
+     * Result is of type future and will by filled upon delivery.
+     *
+     * @param notification the notification to publish.
+     *                     timeout parameter
+     * @return asynchronous result
+     * @throws NullPointerException if the notification or unit is null
+     */
+    Future<Void> putNotificationAsync(Notification notification);
 }
