@@ -24,7 +24,9 @@ module event-source {
         http://www.eclipse.org/legal/epl-v10.html";
 
     revision "2014-12-02" {
-        description "first revision";
+        description "first revision
+            + add rpc dis-join-topic
+            + add notification event-source-status-notification";
     }
 
     // FIXME: expand this
@@ -82,6 +84,21 @@ module event-source {
                 type join-topic-status;
             }
         }
+    }
+
+    rpc dis-join-topic {
+        input {
+            leaf node {
+               ext:context-reference "inv:node-context";
+               type "instance-identifier";
+            }
+            leaf topic-id {
+                type aggr:topic-id;
+                mandatory true;
+                description "identifier of topic to be disjoin";
+            }
+        }
+
     }
 
     notification event-source-status-notification {
