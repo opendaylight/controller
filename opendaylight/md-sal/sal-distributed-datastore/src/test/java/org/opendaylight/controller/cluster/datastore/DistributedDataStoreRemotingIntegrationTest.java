@@ -33,6 +33,7 @@ import org.opendaylight.controller.md.cluster.datastore.model.PeopleModel;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -253,8 +254,8 @@ public class DistributedDataStoreRemotingIntegrationTest {
     }
 
     @Test
-    public void testTransactionChain() throws Exception {
-        initDatastores("testTransactionChain");
+    public void testTransactionChainWithSingleShard() throws Exception {
+        initDatastores("testTransactionChainWithSingleShard");
 
         DOMStoreTransactionChain txChain = followerDistributedDataStore.createTransactionChain();
 
@@ -297,6 +298,61 @@ public class DistributedDataStoreRemotingIntegrationTest {
         txChain.close();
 
         verifyCars(followerDistributedDataStore.newReadOnlyTransaction(), car2);
+    }
+
+    @Test
+    public void testTransactionChainWithMultipleShards() throws Exception{
+        initDatastores("testTransactionChainWithMultipleShards");
+
+        DOMStoreTransactionChain txChain = followerDistributedDataStore.createTransactionChain();
+
+        DOMStoreWriteTransaction writeTx = txChain.newWriteOnlyTransaction();
+        assertNotNull("newWriteOnlyTransaction returned null", writeTx);
+
+        writeTx.write(CarsModel.BASE_PATH, CarsModel.emptyContainer());
+        writeTx.write(PeopleModel.BASE_PATH, PeopleModel.emptyContainer());
+
+        writeTx.write(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode());
+        writeTx.write(PeopleModel.PERSON_LIST_PATH, PeopleModel.newPersonMapNode());
+
+        followerTestKit.doCommit(writeTx.ready());
+
+        DOMStoreReadWriteTransaction readWriteTx = txChain.newReadWriteTransaction();
+
+        MapEntryNode car = CarsModel.newCarEntry("optima", BigInteger.valueOf(20000));
+        YangInstanceIdentifier carPath = CarsModel.newCarPath("optima");
+        readWriteTx.write(carPath, car);
+
+        MapEntryNode person = PeopleModel.newPersonEntry("jack");
+        YangInstanceIdentifier personPath = PeopleModel.newPersonPath("jack");
+        readWriteTx.merge(personPath, person);
+
+        Optional<NormalizedNode<?, ?>> optional = readWriteTx.read(carPath).get(5, TimeUnit.SECONDS);
+        assertEquals("isPresent", true, optional.isPresent());
+        assertEquals("Data node", car, optional.get());
+
+        optional = readWriteTx.read(personPath).get(5, TimeUnit.SECONDS);
+        assertEquals("isPresent", true, optional.isPresent());
+        assertEquals("Data node", person, optional.get());
+
+        DOMStoreThreePhaseCommitCohort cohort2 = readWriteTx.ready();
+
+        writeTx = txChain.newWriteOnlyTransaction();
+
+        writeTx.delete(personPath);
+
+        DOMStoreThreePhaseCommitCohort cohort3 = writeTx.ready();
+
+        followerTestKit.doCommit(cohort2);
+        followerTestKit.doCommit(cohort3);
+
+        txChain.close();
+
+        DOMStoreReadTransaction readTx = followerDistributedDataStore.newReadOnlyTransaction();
+        verifyCars(readTx, car);
+
+        optional = readTx.read(personPath).get(5, TimeUnit.SECONDS);
+        assertEquals("isPresent", false, optional.isPresent());
     }
 
     @Test
