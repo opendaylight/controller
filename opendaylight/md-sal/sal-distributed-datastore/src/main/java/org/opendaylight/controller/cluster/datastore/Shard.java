@@ -317,9 +317,9 @@ public class Shard extends RaftActor {
         // or if cohortEntry has no modifications
         // we can apply modification to the state immediately
         if ((!hasFollowers() && !persistence().isRecoveryApplicable()) || isEmptyCommit(candidate)) {
-            applyModificationToState(getSender(), cohortEntry.getTransactionID(), candidate);
+            applyModificationToState(cohortEntry.getReplySender(), cohortEntry.getTransactionID(), candidate);
         } else {
-            Shard.this.persistData(getSender(), cohortEntry.getTransactionID(),
+            Shard.this.persistData(cohortEntry.getReplySender(), cohortEntry.getTransactionID(),
                 DataTreeCandidatePayload.create(candidate));
         }
     }

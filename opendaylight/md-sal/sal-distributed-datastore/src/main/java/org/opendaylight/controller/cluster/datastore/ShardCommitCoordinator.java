@@ -283,13 +283,14 @@ public class ShardCommitCoordinator {
     }
 
     private void doCanCommit(final CohortEntry cohortEntry) {
-
         boolean canCommit = false;
         try {
             // We block on the future here so we don't have to worry about possibly accessing our
             // state on a different thread outside of our dispatcher. Also, the data store
             // currently uses a same thread executor anyway.
             canCommit = cohortEntry.getCohort().canCommit().get();
+
+            log.debug("{}: canCommit for {}: {}", name, cohortEntry.getTransactionID(), canCommit);
 
             if(cohortEntry.isDoImmediateCommit()) {
                 if(canCommit) {
@@ -367,6 +368,7 @@ public class ShardCommitCoordinator {
             return false;
         }
 
+        cohortEntry.setReplySender(sender);
         return doCommit(cohortEntry);
     }
 
@@ -422,6 +424,12 @@ public class ShardCommitCoordinator {
         if(isCurrentTransaction(transactionID)) {
             // Dequeue the next cohort entry waiting in the queue.
             currentCohortEntry = queuedCohortEntries.poll();
+
+            if(log.isDebugEnabled()) {
+                log.debug("{}: currentTransactionComplete: {} - next entry to canCommit {}", name, transactionID,
+                        currentCohortEntry);
+            }
+
             if(currentCohortEntry != null) {
                 currentCohortEntry.updateLastAccessTime();
                 doCanCommit(currentCohortEntry);
@@ -519,6 +527,14 @@ public class ShardCommitCoordinator {
 
         void setShard(Shard shard) {
             this.shard = shard;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder builder = new StringBuilder();
+            builder.append("CohortEntry [transactionID=").append(transactionID).append(", doImmediateCommit=")
+                    .append(doImmediateCommit).append("]");
+            return builder.toString();
         }
     }
 }
