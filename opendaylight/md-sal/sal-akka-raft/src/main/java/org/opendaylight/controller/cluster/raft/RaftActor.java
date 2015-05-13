@@ -342,7 +342,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                     raftContext.setLastApplied(replicatedLogEntry.getIndex());
 
                     // Apply the state immediately
-                    applyState(clientActor, identifier, data);
+                    self().tell(new ApplyState(clientActor, identifier, replicatedLogEntry), self());
 
                     // Send a ApplyJournalEntries message so that we write the fact that we applied
                     // the state to durable storage
