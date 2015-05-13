@@ -136,11 +136,21 @@ module distributed-datastore-provider {
          }
 
          leaf shard-transaction-commit-queue-capacity {
-            default 20000;
+            default 50000;
             type non-zero-uint32-type;
             description "The maximum allowed capacity for each shard's transaction commit queue.";
          }
 
+         leaf shard-commit-queue-expiry-timeout-in-seconds {
+             default 120; // 2 minutes
+             type non-zero-uint32-type;
+             description "The maximum amount of time a transaction can remain in a shard's commit queue waiting 
+                 to begin the CanCommit phase as coordinated by the broker front-end. Normally this should be
+                 quick but latencies can occur in between transaction ready and CanCommit or a remote broker
+                 could lose connection and CanCommit might never occur. Expiring transactions from the queue
+                 allows subsequent pending transaction to be processed.";
+         }
+         
          leaf shard-initialization-timeout-in-seconds {
             default 300; // 5 minutes
             type non-zero-uint32-type;

@@ -198,7 +198,10 @@ final class RemoteTransactionContextSupport {
                 isTxActorLocal, remoteTransactionVersion, parent.getCompleter());
         }
 
-        TransactionContextCleanup.track(this, ret);
+        if(parent.getType() == TransactionType.READ_ONLY) {
+            TransactionContextCleanup.track(this, ret);
+        }
+
         return ret;
     }
 }
