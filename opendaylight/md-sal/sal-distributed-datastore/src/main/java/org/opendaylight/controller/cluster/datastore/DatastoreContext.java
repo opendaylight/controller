@@ -36,7 +36,7 @@ public class DatastoreContext {
     public static final int DEFAULT_SNAPSHOT_BATCH_COUNT = 20000;
     public static final int DEFAULT_HEARTBEAT_INTERVAL_IN_MILLIS = 500;
     public static final int DEFAULT_ISOLATED_LEADER_CHECK_INTERVAL_IN_MILLIS = DEFAULT_HEARTBEAT_INTERVAL_IN_MILLIS * 10;
-    public static final int DEFAULT_SHARD_TX_COMMIT_QUEUE_CAPACITY = 20000;
+    public static final int DEFAULT_SHARD_TX_COMMIT_QUEUE_CAPACITY = 50000;
     public static final Timeout DEFAULT_SHARD_INITIALIZATION_TIMEOUT = new Timeout(5, TimeUnit.MINUTES);
     public static final Timeout DEFAULT_SHARD_LEADER_ELECTION_TIMEOUT = new Timeout(30, TimeUnit.SECONDS);
     public static final boolean DEFAULT_PERSISTENT = true;
@@ -45,7 +45,8 @@ public class DatastoreContext {
     public static final int DEFAULT_SHARD_ELECTION_TIMEOUT_FACTOR = 2;
     public static final int DEFAULT_TX_CREATION_INITIAL_RATE_LIMIT = 100;
     public static final String UNKNOWN_DATA_STORE_TYPE = "unknown";
-    public static final int DEFAULT_SHARD_BATCHED_MODIFICATION_COUNT= 100;
+    public static final int DEFAULT_SHARD_BATCHED_MODIFICATION_COUNT = 100;
+    public static final long DEFAULT_SHARD_COMMIT_QUEUE_EXPIRY_TIMEOUT_IN_MS = TimeUnit.MILLISECONDS.convert(2, TimeUnit.MINUTES);
 
     private static Set<String> globalDatastoreTypes = Sets.newConcurrentHashSet();
 
@@ -64,6 +65,7 @@ public class DatastoreContext {
     private String dataStoreType = UNKNOWN_DATA_STORE_TYPE;
     private int shardBatchedModificationCount = DEFAULT_SHARD_BATCHED_MODIFICATION_COUNT;
     private boolean writeOnlyTransactionOptimizationsEnabled = true;
+    private long shardCommitQueueExpiryTimeoutInMillis = DEFAULT_SHARD_COMMIT_QUEUE_EXPIRY_TIMEOUT_IN_MS;
 
     public static Set<String> getGlobalDatastoreTypes() {
         return globalDatastoreTypes;
@@ -93,6 +95,7 @@ public class DatastoreContext {
         this.dataStoreType = other.dataStoreType;
         this.shardBatchedModificationCount = other.shardBatchedModificationCount;
         this.writeOnlyTransactionOptimizationsEnabled = other.writeOnlyTransactionOptimizationsEnabled;
+        this.shardCommitQueueExpiryTimeoutInMillis = other.shardCommitQueueExpiryTimeoutInMillis;
 
         setShardJournalRecoveryLogBatchSize(other.raftConfig.getJournalRecoveryLogBatchSize());
         setSnapshotBatchCount(other.raftConfig.getSnapshotBatchCount());
@@ -199,6 +202,10 @@ public class DatastoreContext {
 
     public boolean isWriteOnlyTransactionOptimizationsEnabled() {
         return writeOnlyTransactionOptimizationsEnabled;
+    }
+
+    public long getShardCommitQueueExpiryTimeoutInMillis() {
+        return shardCommitQueueExpiryTimeoutInMillis;
     }
 
     public static class Builder {
@@ -343,6 +350,17 @@ public class DatastoreContext {
 
         public Builder writeOnlyTransactionOptimizationsEnabled(boolean value) {
             datastoreContext.writeOnlyTransactionOptimizationsEnabled = value;
+            return this;
+        }
+
+        public Builder shardCommitQueueExpiryTimeoutInMillis(long value) {
+            datastoreContext.shardCommitQueueExpiryTimeoutInMillis = value;
+            return this;
+        }
+
+        public Builder shardCommitQueueExpiryTimeoutInSeconds(long value) {
+            datastoreContext.shardCommitQueueExpiryTimeoutInMillis = TimeUnit.MILLISECONDS.convert(
+                    value, TimeUnit.SECONDS);
             return this;
         }
 

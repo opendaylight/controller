@@ -34,6 +34,8 @@ public interface DatastoreConfigurationMXBean {
 
     int getShardTransactionCommitQueueCapacity();
 
+    long getShardCommitQueueExpiryTimeoutInSeconds();
+
     long getShardInitializationTimeoutInSeconds();
 
     long getShardLeaderElectionTimeoutInSeconds();

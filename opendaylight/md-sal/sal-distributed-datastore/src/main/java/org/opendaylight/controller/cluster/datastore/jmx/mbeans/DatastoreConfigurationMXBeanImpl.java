@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore.jmx.mbeans;
 
+import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
 
@@ -71,6 +72,11 @@ public class DatastoreConfigurationMXBeanImpl extends AbstractMXBean implements 
     @Override
     public long getShardTransactionCommitTimeoutInSeconds() {
         return context.getShardTransactionCommitTimeoutInSeconds();
+    }
+
+    @Override
+    public long getShardCommitQueueExpiryTimeoutInSeconds() {
+        return TimeUnit.SECONDS.convert(context.getShardCommitQueueExpiryTimeoutInMillis(), TimeUnit.MILLISECONDS);
     }
 
     @Override

@@ -9,6 +9,7 @@ import akka.cluster.Cluster;
 import akka.testkit.JavaTestKit;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.typesafe.config.ConfigFactory;
 import java.io.IOException;
@@ -788,12 +789,15 @@ public class DistributedDataStoreIntegrationTest {
 
             writeTx = txChain.newWriteOnlyTransaction();
 
-            //writeTx.delete(personPath);
+            writeTx.delete(carPath);
 
             DOMStoreThreePhaseCommitCohort cohort3 = writeTx.ready();
 
-            doCommit(cohort1);
-            doCommit(cohort2);
+            ListenableFuture<Boolean> canCommit1 = cohort1.canCommit();
+            ListenableFuture<Boolean> canCommit2 = cohort2.canCommit();
+
+            doCommit(canCommit1, cohort1);
+            doCommit(canCommit2, cohort2);
             doCommit(cohort3);
 
             txChain.close();
@@ -801,12 +805,11 @@ public class DistributedDataStoreIntegrationTest {
             DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
 
             optional = readTx.read(carPath).get(5, TimeUnit.SECONDS);
-            assertEquals("isPresent", true, optional.isPresent());
-            assertEquals("Data node", car, optional.get());
+            assertEquals("isPresent", false, optional.isPresent());
 
             optional = readTx.read(personPath).get(5, TimeUnit.SECONDS);
-            //assertEquals("isPresent", false, optional.isPresent());
             assertEquals("isPresent", true, optional.isPresent());
+            assertEquals("Data node", person, optional.get());
 
             cleanup(dataStore);
         }};
