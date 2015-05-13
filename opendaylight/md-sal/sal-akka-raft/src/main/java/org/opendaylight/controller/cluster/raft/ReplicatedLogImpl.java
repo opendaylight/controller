@@ -81,6 +81,8 @@ class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
             new Procedure<ReplicatedLogEntry>() {
                 @Override
                 public void apply(ReplicatedLogEntry evt) throws Exception {
+                    context.getLogger().debug("{}: persist complete {}", context.getId(), replicatedLogEntry);
+
                     int logEntrySize = replicatedLogEntry.size();
 
                     long dataSizeForCheck = dataSize();

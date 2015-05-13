@@ -14,6 +14,7 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.PoisonPill;
 import com.google.common.base.Optional;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -117,6 +118,13 @@ class IntegrationTestKit extends ShardTestKit {
 
     void doCommit(final DOMStoreThreePhaseCommitCohort cohort) throws Exception {
         Boolean canCommit = cohort.canCommit().get(7, TimeUnit.SECONDS);
+        assertEquals("canCommit", true, canCommit);
+        cohort.preCommit().get(5, TimeUnit.SECONDS);
+        cohort.commit().get(5, TimeUnit.SECONDS);
+    }
+
+    void doCommit(final ListenableFuture<Boolean> canCommitFuture, final DOMStoreThreePhaseCommitCohort cohort) throws Exception {
+        Boolean canCommit = canCommitFuture.get(7, TimeUnit.SECONDS);
         assertEquals("canCommit", true, canCommit);
         cohort.preCommit().get(5, TimeUnit.SECONDS);
         cohort.commit().get(5, TimeUnit.SECONDS);
