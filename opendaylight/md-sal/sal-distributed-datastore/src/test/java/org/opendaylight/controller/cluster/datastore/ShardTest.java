@@ -1819,7 +1819,7 @@ public class ShardTest extends AbstractShardTest {
 
     @Test
     public void testTransactionCommitQueueCapacityExceeded() throws Throwable {
-        dataStoreContextBuilder.shardTransactionCommitQueueCapacity(1);
+        dataStoreContextBuilder.shardTransactionCommitQueueCapacity(2);
 
         new ShardTestKit(getSystem()) {{
             final TestActorRef<Shard> shard = TestActorRef.create(getSystem(),
@@ -1859,9 +1859,11 @@ public class ShardTest extends AbstractShardTest {
                     cohort2, modification2, true, false), getRef());
             expectMsgClass(duration, ReadyTransactionReply.class);
 
+            // The 3rd Tx should exceed queue capacity and fail.
+
             shard.tell(new ForwardedReadyTransaction(transactionID3, CURRENT_VERSION,
                     cohort3, modification3, true, false), getRef());
-            expectMsgClass(duration, ReadyTransactionReply.class);
+            expectMsgClass(duration, akka.actor.Status.Failure.class);
 
             // canCommit 1st Tx.
 
