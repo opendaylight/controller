@@ -26,6 +26,7 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCoh
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,13 +62,13 @@ public class DOMBrokerWriteOnlyTransaction<T extends DOMStoreWriteTransaction>
     private volatile Future<?> commitFuture;
 
     protected DOMBrokerWriteOnlyTransaction(final Object identifier,
-                                            Map storeTxFactories, final AbstractDOMTransactionFactory<?> commitImpl) {
+                                            final Map storeTxFactories, final AbstractDOMTransactionFactory<?> commitImpl) {
         super(identifier, storeTxFactories);
         this.commitImpl = Preconditions.checkNotNull(commitImpl, "commitImpl must not be null.");
     }
 
     @Override
-    protected T createTransaction(LogicalDatastoreType key) {
+    protected T createTransaction(final LogicalDatastoreType key) {
         // FIXME : Casting shouldn't be necessary here
         return (T) getTxFactory(key).newWriteOnlyTransaction();
     }
@@ -75,7 +76,16 @@ public class DOMBrokerWriteOnlyTransaction<T extends DOMStoreWriteTransaction>
     @Override
     public void put(final LogicalDatastoreType store, final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
         checkRunning(commitImpl);
+        checkInstanceIdentifierReferencesData(path,data);
         getSubtransaction(store).write(path, data);
+    }
+
+    private static void checkInstanceIdentifierReferencesData(final YangInstanceIdentifier path,
+            final NormalizedNode<?, ?> data) {
+        final PathArgument lastArg = path.getLastPathArgument();
+        Preconditions.checkArgument(
+                (lastArg == data.getIdentifier()) || (lastArg != null && lastArg.equals(data.getIdentifier())),
+                "Instance identifier references %s but data identifier is %s", lastArg, data);
     }
 
     @Override
@@ -87,6 +97,7 @@ public class DOMBrokerWriteOnlyTransaction<T extends DOMStoreWriteTransaction>
     @Override
     public void merge(final LogicalDatastoreType store, final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
         checkRunning(commitImpl);
+        checkInstanceIdentifierReferencesData(path, data);
         getSubtransaction(store).merge(path, data);
     }
 
@@ -125,7 +136,7 @@ public class DOMBrokerWriteOnlyTransaction<T extends DOMStoreWriteTransaction>
         final Collection<DOMStoreThreePhaseCommitCohort> cohorts = new ArrayList<>(txns.size());
 
         // FIXME: deal with errors thrown by backed (ready and submit can fail in theory)
-        for (DOMStoreWriteTransaction txn : txns) {
+        for (final DOMStoreWriteTransaction txn : txns) {
             cohorts.add(txn.ready());
         }
 
