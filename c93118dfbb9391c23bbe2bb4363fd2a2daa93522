@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_a9f9b681",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/DOMBrokerWriteOnlyTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-13T12:44:43Z",
+      "side": 1,
+      "message": "inconsistent, checkInstance done before checkRunning (in put it\u0027s the other way)",
+      "revId": "c93118dfbb9391c23bbe2bb4363fd2a2daa93522",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
