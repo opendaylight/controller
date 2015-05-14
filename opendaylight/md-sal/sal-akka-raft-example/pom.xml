@@ -14,6 +14,11 @@
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-akka-raft</artifactId>
     </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+    </dependency>
   </dependencies>
 
   <build>
@@ -25,6 +30,9 @@
         <configuration>
           <instructions>
             <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
+            <Export-package>org.opendaylight.controller.cluster.example</Export-package>
+            <Import-Package>*</Import-Package>
+            <DynamicImport-Package>*</DynamicImport-Package>
           </instructions>
         </configuration>
       </plugin>
