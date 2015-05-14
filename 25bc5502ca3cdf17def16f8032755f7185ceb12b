@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "1a9dcd25_9b6b4b85",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/BrokerFacade.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-14T16:50:56Z",
+      "side": 1,
+      "message": "Well then we should be consistent. Elsewhere (later in this file) we throw an exception with the path. Usually log messages or exception messages without context are not that useful, so my rule of thumb is always try to include a variable in a message.",
+      "parentUuid": "3aa0d159_df24e9b0",
+      "revId": "25bc5502ca3cdf17def16f8032755f7185ceb12b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_955f2f41",
         "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/BrokerFacade.java",
         "patchSetId": 4
@@ -89,6 +107,24 @@
     },
     {
       "key": {
+        "uuid": "1a9dcd25_5b2ce34a",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/BrokerFacade.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-14T16:50:56Z",
+      "side": 1,
+      "message": "If you are throwing an exception then why do you need info logging? The response will go to a client and the client will know the root cause anyway. I believe info logging should be used sparingly not in commonly used paths otherwise they will just cause logs to be filled up. If we are to go with your logic most public methods would end up with info messages.",
+      "parentUuid": "3aa0d159_1f79f192",
+      "revId": "25bc5502ca3cdf17def16f8032755f7185ceb12b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_d53cd7e4",
         "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/BrokerFacade.java",
         "patchSetId": 4
@@ -118,6 +154,24 @@
       "side": 1,
       "message": "I don\u0027t think error level is relevant.",
       "parentUuid": "3aa0d159_d53cd7e4",
+      "revId": "25bc5502ca3cdf17def16f8032755f7185ceb12b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_1b265b69",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/BrokerFacade.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 253,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-14T16:50:56Z",
+      "side": 1,
+      "message": "By your explanation. Why is this a nice to know? What action would you do if you saw this in the logs? This is what I call an expected exception and if this is not an error then I would log it at debug level. Info messages can be distracting too - especially if there are too many of them.",
+      "parentUuid": "3aa0d159_3f638ddd",
       "revId": "25bc5502ca3cdf17def16f8032755f7185ceb12b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
