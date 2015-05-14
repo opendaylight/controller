@@ -61,18 +61,12 @@ public class WriteRunningTx extends AbstractWriteTx {
     }
 
     private void lock() {
-        try {
-            invokeBlocking("Lock running", new Function<NetconfBaseOps, ListenableFuture<DOMRpcResult>>() {
+        invoke("Lock runnign", new Function<NetconfBaseOps, ListenableFuture<DOMRpcResult>>() {
                 @Override
                 public ListenableFuture<DOMRpcResult> apply(final NetconfBaseOps input) {
                     return input.lockRunning(new NetconfRpcFutureCallback("Lock running", id));
                 }
-            });
-        } catch (final NetconfDocumentedException e) {
-            LOG.warn("{}: Failed to initialize netconf transaction (lock running)", e);
-            finished = true;
-            throw new RuntimeException(id + ": Failed to initialize netconf transaction (lock running)", e);
-        }
+        });
     }
 
     @Override
@@ -119,7 +113,7 @@ public class WriteRunningTx extends AbstractWriteTx {
 
     @Override
     protected void editConfig(final DataContainerChild<?, ?> editStructure, final Optional<ModifyAction> defaultOperation) throws NetconfDocumentedException {
-        invokeBlocking("Edit running", new Function<NetconfBaseOps, ListenableFuture<DOMRpcResult>>() {
+        invoke("Edit running", new Function<NetconfBaseOps, ListenableFuture<DOMRpcResult>>() {
             @Override
             public ListenableFuture<DOMRpcResult> apply(final NetconfBaseOps input) {
                         return defaultOperation.isPresent()
