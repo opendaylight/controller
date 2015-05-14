@@ -55,6 +55,11 @@ public class DistributedDataStoreRemotingIntegrationTest {
 
     private static final String[] SHARD_NAMES = {"cars", "people"};
 
+    private static final Address MEMBER_1_ADDRESS = AddressFromURIString.parse("akka.tcp://cluster-test@127.0.0.1:2558");
+    private static final Address MEMBER_2_ADDRESS = AddressFromURIString.parse("akka.tcp://cluster-test@127.0.0.1:2559");
+
+    private static final String MODULE_SHARDS_CONFIG = "module-shards-member1-and-2.conf";
+
     private ActorSystem leaderSystem;
     private ActorSystem followerSystem;
 
@@ -62,7 +67,7 @@ public class DistributedDataStoreRemotingIntegrationTest {
             DatastoreContext.newBuilder().shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(1);
 
     private final DatastoreContext.Builder followerDatastoreContextBuilder =
-            DatastoreContext.newBuilder().shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(200);
+            DatastoreContext.newBuilder().shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(5);
 
     private DistributedDataStore followerDistributedDataStore;
     private DistributedDataStore leaderDistributedDataStore;
@@ -72,11 +77,10 @@ public class DistributedDataStoreRemotingIntegrationTest {
     @Before
     public void setUpClass() {
         leaderSystem = ActorSystem.create("cluster-test", ConfigFactory.load().getConfig("Member1"));
-        Address member1Address = AddressFromURIString.parse("akka.tcp://cluster-test@127.0.0.1:2558");
-        Cluster.get(leaderSystem).join(member1Address);
+        Cluster.get(leaderSystem).join(MEMBER_1_ADDRESS);
 
         followerSystem = ActorSystem.create("cluster-test", ConfigFactory.load().getConfig("Member2"));
-        Cluster.get(followerSystem).join(member1Address);
+        Cluster.get(followerSystem).join(MEMBER_1_ADDRESS);
     }
 
     @After
@@ -88,12 +92,10 @@ public class DistributedDataStoreRemotingIntegrationTest {
     private void initDatastores(String type) {
         leaderTestKit = new IntegrationTestKit(leaderSystem, leaderDatastoreContextBuilder);
 
-        String moduleShardsConfig = "module-shards-member1-and-2.conf";
-
         followerTestKit = new IntegrationTestKit(followerSystem, followerDatastoreContextBuilder);
-        followerDistributedDataStore = followerTestKit.setupDistributedDataStore(type, moduleShardsConfig, false, SHARD_NAMES);
+        followerDistributedDataStore = followerTestKit.setupDistributedDataStore(type, MODULE_SHARDS_CONFIG, false, SHARD_NAMES);
 
-        leaderDistributedDataStore = leaderTestKit.setupDistributedDataStore(type, moduleShardsConfig, true, SHARD_NAMES);
+        leaderDistributedDataStore = leaderTestKit.setupDistributedDataStore(type, MODULE_SHARDS_CONFIG, false, SHARD_NAMES);
 
         leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(), SHARD_NAMES);
     }
@@ -353,6 +355,58 @@ public class DistributedDataStoreRemotingIntegrationTest {
 
         optional = readTx.read(personPath).get(5, TimeUnit.SECONDS);
         assertEquals("isPresent", false, optional.isPresent());
+    }
+
+    @Test
+    public void testSingleShardTransactionsWithLeaderChanges() throws Exception {
+        String testName = "testSingleShardTransactionsWithLeaderChanges";
+        initDatastores(testName);
+
+        String followerCarShardName = "member-2-shard-cars-" + testName;
+        InMemoryJournal.addWriteMessagesCompleteLatch(followerCarShardName, 1, ApplyJournalEntries.class );
+
+        // Write top-level car container from the follower so it uses a remote Tx.
+
+        DOMStoreWriteTransaction writeTx = followerDistributedDataStore.newWriteOnlyTransaction();
+
+        writeTx.write(CarsModel.BASE_PATH, CarsModel.emptyContainer());
+        writeTx.write(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode());
+
+        followerTestKit.doCommit(writeTx.ready());
+
+        InMemoryJournal.waitForWriteMessagesComplete(followerCarShardName);
+
+        // Switch the leader to the follower
+
+        followerDatastoreContextBuilder.shardElectionTimeoutFactor(1);
+        followerDistributedDataStore.onDatastoreContextUpdated(followerDatastoreContextBuilder.build());
+
+        JavaTestKit.shutdownActorSystem(leaderSystem, null, true);
+
+        followerTestKit.waitUntilNoLeader(followerDistributedDataStore.getActorContext(), SHARD_NAMES);
+
+        leaderSystem = ActorSystem.create("cluster-test", ConfigFactory.load().getConfig("Member1"));
+        Cluster.get(leaderSystem).join(MEMBER_2_ADDRESS);
+
+        DatastoreContext.Builder newMember1Builder = DatastoreContext.newBuilder().
+                shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(5);
+        IntegrationTestKit newMember1TestKit = new IntegrationTestKit(leaderSystem, newMember1Builder);
+        DistributedDataStore newMember1Datastore = newMember1TestKit.
+                    setupDistributedDataStore(testName, MODULE_SHARDS_CONFIG, false, SHARD_NAMES);
+
+        followerTestKit.waitUntilLeader(followerDistributedDataStore.getActorContext(), SHARD_NAMES);
+
+        // Write a car entry to the new leader - should switch to local Tx
+
+        writeTx = followerDistributedDataStore.newWriteOnlyTransaction();
+
+        MapEntryNode car1 = CarsModel.newCarEntry("optima", BigInteger.valueOf(20000));
+        YangInstanceIdentifier car1Path = CarsModel.newCarPath("optima");
+        writeTx.merge(car1Path, car1);
+
+        followerTestKit.doCommit(writeTx.ready());
+
+        verifyCars(followerDistributedDataStore.newReadOnlyTransaction(), car1);
     }
 
     @Test

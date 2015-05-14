@@ -331,7 +331,7 @@ public class ActorContextTest extends AbstractActorTest{
     public void testClientDispatcherIsGlobalDispatcher(){
         ActorContext actorContext =
                 new ActorContext(getSystem(), mock(ActorRef.class), mock(ClusterWrapper.class),
-                        mock(Configuration.class), DatastoreContext.newBuilder().build());
+                        mock(Configuration.class), DatastoreContext.newBuilder().build(), new PrimaryShardInfoFutureCache());
 
         assertEquals(getSystem().dispatchers().defaultGlobalDispatcher(), actorContext.getClientDispatcher());
 
@@ -343,7 +343,7 @@ public class ActorContextTest extends AbstractActorTest{
 
         ActorContext actorContext =
                 new ActorContext(actorSystem, mock(ActorRef.class), mock(ClusterWrapper.class),
-                        mock(Configuration.class), DatastoreContext.newBuilder().build());
+                        mock(Configuration.class), DatastoreContext.newBuilder().build(), new PrimaryShardInfoFutureCache());
 
         assertNotEquals(actorSystem.dispatchers().defaultGlobalDispatcher(), actorContext.getClientDispatcher());
 
@@ -356,7 +356,7 @@ public class ActorContextTest extends AbstractActorTest{
         new JavaTestKit(getSystem()) {{
             ActorContext actorContext = new ActorContext(getSystem(), getRef(), mock(ClusterWrapper.class),
                             mock(Configuration.class), DatastoreContext.newBuilder().
-                                operationTimeoutInSeconds(5).shardTransactionCommitTimeoutInSeconds(7).build());
+                                operationTimeoutInSeconds(5).shardTransactionCommitTimeoutInSeconds(7).build(), new PrimaryShardInfoFutureCache());
 
             assertEquals("getOperationDuration", 5, actorContext.getOperationDuration().toSeconds());
             assertEquals("getTransactionCommitOperationTimeout", 7,
@@ -389,7 +389,7 @@ public class ActorContextTest extends AbstractActorTest{
             final String expPrimaryPath = "akka://test-system/find-primary-shard";
             ActorContext actorContext =
                     new ActorContext(getSystem(), shardManager, mock(ClusterWrapper.class),
-                            mock(Configuration.class), dataStoreContext) {
+                            mock(Configuration.class), dataStoreContext, new PrimaryShardInfoFutureCache()) {
                         @Override
                         protected Future<Object> doAsk(ActorRef actorRef, Object message, Timeout timeout) {
                             return Futures.successful((Object) new RemotePrimaryShardFound(expPrimaryPath));
@@ -410,9 +410,7 @@ public class ActorContextTest extends AbstractActorTest{
 
             assertEquals(cachedInfo, actual);
 
-            // Wait for 200 Milliseconds. The cached entry should have been removed.
-
-            Uninterruptibles.sleepUninterruptibly(200, TimeUnit.MILLISECONDS);
+            actorContext.getPrimaryShardInfoCache().remove("foobar");
 
             cached = actorContext.getPrimaryShardInfoCache().getIfPresent("foobar");
 
@@ -432,7 +430,7 @@ public class ActorContextTest extends AbstractActorTest{
             final String expPrimaryPath = "akka://test-system/find-primary-shard";
             ActorContext actorContext =
                     new ActorContext(getSystem(), shardManager, mock(ClusterWrapper.class),
-                            mock(Configuration.class), dataStoreContext) {
+                            mock(Configuration.class), dataStoreContext, new PrimaryShardInfoFutureCache()) {
                         @Override
                         protected Future<Object> doAsk(ActorRef actorRef, Object message, Timeout timeout) {
                             return Futures.successful((Object) new LocalPrimaryShardFound(expPrimaryPath, mockDataTree));
@@ -454,9 +452,7 @@ public class ActorContextTest extends AbstractActorTest{
 
             assertEquals(cachedInfo, actual);
 
-            // Wait for 200 Milliseconds. The cached entry should have been removed.
-
-            Uninterruptibles.sleepUninterruptibly(200, TimeUnit.MILLISECONDS);
+            actorContext.getPrimaryShardInfoCache().remove("foobar");
 
             cached = actorContext.getPrimaryShardInfoCache().getIfPresent("foobar");
 
@@ -474,7 +470,7 @@ public class ActorContextTest extends AbstractActorTest{
 
             ActorContext actorContext =
                     new ActorContext(getSystem(), shardManager, mock(ClusterWrapper.class),
-                            mock(Configuration.class), dataStoreContext) {
+                            mock(Configuration.class), dataStoreContext, new PrimaryShardInfoFutureCache()) {
                         @Override
                         protected Future<Object> doAsk(ActorRef actorRef, Object message, Timeout timeout) {
                             return Futures.successful((Object) new PrimaryNotFoundException("not found"));
@@ -507,7 +503,7 @@ public class ActorContextTest extends AbstractActorTest{
 
             ActorContext actorContext =
                     new ActorContext(getSystem(), shardManager, mock(ClusterWrapper.class),
-                            mock(Configuration.class), dataStoreContext) {
+                            mock(Configuration.class), dataStoreContext, new PrimaryShardInfoFutureCache()) {
                         @Override
                         protected Future<Object> doAsk(ActorRef actorRef, Object message, Timeout timeout) {
                             return Futures.successful((Object) new NotInitializedException("not iniislized"));
@@ -547,7 +543,7 @@ public class ActorContextTest extends AbstractActorTest{
 
             ActorContext actorContext = new ActorContext(getSystem(), shardManagerActorRef,
                     mock(ClusterWrapper.class), mockConfig,
-                    DatastoreContext.newBuilder().shardInitializationTimeout(200, TimeUnit.MILLISECONDS).build());
+                    DatastoreContext.newBuilder().shardInitializationTimeout(200, TimeUnit.MILLISECONDS).build(), new PrimaryShardInfoFutureCache());
 
             actorContext.broadcast(new TestMessage());
 

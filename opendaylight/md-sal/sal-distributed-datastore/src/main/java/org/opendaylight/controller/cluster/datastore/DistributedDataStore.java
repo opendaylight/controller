@@ -21,6 +21,7 @@ import org.opendaylight.controller.cluster.datastore.jmx.mbeans.DatastoreInfoMXB
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.cluster.datastore.utils.Dispatchers;
+import org.opendaylight.controller.cluster.datastore.utils.PrimaryShardInfoFutureCache;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
@@ -81,8 +82,10 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
         String shardDispatcher =
                 new Dispatchers(actorSystem.dispatchers()).getDispatcherPath(Dispatchers.DispatcherType.Shard);
 
+        PrimaryShardInfoFutureCache primaryShardInfoCache = new PrimaryShardInfoFutureCache();
         actorContext = new ActorContext(actorSystem, createShardManager(actorSystem, cluster, configuration,
-                datastoreContext, shardDispatcher, shardManagerId ), cluster, configuration, datastoreContext);
+                datastoreContext, shardDispatcher, shardManagerId, primaryShardInfoCache), cluster,
+                configuration, datastoreContext, primaryShardInfoCache);
 
         this.waitTillReadyTimeInMillis =
                 actorContext.getDatastoreContext().getShardLeaderElectionTimeout().duration().toMillis() * READY_WAIT_FACTOR;
@@ -97,7 +100,8 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
         datastoreInfoMXBean.registerMBean();
     }
 
-    public DistributedDataStore(ActorContext actorContext) {
+    @VisibleForTesting
+    DistributedDataStore(ActorContext actorContext) {
         this.actorContext = Preconditions.checkNotNull(actorContext, "actorContext should not be null");
         this.txContextFactory = TransactionContextFactory.create(actorContext);
         this.type = UNKNOWN_TYPE;
@@ -218,14 +222,16 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
     }
 
     private ActorRef createShardManager(ActorSystem actorSystem, ClusterWrapper cluster, Configuration configuration,
-                                        DatastoreContext datastoreContext, String shardDispatcher, String shardManagerId){
+                                        DatastoreContext datastoreContext, String shardDispatcher, String shardManagerId,
+                                        PrimaryShardInfoFutureCache primaryShardInfoCache){
         Exception lastException = null;
 
         for(int i=0;i<100;i++) {
             try {
                 return actorSystem.actorOf(
-                        ShardManager.props(cluster, configuration, datastoreContext, waitTillReadyCountDownLatch)
-                                .withDispatcher(shardDispatcher).withMailbox(ActorContext.MAILBOX), shardManagerId);
+                        ShardManager.props(cluster, configuration, datastoreContext, waitTillReadyCountDownLatch,
+                                primaryShardInfoCache).withDispatcher(shardDispatcher).withMailbox(
+                                        ActorContext.MAILBOX), shardManagerId);
             } catch (Exception e){
                 lastException = e;
                 Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);

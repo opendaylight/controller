@@ -46,7 +46,7 @@ public class DatastoreContext {
     public static final int DEFAULT_TX_CREATION_INITIAL_RATE_LIMIT = 100;
     public static final String UNKNOWN_DATA_STORE_TYPE = "unknown";
     public static final int DEFAULT_SHARD_BATCHED_MODIFICATION_COUNT = 100;
-    public static final long DEFAULT_SHARD_COMMIT_CACHE_EXPIRY_TIMEOUT_IN_MS = TimeUnit.SECONDS.convert(2, TimeUnit.MINUTES);
+    public static final long DEFAULT_SHARD_COMMIT_CACHE_EXPIRY_TIMEOUT_IN_MS = TimeUnit.MILLISECONDS.convert(2, TimeUnit.MINUTES);
 
     private static Set<String> globalDatastoreTypes = Sets.newConcurrentHashSet();
 

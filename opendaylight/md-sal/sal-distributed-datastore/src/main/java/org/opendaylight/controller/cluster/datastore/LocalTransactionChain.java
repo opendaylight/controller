@@ -11,8 +11,10 @@ import akka.actor.ActorSelection;
 import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
 import org.opendaylight.controller.sal.core.spi.data.AbstractSnapshotBackedTransactionChain;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.SnapshotBackedWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
@@ -70,7 +72,17 @@ final class LocalTransactionChain extends AbstractSnapshotBackedTransactionChain
     }
 
     @Override
+    public DOMStoreReadTransaction newReadOnlyTransaction(TransactionIdentifier identifier) {
+        return super.newReadOnlyTransaction(identifier);
+    }
+
+    @Override
     public DOMStoreReadWriteTransaction newReadWriteTransaction(TransactionIdentifier identifier) {
         return super.newReadWriteTransaction(identifier);
+    }
+
+    @Override
+    public DOMStoreWriteTransaction newWriteOnlyTransaction(TransactionIdentifier identifier) {
+        return super.newWriteOnlyTransaction(identifier);
     }
 }

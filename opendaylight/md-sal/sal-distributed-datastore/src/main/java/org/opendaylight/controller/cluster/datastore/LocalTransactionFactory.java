@@ -8,7 +8,9 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 
 /**
  * A factory for creating local transactions used by {@link AbstractTransactionContextFactory} to instantiate
@@ -17,5 +19,9 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransactio
  * @author Thomas Pantelis
  */
 interface LocalTransactionFactory {
+    DOMStoreReadTransaction newReadOnlyTransaction(TransactionIdentifier identifier);
+
     DOMStoreReadWriteTransaction newReadWriteTransaction(TransactionIdentifier identifier);
+
+    DOMStoreWriteTransaction newWriteOnlyTransaction(TransactionIdentifier identifier);
 }
