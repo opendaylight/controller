@@ -72,19 +72,33 @@ class IntegrationTestKit extends ShardTestKit {
 
     void waitUntilLeader(ActorContext actorContext, String... shardNames) {
         for(String shardName: shardNames) {
-            ActorRef shard = null;
-            for(int i = 0; i < 20 * 5 && shard == null; i++) {
-                Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
-                Optional<ActorRef> shardReply = actorContext.findLocalShard(shardName);
-                if(shardReply.isPresent()) {
-                    shard = shardReply.get();
-                }
-            }
+            ActorRef shard = findLocalShard(actorContext, shardName);
 
             assertNotNull("Shard was not created", shard);
 
             waitUntilLeader(shard);
         }
+    }
+
+    void waitUntilNoLeader(ActorContext actorContext, String... shardNames) {
+        for(String shardName: shardNames) {
+            ActorRef shard = findLocalShard(actorContext, shardName);
+            assertNotNull("No local shard found", shard);
+
+            waitUntilNoLeader(shard);
+        }
+    }
+
+    private ActorRef findLocalShard(ActorContext actorContext, String shardName) {
+        ActorRef shard = null;
+        for(int i = 0; i < 20 * 5 && shard == null; i++) {
+            Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
+            Optional<ActorRef> shardReply = actorContext.findLocalShard(shardName);
+            if(shardReply.isPresent()) {
+                shard = shardReply.get();
+            }
+        }
+        return shard;
     }
 
     void testWriteTransaction(DistributedDataStore dataStore, YangInstanceIdentifier nodePath,
