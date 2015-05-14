@@ -16,7 +16,7 @@ module car {
     description
       "YANG model for car for test application";
 
-    revision "2014-08-18" {
+    revision "2015-05-13" {
       description
         "Clustering sample app";
     }
@@ -24,6 +24,15 @@ module car {
     typedef car-id {
       type inet:uri;
       description "An identifier for car entry.";
+    }
+
+    typedef car-entry-ref {
+      type instance-identifier;
+      description "A reference that points to an people:people/person in the data tree.";
+    }
+
+    identity car-entry-context {
+        description "A person-context is a classifier for person elements which allows an RPC to provide a service on behalf of a particular element in the data tree.";
     }
 
     grouping car-entry {
@@ -60,5 +69,14 @@ module car {
       }
     }
 
+    rpc add-car {
+      description
+        "Add a car entry into database";
+      input {
+        uses car-entry;
+      }
+    }
+
     
 }
+
