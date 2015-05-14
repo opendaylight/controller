@@ -14,6 +14,7 @@ import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.utils.PrimaryShardInfoFutureCache;
 import org.opendaylight.controller.cluster.datastore.utils.ShardInfoListenerRegistration;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
@@ -30,13 +31,15 @@ final class TransactionContextFactory extends AbstractTransactionContextFactory<
 
     private final ShardInfoListenerRegistration<TransactionContextFactory> reg;
 
-    private TransactionContextFactory(final ActorContext actorContext) {
+    private TransactionContextFactory(final ActorContext actorContext,
+            final PrimaryShardInfoFutureCache primaryShardInfoCache) {
         super(actorContext);
-        this.reg = actorContext.registerShardInfoListener(this);
+        this.reg = primaryShardInfoCache.registerShardInfoListener(this);
     }
 
-    static TransactionContextFactory create(final ActorContext actorContext) {
-        return new TransactionContextFactory(actorContext);
+    static TransactionContextFactory create(final ActorContext actorContext,
+            final PrimaryShardInfoFutureCache primaryShardInfoCache) {
+        return new TransactionContextFactory(actorContext, primaryShardInfoCache);
     }
 
     @Override
