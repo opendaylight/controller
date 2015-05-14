@@ -75,7 +75,7 @@
               !org.jboss.*,
               javax.transaction,
               org.opendaylight.controller.clustering.services,
-              org.opendaylight.controller.sal.core,*</Import-Package>
+              org.opendaylight.controller.sal.core</Import-Package>
             <Bundle-Activator>org.opendaylight.controller.clustering.services_implementation.internal.Activator</Bundle-Activator>
             <!-- Add in the DynamicImport-Package ONLY the packages that -->
             <!-- contains types that MUST be unmarshalled by the -->
