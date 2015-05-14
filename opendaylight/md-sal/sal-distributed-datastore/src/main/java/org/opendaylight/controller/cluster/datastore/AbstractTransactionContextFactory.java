@@ -19,7 +19,9 @@ import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
-import org.opendaylight.controller.cluster.datastore.utils.ShardInfoListener;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,8 +32,7 @@ import scala.util.Try;
  * Factory for creating local and remote TransactionContext instances. Maintains a cache of known local
  * transaction factories.
  */
-abstract class AbstractTransactionContextFactory<F extends LocalTransactionFactory>
-        implements ShardInfoListener, AutoCloseable {
+abstract class AbstractTransactionContextFactory<F extends LocalTransactionFactory> implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractTransactionContextFactory.class);
 
     protected static final AtomicLong TX_COUNTER = new AtomicLong();
@@ -117,34 +118,16 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
     private void updateShardInfo(final String shardName, final PrimaryShardInfo primaryShardInfo) {
         final Optional<DataTree> maybeDataTree = primaryShardInfo.getLocalShardDataTree();
         if (maybeDataTree.isPresent()) {
-            knownLocal.put(shardName, factoryForShard(shardName, primaryShardInfo.getPrimaryShardActor(), maybeDataTree.get()));
-            LOG.debug("Shard {} resolved to local data tree", shardName);
-        }
-    }
+            if(!knownLocal.containsKey(shardName)) {
+                LOG.debug("Shard {} resolved to local data tree - adding local factory", shardName);
 
-    @Override
-    public void onShardInfoUpdated(final String shardName, final PrimaryShardInfo primaryShardInfo) {
-        final F existing = knownLocal.get(shardName);
-        if (existing != null) {
-            if (primaryShardInfo != null) {
-                final Optional<DataTree> maybeDataTree = primaryShardInfo.getLocalShardDataTree();
-                if (maybeDataTree.isPresent()) {
-                    final DataTree newDataTree = maybeDataTree.get();
-                    final DataTree oldDataTree = dataTreeForFactory(existing);
-                    if (!oldDataTree.equals(newDataTree)) {
-                        final F newChain = factoryForShard(shardName, primaryShardInfo.getPrimaryShardActor(), newDataTree);
-                        knownLocal.replace(shardName, existing, newChain);
-                        LOG.debug("Replaced shard {} local data tree to {}", shardName, newDataTree);
-                    }
+                F factory = factoryForShard(shardName, primaryShardInfo.getPrimaryShardActor(), maybeDataTree.get());
+                knownLocal.putIfAbsent(shardName, factory);
+            }
+        } else if(knownLocal.containsKey(shardName)) {
+            LOG.debug("Shard {} invalidating local data tree", shardName);
 
-                    return;
-                }
-            }
-            if (knownLocal.remove(shardName, existing)) {
-                LOG.debug("Shard {} invalidated data tree {}", shardName, existing);
-            } else {
-                LOG.debug("Shard {} failed to invalidate data tree {} ... strange", shardName, existing);
-            }
+            knownLocal.remove(shardName);
         }
     }
 
@@ -185,14 +168,6 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
     protected abstract F factoryForShard(String shardName, ActorSelection shardLeader, DataTree dataTree);
 
     /**
-     * Extract the backing data tree from a particular factory.
-     *
-     * @param factory Transaction factory
-     * @return Backing data tree
-     */
-    protected abstract DataTree dataTreeForFactory(F factory);
-
-    /**
      * Callback invoked from child transactions to push any futures, which need to
      * be waited for before the next transaction is allocated.
      * @param cohortFutures Collection of futures
@@ -200,6 +175,48 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
     protected abstract <T> void onTransactionReady(@Nonnull TransactionIdentifier transaction, @Nonnull Collection<Future<T>> cohortFutures);
 
     private static TransactionContext createLocalTransactionContext(final LocalTransactionFactory factory, final TransactionProxy parent) {
-        return new LocalTransactionContext(parent.getIdentifier(), factory.newReadWriteTransaction(parent.getIdentifier()), parent.getCompleter());
+        switch(parent.getType()) {
+            case READ_ONLY:
+                final DOMStoreReadTransaction readOnly = factory.newReadOnlyTransaction(parent.getIdentifier());
+                return new LocalTransactionContext(parent.getIdentifier(), readOnly, parent.getCompleter()) {
+                    @Override
+                    protected DOMStoreWriteTransaction getWriteDelegate() {
+                        throw new UnsupportedOperationException();
+                    }
+
+                    @Override
+                    protected DOMStoreReadTransaction getReadDelegate() {
+                        return readOnly;
+                    }
+                };
+            case READ_WRITE:
+                final DOMStoreReadWriteTransaction readWrite = factory.newReadWriteTransaction(parent.getIdentifier());
+                return new LocalTransactionContext(parent.getIdentifier(), readWrite, parent.getCompleter()) {
+                    @Override
+                    protected DOMStoreWriteTransaction getWriteDelegate() {
+                        return readWrite;
+                    }
+
+                    @Override
+                    protected DOMStoreReadTransaction getReadDelegate() {
+                        return readWrite;
+                    }
+                };
+            case WRITE_ONLY:
+                final DOMStoreWriteTransaction writeOnly = factory.newWriteOnlyTransaction(parent.getIdentifier());
+                return new LocalTransactionContext(parent.getIdentifier(), writeOnly, parent.getCompleter()) {
+                    @Override
+                    protected DOMStoreWriteTransaction getWriteDelegate() {
+                        return writeOnly;
+                    }
+
+                    @Override
+                    protected DOMStoreReadTransaction getReadDelegate() {
+                        throw new UnsupportedOperationException();
+                    }
+                };
+             default:
+                 throw new IllegalArgumentException("Invalid transaction type: " + parent.getType());
+        }
     }
 }
