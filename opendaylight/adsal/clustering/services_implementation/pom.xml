@@ -74,6 +74,7 @@
               !org.hornetq.*,
               !org.jboss.*,
               javax.transaction,
+              sun.reflect;resolution:=optional,
               org.opendaylight.controller.clustering.services,
               org.opendaylight.controller.sal.core,*</Import-Package>
             <Bundle-Activator>org.opendaylight.controller.clustering.services_implementation.internal.Activator</Bundle-Activator>
