@@ -153,7 +153,6 @@ final class TransactionChainProxy extends AbstractTransactionContextFactory<Loca
 
         // Send a close transaction chain request to each and every shard
         getActorContext().broadcast(new CloseTransactionChain(transactionChainId).toSerializable());
-        parent.removeTransactionChain(this);
     }
 
     private TransactionProxy allocateWriteTransaction(final TransactionType type) {
@@ -170,11 +169,6 @@ final class TransactionChainProxy extends AbstractTransactionContextFactory<Loca
         final LocalTransactionChain ret = new LocalTransactionChain(this, shardLeader, dataTree);
         LOG.debug("Allocated transaction chain {} for shard {} leader {}", ret, shardName, shardLeader);
         return ret;
-    }
-
-    @Override
-    protected DataTree dataTreeForFactory(final LocalTransactionChain factory) {
-        return factory.getDataTree();
     }
 
     /**
