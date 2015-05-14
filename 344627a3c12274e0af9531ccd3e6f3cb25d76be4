@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_e4f7dcf3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/AbstractTransactionComponentFactory.java",
+        "patchSetId": 29
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-14T13:04:32Z",
+      "side": 1,
+      "message": "To avoid implicit Object[] creation as with more than 2 format args it invokes the vararg method.",
+      "parentUuid": "3aa0d159_b3cd9c5f",
+      "revId": "344627a3c12274e0af9531ccd3e6f3cb25d76be4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_53c5383a",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/AbstractTransactionComponentFactory.java",
         "patchSetId": 29
@@ -30,6 +48,24 @@
       "writtenOn": "2015-05-14T04:33:35Z",
       "side": 1,
       "message": "How come we always create a ReadWriteTransaction?",
+      "revId": "344627a3c12274e0af9531ccd3e6f3cb25d76be4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_a4f554cc",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/AbstractTransactionComponentFactory.java",
+        "patchSetId": 29
+      },
+      "lineNbr": 202,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-14T13:04:32Z",
+      "side": 1,
+      "message": "Mainly to make the code easier as the TransactionContext interface has all the read/write etc methods. I could\u0027ve create a class for each type and ignore or throw UnsupportedOperationEx for the un-applicable methods and duplicate some code as Robert had but I decided to go with the 1 class similar as the remote side with TransactionContextImpl. I don\u0027t think creating a ReadWriteTx for write-only or read-only really makes any difference on the backend. The front-end TransactionProxy checks for allowed methods.  \n\nI you\u0027d rather have e a class for each type, I can do that.",
+      "parentUuid": "3aa0d159_53c5383a",
       "revId": "344627a3c12274e0af9531ccd3e6f3cb25d76be4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_8421384f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/LocalTransactionFactory.java",
+        "patchSetId": 29
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-14T13:04:32Z",
+      "side": 1,
+      "message": "Correct. If we want to stick with only newReadWriteTransaction I\u0027ll remove the others.",
+      "parentUuid": "3aa0d159_93cbc052",
+      "revId": "344627a3c12274e0af9531ccd3e6f3cb25d76be4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_33098c95",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionContextAdapter.java",
         "patchSetId": 29
@@ -64,6 +118,24 @@
       "writtenOn": "2015-05-14T04:33:35Z",
       "side": 1,
       "message": "typo in method name \u0027i\u0027 missing in Operatons",
+      "revId": "344627a3c12274e0af9531ccd3e6f3cb25d76be4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_441b301b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionContextAdapter.java",
+        "patchSetId": 29
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-14T13:04:32Z",
+      "side": 1,
+      "message": "Right. That was there from before - never noticed that. This method was copied from TransactionFutureCallback.",
+      "parentUuid": "3aa0d159_33098c95",
       "revId": "344627a3c12274e0af9531ccd3e6f3cb25d76be4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_24d86452",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 29
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-14T13:04:32Z",
+      "side": 1,
+      "message": "Robert added that. Doesn\u0027t seem to make much sense. I\u0027ll remove it.",
+      "parentUuid": "3aa0d159_b3f4bc87",
+      "revId": "344627a3c12274e0af9531ccd3e6f3cb25d76be4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_73ee34b6",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
         "patchSetId": 29
@@ -98,6 +188,24 @@
       "writtenOn": "2015-05-14T04:33:35Z",
       "side": 1,
       "message": "componentFactory is used in the super call before checking if it\u0027s null.",
+      "revId": "344627a3c12274e0af9531ccd3e6f3cb25d76be4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_e4e11cff",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 29
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-14T13:04:32Z",
+      "side": 1,
+      "message": "Right. Robert added that. I think he automatically checks Preconditions on everything :)",
+      "parentUuid": "3aa0d159_73ee34b6",
       "revId": "344627a3c12274e0af9531ccd3e6f3cb25d76be4",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
