@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a9dcd25_013eeeb8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxyCleanupPhantomReference.java",
+        "patchSetId": 31
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-14T22:30:37Z",
+      "side": 0,
+      "message": "Was this just renamed to TransactionContextCleanup? If so then why does it show this file as deleted and the other file as added?",
+      "revId": "12bf820406245feb0285317a88e5c7b3c9829ce6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
