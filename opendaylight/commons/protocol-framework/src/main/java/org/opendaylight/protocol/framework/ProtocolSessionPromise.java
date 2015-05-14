@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 final class ProtocolSessionPromise<S extends ProtocolSession<?>> extends DefaultPromise<S> {
     private static final Logger LOG = LoggerFactory.getLogger(ProtocolSessionPromise.class);
     private final ReconnectStrategy strategy;
-    private final InetSocketAddress address;
+    private InetSocketAddress address;
     private final Bootstrap b;
 
     @GuardedBy("this")
@@ -50,6 +50,9 @@ final class ProtocolSessionPromise<S extends ProtocolSession<?>> extends Default
 
             LOG.debug("Promise {} attempting connect for {}ms", lock, timeout);
 
+            if(this.address.isUnresolved()) {
+                this.address = new InetSocketAddress(this.address.getHostName(), this.address.getPort());
+            }
             this.b.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, timeout);
             final ChannelFuture connectFuture = this.b.connect(this.address);
             // Add listener that attempts reconnect by invoking this method again.
