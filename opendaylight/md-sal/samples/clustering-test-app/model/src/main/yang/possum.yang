@@ -1,10 +1,10 @@
-module car {
+module possum {
 
     yang-version 1;
 
-    namespace "urn:opendaylight:params:xml:ns:yang:controller:config:sal-clustering-it:car";
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:config:sal-clustering-it:possum";
 
-    prefix car;
+    prefix possum;
 
 	import ietf-inet-types { prefix "inet"; revision-date 2010-09-24; }
 	
@@ -14,32 +14,32 @@ module car {
       "Harman Singh <harmasin@cisco.com>";
 
     description
-      "YANG model for car for test application";
+      "YANG model for possum for test application";
 
     revision "2015-05-13" {
       description
         "Clustering sample app";
     }
     
-    typedef car-id {
+    typedef possum-id {
       type inet:uri;
-      description "An identifier for car entry.";
+      description "An identifier for possum entry.";
     }
 
-    typedef carentry-ref {
+    typedef possumentry-ref {
       type instance-identifier;
       description "A reference that points to an people:people/person in the data tree.";
     }
 
-    identity carentry-context {
+    identity possumentry-context {
         description "A person-context is a classifier for person elements which allows an RPC to provide a service on behalf of a particular element in the data tree.";
     }
 
-    grouping carentry {
-      description "Describes the contents of a car entry -
-                       Details of the car manufacturer, model etc";
+    grouping possumentry {
+      description "Describes the contents of a possum entry -
+                       Details of the possum manufacturer, model etc";
       leaf id {
-        type car-id;
+        type possum-id;
         description "identifier of single list of entries.";
       }
 
@@ -59,25 +59,24 @@ module car {
       }
     }
     
-    container car {
+    container possums {
       description
-        "Top-level container for all car objects.";
+        "Top-level container for all possum objects.";
 
-      list carentry {
+      list possumentry {
       	key "id";
-      	description "A list of cars (as defined by the 'grouping carentry').";
-      	uses carentry;
+      	description "A list of possums (as defined by the 'grouping possumentry').";
+      	uses possumentry;
       }
     }
 
-    rpc add-carentry {
-      description
-        "Add a car entry into database";
-      input {
-        uses carentry;
-      }
-    }
+//    rpc add-possumentry {
+//      description
+//        "Add a possum entry into database";
+//      input {
+//        uses possumentry;
+//      }
+//    }
 
-    
 }
 
