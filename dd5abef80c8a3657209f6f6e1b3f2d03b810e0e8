@@ -53,6 +53,40 @@
     },
     {
       "key": {
+        "uuid": "1a9dcd25_4114f6f4",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardedTransactionChain.java",
+        "patchSetId": 31
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-14T23:27:37Z",
+      "side": 1,
+      "message": "Wouldn\u0027t it be more appropriate to call this a TransactionChainProxy?",
+      "revId": "dd5abef80c8a3657209f6f6e1b3f2d03b810e0e8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_c1ffa6a9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardedTransactionChain.java",
+        "patchSetId": 31
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-14T23:27:37Z",
+      "side": 1,
+      "message": "null check - too late",
+      "revId": "dd5abef80c8a3657209f6f6e1b3f2d03b810e0e8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a9dcd25_1ee8897b",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/SingleTransactionContextFactory.java",
         "patchSetId": 31
