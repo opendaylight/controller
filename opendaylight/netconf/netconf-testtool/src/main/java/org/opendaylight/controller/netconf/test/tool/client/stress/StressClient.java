@@ -32,6 +32,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcherImpl;
 import org.opendaylight.controller.netconf.nettyutil.handler.ssh.client.AsyncSshHandler;
+import org.opendaylight.controller.netconf.test.tool.TestToolUtils;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.controller.sal.connect.api.RemoteDevice;
 import org.opendaylight.controller.sal.connect.netconf.listener.NetconfDeviceCommunicator;
@@ -193,7 +194,7 @@ public final class StressClient {
             final StringBuilder stringBuilder = new StringBuilder(specificEditContent);
             int idx = stringBuilder.indexOf(PHYS_ADDR_PLACEHOLDER);
             while (idx!= -1) {
-                stringBuilder.replace(idx, idx + PHYS_ADDR_PLACEHOLDER.length(), getMac(macStart++));
+                stringBuilder.replace(idx, idx + PHYS_ADDR_PLACEHOLDER.length(), TestToolUtils.getMac(macStart++));
                 idx = stringBuilder.indexOf(PHYS_ADDR_PLACEHOLDER);
             }
             specificEditContent = stringBuilder.toString();
@@ -225,20 +226,6 @@ public final class StressClient {
             }
         }
         return netconfClientDispatcher;
-    }
-
-    public static String getMac(long mac) {
-        StringBuilder m = new StringBuilder(Long.toString(mac, 16));
-
-        for (int i = m.length(); i < 12; i++) {
-            m.insert(0, "0");
-        }
-
-        for (int j = m.length() - 2; j >= 2; j-=2) {
-            m.insert(j, ":");
-        }
-
-        return m.toString();
     }
 
     private static Parameters parseArgs(final String[] args, final ArgumentParser parser) {
