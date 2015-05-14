@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3aa0d159_b3cd9c5f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/AbstractTransactionComponentFactory.java",
+        "patchSetId": 29
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-14T04:33:35Z",
+      "side": 1,
+      "message": "Any specific reason to check if isDebugEnabled?",
+      "revId": "344627a3c12274e0af9531ccd3e6f3cb25d76be4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_53c5383a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/AbstractTransactionComponentFactory.java",
+        "patchSetId": 29
+      },
+      "lineNbr": 202,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-14T04:33:35Z",
+      "side": 1,
+      "message": "How come we always create a ReadWriteTransaction?",
+      "revId": "344627a3c12274e0af9531ccd3e6f3cb25d76be4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_93cbc052",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/LocalTransactionFactory.java",
+        "patchSetId": 29
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-14T04:33:35Z",
+      "side": 1,
+      "message": "newReadOnlyTransaction and newWriteOnlyTransaction are never used.",
+      "revId": "344627a3c12274e0af9531ccd3e6f3cb25d76be4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_33098c95",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionContextAdapter.java",
+        "patchSetId": 29
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-14T04:33:35Z",
+      "side": 1,
+      "message": "typo in method name \u0027i\u0027 missing in Operatons",
+      "revId": "344627a3c12274e0af9531ccd3e6f3cb25d76be4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_b3f4bc87",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 29
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-14T04:33:35Z",
+      "side": 1,
+      "message": "what is the point of adding the VisibleForTesting annotation on a public class - just curious?",
+      "revId": "344627a3c12274e0af9531ccd3e6f3cb25d76be4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_73ee34b6",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 29
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-14T04:33:35Z",
+      "side": 1,
+      "message": "componentFactory is used in the super call before checking if it\u0027s null.",
+      "revId": "344627a3c12274e0af9531ccd3e6f3cb25d76be4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
