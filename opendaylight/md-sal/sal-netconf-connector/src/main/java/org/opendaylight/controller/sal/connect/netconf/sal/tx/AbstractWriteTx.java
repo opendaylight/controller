@@ -67,6 +67,10 @@ public abstract class AbstractWriteTx implements DOMDataWriteTransaction {
         }
     }
 
+    protected ListenableFuture<DOMRpcResult> invoke(final String msg, final Function<NetconfBaseOps, ListenableFuture<DOMRpcResult>> op) {
+        return op.apply(netOps);
+    }
+
     @Override
     public synchronized boolean cancel() {
         if(isFinished()) {
