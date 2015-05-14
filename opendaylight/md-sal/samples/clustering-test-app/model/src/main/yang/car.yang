@@ -16,7 +16,7 @@ module car {
     description
       "YANG model for car for test application";
 
-    revision "2014-08-18" {
+    revision "2015-05-13" {
       description
         "Clustering sample app";
     }
@@ -26,7 +26,16 @@ module car {
       description "An identifier for car entry.";
     }
 
-    grouping car-entry {
+    typedef carentry-ref {
+      type instance-identifier;
+      description "A reference that points to an people:people/person in the data tree.";
+    }
+
+    identity carentry-context {
+        description "A person-context is a classifier for person elements which allows an RPC to provide a service on behalf of a particular element in the data tree.";
+    }
+
+    grouping carentry {
       description "Describes the contents of a car entry -
                        Details of the car manufacturer, model etc";
       leaf id {
@@ -50,15 +59,25 @@ module car {
       }
     }
     
-    container cars {
+    container car {
       description
         "Top-level container for all car objects.";
-      list car-entry {
+
+      list carentry {
       	key "id";
-      	description "A list of cars (as defined by the 'grouping car-entry').";
-      	uses car-entry;
+      	description "A list of cars (as defined by the 'grouping carentry').";
+      	uses carentry;
+      }
+    }
+
+    rpc add-carentry {
+      description
+        "Add a car entry into database";
+      input {
+        uses carentry;
       }
     }
 
     
 }
+
