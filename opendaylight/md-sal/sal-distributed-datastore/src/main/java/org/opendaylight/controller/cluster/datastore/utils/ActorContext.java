@@ -15,25 +15,16 @@ import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Address;
 import akka.actor.PoisonPill;
-import akka.dispatch.Futures;
 import akka.dispatch.Mapper;
 import akka.dispatch.OnComplete;
 import akka.pattern.AskTimeoutException;
 import akka.util.Timeout;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.RemovalListener;
-import com.google.common.cache.RemovalNotification;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.cluster.common.actor.CommonConfig;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.Configuration;
@@ -69,7 +60,7 @@ import scala.concurrent.duration.FiniteDuration;
  * easily. An ActorContext can be freely passed around to local object instances
  * but should not be passed to actors especially remote actors
  */
-public class ActorContext implements RemovalListener<String, Future<PrimaryShardInfo>> {
+public class ActorContext {
     private static final Logger LOG = LoggerFactory.getLogger(ActorContext.class);
     private static final String DISTRIBUTED_DATA_STORE_METRIC_REGISTRY = "distributed-data-store";
     private static final String METRIC_RATE = "rate";
@@ -104,29 +95,29 @@ public class ActorContext implements RemovalListener<String, Future<PrimaryShard
     private Timeout transactionCommitOperationTimeout;
     private Timeout shardInitializationTimeout;
     private final Dispatchers dispatchers;
-    private Cache<String, Future<PrimaryShardInfo>> primaryShardInfoCache;
 
     private volatile SchemaContext schemaContext;
     private volatile boolean updated;
     private final MetricRegistry metricRegistry = MetricsReporter.getInstance(DatastoreContext.METRICS_DOMAIN).getMetricsRegistry();
-    @GuardedBy("shardInfoListeners")
-    private final Collection<ShardInfoListenerRegistration<?>> shardInfoListeners = new ArrayList<>();
+
+    private final PrimaryShardInfoFutureCache primaryShardInfoCache;
 
     public ActorContext(ActorSystem actorSystem, ActorRef shardManager,
             ClusterWrapper clusterWrapper, Configuration configuration) {
         this(actorSystem, shardManager, clusterWrapper, configuration,
-                DatastoreContext.newBuilder().build());
+                DatastoreContext.newBuilder().build(), new PrimaryShardInfoFutureCache());
     }
 
     public ActorContext(ActorSystem actorSystem, ActorRef shardManager,
             ClusterWrapper clusterWrapper, Configuration configuration,
-            DatastoreContext datastoreContext) {
+            DatastoreContext datastoreContext, PrimaryShardInfoFutureCache primaryShardInfoCache) {
         this.actorSystem = actorSystem;
         this.shardManager = shardManager;
         this.clusterWrapper = clusterWrapper;
         this.configuration = configuration;
         this.datastoreContext = datastoreContext;
         this.dispatchers = new Dispatchers(actorSystem.dispatchers());
+        this.primaryShardInfoCache = primaryShardInfoCache;
 
         setCachedProperties();
 
@@ -150,11 +141,6 @@ public class ActorContext implements RemovalListener<String, Future<PrimaryShard
                 datastoreContext.getShardTransactionCommitTimeoutInSeconds(), TimeUnit.SECONDS));
 
         shardInitializationTimeout = new Timeout(datastoreContext.getShardInitializationTimeout().duration().$times(2));
-
-        primaryShardInfoCache = CacheBuilder.newBuilder()
-                .expireAfterWrite(datastoreContext.getShardLeaderElectionTimeout().duration().toMillis(), TimeUnit.MILLISECONDS)
-                .removalListener(this)
-                .build();
     }
 
     public DatastoreContext getDatastoreContext() {
@@ -243,13 +229,7 @@ public class ActorContext implements RemovalListener<String, Future<PrimaryShard
             DataTree localShardDataTree) {
         ActorSelection actorSelection = actorSystem.actorSelection(primaryActorPath);
         PrimaryShardInfo info = new PrimaryShardInfo(actorSelection, Optional.fromNullable(localShardDataTree));
-        primaryShardInfoCache.put(shardName, Futures.successful(info));
-
-        synchronized (shardInfoListeners) {
-            for (ShardInfoListenerRegistration<?> reg : shardInfoListeners) {
-                reg.getInstance().onShardInfoUpdated(shardName, info);
-            }
-        }
+        primaryShardInfoCache.putSuccessful(shardName, info);
         return info;
     }
 
@@ -567,32 +547,7 @@ public class ActorContext implements RemovalListener<String, Future<PrimaryShard
         return ask(actorRef, message, timeout);
     }
 
-    @VisibleForTesting
-    Cache<String, Future<PrimaryShardInfo>> getPrimaryShardInfoCache() {
+    public PrimaryShardInfoFutureCache getPrimaryShardInfoCache() {
         return primaryShardInfoCache;
-    }
-
-    public <T extends ShardInfoListener> ShardInfoListenerRegistration<T> registerShardInfoListener(final T listener) {
-        final ShardInfoListenerRegistration<T> reg = new ShardInfoListenerRegistration<T>(listener, this);
-
-        synchronized (shardInfoListeners) {
-            shardInfoListeners.add(reg);
-        }
-        return reg;
-    }
-
-    protected void removeShardInfoListener(final ShardInfoListenerRegistration<?> registration) {
-        synchronized (shardInfoListeners) {
-            shardInfoListeners.remove(registration);
-        }
-    }
-
-    @Override
-    public void onRemoval(final RemovalNotification<String, Future<PrimaryShardInfo>> notification) {
-        synchronized (shardInfoListeners) {
-            for (ShardInfoListenerRegistration<?> reg : shardInfoListeners) {
-                reg.getInstance().onShardInfoUpdated(notification.getKey(), null);
-            }
-        }
     }
 }
