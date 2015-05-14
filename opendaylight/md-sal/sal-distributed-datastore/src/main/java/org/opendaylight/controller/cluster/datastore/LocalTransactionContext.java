@@ -13,7 +13,9 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransaction;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import scala.concurrent.Future;
@@ -24,32 +26,37 @@ import scala.concurrent.Future;
  *
  * @author Thomas Pantelis
  */
-final class LocalTransactionContext extends AbstractTransactionContext {
-    private final DOMStoreReadWriteTransaction delegate;
+abstract class LocalTransactionContext extends AbstractTransactionContext {
 
-    LocalTransactionContext(TransactionIdentifier identifier, DOMStoreReadWriteTransaction delegate) {
+    private final DOMStoreTransaction txDelegate;
+
+    LocalTransactionContext(TransactionIdentifier identifier, DOMStoreTransaction txDelegate) {
         super(identifier);
-        this.delegate = delegate;
+        this.txDelegate = txDelegate;
     }
+
+    protected abstract DOMStoreWriteTransaction getWriteDelegate();
+
+    protected abstract DOMStoreReadTransaction getReadDelegate();
 
     @Override
     public void writeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
-        delegate.write(path, data);
+        getWriteDelegate().write(path, data);
     }
 
     @Override
     public void mergeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
-        delegate.merge(path, data);
+        getWriteDelegate().merge(path, data);
     }
 
     @Override
     public void deleteData(YangInstanceIdentifier path) {
-        delegate.delete(path);
+        getWriteDelegate().delete(path);
     }
 
     @Override
     public void readData(YangInstanceIdentifier path, final SettableFuture<Optional<NormalizedNode<?, ?>>> proxyFuture) {
-        Futures.addCallback(delegate.read(path), new FutureCallback<Optional<NormalizedNode<?, ?>>>() {
+        Futures.addCallback(getReadDelegate().read(path), new FutureCallback<Optional<NormalizedNode<?, ?>>>() {
             @Override
             public void onSuccess(Optional<NormalizedNode<?, ?>> result) {
                 proxyFuture.set(result);
@@ -64,7 +71,7 @@ final class LocalTransactionContext extends AbstractTransactionContext {
 
     @Override
     public void dataExists(YangInstanceIdentifier path, final SettableFuture<Boolean> proxyFuture) {
-        Futures.addCallback(delegate.exists(path), new FutureCallback<Boolean>() {
+        Futures.addCallback(getReadDelegate().exists(path), new FutureCallback<Boolean>() {
             @Override
             public void onSuccess(Boolean result) {
                 proxyFuture.set(result);
@@ -78,7 +85,7 @@ final class LocalTransactionContext extends AbstractTransactionContext {
     }
 
     private LocalThreePhaseCommitCohort ready() {
-        return (LocalThreePhaseCommitCohort) delegate.ready();
+        return (LocalThreePhaseCommitCohort) getWriteDelegate().ready();
     }
 
     @Override
@@ -98,6 +105,6 @@ final class LocalTransactionContext extends AbstractTransactionContext {
 
     @Override
     public void closeTransaction() {
-        delegate.close();
+        txDelegate.close();
     }
 }

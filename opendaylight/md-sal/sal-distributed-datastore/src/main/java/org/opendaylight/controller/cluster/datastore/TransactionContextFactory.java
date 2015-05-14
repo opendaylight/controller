@@ -8,13 +8,10 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorSelection;
-import java.util.ArrayList;
 import java.util.Collection;
-import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
-import org.opendaylight.controller.cluster.datastore.utils.ShardInfoListenerRegistration;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import scala.concurrent.Future;
@@ -25,14 +22,8 @@ import scala.concurrent.Future;
  */
 final class TransactionContextFactory extends AbstractTransactionContextFactory<LocalTransactionFactoryImpl> {
 
-    @GuardedBy("childChains")
-    private final Collection<TransactionChainProxy> childChains = new ArrayList<>();
-
-    private final ShardInfoListenerRegistration<TransactionContextFactory> reg;
-
     private TransactionContextFactory(final ActorContext actorContext) {
         super(actorContext);
-        this.reg = actorContext.registerShardInfoListener(this);
     }
 
     static TransactionContextFactory create(final ActorContext actorContext) {
@@ -41,7 +32,6 @@ final class TransactionContextFactory extends AbstractTransactionContextFactory<
 
     @Override
     public void close() {
-        reg.close();
     }
 
     @Override
@@ -65,33 +55,6 @@ final class TransactionContextFactory extends AbstractTransactionContextFactory<
     }
 
     DOMStoreTransactionChain createTransactionChain() {
-        final TransactionChainProxy ret = new TransactionChainProxy(this);
-
-        synchronized (childChains) {
-            childChains.add(ret);
-        }
-
-        return ret;
-    }
-
-    void removeTransactionChain(final TransactionChainProxy chain) {
-        synchronized (childChains) {
-            childChains.remove(chain);
-        }
-    }
-
-    @Override
-    public void onShardInfoUpdated(final String shardName, final PrimaryShardInfo primaryShardInfo) {
-        synchronized (childChains) {
-            for (TransactionChainProxy chain : childChains) {
-                chain.onShardInfoUpdated(shardName, primaryShardInfo);
-            }
-            super.onShardInfoUpdated(shardName, primaryShardInfo);
-        }
-    }
-
-    @Override
-    protected DataTree dataTreeForFactory(final LocalTransactionFactoryImpl factory) {
-        return factory.getDataTree();
+        return new TransactionChainProxy(this);
     }
 }

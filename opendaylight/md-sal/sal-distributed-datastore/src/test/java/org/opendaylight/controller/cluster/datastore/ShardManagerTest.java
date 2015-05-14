@@ -2,6 +2,7 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -54,12 +55,14 @@ import org.opendaylight.controller.cluster.datastore.messages.FindPrimary;
 import org.opendaylight.controller.cluster.datastore.messages.LocalPrimaryShardFound;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardFound;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardNotFound;
+import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
 import org.opendaylight.controller.cluster.datastore.messages.RemotePrimaryShardFound;
 import org.opendaylight.controller.cluster.datastore.messages.ShardLeaderStateChanged;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
 import org.opendaylight.controller.cluster.datastore.utils.MessageCollectorActor;
 import org.opendaylight.controller.cluster.datastore.utils.MockClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.utils.MockConfiguration;
+import org.opendaylight.controller.cluster.datastore.utils.PrimaryShardInfoFutureCache;
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListener;
 import org.opendaylight.controller.cluster.notifications.RoleChangeNotification;
@@ -93,6 +96,8 @@ public class ShardManagerTest extends AbstractActorTest {
         return TestActorRef.create(system, Props.create(MessageCollectorActor.class), name);
     }
 
+    private final PrimaryShardInfoFutureCache primaryShardInfoCache = new PrimaryShardInfoFutureCache();
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -112,9 +117,9 @@ public class ShardManagerTest extends AbstractActorTest {
         InMemoryJournal.clear();
     }
 
-    private Props newShardMgrProps() {
+    private Props newShardMgrProps(boolean persistent) {
         return ShardManager.props(new MockClusterWrapper(), new MockConfiguration(),
-                datastoreContextBuilder.build(), ready);
+                datastoreContextBuilder.persistent(persistent).build(), ready, primaryShardInfoCache);
     }
 
     private Props newPropsShardMgrWithMockShardActor() {
@@ -129,7 +134,7 @@ public class ShardManagerTest extends AbstractActorTest {
             @Override
             public ShardManager create() throws Exception {
                 return new ForwardingShardManager(clusterWrapper, config, datastoreContextBuilder.build(),
-                        ready, name, shardActor);
+                        ready, name, shardActor, primaryShardInfoCache);
             }
         };
 
@@ -172,6 +177,14 @@ public class ShardManagerTest extends AbstractActorTest {
             assertTrue("Unexpected primary path " +  primaryFound.getPrimaryPath(),
                     primaryFound.getPrimaryPath().contains("member-1-shard-default"));
             assertSame("getLocalShardDataTree", mockDataTree, primaryFound.getLocalShardDataTree() );
+
+            Future<PrimaryShardInfo> cachedFuture = primaryShardInfoCache.getIfPresent(Shard.DEFAULT_NAME);
+            assertNotNull("Null future", cachedFuture);
+            PrimaryShardInfo info = cachedFuture.value().get().get();
+            assertEquals("isPresent", true, info.getLocalShardDataTree().isPresent());
+            assertEquals("DataTree", mockDataTree, info.getLocalShardDataTree().get());
+            assertTrue("Unexpected primary path " + info.getPrimaryShardActor(),
+                    info.getPrimaryShardActor().pathString().contains("member-1-shard-default"));
         }};
     }
 
@@ -529,7 +542,7 @@ public class ShardManagerTest extends AbstractActorTest {
             throws Exception {
         new JavaTestKit(getSystem()) {{
             final TestActorRef<ShardManager> shardManager =
-                    TestActorRef.create(getSystem(), newShardMgrProps());
+                    TestActorRef.create(getSystem(), newShardMgrProps(true));
 
             assertEquals("getKnownModules size", 0, shardManager.underlyingActor().getKnownModules().size());
 
@@ -564,7 +577,7 @@ public class ShardManagerTest extends AbstractActorTest {
             throws Exception {
         new JavaTestKit(getSystem()) {{
             final TestActorRef<ShardManager> shardManager =
-                    TestActorRef.create(getSystem(), newShardMgrProps());
+                    TestActorRef.create(getSystem(), newShardMgrProps(true));
 
             SchemaContext schemaContext = mock(SchemaContext.class);
             Set<ModuleIdentifier> moduleIdentifierSet = new HashSet<>();
@@ -601,10 +614,7 @@ public class ShardManagerTest extends AbstractActorTest {
     public void testRecoveryApplicable(){
         new JavaTestKit(getSystem()) {
             {
-                final Props persistentProps = ShardManager.props(
-                        new MockClusterWrapper(),
-                        new MockConfiguration(),
-                        DatastoreContext.newBuilder().persistent(true).build(), ready);
+                final Props persistentProps = newShardMgrProps(true);
                 final TestActorRef<ShardManager> persistentShardManager =
                         TestActorRef.create(getSystem(), persistentProps);
 
@@ -612,10 +622,7 @@ public class ShardManagerTest extends AbstractActorTest {
 
                 assertTrue("Recovery Applicable", dataPersistenceProvider1.isRecoveryApplicable());
 
-                final Props nonPersistentProps = ShardManager.props(
-                        new MockClusterWrapper(),
-                        new MockConfiguration(),
-                        DatastoreContext.newBuilder().persistent(false).build(), ready);
+                final Props nonPersistentProps = newShardMgrProps(false);
                 final TestActorRef<ShardManager> nonPersistentShardManager =
                         TestActorRef.create(getSystem(), nonPersistentProps);
 
@@ -636,7 +643,8 @@ public class ShardManagerTest extends AbstractActorTest {
             private static final long serialVersionUID = 1L;
             @Override
             public ShardManager create() throws Exception {
-                return new ShardManager(new MockClusterWrapper(), new MockConfiguration(), DatastoreContext.newBuilder().build(), ready) {
+                return new ShardManager(new MockClusterWrapper(), new MockConfiguration(), DatastoreContext.newBuilder().build(),
+                        ready, new PrimaryShardInfoFutureCache()) {
                     @Override
                     protected DataPersistenceProvider createDataPersistenceProvider(boolean persistent) {
                         DataPersistenceProviderMonitor dataPersistenceProviderMonitor
@@ -674,7 +682,7 @@ public class ShardManagerTest extends AbstractActorTest {
     public void testRoleChangeNotificationAndShardLeaderStateChangedReleaseReady() throws Exception {
         new JavaTestKit(getSystem()) {
             {
-                TestActorRef<ShardManager> shardManager = TestActorRef.create(getSystem(), newShardMgrProps());
+                TestActorRef<ShardManager> shardManager = TestActorRef.create(getSystem(), newShardMgrProps(true));
 
                 String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
                 shardManager.underlyingActor().onReceiveCommand(new RoleChangeNotification(
@@ -694,7 +702,7 @@ public class ShardManagerTest extends AbstractActorTest {
     public void testRoleChangeNotificationToFollowerWithShardLeaderStateChangedReleaseReady() throws Exception {
         new JavaTestKit(getSystem()) {
             {
-                TestActorRef<ShardManager> shardManager = TestActorRef.create(getSystem(), newShardMgrProps());
+                TestActorRef<ShardManager> shardManager = TestActorRef.create(getSystem(), newShardMgrProps(true));
 
                 String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
                 shardManager.underlyingActor().onReceiveCommand(new RoleChangeNotification(
@@ -716,7 +724,7 @@ public class ShardManagerTest extends AbstractActorTest {
     public void testReadyCountDownForMemberUpAfterLeaderStateChanged() throws Exception {
         new JavaTestKit(getSystem()) {
             {
-                TestActorRef<ShardManager> shardManager = TestActorRef.create(getSystem(), newShardMgrProps());
+                TestActorRef<ShardManager> shardManager = TestActorRef.create(getSystem(), newShardMgrProps(true));
 
                 String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
                 shardManager.underlyingActor().onReceiveCommand(new RoleChangeNotification(
@@ -738,7 +746,7 @@ public class ShardManagerTest extends AbstractActorTest {
     public void testRoleChangeNotificationDoNothingForUnknownShard() throws Exception {
         new JavaTestKit(getSystem()) {
             {
-                TestActorRef<ShardManager> shardManager = TestActorRef.create(getSystem(), newShardMgrProps());
+                TestActorRef<ShardManager> shardManager = TestActorRef.create(getSystem(), newShardMgrProps(true));
 
                 shardManager.underlyingActor().onReceiveCommand(new RoleChangeNotification(
                         "unknown", RaftState.Candidate.name(), RaftState.Leader.name()));
@@ -751,10 +759,7 @@ public class ShardManagerTest extends AbstractActorTest {
 
     @Test
     public void testByDefaultSyncStatusIsFalse() throws Exception{
-        final Props persistentProps = ShardManager.props(
-                new MockClusterWrapper(),
-                new MockConfiguration(),
-                DatastoreContext.newBuilder().persistent(true).build(), ready);
+        final Props persistentProps = newShardMgrProps(true);
         final TestActorRef<ShardManager> shardManager =
                 TestActorRef.create(getSystem(), persistentProps);
 
@@ -768,7 +773,7 @@ public class ShardManagerTest extends AbstractActorTest {
         final Props persistentProps = ShardManager.props(
                 new MockClusterWrapper(),
                 new MockConfiguration(),
-                DatastoreContext.newBuilder().persistent(true).build(), ready);
+                DatastoreContext.newBuilder().persistent(true).build(), ready, primaryShardInfoCache);
         final TestActorRef<ShardManager> shardManager =
                 TestActorRef.create(getSystem(), persistentProps);
 
@@ -781,10 +786,7 @@ public class ShardManagerTest extends AbstractActorTest {
 
     @Test
     public void testWhenShardIsCandidateSyncStatusIsFalse() throws Exception{
-        final Props persistentProps = ShardManager.props(
-                new MockClusterWrapper(),
-                new MockConfiguration(),
-                DatastoreContext.newBuilder().persistent(true).build(), ready);
+        final Props persistentProps = newShardMgrProps(true);
         final TestActorRef<ShardManager> shardManager =
                 TestActorRef.create(getSystem(), persistentProps);
 
@@ -805,7 +807,7 @@ public class ShardManagerTest extends AbstractActorTest {
         final Props persistentProps = ShardManager.props(
                 new MockClusterWrapper(),
                 new MockConfiguration(),
-                DatastoreContext.newBuilder().persistent(true).build(), ready);
+                DatastoreContext.newBuilder().persistent(true).build(), ready, primaryShardInfoCache);
         final TestActorRef<ShardManager> shardManager =
                 TestActorRef.create(getSystem(), persistentProps);
 
@@ -838,7 +840,7 @@ public class ShardManagerTest extends AbstractActorTest {
                         return Arrays.asList("default", "astronauts");
                     }
                 },
-                DatastoreContext.newBuilder().persistent(true).build(), ready);
+                DatastoreContext.newBuilder().persistent(true).build(), ready, primaryShardInfoCache);
         final TestActorRef<ShardManager> shardManager =
                 TestActorRef.create(getSystem(), persistentProps);
 
@@ -881,7 +883,8 @@ public class ShardManagerTest extends AbstractActorTest {
 
         TestShardManager(String shardMrgIDSuffix) {
             super(new MockClusterWrapper(), new MockConfiguration(),
-                    DatastoreContext.newBuilder().dataStoreType(shardMrgIDSuffix).build(), ready);
+                    DatastoreContext.newBuilder().dataStoreType(shardMrgIDSuffix).build(), ready,
+                    new PrimaryShardInfoFutureCache());
         }
 
         @Override
@@ -939,8 +942,8 @@ public class ShardManagerTest extends AbstractActorTest {
 
         protected ForwardingShardManager(ClusterWrapper cluster, Configuration configuration,
                 DatastoreContext datastoreContext, CountDownLatch waitTillReadyCountdownLatch, String name,
-                ActorRef shardActor) {
-            super(cluster, configuration, datastoreContext, waitTillReadyCountdownLatch);
+                ActorRef shardActor, PrimaryShardInfoFutureCache primaryShardInfoCache) {
+            super(cluster, configuration, datastoreContext, waitTillReadyCountdownLatch, primaryShardInfoCache);
             this.shardActor = shardActor;
             this.name = name;
         }
