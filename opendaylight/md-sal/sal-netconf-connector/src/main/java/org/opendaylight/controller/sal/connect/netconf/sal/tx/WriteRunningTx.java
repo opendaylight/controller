@@ -11,6 +11,7 @@ package org.opendaylight.controller.sal.connect.netconf.sal.tx;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
@@ -59,18 +60,31 @@ public class WriteRunningTx extends AbstractWriteTx {
     }
 
     private void lock() {
-        try {
-            invokeBlocking("Lock running", new Function<NetconfBaseOps, ListenableFuture<DOMRpcResult>>() {
+        invoke("Lock running", new Function<NetconfBaseOps, ListenableFuture<DOMRpcResult>>() {
                 @Override
                 public ListenableFuture<DOMRpcResult> apply(final NetconfBaseOps input) {
-                    return input.lockRunning(new NetconfRpcFutureCallback("Lock running", id));
+                    return input.lockRunning(new FutureCallback<DOMRpcResult>() {
+                        @Override
+                        public void onSuccess(DOMRpcResult result) {
+                            if (result.getErrors().isEmpty()) {
+                                if (LOG.isTraceEnabled()) {
+                                    LOG.trace("Lock succesfull");
+                                }
+                            } else {
+                                LOG.warn("{}: lock invoked unsuccessfully: {}", id, result.getErrors());
+                            }
+
+                        }
+
+                        @Override
+                        public void onFailure(Throwable t) {
+                            LOG.warn("Lock operation failed. {}", t);
+                            finished = true;
+                            throw new RuntimeException(id + ": Failed to lock datastore", t);
+                        }
+                    });
                 }
-            });
-        } catch (final NetconfDocumentedException e) {
-            LOG.warn("{}: Failed to initialize netconf transaction (lock running)", e);
-            finished = true;
-            throw new RuntimeException(id + ": Failed to initialize netconf transaction (lock running)", e);
-        }
+        });
     }
 
     @Override
@@ -117,14 +131,33 @@ public class WriteRunningTx extends AbstractWriteTx {
 
     @Override
     protected void editConfig(final DataContainerChild<?, ?> editStructure, final Optional<ModifyAction> defaultOperation) throws NetconfDocumentedException {
-        invokeBlocking("Edit running", new Function<NetconfBaseOps, ListenableFuture<DOMRpcResult>>() {
+        final FutureCallback<DOMRpcResult> callback = new FutureCallback<DOMRpcResult>() {
+            @Override
+            public void onSuccess(DOMRpcResult result) {
+                if (result.getErrors().isEmpty()) {
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace("EditConfig succesfull");
+                    }
+                } else {
+                    LOG.warn("{}: EditConfig invoked unsuccessfully: {}", id, result.getErrors());
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                LOG.warn("EditConfig failed. {}", t);
+                throw new RuntimeException("EditConfig failed due to: {}", t);
+            }
+        };
+
+        invoke("Edit running", new Function<NetconfBaseOps, ListenableFuture<DOMRpcResult>>() {
             @Override
             public ListenableFuture<DOMRpcResult> apply(final NetconfBaseOps input) {
-                        return defaultOperation.isPresent()
-                                ? input.editConfigRunning(new NetconfRpcFutureCallback("Edit running", id), editStructure, defaultOperation.get(),
-                                rollbackSupport)
-                                : input.editConfigRunning(new NetconfRpcFutureCallback("Edit running", id), editStructure,
-                                rollbackSupport);
+                return defaultOperation.isPresent()
+                        ? input.editConfigRunning(callback, editStructure, defaultOperation.get(),
+                        rollbackSupport)
+                        : input.editConfigRunning(callback, editStructure,
+                        rollbackSupport);
             }
         });
     }
