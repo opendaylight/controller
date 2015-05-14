@@ -32,6 +32,11 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
+            <groupId>com.ning</groupId>
+            <artifactId>async-http-client</artifactId>
+            <version>1.9.24</version>
+        </dependency>
+        <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcpkix-jdk15on</artifactId>
         </dependency>
@@ -74,10 +79,6 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>xmlunit</groupId>
-            <artifactId>xmlunit</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -185,9 +186,15 @@
                                         <exclude>META-INF/*.SF</exclude>
                                         <exclude>META-INF/*.DSA</exclude>
                                         <exclude>META-INF/*.RSA</exclude>
+                                        <exclude>org.opendaylight.controller.netconf.test.tool.client</exclude>
                                     </excludes>
                                 </filter>
                             </filters>
+                            <artifactSet>
+                                <excludes>
+                                    <exclude>com.ning</exclude>
+                                </excludes>
+                            </artifactSet>
                             <transformers>
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
@@ -214,6 +221,14 @@
                                         <exclude>META-INF/*.SF</exclude>
                                         <exclude>META-INF/*.DSA</exclude>
                                         <exclude>META-INF/*.RSA</exclude>
+                                        <exclude>org.opendaylight.controller.netconf.test.tool.client.http</exclude>
+                                        <exclude>org.opendaylight.controller.netconf.test.tool.rpc</exclude>
+                                        <exclude>org.opendaylight.controller.netconf.test.tool.AcceptingAuthProvider</exclude>
+                                        <exclude>org.opendaylight.controller.netconf.test.tool.DummyMonitoringService</exclude>
+                                        <exclude>org.opendaylight.controller.netconf.test.tool.FakeModuleBuilderCapability</exclude>
+                                        <exclude>org.opendaylight.controller.netconf.test.tool.Main</exclude>
+                                        <exclude>org.opendaylight.controller.netconf.test.tool.ModuleBuilderCapability</exclude>
+                                        <exclude>org.opendaylight.controller.netconf.test.tool.NetconfDeviceSimulator</exclude>
                                     </excludes>
                                 </filter>
                             </filters>
@@ -234,6 +249,68 @@
                             <shadedArtifactAttached>true</shadedArtifactAttached>
                             <shadedClassifierName>stress-client</shadedClassifierName>
                         </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>restconf-perf-client</id>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <phase>package</phase>
+                        <configuration>
+                            <shadedArtifactId>rest-perf-client</shadedArtifactId>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                        <exclude>org.opendaylight.controller.netconf.test.tool.rpc</exclude>
+                                        <exclude>org.opendaylight.controller.netconf.test.tool.AcceptingAuthProvider</exclude>
+                                        <exclude>org.opendaylight.controller.netconf.test.tool.DummyMonitoringService</exclude>
+                                        <exclude>org.opendaylight.controller.netconf.test.tool.FakeModuleBuilderCapability</exclude>
+                                        <exclude>org.opendaylight.controller.netconf.test.tool.Main</exclude>
+                                        <exclude>org.opendaylight.controller.netconf.test.tool.ModuleBuilderCapability</exclude>
+                                        <exclude>org.opendaylight.controller.netconf.test.tool.NetconfDeviceSimulator</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                            <artifactSet>
+                                <excludes>
+                                    <exclude>org.bouncycastle:*</exclude>
+                                    <exclude>com.google:*</exclude>
+                                    <exclude>org.opendaylight.yangtools</exclude>
+                                    <exclude>org.opendaylight.yang</exclude>
+                                </excludes>
+                            </artifactSet>
+                            <transformers>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>org.opendaylight.controller.netconf.test.tool.client.http.perf.RestPerfClient</mainClass>
+                                </transformer>
+                            </transformers>
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <shadedClassifierName>rest-perf-client</shadedClassifierName>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <descriptors>
+                        <descriptor>src/main/assembly/stress-tool.xml</descriptor>
+                    </descriptors>
+                    <finalName>stress-client-${project.version}-package</finalName>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>
