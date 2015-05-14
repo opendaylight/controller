@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a9dcd25_5e8ff123",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/AppendEntries.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-14T20:01:15Z",
+      "side": 1,
+      "message": "payLoadVersion is not serialized",
+      "revId": "bf4cd17d0da1fd4370442118cf4e915603e7d4fb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_9eac998e",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/AppendEntriesReply.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-14T20:01:15Z",
+      "side": 1,
+      "message": "Would this be a breaking change as far as serialization is concerned?",
+      "revId": "bf4cd17d0da1fd4370442118cf4e915603e7d4fb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
