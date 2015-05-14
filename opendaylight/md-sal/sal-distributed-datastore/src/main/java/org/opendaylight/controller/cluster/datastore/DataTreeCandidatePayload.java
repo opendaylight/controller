@@ -78,7 +78,8 @@ final class DataTreeCandidatePayload extends Payload implements Externalizable {
             writer.writeNormalizedNode(node.getDataAfter().get());
             break;
         case UNMODIFIED:
-            throw new IllegalArgumentException("Unmodified candidate should never be in the payload");
+            out.writeByte(UNMODIFIED);
+            break;
         default:
             throw new IllegalArgumentException("Unhandled node type " + node.getModificationType());
         }
