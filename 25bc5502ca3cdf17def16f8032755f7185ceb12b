@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_df24e9b0",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/BrokerFacade.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 994
+      },
+      "writtenOn": "2015-05-14T14:54:39Z",
+      "side": 1,
+      "message": "RestconfDocumentedException is the exception for REST response, so user can see errMsg and he know the uri. I guess, the path is important for the LOG readers only.",
+      "parentUuid": "3aa0d159_154c7f9d",
+      "revId": "25bc5502ca3cdf17def16f8032755f7185ceb12b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_955f2f41",
         "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/BrokerFacade.java",
         "patchSetId": 4
@@ -53,6 +71,24 @@
     },
     {
       "key": {
+        "uuid": "3aa0d159_1f79f192",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/BrokerFacade.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 994
+      },
+      "writtenOn": "2015-05-14T14:54:39Z",
+      "side": 1,
+      "message": "In my mind, Error and Warning levels are reserved for system administrators to know about unstable or unexpected system state which could need some sysAdmin assistance. Info level is reserved for all messages marked as \"would by nice to know about without change LOG level\". Debug and trace levels are primary for programmers to investigate some unexpected functionality behavior. Do you prefer another approach?",
+      "parentUuid": "3aa0d159_b55a6b4e",
+      "revId": "25bc5502ca3cdf17def16f8032755f7185ceb12b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3aa0d159_d53cd7e4",
         "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/BrokerFacade.java",
         "patchSetId": 4
@@ -64,6 +100,24 @@
       "writtenOn": "2015-05-12T23:39:30Z",
       "side": 1,
       "message": "error level logging",
+      "revId": "25bc5502ca3cdf17def16f8032755f7185ceb12b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa0d159_3f638ddd",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/BrokerFacade.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 253,
+      "author": {
+        "id": 994
+      },
+      "writtenOn": "2015-05-14T14:54:39Z",
+      "side": 1,
+      "message": "I don\u0027t think error level is relevant.",
+      "parentUuid": "3aa0d159_d53cd7e4",
       "revId": "25bc5502ca3cdf17def16f8032755f7185ceb12b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
