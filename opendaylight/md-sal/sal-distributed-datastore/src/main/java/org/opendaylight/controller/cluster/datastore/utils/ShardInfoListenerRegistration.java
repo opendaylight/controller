@@ -16,9 +16,9 @@ import org.opendaylight.yangtools.concepts.AbstractObjectRegistration;
  * @param <T> Type of listener
  */
 public class ShardInfoListenerRegistration<T extends ShardInfoListener> extends AbstractObjectRegistration<T> {
-    private final ActorContext parent;
+    private final PrimaryShardInfoFutureCache parent;
 
-    protected ShardInfoListenerRegistration(final T instance, final ActorContext parent) {
+    protected ShardInfoListenerRegistration(final T instance, final PrimaryShardInfoFutureCache parent) {
         super(instance);
         this.parent = Preconditions.checkNotNull(parent);
     }
