@@ -84,6 +84,23 @@
       "revId": "dd5abef80c8a3657209f6f6e1b3f2d03b810e0e8",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_e1dc2277",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/AbstractSnapshotBackedTransactionChain.java",
+        "patchSetId": 31
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-14T22:48:35Z",
+      "side": 1,
+      "message": "What do these changes have to do with this particular patch?",
+      "revId": "dd5abef80c8a3657209f6f6e1b3f2d03b810e0e8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
