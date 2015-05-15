@@ -18,6 +18,7 @@ import com.google.common.collect.Sets;
 import java.io.IOException;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.config.api.ConflictingVersionException;
 import org.opendaylight.controller.netconf.api.Capability;
@@ -129,6 +130,7 @@ public class ConfigPersisterTest {
         }
     }
 
+    @Ignore("this test needs to be redesigned. Remove bundle bundle context and concurrency to make it more stable")
     @Test
     public void testSuccessConflictingVersionException() throws Exception {
         setUpContextAndStartPersister("cap1", getConflictingService());
