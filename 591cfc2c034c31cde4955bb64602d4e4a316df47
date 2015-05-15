@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a9dcd25_04103c4d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DelegatingTransactionContext.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-15T01:49:54Z",
+      "side": 1,
+      "message": "This needs to be removed. I know you mentioned you\u0027ll get rid of this - just a reminder :)",
+      "revId": "591cfc2c034c31cde4955bb64602d4e4a316df47",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
