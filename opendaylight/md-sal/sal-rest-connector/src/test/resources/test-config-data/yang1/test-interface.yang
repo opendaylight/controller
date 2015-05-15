@@ -27,6 +27,14 @@ module test-interface {
         list interface {
             key "name";
          
+            list sub-interface {
+                key "sub-name";
+                
+                leaf sub-name {
+                    type string;
+                }
+            }
+            
             leaf name {
                 type string;
             }
