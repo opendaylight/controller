@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a9dcd25_cfffcda9",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-05-15T09:53:25Z",
+      "side": 1,
+      "message": "correct grammar: due to unresolved address",
+      "range": {
+        "startLine": 7,
+        "startChar": 45,
+        "endLine": 7,
+        "endChar": 46
+      },
+      "revId": "e062691ad5405de4758d5893f1c527f80e6f4f92",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_4f2bbd30",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-05-15T09:53:25Z",
+      "side": 1,
+      "message": "Keep the lines \u003c80 characters. It is unreadable when 80 chars is exceeded in the new git UI",
+      "range": {
+        "startLine": 9,
+        "startChar": 78,
+        "endLine": 9,
+        "endChar": 95
+      },
+      "revId": "e062691ad5405de4758d5893f1c527f80e6f4f92",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
