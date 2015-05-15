@@ -797,7 +797,7 @@ public class RaftActorTest extends AbstractActorTest {
 
             DataPersistenceProvider dataPersistenceProvider = new NonPersistentDataProvider();
 
-            Map<String, String> peerAddresses = new HashMap<>();
+            Map<String, String> peerAddresses = ImmutableMap.<String, String>builder().put("member1", "address").build();
 
             TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(
                     MockRaftActor.props(persistenceId, peerAddresses,
@@ -844,7 +844,7 @@ public class RaftActorTest extends AbstractActorTest {
 
             DataPersistenceProvider dataPersistenceProvider = new NonPersistentDataProvider();
 
-            Map<String, String> peerAddresses = new HashMap<>();
+            Map<String, String> peerAddresses = ImmutableMap.<String, String>builder().put("member1", "address").build();
 
             TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(
                     MockRaftActor.props(persistenceId, peerAddresses,
