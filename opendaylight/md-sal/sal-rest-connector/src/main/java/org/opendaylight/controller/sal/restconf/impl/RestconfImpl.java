@@ -774,10 +774,7 @@ public class RestconfImpl implements RestconfService {
             RestconfValidationUtils.checkDocumentedError(uriKeyValue != null, ErrorType.PROTOCOL, ErrorTag.DATA_MISSING,
                     "Missing key " + keyDefinition + " in URI.");
 
-            final Object dataKeyValue = payload.getAttributeValue(keyDefinition);
-            RestconfValidationUtils.checkDocumentedError(dataKeyValue != null, ErrorType.PROTOCOL, ErrorTag.DATA_MISSING,
-                    "Missing key " + keyDefinition.getLocalName() + " in the message body.");
-
+            final Object dataKeyValue = payload.getIdentifier().getKeyValues().get(keyDefinition);
 
             if ( ! uriKeyValue.equals(dataKeyValue)) {
                 final String errMsg = "The value '" + uriKeyValue + "' for key '" + keyDefinition.getLocalName() +
