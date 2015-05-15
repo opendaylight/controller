@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "1a9dcd25_01926e57",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DistributedDataStore.java",
+        "patchSetId": 31
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-15T00:19:51Z",
+      "side": 1,
+      "message": "done",
+      "parentUuid": "1a9dcd25_9ee499ad",
+      "revId": "dd5abef80c8a3657209f6f6e1b3f2d03b810e0e8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a9dcd25_619b32ca",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/LocalThreePhaseCommitCohort.java",
         "patchSetId": 31
@@ -30,6 +48,24 @@
       "writtenOn": "2015-05-14T22:30:37Z",
       "side": 1,
       "message": "comment outdated - there is no LocalWritableTransactionComponent",
+      "revId": "dd5abef80c8a3657209f6f6e1b3f2d03b810e0e8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_618fb224",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/LocalThreePhaseCommitCohort.java",
+        "patchSetId": 31
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-15T00:19:51Z",
+      "side": 1,
+      "message": "done",
+      "parentUuid": "1a9dcd25_619b32ca",
       "revId": "dd5abef80c8a3657209f6f6e1b3f2d03b810e0e8",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "1a9dcd25_81943e38",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/LocalTransactionContext.java",
+        "patchSetId": 31
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-15T00:19:51Z",
+      "side": 1,
+      "message": "It can. done.",
+      "parentUuid": "1a9dcd25_fed7ddbd",
+      "revId": "dd5abef80c8a3657209f6f6e1b3f2d03b810e0e8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a9dcd25_4114f6f4",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardedTransactionChain.java",
         "patchSetId": 31
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "1a9dcd25_419e3658",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardedTransactionChain.java",
+        "patchSetId": 31
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-15T00:19:51Z",
+      "side": 1,
+      "message": "That\u0027s what it was called before. I changed it back.",
+      "parentUuid": "1a9dcd25_4114f6f4",
+      "revId": "dd5abef80c8a3657209f6f6e1b3f2d03b810e0e8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a9dcd25_c1ffa6a9",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardedTransactionChain.java",
         "patchSetId": 31
@@ -81,6 +153,24 @@
       "writtenOn": "2015-05-14T23:27:37Z",
       "side": 1,
       "message": "null check - too late",
+      "revId": "dd5abef80c8a3657209f6f6e1b3f2d03b810e0e8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_e1a2e299",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardedTransactionChain.java",
+        "patchSetId": 31
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-15T00:19:51Z",
+      "side": 1,
+      "message": "yup - removed it.",
+      "parentUuid": "1a9dcd25_c1ffa6a9",
       "revId": "dd5abef80c8a3657209f6f6e1b3f2d03b810e0e8",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -121,6 +211,24 @@
     },
     {
       "key": {
+        "uuid": "1a9dcd25_c1a9e67c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/SingleTransactionContextFactory.java",
+        "patchSetId": 31
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-15T00:19:51Z",
+      "side": 1,
+      "message": "I think it\u0027s big enough to warrant it\u0027s own class file. It seems we\u0027ve been tending to refactor out inner classes lately anyway.",
+      "parentUuid": "1a9dcd25_1ee8897b",
+      "revId": "dd5abef80c8a3657209f6f6e1b3f2d03b810e0e8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a9dcd25_61b6d2de",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionContextAdapter.java",
         "patchSetId": 31
@@ -155,6 +263,24 @@
     },
     {
       "key": {
+        "uuid": "1a9dcd25_81bbdec3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 31
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-15T00:19:51Z",
+      "side": 1,
+      "message": "I did that but it didn\u0027t get pushed. Must have been one change that got lost due to the internal server error.",
+      "parentUuid": "1a9dcd25_fefefd37",
+      "revId": "dd5abef80c8a3657209f6f6e1b3f2d03b810e0e8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a9dcd25_e1dc2277",
         "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/AbstractSnapshotBackedTransactionChain.java",
         "patchSetId": 31
@@ -166,6 +292,24 @@
       "writtenOn": "2015-05-14T22:48:35Z",
       "side": 1,
       "message": "What do these changes have to do with this particular patch?",
+      "revId": "dd5abef80c8a3657209f6f6e1b3f2d03b810e0e8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_81e2fed3",
+        "filename": "opendaylight/md-sal/sal-dom-spi/src/main/java/org/opendaylight/controller/sal/core/spi/data/AbstractSnapshotBackedTransactionChain.java",
+        "patchSetId": 31
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-15T00:19:51Z",
+      "side": 1,
+      "message": "I needed to pass the tx ID and not have a new one allocated. Every sub tx within a TransactionProxy needs to have the same tx ID as generated when the TransactionProxy is created. This was actually one of the bugs I found while testing with multiple shards. It was allocating a new ID for each sub tx.",
+      "parentUuid": "1a9dcd25_e1dc2277",
       "revId": "dd5abef80c8a3657209f6f6e1b3f2d03b810e0e8",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false

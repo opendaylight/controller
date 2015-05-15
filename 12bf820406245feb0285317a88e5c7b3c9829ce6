@@ -33,6 +33,24 @@
       "revId": "12bf820406245feb0285317a88e5c7b3c9829ce6",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_41b5d6cb",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxyCleanupPhantomReference.java",
+        "patchSetId": 31
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-15T00:19:51Z",
+      "side": 0,
+      "message": "Good question. The code was moved to TransactionContextCleanup - not sure how Robert did it.",
+      "parentUuid": "1a9dcd25_013eeeb8",
+      "revId": "12bf820406245feb0285317a88e5c7b3c9829ce6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
