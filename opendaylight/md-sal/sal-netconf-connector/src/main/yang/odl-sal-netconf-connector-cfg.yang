@@ -126,6 +126,12 @@ module odl-sal-netconf-connector-cfg {
                 default 20000;
             }
 
+            leaf default-request-timeout-millis {
+                description "Timeout for blocking operations within transactions.";
+                type uint32;
+                default 60000;
+            }
+
             leaf max-connection-attempts {
                 description "Maximum number of connection retries. Non positive value or null is interpreted as infinity.";
                 type uint32;
