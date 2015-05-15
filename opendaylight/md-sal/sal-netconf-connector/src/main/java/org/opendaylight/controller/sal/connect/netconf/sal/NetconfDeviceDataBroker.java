@@ -36,11 +36,13 @@ final class NetconfDeviceDataBroker implements DOMDataBroker {
     private final RemoteDeviceId id;
     private final NetconfBaseOps netconfOps;
     private final NetconfSessionPreferences netconfSessionPreferences;
+    private final long defaultRequestTimeoutMillis;
 
-    public NetconfDeviceDataBroker(final RemoteDeviceId id, final SchemaContext schemaContext, final DOMRpcService rpc, final NetconfSessionPreferences netconfSessionPreferences) {
+    public NetconfDeviceDataBroker(final RemoteDeviceId id, final SchemaContext schemaContext, final DOMRpcService rpc, final NetconfSessionPreferences netconfSessionPreferences, long defaultRequestTimeoutMillis) {
         this.id = id;
         this.netconfOps = new NetconfBaseOps(rpc, schemaContext);
         this.netconfSessionPreferences = netconfSessionPreferences;
+        this.defaultRequestTimeoutMillis = defaultRequestTimeoutMillis;
     }
 
     @Override
@@ -57,12 +59,12 @@ final class NetconfDeviceDataBroker implements DOMDataBroker {
     public DOMDataWriteTransaction newWriteOnlyTransaction() {
         if(netconfSessionPreferences.isCandidateSupported()) {
             if(netconfSessionPreferences.isRunningWritable()) {
-                return new WriteCandidateRunningTx(id, netconfOps, netconfSessionPreferences);
+                return new WriteCandidateRunningTx(id, netconfOps, netconfSessionPreferences, defaultRequestTimeoutMillis);
             } else {
-                return new WriteCandidateTx(id, netconfOps, netconfSessionPreferences);
+                return new WriteCandidateTx(id, netconfOps, netconfSessionPreferences, defaultRequestTimeoutMillis);
             }
         } else {
-            return new WriteRunningTx(id, netconfOps, netconfSessionPreferences);
+            return new WriteRunningTx(id, netconfOps, netconfSessionPreferences, defaultRequestTimeoutMillis);
         }
     }
 
