@@ -27,10 +27,6 @@ public class DistributedOperationalDataStoreProviderModule extends
         // add custom validation form module attributes here.
     }
 
-    @Override
-    public boolean canReuseInstance(AbstractDistributedOperationalDataStoreProviderModule oldModule) {
-        return true;
-    }
 
     @Override
     public java.lang.AutoCloseable createInstance() {

@@ -35,11 +35,6 @@ public class DomConcurrentDataBrokerModule extends AbstractDomConcurrentDataBrok
     }
 
     @Override
-    public boolean canReuseInstance(AbstractDomConcurrentDataBrokerModule oldModule) {
-        return true;
-    }
-
-    @Override
     public AutoCloseable createInstance() {
         //Initializing Operational DOM DataStore defaulting to InMemoryDOMDataStore if one is not configured
         DOMStore operStore =  getOperationalDataStoreDependency();
