@@ -13,7 +13,6 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-
 import com.google.common.collect.Sets;
 import java.io.IOException;
 import org.junit.After;
@@ -40,12 +39,15 @@ public class ConfigPersisterTest {
     private ConfigPersisterActivator configPersisterActivator;
     private TestingExceptionHandler handler;
 
-
-    private void setUpContextAndStartPersister(String requiredCapability, final NetconfOperationService conflictingService) throws Exception {
+    private void setUpContext(String requiredCapability) throws Exception {
         DummyAdapterWithInitialSnapshot.expectedCapability = requiredCapability;
         ctx = new MockedBundleContext(1000, 1000);
-        doReturn(getConflictingService()).when(ctx.serviceFactory).createService(anyString());
         configPersisterActivator = new ConfigPersisterActivator();
+    }
+
+    private void setUpContextAndStartPersister(String requiredCapability, final NetconfOperationService conflictingService) throws Exception {
+        setUpContext(requiredCapability);
+        doReturn(conflictingService).when(ctx.serviceFactory).createService(anyString());
         configPersisterActivator.start(ctx.getBundleContext());
     }
 
@@ -72,9 +74,7 @@ public class ConfigPersisterTest {
 
     @Test
     public void testPersisterSuccessfulPush() throws Exception {
-        setUpContextAndStartPersister("cap1", getConflictingService());
-        NetconfOperationService service = getWorkingService(getOKDocument());
-        doReturn(service).when(ctx.serviceFactory).createService(anyString());
+        setUpContextAndStartPersister("cap1", getWorkingService(getOKDocument()));
         Thread.sleep(2000);
         assertCannotRegisterAsJMXListener_pushWasSuccessful();
     }
@@ -131,12 +131,18 @@ public class ConfigPersisterTest {
 
     @Test
     public void testSuccessConflictingVersionException() throws Exception {
-        setUpContextAndStartPersister("cap1", getConflictingService());
-        doReturn(getConflictingService()).when(ctx.serviceFactory).createService(anyString());
-        Thread.sleep(500);
-        // working service:
-        LOG.info("Switching to working service **");
-        doReturn(getWorkingService(getOKDocument())).when(ctx.serviceFactory).createService(anyString());
+        LOG.info("testSuccessConflictingVersionException starting");
+
+        setUpContext("cap1");
+
+        NetconfOperationService conflictingService = getConflictingService();
+        NetconfOperationService workingService = getWorkingService(getOKDocument());
+
+        doReturn(conflictingService).doReturn(conflictingService).doReturn(conflictingService).
+            doReturn(workingService).when(ctx.serviceFactory).createService(anyString());
+
+        configPersisterActivator.start(ctx.getBundleContext());
+
         Thread.sleep(1000);
         assertCannotRegisterAsJMXListener_pushWasSuccessful();
     }
