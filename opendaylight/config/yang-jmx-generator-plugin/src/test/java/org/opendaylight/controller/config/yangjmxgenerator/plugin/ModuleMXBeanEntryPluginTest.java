@@ -129,9 +129,9 @@ public class ModuleMXBeanEntryPluginTest extends ModuleMXBeanEntryTest {
                         is(true));
                 assertThat(peerTO.getFullyQualifiedName(), is(PACKAGE_NAME
                         + ".Peer"));
-                assertThat(peerTO.getMethods().size(), is(5));
-                Method getPort = findFirstMethodByName(peerTO.getMethods(),
-                        "getPort");
+                assertThat(peerTO.getMethods().size(), is(5 + 2/*hashCode Equals*/));
+
+                Method getPort = findFirstMethodByName(peerTO.getMethods(), "getPort");
                 assertNotNull(getPort);
                 Method setPort = findFirstMethodByName(peerTO.getMethods(),
                         "setPort");
