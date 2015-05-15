@@ -424,6 +424,43 @@ public class TemplateFactory {
                     methods.add(setter);
                 }
 
+                // Add hashCode
+                final MethodDefinition hashCode = getHash(attrs);
+                methods.add(hashCode);
+
+                // Add equals
+                final MethodDefinition equals = getEquals(attrs);
+                methods.add(equals);
+            }
+
+            private MethodDefinition getEquals(final Map<String, AttributeIfc> attrs) {
+                final StringBuilder equalsBodyBuilder = new StringBuilder(
+                        "        if (this == o) return true;\n" +
+                        "        if (o == null || getClass() != o.getClass()) return false;\n");
+                equalsBodyBuilder.append(String.format(
+                        "        final %s that = (%s) o;\n", name, name));
+                for (AttributeIfc s : attrs.values()) {
+                    equalsBodyBuilder.append(String.format(
+                            "        if(java.util.Objects.equals(%1$s, that.%1$s) == false) {\n" +
+                            "            return false;\n" +
+                            "        }\n\n", s.getLowerCaseCammelCase()));
+                }
+                equalsBodyBuilder.append(
+                        "       return true;\n");
+                return new MethodDefinition("boolean", "equals", Collections.singletonList(new Field("Object", "o")),
+                        Collections.singletonList(new Annotation("Override", Collections.<Parameter>emptyList())), equalsBodyBuilder.toString());
+            }
+
+            private MethodDefinition getHash(final Map<String, AttributeIfc> attrs) {
+                final StringBuilder hashBodyBuilder = new StringBuilder(
+                        "        return java.util.Objects.hash(");
+                for (AttributeIfc s : attrs.values()) {
+                    hashBodyBuilder.append(s.getLowerCaseCammelCase());
+                    hashBodyBuilder.append(", ");
+                }
+                hashBodyBuilder.replace(hashBodyBuilder.length() - 2, hashBodyBuilder.length(), ");\n");
+                return new MethodDefinition("int", "hashCode", Collections.<Field>emptyList(),
+                        Collections.singletonList(new Annotation("Override", Collections.<Parameter>emptyList())), hashBodyBuilder.toString());
             }
 
             String getType() {
