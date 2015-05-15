@@ -13,7 +13,6 @@ import com.google.common.util.concurrent.Futures;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -27,6 +26,7 @@ import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException
 import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -66,8 +66,27 @@ public class RestPutConfigTest {
         final InstanceIdentifierContext<?> iiCx = controllerCx.toInstanceIdentifier(identifier);
         final MapEntryNode data = Mockito.mock(MapEntryNode.class);
         final QName qName = QName.create("urn:ietf:params:xml:ns:yang:test-interface", "2014-07-01", "interface");
+        final QName qNameKey = QName.create("urn:ietf:params:xml:ns:yang:test-interface", "2014-07-01", "name");
+        final NodeIdentifierWithPredicates identWithPredicates = new NodeIdentifierWithPredicates(qName, qNameKey, "key");
         Mockito.when(data.getNodeType()).thenReturn(qName);
-        Mockito.when(data.getAttributeValue(Matchers.any(QName.class))).thenReturn("key");
+        Mockito.when(data.getIdentifier()).thenReturn(identWithPredicates);
+        final NormalizedNodeContext payload = new NormalizedNodeContext(iiCx, data);
+
+        mockingBrokerPut(iiCx.getInstanceIdentifier(), data);
+
+        restconfService.updateConfigurationData(identifier, payload);
+    }
+
+    @Test
+    public void testPutConfigDataCheckOnlyLastElement() {
+        final String identifier = "test-interface:interfaces/interface/key/sub-interface/subkey";
+        final InstanceIdentifierContext<?> iiCx = controllerCx.toInstanceIdentifier(identifier);
+        final MapEntryNode data = Mockito.mock(MapEntryNode.class);
+        final QName qName = QName.create("urn:ietf:params:xml:ns:yang:test-interface", "2014-07-01", "sub-interface");
+        final QName qNameSubKey = QName.create("urn:ietf:params:xml:ns:yang:test-interface", "2014-07-01", "sub-name");
+        final NodeIdentifierWithPredicates identWithPredicates = new NodeIdentifierWithPredicates(qName, qNameSubKey, "subkey");
+        Mockito.when(data.getNodeType()).thenReturn(qName);
+        Mockito.when(data.getIdentifier()).thenReturn(identWithPredicates);
         final NormalizedNodeContext payload = new NormalizedNodeContext(iiCx, data);
 
         mockingBrokerPut(iiCx.getInstanceIdentifier(), data);
@@ -76,18 +95,9 @@ public class RestPutConfigTest {
     }
 
     @Test(expected=RestconfDocumentedException.class)
-    public void testPutConfigDataNull() {
-        final String identifier = "test-interface:interfaces/interface/key";
-        final InstanceIdentifierContext<?> iiCx = controllerCx.toInstanceIdentifier(identifier);
-        final MapEntryNode data = Mockito.mock(MapEntryNode.class);
-        final QName qName = QName.create("urn:ietf:params:xml:ns:yang:test-interface", "2014-07-01", "interface");
-        Mockito.when(data.getNodeType()).thenReturn(qName);
-        Mockito.when(data.getAttributeValue(Matchers.any(QName.class))).thenReturn(null);
-        final NormalizedNodeContext payload = new NormalizedNodeContext(iiCx, data);
-
-        mockingBrokerPut(iiCx.getInstanceIdentifier(), data);
-
-        restconfService.updateConfigurationData(identifier, payload);
+    public void testPutConfigDataMissingUriKey() {
+        final String identifier = "test-interface:interfaces/interface";
+        controllerCx.toInstanceIdentifier(identifier);
     }
 
     @Test(expected=RestconfDocumentedException.class)
@@ -96,8 +106,10 @@ public class RestPutConfigTest {
         final InstanceIdentifierContext<?> iiCx = controllerCx.toInstanceIdentifier(identifier);
         final MapEntryNode data = Mockito.mock(MapEntryNode.class);
         final QName qName = QName.create("urn:ietf:params:xml:ns:yang:test-interface", "2014-07-01", "interface");
+        final QName qNameKey = QName.create("urn:ietf:params:xml:ns:yang:test-interface", "2014-07-01", "name");
+        final NodeIdentifierWithPredicates identWithPredicates = new NodeIdentifierWithPredicates(qName, qNameKey, "notSameKey");
         Mockito.when(data.getNodeType()).thenReturn(qName);
-        Mockito.when(data.getAttributeValue(Matchers.any(QName.class))).thenReturn("notSameKey");
+        Mockito.when(data.getIdentifier()).thenReturn(identWithPredicates);
         final NormalizedNodeContext payload = new NormalizedNodeContext(iiCx, data);
 
         mockingBrokerPut(iiCx.getInstanceIdentifier(), data);
