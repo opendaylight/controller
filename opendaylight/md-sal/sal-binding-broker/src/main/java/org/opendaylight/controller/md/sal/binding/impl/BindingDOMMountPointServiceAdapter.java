@@ -29,7 +29,7 @@ public class BindingDOMMountPointServiceAdapter implements MountPointService {
     private final BindingToNormalizedNodeCodec codec;
     private final DOMMountPointService mountService;
     private final LoadingCache<DOMMountPoint, BindingMountPointAdapter> bindingMountpoints = CacheBuilder.newBuilder()
-            .build(new CacheLoader<DOMMountPoint, BindingMountPointAdapter>() {
+            .weakKeys().build(new CacheLoader<DOMMountPoint, BindingMountPointAdapter>() {
 
                 @Override
                 public BindingMountPointAdapter load(DOMMountPoint key) throws Exception {
