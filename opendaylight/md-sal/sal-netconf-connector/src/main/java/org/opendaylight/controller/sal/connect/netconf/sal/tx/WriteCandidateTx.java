@@ -69,8 +69,8 @@ public class WriteCandidateTx extends AbstractWriteTx {
         }
     };
 
-    public WriteCandidateTx(final RemoteDeviceId id, final NetconfBaseOps rpc, final NetconfSessionPreferences netconfSessionPreferences) {
-        super(rpc, id, netconfSessionPreferences);
+    public WriteCandidateTx(final RemoteDeviceId id, final NetconfBaseOps rpc, final NetconfSessionPreferences netconfSessionPreferences, long defaultRequestTimeoutMillis) {
+        super(rpc, id, netconfSessionPreferences, defaultRequestTimeoutMillis);
     }
 
     @Override

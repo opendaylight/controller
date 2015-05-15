@@ -50,8 +50,9 @@ public class WriteRunningTx extends AbstractWriteTx {
     private static final Logger LOG  = LoggerFactory.getLogger(WriteRunningTx.class);
 
     public WriteRunningTx(final RemoteDeviceId id, final NetconfBaseOps netOps,
-                          final NetconfSessionPreferences netconfSessionPreferences) {
-        super(netOps, id, netconfSessionPreferences);
+                          final NetconfSessionPreferences netconfSessionPreferences,
+                          final long defaultRequestTimeoutMillis) {
+        super(netOps, id, netconfSessionPreferences, defaultRequestTimeoutMillis);
     }
 
     @Override
