@@ -22,6 +22,30 @@
       "revId": "f892aae383aac29d467b8ea0819739fabe404d52",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_caa9fb7c",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/rest/impl/XmlNormalizedNodeBodyReader.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 2470
+      },
+      "writtenOn": "2015-05-15T13:00:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a9dcd25_6a3787b1",
+      "range": {
+        "startLine": 144,
+        "startChar": 57,
+        "endLine": 144,
+        "endChar": 58
+      },
+      "revId": "f892aae383aac29d467b8ea0819739fabe404d52",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
