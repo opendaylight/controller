@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "1a9dcd25_64a100a9",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/AppendEntries.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-15T04:52:23Z",
+      "side": 1,
+      "message": "It gets serialized via out.defaultWriteObject() along with the other simple fields.",
+      "parentUuid": "1a9dcd25_5e8ff123",
+      "revId": "bf4cd17d0da1fd4370442118cf4e915603e7d4fb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a9dcd25_9eac998e",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/AppendEntriesReply.java",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2015-05-14T20:01:15Z",
       "side": 1,
       "message": "Would this be a breaking change as far as serialization is concerned?",
+      "revId": "bf4cd17d0da1fd4370442118cf4e915603e7d4fb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_e4943046",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/AppendEntriesReply.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-15T04:52:23Z",
+      "side": 1,
+      "message": "Adding a field is OK. If we send an instance to a He server, it will be ignored. \n\nIf an instance comes from a He server then it will be 0. We\u0027ll think it\u0027s base He which may not be correct. However we\u0027ve changed the serialization for AppendEntries which is incompatible with He anyway so we\u0027ll never get this response :)  So rolling upgrades won\u0027t be smooth if attempted. If Li becomes he leader then AppendEntries messages to He will fail and be dropped. I think that\u0027s OK - it means the He server will lag behind but should get caught up as soon as it\u0027s upgraded.",
+      "parentUuid": "1a9dcd25_9eac998e",
       "revId": "bf4cd17d0da1fd4370442118cf4e915603e7d4fb",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
