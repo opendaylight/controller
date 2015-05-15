@@ -60,7 +60,7 @@ public class NetconfDeviceWriteOnlyTxTest {
     @Test
     public void testDiscardChanges() {
         final WriteCandidateTx tx = new WriteCandidateTx(id, new NetconfBaseOps(rpc, mock(SchemaContext.class)),
-                NetconfSessionPreferences.fromStrings(Collections.<String>emptySet()));
+                NetconfSessionPreferences.fromStrings(Collections.<String>emptySet()), new Long(60000));
         final CheckedFuture<Void, TransactionCommitFailedException> submitFuture = tx.submit();
         try {
             submitFuture.checkedGet();
@@ -84,7 +84,7 @@ public class NetconfDeviceWriteOnlyTxTest {
                 .when(rpc).invokeRpc(any(SchemaPath.class), any(NormalizedNode.class));
 
         final WriteRunningTx tx = new WriteRunningTx(id, new NetconfBaseOps(rpc, NetconfDevice.INIT_SCHEMA_CTX),
-                NetconfSessionPreferences.fromStrings(Collections.<String>emptySet()));
+                NetconfSessionPreferences.fromStrings(Collections.<String>emptySet()), new Long(60000));
         try {
             tx.delete(LogicalDatastoreType.CONFIGURATION, yangIId);
         } catch (final Exception e) {

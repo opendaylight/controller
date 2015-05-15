@@ -23,7 +23,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 public abstract class AbstractWriteTx implements DOMDataWriteTransaction {
 
-    private static final long DEFAULT_REQUEST_TIMEOUT_MINUTES = 1L;
+    private final long defaultRequestTimeoutMillis;
 
     protected final RemoteDeviceId id;
     protected final NetconfBaseOps netOps;
@@ -31,10 +31,11 @@ public abstract class AbstractWriteTx implements DOMDataWriteTransaction {
     // Allow commit to be called only once
     protected boolean finished = false;
 
-    public AbstractWriteTx(final NetconfBaseOps netOps, final RemoteDeviceId id, final NetconfSessionPreferences netconfSessionPreferences) {
+    public AbstractWriteTx(final NetconfBaseOps netOps, final RemoteDeviceId id, final NetconfSessionPreferences netconfSessionPreferences, long defaultRequestTimeoutMillis) {
         this.netOps = netOps;
         this.id = id;
         this.netconfSessionPreferences = netconfSessionPreferences;
+        this.defaultRequestTimeoutMillis = defaultRequestTimeoutMillis;
         init();
     }
 
@@ -52,7 +53,7 @@ public abstract class AbstractWriteTx implements DOMDataWriteTransaction {
 
     protected void invokeBlocking(final String msg, final Function<NetconfBaseOps, ListenableFuture<DOMRpcResult>> op) throws NetconfDocumentedException {
         try {
-            final DOMRpcResult compositeNodeRpcResult = op.apply(netOps).get(DEFAULT_REQUEST_TIMEOUT_MINUTES, TimeUnit.MINUTES);
+            final DOMRpcResult compositeNodeRpcResult = op.apply(netOps).get(defaultRequestTimeoutMillis, TimeUnit.MILLISECONDS);
             if(isSuccess(compositeNodeRpcResult) == false) {
                 throw new NetconfDocumentedException(id + ": " + msg + " failed: " + compositeNodeRpcResult.getErrors(), NetconfDocumentedException.ErrorType.application,
                         NetconfDocumentedException.ErrorTag.operation_failed, NetconfDocumentedException.ErrorSeverity.warning);

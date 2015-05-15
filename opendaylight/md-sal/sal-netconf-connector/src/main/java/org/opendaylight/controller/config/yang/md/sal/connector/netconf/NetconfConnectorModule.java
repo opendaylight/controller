@@ -73,6 +73,9 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
         checkNotNull(getConnectionTimeoutMillis(), connectionTimeoutMillisJmxAttribute);
         checkCondition(getConnectionTimeoutMillis() > 0, "must be > 0", connectionTimeoutMillisJmxAttribute);
 
+        checkNotNull(getConnectionTimeoutMillis(), defaultRequestTimeoutMillisJmxAttribute);
+        checkCondition(getConnectionTimeoutMillis() > 0, "must be > 0", defaultRequestTimeoutMillisJmxAttribute);
+
         checkNotNull(getBetweenAttemptsTimeoutMillis(), betweenAttemptsTimeoutMillisJmxAttribute);
         checkCondition(getBetweenAttemptsTimeoutMillis() > 0, "must be > 0", betweenAttemptsTimeoutMillisJmxAttribute);
 
@@ -104,7 +107,7 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
         final BindingAwareBroker bindingBroker = getBindingRegistryDependency();
 
         final RemoteDeviceHandler<NetconfSessionPreferences> salFacade
-                = new NetconfDeviceSalFacade(id, domBroker, bindingBroker, bundleContext);
+                = new NetconfDeviceSalFacade(id, domBroker, bindingBroker, bundleContext, getDefaultRequestTimeoutMillis());
 
         final NetconfDevice.SchemaResourcesDTO schemaResourcesDTO =
                 new NetconfDevice.SchemaResourcesDTO(schemaRegistry, schemaContextFactory, new NetconfStateSchemas.NetconfStateSchemasResolverImpl());
@@ -159,7 +162,7 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
         .withAddress(socketAddress)
         .withConnectionTimeoutMillis(clientConnectionTimeoutMillis)
         .withReconnectStrategy(strategy)
-        .withAuthHandler(new LoginPassword(getUsername(),getPassword()))
+        .withAuthHandler(new LoginPassword(getUsername(), getPassword()))
         .withProtocol(getTcpOnly() ?
                 NetconfClientConfiguration.NetconfClientProtocol.TCP :
                 NetconfClientConfiguration.NetconfClientProtocol.SSH)
