@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "1a9dcd25_412b9630",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionChainProxy.java",
+        "patchSetId": 31
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-15T00:16:57Z",
+      "side": 0,
+      "message": "See this name fits the theme better than ShardedTransactionChain.",
+      "revId": "12bf820406245feb0285317a88e5c7b3c9829ce6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a9dcd25_013eeeb8",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxyCleanupPhantomReference.java",
         "patchSetId": 31
