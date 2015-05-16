@@ -85,6 +85,9 @@ public class Shard extends RaftActor {
     private static final Object TX_COMMIT_TIMEOUT_CHECK_MESSAGE = "txCommitTimeoutCheck";
 
     @VisibleForTesting
+    static final Object GET_SHARD_MBEAN_MESSAGE = "getShardMBeanMessage";
+
+    @VisibleForTesting
     static final String DEFAULT_NAME = "default";
 
     // The state of this Shard
@@ -256,9 +259,11 @@ public class Shard extends RaftActor {
                 onDatastoreContext((DatastoreContext)message);
             } else if(message instanceof RegisterRoleChangeListener){
                 roleChangeNotifier.get().forward(message, context());
-            } else if (message instanceof FollowerInitialSyncUpStatus){
+            } else if (message instanceof FollowerInitialSyncUpStatus) {
                 shardMBean.setFollowerInitialSyncStatus(((FollowerInitialSyncUpStatus) message).isInitialSyncDone());
                 context().parent().tell(message, self());
+            } else if(GET_SHARD_MBEAN_MESSAGE.equals(message)){
+                sender().tell(getShardMBean(), self());
             } else {
                 super.onReceiveCommand(message);
             }
