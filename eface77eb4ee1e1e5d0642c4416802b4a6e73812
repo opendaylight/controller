@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a9dcd25_ba6158d5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DataTreeCandidatePayload.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-16T12:26:53Z",
+      "side": 1,
+      "message": "Guaranteed NPE here - parent is nullable.",
+      "revId": "eface77eb4ee1e1e5d0642c4416802b4a6e73812",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
