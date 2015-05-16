@@ -109,7 +109,6 @@ public enum ValueType {
         b.put(Long.class, LONG_TYPE);
         b.put(Boolean.class, BOOL_TYPE);
         b.put(QName.class, QNAME_TYPE);
-        b.put(YangInstanceIdentifier.class, YANG_IDENTIFIER_TYPE);
         b.put(Short.class,SHORT_TYPE);
         b.put(BigInteger.class, BIG_INTEGER_TYPE);
         b.put(BigDecimal.class, BIG_DECIMAL_TYPE);
@@ -131,6 +130,10 @@ public enum ValueType {
         }
         if (node instanceof Set) {
             return BITS_TYPE;
+        }
+
+        if (node instanceof YangInstanceIdentifier) {
+            return YANG_IDENTIFIER_TYPE;
         }
 
         throw new IllegalArgumentException("Unknown value type " + node.getClass().getSimpleName());
