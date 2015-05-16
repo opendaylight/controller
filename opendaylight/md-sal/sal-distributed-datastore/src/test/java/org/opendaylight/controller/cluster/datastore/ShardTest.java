@@ -41,6 +41,7 @@ import org.mockito.InOrder;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.DelegatingPersistentDataProvider;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
+import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
@@ -1264,12 +1265,15 @@ public class ShardTest extends AbstractShardTest {
                 inOrder.verify(cohort).preCommit();
                 inOrder.verify(cohort).commit();
 
+                shard.tell(Shard.GET_SHARD_MBEAN_MESSAGE, getRef());
+                ShardStats shardStats = expectMsgClass(duration, ShardStats.class);
+
                 // Use MBean for verification
                 // Committed transaction count should increase as usual
-                assertEquals(1,shard.underlyingActor().getShardMBean().getCommittedTransactionsCount());
+                assertEquals(1,shardStats.getCommittedTransactionsCount());
 
                 // Commit index should not advance because this does not go into the journal
-                assertEquals(-1, shard.underlyingActor().getShardMBean().getCommitIndex());
+                assertEquals(-1, shardStats.getCommitIndex());
 
                 shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
 
@@ -1320,12 +1324,15 @@ public class ShardTest extends AbstractShardTest {
                 inOrder.verify(cohort).preCommit();
                 inOrder.verify(cohort).commit();
 
+                shard.tell(Shard.GET_SHARD_MBEAN_MESSAGE, getRef());
+                ShardStats shardStats = expectMsgClass(duration, ShardStats.class);
+
                 // Use MBean for verification
                 // Committed transaction count should increase as usual
-                assertEquals(1, shard.underlyingActor().getShardMBean().getCommittedTransactionsCount());
+                assertEquals(1, shardStats.getCommittedTransactionsCount());
 
                 // Commit index should advance as we do not have an empty modification
-                assertEquals(0, shard.underlyingActor().getShardMBean().getCommitIndex());
+                assertEquals(0, shardStats.getCommitIndex());
 
                 shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
 
