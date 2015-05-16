@@ -43,7 +43,6 @@ final class ValueTypes {
         b.put(Long.class, Byte.valueOf(LONG_TYPE));
         b.put(Boolean.class, Byte.valueOf(BOOL_TYPE));
         b.put(QName.class, Byte.valueOf(QNAME_TYPE));
-        b.put(YangInstanceIdentifier.class, Byte.valueOf(YANG_IDENTIFIER_TYPE));
         b.put(Short.class, Byte.valueOf(SHORT_TYPE));
         b.put(BigInteger.class, Byte.valueOf(BIG_INTEGER_TYPE));
         b.put(BigDecimal.class, Byte.valueOf(BIG_DECIMAL_TYPE));
@@ -65,8 +64,13 @@ final class ValueTypes {
         if (type != null) {
             return type;
         }
+
         if (node instanceof Set) {
             return BITS_TYPE;
+        }
+
+        if (node instanceof YangInstanceIdentifier) {
+            return YANG_IDENTIFIER_TYPE;
         }
 
         throw new IllegalArgumentException("Unknown value type " + node.getClass().getSimpleName());
