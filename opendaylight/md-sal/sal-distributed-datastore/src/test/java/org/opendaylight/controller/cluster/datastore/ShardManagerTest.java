@@ -1,14 +1,12 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.AddressFromURIString;
@@ -25,16 +23,11 @@ import akka.util.Timeout;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.typesafe.config.ConfigFactory;
-import java.net.URI;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.junit.After;
@@ -42,7 +35,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.exceptions.NotInitializedException;
 import org.opendaylight.controller.cluster.datastore.exceptions.PrimaryNotFoundException;
@@ -69,7 +61,6 @@ import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyn
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
-import org.opendaylight.yangtools.yang.model.api.ModuleIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
@@ -667,167 +658,8 @@ public class ShardManagerTest extends AbstractActorTest {
             // Journal entries up to the last one should've been deleted
             Map<Long, Object> journal = InMemoryJournal.get(shardMgrID);
             synchronized (journal) {
-                assertEquals("Journal size", 1, journal.size());
-                assertEquals("Journal entry seq #", Long.valueOf(2), journal.keySet().iterator().next());
+                assertEquals("Journal size", 0, journal.size());
             }
-        }};
-    }
-
-    @Test
-    public void testOnRecoveryPreviouslyKnownModulesAreDiscovered() throws Exception {
-        final ImmutableSet<String> persistedModules = ImmutableSet.of("foo", "bar");
-        InMemoryJournal.addEntry(shardMgrID, 1L, new ShardManager.SchemaContextModules(
-                persistedModules));
-        new JavaTestKit(getSystem()) {{
-            TestActorRef<TestShardManager> shardManager = TestActorRef.create(getSystem(),
-                    Props.create(new TestShardManagerCreator(shardMrgIDSuffix)));
-
-            shardManager.underlyingActor().waitForRecoveryComplete();
-
-            Collection<String> knownModules = shardManager.underlyingActor().getKnownModules();
-
-            assertEquals("getKnownModules", persistedModules, Sets.newHashSet(knownModules));
-        }};
-    }
-
-    @Test
-    public void testOnUpdateSchemaContextUpdateKnownModulesIfTheyContainASuperSetOfTheKnownModules()
-            throws Exception {
-        new JavaTestKit(getSystem()) {{
-            final TestActorRef<ShardManager> shardManager =
-                    TestActorRef.create(getSystem(), newShardMgrProps(true));
-
-            assertEquals("getKnownModules size", 0, shardManager.underlyingActor().getKnownModules().size());
-
-            ModuleIdentifier foo = mock(ModuleIdentifier.class);
-            when(foo.getNamespace()).thenReturn(new URI("foo"));
-
-            Set<ModuleIdentifier> moduleIdentifierSet = new HashSet<>();
-            moduleIdentifierSet.add(foo);
-
-            SchemaContext schemaContext = mock(SchemaContext.class);
-            when(schemaContext.getAllModuleIdentifiers()).thenReturn(moduleIdentifierSet);
-
-            shardManager.underlyingActor().onReceiveCommand(new UpdateSchemaContext(schemaContext));
-
-            assertEquals("getKnownModules", Sets.newHashSet("foo"),
-                    Sets.newHashSet(shardManager.underlyingActor().getKnownModules()));
-
-            ModuleIdentifier bar = mock(ModuleIdentifier.class);
-            when(bar.getNamespace()).thenReturn(new URI("bar"));
-
-            moduleIdentifierSet.add(bar);
-
-            shardManager.underlyingActor().onReceiveCommand(new UpdateSchemaContext(schemaContext));
-
-            assertEquals("getKnownModules", Sets.newHashSet("foo", "bar"),
-                    Sets.newHashSet(shardManager.underlyingActor().getKnownModules()));
-        }};
-    }
-
-    @Test
-    public void testOnUpdateSchemaContextDoNotUpdateKnownModulesIfTheyDoNotContainASuperSetOfKnownModules()
-            throws Exception {
-        new JavaTestKit(getSystem()) {{
-            final TestActorRef<ShardManager> shardManager =
-                    TestActorRef.create(getSystem(), newShardMgrProps(true));
-
-            SchemaContext schemaContext = mock(SchemaContext.class);
-            Set<ModuleIdentifier> moduleIdentifierSet = new HashSet<>();
-
-            ModuleIdentifier foo = mock(ModuleIdentifier.class);
-            when(foo.getNamespace()).thenReturn(new URI("foo"));
-
-            moduleIdentifierSet.add(foo);
-
-            when(schemaContext.getAllModuleIdentifiers()).thenReturn(moduleIdentifierSet);
-
-            shardManager.underlyingActor().onReceiveCommand(new UpdateSchemaContext(schemaContext));
-
-            assertEquals("getKnownModules", Sets.newHashSet("foo"),
-                    Sets.newHashSet(shardManager.underlyingActor().getKnownModules()));
-
-            //Create a completely different SchemaContext with only the bar module in it
-            //schemaContext = mock(SchemaContext.class);
-            moduleIdentifierSet.clear();
-            ModuleIdentifier bar = mock(ModuleIdentifier.class);
-            when(bar.getNamespace()).thenReturn(new URI("bar"));
-
-            moduleIdentifierSet.add(bar);
-
-            shardManager.underlyingActor().onReceiveCommand(new UpdateSchemaContext(schemaContext));
-
-            assertEquals("getKnownModules", Sets.newHashSet("foo"),
-                    Sets.newHashSet(shardManager.underlyingActor().getKnownModules()));
-
-        }};
-    }
-
-    @Test
-    public void testRecoveryApplicable(){
-        new JavaTestKit(getSystem()) {
-            {
-                final Props persistentProps = newShardMgrProps(true);
-                final TestActorRef<ShardManager> persistentShardManager =
-                        TestActorRef.create(getSystem(), persistentProps);
-
-                DataPersistenceProvider dataPersistenceProvider1 = persistentShardManager.underlyingActor().getDataPersistenceProvider();
-
-                assertTrue("Recovery Applicable", dataPersistenceProvider1.isRecoveryApplicable());
-
-                final Props nonPersistentProps = newShardMgrProps(false);
-                final TestActorRef<ShardManager> nonPersistentShardManager =
-                        TestActorRef.create(getSystem(), nonPersistentProps);
-
-                DataPersistenceProvider dataPersistenceProvider2 = nonPersistentShardManager.underlyingActor().getDataPersistenceProvider();
-
-                assertFalse("Recovery Not Applicable", dataPersistenceProvider2.isRecoveryApplicable());
-
-
-            }};
-
-    }
-
-    @Test
-    public void testOnUpdateSchemaContextUpdateKnownModulesCallsDataPersistenceProvider()
-            throws Exception {
-        final CountDownLatch persistLatch = new CountDownLatch(1);
-        final Creator<ShardManager> creator = new Creator<ShardManager>() {
-            private static final long serialVersionUID = 1L;
-            @Override
-            public ShardManager create() throws Exception {
-                return new ShardManager(new MockClusterWrapper(), new MockConfiguration(), DatastoreContext.newBuilder().build(),
-                        ready, new PrimaryShardInfoFutureCache()) {
-                    @Override
-                    protected DataPersistenceProvider createDataPersistenceProvider(boolean persistent) {
-                        DataPersistenceProviderMonitor dataPersistenceProviderMonitor
-                                = new DataPersistenceProviderMonitor();
-                        dataPersistenceProviderMonitor.setPersistLatch(persistLatch);
-                        return dataPersistenceProviderMonitor;
-                    }
-                };
-            }
-        };
-
-        new JavaTestKit(getSystem()) {{
-
-            final TestActorRef<ShardManager> shardManager =
-                    TestActorRef.create(getSystem(), Props.create(new DelegatingShardManagerCreator(creator)));
-
-            ModuleIdentifier foo = mock(ModuleIdentifier.class);
-            when(foo.getNamespace()).thenReturn(new URI("foo"));
-
-            Set<ModuleIdentifier> moduleIdentifierSet = new HashSet<>();
-            moduleIdentifierSet.add(foo);
-
-            SchemaContext schemaContext = mock(SchemaContext.class);
-            when(schemaContext.getAllModuleIdentifiers()).thenReturn(moduleIdentifierSet);
-
-            shardManager.underlyingActor().onReceiveCommand(new UpdateSchemaContext(schemaContext));
-
-            assertEquals("Persisted", true,
-                    Uninterruptibles.awaitUninterruptibly(persistLatch, 5, TimeUnit.SECONDS));
-
         }};
     }
 
