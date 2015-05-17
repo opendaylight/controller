@@ -8,7 +8,6 @@
 package org.opendaylight.controller.sal.dom.broker.osgi;
 
 import java.util.Hashtable;
-
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.controller.sal.dom.broker.GlobalBundleScanningSchemaServiceImpl;
 import org.osgi.framework.BundleActivator;
@@ -24,7 +23,6 @@ public class SchemaServiceActivator implements BundleActivator {
     @Override
     public void start(final BundleContext context) {
         schemaService = GlobalBundleScanningSchemaServiceImpl.createInstance(context);
-        schemaService.start();
         schemaServiceReg = context.registerService(SchemaService.class, schemaService, new Hashtable<String,String>());
     }
 
