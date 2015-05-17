@@ -81,13 +81,20 @@ public class GlobalBundleScanningSchemaServiceImpl implements SchemaContextProvi
 
     public void start() {
         checkState(context != null);
+        LOG.debug("start() starting");
 
         listenerTracker = new ServiceTracker<>(context, SchemaContextListener.class, GlobalBundleScanningSchemaServiceImpl.this);
-        bundleTracker = new BundleTracker<>(context, BundleEvent.RESOLVED | BundleEvent.UNRESOLVED, scanner);
+        bundleTracker = new BundleTracker<>(context, Bundle.RESOLVED | Bundle.STARTING |
+                Bundle.STOPPING | Bundle.ACTIVE, scanner);
         bundleTracker.open();
+
+        LOG.debug("BundleTracker.open() complete");
+
         listenerTracker.open();
         starting = false;
         tryToUpdateSchemaContext();
+
+        LOG.debug("start() complete");
     }
 
     @Override
@@ -184,7 +191,8 @@ public class GlobalBundleScanningSchemaServiceImpl implements SchemaContextProvi
             }
 
             if (!urls.isEmpty()) {
-                LOG.debug("Loaded {} new URLs, rebuilding schema context", urls.size());
+                LOG.debug("Loaded {} new URLs from bundle {}, attempting to rebuild schema context",
+                        urls.size(), bundle.getSymbolicName());
                 tryToUpdateSchemaContext();
             }
 
@@ -193,7 +201,6 @@ public class GlobalBundleScanningSchemaServiceImpl implements SchemaContextProvi
 
         @Override
         public void modifiedBundle(final Bundle bundle, final BundleEvent event, final Iterable<Registration> object) {
-            LOG.debug("Modified bundle {} {} {}", bundle, event, object);
         }
 
         /**
@@ -232,6 +239,10 @@ public class GlobalBundleScanningSchemaServiceImpl implements SchemaContextProvi
         }
         Optional<SchemaContext> schema = contextResolver.getSchemaContext();
         if(schema.isPresent()) {
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("Got new SchemaContext: # of modules {}", schema.get().getAllModuleIdentifiers().size());
+            }
+
             updateContext(schema.get());
         }
     }
