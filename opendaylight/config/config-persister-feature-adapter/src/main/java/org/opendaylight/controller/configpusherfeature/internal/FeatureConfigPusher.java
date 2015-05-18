@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.configpusherfeature.internal;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.LinkedHashMultimap;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,6 +17,7 @@ import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
 import org.opendaylight.controller.config.persist.api.ConfigPusher;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
+import org.opendaylight.controller.config.persist.storage.file.xml.XmlFileStorageAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,19 +59,21 @@ public class FeatureConfigPusher {
      * If a Feature is not in the returned LinkedHashMultimap then we couldn't push its configs
      * (Ususally because it was not yet installed)
      */
-    public LinkedHashMultimap<Feature,FeatureConfigSnapshotHolder> pushConfigs(final List<Feature> features) throws Exception, InterruptedException {
-        LinkedHashMultimap<Feature,FeatureConfigSnapshotHolder> pushedFeatures = LinkedHashMultimap.create();
-        for(Feature feature: features) {
+    public LinkedHashMultimap<Feature, FeatureConfigSnapshotHolder> pushConfigs(final List<Feature> features) throws Exception {
+        LinkedHashMultimap<Feature, FeatureConfigSnapshotHolder> pushedFeatures = LinkedHashMultimap.create();
+        for (Feature feature : features) {
+
+
             LinkedHashSet<FeatureConfigSnapshotHolder> configSnapShots = pushConfig(feature);
-            if(!configSnapShots.isEmpty()) {
-                pushedFeatures.putAll(feature,configSnapShots);
+            if (!configSnapShots.isEmpty()) {
+                pushedFeatures.putAll(feature, configSnapShots);
             }
         }
         return pushedFeatures;
     }
 
-    private LinkedHashSet<FeatureConfigSnapshotHolder> pushConfig(final Feature feature) throws Exception, InterruptedException {
-        LinkedHashSet<FeatureConfigSnapshotHolder> configs = new LinkedHashSet<FeatureConfigSnapshotHolder>();
+    private LinkedHashSet<FeatureConfigSnapshotHolder> pushConfig(final Feature feature) throws Exception {
+        LinkedHashSet<FeatureConfigSnapshotHolder> configs = new LinkedHashSet<>();
         if(isInstalled(feature)) {
             // FIXME Workaround for BUG-2836, features service returns null for feature: standard-condition-webconsole_0_0_0, 3.0.1
             if(featuresService.getFeature(feature.getName(), feature.getVersion()) == null) {
@@ -78,7 +82,7 @@ public class FeatureConfigPusher {
                 ChildAwareFeatureWrapper wrappedFeature = new ChildAwareFeatureWrapper(feature, featuresService);
                 configs = wrappedFeature.getFeatureConfigSnapshotHolders();
                 if (!configs.isEmpty()) {
-                    configs = pushConfig(configs);
+                    configs = pushConfig(configs, feature);
                     feature2configs.putAll(feature, configs);
                 }
             }
@@ -113,11 +117,21 @@ public class FeatureConfigPusher {
         return false;
     }
 
-    private LinkedHashSet<FeatureConfigSnapshotHolder> pushConfig(final LinkedHashSet<FeatureConfigSnapshotHolder> configs) throws InterruptedException {
+    private LinkedHashSet<FeatureConfigSnapshotHolder> pushConfig(final LinkedHashSet<FeatureConfigSnapshotHolder> configs, final Feature feature) throws InterruptedException {
         LinkedHashSet<FeatureConfigSnapshotHolder> configsToPush = new LinkedHashSet<FeatureConfigSnapshotHolder>(configs);
         configsToPush.removeAll(pushedConfigs);
-        if(!configsToPush.isEmpty()) {
-            pusher.pushConfigs(new ArrayList<ConfigSnapshotHolder>(configsToPush));
+        if (!configsToPush.isEmpty()) {
+
+            // Ignore features that are present in persisted current config
+            final Optional<XmlFileStorageAdapter> currentCfgPusher = XmlFileStorageAdapter.getInstance();
+            if (currentCfgPusher.isPresent() &&
+                    currentCfgPusher.get().getPersistedFeatures().contains(feature.getId())) {
+                LOG.warn("Ignoring default configuration {} for feature {}, the configuration is present in {}",
+                        configsToPush, feature.getId(), currentCfgPusher.get());
+            } else {
+                pusher.pushConfigs(new ArrayList<ConfigSnapshotHolder>(configsToPush));
+            }
+
             pushedConfigs.addAll(configsToPush);
         }
         LinkedHashSet<FeatureConfigSnapshotHolder> configsPushed = new LinkedHashSet<FeatureConfigSnapshotHolder>(pushedConfigs);
