@@ -13,6 +13,8 @@ package org.opendaylight.controller.cluster.datastore.util;
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntry;
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntryBuilder;
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapNodeBuilder;
+
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -342,6 +344,9 @@ public class TestModel {
               .withChild(Builders.choiceBuilder()
                    .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(CHOICE_QNAME))
                    .withChild(ImmutableNodes.leafNode(DESC_QNAME, LONG_ID)).build())
+                   .withChild(Builders.orderedMapBuilder().
+                       withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(DESC_QNAME)).
+                       withValue(ImmutableList.<MapEntryNode>builder().add(augMapEntry).build()).build())
                       // .withChild(augmentationNode)
               .withChild(shoes)
               .withChild(numbers)
