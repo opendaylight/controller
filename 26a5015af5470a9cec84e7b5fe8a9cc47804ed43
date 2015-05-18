@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "1a9dcd25_8960d836",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/DataStoreUnavailableException.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-18T23:35:55Z",
+      "side": 1,
+      "message": "Another reason is it\u0027s in the common.api package so theoretically it could be used by any datastore implementation so keeping CDS-specific concepts out of it keeps this generic.",
+      "parentUuid": "1a9dcd25_490c1095",
+      "revId": "26a5015af5470a9cec84e7b5fe8a9cc47804ed43",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a9dcd25_09ca884f",
         "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/DataStoreUnavailableException.java",
         "patchSetId": 1
