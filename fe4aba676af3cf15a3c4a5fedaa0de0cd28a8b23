@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a9dcd25_bdfb9246",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/netconf/sal/NetconfDeviceSalFacade.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-05-18T07:42:31Z",
+      "side": 1,
+      "message": "long instead Long should be enough here ... no need to use wrapper",
+      "range": {
+        "startLine": 38,
+        "startChar": 158,
+        "endLine": 38,
+        "endChar": 162
+      },
+      "revId": "fe4aba676af3cf15a3c4a5fedaa0de0cd28a8b23",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_3db6a28b",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/netconf/sal/tx/WriteCandidateTx.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-05-18T07:42:31Z",
+      "side": 1,
+      "message": "Long vs long again",
+      "range": {
+        "startLine": 72,
+        "startChar": 138,
+        "endLine": 72,
+        "endChar": 142
+      },
+      "revId": "fe4aba676af3cf15a3c4a5fedaa0de0cd28a8b23",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_1dff2636",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/test/java/org/opendaylight/controller/sal/connect/netconf/sal/tx/NetconfDeviceWriteOnlyTxTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-05-18T07:42:31Z",
+      "side": 1,
+      "message": "This can be done without new Long() ... 60000L would be enough",
+      "range": {
+        "startLine": 63,
+        "startChar": 96,
+        "endLine": 63,
+        "endChar": 101
+      },
+      "revId": "fe4aba676af3cf15a3c4a5fedaa0de0cd28a8b23",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
