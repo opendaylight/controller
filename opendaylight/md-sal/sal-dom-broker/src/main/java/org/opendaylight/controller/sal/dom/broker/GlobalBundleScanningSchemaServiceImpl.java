@@ -12,6 +12,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -218,7 +219,15 @@ public class GlobalBundleScanningSchemaServiceImpl implements SchemaContextProvi
                     LOG.warn("Failed do unregister URL {}, proceeding", url, e);
                 }
             }
-            tryToUpdateSchemaContext();
+
+            int numUrls = Iterables.size(urls);
+            if(numUrls > 0 ) {
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug("removedBundle: {}, state: {}, # urls: {}", bundle.getSymbolicName(), bundle.getState(), numUrls);
+                }
+
+                tryToUpdateSchemaContext();
+            }
         }
     }
 
