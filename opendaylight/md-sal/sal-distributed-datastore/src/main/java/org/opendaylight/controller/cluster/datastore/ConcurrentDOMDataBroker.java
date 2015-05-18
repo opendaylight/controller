@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import org.opendaylight.controller.cluster.databroker.AbstractDOMBroker;
+import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
+import org.opendaylight.controller.md.sal.common.api.data.DataStoreUnavailableException;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
@@ -195,7 +197,9 @@ public class ConcurrentDOMDataBroker extends AbstractDOMBroker {
 
         LOG.warn("Tx: {} Error during phase {}, starting Abort", transaction.getIdentifier(), phase, t);
         final Exception e;
-        if (t instanceof Exception) {
+        if(t instanceof NoShardLeaderException) {
+            e = new DataStoreUnavailableException(t.getMessage(), t);
+        } else if (t instanceof Exception) {
             e = (Exception)t;
         } else {
             e = new RuntimeException("Unexpected error occurred", t);
