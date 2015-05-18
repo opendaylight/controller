@@ -180,7 +180,9 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         } else if(message instanceof ClusterEvent.MemberRemoved) {
             memberRemoved((ClusterEvent.MemberRemoved) message);
         } else if(message instanceof ClusterEvent.UnreachableMember) {
-            ignoreMessage(message);
+            memberUnreachable((ClusterEvent.UnreachableMember)message);
+        } else if(message instanceof ClusterEvent.ReachableMember) {
+            memberReachable((ClusterEvent.ReachableMember) message);
         } else if(message instanceof DatastoreContext) {
             onDatastoreContext((DatastoreContext)message);
         } else if(message instanceof RoleChangeNotification) {
@@ -444,6 +446,40 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         checkReady();
     }
 
+    private void memberReachable(ClusterEvent.ReachableMember message) {
+        String memberName = message.member().roles().head();
+        LOG.debug("Received ReachableMember: memberName {}, address: {}", memberName, message.member().address());
+
+        markMemberAvailable(memberName);
+    }
+
+    private void memberUnreachable(ClusterEvent.UnreachableMember message) {
+        String memberName = message.member().roles().head();
+        LOG.debug("Received UnreachableMember: memberName {}, address: {}", memberName, message.member().address());
+
+        markMemberUnavailable(memberName);
+    }
+
+    private void markMemberUnavailable(final String memberName) {
+        for(ShardInformation info : localShards.values()){
+            String leaderId = info.getLeaderId();
+            if(leaderId != null && leaderId.contains(memberName)) {
+                LOG.debug("Marking Leader {} as unavailable.", leaderId);
+                info.setLeaderAvailable(false);
+            }
+        }
+    }
+
+    private void markMemberAvailable(final String memberName) {
+        for(ShardInformation info : localShards.values()){
+            String leaderId = info.getLeaderId();
+            if(leaderId != null && leaderId.contains(memberName)) {
+                LOG.debug("Marking Leader {} as available.", leaderId);
+                info.setLeaderAvailable(true);
+            }
+        }
+    }
+
     private void onDatastoreContext(DatastoreContext context) {
         datastoreContext = context;
         for (ShardInformation info : localShards.values()) {
@@ -674,6 +710,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         private ActorPath actorPath;
         private final Map<String, String> peerAddresses;
         private Optional<DataTree> localShardDataTree;
+        private boolean leaderAvailable = false;
 
         // flag that determines if the actor is ready for business
         private boolean actorInitialized = false;
@@ -748,7 +785,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         }
 
         boolean isShardReadyWithLeaderId() {
-            return isShardReady() && (isLeader() || peerAddresses.get(leaderId) != null);
+            return leaderAvailable && isShardReady() && (isLeader() || peerAddresses.get(leaderId) != null);
         }
 
         boolean isShardInitialized() {
@@ -828,8 +865,16 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
         void setLeaderId(String leaderId) {
             this.leaderId = leaderId;
-
+            this.leaderAvailable = true;
             notifyOnShardInitializedCallbacks();
+        }
+
+        public String getLeaderId() {
+            return leaderId;
+        }
+
+        public void setLeaderAvailable(boolean leaderAvailable) {
+            this.leaderAvailable = leaderAvailable;
         }
     }
 

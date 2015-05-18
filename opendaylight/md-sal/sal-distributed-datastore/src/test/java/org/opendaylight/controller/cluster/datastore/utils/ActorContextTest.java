@@ -465,68 +465,45 @@ public class ActorContextTest extends AbstractActorTest{
 
     @Test
     public void testFindPrimaryShardAsyncPrimaryNotFound() throws Exception {
-
-            TestActorRef<MessageCollectorActor> shardManager =
-                    TestActorRef.create(getSystem(), Props.create(MessageCollectorActor.class));
-
-            DatastoreContext dataStoreContext = DatastoreContext.newBuilder().dataStoreType("config").
-                    shardLeaderElectionTimeout(100, TimeUnit.MILLISECONDS).build();
-
-            ActorContext actorContext =
-                    new ActorContext(getSystem(), shardManager, mock(ClusterWrapper.class),
-                            mock(Configuration.class), dataStoreContext) {
-                        @Override
-                        protected Future<Object> doAsk(ActorRef actorRef, Object message, Timeout timeout) {
-                            return Futures.successful((Object) new PrimaryNotFoundException("not found"));
-                        }
-                    };
-
-
-            Future<PrimaryShardInfo> foobar = actorContext.findPrimaryShardAsync("foobar");
-
-            try {
-                Await.result(foobar, Duration.apply(100, TimeUnit.MILLISECONDS));
-                fail("Expected PrimaryNotFoundException");
-            } catch(PrimaryNotFoundException e){
-
-            }
-
-            Future<PrimaryShardInfo> cached = actorContext.getPrimaryShardInfoCache().getIfPresent("foobar");
-
-            assertNull(cached);
+        testFindPrimaryExceptions(new PrimaryNotFoundException("not found"));
     }
 
     @Test
     public void testFindPrimaryShardAsyncActorNotInitialized() throws Exception {
+        testFindPrimaryExceptions(new NotInitializedException("not initialized"));
+    }
 
-            TestActorRef<MessageCollectorActor> shardManager =
-                    TestActorRef.create(getSystem(), Props.create(MessageCollectorActor.class));
+    private void testFindPrimaryExceptions(final Object expectedException) throws Exception {
+        TestActorRef<MessageCollectorActor> shardManager =
+            TestActorRef.create(getSystem(), Props.create(MessageCollectorActor.class));
 
-            DatastoreContext dataStoreContext = DatastoreContext.newBuilder().dataStoreType("config").
-                    shardLeaderElectionTimeout(100, TimeUnit.MILLISECONDS).build();
+        DatastoreContext dataStoreContext = DatastoreContext.newBuilder().dataStoreType("config").
+            shardLeaderElectionTimeout(100, TimeUnit.MILLISECONDS).build();
 
-            ActorContext actorContext =
-                    new ActorContext(getSystem(), shardManager, mock(ClusterWrapper.class),
-                            mock(Configuration.class), dataStoreContext) {
-                        @Override
-                        protected Future<Object> doAsk(ActorRef actorRef, Object message, Timeout timeout) {
-                            return Futures.successful((Object) new NotInitializedException("not iniislized"));
-                        }
-                    };
+        ActorContext actorContext =
+            new ActorContext(getSystem(), shardManager, mock(ClusterWrapper.class),
+                mock(Configuration.class), dataStoreContext) {
+                @Override
+                protected Future<Object> doAsk(ActorRef actorRef, Object message, Timeout timeout) {
+                    return Futures.successful(expectedException);
+                }
+            };
 
 
-            Future<PrimaryShardInfo> foobar = actorContext.findPrimaryShardAsync("foobar");
+        Future<PrimaryShardInfo> foobar = actorContext.findPrimaryShardAsync("foobar");
 
-            try {
-                Await.result(foobar, Duration.apply(100, TimeUnit.MILLISECONDS));
-                fail("Expected NotInitializedException");
-            } catch(NotInitializedException e){
-
+        try {
+            Await.result(foobar, Duration.apply(100, TimeUnit.MILLISECONDS));
+            fail("Expected" + expectedException.getClass().toString());
+        } catch(Exception e){
+            if(!expectedException.getClass().isInstance(e)) {
+                fail("Expected Exception of type " + expectedException.getClass().toString());
             }
+        }
 
-            Future<PrimaryShardInfo> cached = actorContext.getPrimaryShardInfoCache().getIfPresent("foobar");
+        Future<PrimaryShardInfo> cached = actorContext.getPrimaryShardInfoCache().getIfPresent("foobar");
 
-            assertNull(cached);
+        assertNull(cached);
     }
 
     @Test
