@@ -232,7 +232,7 @@
                                 </transformer>
                             </transformers>
                             <shadedArtifactAttached>true</shadedArtifactAttached>
-                            <shadedClassifierName>executable</shadedClassifierName>
+                            <shadedClassifierName>stress-client</shadedClassifierName>
                         </configuration>
                     </execution>
                 </executions>
