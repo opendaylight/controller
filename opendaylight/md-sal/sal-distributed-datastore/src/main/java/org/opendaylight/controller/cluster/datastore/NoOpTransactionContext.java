@@ -11,7 +11,10 @@ import akka.actor.ActorSelection;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.SettableFuture;
 import java.util.concurrent.Semaphore;
+
+import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
+import org.opendaylight.controller.md.sal.common.api.data.DataStoreUnavailableException;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -77,7 +80,13 @@ final class NoOpTransactionContext extends AbstractTransactionContext {
     public void readData(final YangInstanceIdentifier path, SettableFuture<Optional<NormalizedNode<?, ?>>> proxyFuture) {
         LOG.debug("Tx {} readData called path = {}", getIdentifier(), path);
         operationLimiter.release();
-        proxyFuture.setException(new ReadFailedException("Error reading data for path " + path, failure));
+        Throwable t;
+        if(failure instanceof NoShardLeaderException) {
+            t = new DataStoreUnavailableException(failure.getMessage(), failure);
+        } else {
+            t = failure;
+        }
+        proxyFuture.setException(new ReadFailedException("Error reading data for path " + path, t));
     }
 
     @Override
