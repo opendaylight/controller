@@ -44,6 +44,8 @@ import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
+import org.opendaylight.controller.md.sal.common.api.data.DataStoreUnavailableException;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
@@ -194,7 +196,7 @@ public class ConcurrentDOMDataBrokerTest {
             fail("Expected TransactionCommitFailedException");
         } catch (TransactionCommitFailedException e) {
             if(expCause != null) {
-                assertSame("Expected cause", expCause, e.getCause());
+                assertSame("Expected cause", expCause.getClass(), e.getCause().getClass());
             }
 
             InOrder inOrder = inOrder((Object[])mockCohorts);
@@ -217,6 +219,21 @@ public class ConcurrentDOMDataBrokerTest {
 
         CheckedFuture<Void, TransactionCommitFailedException> future = coordinator.submit(
                 transaction, Arrays.asList(mockCohort1, mockCohort2));
+
+        assertFailure(future, cause, mockCohort1, mockCohort2);
+    }
+
+    @Test
+    public void testSubmitWithCanCommitDataStoreUnavailableException() throws Exception {
+        doReturn(Futures.immediateFuture(true)).when(mockCohort1).canCommit();
+        doReturn(Futures.immediateFuture(null)).when(mockCohort1).abort();
+        NoShardLeaderException rootCause = new NoShardLeaderException("mock");
+        DataStoreUnavailableException cause = new DataStoreUnavailableException(rootCause.getMessage(), rootCause);
+        doReturn(Futures.immediateFailedFuture(rootCause)).when(mockCohort2).canCommit();
+        doReturn(Futures.immediateFuture(null)).when(mockCohort2).abort();
+
+        CheckedFuture<Void, TransactionCommitFailedException> future = coordinator.submit(
+            transaction, Arrays.asList(mockCohort1, mockCohort2));
 
         assertFailure(future, cause, mockCohort1, mockCohort2);
     }
