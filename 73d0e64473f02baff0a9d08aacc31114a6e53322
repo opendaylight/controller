@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a9dcd25_095e0846",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/LocalTransactionContext.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-05-18T23:58:24Z",
+      "side": 1,
+      "message": "Are local operations throttled via this? They should not be and we should really not be wrapping them in Runnables.\n\nI think we only need to complete the future stemming from commit the final commit ...",
+      "revId": "73d0e64473f02baff0a9d08aacc31114a6e53322",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
