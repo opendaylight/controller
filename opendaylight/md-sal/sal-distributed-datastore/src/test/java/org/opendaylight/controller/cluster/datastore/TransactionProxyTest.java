@@ -59,6 +59,8 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.Promise;
@@ -781,6 +783,11 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         return new PrimaryShardInfo(getSystem().actorSelection(actorRef.path()), Optional.<DataTree>absent());
     }
 
+    private PrimaryShardInfo newPrimaryShardInfo(ActorRef actorRef, Optional<DataTree> dataTreeOptional){
+        return new PrimaryShardInfo(getSystem().actorSelection(actorRef.path()), dataTreeOptional);
+    }
+
+
     private void throttleOperation(TransactionProxyOperation operation, int outstandingOpsLimit, boolean shardFound){
         ActorSystem actorSystem = getSystem();
         ActorRef shardActorRef = actorSystem.actorOf(Props.create(DoNothingActor.class));
@@ -869,6 +876,73 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         long expected = TimeUnit.SECONDS.toNanos(mockActorContext.getDatastoreContext().getOperationTimeoutInSeconds());
         Assert.assertTrue(String.format("Expected elapsed time: %s. Actual: %s",
                 expected, (end-start)), (end - start) <= expected);
+    }
+
+    private void completeOperationLocal(TransactionProxyOperation operation, Optional<DataTree> dataTreeOptional){
+        ActorSystem actorSystem = getSystem();
+        ActorRef shardActorRef = actorSystem.actorOf(Props.create(DoNothingActor.class));
+
+        doReturn(1).when(mockActorContext).getTransactionOutstandingOperationLimit();
+
+        doReturn(actorSystem.actorSelection(shardActorRef.path())).
+                when(mockActorContext).actorSelection(shardActorRef.path().toString());
+
+        doReturn(Futures.successful(newPrimaryShardInfo(shardActorRef, dataTreeOptional))).
+                when(mockActorContext).findPrimaryShardAsync(eq(DefaultShardStrategy.DEFAULT_SHARD));
+
+        TransactionProxy transactionProxy = new TransactionProxy(mockComponentFactory, READ_WRITE);
+
+        long start = System.nanoTime();
+
+        operation.run(transactionProxy);
+
+        long end = System.nanoTime();
+
+        long expected = TimeUnit.SECONDS.toNanos(mockActorContext.getDatastoreContext().getOperationTimeoutInSeconds());
+        Assert.assertTrue(String.format("Expected elapsed time: %s. Actual: %s",
+                expected, (end-start)), (end - start) <= expected);
+    }
+
+    private Optional<DataTree> createDataTree(){
+        DataTree dataTree = mock(DataTree.class);
+        Optional<DataTree> dataTreeOptional = Optional.of(dataTree);
+        DataTreeSnapshot dataTreeSnapshot = mock(DataTreeSnapshot.class);
+        DataTreeModification dataTreeModification = mock(DataTreeModification.class);
+
+        doReturn(dataTreeSnapshot).when(dataTree).takeSnapshot();
+        doReturn(dataTreeModification).when(dataTreeSnapshot).newModification();
+
+        return dataTreeOptional;
+    }
+
+    private Optional<DataTree> createDataTree(NormalizedNode readResponse){
+        DataTree dataTree = mock(DataTree.class);
+        Optional<DataTree> dataTreeOptional = Optional.of(dataTree);
+        DataTreeSnapshot dataTreeSnapshot = mock(DataTreeSnapshot.class);
+        DataTreeModification dataTreeModification = mock(DataTreeModification.class);
+
+        doReturn(dataTreeSnapshot).when(dataTree).takeSnapshot();
+        doReturn(dataTreeModification).when(dataTreeSnapshot).newModification();
+        doReturn(Optional.of(readResponse)).when(dataTreeModification).readNode(any(YangInstanceIdentifier.class));
+
+        return dataTreeOptional;
+    }
+
+
+    @Test
+    public void testWriteCompletionForLocalShard(){
+        dataStoreContextBuilder.shardBatchedModificationCount(1);
+        completeOperationLocal(new TransactionProxyOperation() {
+            @Override
+            public void run(TransactionProxy transactionProxy) {
+                NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+
+                transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
+
+                transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
+
+            }
+        }, createDataTree());
     }
 
     @Test
@@ -978,6 +1052,23 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     }
 
     @Test
+    public void testMergeCompletionForLocalShard(){
+        dataStoreContextBuilder.shardBatchedModificationCount(1);
+        completeOperationLocal(new TransactionProxyOperation() {
+            @Override
+            public void run(TransactionProxy transactionProxy) {
+                NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+
+                transactionProxy.merge(TestModel.TEST_PATH, nodeToWrite);
+
+                transactionProxy.merge(TestModel.TEST_PATH, nodeToWrite);
+
+            }
+        }, createDataTree());
+    }
+
+
+    @Test
     public void testDeleteThrottlingWhenShardFound(){
 
         throttleOperation(new TransactionProxyOperation() {
@@ -1006,6 +1097,21 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
                 transactionProxy.delete(TestModel.TEST_PATH);
             }
         }, false);
+    }
+
+    @Test
+    public void testDeleteCompletionForLocalShard(){
+        dataStoreContextBuilder.shardBatchedModificationCount(1);
+        completeOperationLocal(new TransactionProxyOperation() {
+            @Override
+            public void run(TransactionProxy transactionProxy) {
+
+                transactionProxy.delete(TestModel.TEST_PATH);
+
+                transactionProxy.delete(TestModel.TEST_PATH);
+            }
+        }, createDataTree());
+
     }
 
     @Test
@@ -1076,6 +1182,33 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     }
 
     @Test
+    public void testReadCompletionForLocalShard(){
+        final NormalizedNode nodeToRead = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        completeOperationLocal(new TransactionProxyOperation() {
+            @Override
+            public void run(TransactionProxy transactionProxy) {
+                transactionProxy.read(TestModel.TEST_PATH);
+
+                transactionProxy.read(TestModel.TEST_PATH);
+            }
+        }, createDataTree(nodeToRead));
+
+    }
+
+    @Test
+    public void testReadCompletionForLocalShardWhenExceptionOccurs(){
+        completeOperationLocal(new TransactionProxyOperation() {
+            @Override
+            public void run(TransactionProxy transactionProxy) {
+                transactionProxy.read(TestModel.TEST_PATH);
+
+                transactionProxy.read(TestModel.TEST_PATH);
+            }
+        }, createDataTree());
+
+    }
+
+    @Test
     public void testExistsThrottlingWhenShardFound(){
 
         throttleOperation(new TransactionProxyOperation() {
@@ -1124,6 +1257,32 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
     }
 
+    @Test
+    public void testExistsCompletionForLocalShard(){
+        final NormalizedNode nodeToRead = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        completeOperationLocal(new TransactionProxyOperation() {
+            @Override
+            public void run(TransactionProxy transactionProxy) {
+                transactionProxy.exists(TestModel.TEST_PATH);
+
+                transactionProxy.exists(TestModel.TEST_PATH);
+            }
+        }, createDataTree(nodeToRead));
+
+    }
+
+    @Test
+    public void testExistsCompletionForLocalShardWhenExceptionOccurs(){
+        completeOperationLocal(new TransactionProxyOperation() {
+            @Override
+            public void run(TransactionProxy transactionProxy) {
+                transactionProxy.exists(TestModel.TEST_PATH);
+
+                transactionProxy.exists(TestModel.TEST_PATH);
+            }
+        }, createDataTree());
+
+    }
     @Test
     public void testReadyThrottling(){
 
