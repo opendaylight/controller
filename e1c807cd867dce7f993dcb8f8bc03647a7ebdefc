@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a9dcd25_89b698db",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DistributedDataStore.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2015-05-18T23:20:35Z",
+      "side": 1,
+      "message": "Should not we get it from ActorContext?",
+      "range": {
+        "startLine": 105,
+        "startChar": 83,
+        "endLine": 105,
+        "endChar": 110
+      },
+      "revId": "e1c807cd867dce7f993dcb8f8bc03647a7ebdefc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
