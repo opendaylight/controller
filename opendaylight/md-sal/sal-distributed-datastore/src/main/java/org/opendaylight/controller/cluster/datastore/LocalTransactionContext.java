@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorSelection;
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
@@ -26,59 +27,71 @@ import scala.concurrent.Future;
  */
 final class LocalTransactionContext extends AbstractTransactionContext {
     private final DOMStoreReadWriteTransaction delegate;
+    private final OperationCompleter completer;
 
-    LocalTransactionContext(TransactionIdentifier identifier, DOMStoreReadWriteTransaction delegate) {
+    LocalTransactionContext(TransactionIdentifier identifier, DOMStoreReadWriteTransaction delegate, OperationCompleter completer) {
         super(identifier);
-        this.delegate = delegate;
+        this.delegate = Preconditions.checkNotNull(delegate);
+        this.completer = Preconditions.checkNotNull(completer);
     }
 
     @Override
-    public void writeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
+    public void writeData(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
         delegate.write(path, data);
+        completer.onComplete(null, null);
     }
 
     @Override
-    public void mergeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
+    public void mergeData(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
         delegate.merge(path, data);
+        completer.onComplete(null, null);
     }
 
     @Override
-    public void deleteData(YangInstanceIdentifier path) {
+    public void deleteData(final YangInstanceIdentifier path) {
         delegate.delete(path);
+        completer.onComplete(null, null);
     }
 
     @Override
-    public void readData(YangInstanceIdentifier path, final SettableFuture<Optional<NormalizedNode<?, ?>>> proxyFuture) {
+    public void readData(final YangInstanceIdentifier path, final SettableFuture<Optional<NormalizedNode<?, ?>>> proxyFuture) {
+
         Futures.addCallback(delegate.read(path), new FutureCallback<Optional<NormalizedNode<?, ?>>>() {
             @Override
             public void onSuccess(Optional<NormalizedNode<?, ?>> result) {
                 proxyFuture.set(result);
+                completer.onComplete(null, null);
             }
 
             @Override
             public void onFailure(Throwable t) {
                 proxyFuture.setException(t);
+                completer.onComplete(null, null);
             }
         });
     }
 
     @Override
-    public void dataExists(YangInstanceIdentifier path, final SettableFuture<Boolean> proxyFuture) {
+    public void dataExists(final YangInstanceIdentifier path, final SettableFuture<Boolean> proxyFuture) {
         Futures.addCallback(delegate.exists(path), new FutureCallback<Boolean>() {
             @Override
             public void onSuccess(Boolean result) {
                 proxyFuture.set(result);
+                completer.onComplete(null, null);
             }
 
             @Override
             public void onFailure(Throwable t) {
                 proxyFuture.setException(t);
+                completer.onComplete(null, null);
             }
         });
     }
 
     private LocalThreePhaseCommitCohort ready() {
-        return (LocalThreePhaseCommitCohort) delegate.ready();
+        LocalThreePhaseCommitCohort ready = (LocalThreePhaseCommitCohort) delegate.ready();
+        completer.onComplete(null, null);
+        return ready;
     }
 
     @Override
