@@ -87,4 +87,32 @@ public class MockClusterWrapper implements ClusterWrapper{
 
         return new ClusterEvent.MemberUp(member);
     }
+
+    public static ClusterEvent.UnreachableMember createUnreachableMember(String memberName, String address) {
+        akka.cluster.UniqueAddress uniqueAddress = new UniqueAddress(
+            AddressFromURIString.parse(address), 55);
+
+        Set<String> roles = new HashSet<>();
+
+        roles.add(memberName);
+
+        akka.cluster.Member member = new akka.cluster.Member(uniqueAddress, 1, MemberStatus.up(),
+            JavaConversions.asScalaSet(roles).<String>toSet());
+
+        return new ClusterEvent.UnreachableMember(member);
+    }
+
+    public static ClusterEvent.ReachableMember createReachableMember(String memberName, String address) {
+        akka.cluster.UniqueAddress uniqueAddress = new UniqueAddress(
+            AddressFromURIString.parse(address), 55);
+
+        Set<String> roles = new HashSet<>();
+
+        roles.add(memberName);
+
+        akka.cluster.Member member = new akka.cluster.Member(uniqueAddress, 1, MemberStatus.up(),
+            JavaConversions.asScalaSet(roles).<String>toSet());
+
+        return new ClusterEvent.ReachableMember(member);
+    }
 }

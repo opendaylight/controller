@@ -38,6 +38,7 @@ import org.opendaylight.controller.cluster.common.actor.CommonConfig;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.Configuration;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
+import org.opendaylight.controller.md.sal.common.api.data.DataStoreUnavailableException;
 import org.opendaylight.controller.cluster.datastore.exceptions.LocalShardNotFoundException;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.exceptions.NotInitializedException;
@@ -231,6 +232,8 @@ public class ActorContext implements RemovalListener<String, Future<PrimaryShard
                     throw (PrimaryNotFoundException)response;
                 } else if(response instanceof NoShardLeaderException) {
                     throw (NoShardLeaderException)response;
+                } else if(response instanceof DataStoreUnavailableException) {
+                    throw (DataStoreUnavailableException)response;
                 }
 
                 throw new UnknownMessageException(String.format(
