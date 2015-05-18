@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.config.persist.storage.file.xml.model;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import javax.xml.bind.annotation.XmlAnyElement;
@@ -23,10 +25,17 @@ public class ConfigSnapshot {
 
     private String configSnapshot;
     private SortedSet<String> capabilities = new TreeSet<>();
+    private Set<String> features = new HashSet<>();
 
     ConfigSnapshot(String configXml, SortedSet<String> capabilities) {
         this.configSnapshot = configXml;
         this.capabilities = capabilities;
+    }
+
+    ConfigSnapshot(String configXml, SortedSet<String> capabilities, Set<String> features) {
+        this.configSnapshot = configXml;
+        this.capabilities = capabilities;
+        this.features = features;
     }
 
     public ConfigSnapshot() {
@@ -36,6 +45,9 @@ public class ConfigSnapshot {
         return new ConfigSnapshot(cfg.getConfigSnapshot(), cfg.getCapabilities());
     }
 
+    public static ConfigSnapshot fromConfigSnapshot(ConfigSnapshotHolder cfg, Set<String> features) {
+        return new ConfigSnapshot(cfg.getConfigSnapshot(), cfg.getCapabilities(), features);
+    }
 
     @XmlAnyElement(SnapshotHandler.class)
     public String getConfigSnapshot() {
@@ -57,11 +69,23 @@ public class ConfigSnapshot {
         this.capabilities = capabilities;
     }
 
+    @XmlElement(name = "feature")
+    @XmlElementWrapper(name = "features")
+    @XmlJavaTypeAdapter(value=StringTrimAdapter.class)
+    public Set<String> getFeatures() {
+        return features;
+    }
+
+    public void setFeatures(final Set<String> features) {
+        this.features = features;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("ConfigSnapshot{");
         sb.append("configSnapshot='").append(configSnapshot).append('\'');
         sb.append(", capabilities=").append(capabilities);
+        sb.append(", features=").append(features);
         sb.append('}');
         return sb.toString();
     }

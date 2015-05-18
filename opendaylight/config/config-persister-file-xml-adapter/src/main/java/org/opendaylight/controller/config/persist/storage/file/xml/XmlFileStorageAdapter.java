@@ -12,11 +12,15 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.SortedSet;
+import org.apache.karaf.features.Feature;
+import org.apache.karaf.features.FeaturesService;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.Persister;
 import org.opendaylight.controller.config.persist.api.PropertiesProvider;
@@ -38,8 +42,23 @@ public class XmlFileStorageAdapter implements StorageAdapter, Persister {
     private static Integer numberOfStoredBackups;
     private File storage;
 
+    private static volatile XmlFileStorageAdapter instance;
+    private volatile ConfigSnapshot lastCfgSnapshotCache;
+    private volatile Optional<FeaturesService> featuresService = Optional.absent();
+
+    @VisibleForTesting
+    protected void reset() {
+        instance = null;
+        lastCfgSnapshotCache = null;
+        featuresService = null;
+    }
+
     @Override
     public Persister instantiate(PropertiesProvider propertiesProvider) {
+        if(instance != null) {
+            return instance;
+        }
+
         File storage = extractStorageFileFromProperties(propertiesProvider);
         LOG.debug("Using file {}", storage.getAbsolutePath());
         // Create file if it does not exist
@@ -64,7 +83,21 @@ public class XmlFileStorageAdapter implements StorageAdapter, Persister {
                     + " property should be either set to positive value, or ommited. Can not be set to 0.");
         }
         setFileStorage(storage);
+
+        instance = this;
         return this;
+    }
+
+    public static Optional<XmlFileStorageAdapter> getInstance() {
+        return Optional.fromNullable(instance);
+    }
+
+    public Set<String> getPersistedFeatures() {
+        return lastCfgSnapshotCache == null ? Collections.<String>emptySet() : lastCfgSnapshotCache.getFeatures();
+    }
+
+    public void setFeaturesService(final FeaturesService featuresService) {
+        this.featuresService = Optional.of(featuresService);
     }
 
     @VisibleForTesting
@@ -95,8 +128,17 @@ public class XmlFileStorageAdapter implements StorageAdapter, Persister {
     public void persistConfig(ConfigSnapshotHolder holder) throws IOException {
         Preconditions.checkNotNull(storage, "Storage file is null");
 
+        Set<String> installedFeatureIds = Collections.emptySet();
+        if(featuresService.isPresent()) {
+            final Feature[] installedFeatures = featuresService.get().listInstalledFeatures();
+            installedFeatureIds = Sets.newHashSetWithExpectedSize(installedFeatures.length);
+            for (final Feature installedFeature : installedFeatures) {
+                installedFeatureIds.add(installedFeature.getId());
+            }
+        }
+
         Config cfg = Config.fromXml(storage);
-        cfg.addConfigSnapshot(ConfigSnapshot.fromConfigSnapshot(holder), numberOfStoredBackups);
+        cfg.addConfigSnapshot(ConfigSnapshot.fromConfigSnapshot(holder, installedFeatureIds), numberOfStoredBackups);
         cfg.toXml(storage);
     }
 
@@ -111,7 +153,8 @@ public class XmlFileStorageAdapter implements StorageAdapter, Persister {
         Optional<ConfigSnapshot> lastSnapshot = Config.fromXml(storage).getLastSnapshot();
 
         if (lastSnapshot.isPresent()) {
-            return Lists.newArrayList(toConfigSnapshot(lastSnapshot.get()));
+            lastCfgSnapshotCache = lastSnapshot.get();
+            return Lists.newArrayList(toConfigSnapshot(lastCfgSnapshotCache));
         } else {
             return Collections.emptyList();
         }

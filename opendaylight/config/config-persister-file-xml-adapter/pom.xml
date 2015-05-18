@@ -35,6 +35,18 @@
       <artifactId>org.eclipse.persistence.moxy</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.core</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.karaf.features</groupId>
+      <artifactId>org.apache.karaf.features.core</artifactId>
+      <version>${karaf.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
     <!-- test dependencies -->
     <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
