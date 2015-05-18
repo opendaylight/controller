@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.Persister;
@@ -64,6 +65,13 @@ public class PersisterAggregatorTest {
         @Override
         public String getPropertyWithoutPrefix(String fullKey){
             return prop.getProperty(fullKey);
+        }
+    }
+
+    @Before
+    public void setUp() throws Exception {
+        if(XmlFileStorageAdapter.getInstance().isPresent()) {
+            XmlFileStorageAdapter.getInstance().get().reset();
         }
     }
 
