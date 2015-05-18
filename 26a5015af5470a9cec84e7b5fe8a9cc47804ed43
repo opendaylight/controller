@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "1a9dcd25_490c1095",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/DataStoreUnavailableException.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-18T23:28:54Z",
+      "side": 1,
+      "message": "Yeah - I commented on that below.",
+      "parentUuid": "1a9dcd25_4935f044",
+      "revId": "26a5015af5470a9cec84e7b5fe8a9cc47804ed43",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a9dcd25_09ca884f",
         "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/DataStoreUnavailableException.java",
         "patchSetId": 1
@@ -117,6 +135,24 @@
       "side": 1,
       "message": "I thought about that, but i have seen under certain load conditions, akka member sometimes send unreachable member event, then immediately it sends reachable. just for some minor glitches, we should not re-trigger election, that is why i added a flag.",
       "parentUuid": "1a9dcd25_8988d823",
+      "revId": "26a5015af5470a9cec84e7b5fe8a9cc47804ed43",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_c91fc0b6",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 469,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-18T23:28:54Z",
+      "side": 1,
+      "message": "OK - in that case it seems useful. We could use another field in ShardInformation anyway :)  How about if we check the flag in isShardReadyWithLeaderId? That way the findPrimary and sendResponse code doesn\u0027t change.",
+      "parentUuid": "1a9dcd25_e9ee3cb4",
       "revId": "26a5015af5470a9cec84e7b5fe8a9cc47804ed43",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
