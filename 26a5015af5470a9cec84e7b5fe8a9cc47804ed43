@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "1a9dcd25_4935f044",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/DataStoreUnavailableException.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2015-05-18T23:18:47Z",
+      "side": 1,
+      "message": "So, you think, i should avoid shard field in exception as well?",
+      "parentUuid": "1a9dcd25_c9c34037",
+      "revId": "26a5015af5470a9cec84e7b5fe8a9cc47804ed43",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a9dcd25_09ca884f",
         "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/DataStoreUnavailableException.java",
         "patchSetId": 1
@@ -81,6 +99,24 @@
       "writtenOn": "2015-05-18T23:10:56Z",
       "side": 1,
       "message": "I think we can just set leaderId to null or empty. That\u0027s what happens when the shard changes from follower to candidate. By doing this on UnreachableMember then we\u0027ll find out quicker here then waiting for the heartbeat timeout and the LeaderStateChanged event. Then the rest of logic in findPrimary should fall out the same as when we have no leader.\n\nUsing this approach, we wouldn\u0027t listen for ReachableMember - we just let the LeaderStateChanged event tell us when the leader\u0027s been elected.",
+      "revId": "26a5015af5470a9cec84e7b5fe8a9cc47804ed43",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_e9ee3cb4",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 469,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2015-05-18T23:18:47Z",
+      "side": 1,
+      "message": "I thought about that, but i have seen under certain load conditions, akka member sometimes send unreachable member event, then immediately it sends reachable. just for some minor glitches, we should not re-trigger election, that is why i added a flag.",
+      "parentUuid": "1a9dcd25_8988d823",
       "revId": "26a5015af5470a9cec84e7b5fe8a9cc47804ed43",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
