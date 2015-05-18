@@ -50,18 +50,18 @@ public enum NormalizedNodeType {
             return MAP_ENTRY_NODE_TYPE;
         } else if(node instanceof ContainerNode){
             return CONTAINER_NODE_TYPE;
-        } else if(node instanceof MapNode){
-            return MAP_NODE_TYPE;
         } else if(node instanceof AugmentationNode){
             return AUGMENTATION_NODE_TYPE;
-        } else if(node instanceof LeafSetNode){
-            return LEAF_SET_NODE_TYPE;
         } else if(node instanceof ChoiceNode){
             return CHOICE_NODE_TYPE;
         } else if(node instanceof OrderedLeafSetNode){
             return ORDERED_LEAF_SET_NODE_TYPE;
         } else if(node instanceof OrderedMapNode){
             return ORDERED_MAP_NODE_TYPE;
+        } else if(node instanceof MapNode){
+            return MAP_NODE_TYPE;
+        } else if(node instanceof LeafSetNode){
+            return LEAF_SET_NODE_TYPE;
         } else if(node instanceof UnkeyedListNode){
             return UNKEYED_LIST_NODE_TYPE;
         } else if(node instanceof UnkeyedListEntryNode){
