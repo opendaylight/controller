@@ -9,7 +9,7 @@ package org.opendaylight.controller.cluster.datastore.compat;
 
 import akka.actor.ActorSelection;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
-import org.opendaylight.controller.cluster.datastore.OperationCompleter;
+import org.opendaylight.controller.cluster.datastore.OperationLimiter;
 import org.opendaylight.controller.cluster.datastore.RemoteTransactionContext;
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.DeleteData;
@@ -37,8 +37,8 @@ public class PreLithiumTransactionContextImpl extends RemoteTransactionContext {
 
     public PreLithiumTransactionContextImpl(String transactionPath, ActorSelection actor, TransactionIdentifier identifier,
             ActorContext actorContext, boolean isTxActorLocal,
-            short remoteTransactionVersion, OperationCompleter operationCompleter) {
-        super(actor, identifier, actorContext, isTxActorLocal, remoteTransactionVersion, operationCompleter);
+            short remoteTransactionVersion, OperationLimiter limiter) {
+        super(actor, identifier, actorContext, isTxActorLocal, remoteTransactionVersion, limiter);
         this.transactionPath = transactionPath;
     }
 

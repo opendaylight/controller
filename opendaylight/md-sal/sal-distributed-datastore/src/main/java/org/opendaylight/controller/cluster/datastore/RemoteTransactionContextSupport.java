@@ -11,7 +11,6 @@ package org.opendaylight.controller.cluster.datastore;
 import akka.actor.ActorSelection;
 import akka.dispatch.OnComplete;
 import com.google.common.base.Preconditions;
-import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.datastore.compat.PreLithiumTransactionContextImpl;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
@@ -75,7 +74,7 @@ final class RemoteTransactionContextSupport {
         return parent.getActorContext();
     }
 
-    private Semaphore getOperationLimiter() {
+    private OperationLimiter getOperationLimiter() {
         return parent.getLimiter();
     }
 
@@ -192,10 +191,10 @@ final class RemoteTransactionContextSupport {
 
         if (remoteTransactionVersion < DataStoreVersions.LITHIUM_VERSION) {
             ret = new PreLithiumTransactionContextImpl(transactionPath, transactionActor, getIdentifier(),
-                getActorContext(), isTxActorLocal, remoteTransactionVersion, parent.getCompleter());
+                getActorContext(), isTxActorLocal, remoteTransactionVersion, parent.getLimiter());
         } else {
             ret = new RemoteTransactionContext(transactionActor, getIdentifier(), getActorContext(),
-                isTxActorLocal, remoteTransactionVersion, parent.getCompleter());
+                isTxActorLocal, remoteTransactionVersion, parent.getLimiter());
         }
 
         TransactionContextCleanup.track(this, ret);
