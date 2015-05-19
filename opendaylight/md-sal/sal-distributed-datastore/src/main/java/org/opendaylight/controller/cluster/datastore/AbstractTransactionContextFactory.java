@@ -84,11 +84,11 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
         LOG.debug("Tx {}: Find primary for shard {} failed", parent.getIdentifier(), shardName, failure);
 
         transactionContextAdapter.executePriorTransactionOperations(new NoOpTransactionContext(failure,
-                parent.getIdentifier(), parent.getLimiter()));
+                parent.getLimiter()));
     }
 
     final TransactionContextWrapper newTransactionAdapter(final TransactionProxy parent, final String shardName) {
-        final TransactionContextWrapper transactionContextAdapter = new TransactionContextWrapper(parent.getIdentifier());
+        final TransactionContextWrapper transactionContextAdapter = new TransactionContextWrapper(parent.getLimiter());
 
         Future<PrimaryShardInfo> findPrimaryFuture = findPrimaryShard(shardName);
         if(findPrimaryFuture.isCompleted()) {
@@ -200,6 +200,6 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
     protected abstract <T> void onTransactionReady(@Nonnull TransactionIdentifier transaction, @Nonnull Collection<Future<T>> cohortFutures);
 
     private static TransactionContext createLocalTransactionContext(final LocalTransactionFactory factory, final TransactionProxy parent) {
-        return new LocalTransactionContext(parent.getIdentifier(), factory.newReadWriteTransaction(parent.getIdentifier()), parent.getLimiter());
+        return new LocalTransactionContext(factory.newReadWriteTransaction(parent.getIdentifier()), parent.getLimiter());
     }
 }

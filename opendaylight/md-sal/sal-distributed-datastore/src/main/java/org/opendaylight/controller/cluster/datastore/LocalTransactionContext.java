@@ -13,7 +13,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
-import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
+import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -27,30 +27,28 @@ import scala.concurrent.Future;
  */
 final class LocalTransactionContext extends AbstractTransactionContext {
     private final DOMStoreReadWriteTransaction delegate;
-    private final OperationLimiter limiter;
 
-    LocalTransactionContext(TransactionIdentifier identifier, DOMStoreReadWriteTransaction delegate, OperationLimiter limiter) {
-        super(identifier);
+    LocalTransactionContext(final DOMStoreReadWriteTransaction delegate, final OperationLimiter limiter) {
+        super(limiter);
         this.delegate = Preconditions.checkNotNull(delegate);
-        this.limiter = Preconditions.checkNotNull(limiter);
     }
 
     @Override
     public void writeData(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
         delegate.write(path, data);
-        limiter.release();
+        releaseOperation();
     }
 
     @Override
     public void mergeData(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
         delegate.merge(path, data);
-        limiter.release();
+        releaseOperation();
     }
 
     @Override
     public void deleteData(final YangInstanceIdentifier path) {
         delegate.delete(path);
-        limiter.release();
+        releaseOperation();
     }
 
     @Override
@@ -58,15 +56,15 @@ final class LocalTransactionContext extends AbstractTransactionContext {
 
         Futures.addCallback(delegate.read(path), new FutureCallback<Optional<NormalizedNode<?, ?>>>() {
             @Override
-            public void onSuccess(Optional<NormalizedNode<?, ?>> result) {
+            public void onSuccess(final Optional<NormalizedNode<?, ?>> result) {
                 proxyFuture.set(result);
-                limiter.release();
+                releaseOperation();
             }
 
             @Override
-            public void onFailure(Throwable t) {
+            public void onFailure(final Throwable t) {
                 proxyFuture.setException(t);
-                limiter.release();
+                releaseOperation();
             }
         });
     }
@@ -75,33 +73,40 @@ final class LocalTransactionContext extends AbstractTransactionContext {
     public void dataExists(final YangInstanceIdentifier path, final SettableFuture<Boolean> proxyFuture) {
         Futures.addCallback(delegate.exists(path), new FutureCallback<Boolean>() {
             @Override
-            public void onSuccess(Boolean result) {
+            public void onSuccess(final Boolean result) {
                 proxyFuture.set(result);
-                limiter.release();
+                releaseOperation();
             }
 
             @Override
-            public void onFailure(Throwable t) {
+            public void onFailure(final Throwable t) {
                 proxyFuture.setException(t);
-                limiter.release();
+                releaseOperation();
             }
         });
     }
 
     private LocalThreePhaseCommitCohort ready() {
-        LocalThreePhaseCommitCohort ready = (LocalThreePhaseCommitCohort) delegate.ready();
-        limiter.release();
-        return ready;
+        acquireOperation();
+        return (LocalThreePhaseCommitCohort) delegate.ready();
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private <T extends Future> T completeOperation(final ActorContext actorContext, final T operationFuture) {
+        operationFuture.onComplete(getLimiter(), actorContext.getClientDispatcher());
+        return operationFuture;
     }
 
     @Override
     public Future<ActorSelection> readyTransaction() {
-        return ready().initiateCoordinatedCommit();
+        final LocalThreePhaseCommitCohort cohort = ready();
+        return completeOperation(cohort.getActorContext(), cohort.initiateCoordinatedCommit());
     }
 
     @Override
     public Future<Object> directCommit() {
-        return ready().initiateDirectCommit();
+        final LocalThreePhaseCommitCohort cohort = ready();
+        return completeOperation(cohort.getActorContext(), cohort.initiateDirectCommit());
     }
 
     @Override
@@ -112,5 +117,6 @@ final class LocalTransactionContext extends AbstractTransactionContext {
     @Override
     public void closeTransaction() {
         delegate.close();
+        releaseOperation();
     }
 }
