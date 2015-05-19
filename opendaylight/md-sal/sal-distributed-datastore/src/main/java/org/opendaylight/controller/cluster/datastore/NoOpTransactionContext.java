@@ -10,8 +10,6 @@ package org.opendaylight.controller.cluster.datastore;
 import akka.actor.ActorSelection;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.SettableFuture;
-import java.util.concurrent.Semaphore;
-
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
 import org.opendaylight.controller.md.sal.common.api.data.DataStoreUnavailableException;
@@ -26,9 +24,9 @@ final class NoOpTransactionContext extends AbstractTransactionContext {
     private static final Logger LOG = LoggerFactory.getLogger(NoOpTransactionContext.class);
 
     private final Throwable failure;
-    private final Semaphore operationLimiter;
+    private final OperationLimiter operationLimiter;
 
-    public NoOpTransactionContext(Throwable failure, TransactionIdentifier identifier, Semaphore operationLimiter) {
+    public NoOpTransactionContext(Throwable failure, TransactionIdentifier identifier, OperationLimiter operationLimiter) {
         super(identifier);
         this.failure = failure;
         this.operationLimiter = operationLimiter;

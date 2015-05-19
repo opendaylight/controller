@@ -178,7 +178,7 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
         switch(parent.getType()) {
             case READ_ONLY:
                 final DOMStoreReadTransaction readOnly = factory.newReadOnlyTransaction(parent.getIdentifier());
-                return new LocalTransactionContext(parent.getIdentifier(), readOnly, parent.getCompleter()) {
+                return new LocalTransactionContext(parent.getIdentifier(), readOnly, parent.getLimiter()) {
                     @Override
                     protected DOMStoreWriteTransaction getWriteDelegate() {
                         throw new UnsupportedOperationException();
@@ -191,7 +191,7 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
                 };
             case READ_WRITE:
                 final DOMStoreReadWriteTransaction readWrite = factory.newReadWriteTransaction(parent.getIdentifier());
-                return new LocalTransactionContext(parent.getIdentifier(), readWrite, parent.getCompleter()) {
+                return new LocalTransactionContext(parent.getIdentifier(), readWrite, parent.getLimiter()) {
                     @Override
                     protected DOMStoreWriteTransaction getWriteDelegate() {
                         return readWrite;
@@ -204,7 +204,7 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
                 };
             case WRITE_ONLY:
                 final DOMStoreWriteTransaction writeOnly = factory.newWriteOnlyTransaction(parent.getIdentifier());
-                return new LocalTransactionContext(parent.getIdentifier(), writeOnly, parent.getCompleter()) {
+                return new LocalTransactionContext(parent.getIdentifier(), writeOnly, parent.getLimiter()) {
                     @Override
                     protected DOMStoreWriteTransaction getWriteDelegate() {
                         return writeOnly;
