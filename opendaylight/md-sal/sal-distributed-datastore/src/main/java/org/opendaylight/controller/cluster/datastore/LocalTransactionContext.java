@@ -27,30 +27,30 @@ import scala.concurrent.Future;
  */
 final class LocalTransactionContext extends AbstractTransactionContext {
     private final DOMStoreReadWriteTransaction delegate;
-    private final OperationCompleter completer;
+    private final OperationLimiter limiter;
 
-    LocalTransactionContext(TransactionIdentifier identifier, DOMStoreReadWriteTransaction delegate, OperationCompleter completer) {
+    LocalTransactionContext(TransactionIdentifier identifier, DOMStoreReadWriteTransaction delegate, OperationLimiter limiter) {
         super(identifier);
         this.delegate = Preconditions.checkNotNull(delegate);
-        this.completer = Preconditions.checkNotNull(completer);
+        this.limiter = Preconditions.checkNotNull(limiter);
     }
 
     @Override
     public void writeData(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
         delegate.write(path, data);
-        completer.onComplete(null, null);
+        limiter.release();
     }
 
     @Override
     public void mergeData(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
         delegate.merge(path, data);
-        completer.onComplete(null, null);
+        limiter.release();
     }
 
     @Override
     public void deleteData(final YangInstanceIdentifier path) {
         delegate.delete(path);
-        completer.onComplete(null, null);
+        limiter.release();
     }
 
     @Override
@@ -60,13 +60,13 @@ final class LocalTransactionContext extends AbstractTransactionContext {
             @Override
             public void onSuccess(Optional<NormalizedNode<?, ?>> result) {
                 proxyFuture.set(result);
-                completer.onComplete(null, null);
+                limiter.release();
             }
 
             @Override
             public void onFailure(Throwable t) {
                 proxyFuture.setException(t);
-                completer.onComplete(null, null);
+                limiter.release();
             }
         });
     }
@@ -77,20 +77,20 @@ final class LocalTransactionContext extends AbstractTransactionContext {
             @Override
             public void onSuccess(Boolean result) {
                 proxyFuture.set(result);
-                completer.onComplete(null, null);
+                limiter.release();
             }
 
             @Override
             public void onFailure(Throwable t) {
                 proxyFuture.setException(t);
-                completer.onComplete(null, null);
+                limiter.release();
             }
         });
     }
 
     private LocalThreePhaseCommitCohort ready() {
         LocalThreePhaseCommitCohort ready = (LocalThreePhaseCommitCohort) delegate.ready();
-        completer.onComplete(null, null);
+        limiter.release();
         return ready;
     }
 
