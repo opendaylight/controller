@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.datastore;
 import akka.actor.ActorSelection;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.SettableFuture;
-import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -22,12 +21,10 @@ final class NoOpTransactionContext extends AbstractTransactionContext {
     private static final Logger LOG = LoggerFactory.getLogger(NoOpTransactionContext.class);
 
     private final Throwable failure;
-    private final OperationLimiter operationLimiter;
 
-    public NoOpTransactionContext(Throwable failure, TransactionIdentifier identifier, OperationLimiter operationLimiter) {
-        super(identifier);
+    public NoOpTransactionContext(Throwable failure, OperationLimiter limiter) {
+        super(limiter);
         this.failure = failure;
-        this.operationLimiter = operationLimiter;
     }
 
     @Override
@@ -43,46 +40,46 @@ final class NoOpTransactionContext extends AbstractTransactionContext {
     @Override
     public Future<Object> directCommit() {
         LOG.debug("Tx {} directCommit called, failure: {}", getIdentifier(), failure);
-        operationLimiter.release();
+        releaseOperation();
         return akka.dispatch.Futures.failed(failure);
     }
 
     @Override
     public Future<ActorSelection> readyTransaction() {
         LOG.debug("Tx {} readyTransaction called, failure: {}", getIdentifier(), failure);
-        operationLimiter.release();
+        releaseOperation();
         return akka.dispatch.Futures.failed(failure);
     }
 
     @Override
     public void deleteData(YangInstanceIdentifier path) {
         LOG.debug("Tx {} deleteData called path = {}", getIdentifier(), path);
-        operationLimiter.release();
+        releaseOperation();
     }
 
     @Override
     public void mergeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
         LOG.debug("Tx {} mergeData called path = {}", getIdentifier(), path);
-        operationLimiter.release();
+        releaseOperation();
     }
 
     @Override
     public void writeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
         LOG.debug("Tx {} writeData called path = {}", getIdentifier(), path);
-        operationLimiter.release();
+        releaseOperation();
     }
 
     @Override
     public void readData(final YangInstanceIdentifier path, SettableFuture<Optional<NormalizedNode<?, ?>>> proxyFuture) {
         LOG.debug("Tx {} readData called path = {}", getIdentifier(), path);
-        operationLimiter.release();
+        releaseOperation();
         proxyFuture.setException(new ReadFailedException("Error reading data for path " + path, failure));
     }
 
     @Override
     public void dataExists(YangInstanceIdentifier path, SettableFuture<Boolean> proxyFuture) {
         LOG.debug("Tx {} dataExists called path = {}", getIdentifier(), path);
-        operationLimiter.release();
+        releaseOperation();
         proxyFuture.setException(new ReadFailedException("Error checking exists for path " + path, failure));
     }
 }

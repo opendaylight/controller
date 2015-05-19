@@ -36,4 +36,14 @@ interface TransactionContext {
     boolean supportsDirectCommit();
 
     Future<Object> directCommit();
+
+    /**
+     * Invoked by {@link TransactionContextWrapper} when it has finished handing
+     * off operations to this context. From this point on, the context is responsible
+     * for throttling operations.
+     *
+     * Implementations can rely on the wrapper calling this operation in a synchronized
+     * block, so they do not need to ensure visibility of this state transition themselves.
+     */
+    void operationHandoffComplete();
 }
