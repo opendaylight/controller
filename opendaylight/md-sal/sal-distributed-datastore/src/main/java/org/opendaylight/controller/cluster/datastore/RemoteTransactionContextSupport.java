@@ -161,7 +161,7 @@ final class RemoteTransactionContextSupport {
         if(failure != null) {
             LOG.debug("Tx {} Creating NoOpTransaction because of error", getIdentifier(), failure);
 
-            localTransactionContext = new NoOpTransactionContext(failure, getIdentifier(), getOperationLimiter());
+            localTransactionContext = new NoOpTransactionContext(failure, getOperationLimiter());
         } else if (CreateTransactionReply.SERIALIZABLE_CLASS.equals(response.getClass())) {
             localTransactionContext = createValidTransactionContext(
                     CreateTransactionReply.fromSerializable(response));
@@ -169,7 +169,7 @@ final class RemoteTransactionContextSupport {
             IllegalArgumentException exception = new IllegalArgumentException(String.format(
                     "Invalid reply type %s for CreateTransaction", response.getClass()));
 
-            localTransactionContext = new NoOpTransactionContext(exception, getIdentifier(), getOperationLimiter());
+            localTransactionContext = new NoOpTransactionContext(exception, getOperationLimiter());
         }
 
         transactionContextAdapter.executePriorTransactionOperations(localTransactionContext);
@@ -190,10 +190,10 @@ final class RemoteTransactionContextSupport {
         final TransactionContext ret;
 
         if (remoteTransactionVersion < DataStoreVersions.LITHIUM_VERSION) {
-            ret = new PreLithiumTransactionContextImpl(transactionPath, transactionActor, getIdentifier(),
+            ret = new PreLithiumTransactionContextImpl(transactionPath, transactionActor,
                 getActorContext(), isTxActorLocal, remoteTransactionVersion, parent.getLimiter());
         } else {
-            ret = new RemoteTransactionContext(transactionActor, getIdentifier(), getActorContext(),
+            ret = new RemoteTransactionContext(transactionActor, getActorContext(),
                 isTxActorLocal, remoteTransactionVersion, parent.getLimiter());
         }
 

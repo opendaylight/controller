@@ -7,6 +7,9 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import akka.actor.ActorSelection;
+import akka.dispatch.Futures;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,6 +18,8 @@ import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import scala.concurrent.Future;
+import scala.concurrent.Promise;
 
 /**
  * A helper class that wraps an eventual TransactionContext instance. Operations destined for the target
@@ -37,10 +42,10 @@ class TransactionContextWrapper {
      */
     private volatile TransactionContext transactionContext;
 
-    private final TransactionIdentifier identifier;
+    private final OperationLimiter limiter;
 
-    TransactionContextWrapper(final TransactionIdentifier identifier) {
-        this.identifier = identifier;
+    TransactionContextWrapper(final OperationLimiter limiter) {
+        this.limiter = Preconditions.checkNotNull(limiter);
     }
 
     TransactionContext getTransactionContext() {
@@ -48,7 +53,7 @@ class TransactionContextWrapper {
     }
 
     TransactionIdentifier getIdentifier() {
-        return identifier;
+        return limiter.getIdentifier();
     }
 
     /**
@@ -69,6 +74,8 @@ class TransactionContextWrapper {
 
         if (invokeOperation) {
             operation.invoke(transactionContext);
+        } else {
+            limiter.acquire();
         }
     }
 
@@ -95,10 +102,11 @@ class TransactionContextWrapper {
             // queued (eg a put operation from a client read Future callback that is notified
             // synchronously).
             Collection<TransactionOperation> operationsBatch = null;
-            synchronized(queuedTxOperations) {
-                if(queuedTxOperations.isEmpty()) {
+            synchronized (queuedTxOperations) {
+                if (queuedTxOperations.isEmpty()) {
                     // We're done invoking the TransactionOperations so we can now publish the
                     // TransactionContext.
+                    localTransactionContext.operationHandoffComplete();
                     transactionContext = localTransactionContext;
                     break;
                 }
@@ -110,9 +118,26 @@ class TransactionContextWrapper {
             // Invoke TransactionOperations outside the sync block to avoid unnecessary blocking.
             // A slight down-side is that we need to re-acquire the lock below but this should
             // be negligible.
-            for(TransactionOperation oper: operationsBatch) {
+            for (TransactionOperation oper : operationsBatch) {
                 oper.invoke(localTransactionContext);
             }
         }
+    }
+
+    Future<ActorSelection> readyTransaction() {
+        // avoid the creation of a promise and a TransactionOperation
+        if (transactionContext != null) {
+            return transactionContext.readyTransaction();
+        }
+
+        final Promise<ActorSelection> promise = Futures.promise();
+        enqueueTransactionOperation(new TransactionOperation() {
+            @Override
+            public void invoke(TransactionContext transactionContext) {
+                promise.completeWith(transactionContext.readyTransaction());
+            }
+        });
+
+        return promise.future();
     }
 }
