@@ -67,22 +67,23 @@ public final class DOMRpcRouter implements AutoCloseable, DOMRpcService, DOMRpcP
         final DOMRpcRoutingTable newTable = oldTable.remove(implementation, rpcs);
 
         final Collection<DOMRpcIdentifier> removedRpcs = notPresentRpcs(newTable, rpcs);
-        final Collection<ListenerRegistration<? extends DOMRpcAvailabilityListener>> capturedListeners = listeners;
         routingTable = newTable;
-
-        listenerNotifier.execute(new Runnable() {
-            @Override
-            public void run() {
-                for (ListenerRegistration<? extends DOMRpcAvailabilityListener> l : capturedListeners) {
-                    // Need to ensure removed listeners do not get notified
-                    synchronized (DOMRpcRouter.this) {
-                        if (listeners.contains(l)) {
-                            l.getInstance().onRpcUnavailable(removedRpcs);
+        if(!removedRpcs.isEmpty()) {
+            final Collection<ListenerRegistration<? extends DOMRpcAvailabilityListener>> capturedListeners = listeners;
+            listenerNotifier.execute(new Runnable() {
+                @Override
+                public void run() {
+                    for (final ListenerRegistration<? extends DOMRpcAvailabilityListener> l : capturedListeners) {
+                        // Need to ensure removed listeners do not get notified
+                        synchronized (DOMRpcRouter.this) {
+                            if (listeners.contains(l)) {
+                                l.getInstance().onRpcUnavailable(removedRpcs);
+                            }
                         }
                     }
                 }
-            }
-        });
+            });
+        }
     }
 
     @Override
@@ -91,22 +92,24 @@ public final class DOMRpcRouter implements AutoCloseable, DOMRpcService, DOMRpcP
         final DOMRpcRoutingTable newTable = oldTable.add(implementation, rpcs);
 
         final Collection<DOMRpcIdentifier> addedRpcs = notPresentRpcs(oldTable, rpcs);
-        final Collection<ListenerRegistration<? extends DOMRpcAvailabilityListener>> capturedListeners = listeners;
         routingTable = newTable;
 
-        listenerNotifier.execute(new Runnable() {
-            @Override
-            public void run() {
-                for (ListenerRegistration<? extends DOMRpcAvailabilityListener> l : capturedListeners) {
-                    // Need to ensure removed listeners do not get notified
-                    synchronized (DOMRpcRouter.this) {
-                        if (listeners.contains(l)) {
-                            l.getInstance().onRpcAvailable(addedRpcs);
+        if(!addedRpcs.isEmpty()) {
+            final Collection<ListenerRegistration<? extends DOMRpcAvailabilityListener>> capturedListeners = listeners;
+            listenerNotifier.execute(new Runnable() {
+                @Override
+                public void run() {
+                    for (final ListenerRegistration<? extends DOMRpcAvailabilityListener> l : capturedListeners) {
+                        // Need to ensure removed listeners do not get notified
+                        synchronized (DOMRpcRouter.this) {
+                            if (listeners.contains(l)) {
+                                l.getInstance().onRpcAvailable(addedRpcs);
+                            }
                         }
                     }
                 }
-            }
-        });
+            });
+        }
 
         return new AbstractDOMRpcImplementationRegistration<T>(implementation) {
             @Override
