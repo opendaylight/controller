@@ -11,6 +11,7 @@ import akka.actor.ActorSelection;
 import akka.dispatch.OnComplete;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListenableFuture;
+import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyLocalTransaction;
@@ -49,6 +50,15 @@ abstract class LocalThreePhaseCommitCohort implements DOMStoreThreePhaseCommitCo
         final ReadyLocalTransaction message = new ReadyLocalTransaction(transaction.getIdentifier().toString(),
                 modification, immediate);
         return actorContext.executeOperationAsync(leader, message, actorContext.getTransactionCommitOperationTimeout());
+    }
+
+    /**
+     * Return the {@link ActorContext} associated with this object.
+     *
+     * @return An actor context instance.
+     */
+    @Nonnull ActorContext getActorContext() {
+        return actorContext;
     }
 
     Future<ActorSelection> initiateCoordinatedCommit() {
