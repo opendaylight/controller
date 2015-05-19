@@ -12,7 +12,6 @@ import akka.actor.ActorSelection;
 import akka.dispatch.OnComplete;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.SettableFuture;
-import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.DataExists;
@@ -46,26 +45,23 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
     private final boolean isTxActorLocal;
     private final short remoteTransactionVersion;
 
-    private final OperationLimiter operationCompleter;
     private BatchedModifications batchedModifications;
     private int totalBatchedModificationsSent;
 
-    protected RemoteTransactionContext(ActorSelection actor, TransactionIdentifier identifier,
+    protected RemoteTransactionContext(ActorSelection actor,
             ActorContext actorContext, boolean isTxActorLocal,
             short remoteTransactionVersion, OperationLimiter limiter) {
-        super(identifier);
+        super(limiter);
         this.actor = actor;
         this.actorContext = actorContext;
         this.isTxActorLocal = isTxActorLocal;
         this.remoteTransactionVersion = remoteTransactionVersion;
-        this.operationCompleter = limiter;
     }
 
     private Future<Object> completeOperation(Future<Object> operationFuture){
-        operationFuture.onComplete(this.operationCompleter, actorContext.getClientDispatcher());
+        operationFuture.onComplete(getLimiter(), actorContext.getClientDispatcher());
         return operationFuture;
     }
-
 
     private ActorSelection getActor() {
         return actor;

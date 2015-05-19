@@ -7,17 +7,43 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
 
 abstract class AbstractTransactionContext implements TransactionContext {
+    private final OperationLimiter limiter;
+    private boolean handoffComplete;
 
-    private final TransactionIdentifier identifier;
-
-    protected AbstractTransactionContext(TransactionIdentifier identifier) {
-        this.identifier = identifier;
+    protected AbstractTransactionContext(OperationLimiter limiter) {
+        this.limiter = Preconditions.checkNotNull(limiter);
     }
 
     protected final TransactionIdentifier getIdentifier() {
-        return identifier;
+        return limiter.getIdentifier();
+    }
+
+    protected final OperationLimiter getLimiter() {
+        return limiter;
+    }
+
+    protected final boolean isOperationHandoffComplete() {
+        return handoffComplete;
+    }
+
+    protected final void acquireOperation() {
+        if (handoffComplete) {
+            limiter.throttleOperation();
+        }
+    }
+
+    protected final void releaseOperation() {
+        if (!handoffComplete) {
+            limiter.release();
+        }
+    }
+
+    @Override
+    public final void operationHandoffComplete() {
+        handoffComplete = true;
     }
 }
