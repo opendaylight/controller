@@ -56,7 +56,7 @@ class TransactionContextWrapper {
      */
     private void enqueueTransactionOperation(final TransactionOperation operation) {
         final boolean invokeOperation;
-        synchronized(queuedTxOperations) {
+        synchronized (queuedTxOperations) {
             if (transactionContext == null) {
                 LOG.debug("Tx {} Queuing TransactionOperation", getIdentifier());
 
