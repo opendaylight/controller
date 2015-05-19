@@ -91,6 +91,24 @@
     },
     {
       "key": {
+        "uuid": "1a9dcd25_21f998c8",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/DataStoreUnavailableException.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2015-05-19T18:09:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a9dcd25_c9c34037",
+      "revId": "26a5015af5470a9cec84e7b5fe8a9cc47804ed43",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a9dcd25_09ca884f",
         "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/DataStoreUnavailableException.java",
         "patchSetId": 1
@@ -102,6 +120,24 @@
       "writtenOn": "2015-05-18T23:10:56Z",
       "side": 1,
       "message": "I think we should derive this from TransactionCommitFailedException. \n\nAlso, I don\u0027t think we should leak shard information here - I don\u0027t see how a client could/would use that information. I think all they need to know is that this is a transient datastore error and re-trying may succeed.",
+      "revId": "26a5015af5470a9cec84e7b5fe8a9cc47804ed43",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_81142cf6",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/DataStoreUnavailableException.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2015-05-19T18:09:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a9dcd25_09ca884f",
       "revId": "26a5015af5470a9cec84e7b5fe8a9cc47804ed43",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -136,6 +172,24 @@
       "writtenOn": "2015-05-18T23:10:56Z",
       "side": 1,
       "message": "Can we rename this to \"getApproximateRetryPeriod\"?",
+      "revId": "26a5015af5470a9cec84e7b5fe8a9cc47804ed43",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_610fa0e2",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/data/DataStoreUnavailableException.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2015-05-19T18:09:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a9dcd25_a9e274d3",
       "revId": "26a5015af5470a9cec84e7b5fe8a9cc47804ed43",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
