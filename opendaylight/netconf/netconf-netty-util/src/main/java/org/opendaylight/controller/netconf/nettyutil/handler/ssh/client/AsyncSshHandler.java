@@ -15,6 +15,7 @@ import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
 import java.io.IOException;
 import java.net.SocketAddress;
+import java.util.HashMap;
 import org.apache.sshd.ClientChannel;
 import org.apache.sshd.ClientSession;
 import org.apache.sshd.SshClient;
@@ -39,7 +40,16 @@ public class AsyncSshHandler extends ChannelOutboundHandlerAdapter {
 
     public static final int SSH_DEFAULT_NIO_WORKERS = 8;
 
+    // Disable default timeouts from mina sshd
+    private static final long DEFAULT_TIMEOUT = -1L;
+
     static {
+        DEFAULT_CLIENT.setProperties(new HashMap<String, String>(){
+            {
+                put(SshClient.AUTH_TIMEOUT, Long.toString(DEFAULT_TIMEOUT));
+                put(SshClient.IDLE_TIMEOUT, Long.toString(DEFAULT_TIMEOUT));
+            }
+        });
         // TODO make configurable, or somehow reuse netty threadpool
         DEFAULT_CLIENT.setNioWorkers(SSH_DEFAULT_NIO_WORKERS);
         DEFAULT_CLIENT.start();
