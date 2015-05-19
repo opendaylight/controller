@@ -39,7 +39,7 @@ class TransactionContextWrapper {
 
     private final TransactionIdentifier identifier;
 
-    TransactionContextWrapper(TransactionIdentifier identifier) {
+    TransactionContextWrapper(final TransactionIdentifier identifier) {
         this.identifier = identifier;
     }
 
@@ -54,18 +54,20 @@ class TransactionContextWrapper {
     /**
      * Adds a TransactionOperation to be executed once the TransactionContext becomes available.
      */
-    private void enqueueTransactionOperation(TransactionOperation operation) {
-        boolean invokeOperation = true;
+    private void enqueueTransactionOperation(final TransactionOperation operation) {
+        final boolean invokeOperation;
         synchronized(queuedTxOperations) {
-            if(transactionContext == null) {
+            if (transactionContext == null) {
                 LOG.debug("Tx {} Queuing TransactionOperation", getIdentifier());
 
-                invokeOperation = false;
                 queuedTxOperations.add(operation);
+                invokeOperation = false;
+            }  else {
+                invokeOperation = true;
             }
         }
 
-        if(invokeOperation) {
+        if (invokeOperation) {
             operation.invoke(transactionContext);
         }
     }
@@ -81,7 +83,7 @@ class TransactionContextWrapper {
         }
     }
 
-    void executePriorTransactionOperations(TransactionContext localTransactionContext) {
+    void executePriorTransactionOperations(final TransactionContext localTransactionContext) {
         while(true) {
             // Access to queuedTxOperations and transactionContext must be protected and atomic
             // (ie synchronized) with respect to #addTxOperationOnComplete to handle timing
