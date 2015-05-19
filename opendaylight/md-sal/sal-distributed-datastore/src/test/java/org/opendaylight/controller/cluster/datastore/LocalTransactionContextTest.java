@@ -11,9 +11,11 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
+import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import scala.concurrent.Future;
 
 public class LocalTransactionContextTest {
 
@@ -29,13 +31,13 @@ public class LocalTransactionContextTest {
     LocalTransactionContext localTransactionContext;
 
     @Before
-    public void setUp(){
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
-        localTransactionContext = new LocalTransactionContext(identifier, readWriteTransaction, limiter);
+        localTransactionContext = new LocalTransactionContext(readWriteTransaction, limiter);
     }
 
     @Test
-    public void testWrite(){
+    public void testWrite() {
         YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.builder().build();
         NormalizedNode<?, ?> normalizedNode = mock(NormalizedNode.class);
         localTransactionContext.writeData(yangInstanceIdentifier, normalizedNode);
@@ -44,7 +46,7 @@ public class LocalTransactionContextTest {
     }
 
     @Test
-    public void testMerge(){
+    public void testMerge() {
         YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.builder().build();
         NormalizedNode<?, ?> normalizedNode = mock(NormalizedNode.class);
         localTransactionContext.mergeData(yangInstanceIdentifier, normalizedNode);
@@ -53,7 +55,7 @@ public class LocalTransactionContextTest {
     }
 
     @Test
-    public void testDelete(){
+    public void testDelete() {
         YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.builder().build();
         localTransactionContext.deleteData(yangInstanceIdentifier);
         verify(limiter).release();
@@ -62,7 +64,7 @@ public class LocalTransactionContextTest {
 
 
     @Test
-    public void testRead(){
+    public void testRead() {
         YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.builder().build();
         NormalizedNode<?, ?> normalizedNode = mock(NormalizedNode.class);
         doReturn(Futures.immediateCheckedFuture(Optional.of(normalizedNode))).when(readWriteTransaction).read(yangInstanceIdentifier);
@@ -72,7 +74,7 @@ public class LocalTransactionContextTest {
     }
 
     @Test
-    public void testExists(){
+    public void testExists() {
         YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.builder().build();
         doReturn(Futures.immediateCheckedFuture(true)).when(readWriteTransaction).exists(yangInstanceIdentifier);
         localTransactionContext.dataExists(yangInstanceIdentifier, SettableFuture.<Boolean> create());
@@ -81,8 +83,11 @@ public class LocalTransactionContextTest {
     }
 
     @Test
-    public void testReady(){
-        doReturn(mock(LocalThreePhaseCommitCohort.class)).when(readWriteTransaction).ready();
+    public void testReady() {
+        final LocalThreePhaseCommitCohort mockCohort = mock(LocalThreePhaseCommitCohort.class);
+        doReturn(mock(ActorContext.class)).when(mockCohort).getActorContext();
+        doReturn(mock(Future.class)).when(mockCohort).initiateCoordinatedCommit();
+        doReturn(mockCohort).when(readWriteTransaction).ready();
         localTransactionContext.readyTransaction();
         verify(limiter).release();
         verify(readWriteTransaction).ready();
