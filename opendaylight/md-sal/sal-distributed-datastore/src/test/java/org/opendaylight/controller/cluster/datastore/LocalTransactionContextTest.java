@@ -31,7 +31,7 @@ public class LocalTransactionContextTest {
     @Before
     public void setUp(){
         MockitoAnnotations.initMocks(this);
-        localTransactionContext = new LocalTransactionContext(identifier, readWriteTransaction, limiter);
+        localTransactionContext = new LocalTransactionContext(readWriteTransaction, limiter);
     }
 
     @Test
