@@ -110,7 +110,7 @@ public class DatastoreContext {
         private int operationTimeoutInSeconds = 5;
         private String dataStoreMXBeanType;
         private int shardTransactionCommitTimeoutInSeconds = 30;
-        private int shardJournalRecoveryLogBatchSize = 1000;
+        private int shardJournalRecoveryLogBatchSize = 1;
         private int shardSnapshotBatchCount = 20000;
         private int shardHeartbeatIntervalInMillis = 500;
         private int shardTransactionCommitQueueCapacity = 20000;
