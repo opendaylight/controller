@@ -46,19 +46,19 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
     private final boolean isTxActorLocal;
     private final short remoteTransactionVersion;
 
-    private final OperationCompleter operationCompleter;
+    private final OperationLimiter operationCompleter;
     private BatchedModifications batchedModifications;
     private int totalBatchedModificationsSent;
 
     protected RemoteTransactionContext(ActorSelection actor, TransactionIdentifier identifier,
             ActorContext actorContext, boolean isTxActorLocal,
-            short remoteTransactionVersion, OperationCompleter operationCompleter) {
+            short remoteTransactionVersion, OperationLimiter limiter) {
         super(identifier);
         this.actor = actor;
         this.actorContext = actorContext;
         this.isTxActorLocal = isTxActorLocal;
         this.remoteTransactionVersion = remoteTransactionVersion;
-        this.operationCompleter = operationCompleter;
+        this.operationCompleter = limiter;
     }
 
     private Future<Object> completeOperation(Future<Object> operationFuture){
