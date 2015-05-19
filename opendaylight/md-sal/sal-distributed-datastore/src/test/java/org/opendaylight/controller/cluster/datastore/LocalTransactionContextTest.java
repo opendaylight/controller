@@ -6,7 +6,6 @@ import static org.mockito.Mockito.verify;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
-import java.util.concurrent.Semaphore;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -21,7 +20,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 public class LocalTransactionContextTest {
 
     @Mock
-    Semaphore limiter;
+    OperationLimiter limiter;
 
     @Mock
     TransactionIdentifier identifier;
@@ -34,7 +33,7 @@ public class LocalTransactionContextTest {
     @Before
     public void setUp(){
         MockitoAnnotations.initMocks(this);
-        localTransactionContext = new LocalTransactionContext(identifier, readWriteTransaction, new OperationCompleter(limiter)) {
+        localTransactionContext = new LocalTransactionContext(identifier, readWriteTransaction, limiter) {
             @Override
             protected DOMStoreWriteTransaction getWriteDelegate() {
                 return readWriteTransaction;
@@ -50,7 +49,7 @@ public class LocalTransactionContextTest {
     @Test
     public void testWrite(){
         YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.builder().build();
-        NormalizedNode normalizedNode = mock(NormalizedNode.class);
+        NormalizedNode<?, ?> normalizedNode = mock(NormalizedNode.class);
         localTransactionContext.writeData(yangInstanceIdentifier, normalizedNode);
         verify(limiter).release();
         verify(readWriteTransaction).write(yangInstanceIdentifier, normalizedNode);
@@ -59,7 +58,7 @@ public class LocalTransactionContextTest {
     @Test
     public void testMerge(){
         YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.builder().build();
-        NormalizedNode normalizedNode = mock(NormalizedNode.class);
+        NormalizedNode<?, ?> normalizedNode = mock(NormalizedNode.class);
         localTransactionContext.mergeData(yangInstanceIdentifier, normalizedNode);
         verify(limiter).release();
         verify(readWriteTransaction).merge(yangInstanceIdentifier, normalizedNode);
@@ -77,7 +76,7 @@ public class LocalTransactionContextTest {
     @Test
     public void testRead(){
         YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.builder().build();
-        NormalizedNode normalizedNode = mock(NormalizedNode.class);
+        NormalizedNode<?, ?> normalizedNode = mock(NormalizedNode.class);
         doReturn(Futures.immediateCheckedFuture(Optional.of(normalizedNode))).when(readWriteTransaction).read(yangInstanceIdentifier);
         localTransactionContext.readData(yangInstanceIdentifier, SettableFuture.<Optional<NormalizedNode<?,?>>>create());
         verify(limiter).release();
