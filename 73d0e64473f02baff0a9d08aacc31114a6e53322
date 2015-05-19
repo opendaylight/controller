@@ -16,6 +16,24 @@
       "revId": "73d0e64473f02baff0a9d08aacc31114a6e53322",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_6940ec56",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/LocalTransactionContext.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-19T00:02:23Z",
+      "side": 1,
+      "message": "The permit is acquired in transaction proxy and that has to be done before we can even find out that the transaction is remote or local. My preference would have been to avoid throttling altogether for local transactions but it\u0027s tricky with the current implementation. I can avoid the wrapping of the operation in a Runnable/Function though.",
+      "parentUuid": "1a9dcd25_095e0846",
+      "revId": "73d0e64473f02baff0a9d08aacc31114a6e53322",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
