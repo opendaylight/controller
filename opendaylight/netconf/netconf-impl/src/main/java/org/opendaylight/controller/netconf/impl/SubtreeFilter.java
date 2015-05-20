@@ -167,16 +167,23 @@ public class SubtreeFilter {
     }
 
     private static boolean prefixedContentMatches(final XmlElement filter, final XmlElement src) throws NetconfDocumentedException {
-        final Map.Entry<String, String> prefixToNamespaceOfFilter = filter.findNamespaceOfTextContent();
-        final Map.Entry<String, String> prefixToNamespaceOfSrc = src.findNamespaceOfTextContent();
+        final Map.Entry<String, String> prefixToNamespaceOfFilter;
+        final Map.Entry<String, String> prefixToNamespaceOfSrc;
+        try {
+            prefixToNamespaceOfFilter = filter.findNamespaceOfTextContent();
+            prefixToNamespaceOfSrc = src.findNamespaceOfTextContent();
+        } catch (IllegalArgumentException e) {
+            //if we can't find namespace of prefix - it's not a prefix, so it doesn't match
+            return false;
+        }
 
         final String prefix = prefixToNamespaceOfFilter.getKey();
         // If this is not a prefixed content, we do not need to continue since content do not match
-        if(prefix.equals(XmlElement.DEFAULT_NAMESPACE_PREFIX)) {
+        if (prefix.equals(XmlElement.DEFAULT_NAMESPACE_PREFIX)) {
             return false;
         }
         // Namespace mismatch
-        if(!prefixToNamespaceOfFilter.getValue().equals(prefixToNamespaceOfSrc.getValue())) {
+        if (!prefixToNamespaceOfFilter.getValue().equals(prefixToNamespaceOfSrc.getValue())) {
             return false;
         }
 
