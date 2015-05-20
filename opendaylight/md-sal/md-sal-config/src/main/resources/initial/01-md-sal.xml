@@ -167,6 +167,9 @@
                         <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:dom-async-data-broker</type>
                         <name>inmemory-data-broker</name>
                     </async-data-broker>
+                    <notification-queue-depth>65536</notification-queue-depth>
+                    <notification-queue-spin>1</notification-queue-spin>
+                    <notification-queue-park>30</notification-queue-park>
                 </module>
                 <module>
                     <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">prefix:binding-data-compatible-broker</type>

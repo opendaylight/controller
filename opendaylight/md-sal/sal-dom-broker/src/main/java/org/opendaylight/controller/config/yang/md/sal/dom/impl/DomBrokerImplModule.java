@@ -7,8 +7,10 @@
  */
 package org.opendaylight.controller.config.yang.md.sal.dom.impl;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.MutableClassToInstanceMap;
+import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
 import org.opendaylight.controller.md.sal.dom.api.DOMNotificationPublishService;
@@ -23,9 +25,6 @@ import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.controller.sal.dom.broker.BrokerImpl;
 import org.opendaylight.controller.sal.dom.broker.GlobalBundleScanningSchemaServiceImpl;
 
-/**
-*
-*/
 public final class DomBrokerImplModule extends org.opendaylight.controller.config.yang.md.sal.dom.impl.AbstractDomBrokerImplModule
 {
 
@@ -38,8 +37,10 @@ public final class DomBrokerImplModule extends org.opendaylight.controller.confi
     }
 
     @Override
-    public void validate(){
+    public void validate() {
         super.validate();
+        final long depth = getNotificationQueueDepth().getValue();
+        Preconditions.checkArgument(Long.lowestOneBit(depth) == Long.highestOneBit(depth), "Queue depth %s is not power-of-two", depth);
     }
 
     @Override
@@ -48,10 +49,8 @@ public final class DomBrokerImplModule extends org.opendaylight.controller.confi
 
         final ClassToInstanceMap<BrokerService> services = MutableClassToInstanceMap.create();
 
-        // TODO: retrieve from config subsystem
-        final int queueDepth = 1024;
-
-        final DOMNotificationRouter domNotificationRouter = DOMNotificationRouter.create(queueDepth);
+        final DOMNotificationRouter domNotificationRouter = DOMNotificationRouter.create(getNotificationQueueDepth().getValue().intValue(),
+            getNotificationQueueSpin().longValue(), getNotificationQueuePark().longValue(), TimeUnit.MILLISECONDS);
         services.putInstance(DOMNotificationService.class, domNotificationRouter);
         services.putInstance(DOMNotificationPublishService.class, domNotificationRouter);
 
