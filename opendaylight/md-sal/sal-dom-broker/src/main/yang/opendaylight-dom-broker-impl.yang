@@ -40,6 +40,12 @@ module opendaylight-sal-dom-broker-impl {
         config:java-name-prefix SchemaServiceImplSingleton;
     }
 
+    typedef max-queue-depth {
+        type uint32 {
+            range 1..1073741824;
+        }
+    }
+
     augment "/config:modules/config:module/config:configuration" {
         case dom-broker-impl {
             when "/config:modules/config:module/config:type = 'dom-broker-impl'";
@@ -60,6 +66,24 @@ module opendaylight-sal-dom-broker-impl {
                         config:required-identity sal:schema-service;
                     }
                 }
+            }
+
+            leaf notification-queue-depth {
+                description "Maximum number of elements in the notification queue, must be power-of-two.";
+                type max-queue-depth;
+                default 65536;
+            }
+            leaf notification-queue-spin {
+                description "Number of milliseconds notification queue should spin for new requests before parking.";
+                type uint16;
+                units milliseconds;
+                default 1;
+            }
+            leaf notification-queue-park {
+                description "Number of milliseconds notification queue should park for new requests before blocking.";
+                type uint16;
+                units milliseconds;
+                default 30;
             }
         }
     }
