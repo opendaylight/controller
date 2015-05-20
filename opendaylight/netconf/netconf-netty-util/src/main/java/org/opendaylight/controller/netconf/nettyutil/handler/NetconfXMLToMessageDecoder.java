@@ -10,6 +10,7 @@ package org.opendaylight.controller.netconf.nettyutil.handler;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import java.io.IOException;
@@ -30,9 +31,55 @@ public final class NetconfXMLToMessageDecoder extends ByteToMessageDecoder {
                 LOG.trace("Received to decode: {}", ByteBufUtil.hexDump(in));
             }
 
+            /* According to the XML 1.0 specifications, when there is an XML declaration
+             * at the beginning of an XML document, it is invalid to have
+             * white spaces before that declaration (reminder: a XML declaration looks like:
+             * <?xml version="1.0" encoding="UTF-8"?>). In contrast, when there is no XML declaration,
+             * it is valid to have white spaces at the beginning of the document.
+             *
+             * When they send a NETCONF message, several NETCONF servers start with a new line (either
+             * LF or CRLF), presumably to improve readability in interactive sessions with a human being.
+             * Some NETCONF servers send an XML declaration, some others do not.
+             *
+             * If a server starts a NETCONF message with white spaces and follows with an XML
+             * declaration, XmlUtil.readXmlToDocument() will fail because this is invalid XML.
+             * But in the spirit of the "NETCONF over SSH" RFC 4742 and to improve interoperability, we want
+             * to accept those messages.
+             *
+             * To do this, the following code strips the leading bytes before the start of the XML messages.
+             */
+
+            // Skip all leading whitespaces by moving the reader index to the first non whitespace character
+            while (in.isReadable()) {
+                if(!isWhitespace(in.readByte())) {
+                    // return reader index to the first non whitespace character
+                    in.readerIndex(in.readerIndex() - 1);
+                    break;
+                }
+            }
+
+            // Warn about leading whitespaces
+            if(in.readerIndex() != 0 && LOG.isWarnEnabled()) {
+                final byte[] strippedBytes = new byte[in.readerIndex()];
+                in.getBytes(0, strippedBytes, 0, in.readerIndex());
+                LOG.warn("XML message with unwanted leading bytes detected. Discarded the {} leading byte(s): '{}'",
+                        in.readerIndex(), ByteBufUtil.hexDump(Unpooled.wrappedBuffer(strippedBytes)));
+            }
+
             out.add(new NetconfMessage(XmlUtil.readXmlToDocument(new ByteBufInputStream(in))));
         } else {
             LOG.debug("No more content in incoming buffer.");
         }
+    }
+
+    /**
+     * Check whether a byte is whitespace/control character. Considered whitespace characters: <br/>
+     * SPACE, \t, \n, \v, \r, \f
+     *
+     * @param b byte to check
+     * @return true if the byte is a whitespace/control character
+     */
+    private static boolean isWhitespace(final byte b) {
+        return b <= 0x0d && b >= 0x09 || b == 0x20;
     }
 }
