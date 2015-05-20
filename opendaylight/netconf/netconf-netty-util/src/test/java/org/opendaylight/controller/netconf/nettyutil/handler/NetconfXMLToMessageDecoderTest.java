@@ -14,6 +14,7 @@ import com.google.common.collect.Lists;
 import io.netty.buffer.Unpooled;
 import java.util.ArrayList;
 import org.junit.Test;
+import org.xml.sax.SAXParseException;
 
 public class NetconfXMLToMessageDecoderTest {
 
@@ -28,6 +29,37 @@ public class NetconfXMLToMessageDecoderTest {
     public void testDecode() throws Exception {
         final ArrayList<Object> out = Lists.newArrayList();
         new NetconfXMLToMessageDecoder().decode(null, Unpooled.wrappedBuffer("<msg/>".getBytes()), out);
+        assertEquals(1, out.size());
+    }
+
+    @Test
+    public void testDecodeWithLeadingLFAndXmlDecl() throws Exception {
+        /* Test that we accept XML documents with a line feed (0x0a) before the
+         * XML declaration in the XML prologue.
+         * A leading LF is the case reported in BUG-2838.
+         */
+        final ArrayList<Object> out = Lists.newArrayList();
+        new NetconfXMLToMessageDecoder().decode(null, Unpooled.wrappedBuffer("\n<?xml version=\"1.0\" encoding=\"UTF-8\"?><msg/>".getBytes()), out);
+        assertEquals(1, out.size());
+    }
+
+    @Test
+    public void testDecodeWithLeadingCRLFAndXmlDecl() throws Exception {
+        /* Test that we accept XML documents with both a carriage return and
+         * line feed (0x0d 0x0a) before the XML declaration in the XML prologue.
+         * Leading CRLF can be seen with some Cisco routers
+         * (eg CSR1000V running IOS 15.4(1)S)
+         */
+        final ArrayList<Object> out = Lists.newArrayList();
+        new NetconfXMLToMessageDecoder().decode(null, Unpooled.wrappedBuffer("\r\n<?xml version=\"1.0\" encoding=\"UTF-8\"?><msg/>".getBytes()), out);
+        assertEquals(1, out.size());
+    }
+
+    @Test(expected=SAXParseException.class)
+    public void testDecodeGibberish() throws Exception {
+        /* Test that we reject inputs where we cannot find the xml start '<' character */
+        final ArrayList<Object> out = Lists.newArrayList();
+        new NetconfXMLToMessageDecoder().decode(null, Unpooled.wrappedBuffer("\r\n?xml version>".getBytes()), out);
         assertEquals(1, out.size());
     }
 }
