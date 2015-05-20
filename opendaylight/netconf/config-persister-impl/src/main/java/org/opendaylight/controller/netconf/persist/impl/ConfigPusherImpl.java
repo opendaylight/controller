@@ -138,28 +138,65 @@ public class ConfigPusherImpl implements ConfigPusher {
 
     private NetconfOperationService getOperationServiceWithRetries(Set<String> expectedCapabilities, String idForReporting) {
         Stopwatch stopwatch = Stopwatch.createStarted();
-        NotEnoughCapabilitiesException lastException;
+        ConfigPusherException lastException;
         do {
             try {
                 return getOperationService(expectedCapabilities, idForReporting);
-            } catch (NotEnoughCapabilitiesException e) {
+            } catch (ConfigPusherException e) {
                 LOG.debug("Not enough capabilities: {}", e.toString());
                 lastException = e;
                 sleep();
             }
         } while (stopwatch.elapsed(TimeUnit.MILLISECONDS) < maxWaitForCapabilitiesMillis);
-        throw new IllegalStateException("Max wait for capabilities reached." + lastException.getMessage(), lastException);
+
+        if(lastException instanceof NotEnoughCapabilitiesException) {
+            LOG.error("Unable to push configuration due to missing yang models." +
+                            " Yang models that are missing, but required by the configuration: {}." +
+                            " For each mentioned model check: " +
+                            " 1. that the mentioned yang model namespace/name/revision is identical to those in the yang model itself" +
+                            " 2. the yang file is present in the system" +
+                            " 3. the bundle with that yang file is present in the system and active" +
+                            " 4. the yang parser did not fail while attempting to parse that model",
+                    ((NotEnoughCapabilitiesException) lastException).getMissingCaps());
+            throw new IllegalStateException("Unable to push configuration due to missing yang models." +
+                    " Required yang models that are missing: "
+                    + ((NotEnoughCapabilitiesException) lastException).getMissingCaps(), lastException);
+        } else {
+            final String msg = "Unable to push configuration due to missing netconf service";
+            LOG.error(msg, lastException);
+            throw new IllegalStateException(msg, lastException);
+        }
     }
 
-    private static class NotEnoughCapabilitiesException extends Exception {
-        private static final long serialVersionUID = 1L;
+    private static class ConfigPusherException extends Exception {
 
-        private NotEnoughCapabilitiesException(String message, Throwable cause) {
-            super(message, cause);
+        public ConfigPusherException(final String message) {
+            super(message);
         }
 
-        private NotEnoughCapabilitiesException(String message) {
+        public ConfigPusherException(final String message, final Throwable cause) {
+            super(message, cause);
+        }
+    }
+
+    private static class NotEnoughCapabilitiesException extends ConfigPusherException {
+        private static final long serialVersionUID = 1L;
+        private Set<String> missingCaps;
+
+        private NotEnoughCapabilitiesException(String message, Set<String> missingCaps) {
             super(message);
+            this.missingCaps = missingCaps;
+        }
+
+        public Set<String> getMissingCaps() {
+            return missingCaps;
+        }
+    }
+
+    private static final class NetconfServiceNotAvailableException extends ConfigPusherException {
+
+        public NetconfServiceNotAvailableException(final String s, final RuntimeException e) {
+            super(s, e);
         }
     }
 
@@ -170,23 +207,24 @@ public class ConfigPusherImpl implements ConfigPusher {
      * @param idForReporting
      * @return service if capabilities are present, otherwise absent value
      */
-    private NetconfOperationService getOperationService(Set<String> expectedCapabilities, String idForReporting) throws NotEnoughCapabilitiesException {
+    private NetconfOperationService getOperationService(Set<String> expectedCapabilities, String idForReporting) throws ConfigPusherException {
         NetconfOperationService serviceCandidate;
         try {
             serviceCandidate = configNetconfConnector.createService(idForReporting);
         } catch(RuntimeException e) {
-            throw new NotEnoughCapabilitiesException("Netconf service not stable for " + idForReporting, e);
+            throw new NetconfServiceNotAvailableException("Netconf service not stable for config pusher." +
+                    " Cannot push any configuration", e);
         }
         Set<String> notFoundDiff = computeNotFoundCapabilities(expectedCapabilities, configNetconfConnector);
         if (notFoundDiff.isEmpty()) {
             return serviceCandidate;
         } else {
             serviceCandidate.close();
-            LOG.trace("Netconf server did not provide required capabilities for {} ", idForReporting,
+            LOG.debug("Netconf server did not provide required capabilities for {} ", idForReporting,
                     "Expected but not found: {}, all expected {}, current {}",
                      notFoundDiff, expectedCapabilities, configNetconfConnector.getCapabilities()
             );
-            throw new NotEnoughCapabilitiesException("Not enough capabilities for " + idForReporting + ". Expected but not found: " + notFoundDiff);
+            throw new NotEnoughCapabilitiesException("Not enough capabilities for " + idForReporting + ". Expected but not found: " + notFoundDiff, notFoundDiff);
         }
     }
 
@@ -201,8 +239,6 @@ public class ConfigPusherImpl implements ConfigPusher {
         allNotFound.removeAll(actual);
         return allNotFound;
     }
-
-
 
     private void sleep() {
         try {
