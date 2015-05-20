@@ -66,8 +66,7 @@ public class ConfigPersisterTest {
     public void testPersisterNotAllCapabilitiesProvided() throws Exception {
         setUpContextAndStartPersister("required-cap", getConflictingService());
         Thread.sleep(2000);
-        handler.assertException(IllegalStateException.class, "Max wait for capabilities reached.Not enough capabilities " +
-                "for <data><config-snapshot/></data>. Expected but not found: [required-cap]");
+        handler.assertException(IllegalStateException.class, "Required yang models that are missing: [required-cap]");
 
     }
 
