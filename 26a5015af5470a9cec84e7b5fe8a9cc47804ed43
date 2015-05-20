@@ -267,6 +267,24 @@
     },
     {
       "key": {
+        "uuid": "1a9dcd25_fc16f3f0",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 469,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-20T02:41:56Z",
+      "side": 1,
+      "message": "isShardReadyWithLeaderId is checked by findPrimary (actually sendResponse). If the shard doesn\u0027t have a leader  it will schedule retries up to a max timeout. If it still doesn\u0027t have a leader then it sends back NoShardLeaderException. So if we couple isLeaderAvaialble with isShardReadyWithLeaderId then we get all that for free. The leader not available also means no shard leader.\n\nMy thought is to let this code throw NoShardLeaderException  as it currently does. NoShardLeaderException  can be converted to the public DataStoreUnavailableException on the front-end ConcurrentDOMDataBroker (set NoShardLeaderException as the cause). \n\nWe could throw DataStoreUnavailableException here but NoShardLeaderException is also thrown from other places (i.e. Shard) so catching it on the front-end covers all paths.",
+      "parentUuid": "1a9dcd25_09db68ee",
+      "revId": "26a5015af5470a9cec84e7b5fe8a9cc47804ed43",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a9dcd25_09a3689f",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
         "patchSetId": 1
