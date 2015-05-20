@@ -366,8 +366,12 @@
                 <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding?module=opendaylight-md-sal-binding&amp;revision=2013-10-28</capability>
                 <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom?module=opendaylight-md-sal-dom&amp;revision=2013-10-28</capability>
                 <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl?module=opendaylight-sal-binding-broker-impl&amp;revision=2013-10-28</capability>
+                <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:pingpong?module=opendaylight-pingpong-broker&amp;revision=2014-11-07</capability>
                 <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:impl?module=opendaylight-sal-dom-broker-impl&amp;revision=2013-10-28</capability>
                 <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:common?module=opendaylight-md-sal-common&amp;revision=2013-10-28</capability>
+                <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:core:spi:config-dom-store?module=opendaylight-config-dom-datastore&amp;revision=2014-06-17</capability>
+                <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:core:spi:operational-dom-store?module=opendaylight-operational-dom-datastore&amp;revision=2014-06-17</capability>
+                <capability>urn:opendaylight:params:xml:ns:yang:controller:inmemory-datastore-provider?module=opendaylight-inmemory-datastore-provider&amp;revision=2014-06-17</capability>
 
                 <!-- Toaster capabilities -->
                 <capability>http://netconfcentral.org/ns/toaster?module=toaster&amp;revision=2009-11-20</capability>
