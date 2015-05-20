@@ -285,6 +285,24 @@
     },
     {
       "key": {
+        "uuid": "1a9dcd25_b925d8ac",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 469,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2015-05-20T17:00:00Z",
+      "side": 1,
+      "message": "I like the idea of throw noShardLeaderException and Wrap it under DataStoreUnavailableException. So, if isShardReadyWithLeaderId internally schedules retry, then findPrimary could be waiting for a longer time, which we may not want.\n\nDo you think, we should enhance NoShardLeaderException to provide estimated retry time?  Then, if NoShardLeader/DataStoreUnavailableException has retry time, external application can retry after that interval.",
+      "parentUuid": "1a9dcd25_fc16f3f0",
+      "revId": "26a5015af5470a9cec84e7b5fe8a9cc47804ed43",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a9dcd25_09a3689f",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
         "patchSetId": 1
