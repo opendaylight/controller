@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a9dcd25_4f6886ba",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/LocalTransactionContext.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-21T02:09:38Z",
+      "side": 1,
+      "message": "Did you just merge 2 different commits together? :)",
+      "revId": "44e5e68c10ddc437557ca322377e499e7aa909fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_af734ab0",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-21T02:09:38Z",
+      "side": 1,
+      "message": "Why call remove here? Why not put? I think it should be safe now.",
+      "revId": "44e5e68c10ddc437557ca322377e499e7aa909fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_6f6542e0",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 536,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-21T02:09:38Z",
+      "side": 1,
+      "message": "I guess I\u0027ll have to get used to a lot of \u0027elide\u0027 and \u0027maybe\u0027 now :)",
+      "revId": "44e5e68c10ddc437557ca322377e499e7aa909fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

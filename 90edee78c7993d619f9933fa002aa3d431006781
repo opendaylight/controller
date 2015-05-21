@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a9dcd25_cf9b36c8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionChainProxy.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-21T02:09:38Z",
+      "side": 0,
+      "message": "I\u0027m finding it difficult to follow why this method was removed in this commit about updating the primary shard cache.",
+      "revId": "90edee78c7993d619f9933fa002aa3d431006781",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
