@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a9dcd25_caffa400",
+        "filename": "opendaylight/config/config-persister-feature-adapter/src/main/java/org/opendaylight/controller/configpusherfeature/internal/FeatureServiceCustomizer.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2015-05-21T08:16:51Z",
+      "side": 1,
+      "message": "Cosmetic issue, extra spaces",
+      "range": {
+        "startLine": 42,
+        "startChar": 89,
+        "endLine": 42,
+        "endChar": 92
+      },
+      "revId": "7cda958fbe971c63e503cdb4bb807101e6b55bd9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
