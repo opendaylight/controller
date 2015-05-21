@@ -84,7 +84,11 @@ public final class RestUtil {
             return null;
         }
         String namespace = prefixMap.getNamespace(prefix);
-        return new IdentityValue(namespace, identifier, namespace.equals(prefix) ? null : prefix);
+        if (namespace == null) {
+        	return null;
+        } else {
+        	return new IdentityValue(namespace, identifier, namespace.equals(prefix) ? null : prefix);
+        }
     }
 
     private static List<Predicate> toPredicates(final String predicatesStr, final PrefixesMaping prefixMap) {
