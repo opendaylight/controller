@@ -84,6 +84,9 @@ public final class RestUtil {
             return null;
         }
         final String namespace = prefixMap.getNamespace(prefix);
+        if (namespace == null) {
+            return null;
+        }
         return new IdentityValue(namespace, identifier);
     }
 
