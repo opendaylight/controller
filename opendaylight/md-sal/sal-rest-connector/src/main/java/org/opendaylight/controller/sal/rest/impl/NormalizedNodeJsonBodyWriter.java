@@ -47,6 +47,8 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
     Draft02.MediaTypes.OPERATION + RestconfService.JSON, MediaType.APPLICATION_JSON })
 public class NormalizedNodeJsonBodyWriter implements MessageBodyWriter<NormalizedNodeContext> {
 
+    private static final int DEFAULT_INDENT_SPACES_NUM = 2;
+
     @Override
     public boolean isWriteable(final Class<?> type, final Type genericType, final Annotation[] annotations, final MediaType mediaType) {
         return type.equals(NormalizedNodeContext.class);
@@ -70,7 +72,7 @@ public class NormalizedNodeJsonBodyWriter implements MessageBodyWriter<Normalize
         final InstanceIdentifierContext<SchemaNode> context = (InstanceIdentifierContext<SchemaNode>) t.getInstanceIdentifierContext();
 
         SchemaPath path = context.getSchemaNode().getPath();
-        final JsonWriter jsonWriter = createJsonWriter(entityStream);
+        final JsonWriter jsonWriter = createJsonWriter(entityStream, t.getWriterParameters().isPrettyPrint());
         jsonWriter.beginObject();
         writeNormalizedNode(jsonWriter,path,context,data);
         jsonWriter.endObject();
@@ -136,10 +138,13 @@ public class NormalizedNodeJsonBodyWriter implements MessageBodyWriter<Normalize
         return NormalizedNodeWriter.forStreamWriter(streamWriter);
     }
 
-    private JsonWriter createJsonWriter(final OutputStream entityStream) {
-        // FIXME BUG-2153: Add pretty print support
-        return JsonWriterFactory.createJsonWriter(new OutputStreamWriter(entityStream, Charsets.UTF_8));
-
+    private JsonWriter createJsonWriter(final OutputStream entityStream, boolean prettyPrint) {
+        if (prettyPrint) {
+            return JsonWriterFactory.createJsonWriter(new OutputStreamWriter(entityStream, Charsets.UTF_8),
+                    DEFAULT_INDENT_SPACES_NUM);
+        } else {
+            return JsonWriterFactory.createJsonWriter(new OutputStreamWriter(entityStream, Charsets.UTF_8));
+        }
     }
 
     private JSONCodecFactory getCodecFactory(final InstanceIdentifierContext<?> context) {
