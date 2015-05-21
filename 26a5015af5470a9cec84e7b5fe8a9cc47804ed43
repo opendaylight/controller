@@ -303,6 +303,24 @@
     },
     {
       "key": {
+        "uuid": "1a9dcd25_cfc7b611",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 469,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-21T07:14:25Z",
+      "side": 1,
+      "message": "So findPrimary will wait up to 5 min by default so we already give the shard much more than enough time to be ready (both initialized on startup and elected a leader) under normal circumstances. If it hasn\u0027t elected a leader after 5 min then either the other members have been down for a while or the network is borked and we have no idea when the shard will be available again. So we really can\u0027t estimate a retry time. Given that I would say omit the estimated retry time.",
+      "parentUuid": "1a9dcd25_b925d8ac",
+      "revId": "26a5015af5470a9cec84e7b5fe8a9cc47804ed43",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a9dcd25_09a3689f",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
         "patchSetId": 1
