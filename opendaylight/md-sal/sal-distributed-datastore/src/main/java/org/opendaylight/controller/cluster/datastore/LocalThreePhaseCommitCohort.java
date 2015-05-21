@@ -48,7 +48,7 @@ abstract class LocalThreePhaseCommitCohort implements DOMStoreThreePhaseCommitCo
     private Future<Object> initiateCommit(final boolean immediate) {
         final ReadyLocalTransaction message = new ReadyLocalTransaction(transaction.getIdentifier().toString(),
                 modification, immediate);
-        return actorContext.executeOperationAsync(leader, message);
+        return actorContext.executeOperationAsync(leader, message, actorContext.getTransactionCommitOperationTimeout());
     }
 
     Future<ActorSelection> initiateCoordinatedCommit() {
