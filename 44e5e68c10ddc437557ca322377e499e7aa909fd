@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "1a9dcd25_0f903e94",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/LocalTransactionContext.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-21T02:54:13Z",
+      "side": 1,
+      "message": "You mean were these changes in another commit? No - they weren\u0027t.",
+      "parentUuid": "1a9dcd25_4f6886ba",
+      "revId": "44e5e68c10ddc437557ca322377e499e7aa909fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a9dcd25_af734ab0",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
         "patchSetId": 6
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "1a9dcd25_2f8dfa7b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-21T02:54:13Z",
+      "side": 1,
+      "message": "I probably could call put or remove here appropriately here but I was trying to keep the code simpler with less code paths. So only have the ActorContext put. The ShardManager is only responsible for removing b/c it has the knowledge of when shard leadership changes and that must be done in an actor.",
+      "parentUuid": "1a9dcd25_af734ab0",
+      "revId": "44e5e68c10ddc437557ca322377e499e7aa909fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a9dcd25_6f6542e0",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
         "patchSetId": 6
@@ -47,6 +83,24 @@
       "writtenOn": "2015-05-21T02:09:38Z",
       "side": 1,
       "message": "I guess I\u0027ll have to get used to a lot of \u0027elide\u0027 and \u0027maybe\u0027 now :)",
+      "revId": "44e5e68c10ddc437557ca322377e499e7aa909fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_cfe9f61b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 536,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-21T02:54:13Z",
+      "side": 1,
+      "message": ":)  You don\u0027t like maybe? I recently picked that up from other ODL code - I guess I\u0027m a fan now. Actually this change is not necessary - I needed it when I playing around with having this code put to the cache. I\u0027ll revert this change - no need for \"maybe\"",
+      "parentUuid": "1a9dcd25_6f6542e0",
       "revId": "44e5e68c10ddc437557ca322377e499e7aa909fd",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
