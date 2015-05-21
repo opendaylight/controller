@@ -103,22 +103,6 @@ import org.slf4j.LoggerFactory;
 
 public class RestconfImpl implements RestconfService {
 
-    private enum UriParameters {
-        PRETTY_PRINT("prettyPrint"),
-        DEPTH("depth");
-
-        private String uriParameterName;
-
-        UriParameters(final String uriParameterName) {
-            this.uriParameterName = uriParameterName;
-        }
-
-        @Override
-        public String toString() {
-            return uriParameterName;
-        }
-    }
-
     private static final RestconfImpl INSTANCE = new RestconfImpl();
 
     private static final int NOTIFICATION_PORT = 8181;
@@ -209,7 +193,8 @@ public class RestconfImpl implements RestconfService {
         moduleContainerBuilder.withChild(allModuleMap);
 
         return new NormalizedNodeContext(new InstanceIdentifierContext<>(null, modulesSchemaNode,
-                null, schemaContext), moduleContainerBuilder.build());
+                null, schemaContext), moduleContainerBuilder.build(),
+                QueryParametersParser.parseKnownWriterParameters(uriInfo));
     }
 
     /**
@@ -240,7 +225,8 @@ public class RestconfImpl implements RestconfService {
         moduleContainerBuilder.withChild(mountPointModulesMap);
 
         return new NormalizedNodeContext(new InstanceIdentifierContext<>(null, modulesSchemaNode,
-                mountPoint, controllerContext.getGlobalSchema()), moduleContainerBuilder.build());
+                mountPoint, controllerContext.getGlobalSchema()), moduleContainerBuilder.build(),
+                QueryParametersParser.parseKnownWriterParameters(uriInfo));
     }
 
     @Override
@@ -276,7 +262,7 @@ public class RestconfImpl implements RestconfService {
         Preconditions.checkState(moduleSchemaNode instanceof ListSchemaNode);
 
         return new NormalizedNodeContext(new InstanceIdentifierContext<>(null, moduleSchemaNode, mountPoint,
-                schemaContext), moduleMap);
+                schemaContext), moduleMap, QueryParametersParser.parseKnownWriterParameters(uriInfo));
     }
 
     @Override
@@ -305,7 +291,7 @@ public class RestconfImpl implements RestconfService {
 
 
         return new NormalizedNodeContext(new InstanceIdentifierContext<>(null, streamsContainerSchemaNode, null,
-                schemaContext), streamsContainerBuilder.build());
+                schemaContext), streamsContainerBuilder.build(), QueryParametersParser.parseKnownWriterParameters(uriInfo));
     }
 
     @Override
@@ -475,7 +461,8 @@ public class RestconfImpl implements RestconfService {
         }
 
         return new NormalizedNodeContext(new InstanceIdentifierContext<RpcDefinition>(null,
-                resultNodeSchema, mountPoint, schemaContext), resultData);
+                resultNodeSchema, mountPoint, schemaContext), resultData,
+                QueryParametersParser.parseKnownWriterParameters(uriInfo));
     }
 
     private DOMRpcResult checkRpcResponse(final CheckedFuture<DOMRpcResult, DOMRpcException> response) {
@@ -653,7 +640,7 @@ public class RestconfImpl implements RestconfService {
         }
 
         return new NormalizedNodeContext(new InstanceIdentifierContext<>(null, resultNodeSchema, mountPoint,
-                schemaContext), resultData);
+                schemaContext), resultData, QueryParametersParser.parseKnownWriterParameters(uriInfo));
     }
 
     private RpcDefinition findRpc(final SchemaContext schemaContext, final String identifierDecoded) {
@@ -691,35 +678,11 @@ public class RestconfImpl implements RestconfService {
             LOG.debug(errMsg + identifier);
             throw new RestconfDocumentedException(errMsg, ErrorType.APPLICATION, ErrorTag.DATA_MISSING);
         }
-        return new NormalizedNodeContext(iiWithData, data);
-    }
-
-    // FIXME: Move this to proper place
-    @SuppressWarnings("unused")
-    private Integer parseDepthParameter(final UriInfo info) {
-        final String param = info.getQueryParameters(false).getFirst(UriParameters.DEPTH.toString());
-        if (Strings.isNullOrEmpty(param) || "unbounded".equals(param)) {
-            return null;
-        }
-
-        try {
-            final Integer depth = Integer.valueOf(param);
-            if (depth < 1) {
-                throw new RestconfDocumentedException(new RestconfError(ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE,
-                        "Invalid depth parameter: " + depth, null,
-                        "The depth parameter must be an integer > 1 or \"unbounded\""));
-            }
-
-            return depth;
-        } catch (final NumberFormatException e) {
-            throw new RestconfDocumentedException(new RestconfError(ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE,
-                    "Invalid depth parameter: " + e.getMessage(), null,
-                    "The depth parameter must be an integer > 1 or \"unbounded\""));
-        }
+        return new NormalizedNodeContext(iiWithData, data, QueryParametersParser.parseKnownWriterParameters(uriInfo));
     }
 
     @Override
-    public NormalizedNodeContext readOperationalData(final String identifier, final UriInfo info) {
+    public NormalizedNodeContext readOperationalData(final String identifier, final UriInfo uriInfo) {
         final InstanceIdentifierContext<?> iiWithData = controllerContext.toInstanceIdentifier(identifier);
         final DOMMountPoint mountPoint = iiWithData.getMountPoint();
         NormalizedNode<?, ?> data = null;
@@ -734,7 +697,7 @@ public class RestconfImpl implements RestconfService {
             LOG.debug(errMsg + identifier);
             throw new RestconfDocumentedException(errMsg , ErrorType.APPLICATION, ErrorTag.DATA_MISSING);
         }
-        return new NormalizedNodeContext(iiWithData, data);
+        return new NormalizedNodeContext(iiWithData, data, QueryParametersParser.parseKnownWriterParameters(uriInfo));
     }
 
     @Override
