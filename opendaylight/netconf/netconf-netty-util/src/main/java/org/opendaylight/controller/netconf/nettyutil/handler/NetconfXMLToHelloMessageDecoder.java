@@ -84,9 +84,9 @@ public final class NetconfXMLToHelloMessageDecoder extends ByteToMessageDecoder 
                 // Auth information containing username, ip address... extracted for monitoring
                 int endOfAuthHeader = getAdditionalHeaderEndIndex(bytes);
                 if (endOfAuthHeader > -1) {
-                    byte[] additionalHeaderBytes = Arrays.copyOfRange(bytes, 0, endOfAuthHeader + 2);
+                    byte[] additionalHeaderBytes = Arrays.copyOfRange(bytes, 0, endOfAuthHeader);
                     additionalHeader = additionalHeaderToString(additionalHeaderBytes);
-                    bytes = Arrays.copyOfRange(bytes, endOfAuthHeader + 2, bytes.length);
+                    bytes = Arrays.copyOfRange(bytes, endOfAuthHeader, bytes.length);
                 }
             }
 
@@ -127,7 +127,7 @@ public final class NetconfXMLToHelloMessageDecoder extends ByteToMessageDecoder 
             int idx = findByteSequence(bytes, possibleEnd);
 
             if (idx != -1) {
-                return idx;
+                return idx + possibleEnd.length;
             }
         }
 
