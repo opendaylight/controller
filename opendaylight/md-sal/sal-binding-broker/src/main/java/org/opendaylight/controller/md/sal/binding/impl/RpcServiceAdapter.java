@@ -62,6 +62,10 @@ class RpcServiceAdapter implements InvocationHandler {
 
     private final ListenableFuture<RpcResult<?>> invoke0(final SchemaPath schemaPath, final NormalizedNode<?, ?> input) {
         final CheckedFuture<DOMRpcResult, DOMRpcException> result = delegate.invokeRpc(schemaPath, input);
+        if(result instanceof LazyDOMRpcResultFuture) {
+            return ((LazyDOMRpcResultFuture) result).getBindingFuture();
+        }
+
         return transformFuture(schemaPath, result, codec.getCodecFactory());
     }
 
@@ -127,9 +131,6 @@ class RpcServiceAdapter implements InvocationHandler {
         return Futures.transform(domFuture, new Function<DOMRpcResult, RpcResult<?>>() {
             @Override
             public RpcResult<?> apply(final DOMRpcResult input) {
-                if (input instanceof LazySerializedDOMRpcResult) {
-                    return ((LazySerializedDOMRpcResult) input).bidningRpcResult();
-                }
                 final NormalizedNode<?, ?> domData = input.getResult();
                 final DataObject bindingResult;
                 if (domData != null) {
