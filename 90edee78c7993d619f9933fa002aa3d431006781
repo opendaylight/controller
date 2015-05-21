@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "1a9dcd25_2fe41a3a",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 351,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-21T03:44:03Z",
+      "side": 1,
+      "message": "This looks to be no different but I think the AppendEntriesReply code may be wrong to. It makes sense to set the LastApplied after actually applying it - don\u0027t you think?",
+      "parentUuid": "1a9dcd25_2fb65a3e",
+      "revId": "90edee78c7993d619f9933fa002aa3d431006781",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a9dcd25_8c445c75",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContext.java",
         "patchSetId": 7
@@ -66,6 +84,24 @@
       "side": 1,
       "message": "The cache expiry time was 5 min but it was only used to expire the cache. Now it\u0027s used to also expire the queue. An edge case is if we get a ready but then don\u0027t get the canCommit (remote node lost connection or crashed). This would now delay subsequent pending commits in the queue. We really should get the canCommit quickly after ready - even 2 min is probably too high. It\u0027s hard to know what a good default is for this type of knob.\n\nBecause we could delay pending queued commits up to 2 min, we may get a lot of them backed up under load. I\u0027m trying to give it a reasonable cushion. Again tough to know what\u0027s reasonable w/o empirical data. I\u0027m guessing memory-wise we could manage a pretty large queue but of course we don\u0027t want it too big and run OOM. I could make it 50K. What do you think?",
       "parentUuid": "1a9dcd25_8c445c75",
+      "revId": "90edee78c7993d619f9933fa002aa3d431006781",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_cfd01656",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContext.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-21T03:44:03Z",
+      "side": 1,
+      "message": "If we were really backed up 20,000 commits I think we would have a problem so I think we should probably go with a smaller number rather than larger. Anyway I\u0027m willing to try this till we learn more.",
+      "parentUuid": "1a9dcd25_8f7c4e74",
       "revId": "90edee78c7993d619f9933fa002aa3d431006781",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
