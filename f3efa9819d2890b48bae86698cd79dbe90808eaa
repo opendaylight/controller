@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a9dcd25_fb6b5083",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/md/sal/binding/impl/BindingDOMRpcImplementationAdapter.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-05-21T22:49:33Z",
+      "side": 1,
+      "message": "spaces :)",
+      "revId": "f3efa9819d2890b48bae86698cd79dbe90808eaa",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
