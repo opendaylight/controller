@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a9dcd25_0f4b5e5a",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 351,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-21T01:56:50Z",
+      "side": 1,
+      "message": "I\u0027m nervous about this change. The commit index and last applied are changed and the entry will be removed from the log even before it is applied to state.  This may come to bite us. It would be better to take everything in the apply block and schedule it for processing in a separate internal message.",
+      "revId": "90edee78c7993d619f9933fa002aa3d431006781",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_8c445c75",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContext.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-21T01:56:50Z",
+      "side": 1,
+      "message": "Why do the commit queue capacity and the commit cache expiry timeout have to be set so high? Does it have anything to do with the fix?",
+      "revId": "90edee78c7993d619f9933fa002aa3d431006781",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_4c5e5447",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/RemoteTransactionContextSupport.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 201,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-21T01:56:50Z",
+      "side": 1,
+      "message": "I\u0027m assuming this is an unrelated change as well?",
+      "revId": "90edee78c7993d619f9933fa002aa3d431006781",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_af258aac",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardCommitCoordinator.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 409,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-21T01:56:50Z",
+      "side": 1,
+      "message": "we could get rid of this method - it\u0027s not doing much more than getAndRemove",
+      "revId": "90edee78c7993d619f9933fa002aa3d431006781",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_0f1d9e66",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardCommitCoordinator.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 488,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-21T01:56:50Z",
+      "side": 1,
+      "message": "So this patch fixes bug 3028 as well :)",
+      "revId": "90edee78c7993d619f9933fa002aa3d431006781",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
