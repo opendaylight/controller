@@ -41,7 +41,7 @@ public class BindingDOMRpcProviderServiceAdapter {
     }
 
     private <S extends RpcService, T extends S> ObjectRegistration<T> register(final Class<S> type, final T implementation, final Set<DOMRpcIdentifier> domRpcs) {
-        final BindingRpcImplementationAdapter adapter = new BindingRpcImplementationAdapter(codec.getCodecRegistry(), type, implementation);
+        final BindingDOMRpcImplementationAdapter adapter = new BindingDOMRpcImplementationAdapter(codec.getCodecRegistry(), type, implementation);
 
 
         final DOMRpcImplementationRegistration<?> domReg = domRpcRegistry.registerRpcImplementation(adapter, domRpcs);
