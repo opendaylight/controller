@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "1a9dcd25_6f1d420f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 351,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-21T05:19:47Z",
+      "side": 1,
+      "message": "That does seem to make sense. Can we look at this in a follow-up patch? This one\u0027s already gotten a little overloaded and I\u0027d like to get this in b/c it seems folks are running into these issues.",
+      "parentUuid": "1a9dcd25_2fe41a3a",
+      "revId": "90edee78c7993d619f9933fa002aa3d431006781",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a9dcd25_8c445c75",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContext.java",
         "patchSetId": 7
@@ -108,6 +126,24 @@
     },
     {
       "key": {
+        "uuid": "1a9dcd25_0f035eb9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContext.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-21T05:19:47Z",
+      "side": 1,
+      "message": "How about I make it 50K and also add it to the config yang? I added it here so I could set it in unit tests but might as well make it tweakable in production.",
+      "parentUuid": "1a9dcd25_cfd01656",
+      "revId": "90edee78c7993d619f9933fa002aa3d431006781",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a9dcd25_4c5e5447",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/RemoteTransactionContextSupport.java",
         "patchSetId": 7
@@ -119,6 +155,24 @@
       "writtenOn": "2015-05-21T01:56:50Z",
       "side": 1,
       "message": "I\u0027m assuming this is an unrelated change as well?",
+      "revId": "90edee78c7993d619f9933fa002aa3d431006781",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_0f1a7e17",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/RemoteTransactionContextSupport.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 201,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-21T05:19:47Z",
+      "side": 1,
+      "message": "Yes - it\u0027s unrelated to direct commit but I noticed a test failure b/c a read-write tx got GC\u0027ed prematurely.",
+      "parentUuid": "1a9dcd25_4c5e5447",
       "revId": "90edee78c7993d619f9933fa002aa3d431006781",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
