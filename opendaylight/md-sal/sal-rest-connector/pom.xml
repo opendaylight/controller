@@ -103,6 +103,13 @@
     </dependency>
 
     <dependency>
+      <groupId>net.java.dev.stax-utils</groupId>
+      <artifactId>stax-utils</artifactId>
+      <version>20070216</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
       <scope>test</scope>

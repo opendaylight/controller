@@ -7,10 +7,20 @@ public class NormalizedNodeContext {
 
     private final InstanceIdentifierContext<? extends SchemaNode> context;
     private final NormalizedNode<?,?> data;
+    private final boolean prettyPrint;
 
-    public NormalizedNodeContext(final InstanceIdentifierContext<? extends SchemaNode> context, final NormalizedNode<?, ?> data) {
+    public NormalizedNodeContext(final InstanceIdentifierContext<? extends SchemaNode> context,
+                                 final NormalizedNode<?, ?> data, final boolean prettyPrint) {
         this.context = context;
         this.data = data;
+        this.prettyPrint = prettyPrint;
+    }
+
+    public NormalizedNodeContext(final InstanceIdentifierContext<? extends SchemaNode> context,
+                                 final NormalizedNode<?, ?> data) {
+        this.context = context;
+        this.data = data;
+        this.prettyPrint = false;
     }
 
     public InstanceIdentifierContext<? extends SchemaNode> getInstanceIdentifierContext() {
@@ -19,5 +29,10 @@ public class NormalizedNodeContext {
 
     public NormalizedNode<?, ?> getData() {
         return data;
+    }
+
+
+    public boolean isPrettyPrint() {
+        return prettyPrint;
     }
 }
