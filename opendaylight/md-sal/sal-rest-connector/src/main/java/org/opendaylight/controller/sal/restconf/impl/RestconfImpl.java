@@ -202,7 +202,7 @@ public class RestconfImpl implements RestconfService {
         moduleContainerBuilder.withChild(allModuleMap);
 
         return new NormalizedNodeContext(new InstanceIdentifierContext<>(null, modulesSchemaNode,
-                null, schemaContext), moduleContainerBuilder.build());
+                null, schemaContext), moduleContainerBuilder.build(), parsePrettyPrintParameter(uriInfo));
     }
 
     /**
@@ -232,7 +232,7 @@ public class RestconfImpl implements RestconfService {
         moduleContainerBuilder.withChild(mountPointModulesMap);
 
         return new NormalizedNodeContext(new InstanceIdentifierContext<>(null, modulesSchemaNode,
-                mountPoint, controllerContext.getGlobalSchema()), moduleContainerBuilder.build());
+                mountPoint, controllerContext.getGlobalSchema()), moduleContainerBuilder.build(), parsePrettyPrintParameter(uriInfo));
     }
 
     @Override
@@ -267,7 +267,7 @@ public class RestconfImpl implements RestconfService {
         Preconditions.checkState(moduleSchemaNode instanceof ListSchemaNode);
 
         return new NormalizedNodeContext(new InstanceIdentifierContext<>(null, moduleSchemaNode, mountPoint,
-                schemaContext), moduleMap);
+                schemaContext), moduleMap, parsePrettyPrintParameter(uriInfo));
     }
 
     @Override
@@ -296,7 +296,7 @@ public class RestconfImpl implements RestconfService {
 
 
         return new NormalizedNodeContext(new InstanceIdentifierContext<>(null, streamsContainerSchemaNode, null,
-                schemaContext), streamsContainerBuilder.build());
+                schemaContext), streamsContainerBuilder.build(), parsePrettyPrintParameter(uriInfo));
     }
 
     @Override
@@ -406,7 +406,7 @@ public class RestconfImpl implements RestconfService {
         }
 
         return new NormalizedNodeContext(new InstanceIdentifierContext<RpcDefinition>(null,
-                resultNodeSchema, mountPoint, schemaContext), resultData);
+                resultNodeSchema, mountPoint, schemaContext), resultData, parsePrettyPrintParameter(uriInfo));
     }
 
     private DOMRpcResult checkRpcResponse(final CheckedFuture<DOMRpcResult, DOMRpcException> response) {
@@ -582,7 +582,7 @@ public class RestconfImpl implements RestconfService {
         }
 
         return new NormalizedNodeContext(new InstanceIdentifierContext<>(null, resultNodeSchema, mountPoint,
-                schemaContext), resultData);
+                schemaContext), resultData, parsePrettyPrintParameter(uriInfo));
     }
 
     private RpcDefinition findRpc(final SchemaContext schemaContext, final String identifierDecoded) {
@@ -620,7 +620,7 @@ public class RestconfImpl implements RestconfService {
                 "Request could not be completed because the relevant data model content does not exist.",
                 ErrorType.APPLICATION, ErrorTag.DATA_MISSING);
         }
-        return new NormalizedNodeContext(iiWithData, data);
+        return new NormalizedNodeContext(iiWithData, data, parsePrettyPrintParameter(uriInfo));
     }
 
     // FIXME: Move this to proper place
@@ -647,8 +647,13 @@ public class RestconfImpl implements RestconfService {
         }
     }
 
+    private boolean parsePrettyPrintParameter(final UriInfo info) {
+        final String param = info.getQueryParameters(false).getFirst(UriParameters.PRETTY_PRINT.toString());
+        return "true".equals(param);
+    }
+
     @Override
-    public NormalizedNodeContext readOperationalData(final String identifier, final UriInfo info) {
+    public NormalizedNodeContext readOperationalData(final String identifier, final UriInfo uriInfo) {
         final InstanceIdentifierContext<?> iiWithData = controllerContext.toInstanceIdentifier(identifier);
         final DOMMountPoint mountPoint = iiWithData.getMountPoint();
         NormalizedNode<?, ?> data = null;
@@ -663,7 +668,7 @@ public class RestconfImpl implements RestconfService {
                 "Request could not be completed because the relevant data model content does not exist.",
                 ErrorType.APPLICATION, ErrorTag.DATA_MISSING);
         }
-        return new NormalizedNodeContext(iiWithData, data);
+        return new NormalizedNodeContext(iiWithData, data, parsePrettyPrintParameter(uriInfo));
     }
 
     @Override
