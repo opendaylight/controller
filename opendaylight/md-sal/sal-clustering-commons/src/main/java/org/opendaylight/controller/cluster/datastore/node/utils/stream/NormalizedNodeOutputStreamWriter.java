@@ -11,11 +11,11 @@
 package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Iterables;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -270,9 +270,8 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
     }
 
     private void writeYangInstanceIdentifierInternal(YangInstanceIdentifier identifier) throws IOException {
-        Iterable<YangInstanceIdentifier.PathArgument> pathArguments = identifier.getPathArguments();
-        int size = Iterables.size(pathArguments);
-        output.writeInt(size);
+        Collection<YangInstanceIdentifier.PathArgument> pathArguments = identifier.getPathArguments();
+        output.writeInt(pathArguments.size());
 
         for(YangInstanceIdentifier.PathArgument pathArgument : pathArguments) {
             writePathArgument(pathArgument);
