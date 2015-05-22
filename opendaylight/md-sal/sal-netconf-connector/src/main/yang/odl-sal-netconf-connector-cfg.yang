@@ -150,6 +150,25 @@ module odl-sal-netconf-connector-cfg {
                 }
                 default 1.5;
             }
+
+            // Keepalive configuration
+            leaf keepalive-delay {
+                type uint32;
+                default 120;
+                description "Netconf connector sends keepalive RPCs while the session is idle, this delay specifies the delay between keepalive RPC in seconds
+                             If a value <1 is provided, no keepalives will be sent";
+            }
+
+            container keepalive-executor {
+                uses config:service-ref {
+                    refine type {
+                        mandatory false;
+                        config:required-identity th:scheduled-threadpool;
+                    }
+                }
+
+                description "Dedicated solely to keepalive execution";
+            }
         }
     }
 }

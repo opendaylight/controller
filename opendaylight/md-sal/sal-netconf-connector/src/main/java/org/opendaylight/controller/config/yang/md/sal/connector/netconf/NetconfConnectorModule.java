@@ -16,6 +16,9 @@ import java.math.BigDecimal;
 import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 import org.opendaylight.controller.config.api.JmxAttributeValidationException;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
 import org.opendaylight.controller.netconf.client.conf.NetconfClientConfiguration;
@@ -28,6 +31,7 @@ import org.opendaylight.controller.sal.connect.netconf.NetconfDevice;
 import org.opendaylight.controller.sal.connect.netconf.NetconfStateSchemas;
 import org.opendaylight.controller.sal.connect.netconf.listener.NetconfDeviceCommunicator;
 import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionPreferences;
+import org.opendaylight.controller.sal.connect.netconf.sal.KeepaliveSalFacade;
 import org.opendaylight.controller.sal.connect.netconf.sal.NetconfDeviceSalFacade;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
 import org.opendaylight.controller.sal.core.api.Broker;
@@ -90,12 +94,32 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
         }
 
         userCapabilities = getUserCapabilities();
+
+        if(getKeepaliveExecutor() == null) {
+            logger.warn("Keepalive executor missing. Using default instance for now, the configuration needs to be updated");
+
+            // Instantiate the default executor, now we know its necessary
+            if(DEFAULT_KEEPALIVE_EXECUTOR == null) {
+                DEFAULT_KEEPALIVE_EXECUTOR = Executors.newScheduledThreadPool(2, new ThreadFactory() {
+                    @Override
+                    public Thread newThread(final Runnable r) {
+                        final Thread thread = new Thread(r);
+                        thread.setName("netconf-southound-keepalives-" + thread.getId());
+                        thread.setDaemon(true);
+                        return thread;
+                    }
+                });
+            }
+        }
     }
 
     private boolean isHostAddressPresent(final Host address) {
         return address.getDomainName() != null ||
                address.getIpAddress() != null && (address.getIpAddress().getIpv4Address() != null || address.getIpAddress().getIpv6Address() != null);
     }
+
+    @Deprecated
+    private static ScheduledExecutorService DEFAULT_KEEPALIVE_EXECUTOR;
 
     @Override
     public java.lang.AutoCloseable createInstance() {
@@ -106,8 +130,16 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
         final Broker domBroker = getDomRegistryDependency();
         final BindingAwareBroker bindingBroker = getBindingRegistryDependency();
 
-        final RemoteDeviceHandler<NetconfSessionPreferences> salFacade
+        RemoteDeviceHandler<NetconfSessionPreferences> salFacade
                 = new NetconfDeviceSalFacade(id, domBroker, bindingBroker, bundleContext, getDefaultRequestTimeoutMillis());
+
+        final Long keepaliveDelay = getKeepaliveDelay();
+        if(shouldSendKeepalive()) {
+            // Keepalive executor is optional for now and a default instance is supported
+            final ScheduledExecutorService executor = getKeepaliveExecutor() == null ?
+                    DEFAULT_KEEPALIVE_EXECUTOR : getKeepaliveExecutorDependency().getExecutor();
+            salFacade = new KeepaliveSalFacade(id, salFacade, executor, keepaliveDelay);
+        }
 
         final NetconfDevice.SchemaResourcesDTO schemaResourcesDTO =
                 new NetconfDevice.SchemaResourcesDTO(schemaRegistry, schemaContextFactory, new NetconfStateSchemas.NetconfStateSchemasResolverImpl());
@@ -118,12 +150,20 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
         final NetconfDeviceCommunicator listener = userCapabilities.isPresent() ?
                 new NetconfDeviceCommunicator(id, device, userCapabilities.get()) : new NetconfDeviceCommunicator(id, device);
 
+        if(shouldSendKeepalive()) {
+            ((KeepaliveSalFacade) salFacade).setListener(listener);
+        }
+
         final NetconfReconnectingClientConfiguration clientConfig = getClientConfig(listener);
         final NetconfClientDispatcher dispatcher = getClientDispatcherDependency();
 
         listener.initializeRemoteConnection(dispatcher, clientConfig);
 
         return new SalConnectorCloseable(listener, salFacade);
+    }
+
+    private boolean shouldSendKeepalive() {
+        return getKeepaliveDelay() > 0;
     }
 
     private Optional<NetconfSessionPreferences> getUserCapabilities() {

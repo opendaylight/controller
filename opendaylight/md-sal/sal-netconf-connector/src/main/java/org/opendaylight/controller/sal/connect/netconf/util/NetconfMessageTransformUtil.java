@@ -144,6 +144,20 @@ public class NetconfMessageTransformUtil {
     public static final ContainerNode CREATE_SUBSCRIPTION_RPC_CONTENT =
             Builders.containerBuilder().withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(CREATE_SUBSCRIPTION_RPC_QNAME)).build();
 
+    public static final DataContainerChild<?, ?> EMPTY_FILTER;
+
+    static {
+        final NormalizedNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier, DOMSource, AnyXmlNode> anyXmlBuilder = Builders.anyXmlBuilder().withNodeIdentifier(toId(NETCONF_FILTER_QNAME));
+        anyXmlBuilder.withAttributes(Collections.singletonMap(NETCONF_TYPE_QNAME, SUBTREE));
+
+        final Element element = XmlUtil.createElement(BLANK_DOCUMENT, NETCONF_FILTER_QNAME.getLocalName(), Optional.of(NETCONF_FILTER_QNAME.getNamespace().toString()));
+        element.setAttributeNS(NETCONF_FILTER_QNAME.getNamespace().toString(), NETCONF_TYPE_QNAME.getLocalName(), "subtree");
+
+        anyXmlBuilder.withValue(new DOMSource(element));
+
+        EMPTY_FILTER = anyXmlBuilder.build();
+    }
+
     public static DataContainerChild<?, ?> toFilterStructure(final YangInstanceIdentifier identifier, final SchemaContext ctx) {
         final NormalizedNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier, DOMSource, AnyXmlNode> anyXmlBuilder = Builders.anyXmlBuilder().withNodeIdentifier(toId(NETCONF_FILTER_QNAME));
         anyXmlBuilder.withAttributes(Collections.singletonMap(NETCONF_TYPE_QNAME, SUBTREE));
