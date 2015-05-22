@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a9dcd25_7fcacb50",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/test/java/org/opendaylight/controller/cluster/datastore/util/TestModel.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-22T11:15:39Z",
+      "side": 1,
+      "message": "Sorry about the reformat of this file in this patch. The main changes to look for are in the createTestContext* methods which determine what gets added to schema context.",
+      "revId": "6b58e91b292ab65d62106b30b7570aea3911e931",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
