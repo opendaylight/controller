@@ -9,9 +9,7 @@ package org.opendaylight.controller.md.sal.binding.impl;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.CheckedFuture;
-import java.util.Collections;
 import java.util.Map.Entry;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
@@ -20,7 +18,6 @@ import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.Identifiable;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 /**
@@ -98,25 +95,20 @@ public abstract class AbstractWriteTransaction<T extends DOMDataWriteTransaction
     private void ensureListParentIfNeeded(final LogicalDatastoreType store, final InstanceIdentifier<?> path,
             final Entry<YangInstanceIdentifier, NormalizedNode<?, ?>> normalized) {
         if (Identifiable.class.isAssignableFrom(path.getTargetType())) {
-            YangInstanceIdentifier parentMapPath = getParent(normalized.getKey()).get();
+            YangInstanceIdentifier parentMapPath = normalized.getKey().getParent();
+            Preconditions.checkArgument(parentMapPath != null, "Map path %s does not have a parent", path);
+
             NormalizedNode<?, ?> emptyParent = getCodec().getDefaultNodeFor(parentMapPath);
             getDelegate().merge(store, parentMapPath, emptyParent);
         }
     }
 
-    // FIXME (should be probaly part of InstanceIdentifier)
-    protected static Optional<YangInstanceIdentifier> getParent(
-            final YangInstanceIdentifier child) {
-
-        Iterable<PathArgument> mapEntryItemPath = child.getPathArguments();
-        int parentPathSize = Iterables.size(mapEntryItemPath) - 1;
-        if (parentPathSize > 1) {
-            return Optional.of(YangInstanceIdentifier.create(Iterables.limit(mapEntryItemPath,  parentPathSize)));
-        } else if(parentPathSize == 0) {
-            return Optional.of(YangInstanceIdentifier.create(Collections.<PathArgument>emptyList()));
-        } else {
-            return Optional.absent();
-        }
+    /**
+     * @deprecated Use {@link YangInstanceIdentifier#getParent()} instead.
+     */
+    @Deprecated
+    protected static Optional<YangInstanceIdentifier> getParent(final YangInstanceIdentifier child) {
+        return Optional.fromNullable(child.getParent());
     }
 
     /**

@@ -28,7 +28,6 @@ import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -477,7 +476,7 @@ public class RestconfImpl implements RestconfService {
 
         final YangInstanceIdentifier pathIdentifier = ((YangInstanceIdentifier) pathValue);
         String streamName = null;
-        if (!Iterables.isEmpty(pathIdentifier.getPathArguments())) {
+        if (!pathIdentifier.isEmpty()) {
             final String fullRestconfIdentifier = controllerContext.toFullRestconfIdentifier(pathIdentifier, null);
 
             LogicalDatastoreType datastore = parseEnumTypeParameter(value, LogicalDatastoreType.class,
@@ -722,19 +721,18 @@ public class RestconfImpl implements RestconfService {
             final YangInstanceIdentifier identifier) {
 
         final String payloadName = node.getData().getNodeType().getLocalName();
-        final Iterator<PathArgument> pathArguments = identifier.getReversePathArguments().iterator();
 
         //no arguments
-        if ( ! pathArguments.hasNext()) {
+        if (identifier.isEmpty()) {
             //no "data" payload
-            if ( ! node.getData().getNodeType().equals(NETCONF_BASE_QNAME)) {
+            if (!node.getData().getNodeType().equals(NETCONF_BASE_QNAME)) {
                 throw new RestconfDocumentedException("Instance identifier has to contain at least one path argument",
                         ErrorType.PROTOCOL, ErrorTag.MALFORMED_MESSAGE);
             }
         //any arguments
         } else {
-            final String identifierName = pathArguments.next().getNodeType().getLocalName();
-            if ( ! payloadName.equals(identifierName)) {
+            final String identifierName = identifier.getLastPathArgument().getNodeType().getLocalName();
+            if (!payloadName.equals(identifierName)) {
                 throw new RestconfDocumentedException("Payload name (" + payloadName
                         + ") is different from identifier name (" + identifierName + ")", ErrorType.PROTOCOL,
                         ErrorTag.MALFORMED_MESSAGE);
