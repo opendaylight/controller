@@ -10,7 +10,6 @@ package org.opendaylight.controller.sal.connect.netconf.util;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.net.URI;
@@ -265,7 +264,7 @@ public class NetconfMessageTransformUtil {
                                                                      final Optional<ModifyAction> operation, final Optional<NormalizedNode<?, ?>> lastChildOverride) {
         final NormalizedNode<?, ?> configContent;
 
-        if(Iterables.isEmpty(dataPath.getPathArguments())) {
+        if (dataPath.isEmpty()) {
             Preconditions.checkArgument(lastChildOverride.isPresent(), "Data has to be present when creating structure for top level element");
             Preconditions.checkArgument(lastChildOverride.get() instanceof DataContainerChild<?, ?>,
                     "Data has to be either container or a list node when creating structure for top level element, but was: %s", lastChildOverride.get());
