@@ -163,6 +163,18 @@ public class NetconfMessageTransformUtil {
         return anyXmlBuilder.build();
     }
 
+    public static DataContainerChild<?, ?> emptyFilter() {
+        final NormalizedNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier, DOMSource, AnyXmlNode> anyXmlBuilder = Builders.anyXmlBuilder().withNodeIdentifier(toId(NETCONF_FILTER_QNAME));
+        anyXmlBuilder.withAttributes(Collections.singletonMap(NETCONF_TYPE_QNAME, SUBTREE));
+
+        final Element element = XmlUtil.createElement(BLANK_DOCUMENT, NETCONF_FILTER_QNAME.getLocalName(), Optional.of(NETCONF_FILTER_QNAME.getNamespace().toString()));
+        element.setAttributeNS(NETCONF_FILTER_QNAME.getNamespace().toString(), NETCONF_TYPE_QNAME.getLocalName(), "subtree");
+
+        anyXmlBuilder.withValue(new DOMSource(element));
+
+        return anyXmlBuilder.build();
+    }
+
     public static void checkValidReply(final NetconfMessage input, final NetconfMessage output)
             throws NetconfDocumentedException {
         final String inputMsgId = input.getDocument().getDocumentElement().getAttribute(MESSAGE_ID_ATTR);
