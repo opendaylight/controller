@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "1a9dcd25_e5140ef7",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 868,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2015-05-22T16:47:50Z",
+      "side": 1,
+      "message": "I can check If someone calls setLeaderId with null, then don\u0027t set leaderAvailable. Otherwise, if leader is lost, a member unreachable notification will make sure this flags false.",
+      "parentUuid": "1a9dcd25_bb2b88ea",
+      "revId": "4e74bb5c6bd08e62387998f5f3a296803437389d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a9dcd25_db30d458",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2015-05-22T02:56:23Z",
       "side": 1,
       "message": "I assume \"UnreachableReachable\" is not what you intended here :)",
+      "revId": "4e74bb5c6bd08e62387998f5f3a296803437389d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_052d7a46",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 425,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2015-05-22T16:47:50Z",
+      "side": 1,
+      "message": "yup, should have looked at it myself :)",
+      "parentUuid": "1a9dcd25_db30d458",
       "revId": "4e74bb5c6bd08e62387998f5f3a296803437389d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
