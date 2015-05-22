@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a9dcd25_bb2b88ea",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 868,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-22T02:56:23Z",
+      "side": 1,
+      "message": "Should we set this here? I guess if a valid leader id is set then the leader should be available. But leaderId can be null if we lost the leader so it seems we shouldn\u0027t set leaderAvailable to true in that case.",
+      "revId": "4e74bb5c6bd08e62387998f5f3a296803437389d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_db30d458",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 425,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-22T02:56:23Z",
+      "side": 1,
+      "message": "I assume \"UnreachableReachable\" is not what you intended here :)",
+      "revId": "4e74bb5c6bd08e62387998f5f3a296803437389d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
