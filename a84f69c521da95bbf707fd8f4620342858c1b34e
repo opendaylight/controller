@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a9dcd25_28a16bf8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/SimpleShardDataTreeCohort.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-23T00:32:41Z",
+      "side": 1,
+      "message": "I\u0027m doing this because prepare will throw an exception if the type of DataTreeModification is not InMemoryDataTreeModification",
+      "revId": "a84f69c521da95bbf707fd8f4620342858c1b34e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
