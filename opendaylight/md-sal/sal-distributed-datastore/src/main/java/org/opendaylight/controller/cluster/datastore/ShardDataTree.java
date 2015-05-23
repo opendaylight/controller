@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.HashMap;
@@ -42,7 +42,6 @@ import org.slf4j.LoggerFactory;
  * This class is not part of the API contract and is subject to change at any time.
  */
 @NotThreadSafe
-@VisibleForTesting
 public final class ShardDataTree extends ShardDataTreeTransactionParent {
     private static final Logger LOG = LoggerFactory.getLogger(ShardDataTree.class);
     private static final ShardDataTreeNotificationManager MANAGER = new ShardDataTreeNotificationManager();
@@ -50,8 +49,10 @@ public final class ShardDataTree extends ShardDataTreeTransactionParent {
     private final ShardDataTreeChangePublisher treeChangePublisher = new ShardDataTreeChangePublisher();
     private final ListenerTree listenerTree = ListenerTree.create();
     private final TipProducingDataTree dataTree;
+    private SchemaContext schemaContext;
 
     ShardDataTree(final SchemaContext schemaContext) {
+        this.schemaContext = Preconditions.checkNotNull(schemaContext);
         dataTree = InMemoryDataTreeFactory.getInstance().create();
         if (schemaContext != null) {
             dataTree.setSchemaContext(schemaContext);
@@ -63,6 +64,7 @@ public final class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     void updateSchemaContext(final SchemaContext schemaContext) {
+        this.schemaContext = Preconditions.checkNotNull(schemaContext);
         dataTree.setSchemaContext(schemaContext);
     }
 
@@ -78,7 +80,7 @@ public final class ShardDataTree extends ShardDataTreeTransactionParent {
 
     ReadOnlyShardDataTreeTransaction newReadOnlyTransaction(final String txId, final String chainId) {
         if (Strings.isNullOrEmpty(chainId)) {
-            return new ReadOnlyShardDataTreeTransaction(txId, dataTree.takeSnapshot());
+            return new ReadOnlyShardDataTreeTransaction(txId, new ShardDataTreeSnapshot(dataTree.takeSnapshot(), schemaContext));
         }
 
         return ensureTransactionChain(chainId).newReadOnlyTransaction(txId);
@@ -86,7 +88,7 @@ public final class ShardDataTree extends ShardDataTreeTransactionParent {
 
     ReadWriteShardDataTreeTransaction newReadWriteTransaction(final String txId, final String chainId) {
         if (Strings.isNullOrEmpty(chainId)) {
-            return new ReadWriteShardDataTreeTransaction(this, txId, dataTree.takeSnapshot().newModification());
+            return new ReadWriteShardDataTreeTransaction(this, txId, new ShardDataTreeSnapshot(dataTree.takeSnapshot(), schemaContext).newModification());
         }
 
         return ensureTransactionChain(chainId).newReadWriteTransaction(txId);

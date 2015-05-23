@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import org.opendaylight.controller.cluster.datastore.utils.PruningDataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateTip;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.slf4j.Logger;
@@ -47,7 +48,12 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
     @Override
     public ListenableFuture<Void> preCommit() {
         try {
-            candidate = dataTree.getDataTree().prepare(transaction);
+            DataTreeModification dataTreeModification = transaction;
+            if(transaction instanceof PruningDataTreeModification){
+                dataTreeModification = ((PruningDataTreeModification) transaction).getDelegate();
+            }
+
+            candidate = dataTree.getDataTree().prepare(dataTreeModification);
             /*
              * FIXME: this is the place where we should be interacting with persistence, specifically by invoking
              *        persist on the candidate (which gives us a Future).
