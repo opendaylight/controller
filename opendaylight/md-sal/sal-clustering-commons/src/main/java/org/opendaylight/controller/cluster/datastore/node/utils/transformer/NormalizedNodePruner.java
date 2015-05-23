@@ -38,11 +38,13 @@ public class NormalizedNodePruner implements NormalizedNodeStreamWriter {
     private boolean sealed = false;
 
     public NormalizedNodePruner(SchemaContext schemaContext) {
-        validNamespaces = new HashSet<>(schemaContext.getModules().size());
-        for(org.opendaylight.yangtools.yang.model.api.Module module : schemaContext.getModules()){
-            validNamespaces.add(module.getNamespace());
-        }
+        this(NormalizedNodePruner.namespaces(schemaContext));
     }
+
+    public NormalizedNodePruner(Set<URI> validNamespaces) {
+        this.validNamespaces = validNamespaces;
+    }
+
     @Override
     public void leafNode(YangInstanceIdentifier.NodeIdentifier nodeIdentifier, Object o) throws IOException, IllegalArgumentException {
 
@@ -267,5 +269,11 @@ public class NormalizedNodePruner implements NormalizedNodeStreamWriter {
         return stack;
     }
 
-
+    public static Set<URI> namespaces(SchemaContext schemaContext){
+        Set<URI> namespaces = new HashSet<>(schemaContext.getModules().size());
+        for(org.opendaylight.yangtools.yang.model.api.Module module : schemaContext.getModules()){
+            namespaces.add(module.getNamespace());
+        }
+        return namespaces;
+    }
 }
