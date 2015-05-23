@@ -8,30 +8,38 @@
 
 package org.opendaylight.controller.md.cluster.datastore.model;
 
-import org.opendaylight.yangtools.yang.model.api.Module;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
-
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import org.opendaylight.yangtools.yang.model.api.Module;
+import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
 
 public class SchemaContextHelper {
+
+    public static final String ODL_DATASTORE_TEST_YANG = "/odl-datastore-test.yang";
+    public static final String PEOPLE_YANG = "/people.yang";
+    public static final String CARS_YANG = "/cars.yang";
 
     public static InputStream getInputStream(final String yangFileName) {
         return TestModel.class.getResourceAsStream(yangFileName);
     }
 
     public static SchemaContext full(){
+        return select(ODL_DATASTORE_TEST_YANG, PEOPLE_YANG, CARS_YANG);
+    }
+
+    public static SchemaContext select(String... schemaFiles){
         YangParserImpl parser = new YangParserImpl();
         List<InputStream> streams = new ArrayList<>();
-        streams.add(getInputStream("/odl-datastore-test.yang"));
-        streams.add(getInputStream("/people.yang"));
-        streams.add(getInputStream("/cars.yang"));
+
+        for(String schemaFile : schemaFiles){
+            streams.add(getInputStream(schemaFile));
+        }
 
         Set<Module> modules = parser.parseYangModelsFromStreams(streams);
         return parser.resolveSchemaContext(modules);
-
     }
+
 }
