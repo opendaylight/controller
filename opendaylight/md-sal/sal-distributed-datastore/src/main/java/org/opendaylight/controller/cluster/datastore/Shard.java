@@ -600,6 +600,7 @@ public class Shard extends RaftActor {
 
     @Override
     protected void onRecoveryComplete() {
+        store.recoveryDone();
         //notify shard manager
         getContext().parent().tell(new ActorInitialized(), getSelf());
 
