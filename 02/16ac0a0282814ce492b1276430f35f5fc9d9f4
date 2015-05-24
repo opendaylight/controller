@@ -1,0 +1,8 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+1: Robert Varga <nite@hq.sk>
+Code-Review+2: Tony Tkacik <ttkacik@cisco.com>
+Submitted-by: Tony Tkacik <ttkacik@cisco.com>
+Submitted-at: Sun, 24 May 2015 13:56:48 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/20843
+Project: controller
+Branch: refs/heads/master
