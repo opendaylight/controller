@@ -77,10 +77,12 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
 
         for (final Map.Entry<YangInstanceIdentifier, ? extends NormalizedNode<?, ?>> entry : normalized.entrySet()) {
             try {
-                final Optional<Entry<InstanceIdentifier<? extends DataObject>, DataObject>> potential = getCodec().toBinding(entry);
-                if (potential.isPresent()) {
-                    final Entry<InstanceIdentifier<? extends DataObject>, DataObject> binding = potential.get();
-                    newMap.put(binding.getKey(), binding.getValue());
+                if(!entry.getKey().getPathArguments().isEmpty()) {
+                    final Optional<Entry<InstanceIdentifier<? extends DataObject>, DataObject>> potential = getCodec().toBinding(entry);
+                    if (potential.isPresent()) {
+                        final Entry<InstanceIdentifier<? extends DataObject>, DataObject> binding = potential.get();
+                        newMap.put(binding.getKey(), binding.getValue());
+                    }
                 }
             } catch (final DeserializationException e) {
                 LOG.warn("Failed to transform {}, omitting it", entry, e);
