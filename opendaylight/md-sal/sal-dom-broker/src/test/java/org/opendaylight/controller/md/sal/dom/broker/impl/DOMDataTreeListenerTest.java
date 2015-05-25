@@ -7,10 +7,10 @@
  */
 package org.opendaylight.controller.md.sal.dom.broker.impl;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION;
 import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.OPERATIONAL;
 import com.google.common.collect.ImmutableMap;
@@ -383,10 +383,10 @@ public class DOMDataTreeListenerTest {
         listenerReg.close();
     }
 
-    private static void checkChange(NormalizedNode<?, ?> expectedBefore,
-                                    NormalizedNode<?, ?> expectedAfter,
-                                    ModificationType expectedMod,
-                                    DataTreeCandidateNode candidateNode) {
+    private static void checkChange(final NormalizedNode<?, ?> expectedBefore,
+                                    final NormalizedNode<?, ?> expectedAfter,
+                                    final ModificationType expectedMod,
+                                    final DataTreeCandidateNode candidateNode) {
         if (expectedBefore != null) {
             assertTrue(candidateNode.getDataBefore().isPresent());
             assertEquals(expectedBefore, candidateNode.getDataBefore().get());
@@ -434,8 +434,8 @@ public class DOMDataTreeListenerTest {
 
     static class TestDataTreeListener implements DOMDataTreeChangeListener {
 
-        private List<Collection<DataTreeCandidate>> receivedChanges = new ArrayList<>();
-        private CountDownLatch latch;
+        private final List<Collection<DataTreeCandidate>> receivedChanges = new ArrayList<>();
+        private final CountDownLatch latch;
 
         public TestDataTreeListener(final CountDownLatch latch) {
             this.latch = latch;
