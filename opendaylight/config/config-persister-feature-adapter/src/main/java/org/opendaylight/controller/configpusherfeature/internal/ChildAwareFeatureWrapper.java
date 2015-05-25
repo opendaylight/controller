@@ -7,10 +7,10 @@
  */
 package org.opendaylight.controller.configpusherfeature.internal;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import java.util.LinkedHashSet;
 import java.util.List;
-import javax.xml.bind.JAXBException;
 import org.apache.felix.utils.version.VersionRange;
 import org.apache.felix.utils.version.VersionTable;
 import org.apache.karaf.features.Dependency;
@@ -71,12 +71,9 @@ public class ChildAwareFeatureWrapper extends AbstractFeatureWrapper implements 
         LinkedHashSet <FeatureConfigSnapshotHolder> snapShotHolders = new LinkedHashSet<FeatureConfigSnapshotHolder>();
         for(ChildAwareFeatureWrapper c: getChildFeatures()) {
             for(FeatureConfigSnapshotHolder h: c.getFeatureConfigSnapshotHolders()) {
-                FeatureConfigSnapshotHolder f;
-                try {
-                    f = new FeatureConfigSnapshotHolder(h,this);
-                    snapShotHolders.add(f);
-                } catch (JAXBException e) {
-                    LOG.debug("{} is not a config subsystem config file",h.getFileInfo().getFinalname());
+                final Optional<FeatureConfigSnapshotHolder> featureConfigSnapshotHolder = getFeatureConfigSnapshotHolder(h.getFileInfo());
+                if(featureConfigSnapshotHolder.isPresent()) {
+                    snapShotHolders.add(featureConfigSnapshotHolder.get());
                 }
             }
         }
