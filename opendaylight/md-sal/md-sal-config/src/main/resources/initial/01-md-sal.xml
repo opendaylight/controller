@@ -168,8 +168,8 @@
                         <name>inmemory-data-broker</name>
                     </async-data-broker>
                     <notification-queue-depth>65536</notification-queue-depth>
-                    <notification-queue-spin>1</notification-queue-spin>
-                    <notification-queue-park>30</notification-queue-park>
+                    <notification-queue-spin>0</notification-queue-spin>
+                    <notification-queue-park>0</notification-queue-park>
                 </module>
                 <module>
                     <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">prefix:binding-data-compatible-broker</type>
