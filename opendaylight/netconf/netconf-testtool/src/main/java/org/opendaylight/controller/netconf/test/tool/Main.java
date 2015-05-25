@@ -10,7 +10,6 @@ package org.opendaylight.controller.netconf.test.tool;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
 import ch.qos.logback.classic.Level;
 import com.google.common.base.Charsets;
@@ -215,11 +214,7 @@ public final class Main {
     }
 
     private static class ConfigGenerator {
-        public static final String NETCONF_CONNECTOR_XML = "/initial/99-netconf-connector.xml";
-        public static final String NETCONF_CONNECTOR_NAME = "controller-config";
-        public static final String NETCONF_CONNECTOR_PORT = "1830";
-        public static final String NETCONF_CONNECTOR_ADDRESS = "127.0.0.1";
-        public static final String NETCONF_USE_SSH = "false";
+        public static final String NETCONF_CONNECTOR_XML = "/99-netconf-connector-simulated.xml";
         public static final String SIM_DEVICE_SUFFIX = "-sim-device";
 
         private static final String SIM_DEVICE_CFG_PREFIX = "simulated-devices_";
@@ -260,15 +255,6 @@ public final class Main {
             try(InputStream stream = Main.class.getResourceAsStream(NETCONF_CONNECTOR_XML)) {
                 checkNotNull(stream, "Cannot load %s", NETCONF_CONNECTOR_XML);
                 String configBlueprint = CharStreams.toString(new InputStreamReader(stream, Charsets.UTF_8));
-
-                checkState(configBlueprint.contains(NETCONF_CONNECTOR_NAME));
-                checkState(configBlueprint.contains(NETCONF_CONNECTOR_PORT));
-                checkState(configBlueprint.contains(NETCONF_USE_SSH));
-                checkState(configBlueprint.contains(NETCONF_CONNECTOR_ADDRESS));
-                configBlueprint = configBlueprint.replace(NETCONF_CONNECTOR_NAME, "%s");
-                configBlueprint = configBlueprint.replace(NETCONF_CONNECTOR_ADDRESS, "%s");
-                configBlueprint = configBlueprint.replace(NETCONF_CONNECTOR_PORT, "%s");
-                configBlueprint = configBlueprint.replace(NETCONF_USE_SSH, "%s");
 
                 final String before = configBlueprint.substring(0, configBlueprint.indexOf("<module>"));
                 final String middleBlueprint = configBlueprint.substring(configBlueprint.indexOf("<module>"), configBlueprint.indexOf("</module>"));
