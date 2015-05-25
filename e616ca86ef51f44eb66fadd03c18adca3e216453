@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "1a9dcd25_33055c11",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/netconf/sal/KeepaliveSalFacade.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-05-25T07:28:08Z",
+      "side": 1,
+      "message": "stopKeepalives() should be called here. The reconnect can be triggered after an unsuccessful user RPC, but a keepalive task could still be scheduled. In that case, the pending keepalive should be canceled and the rpc service should be set to null (its not working and we are waiting for a new one after reconnect)",
+      "range": {
+        "startLine": 109,
+        "startChar": 0,
+        "endLine": 109,
+        "endChar": 111
+      },
+      "revId": "e616ca86ef51f44eb66fadd03c18adca3e216453",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a9dcd25_c5823200",
         "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/netconf/util/NetconfMessageTransformUtil.java",
         "patchSetId": 1
@@ -13,6 +36,24 @@
       "writtenOn": "2015-05-22T17:43:18Z",
       "side": 1,
       "message": "it would probably a good idea to make this a constant...",
+      "revId": "e616ca86ef51f44eb66fadd03c18adca3e216453",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_d309982d",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/netconf/util/NetconfMessageTransformUtil.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-05-25T07:28:08Z",
+      "side": 1,
+      "message": "The constant is in the KeepaliveFacade, but I agree, makes more sense here",
+      "parentUuid": "1a9dcd25_c5823200",
       "revId": "e616ca86ef51f44eb66fadd03c18adca3e216453",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
