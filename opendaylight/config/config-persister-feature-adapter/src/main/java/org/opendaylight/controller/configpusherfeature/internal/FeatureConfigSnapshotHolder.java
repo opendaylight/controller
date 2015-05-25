@@ -46,7 +46,7 @@ public class FeatureConfigSnapshotHolder implements ConfigSnapshotHolder {
      * @param holder - FeatureConfigSnapshotHolder that we
      * @param feature - new
      */
-    public FeatureConfigSnapshotHolder(final FeatureConfigSnapshotHolder holder, final Feature feature) throws JAXBException {
+    public FeatureConfigSnapshotHolder(final FeatureConfigSnapshotHolder holder, final Feature feature) throws JAXBException, XMLStreamException {
         this(holder.fileInfo,holder.getFeature());
         this.featureChain.add(feature);
     }
@@ -57,7 +57,7 @@ public class FeatureConfigSnapshotHolder implements ConfigSnapshotHolder {
      * @param fileInfo - ConfigFileInfo to read into the ConfigSnapshot
      * @param feature - Feature the ConfigFileInfo was attached to
      */
-    public FeatureConfigSnapshotHolder(final ConfigFileInfo fileInfo, final Feature feature) throws JAXBException {
+    public FeatureConfigSnapshotHolder(final ConfigFileInfo fileInfo, final Feature feature) throws JAXBException, XMLStreamException {
         Preconditions.checkNotNull(fileInfo);
         Preconditions.checkNotNull(fileInfo.getFinalname());
         Preconditions.checkNotNull(feature);
@@ -69,12 +69,9 @@ public class FeatureConfigSnapshotHolder implements ConfigSnapshotHolder {
         XMLInputFactory xif = XMLInputFactory.newFactory();
         xif.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
         xif.setProperty(XMLInputFactory.SUPPORT_DTD, false);
-        try {
-            XMLStreamReader xsr = xif.createXMLStreamReader(new StreamSource(new File(fileInfo.getFinalname())));
-            unmarshalled = ((ConfigSnapshot) um.unmarshal(xsr));
-        } catch (final XMLStreamException e) {
-            throw new JAXBException(e);
-        }
+
+        XMLStreamReader xsr = xif.createXMLStreamReader(new StreamSource(new File(fileInfo.getFinalname())));
+        unmarshalled = ((ConfigSnapshot) um.unmarshal(xsr));
     }
     /*
      * (non-Javadoc)

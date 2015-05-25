@@ -7,10 +7,13 @@
  */
 package org.opendaylight.controller.configpusherfeature.internal;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.io.Files;
 import java.util.LinkedHashSet;
 import java.util.List;
 import javax.xml.bind.JAXBException;
+import javax.xml.stream.XMLStreamException;
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Conditional;
 import org.apache.karaf.features.ConfigFileInfo;
@@ -28,6 +31,9 @@ import org.slf4j.LoggerFactory;
  */
 public class AbstractFeatureWrapper implements Feature {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractFeatureWrapper.class);
+
+    protected static final String CONFIG_FILE_SUFFIX = "xml";
+
     protected Feature feature = null;
 
     protected AbstractFeatureWrapper() {
@@ -47,15 +53,33 @@ public class AbstractFeatureWrapper implements Feature {
      * from the underlying Feature Config files
      */
     public LinkedHashSet<FeatureConfigSnapshotHolder> getFeatureConfigSnapshotHolders() throws Exception {
-        final LinkedHashSet <FeatureConfigSnapshotHolder> snapShotHolders = new LinkedHashSet<FeatureConfigSnapshotHolder>();
+        final LinkedHashSet <FeatureConfigSnapshotHolder> snapShotHolders = new LinkedHashSet<>();
         for(final ConfigFileInfo c: getConfigurationFiles()) {
-            try {
-                snapShotHolders.add(new FeatureConfigSnapshotHolder(c,this));
-            } catch (final JAXBException e) {
-                LOG.debug("{} is not a config subsystem config file",c.getFinalname());
+            // Skip non xml files
+            if(Files.getFileExtension(c.getFinalname()).equals(CONFIG_FILE_SUFFIX)) {
+                final Optional<FeatureConfigSnapshotHolder> featureConfigSnapshotHolder = getFeatureConfigSnapshotHolder(c);
+                if(featureConfigSnapshotHolder.isPresent()) {
+                    snapShotHolders.add(featureConfigSnapshotHolder.get());
+                }
             }
         }
         return snapShotHolders;
+    }
+
+    protected Optional<FeatureConfigSnapshotHolder> getFeatureConfigSnapshotHolder(final ConfigFileInfo c) {
+        try {
+            return Optional.of(new FeatureConfigSnapshotHolder(c, this));
+        } catch (final JAXBException e) {
+            LOG.warn("Unable to parse configuration snapshot. Config from '{}' will be IGNORED. " +
+                            "Note that subsequent config files may fail due to this problem. " +
+                            "Xml markup in this file needs to be fixed, for detailed information see enclosed exception.",
+                    c.getFinalname(), e);
+        } catch (final XMLStreamException e) {
+            // Files that cannot be loaded are ignored as non config subsystem files e.g. jetty.xml
+            LOG.debug("Unable to read configuration file '{}'. Not a configuration snapshot",
+                    c.getFinalname(), e);
+        }
+        return Optional.absent();
     }
 
     @Override
