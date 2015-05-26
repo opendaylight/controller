@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a9dcd25_9e41d00d",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/test/java/org/opendaylight/controller/cluster/datastore/node/utils/transformer/NormalizedNodePrunerTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-26T20:28:11Z",
+      "side": 1,
+      "message": "To be complete we could capture the NormalizedNode here and verify its data, i.e. node ID and value. But that could be done in a follow-up...",
+      "revId": "9ef35715261c2e40580e97a41d4201a3a7636905",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_fe3c9495",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/test/java/org/opendaylight/controller/cluster/datastore/node/utils/transformer/NormalizedNodePrunerTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-26T20:28:11Z",
+      "side": 1,
+      "message": "Same as above",
+      "revId": "9ef35715261c2e40580e97a41d4201a3a7636905",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_de3758af",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/test/java/org/opendaylight/controller/cluster/datastore/node/utils/transformer/NormalizedNodePrunerTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-26T20:28:11Z",
+      "side": 1,
+      "message": "Same as above",
+      "revId": "9ef35715261c2e40580e97a41d4201a3a7636905",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
