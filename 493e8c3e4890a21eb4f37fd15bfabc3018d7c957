@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a9dcd25_08058a10",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/transformer/NormalizedNodePruner.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-26T12:13:52Z",
+      "side": 1,
+      "message": "The unit tests don\u0027t cover the code below.",
+      "revId": "493e8c3e4890a21eb4f37fd15bfabc3018d7c957",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_a809f62d",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/transformer/NormalizedNodePruner.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-26T12:13:52Z",
+      "side": 1,
+      "message": "The unit tests don\u0027t cover the code below.",
+      "revId": "493e8c3e4890a21eb4f37fd15bfabc3018d7c957",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_942536c4",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/transformer/NormalizedNodePruner.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-26T12:13:52Z",
+      "side": 1,
+      "message": "Don\u0027t we need to do something with the data \u0027o\u0027 here?\n\nAlso the unit tests don\u0027t cover this code at all.",
+      "revId": "493e8c3e4890a21eb4f37fd15bfabc3018d7c957",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_c80ec234",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/transformer/NormalizedNodePruner.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-26T12:13:52Z",
+      "side": 1,
+      "message": "The unit tests don\u0027t cover the code below.",
+      "revId": "493e8c3e4890a21eb4f37fd15bfabc3018d7c957",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_b422b2b7",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/transformer/NormalizedNodePruner.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-26T12:13:52Z",
+      "side": 1,
+      "message": "I\u0027m assuming you didn\u0027t use java.util.Stack b/c it derives from Vector.",
+      "revId": "493e8c3e4890a21eb4f37fd15bfabc3018d7c957",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
