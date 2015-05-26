@@ -15,6 +15,33 @@ module test-groups {
         rpcx:rpc-context-instance common-rpc-ctx-two;
     }
 
+    typedef version {
+        type enumeration {
+            enum version1 {
+                value 1;
+              }
+            enum version2 {
+                value 2;
+              }
+            enum version3 {
+                value 3;
+              }
+            enum version4 {
+                value 4;
+              }
+        }
+    }
+
+    grouping config-grouping {
+
+        container from-grouping {
+            leaf enum-in-grouping {
+                type version;
+            }
+        }
+    }
+
+
     identity common-rpc-ctx;
     identity common-rpc-ctx-two;
 
