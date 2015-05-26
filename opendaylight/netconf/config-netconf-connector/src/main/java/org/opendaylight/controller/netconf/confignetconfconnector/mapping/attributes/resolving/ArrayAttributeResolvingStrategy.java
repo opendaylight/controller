@@ -14,6 +14,7 @@ import java.util.List;
 import javax.management.openmbean.ArrayType;
 import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.CompositeType;
+import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.OpenType;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
@@ -71,6 +72,17 @@ final class ArrayAttributeResolvingStrategy extends AbstractAttributeResolvingSt
             }
             Array.set(parsedArray, i, parsedElement.get());
             i++;
+        }
+
+        // Rebuild open type. Underlying composite types might have changed
+        if (innerTypeResolvingStrategy.getOpenType() instanceof CompositeType) {
+            try {
+                final ArrayType<?> openType = new ArrayType<Object>(getOpenType().getDimension(), innerTypeResolvingStrategy.getOpenType());
+                setOpenType(openType);
+            } catch (OpenDataException e) {
+                throw new IllegalStateException("An error occurred during restoration of array type " + this
+                        + " for attribute " + attrName + " from value " + value, e);
+            }
         }
 
         LOG.debug("Attribute {} : {} parsed to type {} as {}", attrName, value, getOpenType(),

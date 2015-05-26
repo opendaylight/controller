@@ -11,7 +11,7 @@ package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attri
 import javax.management.openmbean.OpenType;
 
 abstract class AbstractAttributeResolvingStrategy<T, O extends OpenType<?>> implements AttributeResolvingStrategy<T, O> {
-    private final O openType;
+    private O openType;
 
     public AbstractAttributeResolvingStrategy(O openType) {
         this.openType = openType;
@@ -20,5 +20,12 @@ abstract class AbstractAttributeResolvingStrategy<T, O extends OpenType<?>> impl
     @Override
     public O getOpenType() {
         return openType;
+    }
+
+    /**
+     * Composite types might change during resolution. Use this setter to update open type
+     */
+    public void setOpenType(final O openType) {
+        this.openType = openType;
     }
 }

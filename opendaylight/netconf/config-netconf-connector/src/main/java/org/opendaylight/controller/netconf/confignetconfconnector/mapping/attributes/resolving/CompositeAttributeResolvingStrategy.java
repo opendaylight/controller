@@ -16,6 +16,7 @@ import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.OpenType;
+import javax.management.openmbean.SimpleType;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
 import org.slf4j.Logger;
@@ -54,6 +55,10 @@ class CompositeAttributeResolvingStrategy extends
         Map<String, Object> items = Maps.newHashMap();
         Map<String, OpenType<?>> openTypes = Maps.newHashMap();
 
+        final String[] names = new String[getOpenType().keySet().size()];
+        OpenType<?>[] itemTypes = new OpenType[names.length];
+        int i = 0;
+
         for (Object innerAttrName : innerTypes.keySet()) {
             Preconditions.checkState(innerAttrName instanceof String, "Attribute name must be string");
             String innerAttrNameStr = (String) innerAttrName;
@@ -65,17 +70,32 @@ class CompositeAttributeResolvingStrategy extends
 
             Optional<?> parsedInnerValue = attributeResolvingStrategy.parseAttribute(innerAttrNameStr, valueToParse);
 
-            openTypes.put(innerAttrNameStr, attributeResolvingStrategy.getOpenType());
+            if(attributeResolvingStrategy instanceof EnumAttributeResolvingStrategy) {
+                // Open type for enum contain the class name necessary for its resolution, however in a DTO
+                // the open type need to be just SimpleType.STRING so that JMX is happy
+                // After the enum attribute is resolved, change its open type back to STRING
+                openTypes.put(innerAttrNameStr, SimpleType.STRING);
+            } else {
+                openTypes.put(innerAttrNameStr, attributeResolvingStrategy.getOpenType());
+            }
 
             items.put(yangToJavaAttrMapping.get(innerAttrNameStr),
                     parsedInnerValue.isPresent() ? parsedInnerValue.get() : null);
+
+            // fill names + item types in order to reconstruct the open type for current attribute
+            names[i] = yangToJavaAttrMapping.get(innerAttrNameStr);
+            itemTypes[i] = openTypes.get(innerAttrNameStr);
+            i++;
         }
 
         CompositeDataSupport parsedValue;
         try {
+            LOG.trace("Attribute {} with open type {}. Reconstructing open type.", attrName, getOpenType());
+            setOpenType(new CompositeType(getOpenType().getTypeName(), getOpenType().getDescription(), names, names, itemTypes));
+            LOG.debug("Attribute {} with open type {}. Open type reconstructed to {}", attrName, getOpenType(), getOpenType());
             parsedValue = new CompositeDataSupport(getOpenType(), items);
         } catch (OpenDataException e) {
-            throw new IllegalStateException("An error occured during restoration of composite type " + this
+            throw new IllegalStateException("An error occurred during restoration of composite type " + this
                     + " for attribute " + attrName + " from value " + value, e);
         }
 
@@ -84,7 +104,10 @@ class CompositeAttributeResolvingStrategy extends
         return Optional.of(parsedValue);
     }
 
+
     protected Map<?, ?> preprocessValueMap(Map<?, ?> valueMap) {
         return valueMap;
     }
+
+
 }
