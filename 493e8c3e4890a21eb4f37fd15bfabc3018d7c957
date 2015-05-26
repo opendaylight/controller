@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "1a9dcd25_c8aa42d4",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/transformer/NormalizedNodeBuilderWrapper.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-26T12:34:49Z",
+      "side": 1,
+      "message": "Can you add \u0027?\u0027 type params to avoid warnings? If it\u0027s problematic at all then please suppress the warning.",
+      "revId": "493e8c3e4890a21eb4f37fd15bfabc3018d7c957",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a9dcd25_08058a10",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/transformer/NormalizedNodePruner.java",
         "patchSetId": 2
@@ -81,6 +98,23 @@
       "writtenOn": "2015-05-26T12:13:52Z",
       "side": 1,
       "message": "I\u0027m assuming you didn\u0027t use java.util.Stack b/c it derives from Vector.",
+      "revId": "493e8c3e4890a21eb4f37fd15bfabc3018d7c957",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_a87c9673",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/test/java/org/opendaylight/controller/cluster/datastore/node/utils/transformer/NormalizedNodePrunerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-26T12:34:49Z",
+      "side": 1,
+      "message": "Since we\u0027re expecting actual \u003d\u003d null, we don\u0027t need this assertion or the one on line 132.",
       "revId": "493e8c3e4890a21eb4f37fd15bfabc3018d7c957",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
