@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "1a9dcd25_cb5c7c28",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/transformer/NormalizedNodePruner.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-26T14:53:31Z",
+      "side": 1,
+      "message": "These are covered by testNodesPrunedWhenAugmentationSchemaNotPresent which is more of an integration test but I thought it was probably better for that purpose.  You want me to write more specific units for this?",
+      "parentUuid": "1a9dcd25_08058a10",
+      "revId": "493e8c3e4890a21eb4f37fd15bfabc3018d7c957",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a9dcd25_a809f62d",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/transformer/NormalizedNodePruner.java",
         "patchSetId": 2
@@ -70,6 +88,24 @@
     },
     {
       "key": {
+        "uuid": "1a9dcd25_2b4ba05a",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/transformer/NormalizedNodePruner.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-26T14:53:31Z",
+      "side": 1,
+      "message": "yes we do.",
+      "parentUuid": "1a9dcd25_942536c4",
+      "revId": "493e8c3e4890a21eb4f37fd15bfabc3018d7c957",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a9dcd25_c80ec234",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/transformer/NormalizedNodePruner.java",
         "patchSetId": 2
@@ -87,6 +123,24 @@
     },
     {
       "key": {
+        "uuid": "1a9dcd25_4b486c5b",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/transformer/NormalizedNodePruner.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-26T14:53:31Z",
+      "side": 1,
+      "message": "The integration unit tests do. How are you checking for coverage?",
+      "parentUuid": "1a9dcd25_c80ec234",
+      "revId": "493e8c3e4890a21eb4f37fd15bfabc3018d7c957",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a9dcd25_b422b2b7",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/transformer/NormalizedNodePruner.java",
         "patchSetId": 2
@@ -98,6 +152,24 @@
       "writtenOn": "2015-05-26T12:13:52Z",
       "side": 1,
       "message": "I\u0027m assuming you didn\u0027t use java.util.Stack b/c it derives from Vector.",
+      "revId": "493e8c3e4890a21eb4f37fd15bfabc3018d7c957",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_eb74d89d",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/transformer/NormalizedNodePruner.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-26T14:53:31Z",
+      "side": 1,
+      "message": "precisely",
+      "parentUuid": "1a9dcd25_b422b2b7",
       "revId": "493e8c3e4890a21eb4f37fd15bfabc3018d7c957",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
