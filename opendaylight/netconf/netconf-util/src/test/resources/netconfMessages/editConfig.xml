@@ -31,6 +31,10 @@
 
                     <name>instance-from-code</name>
                     <impl-netconf xmlns="urn:opendaylight:params:xml:ns:yang:controller:test:impl">
+
+                        <from-grouping>
+                            <enum-in-grouping>version1</enum-in-grouping>
+                        </from-grouping>
                         <sleep-factor>
                             2.58
                         </sleep-factor>
