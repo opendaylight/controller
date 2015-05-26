@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "1a9dcd25_28908694",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTreeSnapshot.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-26T12:47:33Z",
+      "side": 1,
+      "message": "Does this class need to be public?",
+      "revId": "a84f69c521da95bbf707fd8f4620342858c1b34e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a9dcd25_28a16bf8",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/SimpleShardDataTreeCohort.java",
         "patchSetId": 1
@@ -13,6 +30,40 @@
       "writtenOn": "2015-05-23T00:32:41Z",
       "side": 1,
       "message": "I\u0027m doing this because prepare will throw an exception if the type of DataTreeModification is not InMemoryDataTreeModification",
+      "revId": "a84f69c521da95bbf707fd8f4620342858c1b34e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_08d6ea4f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/PruningDataTreeModification.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-26T12:47:33Z",
+      "side": 1,
+      "message": "Since validNamespaces is only used to check an invalid IID, can we create and initialize is lazily to save cycles on the fast path? Also this code could be reused via a static method on NormalizedNodePruner.",
+      "revId": "a84f69c521da95bbf707fd8f4620342858c1b34e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_08efca1f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/PruningDataTreeModification.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-26T12:47:33Z",
+      "side": 1,
+      "message": "Shouldn\u0027t this call merge and not write?",
       "revId": "a84f69c521da95bbf707fd8f4620342858c1b34e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
