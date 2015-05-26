@@ -18,6 +18,7 @@
                 <module>
                     <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">prefix:runtime-generated-mapping</type>
                     <name>runtime-mapping-singleton</name>
+                    <wait-for-schema xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">true</wait-for-schema>
                 </module>
                 <module>
                     <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding:impl">prefix:binding-notification-adapter</type>
