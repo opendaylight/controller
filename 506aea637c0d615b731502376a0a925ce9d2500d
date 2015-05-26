@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a9dcd25_7e1de40e",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/registry/gossip/Gossiper.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 390,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-26T21:07:34Z",
+      "side": 1,
+      "message": "braces are on a separate line - I think you corrected it in a subsequent commit before. This happens multiple times in this file.",
+      "revId": "506aea637c0d615b731502376a0a925ce9d2500d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
