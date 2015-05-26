@@ -8,8 +8,6 @@
 package org.opendaylight.controller.remote.rpc.registry;
 
 import akka.actor.ActorRef;
-import akka.event.Logging;
-import akka.event.LoggingAdapter;
 import akka.japi.Option;
 import akka.japi.Pair;
 import com.google.common.base.Preconditions;
@@ -31,8 +29,6 @@ import org.opendaylight.controller.sal.connector.api.RpcRouter.RouteIdentifier;
  * cluster wide information.
  */
 public class RpcRegistry extends BucketStore<RoutingTable> {
-
-    final LoggingAdapter log = Logging.getLogger(getContext().system(), this);
 
     public RpcRegistry() {
         getLocalBucket().setData(new RoutingTable());

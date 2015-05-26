@@ -13,6 +13,13 @@ import akka.actor.Props;
 import akka.japi.Creator;
 import com.google.common.base.Optional;
 import com.google.protobuf.ByteString;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.HashMap;
+import java.util.Map;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.example.messages.KeyValue;
 import org.opendaylight.controller.cluster.example.messages.KeyValueSaved;
@@ -26,14 +33,6 @@ import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotRep
 import org.opendaylight.controller.cluster.raft.behaviors.Leader;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * A sample actor showing how the RaftActor is to be extended
  */
@@ -43,7 +42,7 @@ public class ExampleActor extends RaftActor {
     private final DataPersistenceProvider dataPersistenceProvider;
 
     private long persistIdentifier = 1;
-    private Optional<ActorRef> roleChangeNotifier;
+    private final Optional<ActorRef> roleChangeNotifier;
 
 
     public ExampleActor(String id, Map<String, String> peerAddresses,
@@ -133,7 +132,7 @@ public class ExampleActor extends RaftActor {
         try {
             bs = fromObject(state);
         } catch (Exception e) {
-            LOG.error(e, "Exception in creating snapshot");
+            LOG.error("Exception in creating snapshot", e);
         }
         getSelf().tell(new CaptureSnapshotReply(bs), null);
     }
@@ -143,7 +142,7 @@ public class ExampleActor extends RaftActor {
         try {
             state.putAll((HashMap) toObject(snapshot));
         } catch (Exception e) {
-           LOG.error(e, "Exception in applying snapshot");
+           LOG.error("Exception in applying snapshot", e);
         }
         if(LOG.isDebugEnabled()) {
             LOG.debug("Snapshot applied to state : {}", ((HashMap) state).size());

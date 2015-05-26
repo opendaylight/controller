@@ -84,7 +84,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
     private Cancellable heartbeatSchedule = null;
 
-    private List<ClientRequestTracker> trackerList = new ArrayList<>();
+    private final List<ClientRequestTracker> trackerList = new ArrayList<>();
 
     protected final int minReplicationCount;
 
@@ -222,6 +222,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         return this;
     }
 
+    @Override
     protected ClientRequestTracker removeClientRequestTracker(long logIndex) {
 
         ClientRequestTracker toRemove = findClientRequestTracker(logIndex);
@@ -232,6 +233,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         return toRemove;
     }
 
+    @Override
     protected ClientRequestTracker findClientRequestTracker(long logIndex) {
         for (ClientRequestTracker tracker : trackerList) {
             if (tracker.getIndex() == logIndex) {
@@ -566,7 +568,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                     mapFollowerToSnapshot.get(followerId).getTotalChunks());
             }
         } catch (IOException e) {
-            LOG.error(e, "InstallSnapshot failed for Leader.");
+            LOG.error("InstallSnapshot failed for Leader.", e);
         }
     }
 
@@ -646,14 +648,14 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
      * snapshot chunks
      */
     protected class FollowerToSnapshot {
-        private ByteString snapshotBytes;
+        private final ByteString snapshotBytes;
         private int offset = 0;
         // the next snapshot chunk is sent only if the replyReceivedForOffset matches offset
         private int replyReceivedForOffset;
         // if replyStatus is false, the previous chunk is attempted
         private boolean replyStatus = false;
         private int chunkIndex;
-        private int totalChunks;
+        private final int totalChunks;
         private int lastChunkHashCode = AbstractLeader.INITIAL_LAST_CHUNK_HASH_CODE;
         private int nextChunkHashCode = AbstractLeader.INITIAL_LAST_CHUNK_HASH_CODE;
 

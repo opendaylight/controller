@@ -9,12 +9,11 @@
 package org.opendaylight.controller.cluster.common.actor;
 
 import akka.actor.UntypedActor;
-import akka.event.Logging;
-import akka.event.LoggingAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class AbstractUntypedActor extends UntypedActor {
-    protected final LoggingAdapter LOG =
-        Logging.getLogger(getContext().system(), this);
+    protected final Logger LOG = LoggerFactory.getLogger(getClass());
 
     public AbstractUntypedActor() {
         if(LOG.isDebugEnabled()) {

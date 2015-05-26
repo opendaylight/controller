@@ -13,8 +13,6 @@ import akka.actor.ActorSelection;
 import akka.actor.Cancellable;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
-import akka.event.Logging;
-import akka.event.LoggingAdapter;
 import akka.japi.Creator;
 import akka.persistence.RecoveryFailure;
 import akka.serialization.Serialization;
@@ -104,9 +102,6 @@ public class Shard extends RaftActor {
     // The state of this Shard
     private final InMemoryDOMDataStore store;
 
-    private final LoggingAdapter LOG =
-        Logging.getLogger(getContext().system(), this);
-
     /// The name of this shard
     private final ShardIdentifier name;
 
@@ -133,7 +128,7 @@ public class Shard extends RaftActor {
 
     private Cancellable txCommitTimeoutCheckSchedule;
 
-    private Optional<ActorRef> roleChangeNotifier;
+    private final Optional<ActorRef> roleChangeNotifier;
 
     /**
      * Coordinates persistence recovery on startup.
@@ -228,7 +223,7 @@ public class Shard extends RaftActor {
         }
 
         if (message instanceof RecoveryFailure){
-            LOG.error(((RecoveryFailure) message).cause(), "Recovery failed because of this cause");
+            LOG.error("Recovery failed because of this cause", ((RecoveryFailure) message).cause());
 
             // Even though recovery failed, we still need to finish our recovery, eg send the
             // ActorInitialized message and start the txCommitTimeoutCheckSchedule.
@@ -283,7 +278,7 @@ public class Shard extends RaftActor {
         if(cohortEntry != null) {
             long elapsed = System.currentTimeMillis() - cohortEntry.getLastAccessTime();
             if(elapsed > transactionCommitTimeout) {
-                LOG.warning("Current transaction {} has timed out after {} ms - aborting",
+                LOG.warn("Current transaction {} has timed out after {} ms - aborting",
                         cohortEntry.getTransactionID(), transactionCommitTimeout);
 
                 doAbortTransaction(cohortEntry.getTransactionID(), null);
@@ -325,8 +320,8 @@ public class Shard extends RaftActor {
             Shard.this.persistData(getSender(), transactionID,
                     new CompositeModificationByteStringPayload(cohortEntry.getModification().toSerializable()));
         } catch (InterruptedException | ExecutionException e) {
-            LOG.error(e, "An exception occurred while preCommitting transaction {}",
-                    cohortEntry.getTransactionID());
+            LOG.error("An exception occurred while preCommitting transaction {}",
+                    cohortEntry.getTransactionID(), e);
             shardMBean.incrementFailedTransactionsCount();
             getSender().tell(new akka.actor.Status.Failure(e), getSelf());
         }
@@ -379,7 +374,7 @@ public class Shard extends RaftActor {
         } catch (InterruptedException | ExecutionException e) {
             sender.tell(new akka.actor.Status.Failure(e), getSelf());
 
-            LOG.error(e, "An exception occurred while committing transaction {}", transactionID);
+            LOG.error("An exception occurred while committing transaction {}", transactionID, e);
             shardMBean.incrementFailedTransactionsCount();
         }
 
@@ -448,7 +443,7 @@ public class Shard extends RaftActor {
 
                 @Override
                 public void onFailure(Throwable t) {
-                    LOG.error(t, "An exception happened during abort");
+                    LOG.error("An exception happened during abort", t);
 
                     if(sender != null) {
                         sender.tell(new akka.actor.Status.Failure(t), self);
@@ -596,7 +591,7 @@ public class Shard extends RaftActor {
             shardMBean.setLastCommittedTransactionTime(System.currentTimeMillis());
         } catch (InterruptedException | ExecutionException e) {
             shardMBean.incrementFailedTransactionsCount();
-            LOG.error(e, "Failed to commit");
+            LOG.error("Failed to commit", e);
         }
     }
 
@@ -730,7 +725,7 @@ public class Shard extends RaftActor {
                     shardMBean.incrementCommittedTransactionCount();
                 } catch (InterruptedException | ExecutionException e) {
                     shardMBean.incrementFailedTransactionsCount();
-                    LOG.error(e, "Failed to commit");
+                    LOG.error("Failed to commit", e);
                 }
             }
         }
@@ -842,7 +837,7 @@ public class Shard extends RaftActor {
             transaction.write(YangInstanceIdentifier.builder().build(), node);
             syncCommitTransaction(transaction);
         } catch (InvalidProtocolBufferException | InterruptedException | ExecutionException e) {
-            LOG.error(e, "An exception occurred when applying snapshot");
+            LOG.error("An exception occurred when applying snapshot", e);
         } finally {
             LOG.info("Done applying snapshot");
         }

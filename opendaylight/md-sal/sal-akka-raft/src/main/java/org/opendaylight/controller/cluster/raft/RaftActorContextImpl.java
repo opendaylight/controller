@@ -8,16 +8,14 @@
 
 package org.opendaylight.controller.cluster.raft;
 
+import static com.google.common.base.Preconditions.checkState;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.actor.UntypedActorContext;
-import akka.event.LoggingAdapter;
-
 import java.util.Map;
-
-import static com.google.common.base.Preconditions.checkState;
+import org.slf4j.Logger;
 
 public class RaftActorContextImpl implements RaftActorContext {
 
@@ -37,7 +35,7 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     private final Map<String, String> peerAddresses;
 
-    private final LoggingAdapter LOG;
+    private final Logger LOG;
 
     private final ConfigParams configParams;
 
@@ -46,7 +44,7 @@ public class RaftActorContextImpl implements RaftActorContext {
         ElectionTerm termInformation, long commitIndex,
         long lastApplied, ReplicatedLog replicatedLog,
         Map<String, String> peerAddresses, ConfigParams configParams,
-        LoggingAdapter logger) {
+        Logger logger) {
         this.actor = actor;
         this.context = context;
         this.id = id;
@@ -114,7 +112,7 @@ public class RaftActorContextImpl implements RaftActorContext {
         return context.system();
     }
 
-    @Override public LoggingAdapter getLogger() {
+    @Override public Logger getLogger() {
         return this.LOG;
     }
 

@@ -10,16 +10,15 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.Terminated;
 import akka.actor.UntypedActor;
-import akka.event.Logging;
-import akka.event.LoggingAdapter;
 import org.opendaylight.controller.cluster.datastore.messages.Monitor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TerminationMonitor extends UntypedActor{
-    protected final LoggingAdapter LOG =
-        Logging.getLogger(getContext().system(), this);
+    private static final Logger LOG = LoggerFactory.getLogger(TerminationMonitor.class);
 
     public TerminationMonitor(){
-        LOG.info("Created TerminationMonitor");
+        LOG.debug("Created TerminationMonitor");
     }
 
     @Override public void onReceive(Object message) throws Exception {

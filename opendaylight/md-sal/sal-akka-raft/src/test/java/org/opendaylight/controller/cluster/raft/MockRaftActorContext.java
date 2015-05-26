@@ -12,8 +12,6 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
-import akka.event.Logging;
-import akka.event.LoggingAdapter;
 import com.google.common.base.Preconditions;
 import com.google.protobuf.GeneratedMessage;
 import java.io.Serializable;
@@ -22,6 +20,8 @@ import java.util.Map;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages;
 import org.opendaylight.controller.protobuff.messages.cluster.raft.test.MockPayloadMessages;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MockRaftActorContext implements RaftActorContext {
 
@@ -55,14 +55,17 @@ public class MockRaftActorContext implements RaftActorContext {
             private long currentTerm = 0;
             private String votedFor = "";
 
+            @Override
             public long getCurrentTerm() {
                 return currentTerm;
             }
 
+            @Override
             public String getVotedFor() {
                 return votedFor;
             }
 
+            @Override
             public void update(long currentTerm, String votedFor){
                 this.currentTerm = currentTerm;
                 this.votedFor = votedFor;
@@ -127,6 +130,7 @@ public class MockRaftActorContext implements RaftActorContext {
         return lastApplied;
     }
 
+    @Override
     public void setReplicatedLog(ReplicatedLog replicatedLog) {
         this.replicatedLog = replicatedLog;
     }
@@ -139,8 +143,8 @@ public class MockRaftActorContext implements RaftActorContext {
         return this.system;
     }
 
-    @Override public LoggingAdapter getLogger() {
-        return Logging.getLogger(system, this);
+    @Override public Logger getLogger() {
+        return LoggerFactory.getLogger(getClass());
     }
 
     @Override public Map<String, String> getPeerAddresses() {
@@ -234,6 +238,7 @@ public class MockRaftActorContext implements RaftActorContext {
             return MockPayload.class.getName();
         }
 
+        @Override
         public String toString() {
             return value;
         }
@@ -271,7 +276,7 @@ public class MockRaftActorContext implements RaftActorContext {
     }
 
     public static class MockReplicatedLogBuilder {
-        private ReplicatedLog mockLog = new SimpleReplicatedLog();
+        private final ReplicatedLog mockLog = new SimpleReplicatedLog();
 
         public  MockReplicatedLogBuilder createEntries(int start, int end, int term) {
             for (int i=start; i<end; i++) {
