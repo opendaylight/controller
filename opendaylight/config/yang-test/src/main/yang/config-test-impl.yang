@@ -169,7 +169,11 @@ module config-test-impl {
     augment "/config:modules/config:module/config:configuration" {
         case impl-netconf {
             when "/config:modules/config:module/config:type = 'impl-netconf'";
+
             container impl-netconf {
+
+                uses tg:config-grouping;
+
                 leaf binaryLeaf {
                     type binary;
                     default ZGVmYXVsdEJpbg==;

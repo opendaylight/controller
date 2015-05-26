@@ -686,6 +686,8 @@ public class NetconfMappingTest extends AbstractConfigTest {
         // Enum constants mapping from yang -> Java and back
         enumBiMap.put("one", "One");
         enumBiMap.put("two", "Two");
+        enumBiMap.put("version1", "Version1");
+        enumBiMap.put("version2", "Version2");
         return enumBiMap;
     }
 
