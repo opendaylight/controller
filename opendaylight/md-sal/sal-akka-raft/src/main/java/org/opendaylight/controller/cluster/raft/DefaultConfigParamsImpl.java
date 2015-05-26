@@ -50,6 +50,8 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     // in-memory journal can use before it needs to snapshot
     private int snapshotDataThresholdPercentage = 12;
 
+    private long electionTimeoutFactor = 2;
+
     public void setHeartBeatInterval(FiniteDuration heartBeatInterval) {
         this.heartBeatInterval = heartBeatInterval;
     }
@@ -70,6 +72,10 @@ public class DefaultConfigParamsImpl implements ConfigParams {
         this.isolatedLeaderCheckInterval = isolatedLeaderCheckInterval;
     }
 
+    public void setElectionTimeoutFactor(long electionTimeoutFactor){
+        this.electionTimeoutFactor = electionTimeoutFactor;
+    }
+
     @Override
     public long getSnapshotBatchCount() {
         return snapshotBatchCount;
@@ -88,8 +94,7 @@ public class DefaultConfigParamsImpl implements ConfigParams {
 
     @Override
     public FiniteDuration getElectionTimeOutInterval() {
-        // returns 2 times the heart beat interval
-        return getHeartBeatInterval().$times(2);
+        return getHeartBeatInterval().$times(electionTimeoutFactor);
     }
 
     @Override
@@ -110,5 +115,10 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     @Override
     public FiniteDuration getIsolatedCheckInterval() {
         return isolatedLeaderCheckInterval;
+    }
+
+    @Override
+    public long getElectionTimeoutFactor() {
+        return electionTimeoutFactor;
     }
 }

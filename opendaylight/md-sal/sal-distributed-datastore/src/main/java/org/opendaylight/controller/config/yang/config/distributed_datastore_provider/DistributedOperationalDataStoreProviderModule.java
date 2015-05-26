@@ -1,12 +1,10 @@
 package org.opendaylight.controller.config.yang.config.distributed_datastore_provider;
 
 import java.util.concurrent.TimeUnit;
-
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStoreFactory;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreConfigProperties;
 import org.osgi.framework.BundleContext;
-
 import scala.concurrent.duration.Duration;
 
 public class DistributedOperationalDataStoreProviderModule extends
@@ -66,6 +64,7 @@ public class DistributedOperationalDataStoreProviderModule extends
                 .persistent(props.getPersistent().booleanValue())
                 .shardIsolatedLeaderCheckIntervalInMillis(
                     props.getShardIsolatedLeaderCheckIntervalInMillis().getValue())
+                .shardElectionTimeoutFactor(props.getShardElectionTimeoutFactor().getValue())
                 .build();
 
         return DistributedDataStoreFactory.createInstance("operational",
