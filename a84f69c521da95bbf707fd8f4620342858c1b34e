@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "1a9dcd25_cb731cb0",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTreeSnapshot.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-26T14:55:33Z",
+      "side": 1,
+      "message": "probably not. I\u0027ll reduce visibility.",
+      "parentUuid": "1a9dcd25_28908694",
+      "revId": "a84f69c521da95bbf707fd8f4620342858c1b34e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a9dcd25_28a16bf8",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/SimpleShardDataTreeCohort.java",
         "patchSetId": 1
@@ -53,6 +71,24 @@
     },
     {
       "key": {
+        "uuid": "1a9dcd25_6b68c8ba",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/PruningDataTreeModification.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-26T14:55:33Z",
+      "side": 1,
+      "message": "sure",
+      "parentUuid": "1a9dcd25_08d6ea4f",
+      "revId": "a84f69c521da95bbf707fd8f4620342858c1b34e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a9dcd25_08efca1f",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/PruningDataTreeModification.java",
         "patchSetId": 1
@@ -64,6 +100,24 @@
       "writtenOn": "2015-05-26T12:47:33Z",
       "side": 1,
       "message": "Shouldn\u0027t this call merge and not write?",
+      "revId": "a84f69c521da95bbf707fd8f4620342858c1b34e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_8b6514e3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/utils/PruningDataTreeModification.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-26T14:55:33Z",
+      "side": 1,
+      "message": "yes we should",
+      "parentUuid": "1a9dcd25_08efca1f",
       "revId": "a84f69c521da95bbf707fd8f4620342858c1b34e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
