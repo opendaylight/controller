@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a9dcd25_d2d669c5",
+        "filename": "opendaylight/netconf/netconf-testtool/src/main/java/org/opendaylight/controller/netconf/test/tool/client/http/perf/Parameters.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2015-05-27T17:58:34Z",
+      "side": 1,
+      "message": ".help(\"If true, every thread edits the device at the first port. If false, n-th thread edits device at n-th port.\");",
+      "range": {
+        "startLine": 101,
+        "startChar": 36,
+        "endLine": 101,
+        "endChar": 37
+      },
+      "revId": "341b50edd2ff0c5b5ecd7c84606584af246ef231",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
