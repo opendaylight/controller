@@ -8,7 +8,11 @@
 package org.opendaylight.controller.md.sal.binding.impl;
 
 import com.google.common.collect.ImmutableSet;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcImplementationRegistration;
@@ -32,44 +36,38 @@ public class BindingDOMRpcProviderServiceAdapter {
 
     public <S extends RpcService, T extends S> ObjectRegistration<T> registerRpcImplementation(final Class<S> type,
             final T implementation) {
-        return register(type,implementation,createDomRpcIdentifiers(type,GLOBAL));
+        return register(type, implementation, GLOBAL);
     }
 
     public <S extends RpcService, T extends S> ObjectRegistration<T> registerRpcImplementation(final Class<S> type,
             final T implementation, final Set<InstanceIdentifier<?>> paths) {
-        return register(type,implementation,createDomRpcIdentifiers(type,toYangInstanceIdentifiers(paths)));
+        return register(type, implementation, toYangInstanceIdentifiers(paths));
     }
 
-    private <S extends RpcService, T extends S> ObjectRegistration<T> register(final Class<S> type, final T implementation, final Set<DOMRpcIdentifier> domRpcs) {
-        final BindingDOMRpcImplementationAdapter adapter = new BindingDOMRpcImplementationAdapter(codec.getCodecRegistry(), type, implementation);
+    private <S extends RpcService, T extends S> ObjectRegistration<T> register(final Class<S> type, final T implementation, final Collection<YangInstanceIdentifier> rpcContextPaths) {
+        final Map<SchemaPath, Method> rpcs = codec.getRpcMethodToSchemaPath(type).inverse();
 
-
+        final BindingDOMRpcImplementationAdapter adapter = new BindingDOMRpcImplementationAdapter(codec.getCodecRegistry(), type, rpcs, implementation);
+        final Set<DOMRpcIdentifier> domRpcs = createDomRpcIdentifiers(rpcs.keySet(), rpcContextPaths);
         final DOMRpcImplementationRegistration<?> domReg = domRpcRegistry.registerRpcImplementation(adapter, domRpcs);
         return new BindingRpcAdapterRegistration<>(implementation, domReg);
     }
 
-    private Set<DOMRpcIdentifier> createDomRpcIdentifiers(final Class<? extends RpcService> type, final Set<YangInstanceIdentifier> paths) {
-        final Set<SchemaPath> rpcs = getRpcSchemaPaths(type);
-
+    private static Set<DOMRpcIdentifier> createDomRpcIdentifiers(final Set<SchemaPath> rpcs, final Collection<YangInstanceIdentifier> paths) {
         final Set<DOMRpcIdentifier> ret = new HashSet<>();
-        for(final YangInstanceIdentifier path : paths) {
-            for(final SchemaPath rpc : rpcs) {
+        for (final YangInstanceIdentifier path : paths) {
+            for (final SchemaPath rpc : rpcs) {
                 ret.add(DOMRpcIdentifier.create(rpc, path));
             }
         }
         return ret;
     }
 
-    private Set<YangInstanceIdentifier> toYangInstanceIdentifiers(final Set<InstanceIdentifier<?>> identifiers) {
-        final Set<YangInstanceIdentifier> ret = new HashSet<>();
-        for(final InstanceIdentifier<?> binding: identifiers) {
+    private Collection<YangInstanceIdentifier> toYangInstanceIdentifiers(final Set<InstanceIdentifier<?>> identifiers) {
+        final Collection<YangInstanceIdentifier> ret = new ArrayList<>(identifiers.size());
+        for (final InstanceIdentifier<?> binding : identifiers) {
             ret.add(codec.toYangInstanceIdentifierCached(binding));
         }
         return ret;
     }
-
-    private Set<SchemaPath> getRpcSchemaPaths(final Class<? extends RpcService> type) {
-        return codec.getRpcMethodToSchemaPath(type).values();
-    }
-
 }
