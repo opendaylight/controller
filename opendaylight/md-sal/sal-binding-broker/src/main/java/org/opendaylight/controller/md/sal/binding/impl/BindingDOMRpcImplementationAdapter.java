@@ -14,7 +14,9 @@ import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.JdkFutureAdapters;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
@@ -47,7 +49,12 @@ public class BindingDOMRpcImplementationAdapter implements DOMRpcImplementation 
             this.invoker = SERVICE_INVOKERS.get(type, new Callable<RpcServiceInvoker>() {
                 @Override
                 public RpcServiceInvoker call() {
-                    return RpcServiceInvoker.from(type);
+                    final Map<QName, Method> map = new HashMap<>();
+                    for (Entry<SchemaPath, Method> e : localNameToMethod.entrySet()) {
+                        map.put(e.getKey().getLastComponent(), e.getValue());
+                    }
+
+                    return RpcServiceInvoker.from(map);
                 }
             });
         } catch (ExecutionException e) {
