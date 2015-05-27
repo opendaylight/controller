@@ -44,6 +44,8 @@ public interface DatastoreConfigurationMXBean {
 
     long getTransactionCreationInitialRateLimit();
 
+    boolean getTransactionContextDebugEnabled();
+
     int getMaxShardDataChangeExecutorPoolSize();
 
     int getMaxShardDataChangeExecutorQueueSize();
