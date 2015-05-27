@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a9dcd25_126931f9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DebugThreePhaseCommitCohort.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-27T18:26:49Z",
+      "side": 1,
+      "message": "Could you add unit tests? Just simple ones that ensure the delegate is invoked would be good enough. If you can verify that debug context is being printed as well that would be great :)",
+      "revId": "9f46a30132cda780af494909ce70271b99c50457",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
