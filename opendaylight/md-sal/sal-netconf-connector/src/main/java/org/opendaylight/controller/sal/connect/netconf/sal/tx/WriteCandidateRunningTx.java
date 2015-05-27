@@ -12,7 +12,6 @@ import com.google.common.base.Function;
 import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
-import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionPreferences;
 import org.opendaylight.controller.sal.connect.netconf.util.NetconfBaseOps;
 import org.opendaylight.controller.sal.connect.netconf.util.NetconfRpcFutureCallback;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
@@ -30,8 +29,8 @@ public class WriteCandidateRunningTx extends WriteCandidateTx {
 
     private static final Logger LOG  = LoggerFactory.getLogger(WriteCandidateRunningTx.class);
 
-    public WriteCandidateRunningTx(final RemoteDeviceId id, final NetconfBaseOps netOps, final NetconfSessionPreferences netconfSessionPreferences, long defaultRequestTimeoutMillis) {
-        super(id, netOps, netconfSessionPreferences, defaultRequestTimeoutMillis);
+    public WriteCandidateRunningTx(final RemoteDeviceId id, final NetconfBaseOps netOps, final boolean rollbackSupport, long requestTimeoutMillis) {
+        super(id, netOps, rollbackSupport, requestTimeoutMillis);
     }
 
     @Override

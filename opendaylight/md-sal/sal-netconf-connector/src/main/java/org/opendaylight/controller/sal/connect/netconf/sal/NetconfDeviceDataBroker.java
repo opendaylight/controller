@@ -35,14 +35,21 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 final class NetconfDeviceDataBroker implements DOMDataBroker {
     private final RemoteDeviceId id;
     private final NetconfBaseOps netconfOps;
-    private final NetconfSessionPreferences netconfSessionPreferences;
-    private final long defaultRequestTimeoutMillis;
+    private final long requestTimeoutMillis;
 
-    public NetconfDeviceDataBroker(final RemoteDeviceId id, final SchemaContext schemaContext, final DOMRpcService rpc, final NetconfSessionPreferences netconfSessionPreferences, long defaultRequestTimeoutMillis) {
+    private final boolean rollbackSupport;
+    private boolean candidateSupported;
+    private boolean runningWritable;
+
+    public NetconfDeviceDataBroker(final RemoteDeviceId id, final SchemaContext schemaContext, final DOMRpcService rpc, final NetconfSessionPreferences netconfSessionPreferences, long requestTimeoutMillis) {
         this.id = id;
         this.netconfOps = new NetconfBaseOps(rpc, schemaContext);
-        this.netconfSessionPreferences = netconfSessionPreferences;
-        this.defaultRequestTimeoutMillis = defaultRequestTimeoutMillis;
+        this.requestTimeoutMillis = requestTimeoutMillis;
+        // get specific attributes from netconf preferences and get rid of it
+        // no need to keep the entire preferences object, its quite big with all the capability QNames
+        candidateSupported = netconfSessionPreferences.isCandidateSupported();
+        runningWritable = netconfSessionPreferences.isRunningWritable();
+        rollbackSupport = netconfSessionPreferences.isRollbackSupported();
     }
 
     @Override
@@ -57,14 +64,14 @@ final class NetconfDeviceDataBroker implements DOMDataBroker {
 
     @Override
     public DOMDataWriteTransaction newWriteOnlyTransaction() {
-        if(netconfSessionPreferences.isCandidateSupported()) {
-            if(netconfSessionPreferences.isRunningWritable()) {
-                return new WriteCandidateRunningTx(id, netconfOps, netconfSessionPreferences, defaultRequestTimeoutMillis);
+        if(candidateSupported) {
+            if(runningWritable) {
+                return new WriteCandidateRunningTx(id, netconfOps, rollbackSupport, requestTimeoutMillis);
             } else {
-                return new WriteCandidateTx(id, netconfOps, netconfSessionPreferences, defaultRequestTimeoutMillis);
+                return new WriteCandidateTx(id, netconfOps, rollbackSupport, requestTimeoutMillis);
             }
         } else {
-            return new WriteRunningTx(id, netconfOps, netconfSessionPreferences, defaultRequestTimeoutMillis);
+            return new WriteRunningTx(id, netconfOps, rollbackSupport, requestTimeoutMillis);
         }
     }
 

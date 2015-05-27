@@ -17,7 +17,6 @@ import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
-import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionPreferences;
 import org.opendaylight.controller.sal.connect.netconf.util.NetconfBaseOps;
 import org.opendaylight.controller.sal.connect.netconf.util.NetconfRpcFutureCallback;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
@@ -69,8 +68,8 @@ public class WriteCandidateTx extends AbstractWriteTx {
         }
     };
 
-    public WriteCandidateTx(final RemoteDeviceId id, final NetconfBaseOps rpc, final NetconfSessionPreferences netconfSessionPreferences, long defaultRequestTimeoutMillis) {
-        super(rpc, id, netconfSessionPreferences, defaultRequestTimeoutMillis);
+    public WriteCandidateTx(final RemoteDeviceId id, final NetconfBaseOps rpc, final boolean rollbackSupport, long requestTimeoutMillis) {
+        super(requestTimeoutMillis, rpc, id, rollbackSupport);
     }
 
     @Override
@@ -187,9 +186,9 @@ public class WriteCandidateTx extends AbstractWriteTx {
             public ListenableFuture<DOMRpcResult> apply(final NetconfBaseOps input) {
                         return defaultOperation.isPresent()
                                 ? input.editConfigCandidate(new NetconfRpcFutureCallback("Edit candidate", id), editStructure, defaultOperation.get(),
-                                netconfSessionPreferences.isRollbackSupported())
+                                rollbackSupport)
                                 : input.editConfigCandidate(new NetconfRpcFutureCallback("Edit candidate", id), editStructure,
-                                netconfSessionPreferences.isRollbackSupported());
+                                rollbackSupport);
             }
         });
     }
