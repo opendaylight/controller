@@ -62,7 +62,8 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
 
     @VisibleForTesting
     public TransactionProxy(final AbstractTransactionContextFactory<?> txContextFactory, final TransactionType type) {
-        super(txContextFactory.nextIdentifier(), false);
+        super(txContextFactory.nextIdentifier(), txContextFactory.getActorContext().getDatastoreContext()
+                .isTransactionDebugContextEnabled());
         this.txContextFactory = txContextFactory;
         this.type = Preconditions.checkNotNull(type);
 
@@ -255,7 +256,9 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
         }
 
         txContextFactory.onTransactionReady(getIdentifier(), ret.getCohortFutures());
-        return ret;
+
+        final Throwable debugContext = getDebugContext();
+        return debugContext == null ? ret : new DebugThreePhaseCommitCohort(getIdentifier(), ret, debugContext);
     }
 
     private AbstractThreePhaseCommitCohort<?> createSingleCommitCohort(final String shardName,

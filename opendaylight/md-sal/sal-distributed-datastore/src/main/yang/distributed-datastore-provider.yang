@@ -193,20 +193,27 @@ module distributed-datastore-provider {
             description "Enable or disable data persistence";
          }
 
-        leaf shard-isolated-leader-check-interval-in-millis {
+         leaf shard-isolated-leader-check-interval-in-millis {
             default 5000;
             type heartbeat-interval-type;
             description "The interval at which the leader of the shard will check if its majority
                         followers are active and term itself as isolated";
-        }
+         }
 
-        leaf transaction-creation-initial-rate-limit {
+         leaf transaction-creation-initial-rate-limit {
             default 100;
             type non-zero-uint32-type;
             description "The initial number of transactions per second that are allowed before the data store
                          should begin applying back pressure. This number is only used as an initial guidance,
                          subsequently the datastore measures the latency for a commit and auto-adjusts the rate limit";
-        }
+         }
+         
+         leaf transaction-debug-context-enabled {
+             default false;
+             type boolean;
+             description "Enable or disable transaction context debug. This will log the call site trace for
+                          transactions that fail";
+         }
     }
 
     // Augments the 'configuration' choice node under modules/module.

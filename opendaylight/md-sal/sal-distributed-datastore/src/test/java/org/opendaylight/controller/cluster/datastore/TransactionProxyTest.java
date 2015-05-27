@@ -615,6 +615,25 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         verifyCohortFutures((SingleCommitCohortProxy)ready, TestException.class);
     }
 
+    @Test
+    public void testReadyWithDebugContextEnabled() throws Exception {
+        dataStoreContextBuilder.transactionDebugContextEnabled(true);
+
+        ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), READ_WRITE);
+
+        expectBatchedModificationsReady(actorRef, true);
+
+        TransactionProxy transactionProxy = new TransactionProxy(mockComponentFactory, READ_WRITE);
+
+        transactionProxy.merge(TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+
+        DOMStoreThreePhaseCommitCohort ready = transactionProxy.ready();
+
+        assertTrue(ready instanceof DebugThreePhaseCommitCohort);
+
+        verifyCohortFutures((DebugThreePhaseCommitCohort)ready, new CommitTransactionReply().toSerializable());
+    }
+
     private void testWriteOnlyTxWithFindPrimaryShardFailure(Exception toThrow) throws Exception {
         doReturn(Futures.failed(toThrow)).when(mockActorContext).findPrimaryShardAsync(anyString());
 
