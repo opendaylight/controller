@@ -16,6 +16,24 @@
       "revId": "591b3aa895d49e7717aff96a5ec28e7187d353e8",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_211d0167",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTreeSnapshot.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-27T02:14:32Z",
+      "side": 1,
+      "message": "This is the snapshot we use during recovery. It just so happens that the modification strategy we use is to prune. Note that reads are also done here. What do you think about the name RecoveryShardDataTreeSnapshot?",
+      "parentUuid": "1a9dcd25_9e447075",
+      "revId": "591b3aa895d49e7717aff96a5ec28e7187d353e8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
