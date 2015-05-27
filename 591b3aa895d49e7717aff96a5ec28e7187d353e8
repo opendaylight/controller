@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a9dcd25_9e447075",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTreeSnapshot.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-27T01:41:46Z",
+      "side": 1,
+      "message": "So this class is now used to serve up pruning mods. Can we rename it to PruningShardDataTreeSnapshot to make it clear and/or add javadoc comments briefly explaining its usage/intent? Not a big deal - I\u0027m fine if you want to do this in a follow-up.",
+      "revId": "591b3aa895d49e7717aff96a5ec28e7187d353e8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
