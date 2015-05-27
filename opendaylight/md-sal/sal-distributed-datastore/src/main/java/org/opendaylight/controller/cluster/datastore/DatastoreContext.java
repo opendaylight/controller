@@ -66,6 +66,7 @@ public class DatastoreContext {
     private int shardBatchedModificationCount = DEFAULT_SHARD_BATCHED_MODIFICATION_COUNT;
     private boolean writeOnlyTransactionOptimizationsEnabled = true;
     private long shardCommitQueueExpiryTimeoutInMillis = DEFAULT_SHARD_COMMIT_QUEUE_EXPIRY_TIMEOUT_IN_MS;
+    private boolean transactionContextDebugEnabled = false;
 
     public static Set<String> getGlobalDatastoreTypes() {
         return globalDatastoreTypes;
@@ -96,6 +97,7 @@ public class DatastoreContext {
         this.shardBatchedModificationCount = other.shardBatchedModificationCount;
         this.writeOnlyTransactionOptimizationsEnabled = other.writeOnlyTransactionOptimizationsEnabled;
         this.shardCommitQueueExpiryTimeoutInMillis = other.shardCommitQueueExpiryTimeoutInMillis;
+        this.transactionContextDebugEnabled = other.transactionContextDebugEnabled;
 
         setShardJournalRecoveryLogBatchSize(other.raftConfig.getJournalRecoveryLogBatchSize());
         setSnapshotBatchCount(other.raftConfig.getSnapshotBatchCount());
@@ -206,6 +208,10 @@ public class DatastoreContext {
 
     public long getShardCommitQueueExpiryTimeoutInMillis() {
         return shardCommitQueueExpiryTimeoutInMillis;
+    }
+
+    public boolean isTransactionContextDebugEnabled() {
+        return transactionContextDebugEnabled;
     }
 
     public static class Builder {
@@ -361,6 +367,11 @@ public class DatastoreContext {
         public Builder shardCommitQueueExpiryTimeoutInSeconds(long value) {
             datastoreContext.shardCommitQueueExpiryTimeoutInMillis = TimeUnit.MILLISECONDS.convert(
                     value, TimeUnit.SECONDS);
+            return this;
+        }
+
+        public Builder transactionContextDebugEnabled(boolean value) {
+            datastoreContext.transactionContextDebugEnabled = value;
             return this;
         }
 

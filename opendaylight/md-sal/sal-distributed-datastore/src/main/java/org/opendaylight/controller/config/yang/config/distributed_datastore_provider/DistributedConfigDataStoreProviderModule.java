@@ -66,6 +66,7 @@ public class DistributedConfigDataStoreProviderModule extends
                 .shardBatchedModificationCount(props.getShardBatchedModificationCount().getValue().intValue())
                 .shardCommitQueueExpiryTimeoutInSeconds(
                         props.getShardCommitQueueExpiryTimeoutInSeconds().getValue().intValue())
+                .transactionContextDebugEnabled(props.getTransactionContextDebugEnabled())
                 .build();
 
         return DistributedDataStoreFactory.createInstance(getConfigSchemaServiceDependency(),
