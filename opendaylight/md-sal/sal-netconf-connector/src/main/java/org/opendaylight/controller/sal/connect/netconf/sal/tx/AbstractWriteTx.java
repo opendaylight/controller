@@ -12,7 +12,6 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
-import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionPreferences;
 import org.opendaylight.controller.sal.connect.netconf.util.NetconfBaseOps;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -24,18 +23,17 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 public abstract class AbstractWriteTx implements DOMDataWriteTransaction {
 
     private final long defaultRequestTimeoutMillis;
-
     protected final RemoteDeviceId id;
     protected final NetconfBaseOps netOps;
-    protected final NetconfSessionPreferences netconfSessionPreferences;
+    protected final boolean rollbackSupport;
     // Allow commit to be called only once
     protected boolean finished = false;
 
-    public AbstractWriteTx(final NetconfBaseOps netOps, final RemoteDeviceId id, final NetconfSessionPreferences netconfSessionPreferences, long defaultRequestTimeoutMillis) {
+    public AbstractWriteTx(final long requestTimeoutMillis, final NetconfBaseOps netOps, final RemoteDeviceId id, final boolean rollbackSupport) {
+        this.defaultRequestTimeoutMillis = requestTimeoutMillis;
         this.netOps = netOps;
         this.id = id;
-        this.netconfSessionPreferences = netconfSessionPreferences;
-        this.defaultRequestTimeoutMillis = defaultRequestTimeoutMillis;
+        this.rollbackSupport = rollbackSupport;
         init();
     }
 

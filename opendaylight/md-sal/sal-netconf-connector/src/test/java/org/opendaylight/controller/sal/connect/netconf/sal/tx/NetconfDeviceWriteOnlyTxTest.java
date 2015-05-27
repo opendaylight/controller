@@ -13,7 +13,6 @@ import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessag
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import java.net.InetSocketAddress;
-import java.util.Collections;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
@@ -24,7 +23,6 @@ import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFaile
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 import org.opendaylight.controller.md.sal.dom.spi.DefaultDOMRpcResult;
 import org.opendaylight.controller.sal.connect.netconf.NetconfDevice;
-import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionPreferences;
 import org.opendaylight.controller.sal.connect.netconf.util.NetconfBaseOps;
 import org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
@@ -60,7 +58,7 @@ public class NetconfDeviceWriteOnlyTxTest {
     @Test
     public void testDiscardChanges() {
         final WriteCandidateTx tx = new WriteCandidateTx(id, new NetconfBaseOps(rpc, mock(SchemaContext.class)),
-                NetconfSessionPreferences.fromStrings(Collections.<String>emptySet()), new Long(60000));
+                false, 60000L);
         final CheckedFuture<Void, TransactionCommitFailedException> submitFuture = tx.submit();
         try {
             submitFuture.checkedGet();
@@ -84,7 +82,7 @@ public class NetconfDeviceWriteOnlyTxTest {
                 .when(rpc).invokeRpc(any(SchemaPath.class), any(NormalizedNode.class));
 
         final WriteRunningTx tx = new WriteRunningTx(id, new NetconfBaseOps(rpc, NetconfDevice.INIT_SCHEMA_CTX),
-                NetconfSessionPreferences.fromStrings(Collections.<String>emptySet()), new Long(60000));
+                false, 60000L);
         try {
             tx.delete(LogicalDatastoreType.CONFIGURATION, yangIId);
         } catch (final Exception e) {
