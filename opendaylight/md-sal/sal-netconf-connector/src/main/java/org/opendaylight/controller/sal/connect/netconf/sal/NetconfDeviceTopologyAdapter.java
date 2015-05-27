@@ -68,7 +68,8 @@ final class NetconfDeviceTopologyAdapter implements AutoCloseable {
     public static final Function<QName, String> AVAILABLE_CAPABILITY_TRANSFORMER = new Function<QName, String>() {
         @Override
         public String apply(QName qName) {
-            return qName.toString();
+            // intern string representation of a capability to avoid duplicates
+            return qName.toString().intern();
         }
     };
 

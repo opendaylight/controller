@@ -17,7 +17,6 @@ import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
-import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionPreferences;
 import org.opendaylight.controller.sal.connect.netconf.util.NetconfBaseOps;
 import org.opendaylight.controller.sal.connect.netconf.util.NetconfRpcFutureCallback;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
@@ -50,9 +49,8 @@ public class WriteRunningTx extends AbstractWriteTx {
     private static final Logger LOG  = LoggerFactory.getLogger(WriteRunningTx.class);
 
     public WriteRunningTx(final RemoteDeviceId id, final NetconfBaseOps netOps,
-                          final NetconfSessionPreferences netconfSessionPreferences,
-                          final long defaultRequestTimeoutMillis) {
-        super(netOps, id, netconfSessionPreferences, defaultRequestTimeoutMillis);
+                          final boolean rollbackSupport, long requestTimeoutMillis) {
+        super(requestTimeoutMillis, netOps, id, rollbackSupport);
     }
 
     @Override
@@ -124,9 +122,9 @@ public class WriteRunningTx extends AbstractWriteTx {
             public ListenableFuture<DOMRpcResult> apply(final NetconfBaseOps input) {
                         return defaultOperation.isPresent()
                                 ? input.editConfigRunning(new NetconfRpcFutureCallback("Edit running", id), editStructure, defaultOperation.get(),
-                                netconfSessionPreferences.isRollbackSupported())
+                                rollbackSupport)
                                 : input.editConfigRunning(new NetconfRpcFutureCallback("Edit running", id), editStructure,
-                                netconfSessionPreferences.isRollbackSupported());
+                                rollbackSupport);
             }
         });
     }
