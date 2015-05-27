@@ -7,9 +7,16 @@
  */
 package org.opendaylight.controller.md.sal.binding.impl;
 
+import com.google.common.base.Preconditions;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.JdkFutureAdapters;
 import com.google.common.util.concurrent.ListenableFuture;
+import java.lang.reflect.Method;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcImplementation;
@@ -28,15 +35,27 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
 public class BindingDOMRpcImplementationAdapter implements DOMRpcImplementation {
 
+    private static final Cache<Class<?>, RpcServiceInvoker> SERVICE_INVOKERS = CacheBuilder.newBuilder().weakKeys().build();
+
     private final BindingNormalizedNodeCodecRegistry codec;
     private final RpcServiceInvoker invoker;
     private final RpcService delegate;
     private final QNameModule module;
 
-    public <T extends RpcService> BindingDOMRpcImplementationAdapter(final BindingNormalizedNodeCodecRegistry codec, final Class<T> type ,final T delegate) {
-        this.codec = codec;
-        this.delegate = delegate;
-        invoker = RpcServiceInvoker.from(type);
+    public <T extends RpcService> BindingDOMRpcImplementationAdapter(final BindingNormalizedNodeCodecRegistry codec, final Class<T> type, final Map<SchemaPath, Method> localNameToMethod, final T delegate) {
+        try {
+            this.invoker = SERVICE_INVOKERS.get(type, new Callable<RpcServiceInvoker>() {
+                @Override
+                public RpcServiceInvoker call() {
+                    return RpcServiceInvoker.from(type);
+                }
+            });
+        } catch (ExecutionException e) {
+            throw new IllegalArgumentException("Failed to create invokers for type " + type, e);
+        }
+
+        this.codec = Preconditions.checkNotNull(codec);
+        this.delegate = Preconditions.checkNotNull(delegate);
         module = BindingReflections.getQNameModule(type);
     }
 
@@ -53,7 +72,7 @@ public class BindingDOMRpcImplementationAdapter implements DOMRpcImplementation 
     }
 
     private DataObject deserilialize(final SchemaPath rpcPath, final NormalizedNode<?, ?> input) {
-        if(input instanceof LazySerializedContainerNode) {
+        if (input instanceof LazySerializedContainerNode) {
             return ((LazySerializedContainerNode) input).bindingData();
         }
         final SchemaPath inputSchemaPath = rpcPath.createChild(QName.create(module,"input"));
@@ -67,7 +86,7 @@ public class BindingDOMRpcImplementationAdapter implements DOMRpcImplementation 
 
     private CheckedFuture<DOMRpcResult, DOMRpcException> transformResult(final SchemaPath schemaPath,
             final ListenableFuture<RpcResult<?>> bindingResult) {
-        return LazyDOMRpcResultFuture.create(codec,bindingResult);
+        return LazyDOMRpcResultFuture.create(codec, bindingResult);
     }
 
 }
