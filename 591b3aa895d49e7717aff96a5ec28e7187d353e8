@@ -34,6 +34,24 @@
       "revId": "591b3aa895d49e7717aff96a5ec28e7187d353e8",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_6168e9ba",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTreeSnapshot.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-27T02:52:34Z",
+      "side": 1,
+      "message": "yeah - we could call it Recovery. But it\u0027s possible we might use this as well in the future when applying replicated data (maybe a follower\u0027s schema is out-of-date temporarily during rolling upgrade).  That\u0027s why I thought to just call it Pruning and also to keep it consistent with the DataTreeModification which is called Pruning. But we can also just keep the name as is and explain its usage in the java docs. I\u0027m flexible here - I\u0027ll let you make the final call.",
+      "parentUuid": "1a9dcd25_211d0167",
+      "revId": "591b3aa895d49e7717aff96a5ec28e7187d353e8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
