@@ -52,6 +52,24 @@
       "revId": "591b3aa895d49e7717aff96a5ec28e7187d353e8",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_a17cb173",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTreeSnapshot.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-27T03:18:15Z",
+      "side": 1,
+      "message": "Let\u0027s leave it like this. I\u0027ll add the javadoc in a follow-up. I need to do one anyway to handle the SchemaValidationFailedException (when that gets through)",
+      "parentUuid": "1a9dcd25_6168e9ba",
+      "revId": "591b3aa895d49e7717aff96a5ec28e7187d353e8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
