@@ -105,6 +105,11 @@ public class DatastoreConfigurationMXBeanImpl extends AbstractMXBean implements 
     }
 
     @Override
+    public boolean getTransactionContextDebugEnabled() {
+        return context.isTransactionDebugContextEnabled();
+    }
+
+    @Override
     public int getMaxShardDataChangeExecutorPoolSize() {
         return context.getDataStoreProperties().getMaxDataChangeExecutorPoolSize();
     }

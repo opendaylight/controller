@@ -67,6 +67,7 @@ public class DistributedOperationalDataStoreProviderModule extends
                 .shardBatchedModificationCount(props.getShardBatchedModificationCount().getValue().intValue())
                 .shardCommitQueueExpiryTimeoutInSeconds(
                         props.getShardCommitQueueExpiryTimeoutInSeconds().getValue().intValue())
+                .transactionDebugContextEnabled(props.getTransactionDebugContextEnabled())
                 .build();
 
         return DistributedDataStoreFactory.createInstance(getOperationalSchemaServiceDependency(),
