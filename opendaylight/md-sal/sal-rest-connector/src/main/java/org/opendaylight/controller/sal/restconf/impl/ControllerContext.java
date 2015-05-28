@@ -281,12 +281,12 @@ public class ControllerContext implements SchemaContextListener {
             if (!(element instanceof AugmentationIdentifier)) {
                 final QName _nodeType = element.getNodeType();
                 final DataSchemaNode potentialNode = ControllerContext.childByQName(node, _nodeType);
-                if (!(element instanceof NodeIdentifier && potentialNode instanceof ListSchemaNode)) {
-                    if (!ControllerContext.isListOrContainer(potentialNode)) {
-                        return null;
+                if (!(element instanceof NodeIdentifier && potentialNode instanceof ListSchemaNode) &&
+                        !(potentialNode instanceof ChoiceSchemaNode)) {
+                    builder.append(convertToRestconfIdentifier(element, potentialNode, mount));
+                    if (potentialNode instanceof DataNodeContainer) {
+                        node = (DataNodeContainer) potentialNode;
                     }
-                    builder.append(convertToRestconfIdentifier(element, (DataNodeContainer) potentialNode, mount));
-                    node = (DataNodeContainer) potentialNode;
                 }
             }
         }
@@ -867,8 +867,8 @@ public class ControllerContext implements SchemaContextListener {
         return null;
     }
 
-    private CharSequence convertToRestconfIdentifier(final PathArgument argument, final DataNodeContainer node, final DOMMountPoint mount) {
-        if (argument instanceof NodeIdentifier && node instanceof ContainerSchemaNode) {
+    private CharSequence convertToRestconfIdentifier(final PathArgument argument, final DataSchemaNode node, final DOMMountPoint mount) {
+        if (argument instanceof NodeIdentifier) {
             return convertToRestconfIdentifier((NodeIdentifier) argument, mount);
         } else if (argument instanceof NodeIdentifierWithPredicates && node instanceof ListSchemaNode) {
             return convertToRestconfIdentifierWithPredicates((NodeIdentifierWithPredicates) argument, (ListSchemaNode) node, mount);
