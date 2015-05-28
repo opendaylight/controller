@@ -7,7 +7,7 @@ module car-purchase {
     prefix cp;
 
 	  import ietf-inet-types { prefix "inet"; revision-date 2010-09-24; }
-	  import car { prefix "car"; revision-date 2014-08-18; }
+	  import cars { prefix "car"; revision-date 2014-08-18; }
 	  import people { prefix "person"; revision-date 2014-08-18; }
 	  import yang-ext {prefix "ext"; revision-date "2013-07-09";}
 
@@ -58,3 +58,5 @@ module car-purchase {
           }
         }
 }
+
+..

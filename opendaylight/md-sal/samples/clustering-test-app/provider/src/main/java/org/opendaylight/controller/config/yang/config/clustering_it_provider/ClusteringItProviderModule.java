@@ -10,6 +10,7 @@ package org.opendaylight.controller.config.yang.config.clustering_it_provider;
 
 
 import org.opendaylight.controller.clustering.it.listener.PeopleCarListener;
+import org.opendaylight.controller.clustering.it.provider.CarsProvider;
 import org.opendaylight.controller.clustering.it.provider.PeopleProvider;
 import org.opendaylight.controller.clustering.it.provider.PurchaseCarProvider;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
@@ -17,6 +18,7 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sal.binding.api.NotificationProviderService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.purchase.rev140818.CarPurchaseService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.people.rev140818.PeopleService;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.cars.rev140818.CarsService;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.binding.NotificationListener;
 
@@ -50,12 +52,21 @@ public class ClusteringItProviderModule extends org.opendaylight.controller.conf
       final PeopleProvider people = new PeopleProvider();
       people.setDataProvider(dataBrokerService);
 
-      people.setRpcRegistration(purchaseCarRpc);
+        people.setRpcRegistration(purchaseCarRpc);
 
-      final BindingAwareBroker.RpcRegistration<PeopleService> peopleRpcReg = getRpcRegistryDependency()
-          .addRpcImplementation(PeopleService.class, people);
+        final BindingAwareBroker.RpcRegistration<PeopleService> peopleRpcReg = getRpcRegistryDependency()
+                .addRpcImplementation(PeopleService.class, people);
 
+       // Add cars provider registration
+        final CarsProvider cars = new CarsProvider();
+        cars.setDataProvider(dataBrokerService);
 
+        cars.setRpcRegistration(purchaseCarRpc);
+
+        final BindingAwareBroker.RpcRegistration<CarsService> carsRpcReg = getRpcRegistryDependency()
+                .addRpcImplementation(CarsService.class, cars);
+
+      // people car listener
 
       final PeopleCarListener peopleCarListener = new PeopleCarListener();
       peopleCarListener.setDataProvider(dataBrokerService);
@@ -70,8 +81,10 @@ public class ClusteringItProviderModule extends org.opendaylight.controller.conf
         @Override
         public void close() throws Exception {
           peopleRpcReg.close();
+          carsRpcReg.close();
           purchaseCarRpc.close();
           people.close();
+          cars.close();
           purchaseCar.close();
           listenerReg.close();
         }
@@ -82,3 +95,4 @@ public class ClusteringItProviderModule extends org.opendaylight.controller.conf
     }
 
 }
+

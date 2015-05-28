@@ -13,10 +13,10 @@ import com.google.common.util.concurrent.Futures;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.people.rev140818.CarPeople;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.people.rev140818.car.people.CarPerson;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.people.rev140818.car.people.CarPersonBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.people.rev140818.car.people.CarPersonKey;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.cars.people.rev140818.CarsPeople;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.cars.people.rev140818.cars.people.CarPerson;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.cars.people.rev140818.cars.people.CarPersonBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.cars.people.rev140818.cars.people.CarPersonKey;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.purchase.rev140818.CarBought;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.purchase.rev140818.CarPurchaseListener;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -49,7 +49,7 @@ public class PeopleCarListener implements CarPurchaseListener {
     log.info("Car bought, adding car-person entry: [{}]", carPerson);
 
     InstanceIdentifier<CarPerson> carPersonIId =
-        InstanceIdentifier.<CarPeople>builder(CarPeople.class).child(CarPerson.class, carPerson.getKey()).build();
+        InstanceIdentifier.<CarsPeople>builder(CarsPeople.class).child(CarPerson.class, carPerson.getKey()).build();
 
 
     WriteTransaction tx = dataProvider.newWriteOnlyTransaction();
