@@ -181,4 +181,10 @@ public interface ReplicatedLog {
      */
     int dataSize();
 
+    /**
+     * We decide if snapshot need to be captured based on the count/memory consumed.
+     * @param replicatedLogEntry
+     */
+    void captureSnapshotIfReady(ReplicatedLogEntry replicatedLogEntry);
+
 }
