@@ -154,12 +154,6 @@ public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPro
             }
         }
 
-        YangInstanceIdentifier fullIIToData = YangInstanceIdentifier.create(Iterables.concat(
-                pathContext.getInstanceIdentifier().getPathArguments(), iiToDataList));
-
-        outIIContext = new InstanceIdentifierContext<>(fullIIToData, pathContext.getSchemaNode(), pathContext.getMountPoint(),
-                pathContext.getSchemaContext());
-
         NormalizedNode<?, ?> parsed = null;
 
         if(schemaNode instanceof ContainerSchemaNode) {
@@ -167,8 +161,15 @@ public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPro
         } else if(schemaNode instanceof ListSchemaNode) {
             final ListSchemaNode casted = (ListSchemaNode) schemaNode;
             parsed = parserFactory.getMapEntryNodeParser().parse(elements, casted);
+            iiToDataList.add(parsed.getIdentifier());
         }
         // FIXME : add another DataSchemaNode extensions e.g. LeafSchemaNode
+
+        YangInstanceIdentifier fullIIToData = YangInstanceIdentifier.create(Iterables.concat(
+                pathContext.getInstanceIdentifier().getPathArguments(), iiToDataList));
+
+        outIIContext = new InstanceIdentifierContext<>(fullIIToData, pathContext.getSchemaNode(), pathContext.getMountPoint(),
+                pathContext.getSchemaContext());
 
         return new NormalizedNodeContext(outIIContext, parsed);
     }
