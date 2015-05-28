@@ -1,0 +1,83 @@
+module cars {
+
+    yang-version 1;
+
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:config:sal-clustering-it:cars";
+
+    prefix cars;
+
+	import ietf-inet-types { prefix "inet"; revision-date 2010-09-24; }
+	
+    organization "Netconf Central";
+
+    contact
+      "Harman Singh <harmasin@cisco.com>";
+
+    description
+      "YANG model for car for test application";
+
+    revision "2014-08-18" {
+      description
+        "Clustering sample app";
+    }
+    
+    typedef car-id {
+      type inet:uri;
+      description "An identifier for cars entry.";
+    }
+
+    typedef car-ref {
+      type instance-identifier;
+      description "A reference that points to a cars:cars/car in the data tree.";
+    }
+
+    identity car-context {
+        description "A car-context is a classifier for car elements which allows an RPC to provide a service on behalf of a particular element in the data tree.";
+    }
+
+    grouping car {
+      description "Describes the contents of a car -
+                       Details of the car manufacturer, model etc";
+      leaf id {
+        type car-id;
+        description "identifier of single list of entries.";
+      }
+
+      leaf model {
+        type string;
+      }
+      leaf manufacturer {
+        type string;
+      }
+
+      leaf year {
+        type uint32;
+      }
+
+      leaf category {
+        type string;
+      }
+    }
+    
+    container cars {
+      description
+        "Top-level container for all cars objects.";
+
+      list car {
+      	key "id";
+      	description "A list of cars (as defined by the 'grouping car').";
+      	uses car;
+      }
+    }
+
+    rpc add-car {
+      description
+        "Add a car entry into database";
+      input {
+        uses car;
+      }
+    }
+
+    
+}
+

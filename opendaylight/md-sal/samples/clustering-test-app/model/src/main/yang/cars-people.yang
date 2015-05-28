@@ -1,13 +1,13 @@
-module car-people {
+module cars-people {
 
     yang-version 1;
 
-    namespace "urn:opendaylight:params:xml:ns:yang:controller:config:sal-clustering-it:car-people";
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:config:sal-clustering-it:cars-people";
 
-    prefix car;
+    prefix cars;
 
 	  import ietf-inet-types { prefix "inet"; revision-date 2010-09-24; }
-	  import car { prefix "c"; revision-date 2014-08-18; }
+	  import cars { prefix "c"; revision-date 2014-08-18; }
 	  import people { prefix "people"; revision-date 2014-08-18; }
 
     organization "Netconf Central";
@@ -23,9 +23,9 @@ module car-people {
         "Clustering sample app";
     }
 
-    container car-people {
+    container cars-people {
       description
-       "Top-level container for all people car map";
+       "Top-level container for all people cars map";
 
       list car-person {
         key "car-id person-id";
@@ -40,3 +40,4 @@ module car-people {
       }
     }
 }
+
