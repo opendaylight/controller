@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a9dcd25_e06f0a91",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 335,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-28T23:42:58Z",
+      "side": 1,
+      "message": "This method should be called maybeCaptureSnapshot :)",
+      "revId": "08796eda524e68ffc56b238d0af7eaf2f18bacf3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_e0f62ad7",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/SnapshotManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 327,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-28T23:42:58Z",
+      "side": 1,
+      "message": "drop the if check and use the logging methods interpolation mechanism",
+      "revId": "08796eda524e68ffc56b238d0af7eaf2f18bacf3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_60321aa9",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/ReplicatedLogImplTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-28T23:42:58Z",
+      "side": 1,
+      "message": "delete line",
+      "revId": "08796eda524e68ffc56b238d0af7eaf2f18bacf3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_40d4be1f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 503,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-28T23:42:58Z",
+      "side": 1,
+      "message": "Why did you have to set the current behavior? If we just waited wouldn\u0027t the Shard\u0027s \"behavior\" become Leader?",
+      "revId": "08796eda524e68ffc56b238d0af7eaf2f18bacf3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_a017c2ec",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 548,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-28T23:42:58Z",
+      "side": 1,
+      "message": "Any specific reason for doing a new String()?",
+      "revId": "08796eda524e68ffc56b238d0af7eaf2f18bacf3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

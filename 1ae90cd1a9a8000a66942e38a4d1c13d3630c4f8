@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a9dcd25_00deb63f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/ReplicatedLogImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-28T23:42:58Z",
+      "side": 0,
+      "message": "I\u0027m just wondering if this whole block could have been kept encapsulated in this class in a method like onEntryApplied() or something that way we can get to methods like getDataSizeForSnapshotCheck and such out of the interface and not leak the internals of ReplicatedLogImpl (which I think the other methods do)",
+      "revId": "1ae90cd1a9a8000a66942e38a4d1c13d3630c4f8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
