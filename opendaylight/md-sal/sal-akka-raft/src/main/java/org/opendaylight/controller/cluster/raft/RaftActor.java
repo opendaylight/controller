@@ -209,6 +209,16 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             applyState(applyState.getClientActor(), applyState.getIdentifier(),
                 applyState.getReplicatedLogEntry().getData());
 
+            if (!hasFollowers()) {
+                // for single node, the capture should happen after the apply state
+                // as we delete messages from the persistent journal which have made it to the snapshot
+                // capturing the snapshot before applying makes the persistent journal and snapshot out of sync
+                // and recovery shows data missing
+                captureSnapshot(applyState.getReplicatedLogEntry());
+
+                context.getSnapshotManager().trimLog(context.getLastApplied(), currentBehavior);
+            }
+
         } else if (message instanceof ApplyJournalEntries){
             ApplyJournalEntries applyEntries = (ApplyJournalEntries) message;
             if(LOG.isDebugEnabled()) {
@@ -312,6 +322,33 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         return new LeaderStateChanged(memberId, leaderId);
     }
 
+    @Override
+    public long snapshotSequenceNr() {
+        // When we do a snapshot capture, we also capture and save the sequence-number of the persistent journal,
+        // so that we can delete the persistent journal based on the saved sequence-number
+        // However , when akka replays the journal during recovery, it replays it from the sequence number when the snapshot
+        // was saved and not the number we saved.
+        // We would want to override it , by asking akka to use the last-sequence number known to us.
+        return context.getSnapshotManager().getLastSequenceNumber();
+    }
+
+    private void captureSnapshot(ReplicatedLogEntry replicatedLogEntry) {
+        long journalSize = replicatedLogEntry.getIndex() + 1;
+        long dataThreshold = context.getTotalMemory() *
+                context.getConfigParams().getSnapshotDataThresholdPercentage() / 100;
+
+        if ((journalSize % context.getConfigParams().getSnapshotBatchCount() == 0
+                || context.getReplicatedLog().getDataSizeForSnapshotCheck() > dataThreshold)) {
+
+            boolean started = context.getSnapshotManager().capture(replicatedLogEntry,
+                    currentBehavior.getReplicatedToAllIndex());
+            if (started) {
+                context.getReplicatedLog().resetDataSizeCachedForSingleNode();
+            }
+        }
+    }
+
+
     /**
      * When a derived RaftActor needs to persist something it must call
      * persistData.
@@ -336,26 +373,28 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         replicatedLog().appendAndPersist(replicatedLogEntry, new Procedure<ReplicatedLogEntry>() {
             @Override
             public void apply(ReplicatedLogEntry replicatedLogEntry) throws Exception {
-                if(!hasFollowers()){
+                if (!hasFollowers()){
                     // Increment the Commit Index and the Last Applied values
                     raftContext.setCommitIndex(replicatedLogEntry.getIndex());
                     raftContext.setLastApplied(replicatedLogEntry.getIndex());
 
-                    // Apply the state immediately
+                    // Apply the state immediately.
                     self().tell(new ApplyState(clientActor, identifier, replicatedLogEntry), self());
 
                     // Send a ApplyJournalEntries message so that we write the fact that we applied
                     // the state to durable storage
                     self().tell(new ApplyJournalEntries(replicatedLogEntry.getIndex()), self());
 
-                    context.getSnapshotManager().trimLog(context.getLastApplied(), currentBehavior);
-
                 } else if (clientActor != null) {
+                    captureSnapshot(replicatedLogEntry);
+
                     // Send message for replication
                     currentBehavior.handleMessage(getSelf(),
                             new Replicate(clientActor, identifier, replicatedLogEntry));
                 }
             }
+
+
         });
     }
 
@@ -368,7 +407,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     @VisibleForTesting
-    void setCurrentBehavior(RaftActorBehavior behavior) {
+    public void setCurrentBehavior(RaftActorBehavior behavior) {
         currentBehavior.setDelegate(behavior);
     }
 
@@ -431,7 +470,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         return context.getLastApplied();
     }
 
-    protected RaftActorContext getRaftActorContext() {
+    @VisibleForTesting
+    public RaftActorContext getRaftActorContext() {
         return context;
     }
 

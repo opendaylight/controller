@@ -62,6 +62,33 @@ class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
     }
 
     @Override
+    public long getDataSizeForSnapshotCheck() {
+        long dataSizeForCheck = dataSize();
+        if (!context.hasFollowers()) {
+            // When we do not have followers we do not maintain an in-memory log
+            // due to this the journalSize will never become anything close to the
+            // snapshot batch count. In fact will mostly be 1.
+            // Similarly since the journal's dataSize depends on the entries in the
+            // journal the journal's dataSize will never reach a value close to the
+            // memory threshold.
+            // By maintaining the dataSize outside the journal we are tracking essentially
+            // what we have written to the disk however since we no longer are in
+            // need of doing a snapshot just for the sake of freeing up memory we adjust
+            // the real size of data by the DATA_SIZE_DIVIDER so that we do not snapshot as often
+            // as if we were maintaining a real snapshot
+            dataSizeForCheck = dataSizeSinceLastSnapshot / DATA_SIZE_DIVIDER;
+        }
+        return dataSizeForCheck;
+    }
+
+    @Override
+    public void resetDataSizeCachedForSingleNode() {
+        if (!context.hasFollowers()) {
+            dataSizeSinceLastSnapshot = 0;
+        }
+    }
+
+    @Override
     public void appendAndPersist(final ReplicatedLogEntry replicatedLogEntry,
             final Procedure<ReplicatedLogEntry> callback)  {
 
@@ -84,39 +111,7 @@ class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
                     context.getLogger().debug("{}: persist complete {}", context.getId(), replicatedLogEntry);
 
                     int logEntrySize = replicatedLogEntry.size();
-
-                    long dataSizeForCheck = dataSize();
-
                     dataSizeSinceLastSnapshot += logEntrySize;
-
-                    if (!context.hasFollowers()) {
-                        // When we do not have followers we do not maintain an in-memory log
-                        // due to this the journalSize will never become anything close to the
-                        // snapshot batch count. In fact will mostly be 1.
-                        // Similarly since the journal's dataSize depends on the entries in the
-                        // journal the journal's dataSize will never reach a value close to the
-                        // memory threshold.
-                        // By maintaining the dataSize outside the journal we are tracking essentially
-                        // what we have written to the disk however since we no longer are in
-                        // need of doing a snapshot just for the sake of freeing up memory we adjust
-                        // the real size of data by the DATA_SIZE_DIVIDER so that we do not snapshot as often
-                        // as if we were maintaining a real snapshot
-                        dataSizeForCheck = dataSizeSinceLastSnapshot / DATA_SIZE_DIVIDER;
-                    }
-                    long journalSize = replicatedLogEntry.getIndex() + 1;
-                    long dataThreshold = context.getTotalMemory() *
-                            context.getConfigParams().getSnapshotDataThresholdPercentage() / 100;
-
-                    if ((journalSize % context.getConfigParams().getSnapshotBatchCount() == 0
-                            || dataSizeForCheck > dataThreshold)) {
-
-                        boolean started = context.getSnapshotManager().capture(replicatedLogEntry,
-                                currentBehavior.getReplicatedToAllIndex());
-
-                        if(started){
-                            dataSizeSinceLastSnapshot = 0;
-                        }
-                    }
 
                     if (callback != null){
                         callback.apply(replicatedLogEntry);

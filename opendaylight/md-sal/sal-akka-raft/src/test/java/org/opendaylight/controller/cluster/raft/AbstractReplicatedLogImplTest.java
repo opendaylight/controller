@@ -306,5 +306,14 @@ public class AbstractReplicatedLogImplTest {
         @Override
         public void appendAndPersist(ReplicatedLogEntry replicatedLogEntry, Procedure<ReplicatedLogEntry> callback) {
         }
+
+        @Override
+        public long getDataSizeForSnapshotCheck() {
+            return 0;
+        }
+
+        @Override
+        public void resetDataSizeCachedForSingleNode() {
+        }
     }
 }

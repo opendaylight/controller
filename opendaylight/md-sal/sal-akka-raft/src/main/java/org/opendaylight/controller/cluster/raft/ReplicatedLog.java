@@ -181,4 +181,17 @@ public interface ReplicatedLog {
      */
     int dataSize();
 
+    /**
+     * Calculates and returns the datasize of the memory log.
+     * <br/>
+     * In case of single node, it returns based on the cached data size since last snapshot
+     * @return longsize of the data to determine if a snapshot capture is needed.
+     */
+    long getDataSizeForSnapshotCheck();
+
+    /**
+     * Resets the cached data size to 0 for single node. To be done after a capture is made.
+     */
+    void resetDataSizeCachedForSingleNode();
+
 }

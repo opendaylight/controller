@@ -127,6 +127,8 @@ class RaftActorRecoverySupport {
         long lastUnappliedIndex = context.getLastApplied() + 1;
 
         if(log.isDebugEnabled()) {
+            // it can happen that lastUnappliedIndex > toIndex, if the AJE is in the persistent journal
+            // but the entry itself has made it to that state and recovered via the snapshot
             log.debug("{}: Received apply journal entries for recovery, applying to state: {} to {}",
                     context.getId(), lastUnappliedIndex, toIndex);
         }

@@ -139,8 +139,8 @@ public class InMemoryJournal extends AsyncWriteJournal {
     }
 
     @Override
-    public Future<Void> doAsyncReplayMessages(final String persistenceId, long fromSequenceNr,
-            long toSequenceNr, long max, final Procedure<PersistentRepr> replayCallback) {
+    public Future<Void> doAsyncReplayMessages(final String persistenceId, final long fromSequenceNr,
+            final long toSequenceNr, long max, final Procedure<PersistentRepr> replayCallback) {
         return Futures.future(new Callable<Void>() {
             @Override
             public Void call() throws Exception {
@@ -150,16 +150,18 @@ public class InMemoryJournal extends AsyncWriteJournal {
                 }
 
                 Map<Long, Object> journal = journals.get(persistenceId);
-                if(journal == null) {
+                if (journal == null) {
                     return null;
                 }
 
                 synchronized (journal) {
                     for (Map.Entry<Long,Object> entry : journal.entrySet()) {
-                        PersistentRepr persistentMessage =
-                                new PersistentImpl(entry.getValue(), entry.getKey(), persistenceId,
-                                        false, null, null);
-                        replayCallback.apply(persistentMessage);
+                        if (entry.getKey() >= fromSequenceNr && entry.getKey() <= toSequenceNr) {
+                            PersistentRepr persistentMessage =
+                                    new PersistentImpl(entry.getValue(), entry.getKey(), persistenceId,
+                                            false, null, null);
+                            replayCallback.apply(persistentMessage);
+                        }
                     }
                 }
 

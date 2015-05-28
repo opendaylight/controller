@@ -243,7 +243,8 @@ public class MockRaftActorContext implements RaftActorContext {
     }
 
     public static class SimpleReplicatedLog extends AbstractReplicatedLogImpl {
-        @Override public void appendAndPersist(
+        @Override
+        public void appendAndPersist(
             ReplicatedLogEntry replicatedLogEntry) {
             append(replicatedLogEntry);
         }
@@ -251,6 +252,15 @@ public class MockRaftActorContext implements RaftActorContext {
         @Override
         public int dataSize() {
             return -1;
+        }
+
+        @Override
+        public long getDataSizeForSnapshotCheck() {
+            return dataSize();
+        }
+
+        @Override
+        public void resetDataSizeCachedForSingleNode() {
         }
 
         @Override public void removeFromAndPersist(long index) {
