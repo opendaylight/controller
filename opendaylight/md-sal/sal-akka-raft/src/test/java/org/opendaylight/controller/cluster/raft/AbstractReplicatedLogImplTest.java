@@ -306,5 +306,11 @@ public class AbstractReplicatedLogImplTest {
         @Override
         public void appendAndPersist(ReplicatedLogEntry replicatedLogEntry, Procedure<ReplicatedLogEntry> callback) {
         }
+
+        @Override
+        public void captureSnapshotIfReady(ReplicatedLogEntry replicatedLogEntry) {
+        }
+
+
     }
 }

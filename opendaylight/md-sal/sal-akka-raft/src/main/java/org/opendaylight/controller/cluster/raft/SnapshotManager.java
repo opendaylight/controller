@@ -82,6 +82,10 @@ public class SnapshotManager implements SnapshotState {
         this.createSnapshotProcedure = createSnapshotProcedure;
     }
 
+    public long getLastSequenceNumber() {
+        return lastSequenceNumber;
+    }
+
     @VisibleForTesting
     public CaptureSnapshot getCaptureSnapshot() {
         return captureSnapshot;
@@ -319,6 +323,7 @@ public class SnapshotManager implements SnapshotState {
 
         @Override
         public void commit(long sequenceNumber) {
+            LOG.debug("Snapshot success sequence number:", sequenceNumber);
             context.getReplicatedLog().snapshotCommit();
             context.getPersistenceProvider().deleteSnapshots(new SnapshotSelectionCriteria(
                     sequenceNumber - context.getConfigParams().getSnapshotBatchCount(), 43200000));
@@ -365,6 +370,8 @@ public class SnapshotManager implements SnapshotState {
             this.term = -1L;
             if (!hasFollowers) {
                 if(lastLogEntry != null) {
+                    // since we have persisted the last-log-entry to persistent journal before the capture,
+                    // we would want to snapshot from this entry.
                     index = lastLogEntry.getIndex();
                     term = lastLogEntry.getTerm();
                 }
