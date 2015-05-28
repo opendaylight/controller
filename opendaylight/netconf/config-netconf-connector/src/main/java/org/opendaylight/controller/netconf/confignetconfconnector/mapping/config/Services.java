@@ -23,6 +23,7 @@ import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.ObjectNameAttributeReadingStrategy;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
+import org.opendaylight.yangtools.yang.data.api.ModifyAction;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -68,9 +69,10 @@ public final class Services {
                     }
 
                     String refName = refEntry.getKey();
-
-                    ServiceInstance serviceInstance = ServiceInstance.fromString(refEntry.getValue());
-                    refNameToInstance.put(refName, serviceInstance);
+                    refNameToInstance.put(refName, refEntry.getValue().isEmpty()
+                            //provider name cannot be empty unless we are executing delete
+                            ? ServiceInstance.EMPTY_SERVICE_INSTANCE
+                            : ServiceInstance.fromString(refEntry.getValue()));
 
                 }
             }
@@ -114,12 +116,21 @@ public final class Services {
                 XmlElement nameElement = instance.getOnlyChildElement(NAME_KEY);
                 String refName = nameElement.getTextContent();
 
-                XmlElement providerElement = instance.getOnlyChildElement(PROVIDER_KEY);
-                String providerName = providerElement.getTextContent();
+                if (!ModifyAction.DELETE.toString().toLowerCase().equals(
+                        instance.getAttribute(
+                                XmlNetconfConstants.OPERATION_ATTR_KEY,
+                                XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0)))
+                {
+                    XmlElement providerElement = instance.getOnlyChildElement(PROVIDER_KEY);
+                    String providerName = providerElement.getTextContent();
 
-                instance.checkUnrecognisedElements(nameElement, providerElement);
+                    instance.checkUnrecognisedElements(nameElement, providerElement);
 
-                innerMap.put(refName, providerName);
+                    innerMap.put(refName, providerName);
+                } else {
+                    //since this is a delete we dont have a provider name - we want empty service instance
+                    innerMap.put(refName, "");
+                }
             }
         }
 
@@ -161,6 +172,8 @@ public final class Services {
     }
 
     public static final class ServiceInstance {
+        public static final ServiceInstance EMPTY_SERVICE_INSTANCE = new ServiceInstance("", "");
+
         public ServiceInstance(String moduleName, String instanceName) {
             this.moduleName = moduleName;
             this.instanceName = instanceName;
