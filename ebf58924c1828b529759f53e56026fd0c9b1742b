@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a9dcd25_14591cfe",
+        "filename": "opendaylight/netconf/config-netconf-connector/src/main/java/org/opendaylight/controller/netconf/confignetconfconnector/mapping/config/Services.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-05-28T08:29:13Z",
+      "side": 1,
+      "message": "Does this provider for deletion have to be in the correct form ? I mean cannot we use something like \"EMPTY_PROVIDER\" instead of the whole string ?\n\nBecause what if somebody names a module and its instance \"empty-provider\" ?",
+      "range": {
+        "startLine": 35,
+        "startChar": 31,
+        "endLine": 35,
+        "endChar": 52
+      },
+      "revId": "ebf58924c1828b529759f53e56026fd0c9b1742b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_746420b9",
+        "filename": "opendaylight/netconf/netconf-api/src/main/java/org/opendaylight/controller/netconf/api/xml/XmlNetconfConstants.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-05-28T08:29:13Z",
+      "side": 1,
+      "message": "You can use :\nModifyAction.DELETE.toString().toLowerCase()\n\ninstead of a \"delete\"",
+      "range": {
+        "startLine": 52,
+        "startChar": 47,
+        "endLine": 52,
+        "endChar": 53
+      },
+      "revId": "ebf58924c1828b529759f53e56026fd0c9b1742b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
