@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.reset;
@@ -50,9 +49,6 @@ public class ReplicatedLogImplTest {
     @Mock
     private RaftActorBehavior mockBehavior;
 
-    @Mock
-    private SnapshotManager mockSnapshotManager;
-
     private RaftActorContext context;
     private final DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
 
@@ -62,12 +58,7 @@ public class ReplicatedLogImplTest {
 
         context = new RaftActorContextImpl(null, null, "test",
                 new ElectionTermImpl(mockPersistence, "test", LOG),
-                -1, -1, Collections.<String,String>emptyMap(), configParams, mockPersistence, LOG)  {
-            @Override
-            public SnapshotManager getSnapshotManager() {
-                return mockSnapshotManager;
-            }
-        };
+                -1, -1, Collections.<String,String>emptyMap(), configParams, mockPersistence, LOG);
     }
 
     private void verifyPersist(Object message) throws Exception {
@@ -103,7 +94,6 @@ public class ReplicatedLogImplTest {
         verifyPersist(logEntry);
 
         verify(mockCallback).apply(same(logEntry));
-        verifyNoMoreInteractions(mockSnapshotManager);
 
         assertEquals("size", 2, log.size());
     }
@@ -122,13 +112,11 @@ public class ReplicatedLogImplTest {
         log.appendAndPersist(logEntry1);
         verifyPersist(logEntry1);
 
-        verifyNoMoreInteractions(mockSnapshotManager);
         reset(mockPersistence);
 
         log.appendAndPersist(logEntry2);
         verifyPersist(logEntry2);
 
-        verify(mockSnapshotManager).capture(same(logEntry2), eq(1L));
 
         assertEquals("size", 2, log.size());
     }
@@ -149,21 +137,15 @@ public class ReplicatedLogImplTest {
         int dataSize = 600;
         MockReplicatedLogEntry logEntry = new MockReplicatedLogEntry(1, 2, new MockPayload("2", dataSize));
 
-        doReturn(true).when(mockSnapshotManager).capture(same(logEntry), eq(1L));
-
         log.appendAndPersist(logEntry);
         verifyPersist(logEntry);
 
-        verify(mockSnapshotManager).capture(same(logEntry), eq(1L));
-
-        reset(mockPersistence, mockSnapshotManager);
+        reset(mockPersistence);
 
         logEntry = new MockReplicatedLogEntry(1, 3, new MockPayload("3", 5));
 
         log.appendAndPersist(logEntry);
         verifyPersist(logEntry);
-
-        verifyNoMoreInteractions(mockSnapshotManager);
 
         assertEquals("size", 2, log.size());
     }

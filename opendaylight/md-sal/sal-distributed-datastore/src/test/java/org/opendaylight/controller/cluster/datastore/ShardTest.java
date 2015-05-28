@@ -121,6 +121,31 @@ import scala.concurrent.duration.FiniteDuration;
 public class ShardTest extends AbstractShardTest {
     private static final QName CARS_QNAME = QName.create("urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test:cars", "2014-03-13", "cars");
 
+    private static final String DUMMY_DATA = "Dummy data as snapshot sequence number is set to 0 in InMemorySnapshotStore and journal recovery seq number will start from 1";
+
+    final CountDownLatch recoveryComplete = new CountDownLatch(1);
+
+    protected Props newShardPropsWithRecoveryComplete() {
+
+        Creator<Shard> creator = new Creator<Shard>() {
+            @Override
+            public Shard create() throws Exception {
+                return new Shard(shardID, Collections.<String,String>emptyMap(),
+                        newDatastoreContext(), SCHEMA_CONTEXT) {
+                    @Override
+                    protected void onRecoveryComplete() {
+                        try {
+                            super.onRecoveryComplete();
+                        } finally {
+                            recoveryComplete.countDown();
+                        }
+                    }
+                };
+            }
+        };
+        return Props.create(new DelegatingShardCreator(creator)).withDispatcher(Dispatchers.DefaultDispatcherId());
+    }
+
     @Test
     public void testRegisterChangeListener() throws Exception {
         new ShardTestKit(getSystem()) {{
@@ -497,7 +522,9 @@ public class ShardTest extends AbstractShardTest {
     @Test
     public void testApplyStateWithCandidatePayload() throws Exception {
 
-        TestActorRef<Shard> shard = TestActorRef.create(getSystem(), newShardProps(), "testApplyState");
+        TestActorRef<Shard> shard = TestActorRef.create(getSystem(), newShardPropsWithRecoveryComplete(), "testApplyState");
+
+        recoveryComplete.await(5,  TimeUnit.SECONDS);
 
         NormalizedNode<?, ?> node = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
         DataTreeCandidate candidate = DataTreeCandidates.fromNormalizedNode(TestModel.TEST_PATH, node);
@@ -542,8 +569,10 @@ public class ShardTest extends AbstractShardTest {
         final DataTreeModification writeMod = source.takeSnapshot().newModification();
         writeMod.write(TestModel.OUTER_LIST_PATH, ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build());
 
+        InMemoryJournal.addEntry(shardID.toString(), 0, DUMMY_DATA);
+
         // Set up the InMemoryJournal.
-        InMemoryJournal.addEntry(shardID.toString(), 0, new ReplicatedLogImplEntry(0, 1, payloadForModification(source, writeMod)));
+        InMemoryJournal.addEntry(shardID.toString(), 1, new ReplicatedLogImplEntry(0, 1, payloadForModification(source, writeMod)));
 
         int nListEntries = 16;
         Set<Integer> listEntryKeys = new HashSet<>();
@@ -558,11 +587,11 @@ public class ShardTest extends AbstractShardTest {
             final DataTreeModification mod = source.takeSnapshot().newModification();
             mod.merge(path, ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, i));
 
-            InMemoryJournal.addEntry(shardID.toString(), i, new ReplicatedLogImplEntry(i, 1,
+            InMemoryJournal.addEntry(shardID.toString(), i+1, new ReplicatedLogImplEntry(i, 1,
                 payloadForModification(source, mod)));
         }
 
-        InMemoryJournal.addEntry(shardID.toString(), nListEntries + 1,
+        InMemoryJournal.addEntry(shardID.toString(), nListEntries + 2,
                 new ApplyJournalEntries(nListEntries));
 
         testRecovery(listEntryKeys);
@@ -576,7 +605,9 @@ public class ShardTest extends AbstractShardTest {
 
         // Set up the InMemoryJournal.
 
-        InMemoryJournal.addEntry(shardID.toString(), 0, new ReplicatedLogImplEntry(0, 1, newModificationPayload(
+        InMemoryJournal.addEntry(shardID.toString(), 0, DUMMY_DATA);
+
+        InMemoryJournal.addEntry(shardID.toString(), 1, new ReplicatedLogImplEntry(0, 1, newModificationPayload(
                   new WriteModification(TestModel.OUTER_LIST_PATH,
                           ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build()))));
 
@@ -590,11 +621,11 @@ public class ShardTest extends AbstractShardTest {
                     .nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, i).build();
             Modification mod = new MergeModification(path,
                     ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, i));
-            InMemoryJournal.addEntry(shardID.toString(), i, new ReplicatedLogImplEntry(i, 1,
+            InMemoryJournal.addEntry(shardID.toString(), i + 1, new ReplicatedLogImplEntry(i, 1,
                     newModificationPayload(mod)));
         }
 
-        InMemoryJournal.addEntry(shardID.toString(), nListEntries + 1,
+        InMemoryJournal.addEntry(shardID.toString(), nListEntries + 2,
                 new ApplyJournalEntries(nListEntries));
 
         testRecovery(listEntryKeys);
