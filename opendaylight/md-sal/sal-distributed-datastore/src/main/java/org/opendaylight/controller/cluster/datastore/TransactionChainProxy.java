@@ -187,7 +187,15 @@ final class TransactionChainProxy extends AbstractTransactionContextFactory<Loca
             return parent.findPrimaryShard(shardName);
         }
 
-        LOG.debug("Waiting for ready futures for on chain {}", getTransactionChainId());
+        final String previousTransactionId;
+
+        if(localState instanceof Pending){
+            previousTransactionId = ((Pending) localState).getIdentifier().toString();
+            LOG.debug("Waiting for ready futures on chain {} with pending Tx {}", getTransactionChainId(), previousTransactionId);
+        } else {
+            previousTransactionId = "";
+            LOG.debug("Waiting for ready futures on chain {}", getTransactionChainId());
+        }
 
         // Add a callback for completion of the combined Futures.
         final Promise<PrimaryShardInfo> returnPromise = akka.dispatch.Futures.promise();
@@ -197,10 +205,11 @@ final class TransactionChainProxy extends AbstractTransactionContextFactory<Loca
             public void onComplete(final Throwable failure, final Object notUsed) {
                 if (failure != null) {
                     // A Ready Future failed so fail the returned Promise.
+                    LOG.error("Ready future failed for Tx {} on chain {}", previousTransactionId, getTransactionChainId());
                     returnPromise.failure(failure);
                 } else {
-                    LOG.debug("Previous Tx readied - proceeding to FindPrimaryShard on chain {}",
-                            getTransactionChainId());
+                    LOG.debug("Previous Tx {} readied - proceeding to FindPrimaryShard on chain {}",
+                            previousTransactionId, getTransactionChainId());
 
                     // Send the FindPrimaryShard message and use the resulting Future to complete the
                     // returned Promise.
