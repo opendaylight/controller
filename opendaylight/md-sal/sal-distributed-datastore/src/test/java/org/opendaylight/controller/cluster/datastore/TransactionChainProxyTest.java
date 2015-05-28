@@ -203,8 +203,7 @@ public class TransactionChainProxyTest extends AbstractTransactionProxyTest {
 
         verifyOneBatchedModification(txActorRef1, new WriteModification(TestModel.TEST_PATH, writeNode1), true);
 
-        String tx2MemberName = "tx2MemberName";
-        doReturn(tx2MemberName).when(mockActorContext).getCurrentMemberName();
+        String tx2MemberName = "mock-member";
         ActorRef shardActorRef2 = setupActorContextWithoutInitialCreateTransaction(getSystem());
         ActorRef txActorRef2 = setupActorContextWithInitialCreateTransaction(getSystem(), READ_WRITE,
                 DataStoreVersions.CURRENT_VERSION, tx2MemberName, shardActorRef2);

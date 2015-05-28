@@ -47,7 +47,7 @@ public class DebugThreePhaseCommitCohortTest {
         List<Future<Object>> expCohortFutures = new ArrayList<>();
         doReturn(expCohortFutures).when(mockDelegate).getCohortFutures();
 
-        TransactionIdentifier transactionId = TransactionIdentifier.create("1", 1, "");
+        TransactionIdentifier transactionId = TransactionIdentifier.create("1", 1);
         Throwable debugContext = new RuntimeException("mock");
         DebugThreePhaseCommitCohort cohort = new DebugThreePhaseCommitCohort(transactionId , mockDelegate , debugContext );
 

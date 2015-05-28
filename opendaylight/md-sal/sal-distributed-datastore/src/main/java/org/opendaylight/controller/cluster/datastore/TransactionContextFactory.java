@@ -36,7 +36,7 @@ final class TransactionContextFactory extends AbstractTransactionContextFactory<
 
     @Override
     protected TransactionIdentifier nextIdentifier() {
-        return TransactionIdentifier.create(getMemberName(), TX_COUNTER.getAndIncrement(), null);
+        return TransactionIdentifier.create(getMemberName(), TX_COUNTER.getAndIncrement());
     }
 
     @Override

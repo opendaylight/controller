@@ -38,7 +38,7 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
     public ListenableFuture<Boolean> canCommit() {
         try {
             dataTree.getDataTree().validate(dataTreeModification());
-            LOG.debug("Transaction {} validated", transaction);
+            LOG.trace("Transaction {} validated", transaction);
             return TRUE_FUTURE;
         } catch (Exception e) {
             return Futures.immediateFailedFuture(e);
@@ -53,7 +53,7 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
              * FIXME: this is the place where we should be interacting with persistence, specifically by invoking
              *        persist on the candidate (which gives us a Future).
              */
-            LOG.debug("Transaction {} prepared candidate {}", transaction, candidate);
+            LOG.trace("Transaction {} prepared candidate {}", transaction, candidate);
             return VOID_FUTURE;
         } catch (Exception e) {
             LOG.debug("Transaction {} failed to prepare", transaction, e);
@@ -84,7 +84,7 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
             return Futures.immediateFailedFuture(e);
         }
 
-        LOG.debug("Transaction {} committed, proceeding to notify", transaction);
+        LOG.trace("Transaction {} committed, proceeding to notify", transaction);
         dataTree.notifyListeners(candidate);
         return VOID_FUTURE;
     }
