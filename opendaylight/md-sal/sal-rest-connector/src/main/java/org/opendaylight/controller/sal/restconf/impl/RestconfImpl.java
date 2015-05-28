@@ -568,8 +568,7 @@ public class RestconfImpl implements RestconfService {
                 .withChild(ImmutableNodes.leafNode(streamNameQname, streamName)).build();
 
         if (!Notificator.existListenerFor(streamName)) {
-            final YangInstanceIdentifier normalizedPathIdentifier = controllerContext.toNormalized(pathIdentifier);
-            Notificator.createListener(normalizedPathIdentifier, streamName);
+            Notificator.createListener(pathIdentifier, streamName);
         }
 
         final DOMRpcResult defaultDOMRpcResult = new DefaultDOMRpcResult(output);
