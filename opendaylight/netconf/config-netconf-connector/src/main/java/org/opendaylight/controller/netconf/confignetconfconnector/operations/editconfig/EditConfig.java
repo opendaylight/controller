@@ -155,11 +155,16 @@ public class EditConfig extends AbstractConfigNetconfOperation {
                 for (Map.Entry<String, Services.ServiceInstance> refNameToServiceEntry : refNameToInstance.entrySet()) {
                     ObjectName on = refNameToServiceEntry.getValue().getObjectName(ta.getTransactionName());
                     try {
-                        ObjectName saved = ta.saveServiceReference(qnameOfService, refNameToServiceEntry.getKey(), on);
-                        LOG.debug("Saving service {} with on {} under name {} with service on {}", qnameOfService,
-                                on, refNameToServiceEntry.getKey(), saved);
+                        if (Services.PROVIDER_FOR_DELETION.equals(refNameToServiceEntry.getValue().toString())) {
+                            ta.removeServiceReference(qnameOfService, refNameToServiceEntry.getKey());
+                            LOG.debug("Removing service {} with name {}", qnameOfService, refNameToServiceEntry.getKey());
+                        } else {
+                            ObjectName saved = ta.saveServiceReference(qnameOfService, refNameToServiceEntry.getKey(), on);
+                            LOG.debug("Saving service {} with on {} under name {} with service on {}", qnameOfService,
+                                    on, refNameToServiceEntry.getKey(), saved);
+                        }
                     } catch (InstanceNotFoundException e) {
-                        throw new NetconfDocumentedException(String.format("Unable to save ref name " + refNameToServiceEntry.getKey() + " for instance " + on, e),
+                        throw new NetconfDocumentedException(String.format("Unable to edit ref name " + refNameToServiceEntry.getKey() + " for instance " + on, e),
                                 ErrorType.application,
                                 ErrorTag.operation_failed,
                                 ErrorSeverity.error);

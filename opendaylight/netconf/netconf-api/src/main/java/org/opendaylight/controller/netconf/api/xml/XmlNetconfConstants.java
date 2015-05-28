@@ -49,6 +49,8 @@ public final class XmlNetconfConstants {
     public static final String MESSAGE_ID = "message-id";
     public static final String SESSION_ID = "session-id";
 
+    public static final String DELETE_VALUE = "delete";
+
     //
     // TODO duplicate
     public static final String RFC4741_TARGET_NAMESPACE = "urn:ietf:params:xml:ns:netconf:base:1.0";

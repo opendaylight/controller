@@ -32,6 +32,8 @@ public final class Services {
     private static final String NAME_KEY = "name";
     public static final String TYPE_KEY = "type";
     public static final String SERVICE_KEY = "service";
+    public static final String PROVIDER_FOR_DELETION = "/modules/module[type='empty-provider'][name='empty-provider']";
+
 
     private final Map<String /*Namespace*/, Map<String/* ServiceName */, Map<String/* refName */, ServiceInstance>>> namespaceToServiceNameToRefNameToInstance = Maps
             .newHashMap();
@@ -114,12 +116,20 @@ public final class Services {
                 XmlElement nameElement = instance.getOnlyChildElement(NAME_KEY);
                 String refName = nameElement.getTextContent();
 
-                XmlElement providerElement = instance.getOnlyChildElement(PROVIDER_KEY);
-                String providerName = providerElement.getTextContent();
+                if (!XmlNetconfConstants.DELETE_VALUE.equals(
+                        instance.getAttribute(
+                                XmlNetconfConstants.OPERATION_ATTR_KEY,
+                                XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0)))
+                {
+                    XmlElement providerElement = instance.getOnlyChildElement(PROVIDER_KEY);
+                    String providerName = providerElement.getTextContent();
 
-                instance.checkUnrecognisedElements(nameElement, providerElement);
+                    instance.checkUnrecognisedElements(nameElement, providerElement);
 
-                innerMap.put(refName, providerName);
+                    innerMap.put(refName, providerName);
+                } else {
+                    innerMap.put(refName, PROVIDER_FOR_DELETION);
+                }
             }
         }
 
