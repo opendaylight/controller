@@ -9,10 +9,17 @@
 package org.opendaylight.controller.cluster.datastore.identifiers;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
 
 public class TransactionIdentifier {
-    private static final String TX_SEPARATOR = "-txn-";
+    protected static final String TX_SEPARATOR = "-txn-";
+
+    protected String getMemberName() {
+        return memberName;
+    }
+
+    protected long getCounter() {
+        return counter;
+    }
 
     private final String memberName;
     private final long counter;
@@ -27,12 +34,8 @@ public class TransactionIdentifier {
         return "";
     }
 
-    public static TransactionIdentifier create(String memberName, long counter, String chainId) {
-        if (Strings.isNullOrEmpty(chainId)) {
-            return new TransactionIdentifier(memberName, counter);
-        } else {
-            return new ChainedTransactionIdentifier(memberName, counter, chainId);
-        }
+    public static TransactionIdentifier create(String memberName, long counter) {
+        return new TransactionIdentifier(memberName, counter);
     }
 
     @Override
@@ -72,4 +75,5 @@ public class TransactionIdentifier {
 
         return stringRepresentation;
     }
+
 }
