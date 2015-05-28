@@ -32,6 +32,7 @@ public class V6FlowMod extends OFVendor implements Cloneable {
     private static final long serialVersionUID = 1L;
     protected V6Match match;
     protected long cookie;
+    protected short tableId;
     protected short command;
     protected short idleTimeout;
     protected short hardTimeout;
@@ -85,6 +86,14 @@ public class V6FlowMod extends OFVendor implements Cloneable {
      */
     public void setCookie(long cookie) {
         this.cookie = cookie;
+    }
+
+    /**
+     * Sets the tableId field of V6FlowMod message
+     * @param tableId   TableId type of the message (ADD or DELETE)
+     */
+    public void setTableId(short tableId) {
+        this.tableId = tableId;
     }
 
     /**
@@ -175,6 +184,7 @@ public class V6FlowMod extends OFVendor implements Cloneable {
         super.writeTo(data);
         data.putInt(getIPv6ExtensionFlowModAddSubType());
         data.putLong(this.cookie);
+        data.putShort(tableId);
         data.putShort(command); /* should be OFPFC_ADD, OFPFC_DELETE_STRICT, etc*/
         data.putShort(this.idleTimeout);
         data.putShort(this.hardTimeout);
@@ -232,12 +242,12 @@ public class V6FlowMod extends OFVendor implements Cloneable {
     @Override
     public String toString() {
         return "V6FlowMod [match=" + match + ", cookie=" + cookie
-                + ", command=" + command + ", idleTimeout=" + idleTimeout
-                + ", hardTimeout=" + hardTimeout + ", priority=" + priority
-                + ", bufferId=" + bufferId + ", outPort=" + outPort
-                + ", flags=" + flags + ", actions=" + actions + ", match_len="
-                + match_len + ", actions_len=" + actions_len + ", pad_size="
-                + pad_size + "]";
+                + ", tableId=" + tableId + ", command=" + command
+                + ", idleTimeout=" + idleTimeout + ", hardTimeout=" + hardTimeout
+                + ", priority=" + priority + ", bufferId=" + bufferId
+                + ", outPort=" + outPort + ", flags=" + flags
+                + ", actions=" + actions + ", match_len=" + match_len
+                + ", actions_len=" + actions_len + ", pad_size=" + pad_size + "]";
     }
 
 }

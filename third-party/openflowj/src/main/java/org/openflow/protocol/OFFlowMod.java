@@ -26,6 +26,7 @@ public class OFFlowMod extends OFMessage implements OFActionFactoryAware, Clonea
     protected OFActionFactory actionFactory;
     protected OFMatch match;
     protected long cookie;
+    protected short tableId;
     protected short command;
     protected short idleTimeout;
     protected short hardTimeout;
@@ -72,6 +73,23 @@ public class OFFlowMod extends OFMessage implements OFActionFactoryAware, Clonea
      */
     public OFFlowMod setCookie(long cookie) {
         this.cookie = cookie;
+        return this;
+    }
+
+    /**
+     * Get tableId
+     * @return
+     */
+    public short getTableId() {
+        return this.tableId;
+    }
+
+    /**
+     * Set tableId
+     * @param tableId
+     */
+    public OFFlowMod setTableId(short tableId) {
+        this.tableId = tableId;
         return this;
     }
 
@@ -228,6 +246,7 @@ public class OFFlowMod extends OFMessage implements OFActionFactoryAware, Clonea
             this.match = new OFMatch();
         this.match.readFrom(data);
         this.cookie = data.getLong();
+        this.tableId = data.getShort();
         this.command = data.getShort();
         this.idleTimeout = data.getShort();
         this.hardTimeout = data.getShort();
@@ -246,6 +265,7 @@ public class OFFlowMod extends OFMessage implements OFActionFactoryAware, Clonea
         super.writeTo(data);
         this.match.writeTo(data);
         data.putLong(cookie);
+        data.putShort(tableId);
         data.putShort(command);
         data.putShort(idleTimeout);
         data.putShort(hardTimeout);
@@ -271,6 +291,7 @@ public class OFFlowMod extends OFMessage implements OFActionFactoryAware, Clonea
         int result = super.hashCode();
         result = prime * result + ((actions == null) ? 0 : actions.hashCode());
         result = prime * result + bufferId;
+        result = prime * result + tableId;
         result = prime * result + command;
         result = prime * result + (int) (cookie ^ (cookie >>> 32));
         result = prime * result + flags;
@@ -302,6 +323,9 @@ public class OFFlowMod extends OFMessage implements OFActionFactoryAware, Clonea
             return false;
         }
         if (bufferId != other.bufferId) {
+            return false;
+        }
+        if (tableId != other.tableId) {
             return false;
         }
         if (command != other.command) {
@@ -361,11 +385,11 @@ public class OFFlowMod extends OFMessage implements OFActionFactoryAware, Clonea
     @Override
     public String toString() {
         return "OFFlowMod [actionFactory=" + actionFactory + ", actions="
-                + actions + ", bufferId=" + bufferId + ", command=" + command
-                + ", cookie=" + cookie + ", flags=" + flags + ", hardTimeout="
-                + hardTimeout + ", idleTimeout=" + idleTimeout + ", match="
-                + match + ", outPort=" + outPort + ", priority=" + priority
-                + ", length=" + length + ", type=" + type + ", version="
-                + version + ", xid=" + xid + "]";
+                + actions + ", bufferId=" + bufferId + ", tableId=" + tableId
+                + ", command=" + command + ", cookie=" + cookie + ", flags="
+                + flags + ", hardTimeout=" + hardTimeout + ", idleTimeout="
+                + idleTimeout + ", match=" + match + ", outPort=" + outPort
+                + ", priority=" + priority + ", length=" + length + ", type="
+                + type + ", version=" + version + ", xid=" + xid + "]";
     }
 }

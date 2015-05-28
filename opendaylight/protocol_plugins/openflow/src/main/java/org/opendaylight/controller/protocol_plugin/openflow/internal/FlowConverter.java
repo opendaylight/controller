@@ -453,6 +453,7 @@ public class FlowConverter {
         if (!isIPv6) {
             ((OFFlowMod) fm).setMatch(this.ofMatch);
             ((OFFlowMod) fm).setActions(this.actionsList);
+            ((OFFlowMod) fm).setTableId(flow.getTableId());
             ((OFFlowMod) fm).setPriority(flow.getPriority());
             ((OFFlowMod) fm).setCookie(flow.getId());
             ((OFFlowMod) fm).setBufferId(OFPacketOut.BUFFER_ID_NONE);
@@ -473,6 +474,7 @@ public class FlowConverter {
             ((V6FlowMod) fm).setVendor();
             ((V6FlowMod) fm).setMatch((V6Match) ofMatch);
             ((V6FlowMod) fm).setActions(this.actionsList);
+            ((V6FlowMod) fm).setTableId(flow.getTableId());
             ((V6FlowMod) fm).setPriority(flow.getPriority());
             ((V6FlowMod) fm).setCookie(flow.getId());
             ((V6FlowMod) fm).setLength(U16.t(OFVendor.MINIMUM_LENGTH

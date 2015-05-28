@@ -41,6 +41,8 @@ public class Flow implements Cloneable, Serializable {
     @XmlElement
     private List<Action> actions;
     @XmlElement
+    private short tableId;
+    @XmlElement
     private short priority;
     @XmlElement
     private short idleTimeout;
@@ -181,6 +183,7 @@ public class Flow implements Cloneable, Serializable {
         result = prime * result + idleTimeout;
         result = prime * result + ((match == null) ? 0 : match.hashCode());
         result = prime * result + priority;
+        result = prime * result + tableId;
         return result;
     }
 
@@ -222,13 +225,25 @@ public class Flow implements Cloneable, Serializable {
         if (priority != other.priority) {
             return false;
         }
+        if (tableId != other.tableId) {
+            return false;
+        }
         return true;
     }
 
     @Override
     public String toString() {
-        return "Flow[match = " + match + ", actions = " + actions + ", priority = " + priority + ", id = " + id
+        return "Flow[match = " + match + ", actions = " + actions + ", tableId = " + tableId
+                + ", priority = " + priority + ", id = " + id
                 + ", idleTimeout = " + idleTimeout + ", hardTimeout = " + hardTimeout + "]";
+    }
+
+    public short getTableId() {
+        return tableId;
+    }
+
+    public void setTableId(short tableId) {
+        this.tableId = tableId;
     }
 
     public short getPriority() {
