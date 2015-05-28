@@ -38,6 +38,10 @@
             <param-name>allowedHeaders</param-name>
             <param-value>origin, content-type, accept, authorization</param-value>
         </init-param>
+        <init-param>
+            <param-name>exposedHeaders</param-name>
+            <param-value>location</param-value>
+        </init-param>
     </filter>
     <filter-mapping>
         <filter-name>cross-origin-restconf</filter-name>
