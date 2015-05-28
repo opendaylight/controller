@@ -27,7 +27,6 @@ import org.opendaylight.yangtools.yang.binding.RpcService;
 import org.opendaylight.yangtools.yang.binding.util.BindingReflections;
 import org.opendaylight.yangtools.yang.binding.util.RpcServiceInvoker;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.common.QNameModule;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -40,7 +39,7 @@ public class BindingDOMRpcImplementationAdapter implements DOMRpcImplementation 
     private final BindingNormalizedNodeCodecRegistry codec;
     private final RpcServiceInvoker invoker;
     private final RpcService delegate;
-    private final QNameModule module;
+    private final QName inputQname;
 
     public <T extends RpcService> BindingDOMRpcImplementationAdapter(final BindingNormalizedNodeCodecRegistry codec, final Class<T> type, final Map<SchemaPath, Method> localNameToMethod, final T delegate) {
         try {
@@ -56,11 +55,7 @@ public class BindingDOMRpcImplementationAdapter implements DOMRpcImplementation 
 
         this.codec = Preconditions.checkNotNull(codec);
         this.delegate = Preconditions.checkNotNull(delegate);
-        module = BindingReflections.getQNameModule(type);
-    }
-
-    public QNameModule getQNameModule() {
-        return module;
+        inputQname = QName.cachedReference(QName.create(BindingReflections.getQNameModule(type), "input"));
     }
 
     @Override
@@ -75,10 +70,9 @@ public class BindingDOMRpcImplementationAdapter implements DOMRpcImplementation 
         if (input instanceof LazySerializedContainerNode) {
             return ((LazySerializedContainerNode) input).bindingData();
         }
-        final SchemaPath inputSchemaPath = rpcPath.createChild(QName.create(module,"input"));
+        final SchemaPath inputSchemaPath = rpcPath.createChild(inputQname);
         return codec.fromNormalizedNodeRpcData(inputSchemaPath, (ContainerNode) input);
     }
-
 
     private ListenableFuture<RpcResult<?>> invoke(final SchemaPath schemaPath, final DataObject input) {
         return JdkFutureAdapters.listenInPoolThread(invoker.invokeRpc(delegate, schemaPath.getLastComponent(), input));
