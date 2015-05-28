@@ -101,16 +101,13 @@ public class LLDPTest {
         offset = checkTLV(serialized, offset, (byte) 0b00000010, "ChassisID", CHASSIS_ID_LENGTH, CHASSIS_ID_VALUE);
         offset = checkTLV(serialized, offset, (byte) 0b00000110, "TTL", TTL_LENGTH, TTL_VALUE);
         offset = checkTLV(serialized, offset, (byte) 0b00000100, "PortID", PORT_LENGTH, PORT_VALUE);
-        offset = checkTLV(serialized, offset, (byte) 0b00001010, "SystemName", SYSTEM_NAME_LENGTH,
-                SYSTEM_NAME_VALUE);
-        offset = checkTLV(serialized, offset, (byte) 0b00010000, "System capabilities",
-                SYSTEM_CAPABILITIES_LENGTH, SYSTEM_CAPABILITIES_VALUE);
-        offset = checkTLV(serialized, offset, (byte) 0b11111110, "Custom subtype A",
-                CUSTOM_SUBTYPE_A_LENGTH, CUSTOM_SUBTYPE_A_VALUE, OUI[0], OUI[1], OUI[2],
-                OUI_SUBTYPE_A[0]);
-        offset = checkTLV(serialized, offset, (byte) 0b11111110, "Custom subtype B",
-                CUSTOM_SUBTYPE_B_LENGTH, CUSTOM_SUBTYPE_B_VALUE, OUI[0], OUI[1], OUI[2],
-                OUI_SUBTYPE_B[0]);
+        offset = checkTLV(serialized, offset, (byte) 0b00001010, "SystemName", SYSTEM_NAME_LENGTH, SYSTEM_NAME_VALUE);
+        offset = checkTLV(serialized, offset, (byte) 0b00010000, "System capabilities", SYSTEM_CAPABILITIES_LENGTH,
+                SYSTEM_CAPABILITIES_VALUE);
+        offset = checkTLV(serialized, offset, (byte) 0b11111110, "Custom subtype A", CUSTOM_SUBTYPE_A_LENGTH,
+                CUSTOM_SUBTYPE_A_VALUE, OUI[0], OUI[1], OUI[2], OUI_SUBTYPE_A[0]);
+        offset = checkTLV(serialized, offset, (byte) 0b11111110, "Custom subtype B", CUSTOM_SUBTYPE_B_LENGTH,
+                CUSTOM_SUBTYPE_B_VALUE, OUI[0], OUI[1], OUI[2], OUI_SUBTYPE_B[0]);
 
     }
 
@@ -123,17 +120,16 @@ public class LLDPTest {
     @Test
     public void testDeserialize() throws Exception {
 
-        byte[] rawLldpTlv = Bytes.concat(
-                awaitedBytes((byte) 0b00000010, CHASSIS_ID_LENGTH, CHASSIS_ID_VALUE, null),
-                awaitedBytes((byte) 0b00000110, TTL_LENGTH, TTL_VALUE, null),
-                awaitedBytes((byte) 0b00000100, PORT_LENGTH, PORT_VALUE, null),
-                awaitedBytes((byte) 0b00001010, SYSTEM_NAME_LENGTH, SYSTEM_NAME_VALUE, null),
-                awaitedBytes((byte) 0b00010010, SYSTEM_CAPABILITIES_LENGTH,
-                        SYSTEM_CAPABILITIES_VALUE, null),
-                awaitedBytes((byte) 0b11111110, CUSTOM_SUBTYPE_A_LENGTH, CUSTOM_SUBTYPE_A_VALUE,
-                        BYTES_BEFORE_CUSTOM_A),
-                awaitedBytes((byte) 0b11111110, CUSTOM_SUBTYPE_B_LENGTH, CUSTOM_SUBTYPE_B_VALUE,
-                        BYTES_BEFORE_CUSTOM_B));
+        byte[] rawLldpTlv = Bytes
+                .concat(awaitedBytes((byte) 0b00000010, CHASSIS_ID_LENGTH, CHASSIS_ID_VALUE, null),
+                        awaitedBytes((byte) 0b00000110, TTL_LENGTH, TTL_VALUE, null),
+                        awaitedBytes((byte) 0b00000100, PORT_LENGTH, PORT_VALUE, null),
+                        awaitedBytes((byte) 0b00001010, SYSTEM_NAME_LENGTH, SYSTEM_NAME_VALUE, null),
+                        awaitedBytes((byte) 0b00010010, SYSTEM_CAPABILITIES_LENGTH, SYSTEM_CAPABILITIES_VALUE, null),
+                        awaitedBytes((byte) 0b11111110, CUSTOM_SUBTYPE_A_LENGTH, CUSTOM_SUBTYPE_A_VALUE,
+                                BYTES_BEFORE_CUSTOM_A),
+                        awaitedBytes((byte) 0b11111110, CUSTOM_SUBTYPE_B_LENGTH, CUSTOM_SUBTYPE_B_VALUE,
+                                BYTES_BEFORE_CUSTOM_B));
 
         lldpBuilder.deserialize(rawLldpTlv, 0, rawLldpTlv.length * NetUtils.NumBitsInAByte);
         Assert.assertEquals("chassis", new String(lldpBuilder.getChassisId().getValue()));
@@ -168,6 +164,7 @@ public class LLDPTest {
 
     /**
      * Test of {@link LLDP#addCustomTLV(LLDPTLV)}
+     *
      * @throws PacketException
      */
     @Test
@@ -218,15 +215,11 @@ public class LLDPTest {
         Assert.assertEquals(127, customItem.getType());
         LOG.debug("custom TLV1.length: {}", customItem.getLength());
         Assert.assertEquals(expectedValue,
-                new String(
-                        LLDPTLV.getCustomString(
-                                customItem.getValue(),
-                                customItem.getLength()))
-        );
+                new String(LLDPTLV.getCustomString(customItem.getValue(), customItem.getLength())));
     }
 
-    private static int checkTLV(byte[] serializedData, int offset, byte typeTLVBits, String typeTLVName, short lengthTLV,
-            byte[] valueTLV, byte... bytesBeforeValue) throws ArrayComparisonFailure {
+    private static int checkTLV(byte[] serializedData, int offset, byte typeTLVBits, String typeTLVName,
+            short lengthTLV, byte[] valueTLV, byte... bytesBeforeValue) throws ArrayComparisonFailure {
         byte[] concreteTlvAwaited = awaitedBytes(typeTLVBits, lengthTLV, valueTLV, bytesBeforeValue);
         int concreteTlvAwaitLength = concreteTlvAwaited.length;
         assertArrayEquals("Serialization problem " + typeTLVName, concreteTlvAwaited,
