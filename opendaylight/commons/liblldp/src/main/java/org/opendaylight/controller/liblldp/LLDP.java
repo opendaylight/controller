@@ -24,7 +24,7 @@ public class LLDP extends Packet {
     private static final String PORTID = "PortId";
     private static final String TTL = "TTL";
     private static final int LLDPDefaultTlvs = 3;
-    private static LLDPTLV emptyTLV = new LLDPTLV().setLength((short) 0).setType((byte) 0);
+    private static final LLDPTLV emptyTLV = new LLDPTLV().setLength((short) 0).setType((byte) 0);
     public static final byte[] LLDPMulticastMac = { 1, (byte) 0x80, (byte) 0xc2, 0, 0, (byte) 0xe };
 
     private Map<Byte, LLDPTLV> mandatoryTLVs;
