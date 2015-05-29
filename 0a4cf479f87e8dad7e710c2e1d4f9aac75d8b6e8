@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a9dcd25_abc5635c",
+        "filename": "opendaylight/netconf/config-netconf-connector/src/main/java/org/opendaylight/controller/netconf/confignetconfconnector/mapping/config/Services.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-05-29T09:16:00Z",
+      "side": 1,
+      "message": "Id put the empty provider string into a constant as well, to make the code more readable .. and then use \u003d\u003d instad of isEmpty above.",
+      "range": {
+        "startLine": 132,
+        "startChar": 42,
+        "endLine": 132,
+        "endChar": 46
+      },
+      "revId": "0a4cf479f87e8dad7e710c2e1d4f9aac75d8b6e8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_eb928b56",
+        "filename": "opendaylight/netconf/config-netconf-connector/src/main/java/org/opendaylight/controller/netconf/confignetconfconnector/operations/editconfig/EditConfig.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-05-29T09:16:00Z",
+      "side": 1,
+      "message": "Equals can be replaced with \u003d\u003d . We want to check whether it is the same object, not an equal object. \n\nIf equals method is not implemented in the ServiceInstance class, then \u003d\u003d and equals is the same. But if equals was present there, then this if would match every ServiceInstance instance with arguments \"\", \"\". Its most likely harmless in current situation, but using \u003d\u003d is safe.",
+      "range": {
+        "startLine": 159,
+        "startChar": 67,
+        "endLine": 159,
+        "endChar": 73
+      },
+      "revId": "0a4cf479f87e8dad7e710c2e1d4f9aac75d8b6e8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
