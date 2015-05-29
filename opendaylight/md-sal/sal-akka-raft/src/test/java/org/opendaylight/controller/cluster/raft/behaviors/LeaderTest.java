@@ -906,7 +906,7 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
             Leader leader = new Leader(leaderActorContext);
 
             AppendEntries appendEntries = AppendEntries.fromSerializable(
-                    MessageCollectorActor.getFirstMatching(followerActor, AppendEntriesMessages.AppendEntries.class));
+                    MessageCollectorActor.expectFirstMatching(followerActor, AppendEntriesMessages.AppendEntries.class));
             assertNotNull(appendEntries);
 
             assertEquals(1, appendEntries.getLeaderCommit());
@@ -970,7 +970,7 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
 
             // Initial heartbeat
             AppendEntries appendEntries = AppendEntries.fromSerializable(
-                    MessageCollectorActor.getFirstMatching(followerActor, AppendEntriesMessages.AppendEntries.class));
+                    MessageCollectorActor.expectFirstMatching(followerActor, AppendEntriesMessages.AppendEntries.class));
             assertNotNull(appendEntries);
 
             assertEquals(1, appendEntries.getLeaderCommit());
