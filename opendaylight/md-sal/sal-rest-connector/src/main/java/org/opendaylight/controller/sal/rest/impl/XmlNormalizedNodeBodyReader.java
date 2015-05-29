@@ -132,7 +132,7 @@ public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPro
         }
 
         final String docRootElm = doc.getDocumentElement().getLocalName();
-        List<YangInstanceIdentifier.PathArgument> iiToDataList = new ArrayList<>();
+        final List<YangInstanceIdentifier.PathArgument> iiToDataList = new ArrayList<>();
         InstanceIdentifierContext<SchemaNode> outIIContext;
 
 
@@ -143,7 +143,7 @@ public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPro
         if (isPost()) {
             final Deque<Object> foundSchemaNodes = findPathToSchemaNodeByName(schemaNode, docRootElm);
             while (!foundSchemaNodes.isEmpty()) {
-                Object child  = foundSchemaNodes.pop();
+                final Object child  = foundSchemaNodes.pop();
                 if (child instanceof AugmentationSchema) {
                     final AugmentationSchema augmentSchemaNode = (AugmentationSchema) child;
                     iiToDataList.add(SchemaUtils.getNodeIdentifierForAugmentation(augmentSchemaNode));
@@ -161,11 +161,13 @@ public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPro
         } else if(schemaNode instanceof ListSchemaNode) {
             final ListSchemaNode casted = (ListSchemaNode) schemaNode;
             parsed = parserFactory.getMapEntryNodeParser().parse(elements, casted);
-            iiToDataList.add(parsed.getIdentifier());
+            if (isPost()) {
+                iiToDataList.add(parsed.getIdentifier());
+            }
         }
         // FIXME : add another DataSchemaNode extensions e.g. LeafSchemaNode
 
-        YangInstanceIdentifier fullIIToData = YangInstanceIdentifier.create(Iterables.concat(
+        final YangInstanceIdentifier fullIIToData = YangInstanceIdentifier.create(Iterables.concat(
                 pathContext.getInstanceIdentifier().getPathArguments(), iiToDataList));
 
         outIIContext = new InstanceIdentifierContext<>(fullIIToData, pathContext.getSchemaNode(), pathContext.getMountPoint(),
@@ -174,7 +176,7 @@ public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPro
         return new NormalizedNodeContext(outIIContext, parsed);
     }
 
-    private static Deque<Object> findPathToSchemaNodeByName(DataSchemaNode schemaNode, String elementName) {
+    private static Deque<Object> findPathToSchemaNodeByName(final DataSchemaNode schemaNode, final String elementName) {
         final Deque<Object> result = new ArrayDeque<>();
         final ArrayList<ChoiceSchemaNode> choiceSchemaNodes = new ArrayList<>();
         final Collection<DataSchemaNode> children = ((DataNodeContainer) schemaNode).getChildNodes();
@@ -213,8 +215,8 @@ public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPro
 
     private static AugmentationSchema findCorrespondingAugment(final DataSchemaNode parent, final DataSchemaNode child) {
         if (parent instanceof AugmentationTarget && !(parent instanceof ChoiceSchemaNode)) {
-            for (AugmentationSchema augmentation : ((AugmentationTarget) parent).getAvailableAugmentations()) {
-                DataSchemaNode childInAugmentation = augmentation.getDataChildByName(child.getQName());
+            for (final AugmentationSchema augmentation : ((AugmentationTarget) parent).getAvailableAugmentations()) {
+                final DataSchemaNode childInAugmentation = augmentation.getDataChildByName(child.getQName());
                 if (childInAugmentation != null) {
                     return augmentation;
                 }
