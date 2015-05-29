@@ -217,13 +217,13 @@ public class Shard extends RaftActor {
     @Override
     public void onReceiveRecover(Object message) throws Exception {
         if(LOG.isDebugEnabled()) {
-            LOG.debug("onReceiveRecover: Received message {} from {}",
+            LOG.debug("{}: onReceiveRecover: Received message {} from {}", persistenceId(),
                 message.getClass().toString(),
                 getSender());
         }
 
         if (message instanceof RecoveryFailure){
-            LOG.error("Recovery failed because of this cause", ((RecoveryFailure) message).cause());
+            LOG.error("{}: Recovery failed because of this cause", persistenceId(), ((RecoveryFailure) message).cause());
 
             // Even though recovery failed, we still need to finish our recovery, eg send the
             // ActorInitialized message and start the txCommitTimeoutCheckSchedule.
@@ -235,10 +235,6 @@ public class Shard extends RaftActor {
 
     @Override
     public void onReceiveCommand(Object message) throws Exception {
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("onReceiveCommand: Received message {} from {}", message, getSender());
-        }
-
         if(message.getClass().equals(ReadDataReply.SERIALIZABLE_CLASS)) {
             handleReadDataReply(message);
         } else if (message.getClass().equals(CreateTransaction.SERIALIZABLE_CLASS)) {
@@ -278,8 +274,8 @@ public class Shard extends RaftActor {
         if(cohortEntry != null) {
             long elapsed = System.currentTimeMillis() - cohortEntry.getLastAccessTime();
             if(elapsed > transactionCommitTimeout) {
-                LOG.warn("Current transaction {} has timed out after {} ms - aborting",
-                        cohortEntry.getTransactionID(), transactionCommitTimeout);
+                LOG.warn("{}: Current transaction {} has timed out after {} ms - aborting",
+                        persistenceId(), cohortEntry.getTransactionID(), transactionCommitTimeout);
 
                 doAbortTransaction(cohortEntry.getTransactionID(), null);
             }
@@ -289,7 +285,7 @@ public class Shard extends RaftActor {
     private void handleCommitTransaction(CommitTransaction commit) {
         final String transactionID = commit.getTransactionID();
 
-        LOG.debug("Committing transaction {}", transactionID);
+        LOG.debug("{}: Committing transaction {}", persistenceId(), transactionID);
 
         // Get the current in-progress cohort entry in the commitCoordinator if it corresponds to
         // this transaction.
@@ -298,8 +294,8 @@ public class Shard extends RaftActor {
             // We're not the current Tx - the Tx was likely expired b/c it took too long in
             // between the canCommit and commit messages.
             IllegalStateException ex = new IllegalStateException(
-                    String.format("Cannot commit transaction %s - it is not the current transaction",
-                            transactionID));
+                    String.format("%s: Cannot commit transaction %s - it is not the current transaction",
+                            persistenceId(), transactionID));
             LOG.error(ex.getMessage());
             shardMBean.incrementFailedTransactionsCount();
             getSender().tell(new akka.actor.Status.Failure(ex), getSelf());
@@ -319,9 +315,9 @@ public class Shard extends RaftActor {
 
             Shard.this.persistData(getSender(), transactionID,
                     new CompositeModificationByteStringPayload(cohortEntry.getModification().toSerializable()));
-        } catch (InterruptedException | ExecutionException e) {
-            LOG.error("An exception occurred while preCommitting transaction {}",
-                    cohortEntry.getTransactionID(), e);
+        } catch (Exception e) {
+            LOG.error("{}: An exception occurred while preCommitting transaction {}",
+                    persistenceId(), cohortEntry.getTransactionID(), e);
             shardMBean.incrementFailedTransactionsCount();
             getSender().tell(new akka.actor.Status.Failure(e), getSelf());
         }
@@ -349,8 +345,8 @@ public class Shard extends RaftActor {
                 // This really shouldn't happen - it likely means that persistence or replication
                 // took so long to complete such that the cohort entry was expired from the cache.
                 IllegalStateException ex = new IllegalStateException(
-                        String.format("Could not finish committing transaction %s - no CohortEntry found",
-                                transactionID));
+                        String.format("%s: Could not finish committing transaction %s - no CohortEntry found",
+                                persistenceId(), transactionID));
                 LOG.error(ex.getMessage());
                 sender.tell(new akka.actor.Status.Failure(ex), getSelf());
             }
@@ -358,7 +354,7 @@ public class Shard extends RaftActor {
             return;
         }
 
-        LOG.debug("Finishing commit for transaction {}", cohortEntry.getTransactionID());
+        LOG.debug("{}: Finishing commit for transaction {}", persistenceId(), cohortEntry.getTransactionID());
 
         try {
             // We block on the future here so we don't have to worry about possibly accessing our
@@ -371,10 +367,10 @@ public class Shard extends RaftActor {
             shardMBean.incrementCommittedTransactionCount();
             shardMBean.setLastCommittedTransactionTime(System.currentTimeMillis());
 
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (Exception e) {
             sender.tell(new akka.actor.Status.Failure(e), getSelf());
 
-            LOG.error("An exception occurred while committing transaction {}", transactionID, e);
+            LOG.error("{}: An exception occurred while committing transaction {}", persistenceId(), transactionID, e);
             shardMBean.incrementFailedTransactionsCount();
         }
 
@@ -382,12 +378,12 @@ public class Shard extends RaftActor {
     }
 
     private void handleCanCommitTransaction(CanCommitTransaction canCommit) {
-        LOG.debug("Can committing transaction {}", canCommit.getTransactionID());
+        LOG.debug("{}: Can committing transaction {}", persistenceId(), canCommit.getTransactionID());
         commitCoordinator.handleCanCommit(canCommit, getSender(), self());
     }
 
     private void handleForwardedReadyTransaction(ForwardedReadyTransaction ready) {
-        LOG.debug("Readying transaction {}, client version {}", ready.getTransactionID(),
+        LOG.debug("{}: Readying transaction {}, client version {}", persistenceId(), ready.getTransactionID(),
                 ready.getTxnClientVersion());
 
         // This message is forwarded by the ShardTransaction on ready. We cache the cohort in the
@@ -421,7 +417,7 @@ public class Shard extends RaftActor {
     private void doAbortTransaction(String transactionID, final ActorRef sender) {
         final CohortEntry cohortEntry = commitCoordinator.getCohortEntryIfCurrent(transactionID);
         if(cohortEntry != null) {
-            LOG.debug("Aborting transaction {}", transactionID);
+            LOG.debug("{}: Aborting transaction {}", persistenceId(), transactionID);
 
             // We don't remove the cached cohort entry here (ie pass false) in case the Tx was
             // aborted during replication in which case we may still commit locally if replication
@@ -443,7 +439,7 @@ public class Shard extends RaftActor {
 
                 @Override
                 public void onFailure(Throwable t) {
-                    LOG.error("An exception happened during abort", t);
+                    LOG.error("{}: An exception happened during abort", persistenceId(), t);
 
                     if(sender != null) {
                         sender.tell(new akka.actor.Status.Failure(t), self);
@@ -566,7 +562,7 @@ public class Shard extends RaftActor {
                 .build();
 
         if(LOG.isDebugEnabled()) {
-            LOG.debug("Creating transaction : {} ", transactionId);
+            LOG.debug("{}: Creating transaction : {} ", persistenceId(), transactionId);
         }
 
         ActorRef transactionActor = createTypedTransactionActor(transactionType, transactionId,
@@ -591,7 +587,7 @@ public class Shard extends RaftActor {
             shardMBean.setLastCommittedTransactionTime(System.currentTimeMillis());
         } catch (InterruptedException | ExecutionException e) {
             shardMBean.incrementFailedTransactionsCount();
-            LOG.error("Failed to commit", e);
+            LOG.error("{}: Failed to commit", persistenceId(), e);
         }
     }
 
@@ -608,14 +604,14 @@ public class Shard extends RaftActor {
 
     private void registerChangeListener(RegisterChangeListener registerChangeListener) {
 
-        LOG.debug("registerDataChangeListener for {}", registerChangeListener.getPath());
+        LOG.debug("{}: registerDataChangeListener for {}", persistenceId(), registerChangeListener.getPath());
 
         ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier,
                                                      NormalizedNode<?, ?>>> registration;
         if(isLeader()) {
             registration = doChangeListenerRegistration(registerChangeListener);
         } else {
-            LOG.debug("Shard is not the leader - delaying registration");
+            LOG.debug("{}: Shard is not the leader - delaying registration", persistenceId());
 
             DelayedListenerRegistration delayedReg =
                     new DelayedListenerRegistration(registerChangeListener);
@@ -626,8 +622,8 @@ public class Shard extends RaftActor {
         ActorRef listenerRegistration = getContext().actorOf(
                 DataChangeListenerRegistration.props(registration));
 
-        LOG.debug("registerDataChangeListener sending reply, listenerRegistrationPath = {} ",
-                    listenerRegistration.path());
+        LOG.debug("{}: registerDataChangeListener sending reply, listenerRegistrationPath = {} ",
+                persistenceId(), listenerRegistration.path());
 
         getSender().tell(new RegisterChangeListenerReply(listenerRegistration.path()), getSelf());
     }
@@ -651,7 +647,7 @@ public class Shard extends RaftActor {
         AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> listener =
                 new DataChangeListenerProxy(schemaContext, dataChangeListenerPath);
 
-        LOG.debug("Registering for path {}", registerChangeListener.getPath());
+        LOG.debug("{}: Registering for path {}", persistenceId(), registerChangeListener.getPath());
 
         return store.registerChangeListener(registerChangeListener.getPath(), listener,
                 registerChangeListener.getScope());
@@ -725,7 +721,7 @@ public class Shard extends RaftActor {
                     shardMBean.incrementCommittedTransactionCount();
                 } catch (InterruptedException | ExecutionException e) {
                     shardMBean.incrementFailedTransactionsCount();
-                    LOG.error("Failed to commit", e);
+                    LOG.error("{}: Failed to commit", persistenceId(), e);
                 }
             }
         }
@@ -761,8 +757,8 @@ public class Shard extends RaftActor {
             applyModificationToState(clientActor, identifier, modification);
 
         } else {
-            LOG.error("Unknown state received {} Class loader = {} CompositeNodeMod.ClassLoader = {}",
-                    data, data.getClass().getClassLoader(),
+            LOG.error("{}: Unknown state received {} Class loader = {} CompositeNodeMod.ClassLoader = {}",
+                    persistenceId(), data, data.getClass().getClassLoader(),
                     CompositeModificationPayload.class.getClassLoader());
         }
 
@@ -773,8 +769,8 @@ public class Shard extends RaftActor {
     private void applyModificationToState(ActorRef clientActor, String identifier, Object modification) {
         if(modification == null) {
             LOG.error(
-                    "modification is null - this is very unexpected, clientActor = {}, identifier = {}",
-                    identifier, clientActor != null ? clientActor.path().toString() : null);
+                    "{}: modification is null - this is very unexpected, clientActor = {}, identifier = {}",
+                    persistenceId(), identifier, clientActor != null ? clientActor.path().toString() : null);
         } else if(clientActor == null) {
             // There's no clientActor to which to send a commit reply so we must be applying
             // replicated state from the leader.
@@ -823,7 +819,7 @@ public class Shard extends RaftActor {
         // we can safely commit everything in here. We not need to worry about event notifications
         // as they would have already been disabled on the follower
 
-        LOG.info("Applying snapshot");
+        LOG.info("{}: Applying snapshot", persistenceId());
         try {
             DOMStoreWriteTransaction transaction = store.newWriteOnlyTransaction();
             NormalizedNodeMessages.Node serializedNode = NormalizedNodeMessages.Node.parseFrom(snapshot);
@@ -837,9 +833,9 @@ public class Shard extends RaftActor {
             transaction.write(YangInstanceIdentifier.builder().build(), node);
             syncCommitTransaction(transaction);
         } catch (InvalidProtocolBufferException | InterruptedException | ExecutionException e) {
-            LOG.error("An exception occurred when applying snapshot", e);
+            LOG.error("{}: An exception occurred when applying snapshot", persistenceId(), e);
         } finally {
-            LOG.info("Done applying snapshot");
+            LOG.info("{}: Done applying snapshot", persistenceId());
         }
     }
 
@@ -868,8 +864,8 @@ public class Shard extends RaftActor {
             for(Map.Entry<String, DOMStoreTransactionChain> entry : transactionChains.entrySet()){
                 if(LOG.isDebugEnabled()) {
                     LOG.debug(
-                        "onStateChanged: Closing transaction chain {} because shard {} is no longer the leader",
-                        entry.getKey(), getId());
+                        "{}: onStateChanged: Closing transaction chain {} because shard {} is no longer the leader",
+                        persistenceId(), entry.getKey(), getId());
                 }
                 entry.getValue().close();
             }

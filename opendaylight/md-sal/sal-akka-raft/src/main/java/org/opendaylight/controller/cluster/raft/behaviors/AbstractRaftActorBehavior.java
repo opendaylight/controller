@@ -14,6 +14,7 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.raft.ClientRequestTracker;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
+import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.SerializationUtils;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyLogEntries;
@@ -59,9 +60,25 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
     protected String leaderId = null;
 
 
-    protected AbstractRaftActorBehavior(RaftActorContext context) {
+    private final RaftState state;
+
+    private final String logName;
+
+    protected AbstractRaftActorBehavior(RaftActorContext context, RaftState state) {
         this.context = context;
+        this.state = state;
         this.LOG = context.getLogger();
+
+        logName = String.format("%s (%s)", context.getId(), state);
+    }
+
+    @Override
+    public RaftState state() {
+        return state;
+    }
+
+    public String logName() {
+        return logName;
     }
 
     /**
@@ -94,8 +111,8 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
         // 1. Reply false if term < currentTerm (§5.1)
         if (appendEntries.getTerm() < currentTerm()) {
             if(LOG.isDebugEnabled()) {
-                LOG.debug("Cannot append entries because sender term {} is less than {}",
-                        appendEntries.getTerm(), currentTerm());
+                LOG.debug("{}: Cannot append entries because sender term {} is less than {}",
+                        logName(), appendEntries.getTerm(), currentTerm());
             }
 
             sender.tell(
@@ -135,9 +152,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
     protected RaftActorBehavior requestVote(ActorRef sender,
         RequestVote requestVote) {
 
-        if(LOG.isDebugEnabled()) {
-            LOG.debug(requestVote.toString());
-        }
+        LOG.debug("{}: In requestVote:  {}", logName(), requestVote);
 
         boolean grantVote = false;
 
@@ -173,7 +188,11 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
             }
         }
 
-        sender.tell(new RequestVoteReply(currentTerm(), grantVote), actor());
+        RequestVoteReply reply = new RequestVoteReply(currentTerm(), grantVote);
+
+        LOG.debug("{}: requestVote returning: {}", logName(), reply);
+
+        sender.tell(reply, actor());
 
         return this;
     }
@@ -350,7 +369,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
                 //if one index is not present in the log, no point in looping
                 // around as the rest wont be present either
                 LOG.warn(
-                        "Missing index {} from log. Cannot apply state. Ignoring {} to {}", i, i, index);
+                        "{}: Missing index {} from log. Cannot apply state. Ignoring {} to {}", logName(), i, i, index);
                 break;
             }
         }
@@ -389,11 +408,11 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
     }
 
     protected RaftActorBehavior switchBehavior(RaftActorBehavior behavior) {
-        LOG.info("{} :- Switching from behavior {} to {}", context.getId(), this.state(), behavior.state());
+        LOG.info("{} :- Switching from behavior {} to {}", logName(), this.state(), behavior.state());
         try {
             close();
         } catch (Exception e) {
-            LOG.error("Failed to close behavior : {}", this.state(), e);
+            LOG.error("{}: Failed to close behavior : {}", logName(), this.state(), e);
         }
 
         return behavior;

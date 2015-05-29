@@ -93,7 +93,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     private Optional<ByteString> snapshot;
 
     public AbstractLeader(RaftActorContext context) {
-        super(context);
+        super(context, RaftState.Leader);
 
         followers = context.getPeerAddresses().keySet();
 
@@ -110,7 +110,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         leaderId = context.getId();
 
         if(LOG.isDebugEnabled()) {
-            LOG.debug("Election:Leader has following peers: {}", followers);
+            LOG.debug("{}: Election:Leader has following peers: {}", logName(), followers);
         }
 
         minReplicationCount = getMajorityVoteCount(followers.size());
@@ -145,9 +145,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     protected RaftActorBehavior handleAppendEntries(ActorRef sender,
         AppendEntries appendEntries) {
 
-        if(LOG.isDebugEnabled()) {
-            LOG.debug(appendEntries.toString());
-        }
+        LOG.debug("{}: handleAppendEntries: {}", logName(), appendEntries);
 
         return this;
     }
@@ -156,10 +154,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     protected RaftActorBehavior handleAppendEntriesReply(ActorRef sender,
         AppendEntriesReply appendEntriesReply) {
 
-        if(! appendEntriesReply.isSuccess()) {
-            if(LOG.isDebugEnabled()) {
-                LOG.debug(appendEntriesReply.toString());
-            }
+        if(LOG.isTraceEnabled()) {
+            LOG.trace("{}: handleAppendEntriesReply: {}", logName(), appendEntriesReply);
         }
 
         // Update the FollowerLogInformation
@@ -168,7 +164,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             followerToLog.get(followerId);
 
         if(followerLogInformation == null){
-            LOG.error("Unknown follower {}", followerId);
+            LOG.error("{}: handleAppendEntriesReply - unknown follower {}", logName(), followerId);
             return this;
         }
 
@@ -180,6 +176,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             followerLogInformation
                 .setNextIndex(appendEntriesReply.getLogLastIndex() + 1);
         } else {
+
+            LOG.debug("{}: handleAppendEntriesReply: received unsuccessful reply: {}", logName(), appendEntriesReply);
 
             // TODO: When we find that the follower is out of sync with the
             // Leader we simply decrement that followers next index by 1.
@@ -216,6 +214,11 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
         // Apply the change to the state machine
         if (context.getCommitIndex() > context.getLastApplied()) {
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("{}: handleAppendEntriesReply from {}: applying to log - commitIndex: {}, lastAppliedIndex: {}",
+                        logName(), followerId, context.getCommitIndex(), context.getLastApplied());
+            }
+
             applyLogToStateMachine(context.getCommitIndex());
         }
 
@@ -250,11 +253,6 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     }
 
     @Override
-    public RaftState state() {
-        return RaftState.Leader;
-    }
-
-    @Override
     public RaftActorBehavior handleMessage(ActorRef sender, Object originalMessage) {
         Preconditions.checkNotNull(sender, "sender should not be null");
 
@@ -266,6 +264,9 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             // set currentTerm = T, convert to follower (§5.1)
             // This applies to all RPC messages and responses
             if (rpc.getTerm() > context.getTermInformation().getCurrentTerm()) {
+                LOG.debug("{}: Term {} in \"{}\" message is greater than leader's term {} - switching to Follower",
+                        logName(), rpc.getTerm(), rpc, context.getTermInformation().getCurrentTerm());
+
                 context.getTermInformation().updateAndPersist(rpc.getTerm(), null);
 
                 return switchBehavior(new Follower(context));
@@ -300,6 +301,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     }
 
     private void handleInstallSnapshotReply(InstallSnapshotReply reply) {
+        LOG.debug("{}: handleInstallSnapshotReply: {}", logName(), reply);
+
         String followerId = reply.getFollowerId();
         FollowerToSnapshot followerToSnapshot = mapFollowerToSnapshot.get(followerId);
         FollowerLogInformation followerLogInformation = followerToLog.get(followerId);
@@ -312,9 +315,9 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                 if(followerToSnapshot.isLastChunk(reply.getChunkIndex())) {
                     //this was the last chunk reply
                     if(LOG.isDebugEnabled()) {
-                        LOG.debug("InstallSnapshotReply received, " +
+                        LOG.debug("{}: InstallSnapshotReply received, " +
                                 "last chunk received, Chunk:{}. Follower:{} Setting nextIndex:{}",
-                            reply.getChunkIndex(), followerId,
+                            logName(), reply.getChunkIndex(), followerId,
                             context.getReplicatedLog().getSnapshotIndex() + 1
                         );
                     }
@@ -326,8 +329,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                     mapFollowerToSnapshot.remove(followerId);
 
                     if(LOG.isDebugEnabled()) {
-                        LOG.debug("followerToLog.get(followerId).getNextIndex().get()=" +
-                            followerToLog.get(followerId).getNextIndex().get());
+                        LOG.debug("logName(), {}: followerToLog.get(followerId).getNextIndex().get()=" +
+                                logName(), followerToLog.get(followerId).getNextIndex().get());
                     }
 
                     if (mapFollowerToSnapshot.isEmpty()) {
@@ -340,19 +343,19 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                     followerToSnapshot.markSendStatus(true);
                 }
             } else {
-                LOG.info("InstallSnapshotReply received, " +
+                LOG.info("{}: InstallSnapshotReply received, " +
                         "sending snapshot chunk failed, Will retry, Chunk:{}",
-                    reply.getChunkIndex()
+                        logName(), reply.getChunkIndex()
                 );
 
                 followerToSnapshot.markSendStatus(false);
             }
 
         } else {
-            LOG.error("ERROR!!" +
+            LOG.error("{}: ERROR!!" +
                     "FollowerId in InstallSnapshotReply not known to Leader" +
                     " or Chunk Index in InstallSnapshotReply not matching {} != {}",
-                followerToSnapshot.getChunkIndex(), reply.getChunkIndex()
+                    logName(), followerToSnapshot.getChunkIndex(), reply.getChunkIndex()
             );
 
             if(reply.getChunkIndex() == INVALID_CHUNK_INDEX){
@@ -367,7 +370,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         long logIndex = replicate.getReplicatedLogEntry().getIndex();
 
         if(LOG.isDebugEnabled()) {
-            LOG.debug("Replicate message {}", logIndex);
+            LOG.debug("{}: Replicate message: identifier: {}, logIndex: {}", logName(),
+                    replicate.getIdentifier(), logIndex);
         }
 
         // Create a tracker entry we will use this later to notify the
@@ -423,9 +427,9 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                         // then snapshot should be sent
 
                         if(LOG.isDebugEnabled()) {
-                            LOG.debug("InitiateInstallSnapshot to follower:{}," +
+                            LOG.debug("{}: InitiateInstallSnapshot to follower:{}," +
                                     "follower-nextIndex:{}, leader-snapshot-index:{},  " +
-                                    "leader-last-index:{}", followerId,
+                                    "leader-last-index:{}", logName(), followerId,
                                 followerNextIndex, leaderSnapShotIndex, leaderLastIndex
                             );
                         }
@@ -509,7 +513,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     // on every install snapshot, we try to capture the snapshot.
     // Once a capture is going on, another one issued will get ignored by RaftActor.
     private void initiateCaptureSnapshot() {
-        LOG.info("Initiating Snapshot Capture to Install Snapshot, Leader:{}", getLeaderId());
+        LOG.info("{}: Initiating Snapshot Capture to Install Snapshot, Leader:{}", logName(), getLeaderId());
         ReplicatedLogEntry lastAppliedEntry = context.getReplicatedLog().get(context.getLastApplied());
         long lastAppliedIndex = -1;
         long lastAppliedTerm = -1;
@@ -563,7 +567,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                     ).toSerializable(),
                     actor()
                 );
-                LOG.info("InstallSnapshot sent to follower {}, Chunk: {}/{}",
+                LOG.info("{}: InstallSnapshot sent to follower {}, Chunk: {}/{}", logName(),
                     followerActor.path(), mapFollowerToSnapshot.get(followerId).getChunkIndex(),
                     mapFollowerToSnapshot.get(followerId).getTotalChunks());
             }
@@ -584,7 +588,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         }
         ByteString nextChunk = followerToSnapshot.getNextChunk();
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Leader's snapshot nextChunk size:{}", nextChunk.size());
+            LOG.debug("{}: Leader's snapshot nextChunk size:{}", logName(), nextChunk.size());
         }
         return nextChunk;
     }
@@ -665,7 +669,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             totalChunks = ( size / context.getConfigParams().getSnapshotChunkSize()) +
                 ((size % context.getConfigParams().getSnapshotChunkSize()) > 0 ? 1 : 0);
             if(LOG.isDebugEnabled()) {
-                LOG.debug("Snapshot {} bytes, total chunks to send:{}",
+                LOG.debug("{}: Snapshot {} bytes, total chunks to send:{}", logName(),
                     size, totalChunks);
             }
             replyReceivedForOffset = -1;
@@ -735,7 +739,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             }
 
             if(LOG.isDebugEnabled()) {
-                LOG.debug("length={}, offset={},size={}",
+                LOG.debug("{}: length={}, offset={},size={}", logName(),
                     snapshotLength, start, size);
             }
             ByteString substring = getSnapshotBytes().substring(start, start + size);
