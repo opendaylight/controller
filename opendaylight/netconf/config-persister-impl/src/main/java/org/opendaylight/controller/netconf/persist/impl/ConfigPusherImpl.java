@@ -98,7 +98,14 @@ public class ConfigPusherImpl implements ConfigPusher {
         // start pushing snapshots:
         for (ConfigSnapshotHolder configSnapshotHolder : configs) {
             if(configSnapshotHolder != null) {
-                EditAndCommitResponse editAndCommitResponseWithRetries = pushConfigWithConflictingVersionRetries(configSnapshotHolder);
+                EditAndCommitResponse editAndCommitResponseWithRetries = null;
+                try {
+                    editAndCommitResponseWithRetries = pushConfigWithConflictingVersionRetries(configSnapshotHolder);
+                } catch (ConfigSnapshotFailureException e) {
+                    LOG.warn("Failed to apply configuration snapshot: {}. Config snapshot is not semantically correct and will be IGNORED. " +
+                            "for detailed information see enclosed exception.", e.getConfigIdForReporting(), e);
+                    throw new IllegalStateException("Failed to apply configuration snapshot " + e.getConfigIdForReporting(), e);
+                }
                 LOG.debug("Config snapshot pushed successfully: {}, result: {}", configSnapshotHolder, result);
                 result.put(configSnapshotHolder, editAndCommitResponseWithRetries);
             }
@@ -113,7 +120,7 @@ public class ConfigPusherImpl implements ConfigPusher {
      * is caught, whole process is retried - new service instance need to be obtained from the factory. Closes
      * {@link NetconfOperationService} after each use.
      */
-    private synchronized EditAndCommitResponse pushConfigWithConflictingVersionRetries(ConfigSnapshotHolder configSnapshotHolder) throws NetconfDocumentedException {
+    private synchronized EditAndCommitResponse pushConfigWithConflictingVersionRetries(ConfigSnapshotHolder configSnapshotHolder) throws ConfigSnapshotFailureException {
         ConflictingVersionException lastException;
         Stopwatch stopwatch = Stopwatch.createUnstarted();
         do {
@@ -200,6 +207,20 @@ public class ConfigPusherImpl implements ConfigPusher {
         }
     }
 
+    private static final class ConfigSnapshotFailureException extends ConfigPusherException {
+
+        private final String configIdForReporting;
+
+        public ConfigSnapshotFailureException(final String configIdForReporting, final String operationNameForReporting, final Exception e) {
+            super(String.format("Failed to apply config snapshot: %s during phase: %s", configIdForReporting, operationNameForReporting), e);
+            this.configIdForReporting = configIdForReporting;
+        }
+
+        public String getConfigIdForReporting() {
+            return configIdForReporting;
+        }
+    }
+
     /**
      * Get NetconfOperationService iif all required capabilities are present.
      *
@@ -257,7 +278,7 @@ public class ConfigPusherImpl implements ConfigPusher {
      * @throws java.lang.RuntimeException  if edit-config or commit fails otherwise
      */
     private synchronized EditAndCommitResponse pushConfig(ConfigSnapshotHolder configSnapshotHolder, NetconfOperationService operationService)
-            throws ConflictingVersionException, NetconfDocumentedException {
+            throws ConflictingVersionException, ConfigSnapshotFailureException {
 
         Element xmlToBePersisted;
         try {
@@ -289,14 +310,19 @@ public class ConfigPusherImpl implements ConfigPusher {
         return new EditAndCommitResponse(editResponseMessage, commitResponseMessage);
     }
 
-    private NetconfOperation findOperation(NetconfMessage request, NetconfOperationService operationService) throws NetconfDocumentedException {
+    private NetconfOperation findOperation(NetconfMessage request, NetconfOperationService operationService) {
         TreeMap<HandlingPriority, NetconfOperation> allOperations = new TreeMap<>();
         Set<NetconfOperation> netconfOperations = operationService.getNetconfOperations();
         if (netconfOperations.isEmpty()) {
             throw new IllegalStateException("Possible code error: no config operations");
         }
         for (NetconfOperation netconfOperation : netconfOperations) {
-            HandlingPriority handlingPriority = netconfOperation.canHandle(request.getDocument());
+            HandlingPriority handlingPriority = null;
+            try {
+                handlingPriority = netconfOperation.canHandle(request.getDocument());
+            } catch (NetconfDocumentedException e) {
+                throw new IllegalStateException("Possible code error: canHandle threw exception", e);
+            }
             allOperations.put(handlingPriority, netconfOperation);
         }
         Entry<HandlingPriority, NetconfOperation> highestEntry = allOperations.lastEntry();
@@ -308,24 +334,23 @@ public class ConfigPusherImpl implements ConfigPusher {
 
     private Document sendRequestGetResponseCheckIsOK(NetconfMessage request, NetconfOperationService operationService,
                                                      String operationNameForReporting, String configIdForReporting)
-            throws ConflictingVersionException, NetconfDocumentedException {
+            throws ConflictingVersionException, ConfigSnapshotFailureException {
 
         NetconfOperation operation = findOperation(request, operationService);
         Document response;
         try {
             response = operation.handle(request.getDocument(), NetconfOperationChainedExecution.EXECUTION_TERMINATION_POINT);
-        } catch (NetconfDocumentedException | RuntimeException e) {
-            if (e instanceof NetconfDocumentedException && e.getCause() instanceof ConflictingVersionException) {
+            return NetconfUtil.checkIsMessageOk(response);
+        } catch (NetconfDocumentedException e) {
+            if (e.getCause() instanceof ConflictingVersionException) {
                 throw (ConflictingVersionException) e.getCause();
             }
-            throw new IllegalStateException("Failed to send " + operationNameForReporting +
-                    " for configuration " + configIdForReporting, e);
+            throw new ConfigSnapshotFailureException(configIdForReporting, operationNameForReporting, e);
         }
-        return NetconfUtil.checkIsMessageOk(response);
     }
 
     // load editConfig.xml template, populate /rpc/edit-config/config with parameter
-    private static NetconfMessage createEditConfigMessage(Element dataElement) throws NetconfDocumentedException {
+    private static NetconfMessage createEditConfigMessage(Element dataElement) {
         String editConfigResourcePath = "/netconfOp/editConfig.xml";
         try (InputStream stream = ConfigPersisterNotificationHandler.class.getResourceAsStream(editConfigResourcePath)) {
             checkNotNull(stream, "Unable to load resource " + editConfigResourcePath);
@@ -341,7 +366,7 @@ public class ConfigPusherImpl implements ConfigPusher {
             }
             editConfigElement.appendChild(configWrapper.getDomElement());
             return new NetconfMessage(doc);
-        } catch (IOException | SAXException e) {
+        } catch (IOException | SAXException | NetconfDocumentedException e) {
             // error reading the xml file bundled into the jar
             throw new IllegalStateException("Error while opening local resource " + editConfigResourcePath, e);
         }
