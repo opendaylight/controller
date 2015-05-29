@@ -173,22 +173,31 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
         followerLogInformation.markFollowerActive();
 
+        long followerLastLogIndex = appendEntriesReply.getLogLastIndex();
         if (appendEntriesReply.isSuccess()) {
-            followerLogInformation
-                .setMatchIndex(appendEntriesReply.getLogLastIndex());
-            followerLogInformation
-                .setNextIndex(appendEntriesReply.getLogLastIndex() + 1);
+            followerLogInformation.setMatchIndex(followerLastLogIndex);
+            followerLogInformation.setNextIndex(followerLastLogIndex + 1);
         } else {
 
             LOG.debug("{}: handleAppendEntriesReply: received unsuccessful reply: {}", logName(), appendEntriesReply);
 
-            // TODO: When we find that the follower is out of sync with the
-            // Leader we simply decrement that followers next index by 1.
-            // Would it be possible to do better than this? The RAFT spec
-            // does not explicitly deal with it but may be something for us to
-            // think about
+            ReplicatedLogEntry followersLastLogEntry = context.getReplicatedLog().get(followerLastLogIndex);
+            if(followerLastLogIndex < 0 || (followersLastLogEntry != null &&
+                    followersLastLogEntry.getTerm() >= appendEntriesReply.getLogLastTerm())) {
+                // The follower's last log index is non-existent or is present in the leader's journal
+                // and the term is greater then the followers last log term, then the follower is just behind
+                // the leader's log so start catching it up starting at the follower's last log index.
+                followerLogInformation.setMatchIndex(followerLastLogIndex);
+                followerLogInformation.setNextIndex(followerLastLogIndex + 1);
+            } else {
+                // TODO: When we find that the follower is out of sync with the
+                // Leader we simply decrement that followers next index by 1.
+                // Would it be possible to do better than this? The RAFT spec
+                // does not explicitly deal with it but may be something for us to
+                // think about
 
-            followerLogInformation.decrNextIndex();
+                followerLogInformation.decrNextIndex();
+            }
         }
 
         // Now figure out if this reply warrants a change in the commitIndex
