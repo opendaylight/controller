@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
+import java.util.Set;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
@@ -18,8 +19,6 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
-
-import java.util.Set;
 
 /**
  * The behavior of a RaftActor when it is in the CandidateState
@@ -48,12 +47,12 @@ public class Candidate extends AbstractRaftActorBehavior {
     private final Set<String> peers;
 
     public Candidate(RaftActorContext context) {
-        super(context);
+        super(context, RaftState.Candidate);
 
         peers = context.getPeerAddresses().keySet();
 
         if(LOG.isDebugEnabled()) {
-            LOG.debug("Election:Candidate has following peers: {}", peers);
+            LOG.debug("{}: Election:Candidate has following peers: {}", logName(), peers);
         }
 
         votesRequired = getMajorityVoteCount(peers.size());
@@ -65,9 +64,7 @@ public class Candidate extends AbstractRaftActorBehavior {
     @Override protected RaftActorBehavior handleAppendEntries(ActorRef sender,
         AppendEntries appendEntries) {
 
-        if(LOG.isDebugEnabled()) {
-            LOG.debug(appendEntries.toString());
-        }
+        LOG.debug("{}: handleAppendEntries: {}", logName(), appendEntries);
 
         return this;
     }
@@ -81,6 +78,9 @@ public class Candidate extends AbstractRaftActorBehavior {
     @Override protected RaftActorBehavior handleRequestVoteReply(ActorRef sender,
         RequestVoteReply requestVoteReply) {
 
+        LOG.debug("{}: handleRequestVoteReply: {}, current voteCount: {}", logName(), requestVoteReply,
+                voteCount);
+
         if (requestVoteReply.isVoteGranted()) {
             voteCount++;
         }
@@ -90,10 +90,6 @@ public class Candidate extends AbstractRaftActorBehavior {
         }
 
         return this;
-    }
-
-    @Override public RaftState state() {
-        return RaftState.Candidate;
     }
 
     @Override
@@ -106,7 +102,8 @@ public class Candidate extends AbstractRaftActorBehavior {
             RaftRPC rpc = (RaftRPC) message;
 
             if(LOG.isDebugEnabled()) {
-                LOG.debug("RaftRPC message received {} my term is {}", rpc, context.getTermInformation().getCurrentTerm());
+                LOG.debug("{}: RaftRPC message received {} my term is {}", logName(),
+                        rpc, context.getTermInformation().getCurrentTerm());
             }
 
             // If RPC request or response contains term T > currentTerm:
@@ -120,6 +117,8 @@ public class Candidate extends AbstractRaftActorBehavior {
         }
 
         if (message instanceof ElectionTimeout) {
+            LOG.debug("{}: Received ElectionTimeout", logName());
+
             if (votesRequired == 0) {
                 // If there are no peers then we should be a Leader
                 // We wait for the election timeout to occur before declare
@@ -150,7 +149,7 @@ public class Candidate extends AbstractRaftActorBehavior {
             context.getId());
 
         if(LOG.isDebugEnabled()) {
-            LOG.debug("Starting new term {}", (currentTerm + 1));
+            LOG.debug("{}: Starting new term {}", logName(), (currentTerm + 1));
         }
 
         // Request for a vote
@@ -159,13 +158,15 @@ public class Candidate extends AbstractRaftActorBehavior {
         for (String peerId : peers) {
             ActorSelection peerActor = context.getPeerActorSelection(peerId);
             if(peerActor != null) {
-                peerActor.tell(new RequestVote(
+                RequestVote requestVote = new RequestVote(
                         context.getTermInformation().getCurrentTerm(),
                         context.getId(),
                         context.getReplicatedLog().lastIndex(),
-                        context.getReplicatedLog().lastTerm()),
-                    context.getActor()
-                );
+                        context.getReplicatedLog().lastTerm());
+
+                LOG.debug("{}: Sending {} to peer {}", logName(), requestVote, peerId);
+
+                peerActor.tell(requestVote, context.getActor());
             }
         }
 

@@ -18,11 +18,17 @@ public class RequestVoteReply extends AbstractRaftRPC {
         this.voteGranted = voteGranted;
     }
 
+    @Override
     public long getTerm() {
         return term;
     }
 
     public boolean isVoteGranted() {
         return voteGranted;
+    }
+
+    @Override
+    public String toString() {
+        return "RequestVoteReply [voteGranted=" + voteGranted + "]";
     }
 }
