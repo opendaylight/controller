@@ -17,6 +17,7 @@ import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import org.junit.Assert;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
@@ -86,5 +87,26 @@ public class MessageCollectorActor extends UntypedActor {
         }
 
         return output;
+    }
+
+    public static <T> T expectFirstMatching(ActorRef actor, Class<T> clazz) {
+        return expectFirstMatching(actor, clazz, 5000);
+    }
+
+    public static <T> T expectFirstMatching(ActorRef actor, Class<T> clazz, long timeout) {
+        int count = (int) (timeout / 50);
+        for(int i = 0; i < count; i++) {
+            try {
+                T message = getFirstMatching(actor, clazz);
+                if(message != null) {
+                    return message;
+                }
+            } catch (Exception e) {}
+
+            Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
+        }
+
+        Assert.fail("Did not receive message of type " + clazz);
+        return null;
     }
 }
