@@ -173,23 +173,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
         followerLogInformation.markFollowerActive();
 
-        if (appendEntriesReply.isSuccess()) {
-            followerLogInformation
-                .setMatchIndex(appendEntriesReply.getLogLastIndex());
-            followerLogInformation
-                .setNextIndex(appendEntriesReply.getLogLastIndex() + 1);
-        } else {
-
-            LOG.debug("{}: handleAppendEntriesReply: received unsuccessful reply: {}", logName(), appendEntriesReply);
-
-            // TODO: When we find that the follower is out of sync with the
-            // Leader we simply decrement that followers next index by 1.
-            // Would it be possible to do better than this? The RAFT spec
-            // does not explicitly deal with it but may be something for us to
-            // think about
-
-            followerLogInformation.decrNextIndex();
-        }
+        followerLogInformation.setMatchIndex(appendEntriesReply.getLogLastIndex());
+        followerLogInformation.setNextIndex(appendEntriesReply.getLogLastIndex() + 1);
 
         // Now figure out if this reply warrants a change in the commitIndex
         // If there exists an N such that N > commitIndex, a majority
