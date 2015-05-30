@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a9dcd25_bde7e411",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 186,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-05-30T03:07:21Z",
+      "side": 1,
+      "message": "the term cannot be \u003e\u003d it has to be an exact match. That is the only way we know the logs match.",
+      "range": {
+        "startLine": 186,
+        "startChar": 20,
+        "endLine": 186,
+        "endChar": 92
+      },
+      "revId": "e1f404f721ec86a6ec83da85644bb1ffe1518c3b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
