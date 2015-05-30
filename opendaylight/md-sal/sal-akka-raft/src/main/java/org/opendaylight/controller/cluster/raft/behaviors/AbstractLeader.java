@@ -182,23 +182,29 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
         boolean updated = false;
         if (appendEntriesReply.isSuccess()) {
-            updated = followerLogInformation.setMatchIndex(appendEntriesReply.getLogLastIndex());
-            updated = followerLogInformation.setNextIndex(appendEntriesReply.getLogLastIndex() + 1) || updated;
-
-            if(updated && LOG.isDebugEnabled()) {
-                LOG.debug("{}: handleAppendEntriesReply - FollowerLogInformation for {} updated: matchIndex: {}, nextIndex: {}", logName(),
-                        followerId, followerLogInformation.getMatchIndex(), followerLogInformation.getNextIndex());
-            }
+            updated = updateFollowerLogInformation(followerLogInformation, appendEntriesReply);
         } else {
             LOG.debug("{}: handleAppendEntriesReply: received unsuccessful reply: {}", logName(), appendEntriesReply);
 
-            // TODO: When we find that the follower is out of sync with the
-            // Leader we simply decrement that followers next index by 1.
-            // Would it be possible to do better than this? The RAFT spec
-            // does not explicitly deal with it but may be something for us to
-            // think about
+            long followerLastLogIndex = appendEntriesReply.getLogLastIndex();
+            ReplicatedLogEntry followersLastLogEntry = context.getReplicatedLog().get(followerLastLogIndex);
+            if(followerLastLogIndex < 0 || (followersLastLogEntry != null &&
+                    followersLastLogEntry.getTerm() == appendEntriesReply.getLogLastTerm())) {
+                // The follower's log is empty or the last entry is present in the leader's journal
+                // and the terms match so the follower is just behind the leader's journal from
+                // the last snapshot, if any. We'll catch up the follower quickly by starting at the
+                // follower's last log index.
 
-            followerLogInformation.decrNextIndex();
+                updated = updateFollowerLogInformation(followerLogInformation, appendEntriesReply);
+            } else {
+                // TODO: When we find that the follower is out of sync with the
+                // Leader we simply decrement that followers next index by 1.
+                // Would it be possible to do better than this? The RAFT spec
+                // does not explicitly deal with it but may be something for us to
+                // think about.
+
+                followerLogInformation.decrNextIndex();
+            }
         }
 
         // Now figure out if this reply warrants a change in the commitIndex
@@ -242,6 +248,19 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         //Send the next log entry immediately, if possible, no need to wait for heartbeat to trigger that event
         sendUpdatesToFollower(followerId, followerLogInformation, false, !updated);
         return this;
+    }
+
+    private boolean updateFollowerLogInformation(FollowerLogInformation followerLogInformation,
+            AppendEntriesReply appendEntriesReply) {
+        boolean updated = followerLogInformation.setMatchIndex(appendEntriesReply.getLogLastIndex());
+        updated = followerLogInformation.setNextIndex(appendEntriesReply.getLogLastIndex() + 1) || updated;
+
+        if(updated && LOG.isDebugEnabled()) {
+            LOG.debug("{}: handleAppendEntriesReply - FollowerLogInformation for {} updated: matchIndex: {}, nextIndex: {}",
+                    logName(), followerLogInformation.getId(), followerLogInformation.getMatchIndex(),
+                    followerLogInformation.getNextIndex());
+        }
+        return updated;
     }
 
     private void purgeInMemoryLog() {
@@ -476,8 +495,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                 long leaderSnapShotIndex = context.getReplicatedLog().getSnapshotIndex();
 
                 if((!isHeartbeat && LOG.isDebugEnabled()) || LOG.isTraceEnabled()) {
-                    LOG.debug("{}: Checking sendAppendEntries for follower {}, followerNextIndex {}, leaderLastIndex: {}, leaderSnapShotIndex: {}",
-                            logName(), followerId, followerNextIndex, leaderLastIndex, leaderSnapShotIndex);
+                    LOG.debug("{}: Checking sendAppendEntries for follower {}: active: {}, followerNextIndex: {}, leaderLastIndex: {}, leaderSnapShotIndex: {}",
+                            logName(), followerId, isFollowerActive, followerNextIndex, leaderLastIndex, leaderSnapShotIndex);
                 }
 
                 if (isFollowerActive && context.getReplicatedLog().isPresent(followerNextIndex)) {
