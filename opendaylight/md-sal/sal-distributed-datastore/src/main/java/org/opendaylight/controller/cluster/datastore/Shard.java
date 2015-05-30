@@ -413,7 +413,7 @@ public class Shard extends RaftActor {
     }
 
     private void handleBatchedModifications(BatchedModifications batched) {
-        // This message is sent to prepare the modificationsa transaction directly on the Shard as an
+        // This message is sent to prepare the modifications transaction directly on the Shard as an
         // optimization to avoid the extra overhead of a separate ShardTransaction actor. On the last
         // BatchedModifications message, the caller sets the ready flag in the message indicating
         // modifications are complete. The reply contains the cohort actor path (this actor) for the caller
