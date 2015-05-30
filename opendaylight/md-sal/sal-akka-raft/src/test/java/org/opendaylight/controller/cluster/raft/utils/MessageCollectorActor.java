@@ -51,6 +51,10 @@ public class MessageCollectorActor extends UntypedActor {
         }
     }
 
+    protected List<Object> getMessages() {
+        return messages;
+    }
+
     public void clear() {
         messages.clear();
     }
