@@ -105,6 +105,7 @@
                 </module>
 
                 <!-- PingPong broker -->
+                <!--
                 <module>
                     <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:pingpong">prefix:pingpong-data-broker</type>
                     <name>pingpong-data-broker</name>
@@ -131,7 +132,7 @@
                         </binding-mapping-service>
                     </binding-forwarded-data-broker>
                         </module>
-
+                  -->
                         <!--
                              Tree-based in-memory data store. This is the data store which is currently
                              recommended for single-node deployments.
@@ -325,10 +326,12 @@
                                 <name>binding-data-broker</name>
                                 <provider>/modules/module[type='binding-forwarded-data-broker'][name='binding-async-data-broker']</provider>
                             </instance>
+                        <!--
                         <instance>
                             <name>pingpong-binding-data-broker</name>
                             <provider>/modules/module[type='binding-forwarded-data-broker'][name='pingpong-binding-data-broker']</provider>
                         </instance>
+                        -->
                         </service>
 
                         <service>
@@ -337,10 +340,12 @@
                                 <name>inmemory-data-broker</name>
                                 <provider>/modules/module[type='dom-inmemory-data-broker'][name='inmemory-data-broker']</provider>
                             </instance>
+                            <!--
                             <instance>
                                 <name>pingpong-broker</name>
                                 <provider>/modules/module[type='pingpong-data-broker'][name='pingpong-data-broker']</provider>
                             </instance>
+                            -->
                         </service>
 
                         <!-- Toaster samples -->
