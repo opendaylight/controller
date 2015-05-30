@@ -22,6 +22,30 @@
       "revId": "e1f404f721ec86a6ec83da85644bb1ffe1518c3b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a9dcd25_ddcbd070",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 186,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-05-30T03:32:54Z",
+      "side": 1,
+      "message": "yeah - I originally did that check in an attempt to handle the case where a follower is reverted to an empty journal before I added the check for followerLastLogIndex \u003c 0. I think you\u0027re right - \u0027\u003d\u003d\u0027 is correct here. This is a draft - still refining it. But thanks for the feedback - I\u0027ve gone thru several revisions and a second set of eyes really helps here. I\u0027m trying to optimize the case where the follower is behind the leader\u0027s journal from the last snapshot if any. I think this will be the most common case where a follower falls behind, i.e. a follower will most likely not fall behind by more than 20K entries from the last snapshot. Reverting back to a fresh install with an empty journal won\u0027t be common but falls  within the use case of it being behind the leader. BTW - I\u0027ve tested where a snapshot occurs while a follower is down - on restart the leader immediately sends an install snapshot as expected.",
+      "parentUuid": "1a9dcd25_bde7e411",
+      "range": {
+        "startLine": 186,
+        "startChar": 20,
+        "endLine": 186,
+        "endChar": 92
+      },
+      "revId": "e1f404f721ec86a6ec83da85644bb1ffe1518c3b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
