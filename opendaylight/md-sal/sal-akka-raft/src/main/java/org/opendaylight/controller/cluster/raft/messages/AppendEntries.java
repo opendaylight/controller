@@ -123,7 +123,7 @@ public class AppendEntries extends AbstractRaftRPC {
         builder.append("AppendEntries [leaderId=").append(leaderId).append(", prevLogIndex=").append(prevLogIndex)
                 .append(", prevLogTerm=").append(prevLogTerm).append(", leaderCommit=").append(leaderCommit)
                 .append(", replicatedToAllIndex=").append(replicatedToAllIndex).append(", payloadVersion=")
-                .append(payloadVersion).append("]");
+                .append(payloadVersion).append(", entries=").append(entries).append("]");
         return builder.toString();
     }
 

@@ -201,7 +201,16 @@ public class Follower extends AbstractRaftActorBehavior {
                                 matchEntry.getIndex());
 
                     // Entries do not match so remove all subsequent entries
-                    context.getReplicatedLog().removeFromAndPersist(matchEntry.getIndex());
+                    long removeFromIndex = matchEntry.getIndex();
+                    context.getReplicatedLog().removeFromAndPersist(removeFromIndex);
+
+                    if(context.getCommitIndex() >= removeFromIndex) {
+                        context.setCommitIndex(removeFromIndex - 1);
+                    }
+
+                    if(context.getLastApplied() >= removeFromIndex) {
+                        context.setLastApplied(removeFromIndex - 1);
+                    }
                     break;
                 }
             }
