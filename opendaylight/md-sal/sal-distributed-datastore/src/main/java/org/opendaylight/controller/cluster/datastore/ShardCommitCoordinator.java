@@ -37,7 +37,7 @@ import org.slf4j.Logger;
  *
  * @author Thomas Pantelis
  */
-public class ShardCommitCoordinator {
+class ShardCommitCoordinator {
 
     // Interface hook for unit tests to replace or decorate the DOMStoreThreePhaseCommitCohorts.
     public interface CohortDecorator {
@@ -67,7 +67,7 @@ public class ShardCommitCoordinator {
 
     private ReadyTransactionReply readyTransactionReply;
 
-    public ShardCommitCoordinator(ShardDataTree dataTree,
+    ShardCommitCoordinator(ShardDataTree dataTree,
             long cacheExpiryTimeoutInMillis, int queueCapacity, ActorRef shardActor, Logger log, String name) {
 
         this.queueCapacity = queueCapacity;
@@ -77,7 +77,7 @@ public class ShardCommitCoordinator {
         this.cacheExpiryTimeoutInMillis = cacheExpiryTimeoutInMillis;
     }
 
-    public void setQueueCapacity(int queueCapacity) {
+    void setQueueCapacity(int queueCapacity) {
         this.queueCapacity = queueCapacity;
     }
 
@@ -109,8 +109,12 @@ public class ShardCommitCoordinator {
     /**
      * This method is called to ready a transaction that was prepared by ShardTransaction actor. It caches
      * the prepared cohort entry for the given transactions ID in preparation for the subsequent 3-phase commit.
+     *
+     * @param ready the ForwardedReadyTransaction message to process
+     * @param sender the sender of the message
+     * @param shard the transaction's shard actor
      */
-    public void handleForwardedReadyTransaction(ForwardedReadyTransaction ready, ActorRef sender, Shard shard) {
+    void handleForwardedReadyTransaction(ForwardedReadyTransaction ready, ActorRef sender, Shard shard) {
         log.debug("{}: Readying transaction {}, client version {}", name,
                 ready.getTransactionID(), ready.getTxnClientVersion());
 
@@ -159,13 +163,11 @@ public class ShardCommitCoordinator {
      * DOMStoreWriteTransaction, one is created. The batched modifications are applied to the write Tx. If
      * the BatchedModifications is ready to commit then a DOMStoreThreePhaseCommitCohort is created.
      *
-     * @param batched the BatchedModifications
-     * @param shardActor the transaction's shard actor
-     *
-     * @throws ExecutionException if an error occurs loading the cache
+     * @param batched the BatchedModifications message to process
+     * @param sender the sender of the message
+     * @param shard the transaction's shard actor
      */
-    void handleBatchedModifications(BatchedModifications batched, ActorRef sender, Shard shard)
-            throws ExecutionException {
+    void handleBatchedModifications(BatchedModifications batched, ActorRef sender, Shard shard) {
         CohortEntry cohortEntry = cohortCache.get(batched.getTransactionID());
         if(cohortEntry == null) {
             cohortEntry = new CohortEntry(batched.getTransactionID(),
@@ -209,9 +211,9 @@ public class ShardCommitCoordinator {
      * This method handles {@link ReadyLocalTransaction} message. All transaction modifications have
      * been prepared beforehand by the sender and we just need to drive them through into the dataTree.
      *
-     * @param message
-     * @param sender
-     * @param shard
+     * @param message the ReadyLocalTransaction message to process
+     * @param sender the sender of the message
+     * @param shard the transaction's shard actor
      */
     void handleReadyLocalTransaction(ReadyLocalTransaction message, ActorRef sender, Shard shard) {
         final ShardDataTreeCohort cohort = new SimpleShardDataTreeCohort(dataTree, message.getModification());
@@ -268,11 +270,11 @@ public class ShardCommitCoordinator {
     /**
      * This method handles the canCommit phase for a transaction.
      *
-     * @param canCommit the CanCommitTransaction message
-     * @param sender the actor that sent the message
+     * @param transactionID the ID of the transaction to canCommit
+     * @param sender the actor to which to send the response
      * @param shard the transaction's shard actor
      */
-    public void handleCanCommit(String transactionID, final ActorRef sender, final Shard shard) {
+    void handleCanCommit(String transactionID, final ActorRef sender, final Shard shard) {
         // Lookup the cohort entry that was cached previously (or should have been) by
         // transactionReady (via the ForwardedReadyTransaction message).
         final CohortEntry cohortEntry = cohortCache.get(transactionID);
@@ -363,6 +365,14 @@ public class ShardCommitCoordinator {
         return success;
     }
 
+    /**
+     * This method handles the preCommit and commit phases for a transaction.
+     *
+     * @param transactionID the ID of the transaction to commit
+     * @param sender the actor to which to send the response
+     * @param shard the transaction's shard actor
+     * @return true if the transaction was successfully prepared, false otherwise.
+     */
     boolean handleCommit(final String transactionID, final ActorRef sender, final Shard shard) {
         // Get the current in-progress cohort entry in the commitCoordinator if it corresponds to
         // this transaction.
