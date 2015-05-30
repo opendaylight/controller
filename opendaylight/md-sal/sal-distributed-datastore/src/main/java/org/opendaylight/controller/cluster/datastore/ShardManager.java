@@ -477,6 +477,8 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             if(leaderId != null && leaderId.contains(memberName)) {
                 LOG.debug("Marking Leader {} as unavailable.", leaderId);
                 info.setLeaderAvailable(false);
+
+                primaryShardInfoCache.remove(info.getShardName());
             }
         }
     }

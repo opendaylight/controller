@@ -2,6 +2,7 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -54,6 +55,7 @@ import org.opendaylight.controller.cluster.datastore.messages.FindPrimary;
 import org.opendaylight.controller.cluster.datastore.messages.LocalPrimaryShardFound;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardFound;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardNotFound;
+import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
 import org.opendaylight.controller.cluster.datastore.messages.RemotePrimaryShardFound;
 import org.opendaylight.controller.cluster.datastore.messages.ShardLeaderStateChanged;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
@@ -560,6 +562,9 @@ public class ShardManagerTest extends AbstractActorTest {
             String path = found.getPrimaryPath();
             assertTrue("Unexpected primary path " + path, path.contains("member-2-shard-default-config"));
 
+            primaryShardInfoCache.putSuccessful("default", new PrimaryShardInfo(system1.actorSelection(
+                    mockShardActor1.path()), Optional.<DataTree>absent()));
+
             shardManager1.underlyingActor().onReceiveCommand(MockClusterWrapper.
                 createUnreachableMember("member-2", "akka.tcp://cluster-test@127.0.0.1:2558"));
 
@@ -568,6 +573,8 @@ public class ShardManagerTest extends AbstractActorTest {
             shardManager1.tell(new FindPrimary("default", true), getRef());
 
             expectMsgClass(duration("5 seconds"), NoShardLeaderException.class);
+
+            assertNull("Expected primaryShardInfoCache entry removed", primaryShardInfoCache.getIfPresent("default"));
 
             shardManager1.tell(new ShardLeaderStateChanged(memberId1, memberId1, Optional.of(mock(DataTree.class))),
                 mockShardActor1);
