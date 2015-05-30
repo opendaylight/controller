@@ -47,6 +47,7 @@ public final class ReadyLocalTransactionSerializer extends JSerializer {
         final BatchedModifications batched = new BatchedModifications(msg.getTransactionID(),
                 DataStoreVersions.CURRENT_VERSION, "");
         batched.setDoCommitOnReady(msg.isDoCommitOnReady());
+        batched.setTotalMessagesSent(1);
         batched.setReady(true);
 
         msg.getModification().applyToCursor(new BatchedCursor(batched));
