@@ -34,6 +34,25 @@
       <url>${sitedeploy}</url>
     </site>
   </distributionManagement>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <artifactId>maven-archetype-plugin</artifactId>
+          <version>2.2</version>
+          <dependencies>
+            <dependency>
+              <groupId>commons-lang</groupId>
+              <artifactId>commons-lang</artifactId>
+              <version>2.6</version>
+            </dependency>
+          </dependencies>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
   <modules>
     <module>odl-model-project</module>
     <module>opendaylight-configfile-archetype</module>
