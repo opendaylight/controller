@@ -13,6 +13,7 @@ import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.GuardedBy;
@@ -85,7 +86,7 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
     private volatile PingPongTransaction inflightTx;
 
     PingPongTransactionChain(final DOMDataBroker broker, final TransactionChainListener listener) {
-        this.delegate = broker.createTransactionChain(new TransactionChainListener() {
+        delegate = broker.createTransactionChain(new TransactionChainListener() {
             @Override
             public void onTransactionChainFailed(final TransactionChain<?, ?> chain, final AsyncTransaction<?, ?> transaction, final Throwable cause) {
                 LOG.debug("Delegate chain {} reported failure in {}", chain, transaction, cause);
@@ -264,8 +265,14 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
         // Make sure no transaction is outstanding. Otherwise sleep a bit and retry
         while (inflightTx != null) {
             LOG.debug("Busy-waiting for in-flight transaction {} to complete", inflightTx);
-            Thread.yield();
-            continue;
+            try {
+                TimeUnit.MICROSECONDS.sleep(500L);
+                continue;
+            }
+            catch (final InterruptedException e) {
+                LOG.warn("Unexpected exception ", e);
+                break;
+            }
         }
 
         // If we have an outstanding transaction, send it down
