@@ -9,8 +9,12 @@ module module1 {
         leaf lf1_m1 {
             type string;
         }
+        uses confB_gr;
     }
-    container contB_m1 {
+    
+    grouping confB_gr {
+        container contB_m1 {
+        }
     }
   
 }
