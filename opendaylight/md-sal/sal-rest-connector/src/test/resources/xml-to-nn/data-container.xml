@@ -1,4 +1,4 @@
-<cont>
+<cont xmlns="data:container:yang">
     <lf1>str0</lf1>
     <lf2></lf2>
     <lf3/>
