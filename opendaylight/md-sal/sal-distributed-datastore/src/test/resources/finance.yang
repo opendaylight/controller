@@ -1,0 +1,55 @@
+module finance {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test:finance";
+    prefix "finance";
+
+    revision "2015-05-29" {
+        description "Initial revision.";
+    }
+
+    container finance {
+        list accounts {
+            key institution-name;
+            leaf institution-name {
+                type string;
+            }
+            list sub-accounts {
+                key account-name;
+                leaf account-name {
+                    type string;
+                }
+
+                list transactions {
+                    key date;
+                    leaf date {
+                        type uint64;
+                    }
+
+                    leaf type {
+                        type string;
+                    }
+
+                    leaf desc {
+                        type string;
+                    }
+
+                    leaf value {
+                        type uint64;
+                    }
+
+                    list categories {
+                        key name;
+
+                        leaf name {
+                            type string;
+                        }
+
+                        leaf percentage {
+                            type uint8;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
