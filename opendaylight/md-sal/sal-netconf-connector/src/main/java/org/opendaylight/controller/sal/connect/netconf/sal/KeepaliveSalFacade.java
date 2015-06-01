@@ -100,7 +100,9 @@ public final class KeepaliveSalFacade implements RemoteDeviceHandler<NetconfSess
      * Cancel current keepalive and also reset current deviceRpc
      */
     private void stopKeepalives() {
-        currentKeepalive.cancel(false);
+        if(currentKeepalive != null) {
+            currentKeepalive.cancel(false);
+        }
         currentDeviceRpc = null;
     }
 
