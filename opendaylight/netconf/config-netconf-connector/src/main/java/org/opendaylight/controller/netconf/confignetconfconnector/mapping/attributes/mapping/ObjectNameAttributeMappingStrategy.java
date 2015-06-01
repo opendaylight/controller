@@ -14,16 +14,15 @@ import javax.management.ObjectName;
 import javax.management.openmbean.SimpleType;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.netconf.confignetconfconnector.util.Util;
+import org.opendaylight.yangtools.yang.common.QName;
 
 public class ObjectNameAttributeMappingStrategy extends
         AbstractAttributeMappingStrategy<ObjectNameAttributeMappingStrategy.MappedDependency, SimpleType<?>> {
 
-    private final String serviceName;
     private final String namespace;
 
-    public ObjectNameAttributeMappingStrategy(SimpleType<?> openType,  String serviceName, String namespace) {
+    public ObjectNameAttributeMappingStrategy(SimpleType<?> openType, String namespace) {
         super(openType);
-        this.serviceName = serviceName;
         this.namespace = namespace;
     }
 
@@ -43,7 +42,9 @@ public class ObjectNameAttributeMappingStrategy extends
 
         String refName = ObjectNameUtil.getReferenceName(on);
 
-        return Optional.of(new MappedDependency(namespace, serviceName, refName));
+        //we want to use the exact service name that was configured in xml so services that are referencing it can be resolved
+        return Optional.of(new MappedDependency(namespace,
+                QName.create(ObjectNameUtil.getServiceQName(on)).getLocalName(), refName));
     }
 
     public static class MappedDependency {
