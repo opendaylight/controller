@@ -56,6 +56,7 @@ class CompositeAttributeResolvingStrategy extends
         Map<String, OpenType<?>> openTypes = Maps.newHashMap();
 
         final String[] names = new String[getOpenType().keySet().size()];
+        final String[] descriptions = new String[getOpenType().keySet().size()];
         OpenType<?>[] itemTypes = new OpenType[names.length];
         int i = 0;
 
@@ -84,6 +85,7 @@ class CompositeAttributeResolvingStrategy extends
 
             // fill names + item types in order to reconstruct the open type for current attribute
             names[i] = yangToJavaAttrMapping.get(innerAttrNameStr);
+            descriptions[i] = getOpenType().getDescription(names[i]);
             itemTypes[i] = openTypes.get(innerAttrNameStr);
             i++;
         }
@@ -91,8 +93,8 @@ class CompositeAttributeResolvingStrategy extends
         CompositeDataSupport parsedValue;
         try {
             LOG.trace("Attribute {} with open type {}. Reconstructing open type.", attrName, getOpenType());
-            setOpenType(new CompositeType(getOpenType().getTypeName(), getOpenType().getDescription(), names, names, itemTypes));
-            LOG.debug("Attribute {} with open type {}. Open type reconstructed to {}", attrName, getOpenType(), getOpenType());
+            setOpenType(new CompositeType(getOpenType().getTypeName(), getOpenType().getDescription(), names, descriptions, itemTypes));
+            LOG.debug("Attribute {}. Open type reconstructed to {}", attrName, getOpenType(), getOpenType());
             parsedValue = new CompositeDataSupport(getOpenType(), items);
         } catch (OpenDataException e) {
             throw new IllegalStateException("An error occurred during restoration of composite type " + this
