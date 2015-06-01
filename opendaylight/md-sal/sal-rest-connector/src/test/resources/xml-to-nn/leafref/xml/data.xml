@@ -1,4 +1,4 @@
-<cont>
+<cont xmlns="leafref:module">
     <lf1>121</lf1>
     <lf2>121</lf2>
     <lf-ident xmlns:a="leafref:module">a:base</lf-ident>

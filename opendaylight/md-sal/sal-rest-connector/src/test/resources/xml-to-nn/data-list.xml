@@ -1,4 +1,5 @@
-<cont>
+<cont xmlns="data:container:yang"
+      xmlns:data-list-yang="data:list:yang">
     <lst1>
         <lf11>str0</lf11>
         <lflst11>121</lflst11>
@@ -17,5 +18,5 @@
             <lf111>100</lf111>
         </cont11>
     </lst1>
-    <lf1>lf1</lf1>
+    <data-list-yang:lf1>lf1</data-list-yang:lf1>
 </cont>
