@@ -43,10 +43,8 @@ public class ObjectMapper extends AttributeIfcSwitchStatement<AttributeMappingSt
     public AttributeMappingStrategy<?, ? extends OpenType<?>> prepareStrategy(AttributeIfc attributeIfc) {
 
         if(attributeIfc instanceof DependencyAttribute) {
-            serviceNameOfDepAttr = ((DependencyAttribute)attributeIfc).getDependency().getSie().getQName().getLocalName();
             namespaceOfDepAttr = ((DependencyAttribute)attributeIfc).getDependency().getSie().getQName().getNamespace().toString();
         } else if (attributeIfc instanceof ListDependenciesAttribute) {
-            serviceNameOfDepAttr = ((ListDependenciesAttribute)attributeIfc).getDependency().getSie().getQName().getLocalName();
             namespaceOfDepAttr = ((ListDependenciesAttribute)attributeIfc).getDependency().getSie().getQName().getNamespace().toString();
         }
 
@@ -110,14 +108,12 @@ public class ObjectMapper extends AttributeIfcSwitchStatement<AttributeMappingSt
         return new UnionCompositeAttributeMappingStrategy(compositeType, innerStrategies, attributeMapping);
     }
 
-    private String serviceNameOfDepAttr;
     private String namespaceOfDepAttr;
 
     @Override
     protected AttributeMappingStrategy<?, ? extends OpenType<?>> caseDependencyAttribute(
             SimpleType<?> openType) {
-        return new ObjectNameAttributeMappingStrategy(openType,
-                serviceNameOfDepAttr, namespaceOfDepAttr);
+        return new ObjectNameAttributeMappingStrategy(openType, namespaceOfDepAttr);
     }
 
     @Override
