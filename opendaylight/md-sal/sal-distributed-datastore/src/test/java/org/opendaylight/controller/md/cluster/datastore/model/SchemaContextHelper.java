@@ -21,6 +21,7 @@ public class SchemaContextHelper {
     public static final String ODL_DATASTORE_TEST_YANG = "/odl-datastore-test.yang";
     public static final String PEOPLE_YANG = "/people.yang";
     public static final String CARS_YANG = "/cars.yang";
+    public static final String FINANCE_YANG = "/finance.yang";
 
     public static InputStream getInputStream(final String yangFileName) {
         return TestModel.class.getResourceAsStream(yangFileName);
