@@ -22,7 +22,6 @@ import javax.management.InstanceNotFoundException;
 import javax.management.JMX;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.config.api.ConflictingVersionException;
@@ -50,7 +49,7 @@ public class LogbackWithXmlConfigModuleTest extends AbstractConfigTest {
         configurator.doConfigure("src/test/resources/simple_config_logback.xml");
         File f = new File("target/it");
         if (f.exists())
-            FileUtils.cleanDirectory(f);
+            cleanDirectory(f);
     }
 
     /**

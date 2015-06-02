@@ -12,8 +12,10 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.common.io.Files;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -22,7 +24,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.io.FileUtils;
 import org.apache.maven.project.MavenProject;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
@@ -173,8 +174,7 @@ public class JMXGenerator implements BasicCodeGenerator, MavenProjectAware {
             serviceLoaderFile.getParentFile().mkdirs();
             try {
                 serviceLoaderFile.createNewFile();
-                FileUtils.write(serviceLoaderFile,
-                        fullyQualifiedNamesOfFactories.toString());
+                Files.write(fullyQualifiedNamesOfFactories.toString(), serviceLoaderFile, Charset.defaultCharset());
             } catch (IOException e) {
                 String message = "Cannot write to " + serviceLoaderFile;
                 LOG.error(message);
