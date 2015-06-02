@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a9dcd25_33cd405e",
+        "filename": "opendaylight/netconf/config-netconf-connector/src/main/java/org/opendaylight/controller/netconf/confignetconfconnector/mapping/attributes/mapping/ObjectNameAttributeMappingStrategy.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-06-02T07:47:20Z",
+      "side": 1,
+      "message": "Its not that we want the base service type ... we want the exact service type that was configured in xml, not defined in yang",
+      "range": {
+        "startLine": 45,
+        "startChar": 25,
+        "endLine": 45,
+        "endChar": 29
+      },
+      "revId": "431c5616acee4c5b3d2443aa3cf8dcdeb6701349",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
