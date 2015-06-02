@@ -68,7 +68,7 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         // Now deliver the AppendEntries to the follower
         follower1Actor.underlyingActor().stopDropMessages(AppendEntries.class);
 
-        MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyJournalEntries.class, 3);
+        MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyJournalEntries.class, 1);
 
         // Now deliver the CaptureSnapshotReply to the leader.
         CaptureSnapshotReply captureSnapshotReply = MessageCollectorActor.expectFirstMatching(
@@ -116,7 +116,7 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         // Now deliver the AppendEntries to the follower
         follower1Actor.underlyingActor().stopDropMessages(AppendEntries.class);
 
-        MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyJournalEntries.class, 3);
+        MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyJournalEntries.class, 1);
 
         reinstateLeaderActor();
 
@@ -146,6 +146,9 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         currentTerm = leaderContext.getTermInformation().getCurrentTerm();
 
         payload0 = sendPayloadData(leaderActor, "zero");
+
+        MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyJournalEntries.class, 1);
+
         payload1 = sendPayloadData(leaderActor, "one");
 
         // Verify the leader applies the states.
