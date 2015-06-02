@@ -222,6 +222,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         ShardInformation shardInformation = findShardInformation(leaderStateChanged.getMemberId());
         if(shardInformation != null) {
             shardInformation.setLocalDataTree(leaderStateChanged.getLocalShardDataTree());
+            shardInformation.setLeaderVersion(leaderStateChanged.getLeaderPayloadVersion());
             if(shardInformation.setLeaderId(leaderStateChanged.getLeaderId())) {
                 primaryShardInfoCache.remove(shardInformation.getShardName());
             }
@@ -573,7 +574,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                     String primaryPath = info.getSerializedLeaderActor();
                     Object found = canReturnLocalShardState && info.isLeader() ?
                             new LocalPrimaryShardFound(primaryPath, info.getLocalShardDataTree().get()) :
-                                new RemotePrimaryShardFound(primaryPath);
+                                new RemotePrimaryShardFound(primaryPath, info.getLeaderVersion());
 
                     if(LOG.isDebugEnabled()) {
                         LOG.debug("{}: Found primary for {}: {}", persistenceId(), shardName, found);
@@ -733,6 +734,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         private final Set<OnShardInitialized> onShardInitializedSet = Sets.newHashSet();
         private String role ;
         private String leaderId;
+        private short leaderVersion;
 
         private ShardInformation(String shardName, ShardIdentifier shardId,
                 Map<String, String> peerAddresses) {
@@ -887,12 +889,20 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             return changed;
         }
 
-        public String getLeaderId() {
+        String getLeaderId() {
             return leaderId;
         }
 
-        public void setLeaderAvailable(boolean leaderAvailable) {
+        void setLeaderAvailable(boolean leaderAvailable) {
             this.leaderAvailable = leaderAvailable;
+        }
+
+        short getLeaderVersion() {
+            return leaderVersion;
+        }
+
+        void setLeaderVersion(short leaderVersion) {
+            this.leaderVersion = leaderVersion;
         }
     }
 

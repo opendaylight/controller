@@ -215,14 +215,16 @@ public class ShardManagerTest extends AbstractActorTest {
             String memberId1 = "member-1-shard-default-" + shardMrgIDSuffix;
             shardManager.tell(new RoleChangeNotification(memberId1,
                     RaftState.Candidate.name(), RaftState.Follower.name()), mockShardActor);
+            short leaderVersion = DataStoreVersions.CURRENT_VERSION - 1;
             shardManager.tell(new ShardLeaderStateChanged(memberId1, memberId2, Optional.<DataTree>absent(),
-                    DataStoreVersions.CURRENT_VERSION), mockShardActor);
+                    leaderVersion), mockShardActor);
 
             shardManager.tell(new FindPrimary(Shard.DEFAULT_NAME, false), getRef());
 
             RemotePrimaryShardFound primaryFound = expectMsgClass(duration("5 seconds"), RemotePrimaryShardFound.class);
             assertTrue("Unexpected primary path " +  primaryFound.getPrimaryPath(),
                     primaryFound.getPrimaryPath().contains("member-2-shard-default"));
+            assertEquals("getPrimaryVersion", leaderVersion, primaryFound.getPrimaryVersion());
         }};
     }
 
@@ -402,8 +404,9 @@ public class ShardManagerTest extends AbstractActorTest {
             shardManager2.tell(new ActorInitialized(), mockShardActor2);
 
             String memberId2 = "member-2-shard-astronauts-" + shardMrgIDSuffix;
+            short leaderVersion = DataStoreVersions.CURRENT_VERSION - 1;
             shardManager2.tell(new ShardLeaderStateChanged(memberId2, memberId2,
-                    Optional.of(mock(DataTree.class)), DataStoreVersions.CURRENT_VERSION), mockShardActor2);
+                    Optional.of(mock(DataTree.class)), leaderVersion), mockShardActor2);
             shardManager2.tell(new RoleChangeNotification(memberId2,
                     RaftState.Candidate.name(), RaftState.Leader.name()), mockShardActor2);
 
@@ -414,6 +417,7 @@ public class ShardManagerTest extends AbstractActorTest {
             RemotePrimaryShardFound found = expectMsgClass(duration("5 seconds"), RemotePrimaryShardFound.class);
             String path = found.getPrimaryPath();
             assertTrue("Unexpected primary path " + path, path.contains("member-2-shard-astronauts-config"));
+            assertEquals("getPrimaryVersion", leaderVersion, found.getPrimaryVersion());
 
             shardManager2.underlyingActor().verifyFindPrimary();
 
@@ -569,7 +573,7 @@ public class ShardManagerTest extends AbstractActorTest {
             assertTrue("Unexpected primary path " + path, path.contains("member-2-shard-default-config"));
 
             primaryShardInfoCache.putSuccessful("default", new PrimaryShardInfo(system1.actorSelection(
-                    mockShardActor1.path()), Optional.<DataTree>absent()));
+                    mockShardActor1.path()), DataStoreVersions.CURRENT_VERSION, Optional.<DataTree>absent()));
 
             shardManager1.underlyingActor().onReceiveCommand(MockClusterWrapper.
                 createUnreachableMember("member-2", "akka.tcp://cluster-test@127.0.0.1:2558"));
