@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a9dcd25_992d5349",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/PingPongTransactionChain.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 268,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-06-02T13:55:18Z",
+      "side": 1,
+      "message": "LockSupport.park() may be better, in either case this needs to be turned into an asynchronous tasklet.",
+      "revId": "efe949da64f5e929478e9d706844e8d5ba6bd3ee",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
