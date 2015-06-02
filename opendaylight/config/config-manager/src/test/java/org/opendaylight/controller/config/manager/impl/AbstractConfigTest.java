@@ -14,6 +14,8 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 
 import com.google.common.base.Preconditions;
+import java.io.File;
+import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
@@ -286,6 +288,29 @@ public abstract class AbstractConfigTest extends
                     }
         );
         return (T) proxy;
+    }
+
+    /**
+     * removes contents of the directory
+     * @param dir to be cleaned
+     * @throws IOException
+     */
+    protected void cleanDirectory(File dir) throws IOException {
+        if (!dir.isDirectory()) {
+            throw new IllegalStateException("dir must be a directory");
+        }
+
+        final File[] files = dir.listFiles();
+        if (files == null) {
+            throw new IOException("Failed to list contents of " + dir);
+        }
+
+        for (File file : files) {
+            if (file.isDirectory()) {
+                cleanDirectory(dir);
+            }
+            file.delete();
+        }
     }
 
 }

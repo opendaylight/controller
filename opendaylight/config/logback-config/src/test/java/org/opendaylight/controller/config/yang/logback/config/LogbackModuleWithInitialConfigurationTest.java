@@ -28,7 +28,6 @@ import javax.management.InstanceNotFoundException;
 import javax.management.JMX;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.config.api.ConflictingVersionException;
@@ -151,8 +150,9 @@ public class LogbackModuleWithInitialConfigurationTest extends AbstractConfigTes
         configurator.setContext(lc);
         configurator.doConfigure("src/test/resources/simple_config_logback.xml");
         File f = new File("target/it");
-        if (f.exists())
-            FileUtils.cleanDirectory(f);
+        if (f.exists()) {
+            cleanDirectory(f);
+        }
         ch.qos.logback.classic.Logger logger = lc.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
         ch.qos.logback.core.rolling.RollingFileAppender<ILoggingEvent> fileAppender = (ch.qos.logback.core.rolling.RollingFileAppender<ILoggingEvent>) logger
                 .getAppender("VARLOGFILE");
