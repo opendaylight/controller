@@ -22,10 +22,6 @@
       <artifactId>guava</artifactId>
     </dependency>
     <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
     </dependency>
@@ -77,7 +73,6 @@
             <Provide-Capability>org.opendaylight.controller.config.persister.storage.adapter</Provide-Capability>
             <Import-Package>com.google.common.base,
                             com.google.common.io,
-                            org.apache.commons.io,
                             org.opendaylight.controller.config.persist.api,
                             org.slf4j,
                             com.google.common.collect,
