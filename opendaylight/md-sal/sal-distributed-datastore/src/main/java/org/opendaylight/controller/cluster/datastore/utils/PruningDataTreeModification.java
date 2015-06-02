@@ -19,6 +19,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeWriter;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModificationCursor;
+import org.opendaylight.yangtools.yang.data.impl.schema.tree.SchemaValidationFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +42,7 @@ public class PruningDataTreeModification implements DataTreeModification {
     public void delete(YangInstanceIdentifier yangInstanceIdentifier) {
         try {
             delegate.delete(yangInstanceIdentifier);
-        } catch(IllegalArgumentException e){
+        } catch(SchemaValidationFailedException e){
             LOG.warn("Node at path : {} does not exist ignoring delete", yangInstanceIdentifier);
         }
     }
@@ -50,7 +51,7 @@ public class PruningDataTreeModification implements DataTreeModification {
     public void merge(YangInstanceIdentifier yangInstanceIdentifier, NormalizedNode<?, ?> normalizedNode) {
         try {
             delegate.merge(yangInstanceIdentifier, normalizedNode);
-        } catch (IllegalArgumentException e){
+        } catch (SchemaValidationFailedException e){
             if(!isValidYangInstanceIdentifier(yangInstanceIdentifier)){
                 LOG.warn("Invalid node identifier {} ignoring merge", yangInstanceIdentifier);
                 return;
@@ -71,7 +72,7 @@ public class PruningDataTreeModification implements DataTreeModification {
     public void write(YangInstanceIdentifier yangInstanceIdentifier, NormalizedNode<?, ?> normalizedNode) {
         try {
             delegate.write(yangInstanceIdentifier, normalizedNode);
-        } catch (IllegalArgumentException e){
+        } catch (SchemaValidationFailedException e){
             if(!isValidYangInstanceIdentifier(yangInstanceIdentifier)){
                 LOG.warn("Invalid node identifier {} ignoring write", yangInstanceIdentifier);
                 return;
