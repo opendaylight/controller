@@ -11,14 +11,15 @@ package org.opendaylight.controller.config.yangjmxgenerator.plugin.module;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import com.google.common.io.Files;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import net.sourceforge.pmd.lang.Parser;
 import net.sourceforge.pmd.lang.ParserOptions;
 import net.sourceforge.pmd.lang.ast.Node;
 import net.sourceforge.pmd.lang.java.Java17Parser;
-import org.apache.commons.io.FileUtils;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.AbstractGeneratorTest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +35,7 @@ public class AbstractGeneratedObjectTest extends AbstractGeneratorTest {
 
     protected Node parse(File dstFile) throws IOException {
         assertNotNull(dstFile);
-        LOG.debug(FileUtils.readFileToString(dstFile));
+        LOG.debug(Files.toString(dstFile, StandardCharsets.UTF_8));
         Parser parser = new Java17Parser(new ParserOptions());
         return parser.parse(dstFile.toString(), new FileReader(dstFile));
     }
