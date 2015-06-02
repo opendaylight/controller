@@ -90,20 +90,23 @@ public class NormalizedNodeXmlBodyWriter implements MessageBodyWriter<Normalized
 
 
 
-        writeNormalizedNode(xmlWriter,schemaPath,pathContext,data);
+        writeNormalizedNode(xmlWriter,schemaPath,pathContext,data, t.getWriterParameters().getDepth());
+
     }
 
-    private void writeNormalizedNode(XMLStreamWriter xmlWriter, SchemaPath schemaPath,InstanceIdentifierContext<?> pathContext, NormalizedNode<?, ?> data) throws IOException {
+    private void writeNormalizedNode(XMLStreamWriter xmlWriter, SchemaPath schemaPath, InstanceIdentifierContext<?>
+            pathContext, NormalizedNode<?, ?> data, int depth) throws IOException {
         final NormalizedNodeWriter nnWriter;
         final SchemaContext schemaCtx = pathContext.getSchemaContext();
         if (SchemaPath.ROOT.equals(schemaPath)) {
-            nnWriter = createNormalizedNodeWriter(xmlWriter, schemaCtx, schemaPath);
+            nnWriter = createNormalizedNodeWriter(xmlWriter, schemaCtx, schemaPath, depth);
             writeElements(xmlWriter, nnWriter, (ContainerNode) data);
         }  else if (pathContext.getSchemaNode() instanceof RpcDefinition) {
-            nnWriter = createNormalizedNodeWriter(xmlWriter, schemaCtx, ((RpcDefinition) pathContext.getSchemaNode()).getOutput().getPath());
+            nnWriter = createNormalizedNodeWriter(xmlWriter, schemaCtx,
+                    ((RpcDefinition) pathContext.getSchemaNode()).getOutput().getPath(), depth);
             writeElements(xmlWriter, nnWriter, (ContainerNode) data);
         } else {
-            nnWriter = createNormalizedNodeWriter(xmlWriter, schemaCtx, schemaPath.getParent());
+            nnWriter = createNormalizedNodeWriter(xmlWriter, schemaCtx, schemaPath.getParent(), depth);
             if (data instanceof MapEntryNode) {
                 // Restconf allows returning one list item. We need to wrap it
                 // in map node in order to serialize it properly
@@ -115,9 +118,9 @@ public class NormalizedNodeXmlBodyWriter implements MessageBodyWriter<Normalized
     }
 
     private NormalizedNodeWriter createNormalizedNodeWriter(XMLStreamWriter xmlWriter,
-            SchemaContext schemaContext, SchemaPath schemaPath) {
+            SchemaContext schemaContext, SchemaPath schemaPath, int depth) {
         NormalizedNodeStreamWriter xmlStreamWriter = XMLStreamNormalizedNodeStreamWriter.create(xmlWriter, schemaContext, schemaPath);
-        return NormalizedNodeWriter.forStreamWriter(xmlStreamWriter);
+        return NormalizedNodeWriter.forStreamWriter(xmlStreamWriter, depth);
     }
 
     private void writeElements(final XMLStreamWriter xmlWriter, final NormalizedNodeWriter nnWriter, final ContainerNode data)
