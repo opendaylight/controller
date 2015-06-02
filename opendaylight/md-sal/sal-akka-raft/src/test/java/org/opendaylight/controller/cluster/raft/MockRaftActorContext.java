@@ -435,7 +435,8 @@ public class MockRaftActorContext implements RaftActorContext {
 
         public  MockReplicatedLogBuilder createEntries(int start, int end, int term) {
             for (int i=start; i<end; i++) {
-                this.mockLog.append(new ReplicatedLogImplEntry(i, term, new MockRaftActorContext.MockPayload("foo" + i)));
+                //this.mockLog.append(new ReplicatedLogImplEntry(i, term, new MockRaftActorContext.MockPayload("foo" + i)));
+                this.mockLog.append(new ReplicatedLogImplEntry(i, term, new MockRaftActorContext.MockPayload(Integer.toString(i))));
             }
             return this;
         }

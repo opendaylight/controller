@@ -83,5 +83,4 @@ public interface ConfigParams {
      * is determined by multiplying the election timeout factor with the heartbeat duration.
      */
     long getElectionTimeoutFactor();
-
 }

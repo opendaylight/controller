@@ -504,9 +504,12 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                     LOG.debug("{}: sendAppendEntries: {} is present for follower {}", logName(),
                             followerNextIndex, followerId);
 
-                    // FIXME : Sending one entry at a time
                     if(followerLogInformation.okToReplicate()) {
-                        entries = context.getReplicatedLog().getFrom(followerNextIndex, 1);
+                        // Try to send all the entries in the journal but not exceeding the max data size
+                        // for AppendEntries.
+                        int maxEntries = (int) context.getReplicatedLog().size();
+                        entries = context.getReplicatedLog().getFrom(followerNextIndex, maxEntries,
+                                context.getConfigParams().getSnapshotChunkSize());
                         sendAppendEntries = true;
                     }
                 } else if (isFollowerActive && followerNextIndex >= 0 &&
