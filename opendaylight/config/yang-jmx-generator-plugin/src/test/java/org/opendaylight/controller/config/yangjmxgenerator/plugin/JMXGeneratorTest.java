@@ -38,7 +38,6 @@ import java.util.Map;
 import java.util.Set;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import org.apache.commons.io.FileUtils;
 import org.apache.maven.project.MavenProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
@@ -324,8 +323,8 @@ public class JMXGeneratorTest extends AbstractGeneratorTest {
                 generatedResourcesDir, "META-INF", "services",
                 ModuleFactory.class.getName());
         assertThat(moduleFactoryFile.exists(), is(true));
-        Set<String> lines = Sets.newHashSet(FileUtils
-                .readLines(moduleFactoryFile));
+        Set<String> lines = Sets.newHashSet(Files
+                .readLines(moduleFactoryFile, Charset.defaultCharset()));
         Set<String> expectedLines = Sets.newHashSet(//
                 PackageTranslatorTest.EXPECTED_PACKAGE_PREFIX
                         + ".threads.java.EventBusModuleFactory",//
