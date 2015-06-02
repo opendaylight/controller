@@ -28,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.common.actor.CommonConfig;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.Configuration;
+import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.exceptions.LocalShardNotFoundException;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
@@ -206,11 +207,13 @@ public class ActorContext {
             public PrimaryShardInfo checkedApply(Object response) throws Exception {
                 if(response instanceof RemotePrimaryShardFound) {
                     LOG.debug("findPrimaryShardAsync received: {}", response);
-                    return onPrimaryShardFound(shardName, ((RemotePrimaryShardFound)response).getPrimaryPath(), null);
+                    RemotePrimaryShardFound found = (RemotePrimaryShardFound)response;
+                    return onPrimaryShardFound(shardName, found.getPrimaryPath(), found.getPrimaryVersion(), null);
                 } else if(response instanceof LocalPrimaryShardFound) {
                     LOG.debug("findPrimaryShardAsync received: {}", response);
                     LocalPrimaryShardFound found = (LocalPrimaryShardFound)response;
-                    return onPrimaryShardFound(shardName, found.getPrimaryPath(), found.getLocalShardDataTree());
+                    return onPrimaryShardFound(shardName, found.getPrimaryPath(), DataStoreVersions.CURRENT_VERSION,
+                            found.getLocalShardDataTree());
                 } else if(response instanceof NotInitializedException) {
                     throw (NotInitializedException)response;
                 } else if(response instanceof PrimaryNotFoundException) {
@@ -226,9 +229,10 @@ public class ActorContext {
     }
 
     private PrimaryShardInfo onPrimaryShardFound(String shardName, String primaryActorPath,
-            DataTree localShardDataTree) {
+            short primaryVersion, DataTree localShardDataTree) {
         ActorSelection actorSelection = actorSystem.actorSelection(primaryActorPath);
-        PrimaryShardInfo info = new PrimaryShardInfo(actorSelection, Optional.fromNullable(localShardDataTree));
+        PrimaryShardInfo info = new PrimaryShardInfo(actorSelection, primaryVersion,
+                Optional.fromNullable(localShardDataTree));
         primaryShardInfoCache.putSuccessful(shardName, info);
         return info;
     }

@@ -20,10 +20,13 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
  */
 public class PrimaryShardInfo {
     private final ActorSelection primaryShardActor;
+    private final short primaryShardVersion;
     private final Optional<DataTree> localShardDataTree;
 
-    public PrimaryShardInfo(@Nonnull ActorSelection primaryShardActor, @Nonnull Optional<DataTree> localShardDataTree) {
+    public PrimaryShardInfo(@Nonnull ActorSelection primaryShardActor, short primaryShardVersion,
+            @Nonnull Optional<DataTree> localShardDataTree) {
         this.primaryShardActor = Preconditions.checkNotNull(primaryShardActor);
+        this.primaryShardVersion = primaryShardVersion;
         this.localShardDataTree = Preconditions.checkNotNull(localShardDataTree);
     }
 
@@ -32,6 +35,13 @@ public class PrimaryShardInfo {
      */
     public @Nonnull ActorSelection getPrimaryShardActor() {
         return primaryShardActor;
+    }
+
+    /**
+     * Returns the version of the primary shard.
+     */
+    public short getPrimaryShardVersion() {
+        return primaryShardVersion;
     }
 
     /**
