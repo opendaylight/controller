@@ -49,6 +49,8 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     // in-memory journal can use before it needs to snapshot
     private int snapshotDataThresholdPercentage = 12;
 
+    private int snaphotChunkSize = SNAPSHOT_CHUNK_SIZE;
+
     private long electionTimeoutFactor = 2;
 
     public void setHeartBeatInterval(FiniteDuration heartBeatInterval) {
@@ -62,6 +64,10 @@ public class DefaultConfigParamsImpl implements ConfigParams {
 
     public void setSnapshotDataThresholdPercentage(int snapshotDataThresholdPercentage){
         this.snapshotDataThresholdPercentage = snapshotDataThresholdPercentage;
+    }
+
+    public void setSnaphotChunkSize(int snaphotChunkSize) {
+        this.snaphotChunkSize = snaphotChunkSize;
     }
 
     public void setJournalRecoveryLogBatchSize(int journalRecoveryLogBatchSize) {
@@ -109,7 +115,7 @@ public class DefaultConfigParamsImpl implements ConfigParams {
 
     @Override
     public int getSnapshotChunkSize() {
-        return SNAPSHOT_CHUNK_SIZE;
+        return snaphotChunkSize;
     }
 
     @Override
