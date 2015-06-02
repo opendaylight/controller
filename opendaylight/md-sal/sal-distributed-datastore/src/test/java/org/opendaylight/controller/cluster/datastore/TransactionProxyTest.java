@@ -799,11 +799,13 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     }
 
     private PrimaryShardInfo newPrimaryShardInfo(ActorRef actorRef){
-        return new PrimaryShardInfo(getSystem().actorSelection(actorRef.path()), Optional.<DataTree>absent());
+        return new PrimaryShardInfo(getSystem().actorSelection(actorRef.path()), DataStoreVersions.CURRENT_VERSION,
+                Optional.<DataTree>absent());
     }
 
     private PrimaryShardInfo newPrimaryShardInfo(ActorRef actorRef, Optional<DataTree> dataTreeOptional){
-        return new PrimaryShardInfo(getSystem().actorSelection(actorRef.path()), dataTreeOptional);
+        return new PrimaryShardInfo(getSystem().actorSelection(actorRef.path()), DataStoreVersions.CURRENT_VERSION,
+                dataTreeOptional);
     }
 
 

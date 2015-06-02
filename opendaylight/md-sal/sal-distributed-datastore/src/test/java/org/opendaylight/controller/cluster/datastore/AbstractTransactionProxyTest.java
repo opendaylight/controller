@@ -316,18 +316,28 @@ public abstract class AbstractTransactionProxyTest {
     }
 
     protected Future<PrimaryShardInfo> primaryShardInfoReply(ActorSystem actorSystem, ActorRef actorRef) {
+        return primaryShardInfoReply(actorSystem, actorRef, DataStoreVersions.CURRENT_VERSION);
+    }
+
+    protected Future<PrimaryShardInfo> primaryShardInfoReply(ActorSystem actorSystem, ActorRef actorRef,
+            short transactionVersion) {
         return Futures.successful(new PrimaryShardInfo(actorSystem.actorSelection(actorRef.path()),
-                Optional.<DataTree>absent()));
+                transactionVersion, Optional.<DataTree>absent()));
     }
 
     protected ActorRef setupActorContextWithoutInitialCreateTransaction(ActorSystem actorSystem, String shardName) {
+        return setupActorContextWithoutInitialCreateTransaction(actorSystem, shardName, DataStoreVersions.CURRENT_VERSION);
+    }
+
+    protected ActorRef setupActorContextWithoutInitialCreateTransaction(ActorSystem actorSystem, String shardName,
+            short transactionVersion) {
         ActorRef actorRef = actorSystem.actorOf(Props.create(DoNothingActor.class));
         log.info("Created mock shard actor {}", actorRef);
 
         doReturn(actorSystem.actorSelection(actorRef.path())).
                 when(mockActorContext).actorSelection(actorRef.path().toString());
 
-        doReturn(primaryShardInfoReply(actorSystem, actorRef)).
+        doReturn(primaryShardInfoReply(actorSystem, actorRef, transactionVersion)).
                 when(mockActorContext).findPrimaryShardAsync(eq(shardName));
 
         doReturn(false).when(mockActorContext).isPathLocal(actorRef.path().toString());
@@ -338,15 +348,16 @@ public abstract class AbstractTransactionProxyTest {
     }
 
     protected ActorRef setupActorContextWithInitialCreateTransaction(ActorSystem actorSystem,
-            TransactionType type, int transactionVersion, String shardName) {
-        ActorRef shardActorRef = setupActorContextWithoutInitialCreateTransaction(actorSystem, shardName);
+            TransactionType type, short transactionVersion, String shardName) {
+        ActorRef shardActorRef = setupActorContextWithoutInitialCreateTransaction(actorSystem, shardName,
+                transactionVersion);
 
         return setupActorContextWithInitialCreateTransaction(actorSystem, type, transactionVersion,
                 memberName, shardActorRef);
     }
 
     protected ActorRef setupActorContextWithInitialCreateTransaction(ActorSystem actorSystem,
-            TransactionType type, int transactionVersion, String prefix, ActorRef shardActorRef) {
+            TransactionType type, short transactionVersion, String prefix, ActorRef shardActorRef) {
 
         ActorRef txActorRef;
         if(type == TransactionType.WRITE_ONLY && transactionVersion >= DataStoreVersions.LITHIUM_VERSION &&
@@ -357,11 +368,11 @@ public abstract class AbstractTransactionProxyTest {
             log.info("Created mock shard Tx actor {}", txActorRef);
 
             doReturn(actorSystem.actorSelection(txActorRef.path())).
-            when(mockActorContext).actorSelection(txActorRef.path().toString());
+                when(mockActorContext).actorSelection(txActorRef.path().toString());
 
             doReturn(Futures.successful(createTransactionReply(txActorRef, transactionVersion))).when(mockActorContext).
-            executeOperationAsync(eq(actorSystem.actorSelection(shardActorRef.path())),
-                    eqCreateTransaction(prefix, type));
+                executeOperationAsync(eq(actorSystem.actorSelection(shardActorRef.path())),
+                        eqCreateTransaction(prefix, type));
         }
 
         return txActorRef;

@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.datastore.messages;
 
 import com.google.common.base.Preconditions;
+import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 
 /**
@@ -21,6 +22,9 @@ public final class ReadyLocalTransaction {
     private final DataTreeModification modification;
     private final String transactionID;
     private final boolean doCommitOnReady;
+
+    // The version of the remote system used only when needing to convert to BatchedModifications.
+    private short remoteVersion = DataStoreVersions.CURRENT_VERSION;
 
     public ReadyLocalTransaction(final String transactionID, final DataTreeModification modification, final boolean doCommitOnReady) {
         this.transactionID = Preconditions.checkNotNull(transactionID);
@@ -38,5 +42,13 @@ public final class ReadyLocalTransaction {
 
     public boolean isDoCommitOnReady() {
         return doCommitOnReady;
+    }
+
+    public short getRemoteVersion() {
+        return remoteVersion;
+    }
+
+    public void setRemoteVersion(short remoteVersion) {
+        this.remoteVersion = remoteVersion;
     }
 }

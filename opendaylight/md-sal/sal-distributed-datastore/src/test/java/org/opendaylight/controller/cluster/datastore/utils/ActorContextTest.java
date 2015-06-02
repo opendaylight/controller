@@ -34,6 +34,7 @@ import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.datastore.AbstractActorTest;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.Configuration;
+import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.exceptions.NotInitializedException;
@@ -387,12 +388,13 @@ public class ActorContextTest extends AbstractActorTest{
                     shardLeaderElectionTimeout(100, TimeUnit.MILLISECONDS).build();
 
             final String expPrimaryPath = "akka://test-system/find-primary-shard";
+            final short expPrimaryVersion = DataStoreVersions.CURRENT_VERSION;
             ActorContext actorContext =
                     new ActorContext(getSystem(), shardManager, mock(ClusterWrapper.class),
                             mock(Configuration.class), dataStoreContext, new PrimaryShardInfoFutureCache()) {
                         @Override
                         protected Future<Object> doAsk(ActorRef actorRef, Object message, Timeout timeout) {
-                            return Futures.successful((Object) new RemotePrimaryShardFound(expPrimaryPath));
+                            return Futures.successful((Object) new RemotePrimaryShardFound(expPrimaryPath, expPrimaryVersion));
                         }
                     };
 
@@ -403,6 +405,7 @@ public class ActorContextTest extends AbstractActorTest{
             assertEquals("LocalShardDataTree present", false, actual.getLocalShardDataTree().isPresent());
             assertTrue("Unexpected PrimaryShardActor path " + actual.getPrimaryShardActor().path(),
                     expPrimaryPath.endsWith(actual.getPrimaryShardActor().pathString()));
+            assertEquals("getPrimaryShardVersion", expPrimaryVersion, actual.getPrimaryShardVersion());
 
             Future<PrimaryShardInfo> cached = actorContext.getPrimaryShardInfoCache().getIfPresent("foobar");
 
@@ -445,6 +448,7 @@ public class ActorContextTest extends AbstractActorTest{
             assertSame("LocalShardDataTree", mockDataTree, actual.getLocalShardDataTree().get());
             assertTrue("Unexpected PrimaryShardActor path " + actual.getPrimaryShardActor().path(),
                     expPrimaryPath.endsWith(actual.getPrimaryShardActor().pathString()));
+            assertEquals("getPrimaryShardVersion", DataStoreVersions.CURRENT_VERSION, actual.getPrimaryShardVersion());
 
             Future<PrimaryShardInfo> cached = actorContext.getPrimaryShardInfoCache().getIfPresent("foobar");
 
@@ -509,8 +513,10 @@ public class ActorContextTest extends AbstractActorTest{
 
             TestActorRef<MockShardManager> shardManagerActorRef = TestActorRef.create(getSystem(), MockShardManager.props());
             MockShardManager shardManagerActor = shardManagerActorRef.underlyingActor();
-            shardManagerActor.addFindPrimaryResp("shard1", new RemotePrimaryShardFound(shardActorRef1.path().toString()));
-            shardManagerActor.addFindPrimaryResp("shard2", new RemotePrimaryShardFound(shardActorRef2.path().toString()));
+            shardManagerActor.addFindPrimaryResp("shard1", new RemotePrimaryShardFound(shardActorRef1.path().toString(),
+                    DataStoreVersions.CURRENT_VERSION));
+            shardManagerActor.addFindPrimaryResp("shard2", new RemotePrimaryShardFound(shardActorRef2.path().toString(),
+                    DataStoreVersions.CURRENT_VERSION));
             shardManagerActor.addFindPrimaryResp("shard3", new NoShardLeaderException("not found"));
 
             Configuration mockConfig = mock(Configuration.class);
