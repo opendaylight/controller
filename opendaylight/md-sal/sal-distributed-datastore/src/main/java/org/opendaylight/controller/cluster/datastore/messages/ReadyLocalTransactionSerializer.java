@@ -14,7 +14,6 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import javax.annotation.Nonnull;
 import org.apache.commons.lang3.SerializationUtils;
-import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.cluster.datastore.modification.DeleteModification;
 import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
@@ -43,14 +42,14 @@ public final class ReadyLocalTransactionSerializer extends JSerializer {
     @Override
     public byte[] toBinary(final Object obj) {
         Preconditions.checkArgument(obj instanceof ReadyLocalTransaction, "Unsupported object type %s", obj.getClass());
-        final ReadyLocalTransaction msg = (ReadyLocalTransaction) obj;
-        final BatchedModifications batched = new BatchedModifications(msg.getTransactionID(),
-                DataStoreVersions.CURRENT_VERSION, "");
-        batched.setDoCommitOnReady(msg.isDoCommitOnReady());
+        final ReadyLocalTransaction readyLocal = (ReadyLocalTransaction) obj;
+        final BatchedModifications batched = new BatchedModifications(readyLocal.getTransactionID(),
+                readyLocal.getRemoteVersion(), "");
+        batched.setDoCommitOnReady(readyLocal.isDoCommitOnReady());
         batched.setTotalMessagesSent(1);
         batched.setReady(true);
 
-        msg.getModification().applyToCursor(new BatchedCursor(batched));
+        readyLocal.getModification().applyToCursor(new BatchedCursor(batched));
 
         return SerializationUtils.serialize(batched);
     }

@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.datastore.compat;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.eq;
@@ -21,15 +20,15 @@ import akka.actor.ActorRef;
 import akka.dispatch.Futures;
 import akka.util.Timeout;
 import com.google.common.base.Optional;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import org.junit.Ignore;
+import java.util.concurrent.TimeoutException;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.datastore.AbstractThreePhaseCommitCohort;
 import org.opendaylight.controller.cluster.datastore.AbstractTransactionProxyTest;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
-import org.opendaylight.controller.cluster.datastore.ThreePhaseCommitCohortProxy;
 import org.opendaylight.controller.cluster.datastore.TransactionProxy;
 import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransactionReply;
@@ -174,13 +173,20 @@ public class PreLithiumTransactionProxyTest extends AbstractTransactionProxyTest
 
         verifyCohortFutures(proxy, getSystem().actorSelection(actorRef.path()));
 
+        doThreePhaseCommit(actorRef, transactionProxy, proxy);
+
+        return actorRef;
+    }
+
+    private void doThreePhaseCommit(ActorRef actorRef, TransactionProxy transactionProxy,
+            AbstractThreePhaseCommitCohort<?> proxy) throws InterruptedException, ExecutionException, TimeoutException {
         doReturn(Futures.successful(CanCommitTransactionReply.YES.toSerializable())).when(mockActorContext).
-                executeOperationAsync(eq(actorSelection(actorRef)),
-                    eqCanCommitTransaction(transactionProxy.getIdentifier().toString()), any(Timeout.class));
+                executeOperationAsync(eq(actorSelection(actorRef)), eqCanCommitTransaction(
+                        transactionProxy.getIdentifier().toString()), any(Timeout.class));
 
         doReturn(Futures.successful(new CommitTransactionReply().toSerializable())).when(mockActorContext).
-                executeOperationAsync(eq(actorSelection(actorRef)),
-                   eqCommitTransaction(transactionProxy.getIdentifier().toString()), any(Timeout.class));
+                executeOperationAsync(eq(actorSelection(actorRef)), eqCommitTransaction(
+                        transactionProxy.getIdentifier().toString()), any(Timeout.class));
 
         Boolean canCommit = proxy.canCommit().get(3, TimeUnit.SECONDS);
         assertEquals("canCommit", true, canCommit.booleanValue());
@@ -189,7 +195,11 @@ public class PreLithiumTransactionProxyTest extends AbstractTransactionProxyTest
 
         proxy.commit().get(3, TimeUnit.SECONDS);
 
-        return actorRef;
+        verify(mockActorContext).executeOperationAsync(eq(actorSelection(actorRef)), eqCanCommitTransaction(
+                transactionProxy.getIdentifier().toString()), any(Timeout.class));
+
+        verify(mockActorContext).executeOperationAsync(eq(actorSelection(actorRef)), eqCommitTransaction(
+                transactionProxy.getIdentifier().toString()), any(Timeout.class));
     }
 
     @Test
@@ -209,9 +219,6 @@ public class PreLithiumTransactionProxyTest extends AbstractTransactionProxyTest
     }
 
     @Test
-    @Ignore
-    // FIXME: disabled until we can get the primary shard version from the ShardManager as we now skip
-    // creating transaction actors for write-only Tx's.
     public void testWriteOnlyCompatibilityWithHeliumR2Version() throws Exception {
         short version = DataStoreVersions.HELIUM_2_VERSION;
         ActorRef actorRef = setupActorContextWithInitialCreateTransaction(getSystem(), WRITE_ONLY, version,
@@ -225,19 +232,16 @@ public class PreLithiumTransactionProxyTest extends AbstractTransactionProxyTest
         doReturn(readySerializedTxReply(actorRef.path().toString(), version)).when(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef)), isA(ReadyTransaction.SERIALIZABLE_CLASS));
 
-        doReturn(actorRef.path().toString()).when(mockActorContext).resolvePath(eq(actorRef.path().toString()),
-                eq(actorRef.path().toString()));
-
         TransactionProxy transactionProxy = new TransactionProxy(mockComponentFactory, WRITE_ONLY);
 
         transactionProxy.write(TestModel.TEST_PATH, testNode);
 
         DOMStoreThreePhaseCommitCohort ready = transactionProxy.ready();
 
-        assertTrue(ready instanceof ThreePhaseCommitCohortProxy);
-
-        ThreePhaseCommitCohortProxy proxy = (ThreePhaseCommitCohortProxy) ready;
+        AbstractThreePhaseCommitCohort<?> proxy = (AbstractThreePhaseCommitCohort<?>) ready;
 
         verifyCohortFutures(proxy, getSystem().actorSelection(actorRef.path()));
+
+        doThreePhaseCommit(actorRef, transactionProxy, proxy);
     }
 }
