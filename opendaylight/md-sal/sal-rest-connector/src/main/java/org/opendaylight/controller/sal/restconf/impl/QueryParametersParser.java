@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
@@ -28,20 +28,18 @@ public class QueryParametersParser {
         }
     }
 
-    public static WriterParameters parseKnownWriterParameters(final UriInfo info) {
-        boolean prettyPrint;
-        int depth;
+    public static WriterParameters parseWriterParameters(final UriInfo info) {
+        WriterParameters.WriterParametersBuilder wpBuilder = new WriterParameters.WriterParametersBuilder();
         String param = info.getQueryParameters(false).getFirst(UriParameters.DEPTH.toString());
-        if (Strings.isNullOrEmpty(param) || "unbounded".equals(param)) {
-            depth = Integer.MAX_VALUE;
-        } else {
+        if (!Strings.isNullOrEmpty(param) && !"unbounded".equals(param)) {
             try {
-                depth = Integer.valueOf(param);
+                final int depth = Integer.valueOf(param);
                 if (depth < 1) {
                     throw new RestconfDocumentedException(new RestconfError(RestconfError.ErrorType.PROTOCOL, RestconfError.ErrorTag.INVALID_VALUE,
                             "Invalid depth parameter: " + depth, null,
                             "The depth parameter must be an integer > 1 or \"unbounded\""));
                 }
+                wpBuilder.setDepth(depth);
             } catch (final NumberFormatException e) {
                 throw new RestconfDocumentedException(new RestconfError(RestconfError.ErrorType.PROTOCOL, RestconfError.ErrorTag.INVALID_VALUE,
                         "Invalid depth parameter: " + e.getMessage(), null,
@@ -49,8 +47,8 @@ public class QueryParametersParser {
             }
         }
         param = info.getQueryParameters(false).getFirst(UriParameters.PRETTY_PRINT.toString());
-        prettyPrint = "true".equals(param);
-        return new WriterParameters(prettyPrint, depth);
+        wpBuilder.setPrettyPrint("true".equals(param));
+        return wpBuilder.build();
     }
 
 }
