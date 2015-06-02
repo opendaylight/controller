@@ -85,19 +85,18 @@ final class RemoteTransactionContextSupport {
     /**
      * Sets the target primary shard and initiates a CreateTransaction try.
      */
-    void setPrimaryShard(ActorSelection primaryShard) {
+    void setPrimaryShard(ActorSelection primaryShard, short primaryVersion) {
         this.primaryShard = primaryShard;
 
-        if (getTransactionType() == TransactionType.WRITE_ONLY &&
+        if (getTransactionType() == TransactionType.WRITE_ONLY && primaryVersion >= DataStoreVersions.LITHIUM_VERSION &&
                 getActorContext().getDatastoreContext().isWriteOnlyTransactionOptimizationsEnabled()) {
             LOG.debug("Tx {} Primary shard {} found - creating WRITE_ONLY transaction context",
                 getIdentifier(), primaryShard);
 
             // For write-only Tx's we prepare the transaction modifications directly on the shard actor
             // to avoid the overhead of creating a separate transaction actor.
-            // FIXME: can't assume the shard version is LITHIUM_VERSION - need to obtain it somehow.
             transactionContextAdapter.executePriorTransactionOperations(createValidTransactionContext(this.primaryShard,
-                    this.primaryShard.path().toString(), DataStoreVersions.LITHIUM_VERSION));
+                    this.primaryShard.path().toString(), primaryVersion));
         } else {
             tryCreateTransaction();
         }

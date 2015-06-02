@@ -17,19 +17,26 @@ public class RemotePrimaryShardFound implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final String primaryPath;
+    private final short primaryVersion;
 
-    public RemotePrimaryShardFound(final String primaryPath) {
+    public RemotePrimaryShardFound(final String primaryPath, short primaryVersion) {
         this.primaryPath = primaryPath;
+        this.primaryVersion = primaryVersion;
     }
 
     public String getPrimaryPath() {
         return primaryPath;
     }
 
+    public short getPrimaryVersion() {
+        return primaryVersion;
+    }
+
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("RemotePrimaryShardFound [primaryPath=").append(primaryPath).append("]");
+        builder.append("RemotePrimaryShardFound [primaryPath=").append(primaryPath).append(", primaryVersion=")
+                .append(primaryVersion).append("]");
         return builder.toString();
     }
 }
