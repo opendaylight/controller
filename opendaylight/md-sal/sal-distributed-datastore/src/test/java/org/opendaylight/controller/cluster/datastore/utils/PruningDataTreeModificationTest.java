@@ -18,6 +18,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModificationCursor;
+import org.opendaylight.yangtools.yang.data.impl.schema.tree.SchemaValidationFailedException;
 
 public class PruningDataTreeModificationTest {
 
@@ -53,7 +54,7 @@ public class PruningDataTreeModificationTest {
     @Test
     public void testDeleteOnException(){
         YangInstanceIdentifier path = CarsModel.BASE_PATH;
-        doThrow(IllegalArgumentException.class).when(delegate).delete(path);
+        doThrow(SchemaValidationFailedException.class).when(delegate).delete(path);
 
         pruningDataTreeModification.delete(path);
 
@@ -75,7 +76,7 @@ public class PruningDataTreeModificationTest {
         NormalizedNode<?, ?> normalizedNode = CarsModel.create();
         YangInstanceIdentifier path = CarsModel.BASE_PATH;
 
-        doThrow(IllegalArgumentException.class).when(delegate).merge(path, normalizedNode);
+        doThrow(SchemaValidationFailedException.class).when(delegate).merge(path, normalizedNode);
         doReturn(true).when(validNamespaces).contains(any(YangInstanceIdentifier.PathArgument.class));
 
         pruningDataTreeModification.merge(path, normalizedNode);
@@ -98,7 +99,7 @@ public class PruningDataTreeModificationTest {
         NormalizedNode<?, ?> normalizedNode = CarsModel.create();
         YangInstanceIdentifier path = CarsModel.BASE_PATH;
 
-        doThrow(IllegalArgumentException.class).when(delegate).write(path, normalizedNode);
+        doThrow(SchemaValidationFailedException.class).when(delegate).write(path, normalizedNode);
         doReturn(true).when(validNamespaces).contains(any(YangInstanceIdentifier.PathArgument.class));
 
         pruningDataTreeModification.write(path, normalizedNode);
