@@ -536,7 +536,7 @@ public class ControllerContext implements SchemaContextListener {
                 if (!mountOpt.isPresent()) {
                     LOG.debug("Instance identifier to missing mount point: {}", partialPath);
                     throw new RestconfDocumentedException("Mount point does not exist.", ErrorType.PROTOCOL,
-                            ErrorTag.UNKNOWN_ELEMENT);
+                            ErrorTag.DATA_MISSING);
                 }
                 final DOMMountPoint mount = mountOpt.get();
 
