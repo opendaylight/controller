@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.sal.rest.impl;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -25,6 +26,7 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import org.opendaylight.controller.sal.rest.api.Draft02;
+import org.opendaylight.controller.sal.rest.api.RestconfNormalizedNodeWriter;
 import org.opendaylight.controller.sal.rest.api.RestconfService;
 import org.opendaylight.controller.sal.restconf.impl.InstanceIdentifierContext;
 import org.opendaylight.controller.sal.restconf.impl.NormalizedNodeContext;
@@ -33,7 +35,6 @@ import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
-import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeWriter;
 import org.opendaylight.yangtools.yang.data.impl.codec.xml.XMLStreamNormalizedNodeStreamWriter;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
@@ -90,20 +91,23 @@ public class NormalizedNodeXmlBodyWriter implements MessageBodyWriter<Normalized
 
 
 
-        writeNormalizedNode(xmlWriter,schemaPath,pathContext,data);
+        writeNormalizedNode(xmlWriter, schemaPath, pathContext, data, t.getWriterParameters().getDepth());
+
     }
 
-    private void writeNormalizedNode(XMLStreamWriter xmlWriter, SchemaPath schemaPath,InstanceIdentifierContext<?> pathContext, NormalizedNode<?, ?> data) throws IOException {
-        final NormalizedNodeWriter nnWriter;
+    private void writeNormalizedNode(XMLStreamWriter xmlWriter, SchemaPath schemaPath, InstanceIdentifierContext<?>
+            pathContext, NormalizedNode<?, ?> data, Optional<Integer> depth) throws IOException {
+        final RestconfNormalizedNodeWriter nnWriter;
         final SchemaContext schemaCtx = pathContext.getSchemaContext();
         if (SchemaPath.ROOT.equals(schemaPath)) {
-            nnWriter = createNormalizedNodeWriter(xmlWriter, schemaCtx, schemaPath);
+            nnWriter = createNormalizedNodeWriter(xmlWriter, schemaCtx, schemaPath, depth);
             writeElements(xmlWriter, nnWriter, (ContainerNode) data);
         }  else if (pathContext.getSchemaNode() instanceof RpcDefinition) {
-            nnWriter = createNormalizedNodeWriter(xmlWriter, schemaCtx, ((RpcDefinition) pathContext.getSchemaNode()).getOutput().getPath());
+            nnWriter = createNormalizedNodeWriter(xmlWriter, schemaCtx,
+                    ((RpcDefinition) pathContext.getSchemaNode()).getOutput().getPath(), depth);
             writeElements(xmlWriter, nnWriter, (ContainerNode) data);
         } else {
-            nnWriter = createNormalizedNodeWriter(xmlWriter, schemaCtx, schemaPath.getParent());
+            nnWriter = createNormalizedNodeWriter(xmlWriter, schemaCtx, schemaPath.getParent(), depth);
             if (data instanceof MapEntryNode) {
                 // Restconf allows returning one list item. We need to wrap it
                 // in map node in order to serialize it properly
@@ -114,13 +118,18 @@ public class NormalizedNodeXmlBodyWriter implements MessageBodyWriter<Normalized
         nnWriter.flush();
     }
 
-    private NormalizedNodeWriter createNormalizedNodeWriter(XMLStreamWriter xmlWriter,
-            SchemaContext schemaContext, SchemaPath schemaPath) {
+    private RestconfNormalizedNodeWriter createNormalizedNodeWriter(XMLStreamWriter xmlWriter,
+                                                                        SchemaContext schemaContext, SchemaPath schemaPath, Optional<Integer> depth) {
         NormalizedNodeStreamWriter xmlStreamWriter = XMLStreamNormalizedNodeStreamWriter.create(xmlWriter, schemaContext, schemaPath);
-        return NormalizedNodeWriter.forStreamWriter(xmlStreamWriter);
+        if (depth.isPresent()) {
+            return DepthAwareNormalizedNodeWriter.forStreamWriter(xmlStreamWriter, depth.get());
+        } else {
+            return RestconfDelegatingNormalizedNodeWriter.forStreamWriter(xmlStreamWriter);
+        }
     }
 
-    private void writeElements(final XMLStreamWriter xmlWriter, final NormalizedNodeWriter nnWriter, final ContainerNode data)
+    private void writeElements(final XMLStreamWriter xmlWriter, final RestconfNormalizedNodeWriter nnWriter,
+                               final ContainerNode data)
             throws IOException {
         try {
             final QName name = data.getNodeType();
