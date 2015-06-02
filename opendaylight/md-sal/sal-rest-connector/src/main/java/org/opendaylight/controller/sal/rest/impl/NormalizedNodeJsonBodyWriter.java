@@ -74,20 +74,20 @@ public class NormalizedNodeJsonBodyWriter implements MessageBodyWriter<Normalize
         SchemaPath path = context.getSchemaNode().getPath();
         final JsonWriter jsonWriter = createJsonWriter(entityStream, t.getWriterParameters().isPrettyPrint());
         jsonWriter.beginObject();
-        writeNormalizedNode(jsonWriter,path,context,data);
+        writeNormalizedNode(jsonWriter,path,context,data, t.getWriterParameters().getDepth());
         jsonWriter.endObject();
         jsonWriter.flush();
     }
 
     private void writeNormalizedNode(JsonWriter jsonWriter, SchemaPath path,
-            InstanceIdentifierContext<SchemaNode> context, NormalizedNode<?, ?> data) throws IOException {
+            InstanceIdentifierContext<SchemaNode> context, NormalizedNode<?, ?> data, int depth) throws IOException {
         final NormalizedNodeWriter nnWriter;
         if (SchemaPath.ROOT.equals(path)) {
             /*
              *  Creates writer without initialNs and we write children of root data container
              *  which is not visible in restconf
              */
-            nnWriter = createNormalizedNodeWriter(context,path,jsonWriter);
+            nnWriter = createNormalizedNodeWriter(context,path,jsonWriter, depth);
             writeChildren(nnWriter,(ContainerNode) data);
         } else if (context.getSchemaNode() instanceof RpcDefinition) {
             /*
@@ -95,7 +95,7 @@ public class NormalizedNodeJsonBodyWriter implements MessageBodyWriter<Normalize
              *  so we need to emit initial output declaratation..
              */
             path = ((RpcDefinition) context.getSchemaNode()).getOutput().getPath();
-            nnWriter = createNormalizedNodeWriter(context,path,jsonWriter);
+            nnWriter = createNormalizedNodeWriter(context,path,jsonWriter, depth);
             jsonWriter.name("output");
             jsonWriter.beginObject();
             writeChildren(nnWriter, (ContainerNode) data);
@@ -106,7 +106,7 @@ public class NormalizedNodeJsonBodyWriter implements MessageBodyWriter<Normalize
             if(data instanceof MapEntryNode) {
                 data = ImmutableNodes.mapNodeBuilder(data.getNodeType()).withChild(((MapEntryNode) data)).build();
             }
-            nnWriter = createNormalizedNodeWriter(context,path,jsonWriter);
+            nnWriter = createNormalizedNodeWriter(context,path,jsonWriter, depth);
             nnWriter.write(data);
         }
         nnWriter.flush();
@@ -119,7 +119,7 @@ public class NormalizedNodeJsonBodyWriter implements MessageBodyWriter<Normalize
     }
 
     private NormalizedNodeWriter createNormalizedNodeWriter(final InstanceIdentifierContext<SchemaNode> context,
-            final SchemaPath path, final JsonWriter jsonWriter) {
+            final SchemaPath path, final JsonWriter jsonWriter, int depth) {
 
         final SchemaNode schema = context.getSchemaNode();
         final JSONCodecFactory codecs = getCodecFactory(context);
@@ -135,7 +135,7 @@ public class NormalizedNodeJsonBodyWriter implements MessageBodyWriter<Normalize
             initialNs = null;
         }
         final NormalizedNodeStreamWriter streamWriter = JSONNormalizedNodeStreamWriter.createNestedWriter(codecs,path,initialNs,jsonWriter);
-        return NormalizedNodeWriter.forStreamWriter(streamWriter);
+        return NormalizedNodeWriter.forStreamWriter(streamWriter, depth);
     }
 
     private JsonWriter createJsonWriter(final OutputStream entityStream, boolean prettyPrint) {
