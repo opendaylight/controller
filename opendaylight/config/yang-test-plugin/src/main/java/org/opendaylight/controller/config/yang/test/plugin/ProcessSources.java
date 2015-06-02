@@ -7,10 +7,11 @@
  */
 package org.opendaylight.controller.config.yang.test.plugin;
 
+import com.google.common.io.Files;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
-import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -46,7 +47,7 @@ public class ProcessSources extends AbstractMojo{
             if (sourceFile.getName().endsWith(".java")) {
                 String sourceContent;
                 try {
-                    sourceContent = FileUtils.readFileToString(sourceFile);
+                    sourceContent = Files.toString(sourceFile, StandardCharsets.UTF_8);
                 } catch (IOException e) {
                     getLog().error(String.format("Cannot read %s", sourceFile.getAbsolutePath()), e);
                     continue;
@@ -56,7 +57,7 @@ public class ProcessSources extends AbstractMojo{
                     if (stubFile.exists()) {
                         String stubContent = null;
                         try {
-                            stubContent = FileUtils.readFileToString(stubFile);
+                            stubContent = Files.toString(stubFile, StandardCharsets.UTF_8);
                         } catch (IOException e) {
                             getLog().error(String.format("Cannot read %s", stubFile.getAbsolutePath()), e);
                         }
@@ -70,7 +71,7 @@ public class ProcessSources extends AbstractMojo{
 
                 // replace the file content
                 try {
-                    FileUtils.write(sourceFile, sourceContent);
+                    Files.write(sourceContent, sourceFile, StandardCharsets.UTF_8);
                 } catch (IOException e) {
                     getLog().error(String.format("Cannot write %s", sourceFile.getAbsolutePath()), e);
                 }
