@@ -205,13 +205,13 @@ public final class ShardDataTree extends ShardDataTreeTransactionParent {
         @Override
         public ReadOnlyShardDataTreeTransaction newReadOnlyTransaction(String txId, String chainId) {
             return new ReadOnlyShardDataTreeTransaction(txId,
-                    new ShardDataTreeSnapshot(dataTree.takeSnapshot(), validNamespaces));
+                    new PruningShardDataTreeSnapshot(dataTree.takeSnapshot(), validNamespaces));
         }
 
         @Override
         public ReadWriteShardDataTreeTransaction newReadWriteTransaction(String txId, String chainId) {
             return new ReadWriteShardDataTreeTransaction(ShardDataTree.this, txId,
-                    new ShardDataTreeSnapshot(dataTree.takeSnapshot(), validNamespaces).newModification());
+                    new PruningShardDataTreeSnapshot(dataTree.takeSnapshot(), validNamespaces).newModification());
         }
     }
 

@@ -13,7 +13,7 @@ import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
 
-public class ShardDataTreeSnapshotTest {
+public class PruningShardDataTreeSnapshotTest {
 
     @Mock
     DataTreeSnapshot dataTreeSnapshot;
@@ -28,8 +28,8 @@ public class ShardDataTreeSnapshotTest {
 
     @Test
     public void testNewModification(){
-        ShardDataTreeSnapshot snapshot1
-                = new ShardDataTreeSnapshot(dataTreeSnapshot, validNamespaces);
+        PruningShardDataTreeSnapshot snapshot1
+                = new PruningShardDataTreeSnapshot(dataTreeSnapshot, validNamespaces);
 
         DataTreeModification dataTreeModification1 = snapshot1.newModification();
 
@@ -38,8 +38,8 @@ public class ShardDataTreeSnapshotTest {
 
     @Test
     public void testReadNode(){
-        ShardDataTreeSnapshot snapshot
-                = new ShardDataTreeSnapshot(dataTreeSnapshot, validNamespaces);
+        PruningShardDataTreeSnapshot snapshot
+                = new PruningShardDataTreeSnapshot(dataTreeSnapshot, validNamespaces);
 
         snapshot.readNode(CarsModel.BASE_PATH);
 

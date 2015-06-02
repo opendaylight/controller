@@ -17,12 +17,15 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
 
-class ShardDataTreeSnapshot implements DataTreeSnapshot {
+/**
+ * The PruningShardDataTreeSnapshot returns a PruningDataTreeModification when a newModification is created
+ */
+class PruningShardDataTreeSnapshot implements DataTreeSnapshot {
 
     private final DataTreeSnapshot dataTreeSnapshot;
     private final Set<URI> validNamespaces;
 
-    public ShardDataTreeSnapshot(DataTreeSnapshot dataTreeSnapshot, Set<URI> validNamespaces) {
+    public PruningShardDataTreeSnapshot(DataTreeSnapshot dataTreeSnapshot, Set<URI> validNamespaces) {
         this.dataTreeSnapshot = dataTreeSnapshot;
         this.validNamespaces = validNamespaces;
     }
