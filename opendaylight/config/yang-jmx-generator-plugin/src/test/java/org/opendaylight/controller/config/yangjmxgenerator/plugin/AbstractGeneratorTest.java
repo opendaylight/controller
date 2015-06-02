@@ -8,7 +8,6 @@
 package org.opendaylight.controller.config.yangjmxgenerator.plugin;
 
 import java.io.File;
-import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.opendaylight.controller.config.yangjmxgenerator.AbstractYangTest;
 
@@ -24,7 +23,21 @@ public abstract class AbstractGeneratorTest extends AbstractYangTest {
 
     @Before
     public void cleanUpDirectory() throws Exception {
-        FileUtils.deleteDirectory(generatorOutputPath);
+        deleteFolder(generatorOutputPath);
+    }
+
+    public void deleteFolder(File folder) {
+        File[] files = folder.listFiles();
+        if (files != null) {
+            for (File f: files) {
+                if (f.isDirectory()) {
+                    deleteFolder(f);
+                } else {
+                    f.delete();
+                }
+            }
+        }
+        folder.delete();
     }
 
 }
