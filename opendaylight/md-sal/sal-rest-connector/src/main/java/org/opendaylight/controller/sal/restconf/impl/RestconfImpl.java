@@ -194,7 +194,7 @@ public class RestconfImpl implements RestconfService {
 
         return new NormalizedNodeContext(new InstanceIdentifierContext<>(null, modulesSchemaNode,
                 null, schemaContext), moduleContainerBuilder.build(),
-                QueryParametersParser.parseKnownWriterParameters(uriInfo));
+                QueryParametersParser.parseWriterParameters(uriInfo));
     }
 
     /**
@@ -226,7 +226,7 @@ public class RestconfImpl implements RestconfService {
 
         return new NormalizedNodeContext(new InstanceIdentifierContext<>(null, modulesSchemaNode,
                 mountPoint, controllerContext.getGlobalSchema()), moduleContainerBuilder.build(),
-                QueryParametersParser.parseKnownWriterParameters(uriInfo));
+                QueryParametersParser.parseWriterParameters(uriInfo));
     }
 
     @Override
@@ -262,7 +262,7 @@ public class RestconfImpl implements RestconfService {
         Preconditions.checkState(moduleSchemaNode instanceof ListSchemaNode);
 
         return new NormalizedNodeContext(new InstanceIdentifierContext<>(null, moduleSchemaNode, mountPoint,
-                schemaContext), moduleMap, QueryParametersParser.parseKnownWriterParameters(uriInfo));
+                schemaContext), moduleMap, QueryParametersParser.parseWriterParameters(uriInfo));
     }
 
     @Override
@@ -291,7 +291,7 @@ public class RestconfImpl implements RestconfService {
 
 
         return new NormalizedNodeContext(new InstanceIdentifierContext<>(null, streamsContainerSchemaNode, null,
-                schemaContext), streamsContainerBuilder.build(), QueryParametersParser.parseKnownWriterParameters(uriInfo));
+                schemaContext), streamsContainerBuilder.build(), QueryParametersParser.parseWriterParameters(uriInfo));
     }
 
     @Override
@@ -462,7 +462,7 @@ public class RestconfImpl implements RestconfService {
 
         return new NormalizedNodeContext(new InstanceIdentifierContext<RpcDefinition>(null,
                 resultNodeSchema, mountPoint, schemaContext), resultData,
-                QueryParametersParser.parseKnownWriterParameters(uriInfo));
+                QueryParametersParser.parseWriterParameters(uriInfo));
     }
 
     private DOMRpcResult checkRpcResponse(final CheckedFuture<DOMRpcResult, DOMRpcException> response) {
@@ -640,7 +640,7 @@ public class RestconfImpl implements RestconfService {
         }
 
         return new NormalizedNodeContext(new InstanceIdentifierContext<>(null, resultNodeSchema, mountPoint,
-                schemaContext), resultData, QueryParametersParser.parseKnownWriterParameters(uriInfo));
+                schemaContext), resultData, QueryParametersParser.parseWriterParameters(uriInfo));
     }
 
     private RpcDefinition findRpc(final SchemaContext schemaContext, final String identifierDecoded) {
@@ -678,7 +678,7 @@ public class RestconfImpl implements RestconfService {
             LOG.debug(errMsg + identifier);
             throw new RestconfDocumentedException(errMsg, ErrorType.APPLICATION, ErrorTag.DATA_MISSING);
         }
-        return new NormalizedNodeContext(iiWithData, data, QueryParametersParser.parseKnownWriterParameters(uriInfo));
+        return new NormalizedNodeContext(iiWithData, data, QueryParametersParser.parseWriterParameters(uriInfo));
     }
 
     @Override
@@ -697,7 +697,7 @@ public class RestconfImpl implements RestconfService {
             LOG.debug(errMsg + identifier);
             throw new RestconfDocumentedException(errMsg , ErrorType.APPLICATION, ErrorTag.DATA_MISSING);
         }
-        return new NormalizedNodeContext(iiWithData, data, QueryParametersParser.parseKnownWriterParameters(uriInfo));
+        return new NormalizedNodeContext(iiWithData, data, QueryParametersParser.parseWriterParameters(uriInfo));
     }
 
     @Override
