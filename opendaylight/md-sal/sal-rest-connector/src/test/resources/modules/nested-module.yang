@@ -4,24 +4,42 @@ module nested-module {
     revision "2014-06-3";
 
     container depth1-cont {
-        container depth2-cont1 {
+        list depth2-cont1 {
             container depth3-cont1 {
                 container depth4-cont1 {
                     leaf depth5-leaf1 {
                         type string;
                     }
                 }
-                
+
                 leaf depth4-leaf1 {
                     type string;
                 }
             }
-            
+
             leaf depth3-leaf1 {
                 type string;
             }
         }
-        
+
+        /* list depth2-list2 was added to test keyed list */
+        list depth2-list2 {
+            key "depth3-lf1-key depth3-lf2-key";
+            leaf depth3-lf1-key {
+                type string;
+            }
+            leaf depth3-lf2-key {
+                type string;
+            }
+            leaf depth3-lf3 {
+                type string;
+            }
+        }
+
+        leaf-list depth2-lfLst1 {
+            type string;
+        }
+
         container depth2-cont2 {
             container depth3-cont2 {
                 container depth4-cont2 {
@@ -29,19 +47,19 @@ module nested-module {
                         type string;
                     }
                 }
-                
+
                 leaf depth4-leaf2 {
                     type string;
                 }
             }
-            
+
             leaf depth3-leaf2 {
                 type string;
             }
         }
-        
+
         leaf depth2-leaf1 {
             type string;
         }
     }
-} 
+}
