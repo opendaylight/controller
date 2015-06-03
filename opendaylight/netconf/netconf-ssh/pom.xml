@@ -28,10 +28,6 @@
       <groupId>${project.groupId}</groupId>
       <artifactId>netconf-impl</artifactId>
     </dependency>
-    <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-    </dependency>
       <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>threadpool-config-api</artifactId>
