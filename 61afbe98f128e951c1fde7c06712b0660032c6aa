@@ -34,6 +34,24 @@
       "revId": "61afbe98f128e951c1fde7c06712b0660032c6aa",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_cbed75f1",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-06-03T18:25:37Z",
+      "side": 1,
+      "message": "The followers commit index is only supposed to move forward when the leader tells it to move the commit index forward. Once you say an entry is committed then it cannot be rolled back just because some leader came around and said so. First of all the new leader is not supposed to ask a follower to remove \"committed\" entries - that would be wrong as it would break the consensus algorithm.\n\nMaybe we have issues with our tests.",
+      "parentUuid": "9a6a9dd7_da7b0128",
+      "revId": "61afbe98f128e951c1fde7c06712b0660032c6aa",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
