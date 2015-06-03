@@ -16,6 +16,24 @@
       "revId": "61afbe98f128e951c1fde7c06712b0660032c6aa",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_da7b0128",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-06-03T11:34:45Z",
+      "side": 1,
+      "message": "We\u0027re reverting the log back so we need to revert the commit index as well although we should only do so if already \u003e\u003d removeFromIndex. If this isn\u0027t done then subsequent entries sent by the leader may not applied. I ran into this in a unit test. \n\nSay e.g., the follower\u0027s log has 5 entries and last commit is 4. Then it finds later that that index 0\u0027s term doesn\u0027t match the leader\u0027s term - the follower removes its stale index 0+ entry and then adds the index 0 entry from the leader and any subsequent entry. So if the follower\u0027s commit index was still 4 then the new index 0 up to index 3 don\u0027t get applied. That didn\u0027t seem right to me.",
+      "parentUuid": "9a6a9dd7_57e90c19",
+      "revId": "61afbe98f128e951c1fde7c06712b0660032c6aa",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
