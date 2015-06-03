@@ -337,7 +337,7 @@
       </plugins>
    </build>
    <scm>
-      <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
+      <connection>scm:git:http://git.opendaylight.org/gerrit/controller.git</connection>
       <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
       <tag>HEAD</tag>
       <url>https://git.opendaylight.org/gerrit/gitweb?p=controller.git;a=summary</url>

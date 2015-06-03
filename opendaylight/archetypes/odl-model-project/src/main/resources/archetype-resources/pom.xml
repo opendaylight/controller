@@ -16,7 +16,7 @@
     <bundle.plugin.version>2.3.7</bundle.plugin.version>
   </properties>
   <scm>
-    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
+    <connection>scm:git:http://git.opendaylight.org/gerrit/controller.git</connection>
     <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
     <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
   </scm>
