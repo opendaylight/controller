@@ -39,6 +39,13 @@ public interface SnapshotState {
     boolean captureToInstall(ReplicatedLogEntry lastLogEntry, long replicatedToAllIndex, String targetFollower);
 
     /**
+     * Applies a snapshot on a follower that was installed by the leader.
+     *
+     * @param snapshot the Snapshot to apply.
+     */
+    void apply(Snapshot snapshot);
+
+    /**
      * Persist the snapshot
      *
      * @param snapshotBytes
@@ -52,7 +59,7 @@ public interface SnapshotState {
      *
      * @param sequenceNumber
      */
-    void commit(long sequenceNumber);
+    void commit(long sequenceNumber, RaftActorBehavior currentBehavior);
 
     /**
      * Rollback the snapshot

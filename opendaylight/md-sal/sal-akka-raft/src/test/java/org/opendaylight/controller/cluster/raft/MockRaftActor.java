@@ -200,6 +200,10 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     @Override
     public void applyRecoverySnapshot(byte[] bytes) {
         recoveryCohortDelegate.applyRecoverySnapshot(bytes);
+        applySnapshotBytes(bytes);
+    }
+
+    private void applySnapshotBytes(byte[] bytes) {
         try {
             Object data = toObject(bytes);
             if (data instanceof List) {
@@ -220,6 +224,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     public void applySnapshot(byte [] snapshot) {
         LOG.info("{}: applySnapshot called", persistenceId());
         snapshotCohortDelegate.applySnapshot(snapshot);
+        applySnapshotBytes(snapshot);
     }
 
     @Override

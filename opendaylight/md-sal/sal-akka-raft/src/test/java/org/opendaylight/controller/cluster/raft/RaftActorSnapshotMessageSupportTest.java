@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
@@ -16,15 +17,12 @@ import akka.actor.ActorRef;
 import akka.persistence.SaveSnapshotFailure;
 import akka.persistence.SaveSnapshotSuccess;
 import akka.persistence.SnapshotMetadata;
-import java.util.Arrays;
 import java.util.Collections;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
-import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
-import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
@@ -92,29 +90,16 @@ public class RaftActorSnapshotMessageSupportTest {
     @Test
     public void testOnApplySnapshot() {
 
-        ReplicatedLog replicatedLog = context.getReplicatedLog();
-        replicatedLog.append(new MockReplicatedLogEntry(1, 1, new MockPayload("1")));
-
-        byte[] snapshotBytes = {1,2,3,4,5};
-
-        ReplicatedLogEntry unAppliedEntry = new MockReplicatedLogEntry(1, 2, new MockPayload("2"));
-
         long lastAppliedDuringSnapshotCapture = 1;
         long lastIndexDuringSnapshotCapture = 2;
+        byte[] snapshotBytes = {1,2,3,4,5};
 
-        Snapshot snapshot = Snapshot.create(snapshotBytes, Arrays.asList(unAppliedEntry),
+        Snapshot snapshot = Snapshot.create(snapshotBytes, Collections.<ReplicatedLogEntry>emptyList(),
                 lastIndexDuringSnapshotCapture, 1, lastAppliedDuringSnapshotCapture, 1);
 
         sendMessageToSupport(new ApplySnapshot(snapshot));
 
-        assertEquals("Journal log size", 1, context.getReplicatedLog().size());
-        assertEquals("Last index", lastIndexDuringSnapshotCapture, context.getReplicatedLog().lastIndex());
-        assertEquals("Last applied", lastAppliedDuringSnapshotCapture, context.getLastApplied());
-        assertEquals("Commit index", -1, context.getCommitIndex());
-        assertEquals("Snapshot term", 1, context.getReplicatedLog().getSnapshotTerm());
-        assertEquals("Snapshot index", lastAppliedDuringSnapshotCapture, context.getReplicatedLog().getSnapshotIndex());
-
-        verify(mockCohort).applySnapshot(snapshotBytes);
+        verify(mockSnapshotManager).apply(snapshot);
     }
 
     @Test
@@ -132,7 +117,7 @@ public class RaftActorSnapshotMessageSupportTest {
         long sequenceNumber = 100;
         sendMessageToSupport(new SaveSnapshotSuccess(new SnapshotMetadata("foo", sequenceNumber, 1234L)));
 
-        verify(mockSnapshotManager).commit(sequenceNumber);
+        verify(mockSnapshotManager).commit(eq(sequenceNumber), same(mockBehavior));
     }
 
     @Test
@@ -149,7 +134,7 @@ public class RaftActorSnapshotMessageSupportTest {
 
         sendMessageToSupport(RaftActorSnapshotMessageSupport.COMMIT_SNAPSHOT);
 
-        verify(mockSnapshotManager).commit(-1);
+        verify(mockSnapshotManager).commit(eq(-1L), same(mockBehavior));
     }
 
     @Test
