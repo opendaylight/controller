@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a6a9dd7_5d2b6beb",
+        "filename": "opendaylight/md-sal/sal-dom-xsql/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1
+      },
+      "writtenOn": "2015-06-03T14:18:55Z",
+      "side": 1,
+      "message": "The anonymous http URLs should be used here as the ssh URLs require that someone have an account and SSH key in our system to pull the code. Given that the scm tags are primarily for the java source / docs it\u0027s better to point to anonymous access",
+      "revId": "95a4331c6ec4ac3c2b0b1a75f9ec67da7bb8f7f6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_3d3a3737",
+        "filename": "opendaylight/md-sal/sal-dom-xsql/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1
+      },
+      "writtenOn": "2015-06-03T14:18:55Z",
+      "side": 1,
+      "message": "See above",
+      "revId": "95a4331c6ec4ac3c2b0b1a75f9ec67da7bb8f7f6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
