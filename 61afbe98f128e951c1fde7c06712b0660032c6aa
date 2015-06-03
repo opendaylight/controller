@@ -52,6 +52,24 @@
       "revId": "61afbe98f128e951c1fde7c06712b0660032c6aa",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_cb725549",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-06-03T18:54:27Z",
+      "side": 1,
+      "message": "But the leader is the source of truth - the follower should match what the leader has. In my example above (and my test), the follower\u0027s journal matches the leader\u0027s but not the applied state. That seems wrong to me. So the follower could end up with lastApplied/lastCommitted at 10 but the last log index is 5. Replicates from the leader will not be applied until index 10 comes along. But meanwhile the follower has missed applying everything up to that point which will likely screw up the data tree. How can that be right?\n\nTake a look at the test (testHandleAppendEntriesReplyFailureWithFollowersLogTermDifferent). I don\u0027t think it\u0027s incorrect. The follower starts out with index 0, term 1 that was last committed and applied. The leader\u0027s log has indexes 0 and 1 but at term 2. The follower removes its term 1 entry and replaces it with the leader\u0027s 0 and 1 entries at term 2. I expected the new entries 0 and 1 to be applied. Index 1 was but index 0 wasn\u0027t. So the follower is basically throwing out it\u0027s previous log that had been previously committed so why wouldn\u0027t we roll back the commit index?",
+      "parentUuid": "9a6a9dd7_cbed75f1",
+      "revId": "61afbe98f128e951c1fde7c06712b0660032c6aa",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
