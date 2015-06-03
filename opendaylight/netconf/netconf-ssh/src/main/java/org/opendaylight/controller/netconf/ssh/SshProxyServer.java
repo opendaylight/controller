@@ -13,14 +13,20 @@ import io.netty.channel.EventLoopGroup;
 import java.io.IOException;
 import java.nio.channels.AsynchronousChannelGroup;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.apache.sshd.SshServer;
+import org.apache.sshd.common.Cipher;
 import org.apache.sshd.common.FactoryManager;
 import org.apache.sshd.common.NamedFactory;
 import org.apache.sshd.common.RuntimeSshException;
+import org.apache.sshd.common.cipher.ARCFOUR128;
+import org.apache.sshd.common.cipher.ARCFOUR128.Factory;
+import org.apache.sshd.common.cipher.ARCFOUR256;
 import org.apache.sshd.common.io.IoAcceptor;
 import org.apache.sshd.common.io.IoConnector;
 import org.apache.sshd.common.io.IoHandler;
@@ -39,6 +45,8 @@ import org.apache.sshd.server.ServerFactoryManager;
  */
 public class SshProxyServer implements AutoCloseable {
 
+    private static final ARCFOUR128.Factory DEFAULT_ARCFOUR128_FACTORY = new Factory();
+    private static final ARCFOUR256.Factory DEFAULT_ARCFOUR256_FACTORY = new ARCFOUR256.Factory();
     private final SshServer sshServer;
     private final ScheduledExecutorService minaTimerExecutor;
     private final EventLoopGroup clientGroup;
@@ -55,6 +63,15 @@ public class SshProxyServer implements AutoCloseable {
         sshServer.setHost(sshProxyServerConfiguration.getBindingAddress().getHostString());
         sshServer.setPort(sshProxyServerConfiguration.getBindingAddress().getPort());
 
+        //remove rc4 ciphers
+        final List<NamedFactory<Cipher>> cipherFactories = sshServer.getCipherFactories();
+        for (Iterator<NamedFactory<Cipher>> i = cipherFactories.iterator(); i.hasNext(); ) {
+            final NamedFactory<Cipher> factory = i.next();
+            if (factory.getName().contains(DEFAULT_ARCFOUR128_FACTORY.getName())
+                    || factory.getName().contains(DEFAULT_ARCFOUR256_FACTORY.getName())) {
+                i.remove();
+            }
+        }
         sshServer.setPasswordAuthenticator(sshProxyServerConfiguration.getAuthenticator());
         sshServer.setKeyPairProvider(sshProxyServerConfiguration.getKeyPairProvider());
 
