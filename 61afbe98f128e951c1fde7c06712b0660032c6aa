@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a6a9dd7_57e90c19",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-06-03T04:40:21Z",
+      "side": 1,
+      "message": "Why are you explicitly setting commit index and last applied here? This should not be necessary. In fact if we have already applied an entry then setting last applied to an older entry would be just wrong.",
+      "revId": "61afbe98f128e951c1fde7c06712b0660032c6aa",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
