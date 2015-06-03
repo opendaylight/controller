@@ -56,12 +56,14 @@ public class ClusteringItProviderModule extends org.opendaylight.controller.conf
           .addRpcImplementation(PeopleService.class, people);
 
 
-
       final PeopleCarListener peopleCarListener = new PeopleCarListener();
       peopleCarListener.setDataProvider(dataBrokerService);
 
       final ListenerRegistration<NotificationListener> listenerReg =
           getNotificationServiceDependency().registerNotificationListener( peopleCarListener );
+
+      ClusterProviderMBean mb = new ClusterProviderMBean(dataBrokerService);
+      final ClusteringItProviderRuntimeRegistration runtimeReg = getRootRuntimeBeanRegistratorWrapper().register(mb);
 
       // Wrap toaster as AutoCloseable and close registrations to md-sal at
       // close()
@@ -69,6 +71,7 @@ public class ClusteringItProviderModule extends org.opendaylight.controller.conf
 
         @Override
         public void close() throws Exception {
+            runtimeReg.close();
           peopleRpcReg.close();
           purchaseCarRpc.close();
           people.close();

@@ -48,6 +48,23 @@ module car {
       leaf category {
         type string;
       }
+      
+      container parts {
+          container engine {
+              list cylinders {
+                  key "num";
+                  leaf num {
+                      type uint16;
+                  }
+                  
+                  container inner {
+                      leaf inner-leaf {
+                          type uint32;
+                      }   
+                  }
+              }
+          }
+      }
     }
     
     container cars {
