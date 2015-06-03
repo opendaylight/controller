@@ -19,7 +19,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.sshd.common.util.ThreadUtils;
 import org.apache.sshd.server.keyprovider.PEMGeneratorHostKeyProvider;
 import org.opendaylight.controller.netconf.ssh.SshProxyServer;
@@ -85,7 +84,7 @@ public class NetconfSSHActivator implements BundleActivator {
     private SshProxyServer startSSHServer(final BundleContext bundleContext) throws IOException {
         final Optional<InetSocketAddress> maybeSshSocketAddress = NetconfConfigUtil.extractNetconfServerAddress(bundleContext, InfixProp.ssh);
 
-        if (maybeSshSocketAddress.isPresent() == false) {
+        if (!maybeSshSocketAddress.isPresent()) {
             LOG.trace("SSH bridge not configured");
             return null;
         }
@@ -97,7 +96,8 @@ public class NetconfSSHActivator implements BundleActivator {
 
         authProviderTracker = new AuthProviderTracker(bundleContext);
 
-        final String path = FilenameUtils.separatorsToSystem(NetconfConfigUtil.getPrivateKeyPath(bundleContext));
+        final String path = NetconfConfigUtil.getPrivateKeyPath(bundleContext);
+
         checkState(!Strings.isNullOrEmpty(path), "Path to ssh private key is blank. Reconfigure %s",
                 NetconfConfigUtil.getPrivateKeyKey());
 
