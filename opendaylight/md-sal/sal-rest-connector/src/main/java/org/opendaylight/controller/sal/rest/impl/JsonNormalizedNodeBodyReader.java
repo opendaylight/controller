@@ -109,6 +109,10 @@ public class JsonNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPr
                     iiToDataList.add(result.getIdentifier());
                 }
             } else {
+                while (result instanceof AugmentationNode || result instanceof ChoiceNode) {
+                    final Object childNode = ((DataContainerNode) result).getValue().iterator().next();
+                    result = (NormalizedNode<?, ?>) childNode;
+                }
                 if (result instanceof MapNode) {
                     result = Iterables.getOnlyElement(((MapNode) result).getValue());
                 }
