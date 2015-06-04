@@ -52,11 +52,23 @@ final class RoutedDOMRpcRoutingTableEntry extends AbstractDOMRpcRoutingTableEntr
             final Object value = key.getValue();
             if (value instanceof YangInstanceIdentifier) {
                 final YangInstanceIdentifier iid = (YangInstanceIdentifier) value;
-                final List<DOMRpcImplementation> impls = getImplementations(iid);
-                if (impls != null) {
-                    return impls.get(0).invokeRpc(DOMRpcIdentifier.create(getSchemaPath(), iid), input);
+
+                // Find a DOMRpcImplementation for a specific iid
+                final List<DOMRpcImplementation> specificImpls = getImplementations(iid);
+                if (specificImpls != null) {
+                    return specificImpls.get(0).invokeRpc(DOMRpcIdentifier.create(getSchemaPath(), iid), input);
                 }
-                LOG.debug("No implementation for context {} found", iid);
+
+                LOG.debug("No implementation for context {} found will now look for wildcard id", iid);
+
+                // Find a DOMRpcImplementation for a wild card. Usually remote-rpc-connector would register an
+                // implementation this way
+                final List<DOMRpcImplementation> mayBeRemoteImpls = getImplementations(YangInstanceIdentifier.EMPTY);
+
+                if(mayBeRemoteImpls != null){
+                    return mayBeRemoteImpls.get(0).invokeRpc(DOMRpcIdentifier.create(getSchemaPath(), iid), input);
+                }
+
             } else {
                 LOG.warn("Ignoring wrong context value {}", value);
             }
