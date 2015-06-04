@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a6a9dd7_71e9b819",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 212,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-06-04T01:22:24Z",
+      "side": 1,
+      "message": "I am wondering what would be state\u0027s state when the the index is already applied and we are  decrementing the last-applied to apply again. Wouldnt this mess up the state and be out-of-sync with the leader.\n\nI think this qualifies for a snapshot install, to get in-sync with the leader\u0027s state. \nThis could be one such situation where the follower deduces that it  needs an install and requests the leader for it.",
+      "revId": "f309d2bda838e1883ec69176fb4b854e40f870a9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
