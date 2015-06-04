@@ -39,7 +39,7 @@ public class ChildAwareFeatureWrapper extends AbstractFeatureWrapper implements 
      * @param s FeaturesService to look up dependencies
      */
     ChildAwareFeatureWrapper(Feature f, FeaturesService s) throws Exception {
-        super(s.getFeature(f.getName(), f.getVersion()));
+        super(f);
         Preconditions.checkNotNull(s, "FeatureWrapper requires non-null FeatureService in constructor");
         this.featuresService = s;
     }
@@ -92,7 +92,6 @@ public class ChildAwareFeatureWrapper extends AbstractFeatureWrapper implements 
                 if (range.contains(v) &&
                     (fi == null || VersionTable.getVersion(fi.getVersion()).compareTo(v) < 0)) {
                     fi = f;
-                    break;
                 }
             }
         }
