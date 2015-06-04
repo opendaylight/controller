@@ -16,6 +16,7 @@ import akka.actor.SupervisorStrategy;
 import akka.japi.Function;
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
@@ -24,6 +25,8 @@ import org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 import org.opendaylight.controller.remote.rpc.messages.UpdateSchemaContext;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
@@ -95,9 +98,19 @@ public class RpcManager extends AbstractUntypedActor {
 
         rpcServices.registerRpcListener(rpcListener);
 
-//        rpcProvisionRegistry.registerRouteChangeListener(routeChangeListener);
-//        rpcProvisionRegistry.setRoutedRpcDefaultDelegate(rpcImplementation);
+        registerRoutedRpcImplementation();
         announceSupportedRpcs();
+    }
+
+    private void registerRoutedRpcImplementation() {
+        Set<DOMRpcIdentifier> rpcIdentifiers = new HashSet<>();
+        Set<Module> modules = schemaContext.getModules();
+        for(Module module : modules){
+            for(RpcDefinition rpcDefinition : module.getRpcs()){
+                rpcIdentifiers.add(DOMRpcIdentifier.create(rpcDefinition.getPath(), YangInstanceIdentifier.EMPTY));
+            }
+        }
+        rpcProvisionRegistry.registerRpcImplementation(rpcImplementation, rpcIdentifiers);
     }
 
     /**
@@ -124,6 +137,7 @@ public class RpcManager extends AbstractUntypedActor {
 
     private void updateSchemaContext(final UpdateSchemaContext message) {
       schemaContext = message.getSchemaContext();
+      registerRoutedRpcImplementation();
       rpcBroker.tell(message, ActorRef.noSender());
     }
 
