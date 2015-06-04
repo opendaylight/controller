@@ -138,6 +138,8 @@ public class RpcBroker extends AbstractUntypedActor {
                     return;
                 }
 
+                LOG.debug("Execute Rpc response received for rpc : {}, responding to sender : {}", msg.getRpc(), sender);
+
                 sender.tell(reply, self);
             }
         };
@@ -174,7 +176,15 @@ public class RpcBroker extends AbstractUntypedActor {
                     sender.tell(new akka.actor.Status.Failure(new RpcErrorsException(
                             message, errors)), self);
                 } else {
-                    final Node serializedResultNode = NormalizedNodeSerializer.serialize(result.getResult());
+                    final Node serializedResultNode;
+                    if(result.getResult() == null){
+                        serializedResultNode = null;
+                    } else {
+                        serializedResultNode = NormalizedNodeSerializer.serialize(result.getResult());
+                    }
+
+                    LOG.debug("Sending response for execute rpc : {}", msg.getRpc());
+
                     sender.tell(new RpcResponse(serializedResultNode), self);
                 }
             }
