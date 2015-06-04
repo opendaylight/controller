@@ -142,6 +142,10 @@ public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPro
 
         if (isPost()) {
             final Deque<Object> foundSchemaNodes = findPathToSchemaNodeByName(schemaNode, docRootElm);
+            if (foundSchemaNodes.isEmpty()) {
+                throw new IllegalStateException(String.format("Child \"%s\" was not found in parent schema node \"%s\"",
+                        docRootElm, schemaNode.getQName()));
+            }
             while (!foundSchemaNodes.isEmpty()) {
                 final Object child  = foundSchemaNodes.pop();
                 if (child instanceof AugmentationSchema) {
