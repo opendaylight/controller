@@ -46,6 +46,30 @@
       "revId": "b3e36a3eaffc12ff75143f48ed65397f21a0c0c6",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_c0c30f37",
+        "filename": "karaf/opendaylight-karaf/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2015-06-04T13:35:53Z",
+      "side": 0,
+      "message": "All right. (Maybe if I looked at the patched text I could get it sooner.)",
+      "parentUuid": "9a6a9dd7_ac57f725",
+      "range": {
+        "startLine": 35,
+        "startChar": 30,
+        "endLine": 36,
+        "endChar": 8
+      },
+      "revId": "b3e36a3eaffc12ff75143f48ed65397f21a0c0c6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
