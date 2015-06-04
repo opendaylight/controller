@@ -107,6 +107,8 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
 
     @Override
     public Future<ActorSelection> readyTransaction() {
+        logModificationCount();
+
         LOG.debug("Tx {} readyTransaction called", getIdentifier());
 
         // Send the remaining batched modifications, if any, with the ready flag set.
@@ -128,6 +130,7 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
     }
 
     private void batchModification(Modification modification) {
+        incrementModificationCount();
         if(batchedModifications == null) {
             batchedModifications = newBatchedModifications();
         }

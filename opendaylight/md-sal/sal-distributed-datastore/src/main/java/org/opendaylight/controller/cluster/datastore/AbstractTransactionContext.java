@@ -8,8 +8,14 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 abstract class AbstractTransactionContext implements TransactionContext {
+
+    Logger LOG = LoggerFactory.getLogger(TransactionContext.class);
+
+    private long modificationCount = 0;
 
     private final TransactionIdentifier identifier;
 
@@ -19,5 +25,13 @@ abstract class AbstractTransactionContext implements TransactionContext {
 
     protected final TransactionIdentifier getIdentifier() {
         return identifier;
+    }
+
+    protected void incrementModificationCount(){
+        modificationCount++;
+    }
+
+    protected void logModificationCount(){
+        LOG.debug("Total modifications on Tx {} = [ {} ]", identifier, modificationCount);
     }
 }

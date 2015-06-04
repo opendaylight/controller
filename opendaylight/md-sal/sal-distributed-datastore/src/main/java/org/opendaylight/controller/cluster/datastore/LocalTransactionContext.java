@@ -44,18 +44,21 @@ abstract class LocalTransactionContext extends AbstractTransactionContext {
 
     @Override
     public void writeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
+        incrementModificationCount();
         getWriteDelegate().write(path, data);
         completer.onComplete(null, null);
     }
 
     @Override
     public void mergeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
+        incrementModificationCount();incrementModificationCount();
         getWriteDelegate().merge(path, data);
         completer.onComplete(null, null);
     }
 
     @Override
     public void deleteData(YangInstanceIdentifier path) {
+        incrementModificationCount();
         getWriteDelegate().delete(path);
         completer.onComplete(null, null);
     }
@@ -95,6 +98,7 @@ abstract class LocalTransactionContext extends AbstractTransactionContext {
     }
 
     private LocalThreePhaseCommitCohort ready() {
+        logModificationCount();
         LocalThreePhaseCommitCohort ready = (LocalThreePhaseCommitCohort) getWriteDelegate().ready();
         completer.onComplete(null, null);
         return ready;
