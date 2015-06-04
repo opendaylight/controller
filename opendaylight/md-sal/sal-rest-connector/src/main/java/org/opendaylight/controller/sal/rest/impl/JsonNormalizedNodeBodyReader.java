@@ -93,8 +93,8 @@ public class JsonNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPr
             jsonParser.parse(reader);
 
             NormalizedNode<?, ?> result = resultHolder.getResult();
-            List<YangInstanceIdentifier.PathArgument> iiToDataList = new ArrayList<>();
-            InstanceIdentifierContext<SchemaNode> newIIContext;
+            final List<YangInstanceIdentifier.PathArgument> iiToDataList = new ArrayList<>();
+            InstanceIdentifierContext<? extends SchemaNode> newIIContext;
 
             if (isPost()) {
                 while (result instanceof AugmentationNode || result instanceof ChoiceNode) {
@@ -114,7 +114,7 @@ public class JsonNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPr
                 }
             }
 
-            YangInstanceIdentifier fullIIToData = YangInstanceIdentifier.create(Iterables.concat(
+            final YangInstanceIdentifier fullIIToData = YangInstanceIdentifier.create(Iterables.concat(
                             path.getInstanceIdentifier().getPathArguments(), iiToDataList));
 
             newIIContext = new InstanceIdentifierContext<>(fullIIToData, path.getSchemaNode(), path.getMountPoint(),
