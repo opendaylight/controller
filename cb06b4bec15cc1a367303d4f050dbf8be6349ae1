@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a6a9dd7_56810549",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RpcManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 807
+      },
+      "writtenOn": "2015-06-04T20:47:06Z",
+      "side": 1,
+      "message": "Should we be listening to schema changes and register for any \"new\" RPCs?",
+      "range": {
+        "startLine": 116,
+        "startChar": 0,
+        "endLine": 116,
+        "endChar": 8
+      },
+      "revId": "cb06b4bec15cc1a367303d4f050dbf8be6349ae1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
