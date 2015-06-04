@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.sal.rest.impl;
 
-import com.google.common.collect.Iterables;
-import com.google.gson.stream.JsonReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -16,12 +14,14 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.Provider;
+
 import org.opendaylight.controller.sal.rest.api.Draft02;
 import org.opendaylight.controller.sal.rest.api.RestconfService;
 import org.opendaylight.controller.sal.restconf.impl.InstanceIdentifierContext;
@@ -48,23 +48,32 @@ import org.opendaylight.yangtools.yang.model.util.SchemaContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Provider
-@Consumes({ Draft02.MediaTypes.DATA + RestconfService.JSON, Draft02.MediaTypes.OPERATION + RestconfService.JSON,
-        MediaType.APPLICATION_JSON })
-public class JsonNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsProvider implements MessageBodyReader<NormalizedNodeContext> {
+import com.google.common.collect.Iterables;
+import com.google.gson.stream.JsonReader;
 
-    private final static Logger LOG = LoggerFactory.getLogger(JsonNormalizedNodeBodyReader.class);
+@Provider
+@Consumes({ Draft02.MediaTypes.DATA + RestconfService.JSON,
+        Draft02.MediaTypes.OPERATION + RestconfService.JSON,
+        MediaType.APPLICATION_JSON })
+public class JsonNormalizedNodeBodyReader extends
+        AbstractIdentifierAwareJaxRsProvider implements
+        MessageBodyReader<NormalizedNodeContext> {
+
+    private final static Logger LOG = LoggerFactory
+            .getLogger(JsonNormalizedNodeBodyReader.class);
 
     @Override
-    public boolean isReadable(final Class<?> type, final Type genericType, final Annotation[] annotations,
-            final MediaType mediaType) {
+    public boolean isReadable(final Class<?> type, final Type genericType,
+            final Annotation[] annotations, final MediaType mediaType) {
         return true;
     }
 
     @Override
-    public NormalizedNodeContext readFrom(final Class<NormalizedNodeContext> type, final Type genericType,
+    public NormalizedNodeContext readFrom(
+            final Class<NormalizedNodeContext> type, final Type genericType,
             final Annotation[] annotations, final MediaType mediaType,
-            final MultivaluedMap<String, String> httpHeaders, final InputStream entityStream) throws IOException,
+            final MultivaluedMap<String, String> httpHeaders,
+            final InputStream entityStream) throws IOException,
             WebApplicationException {
         try {
             final InstanceIdentifierContext<?> path = getInstanceIdentifierContext();
@@ -72,52 +81,64 @@ public class JsonNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPr
                 return new NormalizedNodeContext(path, null);
             }
             final NormalizedNodeResult resultHolder = new NormalizedNodeResult();
-            final NormalizedNodeStreamWriter writer = ImmutableNormalizedNodeStreamWriter.from(resultHolder);
+            final NormalizedNodeStreamWriter writer = ImmutableNormalizedNodeStreamWriter
+                    .from(resultHolder);
 
             final SchemaNode parentSchema;
-            if(isPost()) {
+            if (isPost()) {
                 // FIXME: We need dispatch for RPC.
                 parentSchema = path.getSchemaNode();
-            } else if(path.getSchemaNode() instanceof SchemaContext) {
+            } else if (path.getSchemaNode() instanceof SchemaContext) {
                 parentSchema = path.getSchemaContext();
             } else {
-                if (SchemaPath.ROOT.equals(path.getSchemaNode().getPath().getParent())) {
+                if (SchemaPath.ROOT.equals(path.getSchemaNode().getPath()
+                        .getParent())) {
                     parentSchema = path.getSchemaContext();
                 } else {
-                    parentSchema = SchemaContextUtil.findDataSchemaNode(path.getSchemaContext(), path.getSchemaNode().getPath().getParent());
+                    parentSchema = SchemaContextUtil.findDataSchemaNode(
+                            path.getSchemaContext(), path.getSchemaNode()
+                                    .getPath().getParent());
                 }
             }
 
-            final JsonParserStream jsonParser = JsonParserStream.create(writer, path.getSchemaContext(), parentSchema);
-            final JsonReader reader = new JsonReader(new InputStreamReader(entityStream));
+            final JsonParserStream jsonParser = JsonParserStream.create(writer,
+                    path.getSchemaContext(), parentSchema);
+            final JsonReader reader = new JsonReader(new InputStreamReader(
+                    entityStream));
             jsonParser.parse(reader);
 
             NormalizedNode<?, ?> result = resultHolder.getResult();
             List<YangInstanceIdentifier.PathArgument> iiToDataList = new ArrayList<>();
-            InstanceIdentifierContext<SchemaNode> newIIContext;
+            InstanceIdentifierContext<? extends SchemaNode> newIIContext;
 
             if (isPost()) {
-                while (result instanceof AugmentationNode || result instanceof ChoiceNode) {
-                    final Object childNode = ((DataContainerNode) result).getValue().iterator().next();
+                while (result instanceof AugmentationNode
+                        || result instanceof ChoiceNode) {
+                    final Object childNode = ((DataContainerNode) result)
+                            .getValue().iterator().next();
                     iiToDataList.add(result.getIdentifier());
                     result = (NormalizedNode<?, ?>) childNode;
                 }
                 if (result instanceof MapEntryNode) {
-                    iiToDataList.add(new YangInstanceIdentifier.NodeIdentifier(result.getNodeType()));
+                    iiToDataList.add(new YangInstanceIdentifier.NodeIdentifier(
+                            result.getNodeType()));
                     iiToDataList.add(result.getIdentifier());
                 } else {
                     iiToDataList.add(result.getIdentifier());
                 }
             } else {
                 if (result instanceof MapNode) {
-                    result = Iterables.getOnlyElement(((MapNode) result).getValue());
+                    result = Iterables.getOnlyElement(((MapNode) result)
+                            .getValue());
                 }
             }
 
-            YangInstanceIdentifier fullIIToData = YangInstanceIdentifier.create(Iterables.concat(
-                            path.getInstanceIdentifier().getPathArguments(), iiToDataList));
+            YangInstanceIdentifier fullIIToData = YangInstanceIdentifier
+                    .create(Iterables.concat(path.getInstanceIdentifier()
+                            .getPathArguments(), iiToDataList));
 
-            newIIContext = new InstanceIdentifierContext<>(fullIIToData, path.getSchemaNode(), path.getMountPoint(),
+            newIIContext = new InstanceIdentifierContext<>(fullIIToData,
+                    path.getSchemaNode(), path.getMountPoint(),
                     path.getSchemaContext());
 
             return new NormalizedNodeContext(newIIContext, result);
@@ -126,14 +147,15 @@ public class JsonNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPr
         } catch (final ResultAlreadySetException e) {
             LOG.debug("Error parsing json input:", e);
 
-            throw new RestconfDocumentedException("Error parsing json input: Failed to create new parse result data. " +
-                    "Are you creating multiple resources/subresources in POST request?");
+            throw new RestconfDocumentedException(
+                    "Error parsing json input: Failed to create new parse result data. "
+                            + "Are you creating multiple resources/subresources in POST request?");
         } catch (final Exception e) {
             LOG.debug("Error parsing json input", e);
 
-            throw new RestconfDocumentedException("Error parsing input: " + e.getMessage(), ErrorType.PROTOCOL,
+            throw new RestconfDocumentedException("Error parsing input: "
+                    + e.getMessage(), ErrorType.PROTOCOL,
                     ErrorTag.MALFORMED_MESSAGE);
         }
     }
 }
-
