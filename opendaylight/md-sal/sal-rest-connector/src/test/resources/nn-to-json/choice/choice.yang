@@ -1,8 +1,8 @@
 module choice-case-test {
-	namespace "module:with:choice";  
+    namespace "choice:case:test";
 	
 	prefix "chcatst";
-	revision 2013-11-27 {    
+	revision 2013-11-27 {
 	}
 	
 	container cont {
@@ -10,7 +10,7 @@ module choice-case-test {
 			type string;
 		}		
 		
-		choice choi1 {            
+		choice choi1 {
 			case a1 {
 				leaf lf1a {
 					type uint16;	
