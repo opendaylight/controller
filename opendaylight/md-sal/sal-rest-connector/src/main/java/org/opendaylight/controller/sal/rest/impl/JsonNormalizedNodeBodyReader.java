@@ -96,12 +96,15 @@ public class JsonNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPr
             final List<YangInstanceIdentifier.PathArgument> iiToDataList = new ArrayList<>();
             InstanceIdentifierContext<? extends SchemaNode> newIIContext;
 
-            if (isPost()) {
-                while (result instanceof AugmentationNode || result instanceof ChoiceNode) {
-                    final Object childNode = ((DataContainerNode) result).getValue().iterator().next();
+            while (result instanceof AugmentationNode || result instanceof ChoiceNode) {
+                final Object childNode = ((DataContainerNode) result).getValue().iterator().next();
+                if (isPost()) {
                     iiToDataList.add(result.getIdentifier());
-                    result = (NormalizedNode<?, ?>) childNode;
                 }
+                result = (NormalizedNode<?, ?>) childNode;
+            }
+
+            if (isPost()) {
                 if (result instanceof MapEntryNode) {
                     iiToDataList.add(new YangInstanceIdentifier.NodeIdentifier(result.getNodeType()));
                     iiToDataList.add(result.getIdentifier());
