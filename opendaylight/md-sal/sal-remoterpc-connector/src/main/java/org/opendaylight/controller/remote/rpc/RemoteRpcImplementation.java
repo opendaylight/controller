@@ -76,8 +76,16 @@ public class RemoteRpcImplementation implements DOMRpcImplementation {
                 }
 
                 final RpcResponse rpcReply = (RpcResponse)reply;
-                final NormalizedNode<?, ?> result =
-                        NormalizedNodeSerializer.deSerialize(rpcReply.getResultNormalizedNode());
+                final NormalizedNode<?, ?> result;
+
+                if(rpcReply.getResultNormalizedNode() == null){
+                    result = null;
+                    LOG.debug("Received response for invoke rpc : {} result is null", rpcMsg.getRpc());
+                } else {
+                    result = NormalizedNodeSerializer.deSerialize(rpcReply.getResultNormalizedNode());
+                    LOG.debug("Received response for invoke rpc : {} result : {}", rpcMsg.getRpc(), result);
+                }
+
                 settableFuture.set(new DefaultDOMRpcResult(result));
             }
         };

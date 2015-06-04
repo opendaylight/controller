@@ -40,7 +40,7 @@ public class RpcListener implements DOMRpcAvailabilityListener{
         final List<RpcRouter.RouteIdentifier<?,?,?>> routeIds = new ArrayList<>();
 
         for (final DOMRpcIdentifier rpc : rpcs) {
-            final RpcRouter.RouteIdentifier<?,?,?> routeId = new RouteIdentifierImpl(null, rpc.getType().getLastComponent(), null);
+            final RpcRouter.RouteIdentifier<?,?,?> routeId = new RouteIdentifierImpl(null, rpc.getType().getLastComponent(), rpc.getContextReference());
             routeIds.add(routeId);
         }
         final RpcRegistry.Messages.AddOrUpdateRoutes addRpcMsg = new RpcRegistry.Messages.AddOrUpdateRoutes(routeIds);
@@ -55,7 +55,7 @@ public class RpcListener implements DOMRpcAvailabilityListener{
         }
         final List<RpcRouter.RouteIdentifier<?,?,?>> routeIds = new ArrayList<>();
         for (final DOMRpcIdentifier rpc : rpcs) {
-            final RpcRouter.RouteIdentifier<?,?,?> routeId = new RouteIdentifierImpl(null, rpc.getType().getLastComponent(), null);
+            final RpcRouter.RouteIdentifier<?,?,?> routeId = new RouteIdentifierImpl(null, rpc.getType().getLastComponent(), rpc.getContextReference());
             routeIds.add(routeId);
         }
         final RpcRegistry.Messages.RemoveRoutes removeRpcMsg = new RpcRegistry.Messages.RemoveRoutes(routeIds);
