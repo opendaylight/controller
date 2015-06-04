@@ -133,7 +133,7 @@ public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPro
 
         final String docRootElm = doc.getDocumentElement().getLocalName();
         final List<YangInstanceIdentifier.PathArgument> iiToDataList = new ArrayList<>();
-        InstanceIdentifierContext<SchemaNode> outIIContext;
+        InstanceIdentifierContext<? extends SchemaNode> outIIContext;
 
 
         // FIXME the factory instance should be cached if the schema context is the same
