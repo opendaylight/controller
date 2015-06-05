@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a6a9dd7_19109e4d",
+        "filename": "opendaylight/commons/protocol-framework/src/main/java/org/opendaylight/crypto/CryptoUtil.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-06-05T07:42:31Z",
+      "side": 1,
+      "message": "I would prefer a container-wide configuration that will fix all SSLEngine irrespective of how they instantiate it.",
+      "range": {
+        "startLine": 99,
+        "startChar": 26,
+        "endLine": 99,
+        "endChar": 27
+      },
+      "revId": "4cc9d6534548567cd1dca73efd4a05c598811217",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
