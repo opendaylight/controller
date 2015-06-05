@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9a6a9dd7_561105ab",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/AbstractReplicatedLogImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-06-05T01:52:38Z",
+      "side": 1,
+      "message": "No particular reason. I can change it.",
+      "parentUuid": "9a6a9dd7_36ab318b",
+      "revId": "850618455792fc7c38420815e905c401e9ef9d1d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a6a9dd7_f694d945",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/ReplicatedLog.java",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2015-06-04T22:52:31Z",
       "side": 1,
       "message": "Update the @param",
+      "revId": "850618455792fc7c38420815e905c401e9ef9d1d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_b61f41b7",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/ReplicatedLog.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-06-05T01:52:38Z",
+      "side": 1,
+      "message": "The index param is doc\u0027ed - just missing the other 2. Other method javadocs are incomplete as well -  should update them too to be consistent.",
+      "parentUuid": "9a6a9dd7_f694d945",
       "revId": "850618455792fc7c38420815e905c401e9ef9d1d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
