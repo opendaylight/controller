@@ -22,6 +22,30 @@
       "revId": "4cc9d6534548567cd1dca73efd4a05c598811217",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_b94ad253",
+        "filename": "opendaylight/commons/protocol-framework/src/main/java/org/opendaylight/crypto/CryptoUtil.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 2774
+      },
+      "writtenOn": "2015-06-05T08:09:35Z",
+      "side": 1,
+      "message": "There is a problem with that. Quote:\n\n# Note: This property is currently used by Oracle\u0027s JSSE implementation.\n# It is not guaranteed to be examined and used by other implementations.\n\nI personally would prefer fixing it globally, however any of the mechanisms for global fix available at our disposal are not 100% bombproof.",
+      "parentUuid": "9a6a9dd7_19109e4d",
+      "range": {
+        "startLine": 99,
+        "startChar": 26,
+        "endLine": 99,
+        "endChar": 27
+      },
+      "revId": "4cc9d6534548567cd1dca73efd4a05c598811217",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
