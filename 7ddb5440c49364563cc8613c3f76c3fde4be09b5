@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a6a9dd7_d9b54632",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/md/sal/dom/broker/impl/RoutedDOMRpcRoutingTableEntry.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-06-05T08:36:46Z",
+      "side": 1,
+      "message": "I would not modify this section - but rather change registration in clustering to use global RPC.",
+      "range": {
+        "startLine": 56,
+        "startChar": 16,
+        "endLine": 70,
+        "endChar": 17
+      },
+      "revId": "7ddb5440c49364563cc8613c3f76c3fde4be09b5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_7982fa53",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RpcManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-06-05T08:36:46Z",
+      "side": 1,
+      "message": "Using DOMRpcIdentifier.create(SchemaPath) will make this work without special casing YangInstanceIdentifier.EMTPY in DOMRpcRouter.",
+      "range": {
+        "startLine": 113,
+        "startChar": 39,
+        "endLine": 113,
+        "endChar": 117
+      },
+      "revId": "7ddb5440c49364563cc8613c3f76c3fde4be09b5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
