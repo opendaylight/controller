@@ -41,6 +41,10 @@
             <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:threadpool">prefix:threadpool</type>
             <name>global-netconf-processing-executor</name>
           </processing-executor>
+          <keepalive-executor xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:connector:netconf">
+            <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:threadpool">prefix:scheduled-threadpool</type>
+            <name>global-netconf-ssh-scheduled-executor</name>
+          </keepalive-executor>
         </module>
         </modules>
     </data>
