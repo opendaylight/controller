@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a6a9dd7_f9ae0ae7",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/rest/impl/JsonNormalizedNodeBodyReader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-06-05T08:32:44Z",
+      "side": 1,
+      "message": "Why this is guarded only for POST?\nSeems we walk result till last element, but do not modify Instance Identifier? is II already constructed and does not require construction?",
+      "range": {
+        "startLine": 101,
+        "startChar": 16,
+        "endLine": 103,
+        "endChar": 17
+      },
+      "revId": "d5edfc113e16e979f4b481fdcb3ca5d3e6e4db54",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
