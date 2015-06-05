@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a6a9dd7_2f10b44d",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RecoveryIntegrationTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-06-05T13:35:47Z",
+      "side": 1,
+      "message": "Notice the duplicated payload2 in the state related to the comment above. When the leader\u0027s snapshot completes, most of the time it sets the snapshot index to the replicatedToAllIndex which lags behind the lastApplied index by 1 (why is this done? I forgot...).  The snapshot index is used to set the lastIncludedIndex in the InstallSnapshot message sent to the follower. It is also used to set the follower\u0027s nextIndex on the leader when the install snapshot is compete. This is why the leader sends the last entry again to the follower. \n\nPerhaps the leader should use lastAppliedIndex captured in the leader\u0027s Snapshot instance to set the lastIncludedIndex field in the InstallSnapshot message and the nextIndex to avoid the duplicate entry. This would also seem to match the name and semantics of lastIncludedIndex in InstallSnapshot. Moiz - what do you think?",
+      "revId": "f8a93805cc2fd2ad0cdc22fed52d0fe9a44ead42",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
