@@ -21,7 +21,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
-
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -121,7 +120,7 @@ public class AsyncSshHandlerTest {
     }
 
     @SuppressWarnings("unchecked")
-    private <T extends SshFuture<T>> ListenableFuture<SshFutureListener<T>> stubAddListener(final T future) {
+    private static <T extends SshFuture<T>> ListenableFuture<SshFutureListener<T>> stubAddListener(final T future) {
         final SettableFuture<SshFutureListener<T>> listenerSettableFuture = SettableFuture.create();
 
         doAnswer(new Answer<Object>() {
@@ -413,19 +412,19 @@ public class AsyncSshHandlerTest {
         verify(ctx).fireChannelInactive();
     }
 
-    private OpenFuture getSuccessOpenFuture() {
+    private static OpenFuture getSuccessOpenFuture() {
         final OpenFuture failedOpenFuture = mock(OpenFuture.class);
         doReturn(true).when(failedOpenFuture).isOpened();
         return failedOpenFuture;
     }
 
-    private AuthFuture getSuccessAuthFuture() {
+    private static AuthFuture getSuccessAuthFuture() {
         final AuthFuture authFuture = mock(AuthFuture.class);
         doReturn(true).when(authFuture).isSuccess();
         return authFuture;
     }
 
-    private ConnectFuture getSuccessConnectFuture(final ClientSession sshSession) {
+    private static ConnectFuture getSuccessConnectFuture(final ClientSession sshSession) {
         final ConnectFuture connectFuture = mock(ConnectFuture.class);
         doReturn(true).when(connectFuture).isConnected();
 
@@ -433,7 +432,7 @@ public class AsyncSshHandlerTest {
         return connectFuture;
     }
 
-    private ClientSession getMockedSshSession(final ChannelSubsystem subsystemChannel) throws IOException {
+    private static ClientSession getMockedSshSession(final ChannelSubsystem subsystemChannel) throws IOException {
         final ClientSession sshSession = mock(ClientSession.class);
 
         doReturn("sshSession").when(sshSession).toString();
@@ -476,7 +475,7 @@ public class AsyncSshHandlerTest {
         return subsystemChannel;
     }
 
-    private IoOutputStream getMockedIoOutputStream() {
+    private static IoOutputStream getMockedIoOutputStream() {
         final IoOutputStream mock = mock(IoOutputStream.class);
         final IoWriteFuture ioWriteFuture = mock(IoWriteFuture.class);
         doReturn(ioWriteFuture).when(ioWriteFuture).addListener(Matchers.<SshFutureListener<IoWriteFuture>>any());
@@ -495,7 +494,7 @@ public class AsyncSshHandlerTest {
         return mock;
     }
 
-    private IoInputStream getMockedIoInputStream() {
+    private static IoInputStream getMockedIoInputStream() {
         final IoInputStream mock = mock(IoInputStream.class);
         final IoReadFuture ioReadFuture = mock(IoReadFuture.class);
         doReturn(null).when(ioReadFuture).getException();
@@ -554,14 +553,14 @@ public class AsyncSshHandlerTest {
         verify(promise).setFailure(any(Throwable.class));
     }
 
-    private AuthFuture getFailedAuthFuture() {
+    private static AuthFuture getFailedAuthFuture() {
         final AuthFuture authFuture = mock(AuthFuture.class);
         doReturn(false).when(authFuture).isSuccess();
         doReturn(new IllegalStateException()).when(authFuture).getException();
         return authFuture;
     }
 
-    private OpenFuture getFailedOpenFuture() {
+    private static OpenFuture getFailedOpenFuture() {
         final OpenFuture authFuture = mock(OpenFuture.class);
         doReturn(false).when(authFuture).isOpened();
         doReturn(new IllegalStateException()).when(authFuture).getException();
@@ -577,7 +576,7 @@ public class AsyncSshHandlerTest {
         verify(promise).setFailure(any(Throwable.class));
     }
 
-    private ConnectFuture getFailedConnectFuture() {
+    private static ConnectFuture getFailedConnectFuture() {
         final ConnectFuture connectFuture = mock(ConnectFuture.class);
         doReturn(false).when(connectFuture).isConnected();
         doReturn(new IllegalStateException()).when(connectFuture).getException();

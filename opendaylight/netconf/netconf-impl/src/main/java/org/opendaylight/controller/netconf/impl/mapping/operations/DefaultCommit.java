@@ -42,8 +42,8 @@ public class DefaultCommit extends AbstractNetconfOperation {
     private final NetconfMonitoringService cap;
     private final NetconfOperationRouter operationRouter;
 
-    public DefaultCommit(CommitNotifier notifier, NetconfMonitoringService cap,
-                         String netconfSessionIdForReporting, NetconfOperationRouter netconfOperationRouter) {
+    public DefaultCommit(final CommitNotifier notifier, final NetconfMonitoringService cap,
+                         final String netconfSessionIdForReporting, final NetconfOperationRouter netconfOperationRouter) {
         super(netconfSessionIdForReporting);
         this.notificationProducer = notifier;
         this.cap = cap;
@@ -69,7 +69,7 @@ public class DefaultCommit extends AbstractNetconfOperation {
     }
 
     @Override
-    public Document handle(Document requestMessage, NetconfOperationChainedExecution subsequentOperation) throws NetconfDocumentedException {
+    public Document handle(final Document requestMessage, final NetconfOperationChainedExecution subsequentOperation) throws NetconfDocumentedException {
         Preconditions.checkArgument(!subsequentOperation.isExecutionTermination(),
                 "Subsequent netconf operation expected by %s", this);
 
@@ -97,7 +97,7 @@ public class DefaultCommit extends AbstractNetconfOperation {
     }
 
     @Override
-    protected Element handle(Document document, XmlElement message, NetconfOperationChainedExecution subsequentOperation) throws NetconfDocumentedException {
+    protected Element handle(final Document document, final XmlElement message, final NetconfOperationChainedExecution subsequentOperation) throws NetconfDocumentedException {
         throw new UnsupportedOperationException("Never gets called");
     }
 
@@ -106,11 +106,11 @@ public class DefaultCommit extends AbstractNetconfOperation {
         return HandlingPriority.HANDLE_WITH_DEFAULT_PRIORITY.increasePriority(1);
     }
 
-    private void removePersisterAttributes(Document message) {
+    private static void removePersisterAttributes(final Document message) {
         message.getDocumentElement().removeAttribute(NOTIFY_ATTR);
     }
 
-    private boolean isCommitWithoutNotification(Document message) {
+    private static boolean isCommitWithoutNotification(final Document message) {
         XmlElement xmlElement = null;
         try {
             xmlElement = XmlElement.fromDomElementWithExpected(message.getDocumentElement(),
@@ -132,7 +132,7 @@ public class DefaultCommit extends AbstractNetconfOperation {
         }
     }
 
-    private Element getConfigSnapshot(NetconfOperationRouter opRouter) throws NetconfDocumentedException {
+    private Element getConfigSnapshot(final NetconfOperationRouter opRouter) throws NetconfDocumentedException {
         final Document responseDocument = opRouter.onNetconfMessage(
                 getConfigMessage, null);
 

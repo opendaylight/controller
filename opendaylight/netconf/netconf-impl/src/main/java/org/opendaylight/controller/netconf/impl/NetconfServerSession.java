@@ -135,7 +135,7 @@ public final class NetconfServerSession extends AbstractNetconfSession<NetconfSe
         return builder.build();
     }
 
-    private Class<? extends Transport> getTransportForString(final String transport) {
+    private static Class<? extends Transport> getTransportForString(final String transport) {
         switch(transport) {
         case "ssh" :
             return NetconfSsh.class;
@@ -146,7 +146,8 @@ public final class NetconfServerSession extends AbstractNetconfSession<NetconfSe
         }
     }
 
-    private String formatDateTime(final Date loginTime) {
+    private static String formatDateTime(final Date loginTime) {
+        // FIXME: thread-local cache?
         SimpleDateFormat dateFormat = new SimpleDateFormat(ISO_DATE_FORMAT);
         return dateFormat.format(loginTime);
     }

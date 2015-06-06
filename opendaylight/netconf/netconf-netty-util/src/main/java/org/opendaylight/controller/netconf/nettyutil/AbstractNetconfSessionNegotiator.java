@@ -229,7 +229,7 @@ public abstract class AbstractNetconfSessionNegotiator<P extends NetconfSessionP
         this.state = newState;
     }
 
-    private boolean containsBase11Capability(final Document doc) {
+    private static boolean containsBase11Capability(final Document doc) {
         final NodeList nList = doc.getElementsByTagName(XmlNetconfConstants.CAPABILITY);
         for (int i = 0; i < nList.getLength(); i++) {
             if (nList.item(i).getTextContent().contains(XmlNetconfConstants.URN_IETF_PARAMS_NETCONF_BASE_1_1)) {

@@ -16,7 +16,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.util.concurrent.GenericFutureListener;
@@ -47,7 +46,7 @@ public class DefaultCloseSessionTest {
         doReturn(mock(ChannelFuture.class)).when(channel).close();
 
         final ChannelFuture sendFuture = mock(ChannelFuture.class);
-        doAnswer(new Answer() {
+        doAnswer(new Answer<Object>() {
             @Override
             public Object answer(final InvocationOnMock invocation) throws Throwable {
                 ((GenericFutureListener) invocation.getArguments()[0]).operationComplete(sendFuture);

@@ -109,7 +109,7 @@ public final class NetconfXMLToHelloMessageDecoder extends ByteToMessageDecoder 
         }
     }
 
-    private NetconfMessage getNetconfMessage(final String additionalHeader, final Document doc) throws NetconfDocumentedException {
+    private static NetconfMessage getNetconfMessage(final String additionalHeader, final Document doc) throws NetconfDocumentedException {
         NetconfMessage msg = new NetconfMessage(doc);
         if(NetconfHelloMessage.isHelloMessage(msg)) {
             if (additionalHeader != null) {
@@ -122,7 +122,7 @@ public final class NetconfXMLToHelloMessageDecoder extends ByteToMessageDecoder 
         return msg;
     }
 
-    private int getAdditionalHeaderEndIndex(final byte[] bytes) {
+    private static int getAdditionalHeaderEndIndex(final byte[] bytes) {
         for (byte[] possibleEnd : POSSIBLE_ENDS) {
             int idx = findByteSequence(bytes, possibleEnd);
 
@@ -159,13 +159,14 @@ public final class NetconfXMLToHelloMessageDecoder extends ByteToMessageDecoder 
         return -1;
     }
 
-
-    private void logMessage(final byte[] bytes) {
-        String s = Charsets.UTF_8.decode(ByteBuffer.wrap(bytes)).toString();
-        LOG.debug("Parsing message \n{}", s);
+    private static void logMessage(final byte[] bytes) {
+        if (LOG.isDebugEnabled()) {
+            String s = Charsets.UTF_8.decode(ByteBuffer.wrap(bytes)).toString();
+            LOG.debug("Parsing message \n{}", s);
+        }
     }
 
-    private boolean startsWithAdditionalHeader(final byte[] bytes) {
+    private static boolean startsWithAdditionalHeader(final byte[] bytes) {
         for (byte[] possibleStart : POSSIBLE_STARTS) {
             int i = 0;
             for (byte b : possibleStart) {
@@ -182,7 +183,7 @@ public final class NetconfXMLToHelloMessageDecoder extends ByteToMessageDecoder 
         return false;
     }
 
-    private String additionalHeaderToString(final byte[] bytes) {
+    private static String additionalHeaderToString(final byte[] bytes) {
         return Charsets.UTF_8.decode(ByteBuffer.wrap(bytes)).toString();
     }
 
