@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.netconf.client.conf;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.base.Preconditions;
 import java.net.InetSocketAddress;
 import org.opendaylight.controller.netconf.client.NetconfClientSessionListener;
@@ -39,7 +39,7 @@ public final class NetconfReconnectingClientConfiguration extends NetconfClientC
     }
 
     @Override
-    protected Objects.ToStringHelper buildToStringHelper() {
+    protected ToStringHelper buildToStringHelper() {
         return super.buildToStringHelper().add("connectStrategyFactory", connectStrategyFactory);
     }
 }
