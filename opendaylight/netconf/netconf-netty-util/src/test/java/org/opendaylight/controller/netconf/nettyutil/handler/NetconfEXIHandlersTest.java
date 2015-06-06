@@ -47,7 +47,7 @@ public class NetconfEXIHandlersTest {
         this.msgAsExi = msgToExi(msgAsString, codec);
     }
 
-    private byte[] msgToExi(final String msgAsString, final NetconfEXICodec codec) throws EXIOptionsException, TransmogrifierException, IOException {
+    private static byte[] msgToExi(final String msgAsString, final NetconfEXICodec codec) throws EXIOptionsException, TransmogrifierException, IOException {
         final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         final Transmogrifier transmogrifier = codec.getTransmogrifier();
         transmogrifier.setOutputStream(byteArrayOutputStream);

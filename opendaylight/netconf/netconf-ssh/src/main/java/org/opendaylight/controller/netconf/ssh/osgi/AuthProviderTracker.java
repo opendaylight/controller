@@ -47,7 +47,7 @@ final class AuthProviderTracker implements ServiceTrackerCustomizer<AuthProvider
         return authService;
     }
 
-    private Integer getPreference(final ServiceReference<AuthProvider> reference) {
+    private static Integer getPreference(final ServiceReference<AuthProvider> reference) {
         final Object preferenceProperty = reference.getProperty(AuthConstants.SERVICE_PREFERENCE_KEY);
         return preferenceProperty == null ? Integer.MIN_VALUE : Integer.valueOf(preferenceProperty.toString());
     }

@@ -16,7 +16,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-
 import com.google.common.base.Optional;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -64,7 +63,7 @@ public class NetconfClientSessionNegotiatorTest {
         channel = mockChannel();
     }
 
-    private ChannelHandler mockChannelHandler() {
+    private static ChannelHandler mockChannelHandler() {
         ChannelHandler handler = mock(ChannelHandler.class);
         return handler;
     }
@@ -83,13 +82,13 @@ public class NetconfClientSessionNegotiatorTest {
         return channel;
     }
 
-    private ChannelFuture mockChannelFuture() {
+    private static ChannelFuture mockChannelFuture() {
         ChannelFuture future = mock(ChannelFuture.class);
         doReturn(future).when(future).addListener(any(GenericFutureListener.class));
         return future;
     }
 
-    private ChannelPipeline mockChannelPipeline() {
+    private static ChannelPipeline mockChannelPipeline() {
         ChannelPipeline pipeline = mock(ChannelPipeline.class);
         ChannelHandler handler = mock(ChannelHandler.class);
         doReturn(pipeline).when(pipeline).addAfter(anyString(), anyString(), any(ChannelHandler.class));

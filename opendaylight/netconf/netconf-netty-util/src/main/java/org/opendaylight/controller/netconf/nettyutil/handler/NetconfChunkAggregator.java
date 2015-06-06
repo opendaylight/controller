@@ -40,29 +40,29 @@ public class NetconfChunkAggregator extends ByteToMessageDecoder {
     private long chunkSize;
     private CompositeByteBuf chunk;
 
-    private void checkNewLine(byte b,String errorMessage){
+    private static void checkNewLine(final byte b,final String errorMessage) {
         if (b != '\n') {
             LOG.debug(GOT_PARAM_WHILE_WAITING_FOR_PARAM, b, (byte)'\n');
             throw new IllegalStateException(errorMessage);
         }
     }
 
-    private void checkHash(byte b,String errorMessage){
+    private static void checkHash(final byte b,final String errorMessage) {
         if (b != '#') {
             LOG.debug(GOT_PARAM_WHILE_WAITING_FOR_PARAM, b, (byte)'#');
             throw new IllegalStateException(errorMessage);
         }
     }
 
-    private void checkChunkSize(){
+    private void checkChunkSize() {
         if (chunkSize > maxChunkSize) {
             LOG.debug("Parsed chunk size {}, maximum allowed is {}", chunkSize, maxChunkSize);
             throw new IllegalStateException("Maximum chunk size exceeded");
         }
-
     }
+
     @Override
-    protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws IllegalStateException {
+    protected void decode(final ChannelHandlerContext ctx, final ByteBuf in, final List<Object> out) throws IllegalStateException {
         while (in.isReadable()) {
             switch (state) {
             case HEADER_ONE:
@@ -164,7 +164,7 @@ public class NetconfChunkAggregator extends ByteToMessageDecoder {
         in.discardReadBytes();
     }
 
-    private void extractNewChunkOrMessageEnd(byte b) {
+    private void extractNewChunkOrMessageEnd(final byte b) {
         if (isHeaderLengthFirst(b)) {
             // Extract header length#1 from new chunk
             chunkSize = processHeaderLengthFirst(b);
@@ -182,14 +182,14 @@ public class NetconfChunkAggregator extends ByteToMessageDecoder {
         chunk = Unpooled.compositeBuffer();
     }
 
-    private void aggregateChunks(ByteBuf newChunk) {
+    private void aggregateChunks(final ByteBuf newChunk) {
         chunk.addComponent(chunk.numComponents(), newChunk);
 
         // Update writer index, addComponent does not update it
         chunk.writerIndex(chunk.writerIndex() + newChunk.readableBytes());
     }
 
-    private static int processHeaderLengthFirst(byte b) {
+    private static int processHeaderLengthFirst(final byte b) {
         if (!isHeaderLengthFirst(b)) {
             LOG.debug(GOT_PARAM_WHILE_WAITING_FOR_PARAM_PARAM, b, (byte)'1', (byte)'9');
             throw new IllegalStateException("Invalid chunk size encountered (byte 0)");
@@ -198,7 +198,7 @@ public class NetconfChunkAggregator extends ByteToMessageDecoder {
         return b - '0';
     }
 
-    private static boolean isHeaderLengthFirst(byte b) {
+    private static boolean isHeaderLengthFirst(final byte b) {
         return b >= '1' && b <= '9';
     }
 }

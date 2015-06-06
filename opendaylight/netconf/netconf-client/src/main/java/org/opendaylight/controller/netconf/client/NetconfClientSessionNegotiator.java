@@ -105,7 +105,7 @@ public class NetconfClientSessionNegotiator extends
                 && containsExi10Capability(sessionPreferences.getHelloMessage().getDocument());
     }
 
-    private boolean containsExi10Capability(final Document doc) {
+    private static boolean containsExi10Capability(final Document doc) {
         final NodeList nList = doc.getElementsByTagName(XmlNetconfConstants.CAPABILITY);
         for (int i = 0; i < nList.getLength(); i++) {
             if (nList.item(i).getTextContent().contains(EXI_1_0_CAPABILITY_MARKER)) {
@@ -115,7 +115,7 @@ public class NetconfClientSessionNegotiator extends
         return false;
     }
 
-    private long extractSessionId(final Document doc) {
+    private static long extractSessionId(final Document doc) {
         String textContent = getSessionIdWithXPath(doc, sessionIdXPath);
         if (Strings.isNullOrEmpty(textContent)) {
             textContent = getSessionIdWithXPath(doc, sessionIdXPathNoNamespace);
@@ -127,7 +127,7 @@ public class NetconfClientSessionNegotiator extends
         return Long.valueOf(textContent);
     }
 
-    private String getSessionIdWithXPath(final Document doc, final XPathExpression sessionIdXPath) {
+    private static String getSessionIdWithXPath(final Document doc, final XPathExpression sessionIdXPath) {
         final Node sessionIdNode = (Node) XmlUtil.evaluateXPath(sessionIdXPath, doc, XPathConstants.NODE);
         return sessionIdNode != null ? sessionIdNode.getTextContent() : null;
     }

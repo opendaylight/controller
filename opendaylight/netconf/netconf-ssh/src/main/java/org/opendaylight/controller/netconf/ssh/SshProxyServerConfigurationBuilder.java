@@ -49,7 +49,7 @@ public final class SshProxyServerConfigurationBuilder {
         return new SshProxyServerConfiguration(bindingAddress, localAddress, authenticator, keyPairProvider, idleTimeout);
     }
 
-    public SshProxyServerConfigurationBuilder create () {
+    public static SshProxyServerConfigurationBuilder create() {
         return new SshProxyServerConfigurationBuilder();
     }
 }

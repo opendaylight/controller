@@ -84,7 +84,7 @@ public class CreateSubscription extends AbstractLastNetconfOperation implements 
         return XmlUtil.createElement(document, XmlNetconfConstants.OK, Optional.<String>absent());
     }
 
-    private StreamNameType parseStreamIfPresent(final XmlElement operationElement) throws NetconfDocumentedException {
+    private static StreamNameType parseStreamIfPresent(final XmlElement operationElement) throws NetconfDocumentedException {
         final Optional<XmlElement> stream = operationElement.getOnlyChildElementWithSameNamespaceOptionally("stream");
         return stream.isPresent() ? new StreamNameType(stream.get().getTextContent()) : NetconfNotificationManager.BASE_STREAM_NAME;
     }
