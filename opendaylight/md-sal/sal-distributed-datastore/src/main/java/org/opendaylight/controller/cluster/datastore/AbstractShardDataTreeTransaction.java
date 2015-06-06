@@ -28,6 +28,10 @@ abstract class AbstractShardDataTreeTransaction<T extends DataTreeSnapshot> {
         this.id = Preconditions.checkNotNull(id);
     }
 
+    String getId() {
+        return id;
+    }
+
     final T getSnapshot() {
         return snapshot;
     }
