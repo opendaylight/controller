@@ -33,7 +33,7 @@ public class NetconfServerSessionListener implements NetconfSessionListener<Netc
     private final NetconfOperationRouter operationRouter;
     private final AutoCloseable onSessionDownCloseable;
 
-    public NetconfServerSessionListener(final NetconfOperationRouter operationRouter, NetconfMonitoringService monitoringService,
+    public NetconfServerSessionListener(final NetconfOperationRouter operationRouter, final NetconfMonitoringService monitoringService,
                                         final AutoCloseable onSessionDownCloseable) {
         this.operationRouter = operationRouter;
         this.monitoringService = monitoringService;
@@ -133,7 +133,7 @@ public class NetconfServerSessionListener implements NetconfSessionListener<Netc
         }
     }
 
-    private void checkMessageId(final Node rootNode) throws NetconfDocumentedException {
+    private static void checkMessageId(final Node rootNode) throws NetconfDocumentedException {
 
         NamedNodeMap attributes = rootNode.getAttributes();
 

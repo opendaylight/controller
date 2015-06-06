@@ -71,7 +71,7 @@ public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorF
         this.baseCapabilities = validateBaseCapabilities(baseCapabilities);
     }
 
-    private ImmutableSet<String> validateBaseCapabilities(final Set<String> baseCapabilities) {
+    private static ImmutableSet<String> validateBaseCapabilities(final Set<String> baseCapabilities) {
         // Check base capabilities to be supported by the server
         final Sets.SetView<String> unknownBaseCaps = Sets.difference(baseCapabilities, DEFAULT_BASE_CAPABILITIES);
         Preconditions.checkArgument(unknownBaseCaps.isEmpty(),

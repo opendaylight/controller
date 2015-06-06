@@ -60,7 +60,7 @@ public class ChunkedFramingMechanismEncoderTest {
         assertTrue(s.endsWith("\n#20\naaaaaaaaaaaaaaaaaaaa\n##\n"));
     }
 
-    private byte[] getByteArray(final int size) {
+    private static byte[] getByteArray(final int size) {
         final byte[] bytes = new byte[size];
         for (int i = 0; i < size; i++) {
             bytes[i] = 'a';

@@ -52,7 +52,7 @@ public class GetTest {
                         "</rpc-reply>\n");
     }
 
-    private Document getBlankResponse() throws IOException, SAXException {
+    private static Document getBlankResponse() throws IOException, SAXException {
 
         return XmlUtil.readXmlToDocument("<rpc-reply message-id=\"101\"\n" +
                 "xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +

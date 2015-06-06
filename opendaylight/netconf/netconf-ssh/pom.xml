@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>netconf-subsystem</artifactId>
-    <version>0.4.0-SNAPSHOT</version>
+    <version>0.3.0-SNAPSHOT</version>
     <relativePath>../</relativePath>
   </parent>
   <artifactId>netconf-ssh</artifactId>
@@ -39,7 +39,6 @@
       <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>netty-config-api</artifactId>
-          <version>0.4.0-SNAPSHOT</version>
       </dependency>
 
       <dependency>
