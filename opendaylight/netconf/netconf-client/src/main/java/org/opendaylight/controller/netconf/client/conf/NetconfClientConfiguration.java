@@ -7,7 +7,8 @@
  */
 package org.opendaylight.controller.netconf.client.conf;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
+import com.google.common.base.MoreObjects.ToStringHelper;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import java.net.InetSocketAddress;
@@ -96,8 +97,8 @@ public class NetconfClientConfiguration {
         return buildToStringHelper().toString();
     }
 
-    protected Objects.ToStringHelper buildToStringHelper() {
-        return Objects.toStringHelper(this)
+    protected ToStringHelper buildToStringHelper() {
+        return MoreObjects.toStringHelper(this)
                 .add("address", address)
                 .add("connectionTimeoutMillis", connectionTimeoutMillis)
                 .add("additionalHeader", additionalHeader)

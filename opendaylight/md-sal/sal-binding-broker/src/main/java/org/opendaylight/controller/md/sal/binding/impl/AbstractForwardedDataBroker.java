@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.md.sal.binding.impl;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Optional;
 import java.util.Collections;
 import java.util.HashMap;
@@ -218,7 +218,7 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
 
         @Override
         public String toString() {
-            return Objects.toStringHelper(TranslatedDataChangeEvent.class) //
+            return MoreObjects.toStringHelper(TranslatedDataChangeEvent.class) //
                     .add("created", getCreatedData()) //
                     .add("updated", getUpdatedData()) //
                     .add("removed", getRemovedPaths()) //
