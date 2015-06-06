@@ -11,8 +11,12 @@ import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.controller.cluster.datastore.utils.PruningDataTreeModification;
+import org.opendaylight.controller.md.sal.common.api.data.OptimisticLockFailedException;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.ConflictingModificationAppliedException;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateTip;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,11 +26,14 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
     private static final ListenableFuture<Void> VOID_FUTURE = Futures.immediateFuture(null);
     private final DataTreeModification transaction;
     private final ShardDataTree dataTree;
+    private final String transactionId;
     private DataTreeCandidateTip candidate;
 
-    SimpleShardDataTreeCohort(final ShardDataTree dataTree, final DataTreeModification transaction) {
+    SimpleShardDataTreeCohort(final ShardDataTree dataTree, final DataTreeModification transaction,
+            final String transactionId) {
         this.dataTree = Preconditions.checkNotNull(dataTree);
         this.transaction = Preconditions.checkNotNull(transaction);
+        this.transactionId = transactionId;
     }
 
     @Override
@@ -36,11 +43,25 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
 
     @Override
     public ListenableFuture<Boolean> canCommit() {
+        DataTreeModification modification = dataTreeModification();
         try {
-            dataTree.getDataTree().validate(dataTreeModification());
+            dataTree.getDataTree().validate(modification);
             LOG.trace("Transaction {} validated", transaction);
             return TRUE_FUTURE;
+        }
+        catch (ConflictingModificationAppliedException e) {
+            LOG.warn("Store Tx {}: Conflicting modification for path {}.", transactionId, e.getPath());
+            return Futures.immediateFailedFuture(new OptimisticLockFailedException("Optimistic lock failed.", e));
+        } catch (DataValidationFailedException e) {
+            LOG.warn("Store Tx {}: Data validation failed for path {}.", transactionId, e.getPath(), e);
+
+            // For debugging purposes, allow dumping of the modification. Coupled with the above
+            // precondition log, it should allow us to understand what went on.
+            LOG.debug("Store Tx {}: modifications: {} tree: {}", transactionId, modification, dataTree.getDataTree());
+
+            return Futures.immediateFailedFuture(new TransactionCommitFailedException("Data did not pass validation.", e));
         } catch (Exception e) {
+            LOG.warn("Unexpected failure in validation phase", e);
             return Futures.immediateFailedFuture(e);
         }
     }

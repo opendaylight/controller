@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
  * This class is not part of the API contract and is subject to change at any time.
  */
 @NotThreadSafe
-public final class ShardDataTree extends ShardDataTreeTransactionParent {
+public class ShardDataTree extends ShardDataTreeTransactionParent {
     private static final Logger LOG = LoggerFactory.getLogger(ShardDataTree.class);
     private static final ShardDataTreeNotificationManager MANAGER = new ShardDataTreeNotificationManager();
     private final Map<String, ShardDataTreeTransactionChain> transactionChains = new HashMap<>();
@@ -180,7 +180,7 @@ public final class ShardDataTree extends ShardDataTreeTransactionParent {
     ShardDataTreeCohort finishTransaction(final ReadWriteShardDataTreeTransaction transaction) {
         final DataTreeModification snapshot = transaction.getSnapshot();
         snapshot.ready();
-        return new SimpleShardDataTreeCohort(this, snapshot);
+        return new SimpleShardDataTreeCohort(this, snapshot, transaction.getId());
     }
 
     void recoveryDone(){
