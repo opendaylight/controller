@@ -171,7 +171,7 @@ public final class AsyncSshHandlerWriter implements AutoCloseable {
         asyncIn = null;
     }
 
-    private Buffer toBuffer(final ByteBuf msg) {
+    private static Buffer toBuffer(final ByteBuf msg) {
         // TODO Buffer vs ByteBuf translate, Can we handle that better ?
         msg.resetReaderIndex();
         final byte[] temp = new byte[msg.readableBytes()];

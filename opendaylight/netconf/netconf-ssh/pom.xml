@@ -39,7 +39,6 @@
       <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>netty-config-api</artifactId>
-          <version>0.3.0-SNAPSHOT</version>
       </dependency>
 
       <dependency>
