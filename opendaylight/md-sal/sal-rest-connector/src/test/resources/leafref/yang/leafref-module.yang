@@ -1,15 +1,15 @@
 module leafref-module {
-  namespace "leafref:module";  
+  namespace "leafref:module";
 
 
   prefix "lfrfmodule";
 
-  import referenced-module { prefix refmod; revision-date 2014-04-17;} 
+  import referenced-module { prefix refmod; revision-date 2014-04-17;}
 
-  
-  revision 2014-04-17 {    
+
+  revision 2014-04-17 {
   }
-  
+
 
     container cont {
         leaf lf1 {
@@ -39,6 +39,16 @@ module leafref-module {
                 path "../lf1";
             }
         }
-        
+
+        list lst-with-lfref-key {
+            key "lfref-key";
+
+            leaf lfref-key {
+                type leafref {
+                    path "/refmod:cont/refmod:id-ref";
+                }
+            }
+        }
+
     }
 }
