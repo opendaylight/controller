@@ -123,8 +123,7 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
         final Map.Entry<Date, XmlElement> stripped = stripNotification(message);
         final QName notificationNoRev;
         try {
-            // How to construct QName with no revision ?
-            notificationNoRev = QName.cachedReference(QName.create(stripped.getValue().getNamespace(), "0000-00-00", stripped.getValue().getName()).withoutRevision());
+            notificationNoRev = QName.create(stripped.getValue().getNamespace(), stripped.getValue().getName()).withoutRevision();
         } catch (final MissingNameSpaceException e) {
             throw new IllegalArgumentException("Unable to parse notification " + message + ", cannot find namespace", e);
         }
@@ -143,6 +142,16 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
                 notificationAsContainerSchemaNode);
         return new NetconfDeviceNotification(content, stripped.getKey());
     }
+
+    private static final ThreadLocal<SimpleDateFormat> EVENT_TIME_FORMAT = new ThreadLocal<SimpleDateFormat>() {
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat(NetconfNotification.RFC3339_DATE_FORMAT_BLUEPRINT);
+        }
+
+        public void set(SimpleDateFormat value) {
+            throw new UnsupportedOperationException();
+        }
+    };
 
     // FIXME move somewhere to util
     private static Map.Entry<Date, XmlElement> stripNotification(final NetconfMessage message) {
@@ -165,17 +174,11 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
         }
 
         try {
-            return new AbstractMap.SimpleEntry<>(parseEventTime(eventTimeElement.getTextContent()), notificationElement);
+            return new AbstractMap.SimpleEntry<>(EVENT_TIME_FORMAT.get().parse(eventTimeElement.getTextContent()), notificationElement);
         } catch (NetconfDocumentedException e) {
             throw new IllegalArgumentException("Notification payload does not contain " + EVENT_TIME + " " + message);
-        }
-    }
-
-    private static Date parseEventTime(final String eventTime) {
-        try {
-            return new SimpleDateFormat(NetconfNotification.RFC3339_DATE_FORMAT_BLUEPRINT).parse(eventTime);
         } catch (ParseException e) {
-            throw new IllegalArgumentException("Unable to parse event time from " + eventTime, e);
+            throw new IllegalArgumentException("Notification event time in wrong format " + EVENT_TIME + " " + message);
         }
     }
 
