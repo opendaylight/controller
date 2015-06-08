@@ -10,11 +10,14 @@ package org.opendaylight.controller.netconf.test.tool.rpc;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -36,18 +39,33 @@ import org.xml.sax.SAXException;
 
 public class SimulatedCreateSubscription extends AbstractLastNetconfOperation implements DefaultNetconfOperation {
 
+    private final Map<Notification, NetconfMessage> notifications;
     private NetconfServerSession session;
-    private final Optional<Notifications> notifications;
     private ScheduledExecutorService scheduledExecutorService;
 
     public SimulatedCreateSubscription(final String id, final Optional<File> notificationsFile) {
         super(id);
+
+        Optional<Notifications> notifications;
+
         if(notificationsFile.isPresent()) {
             notifications = Optional.of(loadNotifications(notificationsFile.get()));
             scheduledExecutorService = Executors.newScheduledThreadPool(1);
         } else {
             notifications = Optional.absent();
         }
+
+        if(notifications.isPresent()) {
+            Map<Notification, NetconfMessage> preparedMessages = Maps.newHashMapWithExpectedSize(notifications.get().getNotificationList().size());
+            for (final Notification notification : notifications.get().getNotificationList()) {
+                final NetconfMessage parsedNotification = parseNetconfNotification(notification.getContent());
+                preparedMessages.put(notification, parsedNotification);
+            }
+            this.notifications = preparedMessages;
+        } else {
+            this.notifications = Collections.emptyMap();
+        }
+
     }
 
     private Notifications loadNotifications(final File file) {
@@ -72,37 +90,26 @@ public class SimulatedCreateSubscription extends AbstractLastNetconfOperation im
 
     @Override
     protected Element handleWithNoSubsequentOperations(final Document document, final XmlElement operationElement) throws NetconfDocumentedException {
+        long delayAggregator = 0;
 
+        for (final Map.Entry<Notification, NetconfMessage> notification : notifications.entrySet()) {
+            for (int i = 0; i <= notification.getKey().getTimes(); i++) {
 
-        if(notifications.isPresent()) {
-            long delayAggregator = 0;
-            System.console().writer().println("Scheduling notifications " + notifications.get());
+                delayAggregator += notification.getKey().getDelayInSeconds();
 
-            for (final Notification notification : notifications.get().getNotificationList()) {
-                for (int i = 0; i <= notification.getTimes(); i++) {
-
-                    delayAggregator += notification.getDelayInSeconds();
-
-                    System.console().writer().println("Times " + notification.getTimes());
-                    scheduledExecutorService.schedule(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                System.console().writer().println("Sending actual notification " + notification);
-                                Preconditions.checkState(session != null, "Session is not set, cannot process notifications");
-                                session.sendMessage(parseNetconfNotification(notification.getContent()));
-                            } catch (IOException | SAXException e) {
-                                throw new IllegalStateException("Unable to process notification " + notification, e);
-                            }
-                        }
-                    }, delayAggregator, TimeUnit.SECONDS);
-                }
+                scheduledExecutorService.schedule(new Runnable() {
+                    @Override
+                    public void run() {
+                        Preconditions.checkState(session != null, "Session is not set, cannot process notifications");
+                        session.sendMessage(notification.getValue());
+                    }
+                }, delayAggregator, TimeUnit.SECONDS);
             }
         }
         return XmlUtil.createElement(document, XmlNetconfConstants.OK, Optional.<String>absent());
     }
 
-    private static NetconfMessage parseNetconfNotification(String content) throws IOException, SAXException {
+    private static NetconfMessage parseNetconfNotification(String content) {
         final int startEventTime = content.indexOf("<eventTime>") + "<eventTime>".length();
         final int endEventTime = content.indexOf("</eventTime>");
         final String eventTime = content.substring(startEventTime, endEventTime);
@@ -110,7 +117,11 @@ public class SimulatedCreateSubscription extends AbstractLastNetconfOperation im
             content = content.replace(eventTime, new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX").format(new Date()));
         }
 
-        return new NetconfMessage(XmlUtil.readXmlToDocument(content));
+        try {
+            return new NetconfMessage(XmlUtil.readXmlToDocument(content));
+        } catch (SAXException | IOException e) {
+            throw new IllegalArgumentException("Cannot parse notifications", e);
+        }
     }
 
     @Override
