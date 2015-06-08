@@ -63,6 +63,8 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
 import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.type.IdentityrefTypeDefinition;
+import org.opendaylight.yangtools.yang.model.api.type.LeafrefTypeDefinition;
+import org.opendaylight.yangtools.yang.model.util.SchemaContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -754,17 +756,19 @@ public class ControllerContext implements SchemaContextListener {
 
     private void addKeyValue(final HashMap<QName, Object> map, final DataSchemaNode node, final String uriValue,
             final DOMMountPoint mountPoint) {
-        Preconditions.<String> checkNotNull(uriValue);
+        Preconditions.checkNotNull(uriValue);
         Preconditions.checkArgument((node instanceof LeafSchemaNode));
 
         final String urlDecoded = urlPathArgDecode(uriValue);
-        final TypeDefinition<? extends Object> typedef = ((LeafSchemaNode) node).getType();
-        final Codec<Object, Object> codec = RestCodec.from(typedef, mountPoint);
-
-        Object decoded = codec == null ? null : codec.deserialize(urlDecoded);
+        TypeDefinition<?> typedef = ((LeafSchemaNode) node).getType();
+        final TypeDefinition<?> baseType = RestUtil.resolveBaseTypeFrom(typedef);
+        if (baseType instanceof LeafrefTypeDefinition) {
+            typedef = SchemaContextUtil.getBaseTypeForLeafRef((LeafrefTypeDefinition) baseType, globalSchema, node);
+        }
+        Codec<Object, Object> codec = RestCodec.from(typedef, mountPoint);
+        Object decoded = codec.deserialize(urlDecoded);
         String additionalInfo = "";
         if (decoded == null) {
-            final TypeDefinition<? extends Object> baseType = RestUtil.resolveBaseTypeFrom(typedef);
             if ((baseType instanceof IdentityrefTypeDefinition)) {
                 decoded = toQName(urlDecoded);
                 additionalInfo = "For key which is of type identityref it should be in format module_name:identity_name.";
