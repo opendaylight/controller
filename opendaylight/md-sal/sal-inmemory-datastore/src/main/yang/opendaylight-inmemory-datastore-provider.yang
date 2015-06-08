@@ -78,6 +78,10 @@ module opendaylight-inmemory-datastore-provider {
                     }
                 }
                 uses datastore-configuration;
+                leaf check-config-true {
+                    type boolean;
+                    default false;
+                }
             }
         }
     }

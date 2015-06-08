@@ -4,6 +4,7 @@ import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreConfigProperties;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreFactory;
 import org.opendaylight.controller.md.sal.dom.store.impl.jmx.InMemoryDataStoreStats;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
 
 public class InMemoryConfigDataStoreProviderModule extends org.opendaylight.controller.config.yang.inmemory_datastore_provider.AbstractInMemoryConfigDataStoreProviderModule {
 
@@ -22,13 +23,14 @@ public class InMemoryConfigDataStoreProviderModule extends org.opendaylight.cont
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        InMemoryDOMDataStore dataStore = InMemoryDOMDataStoreFactory.create("DOM-CFG", getSchemaServiceDependency(),
-                getDebugTransactions(),
-                InMemoryDOMDataStoreConfigProperties.create(getMaxDataChangeExecutorPoolSize(),
-                        getMaxDataChangeExecutorQueueSize(), getMaxDataChangeListenerQueueSize(),
-                        getMaxDataStoreExecutorQueueSize()));
+        final TreeType treeType = getCheckConfigTrue() ? TreeType.CONFIGURATION : TreeType.OPERATIONAL;
+        final InMemoryDOMDataStore dataStore =
+                InMemoryDOMDataStoreFactory.create("DOM-CFG", treeType, getSchemaServiceDependency(),
+                        getDebugTransactions(), InMemoryDOMDataStoreConfigProperties.create(
+                                getMaxDataChangeExecutorPoolSize(), getMaxDataChangeExecutorQueueSize(),
+                                getMaxDataChangeListenerQueueSize(), getMaxDataStoreExecutorQueueSize()));
 
-        InMemoryDataStoreStats statsBean = new InMemoryDataStoreStats("InMemoryConfigDataStore", dataStore);
+        final InMemoryDataStoreStats statsBean = new InMemoryDataStoreStats("InMemoryConfigDataStore", dataStore);
         dataStore.setCloseable(statsBean);
 
         return dataStore;

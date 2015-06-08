@@ -39,6 +39,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
@@ -69,7 +70,7 @@ public class InMemoryDOMDataStore extends TransactionReadyPrototype<String> impl
                 }
             };
 
-    private final DataTree dataTree = InMemoryDataTreeFactory.getInstance().create();
+    private final DataTree dataTree;
     private final ListenerTree listenerTree = ListenerTree.create();
     private final AtomicLong txCounter = new AtomicLong(0);
 
@@ -82,15 +83,21 @@ public class InMemoryDOMDataStore extends TransactionReadyPrototype<String> impl
     private volatile AutoCloseable closeable;
 
     public InMemoryDOMDataStore(final String name, final ExecutorService dataChangeListenerExecutor) {
-        this(name, dataChangeListenerExecutor, InMemoryDOMDataStoreConfigProperties.DEFAULT_MAX_DATA_CHANGE_LISTENER_QUEUE_SIZE, false);
+        this(name,TreeType.OPERATIONAL, dataChangeListenerExecutor, InMemoryDOMDataStoreConfigProperties.DEFAULT_MAX_DATA_CHANGE_LISTENER_QUEUE_SIZE, false);
     }
 
+
     public InMemoryDOMDataStore(final String name, final ExecutorService dataChangeListenerExecutor,
+            final int maxDataChangeListenerQueueSize, final boolean debugTransactions) {
+        this(name,TreeType.OPERATIONAL,dataChangeListenerExecutor,maxDataChangeListenerQueueSize,debugTransactions);
+    }
+
+    public InMemoryDOMDataStore(final String name, final TreeType treeType, final ExecutorService dataChangeListenerExecutor,
             final int maxDataChangeListenerQueueSize, final boolean debugTransactions) {
         this.name = Preconditions.checkNotNull(name);
         this.dataChangeListenerExecutor = Preconditions.checkNotNull(dataChangeListenerExecutor);
         this.debugTransactions = debugTransactions;
-
+        this.dataTree = InMemoryDataTreeFactory.getInstance().create(treeType);
         dataChangeListenerNotificationManager =
                 new QueuedNotificationManager<>(this.dataChangeListenerExecutor,
                         DCL_NOTIFICATION_MGR_INVOKER, maxDataChangeListenerQueueSize,
@@ -143,7 +150,7 @@ public class InMemoryDOMDataStore extends TransactionReadyPrototype<String> impl
         if(closeable != null) {
             try {
                 closeable.close();
-            } catch(Exception e) {
+            } catch(final Exception e) {
                 LOG.debug("Error closing instance", e);
             }
         }
@@ -174,7 +181,7 @@ public class InMemoryDOMDataStore extends TransactionReadyPrototype<String> impl
 
             reg = listenerTree.registerDataChangeListener(path, listener, scope);
 
-            Optional<NormalizedNode<?, ?>> currentState = dataTree.takeSnapshot().readNode(path);
+            final Optional<NormalizedNode<?, ?>> currentState = dataTree.takeSnapshot().readNode(path);
             if (currentState.isPresent()) {
                 final NormalizedNode<?, ?> data = currentState.get();
 
