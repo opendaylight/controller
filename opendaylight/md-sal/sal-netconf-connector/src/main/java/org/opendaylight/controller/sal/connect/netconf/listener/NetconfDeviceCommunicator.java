@@ -324,10 +324,8 @@ public class NetconfDeviceCommunicator implements NetconfClientSessionListener, 
     }
 
     private void processNotification(final NetconfMessage notification) {
-        logger.debug("{}: Notification received: {}", id, notification);
-
         if(logger.isTraceEnabled()) {
-            logger.trace("{}: Notification received: {}", id, msgToS(notification));
+            logger.trace("{}: Notification received: {}", id, notification);
         }
 
         remoteDevice.onNotification(notification);
