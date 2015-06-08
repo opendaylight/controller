@@ -19,8 +19,6 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.Collections;
@@ -38,7 +36,6 @@ import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.md.sal.dom.spi.DefaultDOMRpcResult;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
-import org.opendaylight.controller.netconf.notifications.NetconfNotification;
 import org.opendaylight.controller.netconf.util.OrderedNormalizedNodeWriter;
 import org.opendaylight.controller.netconf.util.exception.MissingNameSpaceException;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
@@ -123,8 +120,7 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
         final Map.Entry<Date, XmlElement> stripped = stripNotification(message);
         final QName notificationNoRev;
         try {
-            // How to construct QName with no revision ?
-            notificationNoRev = QName.cachedReference(QName.create(stripped.getValue().getNamespace(), "0000-00-00", stripped.getValue().getName()).withoutRevision());
+            notificationNoRev = QName.create(stripped.getValue().getNamespace(), stripped.getValue().getName()).withoutRevision();
         } catch (final MissingNameSpaceException e) {
             throw new IllegalArgumentException("Unable to parse notification " + message + ", cannot find namespace", e);
         }
@@ -165,17 +161,9 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
         }
 
         try {
-            return new AbstractMap.SimpleEntry<>(parseEventTime(eventTimeElement.getTextContent()), notificationElement);
+            return new AbstractMap.SimpleEntry<>(QName.parseRevision(eventTimeElement.getTextContent()), notificationElement);
         } catch (NetconfDocumentedException e) {
             throw new IllegalArgumentException("Notification payload does not contain " + EVENT_TIME + " " + message);
-        }
-    }
-
-    private static Date parseEventTime(final String eventTime) {
-        try {
-            return new SimpleDateFormat(NetconfNotification.RFC3339_DATE_FORMAT_BLUEPRINT).parse(eventTime);
-        } catch (ParseException e) {
-            throw new IllegalArgumentException("Unable to parse event time from " + eventTime, e);
         }
     }
 
