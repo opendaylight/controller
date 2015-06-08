@@ -57,6 +57,8 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
 
     @GuardedBy("this")
     private boolean failed;
+    @GuardedBy("this")
+    private PingPongTransaction shutdownTx;
 
     /**
      * This updater is used to manipulate the "ready" transaction. We perform only atomic
@@ -124,6 +126,8 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
     }
 
     private synchronized PingPongTransaction slowAllocateTransaction() {
+        Preconditions.checkState(shutdownTx == null, "Transaction chain %s has been shut down", this);
+
         final DOMDataReadWriteTransaction delegateTx = delegate.newReadWriteTransaction();
         final PingPongTransaction newTx = new PingPongTransaction(delegateTx);
 
@@ -203,27 +207,34 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
         });
     }
 
+    private void processNextTransaction(final PingPongTransaction tx) {
+        final boolean success = INFLIGHT_UPDATER.compareAndSet(this, tx, null);
+        Preconditions.checkState(success, "Completed transaction %s while %s was submitted", tx, inflightTx);
+
+        synchronized (this) {
+            final PingPongTransaction nextTx = READY_UPDATER.getAndSet(this, null);
+            if (nextTx != null) {
+                processTransaction(nextTx);
+            } else if (shutdownTx != null) {
+                processTransaction(shutdownTx);
+                delegate.close();
+                shutdownTx = null;
+            }
+        }
+    }
+
     private void transactionSuccessful(final PingPongTransaction tx, final Void result) {
         LOG.debug("Transaction {} completed successfully", tx);
 
-        final boolean success = INFLIGHT_UPDATER.compareAndSet(this, tx, null);
-        Preconditions.checkState(success, "Successful transaction %s while %s was submitted", tx, inflightTx);
-
-        synchronized (this) {
-            processIfReady();
-        }
-
-        // Can run unsynchronized
         tx.onSuccess(result);
+        processNextTransaction(tx);
     }
 
     private void transactionFailed(final PingPongTransaction tx, final Throwable t) {
         LOG.debug("Transaction {} failed", tx, t);
 
-        final boolean success = INFLIGHT_UPDATER.compareAndSet(this, tx, null);
-        Preconditions.checkState(success, "Failed transaction %s while %s was submitted", tx, inflightTx);
-
         tx.onFailure(t);
+        processNextTransaction(tx);
     }
 
     private void readyTransaction(@Nonnull final PingPongTransaction tx) {
@@ -258,23 +269,29 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
         final PingPongTransaction notLocked = lockedTx;
         Preconditions.checkState(notLocked == null, "Attempted to close chain with outstanding transaction %s", notLocked);
 
-        // Force allocations on slow path. We will complete the rest
+        // This is not reliable, but if we observe it to be null and the process has already completed,
+        // the backend transaction chain will throw the appropriate error.
+        Preconditions.checkState(shutdownTx == null, "Attempted to close an already-closed chain");
+
+        // Force allocations on slow path, picking up a potentially-outstanding transaction
         final PingPongTransaction tx = READY_UPDATER.getAndSet(this, null);
 
-        // Make sure no transaction is outstanding. Otherwise sleep a bit and retry
-        while (inflightTx != null) {
-            LOG.debug("Busy-waiting for in-flight transaction {} to complete", inflightTx);
-            Thread.yield();
-            continue;
-        }
-
-        // If we have an outstanding transaction, send it down
         if (tx != null) {
-            processTransaction(tx);
+            // We have one more transaction, which needs to be processed somewhere. If we do not
+            // a transaction in-flight, we need to push it down ourselves.
+            // If there is an in-flight transaction we will schedule this last one into a dedicated
+            // slot. Allocation slow path will check its presence and fail, the in-flight path will
+            // pick it up, submit and immediately close the chain.
+            if (inflightTx == null) {
+                processTransaction(tx);
+                delegate.close();
+            } else {
+                shutdownTx = tx;
+            }
+        } else {
+            // Nothing outstanding, we can safely shutdown
+            delegate.close();
         }
-
-        // All done, close the delegate. All new allocations should fail.
-        delegate.close();
     }
 
     @Override
