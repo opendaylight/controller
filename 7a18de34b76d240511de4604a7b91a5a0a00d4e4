@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a6a9dd7_12b6303e",
+        "filename": "karaf/opendaylight-karaf-resources/src/main/resources/etc/custom.properties",
+        "patchSetId": 1
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-06-08T13:16:54Z",
+      "side": 1,
+      "message": "as mentioned in the other gerrit, maybe name this l3.arp.responder if it will always be with l3.fwd.",
+      "range": {
+        "startLine": 88,
+        "startChar": 10,
+        "endLine": 88,
+        "endChar": 19
+      },
+      "revId": "7a18de34b76d240511de4604a7b91a5a0a00d4e4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
