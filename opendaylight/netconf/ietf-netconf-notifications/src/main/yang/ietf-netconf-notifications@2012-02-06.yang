@@ -5,8 +5,8 @@ module ietf-netconf-notifications {
 
    prefix ncn;
 
-   import ietf-inet-types { prefix inet; }
-   import ietf-netconf { prefix nc; }
+   import ietf-inet-types { prefix inet; revision-date "2010-09-24";}
+   import ietf-netconf { prefix nc; revision-date "2011-06-01";}
 
    organization
      "IETF NETCONF (Network Configuration Protocol) Working Group";

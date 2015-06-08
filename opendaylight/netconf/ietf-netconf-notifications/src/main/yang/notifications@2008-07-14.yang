@@ -3,7 +3,7 @@ module notifications {
     namespace "urn:ietf:params:xml:ns:netconf:notification:1.0";
     prefix "ncEvent";
 
-    import ietf-yang-types { prefix yang; }
+    import ietf-yang-types { prefix yang; revision-date "2010-09-24";}
 
     organization
       "IETF NETCONF WG";
