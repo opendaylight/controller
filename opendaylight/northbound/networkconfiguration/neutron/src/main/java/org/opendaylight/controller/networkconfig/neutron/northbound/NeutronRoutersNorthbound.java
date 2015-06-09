@@ -438,7 +438,8 @@ public class NeutronRoutersNorthbound {
         if (targetPort.getDeviceID() != null && !targetPort.getDeviceID().equals(routerUUID))
             throw new ResourceConflictException("Target Port already allocated to a different device id");
         if (targetPort.getDeviceOwner() != null &&
-                !targetPort.getDeviceOwner().equalsIgnoreCase(ROUTER_INTERFACE_STR))
+                !targetPort.getDeviceOwner().equalsIgnoreCase(ROUTER_INTERFACE_STR) &&
+                !targetPort.getDeviceOwner().equalsIgnoreCase(ROUTER_GATEWAY_STR))
             throw new ResourceConflictException("Target Port already allocated to non-router interface");
         Object[] instances = ServiceHelper.getGlobalInstances(INeutronRouterAware.class, this, null);
         if (instances != null) {
