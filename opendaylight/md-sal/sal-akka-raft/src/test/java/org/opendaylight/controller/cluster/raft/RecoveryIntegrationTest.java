@@ -8,15 +8,22 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
+import akka.actor.ActorRef;
 import akka.persistence.SaveSnapshotSuccess;
 import com.google.common.collect.ImmutableMap;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyJournalEntries;
+import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
+import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
+import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 
 /**
@@ -34,8 +41,9 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         follower1Actor = newTestRaftActor(follower1Id, ImmutableMap.of(leaderId, testActorPath(leaderId)),
                 newFollowerConfigParams());
 
-        peerAddresses = ImmutableMap.<String, String>builder().
-                put(follower1Id, follower1Actor.path().toString()).build();
+        Map<String, String> peerAddresses = new HashMap<>();
+        peerAddresses.put(follower1Id, follower1Actor.path().toString());
+        peerAddresses.put(follower2Id, "");
 
         leaderConfigParams = newLeaderConfigParams();
         leaderActor = newTestRaftActor(leaderId, peerAddresses, leaderConfigParams);
@@ -129,6 +137,76 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
 
         assertEquals("Leader state", Arrays.asList(payload0, payload1, payload2, payload3, payload4),
                 leaderActor.underlyingActor().getState());
+    }
+
+    @Test
+    public void testFollowerRecoveryAfterInstallSnapshot() throws Exception {
+
+        send2InitialPayloads();
+
+        leader = leaderActor.underlyingActor().getCurrentBehavior();
+
+        follower2Actor = newTestRaftActor(follower2Id, ImmutableMap.of(leaderId, testActorPath(leaderId)),
+                newFollowerConfigParams());
+        follower2CollectorActor = follower2Actor.underlyingActor().collectorActor();
+
+        leaderActor.tell(new SetPeerAddress(follower2Id, follower2Actor.path().toString()), ActorRef.noSender());
+
+        MockPayload payload2 = sendPayloadData(leaderActor, "two");
+
+        // Verify the leader applies the 3rd payload state.
+        MessageCollectorActor.expectMatching(leaderCollectorActor, ApplyJournalEntries.class, 1);
+
+        MessageCollectorActor.expectMatching(follower2CollectorActor, ApplyJournalEntries.class, 1);
+
+        assertEquals("Leader commit index", 2, leaderContext.getCommitIndex());
+        assertEquals("Leader last applied", 2, leaderContext.getLastApplied());
+        assertEquals("Leader snapshot index", 1, leaderContext.getReplicatedLog().getSnapshotIndex());
+        assertEquals("Leader replicatedToAllIndex", 1, leader.getReplicatedToAllIndex());
+
+        killActor(follower2Actor);
+
+        InMemoryJournal.clear();
+
+        follower2Actor = newTestRaftActor(follower2Id, ImmutableMap.of(leaderId, testActorPath(leaderId)),
+                newFollowerConfigParams());
+        TestRaftActor follower2Underlying = follower2Actor.underlyingActor();
+        follower2CollectorActor = follower2Underlying.collectorActor();
+        follower2Context = follower2Underlying.getRaftActorContext();
+
+        leaderActor.tell(new SetPeerAddress(follower2Id, follower2Actor.path().toString()), ActorRef.noSender());
+
+        // The leader should install a snapshot so wait for the follower to receive ApplySnapshot.
+        MessageCollectorActor.expectFirstMatching(follower2CollectorActor, ApplySnapshot.class);
+
+        // Wait for the follower to persist the snapshot.
+        MessageCollectorActor.expectFirstMatching(follower2CollectorActor, SaveSnapshotSuccess.class);
+
+        // The last applied entry on the leader is included in the snapshot but is also sent in a subsequent
+        // AppendEntries because the InstallSnapshot message lastIncludedIndex field is set to the leader's
+        // snapshotIndex and not the actual last index included in the snapshot.
+        // FIXME? - is this OK?
+        MessageCollectorActor.expectFirstMatching(follower2CollectorActor, ApplyState.class);
+        List<MockPayload> expFollowerState = Arrays.asList(payload0, payload1, payload2, payload2);
+
+        assertEquals("Follower commit index", 2, follower2Context.getCommitIndex());
+        assertEquals("Follower last applied", 2, follower2Context.getLastApplied());
+        assertEquals("Follower snapshot index", 1, follower2Context.getReplicatedLog().getSnapshotIndex());
+        assertEquals("Follower state", expFollowerState, follower2Underlying.getState());
+
+        killActor(follower2Actor);
+
+        follower2Actor = newTestRaftActor(follower2Id, ImmutableMap.of(leaderId, testActorPath(leaderId)),
+                newFollowerConfigParams());
+
+        follower2Underlying = follower2Actor.underlyingActor();
+        follower2Underlying.waitForRecoveryComplete();
+        follower2Context = follower2Underlying.getRaftActorContext();
+
+        assertEquals("Follower commit index", 2, follower2Context.getCommitIndex());
+        assertEquals("Follower last applied", 2, follower2Context.getLastApplied());
+        assertEquals("Follower snapshot index", 1, follower2Context.getReplicatedLog().getSnapshotIndex());
+        assertEquals("Follower state", expFollowerState, follower2Underlying.getState());
     }
 
     private void reinstateLeaderActor() {
