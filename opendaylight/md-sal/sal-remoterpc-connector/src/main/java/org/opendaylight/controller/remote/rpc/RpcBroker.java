@@ -9,6 +9,7 @@
 package org.opendaylight.controller.remote.rpc;
 
 import static akka.pattern.Patterns.ask;
+
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.dispatch.OnComplete;
@@ -26,6 +27,7 @@ import java.util.List;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
 import org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeSerializer;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcImplementationNotAvailableException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node;
@@ -104,14 +106,10 @@ public class RpcBroker extends AbstractUntypedActor {
                 final List<Pair<ActorRef, Long>> actorRefList = findReply.getRouterWithUpdateTime();
 
                 if(actorRefList == null || actorRefList.isEmpty()) {
-                    final String message = String.format(
-                            "No remote implementation found for rpc %s",  msg.getRpc());
-                    sender.tell(new akka.actor.Status.Failure(new RpcErrorsException(
-                            message, Arrays.asList(RpcResultBuilder.newError(ErrorType.RPC,
-                                    "operation-not-supported", message)))), self);
+                    sender.tell(new akka.actor.Status.Failure(new DOMRpcImplementationNotAvailableException(
+                            "No remote implementation available for rpc %s", msg.getRpc())), self);
                     return;
                 }
-
                 finishInvokeRpc(actorRefList, msg, sender, self);
             }
         };
