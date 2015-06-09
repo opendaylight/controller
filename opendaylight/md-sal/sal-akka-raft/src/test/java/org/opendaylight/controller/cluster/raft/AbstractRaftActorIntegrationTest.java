@@ -50,6 +50,24 @@ import scala.concurrent.duration.FiniteDuration;
  */
 public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest {
 
+    public static class SetPeerAddress {
+        private final String peerId;
+        private final String peerAddress;
+
+        public SetPeerAddress(String peerId, String peerAddress) {
+            this.peerId = peerId;
+            this.peerAddress = peerAddress;
+        }
+
+        public String getPeerId() {
+            return peerId;
+        }
+
+        public String getPeerAddress() {
+            return peerAddress;
+        }
+    }
+
     public static class TestRaftActor extends MockRaftActor {
 
         private final TestActorRef<MessageCollectorActor> collectorActor;
@@ -94,6 +112,12 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
             if(message instanceof MockPayload) {
                 MockPayload payload = (MockPayload)message;
                 super.persistData(collectorActor, payload.toString(), payload);
+                return;
+            }
+
+            if(message instanceof SetPeerAddress) {
+                setPeerAddress(((SetPeerAddress) message).getPeerId().toString(),
+                        ((SetPeerAddress) message).getPeerAddress());
                 return;
             }
 
