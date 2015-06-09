@@ -18,9 +18,14 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.ModifyAction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
+import org.opendaylight.yangtools.yang.data.api.schema.MixinNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class AbstractWriteTx implements DOMDataWriteTransaction {
+
+    private static final Logger LOG  = LoggerFactory.getLogger(AbstractWriteTx.class);
 
     private final long defaultRequestTimeoutMillis;
     protected final RemoteDeviceId id;
@@ -89,6 +94,12 @@ public abstract class AbstractWriteTx implements DOMDataWriteTransaction {
     public synchronized void put(final LogicalDatastoreType store, final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
         checkEditable(store);
 
+        // trying to write only mixin nodes (not visible when serialized). Ignoring. Some devices cannot handle empty edit-config rpc
+        if(containsOnlyNonVisibleData(path, data)) {
+            LOG.debug("Ignoring put for {} and data {}. Resulting data structure is empty.", path, data);
+            return;
+        }
+
         try {
             editConfig(
                     netOps.createEditConfigStrcture(Optional.<NormalizedNode<?, ?>>fromNullable(data), Optional.of(ModifyAction.REPLACE), path), Optional.of(ModifyAction.NONE));
@@ -104,12 +115,27 @@ public abstract class AbstractWriteTx implements DOMDataWriteTransaction {
     public synchronized void merge(final LogicalDatastoreType store, final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
         checkEditable(store);
 
+        // trying to write only mixin nodes (not visible when serialized). Ignoring. Some devices cannot handle empty edit-config rpc
+        if (containsOnlyNonVisibleData(path, data)) {
+            LOG.debug("Ignoring merge for {} and data {}. Resulting data structure is empty.", path, data);
+            return;
+        }
+
         try {
             editConfig(
                     netOps.createEditConfigStrcture(Optional.<NormalizedNode<?, ?>>fromNullable(data), Optional.<ModifyAction>absent(), path), Optional.<ModifyAction>absent());
         } catch (final NetconfDocumentedException e) {
             handleEditException(path, data, e, "merge");
         }
+    }
+
+    /**
+     * Check whether the data to be written consists only from mixins
+     */
+    private static boolean containsOnlyNonVisibleData(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+        // There's only one such case:top level list (pathArguments == 1 && data is Mixin)
+        // any other mixin nodes are contained by a "regular" node thus visible when serialized
+        return path.getPathArguments().size() == 1 && data instanceof MixinNode;
     }
 
     @Override
