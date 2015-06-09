@@ -123,8 +123,10 @@ public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPro
         final List<Element> elements = Collections.singletonList(doc.getDocumentElement());
         final SchemaNode schemaNodeContext = pathContext.getSchemaNode();
         DataSchemaNode schemaNode;
+        boolean isRpc = false;
         if (schemaNodeContext instanceof RpcDefinition) {
             schemaNode = ((RpcDefinition) schemaNodeContext).getInput();
+            isRpc = true;
         } else if (schemaNodeContext instanceof DataSchemaNode) {
             schemaNode = (DataSchemaNode) schemaNodeContext;
         } else {
@@ -140,14 +142,14 @@ public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPro
         final DomToNormalizedNodeParserFactory parserFactory =
                 DomToNormalizedNodeParserFactory.getInstance(XmlUtils.DEFAULT_XML_CODEC_PROVIDER, pathContext.getSchemaContext());
 
-        if (isPost()) {
+        if (isPost() && !isRpc) {
             final Deque<Object> foundSchemaNodes = findPathToSchemaNodeByName(schemaNode, docRootElm);
             if (foundSchemaNodes.isEmpty()) {
                 throw new IllegalStateException(String.format("Child \"%s\" was not found in parent schema node \"%s\"",
                         docRootElm, schemaNode.getQName()));
             }
             while (!foundSchemaNodes.isEmpty()) {
-                final Object child  = foundSchemaNodes.pop();
+                final Object child = foundSchemaNodes.pop();
                 if (child instanceof AugmentationSchema) {
                     final AugmentationSchema augmentSchemaNode = (AugmentationSchema) child;
                     iiToDataList.add(SchemaUtils.getNodeIdentifierForAugmentation(augmentSchemaNode));

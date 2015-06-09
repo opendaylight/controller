@@ -1,3 +1,5 @@
-<cont xmlns="invoke:rpc:module">
-    <lf>lf-test</lf>
-</cont>
+<input xmlns="invoke:rpc:module">
+    <cont>
+        <lf>lf-test</lf>
+    </cont>
+</input>
