@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a6a9dd7_756511e0",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/netconf/sal/tx/AbstractWriteTx.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-06-09T11:27:56Z",
+      "side": 1,
+      "message": "So for a nested list, e.g.\n\n  container outer {\n      list inner-list {\n      }\n  }\n\nIt seems for ensure parents,  restconf would pass in:\n\n  \u003couter\u003e\n      \u003cinner-list/\u003e\n  \u003c/outer\u003e\n\nand the path would have 2 args so this check would let it thru. Would this cause the same issue or, based on your comment, the empty \u003cinner-list\u003e would not get serialized to the device?",
+      "revId": "1f55bd061060673c7ffb6b30cd77ba3a2458009f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
