@@ -80,7 +80,6 @@ import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogImplEntry;
 import org.opendaylight.controller.cluster.raft.Snapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyJournalEntries;
-import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyncUpStatus;
@@ -113,6 +112,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.ModificationType;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.Await;
@@ -484,16 +484,20 @@ public class ShardTest extends AbstractShardTest {
         DataTree store = InMemoryDataTreeFactory.getInstance().create();
         store.setSchemaContext(SCHEMA_CONTEXT);
 
-        writeToStore(store, TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+        ContainerNode container = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
+                new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME)).
+                    withChild(ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).addChild(
+                        ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1)).build()).build();
+
+        writeToStore(store, TestModel.TEST_PATH, container);
 
         YangInstanceIdentifier root = YangInstanceIdentifier.builder().build();
         NormalizedNode<?,?> expected = readStore(store, root);
 
-        ApplySnapshot applySnapshot = new ApplySnapshot(Snapshot.create(
-                SerializationUtils.serializeNormalizedNode(expected),
-                Collections.<ReplicatedLogEntry>emptyList(), 1, 2, 3, 4));
+        Snapshot snapshot = Snapshot.create(SerializationUtils.serializeNormalizedNode(expected),
+                Collections.<ReplicatedLogEntry>emptyList(), 1, 2, 3, 4);
 
-        shard.underlyingActor().onReceiveCommand(applySnapshot);
+        shard.underlyingActor().getRaftActorSnapshotCohort().applySnapshot(snapshot.getState());
 
         NormalizedNode<?,?> actual = readStore(shard, root);
 

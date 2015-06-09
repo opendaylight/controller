@@ -589,7 +589,8 @@ public class Shard extends RaftActor {
     }
 
     @Override
-    protected RaftActorSnapshotCohort getRaftActorSnapshotCohort() {
+    @VisibleForTesting
+    public RaftActorSnapshotCohort getRaftActorSnapshotCohort() {
         return snapshotCohort;
     }
 

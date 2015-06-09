@@ -340,7 +340,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         snapshotManager.persist(new byte[]{}, mockRaftActorBehavior, Runtime.getRuntime().totalMemory());
 
-        snapshotManager.commit(100L);
+        snapshotManager.commit(100L, mockRaftActorBehavior);
 
         verify(mockReplicatedLog).snapshotCommit();
 
@@ -361,7 +361,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         snapshotManager.captureToInstall(new MockRaftActorContext.MockReplicatedLogEntry(6, 9,
                 new MockRaftActorContext.MockPayload()), -1, "follower-1");
 
-        snapshotManager.commit(100L);
+        snapshotManager.commit(100L, mockRaftActorBehavior);
 
         verify(mockReplicatedLog, never()).snapshotCommit();
 
@@ -373,7 +373,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
     @Test
     public void testCommitBeforeCapture(){
-        snapshotManager.commit(100L);
+        snapshotManager.commit(100L, mockRaftActorBehavior);
 
         verify(mockReplicatedLog, never()).snapshotCommit();
 
@@ -393,9 +393,9 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         snapshotManager.persist(new byte[]{}, mockRaftActorBehavior, Runtime.getRuntime().totalMemory());
 
-        snapshotManager.commit(100L);
+        snapshotManager.commit(100L, mockRaftActorBehavior);
 
-        snapshotManager.commit(100L);
+        snapshotManager.commit(100L, mockRaftActorBehavior);
 
         verify(mockReplicatedLog, times(1)).snapshotCommit();
 
