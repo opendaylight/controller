@@ -38,6 +38,9 @@ public class SnapshotManager implements SnapshotState {
 
     private Procedure<Void> createSnapshotProcedure;
 
+    private Snapshot applySnapshot;
+    private Procedure<byte[]> applySnapshotProcedure;
+
     public SnapshotManager(RaftActorContext context, Logger logger) {
         this.context = context;
         this.LOG = logger;
@@ -59,13 +62,18 @@ public class SnapshotManager implements SnapshotState {
     }
 
     @Override
+    public void apply(Snapshot snapshot) {
+        currentState.apply(snapshot);
+    }
+
+    @Override
     public void persist(byte[] snapshotBytes, RaftActorBehavior currentBehavior, long totalMemory) {
         currentState.persist(snapshotBytes, currentBehavior, totalMemory);
     }
 
     @Override
-    public void commit(long sequenceNumber) {
-        currentState.commit(sequenceNumber);
+    public void commit(long sequenceNumber, RaftActorBehavior currentBehavior) {
+        currentState.commit(sequenceNumber, currentBehavior);
     }
 
     @Override
@@ -80,6 +88,10 @@ public class SnapshotManager implements SnapshotState {
 
     public void setCreateSnapshotCallable(Procedure<Void> createSnapshotProcedure) {
         this.createSnapshotProcedure = createSnapshotProcedure;
+    }
+
+    public void setApplySnapshotProcedure(Procedure<byte[]> applySnapshotProcedure) {
+        this.applySnapshotProcedure = applySnapshotProcedure;
     }
 
     public long getLastSequenceNumber() {
@@ -119,12 +131,17 @@ public class SnapshotManager implements SnapshotState {
         }
 
         @Override
+        public void apply(Snapshot snapshot) {
+            LOG.debug("apply should not be called in state {}", this);
+        }
+
+        @Override
         public void persist(byte[] snapshotBytes, RaftActorBehavior currentBehavior, long totalMemory) {
             LOG.debug("persist should not be called in state {}", this);
         }
 
         @Override
-        public void commit(long sequenceNumber) {
+        public void commit(long sequenceNumber, RaftActorBehavior currentBehavior) {
             LOG.debug("commit should not be called in state {}", this);
         }
 
@@ -229,6 +246,19 @@ public class SnapshotManager implements SnapshotState {
         }
 
         @Override
+        public void apply(Snapshot snapshot) {
+            applySnapshot = snapshot;
+
+            lastSequenceNumber = context.getPersistenceProvider().getLastSequenceNumber();
+
+            LOG.debug("lastSequenceNumber prior to persisting applied snapshot: {}", lastSequenceNumber);
+
+            context.getPersistenceProvider().saveSnapshot(snapshot);
+
+            SnapshotManager.this.currentState = PERSISTING;
+        }
+
+        @Override
         public String toString() {
             return "Idle";
         }
@@ -322,28 +352,49 @@ public class SnapshotManager implements SnapshotState {
     private class Persisting extends AbstractSnapshotState {
 
         @Override
-        public void commit(long sequenceNumber) {
+        public void commit(long sequenceNumber, RaftActorBehavior currentBehavior) {
             LOG.debug("Snapshot success sequence number:", sequenceNumber);
-            context.getReplicatedLog().snapshotCommit();
+
+            if(applySnapshot != null) {
+                try {
+                    applySnapshotProcedure.apply(applySnapshot.getState());
+
+                    //clears the followers log, sets the snapshot index to ensure adjusted-index works
+                    context.setReplicatedLog(ReplicatedLogImpl.newInstance(applySnapshot, context, currentBehavior));
+                    context.setLastApplied(applySnapshot.getLastAppliedIndex());
+                    context.setCommitIndex(applySnapshot.getLastAppliedIndex());
+                } catch (Exception e) {
+                    LOG.error("Error applying snapshot", e);
+                }
+            } else {
+                context.getReplicatedLog().snapshotCommit();
+            }
+
             context.getPersistenceProvider().deleteSnapshots(new SnapshotSelectionCriteria(
                     sequenceNumber - context.getConfigParams().getSnapshotBatchCount(), 43200000));
 
             context.getPersistenceProvider().deleteMessages(lastSequenceNumber);
 
             lastSequenceNumber = -1;
+            applySnapshot = null;
             SnapshotManager.this.currentState = IDLE;
         }
 
         @Override
         public void rollback() {
-            context.getReplicatedLog().snapshotRollback();
+            // Nothing to rollback if we're applying a snapshot from the leader.
+            if(applySnapshot == null) {
+                context.getReplicatedLog().snapshotRollback();
 
-            LOG.info("{}: Replicated Log rolled back. Snapshot will be attempted in the next cycle." +
-                            "snapshotIndex:{}, snapshotTerm:{}, log-size:{}", persistenceId(),
-                    context.getReplicatedLog().getSnapshotIndex(),
-                    context.getReplicatedLog().getSnapshotTerm(),
-                    context.getReplicatedLog().size());
+                LOG.info("{}: Replicated Log rolled back. Snapshot will be attempted in the next cycle." +
+                        "snapshotIndex:{}, snapshotTerm:{}, log-size:{}", persistenceId(),
+                        context.getReplicatedLog().getSnapshotIndex(),
+                        context.getReplicatedLog().getSnapshotTerm(),
+                        context.getReplicatedLog().size());
+            }
 
+            lastSequenceNumber = -1;
+            applySnapshot = null;
             SnapshotManager.this.currentState = IDLE;
         }
 
