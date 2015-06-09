@@ -64,10 +64,14 @@ public class RemoteRpcImplementation implements DOMRpcImplementation {
                         LOG.debug("Detailed Error", failure);
                     }
 
-                    final String message = String.format("Execution of RPC %s failed",  rpcMsg.getRpc());
-                    Collection<RpcError> errors = ((RpcErrorsException)failure).getRpcErrors();
-                    if(errors == null || errors.size() == 0) {
-                        errors = Arrays.asList(RpcResultBuilder.newError(ErrorType.RPC, null, message));
+                    final String message = String.format("Execution of RPC %s failed because of %s",
+                            rpcMsg.getRpc(), failure.getMessage());
+                    Collection<RpcError> errors = Arrays.asList(RpcResultBuilder.newError(ErrorType.RPC, null, message));
+                    if(failure instanceof RpcErrorsException) {
+                        errors = ((RpcErrorsException) failure).getRpcErrors();
+                        if (errors == null || errors.size() == 0) {
+                            errors = Arrays.asList(RpcResultBuilder.newError(ErrorType.RPC, null, message));
+                        }
                     }
                     final DOMRpcResult rpcResult = new DefaultDOMRpcResult(errors);
 
