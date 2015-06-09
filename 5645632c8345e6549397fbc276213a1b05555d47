@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a6a9dd7_351a396f",
+        "filename": "opendaylight/config/yang-jmx-generator-plugin/src/main/java/org/opendaylight/controller/config/yangjmxgenerator/plugin/JMXGenerator.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-06-09T11:11:07Z",
+      "side": 1,
+      "message": "I would use UTF-8 instead of default charset here ... and also in other places within this commit",
+      "range": {
+        "startLine": 177,
+        "startChar": 98,
+        "endLine": 177,
+        "endChar": 112
+      },
+      "revId": "5645632c8345e6549397fbc276213a1b05555d47",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

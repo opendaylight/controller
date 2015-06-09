@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a6a9dd7_151db566",
+        "filename": "opendaylight/md-sal/sal-binding-it/src/main/java/org/opendaylight/controller/test/sal/binding/it/TestHelper.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-06-09T11:11:07Z",
+      "side": 0,
+      "message": "This TestHelper is used by other projects as well. Dont delete the commons-io dependency from here just yet.",
+      "range": {
+        "startLine": 60,
+        "startChar": 43,
+        "endLine": 60,
+        "endChar": 50
+      },
+      "revId": "7e5c1fa516878ee5744e95f784e724381335b21e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
