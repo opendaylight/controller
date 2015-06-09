@@ -132,13 +132,16 @@ public class TestXmlBodyReaderMountPoint extends AbstractBodyReaderTest {
                 null, null, mediaType, null, inputStream);
         checkNormalizedNodeContext(returnValue);
         final ContainerNode contNode = (ContainerNode) returnValue.getData();
-        final YangInstanceIdentifier yangleaf = YangInstanceIdentifier.of(QName
-                .create(contNode.getNodeType(), "lf"));
-        final Optional<DataContainerChild<? extends PathArgument, ?>> leafDataNode = contNode
-                .getChild(yangleaf.getLastPathArgument());
+        final YangInstanceIdentifier yangCont = YangInstanceIdentifier.of(QName.create(contNode.getNodeType(), "cont"));
+        final Optional<DataContainerChild<? extends PathArgument, ?>> contDataNodePotential = contNode.getChild(yangCont
+                .getLastPathArgument());
+        assertTrue(contDataNodePotential.isPresent());
+        final ContainerNode contDataNode = (ContainerNode) contDataNodePotential.get();
+        final YangInstanceIdentifier yangLeaf = YangInstanceIdentifier.of(QName.create(contDataNode.getNodeType(), "lf"));
+        final Optional<DataContainerChild<? extends PathArgument, ?>> leafDataNode = contDataNode.getChild(yangLeaf
+                .getLastPathArgument());
         assertTrue(leafDataNode.isPresent());
-        assertTrue("lf-test".equalsIgnoreCase(leafDataNode.get().getValue()
-                .toString()));
+        assertTrue("lf-test".equalsIgnoreCase(leafDataNode.get().getValue().toString()));
     }
 
     private void checkExpectValueNormalizeNodeContext(
