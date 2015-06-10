@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a6a9dd7_41b04f8b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/AbstractTransactionContextFactory.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-06-10T12:28:00Z",
+      "side": 1,
+      "message": "Do we even need the limiter for local transactions? The mod operations are synchronous to the caller. Also, now that there\u0027s a limiter per TransactionContext,  the LocalTransactionContext would need to acquire - it doesn\u0027t now, just releases.  But then it would do, e.g. acquire -\u003e write to local DOM Tx -\u003e release which seems unnecessary now.",
+      "revId": "44dbf4a17011d5e82e10b3dff79b3c4d31801ac0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
