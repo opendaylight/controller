@@ -25,7 +25,6 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import java.util.concurrent.TimeUnit;
-import org.opendaylight.controller.cluster.common.actor.CommonConfig;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.Configuration;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
@@ -91,7 +90,6 @@ public class ActorContext {
     private Timeout operationTimeout;
     private final String selfAddressHostPort;
     private TransactionRateLimiter txRateLimiter;
-    private final int transactionOutstandingOperationLimit;
     private Timeout transactionCommitOperationTimeout;
     private Timeout shardInitializationTimeout;
     private final Dispatchers dispatchers;
@@ -128,7 +126,6 @@ public class ActorContext {
             selfAddressHostPort = null;
         }
 
-        transactionOutstandingOperationLimit = new CommonConfig(this.getActorSystem().settings().config()).getMailBoxCapacity();
     }
 
     private void setCachedProperties() {
@@ -459,18 +456,6 @@ public class ActorContext {
             }
 
         return builder.toString();
-    }
-
-    /**
-     * Get the maximum number of operations that are to be permitted within a transaction before the transaction
-     * should begin throttling the operations
-     *
-     * Parking reading this configuration here because we need to get to the actor system settings
-     *
-     * @return
-     */
-    public int getTransactionOutstandingOperationLimit(){
-        return transactionOutstandingOperationLimit;
     }
 
     /**

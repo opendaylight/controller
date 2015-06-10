@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.dispatch.OnComplete;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -26,6 +25,7 @@ public class OperationLimiter extends OnComplete<Object> {
     private final TransactionIdentifier identifier;
     private final long acquireTimeout;
     private final Semaphore semaphore;
+    private final int maxPermits;
 
     OperationLimiter(final TransactionIdentifier identifier, final int maxPermits, final int acquireTimeoutSeconds) {
         this.identifier = Preconditions.checkNotNull(identifier);
@@ -34,6 +34,7 @@ public class OperationLimiter extends OnComplete<Object> {
         this.acquireTimeout = TimeUnit.SECONDS.toNanos(acquireTimeoutSeconds);
 
         Preconditions.checkArgument(maxPermits >= 0);
+        this.maxPermits = maxPermits;
         this.semaphore = new Semaphore(maxPermits);
     }
 
@@ -41,7 +42,7 @@ public class OperationLimiter extends OnComplete<Object> {
         acquire(1);
     }
 
-    private void acquire(final int acquirePermits) {
+    void acquire(final int acquirePermits) {
         try {
             if (!semaphore.tryAcquire(acquirePermits, acquireTimeout, TimeUnit.NANOSECONDS)) {
                 LOG.warn("Failed to acquire operation permit for transaction {}", identifier);
@@ -59,6 +60,10 @@ public class OperationLimiter extends OnComplete<Object> {
         this.semaphore.release();
     }
 
+    void release(int permits) {
+        this.semaphore.release(permits);
+    }
+
     @Override
     public void onComplete(final Throwable throwable, final Object message) {
         if (message instanceof BatchedModificationsReply) {
@@ -72,8 +77,17 @@ public class OperationLimiter extends OnComplete<Object> {
         return identifier;
     }
 
-    @VisibleForTesting
-    Semaphore getSemaphore() {
-        return semaphore;
+    int availablePermits(){
+        return semaphore.availablePermits();
+    }
+
+    /**
+     * Increments the number of available permits on the limiter
+     *
+     */
+    void addMaxPermits(){
+        // This is equivalent to adding permits to the semaphore as per java docs
+        // http://docs.oracle.com/javase/6/docs/api/java/util/concurrent/Semaphore.html#release%28int%29
+        semaphore.release(maxPermits);
     }
 }
