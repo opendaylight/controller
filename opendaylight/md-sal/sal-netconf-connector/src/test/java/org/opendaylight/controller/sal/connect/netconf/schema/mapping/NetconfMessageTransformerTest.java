@@ -120,7 +120,7 @@ public class NetconfMessageTransformerTest {
                 NetconfRemoteSchemaYangSourceProvider.createGetSchemaRequest("module", Optional.of("2012-12-12")));
         assertSimilarXml(netconfMessage, "<rpc message-id=\"m-0\" xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\">\n" +
                 "<get-schema xmlns=\"urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring\">\n" +
-                "<format xmlns:x=\"urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring\">x:yang</format>\n" +
+                "<format>yang</format>\n" +
                 "<identifier>module</identifier>\n" +
                 "<version>2012-12-12</version>\n" +
                 "</get-schema>\n" +
@@ -246,7 +246,7 @@ public class NetconfMessageTransformerTest {
                 "<schema>\n" +
                 "<identifier>module</identifier>\n" +
                 "<version>2012-12-12</version>\n" +
-                "<format xmlns:x=\"urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring\">x:yang</format>\n" +
+                "<format>yang</format>\n" +
                 "</schema>\n" +
                 "</schemas>\n" +
                 "</netconf-state>\n" +
