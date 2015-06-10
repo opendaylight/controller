@@ -20,7 +20,6 @@ import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
-import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
@@ -182,16 +181,11 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
         // Wait for the follower to persist the snapshot.
         MessageCollectorActor.expectFirstMatching(follower2CollectorActor, SaveSnapshotSuccess.class);
 
-        // The last applied entry on the leader is included in the snapshot but is also sent in a subsequent
-        // AppendEntries because the InstallSnapshot message lastIncludedIndex field is set to the leader's
-        // snapshotIndex and not the actual last index included in the snapshot.
-        // FIXME? - is this OK?
-        MessageCollectorActor.expectFirstMatching(follower2CollectorActor, ApplyState.class);
-        List<MockPayload> expFollowerState = Arrays.asList(payload0, payload1, payload2, payload2);
+        List<MockPayload> expFollowerState = Arrays.asList(payload0, payload1, payload2);
 
         assertEquals("Follower commit index", 2, follower2Context.getCommitIndex());
         assertEquals("Follower last applied", 2, follower2Context.getLastApplied());
-        assertEquals("Follower snapshot index", 1, follower2Context.getReplicatedLog().getSnapshotIndex());
+        assertEquals("Follower snapshot index", 2, follower2Context.getReplicatedLog().getSnapshotIndex());
         assertEquals("Follower state", expFollowerState, follower2Underlying.getState());
 
         killActor(follower2Actor);
@@ -205,7 +199,7 @@ public class RecoveryIntegrationTest extends AbstractRaftActorIntegrationTest {
 
         assertEquals("Follower commit index", 2, follower2Context.getCommitIndex());
         assertEquals("Follower last applied", 2, follower2Context.getLastApplied());
-        assertEquals("Follower snapshot index", 1, follower2Context.getReplicatedLog().getSnapshotIndex());
+        assertEquals("Follower snapshot index", 2, follower2Context.getReplicatedLog().getSnapshotIndex());
         assertEquals("Follower state", expFollowerState, follower2Underlying.getState());
     }
 

@@ -26,6 +26,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.ClientRequestTracker;
 import org.opendaylight.controller.cluster.raft.ClientRequestTrackerImpl;
 import org.opendaylight.controller.cluster.raft.FollowerLogInformation;
@@ -33,6 +34,7 @@ import org.opendaylight.controller.cluster.raft.FollowerLogInformationImpl;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.Snapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.Replicate;
 import org.opendaylight.controller.cluster.raft.base.messages.SendHeartBeat;
 import org.opendaylight.controller.cluster.raft.base.messages.SendInstallSnapshot;
@@ -88,7 +90,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
     protected final int minIsolatedLeaderPeerCount;
 
-    private Optional<ByteString> snapshot;
+    private Optional<SnapshotHolder> snapshot;
 
     public AbstractLeader(RaftActorContext context) {
         super(context, RaftState.Leader);
@@ -140,8 +142,12 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     }
 
     @VisibleForTesting
-    void setSnapshot(Optional<ByteString> snapshot) {
-        this.snapshot = snapshot;
+    void setSnapshot(@Nullable Snapshot snapshot) {
+        if(snapshot != null) {
+            this.snapshot = Optional.of(new SnapshotHolder(snapshot));
+        } else {
+            this.snapshot = Optional.absent();
+        }
     }
 
     @Override
@@ -339,7 +345,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
         } else if(message instanceof SendInstallSnapshot) {
             // received from RaftActor
-            setSnapshot(Optional.of(((SendInstallSnapshot) message).getSnapshot()));
+            setSnapshot(((SendInstallSnapshot) message).getSnapshot());
             sendInstallSnapshot();
 
         } else if (message instanceof Replicate) {
@@ -382,10 +388,9 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                         );
                     }
 
-                    followerLogInformation.setMatchIndex(
-                        context.getReplicatedLog().getSnapshotIndex());
-                    followerLogInformation.setNextIndex(
-                        context.getReplicatedLog().getSnapshotIndex() + 1);
+                    long followerMatchIndex = snapshot.get().getLastIncludedIndex();
+                    followerLogInformation.setMatchIndex(followerMatchIndex);
+                    followerLogInformation.setNextIndex(followerMatchIndex + 1);
                     mapFollowerToSnapshot.remove(followerId);
 
                     LOG.debug("{}: follower: {}, matchIndex set to {}, nextIndex set to {}",
@@ -395,7 +400,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                     if (mapFollowerToSnapshot.isEmpty()) {
                         // once there are no pending followers receiving snapshots
                         // we can remove snapshot from the memory
-                        setSnapshot(Optional.<ByteString>absent());
+                        setSnapshot(null);
                     }
                     wasLastChunk = true;
 
@@ -618,7 +623,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     private void sendSnapshotChunk(ActorSelection followerActor, String followerId) {
         try {
             if (snapshot.isPresent()) {
-                ByteString nextSnapshotChunk = getNextSnapshotChunk(followerId,snapshot.get());
+                ByteString nextSnapshotChunk = getNextSnapshotChunk(followerId, snapshot.get().getSnapshotBytes());
 
                 // Note: the previous call to getNextSnapshotChunk has the side-effect of adding
                 // followerId to the followerToSnapshot map.
@@ -626,8 +631,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
                 followerActor.tell(
                     new InstallSnapshot(currentTerm(), context.getId(),
-                        context.getReplicatedLog().getSnapshotIndex(),
-                        context.getReplicatedLog().getSnapshotTerm(),
+                        snapshot.get().getLastIncludedIndex(),
+                        snapshot.get().getLastIncludedTerm(),
                         nextSnapshotChunk,
                         followerToSnapshot.incrementChunkIndex(),
                         followerToSnapshot.getTotalChunks(),
@@ -870,5 +875,27 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     @VisibleForTesting
     public int followerLogSize() {
         return followerToLog.size();
+    }
+
+    private static class SnapshotHolder {
+        private final Snapshot snapshot;
+        private final ByteString snapshotBytes;
+
+        SnapshotHolder(Snapshot snapshot) {
+            this.snapshot = snapshot;
+            this.snapshotBytes = ByteString.copyFrom(snapshot.getState());
+        }
+
+        long getLastIncludedTerm() {
+            return snapshot.getLastAppliedTerm();
+        }
+
+        long getLastIncludedIndex() {
+            return snapshot.getLastAppliedIndex();
+        }
+
+        ByteString getSnapshotBytes() {
+            return snapshotBytes;
+        }
     }
 }
