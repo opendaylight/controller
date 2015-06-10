@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a6a9dd7_010337b9",
+        "filename": "karaf/opendaylight-karaf-resources/src/main/resources/bin/karaf",
+        "patchSetId": 1
+      },
+      "lineNbr": 419,
+      "author": {
+        "id": 2774
+      },
+      "writtenOn": "2015-06-10T09:41:42Z",
+      "side": 1,
+      "message": "This hardwires it. \n\nIt should be optional as it is against policy in quite a few places to override global settings.\n\nIt is better if this is done in a manner similar to the memory parameters (via its own environmental variable).\n\nWe can still turn it on by default.",
+      "range": {
+        "startLine": 419,
+        "startChar": 17,
+        "endLine": 419,
+        "endChar": 18
+      },
+      "revId": "4a8ff53dee3dfc04b2a0f976021d9c3e25ce909e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
