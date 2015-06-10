@@ -298,7 +298,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         SendInstallSnapshot sendInstallSnapshot = sendInstallSnapshotArgumentCaptor.getValue();
 
-        assertTrue(Arrays.equals(bytes, sendInstallSnapshot.getSnapshot().toByteArray()));
+        assertTrue(Arrays.equals(bytes, sendInstallSnapshot.getSnapshot().getState()));
     }
 
     @Test

@@ -8,16 +8,16 @@
 
 package org.opendaylight.controller.cluster.raft.base.messages;
 
-import com.google.protobuf.ByteString;
+import org.opendaylight.controller.cluster.raft.Snapshot;
 
 public class SendInstallSnapshot {
-    private ByteString snapshot;
+    private final Snapshot snapshot;
 
-    public SendInstallSnapshot(ByteString snapshot) {
+    public SendInstallSnapshot(Snapshot snapshot) {
         this.snapshot = snapshot;
     }
 
-    public ByteString getSnapshot() {
+    public Snapshot getSnapshot() {
         return snapshot;
     }
 }
