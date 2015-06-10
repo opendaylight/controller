@@ -16,6 +16,24 @@
       "revId": "f8a93805cc2fd2ad0cdc22fed52d0fe9a44ead42",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_e66899f7",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RecoveryIntegrationTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-06-10T02:45:13Z",
+      "side": 1,
+      "message": "One explanation for why we choose to set lastincludedindex to replicatedlogindex may be because we do a fakeSnapshot on replicatedToAllIndex. You do not have to replicated to all nodes however to apply an index entry, once you get a majority you should be good. \n\nNow coming to what exactly the value should be set to - I think the answer really is what really was the last index that went into the snapshot. The way we have the create an InstallSnapshot today is not very clean - we simply get the snapshot index from the replicated log - which may actually advance if memory was low and the leader had to snapshot again. I think we need to capture this index and term and store it the way we are storing the snapshot on the Leader and then use those values when constructing InstallSnapshot - that will make this work properly and we will not have any need to send an extra entry as well.",
+      "parentUuid": "9a6a9dd7_2f10b44d",
+      "revId": "f8a93805cc2fd2ad0cdc22fed52d0fe9a44ead42",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
