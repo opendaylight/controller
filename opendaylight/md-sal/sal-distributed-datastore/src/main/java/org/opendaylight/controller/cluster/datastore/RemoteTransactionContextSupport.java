@@ -50,13 +50,13 @@ final class RemoteTransactionContextSupport {
     private volatile ActorSelection primaryShard;
     private volatile int createTxTries;
 
-    private final TransactionContextWrapper transactionContextAdapter;
+    private final TransactionContextWrapper transactionContextWrapper;
 
-    RemoteTransactionContextSupport(final TransactionContextWrapper transactionContextAdapter, final TransactionProxy parent,
+    RemoteTransactionContextSupport(final TransactionContextWrapper transactionContextWrapper, final TransactionProxy parent,
             final String shardName) {
         this.parent = Preconditions.checkNotNull(parent);
         this.shardName = shardName;
-        this.transactionContextAdapter = transactionContextAdapter;
+        this.transactionContextWrapper = transactionContextWrapper;
         createTxTries = (int) (parent.getActorContext().getDatastoreContext().
                 getShardLeaderElectionTimeout().duration().toMillis() /
                 CREATE_TX_TRY_INTERVAL.toMillis());
@@ -75,7 +75,7 @@ final class RemoteTransactionContextSupport {
     }
 
     private OperationLimiter getOperationLimiter() {
-        return transactionContextAdapter.getLimiter();
+        return transactionContextWrapper.getLimiter();
     }
 
     private TransactionIdentifier getIdentifier() {
@@ -95,7 +95,8 @@ final class RemoteTransactionContextSupport {
 
             // For write-only Tx's we prepare the transaction modifications directly on the shard actor
             // to avoid the overhead of creating a separate transaction actor.
-            transactionContextAdapter.executePriorTransactionOperations(createValidTransactionContext(this.primaryShard,
+            // FIXME: can't assume the shard version is LITHIUM_VERSION - need to obtain it somehow.
+            transactionContextWrapper.executePriorTransactionOperations(createValidTransactionContext(this.primaryShard,
                     this.primaryShard.path().toString(), primaryVersion));
         } else {
             tryCreateTransaction();
@@ -171,7 +172,7 @@ final class RemoteTransactionContextSupport {
             localTransactionContext = new NoOpTransactionContext(exception, getIdentifier());
         }
 
-        transactionContextAdapter.executePriorTransactionOperations(localTransactionContext);
+        transactionContextWrapper.executePriorTransactionOperations(localTransactionContext);
     }
 
     private TransactionContext createValidTransactionContext(CreateTransactionReply reply) {
@@ -189,11 +190,11 @@ final class RemoteTransactionContextSupport {
         final TransactionContext ret;
 
         if (remoteTransactionVersion < DataStoreVersions.LITHIUM_VERSION) {
-            ret = new PreLithiumTransactionContextImpl(transactionContextAdapter.getIdentifier(), transactionPath, transactionActor,
-                getActorContext(), isTxActorLocal, remoteTransactionVersion, transactionContextAdapter.getLimiter());
+            ret = new PreLithiumTransactionContextImpl(transactionContextWrapper.getIdentifier(), transactionPath, transactionActor,
+                getActorContext(), isTxActorLocal, remoteTransactionVersion, transactionContextWrapper.getLimiter());
         } else {
-            ret = new RemoteTransactionContext(transactionContextAdapter.getIdentifier(), transactionActor, getActorContext(),
-                isTxActorLocal, remoteTransactionVersion, transactionContextAdapter.getLimiter());
+            ret = new RemoteTransactionContext(transactionContextWrapper.getIdentifier(), transactionActor, getActorContext(),
+                isTxActorLocal, remoteTransactionVersion, transactionContextWrapper.getLimiter());
         }
 
         if(parent.getType() == TransactionType.READ_ONLY) {
