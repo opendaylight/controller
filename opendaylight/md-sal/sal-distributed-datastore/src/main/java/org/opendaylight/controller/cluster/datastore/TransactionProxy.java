@@ -53,7 +53,6 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
 
     private final Map<String, TransactionContextWrapper> txContextAdapters = new HashMap<>();
     private final AbstractTransactionContextFactory<?> txContextFactory;
-    private final OperationLimiter limiter;
     private final TransactionType type;
     private TransactionState state = TransactionState.OPEN;
 
@@ -63,11 +62,6 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
                 .isTransactionDebugContextEnabled());
         this.txContextFactory = txContextFactory;
         this.type = Preconditions.checkNotNull(type);
-
-        // Note : Currently mailbox-capacity comes from akka.conf and not from the config-subsystem
-        this.limiter = new OperationLimiter(getIdentifier(),
-            getActorContext().getTransactionOutstandingOperationLimit(),
-            getActorContext().getDatastoreContext().getOperationTimeoutInSeconds());
 
         LOG.debug("New {} Tx - {}", type, getIdentifier());
     }
@@ -336,9 +330,5 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
 
     ActorContext getActorContext() {
         return txContextFactory.getActorContext();
-    }
-
-    OperationLimiter getLimiter() {
-        return limiter;
     }
 }
