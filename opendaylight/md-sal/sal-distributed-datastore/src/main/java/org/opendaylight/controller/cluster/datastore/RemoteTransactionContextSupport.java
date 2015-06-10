@@ -75,7 +75,7 @@ final class RemoteTransactionContextSupport {
     }
 
     private OperationLimiter getOperationLimiter() {
-        return parent.getLimiter();
+        return transactionContextAdapter.getLimiter();
     }
 
     private TransactionIdentifier getIdentifier() {
@@ -161,7 +161,7 @@ final class RemoteTransactionContextSupport {
         if(failure != null) {
             LOG.debug("Tx {} Creating NoOpTransaction because of error", getIdentifier(), failure);
 
-            localTransactionContext = new NoOpTransactionContext(failure, getOperationLimiter());
+            localTransactionContext = new NoOpTransactionContext(failure, getIdentifier());
         } else if (CreateTransactionReply.SERIALIZABLE_CLASS.equals(response.getClass())) {
             localTransactionContext = createValidTransactionContext(
                     CreateTransactionReply.fromSerializable(response));
@@ -169,7 +169,7 @@ final class RemoteTransactionContextSupport {
             IllegalArgumentException exception = new IllegalArgumentException(String.format(
                     "Invalid reply type %s for CreateTransaction", response.getClass()));
 
-            localTransactionContext = new NoOpTransactionContext(exception, getOperationLimiter());
+            localTransactionContext = new NoOpTransactionContext(exception, getIdentifier());
         }
 
         transactionContextAdapter.executePriorTransactionOperations(localTransactionContext);
@@ -190,11 +190,11 @@ final class RemoteTransactionContextSupport {
         final TransactionContext ret;
 
         if (remoteTransactionVersion < DataStoreVersions.LITHIUM_VERSION) {
-            ret = new PreLithiumTransactionContextImpl(transactionPath, transactionActor,
-                getActorContext(), isTxActorLocal, remoteTransactionVersion, parent.getLimiter());
+            ret = new PreLithiumTransactionContextImpl(transactionContextAdapter.getIdentifier(), transactionPath, transactionActor,
+                getActorContext(), isTxActorLocal, remoteTransactionVersion, transactionContextAdapter.getLimiter());
         } else {
-            ret = new RemoteTransactionContext(transactionActor, getActorContext(),
-                isTxActorLocal, remoteTransactionVersion, parent.getLimiter());
+            ret = new RemoteTransactionContext(transactionContextAdapter.getIdentifier(), transactionActor, getActorContext(),
+                isTxActorLocal, remoteTransactionVersion, transactionContextAdapter.getLimiter());
         }
 
         if(parent.getType() == TransactionType.READ_ONLY) {

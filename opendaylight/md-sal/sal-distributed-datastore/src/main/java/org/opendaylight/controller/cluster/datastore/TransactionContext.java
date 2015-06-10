@@ -45,5 +45,5 @@ interface TransactionContext {
      * Implementations can rely on the wrapper calling this operation in a synchronized
      * block, so they do not need to ensure visibility of this state transition themselves.
      */
-    void operationHandoffComplete();
+    void operationHandOffComplete();
 }

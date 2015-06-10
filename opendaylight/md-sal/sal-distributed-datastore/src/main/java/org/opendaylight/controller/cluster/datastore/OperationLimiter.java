@@ -41,7 +41,7 @@ public class OperationLimiter extends OnComplete<Object> {
         acquire(1);
     }
 
-    private void acquire(final int acquirePermits) {
+    void acquire(final int acquirePermits) {
         try {
             if (!semaphore.tryAcquire(acquirePermits, acquireTimeout, TimeUnit.NANOSECONDS)) {
                 LOG.warn("Failed to acquire operation permit for transaction {}", identifier);
@@ -53,10 +53,6 @@ public class OperationLimiter extends OnComplete<Object> {
                 LOG.warn("Interrupted when trying to acquire operation permit for transaction {}", identifier);
             }
         }
-    }
-
-    void release() {
-        this.semaphore.release();
     }
 
     @Override
@@ -73,7 +69,7 @@ public class OperationLimiter extends OnComplete<Object> {
     }
 
     @VisibleForTesting
-    Semaphore getSemaphore() {
-        return semaphore;
+    int availablePermits(){
+        return semaphore.availablePermits();
     }
 }
