@@ -98,7 +98,14 @@ public final class NetconfSessionPreferences {
     }
 
     public boolean isCandidateSupported() {
-        return containsNonModuleCapability(NetconfMessageTransformUtil.NETCONF_CANDIDATE_URI.toString());
+        // Check for cadidate capability support, and fall back in case of Non RFC compliant capability reported by Juniper devices.
+        if ( containsNonModuleCapability(NetconfMessageTransformUtil.NETCONF_CANDIDATE_URI.toString())) return true;
+        else if (containsNonModuleCapability("urn:ietf:params:xml:ns:netconf:capability:candidate:1.0"))
+        {
+                LOG.debug("Candidate capability: Juniper style candidate capability found");
+                return true;
+        }
+        return false;
     }
 
     public boolean isRunningWritable() {
