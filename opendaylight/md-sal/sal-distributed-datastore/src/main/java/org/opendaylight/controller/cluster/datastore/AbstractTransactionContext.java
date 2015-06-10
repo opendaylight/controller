@@ -41,15 +41,6 @@ abstract class AbstractTransactionContext implements TransactionContext {
     }
 
     /**
-     * Indicate whether all operations have been handed off by the {@link TransactionContextWrapper}.
-     *
-     * @return True if this context is responsible for throttling.
-     */
-    protected final boolean isOperationHandoffComplete() {
-        return handoffComplete;
-    }
-
-    /**
      * Acquire operation from the limiter if the handoff has completed. If
      * the handoff is still ongoing, this method does nothing.
      */
@@ -60,7 +51,7 @@ abstract class AbstractTransactionContext implements TransactionContext {
     }
 
     /**
-     * Acquire operation from the limiter if the handoff has NOT completed. If
+     * Release operation from the limiter if the handoff has NOT completed. If
      * the handoff has completed, this method does nothing.
      */
     protected final void releaseOperation() {

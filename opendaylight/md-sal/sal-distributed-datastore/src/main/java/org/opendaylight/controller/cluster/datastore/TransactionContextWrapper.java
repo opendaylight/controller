@@ -9,13 +9,13 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorSelection;
 import akka.dispatch.Futures;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
+import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
@@ -44,8 +44,10 @@ class TransactionContextWrapper {
 
     private final OperationLimiter limiter;
 
-    TransactionContextWrapper(final OperationLimiter limiter) {
-        this.limiter = Preconditions.checkNotNull(limiter);
+    TransactionContextWrapper(TransactionIdentifier identifier, final ActorContext actorContext) {
+        this.limiter = new OperationLimiter(identifier,
+                actorContext.getDatastoreContext().getShardBatchedModificationCount() + 1, // 1 extra permit for the ready operation
+                actorContext.getDatastoreContext().getOperationTimeoutInSeconds());
     }
 
     TransactionContext getTransactionContext() {
@@ -140,4 +142,10 @@ class TransactionContextWrapper {
 
         return promise.future();
     }
+
+    public OperationLimiter getLimiter() {
+        return limiter;
+    }
+
+
 }
