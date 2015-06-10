@@ -798,6 +798,10 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         throttleOperation(operation, 1, true);
     }
 
+    private void throttleOperation(TransactionProxyOperation operation, int outstandingOpsLimit, boolean shardFound){
+        throttleOperation(operation, outstandingOpsLimit, shardFound, TimeUnit.SECONDS.toNanos(mockActorContext.getDatastoreContext().getOperationTimeoutInSeconds()));
+    }
+
     private PrimaryShardInfo newPrimaryShardInfo(ActorRef actorRef){
         return new PrimaryShardInfo(getSystem().actorSelection(actorRef.path()), Optional.<DataTree>absent());
     }
@@ -807,11 +811,14 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     }
 
 
-    private void throttleOperation(TransactionProxyOperation operation, int outstandingOpsLimit, boolean shardFound){
+    private void throttleOperation(TransactionProxyOperation operation, int outstandingOpsLimit, boolean shardFound, long expectedCompletionTime){
         ActorSystem actorSystem = getSystem();
         ActorRef shardActorRef = actorSystem.actorOf(Props.create(DoNothingActor.class));
 
-        doReturn(outstandingOpsLimit).when(mockActorContext).getTransactionOutstandingOperationLimit();
+        // Note that we setting batchedModificationCount to one less than what we need because in TransactionProxy
+        // we now allow one extra permit to be allowed for ready
+        doReturn(dataStoreContextBuilder.operationTimeoutInSeconds(2).
+                shardBatchedModificationCount(outstandingOpsLimit-1).build()).when(mockActorContext).getDatastoreContext();
 
         doReturn(actorSystem.actorSelection(shardActorRef.path())).
                 when(mockActorContext).actorSelection(shardActorRef.path().toString());
@@ -819,6 +826,9 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         if(shardFound) {
             doReturn(Futures.successful(newPrimaryShardInfo(shardActorRef))).
                     when(mockActorContext).findPrimaryShardAsync(eq(DefaultShardStrategy.DEFAULT_SHARD));
+            doReturn(Futures.successful(newPrimaryShardInfo(shardActorRef))).
+                    when(mockActorContext).findPrimaryShardAsync(eq("cars"));
+
         } else {
             doReturn(Futures.failed(new Exception("not found")))
                     .when(mockActorContext).findPrimaryShardAsync(eq(DefaultShardStrategy.DEFAULT_SHARD));
@@ -843,9 +853,9 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         long end = System.nanoTime();
 
-        long expected = TimeUnit.SECONDS.toNanos(mockActorContext.getDatastoreContext().getOperationTimeoutInSeconds());
         Assert.assertTrue(String.format("Expected elapsed time: %s. Actual: %s",
-                expected, (end-start)), (end - start) > expected);
+                expectedCompletionTime, (end-start)),
+                ((end - start) > expectedCompletionTime) && ((end - start) < expectedCompletionTime*2));
 
     }
 
@@ -856,8 +866,6 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     private void completeOperation(TransactionProxyOperation operation, boolean shardFound){
         ActorSystem actorSystem = getSystem();
         ActorRef shardActorRef = actorSystem.actorOf(Props.create(DoNothingActor.class));
-
-        doReturn(1).when(mockActorContext).getTransactionOutstandingOperationLimit();
 
         doReturn(actorSystem.actorSelection(shardActorRef.path())).
                 when(mockActorContext).actorSelection(shardActorRef.path().toString());
@@ -900,8 +908,6 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     private void completeOperationLocal(TransactionProxyOperation operation, Optional<DataTree> dataTreeOptional){
         ActorSystem actorSystem = getSystem();
         ActorRef shardActorRef = actorSystem.actorOf(Props.create(DoNothingActor.class));
-
-        doReturn(1).when(mockActorContext).getTransactionOutstandingOperationLimit();
 
         doReturn(actorSystem.actorSelection(shardActorRef.path())).
                 when(mockActorContext).actorSelection(shardActorRef.path().toString());
@@ -950,7 +956,6 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
     @Test
     public void testWriteCompletionForLocalShard(){
-        dataStoreContextBuilder.shardBatchedModificationCount(1);
         completeOperationLocal(new TransactionProxyOperation() {
             @Override
             public void run(TransactionProxy transactionProxy) {
@@ -966,7 +971,6 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
     @Test
     public void testWriteThrottlingWhenShardFound(){
-        dataStoreContextBuilder.shardBatchedModificationCount(1);
         throttleOperation(new TransactionProxyOperation() {
             @Override
             public void run(TransactionProxy transactionProxy) {
@@ -984,7 +988,6 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     @Test
     public void testWriteThrottlingWhenShardNotFound(){
         // Confirm that there is no throttling when the Shard is not found
-        dataStoreContextBuilder.shardBatchedModificationCount(1);
         completeOperation(new TransactionProxyOperation() {
             @Override
             public void run(TransactionProxy transactionProxy) {
@@ -1003,7 +1006,6 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
     @Test
     public void testWriteCompletion(){
-        dataStoreContextBuilder.shardBatchedModificationCount(1);
         completeOperation(new TransactionProxyOperation() {
             @Override
             public void run(TransactionProxy transactionProxy) {
@@ -1020,7 +1022,6 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
     @Test
     public void testMergeThrottlingWhenShardFound(){
-        dataStoreContextBuilder.shardBatchedModificationCount(1);
         throttleOperation(new TransactionProxyOperation() {
             @Override
             public void run(TransactionProxy transactionProxy) {
@@ -1037,7 +1038,6 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
     @Test
     public void testMergeThrottlingWhenShardNotFound(){
-        dataStoreContextBuilder.shardBatchedModificationCount(1);
         completeOperation(new TransactionProxyOperation() {
             @Override
             public void run(TransactionProxy transactionProxy) {
@@ -1054,7 +1054,6 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
     @Test
     public void testMergeCompletion(){
-        dataStoreContextBuilder.shardBatchedModificationCount(1);
         completeOperation(new TransactionProxyOperation() {
             @Override
             public void run(TransactionProxy transactionProxy) {
@@ -1072,7 +1071,6 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
     @Test
     public void testMergeCompletionForLocalShard(){
-        dataStoreContextBuilder.shardBatchedModificationCount(1);
         completeOperationLocal(new TransactionProxyOperation() {
             @Override
             public void run(TransactionProxy transactionProxy) {
@@ -1120,7 +1118,6 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
     @Test
     public void testDeleteCompletionForLocalShard(){
-        dataStoreContextBuilder.shardBatchedModificationCount(1);
         completeOperationLocal(new TransactionProxyOperation() {
             @Override
             public void run(TransactionProxy transactionProxy) {
@@ -1135,7 +1132,6 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
     @Test
     public void testDeleteCompletion(){
-        dataStoreContextBuilder.shardBatchedModificationCount(1);
         completeOperation(new TransactionProxyOperation() {
             @Override
             public void run(TransactionProxy transactionProxy) {
@@ -1324,7 +1320,6 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
     @Test
     public void testReadyThrottlingWithTwoTransactionContexts(){
-
         throttleOperation(new TransactionProxyOperation() {
             @Override
             public void run(TransactionProxy transactionProxy) {
@@ -1336,13 +1331,25 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
                 doReturn(incompleteFuture()).when(mockActorContext).executeOperationAsync(
                         any(ActorSelection.class), any(ReadyTransaction.class));
 
+                // When transaction proxy is created permits will be 0 + 1 = 1
+                assertEquals(1, transactionProxy.getLimiter().availablePermits());
+
                 transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
 
-                transactionProxy.write(TestModel.TEST_PATH, carsNode);
+                // Write uses up a permit so now available permits will be 0
+                assertEquals(0, transactionProxy.getLimiter().availablePermits());
 
+                // Trying to write to Cars will cause another transaction context to get created
+                // This will add more max permits to the limiter
+                transactionProxy.write(CarsModel.BASE_PATH, carsNode);
+
+                // Write would then use up the newly added permit and we would be left with 0 permits
+                assertEquals(0, transactionProxy.getLimiter().availablePermits());
+
+                // Now ready should block for both transaction contexts
                 transactionProxy.ready();
             }
-        }, 2, true);
+        }, 1, true, TimeUnit.SECONDS.toNanos(mockActorContext.getDatastoreContext().getOperationTimeoutInSeconds()) * 2);
     }
 
     private void testModificationOperationBatching(TransactionType type) throws Exception {
@@ -1523,8 +1530,6 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         setUpReadData("cars", NormalizedNodeAggregatorTest.getRootNode(expectedNode2, schemaContext));
 
         doReturn(memberName).when(mockActorContext).getCurrentMemberName();
-
-        doReturn(10).when(mockActorContext).getTransactionOutstandingOperationLimit();
 
         doReturn(getSystem().dispatchers().defaultGlobalDispatcher()).when(mockActorContext).getClientDispatcher();
 

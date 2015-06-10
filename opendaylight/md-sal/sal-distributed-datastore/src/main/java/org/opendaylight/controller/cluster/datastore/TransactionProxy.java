@@ -64,10 +64,9 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
         this.txContextFactory = txContextFactory;
         this.type = Preconditions.checkNotNull(type);
 
-        // Note : Currently mailbox-capacity comes from akka.conf and not from the config-subsystem
         this.limiter = new OperationLimiter(getIdentifier(),
-            getActorContext().getTransactionOutstandingOperationLimit(),
-            getActorContext().getDatastoreContext().getOperationTimeoutInSeconds());
+                getActorContext().getDatastoreContext().getShardBatchedModificationCount() + 1, // 1 extra permit for the ready operation
+                getActorContext().getDatastoreContext().getOperationTimeoutInSeconds());
 
         LOG.debug("New {} Tx - {}", type, getIdentifier());
     }
@@ -319,6 +318,16 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
         final TransactionContextWrapper existing = txContextAdapters.get(shardName);
         if (existing != null) {
             return existing;
+        }
+
+        if(txContextAdapters.size() > 0) {
+            // Allow more permits because a new transaction context means that we will now be doing backend work on a
+            // different actor so we can ease up the back pressure a bit
+            // This also avoids the situation where let's say we have two transaction contexts and the shard batch
+            // count is set to 100. We could do 50 operations on transaction context 1 and 50 operations on transaction
+            // context 2 which would exhaust all the permits on the limiter and any subsequent operation would then
+            // block. With this modification it will not
+            limiter.addMaxPermits();
         }
 
         final TransactionContextWrapper fresh = txContextFactory.newTransactionAdapter(this, shardName);
