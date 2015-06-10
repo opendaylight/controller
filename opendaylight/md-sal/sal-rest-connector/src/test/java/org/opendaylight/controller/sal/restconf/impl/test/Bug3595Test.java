@@ -1,7 +1,7 @@
 package org.opendaylight.controller.sal.restconf.impl.test;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.TestCase.assertNotNull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import java.io.FileNotFoundException;
 import org.junit.BeforeClass;
 import org.junit.Test;
