@@ -34,6 +34,24 @@
       "revId": "f8a93805cc2fd2ad0cdc22fed52d0fe9a44ead42",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_267e91af",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RecoveryIntegrationTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-06-10T03:26:44Z",
+      "side": 1,
+      "message": "yes - I think what you\u0027re saying matches what I described above, i.e. use the lastAppliedIndex captured in the leader\u0027s Snapshot instance. I\u0027ll look into that in for a follow-up patch.",
+      "parentUuid": "9a6a9dd7_e66899f7",
+      "revId": "f8a93805cc2fd2ad0cdc22fed52d0fe9a44ead42",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
