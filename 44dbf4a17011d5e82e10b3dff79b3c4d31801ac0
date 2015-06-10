@@ -52,6 +52,24 @@
       "revId": "44dbf4a17011d5e82e10b3dff79b3c4d31801ac0",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_1c74fafb",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/AbstractTransactionContextFactory.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-06-10T16:52:20Z",
+      "side": 1,
+      "message": "No limiting in LocalTransactionContext is what I will do.",
+      "parentUuid": "9a6a9dd7_7c82d601",
+      "revId": "44dbf4a17011d5e82e10b3dff79b3c4d31801ac0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
