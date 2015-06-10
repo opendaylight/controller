@@ -34,6 +34,24 @@
       "revId": "44dbf4a17011d5e82e10b3dff79b3c4d31801ac0",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_7c82d601",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/AbstractTransactionContextFactory.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-06-10T15:20:06Z",
+      "side": 1,
+      "message": "Yeah in enqueueTransactionOperation - missed that. We don\u0027t know at that point if the TC will be local or remote. We can leave it that way but it seems we do need to acquire in LocalTransactionContext as is done in the remote one. \n\nThe other option is to do no limiting in LocalTransactionContext and just release all permits once the hand-off occurs to a LocalTransactionContext (in the factory\u0027s createLocalTransactionContext method).",
+      "parentUuid": "9a6a9dd7_fc0266b3",
+      "revId": "44dbf4a17011d5e82e10b3dff79b3c4d31801ac0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
