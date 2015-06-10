@@ -66,6 +66,7 @@ import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategy
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.cluster.datastore.utils.DoNothingActor;
 import org.opendaylight.controller.cluster.datastore.utils.MockConfiguration;
+import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages.CreateTransactionReply;
@@ -98,13 +99,23 @@ public abstract class AbstractTransactionProxyTest {
                         public String findShard(YangInstanceIdentifier path) {
                             return "junk";
                         }
+                    }).put(
+                    "cars", new ShardStrategy() {
+                        @Override
+                        public String findShard(YangInstanceIdentifier path) {
+                            return "cars";
+                        }
                     }).build();
         }
 
         @Override
         public Optional<String> getModuleNameFromNameSpace(String nameSpace) {
-            return TestModel.JUNK_QNAME.getNamespace().toASCIIString().equals(nameSpace) ?
-                    Optional.of("junk") : Optional.<String>absent();
+            if(TestModel.JUNK_QNAME.getNamespace().toASCIIString().equals(nameSpace)) {
+                return Optional.of("junk");
+            } else if(CarsModel.BASE_QNAME.getNamespace().toASCIIString().equals(nameSpace)){
+                return Optional.of("cars");
+            }
+            return Optional.<String>absent();
         }
     };
 
@@ -151,7 +162,6 @@ public abstract class AbstractTransactionProxyTest {
         doReturn(mockClusterWrapper).when(mockActorContext).getClusterWrapper();
         doReturn(mockClusterWrapper).when(mockActorContext).getClusterWrapper();
         doReturn(dataStoreContextBuilder.build()).when(mockActorContext).getDatastoreContext();
-        doReturn(10).when(mockActorContext).getTransactionOutstandingOperationLimit();
 
         mockComponentFactory = TransactionContextFactory.create(mockActorContext);
 
@@ -341,8 +351,6 @@ public abstract class AbstractTransactionProxyTest {
                 when(mockActorContext).findPrimaryShardAsync(eq(shardName));
 
         doReturn(false).when(mockActorContext).isPathLocal(actorRef.path().toString());
-
-        doReturn(10).when(mockActorContext).getTransactionOutstandingOperationLimit();
 
         return actorRef;
     }

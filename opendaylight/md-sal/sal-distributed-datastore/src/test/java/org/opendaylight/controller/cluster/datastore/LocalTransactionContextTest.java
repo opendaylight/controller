@@ -36,7 +36,7 @@ public class LocalTransactionContextTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        localTransactionContext = new LocalTransactionContext(readWriteTransaction, limiter) {
+        localTransactionContext = new LocalTransactionContext(readWriteTransaction, limiter.getIdentifier()) {
             @Override
             protected DOMStoreWriteTransaction getWriteDelegate() {
                 return readWriteTransaction;
@@ -54,7 +54,6 @@ public class LocalTransactionContextTest {
         YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.builder().build();
         NormalizedNode<?, ?> normalizedNode = mock(NormalizedNode.class);
         localTransactionContext.writeData(yangInstanceIdentifier, normalizedNode);
-        verify(limiter).release();
         verify(readWriteTransaction).write(yangInstanceIdentifier, normalizedNode);
     }
 
@@ -63,7 +62,6 @@ public class LocalTransactionContextTest {
         YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.builder().build();
         NormalizedNode<?, ?> normalizedNode = mock(NormalizedNode.class);
         localTransactionContext.mergeData(yangInstanceIdentifier, normalizedNode);
-        verify(limiter).release();
         verify(readWriteTransaction).merge(yangInstanceIdentifier, normalizedNode);
     }
 
@@ -71,7 +69,6 @@ public class LocalTransactionContextTest {
     public void testDelete() {
         YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.builder().build();
         localTransactionContext.deleteData(yangInstanceIdentifier);
-        verify(limiter).release();
         verify(readWriteTransaction).delete(yangInstanceIdentifier);
     }
 
@@ -82,7 +79,6 @@ public class LocalTransactionContextTest {
         NormalizedNode<?, ?> normalizedNode = mock(NormalizedNode.class);
         doReturn(Futures.immediateCheckedFuture(Optional.of(normalizedNode))).when(readWriteTransaction).read(yangInstanceIdentifier);
         localTransactionContext.readData(yangInstanceIdentifier, SettableFuture.<Optional<NormalizedNode<?,?>>>create());
-        verify(limiter).release();
         verify(readWriteTransaction).read(yangInstanceIdentifier);
     }
 
@@ -91,7 +87,6 @@ public class LocalTransactionContextTest {
         YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.builder().build();
         doReturn(Futures.immediateCheckedFuture(true)).when(readWriteTransaction).exists(yangInstanceIdentifier);
         localTransactionContext.dataExists(yangInstanceIdentifier, SettableFuture.<Boolean> create());
-        verify(limiter).release();
         verify(readWriteTransaction).exists(yangInstanceIdentifier);
     }
 
@@ -104,7 +99,6 @@ public class LocalTransactionContextTest {
         doReturn(akka.dispatch.Futures.successful(null)).when(mockCohort).initiateCoordinatedCommit();
         doReturn(mockCohort).when(readWriteTransaction).ready();
         localTransactionContext.readyTransaction();
-        verify(limiter).onComplete(null, null);
         verify(readWriteTransaction).ready();
     }
 
