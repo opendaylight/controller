@@ -13,7 +13,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
+import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
@@ -30,8 +30,8 @@ import scala.concurrent.Future;
 abstract class LocalTransactionContext extends AbstractTransactionContext {
     private final DOMStoreTransaction txDelegate;
 
-    LocalTransactionContext(DOMStoreTransaction txDelegate, OperationLimiter limiter) {
-        super(limiter);
+    LocalTransactionContext(DOMStoreTransaction txDelegate, TransactionIdentifier identifier) {
+        super(identifier);
         this.txDelegate = Preconditions.checkNotNull(txDelegate);
     }
 
@@ -43,21 +43,18 @@ abstract class LocalTransactionContext extends AbstractTransactionContext {
     public void writeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
         incrementModificationCount();
         getWriteDelegate().write(path, data);
-        releaseOperation();
     }
 
     @Override
     public void mergeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
         incrementModificationCount();
         getWriteDelegate().merge(path, data);
-        releaseOperation();
     }
 
     @Override
     public void deleteData(YangInstanceIdentifier path) {
         incrementModificationCount();
         getWriteDelegate().delete(path);
-        releaseOperation();
     }
 
     @Override
@@ -66,13 +63,11 @@ abstract class LocalTransactionContext extends AbstractTransactionContext {
             @Override
             public void onSuccess(final Optional<NormalizedNode<?, ?>> result) {
                 proxyFuture.set(result);
-                releaseOperation();
             }
 
             @Override
             public void onFailure(final Throwable t) {
                 proxyFuture.setException(t);
-                releaseOperation();
             }
         });
     }
@@ -83,39 +78,30 @@ abstract class LocalTransactionContext extends AbstractTransactionContext {
             @Override
             public void onSuccess(final Boolean result) {
                 proxyFuture.set(result);
-                releaseOperation();
             }
 
             @Override
             public void onFailure(final Throwable t) {
                 proxyFuture.setException(t);
-                releaseOperation();
             }
         });
     }
 
     private LocalThreePhaseCommitCohort ready() {
         logModificationCount();
-        acquireOperation();
         return (LocalThreePhaseCommitCohort) getWriteDelegate().ready();
-    }
-
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    private <T extends Future> T completeOperation(final ActorContext actorContext, final T operationFuture) {
-        operationFuture.onComplete(getLimiter(), actorContext.getClientDispatcher());
-        return operationFuture;
     }
 
     @Override
     public Future<ActorSelection> readyTransaction() {
         final LocalThreePhaseCommitCohort cohort = ready();
-        return completeOperation(cohort.getActorContext(), cohort.initiateCoordinatedCommit());
+        return cohort.initiateCoordinatedCommit();
     }
 
     @Override
     public Future<Object> directCommit() {
         final LocalThreePhaseCommitCohort cohort = ready();
-        return completeOperation(cohort.getActorContext(), cohort.initiateDirectCommit());
+        return cohort.initiateDirectCommit();
     }
 
     @Override
@@ -126,6 +112,5 @@ abstract class LocalTransactionContext extends AbstractTransactionContext {
     @Override
     public void closeTransaction() {
         txDelegate.close();
-        releaseOperation();
     }
 }

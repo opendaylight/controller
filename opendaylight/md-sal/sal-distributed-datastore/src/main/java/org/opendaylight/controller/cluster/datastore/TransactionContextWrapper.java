@@ -16,6 +16,7 @@ import java.util.Collection;
 import java.util.List;
 import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
+import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
@@ -37,6 +38,8 @@ class TransactionContextWrapper {
     @GuardedBy("queuedTxOperations")
     private final List<TransactionOperation> queuedTxOperations = Lists.newArrayList();
 
+    private final TransactionIdentifier identifier;
+
     /**
      * The resulting TransactionContext.
      */
@@ -44,8 +47,11 @@ class TransactionContextWrapper {
 
     private final OperationLimiter limiter;
 
-    TransactionContextWrapper(final OperationLimiter limiter) {
-        this.limiter = Preconditions.checkNotNull(limiter);
+    TransactionContextWrapper(TransactionIdentifier identifier, final ActorContext actorContext) {
+        this.identifier = Preconditions.checkNotNull(identifier);
+        this.limiter = new OperationLimiter(identifier,
+                actorContext.getDatastoreContext().getShardBatchedModificationCount() + 1, // 1 extra permit for the ready operation
+                actorContext.getDatastoreContext().getOperationTimeoutInSeconds());
     }
 
     TransactionContext getTransactionContext() {
@@ -53,7 +59,7 @@ class TransactionContextWrapper {
     }
 
     TransactionIdentifier getIdentifier() {
-        return limiter.getIdentifier();
+        return identifier;
     }
 
     /**
@@ -106,7 +112,10 @@ class TransactionContextWrapper {
                 if (queuedTxOperations.isEmpty()) {
                     // We're done invoking the TransactionOperations so we can now publish the
                     // TransactionContext.
-                    localTransactionContext.operationHandoffComplete();
+                    localTransactionContext.operationHandOffComplete();
+                    if(!localTransactionContext.usesOperationLimiting()){
+                        limiter.releaseAll();
+                    }
                     transactionContext = localTransactionContext;
                     break;
                 }
@@ -140,4 +149,10 @@ class TransactionContextWrapper {
 
         return promise.future();
     }
+
+    public OperationLimiter getLimiter() {
+        return limiter;
+    }
+
+
 }
