@@ -11,7 +11,6 @@ package org.opendaylight.controller.cluster.raft;
 import akka.japi.Procedure;
 import akka.persistence.SnapshotSelectionCriteria;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.protobuf.ByteString;
 import java.util.List;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.SendInstallSnapshot;
@@ -281,14 +280,14 @@ public class SnapshotManager implements SnapshotState {
             // create a snapshot object from the state provided and save it
             // when snapshot is saved async, SaveSnapshotSuccess is raised.
 
-            Snapshot sn = Snapshot.create(snapshotBytes,
+            Snapshot snapshot = Snapshot.create(snapshotBytes,
                     captureSnapshot.getUnAppliedEntries(),
                     captureSnapshot.getLastIndex(), captureSnapshot.getLastTerm(),
                     captureSnapshot.getLastAppliedIndex(), captureSnapshot.getLastAppliedTerm());
 
-            context.getPersistenceProvider().saveSnapshot(sn);
+            context.getPersistenceProvider().saveSnapshot(snapshot);
 
-            LOG.info("{}: Persisting of snapshot done:{}", persistenceId(), sn.getLogMessage());
+            LOG.info("{}: Persisting of snapshot done:{}", persistenceId(), snapshot.getLogMessage());
 
             long dataThreshold = totalMemory *
                     context.getConfigParams().getSnapshotDataThresholdPercentage() / 100;
@@ -334,8 +333,7 @@ public class SnapshotManager implements SnapshotState {
             if (context.getId().equals(currentBehavior.getLeaderId())
                     && captureSnapshot.isInstallSnapshotInitiated()) {
                 // this would be call straight to the leader and won't initiate in serialization
-                currentBehavior.handleMessage(context.getActor(), new SendInstallSnapshot(
-                        ByteString.copyFrom(snapshotBytes)));
+                currentBehavior.handleMessage(context.getActor(), new SendInstallSnapshot(snapshot));
             }
 
             captureSnapshot = null;
