@@ -26,6 +26,7 @@ public class OperationLimiter extends OnComplete<Object> {
     private final TransactionIdentifier identifier;
     private final long acquireTimeout;
     private final Semaphore semaphore;
+    private final int maxPermits;
 
     OperationLimiter(final TransactionIdentifier identifier, final int maxPermits, final int acquireTimeoutSeconds) {
         this.identifier = Preconditions.checkNotNull(identifier);
@@ -34,6 +35,7 @@ public class OperationLimiter extends OnComplete<Object> {
         this.acquireTimeout = TimeUnit.SECONDS.toNanos(acquireTimeoutSeconds);
 
         Preconditions.checkArgument(maxPermits >= 0);
+        this.maxPermits = maxPermits;
         this.semaphore = new Semaphore(maxPermits);
     }
 
@@ -41,7 +43,7 @@ public class OperationLimiter extends OnComplete<Object> {
         acquire(1);
     }
 
-    private void acquire(final int acquirePermits) {
+    void acquire(final int acquirePermits) {
         try {
             if (!semaphore.tryAcquire(acquirePermits, acquireTimeout, TimeUnit.NANOSECONDS)) {
                 LOG.warn("Failed to acquire operation permit for transaction {}", identifier);
@@ -73,7 +75,7 @@ public class OperationLimiter extends OnComplete<Object> {
     }
 
     @VisibleForTesting
-    Semaphore getSemaphore() {
-        return semaphore;
+    int availablePermits(){
+        return semaphore.availablePermits();
     }
 }

@@ -75,7 +75,7 @@ final class RemoteTransactionContextSupport {
     }
 
     private OperationLimiter getOperationLimiter() {
-        return parent.getLimiter();
+        return transactionContextAdapter.getLimiter();
     }
 
     private TransactionIdentifier getIdentifier() {
@@ -191,10 +191,10 @@ final class RemoteTransactionContextSupport {
 
         if (remoteTransactionVersion < DataStoreVersions.LITHIUM_VERSION) {
             ret = new PreLithiumTransactionContextImpl(transactionPath, transactionActor,
-                getActorContext(), isTxActorLocal, remoteTransactionVersion, parent.getLimiter());
+                getActorContext(), isTxActorLocal, remoteTransactionVersion, transactionContextAdapter.getLimiter());
         } else {
             ret = new RemoteTransactionContext(transactionActor, getActorContext(),
-                isTxActorLocal, remoteTransactionVersion, parent.getLimiter());
+                isTxActorLocal, remoteTransactionVersion, transactionContextAdapter.getLimiter());
         }
 
         if(parent.getType() == TransactionType.READ_ONLY) {
