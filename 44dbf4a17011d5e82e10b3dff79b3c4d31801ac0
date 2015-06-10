@@ -16,6 +16,24 @@
       "revId": "44dbf4a17011d5e82e10b3dff79b3c4d31801ac0",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_fc0266b3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/AbstractTransactionContextFactory.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-06-10T14:57:06Z",
+      "side": 1,
+      "message": "We do not need the limiter for local transactions per se - currently there is an asymmetry in how acquire/release. We acquire when enqueueing operation in TransactionContextWrapper and then release when the operation is completed in the TransactionContext. Let me see if I can do something about that.",
+      "parentUuid": "9a6a9dd7_41b04f8b",
+      "revId": "44dbf4a17011d5e82e10b3dff79b3c4d31801ac0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
