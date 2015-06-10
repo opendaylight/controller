@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import static org.junit.Assert.assertEquals;
-import java.util.concurrent.Semaphore;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModificationsReply;
@@ -25,21 +24,21 @@ public class OperationLimiterTest {
     public void testOnComplete() throws Exception {
         int permits = 10;
         OperationLimiter limiter = new OperationLimiter(new TransactionIdentifier("foo", 1), permits, 1);
-        Semaphore semaphore = limiter.getSemaphore();
-        semaphore.acquire(permits);
+        limiter.acquire(permits);
         int availablePermits = 0;
 
         limiter.onComplete(null, DataExistsReply.create(true));
-        assertEquals("availablePermits", ++availablePermits, semaphore.availablePermits());
+        assertEquals("availablePermits", ++availablePermits, limiter.availablePermits());
 
         limiter.onComplete(null, DataExistsReply.create(true));
-        assertEquals("availablePermits", ++availablePermits, semaphore.availablePermits());
+        assertEquals("availablePermits", ++availablePermits, limiter.availablePermits());
 
         limiter.onComplete(null, new IllegalArgumentException());
-        assertEquals("availablePermits", ++availablePermits, semaphore.availablePermits());
+        assertEquals("availablePermits", ++availablePermits, limiter.availablePermits());
 
         limiter.onComplete(null, new BatchedModificationsReply(4));
         availablePermits += 4;
-        assertEquals("availablePermits", availablePermits, semaphore.availablePermits());
+        assertEquals("availablePermits", availablePermits, limiter.availablePermits());
     }
+
 }

@@ -11,7 +11,9 @@ package org.opendaylight.controller.cluster.datastore;
 import akka.actor.ActorSelection;
 import akka.dispatch.OnComplete;
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.SettableFuture;
+import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.DataExists;
@@ -44,14 +46,16 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
     private final ActorSelection actor;
     private final boolean isTxActorLocal;
     private final short remoteTransactionVersion;
+    private final OperationLimiter limiter;
 
     private BatchedModifications batchedModifications;
     private int totalBatchedModificationsSent;
 
-    protected RemoteTransactionContext(ActorSelection actor,
+    protected RemoteTransactionContext(TransactionIdentifier identifier, ActorSelection actor,
             ActorContext actorContext, boolean isTxActorLocal,
             short remoteTransactionVersion, OperationLimiter limiter) {
-        super(limiter);
+        super(identifier);
+        this.limiter = Preconditions.checkNotNull(limiter);
         this.actor = actor;
         this.actorContext = actorContext;
         this.isTxActorLocal = isTxActorLocal;
@@ -59,7 +63,7 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
     }
 
     private Future<Object> completeOperation(Future<Object> operationFuture){
-        operationFuture.onComplete(getLimiter(), actorContext.getClientDispatcher());
+        operationFuture.onComplete(limiter, actorContext.getClientDispatcher());
         return operationFuture;
     }
 
@@ -276,5 +280,20 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
         Future<Object> future = executeOperationAsync(new DataExists(path));
 
         future.onComplete(onComplete, actorContext.getClientDispatcher());
+    }
+
+    /**
+     * Acquire operation from the limiter if the hand-off has completed. If
+     * the hand-off is still ongoing, this method does nothing.
+     */
+    private final void acquireOperation() {
+        if (isOperationHandOffComplete()) {
+            limiter.acquire();
+        }
+    }
+
+    @Override
+    public boolean usesOperationLimiting() {
+        return true;
     }
 }

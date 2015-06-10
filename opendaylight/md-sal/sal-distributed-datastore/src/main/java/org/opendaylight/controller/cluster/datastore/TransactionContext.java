@@ -45,5 +45,11 @@ interface TransactionContext {
      * Implementations can rely on the wrapper calling this operation in a synchronized
      * block, so they do not need to ensure visibility of this state transition themselves.
      */
-    void operationHandoffComplete();
+    void operationHandOffComplete();
+
+    /**
+     * A TransactionContext that uses Operation limiting should return true else false
+     * @return
+     */
+    boolean usesOperationLimiting();
 }
