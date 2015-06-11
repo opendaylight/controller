@@ -8,7 +8,6 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
 import java.util.List;
 import java.util.Map;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
@@ -50,15 +49,18 @@ public class ObjectNameAttributeReadingStrategy extends AbstractAttributeReading
 
     public static String checkPrefixAndExtractServiceName(XmlElement typeElement, Map.Entry<String, String> prefixNamespace) throws NetconfDocumentedException {
         String serviceName = typeElement.getTextContent();
-        // FIXME: comparing Entry with String:
-        Preconditions.checkState(!Strings.isNullOrEmpty(prefixNamespace.getKey()), "Service %s value not prefixed with namespace",
+        Preconditions.checkNotNull(prefixNamespace.getKey(), "Service %s value cannot be linked to namespace namespace",
                 XmlNetconfConstants.TYPE_KEY);
-        String prefix = prefixNamespace.getKey() + PREFIX_SEPARATOR;
-        Preconditions.checkState(serviceName.startsWith(prefix),
-                "Service %s not correctly prefixed, expected %s, but was %s", XmlNetconfConstants.TYPE_KEY, prefix,
-                serviceName);
-        serviceName = serviceName.substring(prefix.length());
-        return serviceName;
+        if(prefixNamespace.getKey().isEmpty()) {
+            return serviceName;
+        } else {
+            String prefix = prefixNamespace.getKey() + PREFIX_SEPARATOR;
+            Preconditions.checkState(serviceName.startsWith(prefix),
+                    "Service %s not correctly prefixed, expected %s, but was %s", XmlNetconfConstants.TYPE_KEY, prefix,
+                    serviceName);
+            serviceName = serviceName.substring(prefix.length());
+            return serviceName;
+        }
     }
 
 }
