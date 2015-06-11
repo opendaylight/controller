@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a6a9dd7_a7acd6ee",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RemoteRpcImplementation.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-06-11T19:03:35Z",
+      "side": 1,
+      "message": "No longer used - can be removed.",
+      "revId": "5a330f9b1ac077f71959643bb07c4ff770c4dcfc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_47b93a2d",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RemoteRpcImplementation.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-06-11T19:03:35Z",
+      "side": 1,
+      "message": "rpcBroker can be removed",
+      "revId": "5a330f9b1ac077f71959643bb07c4ff770c4dcfc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_8768b2bb",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RemoteRpcImplementation.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-06-11T19:03:35Z",
+      "side": 1,
+      "message": "\u0027input\u0027 is a NormalizedNode - why is this checking if it\u0027s an instance of RemoteDOMRpcFuture? RemoteDOMRpcFuture isn\u0027t a NormalizedNode. Or am I just missing something here....",
+      "revId": "5a330f9b1ac077f71959643bb07c4ff770c4dcfc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_27a1a6f8",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RemoteRpcImplementation.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-06-11T19:03:35Z",
+      "side": 1,
+      "message": "Need to pass a non-null message instance here ...",
+      "revId": "5a330f9b1ac077f71959643bb07c4ff770c4dcfc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_6748fe5b",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RemoteRpcInput.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-06-11T19:03:35Z",
+      "side": 1,
+      "message": "Needs license header",
+      "revId": "5a330f9b1ac077f71959643bb07c4ff770c4dcfc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
