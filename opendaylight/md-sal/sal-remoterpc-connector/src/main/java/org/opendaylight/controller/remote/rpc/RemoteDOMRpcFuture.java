@@ -29,12 +29,16 @@ class RemoteDOMRpcFuture extends AbstractFuture<DOMRpcResult> implements Checked
 
     private static final Logger LOG = LoggerFactory.getLogger(RemoteDOMRpcFuture.class);
 
-    private RemoteDOMRpcFuture(final Future<Object> future) {
-        future.onComplete(new FutureUpdater(), ExecutionContext.Implicits$.MODULE$.global());
+    public static RemoteDOMRpcFuture create() {
+        return new RemoteDOMRpcFuture();
     }
 
-    public static CheckedFuture<DOMRpcResult, DOMRpcException> from(final Future<Object> future) {
-        return new RemoteDOMRpcFuture(future);
+    protected void failImmediatelly(final Throwable error) {
+        setException(error);
+    }
+
+    protected void finishUsing(final Future<Object> future) {
+        future.onComplete(new FutureUpdater(), ExecutionContext.Implicits$.MODULE$.global());
     }
 
     @Override
@@ -89,5 +93,7 @@ class RemoteDOMRpcFuture extends AbstractFuture<DOMRpcResult> implements Checked
                     + "from Akka"));
         }
     }
+
+
 
 }
