@@ -33,15 +33,20 @@ public class SimpleIdentityRefAttributeReadingStrategy extends SimpleAttributeRe
 
     @Override
     protected String readElementContent(XmlElement xmlElement) throws NetconfDocumentedException {
-        // TODO test
         Map.Entry<String, String> namespaceOfTextContent = xmlElement.findNamespaceOfTextContent();
         String content = xmlElement.getTextContent();
 
-        String prefix = namespaceOfTextContent.getKey() + ":";
-        Preconditions.checkArgument(content.startsWith(prefix), "Identity ref should be prefixed");
-
-        String localName = content.substring(prefix.length());
-        String namespace = namespaceOfTextContent.getValue();
+        final String namespace;
+        final String localName;
+        if(namespaceOfTextContent.getKey().isEmpty()) {
+            localName = content;
+            namespace = xmlElement.getNamespace();
+        } else {
+            String prefix = namespaceOfTextContent.getKey() + ":";
+            Preconditions.checkArgument(content.startsWith(prefix), "Identity ref should be prefixed with \"%s\"", prefix);
+            localName = content.substring(prefix.length());
+            namespace = namespaceOfTextContent.getValue();
+        }
 
         Date revision = null;
         Map<Date, EditConfig.IdentityMapping> revisions = identityMap.get(namespace);
