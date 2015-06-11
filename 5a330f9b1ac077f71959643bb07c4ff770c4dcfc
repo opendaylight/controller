@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "9a6a9dd7_47f13acc",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RemoteDOMRpcFuture.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2015-06-11T21:18:32Z",
+      "side": 1,
+      "message": "minor thing - correct spelling of Immediately",
+      "range": {
+        "startLine": 36,
+        "startChar": 19,
+        "endLine": 36,
+        "endChar": 35
+      },
+      "revId": "5a330f9b1ac077f71959643bb07c4ff770c4dcfc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a6a9dd7_a7acd6ee",
         "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RemoteRpcImplementation.java",
         "patchSetId": 2
