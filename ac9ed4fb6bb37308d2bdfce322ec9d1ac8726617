@@ -22,6 +22,30 @@
       "revId": "ac9ed4fb6bb37308d2bdfce322ec9d1ac8726617",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_87caf24d",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/resources/WEB-INF/web.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-06-11T20:37:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a6a9dd7_16f4d659",
+      "range": {
+        "startLine": 31,
+        "startChar": 12,
+        "endLine": 31,
+        "endChar": 81
+      },
+      "revId": "ac9ed4fb6bb37308d2bdfce322ec9d1ac8726617",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
