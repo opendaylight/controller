@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a6a9dd7_16f4d659",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/resources/WEB-INF/web.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-06-11T10:12:33Z",
+      "side": 1,
+      "message": "Data mediatypes should be:\napplication/xml\napplication/json\napplication/yang.data+xml\napplication/yang.data+json\ntext/xml\n\nThis are all data types which may be used for reading data.",
+      "range": {
+        "startLine": 31,
+        "startChar": 12,
+        "endLine": 31,
+        "endChar": 81
+      },
+      "revId": "ac9ed4fb6bb37308d2bdfce322ec9d1ac8726617",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
