@@ -12,7 +12,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorSeverity;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
@@ -23,7 +23,7 @@ import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
  *
  * @author Thomas Pantelis
  */
-public class RpcErrorsException extends Exception {
+public class RpcErrorsException extends DOMRpcException {
 
     private static final long serialVersionUID = 1L;
 
@@ -38,8 +38,8 @@ public class RpcErrorsException extends Exception {
         final String info;
         final Throwable cause;
 
-        RpcErrorData(ErrorSeverity severity, ErrorType errorType, String tag,
-                String applicationTag, String message, String info, Throwable cause) {
+        RpcErrorData(final ErrorSeverity severity, final ErrorType errorType, final String tag,
+                final String applicationTag, final String message, final String info, final Throwable cause) {
             this.severity = severity;
             this.errorType = errorType;
             this.tag = tag;
@@ -52,10 +52,10 @@ public class RpcErrorsException extends Exception {
 
     private final List<RpcErrorData> rpcErrorDataList = new ArrayList<>();
 
-    public RpcErrorsException(String message, Iterable<RpcError> rpcErrors) {
+    public RpcErrorsException(final String message, final Iterable<RpcError> rpcErrors) {
         super(message);
 
-        for(RpcError rpcError: rpcErrors) {
+        for(final RpcError rpcError: rpcErrors) {
             rpcErrorDataList.add(new RpcErrorData(rpcError.getSeverity(), rpcError.getErrorType(),
                     rpcError.getTag(), rpcError.getApplicationTag(), rpcError.getMessage(),
                     rpcError.getInfo(), rpcError.getCause()));
@@ -63,9 +63,9 @@ public class RpcErrorsException extends Exception {
     }
 
     public Collection<RpcError> getRpcErrors() {
-        Collection<RpcError> rpcErrors = new ArrayList<>();
-        for(RpcErrorData ed: rpcErrorDataList) {
-            RpcError rpcError = ed.severity == ErrorSeverity.ERROR ?
+        final Collection<RpcError> rpcErrors = new ArrayList<>();
+        for(final RpcErrorData ed: rpcErrorDataList) {
+            final RpcError rpcError = ed.severity == ErrorSeverity.ERROR ?
                     RpcResultBuilder.newError(ed.errorType, ed.tag, ed.message, ed.applicationTag,
                             ed.info, ed.cause) :
                     RpcResultBuilder.newWarning(ed.errorType, ed.tag, ed.message, ed.applicationTag,
