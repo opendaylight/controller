@@ -8,6 +8,7 @@
 package org.opendaylight.controller.remote.rpc;
 
 import akka.dispatch.OnComplete;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.AbstractFuture;
 import com.google.common.util.concurrent.CheckedFuture;
@@ -19,22 +20,38 @@ import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.md.sal.dom.spi.DefaultDOMRpcResult;
 import org.opendaylight.controller.remote.rpc.messages.RpcResponse;
+import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.ExecutionContext;
 import scala.concurrent.Future;
 
+/**
+ * @author tony
+ *
+ */
 class RemoteDOMRpcFuture extends AbstractFuture<DOMRpcResult> implements CheckedFuture<DOMRpcResult, DOMRpcException> {
 
     private static final Logger LOG = LoggerFactory.getLogger(RemoteDOMRpcFuture.class);
 
-    private RemoteDOMRpcFuture(final Future<Object> future) {
-        future.onComplete(new FutureUpdater(), ExecutionContext.Implicits$.MODULE$.global());
+    private final QName rpcName;
+
+    private RemoteDOMRpcFuture(final QName rpcName) {
+        this.rpcName = Preconditions.checkNotNull(rpcName,"rpcName");
     }
 
-    public static CheckedFuture<DOMRpcResult, DOMRpcException> from(final Future<Object> future) {
-        return new RemoteDOMRpcFuture(future);
+    public static RemoteDOMRpcFuture create(final QName rpcName) {
+        return new RemoteDOMRpcFuture(rpcName);
+    }
+
+    protected void failNow(final Throwable error) {
+        LOG.debug("Failing future {} for rpc {}", this, rpcName, error);
+        setException(error);
+    }
+
+    protected void completeWith(final Future<Object> future) {
+        future.onComplete(new FutureUpdater(), ExecutionContext.Implicits$.MODULE$.global());
     }
 
     @Override
@@ -72,20 +89,21 @@ class RemoteDOMRpcFuture extends AbstractFuture<DOMRpcResult> implements Checked
         @Override
         public void onComplete(final Throwable error, final Object reply) throws Throwable {
             if (error != null) {
-                RemoteDOMRpcFuture.this.setException(error);
+                RemoteDOMRpcFuture.this.failNow(error);
             } else if (reply instanceof RpcResponse) {
                 final RpcResponse rpcReply = (RpcResponse) reply;
                 final NormalizedNode<?, ?> result;
                 if (rpcReply.getResultNormalizedNode() == null) {
                     result = null;
-                    LOG.debug("Received response for invoke rpc: result is null");
+                    LOG.debug("Received response for rpc {}: result is null", rpcName);
                 } else {
                     result = NormalizedNodeSerializer.deSerialize(rpcReply.getResultNormalizedNode());
-                    LOG.debug("Received response for invoke rpc: result is {}", result);
+                    LOG.debug("Received response for rpc {}: result is {}", rpcName, result);
                 }
                 RemoteDOMRpcFuture.this.set(new DefaultDOMRpcResult(result));
+                LOG.debug("Future {} for rpc {} successfully completed", RemoteDOMRpcFuture.this, rpcName);
             }
-            RemoteDOMRpcFuture.this.setException(new IllegalStateException("Incorrect reply type " + reply
+            RemoteDOMRpcFuture.this.failNow(new IllegalStateException("Incorrect reply type " + reply
                     + "from Akka"));
         }
     }
