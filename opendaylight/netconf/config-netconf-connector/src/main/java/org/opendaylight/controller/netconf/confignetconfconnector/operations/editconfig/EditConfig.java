@@ -222,7 +222,7 @@ public class EditConfig extends AbstractConfigNetconfOperation {
     public static class IdentityMapping {
         private final Map<String, IdentitySchemaNode> identityNameToSchemaNode;
 
-        IdentityMapping() {
+        public IdentityMapping() {
             this.identityNameToSchemaNode = Maps.newHashMap();
         }
 
