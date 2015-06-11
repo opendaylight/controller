@@ -10,8 +10,12 @@ package org.opendaylight.controller.remote.rpc.messages;
 
 import com.google.common.base.Preconditions;
 import java.io.Serializable;
+import org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeSerializer;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
+import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node;
 import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 public class ExecuteRpc implements Serializable {
     private static final long serialVersionUID = 1128904894827335676L;
@@ -20,7 +24,6 @@ public class ExecuteRpc implements Serializable {
     private final QName rpc;
 
     public ExecuteRpc(final NormalizedNodeMessages.Node inputNormalizedNode, final QName rpc) {
-        Preconditions.checkNotNull(inputNormalizedNode, "Normalized Node input string should be present");
         Preconditions.checkNotNull(rpc, "rpc Qname should not be null");
 
         this.inputNormalizedNode = inputNormalizedNode;
@@ -33,5 +36,15 @@ public class ExecuteRpc implements Serializable {
 
     public QName getRpc() {
         return rpc;
+    }
+
+    public static ExecuteRpc from(final DOMRpcIdentifier rpc, final NormalizedNode<?, ?> input) {
+        final Node serializedInput;
+        if(input != null) {
+            serializedInput = NormalizedNodeSerializer.serialize(input);
+        } else {
+            serializedInput = null;
+        }
+        return new ExecuteRpc(serializedInput, rpc.getType().getLastComponent());
     }
 }

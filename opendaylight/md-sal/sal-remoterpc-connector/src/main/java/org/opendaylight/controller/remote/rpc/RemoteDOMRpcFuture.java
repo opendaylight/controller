@@ -29,12 +29,17 @@ class RemoteDOMRpcFuture extends AbstractFuture<DOMRpcResult> implements Checked
 
     private static final Logger LOG = LoggerFactory.getLogger(RemoteDOMRpcFuture.class);
 
-    private RemoteDOMRpcFuture(final Future<Object> future) {
-        future.onComplete(new FutureUpdater(), ExecutionContext.Implicits$.MODULE$.global());
+    public static RemoteDOMRpcFuture create() {
+        return new RemoteDOMRpcFuture();
     }
 
-    public static CheckedFuture<DOMRpcResult, DOMRpcException> from(final Future<Object> future) {
-        return new RemoteDOMRpcFuture(future);
+    protected void failImmediately(final Throwable error) {
+        LOG.debug("Failing future {} imediatelly", this, error);
+        setException(error);
+    }
+
+    protected void finishUsing(final Future<Object> future) {
+        future.onComplete(new FutureUpdater(), ExecutionContext.Implicits$.MODULE$.global());
     }
 
     @Override
@@ -84,10 +89,13 @@ class RemoteDOMRpcFuture extends AbstractFuture<DOMRpcResult> implements Checked
                     LOG.debug("Received response for invoke rpc: result is {}", result);
                 }
                 RemoteDOMRpcFuture.this.set(new DefaultDOMRpcResult(result));
+                LOG.info("Future {} successfully completed", RemoteDOMRpcFuture.this);
             }
             RemoteDOMRpcFuture.this.setException(new IllegalStateException("Incorrect reply type " + reply
                     + "from Akka"));
         }
     }
+
+
 
 }
