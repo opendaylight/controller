@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a6a9dd7_474e1ac3",
+        "filename": "karaf/opendaylight-karaf-resources/src/main/resources/etc/custom.properties",
+        "patchSetId": 4
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1450
+      },
+      "writtenOn": "2015-06-11T21:24:48Z",
+      "side": 1,
+      "message": "yes! thank you.",
+      "revId": "bc6d06b5f57d094290979b9ce2cd0e904a1c1b86",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
