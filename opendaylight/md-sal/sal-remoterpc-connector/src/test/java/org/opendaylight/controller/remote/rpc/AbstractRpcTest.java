@@ -11,6 +11,7 @@ package org.opendaylight.controller.remote.rpc;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.testkit.JavaTestKit;
@@ -81,9 +82,9 @@ public class AbstractRpcTest {
         rpcService = Mockito.mock(DOMRpcService.class);
 
         probeReg1 = new JavaTestKit(node1);
-        rpcBroker1 = node1.actorOf(RpcBroker.props(rpcService, probeReg1.getRef()));
+        rpcBroker1 = node1.actorOf(RpcBroker.props(rpcService));
         probeReg2 = new JavaTestKit(node2);
-        rpcBroker2 = node2.actorOf(RpcBroker.props(rpcService, probeReg2.getRef()));
+        rpcBroker2 = node2.actorOf(RpcBroker.props(rpcService));
 
     }
 

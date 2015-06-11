@@ -82,7 +82,7 @@ public class RpcManager extends AbstractUntypedActor {
                     withMailbox(config.getMailBoxName()), config.getRpcRegistryName());
 
         rpcBroker =
-                getContext().actorOf(RpcBroker.props(rpcServices, rpcRegistry).
+                getContext().actorOf(RpcBroker.props(rpcServices).
                     withMailbox(config.getMailBoxName()), config.getRpcBrokerName());
 
         final RpcRegistry.Messages.SetLocalRouter localRouter = new RpcRegistry.Messages.SetLocalRouter(rpcBroker);
@@ -93,7 +93,7 @@ public class RpcManager extends AbstractUntypedActor {
         LOG.debug("Registers rpc listeners");
 
         rpcListener = new RpcListener(rpcRegistry);
-        rpcImplementation = new RemoteRpcImplementation(rpcBroker, config);
+        rpcImplementation = new RemoteRpcImplementation(rpcBroker, rpcRegistry, config);
 
         rpcServices.registerRpcListener(rpcListener);
 
@@ -102,10 +102,10 @@ public class RpcManager extends AbstractUntypedActor {
     }
 
     private void registerRoutedRpcDelegate() {
-        Set<DOMRpcIdentifier> rpcIdentifiers = new HashSet<>();
-        Set<Module> modules = schemaContext.getModules();
-        for(Module module : modules){
-            for(RpcDefinition rpcDefinition : module.getRpcs()){
+        final Set<DOMRpcIdentifier> rpcIdentifiers = new HashSet<>();
+        final Set<Module> modules = schemaContext.getModules();
+        for(final Module module : modules){
+            for(final RpcDefinition rpcDefinition : module.getRpcs()){
                 if(RpcRoutingStrategy.from(rpcDefinition).isContextBasedRouted()) {
                     LOG.debug("Adding routed rpcDefinition for path {}", rpcDefinition.getPath());
                     rpcIdentifiers.add(DOMRpcIdentifier.create(rpcDefinition.getPath(), YangInstanceIdentifier.EMPTY));
