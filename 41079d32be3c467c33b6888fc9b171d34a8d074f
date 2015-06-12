@@ -1,0 +1,242 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a6a9dd7_88267f15",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RemoteDOMRpcFuture.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-06-12T14:05:13Z",
+      "side": 1,
+      "message": "oops- \"imediatelly\" misspelled :)",
+      "revId": "41079d32be3c467c33b6888fc9b171d34a8d074f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_28c2d3e9",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RemoteDOMRpcFuture.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-06-12T14:05:13Z",
+      "side": 1,
+      "message": "Can we rename this to completeWith? (scala/akka names a similar method that way)",
+      "revId": "41079d32be3c467c33b6888fc9b171d34a8d074f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_e85ffb70",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RemoteDOMRpcFuture.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-06-12T14:05:13Z",
+      "side": 1,
+      "message": "Please add debug log (or maybe error?) to print the failure, e.g. \"Rpc failed\", error. Would be nice to print the rpc QName for context but it would need to passed in.",
+      "revId": "41079d32be3c467c33b6888fc9b171d34a8d074f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_e8885be9",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RemoteDOMRpcFuture.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-06-12T14:05:13Z",
+      "side": 1,
+      "message": "I think we should make this debug. But do we need this log since we already log debug above?",
+      "revId": "41079d32be3c467c33b6888fc9b171d34a8d074f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_0896eff0",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RemoteRpcImplementation.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-06-12T14:05:13Z",
+      "side": 1,
+      "message": "We\u0027re missing coverage in the unit tests for this code path.",
+      "revId": "41079d32be3c467c33b6888fc9b171d34a8d074f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_c8d1d7ce",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RemoteRpcImplementation.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-06-12T14:05:13Z",
+      "side": 1,
+      "message": "Can you add debug log here?\n\nAlso we\u0027re missing coverage in the unit tests for this code path.",
+      "revId": "41079d32be3c467c33b6888fc9b171d34a8d074f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_28cdf331",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RemoteRpcImplementation.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-06-12T14:05:13Z",
+      "side": 1,
+      "message": "Can you add debug log here as well, e.g. \"Found remote actor {} for rpc {} - sending {}\", remoteImplRef, rpc.getType(), executeRpcMessage.  Also add toString to ExecuteRpc.",
+      "revId": "41079d32be3c467c33b6888fc9b171d34a8d074f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_e8d61bc5",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/messages/ExecuteRpc.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-06-12T14:05:13Z",
+      "side": 1,
+      "message": "This could be made private since you\u0027ve added the \u0027from\u0027 method.",
+      "revId": "41079d32be3c467c33b6888fc9b171d34a8d074f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_a886e3b7",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/test/java/org/opendaylight/controller/remote/rpc/RouteRpcListenerTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-06-12T14:05:13Z",
+      "side": 1,
+      "message": "This class tests RpcListener so can you rename to RpcListenerTest (or add the code to the original RpcListenerTest which you removed)?",
+      "revId": "41079d32be3c467c33b6888fc9b171d34a8d074f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_e8a4db58",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/test/java/org/opendaylight/controller/remote/rpc/RouteRpcListenerTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-06-12T14:05:13Z",
+      "side": 1,
+      "message": "Please fix the indentation.",
+      "revId": "41079d32be3c467c33b6888fc9b171d34a8d074f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_88dbdfec",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/test/java/org/opendaylight/controller/remote/rpc/RouteRpcListenerTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-06-12T14:05:13Z",
+      "side": 1,
+      "message": "Can we verify the contents of the AddOrUpdateRoutes message (getRouteIdentifiers)?",
+      "revId": "41079d32be3c467c33b6888fc9b171d34a8d074f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_a8d823f0",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/test/java/org/opendaylight/controller/remote/rpc/RouteRpcListenerTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-06-12T14:05:13Z",
+      "side": 1,
+      "message": "Verify the contents of the RemoveRoutes message?",
+      "revId": "41079d32be3c467c33b6888fc9b171d34a8d074f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_48fce73e",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/test/java/org/opendaylight/controller/remote/rpc/RpcBrokerTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-06-12T14:05:13Z",
+      "side": 1,
+      "message": "This should actually be \"WithException\" as in the original tests. Also can you add back the original \"FailureWithRpcErrors\" and \"FailureWithNoRpcErrors\" tests?",
+      "revId": "41079d32be3c467c33b6888fc9b171d34a8d074f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_c89f9702",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/test/java/org/opendaylight/controller/remote/rpc/RpcBrokerTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-06-12T14:05:13Z",
+      "side": 1,
+      "message": "These 2 variables are unused.",
+      "revId": "41079d32be3c467c33b6888fc9b171d34a8d074f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
