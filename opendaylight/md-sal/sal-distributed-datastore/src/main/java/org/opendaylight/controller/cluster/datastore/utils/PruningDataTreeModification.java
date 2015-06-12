@@ -50,41 +50,57 @@ public class PruningDataTreeModification implements DataTreeModification {
     @Override
     public void merge(YangInstanceIdentifier yangInstanceIdentifier, NormalizedNode<?, ?> normalizedNode) {
         try {
-            delegate.merge(yangInstanceIdentifier, normalizedNode);
+            if(YangInstanceIdentifier.EMPTY.equals(yangInstanceIdentifier)){
+                pruneAndMergeNode(yangInstanceIdentifier, normalizedNode);
+            } else {
+                delegate.merge(yangInstanceIdentifier, normalizedNode);
+            }
         } catch (SchemaValidationFailedException e){
             if(!isValidYangInstanceIdentifier(yangInstanceIdentifier)){
                 LOG.warn("Invalid node identifier {} ignoring merge", yangInstanceIdentifier);
                 return;
             }
 
-            LOG.warn("Node at path : {} was pruned during merge", yangInstanceIdentifier);
-
-            NormalizedNode<?,?> pruned = pruneNormalizedNode(normalizedNode);
-
-            if(pruned != null) {
-                delegate.merge(yangInstanceIdentifier, pruned);
-            }
+            pruneAndMergeNode(yangInstanceIdentifier, normalizedNode);
         }
 
+    }
+
+    private void pruneAndMergeNode(YangInstanceIdentifier yangInstanceIdentifier, NormalizedNode<?, ?> normalizedNode) {
+        LOG.warn("Node at path : {} was pruned during merge", yangInstanceIdentifier);
+
+        NormalizedNode<?,?> pruned = pruneNormalizedNode(normalizedNode);
+
+        if(pruned != null) {
+            delegate.merge(yangInstanceIdentifier, pruned);
+        }
     }
 
     @Override
     public void write(YangInstanceIdentifier yangInstanceIdentifier, NormalizedNode<?, ?> normalizedNode) {
         try {
-            delegate.write(yangInstanceIdentifier, normalizedNode);
+            if(YangInstanceIdentifier.EMPTY.equals(yangInstanceIdentifier)){
+                pruneAndWriteNode(yangInstanceIdentifier, normalizedNode);
+            } else {
+                delegate.write(yangInstanceIdentifier, normalizedNode);
+            }
         } catch (SchemaValidationFailedException e){
             if(!isValidYangInstanceIdentifier(yangInstanceIdentifier)){
                 LOG.warn("Invalid node identifier {} ignoring write", yangInstanceIdentifier);
                 return;
             }
 
-            LOG.warn("Node at path : {} was pruned during write", yangInstanceIdentifier);
+            pruneAndWriteNode(yangInstanceIdentifier, normalizedNode);
+        }
+    }
 
-            NormalizedNode<?,?> pruned = pruneNormalizedNode(normalizedNode);
+    private void pruneAndWriteNode(YangInstanceIdentifier yangInstanceIdentifier, NormalizedNode<?, ?> normalizedNode) {
+        LOG.warn("Node at path : {} was pruned during write", yangInstanceIdentifier);
 
-            if(pruned != null) {
-                delegate.write(yangInstanceIdentifier, pruned);
-            }
+        NormalizedNode<?,?> pruned = pruneNormalizedNode(normalizedNode);
+
+        if(pruned != null) {
+            delegate.write(yangInstanceIdentifier, pruned);
         }
     }
 
