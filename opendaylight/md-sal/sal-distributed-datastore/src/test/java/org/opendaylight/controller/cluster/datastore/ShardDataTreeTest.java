@@ -2,7 +2,6 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import com.google.common.base.Optional;
 import java.util.concurrent.ExecutionException;
 import org.junit.Test;
@@ -25,14 +24,6 @@ public class ShardDataTreeTest {
     }
 
     @Test
-    public void testWriteWithMissingSchema() throws ExecutionException, InterruptedException {
-
-        SchemaContext schemaContext = SchemaContextHelper.select(SchemaContextHelper.ODL_DATASTORE_TEST_YANG, SchemaContextHelper.PEOPLE_YANG);
-
-        modify(new ShardDataTree(schemaContext), false, false, true);
-    }
-
-    @Test
     public void testMerge() throws ExecutionException, InterruptedException {
 
         SchemaContext schemaContext = SchemaContextHelper.full();
@@ -40,13 +31,6 @@ public class ShardDataTreeTest {
         modify(new ShardDataTree(schemaContext), true, true, true);
     }
 
-    @Test
-    public void testMergeWithMissingSchema() throws ExecutionException, InterruptedException {
-
-        SchemaContext schemaContext = SchemaContextHelper.select(SchemaContextHelper.ODL_DATASTORE_TEST_YANG, SchemaContextHelper.PEOPLE_YANG);
-
-        modify(new ShardDataTree(schemaContext), true, false, true);
-    }
 
     private void modify(ShardDataTree shardDataTree, boolean merge, boolean expectedCarsPresent, boolean expectedPeoplePresent) throws ExecutionException, InterruptedException {
         ReadWriteShardDataTreeTransaction transaction = shardDataTree.newReadWriteTransaction("txn-1", null);
@@ -80,20 +64,6 @@ public class ShardDataTreeTest {
         Optional<NormalizedNode<?, ?>> optional1 = snapshot1.readNode(PeopleModel.BASE_PATH);
 
         assertEquals(expectedPeoplePresent, optional1.isPresent());
-
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testAfterRecoveryDone() throws ExecutionException, InterruptedException {
-        SchemaContext schemaContext = SchemaContextHelper.select(SchemaContextHelper.ODL_DATASTORE_TEST_YANG, SchemaContextHelper.PEOPLE_YANG);
-        ShardDataTree shardDataTree = new ShardDataTree(schemaContext);
-        assertTrue("transaction factory must be the recovery transaction factory",
-                shardDataTree.getTransactionFactory() instanceof ShardDataTree.RecoveryShardDataTreeTransactionFactory);
-        shardDataTree.recoveryDone();
-        assertTrue("transaction factory must be the regular transaction factory",
-                shardDataTree.getTransactionFactory() instanceof ShardDataTree.RegularShardDataTreeTransactionFactory);
-
-        modify(shardDataTree, true, false, true);
 
     }
 

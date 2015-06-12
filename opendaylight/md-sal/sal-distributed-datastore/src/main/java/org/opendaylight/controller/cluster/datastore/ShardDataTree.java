@@ -7,18 +7,14 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import java.net.URI;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import javax.annotation.concurrent.NotThreadSafe;
-import org.opendaylight.controller.cluster.datastore.node.utils.transformer.NormalizedNodePruner;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
@@ -53,8 +49,6 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     private final ShardDataTreeChangePublisher treeChangePublisher = new ShardDataTreeChangePublisher();
     private final ListenerTree listenerTree = ListenerTree.create();
     private final TipProducingDataTree dataTree;
-    private Set<URI> validNamespaces;
-    private ShardDataTreeTransactionFactory transactionFactory = new RecoveryShardDataTreeTransactionFactory();
 
     ShardDataTree(final SchemaContext schemaContext) {
         dataTree = InMemoryDataTreeFactory.getInstance().create();
@@ -69,7 +63,6 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     void updateSchemaContext(final SchemaContext schemaContext) {
         Preconditions.checkNotNull(schemaContext);
         dataTree.setSchemaContext(schemaContext);
-        validNamespaces = NormalizedNodePruner.namespaces(schemaContext);
     }
 
     private ShardDataTreeTransactionChain ensureTransactionChain(final String chainId) {
@@ -84,7 +77,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
     ReadOnlyShardDataTreeTransaction newReadOnlyTransaction(final String txId, final String chainId) {
         if (Strings.isNullOrEmpty(chainId)) {
-            return transactionFactory.newReadOnlyTransaction(txId, chainId);
+            return new ReadOnlyShardDataTreeTransaction(txId, dataTree.takeSnapshot());
         }
 
         return ensureTransactionChain(chainId).newReadOnlyTransaction(txId);
@@ -92,7 +85,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
 
     ReadWriteShardDataTreeTransaction newReadWriteTransaction(final String txId, final String chainId) {
         if (Strings.isNullOrEmpty(chainId)) {
-            return transactionFactory.newReadWriteTransaction(txId, chainId);
+            return new ReadWriteShardDataTreeTransaction(ShardDataTree.this, txId, dataTree.takeSnapshot()
+                    .newModification());
         }
 
         return ensureTransactionChain(chainId).newReadWriteTransaction(txId);
@@ -181,53 +175,5 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         final DataTreeModification snapshot = transaction.getSnapshot();
         snapshot.ready();
         return new SimpleShardDataTreeCohort(this, snapshot, transaction.getId());
-    }
-
-    void recoveryDone(){
-        transactionFactory = new RegularShardDataTreeTransactionFactory();
-    }
-
-    @VisibleForTesting
-    ShardDataTreeTransactionFactory getTransactionFactory(){
-        return transactionFactory;
-    }
-
-    @VisibleForTesting
-    static interface ShardDataTreeTransactionFactory {
-        ReadOnlyShardDataTreeTransaction newReadOnlyTransaction(final String txId, final String chainId);
-
-        ReadWriteShardDataTreeTransaction newReadWriteTransaction(final String txId, final String chainId);
-    }
-
-    @VisibleForTesting
-    class RecoveryShardDataTreeTransactionFactory implements ShardDataTreeTransactionFactory {
-
-        @Override
-        public ReadOnlyShardDataTreeTransaction newReadOnlyTransaction(String txId, String chainId) {
-            return new ReadOnlyShardDataTreeTransaction(txId,
-                    new PruningShardDataTreeSnapshot(dataTree.takeSnapshot(), validNamespaces));
-        }
-
-        @Override
-        public ReadWriteShardDataTreeTransaction newReadWriteTransaction(String txId, String chainId) {
-            return new ReadWriteShardDataTreeTransaction(ShardDataTree.this, txId,
-                    new PruningShardDataTreeSnapshot(dataTree.takeSnapshot(), validNamespaces).newModification());
-        }
-    }
-
-    @VisibleForTesting
-    class RegularShardDataTreeTransactionFactory implements ShardDataTreeTransactionFactory {
-
-        @Override
-        public ReadOnlyShardDataTreeTransaction newReadOnlyTransaction(String txId, String chainId) {
-            return new ReadOnlyShardDataTreeTransaction(txId, dataTree.takeSnapshot());
-
-        }
-
-        @Override
-        public ReadWriteShardDataTreeTransaction newReadWriteTransaction(String txId, String chainId) {
-            return new ReadWriteShardDataTreeTransaction(ShardDataTree.this, txId, dataTree.takeSnapshot()
-                    .newModification());
-        }
     }
 }
