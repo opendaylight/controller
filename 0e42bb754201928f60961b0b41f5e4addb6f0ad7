@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a6a9dd7_9c448075",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 609,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-06-12T19:50:26Z",
+      "side": 1,
+      "message": "After recovery complete, we don\u0027t need the shardRecoveryCoordinator so we could null it out. Or change it back to creating the instance in getRaftActorRecoveryCohort. To get the SchemaContext you could store it in ShardDataTree. Not a big deal though.",
+      "revId": "0e42bb754201928f60961b0b41f5e4addb6f0ad7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_bc49448d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardRecoveryCoordinator.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-06-12T19:50:26Z",
+      "side": 1,
+      "message": "Since we always create a PruningDataTreeModification, we could pass a PruningDataTreeModification to avoid the instanceof and cast. Also change declaration of the transaction field to PruningDataTreeModification.",
+      "revId": "0e42bb754201928f60961b0b41f5e4addb6f0ad7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
