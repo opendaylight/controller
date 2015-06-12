@@ -117,6 +117,8 @@ public class Shard extends RaftActor {
     private final DataTreeChangeListenerSupport treeChangeSupport = new DataTreeChangeListenerSupport(this);
     private final DataChangeListenerSupport changeSupport = new DataChangeListenerSupport(this);
 
+    private final ShardRecoveryCoordinator shardRecoveryCoordinator;
+
     protected Shard(final ShardIdentifier name, final Map<String, String> peerAddresses,
             final DatastoreContext datastoreContext, final SchemaContext schemaContext) {
         super(name.toString(), new HashMap<>(peerAddresses), Optional.of(datastoreContext.getShardRaftConfig()),
@@ -156,6 +158,8 @@ public class Shard extends RaftActor {
                         Dispatchers.DispatcherType.Transaction), self(), getContext(), shardMBean);
 
         snapshotCohort = new ShardSnapshotCohort(transactionActorFactory, store, LOG, this.name);
+
+        shardRecoveryCoordinator = new ShardRecoveryCoordinator(store, schemaContext, persistenceId(), LOG);
     }
 
     private void setTransactionCommitTimeout() {
@@ -598,7 +602,7 @@ public class Shard extends RaftActor {
     @Override
     @Nonnull
     protected RaftActorRecoveryCohort getRaftActorRecoveryCohort() {
-        return new ShardRecoveryCoordinator(store, persistenceId(), LOG);
+        return shardRecoveryCoordinator;
     }
 
     @Override
