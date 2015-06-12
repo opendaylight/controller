@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9a6a9dd7_7c65ecdf",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RemoteDOMRpcFuture.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-06-12T15:36:52Z",
+      "side": 1,
+      "message": "failNow would have the same effect and wouldn\u0027t be susceptible to spelling mistakes either :)",
+      "parentUuid": "9a6a9dd7_88267f15",
+      "revId": "41079d32be3c467c33b6888fc9b171d34a8d074f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a6a9dd7_28c2d3e9",
         "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RemoteDOMRpcFuture.java",
         "patchSetId": 3
@@ -47,6 +65,24 @@
       "writtenOn": "2015-06-12T14:05:13Z",
       "side": 1,
       "message": "Please add debug log (or maybe error?) to print the failure, e.g. \"Rpc failed\", error. Would be nice to print the rpc QName for context but it would need to passed in.",
+      "revId": "41079d32be3c467c33b6888fc9b171d34a8d074f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_c8123762",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RemoteDOMRpcFuture.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-06-12T15:36:52Z",
+      "side": 1,
+      "message": "+1. The QName should be passed in and logged.",
+      "parentUuid": "9a6a9dd7_e85ffb70",
       "revId": "41079d32be3c467c33b6888fc9b171d34a8d074f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +123,23 @@
     },
     {
       "key": {
+        "uuid": "9a6a9dd7_3c31b4ec",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RemoteRpcImplementation.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-06-12T15:36:52Z",
+      "side": 1,
+      "message": "typo processing",
+      "revId": "41079d32be3c467c33b6888fc9b171d34a8d074f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a6a9dd7_c8d1d7ce",
         "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RemoteRpcImplementation.java",
         "patchSetId": 3
@@ -115,6 +168,23 @@
       "writtenOn": "2015-06-12T14:05:13Z",
       "side": 1,
       "message": "Can you add debug log here as well, e.g. \"Found remote actor {} for rpc {} - sending {}\", remoteImplRef, rpc.getType(), executeRpcMessage.  Also add toString to ExecuteRpc.",
+      "revId": "41079d32be3c467c33b6888fc9b171d34a8d074f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a6a9dd7_1c62b0d8",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RemoteRpcInput.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-06-12T15:36:52Z",
+      "side": 1,
+      "message": "Could you please write a test for this?",
       "revId": "41079d32be3c467c33b6888fc9b171d34a8d074f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
