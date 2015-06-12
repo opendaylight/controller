@@ -156,6 +156,8 @@ public class Shard extends RaftActor {
                         Dispatchers.DispatcherType.Transaction), self(), getContext(), shardMBean);
 
         snapshotCohort = new ShardSnapshotCohort(transactionActorFactory, store, LOG, this.name);
+
+
     }
 
     private void setTransactionCommitTimeout() {
@@ -598,12 +600,11 @@ public class Shard extends RaftActor {
     @Override
     @Nonnull
     protected RaftActorRecoveryCohort getRaftActorRecoveryCohort() {
-        return new ShardRecoveryCoordinator(store, persistenceId(), LOG);
+        return new ShardRecoveryCoordinator(store, store.getSchemaContext(), persistenceId(), LOG);
     }
 
     @Override
     protected void onRecoveryComplete() {
-        store.recoveryDone();
         //notify shard manager
         getContext().parent().tell(new ActorInitialized(), getSelf());
 
