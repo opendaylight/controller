@@ -32,6 +32,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
  */
 public class NormalizedNodePruner implements NormalizedNodeStreamWriter {
 
+    public static final URI BASE_NAMESPACE = URI.create("urn:ietf:params:xml:ns:netconf:base:1.0");
     private final SimpleStack<NormalizedNodeBuilderWrapper> stack = new SimpleStack<>();
     private NormalizedNode<?,?> normalizedNode;
     private final Set<URI> validNamespaces;
@@ -271,6 +272,7 @@ public class NormalizedNodePruner implements NormalizedNodeStreamWriter {
 
     public static Set<URI> namespaces(SchemaContext schemaContext){
         Set<URI> namespaces = new HashSet<>(schemaContext.getModules().size());
+        namespaces.add(BASE_NAMESPACE);
         for(org.opendaylight.yangtools.yang.model.api.Module module : schemaContext.getModules()){
             namespaces.add(module.getNamespace());
         }
