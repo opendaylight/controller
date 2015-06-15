@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorSelection;
+import akka.dispatch.Futures;
 import akka.dispatch.OnComplete;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -37,6 +38,7 @@ abstract class LocalThreePhaseCommitCohort implements DOMStoreThreePhaseCommitCo
     private final DataTreeModification modification;
     private final ActorContext actorContext;
     private final ActorSelection leader;
+    private Exception operationError;
 
     protected LocalThreePhaseCommitCohort(final ActorContext actorContext, final ActorSelection leader,
             final SnapshotBackedWriteTransaction<TransactionIdentifier> transaction, final DataTreeModification modification) {
@@ -47,6 +49,10 @@ abstract class LocalThreePhaseCommitCohort implements DOMStoreThreePhaseCommitCo
     }
 
     private Future<Object> initiateCommit(final boolean immediate) {
+        if(operationError != null) {
+            return Futures.failed(operationError);
+        }
+
         final ReadyLocalTransaction message = new ReadyLocalTransaction(transaction.getIdentifier().toString(),
                 modification, immediate);
         return actorContext.executeOperationAsync(leader, message, actorContext.getTransactionCommitOperationTimeout());
@@ -59,6 +65,10 @@ abstract class LocalThreePhaseCommitCohort implements DOMStoreThreePhaseCommitCo
      */
     @Nonnull ActorContext getActorContext() {
         return actorContext;
+    }
+
+    void setOperationError(Exception operationError) {
+        this.operationError = operationError;
     }
 
     Future<ActorSelection> initiateCoordinatedCommit() {
