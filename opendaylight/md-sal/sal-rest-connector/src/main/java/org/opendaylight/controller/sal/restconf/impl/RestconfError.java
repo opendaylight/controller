@@ -8,8 +8,7 @@
 package org.opendaylight.controller.sal.restconf.impl;
 
 import com.google.common.base.Preconditions;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import com.google.common.base.Throwables;
 import org.opendaylight.yangtools.yang.common.RpcError;
 
 /**
@@ -38,10 +37,10 @@ public class RestconfError {
             return name().toLowerCase();
         }
 
-        public static ErrorType valueOfCaseInsensitive(String value) {
+        public static ErrorType valueOfCaseInsensitive(final String value) {
             try {
                 return ErrorType.valueOf(ErrorType.class, value.toUpperCase());
-            } catch (IllegalArgumentException e) {
+            } catch (final IllegalArgumentException e) {
                 return APPLICATION;
             }
         }
@@ -80,10 +79,10 @@ public class RestconfError {
             return this.tagValue.toLowerCase();
         }
 
-        public static ErrorTag valueOfCaseInsensitive(String value) {
+        public static ErrorTag valueOfCaseInsensitive(final String value) {
             try {
                 return ErrorTag.valueOf(ErrorTag.class, value.toUpperCase().replaceAll("-", "_"));
-            } catch (IllegalArgumentException e) {
+            } catch (final IllegalArgumentException e) {
                 return OPERATION_FAILED;
             }
         }
@@ -100,11 +99,11 @@ public class RestconfError {
     private final String errorMessage;
 
     // TODO: Add in the error-path concept as defined in the ietf draft.
-
-    static String toErrorInfo(Throwable cause) {
-        StringWriter writer = new StringWriter();
-        cause.printStackTrace(new PrintWriter(writer));
-        return writer.toString();
+    /**
+     * Actualy, method returns stack trace for bring the additional information
+     */
+    static String toErrorInfo(final Throwable cause) {
+        return Throwables.getStackTraceAsString(cause);
     }
 
     /**
@@ -117,7 +116,7 @@ public class RestconfError {
      * @param errorMessage
      *            A string which provides a plain text string describing the error.
      */
-    public RestconfError(ErrorType errorType, ErrorTag errorTag, String errorMessage) {
+    public RestconfError(final ErrorType errorType, final ErrorTag errorTag, final String errorMessage) {
         this(errorType, errorTag, errorMessage, null);
     }
 
@@ -133,7 +132,7 @@ public class RestconfError {
      * @param errorAppTag
      *            A string which represents an application-specific error tag that further specifies the error cause.
      */
-    public RestconfError(ErrorType errorType, ErrorTag errorTag, String errorMessage, String errorAppTag) {
+    public RestconfError(final ErrorType errorType, final ErrorTag errorTag, final String errorMessage, final String errorAppTag) {
         this(errorType, errorTag, errorMessage, errorAppTag, null);
     }
 
@@ -151,8 +150,8 @@ public class RestconfError {
      * @param errorInfo
      *            A string, <b>formatted as XML</b>, which contains additional error information.
      */
-    public RestconfError(ErrorType errorType, ErrorTag errorTag, String errorMessage, String errorAppTag,
-            String errorInfo) {
+    public RestconfError(final ErrorType errorType, final ErrorTag errorTag, final String errorMessage, final String errorAppTag,
+            final String errorInfo) {
         Preconditions.checkNotNull(errorType, "Error type is required for RestConfError");
         Preconditions.checkNotNull(errorTag, "Error tag is required for RestConfError");
         this.errorType = errorType;
@@ -165,7 +164,7 @@ public class RestconfError {
     /**
      * Constructs a RestConfError object from an RpcError.
      */
-    public RestconfError(RpcError rpcError) {
+    public RestconfError(final RpcError rpcError) {
 
         this.errorType = rpcError.getErrorType() == null ? ErrorType.APPLICATION : ErrorType
                 .valueOfCaseInsensitive(rpcError.getErrorType().name());
