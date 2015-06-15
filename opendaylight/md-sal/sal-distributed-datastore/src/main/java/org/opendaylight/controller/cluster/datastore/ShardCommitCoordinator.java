@@ -185,6 +185,7 @@ class ShardCommitCoordinator {
 
         if(batched.isReady()) {
             if(cohortEntry.getTotalBatchedModificationsReceived() != batched.getTotalMessagesSent()) {
+                cohortCache.remove(cohortEntry.getTransactionID());
                 throw new IllegalStateException(String.format(
                         "The total number of batched messages received %d does not match the number sent %d",
                         cohortEntry.getTotalBatchedModificationsReceived(), batched.getTotalMessagesSent()));
