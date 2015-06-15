@@ -8,10 +8,10 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorSelection;
+import akka.dispatch.Futures;
 import akka.dispatch.OnComplete;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListenableFuture;
-import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyLocalTransaction;
@@ -30,13 +30,14 @@ import scala.concurrent.Future;
  * It is not actually called by the front-end to perform 3PC thus the canCommit/preCommit/commit methods
  * are no-ops.
  */
-abstract class LocalThreePhaseCommitCohort implements DOMStoreThreePhaseCommitCohort {
+class LocalThreePhaseCommitCohort implements DOMStoreThreePhaseCommitCohort {
     private static final Logger LOG = LoggerFactory.getLogger(LocalThreePhaseCommitCohort.class);
 
     private final SnapshotBackedWriteTransaction<TransactionIdentifier> transaction;
     private final DataTreeModification modification;
     private final ActorContext actorContext;
     private final ActorSelection leader;
+    private Exception operationError;
 
     protected LocalThreePhaseCommitCohort(final ActorContext actorContext, final ActorSelection leader,
             final SnapshotBackedWriteTransaction<TransactionIdentifier> transaction, final DataTreeModification modification) {
@@ -46,19 +47,27 @@ abstract class LocalThreePhaseCommitCohort implements DOMStoreThreePhaseCommitCo
         this.modification = Preconditions.checkNotNull(modification);
     }
 
+    protected LocalThreePhaseCommitCohort(final ActorContext actorContext, final ActorSelection leader,
+            final SnapshotBackedWriteTransaction<TransactionIdentifier> transaction, final Exception operationError) {
+        this.actorContext = Preconditions.checkNotNull(actorContext);
+        this.leader = Preconditions.checkNotNull(leader);
+        this.transaction = Preconditions.checkNotNull(transaction);
+        this.operationError = Preconditions.checkNotNull(operationError);
+        this.modification = null;
+    }
+
     private Future<Object> initiateCommit(final boolean immediate) {
+        if(operationError != null) {
+            return Futures.failed(operationError);
+        }
+
         final ReadyLocalTransaction message = new ReadyLocalTransaction(transaction.getIdentifier().toString(),
                 modification, immediate);
         return actorContext.executeOperationAsync(leader, message, actorContext.getTransactionCommitOperationTimeout());
     }
 
-    /**
-     * Return the {@link ActorContext} associated with this object.
-     *
-     * @return An actor context instance.
-     */
-    @Nonnull ActorContext getActorContext() {
-        return actorContext;
+    void setOperationError(Exception operationError) {
+        this.operationError = operationError;
     }
 
     Future<ActorSelection> initiateCoordinatedCommit() {
@@ -126,6 +135,9 @@ abstract class LocalThreePhaseCommitCohort implements DOMStoreThreePhaseCommitCo
         throw new UnsupportedOperationException();
     }
 
-    protected abstract void transactionAborted(SnapshotBackedWriteTransaction<TransactionIdentifier> transaction);
-    protected abstract void transactionCommitted(SnapshotBackedWriteTransaction<TransactionIdentifier> transaction);
+    protected void transactionAborted(SnapshotBackedWriteTransaction<TransactionIdentifier> transaction) {
+    }
+
+    protected void transactionCommitted(SnapshotBackedWriteTransaction<TransactionIdentifier> transaction) {
+    }
 }

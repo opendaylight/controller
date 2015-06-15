@@ -20,8 +20,6 @@ import org.opendaylight.controller.sal.core.spi.data.SnapshotBackedWriteTransact
 import org.opendaylight.controller.sal.core.spi.data.SnapshotBackedWriteTransaction.TransactionReadyPrototype;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * {@link LocalTransactionFactory} for instantiating backing transactions which are
@@ -31,7 +29,6 @@ import org.slf4j.LoggerFactory;
 final class LocalTransactionFactoryImpl extends TransactionReadyPrototype<TransactionIdentifier>
         implements LocalTransactionFactory {
 
-    private static final Logger LOG = LoggerFactory.getLogger(LocalTransactionFactoryImpl.class);
     private final ActorSelection leader;
     private final DataTree dataTree;
     private final ActorContext actorContext;
@@ -69,18 +66,19 @@ final class LocalTransactionFactoryImpl extends TransactionReadyPrototype<Transa
     @Override
     protected DOMStoreThreePhaseCommitCohort transactionReady(final SnapshotBackedWriteTransaction<TransactionIdentifier> tx,
             final DataTreeModification tree) {
-        return new LocalThreePhaseCommitCohort(actorContext, leader, tx, tree) {
-            @Override
-            protected void transactionAborted(final SnapshotBackedWriteTransaction<TransactionIdentifier> transaction) {
-                // No-op
-                LOG.debug("Transaction {} aborted", transaction);
-            }
+        return new LocalThreePhaseCommitCohort(actorContext, leader, tx, tree);
+    }
 
-            @Override
-            protected void transactionCommitted(final SnapshotBackedWriteTransaction<TransactionIdentifier> transaction) {
-                // No-op
-                LOG.debug("Transaction {} committed", transaction);
-            }
-        };
+    @SuppressWarnings("unchecked")
+    @Override
+    public LocalThreePhaseCommitCohort onTransactionReady(DOMStoreWriteTransaction tx) {
+        try {
+            return (LocalThreePhaseCommitCohort) tx.ready();
+        } catch (Exception e) {
+            // Unfortunately we need to cast to SnapshotBackedWriteTransaction here as it's required by
+            // LocalThreePhaseCommitCohort.
+            return new LocalThreePhaseCommitCohort(actorContext, leader,
+                    (SnapshotBackedWriteTransaction<TransactionIdentifier>)tx, e);
+        }
     }
 }
