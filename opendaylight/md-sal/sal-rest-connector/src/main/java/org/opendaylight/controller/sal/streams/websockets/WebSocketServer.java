@@ -54,7 +54,7 @@ public class WebSocketServer implements Runnable {
      * @return instance of {@link WebSocketServer}
      */
     public static WebSocketServer getInstance() {
-        Preconditions.checkNotNull(instance, "createInstance() must be called prior to getInstance()");
+        Preconditions.checkState(instance != null, "createInstance() must be called prior to getInstance()");
         return instance;
     }
 
