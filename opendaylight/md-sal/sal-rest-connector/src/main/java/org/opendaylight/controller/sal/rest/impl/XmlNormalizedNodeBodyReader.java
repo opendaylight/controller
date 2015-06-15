@@ -19,7 +19,6 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyReader;
@@ -59,7 +58,7 @@ import org.w3c.dom.Element;
     MediaType.APPLICATION_XML, MediaType.TEXT_XML })
 public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsProvider implements MessageBodyReader<NormalizedNodeContext> {
 
-    private final static Logger LOG = LoggerFactory.getLogger(XmlNormalizedNodeBodyReader.class);
+    private static final Logger LOG = LoggerFactory.getLogger(XmlNormalizedNodeBodyReader.class);
     private static final DocumentBuilderFactory BUILDERFACTORY;
 
     static {
@@ -89,8 +88,7 @@ public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPro
     @Override
     public NormalizedNodeContext readFrom(final Class<NormalizedNodeContext> type, final Type genericType,
             final Annotation[] annotations, final MediaType mediaType,
-            final MultivaluedMap<String, String> httpHeaders, final InputStream entityStream) throws IOException,
-            WebApplicationException {
+            final MultivaluedMap<String, String> httpHeaders, final InputStream entityStream) throws IOException {
         try {
             final InstanceIdentifierContext<?> path = getInstanceIdentifierContext();
 
@@ -103,7 +101,7 @@ public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPro
             try {
                 dBuilder = BUILDERFACTORY.newDocumentBuilder();
             } catch (final ParserConfigurationException e) {
-                throw new RuntimeException("Failed to parse XML document", e);
+                throw e;
             }
             final Document doc = dBuilder.parse(entityStream);
 
@@ -184,7 +182,7 @@ public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPro
 
     private static Deque<Object> findPathToSchemaNodeByName(final DataSchemaNode schemaNode, final String elementName) {
         final Deque<Object> result = new ArrayDeque<>();
-        final ArrayList<ChoiceSchemaNode> choiceSchemaNodes = new ArrayList<>();
+        final List<ChoiceSchemaNode> choiceSchemaNodes = new ArrayList<>();
         final Collection<DataSchemaNode> children = ((DataNodeContainer) schemaNode).getChildNodes();
         for (final DataSchemaNode child : children) {
             if (child instanceof ChoiceSchemaNode) {
