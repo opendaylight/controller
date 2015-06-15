@@ -38,8 +38,7 @@ public class SchemaExportContentYangBodyWriter implements MessageBodyWriter<Sche
     @Override
     public void writeTo(final SchemaExportContext t, final Class<?> type, final Type genericType,
             final Annotation[] annotations, final MediaType mediaType,
-            final MultivaluedMap<String, Object> httpHeaders, final OutputStream entityStream) throws IOException,
-            WebApplicationException {
+            final MultivaluedMap<String, Object> httpHeaders, final OutputStream entityStream) throws IOException {
         final PrintWriter writer = new PrintWriter(entityStream);
         writer.write(t.getModule().getSource());
 

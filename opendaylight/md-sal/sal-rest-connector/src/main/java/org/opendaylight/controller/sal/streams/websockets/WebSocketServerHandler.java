@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
  */
 public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> {
 
-    private static final Logger logger = LoggerFactory.getLogger(WebSocketServerHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(WebSocketServerHandler.class);
 
     private WebSocketServerHandshaker handshaker;
 
@@ -59,7 +59,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
      * @param req
      *            FullHttpRequest
      */
-    private void handleHttpRequest(final ChannelHandlerContext ctx, final FullHttpRequest req) throws Exception {
+    private void handleHttpRequest(final ChannelHandlerContext ctx, final FullHttpRequest req) {
         // Handle a bad request.
         if (!req.getDecoderResult().isSuccess()) {
             sendHttpResponse(ctx, req, new DefaultFullHttpResponse(HTTP_1_1, BAD_REQUEST));
@@ -67,7 +67,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
         }
 
         // Allow only GET methods.
-        if (req.getMethod() != GET) {
+        if (req.getMethod().equals(GET)) {
             sendHttpResponse(ctx, req, new DefaultFullHttpResponse(HTTP_1_1, FORBIDDEN));
             return;
         }
@@ -76,9 +76,9 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
         ListenerAdapter listener = Notificator.getListenerFor(streamName);
         if (listener != null) {
             listener.addSubscriber(ctx.channel());
-            logger.debug("Subscriber successfully registered.");
+            LOG.debug("Subscriber successfully registered.");
         } else {
-            logger.error("Listener for stream with name '{}' was not found.", streamName);
+            LOG.error("Listener for stream with name '{}' was not found.", streamName);
             sendHttpResponse(ctx, req, new DefaultFullHttpResponse(HTTP_1_1, INTERNAL_SERVER_ERROR));
         }
 
@@ -136,7 +136,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
             ListenerAdapter listener = Notificator.getListenerFor(streamName);
             if (listener != null) {
                 listener.removeSubscriber(ctx.channel());
-                logger.debug("Subscriber successfully registered.");
+                LOG.debug("Subscriber successfully registered.");
             }
             Notificator.removeListenerIfNoSubscriberExists(listener);
             return;
@@ -148,8 +148,8 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 
     @Override
     public void exceptionCaught(final ChannelHandlerContext ctx, final Throwable cause) throws Exception {
-        if (cause instanceof java.nio.channels.ClosedChannelException == false) {
-            // cause.printStackTrace();
+        if (!(cause instanceof java.nio.channels.ClosedChannelException)) {
+            LOG.error("WebSocketServerHandler exception: '" + cause + "'");
         }
         ctx.close();
     }

@@ -252,8 +252,8 @@ public class ControllerContext implements SchemaContextListener {
                 startQName.getRevision());
         DataNodeContainer node = initialModule;
         for (final PathArgument element : elements) {
-            final QName _nodeType = element.getNodeType();
-            final DataSchemaNode potentialNode = ControllerContext.childByQName(node, _nodeType);
+            final QName nodeType = element.getNodeType();
+            final DataSchemaNode potentialNode = ControllerContext.childByQName(node, nodeType);
             if (potentialNode == null || !ControllerContext.isListOrContainer(potentialNode)) {
                 return null;
             }
@@ -281,8 +281,8 @@ public class ControllerContext implements SchemaContextListener {
         DataNodeContainer node = initialModule;
         for (final PathArgument element : elements) {
             if (!(element instanceof AugmentationIdentifier)) {
-                final QName _nodeType = element.getNodeType();
-                final DataSchemaNode potentialNode = ControllerContext.childByQName(node, _nodeType);
+                final QName nodeType = element.getNodeType();
+                final DataSchemaNode potentialNode = ControllerContext.childByQName(node, nodeType);
                 if (!(element instanceof NodeIdentifier && potentialNode instanceof ListSchemaNode) &&
                         !(potentialNode instanceof ChoiceSchemaNode)) {
                     builder.append(convertToRestconfIdentifier(element, potentialNode, mount));
@@ -476,10 +476,6 @@ public class ControllerContext implements SchemaContextListener {
         return ControllerContext.dataNodeChildByQName(container, name);
     }
 
-    private static DataSchemaNode childByQName(final DataSchemaNode container, final QName name) {
-        return null;
-    }
-
     private static DataSchemaNode dataNodeChildByQName(final DataNodeContainer container, final QName name) {
         final DataSchemaNode ret = container.getDataChildByName(name);
         if (ret == null) {
@@ -522,17 +518,14 @@ public class ControllerContext implements SchemaContextListener {
         if (!Strings.isNullOrEmpty(moduleName)) {
             if (Objects.equal(moduleName, ControllerContext.MOUNT_MODULE)
                     && Objects.equal(nodeName, ControllerContext.MOUNT_NODE)) {
-                if (mountPoint != null) {
-                    throw new RestconfDocumentedException("Restconf supports just one mount point in URI.",
-                            ErrorType.APPLICATION, ErrorTag.OPERATION_NOT_SUPPORTED);
-                }
-
-                if (mountService == null) {
-                    throw new RestconfDocumentedException(
-                            "MountService was not found. Finding behind mount points does not work.",
-                            ErrorType.APPLICATION, ErrorTag.OPERATION_NOT_SUPPORTED);
-                }
-
+                if (mountPoint != null) { throw new RestconfDocumentedException(
+                        "Restconf supports just one mount point in URI.", ErrorType.APPLICATION,
+                        ErrorTag.OPERATION_NOT_SUPPORTED); }
+                
+                if (mountService == null) { throw new RestconfDocumentedException(
+                        "MountService was not found. Finding behind mount points does not work.",
+                        ErrorType.APPLICATION, ErrorTag.OPERATION_NOT_SUPPORTED); }
+                
                 final YangInstanceIdentifier partialPath = dataNormalizer.toNormalized(builder.build());
                 final Optional<DOMMountPoint> mountOpt = mountService.getMountPoint(partialPath);
                 if (!mountOpt.isPresent()) {
@@ -541,73 +534,63 @@ public class ControllerContext implements SchemaContextListener {
                             ErrorTag.DATA_MISSING);
                 }
                 final DOMMountPoint mount = mountOpt.get();
-
+                
                 final SchemaContext mountPointSchema = mount.getSchemaContext();
-                if (mountPointSchema == null) {
-                    throw new RestconfDocumentedException("Mount point does not contain any schema with modules.",
-                            ErrorType.APPLICATION, ErrorTag.UNKNOWN_ELEMENT);
-                }
-
+                if (mountPointSchema == null) { throw new RestconfDocumentedException(
+                        "Mount point does not contain any schema with modules.", ErrorType.APPLICATION,
+                        ErrorTag.UNKNOWN_ELEMENT); }
+                
                 if (returnJustMountPoint || strings.size() == 1) {
                     final YangInstanceIdentifier instance = YangInstanceIdentifier.builder().toInstance();
-                    return new InstanceIdentifierContext<>(instance, mountPointSchema, mount,mountPointSchema);
+                    return new InstanceIdentifierContext<>(instance, mountPointSchema, mount, mountPointSchema);
                 }
-
+                
                 final String moduleNameBehindMountPoint = toModuleName(strings.get(1));
-                if (moduleNameBehindMountPoint == null) {
-                    throw new RestconfDocumentedException(
-                            "First node after mount point in URI has to be in format \"moduleName:nodeName\"",
-                            ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
-                }
-
-                final Module moduleBehindMountPoint = mountPointSchema.findModuleByName(moduleNameBehindMountPoint, null);
-                if (moduleBehindMountPoint == null) {
-                    throw new RestconfDocumentedException("\"" + moduleName
-                            + "\" module does not exist in mount point.", ErrorType.PROTOCOL, ErrorTag.UNKNOWN_ELEMENT);
-                }
-
+                if (moduleNameBehindMountPoint == null) { throw new RestconfDocumentedException(
+                        "First node after mount point in URI has to be in format \"moduleName:nodeName\"",
+                        ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE); }
+                
+                final Module moduleBehindMountPoint = mountPointSchema.findModuleByName(moduleNameBehindMountPoint,
+                        null);
+                if (moduleBehindMountPoint == null) { throw new RestconfDocumentedException("\"" + moduleName
+                        + "\" module does not exist in mount point.", ErrorType.PROTOCOL, ErrorTag.UNKNOWN_ELEMENT); }
+                
                 final List<String> subList = strings.subList(1, strings.size());
                 return collectPathArguments(YangInstanceIdentifier.builder(), subList, moduleBehindMountPoint, mount,
                         returnJustMountPoint);
             }
-
+            
             Module module = null;
             if (mountPoint == null) {
                 checkPreconditions();
                 module = globalSchema.findModuleByName(moduleName, null);
-                if (module == null) {
-                    throw new RestconfDocumentedException("\"" + moduleName + "\" module does not exist.",
-                            ErrorType.PROTOCOL, ErrorTag.UNKNOWN_ELEMENT);
-                }
-            } else {
+                if (module == null) { throw new RestconfDocumentedException("\"" + moduleName
+                        + "\" module does not exist.", ErrorType.PROTOCOL, ErrorTag.UNKNOWN_ELEMENT); }
+            }
+            else {
                 final SchemaContext schemaContext = mountPoint.getSchemaContext();
                 if (schemaContext != null) {
                     module = schemaContext.findModuleByName(moduleName, null);
-                } else {
+                }
+                else {
                     module = null;
                 }
-                if (module == null) {
-                    throw new RestconfDocumentedException("\"" + moduleName
-                            + "\" module does not exist in mount point.", ErrorType.PROTOCOL, ErrorTag.UNKNOWN_ELEMENT);
-                }
+                if (module == null) { throw new RestconfDocumentedException("\"" + moduleName
+                        + "\" module does not exist in mount point.", ErrorType.PROTOCOL, ErrorTag.UNKNOWN_ELEMENT); }
             }
-
+            
             targetNode = findInstanceDataChildByNameAndNamespace(parentNode, nodeName, module.getNamespace());
-
+            
             if (targetNode == null && parentNode instanceof Module) {
                 final RpcDefinition rpc = ControllerContext.getInstance().getRpcDefinition(head);
-                if (rpc != null) {
-                    return new InstanceIdentifierContext<RpcDefinition>(builder.build(), rpc, mountPoint,
-                            mountPoint != null ? mountPoint.getSchemaContext() : globalSchema);
-                }
+                if (rpc != null) { return new InstanceIdentifierContext<RpcDefinition>(builder.build(), rpc,
+                        mountPoint, mountPoint != null ? mountPoint.getSchemaContext() : globalSchema); }
             }
-
-            if (targetNode == null) {
-                throw new RestconfDocumentedException("URI has bad format. Possible reasons:\n" + " 1. \"" + head
-                        + "\" was not found in parent data node.\n" + " 2. \"" + head
-                        + "\" is behind mount point. Then it should be in format \"/" + MOUNT + "/" + head + "\".",
-                        ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
-            }
+            
+            if (targetNode == null) { throw new RestconfDocumentedException("URI has bad format. Possible reasons:\n"
+                    + " 1. \"" + head + "\" was not found in parent data node.\n" + " 2. \"" + head
+                    + "\" is behind mount point. Then it should be in format \"/" + MOUNT + "/" + head + "\".",
+                    ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE); }
         } else {
             final List<DataSchemaNode> potentialSchemaNodes = findInstanceDataChildrenByName(parentNode, nodeName);
             if (potentialSchemaNodes.size() > 1) {
@@ -648,7 +631,7 @@ public class ControllerContext implements SchemaContextListener {
             }
 
             final List<String> uriKeyValues = strings.subList(consumed, consumed + keysSize);
-            final HashMap<QName, Object> keyValues = new HashMap<QName, Object>();
+            final Map<QName, Object> keyValues = new HashMap<QName, Object>();
             int i = 0;
             for (final QName key : listNode.getKeyDefinition()) {
                 {
@@ -749,12 +732,15 @@ public class ControllerContext implements SchemaContextListener {
     }
 
     public static boolean isInstantiatedDataSchema(final DataSchemaNode node) {
-        return node instanceof LeafSchemaNode || node instanceof LeafListSchemaNode
-                || node instanceof ContainerSchemaNode || node instanceof ListSchemaNode
-                || node instanceof AnyXmlSchemaNode;
+        if(node instanceof LeafSchemaNode) { return true;}
+        if(node instanceof LeafListSchemaNode) { return true;}
+        if(node instanceof ContainerSchemaNode) { return true;}
+        if(node instanceof ListSchemaNode) { return true;}
+        if(node instanceof AnyXmlSchemaNode) { return true;}
+        return false;
     }
 
-    private void addKeyValue(final HashMap<QName, Object> map, final DataSchemaNode node, final String uriValue,
+    private void addKeyValue(final Map<QName, Object> map, final DataSchemaNode node, final String uriValue,
             final DOMMountPoint mountPoint) {
         Preconditions.checkNotNull(uriValue);
         Preconditions.checkArgument((node instanceof LeafSchemaNode));
@@ -765,7 +751,7 @@ public class ControllerContext implements SchemaContextListener {
         if (baseType instanceof LeafrefTypeDefinition) {
             typedef = SchemaContextUtil.getBaseTypeForLeafRef((LeafrefTypeDefinition) baseType, globalSchema, node);
         }
-        Codec<Object, Object> codec = RestCodec.from(typedef, mountPoint);
+        final Codec<Object, Object> codec = RestCodec.from(typedef, mountPoint);
         Object decoded = codec.deserialize(urlDecoded);
         String additionalInfo = "";
         if (decoded == null) {
@@ -848,11 +834,12 @@ public class ControllerContext implements SchemaContextListener {
         try {
             final List<String> decodedPathArgs = new ArrayList<String>();
             for (final String pathArg : strings) {
-                final String _decode = URLDecoder.decode(pathArg, URI_ENCODING_CHAR_SET);
-                decodedPathArgs.add(_decode);
+                final String decode = URLDecoder.decode(pathArg, URI_ENCODING_CHAR_SET);
+                decodedPathArgs.add(decode);
             }
             return decodedPathArgs;
         } catch (final UnsupportedEncodingException e) {
+            LOG.debug(e.getMessage(), e);
             throw new RestconfDocumentedException("Invalid URL path '" + strings + "': " + e.getMessage(),
                     ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
         }
@@ -863,6 +850,7 @@ public class ControllerContext implements SchemaContextListener {
             try {
                 return URLDecoder.decode(pathArg, URI_ENCODING_CHAR_SET);
             } catch (final UnsupportedEncodingException e) {
+                LOG.debug(e.getMessage(), e);
                 throw new RestconfDocumentedException("Invalid URL path arg '" + pathArg + "': " + e.getMessage(),
                         ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
             }
@@ -935,7 +923,7 @@ public class ControllerContext implements SchemaContextListener {
         } else if (container instanceof ListSchemaNode) {
             return childByQName((ListSchemaNode) container, name);
         } else if (container instanceof DataSchemaNode) {
-            return childByQName((DataSchemaNode) container, name);
+            return null;
         } else if (container instanceof Module) {
             return childByQName((Module) container, name);
         } else {
@@ -945,18 +933,12 @@ public class ControllerContext implements SchemaContextListener {
     }
 
     public YangInstanceIdentifier toNormalized(final YangInstanceIdentifier legacy) {
-        try {
             return dataNormalizer.toNormalized(legacy);
-        } catch (final NullPointerException e) {
-            throw new RestconfDocumentedException("Data normalizer isn't set. Normalization isn't possible", e);
-        }
     }
 
     public YangInstanceIdentifier toXpathRepresentation(final YangInstanceIdentifier instanceIdentifier) {
         try {
             return dataNormalizer.toLegacy(instanceIdentifier);
-        } catch (final NullPointerException e) {
-            throw new RestconfDocumentedException("Data normalizer isn't set. Normalization isn't possible", e);
         } catch (final DataNormalizationException e) {
             throw new RestconfDocumentedException("Data normalizer failed. Normalization isn't possible", e);
         }
