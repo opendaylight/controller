@@ -1,24 +1,25 @@
 package org.opendaylight.controller.cluster.datastore;
 
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import akka.dispatch.ExecutionContexts;
+import akka.actor.ActorSelection;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
-import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import scala.concurrent.Future;
 
 public class LocalTransactionContextTest {
 
@@ -31,12 +32,15 @@ public class LocalTransactionContextTest {
     @Mock
     DOMStoreReadWriteTransaction readWriteTransaction;
 
+    @Mock
+    LocalTransactionReadySupport mockReadySupport;
+
     LocalTransactionContext localTransactionContext;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        localTransactionContext = new LocalTransactionContext(readWriteTransaction, limiter.getIdentifier()) {
+        localTransactionContext = new LocalTransactionContext(readWriteTransaction, limiter.getIdentifier(), mockReadySupport) {
             @Override
             protected DOMStoreWriteTransaction getWriteDelegate() {
                 return readWriteTransaction;
@@ -93,14 +97,66 @@ public class LocalTransactionContextTest {
     @Test
     public void testReady() {
         final LocalThreePhaseCommitCohort mockCohort = mock(LocalThreePhaseCommitCohort.class);
-        final ActorContext mockContext = mock(ActorContext.class);
-        doReturn(mockContext).when(mockCohort).getActorContext();
-        doReturn(ExecutionContexts.fromExecutor(MoreExecutors.directExecutor())).when(mockContext).getClientDispatcher();
         doReturn(akka.dispatch.Futures.successful(null)).when(mockCohort).initiateCoordinatedCommit();
-        doReturn(mockCohort).when(readWriteTransaction).ready();
-        localTransactionContext.readyTransaction();
-        verify(readWriteTransaction).ready();
+        doReturn(mockCohort).when(mockReadySupport).onTransactionReady(readWriteTransaction);
+
+        Future<ActorSelection> future = localTransactionContext.readyTransaction();
+        assertTrue(future.isCompleted());
+
+        verify(mockReadySupport).onTransactionReady(readWriteTransaction);
     }
 
+    @Test
+    public void testReadyWithWriteError() {
+        YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.builder().build();
+        NormalizedNode<?, ?> normalizedNode = mock(NormalizedNode.class);
+        RuntimeException error = new RuntimeException("mock");
+        doThrow(error).when(readWriteTransaction).write(yangInstanceIdentifier, normalizedNode);
 
+        localTransactionContext.writeData(yangInstanceIdentifier, normalizedNode);
+        localTransactionContext.writeData(yangInstanceIdentifier, normalizedNode);
+
+        verify(readWriteTransaction).write(yangInstanceIdentifier, normalizedNode);
+
+        doReadyWithExpectedError(error);
+    }
+
+    @Test
+    public void testReadyWithMergeError() {
+        YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.builder().build();
+        NormalizedNode<?, ?> normalizedNode = mock(NormalizedNode.class);
+        RuntimeException error = new RuntimeException("mock");
+        doThrow(error).when(readWriteTransaction).merge(yangInstanceIdentifier, normalizedNode);
+
+        localTransactionContext.mergeData(yangInstanceIdentifier, normalizedNode);
+        localTransactionContext.mergeData(yangInstanceIdentifier, normalizedNode);
+
+        verify(readWriteTransaction).merge(yangInstanceIdentifier, normalizedNode);
+
+        doReadyWithExpectedError(error);
+    }
+
+    @Test
+    public void testReadyWithDeleteError() {
+        YangInstanceIdentifier yangInstanceIdentifier = YangInstanceIdentifier.builder().build();
+        RuntimeException error = new RuntimeException("mock");
+        doThrow(error).when(readWriteTransaction).delete(yangInstanceIdentifier);
+
+        localTransactionContext.deleteData(yangInstanceIdentifier);
+        localTransactionContext.deleteData(yangInstanceIdentifier);
+
+        verify(readWriteTransaction).delete(yangInstanceIdentifier);
+
+        doReadyWithExpectedError(error);
+    }
+
+    private void doReadyWithExpectedError(RuntimeException expError) {
+        LocalThreePhaseCommitCohort mockCohort = mock(LocalThreePhaseCommitCohort.class);
+        doReturn(akka.dispatch.Futures.successful(null)).when(mockCohort).initiateCoordinatedCommit();
+        doReturn(mockCohort).when(mockReadySupport).onTransactionReady(readWriteTransaction);
+
+        localTransactionContext.readyTransaction();
+
+        verify(mockCohort).setOperationError(expError);
+    }
 }
