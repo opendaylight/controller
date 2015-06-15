@@ -11,7 +11,6 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.opendaylight.controller.cluster.datastore.DataStoreVersions.CURRENT_VERSION;
-
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.PoisonPill;
@@ -985,6 +984,44 @@ public class ShardTest extends AbstractShardTest {
             if(failure != null) {
                 throw failure.cause();
             }
+        }};
+    }
+
+    @Test
+    public void testBatchedModificationsWithOperationFailure() throws Throwable {
+        new ShardTestKit(getSystem()) {{
+            final TestActorRef<Shard> shard = TestActorRef.create(getSystem(),
+                    newShardProps().withDispatcher(Dispatchers.DefaultDispatcherId()),
+                    "testBatchedModificationsWithOperationFailure");
+
+            waitUntilLeader(shard);
+
+            // Test merge with invalid data. An exception should occur when the merge is applied. Note that
+            // write will not validate the children for performance reasons.
+
+            String transactionID = "tx1";
+
+            ContainerNode invalidData = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
+                    new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME)).
+                        withChild(ImmutableNodes.leafNode(TestModel.JUNK_QNAME, "junk")).build();
+
+            BatchedModifications batched = new BatchedModifications(transactionID, CURRENT_VERSION, null);
+            batched.addModification(new MergeModification(TestModel.TEST_PATH, invalidData));
+            shard.tell(batched, getRef());
+            Failure failure = expectMsgClass(duration("5 seconds"), akka.actor.Status.Failure.class);
+
+            Throwable cause = failure.cause();
+
+            batched = new BatchedModifications(transactionID, DataStoreVersions.CURRENT_VERSION, null);
+            batched.setReady(true);
+            batched.setTotalMessagesSent(2);
+
+            shard.tell(batched, getRef());
+
+            failure = expectMsgClass(duration("5 seconds"), akka.actor.Status.Failure.class);
+            assertEquals("Failure cause", cause, failure.cause());
+
+            shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
         }};
     }
 
