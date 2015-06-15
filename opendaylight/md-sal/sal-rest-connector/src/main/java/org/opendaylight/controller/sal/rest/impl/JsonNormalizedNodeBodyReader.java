@@ -17,7 +17,6 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyReader;
@@ -53,7 +52,7 @@ import org.slf4j.LoggerFactory;
         MediaType.APPLICATION_JSON })
 public class JsonNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsProvider implements MessageBodyReader<NormalizedNodeContext> {
 
-    private final static Logger LOG = LoggerFactory.getLogger(JsonNormalizedNodeBodyReader.class);
+    private static final Logger LOG = LoggerFactory.getLogger(JsonNormalizedNodeBodyReader.class);
 
     @Override
     public boolean isReadable(final Class<?> type, final Type genericType, final Annotation[] annotations,
@@ -64,8 +63,7 @@ public class JsonNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPr
     @Override
     public NormalizedNodeContext readFrom(final Class<NormalizedNodeContext> type, final Type genericType,
             final Annotation[] annotations, final MediaType mediaType,
-            final MultivaluedMap<String, String> httpHeaders, final InputStream entityStream) throws IOException,
-            WebApplicationException {
+            final MultivaluedMap<String, String> httpHeaders, final InputStream entityStream) throws IOException {
         try {
             final InstanceIdentifierContext<?> path = getInstanceIdentifierContext();
             if (entityStream.available() < 1) {

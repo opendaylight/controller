@@ -114,8 +114,6 @@ public class RestconfImpl implements RestconfService {
 
     private static final String SAL_REMOTE_NAMESPACE = "urn:opendaylight:params:xml:ns:yang:controller:md:sal:remote";
 
-    private static final String SAL_REMOTE_RPC_SUBSRCIBE = "create-data-change-event-subscription";
-
     private BrokerFacade broker;
 
     private ControllerContext controllerContext;
@@ -504,12 +502,6 @@ public class RestconfImpl implements RestconfService {
             // did not expect any input
             throw new RestconfDocumentedException("No input expected.", ErrorType.PROTOCOL, ErrorTag.MALFORMED_MESSAGE);
         }
-        // else
-        // {
-        // TODO: Validate "mandatory" and "config" values here??? Or should those be
-        // those be
-        // validate in a more central location inside MD-SAL core.
-        // }
     }
 
     private CheckedFuture<DOMRpcResult, DOMRpcException> invokeSalRemoteRpcSubscribeRPC(final NormalizedNodeContext payload) {
@@ -570,7 +562,7 @@ public class RestconfImpl implements RestconfService {
             throw new RestconfDocumentedException("Content must be empty.", ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
         }
 
-        String identifierEncoded = null;
+        String identifierEncoded;
         DOMMountPoint mountPoint = null;
         final SchemaContext schemaContext;
         if (identifier.contains(ControllerContext.MOUNT)) {
@@ -580,10 +572,9 @@ public class RestconfImpl implements RestconfService {
             schemaContext = mountPoint.getSchemaContext();
             final int startOfRemoteRpcName = identifier.lastIndexOf(ControllerContext.MOUNT)
                     + ControllerContext.MOUNT.length() + 1;
-            final String remoteRpcName = identifier.substring(startOfRemoteRpcName);
-            identifierEncoded = remoteRpcName;
+            identifierEncoded = identifier.substring(startOfRemoteRpcName);
 
-        } else if (identifier.indexOf("/") != CHAR_NOT_FOUND) {
+        } else if (identifier.indexOf('/') != CHAR_NOT_FOUND) {
             final String slashErrorMsg = String.format("Identifier %n%s%ncan\'t contain slash "
                     + "character (/).%nIf slash is part of identifier name then use %%2F placeholder.", identifier);
             LOG.debug(slashErrorMsg);
@@ -722,18 +713,15 @@ public class RestconfImpl implements RestconfService {
                 }
 
                 break;
-            } catch (final TransactionCommitFailedException e) {
-                if(e instanceof OptimisticLockFailedException) {
-                    if(--tries <= 0) {
-                        LOG.debug("Got OptimisticLockFailedException on last try - failing " + identifier);
-                        throw new RestconfDocumentedException(e.getMessage(), e, e.getErrorList());
-                    }
-
-                    LOG.debug("Got OptimisticLockFailedException - trying again " + identifier);
-                } else {
-                    LOG.debug("Update ConfigDataStore fail " + identifier, e);
+            } catch (final OptimisticLockFailedException e) {
+                if(--tries <= 0) {
+                    LOG.debug("Got OptimisticLockFailedException on last try - failing " + identifier);
                     throw new RestconfDocumentedException(e.getMessage(), e, e.getErrorList());
                 }
+                LOG.debug("Got OptimisticLockFailedException - trying again " + identifier);
+            } catch (TransactionCommitFailedException e) {
+                LOG.debug("Update ConfigDataStore fail " + identifier, e);
+                throw new RestconfDocumentedException(e.getMessage(), e, e.getErrorList());
             }
         }
 
@@ -874,14 +862,14 @@ public class RestconfImpl implements RestconfService {
 
         final ResponseBuilder responseBuilder = Response.status(Status.NO_CONTENT);
         // FIXME: Provide path to result.
-        final URI location = resolveLocation(uriInfo, "", mountPoint, normalizedII);
+        final URI location = resolveLocation(uriInfo, mountPoint, normalizedII);
         if (location != null) {
             responseBuilder.location(location);
         }
         return responseBuilder.build();
     }
 
-    private URI resolveLocation(final UriInfo uriInfo, final String uriBehindBase, final DOMMountPoint mountPoint, final YangInstanceIdentifier normalizedII) {
+    private URI resolveLocation(final UriInfo uriInfo, final DOMMountPoint mountPoint, final YangInstanceIdentifier normalizedII) {
         final UriBuilder uriBuilder = uriInfo.getBaseUriBuilder();
         uriBuilder.path("config");
         try {
@@ -959,7 +947,7 @@ public class RestconfImpl implements RestconfService {
         try {
             final WebSocketServer webSocketServerInstance = WebSocketServer.getInstance();
             notificationPort = webSocketServerInstance.getPort();
-        } catch (final NullPointerException e) {
+        } catch (final IllegalStateException e) {
             WebSocketServer.createInstance(NOTIFICATION_PORT);
         }
         final UriBuilder uriToWebsocketServerBuilder = uriBuilder.port(notificationPort).scheme("ws");
@@ -1122,7 +1110,7 @@ public class RestconfImpl implements RestconfService {
         final DataSchemaNode replaySupportSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);
         Preconditions.checkState(replaySupportSchemaNode instanceof LeafSchemaNode);
         streamNodeValues.withChild(Builders.leafBuilder((LeafSchemaNode) replaySupportSchemaNode)
-                .withValue(Boolean.valueOf(true)).build());
+                .withValue(true).build());
 
         instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(
                 (listStreamSchemaNode), "replay-log-creation-time");
