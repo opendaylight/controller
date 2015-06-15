@@ -988,6 +988,40 @@ public class ShardTest extends AbstractShardTest {
         }};
     }
 
+    @Test
+    public void testBatchedModificationsWithOperationFailure() throws Throwable {
+        new ShardTestKit(getSystem()) {{
+            final TestActorRef<Shard> shard = TestActorRef.create(getSystem(),
+                    newShardProps().withDispatcher(Dispatchers.DefaultDispatcherId()),
+                    "testBatchedModificationsWithOperationFailure");
+
+            waitUntilLeader(shard);
+
+            String transactionID = "tx1";
+
+            ContainerNode invalidData = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
+                    new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME)).
+                        withChild(ImmutableNodes.leafNode(TestModel.JUNK_QNAME, "junk")).build();
+
+            shard.tell(newBatchedModifications(transactionID, TestModel.TEST_PATH,
+                    invalidData, false, false, 1), getRef());
+            Failure failure = expectMsgClass(duration("5 seconds"), akka.actor.Status.Failure.class);
+
+            Throwable cause = failure.cause();
+
+            BatchedModifications batched = new BatchedModifications(transactionID, DataStoreVersions.CURRENT_VERSION, null);
+            batched.setReady(true);
+            batched.setTotalMessagesSent(2);
+
+            shard.tell(batched, getRef());
+
+            failure = expectMsgClass(duration("5 seconds"), akka.actor.Status.Failure.class);
+            assertEquals("Failure cause", cause, failure.cause());
+
+            shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
+        }};
+    }
+
     @SuppressWarnings("unchecked")
     private static void verifyOuterListEntry(final TestActorRef<Shard> shard, final Object expIDValue) throws Exception {
         final NormalizedNode<?, ?> outerList = readStore(shard, TestModel.OUTER_LIST_PATH);

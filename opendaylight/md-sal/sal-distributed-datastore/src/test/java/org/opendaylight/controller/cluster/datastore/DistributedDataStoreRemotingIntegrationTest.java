@@ -9,6 +9,11 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Address;
@@ -16,12 +21,15 @@ import akka.actor.AddressFromURIString;
 import akka.cluster.Cluster;
 import akka.testkit.JavaTestKit;
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.typesafe.config.ConfigFactory;
 import java.math.BigInteger;
 import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyLocalTransaction;
 import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
@@ -31,12 +39,20 @@ import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.PeopleModel;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
+import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListener;
+import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
+import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
+import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -44,6 +60,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification
 import org.opendaylight.yangtools.yang.data.api.schema.tree.TipProducingDataTree;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.CollectionNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
 
 /**
@@ -355,6 +372,74 @@ public class DistributedDataStoreRemotingIntegrationTest {
 
         optional = readTx.read(personPath).get(5, TimeUnit.SECONDS);
         assertEquals("isPresent", false, optional.isPresent());
+    }
+
+    @Test
+    public void testChainedTransactionFailureWithSingleShard() throws Exception {
+        initDatastores("testChainedTransactionFailureWithSingleShard");
+
+        ConcurrentDOMDataBroker broker = new ConcurrentDOMDataBroker(
+                ImmutableMap.<LogicalDatastoreType, DOMStore>builder().put(
+                        LogicalDatastoreType.CONFIGURATION, followerDistributedDataStore).build(),
+                        MoreExecutors.directExecutor());
+
+        TransactionChainListener listener = Mockito.mock(TransactionChainListener.class);
+        DOMTransactionChain txChain = broker.createTransactionChain(listener);
+
+        DOMDataWriteTransaction writeTx = txChain.newWriteOnlyTransaction();
+
+        ContainerNode invalidData = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
+                new YangInstanceIdentifier.NodeIdentifier(CarsModel.BASE_QNAME)).
+                    withChild(ImmutableNodes.leafNode(TestModel.JUNK_QNAME, "junk")).build();
+
+        writeTx.merge(LogicalDatastoreType.CONFIGURATION, CarsModel.BASE_PATH, invalidData);
+
+        try {
+            writeTx.submit().checkedGet(5, TimeUnit.SECONDS);
+            fail("Expected TransactionCommitFailedException");
+        } catch (TransactionCommitFailedException e) {
+            // Expected
+        }
+
+        verify(listener, timeout(5000)).onTransactionChainFailed(eq(txChain), eq(writeTx), any(Throwable.class));
+
+        txChain.close();
+        broker.close();
+    }
+
+    @Test
+    public void testChainedTransactionFailureWithMultipleShards() throws Exception {
+        initDatastores("testChainedTransactionFailureWithMultipleShards");
+
+        ConcurrentDOMDataBroker broker = new ConcurrentDOMDataBroker(
+                ImmutableMap.<LogicalDatastoreType, DOMStore>builder().put(
+                        LogicalDatastoreType.CONFIGURATION, followerDistributedDataStore).build(),
+                        MoreExecutors.directExecutor());
+
+        TransactionChainListener listener = Mockito.mock(TransactionChainListener.class);
+        DOMTransactionChain txChain = broker.createTransactionChain(listener);
+
+        DOMDataWriteTransaction writeTx = txChain.newWriteOnlyTransaction();
+
+        writeTx.put(LogicalDatastoreType.CONFIGURATION, PeopleModel.BASE_PATH, PeopleModel.emptyContainer());
+
+        ContainerNode invalidData = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
+                new YangInstanceIdentifier.NodeIdentifier(CarsModel.BASE_QNAME)).
+                    withChild(ImmutableNodes.leafNode(TestModel.JUNK_QNAME, "junk")).build();
+
+        writeTx.put(LogicalDatastoreType.CONFIGURATION, CarsModel.BASE_PATH, invalidData);
+
+        try {
+            writeTx.submit().checkedGet(5, TimeUnit.SECONDS);
+            fail("Expected TransactionCommitFailedException");
+        } catch (TransactionCommitFailedException e) {
+            // Expected
+        }
+
+        verify(listener, timeout(5000)).onTransactionChainFailed(eq(txChain), eq(writeTx), any(Throwable.class));
+
+        txChain.close();
+        broker.close();
     }
 
     @Test

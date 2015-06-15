@@ -29,6 +29,7 @@ import scala.concurrent.Future;
  */
 abstract class LocalTransactionContext extends AbstractTransactionContext {
     private final DOMStoreTransaction txDelegate;
+    private Exception operationError;
 
     LocalTransactionContext(DOMStoreTransaction txDelegate, TransactionIdentifier identifier) {
         super(identifier);
@@ -42,19 +43,38 @@ abstract class LocalTransactionContext extends AbstractTransactionContext {
     @Override
     public void writeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
         incrementModificationCount();
-        getWriteDelegate().write(path, data);
+        if(operationError == null) {
+            try {
+                getWriteDelegate().write(path, data);
+            } catch (Exception e) {
+                operationError = e;
+            }
+        }
+
     }
 
     @Override
     public void mergeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
         incrementModificationCount();
-        getWriteDelegate().merge(path, data);
+        if(operationError == null) {
+            try {
+                getWriteDelegate().merge(path, data);
+            } catch (Exception e) {
+                operationError = e;
+            }
+        }
     }
 
     @Override
     public void deleteData(YangInstanceIdentifier path) {
         incrementModificationCount();
-        getWriteDelegate().delete(path);
+        if(operationError == null) {
+            try {
+                getWriteDelegate().delete(path);
+            } catch (Exception e) {
+                operationError = e;
+            }
+        }
     }
 
     @Override
@@ -89,7 +109,9 @@ abstract class LocalTransactionContext extends AbstractTransactionContext {
 
     private LocalThreePhaseCommitCohort ready() {
         logModificationCount();
-        return (LocalThreePhaseCommitCohort) getWriteDelegate().ready();
+        LocalThreePhaseCommitCohort cohort = (LocalThreePhaseCommitCohort) getWriteDelegate().ready();
+        cohort.setOperationError(operationError);
+        return cohort;
     }
 
     @Override
