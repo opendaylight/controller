@@ -70,7 +70,7 @@ import org.slf4j.LoggerFactory;
 @Provider
 public class RestconfDocumentedExceptionMapper implements ExceptionMapper<RestconfDocumentedException> {
 
-    private final static Logger LOG = LoggerFactory.getLogger(RestconfDocumentedExceptionMapper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RestconfDocumentedExceptionMapper.class);
 
     private static final XMLOutputFactory XML_FACTORY;
 
@@ -94,7 +94,8 @@ public class RestconfDocumentedExceptionMapper implements ExceptionMapper<Restco
 
         final MediaType mediaType;
         if (accepts != null && accepts.size() > 0) {
-            mediaType = accepts.get(0); // just pick the first one
+            // just pick the first one
+            mediaType = accepts.get(0);
         } else {
             // Default to the content type if there's no Accept header
             mediaType = MediaType.APPLICATION_JSON_TYPE;
@@ -143,9 +144,9 @@ public class RestconfDocumentedExceptionMapper implements ExceptionMapper<Restco
 
         Object responseBody;
         if (mediaType.getSubtype().endsWith("json")) {
-            responseBody = toJsonResponseBody(errContext, errorsSchemaNode);
+            responseBody = toJsonResponseBody(errContext);
         } else {
-            responseBody = toXMLResponseBody(errContext, errorsSchemaNode);
+            responseBody = toXMLResponseBody(errContext);
         }
 
         return Response.status(status).type(mediaType).entity(responseBody).build();
@@ -193,7 +194,7 @@ public class RestconfDocumentedExceptionMapper implements ExceptionMapper<Restco
         return errNodeValues.build();
     }
 
-    private Object toJsonResponseBody(final NormalizedNodeContext errorsNode, final DataNodeContainer errorsSchemaNode) {
+    private Object toJsonResponseBody(final NormalizedNodeContext errorsNode) {
 
         final ByteArrayOutputStream outStream = new ByteArrayOutputStream();
         NormalizedNode<?, ?> data = errorsNode.getData();
@@ -239,7 +240,7 @@ public class RestconfDocumentedExceptionMapper implements ExceptionMapper<Restco
 
     }
 
-    private Object toXMLResponseBody(final NormalizedNodeContext errorsNode, final DataNodeContainer errorsSchemaNode) {
+    private Object toXMLResponseBody(final NormalizedNodeContext errorsNode) {
 
         final InstanceIdentifierContext<?> pathContext = errorsNode.getInstanceIdentifierContext();
         final ByteArrayOutputStream outStream = new ByteArrayOutputStream();

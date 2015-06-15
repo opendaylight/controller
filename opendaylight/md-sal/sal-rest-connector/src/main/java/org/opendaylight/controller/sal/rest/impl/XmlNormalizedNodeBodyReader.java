@@ -19,7 +19,6 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyReader;
@@ -35,6 +34,7 @@ import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.codec.xml.XmlUtils;
 import org.opendaylight.yangtools.yang.data.impl.schema.SchemaUtils;
@@ -59,7 +59,7 @@ import org.w3c.dom.Element;
     MediaType.APPLICATION_XML, MediaType.TEXT_XML })
 public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsProvider implements MessageBodyReader<NormalizedNodeContext> {
 
-    private final static Logger LOG = LoggerFactory.getLogger(XmlNormalizedNodeBodyReader.class);
+    private static final Logger LOG = LoggerFactory.getLogger(XmlNormalizedNodeBodyReader.class);
     private static final DocumentBuilderFactory BUILDERFACTORY;
 
     static {
@@ -89,8 +89,7 @@ public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPro
     @Override
     public NormalizedNodeContext readFrom(final Class<NormalizedNodeContext> type, final Type genericType,
             final Annotation[] annotations, final MediaType mediaType,
-            final MultivaluedMap<String, String> httpHeaders, final InputStream entityStream) throws IOException,
-            WebApplicationException {
+            final MultivaluedMap<String, String> httpHeaders, final InputStream entityStream) throws IOException {
         try {
             final InstanceIdentifierContext<?> path = getInstanceIdentifierContext();
 
@@ -99,12 +98,7 @@ public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPro
                 return new NormalizedNodeContext(path, null);
             }
 
-            final DocumentBuilder dBuilder;
-            try {
-                dBuilder = BUILDERFACTORY.newDocumentBuilder();
-            } catch (final ParserConfigurationException e) {
-                throw new RuntimeException("Failed to parse XML document", e);
-            }
+            final DocumentBuilder dBuilder = buildBuilder();
             final Document doc = dBuilder.parse(entityStream);
 
             return parse(path,doc);
@@ -118,50 +112,56 @@ public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPro
         }
     }
 
+    private DocumentBuilder buildBuilder() throws ParserConfigurationException {
+        final DocumentBuilder dBuilder;
+        try {
+            dBuilder = BUILDERFACTORY.newDocumentBuilder();
+        }
+        catch (final ParserConfigurationException e) {
+            throw e;
+        }
+        return dBuilder;
+    }
+
     private NormalizedNodeContext parse(final InstanceIdentifierContext<?> pathContext,final Document doc) {
 
         final List<Element> elements = Collections.singletonList(doc.getDocumentElement());
         final SchemaNode schemaNodeContext = pathContext.getSchemaNode();
         DataSchemaNode schemaNode;
         boolean isRpc = false;
+
         if (schemaNodeContext instanceof RpcDefinition) {
-            schemaNode = ((RpcDefinition) schemaNodeContext).getInput();
             isRpc = true;
-        } else if (schemaNodeContext instanceof DataSchemaNode) {
-            schemaNode = (DataSchemaNode) schemaNodeContext;
-        } else {
-            throw new IllegalStateException("Unknow SchemaNode");
         }
+        schemaNode = setSchemaNode(schemaNodeContext);
 
         final String docRootElm = doc.getDocumentElement().getLocalName();
         final List<YangInstanceIdentifier.PathArgument> iiToDataList = new ArrayList<>();
         InstanceIdentifierContext<? extends SchemaNode> outIIContext;
 
-
         // FIXME the factory instance should be cached if the schema context is the same
         final DomToNormalizedNodeParserFactory parserFactory =
                 DomToNormalizedNodeParserFactory.getInstance(XmlUtils.DEFAULT_XML_CODEC_PROVIDER, pathContext.getSchemaContext());
 
-        if (isPost() && !isRpc) {
-            final Deque<Object> foundSchemaNodes = findPathToSchemaNodeByName(schemaNode, docRootElm);
-            if (foundSchemaNodes.isEmpty()) {
-                throw new IllegalStateException(String.format("Child \"%s\" was not found in parent schema node \"%s\"",
-                        docRootElm, schemaNode.getQName()));
-            }
-            while (!foundSchemaNodes.isEmpty()) {
-                final Object child = foundSchemaNodes.pop();
-                if (child instanceof AugmentationSchema) {
-                    final AugmentationSchema augmentSchemaNode = (AugmentationSchema) child;
-                    iiToDataList.add(SchemaUtils.getNodeIdentifierForAugmentation(augmentSchemaNode));
-                } else if (child instanceof DataSchemaNode) {
-                    schemaNode = (DataSchemaNode) child;
-                    iiToDataList.add(new YangInstanceIdentifier.NodeIdentifier(schemaNode.getQName()));
-                }
-            }
-        }
+        schemaNode = checkIsPostAndRpc(schemaNode, docRootElm, isRpc, iiToDataList);
 
         NormalizedNode<?, ?> parsed = null;
 
+        parsed = setParsed(iiToDataList, schemaNode, parsed, elements, doc, parserFactory);
+        // FIXME : add another DataSchemaNode extensions e.g. LeafSchemaNode
+
+        final YangInstanceIdentifier fullIIToData = YangInstanceIdentifier.create(Iterables.concat(pathContext
+                .getInstanceIdentifier().getPathArguments(), iiToDataList));
+
+        outIIContext = new InstanceIdentifierContext<>(fullIIToData, pathContext.getSchemaNode(),
+                pathContext.getMountPoint(), pathContext.getSchemaContext());
+
+        return new NormalizedNodeContext(outIIContext, parsed);
+    }
+
+    private NormalizedNode<?, ?> setParsed(final List<PathArgument> iiToDataList, final DataSchemaNode schemaNode,
+            NormalizedNode<?, ?> parsed, final List<Element> elements, final Document doc,
+            final DomToNormalizedNodeParserFactory parserFactory) {
         if(schemaNode instanceof ContainerSchemaNode) {
             parsed = parserFactory.getContainerNodeParser().parse(Collections.singletonList(doc.getDocumentElement()), (ContainerSchemaNode) schemaNode);
         } else if(schemaNode instanceof ListSchemaNode) {
@@ -171,36 +171,56 @@ public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPro
                 iiToDataList.add(parsed.getIdentifier());
             }
         }
-        // FIXME : add another DataSchemaNode extensions e.g. LeafSchemaNode
+        return parsed;
+    }
 
-        final YangInstanceIdentifier fullIIToData = YangInstanceIdentifier.create(Iterables.concat(
-                pathContext.getInstanceIdentifier().getPathArguments(), iiToDataList));
+    private DataSchemaNode checkIsPostAndRpc(DataSchemaNode schemaNode, final String docRootElm, final boolean isRpc,
+            final List<PathArgument> iiToDataList) {
+        if (isPost() && !isRpc) {
+            final Deque<Object> foundSchemaNodes = findPathToSchemaNodeByName(schemaNode, docRootElm);
+            if (foundSchemaNodes.isEmpty()) { throw new IllegalStateException(String.format(
+                    "Child \"%s\" was not found in parent schema node \"%s\"", docRootElm, schemaNode.getQName())); }
+            while (!foundSchemaNodes.isEmpty()) {
+                final Object child = foundSchemaNodes.pop();
+                if (child instanceof AugmentationSchema) {
+                    final AugmentationSchema augmentSchemaNode = (AugmentationSchema) child;
+                    iiToDataList.add(SchemaUtils.getNodeIdentifierForAugmentation(augmentSchemaNode));
+                }
+                else if (child instanceof DataSchemaNode) {
+                    schemaNode = (DataSchemaNode) child;
+                    iiToDataList.add(new YangInstanceIdentifier.NodeIdentifier(schemaNode.getQName()));
+                }
+            }
+        }
+        return schemaNode;
+    }
 
-        outIIContext = new InstanceIdentifierContext<>(fullIIToData, pathContext.getSchemaNode(), pathContext.getMountPoint(),
-                pathContext.getSchemaContext());
-
-        return new NormalizedNodeContext(outIIContext, parsed);
+    private DataSchemaNode setSchemaNode(final SchemaNode schemaNodeContext) {
+        if (schemaNodeContext instanceof RpcDefinition) {
+            return ((RpcDefinition) schemaNodeContext).getInput();
+        }
+        else if (schemaNodeContext instanceof DataSchemaNode) {
+            return (DataSchemaNode) schemaNodeContext;
+        }
+        else {
+            throw new IllegalStateException("Unknow SchemaNode");
+        }
     }
 
     private static Deque<Object> findPathToSchemaNodeByName(final DataSchemaNode schemaNode, final String elementName) {
-        final Deque<Object> result = new ArrayDeque<>();
-        final ArrayList<ChoiceSchemaNode> choiceSchemaNodes = new ArrayList<>();
+        Deque<Object> result = new ArrayDeque<>();
+        final List<ChoiceSchemaNode> choiceSchemaNodes = new ArrayList<>();
         final Collection<DataSchemaNode> children = ((DataNodeContainer) schemaNode).getChildNodes();
-        for (final DataSchemaNode child : children) {
-            if (child instanceof ChoiceSchemaNode) {
-                choiceSchemaNodes.add((ChoiceSchemaNode) child);
-            } else if (child.getQName().getLocalName().equalsIgnoreCase(elementName)) {
-                result.push(child);
-                if (child.isAugmenting()) {
-                    final AugmentationSchema augment = findCorrespondingAugment(schemaNode, child);
-                    if (augment != null) {
-                        result.push(augment);
-                    }
-                }
-                return result;
-            }
-        }
 
+        result = checkChild(result, children, elementName, schemaNode, choiceSchemaNodes);
+
+        if (!result.isEmpty()) { return result; }
+
+        return choiceResult(choiceSchemaNodes, elementName, schemaNode, result);
+    }
+
+    private static Deque<Object> choiceResult(final List<ChoiceSchemaNode> choiceSchemaNodes, final String elementName,
+            final DataSchemaNode schemaNode, final Deque<Object> result) {
         for (final ChoiceSchemaNode choiceNode : choiceSchemaNodes) {
             for (final ChoiceCaseNode caseNode : choiceNode.getCases()) {
                 final Deque<Object> resultFromRecursion = findPathToSchemaNodeByName(caseNode, elementName);
@@ -214,6 +234,26 @@ public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPro
                     }
                     return resultFromRecursion;
                 }
+            }
+        }
+        return result;
+    }
+
+    private static Deque<Object> checkChild(final Deque<Object> result, final Collection<DataSchemaNode> children,
+            final String elementName, final DataSchemaNode schemaNode, final List<ChoiceSchemaNode> choiceSchemaNodes) {
+        for (final DataSchemaNode child : children) {
+            if (child instanceof ChoiceSchemaNode) {
+                choiceSchemaNodes.add((ChoiceSchemaNode) child);
+            }
+            else if (child.getQName().getLocalName().equalsIgnoreCase(elementName)) {
+                result.push(child);
+                if (child.isAugmenting()) {
+                    final AugmentationSchema augment = findCorrespondingAugment(schemaNode, child);
+                    if (augment != null) {
+                        result.push(augment);
+                    }
+                }
+                return result;
             }
         }
         return result;

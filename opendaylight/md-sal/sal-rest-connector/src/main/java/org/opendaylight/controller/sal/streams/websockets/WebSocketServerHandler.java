@@ -8,7 +8,6 @@ import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
 import static io.netty.handler.codec.http.HttpResponseStatus.FORBIDDEN;
 import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERROR;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
-
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
@@ -38,7 +37,7 @@ import org.slf4j.LoggerFactory;
  */
 public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> {
 
-    private static final Logger logger = LoggerFactory.getLogger(WebSocketServerHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(WebSocketServerHandler.class);
 
     private WebSocketServerHandshaker handshaker;
 
@@ -59,7 +58,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
      * @param req
      *            FullHttpRequest
      */
-    private void handleHttpRequest(final ChannelHandlerContext ctx, final FullHttpRequest req) throws Exception {
+    private void handleHttpRequest(final ChannelHandlerContext ctx, final FullHttpRequest req) {
         // Handle a bad request.
         if (!req.getDecoderResult().isSuccess()) {
             sendHttpResponse(ctx, req, new DefaultFullHttpResponse(HTTP_1_1, BAD_REQUEST));
@@ -67,23 +66,23 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
         }
 
         // Allow only GET methods.
-        if (req.getMethod() != GET) {
+        if (!req.getMethod().equals(GET)) {
             sendHttpResponse(ctx, req, new DefaultFullHttpResponse(HTTP_1_1, FORBIDDEN));
             return;
         }
 
-        String streamName = Notificator.createStreamNameFromUri(req.getUri());
-        ListenerAdapter listener = Notificator.getListenerFor(streamName);
+        final String streamName = Notificator.createStreamNameFromUri(req.getUri());
+        final ListenerAdapter listener = Notificator.getListenerFor(streamName);
         if (listener != null) {
             listener.addSubscriber(ctx.channel());
-            logger.debug("Subscriber successfully registered.");
+            LOG.debug("Subscriber successfully registered.");
         } else {
-            logger.error("Listener for stream with name '{}' was not found.", streamName);
+            LOG.error("Listener for stream with name '{}' was not found.", streamName);
             sendHttpResponse(ctx, req, new DefaultFullHttpResponse(HTTP_1_1, INTERNAL_SERVER_ERROR));
         }
 
         // Handshake
-        WebSocketServerHandshakerFactory wsFactory = new WebSocketServerHandshakerFactory(getWebSocketLocation(req),
+        final WebSocketServerHandshakerFactory wsFactory = new WebSocketServerHandshakerFactory(getWebSocketLocation(req),
                 null, false);
         handshaker = wsFactory.newHandshaker(req);
         if (handshaker == null) {
@@ -108,14 +107,14 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
             final FullHttpResponse res) {
         // Generate an error page if response getStatus code is not OK (200).
         if (res.getStatus().code() != 200) {
-            ByteBuf buf = Unpooled.copiedBuffer(res.getStatus().toString(), CharsetUtil.UTF_8);
+            final ByteBuf buf = Unpooled.copiedBuffer(res.getStatus().toString(), CharsetUtil.UTF_8);
             res.content().writeBytes(buf);
             buf.release();
             setContentLength(res, res.content().readableBytes());
         }
 
         // Send the response and close the connection if necessary.
-        ChannelFuture f = ctx.channel().writeAndFlush(res);
+        final ChannelFuture f = ctx.channel().writeAndFlush(res);
         if (!isKeepAlive(req) || res.getStatus().code() != 200) {
             f.addListener(ChannelFutureListener.CLOSE);
         }
@@ -132,11 +131,11 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
     private void handleWebSocketFrame(final ChannelHandlerContext ctx, final WebSocketFrame frame) throws IOException {
         if (frame instanceof CloseWebSocketFrame) {
             handshaker.close(ctx.channel(), (CloseWebSocketFrame) frame.retain());
-            String streamName = Notificator.createStreamNameFromUri(((CloseWebSocketFrame) frame).reasonText());
-            ListenerAdapter listener = Notificator.getListenerFor(streamName);
+            final String streamName = Notificator.createStreamNameFromUri(((CloseWebSocketFrame) frame).reasonText());
+            final ListenerAdapter listener = Notificator.getListenerFor(streamName);
             if (listener != null) {
                 listener.removeSubscriber(ctx.channel());
-                logger.debug("Subscriber successfully registered.");
+                LOG.debug("Subscriber successfully registered.");
             }
             Notificator.removeListenerIfNoSubscriberExists(listener);
             return;
@@ -148,8 +147,8 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
 
     @Override
     public void exceptionCaught(final ChannelHandlerContext ctx, final Throwable cause) throws Exception {
-        if (cause instanceof java.nio.channels.ClosedChannelException == false) {
-            // cause.printStackTrace();
+        if (!(cause instanceof java.nio.channels.ClosedChannelException)) {
+            LOG.error("WebSocketServerHandler exception: '" + cause + "'");
         }
         ctx.close();
     }

@@ -14,7 +14,7 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 import org.opendaylight.controller.sal.rest.api.RestconfService;
 
-public class StatisticsRestconfServiceWrapper implements RestconfService {
+public final class StatisticsRestconfServiceWrapper implements RestconfService {
 
     AtomicLong operationalGet = new AtomicLong();
     AtomicLong configGet = new AtomicLong();
@@ -99,7 +99,7 @@ public class StatisticsRestconfServiceWrapper implements RestconfService {
             else {
                 failureGetConfig.incrementAndGet();
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             failureGetConfig.incrementAndGet();
             throw e;
         }
@@ -118,7 +118,7 @@ public class StatisticsRestconfServiceWrapper implements RestconfService {
             else {
                 failureGetOperational.incrementAndGet();
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             failureGetOperational.incrementAndGet();
             throw e;
         }
@@ -137,7 +137,7 @@ public class StatisticsRestconfServiceWrapper implements RestconfService {
             else {
                 failurePut.incrementAndGet();
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             failurePut.incrementAndGet();
             throw e;
         }
@@ -156,7 +156,7 @@ public class StatisticsRestconfServiceWrapper implements RestconfService {
             else {
                 failurePost.incrementAndGet();
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             failurePost.incrementAndGet();
             throw e;
         }
@@ -175,7 +175,7 @@ public class StatisticsRestconfServiceWrapper implements RestconfService {
             else {
                 failurePost.incrementAndGet();
             }
-        }catch (Exception e) {
+        }catch (final Exception e) {
             failurePost.incrementAndGet();
             throw e;
         }
@@ -194,7 +194,7 @@ public class StatisticsRestconfServiceWrapper implements RestconfService {
             else {
                 failureDelete.incrementAndGet();
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             failureDelete.incrementAndGet();
             throw e;
         }
