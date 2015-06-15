@@ -264,6 +264,7 @@ public class ListenerAdapter implements DOMDataChangeListener {
         try {
             bob = DBF.newDocumentBuilder();
         } catch (final ParserConfigurationException e) {
+            LOG.error("Exception when trying to create document builder: " + e);
             return null;
         }
         return bob.newDocument();
@@ -465,7 +466,7 @@ public class ListenerAdapter implements DOMDataChangeListener {
     /**
      * Removes all subscribers and unregisters event bus change recorder form event bus.
      */
-    public void close() throws Exception {
+    public void close() {
         subscribers = new ConcurrentSet<>();
         registration.close();
         registration = null;
