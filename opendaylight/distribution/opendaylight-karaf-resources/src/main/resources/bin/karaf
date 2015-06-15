@@ -295,6 +295,14 @@ setupDefaults() {
         fi
     fi
 
+    # Add default security file option
+    if [ "x$ODL_JAVA_SECURITY_PROPERTIES" != "x" ]; then
+        DEFAULT_JAVA_OPTS="-Djava.security.properties="${ODL_JAVA_SECURITY_PROPERTIES}" $DEFAULT_JAVA_OPTS"
+    else
+        DEFAULT_JAVA_OPTS="-Djava.security.properties="${KARAF_ETC}/odl.java.security" $DEFAULT_JAVA_OPTS"
+    fi
+
+
     # Add the jars in the lib dir
     for file in "$KARAF_HOME"/lib/karaf*.jar
     do
