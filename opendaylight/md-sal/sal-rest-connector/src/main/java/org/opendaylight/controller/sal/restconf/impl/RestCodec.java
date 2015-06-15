@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 
 public class RestCodec {
 
-    private static final Logger logger = LoggerFactory.getLogger(RestCodec.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RestCodec.class);
 
     private RestCodec() {
     }
@@ -161,7 +161,7 @@ public class RestCodec {
 
         @Override
         public IdentityValuesDTO serialize(final QName data) {
-            return new IdentityValuesDTO(data.getNamespace().toString(), data.getLocalName(), null, null);
+            return new IdentityValuesDTO(data.getNamespace().toString(), data.getLocalName(), null);
         }
 
         @Override
@@ -323,7 +323,7 @@ public class RestCodec {
             module = ControllerContext.getInstance().findModuleByNamespace(validNamespace);
         }
         if (module == null) {
-            logger.info("Module for namespace " + validNamespace + " wasn't found.");
+            LOG.info("Module for namespace " + validNamespace + " wasn't found.");
             return null;
         }
         return module;

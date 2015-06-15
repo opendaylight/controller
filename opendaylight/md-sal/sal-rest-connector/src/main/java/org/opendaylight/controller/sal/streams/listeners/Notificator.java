@@ -13,15 +13,18 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * {@link Notificator} is responsible to create, remove and find
  * {@link ListenerAdapter} listener.
  */
-public class Notificator {
+public final class Notificator {
 
+    private static final Logger LOG = LoggerFactory.getLogger(Notificator.class);
     private static Map<String, ListenerAdapter> listenersByStreamName = new ConcurrentHashMap<>();
-    private static final Lock lock = new ReentrantLock();
+    private static final Lock LOCK = new ReentrantLock();
 
     private Notificator() {
     }
@@ -40,7 +43,7 @@ public class Notificator {
      *            The name of the stream.
      * @return {@link ListenerAdapter} specified by stream name.
      */
-    public static ListenerAdapter getListenerFor(String streamName) {
+    public static ListenerAdapter getListenerFor(final String streamName) {
         return listenersByStreamName.get(streamName);
     }
 
@@ -50,7 +53,7 @@ public class Notificator {
      * @param streamName
      * @return True if the listener exist, false otherwise.
      */
-    public static boolean existListenerFor(String streamName) {
+    public static boolean existListenerFor(final String streamName) {
         return listenersByStreamName.containsKey(streamName);
     }
 
@@ -63,13 +66,13 @@ public class Notificator {
      *            The name of the stream.
      * @return New {@link ListenerAdapter} listener from {@link YangInstanceIdentifier} path and stream name.
      */
-    public static ListenerAdapter createListener(YangInstanceIdentifier path, String streamName) {
-        ListenerAdapter listener = new ListenerAdapter(path, streamName);
+    public static ListenerAdapter createListener(final YangInstanceIdentifier path, final String streamName) {
+        final ListenerAdapter listener = new ListenerAdapter(path, streamName);
         try {
-            lock.lock();
+            LOCK.lock();
             listenersByStreamName.put(streamName, listener);
         } finally {
-            lock.unlock();
+            LOCK.unlock();
         }
         return listener;
     }
@@ -82,7 +85,7 @@ public class Notificator {
      *            URI for creation stream name.
      * @return String representation of stream name.
      */
-    public static String createStreamNameFromUri(String uri) {
+    public static String createStreamNameFromUri(final String uri) {
         if (uri == null) {
             return null;
         }
@@ -100,17 +103,18 @@ public class Notificator {
      * Removes all listeners.
      */
     public static void removeAllListeners() {
-        for (ListenerAdapter listener : listenersByStreamName.values()) {
+        for (final ListenerAdapter listener : listenersByStreamName.values()) {
             try {
                 listener.close();
-            } catch (Exception e) {
+            } catch (final Exception e) {
+                LOG.debug(e.getMessage(), e);
             }
         }
         try {
-            lock.lock();
+            LOCK.lock();
             listenersByStreamName = new ConcurrentHashMap<>();
         } finally {
-            lock.unlock();
+            LOCK.unlock();
         }
     }
 
@@ -120,7 +124,7 @@ public class Notificator {
      * @param listener
      *            ListenerAdapter
      */
-    public static void removeListenerIfNoSubscriberExists(ListenerAdapter listener) {
+    public static void removeListenerIfNoSubscriberExists(final ListenerAdapter listener) {
         if (!listener.hasSubscribers()) {
             deleteListener(listener);
         }
@@ -132,17 +136,18 @@ public class Notificator {
      * @param listener
      *            ListenerAdapter
      */
-    private static void deleteListener(ListenerAdapter listener) {
+    private static void deleteListener(final ListenerAdapter listener) {
         if (listener != null) {
             try {
                 listener.close();
-            } catch (Exception e) {
+            } catch (final Exception e) {
+                LOG.debug(e.getMessage(), e);
             }
             try {
-                lock.lock();
+                LOCK.lock();
                 listenersByStreamName.remove(listener.getStreamName());
             } finally {
-                lock.unlock();
+                LOCK.unlock();
             }
         }
     }
