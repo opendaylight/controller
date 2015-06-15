@@ -19,7 +19,6 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyReader;
@@ -59,7 +58,7 @@ import org.w3c.dom.Element;
     MediaType.APPLICATION_XML, MediaType.TEXT_XML })
 public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsProvider implements MessageBodyReader<NormalizedNodeContext> {
 
-    private final static Logger LOG = LoggerFactory.getLogger(XmlNormalizedNodeBodyReader.class);
+    private static final Logger LOG = LoggerFactory.getLogger(XmlNormalizedNodeBodyReader.class);
     private static final DocumentBuilderFactory BUILDERFACTORY;
 
     static {
@@ -89,8 +88,7 @@ public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPro
     @Override
     public NormalizedNodeContext readFrom(final Class<NormalizedNodeContext> type, final Type genericType,
             final Annotation[] annotations, final MediaType mediaType,
-            final MultivaluedMap<String, String> httpHeaders, final InputStream entityStream) throws IOException,
-            WebApplicationException {
+            final MultivaluedMap<String, String> httpHeaders, final InputStream entityStream) throws IOException {
         try {
             final InstanceIdentifierContext<?> path = getInstanceIdentifierContext();
 
@@ -99,12 +97,7 @@ public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPro
                 return new NormalizedNodeContext(path, null);
             }
 
-            final DocumentBuilder dBuilder;
-            try {
-                dBuilder = BUILDERFACTORY.newDocumentBuilder();
-            } catch (final ParserConfigurationException e) {
-                throw new RuntimeException("Failed to parse XML document", e);
-            }
+            final DocumentBuilder dBuilder = buildBuilder();
             final Document doc = dBuilder.parse(entityStream);
 
             return parse(path,doc);
@@ -116,6 +109,17 @@ public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPro
             throw new RestconfDocumentedException("Error parsing input: " + e.getMessage(), ErrorType.PROTOCOL,
                     ErrorTag.MALFORMED_MESSAGE);
         }
+    }
+
+    private DocumentBuilder buildBuilder() throws ParserConfigurationException {
+        final DocumentBuilder dBuilder;
+        try {
+            dBuilder = BUILDERFACTORY.newDocumentBuilder();
+        }
+        catch (final ParserConfigurationException e) {
+            throw e;
+        }
+        return dBuilder;
     }
 
     private NormalizedNodeContext parse(final InstanceIdentifierContext<?> pathContext,final Document doc) {
@@ -183,24 +187,19 @@ public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPro
     }
 
     private static Deque<Object> findPathToSchemaNodeByName(final DataSchemaNode schemaNode, final String elementName) {
-        final Deque<Object> result = new ArrayDeque<>();
-        final ArrayList<ChoiceSchemaNode> choiceSchemaNodes = new ArrayList<>();
+        Deque<Object> result = new ArrayDeque<>();
+        final List<ChoiceSchemaNode> choiceSchemaNodes = new ArrayList<>();
         final Collection<DataSchemaNode> children = ((DataNodeContainer) schemaNode).getChildNodes();
-        for (final DataSchemaNode child : children) {
-            if (child instanceof ChoiceSchemaNode) {
-                choiceSchemaNodes.add((ChoiceSchemaNode) child);
-            } else if (child.getQName().getLocalName().equalsIgnoreCase(elementName)) {
-                result.push(child);
-                if (child.isAugmenting()) {
-                    final AugmentationSchema augment = findCorrespondingAugment(schemaNode, child);
-                    if (augment != null) {
-                        result.push(augment);
-                    }
-                }
-                return result;
-            }
-        }
 
+        result = checkChild(result, children, elementName, schemaNode, choiceSchemaNodes);
+
+        if (!result.isEmpty()) { return result; }
+
+        return choiceResult(choiceSchemaNodes, elementName, schemaNode, result);
+    }
+
+    private static Deque<Object> choiceResult(final List<ChoiceSchemaNode> choiceSchemaNodes, final String elementName,
+            final DataSchemaNode schemaNode, final Deque<Object> result) {
         for (final ChoiceSchemaNode choiceNode : choiceSchemaNodes) {
             for (final ChoiceCaseNode caseNode : choiceNode.getCases()) {
                 final Deque<Object> resultFromRecursion = findPathToSchemaNodeByName(caseNode, elementName);
@@ -214,6 +213,26 @@ public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPro
                     }
                     return resultFromRecursion;
                 }
+            }
+        }
+        return result;
+    }
+
+    private static Deque<Object> checkChild(final Deque<Object> result, final Collection<DataSchemaNode> children,
+            final String elementName, final DataSchemaNode schemaNode, final List<ChoiceSchemaNode> choiceSchemaNodes) {
+        for (final DataSchemaNode child : children) {
+            if (child instanceof ChoiceSchemaNode) {
+                choiceSchemaNodes.add((ChoiceSchemaNode) child);
+            }
+            else if (child.getQName().getLocalName().equalsIgnoreCase(elementName)) {
+                result.push(child);
+                if (child.isAugmenting()) {
+                    final AugmentationSchema augment = findCorrespondingAugment(schemaNode, child);
+                    if (augment != null) {
+                        result.push(augment);
+                    }
+                }
+                return result;
             }
         }
         return result;

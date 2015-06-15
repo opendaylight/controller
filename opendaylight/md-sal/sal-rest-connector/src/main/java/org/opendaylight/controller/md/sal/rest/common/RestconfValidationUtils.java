@@ -25,7 +25,7 @@ import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
  *
  * Created: Feb 24, 2015
  */
-public class RestconfValidationUtils {
+public final class RestconfValidationUtils {
 
     private RestconfValidationUtils () {
         throw new UnsupportedOperationException("Utility class");
