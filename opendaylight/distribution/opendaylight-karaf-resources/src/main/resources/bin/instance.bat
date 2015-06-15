@@ -95,6 +95,12 @@ if "%KARAF_ETC%" == "" (
 )
 
 set DEFAULT_JAVA_OPTS=
+if not "%ODL_JAVA_SECURITY_PROPERTIES%" == "" (
+    set DEFAULT_JAVA_OPTS=-Djava.security.properties="%ODL_JAVA_SECURITY_PROPERTIES%" %DEFAULT_JAVA_OPTS%
+) else (
+    set DEFAULT_JAVA_OPTS=-Djava.security.properties="%KARAF_ETC%\odl.java.security" %DEFAULT_JAVA_OPTS%
+)
+
 set DEFAULT_JAVA_DEBUG_OPTS=-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005
 
 rem Support for loading native libraries

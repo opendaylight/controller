@@ -106,6 +106,12 @@ if not exist "%JAVA_HOME%\bin\server\jvm.dll" (
 )
 set DEFAULT_JAVA_OPTS=%JAVA_MODE% -Xms%JAVA_MIN_MEM% -Xmx%JAVA_MAX_MEM% -Dderby.system.home="%KARAF_DATA%\derby" -Dderby.storage.fileSyncTransactionLog=true -Dcom.sun.management.jmxremote  -XX:+UnlockDiagnosticVMOptions -XX:+UnsyncloadClass
 
+if not "%ODL_JAVA_SECURITY_PROPERTIES%" == "" (
+    set DEFAULT_JAVA_OPTS=-Djava.security.properties="%ODL_JAVA_SECURITY_PROPERTIES%" %DEFAULT_JAVA_OPTS%
+) else (
+    set DEFAULT_JAVA_OPTS=-Djava.security.properties="%KARAF_ETC%\odl.java.security" %DEFAULT_JAVA_OPTS%
+)
+
 rem Check some easily accessible MIN/MAX params for JVM mem usage
 if not "%JAVA_PERM_MEM%" == "" (
     set DEFAULT_JAVA_OPTS=%DEFAULT_JAVA_OPTS% -XX:PermSize=%JAVA_PERM_MEM%
