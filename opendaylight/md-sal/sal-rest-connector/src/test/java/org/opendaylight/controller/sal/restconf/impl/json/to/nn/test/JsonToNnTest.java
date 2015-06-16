@@ -7,18 +7,17 @@
  */
 package org.opendaylight.controller.sal.restconf.impl.json.to.nn.test;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
 import java.io.IOException;
 import java.io.InputStream;
-
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
-
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.JsonNormalizedNodeBodyReader;
 import org.opendaylight.controller.sal.rest.impl.test.providers.AbstractBodyReaderTest;
@@ -126,9 +125,8 @@ public class JsonToNnTest extends AbstractBodyReaderTest {
             countExceptions++;
         }
         assertNotNull(exception);
-        assertEquals(
-                "Error parsing input: Schema node with name cont wasn't found.",
-                exception.getErrors().get(0).getErrorMessage());
+        assertThat(exception.getErrors().get(0).getErrorMessage(),
+                containsString("Error parsing input: Schema node with name cont wasn't found"));
 
         inputStream = this.getClass().getResourceAsStream(
                 "/json-to-nn/wrong-top-level2.json");
@@ -141,9 +139,8 @@ public class JsonToNnTest extends AbstractBodyReaderTest {
             countExceptions++;
         }
         assertNotNull(exception);
-        assertEquals(
-                "Error parsing input: Schema node with name lst1 wasn't found.",
-                exception.getErrors().get(0).getErrorMessage());
+        assertThat(exception.getErrors().get(0).getErrorMessage(),
+                containsString("Error parsing input: Schema node with name lst1 wasn't found"));
 
         inputStream = this.getClass().getResourceAsStream(
                 "/json-to-nn/wrong-top-level3.json");
@@ -156,9 +153,8 @@ public class JsonToNnTest extends AbstractBodyReaderTest {
             countExceptions++;
         }
         assertNotNull(exception);
-        assertEquals(
-                "Error parsing input: Schema node with name lf wasn't found.",
-                exception.getErrors().get(0).getErrorMessage());
+        assertThat(exception.getErrors().get(0).getErrorMessage(),
+                containsString("Error parsing input: Schema node with name lf wasn't found"));
         assertEquals(3, countExceptions);
     }
 
