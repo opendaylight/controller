@@ -9,12 +9,15 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
+import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditStrategyType;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 
 public class CompositeAttributeReadingStrategy extends AbstractAttributeReadingStrategy {
@@ -54,7 +57,11 @@ public class CompositeAttributeReadingStrategy extends AbstractAttributeReadingS
 
         complexElement.checkUnrecognisedElements(recognisedChildren);
 
-        return AttributeConfigElement.create(getNullableDefault(), innerMap);
+        String perInstanceEditStrategy = complexElement.getAttribute(XmlNetconfConstants.OPERATION_ATTR_KEY,
+                XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
+
+        return Strings.isNullOrEmpty(perInstanceEditStrategy) ? AttributeConfigElement.create(getNullableDefault(), innerMap) :
+                AttributeConfigElement.create(getNullableDefault(), innerMap, EditStrategyType.valueOf(perInstanceEditStrategy));
     }
 
 }

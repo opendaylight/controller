@@ -11,6 +11,7 @@ package org.opendaylight.controller.netconf.confignetconfconnector.mapping.attri
 import com.google.common.collect.Lists;
 import java.util.List;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditStrategyType;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 
 public class ArrayAttributeReadingStrategy extends AbstractAttributeReadingStrategy {
@@ -29,10 +30,17 @@ public class ArrayAttributeReadingStrategy extends AbstractAttributeReadingStrat
     @Override
     AttributeConfigElement readElementHook(List<XmlElement> configNodes) throws NetconfDocumentedException {
         List<Object> innerList = Lists.newArrayList();
+        EditStrategyType innerEditStrategy= null;
         for (XmlElement configNode : configNodes) {
-            innerList.add(innerStrategy.readElement(Lists.newArrayList(configNode)).getValue());
+            final AttributeConfigElement attributeConfigElement = innerStrategy.readElement(Lists.newArrayList(configNode));
+            if(attributeConfigElement.getEditStrategy().isPresent()) {
+                // TODO this sets the last operation for the entire array
+                innerEditStrategy = attributeConfigElement.getEditStrategy().get();
+            }
+            innerList.add(attributeConfigElement.getValue());
         }
-        return AttributeConfigElement.create(getNullableDefault(), innerList);
+        return innerEditStrategy == null ? AttributeConfigElement.create(getNullableDefault(), innerList) :
+                AttributeConfigElement.create(getNullableDefault(), innerList, innerEditStrategy);
     }
 
 }

@@ -12,6 +12,7 @@ import com.google.common.base.Optional;
 import javax.management.openmbean.OpenType;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.resolving.AttributeResolvingStrategy;
+import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditStrategyType;
 
 /**
  * Parsed xml element containing configuration for one attribute of an instance
@@ -20,14 +21,16 @@ import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attrib
 public class AttributeConfigElement {
     private final Object defaultValue;
     private final Object value;
+    private final Optional<EditStrategyType> editStrategy;
 
     private Optional<?> resolvedValue;
     private Object resolvedDefaultValue;
     private String jmxName;
 
-    public AttributeConfigElement(Object defaultValue, Object value) {
+    public AttributeConfigElement(Object defaultValue, Object value, final EditStrategyType editStrategyType) {
         this.defaultValue = defaultValue;
         this.value = value;
+        this.editStrategy = Optional.fromNullable(editStrategyType);
     }
 
     public void setJmxName(String jmxName) {
@@ -45,12 +48,20 @@ public class AttributeConfigElement {
         resolvedDefaultValue = resolvedDefault.isPresent() ? resolvedDefault.get() : null;
     }
 
+    public Optional<EditStrategyType> getEditStrategy() {
+        return editStrategy;
+    }
+
     public static AttributeConfigElement create(Object nullableDefault, Object value) {
-        return new AttributeConfigElement(nullableDefault, value);
+        return new AttributeConfigElement(nullableDefault, value, null);
     }
 
     public static AttributeConfigElement createNullValue(Object nullableDefault) {
-        return new AttributeConfigElement(nullableDefault, null);
+        return new AttributeConfigElement(nullableDefault, null, null);
+    }
+
+    public static AttributeConfigElement create(final String nullableDefault, final Object value, final EditStrategyType editStrategyType) {
+        return new AttributeConfigElement(nullableDefault, value, editStrategyType);
     }
 
     public Object getValue() {

@@ -9,6 +9,8 @@
 package org.opendaylight.controller.netconf.confignetconfconnector;
 
 import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -47,6 +49,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
@@ -57,7 +61,6 @@ import org.custommonkey.xmlunit.NodeTestException;
 import org.custommonkey.xmlunit.NodeTester;
 import org.custommonkey.xmlunit.XMLAssert;
 import org.custommonkey.xmlunit.XMLUnit;
-import org.hamcrest.CoreMatchers;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -215,7 +218,29 @@ public class NetconfMappingTest extends AbstractConfigTest {
         edit("netconfMessages/editConfig_identities.xml");
 
         commit();
-        getConfigRunning();
+        Document configRunning = getConfigRunning();
+        String asString = XmlUtil.toString(configRunning);
+        assertThat(asString, containsString("test-identity2"));
+        assertThat(asString, containsString("test-identity1"));
+        assertEquals(2, countSubstringOccurence(asString, "</identities>"));
+
+        edit("netconfMessages/editConfig_identities_inner_replace.xml");
+        commit();
+        configRunning = getConfigRunning();
+        asString = XmlUtil.toString(configRunning);
+        // test-identity1 was removed by replace
+        assertThat(asString, not(containsString("test-identity2")));
+        // now only 1 identities entry is present
+        assertEquals(1, countSubstringOccurence(asString, "</identities>"));
+    }
+
+    private int countSubstringOccurence(final String string, final String substring) {
+        final Matcher matches = Pattern.compile(substring).matcher(string);
+        int count = 0;
+        while (matches.find()) {
+            count++;
+        }
+        return count;
     }
 
     @Override
@@ -623,7 +648,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
     }
 
     private void assertContainsString(String string, String substring) {
-        assertThat(string, CoreMatchers.containsString(substring));
+        assertThat(string, containsString(substring));
     }
 
     private void checkEnum(final Document response) throws Exception {
