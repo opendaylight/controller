@@ -35,7 +35,6 @@ public class TestModel {
     public static final QName ID_QNAME = QName.create(TEST_QNAME, "id");
     public static final QName NAME_QNAME = QName.create(TEST_QNAME, "name");
     public static final QName DESC_QNAME = QName.create(TEST_QNAME, "desc");
-    public static final QName VALUE_QNAME = QName.create(TEST_QNAME, "value");
     private static final String DATASTORE_TEST_YANG = "/odl-datastore-test.yang";
 
     public static final YangInstanceIdentifier TEST_PATH = YangInstanceIdentifier.of(TEST_QNAME);

@@ -133,20 +133,24 @@ public class PreLithiumShardTest extends AbstractShardTest {
 
     @Test
     public void testHelium2VersionApplyStateLegacy() throws Exception {
+        new ShardTestKit(getSystem()) {{
+            TestActorRef<Shard> shard = TestActorRef.create(getSystem(), newShardProps(),
+                    "testHelium2VersionApplyStateLegacy");
 
-        TestActorRef<Shard> shard = TestActorRef.create(getSystem(), newShardProps(), "testHelium2VersionApplyStateLegacy");
+            waitUntilLeader(shard);
 
-        NormalizedNode<?, ?> node = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+            NormalizedNode<?, ?> node = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
-        ApplyState applyState = new ApplyState(null, "test", new ReplicatedLogImplEntry(1, 2,
-                newLegacyByteStringPayload(new WriteModification(TestModel.TEST_PATH, node))));
+            ApplyState applyState = new ApplyState(null, "test", new ReplicatedLogImplEntry(1, 2,
+                    newLegacyByteStringPayload(new WriteModification(TestModel.TEST_PATH, node))));
 
-        shard.underlyingActor().onReceiveCommand(applyState);
+            shard.underlyingActor().onReceiveCommand(applyState);
 
-        NormalizedNode<?,?> actual = readStore(shard, TestModel.TEST_PATH);
-        assertEquals("Applied state", node, actual);
+            NormalizedNode<?,?> actual = readStore(shard, TestModel.TEST_PATH);
+            assertEquals("Applied state", node, actual);
 
-        shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
+            shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
+        }};
     }
 
     @Test

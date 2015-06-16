@@ -8,6 +8,14 @@ module odl-datastore-test {
     }
 
     container test {
+        leaf name {
+            type string;
+        }
+
+        leaf desc {
+            type string;
+        }
+
         list outer-list {
             key id;
             leaf id {
