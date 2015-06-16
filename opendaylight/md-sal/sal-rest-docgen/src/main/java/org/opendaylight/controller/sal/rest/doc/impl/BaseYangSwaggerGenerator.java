@@ -8,7 +8,6 @@
 package org.opendaylight.controller.sal.rest.doc.impl;
 
 import static org.opendaylight.controller.sal.rest.doc.util.RestDocgenUtil.resolvePathArgumentsName;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
@@ -20,10 +19,12 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
@@ -119,11 +120,25 @@ public class BaseYangSwaggerGenerator {
 
     public ApiDeclaration getApiDeclaration(String module, String revision, UriInfo uriInfo, SchemaContext schemaContext, String context) {
         Date rev = null;
+
         try {
-            rev = SIMPLE_DATE_FORMAT.parse(revision);
+            if(revision != null && !revision.equals("0000-00-00")) {
+                rev = SIMPLE_DATE_FORMAT.parse(revision);
+            }
         } catch (ParseException e) {
             throw new IllegalArgumentException(e);
         }
+
+        if(rev != null) {
+            Calendar cal = new GregorianCalendar();
+
+            cal.setTime(rev);
+
+            if(cal.get(Calendar.YEAR) < 1970) {
+                rev = null;
+            }
+        }
+
         Module m = schemaContext.findModuleByName(module, rev);
         Preconditions.checkArgument(m != null, "Could not find module by name,revision: " + module + "," + revision);
 
