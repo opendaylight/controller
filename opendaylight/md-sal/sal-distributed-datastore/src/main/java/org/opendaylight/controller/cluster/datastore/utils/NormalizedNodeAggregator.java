@@ -23,8 +23,8 @@ public class NormalizedNodeAggregator {
     private final List<Optional<NormalizedNode<?, ?>>> nodes;
     private final DataTree dataTree;
 
-    private NormalizedNodeAggregator(YangInstanceIdentifier rootIdentifier, List<Optional<NormalizedNode<?, ?>>> nodes,
-                             SchemaContext schemaContext) {
+    private NormalizedNodeAggregator(final YangInstanceIdentifier rootIdentifier, final List<Optional<NormalizedNode<?, ?>>> nodes,
+                             final SchemaContext schemaContext) {
         this.rootIdentifier = rootIdentifier;
         this.nodes = nodes;
         this.dataTree = InMemoryDataTreeFactory.getInstance().create();
@@ -39,9 +39,9 @@ public class NormalizedNodeAggregator {
      * @return
      * @throws DataValidationFailedException
      */
-    public static Optional<NormalizedNode<?,?>> aggregate(YangInstanceIdentifier rootIdentifier,
-                                                          List<Optional<NormalizedNode<?, ?>>> nodes,
-                                                          SchemaContext schemaContext) throws DataValidationFailedException {
+    public static Optional<NormalizedNode<?,?>> aggregate(final YangInstanceIdentifier rootIdentifier,
+                                                          final List<Optional<NormalizedNode<?, ?>>> nodes,
+                                                          final SchemaContext schemaContext) throws DataValidationFailedException {
         return new NormalizedNodeAggregator(rootIdentifier, nodes, schemaContext).aggregate();
     }
 
@@ -50,14 +50,14 @@ public class NormalizedNodeAggregator {
     }
 
     private NormalizedNodeAggregator combine() throws DataValidationFailedException {
-        DataTreeModification mod = dataTree.takeSnapshot().newModification();
+        final DataTreeModification mod = dataTree.takeSnapshot().newModification();
 
-        for (Optional<NormalizedNode<?,?>> node : nodes) {
+        for (final Optional<NormalizedNode<?,?>> node : nodes) {
             if (node.isPresent()) {
                 mod.merge(rootIdentifier, node.get());
             }
         }
-
+        mod.ready();
         dataTree.validate(mod);
         final DataTreeCandidate candidate = dataTree.prepare(mod);
         dataTree.commit(candidate);

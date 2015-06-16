@@ -11,6 +11,7 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.opendaylight.controller.cluster.datastore.DataStoreVersions.CURRENT_VERSION;
+
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.PoisonPill;
@@ -128,7 +129,7 @@ public class ShardTest extends AbstractShardTest {
 
     protected Props newShardPropsWithRecoveryComplete() {
 
-        Creator<Shard> creator = new Creator<Shard>() {
+        final Creator<Shard> creator = new Creator<Shard>() {
             @Override
             public Shard create() throws Exception {
                 return new Shard(shardID, Collections.<String,String>emptyMap(),
@@ -150,27 +151,27 @@ public class ShardTest extends AbstractShardTest {
     @Test
     public void testRegisterChangeListener() throws Exception {
         new ShardTestKit(getSystem()) {{
-            TestActorRef<Shard> shard = TestActorRef.create(getSystem(),
+            final TestActorRef<Shard> shard = TestActorRef.create(getSystem(),
                     newShardProps(),  "testRegisterChangeListener");
 
             waitUntilLeader(shard);
 
             shard.tell(new UpdateSchemaContext(SchemaContextHelper.full()), ActorRef.noSender());
 
-            MockDataChangeListener listener = new MockDataChangeListener(1);
-            ActorRef dclActor = getSystem().actorOf(DataChangeListener.props(listener),
+            final MockDataChangeListener listener = new MockDataChangeListener(1);
+            final ActorRef dclActor = getSystem().actorOf(DataChangeListener.props(listener),
                     "testRegisterChangeListener-DataChangeListener");
 
             shard.tell(new RegisterChangeListener(TestModel.TEST_PATH,
                     dclActor, AsyncDataBroker.DataChangeScope.BASE), getRef());
 
-            RegisterChangeListenerReply reply = expectMsgClass(duration("3 seconds"),
+            final RegisterChangeListenerReply reply = expectMsgClass(duration("3 seconds"),
                     RegisterChangeListenerReply.class);
-            String replyPath = reply.getListenerRegistrationPath().toString();
+            final String replyPath = reply.getListenerRegistrationPath().toString();
             assertTrue("Incorrect reply path: " + replyPath, replyPath.matches(
                     "akka:\\/\\/test\\/user\\/testRegisterChangeListener\\/\\$.*"));
 
-            YangInstanceIdentifier path = TestModel.TEST_PATH;
+            final YangInstanceIdentifier path = TestModel.TEST_PATH;
             writeToStore(shard, path, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
 
             listener.waitForChangeEvents(path);
@@ -195,7 +196,7 @@ public class ShardTest extends AbstractShardTest {
             // ElectionTimeout with the sending of the RegisterChangeListener message.
             final CountDownLatch onFirstElectionTimeout = new CountDownLatch(1);
             final CountDownLatch onChangeListenerRegistered = new CountDownLatch(1);
-            Creator<Shard> creator = new Creator<Shard>() {
+            final Creator<Shard> creator = new Creator<Shard>() {
                 boolean firstElectionTimeout = true;
 
                 @Override
@@ -237,16 +238,16 @@ public class ShardTest extends AbstractShardTest {
                 }
             };
 
-            MockDataChangeListener listener = new MockDataChangeListener(1);
-            ActorRef dclActor = getSystem().actorOf(DataChangeListener.props(listener),
+            final MockDataChangeListener listener = new MockDataChangeListener(1);
+            final ActorRef dclActor = getSystem().actorOf(DataChangeListener.props(listener),
                     "testRegisterChangeListenerWhenNotLeaderInitially-DataChangeListener");
 
-            TestActorRef<Shard> shard = TestActorRef.create(getSystem(),
+            final TestActorRef<Shard> shard = TestActorRef.create(getSystem(),
                     Props.create(new DelegatingShardCreator(creator)),
                     "testRegisterChangeListenerWhenNotLeaderInitially");
 
             // Write initial data into the in-memory store.
-            YangInstanceIdentifier path = TestModel.TEST_PATH;
+            final YangInstanceIdentifier path = TestModel.TEST_PATH;
             writeToStore(shard, path, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
 
             // Wait until the shard receives the first ElectionTimeout message.
@@ -257,13 +258,13 @@ public class ShardTest extends AbstractShardTest {
             shard.tell(new RegisterChangeListener(path, dclActor,
                     AsyncDataBroker.DataChangeScope.SUBTREE), getRef());
 
-            RegisterChangeListenerReply reply = expectMsgClass(duration("5 seconds"),
+            final RegisterChangeListenerReply reply = expectMsgClass(duration("5 seconds"),
                     RegisterChangeListenerReply.class);
             assertNotNull("getListenerRegistrationPath", reply.getListenerRegistrationPath());
 
             // Sanity check - verify the shard is not the leader yet.
             shard.tell(new FindLeader(), getRef());
-            FindLeaderReply findLeadeReply =
+            final FindLeaderReply findLeadeReply =
                     expectMsgClass(duration("5 seconds"), FindLeaderReply.class);
             assertNull("Expected the shard not to be the leader", findLeadeReply.getLeaderActor());
 
@@ -283,26 +284,26 @@ public class ShardTest extends AbstractShardTest {
     @Test
     public void testRegisterDataTreeChangeListener() throws Exception {
         new ShardTestKit(getSystem()) {{
-            TestActorRef<Shard> shard = TestActorRef.create(getSystem(),
+            final TestActorRef<Shard> shard = TestActorRef.create(getSystem(),
                     newShardProps(), "testRegisterDataTreeChangeListener");
 
             waitUntilLeader(shard);
 
             shard.tell(new UpdateSchemaContext(SchemaContextHelper.full()), ActorRef.noSender());
 
-            MockDataTreeChangeListener listener = new MockDataTreeChangeListener(1);
-            ActorRef dclActor = getSystem().actorOf(DataTreeChangeListenerActor.props(listener),
+            final MockDataTreeChangeListener listener = new MockDataTreeChangeListener(1);
+            final ActorRef dclActor = getSystem().actorOf(DataTreeChangeListenerActor.props(listener),
                     "testRegisterDataTreeChangeListener-DataTreeChangeListener");
 
             shard.tell(new RegisterDataTreeChangeListener(TestModel.TEST_PATH, dclActor), getRef());
 
-            RegisterDataTreeChangeListenerReply reply = expectMsgClass(duration("3 seconds"),
+            final RegisterDataTreeChangeListenerReply reply = expectMsgClass(duration("3 seconds"),
                     RegisterDataTreeChangeListenerReply.class);
-            String replyPath = reply.getListenerRegistrationPath().toString();
+            final String replyPath = reply.getListenerRegistrationPath().toString();
             assertTrue("Incorrect reply path: " + replyPath, replyPath.matches(
                     "akka:\\/\\/test\\/user\\/testRegisterDataTreeChangeListener\\/\\$.*"));
 
-            YangInstanceIdentifier path = TestModel.TEST_PATH;
+            final YangInstanceIdentifier path = TestModel.TEST_PATH;
             writeToStore(shard, path, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
 
             listener.waitForChangeEvents();
@@ -318,7 +319,7 @@ public class ShardTest extends AbstractShardTest {
         new ShardTestKit(getSystem()) {{
             final CountDownLatch onFirstElectionTimeout = new CountDownLatch(1);
             final CountDownLatch onChangeListenerRegistered = new CountDownLatch(1);
-            Creator<Shard> creator = new Creator<Shard>() {
+            final Creator<Shard> creator = new Creator<Shard>() {
                 boolean firstElectionTimeout = true;
 
                 @Override
@@ -348,27 +349,27 @@ public class ShardTest extends AbstractShardTest {
                 }
             };
 
-            MockDataTreeChangeListener listener = new MockDataTreeChangeListener(1);
-            ActorRef dclActor = getSystem().actorOf(DataTreeChangeListenerActor.props(listener),
+            final MockDataTreeChangeListener listener = new MockDataTreeChangeListener(1);
+            final ActorRef dclActor = getSystem().actorOf(DataTreeChangeListenerActor.props(listener),
                     "testDataTreeChangeListenerNotifiedWhenNotTheLeaderOnRegistration-DataChangeListener");
 
-            TestActorRef<Shard> shard = TestActorRef.create(getSystem(),
+            final TestActorRef<Shard> shard = TestActorRef.create(getSystem(),
                     Props.create(new DelegatingShardCreator(creator)),
                     "testDataTreeChangeListenerNotifiedWhenNotTheLeaderOnRegistration");
 
-            YangInstanceIdentifier path = TestModel.TEST_PATH;
+            final YangInstanceIdentifier path = TestModel.TEST_PATH;
             writeToStore(shard, path, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
 
             assertEquals("Got first ElectionTimeout", true,
                     onFirstElectionTimeout.await(5, TimeUnit.SECONDS));
 
             shard.tell(new RegisterDataTreeChangeListener(path, dclActor), getRef());
-            RegisterDataTreeChangeListenerReply reply = expectMsgClass(duration("5 seconds"),
+            final RegisterDataTreeChangeListenerReply reply = expectMsgClass(duration("5 seconds"),
                     RegisterDataTreeChangeListenerReply.class);
             assertNotNull("getListenerRegistratioznPath", reply.getListenerRegistrationPath());
 
             shard.tell(new FindLeader(), getRef());
-            FindLeaderReply findLeadeReply =
+            final FindLeaderReply findLeadeReply =
                     expectMsgClass(duration("5 seconds"), FindLeaderReply.class);
             assertNull("Expected the shard not to be the leader", findLeadeReply.getLeaderActor());
 
@@ -387,7 +388,7 @@ public class ShardTest extends AbstractShardTest {
     @Test
     public void testCreateTransaction(){
         new ShardTestKit(getSystem()) {{
-            ActorRef shard = getSystem().actorOf(newShardProps(), "testCreateTransaction");
+            final ActorRef shard = getSystem().actorOf(newShardProps(), "testCreateTransaction");
 
             waitUntilLeader(shard);
 
@@ -396,10 +397,10 @@ public class ShardTest extends AbstractShardTest {
             shard.tell(new CreateTransaction("txn-1",
                     TransactionType.READ_ONLY.ordinal() ).toSerializable(), getRef());
 
-            CreateTransactionReply reply = expectMsgClass(duration("3 seconds"),
+            final CreateTransactionReply reply = expectMsgClass(duration("3 seconds"),
                     CreateTransactionReply.class);
 
-            String path = reply.getTransactionActorPath().toString();
+            final String path = reply.getTransactionActorPath().toString();
             assertTrue("Unexpected transaction path " + path,
                     path.contains("akka://test/user/testCreateTransaction/shard-txn-1"));
 
@@ -418,10 +419,10 @@ public class ShardTest extends AbstractShardTest {
                     TransactionType.READ_ONLY.ordinal() , "foobar").toSerializable(),
                     getRef());
 
-            CreateTransactionReply reply = expectMsgClass(duration("3 seconds"),
+            final CreateTransactionReply reply = expectMsgClass(duration("3 seconds"),
                     CreateTransactionReply.class);
 
-            String path = reply.getTransactionActorPath().toString();
+            final String path = reply.getTransactionActorPath().toString();
             assertTrue("Unexpected transaction path " + path,
                     path.contains("akka://test/user/testCreateTransactionOnChain/shard-txn-1"));
 
@@ -466,7 +467,7 @@ public class ShardTest extends AbstractShardTest {
             assertEquals("Recovery complete", true,
                     Uninterruptibles.awaitUninterruptibly(recoveryComplete, 5, TimeUnit.SECONDS));
 
-            String address = "akka://foobar";
+            final String address = "akka://foobar";
             shard.underlyingActor().onReceiveCommand(new PeerAddressResolved(shardID.toString(), address));
 
             assertEquals("getPeerAddresses", address,
@@ -478,28 +479,28 @@ public class ShardTest extends AbstractShardTest {
 
     @Test
     public void testApplySnapshot() throws Exception {
-        TestActorRef<Shard> shard = TestActorRef.create(getSystem(), newShardProps(),
+        final TestActorRef<Shard> shard = TestActorRef.create(getSystem(), newShardProps(),
                 "testApplySnapshot");
 
-        DataTree store = InMemoryDataTreeFactory.getInstance().create();
+        final DataTree store = InMemoryDataTreeFactory.getInstance().create();
         store.setSchemaContext(SCHEMA_CONTEXT);
 
-        ContainerNode container = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
+        final ContainerNode container = ImmutableContainerNodeBuilder.create().withNodeIdentifier(
                 new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME)).
                     withChild(ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).addChild(
                         ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1)).build()).build();
 
         writeToStore(store, TestModel.TEST_PATH, container);
 
-        YangInstanceIdentifier root = YangInstanceIdentifier.builder().build();
-        NormalizedNode<?,?> expected = readStore(store, root);
+        final YangInstanceIdentifier root = YangInstanceIdentifier.builder().build();
+        final NormalizedNode<?,?> expected = readStore(store, root);
 
-        Snapshot snapshot = Snapshot.create(SerializationUtils.serializeNormalizedNode(expected),
+        final Snapshot snapshot = Snapshot.create(SerializationUtils.serializeNormalizedNode(expected),
                 Collections.<ReplicatedLogEntry>emptyList(), 1, 2, 3, 4);
 
         shard.underlyingActor().getRaftActorSnapshotCohort().applySnapshot(snapshot.getState());
 
-        NormalizedNode<?,?> actual = readStore(shard, root);
+        final NormalizedNode<?,?> actual = readStore(shard, root);
 
         assertEquals("Root node", expected, actual);
 
@@ -509,16 +510,16 @@ public class ShardTest extends AbstractShardTest {
     @Test
     public void testApplyState() throws Exception {
 
-        TestActorRef<Shard> shard = TestActorRef.create(getSystem(), newShardProps(), "testApplyState");
+        final TestActorRef<Shard> shard = TestActorRef.create(getSystem(), newShardProps(), "testApplyState");
 
-        NormalizedNode<?, ?> node = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        final NormalizedNode<?, ?> node = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
-        ApplyState applyState = new ApplyState(null, "test", new ReplicatedLogImplEntry(1, 2,
+        final ApplyState applyState = new ApplyState(null, "test", new ReplicatedLogImplEntry(1, 2,
                 newModificationPayload(new WriteModification(TestModel.TEST_PATH, node))));
 
         shard.underlyingActor().onReceiveCommand(applyState);
 
-        NormalizedNode<?,?> actual = readStore(shard, TestModel.TEST_PATH);
+        final NormalizedNode<?,?> actual = readStore(shard, TestModel.TEST_PATH);
         assertEquals("Applied state", node, actual);
 
         shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
@@ -527,31 +528,31 @@ public class ShardTest extends AbstractShardTest {
     @Test
     public void testApplyStateWithCandidatePayload() throws Exception {
 
-        TestActorRef<Shard> shard = TestActorRef.create(getSystem(), newShardPropsWithRecoveryComplete(), "testApplyState");
+        final TestActorRef<Shard> shard = TestActorRef.create(getSystem(), newShardPropsWithRecoveryComplete(), "testApplyState");
 
         recoveryComplete.await(5,  TimeUnit.SECONDS);
 
-        NormalizedNode<?, ?> node = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
-        DataTreeCandidate candidate = DataTreeCandidates.fromNormalizedNode(TestModel.TEST_PATH, node);
+        final NormalizedNode<?, ?> node = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        final DataTreeCandidate candidate = DataTreeCandidates.fromNormalizedNode(TestModel.TEST_PATH, node);
 
-        ApplyState applyState = new ApplyState(null, "test", new ReplicatedLogImplEntry(1, 2,
+        final ApplyState applyState = new ApplyState(null, "test", new ReplicatedLogImplEntry(1, 2,
                 DataTreeCandidatePayload.create(candidate)));
 
         shard.underlyingActor().onReceiveCommand(applyState);
 
-        NormalizedNode<?,?> actual = readStore(shard, TestModel.TEST_PATH);
+        final NormalizedNode<?,?> actual = readStore(shard, TestModel.TEST_PATH);
         assertEquals("Applied state", node, actual);
 
         shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
     }
 
     DataTree setupInMemorySnapshotStore() throws DataValidationFailedException {
-        DataTree testStore = InMemoryDataTreeFactory.getInstance().create();
+        final DataTree testStore = InMemoryDataTreeFactory.getInstance().create();
         testStore.setSchemaContext(SCHEMA_CONTEXT);
 
         writeToStore(testStore, TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
 
-        NormalizedNode<?, ?> root = readStore(testStore, YangInstanceIdentifier.builder().build());
+        final NormalizedNode<?, ?> root = readStore(testStore, YangInstanceIdentifier.builder().build());
 
         InMemorySnapshotStore.addSnapshot(shardID.toString(), Snapshot.create(
                 SerializationUtils.serializeNormalizedNode(root),
@@ -559,7 +560,7 @@ public class ShardTest extends AbstractShardTest {
         return testStore;
     }
 
-    private static DataTreeCandidatePayload payloadForModification(DataTree source, DataTreeModification mod) throws DataValidationFailedException {
+    private static DataTreeCandidatePayload payloadForModification(final DataTree source, final DataTreeModification mod) throws DataValidationFailedException {
         source.validate(mod);
         final DataTreeCandidate candidate = source.prepare(mod);
         source.commit(candidate);
@@ -573,25 +574,25 @@ public class ShardTest extends AbstractShardTest {
 
         final DataTreeModification writeMod = source.takeSnapshot().newModification();
         writeMod.write(TestModel.OUTER_LIST_PATH, ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build());
-
+        writeMod.ready();
         InMemoryJournal.addEntry(shardID.toString(), 0, DUMMY_DATA);
 
         // Set up the InMemoryJournal.
         InMemoryJournal.addEntry(shardID.toString(), 1, new ReplicatedLogImplEntry(0, 1, payloadForModification(source, writeMod)));
 
-        int nListEntries = 16;
-        Set<Integer> listEntryKeys = new HashSet<>();
+        final int nListEntries = 16;
+        final Set<Integer> listEntryKeys = new HashSet<>();
 
         // Add some ModificationPayload entries
         for (int i = 1; i <= nListEntries; i++) {
             listEntryKeys.add(Integer.valueOf(i));
 
-            YangInstanceIdentifier path = YangInstanceIdentifier.builder(TestModel.OUTER_LIST_PATH)
+            final YangInstanceIdentifier path = YangInstanceIdentifier.builder(TestModel.OUTER_LIST_PATH)
                     .nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, i).build();
 
             final DataTreeModification mod = source.takeSnapshot().newModification();
             mod.merge(path, ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, i));
-
+            mod.ready();
             InMemoryJournal.addEntry(shardID.toString(), i+1, new ReplicatedLogImplEntry(i, 1,
                 payloadForModification(source, mod)));
         }
@@ -616,15 +617,15 @@ public class ShardTest extends AbstractShardTest {
                   new WriteModification(TestModel.OUTER_LIST_PATH,
                           ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build()))));
 
-        int nListEntries = 16;
-        Set<Integer> listEntryKeys = new HashSet<>();
+        final int nListEntries = 16;
+        final Set<Integer> listEntryKeys = new HashSet<>();
 
         // Add some ModificationPayload entries
         for(int i = 1; i <= nListEntries; i++) {
             listEntryKeys.add(Integer.valueOf(i));
-            YangInstanceIdentifier path = YangInstanceIdentifier.builder(TestModel.OUTER_LIST_PATH)
+            final YangInstanceIdentifier path = YangInstanceIdentifier.builder(TestModel.OUTER_LIST_PATH)
                     .nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, i).build();
-            Modification mod = new MergeModification(path,
+            final Modification mod = new MergeModification(path,
                     ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, i));
             InMemoryJournal.addEntry(shardID.toString(), i + 1, new ReplicatedLogImplEntry(i, 1,
                     newModificationPayload(mod)));
@@ -637,8 +638,8 @@ public class ShardTest extends AbstractShardTest {
     }
 
     private static ModificationPayload newModificationPayload(final Modification... mods) throws IOException {
-        MutableCompositeModification compMod = new MutableCompositeModification();
-        for(Modification mod: mods) {
+        final MutableCompositeModification compMod = new MutableCompositeModification();
+        for(final Modification mod: mods) {
             compMod.addModification(mod);
         }
 
@@ -656,29 +657,29 @@ public class ShardTest extends AbstractShardTest {
 
          // Setup 3 simulated transactions with mock cohorts backed by real cohorts.
 
-            ShardDataTree dataStore = shard.underlyingActor().getDataStore();
+            final ShardDataTree dataStore = shard.underlyingActor().getDataStore();
 
-            String transactionID1 = "tx1";
-            MutableCompositeModification modification1 = new MutableCompositeModification();
-            ShardDataTreeCohort cohort1 = setupMockWriteTransaction("cohort1", dataStore,
+            final String transactionID1 = "tx1";
+            final MutableCompositeModification modification1 = new MutableCompositeModification();
+            final ShardDataTreeCohort cohort1 = setupMockWriteTransaction("cohort1", dataStore,
                     TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME), modification1);
 
-            String transactionID2 = "tx2";
-            MutableCompositeModification modification2 = new MutableCompositeModification();
-            ShardDataTreeCohort cohort2 = setupMockWriteTransaction("cohort2", dataStore,
+            final String transactionID2 = "tx2";
+            final MutableCompositeModification modification2 = new MutableCompositeModification();
+            final ShardDataTreeCohort cohort2 = setupMockWriteTransaction("cohort2", dataStore,
                     TestModel.OUTER_LIST_PATH,
                     ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build(),
                     modification2);
 
-            String transactionID3 = "tx3";
-            MutableCompositeModification modification3 = new MutableCompositeModification();
-            ShardDataTreeCohort cohort3 = setupMockWriteTransaction("cohort3", dataStore,
+            final String transactionID3 = "tx3";
+            final MutableCompositeModification modification3 = new MutableCompositeModification();
+            final ShardDataTreeCohort cohort3 = setupMockWriteTransaction("cohort3", dataStore,
                     YangInstanceIdentifier.builder(TestModel.OUTER_LIST_PATH)
                         .nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1).build(),
                     ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1),
                     modification3);
 
-            long timeoutSec = 5;
+            final long timeoutSec = 5;
             final FiniteDuration duration = FiniteDuration.create(timeoutSec, TimeUnit.SECONDS);
             final Timeout timeout = new Timeout(duration);
 
@@ -687,14 +688,14 @@ public class ShardTest extends AbstractShardTest {
 
             shard.tell(new ForwardedReadyTransaction(transactionID1, CURRENT_VERSION,
                     cohort1, modification1, true, false), getRef());
-            ReadyTransactionReply readyReply = ReadyTransactionReply.fromSerializable(
+            final ReadyTransactionReply readyReply = ReadyTransactionReply.fromSerializable(
                     expectMsgClass(duration, ReadyTransactionReply.class));
             assertEquals("Cohort path", shard.path().toString(), readyReply.getCohortPath());
 
             // Send the CanCommitTransaction message for the first Tx.
 
             shard.tell(new CanCommitTransaction(transactionID1).toSerializable(), getRef());
-            CanCommitTransactionReply canCommitReply = CanCommitTransactionReply.fromSerializable(
+            final CanCommitTransactionReply canCommitReply = CanCommitTransactionReply.fromSerializable(
                     expectMsgClass(duration, CanCommitTransactionReply.SERIALIZABLE_CLASS));
             assertEquals("Can commit", true, canCommitReply.getCanCommit());
 
@@ -711,10 +712,10 @@ public class ShardTest extends AbstractShardTest {
             // Send the CanCommitTransaction message for the next 2 Tx's. These should get queued and
             // processed after the first Tx completes.
 
-            Future<Object> canCommitFuture1 = Patterns.ask(shard,
+            final Future<Object> canCommitFuture1 = Patterns.ask(shard,
                     new CanCommitTransaction(transactionID2).toSerializable(), timeout);
 
-            Future<Object> canCommitFuture2 = Patterns.ask(shard,
+            final Future<Object> canCommitFuture2 = Patterns.ask(shard,
                     new CanCommitTransaction(transactionID3).toSerializable(), timeout);
 
             // Send the CommitTransaction message for the first Tx. After it completes, it should
@@ -743,7 +744,7 @@ public class ShardTest extends AbstractShardTest {
                         try {
                             assertEquals("Commit response type", expRespType, resp.getClass());
                             onSuccess(resp);
-                        } catch (Exception e) {
+                        } catch (final Exception e) {
                             caughtEx.set(e);
                         }
                     }
@@ -775,11 +776,11 @@ public class ShardTest extends AbstractShardTest {
 
                 @Override
                 void onSuccess(final Object resp) throws Exception {
-                    CanCommitTransactionReply canCommitReply =
+                    final CanCommitTransactionReply canCommitReply =
                             CanCommitTransactionReply.fromSerializable(resp);
                     assertEquals("Can commit", true, canCommitReply.getCanCommit());
 
-                    Future<Object> commitFuture = Patterns.ask(shard,
+                    final Future<Object> commitFuture = Patterns.ask(shard,
                             new CommitTransaction(transactionID).toSerializable(), timeout);
                     commitFuture.onComplete(new OnCommitFutureComplete(), getSystem().dispatcher());
                 }
@@ -791,7 +792,7 @@ public class ShardTest extends AbstractShardTest {
             canCommitFuture2.onComplete(new OnCanCommitFutureComplete(transactionID3),
                     getSystem().dispatcher());
 
-            boolean done = commitLatch.await(timeoutSec, TimeUnit.SECONDS);
+            final boolean done = commitLatch.await(timeoutSec, TimeUnit.SECONDS);
 
             if(caughtEx.get() != null) {
                 throw caughtEx.get();
@@ -799,7 +800,7 @@ public class ShardTest extends AbstractShardTest {
 
             assertEquals("Commits complete", true, done);
 
-            InOrder inOrder = inOrder(cohort1, cohort2, cohort3);
+            final InOrder inOrder = inOrder(cohort1, cohort2, cohort3);
             inOrder.verify(cohort1).canCommit();
             inOrder.verify(cohort1).preCommit();
             inOrder.verify(cohort1).commit();
@@ -820,15 +821,15 @@ public class ShardTest extends AbstractShardTest {
         }};
     }
 
-    private static BatchedModifications newBatchedModifications(String transactionID, YangInstanceIdentifier path,
-            NormalizedNode<?, ?> data, boolean ready, boolean doCommitOnReady, int messagesSent) {
+    private static BatchedModifications newBatchedModifications(final String transactionID, final YangInstanceIdentifier path,
+            final NormalizedNode<?, ?> data, final boolean ready, final boolean doCommitOnReady, final int messagesSent) {
         return newBatchedModifications(transactionID, null, path, data, ready, doCommitOnReady, messagesSent);
     }
 
-    private static BatchedModifications newBatchedModifications(String transactionID, String transactionChainID,
-            YangInstanceIdentifier path, NormalizedNode<?, ?> data, boolean ready, boolean doCommitOnReady,
-            int messagesSent) {
-        BatchedModifications batched = new BatchedModifications(transactionID, CURRENT_VERSION, transactionChainID);
+    private static BatchedModifications newBatchedModifications(final String transactionID, final String transactionChainID,
+            final YangInstanceIdentifier path, final NormalizedNode<?, ?> data, final boolean ready, final boolean doCommitOnReady,
+            final int messagesSent) {
+        final BatchedModifications batched = new BatchedModifications(transactionID, CURRENT_VERSION, transactionChainID);
         batched.addModification(new WriteModification(path, data));
         batched.setReady(ready);
         batched.setDoCommitOnReady(doCommitOnReady);
@@ -846,12 +847,12 @@ public class ShardTest extends AbstractShardTest {
             waitUntilLeader(shard);
 
             final String transactionID = "tx";
-            FiniteDuration duration = duration("5 seconds");
+            final FiniteDuration duration = duration("5 seconds");
 
             final AtomicReference<ShardDataTreeCohort> mockCohort = new AtomicReference<>();
-            ShardCommitCoordinator.CohortDecorator cohortDecorator = new ShardCommitCoordinator.CohortDecorator() {
+            final ShardCommitCoordinator.CohortDecorator cohortDecorator = new ShardCommitCoordinator.CohortDecorator() {
                 @Override
-                public ShardDataTreeCohort decorate(String txID, ShardDataTreeCohort actual) {
+                public ShardDataTreeCohort decorate(final String txID, final ShardDataTreeCohort actual) {
                     if(mockCohort.get() == null) {
                         mockCohort.set(createDelegatingMockCohort("cohort", actual));
                     }
@@ -882,7 +883,7 @@ public class ShardTest extends AbstractShardTest {
             // Send the CanCommitTransaction message.
 
             shard.tell(new CanCommitTransaction(transactionID).toSerializable(), getRef());
-            CanCommitTransactionReply canCommitReply = CanCommitTransactionReply.fromSerializable(
+            final CanCommitTransactionReply canCommitReply = CanCommitTransactionReply.fromSerializable(
                     expectMsgClass(duration, CanCommitTransactionReply.SERIALIZABLE_CLASS));
             assertEquals("Can commit", true, canCommitReply.getCanCommit());
 
@@ -891,7 +892,7 @@ public class ShardTest extends AbstractShardTest {
             shard.tell(new CommitTransaction(transactionID).toSerializable(), getRef());
             expectMsgClass(duration, CommitTransactionReply.SERIALIZABLE_CLASS);
 
-            InOrder inOrder = inOrder(mockCohort.get());
+            final InOrder inOrder = inOrder(mockCohort.get());
             inOrder.verify(mockCohort.get()).canCommit();
             inOrder.verify(mockCohort.get()).preCommit();
             inOrder.verify(mockCohort.get()).commit();
@@ -914,12 +915,12 @@ public class ShardTest extends AbstractShardTest {
             waitUntilLeader(shard);
 
             final String transactionID = "tx";
-            FiniteDuration duration = duration("5 seconds");
+            final FiniteDuration duration = duration("5 seconds");
 
             final AtomicReference<ShardDataTreeCohort> mockCohort = new AtomicReference<>();
-            ShardCommitCoordinator.CohortDecorator cohortDecorator = new ShardCommitCoordinator.CohortDecorator() {
+            final ShardCommitCoordinator.CohortDecorator cohortDecorator = new ShardCommitCoordinator.CohortDecorator() {
                 @Override
-                public ShardDataTreeCohort decorate(String txID, ShardDataTreeCohort actual) {
+                public ShardDataTreeCohort decorate(final String txID, final ShardDataTreeCohort actual) {
                     if(mockCohort.get() == null) {
                         mockCohort.set(createDelegatingMockCohort("cohort", actual));
                     }
@@ -948,7 +949,7 @@ public class ShardTest extends AbstractShardTest {
 
             expectMsgClass(duration, CommitTransactionReply.SERIALIZABLE_CLASS);
 
-            InOrder inOrder = inOrder(mockCohort.get());
+            final InOrder inOrder = inOrder(mockCohort.get());
             inOrder.verify(mockCohort.get()).canCommit();
             inOrder.verify(mockCohort.get()).preCommit();
             inOrder.verify(mockCohort.get()).commit();
@@ -970,14 +971,14 @@ public class ShardTest extends AbstractShardTest {
 
             waitUntilLeader(shard);
 
-            String transactionID = "tx1";
-            BatchedModifications batched = new BatchedModifications(transactionID, DataStoreVersions.CURRENT_VERSION, null);
+            final String transactionID = "tx1";
+            final BatchedModifications batched = new BatchedModifications(transactionID, DataStoreVersions.CURRENT_VERSION, null);
             batched.setReady(true);
             batched.setTotalMessagesSent(2);
 
             shard.tell(batched, getRef());
 
-            Failure failure = expectMsgClass(duration("5 seconds"), akka.actor.Status.Failure.class);
+            final Failure failure = expectMsgClass(duration("5 seconds"), akka.actor.Status.Failure.class);
 
             shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
 
@@ -988,16 +989,16 @@ public class ShardTest extends AbstractShardTest {
     }
 
     @SuppressWarnings("unchecked")
-    private static void verifyOuterListEntry(final TestActorRef<Shard> shard, Object expIDValue) throws Exception {
-        NormalizedNode<?, ?> outerList = readStore(shard, TestModel.OUTER_LIST_PATH);
+    private static void verifyOuterListEntry(final TestActorRef<Shard> shard, final Object expIDValue) throws Exception {
+        final NormalizedNode<?, ?> outerList = readStore(shard, TestModel.OUTER_LIST_PATH);
         assertNotNull(TestModel.OUTER_LIST_QNAME.getLocalName() + " not found", outerList);
         assertTrue(TestModel.OUTER_LIST_QNAME.getLocalName() + " value is not Iterable",
                 outerList.getValue() instanceof Iterable);
-        Object entry = ((Iterable<Object>)outerList.getValue()).iterator().next();
+        final Object entry = ((Iterable<Object>)outerList.getValue()).iterator().next();
         assertTrue(TestModel.OUTER_LIST_QNAME.getLocalName() + " entry is not MapEntryNode",
                 entry instanceof MapEntryNode);
-        MapEntryNode mapEntry = (MapEntryNode)entry;
-        Optional<DataContainerChild<? extends PathArgument, ?>> idLeaf =
+        final MapEntryNode mapEntry = (MapEntryNode)entry;
+        final Optional<DataContainerChild<? extends PathArgument, ?>> idLeaf =
                 mapEntry.getChild(new YangInstanceIdentifier.NodeIdentifier(TestModel.ID_QNAME));
         assertTrue("Missing leaf " + TestModel.ID_QNAME.getLocalName(), idLeaf.isPresent());
         assertEquals(TestModel.ID_QNAME.getLocalName() + " value", expIDValue, idLeaf.get().getValue());
@@ -1012,16 +1013,16 @@ public class ShardTest extends AbstractShardTest {
 
             waitUntilLeader(shard);
 
-            String transactionChainID = "txChain";
-            String transactionID1 = "tx1";
-            String transactionID2 = "tx2";
+            final String transactionChainID = "txChain";
+            final String transactionID1 = "tx1";
+            final String transactionID2 = "tx2";
 
-            FiniteDuration duration = duration("5 seconds");
+            final FiniteDuration duration = duration("5 seconds");
 
             // Send a BatchedModifications to start a chained write transaction and ready it.
 
-            ContainerNode containerNode = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
-            YangInstanceIdentifier path = TestModel.TEST_PATH;
+            final ContainerNode containerNode = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+            final YangInstanceIdentifier path = TestModel.TEST_PATH;
             shard.tell(newBatchedModifications(transactionID1, transactionChainID, path,
                     containerNode, true, false, 1), getRef());
             expectMsgClass(duration, ReadyTransactionReply.class);
@@ -1031,16 +1032,16 @@ public class ShardTest extends AbstractShardTest {
             shard.tell(new CreateTransaction(transactionID2, TransactionType.READ_ONLY.ordinal() ,
                     transactionChainID).toSerializable(), getRef());
 
-            CreateTransactionReply createReply = expectMsgClass(duration("3 seconds"), CreateTransactionReply.class);
+            final CreateTransactionReply createReply = expectMsgClass(duration("3 seconds"), CreateTransactionReply.class);
 
             getSystem().actorSelection(createReply.getTransactionActorPath()).tell(new ReadData(path), getRef());
-            ReadDataReply readReply = expectMsgClass(duration("3 seconds"), ReadDataReply.class);
+            final ReadDataReply readReply = expectMsgClass(duration("3 seconds"), ReadDataReply.class);
             assertEquals("Read node", containerNode, readReply.getNormalizedNode());
 
             // Commit the write transaction.
 
             shard.tell(new CanCommitTransaction(transactionID1).toSerializable(), getRef());
-            CanCommitTransactionReply canCommitReply = CanCommitTransactionReply.fromSerializable(
+            final CanCommitTransactionReply canCommitReply = CanCommitTransactionReply.fromSerializable(
                     expectMsgClass(duration, CanCommitTransactionReply.SERIALIZABLE_CLASS));
             assertEquals("Can commit", true, canCommitReply.getCanCommit());
 
@@ -1049,7 +1050,7 @@ public class ShardTest extends AbstractShardTest {
 
             // Verify data in the data store.
 
-            NormalizedNode<?, ?> actualNode = readStore(shard, path);
+            final NormalizedNode<?, ?> actualNode = readStore(shard, path);
             assertEquals("Stored node", containerNode, actualNode);
 
             shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
@@ -1060,7 +1061,7 @@ public class ShardTest extends AbstractShardTest {
     public void testOnBatchedModificationsWhenNotLeader() {
         final AtomicBoolean overrideLeaderCalls = new AtomicBoolean();
         new ShardTestKit(getSystem()) {{
-            Creator<Shard> creator = new Creator<Shard>() {
+            final Creator<Shard> creator = new Creator<Shard>() {
                 private static final long serialVersionUID = 1L;
 
                 @Override
@@ -1081,14 +1082,14 @@ public class ShardTest extends AbstractShardTest {
                 }
             };
 
-            TestActorRef<Shard> shard = TestActorRef.create(getSystem(),
+            final TestActorRef<Shard> shard = TestActorRef.create(getSystem(),
                     Props.create(new DelegatingShardCreator(creator)), "testOnBatchedModificationsWhenNotLeader");
 
             waitUntilLeader(shard);
 
             overrideLeaderCalls.set(true);
 
-            BatchedModifications batched = new BatchedModifications("tx", DataStoreVersions.CURRENT_VERSION, "");
+            final BatchedModifications batched = new BatchedModifications("tx", DataStoreVersions.CURRENT_VERSION, "");
 
             shard.tell(batched, ActorRef.noSender());
 
@@ -1107,15 +1108,15 @@ public class ShardTest extends AbstractShardTest {
 
             waitUntilLeader(shard);
 
-            ShardDataTree dataStore = shard.underlyingActor().getDataStore();
+            final ShardDataTree dataStore = shard.underlyingActor().getDataStore();
 
-            String transactionID = "tx1";
-            MutableCompositeModification modification = new MutableCompositeModification();
-            NormalizedNode<?, ?> containerNode = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
-            ShardDataTreeCohort cohort = setupMockWriteTransaction("cohort", dataStore,
+            final String transactionID = "tx1";
+            final MutableCompositeModification modification = new MutableCompositeModification();
+            final NormalizedNode<?, ?> containerNode = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+            final ShardDataTreeCohort cohort = setupMockWriteTransaction("cohort", dataStore,
                     TestModel.TEST_PATH, containerNode, modification);
 
-            FiniteDuration duration = duration("5 seconds");
+            final FiniteDuration duration = duration("5 seconds");
 
             // Simulate the ForwardedReadyTransaction messages that would be sent
             // by the ShardTransaction.
@@ -1125,12 +1126,12 @@ public class ShardTest extends AbstractShardTest {
 
             expectMsgClass(duration, ThreePhaseCommitCohortMessages.CommitTransactionReply.class);
 
-            InOrder inOrder = inOrder(cohort);
+            final InOrder inOrder = inOrder(cohort);
             inOrder.verify(cohort).canCommit();
             inOrder.verify(cohort).preCommit();
             inOrder.verify(cohort).commit();
 
-            NormalizedNode<?, ?> actualNode = readStore(shard, TestModel.TEST_PATH);
+            final NormalizedNode<?, ?> actualNode = readStore(shard, TestModel.TEST_PATH);
             assertEquals(TestModel.TEST_QNAME.getLocalName(), containerNode, actualNode);
 
             shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
@@ -1146,23 +1147,24 @@ public class ShardTest extends AbstractShardTest {
 
             waitUntilLeader(shard);
 
-            ShardDataTree dataStore = shard.underlyingActor().getDataStore();
+            final ShardDataTree dataStore = shard.underlyingActor().getDataStore();
 
-            DataTreeModification modification = dataStore.getDataTree().takeSnapshot().newModification();
+            final DataTreeModification modification = dataStore.getDataTree().takeSnapshot().newModification();
 
-            ContainerNode writeData = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+            final ContainerNode writeData = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
             new WriteModification(TestModel.TEST_PATH, writeData).apply(modification);
-            MapNode mergeData = ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build();
+            final MapNode mergeData = ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build();
             new MergeModification(TestModel.OUTER_LIST_PATH, mergeData).apply(modification);
 
-            String txId = "tx1";
-            ReadyLocalTransaction readyMessage = new ReadyLocalTransaction(txId, modification, true);
+            final String txId = "tx1";
+            modification.ready();
+            final ReadyLocalTransaction readyMessage = new ReadyLocalTransaction(txId, modification, true);
 
             shard.tell(readyMessage, getRef());
 
             expectMsgClass(CommitTransactionReply.SERIALIZABLE_CLASS);
 
-            NormalizedNode<?, ?> actualNode = readStore(shard, TestModel.OUTER_LIST_PATH);
+            final NormalizedNode<?, ?> actualNode = readStore(shard, TestModel.OUTER_LIST_PATH);
             assertEquals(TestModel.OUTER_LIST_QNAME.getLocalName(), mergeData, actualNode);
 
             shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
@@ -1178,17 +1180,18 @@ public class ShardTest extends AbstractShardTest {
 
             waitUntilLeader(shard);
 
-            ShardDataTree dataStore = shard.underlyingActor().getDataStore();
+            final ShardDataTree dataStore = shard.underlyingActor().getDataStore();
 
-            DataTreeModification modification = dataStore.getDataTree().takeSnapshot().newModification();
+            final DataTreeModification modification = dataStore.getDataTree().takeSnapshot().newModification();
 
-            ContainerNode writeData = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+            final ContainerNode writeData = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
             new WriteModification(TestModel.TEST_PATH, writeData).apply(modification);
-            MapNode mergeData = ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build();
+            final MapNode mergeData = ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build();
             new MergeModification(TestModel.OUTER_LIST_PATH, mergeData).apply(modification);
 
-            String txId = "tx1";
-            ReadyLocalTransaction readyMessage = new ReadyLocalTransaction(txId, modification, false);
+            final String txId = "tx1";
+                modification.ready();
+            final ReadyLocalTransaction readyMessage = new ReadyLocalTransaction(txId, modification, false);
 
             shard.tell(readyMessage, getRef());
 
@@ -1197,7 +1200,7 @@ public class ShardTest extends AbstractShardTest {
             // Send the CanCommitTransaction message.
 
             shard.tell(new CanCommitTransaction(txId).toSerializable(), getRef());
-            CanCommitTransactionReply canCommitReply = CanCommitTransactionReply.fromSerializable(
+            final CanCommitTransactionReply canCommitReply = CanCommitTransactionReply.fromSerializable(
                     expectMsgClass(CanCommitTransactionReply.SERIALIZABLE_CLASS));
             assertEquals("Can commit", true, canCommitReply.getCanCommit());
 
@@ -1206,7 +1209,7 @@ public class ShardTest extends AbstractShardTest {
             shard.tell(new CommitTransaction(txId).toSerializable(), getRef());
             expectMsgClass(CommitTransactionReply.SERIALIZABLE_CLASS);
 
-            NormalizedNode<?, ?> actualNode = readStore(shard, TestModel.OUTER_LIST_PATH);
+            final NormalizedNode<?, ?> actualNode = readStore(shard, TestModel.OUTER_LIST_PATH);
             assertEquals(TestModel.OUTER_LIST_QNAME.getLocalName(), mergeData, actualNode);
 
             shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
@@ -1223,17 +1226,17 @@ public class ShardTest extends AbstractShardTest {
 
             waitUntilLeader(shard);
 
-            ShardDataTree dataStore = shard.underlyingActor().getDataStore();
+            final ShardDataTree dataStore = shard.underlyingActor().getDataStore();
 
             // Setup a simulated transactions with a mock cohort.
 
-            String transactionID = "tx";
-            MutableCompositeModification modification = new MutableCompositeModification();
-            NormalizedNode<?, ?> containerNode = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
-            ShardDataTreeCohort cohort = setupMockWriteTransaction("cohort", dataStore,
+            final String transactionID = "tx";
+            final MutableCompositeModification modification = new MutableCompositeModification();
+            final NormalizedNode<?, ?> containerNode = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+            final ShardDataTreeCohort cohort = setupMockWriteTransaction("cohort", dataStore,
                     TestModel.TEST_PATH, containerNode, modification);
 
-            FiniteDuration duration = duration("5 seconds");
+            final FiniteDuration duration = duration("5 seconds");
 
             // Simulate the ForwardedReadyTransaction messages that would be sent
             // by the ShardTransaction.
@@ -1245,7 +1248,7 @@ public class ShardTest extends AbstractShardTest {
             // Send the CanCommitTransaction message.
 
             shard.tell(new CanCommitTransaction(transactionID).toSerializable(), getRef());
-            CanCommitTransactionReply canCommitReply = CanCommitTransactionReply.fromSerializable(
+            final CanCommitTransactionReply canCommitReply = CanCommitTransactionReply.fromSerializable(
                     expectMsgClass(duration, CanCommitTransactionReply.SERIALIZABLE_CLASS));
             assertEquals("Can commit", true, canCommitReply.getCanCommit());
 
@@ -1254,12 +1257,12 @@ public class ShardTest extends AbstractShardTest {
             shard.tell(new CommitTransaction(transactionID).toSerializable(), getRef());
             expectMsgClass(duration, CommitTransactionReply.SERIALIZABLE_CLASS);
 
-            InOrder inOrder = inOrder(cohort);
+            final InOrder inOrder = inOrder(cohort);
             inOrder.verify(cohort).canCommit();
             inOrder.verify(cohort).preCommit();
             inOrder.verify(cohort).commit();
 
-            NormalizedNode<?, ?> actualNode = readStore(shard, TestModel.TEST_PATH);
+            final NormalizedNode<?, ?> actualNode = readStore(shard, TestModel.TEST_PATH);
             assertEquals(TestModel.TEST_QNAME.getLocalName(), containerNode, actualNode);
 
             shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
@@ -1267,8 +1270,8 @@ public class ShardTest extends AbstractShardTest {
     }
 
     private static DataTreeCandidateTip mockCandidate(final String name) {
-        DataTreeCandidateTip mockCandidate = mock(DataTreeCandidateTip.class, name);
-        DataTreeCandidateNode mockCandidateNode = mock(DataTreeCandidateNode.class, name + "-node");
+        final DataTreeCandidateTip mockCandidate = mock(DataTreeCandidateTip.class, name);
+        final DataTreeCandidateNode mockCandidateNode = mock(DataTreeCandidateNode.class, name + "-node");
         doReturn(ModificationType.WRITE).when(mockCandidateNode).getModificationType();
         doReturn(Optional.of(ImmutableNodes.containerNode(CARS_QNAME))).when(mockCandidateNode).getDataAfter();
         doReturn(YangInstanceIdentifier.builder().build()).when(mockCandidate).getRootPath();
@@ -1277,8 +1280,8 @@ public class ShardTest extends AbstractShardTest {
     }
 
     private static DataTreeCandidateTip mockUnmodifiedCandidate(final String name) {
-        DataTreeCandidateTip mockCandidate = mock(DataTreeCandidateTip.class, name);
-        DataTreeCandidateNode mockCandidateNode = mock(DataTreeCandidateNode.class, name + "-node");
+        final DataTreeCandidateTip mockCandidate = mock(DataTreeCandidateTip.class, name);
+        final DataTreeCandidateNode mockCandidateNode = mock(DataTreeCandidateNode.class, name + "-node");
         doReturn(ModificationType.UNMODIFIED).when(mockCandidateNode).getModificationType();
         doReturn(YangInstanceIdentifier.builder().build()).when(mockCandidate).getRootPath();
         doReturn(mockCandidateNode).when(mockCandidate).getRootNode();
@@ -1297,15 +1300,15 @@ public class ShardTest extends AbstractShardTest {
 
                 waitUntilLeader(shard);
 
-                String transactionID = "tx1";
-                MutableCompositeModification modification = new MutableCompositeModification();
-                ShardDataTreeCohort cohort = mock(ShardDataTreeCohort.class, "cohort1");
+                final String transactionID = "tx1";
+                final MutableCompositeModification modification = new MutableCompositeModification();
+                final ShardDataTreeCohort cohort = mock(ShardDataTreeCohort.class, "cohort1");
                 doReturn(Futures.immediateFuture(Boolean.TRUE)).when(cohort).canCommit();
                 doReturn(Futures.immediateFuture(Boolean.TRUE)).when(cohort).preCommit();
                 doReturn(Futures.immediateFuture(Boolean.TRUE)).when(cohort).commit();
                 doReturn(mockUnmodifiedCandidate("cohort1-candidate")).when(cohort).getCandidate();
 
-                FiniteDuration duration = duration("5 seconds");
+                final FiniteDuration duration = duration("5 seconds");
 
                 // Simulate the ForwardedReadyTransaction messages that would be sent
                 // by the ShardTransaction.
@@ -1317,20 +1320,20 @@ public class ShardTest extends AbstractShardTest {
                 // Send the CanCommitTransaction message.
 
                 shard.tell(new CanCommitTransaction(transactionID).toSerializable(), getRef());
-                CanCommitTransactionReply canCommitReply = CanCommitTransactionReply.fromSerializable(
+                final CanCommitTransactionReply canCommitReply = CanCommitTransactionReply.fromSerializable(
                         expectMsgClass(duration, CanCommitTransactionReply.SERIALIZABLE_CLASS));
                 assertEquals("Can commit", true, canCommitReply.getCanCommit());
 
                 shard.tell(new CommitTransaction(transactionID).toSerializable(), getRef());
                 expectMsgClass(duration, ThreePhaseCommitCohortMessages.CommitTransactionReply.class);
 
-                InOrder inOrder = inOrder(cohort);
+                final InOrder inOrder = inOrder(cohort);
                 inOrder.verify(cohort).canCommit();
                 inOrder.verify(cohort).preCommit();
                 inOrder.verify(cohort).commit();
 
                 shard.tell(Shard.GET_SHARD_MBEAN_MESSAGE, getRef());
-                ShardStats shardStats = expectMsgClass(duration, ShardStats.class);
+                final ShardStats shardStats = expectMsgClass(duration, ShardStats.class);
 
                 // Use MBean for verification
                 // Committed transaction count should increase as usual
@@ -1355,16 +1358,16 @@ public class ShardTest extends AbstractShardTest {
 
                 waitUntilLeader(shard);
 
-                String transactionID = "tx1";
-                MutableCompositeModification modification = new MutableCompositeModification();
+                final String transactionID = "tx1";
+                final MutableCompositeModification modification = new MutableCompositeModification();
                 modification.addModification(new DeleteModification(YangInstanceIdentifier.builder().build()));
-                ShardDataTreeCohort cohort = mock(ShardDataTreeCohort.class, "cohort1");
+                final ShardDataTreeCohort cohort = mock(ShardDataTreeCohort.class, "cohort1");
                 doReturn(Futures.immediateFuture(Boolean.TRUE)).when(cohort).canCommit();
                 doReturn(Futures.immediateFuture(Boolean.TRUE)).when(cohort).preCommit();
                 doReturn(Futures.immediateFuture(Boolean.TRUE)).when(cohort).commit();
                 doReturn(mockCandidate("cohort1-candidate")).when(cohort).getCandidate();
 
-                FiniteDuration duration = duration("5 seconds");
+                final FiniteDuration duration = duration("5 seconds");
 
                 // Simulate the ForwardedReadyTransaction messages that would be sent
                 // by the ShardTransaction.
@@ -1376,20 +1379,20 @@ public class ShardTest extends AbstractShardTest {
                 // Send the CanCommitTransaction message.
 
                 shard.tell(new CanCommitTransaction(transactionID).toSerializable(), getRef());
-                CanCommitTransactionReply canCommitReply = CanCommitTransactionReply.fromSerializable(
+                final CanCommitTransactionReply canCommitReply = CanCommitTransactionReply.fromSerializable(
                         expectMsgClass(duration, CanCommitTransactionReply.SERIALIZABLE_CLASS));
                 assertEquals("Can commit", true, canCommitReply.getCanCommit());
 
                 shard.tell(new CommitTransaction(transactionID).toSerializable(), getRef());
                 expectMsgClass(duration, ThreePhaseCommitCohortMessages.CommitTransactionReply.class);
 
-                InOrder inOrder = inOrder(cohort);
+                final InOrder inOrder = inOrder(cohort);
                 inOrder.verify(cohort).canCommit();
                 inOrder.verify(cohort).preCommit();
                 inOrder.verify(cohort).commit();
 
                 shard.tell(Shard.GET_SHARD_MBEAN_MESSAGE, getRef());
-                ShardStats shardStats = expectMsgClass(duration, ShardStats.class);
+                final ShardStats shardStats = expectMsgClass(duration, ShardStats.class);
 
                 // Use MBean for verification
                 // Committed transaction count should increase as usual
@@ -1416,20 +1419,20 @@ public class ShardTest extends AbstractShardTest {
             // Setup 2 simulated transactions with mock cohorts. The first one fails in the
             // commit phase.
 
-            String transactionID1 = "tx1";
-            MutableCompositeModification modification1 = new MutableCompositeModification();
-            ShardDataTreeCohort cohort1 = mock(ShardDataTreeCohort.class, "cohort1");
+            final String transactionID1 = "tx1";
+            final MutableCompositeModification modification1 = new MutableCompositeModification();
+            final ShardDataTreeCohort cohort1 = mock(ShardDataTreeCohort.class, "cohort1");
             doReturn(Futures.immediateFuture(Boolean.TRUE)).when(cohort1).canCommit();
             doReturn(Futures.immediateFuture(null)).when(cohort1).preCommit();
             doReturn(Futures.immediateFailedFuture(new IllegalStateException("mock"))).when(cohort1).commit();
             doReturn(mockCandidate("cohort1-candidate")).when(cohort1).getCandidate();
 
-            String transactionID2 = "tx2";
-            MutableCompositeModification modification2 = new MutableCompositeModification();
-            ShardDataTreeCohort cohort2 = mock(ShardDataTreeCohort.class, "cohort2");
+            final String transactionID2 = "tx2";
+            final MutableCompositeModification modification2 = new MutableCompositeModification();
+            final ShardDataTreeCohort cohort2 = mock(ShardDataTreeCohort.class, "cohort2");
             doReturn(Futures.immediateFuture(Boolean.TRUE)).when(cohort2).canCommit();
 
-            FiniteDuration duration = duration("5 seconds");
+            final FiniteDuration duration = duration("5 seconds");
             final Timeout timeout = new Timeout(duration);
 
             // Simulate the ForwardedReadyTransaction messages that would be sent
@@ -1446,14 +1449,14 @@ public class ShardTest extends AbstractShardTest {
             // Send the CanCommitTransaction message for the first Tx.
 
             shard.tell(new CanCommitTransaction(transactionID1).toSerializable(), getRef());
-            CanCommitTransactionReply canCommitReply = CanCommitTransactionReply.fromSerializable(
+            final CanCommitTransactionReply canCommitReply = CanCommitTransactionReply.fromSerializable(
                     expectMsgClass(duration, CanCommitTransactionReply.SERIALIZABLE_CLASS));
             assertEquals("Can commit", true, canCommitReply.getCanCommit());
 
             // Send the CanCommitTransaction message for the 2nd Tx. This should get queued and
             // processed after the first Tx completes.
 
-            Future<Object> canCommitFuture = Patterns.ask(shard,
+            final Future<Object> canCommitFuture = Patterns.ask(shard,
                     new CanCommitTransaction(transactionID2).toSerializable(), timeout);
 
             // Send the CommitTransaction message for the first Tx. This should send back an error
@@ -1474,7 +1477,7 @@ public class ShardTest extends AbstractShardTest {
 
             assertEquals("2nd CanCommit complete", true, latch.await(5, TimeUnit.SECONDS));
 
-            InOrder inOrder = inOrder(cohort1, cohort2);
+            final InOrder inOrder = inOrder(cohort1, cohort2);
             inOrder.verify(cohort1).canCommit();
             inOrder.verify(cohort1).preCommit();
             inOrder.verify(cohort1).commit();
@@ -1493,18 +1496,18 @@ public class ShardTest extends AbstractShardTest {
 
             waitUntilLeader(shard);
 
-            String transactionID1 = "tx1";
-            MutableCompositeModification modification1 = new MutableCompositeModification();
-            ShardDataTreeCohort cohort1 = mock(ShardDataTreeCohort.class, "cohort1");
+            final String transactionID1 = "tx1";
+            final MutableCompositeModification modification1 = new MutableCompositeModification();
+            final ShardDataTreeCohort cohort1 = mock(ShardDataTreeCohort.class, "cohort1");
             doReturn(Futures.immediateFuture(Boolean.TRUE)).when(cohort1).canCommit();
             doReturn(Futures.immediateFailedFuture(new IllegalStateException("mock"))).when(cohort1).preCommit();
 
-            String transactionID2 = "tx2";
-            MutableCompositeModification modification2 = new MutableCompositeModification();
-            ShardDataTreeCohort cohort2 = mock(ShardDataTreeCohort.class, "cohort2");
+            final String transactionID2 = "tx2";
+            final MutableCompositeModification modification2 = new MutableCompositeModification();
+            final ShardDataTreeCohort cohort2 = mock(ShardDataTreeCohort.class, "cohort2");
             doReturn(Futures.immediateFuture(Boolean.TRUE)).when(cohort2).canCommit();
 
-            FiniteDuration duration = duration("5 seconds");
+            final FiniteDuration duration = duration("5 seconds");
             final Timeout timeout = new Timeout(duration);
 
             // Simulate the ForwardedReadyTransaction messages that would be sent
@@ -1521,14 +1524,14 @@ public class ShardTest extends AbstractShardTest {
             // Send the CanCommitTransaction message for the first Tx.
 
             shard.tell(new CanCommitTransaction(transactionID1).toSerializable(), getRef());
-            CanCommitTransactionReply canCommitReply = CanCommitTransactionReply.fromSerializable(
+            final CanCommitTransactionReply canCommitReply = CanCommitTransactionReply.fromSerializable(
                     expectMsgClass(duration, CanCommitTransactionReply.SERIALIZABLE_CLASS));
             assertEquals("Can commit", true, canCommitReply.getCanCommit());
 
             // Send the CanCommitTransaction message for the 2nd Tx. This should get queued and
             // processed after the first Tx completes.
 
-            Future<Object> canCommitFuture = Patterns.ask(shard,
+            final Future<Object> canCommitFuture = Patterns.ask(shard,
                     new CanCommitTransaction(transactionID2).toSerializable(), timeout);
 
             // Send the CommitTransaction message for the first Tx. This should send back an error
@@ -1549,7 +1552,7 @@ public class ShardTest extends AbstractShardTest {
 
             assertEquals("2nd CanCommit complete", true, latch.await(5, TimeUnit.SECONDS));
 
-            InOrder inOrder = inOrder(cohort1, cohort2);
+            final InOrder inOrder = inOrder(cohort1, cohort2);
             inOrder.verify(cohort1).canCommit();
             inOrder.verify(cohort1).preCommit();
             inOrder.verify(cohort2).canCommit();
@@ -1569,9 +1572,9 @@ public class ShardTest extends AbstractShardTest {
 
             final FiniteDuration duration = duration("5 seconds");
 
-            String transactionID1 = "tx1";
-            MutableCompositeModification modification = new MutableCompositeModification();
-            ShardDataTreeCohort cohort = mock(ShardDataTreeCohort.class, "cohort1");
+            final String transactionID1 = "tx1";
+            final MutableCompositeModification modification = new MutableCompositeModification();
+            final ShardDataTreeCohort cohort = mock(ShardDataTreeCohort.class, "cohort1");
             doReturn(Futures.immediateFailedFuture(new IllegalStateException("mock"))).when(cohort).canCommit();
 
             // Simulate the ForwardedReadyTransaction messages that would be sent
@@ -1590,7 +1593,7 @@ public class ShardTest extends AbstractShardTest {
 
             reset(cohort);
 
-            String transactionID2 = "tx2";
+            final String transactionID2 = "tx2";
             doReturn(Futures.immediateFuture(Boolean.TRUE)).when(cohort).canCommit();
 
             shard.tell(new ForwardedReadyTransaction(transactionID2, CURRENT_VERSION,
@@ -1598,7 +1601,7 @@ public class ShardTest extends AbstractShardTest {
             expectMsgClass(duration, ReadyTransactionReply.class);
 
             shard.tell(new CanCommitTransaction(transactionID2).toSerializable(), getRef());
-            CanCommitTransactionReply reply = CanCommitTransactionReply.fromSerializable(
+            final CanCommitTransactionReply reply = CanCommitTransactionReply.fromSerializable(
                     expectMsgClass(CanCommitTransactionReply.SERIALIZABLE_CLASS));
             assertEquals("getCanCommit", true, reply.getCanCommit());
 
@@ -1617,9 +1620,9 @@ public class ShardTest extends AbstractShardTest {
 
             final FiniteDuration duration = duration("5 seconds");
 
-            String transactionID1 = "tx1";
-            MutableCompositeModification modification = new MutableCompositeModification();
-            ShardDataTreeCohort cohort = mock(ShardDataTreeCohort.class, "cohort1");
+            final String transactionID1 = "tx1";
+            final MutableCompositeModification modification = new MutableCompositeModification();
+            final ShardDataTreeCohort cohort = mock(ShardDataTreeCohort.class, "cohort1");
             doReturn(Futures.immediateFuture(Boolean.FALSE)).when(cohort).canCommit();
 
             // Simulate the ForwardedReadyTransaction messages that would be sent
@@ -1640,7 +1643,7 @@ public class ShardTest extends AbstractShardTest {
 
             reset(cohort);
 
-            String transactionID2 = "tx2";
+            final String transactionID2 = "tx2";
             doReturn(Futures.immediateFuture(Boolean.TRUE)).when(cohort).canCommit();
 
             shard.tell(new ForwardedReadyTransaction(transactionID2, CURRENT_VERSION,
@@ -1667,9 +1670,9 @@ public class ShardTest extends AbstractShardTest {
 
             final FiniteDuration duration = duration("5 seconds");
 
-            String transactionID1 = "tx1";
-            MutableCompositeModification modification = new MutableCompositeModification();
-            ShardDataTreeCohort cohort = mock(ShardDataTreeCohort.class, "cohort1");
+            final String transactionID1 = "tx1";
+            final MutableCompositeModification modification = new MutableCompositeModification();
+            final ShardDataTreeCohort cohort = mock(ShardDataTreeCohort.class, "cohort1");
             doReturn(Futures.immediateFailedFuture(new IllegalStateException("mock"))).when(cohort).canCommit();
 
             // Simulate the ForwardedReadyTransaction messages that would be sent
@@ -1684,12 +1687,12 @@ public class ShardTest extends AbstractShardTest {
 
             reset(cohort);
 
-            String transactionID2 = "tx2";
+            final String transactionID2 = "tx2";
             doReturn(Futures.immediateFuture(Boolean.TRUE)).when(cohort).canCommit();
             doReturn(Futures.immediateFuture(null)).when(cohort).preCommit();
             doReturn(Futures.immediateFuture(null)).when(cohort).commit();
-            DataTreeCandidateTip candidate = mock(DataTreeCandidateTip.class);
-            DataTreeCandidateNode candidateRoot = mock(DataTreeCandidateNode.class);
+            final DataTreeCandidateTip candidate = mock(DataTreeCandidateTip.class);
+            final DataTreeCandidateNode candidateRoot = mock(DataTreeCandidateNode.class);
             doReturn(ModificationType.UNMODIFIED).when(candidateRoot).getModificationType();
             doReturn(candidateRoot).when(candidate).getRootNode();
             doReturn(candidate).when(cohort).getCandidate();
@@ -1714,9 +1717,9 @@ public class ShardTest extends AbstractShardTest {
 
             final FiniteDuration duration = duration("5 seconds");
 
-            String transactionID = "tx1";
-            MutableCompositeModification modification = new MutableCompositeModification();
-            ShardDataTreeCohort cohort = mock(ShardDataTreeCohort.class, "cohort1");
+            final String transactionID = "tx1";
+            final MutableCompositeModification modification = new MutableCompositeModification();
+            final ShardDataTreeCohort cohort = mock(ShardDataTreeCohort.class, "cohort1");
             doReturn(Futures.immediateFuture(Boolean.FALSE)).when(cohort).canCommit();
 
             // Simulate the ForwardedReadyTransaction messages that would be sent
@@ -1731,12 +1734,12 @@ public class ShardTest extends AbstractShardTest {
 
             reset(cohort);
 
-            String transactionID2 = "tx2";
+            final String transactionID2 = "tx2";
             doReturn(Futures.immediateFuture(Boolean.TRUE)).when(cohort).canCommit();
             doReturn(Futures.immediateFuture(null)).when(cohort).preCommit();
             doReturn(Futures.immediateFuture(null)).when(cohort).commit();
-            DataTreeCandidateTip candidate = mock(DataTreeCandidateTip.class);
-            DataTreeCandidateNode candidateRoot = mock(DataTreeCandidateNode.class);
+            final DataTreeCandidateTip candidate = mock(DataTreeCandidateTip.class);
+            final DataTreeCandidateNode candidateRoot = mock(DataTreeCandidateNode.class);
             doReturn(ModificationType.UNMODIFIED).when(candidateRoot).getModificationType();
             doReturn(candidateRoot).when(candidate).getRootNode();
             doReturn(candidate).when(cohort).getCandidate();
@@ -1760,14 +1763,14 @@ public class ShardTest extends AbstractShardTest {
             waitUntilLeader(shard);
 
             final FiniteDuration duration = duration("5 seconds");
-            ShardDataTree dataStore = shard.underlyingActor().getDataStore();
+            final ShardDataTree dataStore = shard.underlyingActor().getDataStore();
 
             final String transactionID = "tx1";
-            Function<ShardDataTreeCohort, ListenableFuture<Void>> preCommit =
+            final Function<ShardDataTreeCohort, ListenableFuture<Void>> preCommit =
                           new Function<ShardDataTreeCohort, ListenableFuture<Void>>() {
                 @Override
                 public ListenableFuture<Void> apply(final ShardDataTreeCohort cohort) {
-                    ListenableFuture<Void> preCommitFuture = cohort.preCommit();
+                    final ListenableFuture<Void> preCommitFuture = cohort.preCommit();
 
                     // Simulate an AbortTransaction message occurring during replication, after
                     // persisting and before finishing the commit to the in-memory store.
@@ -1783,8 +1786,8 @@ public class ShardTest extends AbstractShardTest {
                 }
             };
 
-            MutableCompositeModification modification = new MutableCompositeModification();
-            ShardDataTreeCohort cohort = setupMockWriteTransaction("cohort1", dataStore,
+            final MutableCompositeModification modification = new MutableCompositeModification();
+            final ShardDataTreeCohort cohort = setupMockWriteTransaction("cohort1", dataStore,
                     TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME),
                     modification, preCommit);
 
@@ -1793,14 +1796,14 @@ public class ShardTest extends AbstractShardTest {
             expectMsgClass(duration, ReadyTransactionReply.class);
 
             shard.tell(new CanCommitTransaction(transactionID).toSerializable(), getRef());
-            CanCommitTransactionReply canCommitReply = CanCommitTransactionReply.fromSerializable(
+            final CanCommitTransactionReply canCommitReply = CanCommitTransactionReply.fromSerializable(
                     expectMsgClass(duration, CanCommitTransactionReply.SERIALIZABLE_CLASS));
             assertEquals("Can commit", true, canCommitReply.getCanCommit());
 
             shard.tell(new CommitTransaction(transactionID).toSerializable(), getRef());
             expectMsgClass(duration, CommitTransactionReply.SERIALIZABLE_CLASS);
 
-            NormalizedNode<?, ?> node = readStore(shard, TestModel.TEST_PATH);
+            final NormalizedNode<?, ?> node = readStore(shard, TestModel.TEST_PATH);
 
             // Since we're simulating an abort occurring during replication and before finish commit,
             // the data should still get written to the in-memory store since we've gotten past
@@ -1824,7 +1827,7 @@ public class ShardTest extends AbstractShardTest {
 
             final FiniteDuration duration = duration("5 seconds");
 
-            ShardDataTree dataStore = shard.underlyingActor().getDataStore();
+            final ShardDataTree dataStore = shard.underlyingActor().getDataStore();
 
             writeToStore(shard, TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
             writeToStore(shard, TestModel.OUTER_LIST_PATH,
@@ -1832,9 +1835,9 @@ public class ShardTest extends AbstractShardTest {
 
             // Create 1st Tx - will timeout
 
-            String transactionID1 = "tx1";
-            MutableCompositeModification modification1 = new MutableCompositeModification();
-            ShardDataTreeCohort cohort1 = setupMockWriteTransaction("cohort1", dataStore,
+            final String transactionID1 = "tx1";
+            final MutableCompositeModification modification1 = new MutableCompositeModification();
+            final ShardDataTreeCohort cohort1 = setupMockWriteTransaction("cohort1", dataStore,
                     YangInstanceIdentifier.builder(TestModel.OUTER_LIST_PATH)
                         .nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1).build(),
                     ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1),
@@ -1842,11 +1845,11 @@ public class ShardTest extends AbstractShardTest {
 
             // Create 2nd Tx
 
-            String transactionID2 = "tx3";
-            MutableCompositeModification modification2 = new MutableCompositeModification();
-            YangInstanceIdentifier listNodePath = YangInstanceIdentifier.builder(TestModel.OUTER_LIST_PATH)
+            final String transactionID2 = "tx3";
+            final MutableCompositeModification modification2 = new MutableCompositeModification();
+            final YangInstanceIdentifier listNodePath = YangInstanceIdentifier.builder(TestModel.OUTER_LIST_PATH)
                 .nodeWithKey(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 2).build();
-            ShardDataTreeCohort cohort2 = setupMockWriteTransaction("cohort3", dataStore,
+            final ShardDataTreeCohort cohort2 = setupMockWriteTransaction("cohort3", dataStore,
                     listNodePath,
                     ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 2),
                     modification2);
@@ -1881,7 +1884,7 @@ public class ShardTest extends AbstractShardTest {
             shard.tell(new CommitTransaction(transactionID2).toSerializable(), getRef());
             expectMsgClass(duration, CommitTransactionReply.SERIALIZABLE_CLASS);
 
-            NormalizedNode<?, ?> node = readStore(shard, listNodePath);
+            final NormalizedNode<?, ?> node = readStore(shard, listNodePath);
             assertNotNull(listNodePath + " not found", node);
 
             shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
@@ -1901,23 +1904,23 @@ public class ShardTest extends AbstractShardTest {
 
             final FiniteDuration duration = duration("5 seconds");
 
-            ShardDataTree dataStore = shard.underlyingActor().getDataStore();
+            final ShardDataTree dataStore = shard.underlyingActor().getDataStore();
 
-            String transactionID1 = "tx1";
-            MutableCompositeModification modification1 = new MutableCompositeModification();
-            ShardDataTreeCohort cohort1 = setupMockWriteTransaction("cohort1", dataStore,
+            final String transactionID1 = "tx1";
+            final MutableCompositeModification modification1 = new MutableCompositeModification();
+            final ShardDataTreeCohort cohort1 = setupMockWriteTransaction("cohort1", dataStore,
                     TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME), modification1);
 
-            String transactionID2 = "tx2";
-            MutableCompositeModification modification2 = new MutableCompositeModification();
-            ShardDataTreeCohort cohort2 = setupMockWriteTransaction("cohort2", dataStore,
+            final String transactionID2 = "tx2";
+            final MutableCompositeModification modification2 = new MutableCompositeModification();
+            final ShardDataTreeCohort cohort2 = setupMockWriteTransaction("cohort2", dataStore,
                     TestModel.OUTER_LIST_PATH,
                     ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build(),
                     modification2);
 
-            String transactionID3 = "tx3";
-            MutableCompositeModification modification3 = new MutableCompositeModification();
-            ShardDataTreeCohort cohort3 = setupMockWriteTransaction("cohort3", dataStore,
+            final String transactionID3 = "tx3";
+            final MutableCompositeModification modification3 = new MutableCompositeModification();
+            final ShardDataTreeCohort cohort3 = setupMockWriteTransaction("cohort3", dataStore,
                     TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME), modification3);
 
             // Ready the Tx's
@@ -1967,29 +1970,29 @@ public class ShardTest extends AbstractShardTest {
 
             final FiniteDuration duration = duration("5 seconds");
 
-            ShardDataTree dataStore = shard.underlyingActor().getDataStore();
+            final ShardDataTree dataStore = shard.underlyingActor().getDataStore();
 
-            String transactionID1 = "tx1";
-            MutableCompositeModification modification1 = new MutableCompositeModification();
-            ShardDataTreeCohort cohort1 = setupMockWriteTransaction("cohort1", dataStore,
+            final String transactionID1 = "tx1";
+            final MutableCompositeModification modification1 = new MutableCompositeModification();
+            final ShardDataTreeCohort cohort1 = setupMockWriteTransaction("cohort1", dataStore,
                     TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME), modification1);
 
             shard.tell(new ForwardedReadyTransaction(transactionID1, CURRENT_VERSION,
                     cohort1, modification1, true, false), getRef());
             expectMsgClass(duration, ReadyTransactionReply.class);
 
-            String transactionID2 = "tx2";
-            MutableCompositeModification modification2 = new MutableCompositeModification();
-            ShardDataTreeCohort cohort2 = setupMockWriteTransaction("cohort2", dataStore,
+            final String transactionID2 = "tx2";
+            final MutableCompositeModification modification2 = new MutableCompositeModification();
+            final ShardDataTreeCohort cohort2 = setupMockWriteTransaction("cohort2", dataStore,
                     TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME), modification2);
 
             shard.tell(new ForwardedReadyTransaction(transactionID2, CURRENT_VERSION,
                     cohort2, modification2, true, false), getRef());
             expectMsgClass(duration, ReadyTransactionReply.class);
 
-            String transactionID3 = "tx3";
-            MutableCompositeModification modification3 = new MutableCompositeModification();
-            ShardDataTreeCohort cohort3 = setupMockWriteTransaction("cohort3", dataStore,
+            final String transactionID3 = "tx3";
+            final MutableCompositeModification modification3 = new MutableCompositeModification();
+            final ShardDataTreeCohort cohort3 = setupMockWriteTransaction("cohort3", dataStore,
                     TestModel.TEST2_PATH, ImmutableNodes.containerNode(TestModel.TEST2_QNAME), modification3);
 
             shard.tell(new ForwardedReadyTransaction(transactionID3, CURRENT_VERSION,
@@ -2019,11 +2022,11 @@ public class ShardTest extends AbstractShardTest {
 
             final FiniteDuration duration = duration("5 seconds");
 
-            ShardDataTree dataStore = shard.underlyingActor().getDataStore();
+            final ShardDataTree dataStore = shard.underlyingActor().getDataStore();
 
-            String transactionID1 = "tx1";
-            MutableCompositeModification modification1 = new MutableCompositeModification();
-            ShardDataTreeCohort cohort1 = setupMockWriteTransaction("cohort1", dataStore,
+            final String transactionID1 = "tx1";
+            final MutableCompositeModification modification1 = new MutableCompositeModification();
+            final ShardDataTreeCohort cohort1 = setupMockWriteTransaction("cohort1", dataStore,
                     TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME), modification1);
 
             shard.tell(new ForwardedReadyTransaction(transactionID1, CURRENT_VERSION,
@@ -2037,9 +2040,9 @@ public class ShardTest extends AbstractShardTest {
 
             // Ready the second Tx.
 
-            String transactionID2 = "tx2";
-            MutableCompositeModification modification2 = new MutableCompositeModification();
-            ShardDataTreeCohort cohort2 = setupMockWriteTransaction("cohort2", dataStore,
+            final String transactionID2 = "tx2";
+            final MutableCompositeModification modification2 = new MutableCompositeModification();
+            final ShardDataTreeCohort cohort2 = setupMockWriteTransaction("cohort2", dataStore,
                     TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME), modification2);
 
             shard.tell(new ForwardedReadyTransaction(transactionID2, CURRENT_VERSION,
@@ -2048,11 +2051,12 @@ public class ShardTest extends AbstractShardTest {
 
             // Ready the third Tx.
 
-            String transactionID3 = "tx3";
-            DataTreeModification modification3 = dataStore.getDataTree().takeSnapshot().newModification();
+            final String transactionID3 = "tx3";
+            final DataTreeModification modification3 = dataStore.getDataTree().takeSnapshot().newModification();
             new WriteModification(TestModel.TEST2_PATH, ImmutableNodes.containerNode(TestModel.TEST2_QNAME))
                     .apply(modification3);
-            ReadyLocalTransaction readyMessage = new ReadyLocalTransaction(transactionID3, modification3, true);
+                modification3.ready();
+            final ReadyLocalTransaction readyMessage = new ReadyLocalTransaction(transactionID3, modification3, true);
 
             shard.tell(readyMessage, getRef());
 
@@ -2066,7 +2070,7 @@ public class ShardTest extends AbstractShardTest {
 
             expectMsgClass(duration, CommitTransactionReply.SERIALIZABLE_CLASS);
 
-            NormalizedNode<?, ?> node = readStore(shard, TestModel.TEST2_PATH);
+            final NormalizedNode<?, ?> node = readStore(shard, TestModel.TEST2_PATH);
             assertNotNull(TestModel.TEST2_PATH + " not found", node);
 
             shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
@@ -2098,18 +2102,18 @@ public class ShardTest extends AbstractShardTest {
 
             // Setup 2 simulated transactions with mock cohorts. The first one will be aborted.
 
-            String transactionID1 = "tx1";
-            MutableCompositeModification modification1 = new MutableCompositeModification();
-            ShardDataTreeCohort cohort1 = mock(ShardDataTreeCohort.class, "cohort1");
+            final String transactionID1 = "tx1";
+            final MutableCompositeModification modification1 = new MutableCompositeModification();
+            final ShardDataTreeCohort cohort1 = mock(ShardDataTreeCohort.class, "cohort1");
             doReturn(Futures.immediateFuture(Boolean.TRUE)).when(cohort1).canCommit();
             doReturn(Futures.immediateFuture(null)).when(cohort1).abort();
 
-            String transactionID2 = "tx2";
-            MutableCompositeModification modification2 = new MutableCompositeModification();
-            ShardDataTreeCohort cohort2 = mock(ShardDataTreeCohort.class, "cohort2");
+            final String transactionID2 = "tx2";
+            final MutableCompositeModification modification2 = new MutableCompositeModification();
+            final ShardDataTreeCohort cohort2 = mock(ShardDataTreeCohort.class, "cohort2");
             doReturn(Futures.immediateFuture(Boolean.TRUE)).when(cohort2).canCommit();
 
-            FiniteDuration duration = duration("5 seconds");
+            final FiniteDuration duration = duration("5 seconds");
             final Timeout timeout = new Timeout(duration);
 
             // Simulate the ForwardedReadyTransaction messages that would be sent
@@ -2126,14 +2130,14 @@ public class ShardTest extends AbstractShardTest {
             // Send the CanCommitTransaction message for the first Tx.
 
             shard.tell(new CanCommitTransaction(transactionID1).toSerializable(), getRef());
-            CanCommitTransactionReply canCommitReply = CanCommitTransactionReply.fromSerializable(
+            final CanCommitTransactionReply canCommitReply = CanCommitTransactionReply.fromSerializable(
                     expectMsgClass(duration, CanCommitTransactionReply.SERIALIZABLE_CLASS));
             assertEquals("Can commit", true, canCommitReply.getCanCommit());
 
             // Send the CanCommitTransaction message for the 2nd Tx. This should get queued and
             // processed after the first Tx completes.
 
-            Future<Object> canCommitFuture = Patterns.ask(shard,
+            final Future<Object> canCommitFuture = Patterns.ask(shard,
                     new CanCommitTransaction(transactionID2).toSerializable(), timeout);
 
             // Send the AbortTransaction message for the first Tx. This should trigger the 2nd
@@ -2146,7 +2150,7 @@ public class ShardTest extends AbstractShardTest {
 
             Await.ready(canCommitFuture, duration);
 
-            InOrder inOrder = inOrder(cohort1, cohort2);
+            final InOrder inOrder = inOrder(cohort1, cohort2);
             inOrder.verify(cohort1).canCommit();
             inOrder.verify(cohort2).canCommit();
 
@@ -2171,12 +2175,12 @@ public class ShardTest extends AbstractShardTest {
 
         final AtomicReference<Object> savedSnapshot = new AtomicReference<>();
         class TestPersistentDataProvider extends DelegatingPersistentDataProvider {
-            TestPersistentDataProvider(DataPersistenceProvider delegate) {
+            TestPersistentDataProvider(final DataPersistenceProvider delegate) {
                 super(delegate);
             }
 
             @Override
-            public void saveSnapshot(Object o) {
+            public void saveSnapshot(final Object o) {
                 savedSnapshot.set(o);
                 super.saveSnapshot(o);
             }
@@ -2187,14 +2191,14 @@ public class ShardTest extends AbstractShardTest {
         new ShardTestKit(getSystem()) {{
             class TestShard extends Shard {
 
-                protected TestShard(ShardIdentifier name, Map<String, String> peerAddresses,
-                                    DatastoreContext datastoreContext, SchemaContext schemaContext) {
+                protected TestShard(final ShardIdentifier name, final Map<String, String> peerAddresses,
+                                    final DatastoreContext datastoreContext, final SchemaContext schemaContext) {
                     super(name, peerAddresses, datastoreContext, schemaContext);
                     setPersistence(new TestPersistentDataProvider(super.persistence()));
                 }
 
                 @Override
-                public void handleCommand(Object message) {
+                public void handleCommand(final Object message) {
                     super.handleCommand(message);
 
                     if (message instanceof SaveSnapshotSuccess || message.equals("commit_snapshot")) {
@@ -2208,7 +2212,7 @@ public class ShardTest extends AbstractShardTest {
                 }
             }
 
-            Creator<Shard> creator = new Creator<Shard>() {
+            final Creator<Shard> creator = new Creator<Shard>() {
                 @Override
                 public Shard create() throws Exception {
                     return new TestShard(shardID, Collections.<String,String>emptyMap(),
@@ -2216,17 +2220,17 @@ public class ShardTest extends AbstractShardTest {
                 }
             };
 
-            TestActorRef<Shard> shard = TestActorRef.create(getSystem(),
+            final TestActorRef<Shard> shard = TestActorRef.create(getSystem(),
                     Props.create(new DelegatingShardCreator(creator)), shardActorName);
 
             waitUntilLeader(shard);
 
             writeToStore(shard, TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
 
-            NormalizedNode<?,?> expectedRoot = readStore(shard, YangInstanceIdentifier.builder().build());
+            final NormalizedNode<?,?> expectedRoot = readStore(shard, YangInstanceIdentifier.builder().build());
 
             // Trigger creation of a snapshot by ensuring
-            RaftActorContext raftActorContext = ((TestShard) shard.underlyingActor()).getRaftActorContext();
+            final RaftActorContext raftActorContext = ((TestShard) shard.underlyingActor()).getRaftActorContext();
             raftActorContext.getSnapshotManager().capture(mock(ReplicatedLogEntry.class), -1);
 
             assertEquals("Snapshot saved", true, latch.get().await(5, TimeUnit.SECONDS));
@@ -2251,9 +2255,9 @@ public class ShardTest extends AbstractShardTest {
             shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
         }
 
-        private void verifySnapshot(Snapshot snapshot, NormalizedNode<?,?> expectedRoot) {
+        private void verifySnapshot(final Snapshot snapshot, final NormalizedNode<?,?> expectedRoot) {
 
-            NormalizedNode<?, ?> actual = SerializationUtils.deserializeNormalizedNode(snapshot.getState());
+            final NormalizedNode<?, ?> actual = SerializationUtils.deserializeNormalizedNode(snapshot.getState());
             assertEquals("Root node", expectedRoot, actual);
 
         }};
@@ -2266,25 +2270,25 @@ public class ShardTest extends AbstractShardTest {
      */
     @Test
     public void testInMemoryDataTreeRestore() throws ReadFailedException, DataValidationFailedException {
-        DataTree store = InMemoryDataTreeFactory.getInstance().create();
+        final DataTree store = InMemoryDataTreeFactory.getInstance().create();
         store.setSchemaContext(SCHEMA_CONTEXT);
 
-        DataTreeModification putTransaction = store.takeSnapshot().newModification();
+        final DataTreeModification putTransaction = store.takeSnapshot().newModification();
         putTransaction.write(TestModel.TEST_PATH,
             ImmutableNodes.containerNode(TestModel.TEST_QNAME));
         commitTransaction(store, putTransaction);
 
 
-        NormalizedNode<?, ?> expected = readStore(store, YangInstanceIdentifier.builder().build());
+        final NormalizedNode<?, ?> expected = readStore(store, YangInstanceIdentifier.builder().build());
 
-        DataTreeModification writeTransaction = store.takeSnapshot().newModification();
+        final DataTreeModification writeTransaction = store.takeSnapshot().newModification();
 
         writeTransaction.delete(YangInstanceIdentifier.builder().build());
         writeTransaction.write(YangInstanceIdentifier.builder().build(), expected);
 
         commitTransaction(store, writeTransaction);
 
-        NormalizedNode<?, ?> actual = readStore(store, YangInstanceIdentifier.builder().build());
+        final NormalizedNode<?, ?> actual = readStore(store, YangInstanceIdentifier.builder().build());
 
         assertEquals(expected, actual);
     }
@@ -2305,14 +2309,14 @@ public class ShardTest extends AbstractShardTest {
                 nonPersistentContext, SCHEMA_CONTEXT);
 
         new ShardTestKit(getSystem()) {{
-            TestActorRef<Shard> shard1 = TestActorRef.create(getSystem(),
+            final TestActorRef<Shard> shard1 = TestActorRef.create(getSystem(),
                     persistentProps, "testPersistence1");
 
             assertTrue("Recovery Applicable", shard1.underlyingActor().persistence().isRecoveryApplicable());
 
             shard1.tell(PoisonPill.getInstance(), ActorRef.noSender());
 
-            TestActorRef<Shard> shard2 = TestActorRef.create(getSystem(),
+            final TestActorRef<Shard> shard2 = TestActorRef.create(getSystem(),
                     nonPersistentProps, "testPersistence2");
 
             assertFalse("Recovery Not Applicable", shard2.underlyingActor().persistence().isRecoveryApplicable());
@@ -2328,7 +2332,7 @@ public class ShardTest extends AbstractShardTest {
         new ShardTestKit(getSystem()) {{
             dataStoreContextBuilder.persistent(true);
 
-            TestActorRef<Shard> shard = TestActorRef.create(getSystem(), newShardProps(), "testOnDatastoreContext");
+            final TestActorRef<Shard> shard = TestActorRef.create(getSystem(), newShardProps(), "testOnDatastoreContext");
 
             assertEquals("isRecoveryApplicable", true,
                     shard.underlyingActor().persistence().isRecoveryApplicable());
@@ -2359,7 +2363,7 @@ public class ShardTest extends AbstractShardTest {
 
                 waitUntilLeader(shard);
 
-                TestActorRef<MessageCollectorActor> listener =
+                final TestActorRef<MessageCollectorActor> listener =
                         TestActorRef.create(getSystem(), Props.create(MessageCollectorActor.class));
 
                 shard.tell(new RegisterRoleChangeListener(), listener);
@@ -2406,7 +2410,7 @@ public class ShardTest extends AbstractShardTest {
         shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
     }
 
-    private static void commitTransaction(DataTree store, final DataTreeModification modification) throws DataValidationFailedException {
+    private static void commitTransaction(final DataTree store, final DataTreeModification modification) throws DataValidationFailedException {
         modification.ready();
         store.validate(modification);
         store.commit(store.prepare(modification));
