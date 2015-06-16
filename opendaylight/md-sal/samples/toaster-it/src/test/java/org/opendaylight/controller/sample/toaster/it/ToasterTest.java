@@ -77,8 +77,8 @@ public class ToasterTest {
                 mavenBundle("org.opendaylight.controller.samples", "sample-toaster-provider").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller.samples", "sample-toaster-consumer").versionAsInProject(),
                 mavenBundle("org.opendaylight.controller.samples", "sample-toaster").versionAsInProject(),
-                mavenBundle("org.openexi", "nagasena").versionAsInProject(),
-                mavenBundle("org.openexi", "nagasena-rta").versionAsInProject()
+                mavenBundle("openexi", "nagasena").versionAsInProject(),
+                mavenBundle("openexi", "nagasena-rta").versionAsInProject()
         );
     }
 

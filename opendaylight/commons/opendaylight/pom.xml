@@ -78,7 +78,7 @@
     <eclipse.jdt.core.compiler.batch.version>3.8.0.I20120518-2145</eclipse.jdt.core.compiler.batch.version>
 
     <!-- OpenEXI third party lib for netconf-->
-    <exi.nagasena.version>0000.0002.0038.0</exi.nagasena.version>
+    <exi.nagasena.version>0000.0002.0053.0</exi.nagasena.version>
     <felix.util.version>1.6.0</felix.util.version>
     <features.test.version>1.5.0-SNAPSHOT</features.test.version>
     <filtervalve.version>1.5.0-SNAPSHOT</filtervalve.version>
@@ -1216,12 +1216,12 @@
       </dependency>
 
       <dependency>
-        <groupId>org.openexi</groupId>
+        <groupId>openexi</groupId>
         <artifactId>nagasena</artifactId>
         <version>${exi.nagasena.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.openexi</groupId>
+        <groupId>openexi</groupId>
         <artifactId>nagasena-rta</artifactId>
         <version>${exi.nagasena.version}</version>
       </dependency>
