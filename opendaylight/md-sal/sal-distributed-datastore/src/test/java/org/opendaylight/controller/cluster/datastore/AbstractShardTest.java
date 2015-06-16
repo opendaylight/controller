@@ -13,6 +13,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+
 import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
@@ -92,14 +93,15 @@ public abstract class AbstractShardTest extends AbstractActorTest{
                 newDatastoreContext(), SCHEMA_CONTEXT);
     }
 
-    protected void testRecovery(Set<Integer> listEntryKeys) throws Exception {
+    protected void testRecovery(final Set<Integer> listEntryKeys) throws Exception {
         // Create the actor and wait for recovery complete.
 
-        int nListEntries = listEntryKeys.size();
+        final int nListEntries = listEntryKeys.size();
 
         final CountDownLatch recoveryComplete = new CountDownLatch(1);
 
         @SuppressWarnings("serial")
+        final
         Creator<Shard> creator = new Creator<Shard>() {
             @Override
             public Shard create() throws Exception {
@@ -117,25 +119,25 @@ public abstract class AbstractShardTest extends AbstractActorTest{
             }
         };
 
-        TestActorRef<Shard> shard = TestActorRef.create(getSystem(),
+        final TestActorRef<Shard> shard = TestActorRef.create(getSystem(),
                 Props.create(new DelegatingShardCreator(creator)).withDispatcher(Dispatchers.DefaultDispatcherId()), "testRecovery");
 
         assertEquals("Recovery complete", true, recoveryComplete.await(5, TimeUnit.SECONDS));
 
         // Verify data in the data store.
 
-        NormalizedNode<?, ?> outerList = readStore(shard, TestModel.OUTER_LIST_PATH);
+        final NormalizedNode<?, ?> outerList = readStore(shard, TestModel.OUTER_LIST_PATH);
         assertNotNull(TestModel.OUTER_LIST_QNAME.getLocalName() + " not found", outerList);
         assertTrue(TestModel.OUTER_LIST_QNAME.getLocalName() + " value is not Iterable",
                 outerList.getValue() instanceof Iterable);
-        for(Object entry: (Iterable<?>) outerList.getValue()) {
+        for(final Object entry: (Iterable<?>) outerList.getValue()) {
             assertTrue(TestModel.OUTER_LIST_QNAME.getLocalName() + " entry is not MapEntryNode",
                     entry instanceof MapEntryNode);
-            MapEntryNode mapEntry = (MapEntryNode)entry;
-            Optional<DataContainerChild<? extends PathArgument, ?>> idLeaf =
+            final MapEntryNode mapEntry = (MapEntryNode)entry;
+            final Optional<DataContainerChild<? extends PathArgument, ?>> idLeaf =
                     mapEntry.getChild(new YangInstanceIdentifier.NodeIdentifier(TestModel.ID_QNAME));
             assertTrue("Missing leaf " + TestModel.ID_QNAME.getLocalName(), idLeaf.isPresent());
-            Object value = idLeaf.get().getValue();
+            final Object value = idLeaf.get().getValue();
             assertTrue("Unexpected value for leaf "+ TestModel.ID_QNAME.getLocalName() + ": " + value,
                     listEntryKeys.remove(value));
         }
@@ -155,7 +157,7 @@ public abstract class AbstractShardTest extends AbstractActorTest{
         shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
     }
 
-    protected void verifyLastApplied(TestActorRef<Shard> shard, long expectedValue) {
+    protected void verifyLastApplied(final TestActorRef<Shard> shard, final long expectedValue) {
         long lastApplied = -1;
         for(int i = 0; i < 20 * 5; i++) {
             lastApplied = shard.underlyingActor().getShardMBean().getLastApplied();
@@ -179,9 +181,9 @@ public abstract class AbstractShardTest extends AbstractActorTest{
             final MutableCompositeModification modification,
             final Function<ShardDataTreeCohort, ListenableFuture<Void>> preCommit) {
 
-        ReadWriteShardDataTreeTransaction tx = dataStore.newReadWriteTransaction("setup-mock-" + cohortName, null);
+        final ReadWriteShardDataTreeTransaction tx = dataStore.newReadWriteTransaction("setup-mock-" + cohortName, null);
         tx.getSnapshot().write(path, data);
-        ShardDataTreeCohort cohort = createDelegatingMockCohort(cohortName, dataStore.finishTransaction(tx), preCommit);
+        final ShardDataTreeCohort cohort = createDelegatingMockCohort(cohortName, dataStore.finishTransaction(tx), preCommit);
 
         modification.addModification(new WriteModification(path, data));
 
@@ -196,7 +198,7 @@ public abstract class AbstractShardTest extends AbstractActorTest{
     protected ShardDataTreeCohort createDelegatingMockCohort(final String cohortName,
             final ShardDataTreeCohort actual,
             final Function<ShardDataTreeCohort, ListenableFuture<Void>> preCommit) {
-        ShardDataTreeCohort cohort = mock(ShardDataTreeCohort.class, cohortName);
+        final ShardDataTreeCohort cohort = mock(ShardDataTreeCohort.class, cohortName);
 
         doAnswer(new Answer<ListenableFuture<Boolean>>() {
             @Override
@@ -246,10 +248,10 @@ public abstract class AbstractShardTest extends AbstractActorTest{
     }
 
     public static NormalizedNode<?,?> readStore(final DataTree store, final YangInstanceIdentifier id) {
-        DataTreeSnapshot transaction = store.takeSnapshot();
+        final DataTreeSnapshot transaction = store.takeSnapshot();
 
-        Optional<NormalizedNode<?, ?>> optional = transaction.readNode(id);
-        NormalizedNode<?, ?> node = optional.isPresent()? optional.get() : null;
+        final Optional<NormalizedNode<?, ?>> optional = transaction.readNode(id);
+        final NormalizedNode<?, ?> node = optional.isPresent()? optional.get() : null;
 
         return node;
     }
@@ -261,10 +263,10 @@ public abstract class AbstractShardTest extends AbstractActorTest{
 
     public static void writeToStore(final ShardDataTree store, final YangInstanceIdentifier id,
             final NormalizedNode<?,?> node) throws InterruptedException, ExecutionException {
-        ReadWriteShardDataTreeTransaction transaction = store.newReadWriteTransaction("writeToStore", null);
+        final ReadWriteShardDataTreeTransaction transaction = store.newReadWriteTransaction("writeToStore", null);
 
         transaction.getSnapshot().write(id, node);
-        ShardDataTreeCohort cohort = transaction.ready();
+        final ShardDataTreeCohort cohort = transaction.ready();
         cohort.canCommit().get();
         cohort.preCommit().get();
         cohort.commit();
@@ -272,7 +274,7 @@ public abstract class AbstractShardTest extends AbstractActorTest{
 
     public static void writeToStore(final DataTree store, final YangInstanceIdentifier id,
             final NormalizedNode<?,?> node) throws DataValidationFailedException {
-        DataTreeModification transaction = store.takeSnapshot().newModification();
+        final DataTreeModification transaction = store.takeSnapshot().newModification();
 
         transaction.write(id, node);
         transaction.ready();

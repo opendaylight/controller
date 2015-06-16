@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+
 import com.google.common.base.Optional;
 import java.io.IOException;
 import org.junit.Before;
@@ -50,11 +51,11 @@ public class ShardRecoveryCoordinatorTest {
 
     @Test
     public void testAppendRecoveredLogEntryDataTreeCandidatePayload(){
-        ShardRecoveryCoordinator coordinator = new ShardRecoveryCoordinator(peopleDataTree, peopleSchemaContext, "foobar", LoggerFactory.getLogger("foo"));
+        final ShardRecoveryCoordinator coordinator = new ShardRecoveryCoordinator(peopleDataTree, peopleSchemaContext, "foobar", LoggerFactory.getLogger("foo"));
         coordinator.startLogRecoveryBatch(10);
         try {
             coordinator.appendRecoveredLogEntry(DataTreeCandidatePayload.create(createCar()));
-        } catch(SchemaValidationFailedException e){
+        } catch(final SchemaValidationFailedException e){
             fail("SchemaValidationFailedException should not happen if pruning is done");
         }
 
@@ -63,39 +64,39 @@ public class ShardRecoveryCoordinatorTest {
 
     @Test
     public void testAppendRecoveredLogEntryModificationPayload() throws IOException {
-        ShardRecoveryCoordinator coordinator = new ShardRecoveryCoordinator(peopleDataTree, peopleSchemaContext, "foobar", LoggerFactory.getLogger("foo"));
+        final ShardRecoveryCoordinator coordinator = new ShardRecoveryCoordinator(peopleDataTree, peopleSchemaContext, "foobar", LoggerFactory.getLogger("foo"));
         coordinator.startLogRecoveryBatch(10);
         try {
-            MutableCompositeModification modification  = new MutableCompositeModification((short) 1);
+            final MutableCompositeModification modification  = new MutableCompositeModification((short) 1);
             modification.addModification(new WriteModification(CarsModel.BASE_PATH, CarsModel.create()));
             coordinator.appendRecoveredLogEntry(new ModificationPayload(modification));
-        } catch(SchemaValidationFailedException e){
+        } catch(final SchemaValidationFailedException e){
             fail("SchemaValidationFailedException should not happen if pruning is done");
         }
     }
 
     @Test
     public void testAppendRecoveredLogEntryCompositeModificationPayload() throws IOException {
-        ShardRecoveryCoordinator coordinator = new ShardRecoveryCoordinator(peopleDataTree, peopleSchemaContext, "foobar", LoggerFactory.getLogger("foo"));
+        final ShardRecoveryCoordinator coordinator = new ShardRecoveryCoordinator(peopleDataTree, peopleSchemaContext, "foobar", LoggerFactory.getLogger("foo"));
         coordinator.startLogRecoveryBatch(10);
         try {
-            MutableCompositeModification modification  = new MutableCompositeModification((short) 1);
+            final MutableCompositeModification modification  = new MutableCompositeModification((short) 1);
             modification.addModification(new WriteModification(CarsModel.BASE_PATH, CarsModel.create()));
             coordinator.appendRecoveredLogEntry(new CompositeModificationPayload(modification.toSerializable()));
-        } catch(SchemaValidationFailedException e){
+        } catch(final SchemaValidationFailedException e){
             fail("SchemaValidationFailedException should not happen if pruning is done");
         }
     }
 
     @Test
     public void testAppendRecoveredLogEntryCompositeModificationByteStringPayload() throws IOException {
-        ShardRecoveryCoordinator coordinator = new ShardRecoveryCoordinator(peopleDataTree, peopleSchemaContext, "foobar", LoggerFactory.getLogger("foo"));
+        final ShardRecoveryCoordinator coordinator = new ShardRecoveryCoordinator(peopleDataTree, peopleSchemaContext, "foobar", LoggerFactory.getLogger("foo"));
         coordinator.startLogRecoveryBatch(10);
         try {
-            MutableCompositeModification modification  = new MutableCompositeModification((short) 1);
+            final MutableCompositeModification modification  = new MutableCompositeModification((short) 1);
             modification.addModification(new WriteModification(CarsModel.BASE_PATH, CarsModel.create()));
             coordinator.appendRecoveredLogEntry(new CompositeModificationByteStringPayload(modification.toSerializable()));
-        } catch(SchemaValidationFailedException e){
+        } catch(final SchemaValidationFailedException e){
             fail("SchemaValidationFailedException should not happen if pruning is done");
         }
 
@@ -104,7 +105,7 @@ public class ShardRecoveryCoordinatorTest {
 
     @Test
     public void testApplyRecoverySnapshot(){
-        ShardRecoveryCoordinator coordinator = new ShardRecoveryCoordinator(peopleDataTree , peopleSchemaContext, "foobar", LoggerFactory.getLogger("foo"));
+        final ShardRecoveryCoordinator coordinator = new ShardRecoveryCoordinator(peopleDataTree , peopleSchemaContext, "foobar", LoggerFactory.getLogger("foo"));
         coordinator.startLogRecoveryBatch(10);
 
         coordinator.applyRecoverySnapshot(createSnapshot());
@@ -116,47 +117,47 @@ public class ShardRecoveryCoordinatorTest {
 
     @Test
     public void testApplyCurrentLogRecoveryBatch(){
-        ShardRecoveryCoordinator coordinator = new ShardRecoveryCoordinator(peopleDataTree, peopleSchemaContext, "foobar", LoggerFactory.getLogger("foo"));
+        final ShardRecoveryCoordinator coordinator = new ShardRecoveryCoordinator(peopleDataTree, peopleSchemaContext, "foobar", LoggerFactory.getLogger("foo"));
         coordinator.startLogRecoveryBatch(10);
 
         try {
             coordinator.applyCurrentLogRecoveryBatch();
-        } catch(IllegalArgumentException e){
+        } catch(final IllegalArgumentException e){
             fail("IllegalArgumentException should not happen - if the pruning modification delegate is passed");
         }
     }
 
     private DataTreeCandidateTip createCar(){
-        TipProducingDataTree dataTree = InMemoryDataTreeFactory.getInstance().create();
+        final TipProducingDataTree dataTree = InMemoryDataTreeFactory.getInstance().create();
         dataTree.setSchemaContext(carsSchemaContext);
 
-        DataTreeSnapshot snapshot = dataTree.takeSnapshot();
+        final DataTreeSnapshot snapshot = dataTree.takeSnapshot();
 
-        DataTreeModification modification = snapshot.newModification();
+        final DataTreeModification modification = snapshot.newModification();
 
         modification.merge(CarsModel.BASE_PATH, CarsModel.create());
-
+        modification.ready();
         return dataTree.prepare(modification);
     }
 
-    private Optional<NormalizedNode<?,?>> readCars(ShardDataTree shardDataTree){
-        TipProducingDataTree dataTree = shardDataTree.getDataTree();
+    private Optional<NormalizedNode<?,?>> readCars(final ShardDataTree shardDataTree){
+        final TipProducingDataTree dataTree = shardDataTree.getDataTree();
         dataTree.setSchemaContext(peopleSchemaContext);
 
-        DataTreeSnapshot snapshot = dataTree.takeSnapshot();
+        final DataTreeSnapshot snapshot = dataTree.takeSnapshot();
 
-        DataTreeModification modification = snapshot.newModification();
+        final DataTreeModification modification = snapshot.newModification();
 
         return modification.readNode(CarsModel.BASE_PATH);
     }
 
-    private Optional<NormalizedNode<?,?>> readPeople(ShardDataTree shardDataTree){
-        TipProducingDataTree dataTree = shardDataTree.getDataTree();
+    private Optional<NormalizedNode<?,?>> readPeople(final ShardDataTree shardDataTree){
+        final TipProducingDataTree dataTree = shardDataTree.getDataTree();
         dataTree.setSchemaContext(peopleSchemaContext);
 
-        DataTreeSnapshot snapshot = dataTree.takeSnapshot();
+        final DataTreeSnapshot snapshot = dataTree.takeSnapshot();
 
-        DataTreeModification modification = snapshot.newModification();
+        final DataTreeModification modification = snapshot.newModification();
 
         return modification.readNode(PeopleModel.BASE_PATH);
     }
@@ -164,7 +165,7 @@ public class ShardRecoveryCoordinatorTest {
 
 
     private byte[] createSnapshot(){
-        TipProducingDataTree dataTree = InMemoryDataTreeFactory.getInstance().create();
+        final TipProducingDataTree dataTree = InMemoryDataTreeFactory.getInstance().create();
         dataTree.setSchemaContext(SchemaContextHelper.select(SchemaContextHelper.CARS_YANG, SchemaContextHelper.PEOPLE_YANG));
 
         DataTreeSnapshot snapshot = dataTree.takeSnapshot();
@@ -173,8 +174,8 @@ public class ShardRecoveryCoordinatorTest {
 
         modification.merge(CarsModel.BASE_PATH, CarsModel.create());
         modification.merge(PeopleModel.BASE_PATH, PeopleModel.create());
-
-        DataTreeCandidateTip prepare = dataTree.prepare(modification);
+        modification.ready();
+        final DataTreeCandidateTip prepare = dataTree.prepare(modification);
 
         dataTree.commit(prepare);
 
@@ -182,9 +183,9 @@ public class ShardRecoveryCoordinatorTest {
 
         modification = snapshot.newModification();
 
-        Optional<NormalizedNode<?, ?>> optional = modification.readNode(YangInstanceIdentifier.EMPTY);
+        final Optional<NormalizedNode<?, ?>> optional = modification.readNode(YangInstanceIdentifier.EMPTY);
 
-        byte[] bytes = SerializationUtils.serializeNormalizedNode(optional.get());
+        final byte[] bytes = SerializationUtils.serializeNormalizedNode(optional.get());
 
         return bytes;
 
