@@ -29,7 +29,6 @@ import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessag
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -193,7 +192,7 @@ public final class NetconfBaseOps {
     }
 
     private boolean isFilterPresent(final Optional<YangInstanceIdentifier> filterPath) {
-        return filterPath.isPresent() && Iterables.isEmpty(filterPath.get().getPathArguments()) == false;
+        return filterPath.isPresent() && !filterPath.get().isEmpty();
     }
 
     public ListenableFuture<DOMRpcResult> editConfigCandidate(final FutureCallback<? super DOMRpcResult> callback, final DataContainerChild<?, ?> editStructure, final ModifyAction modifyAction, final boolean rollback) {
