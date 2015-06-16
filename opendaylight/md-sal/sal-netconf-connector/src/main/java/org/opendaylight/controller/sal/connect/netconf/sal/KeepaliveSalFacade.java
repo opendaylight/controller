@@ -92,7 +92,9 @@ public final class KeepaliveSalFacade implements RemoteDeviceHandler<NetconfSess
      */
     private void resetKeepalive() {
         LOG.trace("{}: Resetting netconf keepalive timer", id);
-        currentKeepalive.cancel(false);
+        if(currentKeepalive != null) {
+            currentKeepalive.cancel(false);
+        }
         scheduleKeepalive();
     }
 
