@@ -87,45 +87,45 @@ public class NetconfMessageTransformUtil {
 
     public static final QName IETF_NETCONF_NOTIFICATIONS = QName.create(NetconfCapabilityChange.QNAME, "ietf-netconf-notifications");
 
-    public static URI NETCONF_URI = URI.create("urn:ietf:params:xml:ns:netconf:base:1.0");
-    public static QName NETCONF_QNAME = QName.create(NETCONF_URI.toString(), "2011-06-01", "netconf");
-    public static QName NETCONF_DATA_QNAME = QName.create(NETCONF_QNAME, "data");
-    public static QName NETCONF_RPC_REPLY_QNAME = QName.create(NETCONF_QNAME, "rpc-reply");
-    public static QName NETCONF_OK_QNAME = QName.create(NETCONF_QNAME, "ok");
-    public static QName NETCONF_ERROR_OPTION_QNAME = QName.create(NETCONF_QNAME, "error-option");
-    public static QName NETCONF_RUNNING_QNAME = QName.create(NETCONF_QNAME, "running");
-    public static QName NETCONF_SOURCE_QNAME = QName.create(NETCONF_QNAME, "source");
-    public static QName NETCONF_CANDIDATE_QNAME = QName.create(NETCONF_QNAME, "candidate");
-    public static QName NETCONF_TARGET_QNAME = QName.create(NETCONF_QNAME, "target");
-    public static QName NETCONF_CONFIG_QNAME = QName.create(NETCONF_QNAME, "config");
-    public static QName NETCONF_COMMIT_QNAME = QName.create(NETCONF_QNAME, "commit");
-    public static QName NETCONF_VALIDATE_QNAME = QName.create(NETCONF_QNAME, "validate");
-    public static QName NETCONF_COPY_CONFIG_QNAME = QName.create(NETCONF_QNAME, "copy-config");
-    public static QName NETCONF_OPERATION_QNAME = QName.create(NETCONF_QNAME, "operation");
-    public static QName NETCONF_DEFAULT_OPERATION_QNAME = QName.create(NETCONF_OPERATION_QNAME, "default-operation");
-    public static QName NETCONF_EDIT_CONFIG_QNAME = QName.create(NETCONF_QNAME, "edit-config");
-    public static QName NETCONF_GET_CONFIG_QNAME = QName.create(NETCONF_QNAME, "get-config");
-    public static QName NETCONF_DISCARD_CHANGES_QNAME = QName.create(NETCONF_QNAME, "discard-changes");
-    public static QName NETCONF_TYPE_QNAME = QName.create(NETCONF_QNAME, "type");
-    public static QName NETCONF_FILTER_QNAME = QName.create(NETCONF_QNAME, "filter");
-    public static QName NETCONF_GET_QNAME = QName.create(NETCONF_QNAME, "get");
-    public static QName NETCONF_RPC_QNAME = QName.create(NETCONF_QNAME, "rpc");
+    public static final URI NETCONF_URI = URI.create("urn:ietf:params:xml:ns:netconf:base:1.0");
+    public static final QName NETCONF_QNAME = QName.cachedReference(QName.create(NETCONF_URI, "2011-06-01", "netconf"));
+    public static final QName NETCONF_DATA_QNAME = QName.create(NETCONF_QNAME, "data");
+    public static final QName NETCONF_RPC_REPLY_QNAME = QName.create(NETCONF_QNAME, "rpc-reply");
+    public static final QName NETCONF_OK_QNAME = QName.create(NETCONF_QNAME, "ok");
+    public static final QName NETCONF_ERROR_OPTION_QNAME = QName.create(NETCONF_QNAME, "error-option");
+    public static final QName NETCONF_RUNNING_QNAME = QName.create(NETCONF_QNAME, "running");
+    public static final QName NETCONF_SOURCE_QNAME = QName.create(NETCONF_QNAME, "source");
+    public static final QName NETCONF_CANDIDATE_QNAME = QName.create(NETCONF_QNAME, "candidate");
+    public static final QName NETCONF_TARGET_QNAME = QName.create(NETCONF_QNAME, "target");
+    public static final QName NETCONF_CONFIG_QNAME = QName.create(NETCONF_QNAME, "config");
+    public static final QName NETCONF_COMMIT_QNAME = QName.create(NETCONF_QNAME, "commit");
+    public static final QName NETCONF_VALIDATE_QNAME = QName.create(NETCONF_QNAME, "validate");
+    public static final QName NETCONF_COPY_CONFIG_QNAME = QName.create(NETCONF_QNAME, "copy-config");
+    public static final QName NETCONF_OPERATION_QNAME = QName.create(NETCONF_QNAME, "operation");
+    public static final QName NETCONF_DEFAULT_OPERATION_QNAME = QName.create(NETCONF_OPERATION_QNAME, "default-operation");
+    public static final QName NETCONF_EDIT_CONFIG_QNAME = QName.create(NETCONF_QNAME, "edit-config");
+    public static final QName NETCONF_GET_CONFIG_QNAME = QName.create(NETCONF_QNAME, "get-config");
+    public static final QName NETCONF_DISCARD_CHANGES_QNAME = QName.create(NETCONF_QNAME, "discard-changes");
+    public static final QName NETCONF_TYPE_QNAME = QName.create(NETCONF_QNAME, "type");
+    public static final QName NETCONF_FILTER_QNAME = QName.create(NETCONF_QNAME, "filter");
+    public static final QName NETCONF_GET_QNAME = QName.create(NETCONF_QNAME, "get");
+    public static final QName NETCONF_RPC_QNAME = QName.create(NETCONF_QNAME, "rpc");
 
-    public static URI NETCONF_ROLLBACK_ON_ERROR_URI = URI
+    public static final URI NETCONF_ROLLBACK_ON_ERROR_URI = URI
             .create("urn:ietf:params:netconf:capability:rollback-on-error:1.0");
-    public static String ROLLBACK_ON_ERROR_OPTION = "rollback-on-error";
+    public static final String ROLLBACK_ON_ERROR_OPTION = "rollback-on-error";
 
-    public static URI NETCONF_CANDIDATE_URI = URI
+    public static final URI NETCONF_CANDIDATE_URI = URI
             .create("urn:ietf:params:netconf:capability:candidate:1.0");
 
-    public static URI NETCONF_NOTIFICATONS_URI = URI
+    public static final URI NETCONF_NOTIFICATONS_URI = URI
             .create("urn:ietf:params:netconf:capability:notification:1.0");
 
-    public static URI NETCONF_RUNNING_WRITABLE_URI = URI
+    public static final URI NETCONF_RUNNING_WRITABLE_URI = URI
             .create("urn:ietf:params:netconf:capability:writable-running:1.0");
 
-    public static QName NETCONF_LOCK_QNAME = QName.create(NETCONF_QNAME, "lock");
-    public static QName NETCONF_UNLOCK_QNAME = QName.create(NETCONF_QNAME, "unlock");
+    public static final QName NETCONF_LOCK_QNAME = QName.create(NETCONF_QNAME, "lock");
+    public static final QName NETCONF_UNLOCK_QNAME = QName.create(NETCONF_QNAME, "unlock");
 
     // Discard changes message
     public static final ContainerNode DISCARD_CHANGES_RPC_CONTENT =
@@ -222,7 +222,7 @@ public class NetconfMessageTransformUtil {
     }
 
     private static ErrorSeverity toRpcErrorSeverity( final NetconfDocumentedException.ErrorSeverity severity ) {
-        switch( severity ) {
+        switch (severity) {
         case warning:
             return RpcError.ErrorSeverity.WARNING;
         default:
@@ -231,7 +231,7 @@ public class NetconfMessageTransformUtil {
     }
 
     private static RpcError.ErrorType toRpcErrorType(final NetconfDocumentedException.ErrorType type) {
-        switch( type ) {
+        switch (type) {
         case protocol:
             return RpcError.ErrorType.PROTOCOL;
         case rpc:
@@ -257,13 +257,12 @@ public class NetconfMessageTransformUtil {
 
     public static boolean isDataRetrievalOperation(final QName rpc) {
         return NETCONF_URI.equals(rpc.getNamespace())
-                && (rpc.getLocalName().equals(NETCONF_GET_CONFIG_QNAME.getLocalName()) || rpc.getLocalName().equals(
-                        NETCONF_GET_QNAME.getLocalName()));
+                && (NETCONF_GET_CONFIG_QNAME.getLocalName().equals(rpc.getLocalName())
+                || NETCONF_GET_QNAME.getLocalName().equals(rpc.getLocalName()));
     }
 
     public static ContainerSchemaNode createSchemaForDataRead(final SchemaContext schemaContext) {
-        final QName config = QName.create(NETCONF_EDIT_CONFIG_QNAME, "data");
-        return new NodeContainerProxy(config, schemaContext.getChildNodes());
+        return new NodeContainerProxy(NETCONF_DATA_QNAME, schemaContext.getChildNodes());
     }
 
     public static ContainerSchemaNode createSchemaForNotification(final NotificationDefinition next) {
