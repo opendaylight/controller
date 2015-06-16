@@ -8,6 +8,7 @@
 package org.opendaylight.controller.sal.restconf.impl.nn.to.xml.test;
 
 import static org.junit.Assert.assertTrue;
+
 import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -266,7 +267,7 @@ public class NnToXmlTest extends AbstractBodyReaderTest {
         final String elName = "lfBoolean";
         NormalizedNodeContext normalizedNodeContext = prepareNNC(
                 TypeDefinitionAwareCodec.from(BooleanType.getInstance())
-                        .deserialize("str"), elName);
+.deserialize("false"), elName);
         nnToXml(normalizedNodeContext, "<" + elName + ">false</"
                 + elName + ">");
 
@@ -311,11 +312,11 @@ public class NnToXmlTest extends AbstractBodyReaderTest {
         nnToXml(normalizedNodeContext, "<" + elName + ">first second</"
                 + elName + ">");
 
-        final String bool = "str";
+        final String bool = "true";
         normalizedNodeContext = prepareNNC(
                 TypeDefinitionAwareCodec.from(unionType).deserialize(bool),
                 elName);
-        nnToXml(normalizedNodeContext, "<" + elName + ">str</" + elName
+        nnToXml(normalizedNodeContext, "<" + elName + ">true</" + elName
                 + ">");
     }
 
