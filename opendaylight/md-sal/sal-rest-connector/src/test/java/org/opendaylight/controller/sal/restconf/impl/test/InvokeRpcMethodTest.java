@@ -320,6 +320,7 @@ public class InvokeRpcMethodTest {
         final NormalizedNodeContext output = restconfImpl.invokeRpc("toaster:make-toast", payload, uriInfo);
         assertNotNull(output);
         assertEquals(null, output.getData());
+        assertEquals(rpcDef, output.getInstanceIdentifierContext().getSchemaNode());
         // additional validation in the fact that the restconfImpl does not
         // throw an exception.
     }
@@ -379,6 +380,7 @@ public class InvokeRpcMethodTest {
         assertNotNull(output);
         assertNotNull(output.getData());
         assertSame(container, output.getData());
+        assertEquals(rpcDef, output.getInstanceIdentifierContext().getSchemaNode());
         assertNotNull(output.getInstanceIdentifierContext());
         assertNotNull(output.getInstanceIdentifierContext().getSchemaContext());
     }
