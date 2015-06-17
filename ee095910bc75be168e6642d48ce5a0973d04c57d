@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a7fa997_91ba4be0",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/LocalTransactionContext.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-06-17T02:35:59Z",
+      "side": 1,
+      "message": "Should we check if the operationError is not null before we do the mod? If not we may get additional errors and the original error will be overwritten",
+      "revId": "ee095910bc75be168e6642d48ce5a0973d04c57d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_b1bf47d0",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardCommitCoordinator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-06-17T02:35:59Z",
+      "side": 1,
+      "message": "This seems to be a good cache",
+      "revId": "ee095910bc75be168e6642d48ce5a0973d04c57d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
