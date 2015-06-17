@@ -2,9 +2,9 @@ module invoke-rpc-module {
   namespace "invoke:rpc:module";  
 
   prefix "inrpcmod";
-  	  
+
   revision 2013-12-3 {
-  
+
   }
 
   rpc rpc-test {
@@ -27,4 +27,23 @@ module invoke-rpc-module {
   rpc rpc-noop {
   }
 
+  rpc rpc-input-only-test {
+      input {
+          container cont {
+              leaf lf {
+                  type string;
+              }
+          }
+      }
+  }
+
+  rpc rpc-output-only-test {
+	  output {
+          container cont-out {
+              leaf lf-out {
+                  type string;
+              }
+          }
+      }
+  }
 }

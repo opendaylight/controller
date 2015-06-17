@@ -9,13 +9,10 @@
 package org.opendaylight.controller.sal.rest.impl.test.providers;
 
 import static org.junit.Assert.assertTrue;
-
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-
 import javax.ws.rs.core.MediaType;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.JsonNormalizedNodeBodyReader;
@@ -46,7 +43,7 @@ public class TestJsonBodyWriter extends AbstractBodyReaderTest {
 
     @Override
     protected MediaType getMediaType() {
-        return new MediaType(MediaType.APPLICATION_XML, null);
+        return new MediaType(MediaType.APPLICATION_JSON, null);
     }
 
     @BeforeClass
