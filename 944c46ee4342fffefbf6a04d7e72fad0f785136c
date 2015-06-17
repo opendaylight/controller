@@ -16,6 +16,24 @@
       "revId": "944c46ee4342fffefbf6a04d7e72fad0f785136c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_2251a362",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/LocalTransactionContext.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-06-17T19:35:15Z",
+      "side": 1,
+      "message": "I can do that.",
+      "parentUuid": "7a7fa997_027ca71f",
+      "revId": "944c46ee4342fffefbf6a04d7e72fad0f785136c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
