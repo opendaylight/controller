@@ -9,13 +9,8 @@ package org.opendaylight.controller.sal.restconf.impl.json.to.nn.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
 import java.io.InputStream;
-
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.JsonNormalizedNodeBodyReader;
@@ -43,22 +38,20 @@ public class JsonIdentityrefToNnTest extends AbstractBodyReaderTest {
     }
 
     @Test
-    public void jsonIdentityrefToNn() throws NoSuchFieldException,
-            SecurityException, IllegalArgumentException,
-            IllegalAccessException, WebApplicationException, IOException {
+    public void jsonIdentityrefToNn() throws Exception {
 
-        String uri = "identityref-module:cont";
+        final String uri = "identityref-module:cont";
         mockBodyReader(uri, jsonBodyReader, false);
-        InputStream inputStream = this.getClass().getResourceAsStream(
+        final InputStream inputStream = this.getClass().getResourceAsStream(
                 "/json-to-nn/identityref/json/data.json");
 
-        NormalizedNodeContext normalizedNodeContext = jsonBodyReader.readFrom(
+        final NormalizedNodeContext normalizedNodeContext = jsonBodyReader.readFrom(
                 null, null, null, mediaType, null, inputStream);
 
         assertEquals("cont", normalizedNodeContext.getData().getNodeType()
                 .getLocalName());
 
-        String dataTree = NormalizedNodes.toStringTree(normalizedNodeContext
+        final String dataTree = NormalizedNodes.toStringTree(normalizedNodeContext
                 .getData());
 
         assertTrue(dataTree.contains("cont1"));
