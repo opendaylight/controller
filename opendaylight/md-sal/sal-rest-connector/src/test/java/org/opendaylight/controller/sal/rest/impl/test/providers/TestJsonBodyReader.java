@@ -53,7 +53,7 @@ public class TestJsonBodyReader extends AbstractBodyReaderTest {
 
     @Override
     protected MediaType getMediaType() {
-        return new MediaType(MediaType.APPLICATION_XML, null);
+        return new MediaType(MediaType.APPLICATION_JSON, null);
     }
 
     @BeforeClass
@@ -81,7 +81,7 @@ public class TestJsonBodyReader extends AbstractBodyReaderTest {
     @Test
     public void moduleSubContainerDataPutTest() throws Exception {
         final DataSchemaNode dataSchemaNode = schemaContext.getDataChildByName("cont");
-        QName cont1QName = QName.create(dataSchemaNode.getQName(), "cont1");
+        final QName cont1QName = QName.create(dataSchemaNode.getQName(), "cont1");
         final YangInstanceIdentifier dataII = YangInstanceIdentifier.of(dataSchemaNode.getQName()).node(cont1QName);
         final DataSchemaNode dataSchemaNodeOnPath = ((DataNodeContainer) dataSchemaNode).getDataChildByName(cont1QName);
         final String uri = "instance-identifier-module:cont/cont1";
@@ -97,7 +97,7 @@ public class TestJsonBodyReader extends AbstractBodyReaderTest {
     @Test
     public void moduleSubContainerDataPostTest() throws Exception {
         final DataSchemaNode dataSchemaNode = schemaContext.getDataChildByName("cont");
-        QName cont1QName = QName.create(dataSchemaNode.getQName(), "cont1");
+        final QName cont1QName = QName.create(dataSchemaNode.getQName(), "cont1");
         final YangInstanceIdentifier dataII = YangInstanceIdentifier.of(dataSchemaNode.getQName()).node(cont1QName);
         final String uri = "instance-identifier-module:cont";
         mockBodyReader(uri, jsonBodyReader, true);
@@ -113,8 +113,8 @@ public class TestJsonBodyReader extends AbstractBodyReaderTest {
     public void moduleSubContainerAugmentDataPostTest() throws Exception {
         final DataSchemaNode dataSchemaNode = schemaContext.getDataChildByName("cont");
         final Module augmentModule = schemaContext.findModuleByNamespace(new URI("augment:module")).iterator().next();
-        QName contAugmentQName = QName.create(augmentModule.getQNameModule(), "cont-augment");
-        YangInstanceIdentifier.AugmentationIdentifier augII = new YangInstanceIdentifier.AugmentationIdentifier(
+        final QName contAugmentQName = QName.create(augmentModule.getQNameModule(), "cont-augment");
+        final YangInstanceIdentifier.AugmentationIdentifier augII = new YangInstanceIdentifier.AugmentationIdentifier(
                 Sets.newHashSet(contAugmentQName));
         final YangInstanceIdentifier dataII = YangInstanceIdentifier.of(dataSchemaNode.getQName())
                 .node(augII).node(contAugmentQName);
@@ -128,17 +128,16 @@ public class TestJsonBodyReader extends AbstractBodyReaderTest {
         checkExpectValueNormalizeNodeContext(dataSchemaNode, returnValue, dataII);
     }
 
-    //FIXME: Uncomment this when JsonParserStream works correctly with case augmentation with choice
-    //@Test
+    @Test
     public void moduleSubContainerChoiceAugmentDataPostTest() throws Exception {
         final DataSchemaNode dataSchemaNode = schemaContext.getDataChildByName("cont");
         final Module augmentModule = schemaContext.findModuleByNamespace(new URI("augment:module")).iterator().next();
-        QName augmentChoice1QName = QName.create(augmentModule.getQNameModule(), "augment-choice1");
-        QName augmentChoice2QName = QName.create(augmentChoice1QName, "augment-choice2");
+        final QName augmentChoice1QName = QName.create(augmentModule.getQNameModule(), "augment-choice1");
+        final QName augmentChoice2QName = QName.create(augmentChoice1QName, "augment-choice2");
         final QName containerQName = QName.create(augmentChoice1QName, "case-choice-case-container1");
-        YangInstanceIdentifier.AugmentationIdentifier augChoice1II = new YangInstanceIdentifier.AugmentationIdentifier(
+        final YangInstanceIdentifier.AugmentationIdentifier augChoice1II = new YangInstanceIdentifier.AugmentationIdentifier(
                 Sets.newHashSet(augmentChoice1QName));
-        YangInstanceIdentifier.AugmentationIdentifier augChoice2II = new YangInstanceIdentifier.AugmentationIdentifier(
+        final YangInstanceIdentifier.AugmentationIdentifier augChoice2II = new YangInstanceIdentifier.AugmentationIdentifier(
                 Sets.newHashSet(augmentChoice2QName));
         final YangInstanceIdentifier dataII = YangInstanceIdentifier.of(dataSchemaNode.getQName())
                 .node(augChoice1II).node(augmentChoice1QName).node(augChoice2II).node(augmentChoice2QName)

@@ -92,7 +92,6 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.opendaylight.yangtools.yang.model.util.EmptyType;
-import org.opendaylight.yangtools.yang.model.util.SchemaContextUtil;
 import org.opendaylight.yangtools.yang.parser.builder.api.GroupingBuilder;
 import org.opendaylight.yangtools.yang.parser.builder.impl.ContainerSchemaNodeBuilder;
 import org.opendaylight.yangtools.yang.parser.builder.impl.LeafSchemaNodeBuilder;
@@ -430,6 +429,8 @@ public class RestconfImpl implements RestconfService {
 
     @Override
     public NormalizedNodeContext invokeRpc(final String identifier, final NormalizedNodeContext payload, final UriInfo uriInfo) {
+        Preconditions.checkArgument(payload.getInstanceIdentifierContext().getSchemaNode() != null);
+        Preconditions.checkArgument(payload.getInstanceIdentifierContext().getSchemaNode() instanceof RpcDefinition);
         final SchemaPath type = payload.getInstanceIdentifierContext().getSchemaNode().getPath();
         final URI namespace = payload.getInstanceIdentifierContext().getSchemaNode().getQName().getNamespace();
         final CheckedFuture<DOMRpcResult, DOMRpcException> response;
@@ -453,19 +454,13 @@ public class RestconfImpl implements RestconfService {
         }
 
         final DOMRpcResult result = checkRpcResponse(response);
+        final RpcDefinition rpcSchemaNode = (RpcDefinition) payload.getInstanceIdentifierContext().getSchemaNode();
 
-        RpcDefinition resultNodeSchema = null;
-        final NormalizedNode<?, ?> resultData = result.getResult();
-        if (result != null && result.getResult() != null) {
-            resultNodeSchema = (RpcDefinition) payload.getInstanceIdentifierContext().getSchemaNode();
-        }
-
-        return new NormalizedNodeContext(new InstanceIdentifierContext<RpcDefinition>(null,
-                resultNodeSchema, mountPoint, schemaContext), resultData,
-                QueryParametersParser.parseWriterParameters(uriInfo));
+        return new NormalizedNodeContext(new InstanceIdentifierContext<>(null, rpcSchemaNode, mountPoint,
+                schemaContext), result.getResult(), QueryParametersParser.parseWriterParameters(uriInfo));
     }
 
-    private DOMRpcResult checkRpcResponse(final CheckedFuture<DOMRpcResult, DOMRpcException> response) {
+    private static DOMRpcResult checkRpcResponse(final CheckedFuture<DOMRpcResult, DOMRpcException> response) {
         if (response == null) {
             return null;
         }
@@ -489,13 +484,11 @@ public class RestconfImpl implements RestconfService {
                 }
 
                 if (cause instanceof IllegalArgumentException) {
-                    throw new RestconfDocumentedException(cause.getMessage(), ErrorType.PROTOCOL,
-                            ErrorTag.INVALID_VALUE);
+                    throw new RestconfDocumentedException(cause.getMessage(), ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
                 }
                 throw new RestconfDocumentedException("The operation encountered an unexpected error while executing.",cause);
-            } else {
-                throw new RestconfDocumentedException("The operation encountered an unexpected error while executing.",e);
             }
+            throw new RestconfDocumentedException("The operation encountered an unexpected error while executing.", e);
         } catch (final CancellationException e) {
             final String errMsg = "The operation was cancelled while executing.";
             LOG.debug("Cancel RpcExecution: " + errMsg, e);
@@ -503,7 +496,7 @@ public class RestconfImpl implements RestconfService {
         }
     }
 
-    private void validateInput(final SchemaNode inputSchema, final NormalizedNodeContext payload) {
+    private static void validateInput(final SchemaNode inputSchema, final NormalizedNodeContext payload) {
         if (inputSchema != null && payload.getData() == null) {
             // expected a non null payload
             throw new RestconfDocumentedException("Input is required.", ErrorType.PROTOCOL, ErrorTag.MALFORMED_MESSAGE);
@@ -553,7 +546,11 @@ public class RestconfImpl implements RestconfService {
             throw new RestconfDocumentedException(errMsg, ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
         }
 
-        final QName outputQname = QName.create(rpcQName, "output");
+        final RpcDefinition rpcSchemaNode = (RpcDefinition) payload.getInstanceIdentifierContext().getSchemaNode();
+        RestconfValidationUtils.checkDocumentedError(rpcSchemaNode != null, ErrorType.RPC, ErrorTag.INVALID_VALUE,
+                "Create stream RPC output can not be null!");
+
+        final QName outputQname = rpcSchemaNode.getOutput().getQName();
         final QName streamNameQname = QName.create(rpcQName, "stream-name");
 
         final ContainerNode output = ImmutableContainerNodeBuilder.create().withNodeIdentifier(new NodeIdentifier(outputQname))
@@ -564,7 +561,6 @@ public class RestconfImpl implements RestconfService {
         }
 
         final DOMRpcResult defaultDOMRpcResult = new DefaultDOMRpcResult(output);
-
         return Futures.immediateCheckedFuture(defaultDOMRpcResult);
     }
 
@@ -630,20 +626,11 @@ public class RestconfImpl implements RestconfService {
 
         final DOMRpcResult result = checkRpcResponse(response);
 
-        DataSchemaNode resultNodeSchema = null;
-        NormalizedNode<?, ?> resultData = null;
-        if (result != null && result.getResult() != null) {
-            resultData = result.getResult();
-            final ContainerSchemaNode rpcDataSchemaNode =
-                    SchemaContextUtil.getRpcDataSchema(schemaContext, rpc.getOutput().getPath());
-            resultNodeSchema = rpcDataSchemaNode.getDataChildByName(result.getResult().getNodeType());
-        }
-
-        return new NormalizedNodeContext(new InstanceIdentifierContext<>(null, resultNodeSchema, mountPoint,
-                schemaContext), resultData, QueryParametersParser.parseWriterParameters(uriInfo));
+        return new NormalizedNodeContext(new InstanceIdentifierContext<>(null, rpc, mountPoint, schemaContext),
+                result.getResult(), QueryParametersParser.parseWriterParameters(uriInfo));
     }
 
-    private RpcDefinition findRpc(final SchemaContext schemaContext, final String identifierDecoded) {
+    private static RpcDefinition findRpc(final SchemaContext schemaContext, final String identifierDecoded) {
         final String[] splittedIdentifier = identifierDecoded.split(":");
         if (splittedIdentifier.length != 2) {
             final String errMsg = identifierDecoded + " couldn't be splitted to 2 parts (module:rpc name)";
@@ -753,7 +740,7 @@ public class RestconfImpl implements RestconfService {
         return Response.status(Status.OK).build();
     }
 
-    private void validateTopLevelNodeName(final NormalizedNodeContext node,
+    private static void validateTopLevelNodeName(final NormalizedNodeContext node,
             final YangInstanceIdentifier identifier) {
 
         final String payloadName = node.getData().getNodeType().getLocalName();
