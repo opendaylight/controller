@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a7fa997_027ca71f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/LocalTransactionContext.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-06-17T18:47:40Z",
+      "side": 1,
+      "message": "Do we even need to do the next operation if a previous operation had failed? I was thinking more in terms of return if(operationError !\u003d null). I\u0027m ok to merge this though - because these issues would most likely get caught in development. Let me know what you think.",
+      "revId": "944c46ee4342fffefbf6a04d7e72fad0f785136c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
