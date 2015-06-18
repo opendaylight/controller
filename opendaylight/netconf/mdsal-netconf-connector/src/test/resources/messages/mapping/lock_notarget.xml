@@ -6,9 +6,7 @@
   ~ and is available at http://www.eclipse.org/legal/epl-v10.html
   -->
 
-<rpc id="a" a="64" xmlnx="a:b:c:d" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="101">
-    <get>
-        <filter type="subtree">
-        </filter>
-    </get>
+<rpc a="64" message-id="a" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+    <lock>
+    </lock>
 </rpc>

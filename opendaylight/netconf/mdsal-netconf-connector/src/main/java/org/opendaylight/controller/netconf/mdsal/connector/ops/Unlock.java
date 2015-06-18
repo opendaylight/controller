@@ -24,7 +24,6 @@ public class Unlock extends AbstractSingletonNetconfOperation {
     private static final Logger LOG = LoggerFactory.getLogger(Unlock.class);
 
     private static final String OPERATION_NAME = "unlock";
-    private static final String TARGET_KEY = "target";
 
     public Unlock(final String netconfSessionIdForReporting) {
         super(netconfSessionIdForReporting);
