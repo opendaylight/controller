@@ -11,8 +11,6 @@ package org.opendaylight.controller.netconf.mdsal.connector.ops;
 import com.google.common.base.Optional;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
-import org.opendaylight.controller.netconf.util.exception.MissingNameSpaceException;
-import org.opendaylight.controller.netconf.util.exception.UnexpectedNamespaceException;
 import org.opendaylight.controller.netconf.util.mapping.AbstractSingletonNetconfOperation;
 import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
@@ -45,15 +43,8 @@ public class Lock extends AbstractSingletonNetconfOperation {
     }
 
     static Datastore extractTargetParameter(final XmlElement operationElement) throws NetconfDocumentedException {
-        final XmlElement targetChildNode;
-        try {
-            final XmlElement targetElement = operationElement.getOnlyChildElementWithSameNamespace(TARGET_KEY);
-            targetChildNode = targetElement.getOnlyChildElementWithSameNamespace();
-        } catch (final MissingNameSpaceException | UnexpectedNamespaceException e) {
-            LOG.trace("Can't get only child element with same namespace", e);
-            throw NetconfDocumentedException.wrap(e);
-        }
-
+        final XmlElement targetElement = operationElement.getOnlyChildElementWithSameNamespace(TARGET_KEY);
+        final XmlElement targetChildNode = targetElement.getOnlyChildElementWithSameNamespace();
         return Datastore.valueOf(targetChildNode.getName());
     }
 

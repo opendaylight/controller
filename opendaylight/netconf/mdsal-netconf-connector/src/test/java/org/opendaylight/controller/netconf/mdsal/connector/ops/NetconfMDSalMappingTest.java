@@ -13,7 +13,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import com.google.common.base.Preconditions;
 import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,7 +43,6 @@ import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorSeverity;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorTag;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorType;
-import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedExecution;
 import org.opendaylight.controller.netconf.mdsal.connector.CurrentSchemaContext;
@@ -149,6 +147,43 @@ public class NetconfMDSalMappingTest {
     }
 
     @Test
+    public void testDiscard() throws Exception {
+
+        try {
+            discardChanges();
+            fail("Should have failed, need to execute an edit before discard");
+        } catch (NetconfDocumentedException e) {
+            assertTrue(e.getErrorSeverity() == ErrorSeverity.error);
+            assertTrue(e.getErrorTag() == ErrorTag.operation_failed);
+            assertTrue(e.getErrorType() == ErrorType.application);
+        }
+    }
+
+    @Test
+    public void testIncorrectGet() throws Exception {
+
+        try {
+            executeOperation(new GetConfig(sessionIdForReporting, currentSchemaContext, transactionProvider), "messages/mapping/bad_getConfig.xml");
+            fail("Should have failed, this is an incorrect request");
+        } catch (NetconfDocumentedException e) {
+            assertTrue(e.getErrorSeverity() == ErrorSeverity.error);
+            assertTrue(e.getErrorTag() == ErrorTag.operation_failed);
+            assertTrue(e.getErrorType() == ErrorType.application);
+        }
+
+        try {
+            executeOperation(new GetConfig(sessionIdForReporting, currentSchemaContext, transactionProvider), "messages/mapping/bad_namespace_getConfig.xml");
+            fail("Should have failed, this is an incorrect request");
+        } catch (NetconfDocumentedException e) {
+            assertTrue(e.getErrorSeverity() == ErrorSeverity.error);
+            assertTrue(e.getErrorTag() == ErrorTag.operation_failed);
+            assertTrue(e.getErrorType() == ErrorType.application);
+        }
+
+
+    }
+
+    @Test
     public void testEditRunning() throws Exception {
 
         try {
@@ -244,6 +279,16 @@ public class NetconfMDSalMappingTest {
             assertTrue(e.getErrorTag() == ErrorTag.operation_not_supported);
             assertTrue(e.getErrorType() == ErrorType.application);
         }
+
+
+        try {
+            lockWithoutTarget();
+            fail("Should have failed, target is missing");
+        } catch (NetconfDocumentedException e) {
+            assertTrue(e.getErrorSeverity() == ErrorSeverity.error);
+            assertTrue(e.getErrorTag() == ErrorTag.invalid_value);
+            assertTrue(e.getErrorType() == ErrorType.application);
+        }
     }
 
     @Test
@@ -257,6 +302,15 @@ public class NetconfMDSalMappingTest {
         } catch (NetconfDocumentedException e) {
             assertTrue(e.getErrorSeverity() == ErrorSeverity.error);
             assertTrue(e.getErrorTag() == ErrorTag.operation_not_supported);
+            assertTrue(e.getErrorType() == ErrorType.application);
+        }
+
+        try {
+            unlockWithoutTarget();
+            fail("Should have failed, target is missing");
+        } catch (NetconfDocumentedException e) {
+            assertTrue(e.getErrorSeverity() == ErrorSeverity.error);
+            assertTrue(e.getErrorTag() == ErrorTag.invalid_value);
             assertTrue(e.getErrorType() == ErrorType.application);
         }
     }
@@ -384,6 +438,11 @@ public class NetconfMDSalMappingTest {
         assertEmptyDatastore(getConfigCandidate());
         assertEmptyDatastore(getConfigRunning());
 
+        verifyResponse(getConfigWithFilter("messages/mapping/filters/get-config-empty-filter.xml"),
+                XmlFileLoader.xmlFileToDocument("messages/mapping/get-empty-response.xml"));
+        verifyResponse(getWithFilter("messages/mapping/filters/get-empty-filter.xml"),
+                XmlFileLoader.xmlFileToDocument("messages/mapping/get-empty-response.xml"));
+
         verifyResponse(getConfigCandidate(), XmlFileLoader.xmlFileToDocument("messages/mapping/get-empty-response.xml"));
         verifyResponse(getConfigRunning(), XmlFileLoader.xmlFileToDocument("messages/mapping/get-empty-response.xml"));
         verifyResponse(getConfigWithFilter("messages/mapping/filters/get-filter-users.xml"),
@@ -480,7 +539,7 @@ public class NetconfMDSalMappingTest {
         NodeList nodes = response.getChildNodes();
         assertTrue(nodes.getLength() == 1);
 
-        assertEquals(nodes.item(0).getLocalName(),RPC_REPLY_ELEMENT);
+        assertEquals(nodes.item(0).getLocalName(), RPC_REPLY_ELEMENT);
 
         NodeList replyNodes = nodes.item(0).getChildNodes();
         assertTrue(replyNodes.getLength() == 1);
@@ -511,6 +570,11 @@ public class NetconfMDSalMappingTest {
         return executeOperation(get, "messages/mapping/get.xml");
     }
 
+    private Document getWithFilter(String resource) throws NetconfDocumentedException, ParserConfigurationException, SAXException, IOException {
+        Get get = new Get(sessionIdForReporting, currentSchemaContext, transactionProvider);
+        return executeOperation(get, resource);
+    }
+
     private Document getConfigRunning() throws NetconfDocumentedException, ParserConfigurationException, SAXException, IOException {
         GetConfig getConfig = new GetConfig(sessionIdForReporting, currentSchemaContext, transactionProvider);
         return executeOperation(getConfig, "messages/mapping/getConfig.xml");
@@ -536,6 +600,16 @@ public class NetconfMDSalMappingTest {
         return executeOperation(unlock, "messages/mapping/unlock.xml");
     }
 
+    private Document lockWithoutTarget() throws NetconfDocumentedException, ParserConfigurationException, SAXException, IOException {
+        Lock lock = new Lock(sessionIdForReporting);
+        return executeOperation(lock, "messages/mapping/lock_notarget.xml");
+    }
+
+    private Document unlockWithoutTarget() throws NetconfDocumentedException, ParserConfigurationException, SAXException, IOException {
+        Unlock unlock = new Unlock(sessionIdForReporting);
+        return executeOperation(unlock, "messages/mapping/unlock_notarget.xml");
+    }
+
     private Document lockCandidate() throws NetconfDocumentedException, ParserConfigurationException, SAXException, IOException {
         Lock lock = new Lock(sessionIdForReporting);
         return executeOperation(lock, "messages/mapping/lock_candidate.xml");
@@ -548,14 +622,9 @@ public class NetconfMDSalMappingTest {
 
     private Document executeOperation(NetconfOperation op, String filename) throws ParserConfigurationException, SAXException, IOException, NetconfDocumentedException {
         final Document request = XmlFileLoader.xmlFileToDocument(filename);
-
-        HandlingPriority priority = op.canHandle(request);
-        Preconditions.checkState(priority != HandlingPriority.CANNOT_HANDLE);
-
         final Document response = op.handle(request, NetconfOperationChainedExecution.EXECUTION_TERMINATION_POINT);
 
         LOG.debug("Got response {}" , response);
-
         return response;
     }
 
