@@ -245,6 +245,21 @@ public class RuntimeRpcTest {
         verifyResponse(response, RPC_REPLY_OK);
     }
 
+    @Test
+    public void testBadNamespaceInRpc() throws Exception {
+        RuntimeRpc rpc = new RuntimeRpc(sessionIdForReporting, currentSchemaContext, rpcServiceVoidInvoke);
+        Document rpcDocument = XmlFileLoader.xmlFileToDocument("messages/mapping/rpcs/rpc-bad-namespace.xml");
+
+        try {
+            rpc.handle(rpcDocument, NetconfOperationChainedExecution.EXECUTION_TERMINATION_POINT);
+            fail("Should have failed, rpc has bad namespace");
+        } catch (NetconfDocumentedException e) {
+            assertTrue(e.getErrorSeverity() == ErrorSeverity.error);
+            assertTrue(e.getErrorTag() == ErrorTag.bad_element);
+            assertTrue(e.getErrorType() == ErrorType.application);
+        }
+    }
+
     private void verifyResponse(Document response, Document template) throws IOException, TransformerException {
         DetailedDiff dd = new DetailedDiff(new Diff(response, template));
         dd.overrideElementQualifier(new RecursiveElementNameAndTextQualifier());
