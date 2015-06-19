@@ -88,11 +88,11 @@
 
     <!--TODO Create generic utilities(extract from this module) for integration tests on the controller-->
     <dependency>
-      <groupId>org.openexi</groupId>
+      <groupId>openexi</groupId>
       <artifactId>nagasena</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.openexi</groupId>
+      <groupId>openexi</groupId>
       <artifactId>nagasena-rta</artifactId>
     </dependency>
     <dependency>
