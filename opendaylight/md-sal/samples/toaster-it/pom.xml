@@ -36,11 +36,11 @@
       <artifactId>sample-toaster-provider</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.openexi</groupId>
+      <groupId>openexi</groupId>
       <artifactId>nagasena</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.openexi</groupId>
+      <groupId>openexi</groupId>
       <artifactId>nagasena-rta</artifactId>
     </dependency>
     <dependency>

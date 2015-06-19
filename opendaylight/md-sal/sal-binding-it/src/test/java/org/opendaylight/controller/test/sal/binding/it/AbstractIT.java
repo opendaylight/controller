@@ -66,8 +66,8 @@ public abstract class AbstractIT {
                 mavenBundle("org.slf4j", "log4j-over-slf4j").versionAsInProject(), //
                 mavenBundle("ch.qos.logback", "logback-core").versionAsInProject(), //
                 mavenBundle("ch.qos.logback", "logback-classic").versionAsInProject(),
-                mavenBundle("org.openexi", "nagasena").versionAsInProject(),
-                mavenBundle("org.openexi", "nagasena-rta").versionAsInProject(),
+                mavenBundle("openexi", "nagasena").versionAsInProject(),
+                mavenBundle("openexi", "nagasena-rta").versionAsInProject(),
                  //
                 systemProperty("osgi.bundles.defaultStartLevel").value("4"),
                 systemPackages("sun.nio.ch"),
