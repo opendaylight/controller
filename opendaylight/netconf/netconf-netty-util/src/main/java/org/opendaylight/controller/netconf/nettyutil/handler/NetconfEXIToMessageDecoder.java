@@ -17,9 +17,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.dom.DOMResult;
-import javax.xml.transform.sax.SAXTransformerFactory;
-import javax.xml.transform.sax.TransformerHandler;
+import org.opendaylight.controller.config.util.xml.XmlUtil;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.openexi.proc.common.EXIOptionsException;
 import org.openexi.sax.EXIReader;
@@ -32,16 +30,17 @@ import org.xml.sax.SAXException;
 public final class NetconfEXIToMessageDecoder extends ByteToMessageDecoder {
 
     private static final Logger LOG = LoggerFactory.getLogger(NetconfEXIToMessageDecoder.class);
-    private static final SAXTransformerFactory FACTORY = (SAXTransformerFactory) SAXTransformerFactory.newInstance();
     /**
      * This class is not marked as shared, so it can be attached to only a single channel,
      * which means that {@link #decode(ChannelHandlerContext, ByteBuf, List)}
      * cannot be invoked concurrently. Hence we can reuse the reader.
      */
     private final EXIReader reader;
+    private final SAX2DOM sax2DOM;
 
     private NetconfEXIToMessageDecoder(final EXIReader reader) {
         this.reader = Preconditions.checkNotNull(reader);
+        this.sax2DOM = new SAX2DOM();
     }
 
     public static NetconfEXIToMessageDecoder create(final NetconfEXICodec codec) throws EXIOptionsException {
@@ -49,7 +48,7 @@ public final class NetconfEXIToMessageDecoder extends ByteToMessageDecoder {
     }
 
     @Override
-    protected void decode(final ChannelHandlerContext ctx, final ByteBuf in, final List<Object> out) throws EXIOptionsException, IOException, SAXException, TransformerConfigurationException  {
+    protected void decode(final ChannelHandlerContext ctx, final ByteBuf in, final List<Object> out) throws EXIOptionsException, IOException, SAXException, TransformerConfigurationException {
         /*
          * Note that we could loop here and process all the messages, but we can't do that.
          * The reason is <stop-exi> operation, which has the contract of immediately stopping
@@ -67,17 +66,16 @@ public final class NetconfEXIToMessageDecoder extends ByteToMessageDecoder {
             LOG.trace("Received to decode: {}", ByteBufUtil.hexDump(in));
         }
 
-        final TransformerHandler handler = FACTORY.newTransformerHandler();
-        reader.setContentHandler(handler);
-
-        final DOMResult domResult = new DOMResult();
-        handler.setResult(domResult);
-
         try (final InputStream is = new ByteBufInputStream(in)) {
-            // Performs internal reset before doing anything
-            reader.parse(new InputSource(is));
-        }
+            final InputSource input = new InputSource(is);
 
-        out.add(new NetconfMessage((Document) domResult.getNode()));
+            final Document root = XmlUtil.newDocument();
+
+            sax2DOM.setDocument(root);
+            reader.setContentHandler(sax2DOM);
+
+            reader.parse(input);
+            out.add(new NetconfMessage(root));
+        }
     }
 }
