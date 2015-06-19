@@ -60,6 +60,7 @@ import org.opendaylight.controller.sal.streams.listeners.Notificator;
 import org.opendaylight.controller.sal.streams.websockets.WebSocketServer;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.QNameModule;
+import org.opendaylight.yangtools.yang.common.SimpleDateFormatUtil;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
@@ -110,7 +111,7 @@ public class RestconfImpl implements RestconfService {
 
     private static final String MOUNT_POINT_MODULE_NAME = "ietf-netconf";
 
-    private static final SimpleDateFormat REVISION_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+    private static final SimpleDateFormat REVISION_FORMAT = SimpleDateFormatUtil.getRevisionFormat();
 
     private static final String SAL_REMOTE_NAMESPACE = "urn:opendaylight:params:xml:ns:yang:controller:md:sal:remote";
 
