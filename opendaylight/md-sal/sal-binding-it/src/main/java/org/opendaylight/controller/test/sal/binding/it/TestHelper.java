@@ -74,8 +74,8 @@ public class TestHelper {
                 mavenBundle(CONTROLLER, "netconf-util").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "netconf-netty-util").versionAsInProject(), //
                 mavenBundle("org.apache.sshd", "sshd-core").versionAsInProject(), //
-                mavenBundle("org.openexi", "nagasena").versionAsInProject(), //
-                mavenBundle("org.openexi", "nagasena-rta").versionAsInProject(), //
+                mavenBundle("openexi", "nagasena").versionAsInProject(), //
+                mavenBundle("openexi", "nagasena-rta").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "netconf-mapping-api").versionAsInProject(), //
 
                 mavenBundle(CONTROLLER, "config-persister-impl").versionAsInProject(), //

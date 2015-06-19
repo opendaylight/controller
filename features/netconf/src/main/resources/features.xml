@@ -67,7 +67,7 @@
     <bundle>mvn:org.bouncycastle/bcpkix-jdk15on/${bouncycastle.version}</bundle>
     <bundle>mvn:org.bouncycastle/bcprov-jdk15on/${bouncycastle.version}</bundle>
     <bundle>mvn:org.apache.sshd/sshd-core/${sshd-core.version}</bundle>
-    <bundle>mvn:org.openexi/nagasena/${exi.nagasena.version}</bundle>
+    <bundle>mvn:openexi/nagasena/${exi.nagasena.version}</bundle>
     <bundle>mvn:io.netty/netty-codec/${netty.version}</bundle>
     <bundle>mvn:io.netty/netty-handler/${netty.version}</bundle>
     <bundle>mvn:io.netty/netty-common/${netty.version}</bundle>
