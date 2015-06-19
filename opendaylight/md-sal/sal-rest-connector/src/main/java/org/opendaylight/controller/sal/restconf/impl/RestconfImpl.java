@@ -60,6 +60,7 @@ import org.opendaylight.controller.sal.streams.listeners.Notificator;
 import org.opendaylight.controller.sal.streams.websockets.WebSocketServer;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.QNameModule;
+import org.opendaylight.yangtools.yang.common.SimpleDateFormatUtil;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
@@ -110,8 +111,6 @@ public class RestconfImpl implements RestconfService {
     private static final int CHAR_NOT_FOUND = -1;
 
     private static final String MOUNT_POINT_MODULE_NAME = "ietf-netconf";
-
-    private static final SimpleDateFormat REVISION_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
     private static final String SAL_REMOTE_NAMESPACE = "urn:opendaylight:params:xml:ns:yang:controller:md:sal:remote";
 
@@ -414,7 +413,7 @@ public class RestconfImpl implements RestconfService {
         try {
             final String moduleName = pathArgs.get(0);
             final String revision = pathArgs.get(1);
-            final Date moduleRevision = REVISION_FORMAT.parse(revision);
+            final Date moduleRevision = SimpleDateFormatUtil.getRevisionFormat().parse(revision);
             return QName.create(null, moduleRevision, moduleName);
         } catch (final ParseException e) {
             LOG.debug("URI has bad format. It should be \'moduleName/yyyy-MM-dd\' " + identifier);
@@ -1083,7 +1082,7 @@ public class RestconfImpl implements RestconfService {
                 (listModuleSchemaNode), "revision");
         final DataSchemaNode revisionSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);
         Preconditions.checkState(revisionSchemaNode instanceof LeafSchemaNode);
-        final String revision = REVISION_FORMAT.format(module.getRevision());
+        final String revision = SimpleDateFormatUtil.getRevisionFormat().format(module.getRevision());
         moduleNodeValues.withChild(Builders.leafBuilder((LeafSchemaNode) revisionSchemaNode).withValue(revision)
                 .build());
 
