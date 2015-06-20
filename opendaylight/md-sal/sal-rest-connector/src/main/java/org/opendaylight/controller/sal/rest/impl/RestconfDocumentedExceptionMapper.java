@@ -12,6 +12,7 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Iterables;
+import com.google.gson.stream.JsonWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -24,6 +25,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
+import javax.xml.XMLConstants;
 import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -35,6 +37,7 @@ import org.opendaylight.controller.sal.restconf.impl.NormalizedNodeContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError;
 import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.AugmentationIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
@@ -45,7 +48,9 @@ import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeWriter;
+import org.opendaylight.yangtools.yang.data.codec.gson.JSONCodecFactory;
 import org.opendaylight.yangtools.yang.data.codec.gson.JSONNormalizedNodeStreamWriter;
+import org.opendaylight.yangtools.yang.data.codec.gson.JsonWriterFactory;
 import org.opendaylight.yangtools.yang.data.impl.codec.xml.XMLStreamNormalizedNodeStreamWriter;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
@@ -188,7 +193,15 @@ public class RestconfDocumentedExceptionMapper implements ExceptionMapper<Restco
         errNodeValues.withChild(Builders.leafBuilder((LeafSchemaNode) errMsgSchemaNode)
                 .withValue(error.getErrorMessage()).build());
 
-        // TODO : find how could we add possible "error-path" and "error-info"
+        if(error.getErrorInfo() != null) {
+            // Oddly, error-info is defined as an empty container in the restconf yang. Apparently the
+            // intention is for implementors to define their own data content so we'll just treat it as a leaf
+            // with string data.
+            errNodeValues.withChild(ImmutableNodes.leafNode(Draft02.RestConfModule.ERROR_INFO_QNAME,
+                    error.getErrorInfo()));
+        }
+
+        // TODO : find how could we add possible "error-path"
 
         return errNodeValues.build();
     }
@@ -217,8 +230,29 @@ public class RestconfDocumentedExceptionMapper implements ExceptionMapper<Restco
         if(!schema.isAugmenting() && !(schema instanceof SchemaContext)) {
             initialNs = schema.getQName().getNamespace();
         }
-        final NormalizedNodeStreamWriter jsonWriter = JSONNormalizedNodeStreamWriter.create(context.getSchemaContext(),path,initialNs,outputWriter);
-        final NormalizedNodeWriter nnWriter = NormalizedNodeWriter.forStreamWriter(jsonWriter);
+
+        final JsonWriter jsonWriter = JsonWriterFactory.createJsonWriter(outputWriter);
+        final NormalizedNodeStreamWriter jsonStreamWriter = JSONNormalizedNodeStreamWriter.createExclusiveWriter(
+                JSONCodecFactory.create(context.getSchemaContext()), path, initialNs, jsonWriter);
+
+        // We create a delegating writer to special-case error-info as error-info is defined as an empty
+        // container in the restconf yang schema but we create a leaf node so we can output it. The delegate
+        // stream writer validates the node type against the schema and thus will expect a LeafSchemaNode but
+        // the schema has a ContainerSchemaNode so, to avoid an error, we override the leafNode behavior
+        // for error-info.
+        final NormalizedNodeStreamWriter streamWriter = new DelegatingNormalizedNodeStreamWriter(jsonStreamWriter) {
+            @Override
+            public void leafNode(final NodeIdentifier name, final Object value) throws IOException {
+                if(name.getNodeType().equals(Draft02.RestConfModule.ERROR_INFO_QNAME)) {
+                    jsonWriter.name(Draft02.RestConfModule.ERROR_INFO_QNAME.getLocalName());
+                    jsonWriter.value(value.toString());
+                } else {
+                    super.leafNode(name, value);
+                }
+            }
+        };
+
+        final NormalizedNodeWriter nnWriter = NormalizedNodeWriter.forStreamWriter(streamWriter);
         try {
             if(isDataRoot) {
                 writeDataRoot(outputWriter,nnWriter,(ContainerNode) data);
@@ -244,7 +278,7 @@ public class RestconfDocumentedExceptionMapper implements ExceptionMapper<Restco
         final InstanceIdentifierContext<?> pathContext = errorsNode.getInstanceIdentifierContext();
         final ByteArrayOutputStream outStream = new ByteArrayOutputStream();
 
-        XMLStreamWriter xmlWriter;
+        final XMLStreamWriter xmlWriter;
         try {
             xmlWriter = XML_FACTORY.createXMLStreamWriter(outStream, "UTF-8");
         } catch (final XMLStreamException e) {
@@ -262,8 +296,33 @@ public class RestconfDocumentedExceptionMapper implements ExceptionMapper<Restco
             schemaPath = schemaPath.getParent();
         }
 
-        final NormalizedNodeStreamWriter streamWriter = XMLStreamNormalizedNodeStreamWriter.create(xmlWriter,
+        final NormalizedNodeStreamWriter xmlStreamWriter = XMLStreamNormalizedNodeStreamWriter.create(xmlWriter,
                 pathContext.getSchemaContext(), schemaPath);
+
+        // We create a delegating writer to special-case error-info as error-info is defined as an empty
+        // container in the restconf yang schema but we create a leaf node so we can output it. The delegate
+        // stream writer validates the node type against the schema and thus will expect a LeafSchemaNode but
+        // the schema has a ContainerSchemaNode so, to avoid an error, we override the leafNode behavior
+        // for error-info.
+        final NormalizedNodeStreamWriter streamWriter = new DelegatingNormalizedNodeStreamWriter(xmlStreamWriter) {
+            @Override
+            public void leafNode(final NodeIdentifier name, final Object value) throws IOException {
+                if(name.getNodeType().equals(Draft02.RestConfModule.ERROR_INFO_QNAME)) {
+                    String ns = Draft02.RestConfModule.ERROR_INFO_QNAME.getNamespace().toString();
+                    try {
+                        xmlWriter.writeStartElement(XMLConstants.DEFAULT_NS_PREFIX,
+                                Draft02.RestConfModule.ERROR_INFO_QNAME.getLocalName(), ns);
+                        xmlWriter.writeCharacters(value.toString());
+                        xmlWriter.writeEndElement();
+                    } catch (XMLStreamException e) {
+                        throw new IOException("Error writing error-info", e);
+                    }
+                } else {
+                    super.leafNode(name, value);
+                }
+            }
+        };
+
         final NormalizedNodeWriter nnWriter = NormalizedNodeWriter.forStreamWriter(streamWriter);
         try {
             if (isDataRoot) {
@@ -307,6 +366,96 @@ public class RestconfDocumentedExceptionMapper implements ExceptionMapper<Restco
             final DataContainerChild<? extends PathArgument, ?> child = iterator.next();
             nnWriter.write(child);
             nnWriter.flush();
+        }
+    }
+
+    private static class DelegatingNormalizedNodeStreamWriter implements NormalizedNodeStreamWriter {
+        private final NormalizedNodeStreamWriter delegate;
+
+        DelegatingNormalizedNodeStreamWriter(NormalizedNodeStreamWriter delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void leafNode(NodeIdentifier name, Object value) throws IOException, IllegalArgumentException {
+            delegate.leafNode(name, value);
+        }
+
+        @Override
+        public void startLeafSet(NodeIdentifier name, int childSizeHint) throws IOException, IllegalArgumentException {
+            delegate.startLeafSet(name, childSizeHint);
+        }
+
+        @Override
+        public void leafSetEntryNode(Object value) throws IOException, IllegalArgumentException {
+            delegate.leafSetEntryNode(value);
+        }
+
+        @Override
+        public void startContainerNode(NodeIdentifier name, int childSizeHint) throws IOException,
+                IllegalArgumentException {
+            delegate.startContainerNode(name, childSizeHint);
+        }
+
+        @Override
+        public void startUnkeyedList(NodeIdentifier name, int childSizeHint) throws IOException,
+                IllegalArgumentException {
+            delegate.startUnkeyedList(name, childSizeHint);
+        }
+
+        @Override
+        public void startUnkeyedListItem(NodeIdentifier name, int childSizeHint) throws IOException,
+                IllegalStateException {
+            delegate.startUnkeyedListItem(name, childSizeHint);
+        }
+
+        @Override
+        public void startMapNode(NodeIdentifier name, int childSizeHint) throws IOException, IllegalArgumentException {
+            delegate.startMapNode(name, childSizeHint);
+        }
+
+        @Override
+        public void startMapEntryNode(NodeIdentifierWithPredicates identifier, int childSizeHint) throws IOException,
+                IllegalArgumentException {
+            delegate.startMapEntryNode(identifier, childSizeHint);
+        }
+
+        @Override
+        public void startOrderedMapNode(NodeIdentifier name, int childSizeHint) throws IOException,
+                IllegalArgumentException {
+            delegate.startOrderedMapNode(name, childSizeHint);
+        }
+
+        @Override
+        public void startChoiceNode(NodeIdentifier name, int childSizeHint) throws IOException,
+                IllegalArgumentException {
+            delegate.startChoiceNode(name, childSizeHint);
+        }
+
+        @Override
+        public void startAugmentationNode(AugmentationIdentifier identifier) throws IOException,
+                IllegalArgumentException {
+            delegate.startAugmentationNode(identifier);
+        }
+
+        @Override
+        public void anyxmlNode(NodeIdentifier name, Object value) throws IOException, IllegalArgumentException {
+            delegate.anyxmlNode(name, value);
+        }
+
+        @Override
+        public void endNode() throws IOException, IllegalStateException {
+            delegate.endNode();
+        }
+
+        @Override
+        public void close() throws IOException {
+            delegate.close();
+        }
+
+        @Override
+        public void flush() throws IOException {
+            delegate.flush();
         }
     }
 }
