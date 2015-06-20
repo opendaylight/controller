@@ -733,6 +733,10 @@ public class RestconfImpl implements RestconfService {
                     LOG.debug("Update ConfigDataStore fail " + identifier, e);
                     throw new RestconfDocumentedException(e.getMessage(), e, e.getErrorList());
                 }
+            } catch (Exception e) {
+                final String errMsg = "Error updating data ";
+                LOG.debug(errMsg + identifier, e);
+                throw new RestconfDocumentedException(errMsg, e);
             }
         }
 
@@ -867,7 +871,7 @@ public class RestconfImpl implements RestconfService {
             throw e;
         } catch (final Exception e) {
             final String errMsg = "Error creating data ";
-            LOG.info(errMsg + (uriInfo != null ? uriInfo.getPath() : ""), e);
+            LOG.debug(errMsg + (uriInfo != null ? uriInfo.getPath() : ""), e);
             throw new RestconfDocumentedException(errMsg, e);
         }
 

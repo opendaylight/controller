@@ -18,7 +18,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.io.ByteStreams;
 import com.google.gson.JsonArray;
@@ -68,7 +67,6 @@ import org.opendaylight.controller.sal.restconf.impl.RestconfError;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -83,60 +81,6 @@ public class RestconfDocumentedExceptionMapperTest extends JerseyTest {
         void verifyXML(Node errorInfoNode);
 
         void verifyJson(JsonElement errorInfoElement);
-    }
-
-    static class ComplexErrorInfoVerifier implements ErrorInfoVerifier {
-
-        Map<String, String> expErrorInfo;
-
-        public ComplexErrorInfoVerifier(final Map<String, String> expErrorInfo) {
-            this.expErrorInfo = expErrorInfo;
-        }
-
-        @Override
-        public void verifyXML(final Node errorInfoNode) {
-
-            final Map<String, String> mutableExpMap = Maps.newHashMap(expErrorInfo);
-            final NodeList childNodes = errorInfoNode.getChildNodes();
-            for (int i = 0; i < childNodes.getLength(); i++) {
-                final Node child = childNodes.item(i);
-                if (child instanceof Element) {
-                    final String expValue = mutableExpMap.remove(child.getNodeName());
-                    assertNotNull("Found unexpected \"error-info\" child node: " + child.getNodeName(), expValue);
-                    assertEquals("Text content for \"error-info\" child node " + child.getNodeName(), expValue,
-                            child.getTextContent());
-                }
-            }
-
-            if (!mutableExpMap.isEmpty()) {
-                fail("Missing \"error-info\" child nodes: " + mutableExpMap);
-            }
-        }
-
-        @Override
-        public void verifyJson(final JsonElement errorInfoElement) {
-
-            assertTrue("\"error-info\" Json element is not an Object", errorInfoElement.isJsonObject());
-
-            final Map<String, String> actualErrorInfo = Maps.newHashMap();
-            for (final Entry<String, JsonElement> entry : errorInfoElement.getAsJsonObject().entrySet()) {
-                final String leafName = entry.getKey();
-                final JsonElement leafElement = entry.getValue();
-                actualErrorInfo.put(leafName, leafElement.getAsString());
-            }
-
-            final Map<String, String> mutableExpMap = Maps.newHashMap(expErrorInfo);
-            for (final Entry<String, String> actual : actualErrorInfo.entrySet()) {
-                final String expValue = mutableExpMap.remove(actual.getKey());
-                assertNotNull("Found unexpected \"error-info\" child node: " + actual.getKey(), expValue);
-                assertEquals("Text content for \"error-info\" child node " + actual.getKey(), expValue,
-                        actual.getValue());
-            }
-
-            if (!mutableExpMap.isEmpty()) {
-                fail("Missing \"error-info\" child nodes: " + mutableExpMap);
-            }
-        }
     }
 
     static class SimpleErrorInfoVerifier implements ErrorInfoVerifier {
@@ -432,18 +376,16 @@ public class RestconfDocumentedExceptionMapperTest extends JerseyTest {
     }
 
     @Test
-    @Ignore // TODO : we are not supported "error-info" element yet
     public void testToJsonResponseWithErrorInfo() throws Exception {
 
         final String errorInfo = "<address>1.2.3.4</address> <session-id>123</session-id>";
         testJsonResponse(new RestconfDocumentedException(new RestconfError(ErrorType.APPLICATION,
                 ErrorTag.INVALID_VALUE, "mock error", "mock-app-tag", errorInfo)), Status.BAD_REQUEST,
                 ErrorType.APPLICATION, ErrorTag.INVALID_VALUE, "mock error", "mock-app-tag",
-                new ComplexErrorInfoVerifier(ImmutableMap.of("session-id", "123", "address", "1.2.3.4")));
+                new SimpleErrorInfoVerifier(errorInfo));
     }
 
     @Test
-    @Ignore //TODO : we are not supporting "error-info" yet
     public void testToJsonResponseWithExceptionCause() throws Exception {
 
         final Exception cause = new Exception("mock exception cause");
@@ -634,18 +576,16 @@ public class RestconfDocumentedExceptionMapperTest extends JerseyTest {
     }
 
     @Test
-    @Ignore // TODO : we are not supporting "error-info" node yet
     public void testToXMLResponseWithErrorInfo() throws Exception {
 
         final String errorInfo = "<address>1.2.3.4</address> <session-id>123</session-id>";
         testXMLResponse(new RestconfDocumentedException(new RestconfError(ErrorType.APPLICATION,
                 ErrorTag.INVALID_VALUE, "mock error", "mock-app-tag", errorInfo)), Status.BAD_REQUEST,
                 ErrorType.APPLICATION, ErrorTag.INVALID_VALUE, "mock error", "mock-app-tag",
-                new ComplexErrorInfoVerifier(ImmutableMap.of("session-id", "123", "address", "1.2.3.4")));
+                new SimpleErrorInfoVerifier(errorInfo));
     }
 
     @Test
-    @Ignore // TODO : we are not supporting "error-info" node yet
     public void testToXMLResponseWithExceptionCause() throws Exception {
 
         final Exception cause = new Exception("mock exception cause");
