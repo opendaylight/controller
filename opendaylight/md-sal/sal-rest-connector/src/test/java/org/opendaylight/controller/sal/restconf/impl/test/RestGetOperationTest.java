@@ -18,6 +18,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
@@ -61,12 +62,15 @@ import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
+import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableMapEntryNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableMapNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -194,8 +198,7 @@ public class RestGetOperationTest extends JerseyTest {
      * @throws ParseException
      */
     @Test
-    public void getDataWithSlashesBehindMountPoint() throws UnsupportedEncodingException, URISyntaxException,
-            ParseException {
+    public void getDataWithSlashesBehindMountPoint() throws Exception {
         final YangInstanceIdentifier awaitedInstanceIdentifier = prepareInstanceIdentifierForList();
         when(brokerFacade.readConfigurationData(any(DOMMountPoint.class), eq(awaitedInstanceIdentifier))).thenReturn(
                 prepareCnDataForSlashesBehindMountPointTest());
@@ -210,20 +213,24 @@ public class RestGetOperationTest extends JerseyTest {
         assertEquals(200, get(uri, MediaType.APPLICATION_XML));
     }
 
-    private YangInstanceIdentifier prepareInstanceIdentifierForList() throws URISyntaxException, ParseException {
+    private YangInstanceIdentifier prepareInstanceIdentifierForList() throws Exception {
         final List<PathArgument> parameters = new ArrayList<>();
 
-        final Date revision = new SimpleDateFormat("yyyy-MM-dd").parse("2014-01-09");
-        final URI uri = new URI("test:module");
-        final QName qNameCont = QName.create(uri, revision, "cont");
-        final QName qNameList = QName.create(uri, revision, "lst1");
-        final QName qNameKeyList = QName.create(uri, revision, "lf11");
+        final QName qNameCont = newTestModuleQName("cont");
+        final QName qNameList = newTestModuleQName("lst1");
+        final QName qNameKeyList = newTestModuleQName("lf11");
 
         parameters.add(new YangInstanceIdentifier.NodeIdentifier(qNameCont));
         parameters.add(new YangInstanceIdentifier.NodeIdentifier(qNameList));
         parameters.add(new YangInstanceIdentifier.NodeIdentifierWithPredicates(qNameList, qNameKeyList,
                 "GigabitEthernet0/0/0/0"));
         return YangInstanceIdentifier.create(parameters);
+    }
+
+    private QName newTestModuleQName(String localPart) throws Exception {
+        final Date revision = new SimpleDateFormat("yyyy-MM-dd").parse("2014-01-09");
+        final URI uri = new URI("test:module");
+        return QName.create(uri, revision, localPart);
     }
 
     @Test
@@ -239,6 +246,30 @@ public class RestGetOperationTest extends JerseyTest {
         ControllerContext.getInstance().setMountService(mockMountService);
 
         final String uri = "/config/ietf-interfaces:interfaces/interface/0/yang-ext:mount/test-module:cont";
+        assertEquals(200, get(uri, MediaType.APPLICATION_XML));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void getDataWithIdentityrefInURL() throws Exception {
+        setControllerContext(schemaContextTestModule);
+
+        QName moduleQN = newTestModuleQName("module");
+        ImmutableMap<QName, Object> keyMap = ImmutableMap.<QName, Object>builder()
+                .put(newTestModuleQName("type"), newTestModuleQName("test-identity"))
+                .put(newTestModuleQName("name"), "foo").build();
+        YangInstanceIdentifier iid = YangInstanceIdentifier.builder().node(newTestModuleQName("modules"))
+                .node(moduleQN).nodeWithKey(moduleQN, keyMap).build();
+        @SuppressWarnings("rawtypes")
+        NormalizedNode data = ImmutableMapNodeBuilder.create().withNodeIdentifier(
+                new NodeIdentifier(moduleQN)).withChild(ImmutableNodes.mapEntryBuilder()
+                        .withNodeIdentifier(new NodeIdentifierWithPredicates(moduleQN, keyMap))
+                        .withChild(ImmutableNodes.leafNode(newTestModuleQName("type"), newTestModuleQName("test-identity")))
+                        .withChild(ImmutableNodes.leafNode(newTestModuleQName("name"), "foo"))
+                        .withChild(ImmutableNodes.leafNode(newTestModuleQName("data"), "bar")).build()).build();
+        when(brokerFacade.readConfigurationData(iid)).thenReturn(data);
+
+        String uri = "/config/test-module:modules/module/test-module:test-identity/foo";
         assertEquals(200, get(uri, MediaType.APPLICATION_XML));
     }
 

@@ -5,6 +5,12 @@ module test-module {
   revision 2014-01-09 {
   }
 
+  identity module-type {
+  }
+
+  identity test-identity {
+  }
+
   container interfaces {
     container class {
         leaf name {
@@ -35,7 +41,28 @@ module test-module {
         }
     }
   }
-  
+
+  container modules {
+      list module {
+          key "type name";
+          leaf name {
+              type string;
+              mandatory true;
+          }
+
+          leaf type {
+              type identityref {
+                  base module-type;
+              }
+              mandatory true;
+          }
+
+          leaf data {
+              type string;
+          }
+      }
+  }
+
   list lst-with-composite-key {
     key "key1 key2";
     leaf key1 {
