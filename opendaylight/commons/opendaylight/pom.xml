@@ -155,6 +155,7 @@
     <sonar.language>java</sonar.language>
     <sonar.jacoco.reportPath>target/code-coverage/jacoco.exec</sonar.jacoco.reportPath>
     <sonar.jacoco.itReportPath>target/code-coverage/jacoco-it.exec</sonar.jacoco.itReportPath>
+    <sonar.exclusions>**/org/opendaylight/controller/netconf/cli/**, **/org/opendaylight/controller/netconf/test/tool/**</sonar.exclusions>
     <sonar.skippedModules>org.openflow.openflowj,net.sf.jung2,org.opendaylight.controller.protobuff.messages</sonar.skippedModules>
     <spifly.version>1.0.0</spifly.version>
     <spring-osgi.version>1.2.1</spring-osgi.version>
