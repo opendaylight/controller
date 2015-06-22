@@ -1,17 +1,21 @@
 package org.opendaylight.controller.remote.rpc.registry;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Address;
 import akka.actor.Props;
 import akka.japi.Pair;
 import akka.testkit.JavaTestKit;
+import akka.testkit.TestActorRef;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -21,14 +25,17 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.controller.remote.rpc.RemoteRpcProviderConfig;
 import org.opendaylight.controller.remote.rpc.RouteIdentifierImpl;
+import org.opendaylight.controller.remote.rpc.RpcManager;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.AddOrUpdateRoutes;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.FindRouters;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.FindRoutersReply;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.RemoveRoutes;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.SetLocalRouter;
 import org.opendaylight.controller.remote.rpc.registry.gossip.Bucket;
+import org.opendaylight.controller.remote.rpc.registry.gossip.Messages;
 import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.GetAllBuckets;
 import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.GetAllBucketsReply;
 import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.GetBucketVersions;
@@ -36,6 +43,7 @@ import org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketSto
 import org.opendaylight.controller.sal.connector.api.RpcRouter;
 import org.opendaylight.controller.sal.connector.api.RpcRouter.RouteIdentifier;
 import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
 
@@ -154,6 +162,10 @@ public class RpcRegistryTest {
         registry1.tell(new SetLocalRouter(mockBroker1.getRef()), mockBroker1.getRef());
         registry1.tell(new AddOrUpdateRoutes(addedRouteIds), mockBroker1.getRef());
 
+        Map<Address, Bucket> bucketsRegistry1 = retrieveBuckets(registry1, mockBroker1, node1Address);
+        Assert.assertEquals(1, bucketsRegistry1.size());
+        verifyBucket(bucketsRegistry1.get(node1Address), addedRouteIds);
+
         // Bucket store on node2 should get a message to update its local copy of remote buckets
 
         Map<Address, Bucket> buckets = retrieveBuckets(registry2, mockBroker2, node1Address);
@@ -261,10 +273,9 @@ public class RpcRegistryTest {
         Assert.assertEquals("RoutingTable size", expRouteIds.size(), table.size());
     }
 
-    private Map<Address, Bucket> retrieveBuckets(ActorRef bucketStore, JavaTestKit testKit,
-            Address... addresses) {
+    private Map<Address, Bucket> retrieveBuckets(ActorRef bucketStore, JavaTestKit testKit, Address... addresses) {
         int nTries = 0;
-        while(true) {
+        while (true) {
             bucketStore.tell(new GetAllBuckets(), testKit.getRef());
             GetAllBucketsReply reply = testKit.expectMsgClass(Duration.create(3, TimeUnit.SECONDS),
                     GetAllBucketsReply.class);
@@ -342,4 +353,102 @@ public class RpcRegistryTest {
         routeIds.add(new RouteIdentifierImpl(null, type, null));
         return routeIds;
     }
+
+    @Test
+    public void testGlobalRpcRemoteNodeRegistration() throws Exception {
+        new JavaTestKit(node2) {{
+
+            TestActorRef<RpcRegistry> testActorRef = TestActorRef.apply(RpcRegistry.props(), getRef(), "rpcReg", node2);
+
+            ActorRef rpcReg = testActorRef.underlyingActor().getSelf();
+
+            // global rpc is loaded as part of the schema of node 1
+            List<RpcRouter.RouteIdentifier<?, ?, ?>> addedRouteIds1 = createRouteIds();
+            Map<String, DOMRpcIdentifier> globalRpcMap1 = new HashMap<>();
+            DOMRpcIdentifier globalRpcIdentifier = DOMRpcIdentifier.create(SchemaPath.create(true, (QName) addedRouteIds1.get(0).getType()));
+            globalRpcMap1.put(addedRouteIds1.get(0).getType().toString(), globalRpcIdentifier);
+
+            rpcReg.tell(new RpcRegistry.Messages.StoreGlobalRpcsFound(globalRpcMap1), getRef());
+
+            Bucket mockBucket = mock(Bucket.class);
+            Address mockAddress = Address.apply("http", "address1");
+            Map<Address, Bucket> remoteBucket = new HashMap<>();
+            remoteBucket.put(mockAddress, mockBucket);
+
+            RoutingTable mockRoutingTable = mock(RoutingTable.class);
+
+            when(mockBucket.getData()).thenReturn(mockRoutingTable);
+            when(mockRoutingTable.getRoutes()).thenReturn(com.google.common.collect.Sets.newHashSet(addedRouteIds1));
+
+            rpcReg.tell(new Messages.BucketStoreMessages.UpdateRemoteBuckets(remoteBucket), getRef());
+
+            expectMsgClass(Duration.create(5, TimeUnit.SECONDS), RpcManager.Messages.RegisterRpcImplemenation.class);
+        }};
+    }
+
+    @Test
+    public void testRoutedRpcRemoteNodeRegistration() throws Exception {
+        new JavaTestKit(node2) {{
+
+            TestActorRef<RpcRegistry> testActorRef = TestActorRef.apply(RpcRegistry.props(), getRef(), "rpcReg", node2);
+
+            ActorRef rpcReg = testActorRef.underlyingActor().getSelf();
+
+            // global rpc is loaded as part of the schema of node 1
+            List<RpcRouter.RouteIdentifier<?, ?, ?>> addedRouteIds1 = createRouteIds();
+
+            Bucket mockBucket = mock(Bucket.class);
+            Address mockAddress = Address.apply("http", "address1");
+            Map<Address, Bucket> remoteBucket = new HashMap<>();
+            remoteBucket.put(mockAddress, mockBucket);
+
+            RoutingTable mockRoutingTable = mock(RoutingTable.class);
+
+            when(mockBucket.getData()).thenReturn(mockRoutingTable);
+            when(mockRoutingTable.getRoutes()).thenReturn(com.google.common.collect.Sets.newHashSet(addedRouteIds1));
+
+            rpcReg.tell(new Messages.BucketStoreMessages.UpdateRemoteBuckets(remoteBucket), getRef());
+
+            expectMsgClass(Duration.create(5, TimeUnit.SECONDS), RpcManager.Messages.RegisterRpcImplemenation.class);
+        }};
+    }
+
+    /**
+     * Global RPC is present in the local bucket,
+     * ensure that the remote bucket's rpc with the same route does not get registered.
+     * This can happen with non-cluster-aware apps registering global rpcs
+     * @throws Exception
+     */
+    @Test
+    public void testLocalPresentGlobalRpcRegistration() throws Exception {
+        new JavaTestKit(node2) {{
+
+            TestActorRef<RpcRegistry> testActorRef = TestActorRef.apply(RpcRegistry.props(), getRef(), "rpcReg", node2);
+
+            ActorRef rpcReg = testActorRef.underlyingActor().getSelf();
+
+            // global rpc is loaded as part of the schema of node 1
+            List<RpcRouter.RouteIdentifier<?, ?, ?>> addedRouteIds1 = createRouteIds();
+
+            Bucket mockBucket = mock(Bucket.class);
+            Address mockAddress = Address.apply("http", "address1");
+            Map<Address, Bucket> remoteBucket = new HashMap<>();
+            remoteBucket.put(mockAddress, mockBucket);
+
+            RoutingTable mockRoutingTable = mock(RoutingTable.class);
+
+            testActorRef.underlyingActor().getLocalBucket().setData(mockRoutingTable);
+
+            when(mockBucket.getData()).thenReturn(mockRoutingTable);
+            when(mockRoutingTable.getRoutes()).thenReturn(com.google.common.collect.Sets.newHashSet(addedRouteIds1));
+            when(mockRoutingTable.contains(addedRouteIds1.get(0))).thenReturn(true);
+
+            rpcReg.tell(new Messages.BucketStoreMessages.UpdateRemoteBuckets(remoteBucket), getRef());
+
+            expectNoMsg();
+        }};
+    }
 }
+
+
+

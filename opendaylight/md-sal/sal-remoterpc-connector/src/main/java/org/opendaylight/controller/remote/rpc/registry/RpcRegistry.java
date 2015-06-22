@@ -8,13 +8,20 @@
 package org.opendaylight.controller.remote.rpc.registry;
 
 import akka.actor.ActorRef;
+import akka.actor.Address;
 import akka.actor.Props;
 import akka.japi.Creator;
 import akka.japi.Option;
 import akka.japi.Pair;
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcIdentifier;
+import org.opendaylight.controller.remote.rpc.RpcManager;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.AddOrUpdateRoutes;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.FindRouters;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.RemoveRoutes;
@@ -25,6 +32,8 @@ import org.opendaylight.controller.remote.rpc.registry.mbeans.RemoteRpcRegistryM
 import org.opendaylight.controller.remote.rpc.registry.mbeans.RemoteRpcRegistryMXBeanImpl;
 import org.opendaylight.controller.sal.connector.api.RpcRouter;
 import org.opendaylight.controller.sal.connector.api.RpcRouter.RouteIdentifier;
+import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
 /**
  * Registry to look up cluster nodes that have registered for a given rpc.
@@ -33,6 +42,8 @@ import org.opendaylight.controller.sal.connector.api.RpcRouter.RouteIdentifier;
  * cluster wide information.
  */
 public class RpcRegistry extends BucketStore<RoutingTable> {
+
+    private Map<String, DOMRpcIdentifier> globalRpcIdentifiers;
 
     public RpcRegistry() {
         getLocalBucket().setData(new RoutingTable());
@@ -54,6 +65,11 @@ public class RpcRegistry extends BucketStore<RoutingTable> {
             receiveRemoveRoutes((RemoveRoutes) message);
         } else if (message instanceof Messages.FindRouters) {
             receiveGetRouter((FindRouters) message);
+        } else if (message instanceof Messages.StoreGlobalRpcsFound) {
+            receiveStoreGlobalRpcsFound((Messages.StoreGlobalRpcsFound) message);
+        } else if (message instanceof org.opendaylight.controller.remote.rpc.registry.gossip.Messages.BucketStoreMessages.UpdateRemoteBuckets) {
+            super.handleReceive(message);
+            registerRoutedRpcDelegate();
         } else {
             super.handleReceive(message);
         }
@@ -114,16 +130,76 @@ public class RpcRegistry extends BucketStore<RoutingTable> {
         getSender().tell(new Messages.FindRoutersReply(routers), getSelf());
     }
 
-    private void findRoutes(RoutingTable table, RpcRouter.RouteIdentifier<?, ?, ?> routeId,
-            List<Pair<ActorRef, Long>> routers) {
+    private void findRoutes(RoutingTable table, RpcRouter.RouteIdentifier<?, ?, ?> routeId, List<Pair<ActorRef, Long>> routers) {
         if (table == null) {
             return;
         }
 
         Option<Pair<ActorRef, Long>> routerWithUpdateTime = table.getRouterFor(routeId);
-        if(!routerWithUpdateTime.isEmpty()) {
+        if (!routerWithUpdateTime.isEmpty()) {
             routers.add(routerWithUpdateTime.get());
         }
+    }
+
+    private void receiveStoreGlobalRpcsFound(Messages.StoreGlobalRpcsFound storeGlobalRpcsFound) {
+        if (this.globalRpcIdentifiers == null) {
+            this.globalRpcIdentifiers = new HashMap<>();
+        }
+        this.globalRpcIdentifiers.putAll(storeGlobalRpcsFound.globalRpcIdentifiers);
+    }
+
+    /**
+     * Registering delegates for remote rpcs present in the remote bucket, both global and routed rpcs.
+     *
+     * We do not register for local rpcs as md-sal rpcregistry would handle the local rpcs
+     */
+    private void registerRoutedRpcDelegate() {
+        Set<DOMRpcIdentifier> domRpcIdentifierSet = new HashSet<>();
+        for(Map.Entry<Address, Bucket<RoutingTable>> entry : getRemoteBuckets().entrySet()) {
+            Address address = entry.getKey();
+            RoutingTable table = entry.getValue().getData();
+            for(RpcRouter.RouteIdentifier<?, ?, ?> route : table.getRoutes()){
+                if (getLocalBucket().getData().contains(route) || isRpcGlobal(route)) {
+                    // on a remote node, we don't want to register ourselves as delegate/provider, if the rpc is present in local-bucket or if the rpc is global
+                    // it will get serviced by md-sal core rpc registry. This can happen if a non-cluster-aware app registers a global rpc in every node.
+                    // this should handle routed-rpc as well, as route-identifier contains type and route
+                    LOG.debug("Found remote in local bucket, so ignoring for rpc registration, route:{}", route);
+                    continue;
+                }
+
+                if(route.getType() != null) {
+                    // we register based on only the type of the rpc and not the route.
+                    // Any routed rpcs  matching the type but not the route, will get routed to remote-rpc-connector
+                    DOMRpcIdentifier domRpcIdentifier = DOMRpcIdentifier.create(SchemaPath.create(true, (QName)route.getType()));
+                    domRpcIdentifierSet.add(domRpcIdentifier);
+                }
+            }
+        }
+
+
+        if (!domRpcIdentifierSet.isEmpty()) {
+            ActorRef registryParent = getContext().parent();
+            Address selfAddress = getContext().provider().getDefaultAddress();
+            // send a message to rpcmanager, since its a light-weight actor, these messages should get processed faster
+            LOG.info("{} Registering remote rpcs with broker:{}", selfAddress, domRpcIdentifierSet);
+            registryParent.tell(new RpcManager.Messages.RegisterRpcImplemenation(domRpcIdentifierSet), self());
+        }
+    }
+
+    private boolean isRpcGlobal(RpcRouter.RouteIdentifier<?, ?, ?> route) {
+        if (globalRpcIdentifiers != null) {
+            // the remote rpc can be a locally registered global rpc, if the type of the rpc matches
+            for (Map.Entry<String, DOMRpcIdentifier> entry : globalRpcIdentifiers.entrySet()) {
+                if (route.getType().equals(entry.getValue().getType())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public Map<String, DOMRpcIdentifier> getGlobalRpcsFromModules() {
+        return this.globalRpcIdentifiers;
     }
 
     /**
@@ -224,6 +300,25 @@ public class RpcRegistry extends BucketStore<RoutingTable> {
             public String toString() {
                 return "FindRoutersReply{" +
                         "routerWithUpdateTime=" + routerWithUpdateTime +
+                        '}';
+            }
+        }
+
+        public static class StoreGlobalRpcsFound {
+            private Map<String, DOMRpcIdentifier> globalRpcIdentifiers;
+
+            public StoreGlobalRpcsFound(Map<String, DOMRpcIdentifier> globalRpcIdentifiers) {
+                this.globalRpcIdentifiers =  globalRpcIdentifiers;
+            }
+
+            public Map<String, DOMRpcIdentifier> getGlobalRpcIdentifiers() {
+                return globalRpcIdentifiers;
+            }
+
+            @Override
+            public String toString() {
+                return "StoreGlobalRpcsFound{" +
+                        "globalRpcIdentifiers=" + globalRpcIdentifiers +
                         '}';
             }
         }

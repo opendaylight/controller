@@ -189,7 +189,7 @@ public class BucketStore<T extends Copier<T>> extends AbstractUntypedActorWithMe
      *                        {@link org.opendaylight.controller.remote.rpc.registry.gossip.Gossiper}
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    void receiveUpdateRemoteBuckets(Map<Address, Bucket> receivedBuckets){
+    protected void receiveUpdateRemoteBuckets(Map<Address, Bucket> receivedBuckets){
         log.debug("{}: receiveUpdateRemoteBuckets: {}", selfAddress, receivedBuckets);
         if (receivedBuckets == null || receivedBuckets.isEmpty())
          {
@@ -201,13 +201,7 @@ public class BucketStore<T extends Copier<T>> extends AbstractUntypedActorWithMe
 
         for (Map.Entry<Address, Bucket> entry : receivedBuckets.entrySet()){
 
-            Long localVersion = versions.get(entry.getKey());
-            if (localVersion == null) {
-                localVersion = NO_VERSION;
-            }
-
             Bucket<T> receivedBucket = entry.getValue();
-
             if (receivedBucket == null) {
                 continue;
             }
@@ -215,6 +209,12 @@ public class BucketStore<T extends Copier<T>> extends AbstractUntypedActorWithMe
             Long remoteVersion = receivedBucket.getVersion();
             if (remoteVersion == null) {
                 remoteVersion = NO_VERSION;
+            }
+
+
+            Long localVersion = versions.get(entry.getKey());
+            if (localVersion == null) {
+                localVersion = NO_VERSION;
             }
 
             //update only if remote version is newer
