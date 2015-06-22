@@ -2,6 +2,7 @@ package org.opendaylight.controller.remote.rpc.registry.mbeans;
 
 import akka.actor.Address;
 import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcIdentifier;
 import org.opendaylight.controller.remote.rpc.registry.RoutingTable;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry;
 import org.opendaylight.controller.remote.rpc.registry.gossip.Bucket;
@@ -37,11 +38,17 @@ public class RemoteRpcRegistryMXBeanImpl extends AbstractMXBean implements Remot
 
     @Override
     public Set<String> getGlobalRpc() {
+        Map<String, DOMRpcIdentifier> globalRpcsFromModules = rpcRegistry.getGlobalRpcsFromModules();
         RoutingTable table = rpcRegistry.getLocalBucket().getData();
         Set<String> globalRpc = new HashSet<>(table.getRoutes().size());
         for(RpcRouter.RouteIdentifier<?, ?, ?> route : table.getRoutes()){
-            if(route.getRoute() == null) {
-                globalRpc.add(route.getType() != null ? route.getType().toString() : NULL_CONSTANT);
+            if(route.getType() != null && globalRpcsFromModules.containsKey(route.getType().toString())) {
+                StringBuilder builder = new StringBuilder();
+                if (route.getRoute() != null) {
+                    builder.append(ROUTE_CONSTANT).append(route.getRoute().toString());
+                }
+                builder.append(NAME_CONSTANT).append(route.getType() != null ? route.getType().toString() : NULL_CONSTANT);
+                globalRpc.add(builder.toString());
             }
         }
         if(log.isDebugEnabled()) {
@@ -52,13 +59,19 @@ public class RemoteRpcRegistryMXBeanImpl extends AbstractMXBean implements Remot
 
     @Override
     public Set<String> getLocalRegisteredRoutedRpc() {
+        Map<String, DOMRpcIdentifier> globalRpcsFromModules = rpcRegistry.getGlobalRpcsFromModules();
         RoutingTable table = rpcRegistry.getLocalBucket().getData();
         Set<String> routedRpc = new HashSet<>(table.getRoutes().size());
         for(RpcRouter.RouteIdentifier<?, ?, ?> route : table.getRoutes()){
-            if(route.getRoute() != null) {
+            if(route.getRoute() != null ) {
+                if(route.getType() != null && globalRpcsFromModules.containsKey(route.getType().toString())) {
+                    // it is  global rpc, so skip
+                    continue;
+                }
                 StringBuilder builder = new StringBuilder(ROUTE_CONSTANT);
-                builder.append(route.getRoute().toString()).append(NAME_CONSTANT).append(route.getType() != null ?
-                    route.getType().toString() : NULL_CONSTANT);
+                builder.append(route.getRoute().toString())
+                        .append(NAME_CONSTANT)
+                        .append(route.getType() != null ? route.getType().toString() : NULL_CONSTANT);
                 routedRpc.add(builder.toString());
             }
         }

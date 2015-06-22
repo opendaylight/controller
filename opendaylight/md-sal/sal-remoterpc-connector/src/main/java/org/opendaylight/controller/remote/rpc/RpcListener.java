@@ -33,7 +33,11 @@ public class RpcListener implements DOMRpcAvailabilityListener{
 
     @Override
     public void onRpcAvailable(@Nonnull final Collection<DOMRpcIdentifier> rpcs) {
-        Preconditions.checkArgument(rpcs != null, "Input Collection of DOMRpcIdentifier can not be null.");
+        Preconditions.checkArgument(rpcs != null, "DomRpcIdentifier Collection of onRpcAvailable can not be null");
+        if (rpcs.isEmpty()) {
+            LOG.debug("DomRpcIdentifier Collection of onRpcAvailable is empty");
+            return;
+        }
         if (LOG.isDebugEnabled()) {
             LOG.debug("Adding registration for [{}]", rpcs);
         }

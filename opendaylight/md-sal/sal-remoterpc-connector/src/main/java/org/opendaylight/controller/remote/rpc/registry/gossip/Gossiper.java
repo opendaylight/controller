@@ -169,7 +169,7 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
 
         clusterMembers.remove(member.address());
         if(log.isDebugEnabled()) {
-            log.debug("Removed member [{}], Active member list [{}]", member.address(), clusterMembers);
+            log.debug("{} Removed member [{}], Active member list [{}]", selfAddress, member.address(), clusterMembers);
         }
     }
 
@@ -187,7 +187,7 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
             clusterMembers.add(member.address());
         }
         if(log.isDebugEnabled()) {
-            log.debug("Added member [{}], Active member list [{}]", member.address(), clusterMembers);
+            log.debug("{} Added member [{}], Active member list [{}]", selfAddress, member.address(), clusterMembers);
         }
     }
 
@@ -210,8 +210,8 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
             Integer randomIndex = ThreadLocalRandom.current().nextInt(0, clusterMembers.size());
             remoteMemberToGossipTo = clusterMembers.get(randomIndex);
         }
-        if(log.isTraceEnabled()) {
-            log.trace("Gossiping to [{}]", remoteMemberToGossipTo);
+        if(log.isDebugEnabled()) {
+            log.debug("{} Gossiping to [{}]", selfAddress, remoteMemberToGossipTo);
         }
         getLocalStatusAndSendTo(remoteMemberToGossipTo);
     }
@@ -251,8 +251,8 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
     void receiveGossip(GossipEnvelope envelope){
         //TODO: Add more validations
         if (!selfAddress.equals(envelope.to())) {
-            if(log.isTraceEnabled()) {
-                log.trace("Ignoring message intended for someone else. From [{}] to [{}]", envelope.from(), envelope.to());
+            if(log.isDebugEnabled()) {
+                log.debug("{} Ignoring message intended for someone else. From [{}] to [{}]", selfAddress, envelope.from(), envelope.to());
             }
             return;
         }
@@ -300,8 +300,8 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
         ActorSelection remoteRef = getContext().system().actorSelection(
                 remoteActorSystemAddress.toString() + getSelf().path().toStringWithoutAddress());
 
-        if(log.isTraceEnabled()) {
-            log.trace("Sending bucket versions to [{}]", remoteRef);
+        if(log.isDebugEnabled()) {
+            log.debug("{} Sending bucket versions to [{}]", selfAddress, remoteRef);
         }
 
         futureReply.map(getMapperToSendLocalStatus(remoteRef), getContext().dispatcher());
