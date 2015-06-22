@@ -19,6 +19,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -88,6 +89,9 @@ import org.opendaylight.controller.config.yang.test.impl.Peers;
 import org.opendaylight.controller.config.yang.test.impl.TestImplModuleFactory;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorSeverity;
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorTag;
+import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorType;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.Commit;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.DiscardChanges;
@@ -280,6 +284,21 @@ public class NetconfMappingTest extends AbstractConfigTest {
         assertCorrectServiceNames(config, Sets.newHashSet("user_to_instance_from_code", "ref_dep_user",
                 "ref_dep_user_two", "ref_from_code_to_instance-from-code_dep_1",
                 "ref_from_code_to_instance-from-code_1", "ref_dep_user_another"));
+
+        edit("netconfMessages/editConfig_removeServiceNameOnTest.xml");
+        config = getConfigCandidate();
+        assertCorrectServiceNames(config, Sets.newHashSet("user_to_instance_from_code", "ref_dep_user",
+                "ref_dep_user_two", "ref_from_code_to_instance-from-code_dep_1",
+                "ref_from_code_to_instance-from-code_1"));
+
+        try {
+            edit("netconfMessages/editConfig_removeServiceNameOnTest.xml");
+            fail("Should've failed, non-existing service instance");
+        } catch (NetconfDocumentedException e) {
+            assertEquals(e.getErrorSeverity(), ErrorSeverity.error);
+            assertEquals(e.getErrorTag(), ErrorTag.operation_failed);
+            assertEquals(e.getErrorType(), ErrorType.application);
+        }
 
         edit("netconfMessages/editConfig_replace_default.xml");
         config = getConfigCandidate();
@@ -619,7 +638,32 @@ public class NetconfMappingTest extends AbstractConfigTest {
 
     @Test
     public void testEx2() throws Exception {
+        //check abort before tx creation
         assertContainsElement(discard(), readXmlToElement("<ok xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\"/>"));
+
+        //check abort after tx creation
+        edit("netconfMessages/editConfig.xml");
+        assertContainsElement(discard(), readXmlToElement("<ok xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\"/>"));
+    }
+
+    @Test
+    public void testFailedDiscardChangesAbort() throws Exception {
+
+        TransactionProvider mockedTxProvider = mock(TransactionProvider.class);
+        doThrow(new RuntimeException("Mocked runtime exception, Abort has to fail")).when(mockedTxProvider).abortTransaction();
+        doReturn(Optional.of(ObjectName.getInstance("dummyDomain", "DummyKey", "DummyValue"))).when(mockedTxProvider).getTransaction();
+
+        DiscardChanges discardOp = new DiscardChanges(mockedTxProvider, configRegistryClient, NETCONF_SESSION_ID);
+
+        try {
+            executeOp(discardOp, "netconfMessages/discardChanges.xml");
+            fail("Should've failed, abort on mocked is supposed to throw RuntimeException");
+        } catch (NetconfDocumentedException e) {
+            assertTrue(e.getErrorTag() == ErrorTag.operation_failed);
+            assertTrue(e.getErrorSeverity() == ErrorSeverity.error);
+            assertTrue(e.getErrorType() == ErrorType.application);
+        }
+
     }
 
     private Document discard() throws ParserConfigurationException, SAXException, IOException, NetconfDocumentedException {
