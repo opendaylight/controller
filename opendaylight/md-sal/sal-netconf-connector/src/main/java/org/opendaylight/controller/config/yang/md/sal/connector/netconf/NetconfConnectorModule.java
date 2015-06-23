@@ -131,7 +131,7 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
         final BindingAwareBroker bindingBroker = getBindingRegistryDependency();
 
         RemoteDeviceHandler<NetconfSessionPreferences> salFacade
-                = new NetconfDeviceSalFacade(id, domBroker, bindingBroker, bundleContext, getDefaultRequestTimeoutMillis());
+                = new NetconfDeviceSalFacade(id, domBroker, bindingBroker, getDefaultRequestTimeoutMillis());
 
         final Long keepaliveDelay = getKeepaliveDelay();
         if(shouldSendKeepalive()) {
@@ -184,10 +184,6 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
                 yangModuleCapabilitiesJmxAttribute);
 
         return Optional.of(parsedOverrideCapabilities);
-    }
-
-    public void setBundleContext(final BundleContext bundleContext) {
-        this.bundleContext = bundleContext;
     }
 
     public NetconfReconnectingClientConfiguration getClientConfig(final NetconfDeviceCommunicator listener) {

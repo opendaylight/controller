@@ -8,7 +8,6 @@
 package org.opendaylight.controller.sal.connect.netconf.sal;
 
 import com.google.common.collect.Lists;
-import java.util.Collections;
 import java.util.List;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMNotification;
@@ -19,9 +18,7 @@ import org.opendaylight.controller.sal.connect.netconf.listener.NetconfDeviceCap
 import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionPreferences;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
 import org.opendaylight.controller.sal.core.api.Broker;
-import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,16 +32,16 @@ public final class NetconfDeviceSalFacade implements AutoCloseable, RemoteDevice
 
     private final List<AutoCloseable> salRegistrations = Lists.newArrayList();
 
-    public NetconfDeviceSalFacade(final RemoteDeviceId id, final Broker domBroker, final BindingAwareBroker bindingBroker, final BundleContext bundleContext, long defaultRequestTimeoutMillis) {
+    public NetconfDeviceSalFacade(final RemoteDeviceId id, final Broker domBroker, final BindingAwareBroker bindingBroker, long defaultRequestTimeoutMillis) {
         this.id = id;
         this.salProvider = new NetconfDeviceSalProvider(id);
         this.defaultRequestTimeoutMillis = defaultRequestTimeoutMillis;
-        registerToSal(domBroker, bindingBroker, bundleContext);
+        registerToSal(domBroker, bindingBroker);
     }
 
-    public void registerToSal(final Broker domRegistryDependency, final BindingAwareBroker bindingBroker, final BundleContext bundleContext) {
-        domRegistryDependency.registerProvider(salProvider, bundleContext);
-        bindingBroker.registerProvider(salProvider, bundleContext);
+    public void registerToSal(final Broker domRegistryDependency, final BindingAwareBroker bindingBroker) {
+        domRegistryDependency.registerProvider(salProvider);
+        bindingBroker.registerProvider(salProvider);
     }
 
     @Override
@@ -60,24 +57,19 @@ public final class NetconfDeviceSalFacade implements AutoCloseable, RemoteDevice
 
         final NetconfDeviceNotificationService notificationService = new NetconfDeviceNotificationService();
 
-        salProvider.getMountInstance().onDeviceConnected(schemaContext, domBroker, deviceRpc, notificationService);
-        salProvider.getDatastoreAdapter().updateDeviceState(true, netconfSessionPreferences.getModuleBasedCaps());
         salProvider.getMountInstance().onTopologyDeviceConnected(schemaContext, domBroker, deviceRpc, notificationService);
         salProvider.getTopologyDatastoreAdapter().updateDeviceData(true, netconfSessionPreferences.getNetconfDeviceCapabilities());
     }
 
     @Override
     public synchronized void onDeviceDisconnected() {
-        salProvider.getDatastoreAdapter().updateDeviceState(false, Collections.<QName>emptySet());
         salProvider.getTopologyDatastoreAdapter().updateDeviceData(false, new NetconfDeviceCapabilities());
-        salProvider.getMountInstance().onDeviceDisconnected();
         salProvider.getMountInstance().onTopologyDeviceDisconnected();
     }
 
     @Override
     public synchronized void onDeviceFailed(final Throwable throwable) {
         salProvider.getTopologyDatastoreAdapter().setDeviceAsFailed(throwable);
-        salProvider.getMountInstance().onDeviceDisconnected();
         salProvider.getMountInstance().onTopologyDeviceDisconnected();
     }
 
