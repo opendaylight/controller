@@ -193,9 +193,8 @@ public class NetconfDeviceSimulator implements Closeable {
         return sourceToBuilder;
     }
 
-
     public List<Integer> start(final Main.Params params) {
-        LOG.info("Starting {}, {} simulated devices starting on port {}", params.deviceCount, params.ssh ? "SSH" : "TCP", params.startingPort);
+        LOG.info("Starting {}, {} simulated devices starting on port {}, ports {}", params.deviceCount, params.ssh ? "SSH" : "TCP", params.startingPort, params.portCount);
 
         final Map<ModuleBuilder, String> moduleBuilders = parseSchemasToModuleBuilders(params);
 
@@ -203,12 +202,19 @@ public class NetconfDeviceSimulator implements Closeable {
 
         int currentPort = params.startingPort;
 
+        int portsToOpen = params.deviceCount;
+
+        if(params.portCount > 0 ){
+            portsToOpen = params.portCount;
+        }
+
         final List<Integer> openDevices = Lists.newArrayList();
 
         // Generate key to temp folder
         final PEMGeneratorHostKeyProvider keyPairProvider = getPemGeneratorHostKeyProvider();
 
-        for (int i = 0; i < params.deviceCount; i++) {
+        for(int i = 0; i < portsToOpen; i++) {
+        //for (int i = 0; i < params.deviceCount; i++) {
             if (currentPort > 65535) {
                 LOG.warn("Port cannot be greater than 65535, stopping further attempts.");
                 break;
