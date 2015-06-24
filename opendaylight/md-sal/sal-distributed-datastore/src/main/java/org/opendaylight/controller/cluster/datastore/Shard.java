@@ -372,9 +372,9 @@ public class Shard extends RaftActor {
 
             LOG.error("{}: An exception occurred while committing transaction {}", persistenceId(), transactionID, e);
             shardMBean.incrementFailedTransactionsCount();
+        } finally {
+            commitCoordinator.currentTransactionComplete(transactionID, true);
         }
-
-        commitCoordinator.currentTransactionComplete(transactionID, true);
     }
 
     private void handleCanCommitTransaction(CanCommitTransaction canCommit) {

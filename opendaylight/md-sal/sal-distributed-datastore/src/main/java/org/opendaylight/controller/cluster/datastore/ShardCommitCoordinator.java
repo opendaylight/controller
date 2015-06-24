@@ -7,6 +7,10 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import akka.actor.ActorRef;
+import akka.actor.Status;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.ExecutionException;
@@ -17,10 +21,6 @@ import org.opendaylight.controller.cluster.datastore.modification.Modification;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import akka.actor.ActorRef;
-import akka.actor.Status;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 
 /**
  * Coordinates commits for a shard ensuring only one concurrent 3-phase commit.
@@ -206,6 +206,7 @@ public class ShardCommitCoordinator {
             // Dequeue the next cohort entry waiting in the queue.
             currentCohortEntry = queuedCohortEntries.poll();
             if(currentCohortEntry != null) {
+                currentCohortEntry.updateLastAccessTime();
                 doCanCommit(currentCohortEntry);
             }
         }

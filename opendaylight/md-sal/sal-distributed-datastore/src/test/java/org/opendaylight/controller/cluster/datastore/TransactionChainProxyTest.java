@@ -75,4 +75,32 @@ public class TransactionChainProxyTest {
 
         Assert.assertNotEquals(one.getTransactionChainId(), two.getTransactionChainId());
     }
+
+    @Test
+    public void testRateLimitingUsedInReadWriteTxCreation(){
+        TransactionChainProxy txChainProxy = new TransactionChainProxy(actorContext);
+
+        txChainProxy.newReadWriteTransaction();
+
+        verify(actorContext, times(1)).acquireTxCreationPermit();
+    }
+
+    @Test
+    public void testRateLimitingUsedInWriteOnlyTxCreation(){
+        TransactionChainProxy txChainProxy = new TransactionChainProxy(actorContext);
+
+        txChainProxy.newWriteOnlyTransaction();
+
+        verify(actorContext, times(1)).acquireTxCreationPermit();
+    }
+
+
+    @Test
+    public void testRateLimitingNotUsedInReadOnlyTxCreation(){
+        TransactionChainProxy txChainProxy = new TransactionChainProxy(actorContext);
+
+        txChainProxy.newReadOnlyTransaction();
+
+        verify(actorContext, times(0)).acquireTxCreationPermit();
+    }
 }
