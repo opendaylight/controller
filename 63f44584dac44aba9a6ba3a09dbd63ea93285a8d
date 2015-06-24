@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a7fa997_c3b6a08a",
+        "filename": "opendaylight/commons/opendaylight/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-06-24T13:53:14Z",
+      "side": 1,
+      "message": "why are these two packages not among skippedModules? Whats the difference between exclusions and skippedModules ?",
+      "range": {
+        "startLine": 158,
+        "startChar": 11,
+        "endLine": 158,
+        "endChar": 21
+      },
+      "revId": "63f44584dac44aba9a6ba3a09dbd63ea93285a8d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
