@@ -104,11 +104,13 @@ public class TransactionChainProxy implements DOMStoreTransactionChain {
 
     @Override
     public DOMStoreReadWriteTransaction newReadWriteTransaction() {
+        actorContext.acquireTxCreationPermit();
         return allocateWriteTransaction(TransactionProxy.TransactionType.READ_WRITE);
     }
 
     @Override
     public DOMStoreWriteTransaction newWriteOnlyTransaction() {
+        actorContext.acquireTxCreationPermit();
         return allocateWriteTransaction(TransactionProxy.TransactionType.WRITE_ONLY);
     }
 

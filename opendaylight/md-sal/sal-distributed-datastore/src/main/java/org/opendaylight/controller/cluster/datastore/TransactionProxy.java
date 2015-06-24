@@ -467,7 +467,8 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
      */
     protected Future<Object> sendCreateTransaction(ActorSelection shard,
             Object serializedCreateMessage) {
-        return actorContext.executeOperationAsync(shard, serializedCreateMessage);
+        return actorContext.executeOperationAsync(shard, serializedCreateMessage,
+                actorContext.getTransactionCommitOperationTimeout());
     }
 
     @Override
@@ -668,7 +669,12 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
                     LOG.debug("Tx {} Creating NoOpTransaction because of error: {}", identifier,
                             failure.getMessage());
 
-                    localTransactionContext = new NoOpTransactionContext(failure, identifier);
+                    Throwable resultingEx = failure;
+                    if(!(failure instanceof NoShardLeaderException)) {
+                        resultingEx = new Exception(String.format(
+                            "Error creating %s transaction on shard %s", transactionType, shardName), failure);
+                    }
+                    localTransactionContext = new NoOpTransactionContext(resultingEx, identifier);
                 } else if (response.getClass().equals(CreateTransactionReply.SERIALIZABLE_CLASS)) {
                     localTransactionContext = createValidTransactionContext(
                             CreateTransactionReply.fromSerializable(response));

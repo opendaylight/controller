@@ -1,16 +1,35 @@
 package org.opendaylight.controller.cluster.datastore;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.argThat;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.isA;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.opendaylight.controller.cluster.datastore.TransactionProxy.TransactionType.READ_ONLY;
+import static org.opendaylight.controller.cluster.datastore.TransactionProxy.TransactionType.READ_WRITE;
+import static org.opendaylight.controller.cluster.datastore.TransactionProxy.TransactionType.WRITE_ONLY;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.dispatch.Futures;
 import akka.testkit.JavaTestKit;
+import akka.util.Timeout;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -50,24 +69,6 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
-import java.io.IOException;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.argThat;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.isA;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.opendaylight.controller.cluster.datastore.TransactionProxy.TransactionType.READ_ONLY;
-import static org.opendaylight.controller.cluster.datastore.TransactionProxy.TransactionType.READ_WRITE;
-import static org.opendaylight.controller.cluster.datastore.TransactionProxy.TransactionType.WRITE_ONLY;
 
 @SuppressWarnings("resource")
 public class TransactionProxyTest {
@@ -356,7 +357,7 @@ public class TransactionProxyTest {
 
         doReturn(Futures.successful(createTransactionReply(actorRef, transactionVersion))).when(mockActorContext).
                 executeOperationAsync(eq(actorSystem.actorSelection(actorRef.path())),
-                        eqCreateTransaction(memberName, type));
+                        eqCreateTransaction(memberName, type), any(Timeout.class));
 
         doReturn(false).when(mockActorContext).isPathLocal(actorRef.path().toString());
 
@@ -375,7 +376,11 @@ public class TransactionProxyTest {
             future.checkedGet(5, TimeUnit.SECONDS);
             fail("Expected ReadFailedException");
         } catch(ReadFailedException e) {
-            throw e.getCause();
+            if(e.getCause().getCause() != null) {
+                throw e.getCause().getCause();
+            } else {
+                throw e.getCause();
+            }
         }
     }
 
@@ -444,7 +449,7 @@ public class TransactionProxyTest {
         }
 
         doReturn(Futures.failed(exToThrow)).when(mockActorContext).executeOperationAsync(
-                any(ActorSelection.class), any());
+                any(ActorSelection.class), any(), any(Timeout.class));
 
         TransactionProxy transactionProxy = new TransactionProxy(mockActorContext, READ_ONLY);
 
@@ -551,7 +556,8 @@ public class TransactionProxyTest {
             when(mockActorContext).findPrimaryShardAsync(eq(DefaultShardStrategy.DEFAULT_SHARD));
 
         doReturn(Futures.successful(new Object())).when(mockActorContext).executeOperationAsync(
-            eq(getSystem().actorSelection(actorRef.path())), eqCreateTransaction(memberName, READ_ONLY));
+            eq(getSystem().actorSelection(actorRef.path())), eqCreateTransaction(memberName, READ_ONLY),
+            any(Timeout.class));
 
         TransactionProxy transactionProxy = new TransactionProxy(mockActorContext, READ_ONLY);
 
@@ -1067,7 +1073,7 @@ public class TransactionProxyTest {
 
         doReturn(Futures.successful(createTransactionReply)).when(mockActorContext).
             executeOperationAsync(eq(actorSystem.actorSelection(shardActorRef.path())),
-                eqCreateTransaction(memberName, READ_ONLY));
+                eqCreateTransaction(memberName, READ_ONLY), any(Timeout.class));
 
         doReturn(true).when(mockActorContext).isPathLocal(actorPath);
 
@@ -1122,7 +1128,7 @@ public class TransactionProxyTest {
 
         doReturn(Futures.successful(createTransactionReply)).when(mockActorContext).
         executeOperationAsync(eq(actorSystem.actorSelection(shardActorRef.path())),
-                eqCreateTransaction(memberName, WRITE_ONLY));
+                eqCreateTransaction(memberName, WRITE_ONLY), any(Timeout.class));
 
         doReturn(true).when(mockActorContext).isPathLocal(actorPath);
 
