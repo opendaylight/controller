@@ -60,6 +60,19 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
                     ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build());
 
             cleanup(dataStore);
+        }
+
+        {
+            DistributedDataStore dataStore =
+                    setupDistributedDataStore("transactionIntegrationTest", "test-1");
+
+            testWriteTransaction(dataStore, TestModel.TEST_PATH,
+                    ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+
+            testWriteTransaction(dataStore, TestModel.OUTER_LIST_PATH,
+                    ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build());
+
+            cleanup(dataStore);
         }};
     }
 
@@ -235,6 +248,97 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
             assertEquals("isPresent", false, optional.isPresent());
 
             cleanup(dataStore);
+        }
+
+        @Test
+        public void testTransactionWritesWithShardNotInitiallyReady() throws Exception{
+            new IntegrationTestKit(getSystem()) {{
+                String testName = "testTransactionWritesWithShardNotInitiallyReady";
+                String shardName = "test-1";
+
+                // Setup the InMemoryJournal to block shard recovery to ensure the shard isn't
+                // initialized until we create and submit the write the Tx.
+                String persistentID = String.format("member-1-shard-%s-%s", shardName, testName);
+                CountDownLatch blockRecoveryLatch = new CountDownLatch(1);
+                InMemoryJournal.addBlockReadMessagesLatch(persistentID, blockRecoveryLatch);
+
+                DistributedDataStore dataStore = setupDistributedDataStore(testName, false, shardName);
+
+                // Create the write Tx
+
+                final DOMStoreWriteTransaction writeTx = dataStore.newWriteOnlyTransaction();
+                assertNotNull("newReadWriteTransaction returned null", writeTx);
+
+                // Do some modification operations and ready the Tx on a separate thread.
+
+                final YangInstanceIdentifier listEntryPath = YangInstanceIdentifier.builder(
+                        TestModel.OUTER_LIST_PATH).nodeWithKey(TestModel.OUTER_LIST_QNAME,
+                                TestModel.ID_QNAME, 1).build();
+
+                final AtomicReference<DOMStoreThreePhaseCommitCohort> txCohort = new AtomicReference<>();
+                final AtomicReference<Exception> caughtEx = new AtomicReference<>();
+                final CountDownLatch txReady = new CountDownLatch(1);
+                Thread txThread = new Thread() {
+                    @Override
+                    public void run() {
+                        try {
+                            writeTx.write(TestModel.TEST_PATH,
+                                    ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+
+                            writeTx.merge(TestModel.OUTER_LIST_PATH, ImmutableNodes.mapNodeBuilder(
+                                    TestModel.OUTER_LIST_QNAME).build());
+
+                            writeTx.write(listEntryPath, ImmutableNodes.mapEntry(
+                                    TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 1));
+
+                            writeTx.delete(listEntryPath);
+
+                            txCohort.set(writeTx.ready());
+                        } catch(Exception e) {
+                            caughtEx.set(e);
+                            return;
+                        } finally {
+                            txReady.countDown();
+                        }
+                    }
+                };
+
+                txThread.start();
+
+                // Wait for the Tx operations to complete.
+
+                boolean done = Uninterruptibles.awaitUninterruptibly(txReady, 5, TimeUnit.SECONDS);
+                if(caughtEx.get() != null) {
+                    throw caughtEx.get();
+                }
+
+                assertEquals("Tx ready", true, done);
+
+                // At this point the Tx operations should be waiting for the shard to initialize so
+                // trigger the latch to let the shard recovery to continue.
+
+                blockRecoveryLatch.countDown();
+
+                // Wait for the Tx commit to complete.
+
+                doCommit(txCohort.get());
+
+                // Verify the data in the store
+
+                DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
+
+                Optional<NormalizedNode<?, ?>> optional = readTx.read(TestModel.TEST_PATH).
+                        get(5, TimeUnit.SECONDS);
+                assertEquals("isPresent", true, optional.isPresent());
+
+                optional = readTx.read(TestModel.OUTER_LIST_PATH).get(5, TimeUnit.SECONDS);
+                assertEquals("isPresent", true, optional.isPresent());
+
+                optional = readTx.read(listEntryPath).get(5, TimeUnit.SECONDS);
+                assertEquals("isPresent", false, optional.isPresent());
+
+                cleanup(dataStore);
+            }};
         }};
     }
 
@@ -373,7 +477,11 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
             try {
                 txCohort.get().canCommit().get(5, TimeUnit.SECONDS);
             } catch(ExecutionException e) {
-                throw e.getCause();
+                if(e.getCause().getCause() != null) {
+                    throw e.getCause().getCause();
+                } else {
+                    throw e.getCause();
+                }
             } finally {
                 blockRecoveryLatch.countDown();
                 cleanup(dataStore);
@@ -446,7 +554,11 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
             try {
                 txReadFuture.get().checkedGet(5, TimeUnit.SECONDS);
             } catch(ReadFailedException e) {
-                throw e.getCause();
+                if(e.getCause().getCause() != null) {
+                    throw e.getCause().getCause();
+                } else {
+                    throw e.getCause();
+                }
             } finally {
                 blockRecoveryLatch.countDown();
                 cleanup(dataStore);

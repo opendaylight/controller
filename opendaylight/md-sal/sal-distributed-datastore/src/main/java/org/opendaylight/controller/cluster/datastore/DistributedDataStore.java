@@ -12,6 +12,7 @@ import akka.actor.ActorSystem;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardManagerIdentifier;
+import org.opendaylight.controller.cluster.datastore.jmx.mbeans.DatastoreInfoMXBeanImpl;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
@@ -39,6 +40,8 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
 
     private final ActorContext actorContext;
 
+    private DatastoreInfoMXBeanImpl datastoreInfoMXBean;
+
     public DistributedDataStore(ActorSystem actorSystem, String type, ClusterWrapper cluster,
             Configuration configuration, DatastoreContext datastoreContext) {
         Preconditions.checkNotNull(actorSystem, "actorSystem should not be null");
@@ -55,6 +58,9 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
                 ShardManager.props(type, cluster, configuration, datastoreContext)
                     .withMailbox(ActorContext.MAILBOX), shardManagerId ),
                 cluster, configuration, datastoreContext);
+
+        datastoreInfoMXBean = new DatastoreInfoMXBeanImpl(datastoreContext.getDataStoreMXBeanType(), actorContext);
+        datastoreInfoMXBean.registerMBean();
     }
 
     public DistributedDataStore(ActorContext actorContext) {
@@ -94,11 +100,13 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
 
     @Override
     public DOMStoreWriteTransaction newWriteOnlyTransaction() {
+        actorContext.acquireTxCreationPermit();
         return new TransactionProxy(actorContext, TransactionProxy.TransactionType.WRITE_ONLY);
     }
 
     @Override
     public DOMStoreReadWriteTransaction newReadWriteTransaction() {
+        actorContext.acquireTxCreationPermit();
         return new TransactionProxy(actorContext, TransactionProxy.TransactionType.READ_WRITE);
     }
 
@@ -109,6 +117,7 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener, Au
 
     @Override
     public void close() throws Exception {
+        datastoreInfoMXBean.unregisterMBean();
         actorContext.shutdown();
     }
 

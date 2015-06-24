@@ -39,7 +39,7 @@ public class DistributedOperationalDataStoreProviderModule extends
         }
 
         DatastoreContext datastoreContext = DatastoreContext.newBuilder()
-                .dataStoreMXBeanType("DistributedOperationalDatastore")
+                .dataStoreType("operational")
                 .dataStoreProperties(InMemoryDOMDataStoreConfigProperties.create(
                         props.getMaxShardDataChangeExecutorPoolSize().getValue().intValue(),
                         props.getMaxShardDataChangeExecutorQueueSize().getValue().intValue(),
@@ -65,6 +65,7 @@ public class DistributedOperationalDataStoreProviderModule extends
                 .shardIsolatedLeaderCheckIntervalInMillis(
                     props.getShardIsolatedLeaderCheckIntervalInMillis().getValue())
                 .shardElectionTimeoutFactor(props.getShardElectionTimeoutFactor().getValue())
+                .transactionCreationInitialRateLimit(props.getTransactionCreationInitialRateLimit().getValue())
                 .build();
 
         return DistributedDataStoreFactory.createInstance("operational",
