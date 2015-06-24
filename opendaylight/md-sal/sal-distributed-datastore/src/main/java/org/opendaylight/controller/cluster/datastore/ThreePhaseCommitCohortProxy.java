@@ -15,6 +15,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
+import java.util.Collections;
+import java.util.List;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransaction;
@@ -27,8 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
 import scala.runtime.AbstractFunction1;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * ThreePhaseCommitCohortProxy represents a set of remote cohort proxies
@@ -152,7 +152,8 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
                 LOG.debug("Tx {}: Sending {} to cohort {}", transactionId, message, cohort);
             }
 
-            futureList.add(actorContext.executeOperationAsync(cohort, message));
+            futureList.add(actorContext.executeOperationAsync(cohort, message,
+                    actorContext.getTransactionCommitOperationTimeout()));
         }
 
         return Futures.sequence(futureList, actorContext.getActorSystem().dispatcher());
@@ -179,12 +180,21 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
 
     @Override
     public ListenableFuture<Void> commit() {
+        OperationCallback operationCallback = cohortFutures.isEmpty() ? OperationCallback.NO_OP_CALLBACK :
+            new TransactionRateLimitingCallback(actorContext);
+
         return voidOperation("commit",  new CommitTransaction(transactionId).toSerializable(),
-                CommitTransactionReply.SERIALIZABLE_CLASS, true);
+                CommitTransactionReply.SERIALIZABLE_CLASS, true, operationCallback);
     }
 
     private ListenableFuture<Void> voidOperation(final String operationName, final Object message,
             final Class<?> expectedResponseClass, final boolean propagateException) {
+        return voidOperation(operationName, message, expectedResponseClass, propagateException,
+                OperationCallback.NO_OP_CALLBACK);
+    }
+
+    private ListenableFuture<Void> voidOperation(final String operationName, final Object message,
+            final Class<?> expectedResponseClass, final boolean propagateException, final OperationCallback callback) {
 
         if(LOG.isDebugEnabled()) {
             LOG.debug("Tx {} {}", transactionId, operationName);
@@ -196,7 +206,7 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
 
         if(cohorts != null) {
             finishVoidOperation(operationName, message, expectedResponseClass, propagateException,
-                    returnFuture);
+                    returnFuture, callback);
         } else {
             buildCohortList().onComplete(new OnComplete<Void>() {
                 @Override
@@ -213,7 +223,7 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
                         }
                     } else {
                         finishVoidOperation(operationName, message, expectedResponseClass,
-                                propagateException, returnFuture);
+                                propagateException, returnFuture, callback);
                     }
                 }
             }, actorContext.getActorSystem().dispatcher());
@@ -224,10 +234,13 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
 
     private void finishVoidOperation(final String operationName, final Object message,
             final Class<?> expectedResponseClass, final boolean propagateException,
-            final SettableFuture<Void> returnFuture) {
+            final SettableFuture<Void> returnFuture, final OperationCallback callback) {
         if(LOG.isDebugEnabled()) {
             LOG.debug("Tx {} finish {}", transactionId, operationName);
         }
+
+        callback.run();
+
         Future<Iterable<Object>> combinedFuture = invokeCohorts(message);
 
         combinedFuture.onComplete(new OnComplete<Iterable<Object>>() {
@@ -265,11 +278,15 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
                         }
                         returnFuture.set(null);
                     }
+
+                    callback.failure();
                 } else {
                     if(LOG.isDebugEnabled()) {
                         LOG.debug("Tx {}: {} succeeded", transactionId, operationName);
                     }
                     returnFuture.set(null);
+
+                    callback.success();
                 }
             }
         }, actorContext.getActorSystem().dispatcher());
