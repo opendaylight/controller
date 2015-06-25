@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a7fa997_e9d61dc5",
+        "filename": "opendaylight/netconf/netconf-netty-util/src/main/java/org/opendaylight/controller/netconf/nettyutil/handler/SAX2DOM.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-06-25T07:38:37Z",
+      "side": 1,
+      "message": "This is incorrect ... xmlns attribute defining default namespace has to be added as well.",
+      "range": {
+        "startLine": 86,
+        "startChar": 15,
+        "endLine": 86,
+        "endChar": 21
+      },
+      "revId": "32e3f22f72e65791ef564fc2b34d85a434de37fd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
