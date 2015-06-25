@@ -47,6 +47,7 @@ import org.opendaylight.controller.md.sal.common.api.data.OptimisticLockFailedEx
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
+import org.opendaylight.controller.md.sal.dom.api.DOMRpcImplementationNotAvailableException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 import org.opendaylight.controller.md.sal.dom.spi.DefaultDOMRpcResult;
@@ -485,6 +486,9 @@ public class RestconfImpl implements RestconfService {
 
                 if (cause instanceof IllegalArgumentException) {
                     throw new RestconfDocumentedException(cause.getMessage(), ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
+                } else if (cause instanceof DOMRpcImplementationNotAvailableException) {
+                    throw new RestconfDocumentedException(cause.getMessage(), ErrorType.APPLICATION,
+                            ErrorTag.OPERATION_NOT_SUPPORTED);
                 }
                 throw new RestconfDocumentedException("The operation encountered an unexpected error while executing.",cause);
             }
