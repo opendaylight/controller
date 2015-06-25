@@ -90,25 +90,19 @@ public class MountPointSwagger extends BaseYangSwaggerGenerator implements Mount
             builder.append(moduleName);
             builder.append(':');
         }
-        boolean first = true;
         for (PathArgument arg : key.getPathArguments()) {
-
             String name = arg.getNodeType().getLocalName();
-            if (first) {
-                first = false;
-            } else {
-                builder.append('/');
-            }
-            builder.append(name);
             if (arg instanceof YangInstanceIdentifier.NodeIdentifierWithPredicates) {
                 NodeIdentifierWithPredicates nodeId = (NodeIdentifierWithPredicates) arg;
                 for (Entry<QName, Object> entry : nodeId.getKeyValues().entrySet()) {
-                    builder.append('/').append(entry.getValue());
+                    builder.append(entry.getValue()).append('/');
                 }
+            } else {
+                builder.append(name);
+                builder.append('/');
             }
         }
-
-        return builder.append('/').toString();
+        return builder.toString();
     }
 
     private String getYangMountUrl(final YangInstanceIdentifier key) {
