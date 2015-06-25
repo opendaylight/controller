@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a7fa997_a9d825f0",
+        "filename": "opendaylight/netconf/netconf-testtool/src/main/java/org/opendaylight/controller/netconf/test/tool/Main.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-06-25T07:41:56Z",
+      "side": 1,
+      "message": "remove comments",
+      "range": {
+        "startLine": 166,
+        "startChar": 26,
+        "endLine": 166,
+        "endChar": 47
+      },
+      "revId": "5e17de8b2802bd9d496059253e43394ae48efb5b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_49e5d1a6",
+        "filename": "opendaylight/netconf/netconf-testtool/src/main/java/org/opendaylight/controller/netconf/test/tool/Main.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 296,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-06-25T07:41:56Z",
+      "side": 1,
+      "message": "the index should be removed and replaced by / and %.",
+      "range": {
+        "startLine": 296,
+        "startChar": 20,
+        "endLine": 296,
+        "endChar": 25
+      },
+      "revId": "5e17de8b2802bd9d496059253e43394ae48efb5b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_69e20da1",
+        "filename": "opendaylight/netconf/netconf-testtool/src/main/java/org/opendaylight/controller/netconf/test/tool/Main.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 302,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-06-25T07:41:56Z",
+      "side": 1,
+      "message": "This can probably be calculated in the loop as well. Maybe all of the 4 variables can be.",
+      "range": {
+        "startLine": 302,
+        "startChar": 20,
+        "endLine": 302,
+        "endChar": 35
+      },
+      "revId": "5e17de8b2802bd9d496059253e43394ae48efb5b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_09efd988",
+        "filename": "opendaylight/netconf/netconf-testtool/src/main/java/org/opendaylight/controller/netconf/test/tool/Main.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 345,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-06-25T07:41:56Z",
+      "side": 1,
+      "message": "accidental copy/paste",
+      "range": {
+        "startLine": 345,
+        "startChar": 25,
+        "endLine": 345,
+        "endChar": 45
+      },
+      "revId": "5e17de8b2802bd9d496059253e43394ae48efb5b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_091359b9",
+        "filename": "opendaylight/netconf/netconf-testtool/src/main/java/org/opendaylight/controller/netconf/test/tool/NetconfDeviceSimulator.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-06-25T07:41:56Z",
+      "side": 1,
+      "message": "this condition is pointless .. you are doing the same thing already in Main",
+      "range": {
+        "startLine": 206,
+        "startChar": 12,
+        "endLine": 206,
+        "endChar": 23
+      },
+      "revId": "5e17de8b2802bd9d496059253e43394ae48efb5b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
