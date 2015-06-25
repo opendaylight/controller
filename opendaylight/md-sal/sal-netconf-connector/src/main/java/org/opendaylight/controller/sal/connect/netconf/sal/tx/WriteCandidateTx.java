@@ -10,6 +10,7 @@ package org.opendaylight.controller.sal.connect.netconf.sal.tx;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -130,6 +131,7 @@ public class WriteCandidateTx extends AbstractWriteTx {
         final ListenableFuture<Void> commitFutureAsVoid = Futures.transform(commit(), new Function<RpcResult<TransactionStatus>, Void>() {
             @Override
             public Void apply(final RpcResult<TransactionStatus> input) {
+                Preconditions.checkArgument(input.isSuccessful() && input.getErrors().isEmpty(), "Submit failed with errors: %s", input.getErrors());
                 return null;
             }
         });
