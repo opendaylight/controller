@@ -30,6 +30,8 @@ import org.opendaylight.controller.sal.connect.netconf.util.NetconfBaseOps;
 import org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.NetconfState;
+import org.opendaylight.yangtools.yang.common.RpcError;
+import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -85,6 +87,27 @@ public class NetconfDeviceWriteOnlyTxTest {
             inOrder.verify(rpc).invokeRpc(toPath(NetconfMessageTransformUtil.NETCONF_COMMIT_QNAME), NetconfMessageTransformUtil.COMMIT_RPC_CONTENT);
             inOrder.verify(rpc).invokeRpc(eq(toPath(NetconfMessageTransformUtil.NETCONF_DISCARD_CHANGES_QNAME)), any(NormalizedNode.class));
             inOrder.verify(rpc).invokeRpc(toPath(NetconfMessageTransformUtil.NETCONF_UNLOCK_QNAME), NetconfBaseOps.getUnLockContent(NETCONF_CANDIDATE_QNAME));
+            return;
+        }
+
+        fail("Submit should fail");
+    }
+
+    @Test
+    public void testFailedCommit() throws Exception {
+        final CheckedFuture<DefaultDOMRpcResult, Exception> rpcErrorFuture =
+                Futures.immediateCheckedFuture(new DefaultDOMRpcResult(RpcResultBuilder.newError(RpcError.ErrorType.APPLICATION, "a", "m")));
+
+        doReturn(Futures.immediateCheckedFuture(new DefaultDOMRpcResult(((NormalizedNode<?, ?>) null))))
+        .doReturn(rpcErrorFuture).when(rpc).invokeRpc(any(SchemaPath.class), any(NormalizedNode.class));
+
+        final WriteCandidateTx tx = new WriteCandidateTx(id, new NetconfBaseOps(rpc, mock(SchemaContext.class)),
+                false, 60000L);
+
+        final CheckedFuture<Void, TransactionCommitFailedException> submitFuture = tx.submit();
+        try {
+            submitFuture.checkedGet();
+        } catch (final TransactionCommitFailedException e) {
             return;
         }
 
