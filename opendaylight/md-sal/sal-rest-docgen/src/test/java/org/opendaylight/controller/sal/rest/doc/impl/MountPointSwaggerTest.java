@@ -42,6 +42,7 @@ public class MountPointSwaggerTest {
     private static final String HTTP_URL = "http://localhost/path";
     private static final YangInstanceIdentifier instanceId = YangInstanceIdentifier.builder()
             .node(QName.create("nodes"))
+            .node(QName.create("node"))
             .nodeWithKey(QName.create("node"), QName.create("id"), "123").build();
     private static final String INSTANCE_URL = "nodes/node/123/";
     private MountPointSwagger swagger;
