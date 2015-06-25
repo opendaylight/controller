@@ -178,7 +178,7 @@ public class InvokeRpcMethodTest {
             restconfImpl.invokeRpc("toaster:cancel-toast", "", uriInfo);
             fail("Expected an exception to be thrown.");
         } catch (final RestconfDocumentedException e) {
-            verifyRestconfDocumentedException(e, 0, ErrorType.APPLICATION, ErrorTag.OPERATION_FAILED,
+            verifyRestconfDocumentedException(e, 0, ErrorType.APPLICATION, ErrorTag.OPERATION_NOT_SUPPORTED,
                     Optional.<String> absent(), Optional.<String> absent());
         }
     }
