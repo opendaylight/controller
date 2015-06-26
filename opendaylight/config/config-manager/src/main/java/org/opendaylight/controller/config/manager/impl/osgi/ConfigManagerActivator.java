@@ -80,6 +80,7 @@ public class ConfigManagerActivator implements BundleActivator {
                 blankTransactionServiceTracker);
         serviceTracker.open();
 
+
         List<AutoCloseable> list = Arrays.asList(
                 bindingContextProvider, clsReg,configRegistry, wrap(bundleTracker), configRegReg, configRegistryJMXRegistrator, wrap(serviceTracker));
         autoCloseable = OsgiRegistrationUtil.aggregate(list);
