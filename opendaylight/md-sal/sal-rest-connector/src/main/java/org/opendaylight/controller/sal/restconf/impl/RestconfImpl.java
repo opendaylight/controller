@@ -8,6 +8,7 @@
  */
 package org.opendaylight.controller.sal.restconf.impl;
 
+import com.google.common.base.CharMatcher;
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -535,22 +536,18 @@ public class RestconfImpl implements RestconfService {
     private RpcExecutor resolveIdentifierInInvokeRpc(final String identifier) {
         String identifierEncoded = null;
         DOMMountPoint mountPoint = null;
-        if (identifier.contains(ControllerContext.MOUNT)) {
+        final String identifierTrimmed = CharMatcher.is('/').trimTrailingFrom(identifier);
+        if (identifierTrimmed.contains(ControllerContext.MOUNT)) {
             // mounted RPC call - look up mount instance.
-            InstanceIdentifierContext mountPointId = controllerContext.toMountPointIdentifier(identifier);
+            InstanceIdentifierContext mountPointId = controllerContext.toMountPointIdentifier(identifierTrimmed);
             mountPoint = mountPointId.getMountPoint();
 
-            int startOfRemoteRpcName = identifier.lastIndexOf(ControllerContext.MOUNT)
+            int startOfRemoteRpcName = identifierTrimmed.lastIndexOf(ControllerContext.MOUNT)
                     + ControllerContext.MOUNT.length() + 1;
-            String remoteRpcName = identifier.substring(startOfRemoteRpcName);
+            String remoteRpcName = identifierTrimmed.substring(startOfRemoteRpcName);
             identifierEncoded = remoteRpcName;
-
-        } else if (identifier.indexOf("/") != CHAR_NOT_FOUND) {
-            final String slashErrorMsg = String.format("Identifier %n%s%ncan\'t contain slash "
-                    + "character (/).%nIf slash is part of identifier name then use %%2F placeholder.", identifier);
-            throw new RestconfDocumentedException(slashErrorMsg, ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
         } else {
-            identifierEncoded = identifier;
+            identifierEncoded = identifierTrimmed;
         }
 
         final String identifierDecoded = controllerContext.urlPathArgDecode(identifierEncoded);
