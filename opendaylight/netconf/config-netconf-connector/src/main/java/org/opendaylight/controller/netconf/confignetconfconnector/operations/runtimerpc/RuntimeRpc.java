@@ -14,28 +14,28 @@ import com.google.common.collect.Maps;
 import java.util.Map;
 import javax.management.ObjectName;
 import javax.management.openmbean.OpenType;
+import org.opendaylight.controller.config.persist.mapping.mapping.attributes.fromxml.AttributeConfigElement;
+import org.opendaylight.controller.config.persist.mapping.mapping.attributes.mapping.AttributeMappingStrategy;
+import org.opendaylight.controller.config.persist.mapping.mapping.attributes.mapping.ObjectMapper;
+import org.opendaylight.controller.config.persist.mapping.mapping.attributes.toxml.ObjectXmlWriter;
+import org.opendaylight.controller.config.persist.mapping.osgi.EnumResolver;
+import org.opendaylight.controller.config.persist.mapping.rpc.InstanceRuntimeRpc;
+import org.opendaylight.controller.config.persist.mapping.rpc.ModuleRpcs;
+import org.opendaylight.controller.config.persist.mapping.rpc.Rpcs;
+import org.opendaylight.controller.config.persist.mapping.rpc.RuntimeRpcElementResolved;
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
+import org.opendaylight.controller.config.util.xml.XmlElement;
+import org.opendaylight.controller.config.util.xml.XmlUtil;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.RuntimeBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.RuntimeBeanEntry.Rpc;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.AttributeIfc;
 import org.opendaylight.controller.config.yangjmxgenerator.attribute.VoidAttribute;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.AttributeConfigElement;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.mapping.AttributeMappingStrategy;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.mapping.ObjectMapper;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.toxml.ObjectXmlWriter;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.rpc.InstanceRuntimeRpc;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.rpc.ModuleRpcs;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.rpc.Rpcs;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.AbstractConfigNetconfOperation;
-import org.opendaylight.controller.netconf.confignetconfconnector.osgi.EnumResolver;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreContext;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
-import org.opendaylight.controller.netconf.util.exception.MissingNameSpaceException;
-import org.opendaylight.controller.netconf.util.xml.XmlElement;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -54,7 +54,7 @@ public class RuntimeRpc extends AbstractConfigNetconfOperation {
         this.yangStoreSnapshot = yangStoreSnapshot;
     }
 
-    private Element toXml(Document doc, Object result, AttributeIfc returnType, String namespace, String elementName) throws NetconfDocumentedException {
+    private Element toXml(Document doc, Object result, AttributeIfc returnType, String namespace, String elementName) throws DocumentedException {
         AttributeMappingStrategy<?, ? extends OpenType<?>> mappingStrategy = new ObjectMapper().prepareStrategy(returnType);
         Optional<?> mappedAttributeOpt = mappingStrategy.mapAttribute(result);
         Preconditions.checkState(mappedAttributeOpt.isPresent(), "Unable to map return value %s as %s", result, returnType.getOpenType());
@@ -90,14 +90,10 @@ public class RuntimeRpc extends AbstractConfigNetconfOperation {
         return configRegistryClient.invokeMethod(on, name, params, signature);
     }
 
-    public NetconfOperationExecution fromXml(final XmlElement xml) throws NetconfDocumentedException {
+    public NetconfOperationExecution fromXml(final XmlElement xml) throws DocumentedException {
         final String namespace;
-        try {
-            namespace = xml.getNamespace();
-        } catch (MissingNameSpaceException e) {
-            LOG.trace("Can't get namespace from xml element due to ",e);
-            throw NetconfDocumentedException.wrap(e);
-        }
+        namespace = xml.getNamespace();
+
         final XmlElement contextInstanceElement = xml.getOnlyChildElement(CONTEXT_INSTANCE);
         final String operationName = xml.getName();
 
@@ -120,7 +116,7 @@ public class RuntimeRpc extends AbstractConfigNetconfOperation {
     }
 
     @Override
-    public HandlingPriority canHandle(Document message) throws NetconfDocumentedException {
+    public HandlingPriority canHandle(Document message) throws DocumentedException {
         XmlElement requestElement = null;
         requestElement = getRequestElementWithCheck(message);
 
@@ -129,7 +125,7 @@ public class RuntimeRpc extends AbstractConfigNetconfOperation {
         final String netconfOperationNamespace;
         try {
             netconfOperationNamespace = operationElement.getNamespace();
-        } catch (MissingNameSpaceException e) {
+        } catch (DocumentedException e) {
             LOG.debug("Cannot retrieve netconf operation namespace from message due to ", e);
             return HandlingPriority.CANNOT_HANDLE;
         }
@@ -175,7 +171,7 @@ public class RuntimeRpc extends AbstractConfigNetconfOperation {
     }
 
     @Override
-    protected Element handleWithNoSubsequentOperations(Document document, XmlElement xml) throws NetconfDocumentedException {
+    protected Element handleWithNoSubsequentOperations(Document document, XmlElement xml) throws DocumentedException {
         // TODO check for namespaces and unknown elements
         final NetconfOperationExecution execution = fromXml(xml);
 

@@ -18,10 +18,10 @@ import javax.management.ObjectName;
 import org.opendaylight.controller.config.api.ConflictingVersionException;
 import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.api.jmx.CommitStatus;
+import org.opendaylight.controller.config.persist.mapping.exception.NoTransactionFoundException;
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
 import org.opendaylight.controller.config.util.ConfigTransactionClient;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
-import org.opendaylight.controller.netconf.confignetconfconnector.exception.NoTransactionFoundException;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -128,9 +128,9 @@ public class TransactionProvider implements AutoCloseable {
     public synchronized CommitStatus commitTransaction() throws ValidationException, ConflictingVersionException, NoTransactionFoundException {
         if (!getTransaction().isPresent()){
             throw new NoTransactionFoundException("No transaction found for session " + netconfSessionIdForReporting,
-                    NetconfDocumentedException.ErrorType.application,
-                    NetconfDocumentedException.ErrorTag.operation_failed,
-                    NetconfDocumentedException.ErrorSeverity.error);
+                    DocumentedException.ErrorType.application,
+                    DocumentedException.ErrorTag.operation_failed,
+                    DocumentedException.ErrorSeverity.error);
         }
         final Optional<ObjectName> maybeTaON = getTransaction();
         ObjectName taON = maybeTaON.get();

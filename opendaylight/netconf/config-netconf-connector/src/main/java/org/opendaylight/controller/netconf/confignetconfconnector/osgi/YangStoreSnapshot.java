@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import org.opendaylight.controller.config.persist.mapping.osgi.EnumResolver;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.PackageTranslator;
 import org.opendaylight.controller.config.yangjmxgenerator.ServiceInterfaceEntry;
