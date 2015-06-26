@@ -13,14 +13,15 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+
 import com.google.common.collect.Sets;
 import java.io.IOException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.config.api.ConflictingVersionException;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
 import org.opendaylight.controller.netconf.api.Capability;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedExecution;
@@ -83,7 +84,7 @@ public class ConfigPersisterTest {
         handler.assertException(IllegalStateException.class, "Cannot register as JMX listener to netconf");
     }
 
-    public NetconfOperationService getWorkingService(Document document) throws SAXException, IOException, NetconfDocumentedException {
+    public NetconfOperationService getWorkingService(Document document) throws SAXException, IOException, DocumentedException {
         NetconfOperationService service = mock(NetconfOperationService.class);
         Capability capability = mock(Capability.class);
 //        doReturn(Sets.newHashSet(capability)).when(service).getCapabilities();
@@ -119,9 +120,9 @@ public class ConfigPersisterTest {
         NetconfOperationService service =  getWorkingService(getOKDocument());
         ConflictingVersionException cve = new ConflictingVersionException("");
         try {
-            NetconfDocumentedException.wrap(cve);
+            DocumentedException.wrap(cve);
             throw new AssertionError("Should throw an exception");
-        }catch(NetconfDocumentedException e) {
+        }catch(DocumentedException e) {
             NetconfOperation mockedOperation = service.getNetconfOperations().iterator().next();
             doThrow(e).when(mockedOperation).handle(any(Document.class), any(NetconfOperationChainedExecution.class));
             return service;

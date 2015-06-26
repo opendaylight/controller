@@ -12,14 +12,14 @@ import com.google.common.base.Optional;
 import java.util.HashMap;
 import java.util.Map;
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorSeverity;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorTag;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorType;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
+import org.opendaylight.controller.config.util.xml.DocumentedException.ErrorSeverity;
+import org.opendaylight.controller.config.util.xml.DocumentedException.ErrorTag;
+import org.opendaylight.controller.config.util.xml.DocumentedException.ErrorType;
+import org.opendaylight.controller.config.util.xml.XmlElement;
+import org.opendaylight.controller.config.util.xml.XmlUtil;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
-import org.opendaylight.controller.netconf.util.xml.XmlElement;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -40,7 +40,7 @@ public class DiscardChanges extends AbstractConfigNetconfOperation {
         this.transactionProvider = transactionProvider;
     }
 
-    private static void fromXml(XmlElement xml) throws NetconfDocumentedException {
+    private static void fromXml(XmlElement xml) throws DocumentedException {
         xml.checkName(DISCARD);
         xml.checkNamespace(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
     }
@@ -51,7 +51,7 @@ public class DiscardChanges extends AbstractConfigNetconfOperation {
     }
 
     @Override
-    protected Element handleWithNoSubsequentOperations(Document document, XmlElement xml) throws NetconfDocumentedException {
+    protected Element handleWithNoSubsequentOperations(Document document, XmlElement xml) throws DocumentedException {
         fromXml(xml);
         try {
             if (transactionProvider.getTransaction().isPresent()) {
@@ -63,7 +63,7 @@ public class DiscardChanges extends AbstractConfigNetconfOperation {
             errorInfo
                     .put(ErrorTag.operation_failed.name(),
                             "Abort failed.");
-            throw new NetconfDocumentedException(e.getMessage(), e, ErrorType.application, ErrorTag.operation_failed,
+            throw new DocumentedException(e.getMessage(), e, ErrorType.application, ErrorTag.operation_failed,
                     ErrorSeverity.error, errorInfo);
         }
         LOG.trace("Changes discarded successfully from datastore {}", Datastore.candidate);

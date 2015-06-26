@@ -15,10 +15,10 @@ import static org.mockito.Mockito.mock;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
+import org.opendaylight.controller.config.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedExecution;
-import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -33,7 +33,7 @@ public class AbstractLastNetconfOperationTest {
         }
 
         @Override
-        protected Element handleWithNoSubsequentOperations(Document document, XmlElement operationElement) throws NetconfDocumentedException {
+        protected Element handleWithNoSubsequentOperations(Document document, XmlElement operationElement) throws DocumentedException{
             handleWithNoSubsequentOperationsRun = true;
             return null;
         }
@@ -58,7 +58,7 @@ public class AbstractLastNetconfOperationTest {
         assertEquals(HandlingPriority.HANDLE_WITH_DEFAULT_PRIORITY, netconfOperation.getHandlingPriority());
     }
 
-    @Test(expected = NetconfDocumentedException.class)
+    @Test(expected = DocumentedException.class)
     public void testHandle() throws Exception {
         NetconfOperationChainedExecution operation = mock(NetconfOperationChainedExecution.class);
         doReturn("").when(operation).toString();

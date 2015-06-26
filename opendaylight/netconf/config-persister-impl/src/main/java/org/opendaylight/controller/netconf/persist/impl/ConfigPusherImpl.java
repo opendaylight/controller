@@ -33,18 +33,18 @@ import org.opendaylight.controller.config.api.ConflictingVersionException;
 import org.opendaylight.controller.config.persist.api.ConfigPusher;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.Persister;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
+import org.opendaylight.controller.config.util.xml.XmlElement;
+import org.opendaylight.controller.config.util.xml.XmlNetconfConstants;
+import org.opendaylight.controller.config.util.xml.XmlUtil;
 import org.opendaylight.controller.netconf.api.Capability;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
-import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedExecution;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
 import org.opendaylight.controller.netconf.util.NetconfUtil;
-import org.opendaylight.controller.netconf.util.xml.XmlElement;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -80,7 +80,7 @@ public class ConfigPusherImpl implements ConfigPusher {
                 }
 
                 LOG.debug("ConfigPusher has pushed configs {}", configs);
-            } catch (NetconfDocumentedException e) {
+            } catch (DocumentedException e) {
                 LOG.error("Error pushing configs {}",configs);
                 throw new IllegalStateException(e);
             }
@@ -92,7 +92,7 @@ public class ConfigPusherImpl implements ConfigPusher {
         this.queue.put(configs);
     }
 
-    private LinkedHashMap<? extends ConfigSnapshotHolder, EditAndCommitResponse> internalPushConfigs(List<? extends ConfigSnapshotHolder> configs) throws NetconfDocumentedException {
+    private LinkedHashMap<? extends ConfigSnapshotHolder, EditAndCommitResponse> internalPushConfigs(List<? extends ConfigSnapshotHolder> configs) throws DocumentedException {
         LOG.debug("Last config snapshots to be pushed to netconf: {}", configs);
         LinkedHashMap<ConfigSnapshotHolder, EditAndCommitResponse> result = new LinkedHashMap<>();
         // start pushing snapshots:
@@ -320,7 +320,7 @@ public class ConfigPusherImpl implements ConfigPusher {
             HandlingPriority handlingPriority = null;
             try {
                 handlingPriority = netconfOperation.canHandle(request.getDocument());
-            } catch (NetconfDocumentedException e) {
+            } catch (DocumentedException e) {
                 throw new IllegalStateException("Possible code error: canHandle threw exception", e);
             }
             allOperations.put(handlingPriority, netconfOperation);
@@ -341,7 +341,7 @@ public class ConfigPusherImpl implements ConfigPusher {
         try {
             response = operation.handle(request.getDocument(), NetconfOperationChainedExecution.EXECUTION_TERMINATION_POINT);
             return NetconfUtil.checkIsMessageOk(response);
-        } catch (NetconfDocumentedException e) {
+        } catch (DocumentedException e) {
             if (e.getCause() instanceof ConflictingVersionException) {
                 throw (ConflictingVersionException) e.getCause();
             }
@@ -366,7 +366,7 @@ public class ConfigPusherImpl implements ConfigPusher {
             }
             editConfigElement.appendChild(configWrapper.getDomElement());
             return new NetconfMessage(doc);
-        } catch (IOException | SAXException | NetconfDocumentedException e) {
+        } catch (IOException | SAXException | DocumentedException e) {
             // error reading the xml file bundled into the jar
             throw new IllegalStateException("Error while opening local resource " + editConfigResourcePath, e);
         }

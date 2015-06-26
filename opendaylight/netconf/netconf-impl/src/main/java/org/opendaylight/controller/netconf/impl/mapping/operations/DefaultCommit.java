@@ -14,7 +14,9 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.Sets;
 import java.io.InputStream;
 import java.util.Set;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
+import org.opendaylight.controller.config.util.xml.XmlElement;
+import org.opendaylight.controller.config.util.xml.XmlUtil;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.impl.CommitNotifier;
@@ -22,8 +24,6 @@ import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationRouter;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedExecution;
 import org.opendaylight.controller.netconf.util.mapping.AbstractNetconfOperation;
-import org.opendaylight.controller.netconf.util.xml.XmlElement;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state.Capabilities;
 import org.slf4j.Logger;
@@ -69,7 +69,7 @@ public class DefaultCommit extends AbstractNetconfOperation {
     }
 
     @Override
-    public Document handle(final Document requestMessage, final NetconfOperationChainedExecution subsequentOperation) throws NetconfDocumentedException {
+    public Document handle(final Document requestMessage, final NetconfOperationChainedExecution subsequentOperation) throws DocumentedException {
         Preconditions.checkArgument(!subsequentOperation.isExecutionTermination(),
                 "Subsequent netconf operation expected by %s", this);
 
@@ -97,7 +97,7 @@ public class DefaultCommit extends AbstractNetconfOperation {
     }
 
     @Override
-    protected Element handle(final Document document, final XmlElement message, final NetconfOperationChainedExecution subsequentOperation) throws NetconfDocumentedException {
+    protected Element handle(final Document document, final XmlElement message, final NetconfOperationChainedExecution subsequentOperation) throws DocumentedException {
         throw new UnsupportedOperationException("Never gets called");
     }
 
@@ -115,7 +115,7 @@ public class DefaultCommit extends AbstractNetconfOperation {
         try {
             xmlElement = XmlElement.fromDomElementWithExpected(message.getDocumentElement(),
                     XmlNetconfConstants.RPC_KEY, XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
-        } catch (NetconfDocumentedException e) {
+        } catch (DocumentedException e) {
             LOG.trace("Commit operation is not valid due to ",e);
             return false;
         }
@@ -132,7 +132,7 @@ public class DefaultCommit extends AbstractNetconfOperation {
         }
     }
 
-    private Element getConfigSnapshot(final NetconfOperationRouter opRouter) throws NetconfDocumentedException {
+    private Element getConfigSnapshot(final NetconfOperationRouter opRouter) throws DocumentedException {
         final Document responseDocument = opRouter.onNetconfMessage(
                 getConfigMessage, null);
 

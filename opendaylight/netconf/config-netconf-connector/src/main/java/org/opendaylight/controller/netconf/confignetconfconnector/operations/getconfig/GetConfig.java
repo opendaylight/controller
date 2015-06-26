@@ -11,22 +11,19 @@ package org.opendaylight.controller.netconf.confignetconfconnector.operations.ge
 import com.google.common.base.Optional;
 import java.util.Set;
 import javax.management.ObjectName;
+import org.opendaylight.controller.config.persist.mapping.mapping.config.Config;
+import org.opendaylight.controller.config.persist.mapping.mapping.config.ServiceRegistryWrapper;
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
 import org.opendaylight.controller.config.util.ConfigTransactionClient;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
+import org.opendaylight.controller.config.util.xml.XmlElement;
+import org.opendaylight.controller.config.util.xml.XmlUtil;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Config;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ServiceRegistryWrapper;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.AbstractConfigNetconfOperation;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.Datastore;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfig;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreContext;
 import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
-import org.opendaylight.controller.netconf.util.exception.MissingNameSpaceException;
-import org.opendaylight.controller.netconf.util.exception.UnexpectedElementException;
-import org.opendaylight.controller.netconf.util.exception.UnexpectedNamespaceException;
-import org.opendaylight.controller.netconf.util.xml.XmlElement;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -52,7 +49,7 @@ public class GetConfig extends AbstractConfigNetconfOperation {
         this.transactionProvider = transactionProvider;
     }
 
-    public static Datastore fromXml(XmlElement xml) throws UnexpectedNamespaceException, UnexpectedElementException, MissingNameSpaceException, NetconfDocumentedException {
+    public static Datastore fromXml(XmlElement xml) throws DocumentedException {
 
         xml.checkName(GET_CONFIG);
         xml.checkNamespace(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
@@ -110,7 +107,7 @@ public class GetConfig extends AbstractConfigNetconfOperation {
     }
 
     @Override
-    public Element handleWithNoSubsequentOperations(Document document, XmlElement xml) throws NetconfDocumentedException {
+    public Element handleWithNoSubsequentOperations(Document document, XmlElement xml) throws DocumentedException {
         Datastore source;
         source = fromXml(xml);
         return getResponseInternal(document, getConfigRegistryClient(), source);

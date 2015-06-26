@@ -72,7 +72,10 @@ import org.opendaylight.controller.config.api.annotations.AbstractServiceInterfa
 import org.opendaylight.controller.config.api.annotations.ServiceInterfaceAnnotation;
 import org.opendaylight.controller.config.manager.impl.AbstractConfigTest;
 import org.opendaylight.controller.config.manager.impl.factoriesresolver.HardcodedModuleFactoriesResolver;
+import org.opendaylight.controller.config.persist.mapping.osgi.EnumResolver;
 import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
+import org.opendaylight.controller.config.util.xml.XmlUtil;
 import org.opendaylight.controller.config.yang.test.impl.ComplexDtoBInner;
 import org.opendaylight.controller.config.yang.test.impl.ComplexList;
 import org.opendaylight.controller.config.yang.test.impl.Deep;
@@ -87,7 +90,6 @@ import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplModuleMX
 import org.opendaylight.controller.config.yang.test.impl.Peers;
 import org.opendaylight.controller.config.yang.test.impl.TestImplModuleFactory;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.Commit;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.DiscardChanges;
@@ -97,7 +99,6 @@ import org.opendaylight.controller.netconf.confignetconfconnector.operations.edi
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.get.Get;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.getconfig.GetConfig;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.runtimerpc.RuntimeRpc;
-import org.opendaylight.controller.netconf.confignetconfconnector.osgi.EnumResolver;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreContext;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreService;
 import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
@@ -112,7 +113,6 @@ import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedEx
 import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessageAdditionalHeader;
 import org.opendaylight.controller.netconf.util.messages.NetconfMessageUtil;
 import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.test.types.rev131127.TestIdentity1;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.test.types.rev131127.TestIdentity2;
 import org.opendaylight.yangtools.sal.binding.generator.util.BindingRuntimeContext;
@@ -430,8 +430,8 @@ public class NetconfMappingTest extends AbstractConfigTest {
 
     }
 
-    private void closeSession() throws NetconfDocumentedException, ParserConfigurationException, SAXException,
-            IOException {
+    private void closeSession() throws ParserConfigurationException, SAXException,
+            IOException, DocumentedException {
         final Channel channel = mock(Channel.class);
         doReturn("channel").when(channel).toString();
         final NetconfServerSessionListener listener = mock(NetconfServerSessionListener.class);
@@ -444,43 +444,43 @@ public class NetconfMappingTest extends AbstractConfigTest {
     }
 
     private void edit(String resource) throws ParserConfigurationException, SAXException, IOException,
-            NetconfDocumentedException {
+            DocumentedException {
         EditConfig editOp = new EditConfig(yangStoreSnapshot, transactionProvider, configRegistryClient,
                 NETCONF_SESSION_ID);
         executeOp(editOp, resource);
     }
 
-    private void commit() throws ParserConfigurationException, SAXException, IOException, NetconfDocumentedException {
+    private void commit() throws ParserConfigurationException, SAXException, IOException, DocumentedException {
         Commit commitOp = new Commit(transactionProvider, configRegistryClient, NETCONF_SESSION_ID);
         executeOp(commitOp, "netconfMessages/commit.xml");
     }
 
-    private Document lockCandidate() throws ParserConfigurationException, SAXException, IOException, NetconfDocumentedException {
+    private Document lockCandidate() throws ParserConfigurationException, SAXException, IOException, DocumentedException {
         Lock commitOp = new Lock(NETCONF_SESSION_ID);
         return executeOp(commitOp, "netconfMessages/lock.xml");
     }
 
-    private Document unlockCandidate() throws ParserConfigurationException, SAXException, IOException, NetconfDocumentedException {
+    private Document unlockCandidate() throws ParserConfigurationException, SAXException, IOException, DocumentedException {
         UnLock commitOp = new UnLock(NETCONF_SESSION_ID);
         return executeOp(commitOp, "netconfMessages/unlock.xml");
     }
 
     private Document getConfigCandidate() throws ParserConfigurationException, SAXException, IOException,
-            NetconfDocumentedException {
+            DocumentedException {
         GetConfig getConfigOp = new GetConfig(yangStoreSnapshot, Optional.<String> absent(), transactionProvider,
                 configRegistryClient, NETCONF_SESSION_ID);
         return executeOp(getConfigOp, "netconfMessages/getConfig_candidate.xml");
     }
 
     private Document getConfigRunning() throws ParserConfigurationException, SAXException, IOException,
-            NetconfDocumentedException {
+            DocumentedException {
         GetConfig getConfigOp = new GetConfig(yangStoreSnapshot, Optional.<String> absent(), transactionProvider,
                 configRegistryClient, NETCONF_SESSION_ID);
         return executeOp(getConfigOp, "netconfMessages/getConfig.xml");
     }
 
     @Ignore("second edit message corrupted")
-    @Test(expected = NetconfDocumentedException.class)
+    @Test(expected = DocumentedException.class)
     public void testConfigNetconfReplaceDefaultEx() throws Exception {
 
         createModule(INSTANCE_NAME);
@@ -514,7 +514,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
         try {
             edit("netconfMessages/namespaces/editConfig_sameAttrDifferentNamespaces.xml");
             fail();
-        } catch (NetconfDocumentedException e) {
+        } catch (DocumentedException e) {
             String message = e.getMessage();
             assertContainsString(message, "Element simpleInt present multiple times with different namespaces");
             assertContainsString(message, TEST_NAMESPACE);
@@ -527,7 +527,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
         try {
             edit("netconfMessages/namespaces/editConfig_differentNamespaceTO.xml");
             fail();
-        } catch (NetconfDocumentedException e) {
+        } catch (DocumentedException e) {
             String message = e.getMessage();
             assertContainsString(message, "Unrecognised elements");
             assertContainsString(message, "simple-int2");
@@ -540,7 +540,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
         try {
             edit("netconfMessages/namespaces/editConfig_sameAttrDifferentNamespacesList.xml");
             fail();
-        } catch (NetconfDocumentedException e) {
+        } catch (DocumentedException e) {
             String message = e.getMessage();
             assertContainsString(message, "Element allow-user present multiple times with different namespaces");
             assertContainsString(message, TEST_NAMESPACE);
@@ -560,7 +560,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
     }
 
     // TODO add <modules operation="replace"> functionality
-    @Test(expected = NetconfDocumentedException.class)
+    @Test(expected = DocumentedException.class)
     public void testConfigNetconfReplaceModuleEx() throws Exception {
 
         createModule(INSTANCE_NAME);
@@ -580,7 +580,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
             LOG.info("Reading {}", file);
             try {
                 edit(file);
-            } catch (NetconfDocumentedException e) {
+            } catch (DocumentedException e) {
                 assertContainsString(e.getMessage(), "Unrecognised elements");
                 assertContainsString(e.getMessage(), "unknownAttribute");
                 continue;
@@ -611,7 +611,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
         assertEquals(3 + 3, afterReplace);
     }
 
-    @Test(expected = NetconfDocumentedException.class)
+    @Test(expected = DocumentedException.class)
     public void testEx() throws Exception {
 
         commit();
@@ -622,7 +622,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
         assertContainsElement(discard(), readXmlToElement("<ok xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\"/>"));
     }
 
-    private Document discard() throws ParserConfigurationException, SAXException, IOException, NetconfDocumentedException {
+    private Document discard() throws ParserConfigurationException, SAXException, IOException, DocumentedException {
         DiscardChanges discardOp = new DiscardChanges(transactionProvider, configRegistryClient, NETCONF_SESSION_ID);
         return executeOp(discardOp, "netconfMessages/discardChanges.xml");
     }
@@ -776,7 +776,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
         assertContainsElementWithText(response, "2");
     }
 
-    private Document get() throws NetconfDocumentedException, ParserConfigurationException, SAXException, IOException {
+    private Document get() throws ParserConfigurationException, SAXException, IOException, DocumentedException {
         Get getOp = new Get(transactionProvider, yangStoreSnapshot, configRegistryClient, NETCONF_SESSION_ID);
         return executeOp(getOp, "netconfMessages/get.xml");
     }
@@ -790,7 +790,7 @@ public class NetconfMappingTest extends AbstractConfigTest {
     }
 
     private Document executeOp(final NetconfOperation op, final String filename) throws ParserConfigurationException,
-            SAXException, IOException, NetconfDocumentedException {
+            SAXException, IOException, DocumentedException {
 
         final Document request = XmlFileLoader.xmlFileToDocument(filename);
 

@@ -16,7 +16,7 @@ import java.util.HashSet;
 import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
 import org.opendaylight.controller.netconf.impl.CommitNotifier;
 import org.opendaylight.controller.netconf.impl.NetconfServerSession;
@@ -57,7 +57,7 @@ public class NetconfOperationRouterImpl implements NetconfOperationRouter {
     }
 
     @Override
-    public Document onNetconfMessage(final Document message, final NetconfServerSession session) throws NetconfDocumentedException {
+    public Document onNetconfMessage(final Document message, final NetconfServerSession session) throws DocumentedException {
         Preconditions.checkNotNull(allNetconfOperations, "Operation router was not initialized properly");
 
         final NetconfOperationExecution netconfOperationExecution;
@@ -67,17 +67,17 @@ public class NetconfOperationRouterImpl implements NetconfOperationRouter {
             final String messageAsString = XmlUtil.toString(message);
             LOG.warn("Unable to handle rpc {} on session {}", messageAsString, session, e);
 
-            final NetconfDocumentedException.ErrorTag tag;
+            final DocumentedException.ErrorTag tag;
             if (e instanceof IllegalArgumentException) {
-                tag = NetconfDocumentedException.ErrorTag.operation_not_supported;
+                tag = DocumentedException.ErrorTag.operation_not_supported;
             } else {
-                tag = NetconfDocumentedException.ErrorTag.operation_failed;
+                tag = DocumentedException.ErrorTag.operation_failed;
             }
 
-            throw new NetconfDocumentedException(
+            throw new DocumentedException(
                 String.format("Unable to handle rpc %s on session %s", messageAsString, session),
-                e, NetconfDocumentedException.ErrorType.application,
-                tag, NetconfDocumentedException.ErrorSeverity.error,
+                e, DocumentedException.ErrorType.application,
+                tag, DocumentedException.ErrorSeverity.error,
                 Collections.singletonMap(tag.toString(), e.getMessage()));
         } catch (RuntimeException e) {
             throw handleUnexpectedEx("Unexpected exception during netconf operation sort", e);
@@ -95,18 +95,18 @@ public class NetconfOperationRouterImpl implements NetconfOperationRouter {
         netconfOperationServiceSnapshot.close();
     }
 
-    private static NetconfDocumentedException handleUnexpectedEx(final String s, final Exception e) throws NetconfDocumentedException {
+    private static DocumentedException handleUnexpectedEx(final String s, final Exception e) throws DocumentedException {
         LOG.error("{}", s, e);
-        return new NetconfDocumentedException("Unexpected error",
-                NetconfDocumentedException.ErrorType.application,
-                NetconfDocumentedException.ErrorTag.operation_failed,
-                NetconfDocumentedException.ErrorSeverity.error,
-                Collections.singletonMap(NetconfDocumentedException.ErrorSeverity.error.toString(), e.toString()));
+        return new DocumentedException("Unexpected error",
+                DocumentedException.ErrorType.application,
+                DocumentedException.ErrorTag.operation_failed,
+                DocumentedException.ErrorSeverity.error,
+                Collections.singletonMap(DocumentedException.ErrorSeverity.error.toString(), e.toString()));
     }
 
     private Document executeOperationWithHighestPriority(final Document message,
             final NetconfOperationExecution netconfOperationExecution)
-            throws NetconfDocumentedException {
+            throws DocumentedException {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Forwarding netconf message {} to {}", XmlUtil.toString(message), netconfOperationExecution.netconfOperation);
         }
@@ -115,7 +115,7 @@ public class NetconfOperationRouterImpl implements NetconfOperationRouter {
     }
 
     private NetconfOperationExecution getNetconfOperationWithHighestPriority(
-            final Document message, final NetconfServerSession session) throws NetconfDocumentedException {
+            final Document message, final NetconfServerSession session) throws DocumentedException {
 
         NavigableMap<HandlingPriority, NetconfOperation> sortedByPriority = getSortedNetconfOperationsWithCanHandle(
                 message, session);
@@ -129,7 +129,7 @@ public class NetconfOperationRouterImpl implements NetconfOperationRouter {
     }
 
     private TreeMap<HandlingPriority, NetconfOperation> getSortedNetconfOperationsWithCanHandle(final Document message,
-            final NetconfServerSession session) throws NetconfDocumentedException {
+            final NetconfServerSession session) throws DocumentedException {
         TreeMap<HandlingPriority, NetconfOperation> sortedPriority = Maps.newTreeMap();
 
         for (NetconfOperation netconfOperation : allNetconfOperations) {
@@ -158,11 +158,11 @@ public class NetconfOperationRouterImpl implements NetconfOperationRouter {
         }
 
         @Override
-        public Document execute(final Document requestMessage) throws NetconfDocumentedException {
-            throw new NetconfDocumentedException("This execution represents the termination point in operation execution and cannot be executed itself",
-                    NetconfDocumentedException.ErrorType.application,
-                    NetconfDocumentedException.ErrorTag.operation_failed,
-                    NetconfDocumentedException.ErrorSeverity.error);
+        public Document execute(final Document requestMessage) throws DocumentedException {
+            throw new DocumentedException("This execution represents the termination point in operation execution and cannot be executed itself",
+                    DocumentedException.ErrorType.application,
+                    DocumentedException.ErrorTag.operation_failed,
+                    DocumentedException.ErrorSeverity.error);
         }
     };
 
@@ -181,7 +181,7 @@ public class NetconfOperationRouterImpl implements NetconfOperationRouter {
         }
 
         @Override
-        public Document execute(final Document message) throws NetconfDocumentedException {
+        public Document execute(final Document message) throws DocumentedException {
             return netconfOperation.handle(message, subsequentExecution);
         }
 
