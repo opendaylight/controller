@@ -30,17 +30,19 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.config.api.ServiceReferenceReadableRegistry;
 import org.opendaylight.controller.config.api.ValidationException;
+import org.opendaylight.controller.config.persist.mapping.ConfigExecution;
+import org.opendaylight.controller.config.persist.mapping.mapping.attributes.fromxml.AttributeConfigElement;
+import org.opendaylight.controller.config.persist.mapping.mapping.config.InstanceConfigElementResolved;
+import org.opendaylight.controller.config.persist.mapping.mapping.config.ModuleElementDefinition;
+import org.opendaylight.controller.config.persist.mapping.mapping.config.ModuleElementResolved;
+import org.opendaylight.controller.config.persist.mapping.mapping.config.ServiceRegistryWrapper;
+import org.opendaylight.controller.config.persist.mapping.mapping.config.Services;
+import org.opendaylight.controller.config.persist.mapping.strategy.EditConfigStrategy;
+import org.opendaylight.controller.config.persist.mapping.strategy.EditStrategyType;
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
 import org.opendaylight.controller.config.util.ConfigTransactionClient;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.AttributeConfigElement;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.InstanceConfigElementResolved;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ModuleElementDefinition;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ModuleElementResolved;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ServiceRegistryWrapper;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Services;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.ValidateTest;
-import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfigXmlParser.EditConfigExecution;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreContext;
 import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
@@ -79,7 +81,7 @@ public class EditConfigTest {
     }
 
     @Test
-    public void test() throws NetconfDocumentedException, ValidationException {
+    public void test() throws DocumentedException, ValidationException {
         EditConfig edit = new EditConfig(yangStoreSnapshot, provider, configRegistry,
                 ValidateTest.NETCONF_SESSION_ID_FOR_REPORTING);
         EditConfigStrategy editStrat = mock(EditConfigStrategy.class);
@@ -87,7 +89,7 @@ public class EditConfigTest {
         doNothing().when(editStrat).executeConfiguration(anyString(), anyString(), anyMapOf(String.class, AttributeConfigElement.class),
                 any(ConfigTransactionClient.class), any(ServiceRegistryWrapper.class));
 
-        EditConfigExecution editConfigExecution = mockExecution(editStrat);
+        ConfigExecution editConfigExecution = mockExecution(editStrat);
 
         edit.getResponseInternal(XmlUtil.newDocument(), editConfigExecution);
 
@@ -103,8 +105,8 @@ public class EditConfigTest {
                 any(ConfigTransactionClient.class), any(ServiceRegistryWrapper.class));
     }
 
-    private EditConfigExecution mockExecution(EditConfigStrategy editStrat) throws NetconfDocumentedException {
-        EditConfigExecution mock = mock(EditConfigExecution.class);
+    private ConfigExecution mockExecution(EditConfigStrategy editStrat) throws DocumentedException {
+        ConfigExecution mock = mock(ConfigExecution.class);
         doReturn(getMapping(editStrat)).when(mock).getResolvedXmlElements(any(ConfigTransactionClient.class));
         doReturn(getMappingDefinition(editStrat)).when(mock).getModulesDefinition(any(ConfigTransactionClient.class));
         doReturn(EditStrategyType.merge).when(mock).getDefaultStrategy();

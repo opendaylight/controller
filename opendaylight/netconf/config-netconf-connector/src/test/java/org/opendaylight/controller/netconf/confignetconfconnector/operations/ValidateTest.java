@@ -15,25 +15,25 @@ import static org.mockito.Mockito.mock;
 
 import org.junit.Test;
 import org.opendaylight.controller.config.api.ValidationException;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
+import org.opendaylight.controller.config.util.xml.XmlElement;
+import org.opendaylight.controller.config.util.xml.XmlUtil;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
-import org.opendaylight.controller.netconf.util.xml.XmlElement;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.w3c.dom.Element;
 
 public class ValidateTest {
 
     public static final String NETCONF_SESSION_ID_FOR_REPORTING = "foo";
 
-    @Test(expected = NetconfDocumentedException.class)
+    @Test(expected = DocumentedException.class)
     public void test() throws Exception {
         final XmlElement xml = XmlElement.fromString("<abc></abc>");
         final Validate validate = new Validate(null, null, NETCONF_SESSION_ID_FOR_REPORTING);
         validate.handleWithNoSubsequentOperations(null, xml);
     }
 
-    @Test(expected = NetconfDocumentedException.class)
+    @Test(expected = DocumentedException.class)
     public void testNoSource() throws Exception {
         final XmlElement xml = XmlElement.fromString("<validate xmlns=\""
                 + XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0 + "\"/>");
@@ -41,14 +41,14 @@ public class ValidateTest {
         validate.handleWithNoSubsequentOperations(null, xml);
     }
 
-    @Test(expected = NetconfDocumentedException.class)
+    @Test(expected = DocumentedException.class)
     public void testNoNamespace() throws Exception {
         final XmlElement xml = XmlElement.fromString("<validate/>");
         final Validate validate = new Validate(null, null, NETCONF_SESSION_ID_FOR_REPORTING);
         validate.handleWithNoSubsequentOperations(null, xml);
     }
 
-    @Test(expected = NetconfDocumentedException.class)
+    @Test(expected = DocumentedException.class)
     public void testRunningSource() throws Exception {
 
         final XmlElement xml = XmlElement.fromString("<validate xmlns=\""
@@ -58,7 +58,7 @@ public class ValidateTest {
         validate.handleWithNoSubsequentOperations(null, xml);
     }
 
-    @Test(expected = NetconfDocumentedException.class)
+    @Test(expected = DocumentedException.class)
     public void testNoTransaction() throws Exception {
         final XmlElement xml = XmlElement.fromString("<validate xmlns=\""
                 + XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0
@@ -69,7 +69,7 @@ public class ValidateTest {
         validate.handleWithNoSubsequentOperations(null, xml);
     }
 
-    @Test(expected = NetconfDocumentedException.class)
+    @Test(expected = DocumentedException.class)
     public void testValidationException() throws Exception {
         final XmlElement xml = XmlElement.fromString("<validate xmlns=\""
                 + XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0

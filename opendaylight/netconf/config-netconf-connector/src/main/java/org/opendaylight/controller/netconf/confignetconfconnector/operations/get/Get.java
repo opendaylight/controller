@@ -13,26 +13,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.management.ObjectName;
+import org.opendaylight.controller.config.persist.mapping.mapping.config.InstanceConfig;
+import org.opendaylight.controller.config.persist.mapping.mapping.config.ModuleConfig;
+import org.opendaylight.controller.config.persist.mapping.runtime.InstanceRuntime;
+import org.opendaylight.controller.config.persist.mapping.runtime.ModuleRuntime;
+import org.opendaylight.controller.config.persist.mapping.runtime.Runtime;
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
 import org.opendaylight.controller.config.util.ConfigTransactionClient;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
+import org.opendaylight.controller.config.util.xml.XmlElement;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.RuntimeBeanEntry;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.InstanceConfig;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ModuleConfig;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.runtime.InstanceRuntime;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.runtime.ModuleRuntime;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.runtime.Runtime;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.AbstractConfigNetconfOperation;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.Datastore;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfig;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreContext;
 import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
-import org.opendaylight.controller.netconf.util.exception.MissingNameSpaceException;
-import org.opendaylight.controller.netconf.util.exception.UnexpectedElementException;
-import org.opendaylight.controller.netconf.util.exception.UnexpectedNamespaceException;
-import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -103,7 +100,7 @@ public class Get extends AbstractConfigNetconfOperation {
         return jmxToYangNamesForChildRbe;
     }
 
-    private static void checkXml(XmlElement xml) throws UnexpectedElementException, UnexpectedNamespaceException, MissingNameSpaceException {
+    private static void checkXml(XmlElement xml) throws DocumentedException {
         xml.checkName(XmlNetconfConstants.GET);
         xml.checkNamespace(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
 
@@ -116,7 +113,7 @@ public class Get extends AbstractConfigNetconfOperation {
     }
 
     @Override
-    protected Element handleWithNoSubsequentOperations(Document document, XmlElement xml) throws NetconfDocumentedException {
+    protected Element handleWithNoSubsequentOperations(Document document, XmlElement xml) throws DocumentedException {
         checkXml(xml);
 
         final ObjectName testTransaction = transactionProvider.getOrCreateReadTransaction();

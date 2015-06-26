@@ -12,7 +12,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import org.opendaylight.controller.netconf.api.util.NetconfConstants;
+import org.opendaylight.controller.config.persist.mapping.util.NetconfConstants;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
 import org.opendaylight.yangtools.sal.binding.generator.util.BindingRuntimeContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;

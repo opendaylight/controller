@@ -13,11 +13,11 @@ import org.opendaylight.controller.config.api.ConflictingVersionException;
 import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.api.jmx.CommitStatus;
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
+import org.opendaylight.controller.config.util.xml.XmlElement;
+import org.opendaylight.controller.config.util.xml.XmlUtil;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
-import org.opendaylight.controller.netconf.util.xml.XmlElement;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -35,7 +35,7 @@ public class Commit extends AbstractConfigNetconfOperation {
         this.transactionProvider = transactionProvider;
     }
 
-    private static void checkXml(XmlElement xml) throws NetconfDocumentedException {
+    private static void checkXml(XmlElement xml) throws DocumentedException {
         xml.checkName(XmlNetconfConstants.COMMIT);
         xml.checkNamespace(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
     }
@@ -46,7 +46,7 @@ public class Commit extends AbstractConfigNetconfOperation {
     }
 
     @Override
-    protected Element handleWithNoSubsequentOperations(Document document, XmlElement xml) throws NetconfDocumentedException {
+    protected Element handleWithNoSubsequentOperations(Document document, XmlElement xml) throws DocumentedException {
 
         checkXml(xml);
         CommitStatus status;
@@ -54,7 +54,7 @@ public class Commit extends AbstractConfigNetconfOperation {
             status = this.transactionProvider.commitTransaction();
             LOG.trace("Datastore {} committed successfully: {}", Datastore.candidate, status);
         } catch (ConflictingVersionException | ValidationException e) {
-            throw NetconfDocumentedException.wrap(e);
+            throw DocumentedException.wrap(e);
         }
         LOG.trace("Datastore {} committed successfully: {}", Datastore.candidate, status);
 

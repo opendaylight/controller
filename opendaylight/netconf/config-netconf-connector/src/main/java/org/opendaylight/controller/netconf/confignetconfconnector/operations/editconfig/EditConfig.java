@@ -10,7 +10,6 @@ package org.opendaylight.controller.netconf.confignetconfconnector.operations.ed
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import java.util.Date;
@@ -20,28 +19,31 @@ import java.util.Set;
 import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
 import org.opendaylight.controller.config.api.ValidationException;
+import org.opendaylight.controller.config.persist.mapping.ConfigExecution;
+import org.opendaylight.controller.config.persist.mapping.mapping.IdentityMapping;
+import org.opendaylight.controller.config.persist.mapping.mapping.config.Config;
+import org.opendaylight.controller.config.persist.mapping.mapping.config.InstanceConfig;
+import org.opendaylight.controller.config.persist.mapping.mapping.config.InstanceConfigElementResolved;
+import org.opendaylight.controller.config.persist.mapping.mapping.config.ModuleConfig;
+import org.opendaylight.controller.config.persist.mapping.mapping.config.ModuleElementDefinition;
+import org.opendaylight.controller.config.persist.mapping.mapping.config.ModuleElementResolved;
+import org.opendaylight.controller.config.persist.mapping.mapping.config.Services;
+import org.opendaylight.controller.config.persist.mapping.mapping.config.Services.ServiceInstance;
+import org.opendaylight.controller.config.persist.mapping.strategy.EditConfigStrategy;
+import org.opendaylight.controller.config.persist.mapping.strategy.EditStrategyType;
 import org.opendaylight.controller.config.util.BeanReader;
 import org.opendaylight.controller.config.util.ConfigRegistryClient;
 import org.opendaylight.controller.config.util.ConfigTransactionClient;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
+import org.opendaylight.controller.config.util.xml.DocumentedException.ErrorSeverity;
+import org.opendaylight.controller.config.util.xml.DocumentedException.ErrorTag;
+import org.opendaylight.controller.config.util.xml.DocumentedException.ErrorType;
+import org.opendaylight.controller.config.util.xml.XmlElement;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorSeverity;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorTag;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorType;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Config;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.InstanceConfig;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.InstanceConfigElementResolved;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ModuleConfig;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ModuleElementDefinition;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ModuleElementResolved;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Services;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Services.ServiceInstance;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.AbstractConfigNetconfOperation;
-import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfigXmlParser.EditConfigExecution;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreContext;
 import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
-import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.yangtools.yang.model.api.IdentitySchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
@@ -69,14 +71,14 @@ public class EditConfig extends AbstractConfigNetconfOperation {
 
     @VisibleForTesting
     Element getResponseInternal(final Document document,
-            final EditConfigXmlParser.EditConfigExecution editConfigExecution) throws NetconfDocumentedException {
+            final ConfigExecution ConfigExecution) throws DocumentedException {
 
-        if (editConfigExecution.shouldTest()) {
-            executeTests(getConfigRegistryClient(), editConfigExecution);
+        if (ConfigExecution.shouldTest()) {
+            executeTests(getConfigRegistryClient(), ConfigExecution);
         }
 
-        if (editConfigExecution.shouldSet()) {
-            executeSet(getConfigRegistryClient(), editConfigExecution);
+        if (ConfigExecution.shouldSet()) {
+            executeSet(getConfigRegistryClient(), ConfigExecution);
         }
 
         LOG.trace("Operation {} successful", EditConfigXmlParser.EDIT_CONFIG);
@@ -85,27 +87,27 @@ public class EditConfig extends AbstractConfigNetconfOperation {
     }
 
     private void executeSet(ConfigRegistryClient configRegistryClient,
-            EditConfigXmlParser.EditConfigExecution editConfigExecution) throws NetconfDocumentedException {
-        set(configRegistryClient, editConfigExecution);
+            ConfigExecution ConfigExecution) throws DocumentedException {
+        set(configRegistryClient, ConfigExecution);
         LOG.debug("Set phase for {} operation successful", EditConfigXmlParser.EDIT_CONFIG);
     }
 
     private void executeTests(ConfigRegistryClient configRegistryClient,
-            EditConfigExecution editConfigExecution) throws NetconfDocumentedException {
+            ConfigExecution ConfigExecution) throws DocumentedException {
         try {
-            test(configRegistryClient, editConfigExecution, editConfigExecution.getDefaultStrategy());
+            test(configRegistryClient, ConfigExecution, ConfigExecution.getDefaultStrategy());
         } catch (final ValidationException e) {
             LOG.warn("Test phase for {} failed", EditConfigXmlParser.EDIT_CONFIG, e);
             final Map<String, String> errorInfo = new HashMap<>();
             errorInfo.put(ErrorTag.operation_failed.name(), e.getMessage());
-            throw new NetconfDocumentedException("Test phase: " + e.getMessage(), e, ErrorType.application,
+            throw new DocumentedException("Test phase: " + e.getMessage(), e, ErrorType.application,
                     ErrorTag.operation_failed, ErrorSeverity.error, errorInfo);
         }
         LOG.debug("Test phase for {} operation successful", EditConfigXmlParser.EDIT_CONFIG);
     }
 
-    private void test(ConfigRegistryClient configRegistryClient, EditConfigExecution execution,
-            EditStrategyType editStrategyType) throws ValidationException, NetconfDocumentedException {
+    private void test(ConfigRegistryClient configRegistryClient, ConfigExecution execution,
+            EditStrategyType editStrategyType) throws ValidationException, DocumentedException {
         ObjectName taON = transactionProvider.getTestTransaction();
         try {
             // default strategy = replace wipes config
@@ -125,22 +127,22 @@ public class EditConfig extends AbstractConfigNetconfOperation {
     }
 
     private void set(ConfigRegistryClient configRegistryClient,
-            EditConfigXmlParser.EditConfigExecution editConfigExecution) throws NetconfDocumentedException {
+            ConfigExecution ConfigExecution) throws DocumentedException {
         ObjectName taON = transactionProvider.getOrCreateTransaction();
 
         // default strategy = replace wipes config
-        if (editConfigExecution.getDefaultStrategy() == EditStrategyType.replace) {
+        if (ConfigExecution.getDefaultStrategy() == EditStrategyType.replace) {
             transactionProvider.wipeTransaction();
         }
 
         ConfigTransactionClient ta = configRegistryClient.getConfigTransactionClient(taON);
 
-        handleMisssingInstancesOnTransaction(ta, editConfigExecution);
-        setServicesOnTransaction(ta, editConfigExecution);
-        setOnTransaction(ta, editConfigExecution);
+        handleMisssingInstancesOnTransaction(ta, ConfigExecution);
+        setServicesOnTransaction(ta, ConfigExecution);
+        setOnTransaction(ta, ConfigExecution);
     }
 
-    private void setServicesOnTransaction(ConfigTransactionClient ta, EditConfigExecution execution) throws NetconfDocumentedException {
+    private void setServicesOnTransaction(ConfigTransactionClient ta, ConfigExecution execution) throws DocumentedException {
 
         Services services = execution.getServices();
 
@@ -165,7 +167,7 @@ public class EditConfig extends AbstractConfigNetconfOperation {
                                     on, refNameToServiceEntry.getKey(), saved);
                         }
                     } catch (InstanceNotFoundException e) {
-                        throw new NetconfDocumentedException(String.format("Unable to edit ref name " + refNameToServiceEntry.getKey() + " for instance " + on, e),
+                        throw new DocumentedException(String.format("Unable to edit ref name " + refNameToServiceEntry.getKey() + " for instance " + on, e),
                                 ErrorType.application,
                                 ErrorTag.operation_failed,
                                 ErrorSeverity.error);
@@ -179,7 +181,7 @@ public class EditConfig extends AbstractConfigNetconfOperation {
         return ta.getServiceInterfaceName(namespace, serviceName);
     }
 
-    private void setOnTransaction(ConfigTransactionClient ta, EditConfigExecution execution) throws NetconfDocumentedException {
+    private void setOnTransaction(ConfigTransactionClient ta, ConfigExecution execution) throws DocumentedException {
 
         for (Multimap<String, ModuleElementResolved> modulesToResolved : execution.getResolvedXmlElements(ta).values()) {
 
@@ -197,7 +199,7 @@ public class EditConfig extends AbstractConfigNetconfOperation {
     }
 
     private void handleMisssingInstancesOnTransaction(ConfigTransactionClient ta,
-            EditConfigExecution execution) throws NetconfDocumentedException {
+            ConfigExecution execution) throws DocumentedException {
 
         for (Multimap<String,ModuleElementDefinition> modulesToResolved : execution.getModulesDefinition(ta).values()) {
             for (Map.Entry<String, ModuleElementDefinition> moduleToResolved : modulesToResolved.entries()) {
@@ -216,26 +218,6 @@ public class EditConfig extends AbstractConfigNetconfOperation {
                 yangStoreSnapshot.getModuleMXBeanEntryMap());
         Map<String, Map<Date, IdentityMapping>> identitiesMap = transformIdentities(yangStoreSnapshot.getModules());
         return new Config(factories, identitiesMap, yangStoreSnapshot.getEnumResolver());
-    }
-
-
-    public static class IdentityMapping {
-        private final Map<String, IdentitySchemaNode> identityNameToSchemaNode;
-
-        public IdentityMapping() {
-            this.identityNameToSchemaNode = Maps.newHashMap();
-        }
-
-        void addIdSchemaNode(IdentitySchemaNode node) {
-            String name = node.getQName().getLocalName();
-            Preconditions.checkState(!identityNameToSchemaNode.containsKey(name));
-            identityNameToSchemaNode.put(name, node);
-        }
-
-        public boolean containsIdName(String idName) {
-            return identityNameToSchemaNode.containsKey(idName);
-        }
-
     }
 
     private static Map<String, Map<Date, IdentityMapping>> transformIdentities(Set<Module> modules) {
@@ -299,13 +281,13 @@ public class EditConfig extends AbstractConfigNetconfOperation {
     }
 
     @Override
-    protected Element handleWithNoSubsequentOperations(Document document, XmlElement xml) throws NetconfDocumentedException {
-        EditConfigXmlParser.EditConfigExecution editConfigExecution;
+    protected Element handleWithNoSubsequentOperations(Document document, XmlElement xml) throws DocumentedException {
+        ConfigExecution configExecution;
         Config cfg = getConfigMapping(getConfigRegistryClient(), yangStoreSnapshot);
-        editConfigExecution = editConfigXmlParser.fromXml(xml, cfg);
+        configExecution = editConfigXmlParser.fromXml(xml, cfg);
 
         Element responseInternal;
-        responseInternal = getResponseInternal(document, editConfigExecution);
+        responseInternal = getResponseInternal(document, configExecution);
         return responseInternal;
     }
 

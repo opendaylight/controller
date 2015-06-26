@@ -21,14 +21,14 @@ import static org.mockito.Mockito.verify;
 import java.util.Collections;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
+import org.opendaylight.controller.config.util.xml.XmlUtil;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
 import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
 import org.opendaylight.controller.netconf.impl.NetconfServerSession;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationRouter;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedExecution;
 import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state.CapabilitiesBuilder;
 import org.w3c.dom.Document;
@@ -76,7 +76,7 @@ public class DefaultCommitTest {
         verify(notifier, never()).sendCommitNotification(anyString(), any(Element.class), anySetOf(String.class));
     }
 
-    @Test(expected = NetconfDocumentedException.class)
+    @Test(expected = DocumentedException.class)
     public void testHandle() throws Exception {
         Document rpcData = XmlFileLoader.xmlFileToDocument("netconfMessages/get.xml");
         doReturn(rpcData).when(router).onNetconfMessage(any(Document.class), any(NetconfServerSession.class));

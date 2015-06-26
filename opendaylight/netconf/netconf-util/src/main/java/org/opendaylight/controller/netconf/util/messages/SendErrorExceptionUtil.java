@@ -12,7 +12,7 @@ import com.google.common.base.Preconditions;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
@@ -30,21 +30,21 @@ public final class SendErrorExceptionUtil {
     private SendErrorExceptionUtil() {}
 
     public static void sendErrorMessage(final NetconfSession session,
-            final NetconfDocumentedException sendErrorException) {
+            final DocumentedException sendErrorException) {
         LOG.trace("Sending error {}", sendErrorException.getMessage(), sendErrorException);
         final Document errorDocument = createDocument(sendErrorException);
         ChannelFuture f = session.sendMessage(new NetconfMessage(errorDocument));
         f.addListener(new SendErrorVerifyingListener(sendErrorException));
     }
 
-    public static void sendErrorMessage(final Channel channel, final NetconfDocumentedException sendErrorException) {
+    public static void sendErrorMessage(final Channel channel, final DocumentedException sendErrorException) {
         LOG.trace("Sending error {}", sendErrorException.getMessage(), sendErrorException);
         final Document errorDocument = createDocument(sendErrorException);
         ChannelFuture f = channel.writeAndFlush(new NetconfMessage(errorDocument));
         f.addListener(new SendErrorVerifyingListener(sendErrorException));
     }
 
-    public static void sendErrorMessage(final NetconfSession session, final NetconfDocumentedException sendErrorException,
+    public static void sendErrorMessage(final NetconfSession session, final DocumentedException sendErrorException,
             final NetconfMessage incommingMessage) {
         final Document errorDocument = createDocument(sendErrorException);
         if (LOG.isTraceEnabled()) {
@@ -57,7 +57,7 @@ public final class SendErrorExceptionUtil {
     }
 
     private static void tryToCopyAttributes(final Document incommingDocument, final Document errorDocument,
-            final NetconfDocumentedException sendErrorException) {
+            final DocumentedException sendErrorException) {
         try {
             final Element incommingRpc = incommingDocument.getDocumentElement();
             Preconditions.checkState(incommingRpc.getTagName().equals(XmlNetconfConstants.RPC_KEY), "Missing %s element",
@@ -82,7 +82,7 @@ public final class SendErrorExceptionUtil {
         }
     }
 
-    private static Document createDocument(final NetconfDocumentedException sendErrorException) {
+    private static Document createDocument(final DocumentedException sendErrorException) {
         return sendErrorException.toXMLDocument();
     }
 
@@ -90,9 +90,9 @@ public final class SendErrorExceptionUtil {
      * Checks if netconf error was sent successfully.
      */
     private static final class SendErrorVerifyingListener implements ChannelFutureListener {
-        private final NetconfDocumentedException sendErrorException;
+        private final DocumentedException sendErrorException;
 
-        public SendErrorVerifyingListener(final NetconfDocumentedException sendErrorException) {
+        public SendErrorVerifyingListener(final DocumentedException sendErrorException) {
             this.sendErrorException = sendErrorException;
         }
 

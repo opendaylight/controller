@@ -21,6 +21,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicReference;
+import org.opendaylight.controller.config.persist.mapping.osgi.EnumResolver;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.netconf.api.Capability;
 import org.opendaylight.controller.netconf.api.monitoring.CapabilityListener;
