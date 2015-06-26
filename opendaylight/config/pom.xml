@@ -42,6 +42,8 @@
 
     <module>config-artifacts</module>
     <module>config-parent</module>
+    <module>config-persister-mapping</module>
+    <module>config-southbound-placeholder</module>
   </modules>
 
   <dependencies>

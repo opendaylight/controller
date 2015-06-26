@@ -7,10 +7,10 @@
  */
 package org.opendaylight.controller.netconf.util.mapping;
 
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
+import org.opendaylight.controller.config.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedExecution;
-import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -22,12 +22,12 @@ public abstract class AbstractLastNetconfOperation extends AbstractNetconfOperat
 
     @Override
     protected Element handle(Document document, XmlElement operationElement,
-            NetconfOperationChainedExecution subsequentOperation) throws NetconfDocumentedException {
+            NetconfOperationChainedExecution subsequentOperation) throws DocumentedException {
         if (!subsequentOperation.isExecutionTermination()){
-            throw new NetconfDocumentedException(String.format("No netconf operation expected to be subsequent to %s, but is %s", this, subsequentOperation),
-                    NetconfDocumentedException.ErrorType.application,
-                    NetconfDocumentedException.ErrorTag.malformed_message,
-                    NetconfDocumentedException.ErrorSeverity.error);
+            throw new DocumentedException(String.format("No netconf operation expected to be subsequent to %s, but is %s", this, subsequentOperation),
+                    DocumentedException.ErrorType.application,
+                    DocumentedException.ErrorTag.malformed_message,
+                    DocumentedException.ErrorSeverity.error);
         }
 
         return handleWithNoSubsequentOperations(document, operationElement);
@@ -38,5 +38,5 @@ public abstract class AbstractLastNetconfOperation extends AbstractNetconfOperat
         return HandlingPriority.HANDLE_WITH_DEFAULT_PRIORITY;
     }
 
-    protected abstract Element handleWithNoSubsequentOperations(Document document, XmlElement operationElement) throws NetconfDocumentedException;
+    protected abstract Element handleWithNoSubsequentOperations(Document document, XmlElement operationElement) throws DocumentedException;
 }

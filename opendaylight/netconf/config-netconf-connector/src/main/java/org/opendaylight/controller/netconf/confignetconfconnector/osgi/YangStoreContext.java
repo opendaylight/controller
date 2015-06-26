@@ -9,6 +9,7 @@ package org.opendaylight.controller.netconf.confignetconfconnector.osgi;
 
 import java.util.Map;
 import java.util.Set;
+import org.opendaylight.controller.config.persist.mapping.osgi.EnumResolver;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.Module;

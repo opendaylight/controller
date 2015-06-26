@@ -17,16 +17,15 @@
       <groupId>${project.groupId}</groupId>
       <artifactId>config-api</artifactId>
     </dependency>
-    <!-- test dependencies -->
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <scope>test</scope>
     </dependency>
-  <dependency>
-    <groupId>org.opendaylight.yangtools</groupId>
-    <artifactId>mockito-configuration</artifactId>
-  </dependency>
+    <!-- test dependencies -->
+    <dependency>
+      <groupId>org.opendaylight.yangtools</groupId>
+      <artifactId>mockito-configuration</artifactId>
+    </dependency>
   </dependencies>
 
   <build>
@@ -42,6 +41,7 @@
         <configuration>
           <instructions>
             <Export-Package>org.opendaylight.controller.config.util</Export-Package>
+            <Export-Package>org.opendaylight.controller.config.util.xml</Export-Package>
           </instructions>
         </configuration>
       </plugin>
