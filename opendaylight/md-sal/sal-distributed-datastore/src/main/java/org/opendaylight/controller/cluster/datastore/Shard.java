@@ -793,6 +793,13 @@ public class Shard extends RaftActor {
         shardMBean.setCommitIndex(getCommitIndex());
         shardMBean.setLastApplied(getLastApplied());
         shardMBean.setInMemoryJournalDataSize(getRaftActorContext().getReplicatedLog().dataSize());
+        shardMBean.setInMemoryJournalLogSize(getRaftActorContext().getReplicatedLog().size());
+        shardMBean.setSnapshotIndex(getRaftActorContext().getReplicatedLog().getSnapshotIndex());
+        shardMBean.setSnapshotTerm(getRaftActorContext().getReplicatedLog().getSnapshotTerm());
+
+        if(getCurrentBehavior() != null) {
+            shardMBean.setReplicatedToAllIndex(getCurrentBehavior().getReplicatedToAllIndex());
+        }
     }
 
     @Override

@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,7 +19,7 @@ import java.util.List;
 public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
 
     // We define this as ArrayList so we can use ensureCapacity.
-    protected ArrayList<ReplicatedLogEntry> journal;
+    private ArrayList<ReplicatedLogEntry> journal;
 
     protected long snapshotIndex = -1;
     protected long snapshotTerm = -1;
@@ -26,13 +28,17 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
     protected ArrayList<ReplicatedLogEntry> snapshottedJournal;
     protected long previousSnapshotIndex = -1;
     protected long previousSnapshotTerm = -1;
-    protected int dataSize = 0;
+    private int dataSize = 0;
 
     public AbstractReplicatedLogImpl(long snapshotIndex,
         long snapshotTerm, List<ReplicatedLogEntry> unAppliedEntries) {
         this.snapshotIndex = snapshotIndex;
         this.snapshotTerm = snapshotTerm;
         this.journal = new ArrayList<>(unAppliedEntries);
+
+        for(ReplicatedLogEntry entry: journal) {
+            dataSize += entry.size();
+        }
     }
 
     public AbstractReplicatedLogImpl() {
@@ -88,18 +94,26 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
     }
 
     @Override
-    public void removeFrom(long logEntryIndex) {
+    public long removeFrom(long logEntryIndex) {
         int adjustedIndex = adjustedIndex(logEntryIndex);
         if (adjustedIndex < 0 || adjustedIndex >= journal.size()) {
             // physical index should be less than list size and >= 0
-            return;
+            return -1;
         }
+
+        for(int i = adjustedIndex; i < journal.size(); i++) {
+            dataSize -= journal.get(i).size();
+        }
+
         journal.subList(adjustedIndex , journal.size()).clear();
+
+        return adjustedIndex;
     }
 
     @Override
     public void append(ReplicatedLogEntry replicatedLogEntry) {
         journal.add(replicatedLogEntry);
+        dataSize += replicatedLogEntry.size();
     }
 
     @Override
@@ -132,6 +146,11 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
     @Override
     public long size() {
        return journal.size();
+    }
+
+    @Override
+    public int dataSize() {
+        return dataSize;
     }
 
     @Override
@@ -182,9 +201,14 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
 
     @Override
     public void snapshotPreCommit(long snapshotCapturedIndex, long snapshotCapturedTerm) {
+        Preconditions.checkArgument(snapshotCapturedIndex >= snapshotIndex,
+                "snapshotCapturedIndex must be greater than or equal to snapshotIndex");
+
         snapshottedJournal = new ArrayList<>(journal.size());
 
-        snapshottedJournal.addAll(journal.subList(0, (int)(snapshotCapturedIndex - snapshotIndex)));
+        List<ReplicatedLogEntry> snapshotJournalEntries = journal.subList(0, (int) (snapshotCapturedIndex - snapshotIndex));
+
+        snapshottedJournal.addAll(snapshotJournalEntries);
         clear(0, (int) (snapshotCapturedIndex - snapshotIndex));
 
         previousSnapshotIndex = snapshotIndex;
@@ -200,6 +224,11 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
         previousSnapshotIndex = -1;
         previousSnapshotTerm = -1;
         dataSize = 0;
+
+        // need to recalc the datasize based on the entries left after precommit.
+        for(ReplicatedLogEntry logEntry : journal) {
+            dataSize += logEntry.size();
+        }
     }
 
     @Override
@@ -213,5 +242,10 @@ public abstract class AbstractReplicatedLogImpl implements ReplicatedLog {
 
         snapshotTerm = previousSnapshotTerm;
         previousSnapshotTerm = -1;
+    }
+
+    @VisibleForTesting
+    ReplicatedLogEntry getAtPhysicalIndex(int index) {
+        return journal.get(index);
     }
 }
