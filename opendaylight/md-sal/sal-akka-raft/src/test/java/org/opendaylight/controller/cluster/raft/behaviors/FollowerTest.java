@@ -7,7 +7,6 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.testkit.JavaTestKit;
 import com.google.protobuf.ByteString;
-import junit.framework.Assert;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -16,6 +15,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import junit.framework.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
@@ -46,6 +46,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
         return createActorContext(followerActor);
     }
 
+    @Override
     protected  RaftActorContext createActorContext(ActorRef actorRef){
         return new MockRaftActorContext("test", getSystem(), actorRef);
     }
@@ -55,12 +56,14 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
         new JavaTestKit(getSystem()) {{
 
             new Within(DefaultConfigParamsImpl.HEART_BEAT_INTERVAL.$times(6)) {
+                @Override
                 protected void run() {
 
                     Follower follower = new Follower(createActorContext(getTestActor()));
 
                     final Boolean out = new ExpectMsg<Boolean>(DefaultConfigParamsImpl.HEART_BEAT_INTERVAL.$times(6), "ElectionTimeout") {
                         // do not put code outside this method, will run afterwards
+                        @Override
                         protected Boolean match(Object in) {
                             if (in instanceof ElectionTimeout) {
                                 return true;
@@ -93,6 +96,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
         new JavaTestKit(getSystem()) {{
 
             new Within(duration("1 seconds")) {
+                @Override
                 protected void run() {
 
                     RaftActorContext context = createActorContext(getTestActor());
@@ -105,6 +109,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
 
                     final Boolean out = new ExpectMsg<Boolean>(duration("1 seconds"), "RequestVoteReply") {
                         // do not put code outside this method, will run afterwards
+                        @Override
                         protected Boolean match(Object in) {
                             if (in instanceof RequestVoteReply) {
                                 RequestVoteReply reply = (RequestVoteReply) in;
@@ -126,6 +131,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
         new JavaTestKit(getSystem()) {{
 
             new Within(duration("1 seconds")) {
+                @Override
                 protected void run() {
 
                     RaftActorContext context = createActorContext(getTestActor());
@@ -138,6 +144,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
 
                     final Boolean out = new ExpectMsg<Boolean>(duration("1 seconds"), "RequestVoteReply") {
                         // do not put code outside this method, will run afterwards
+                        @Override
                         protected Boolean match(Object in) {
                             if (in instanceof RequestVoteReply) {
                                 RequestVoteReply reply = (RequestVoteReply) in;
@@ -182,7 +189,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
 
             // The new commitIndex is 101
             AppendEntries appendEntries =
-                new AppendEntries(2, "leader-1", 100, 1, entries, 101);
+                new AppendEntries(2, "leader-1", 100, 1, entries, 101, -1);
 
             RaftActorBehavior raftBehavior =
                 createBehavior(context).handleMessage(getRef(), appendEntries);
@@ -218,7 +225,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
             // AppendEntries is now sent with a bigger term
             // this will set the receivers term to be the same as the sender's term
             AppendEntries appendEntries =
-                new AppendEntries(100, "leader-1", 0, 0, null, 101);
+                new AppendEntries(100, "leader-1", 0, 0, null, 101, -1);
 
             RaftActorBehavior behavior = createBehavior(context);
 
@@ -234,6 +241,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
             final Boolean out = new ExpectMsg<Boolean>(duration("1 seconds"),
                 "AppendEntriesReply") {
                 // do not put code outside this method, will run afterwards
+                @Override
                 protected Boolean match(Object in) {
                     if (in instanceof AppendEntriesReply) {
                         AppendEntriesReply reply = (AppendEntriesReply) in;
@@ -294,7 +302,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
             // This will not work for a Candidate because as soon as a Candidate
             // is created it increments the term
             AppendEntries appendEntries =
-                new AppendEntries(1, "leader-1", 2, 1, entries, 4);
+                new AppendEntries(1, "leader-1", 2, 1, entries, 4, -1);
 
             RaftActorBehavior behavior = createBehavior(context);
 
@@ -313,6 +321,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
             final Boolean out = new ExpectMsg<Boolean>(duration("1 seconds"),
                 "AppendEntriesReply") {
                 // do not put code outside this method, will run afterwards
+                @Override
                 protected Boolean match(Object in) {
                     if (in instanceof AppendEntriesReply) {
                         AppendEntriesReply reply = (AppendEntriesReply) in;
@@ -374,7 +383,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
             // This will not work for a Candidate because as soon as a Candidate
             // is created it increments the term
             AppendEntries appendEntries =
-                new AppendEntries(2, "leader-1", 1, 1, entries, 3);
+                new AppendEntries(2, "leader-1", 1, 1, entries, 3, -1);
 
             RaftActorBehavior behavior = createBehavior(context);
 
@@ -406,6 +415,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
             final Boolean out = new ExpectMsg<Boolean>(duration("1 seconds"),
                 "AppendEntriesReply") {
                 // do not put code outside this method, will run afterwards
+                @Override
                 protected Boolean match(Object in) {
                     if (in instanceof AppendEntriesReply) {
                         AppendEntriesReply reply = (AppendEntriesReply) in;
@@ -447,7 +457,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
                     new MockRaftActorContext.MockReplicatedLogEntry(1, 4, new MockRaftActorContext.MockPayload("two-1")));
 
             AppendEntries appendEntries =
-                    new AppendEntries(1, "leader-1", 3, 1, entries, 4);
+                    new AppendEntries(1, "leader-1", 3, 1, entries, 4, -1);
 
             RaftActorBehavior behavior = createBehavior(context);
 
@@ -463,6 +473,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
             final Boolean out = new ExpectMsg<Boolean>(duration("1 seconds"),
                     "AppendEntriesReply") {
                 // do not put code outside this method, will run afterwards
+                @Override
                 protected Boolean match(Object in) {
                     if (in instanceof AppendEntriesReply) {
                         AppendEntriesReply reply = (AppendEntriesReply) in;
@@ -503,7 +514,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
                     new MockRaftActorContext.MockReplicatedLogEntry(1, 4, new MockRaftActorContext.MockPayload("two-1")));
 
             AppendEntries appendEntries =
-                    new AppendEntries(1, "leader-1", 3, 1, entries, 4);
+                    new AppendEntries(1, "leader-1", 3, 1, entries, 4, -1);
 
             RaftActorBehavior behavior = createBehavior(context);
 
@@ -519,6 +530,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
             final Boolean out = new ExpectMsg<Boolean>(duration("1 seconds"),
                     "AppendEntriesReply") {
                 // do not put code outside this method, will run afterwards
+                @Override
                 protected Boolean match(Object in) {
                     if (in instanceof AppendEntriesReply) {
                         AppendEntriesReply reply = (AppendEntriesReply) in;

@@ -9,24 +9,28 @@
 package org.opendaylight.controller.cluster.raft.base.messages;
 
 public class CaptureSnapshot {
-    private long lastAppliedIndex;
-    private long lastAppliedTerm;
-    private long lastIndex;
-    private long lastTerm;
-    private boolean installSnapshotInitiated;
+    private final long lastAppliedIndex;
+    private final long lastAppliedTerm;
+    private final long lastIndex;
+    private final long lastTerm;
+    private final boolean installSnapshotInitiated;
+    private final long replicatedToAllIndex;
+    private final long replicatedToAllTerm;
 
     public CaptureSnapshot(long lastIndex, long lastTerm,
-        long lastAppliedIndex, long lastAppliedTerm) {
-        this(lastIndex, lastTerm, lastAppliedIndex, lastAppliedTerm, false);
+            long lastAppliedIndex, long lastAppliedTerm, long replicatedToAllIndex, long replicatedToAllTerm) {
+            this(lastIndex, lastTerm, lastAppliedIndex, lastAppliedTerm, replicatedToAllIndex , replicatedToAllTerm, false);
     }
 
     public CaptureSnapshot(long lastIndex, long lastTerm,long lastAppliedIndex,
-        long lastAppliedTerm, boolean installSnapshotInitiated) {
+            long lastAppliedTerm, long replicatedToAllIndex, long replicatedToAllTerm, boolean installSnapshotInitiated) {
         this.lastIndex = lastIndex;
         this.lastTerm = lastTerm;
         this.lastAppliedIndex = lastAppliedIndex;
         this.lastAppliedTerm = lastAppliedTerm;
         this.installSnapshotInitiated = installSnapshotInitiated;
+        this.replicatedToAllIndex = replicatedToAllIndex;
+        this.replicatedToAllTerm = replicatedToAllTerm;
     }
 
     public long getLastAppliedIndex() {
@@ -47,5 +51,13 @@ public class CaptureSnapshot {
 
     public boolean isInstallSnapshotInitiated() {
         return installSnapshotInitiated;
+    }
+
+    public long getReplicatedToAllIndex() {
+        return replicatedToAllIndex;
+    }
+
+    public long getReplicatedToAllTerm() {
+        return replicatedToAllTerm;
     }
 }

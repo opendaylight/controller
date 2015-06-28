@@ -34,6 +34,7 @@ public class MockRaftActorContext implements RaftActorContext {
     private ReplicatedLog replicatedLog;
     private Map<String, String> peerAddresses = new HashMap();
     private ConfigParams configParams;
+    private boolean snapshotCaptureInitiated;
 
     public MockRaftActorContext(){
         electionTerm = null;
@@ -190,6 +191,16 @@ public class MockRaftActorContext implements RaftActorContext {
         this.configParams = configParams;
     }
 
+    @Override
+    public void setSnapshotCaptureInitiated(boolean snapshotCaptureInitiated) {
+        this.snapshotCaptureInitiated = snapshotCaptureInitiated;
+    }
+
+    @Override
+    public boolean isSnapshotCaptureInitiated() {
+        return snapshotCaptureInitiated;
+    }
+
     public static class SimpleReplicatedLog extends AbstractReplicatedLogImpl {
         @Override public void appendAndPersist(
             ReplicatedLogEntry replicatedLogEntry) {
@@ -208,6 +219,7 @@ public class MockRaftActorContext implements RaftActorContext {
 
     public static class MockPayload extends Payload implements Serializable {
         private String value = "";
+        private int size;
 
         public MockPayload(){
 
@@ -215,6 +227,12 @@ public class MockRaftActorContext implements RaftActorContext {
 
         public MockPayload(String s) {
             this.value = s;
+            size = value.length();
+        }
+
+        public MockPayload(String s, int size) {
+            this(s);
+            this.size = size;
         }
 
         @Override public  Map<GeneratedMessage.GeneratedExtension, String> encode() {
@@ -232,7 +250,7 @@ public class MockRaftActorContext implements RaftActorContext {
 
         @Override
         public int size() {
-            return value.length();
+            return size;
         }
 
         @Override public String getClientPayloadClassName() {
