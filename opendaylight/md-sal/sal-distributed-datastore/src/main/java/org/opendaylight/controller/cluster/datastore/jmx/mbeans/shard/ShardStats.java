@@ -8,19 +8,17 @@
 
 package org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
-
 import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
 import org.opendaylight.controller.md.sal.common.util.jmx.QueuedNotificationManagerMXBeanImpl;
 import org.opendaylight.controller.md.sal.common.util.jmx.ThreadExecutorStats;
 import org.opendaylight.controller.md.sal.common.util.jmx.ThreadExecutorStatsMXBeanImpl;
 import org.opendaylight.yangtools.util.concurrent.ListenerNotificationQueueStats;
 import org.opendaylight.yangtools.util.concurrent.QueuedNotificationManager;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 /**
  * Maintains statistics for a shard.
@@ -52,6 +50,12 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
 
     private volatile long lastApplied = -1L;
 
+    private volatile long snapshotTerm = -1L;
+
+    private volatile long snapshotIndex = -1L;
+
+    private volatile long replicatedToAllIndex = -1;
+
     private volatile long lastCommittedTransactionTime;
 
     private final AtomicLong failedTransactionsCount = new AtomicLong();
@@ -67,6 +71,8 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
     private QueuedNotificationManagerMXBeanImpl notificationManagerStatsBean;
 
     private volatile long dataSize = 0;
+
+    private volatile long logSize = 0;
 
     private final SimpleDateFormat sdf =
         new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
@@ -232,6 +238,22 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
         this.dataSize = dataSize;
     }
 
+    public void setInMemoryJournalLogSize(long size){
+        this.logSize = size;
+    }
+
+    public void setSnapshotTerm(long snapshotTerm) {
+        this.snapshotTerm = snapshotTerm;
+    }
+
+    public void setSnapshotIndex(long snapshotIndex) {
+        this.snapshotIndex = snapshotIndex;
+    }
+
+    public void setReplicatedToAllIndex(long replicatedToAllIndex) {
+        this.replicatedToAllIndex = replicatedToAllIndex;
+    }
+
     @Override
     public long getInMemoryJournalDataSize(){
         return dataSize;
@@ -279,5 +301,25 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
 
         abortTransactionsCount.set(0);
 
+    }
+
+    @Override
+    public long getSnapshotIndex() {
+        return snapshotIndex;
+    }
+
+    @Override
+    public long getSnapshotTerm() {
+        return snapshotTerm;
+    }
+
+    @Override
+    public long getReplicatedToAllIndex() {
+        return replicatedToAllIndex;
+    }
+
+    @Override
+    public long getInMemoryJournalLogSize() {
+        return logSize;
     }
 }

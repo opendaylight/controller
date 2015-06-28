@@ -9,22 +9,20 @@
 package org.opendaylight.controller.cluster.raft.messages;
 
 import com.google.protobuf.GeneratedMessage;
-import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
-import org.opendaylight.controller.cluster.raft.ReplicatedLogImplEntry;
-import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
-import org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.ReplicatedLogImplEntry;
+import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
+import org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages;
 
 /**
  * Invoked by leader to replicate log entries (§5.3); also used as
  * heartbeat (§5.2).
  */
 public class AppendEntries extends AbstractRaftRPC {
-
     public static final Class SERIALIZABLE_CLASS = AppendEntriesMessages.AppendEntries.class;
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AppendEntries.class);
@@ -45,14 +43,18 @@ public class AppendEntries extends AbstractRaftRPC {
     // leader's commitIndex
     private final long leaderCommit;
 
+    // index which has been replicated successfully to all followers, -1 if none
+    private final long replicatedToAllIndex;
+
     public AppendEntries(long term, String leaderId, long prevLogIndex,
-        long prevLogTerm, List<ReplicatedLogEntry> entries, long leaderCommit) {
+        long prevLogTerm, List<ReplicatedLogEntry> entries, long leaderCommit, long replicatedToAllIndex) {
         super(term);
         this.leaderId = leaderId;
         this.prevLogIndex = prevLogIndex;
         this.prevLogTerm = prevLogTerm;
         this.entries = entries;
         this.leaderCommit = leaderCommit;
+        this.replicatedToAllIndex = replicatedToAllIndex;
     }
 
     public String getLeaderId() {
@@ -75,6 +77,10 @@ public class AppendEntries extends AbstractRaftRPC {
         return leaderCommit;
     }
 
+    public long getReplicatedToAllIndex() {
+        return replicatedToAllIndex;
+    }
+
     @Override public String toString() {
         final StringBuilder sb =
             new StringBuilder("AppendEntries{");
@@ -84,6 +90,7 @@ public class AppendEntries extends AbstractRaftRPC {
         sb.append(", prevLogTerm=").append(prevLogTerm);
         sb.append(", entries=").append(entries);
         sb.append(", leaderCommit=").append(leaderCommit);
+        sb.append(", replicatedToAllIndex=").append(replicatedToAllIndex);
         sb.append('}');
         return sb.toString();
     }
@@ -94,7 +101,8 @@ public class AppendEntries extends AbstractRaftRPC {
             .setLeaderId(this.getLeaderId())
             .setPrevLogTerm(this.getPrevLogTerm())
             .setPrevLogIndex(this.getPrevLogIndex())
-            .setLeaderCommit(this.getLeaderCommit());
+            .setLeaderCommit(this.getLeaderCommit())
+            .setReplicatedToAllIndex(this.replicatedToAllIndex);
 
         for (ReplicatedLogEntry logEntry : this.getEntries()) {
 
@@ -156,7 +164,8 @@ public class AppendEntries extends AbstractRaftRPC {
             from.getPrevLogIndex(),
             from.getPrevLogTerm(),
             logEntryList,
-            from.getLeaderCommit());
+            from.getLeaderCommit(),
+            from.getReplicatedToAllIndex());
 
         return to;
     }

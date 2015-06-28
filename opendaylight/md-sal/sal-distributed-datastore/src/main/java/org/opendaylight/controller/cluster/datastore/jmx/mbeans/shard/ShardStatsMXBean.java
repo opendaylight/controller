@@ -1,7 +1,6 @@
 package org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard;
 
 import java.util.List;
-
 import org.opendaylight.controller.md.sal.common.util.jmx.ThreadExecutorStats;
 import org.opendaylight.yangtools.util.concurrent.ListenerNotificationQueueStats;
 
@@ -30,6 +29,12 @@ public interface ShardStatsMXBean {
 
    long getLastApplied();
 
+   long getSnapshotIndex();
+
+   long getSnapshotTerm();
+
+   long getReplicatedToAllIndex();
+
    String getLastCommittedTransactionTime();
 
    long getFailedTransactionsCount();
@@ -53,4 +58,6 @@ public interface ShardStatsMXBean {
    void resetTransactionCounters();
 
    long getInMemoryJournalDataSize();
+
+   long getInMemoryJournalLogSize();
 }

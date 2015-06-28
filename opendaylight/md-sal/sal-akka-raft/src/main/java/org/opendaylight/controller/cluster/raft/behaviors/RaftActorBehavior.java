@@ -50,4 +50,16 @@ public interface RaftActorBehavior extends AutoCloseable{
      * @return
      */
     String getLeaderId();
+
+    /**
+     * setting the index of the log entry which is replicated to all nodes
+     * @param replicatedToAllIndex
+     */
+    void setReplicatedToAllIndex(long replicatedToAllIndex);
+
+    /**
+     * getting the index of the log entry which is replicated to all nodes
+     * @return
+     */
+    long getReplicatedToAllIndex();
 }
