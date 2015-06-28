@@ -34,6 +34,7 @@ public class MockRaftActorContext implements RaftActorContext {
     private ReplicatedLog replicatedLog;
     private Map<String, String> peerAddresses = new HashMap();
     private ConfigParams configParams;
+    private boolean snapshotCaptureInitiated;
 
     public MockRaftActorContext(){
         electionTerm = null;
@@ -188,6 +189,16 @@ public class MockRaftActorContext implements RaftActorContext {
 
     public void setConfigParams(ConfigParams configParams) {
         this.configParams = configParams;
+    }
+
+    @Override
+    public void setSnapshotCaptureInitiated(boolean snapshotCaptureInitiated) {
+        this.snapshotCaptureInitiated = snapshotCaptureInitiated;
+    }
+
+    @Override
+    public boolean isSnapshotCaptureInitiated() {
+        return snapshotCaptureInitiated;
     }
 
     public static class SimpleReplicatedLog extends AbstractReplicatedLogImpl {

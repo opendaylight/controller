@@ -9,6 +9,7 @@ message AppendEntries {
     optional string leaderId = 2;
     optional int64 prevLogIndex = 3;
     optional int64 prevLogTerm = 4;
+    optional int64 replicatedToAllIndex = 7;
 
     message ReplicatedLogEntry {
         optional int64 term = 1;

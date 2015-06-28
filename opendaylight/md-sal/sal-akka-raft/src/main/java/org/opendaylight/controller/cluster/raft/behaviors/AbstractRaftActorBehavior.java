@@ -64,6 +64,8 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
 
     private final String logName;
 
+    private long replicatedToAllIndex = -1;
+
     protected AbstractRaftActorBehavior(RaftActorContext context, RaftState state) {
         this.context = context;
         this.state = state;
@@ -75,6 +77,16 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
     @Override
     public RaftState state() {
         return state;
+    }
+
+    @Override
+    public void setReplicatedToAllIndex(long replicatedToAllIndex) {
+        this.replicatedToAllIndex = replicatedToAllIndex;
+    }
+
+    @Override
+    public long getReplicatedToAllIndex() {
+        return replicatedToAllIndex;
     }
 
     public String logName() {
@@ -439,5 +451,25 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
         }
         return numMajority;
 
+    }
+
+    /**
+     * Performs a snapshot with no capture on the replicated log.
+     * It clears the log from the supplied index or last-applied-1 which ever is minimum.
+     *
+     * @param snapshotCapturedIndex
+     */
+    protected void performSnapshotWithoutCapture(final long snapshotCapturedIndex) {
+        //  we would want to keep the lastApplied as its used while capturing snapshots
+        long lastApplied = context.getLastApplied();
+        long tempMin = Math.min(snapshotCapturedIndex, (lastApplied > -1 ? lastApplied - 1 : -1));
+
+        if (tempMin > -1 && context.getReplicatedLog().isPresent(tempMin))  {
+            //use the term of the temp-min, since we check for isPresent, entry will not be null
+            ReplicatedLogEntry entry = context.getReplicatedLog().get(tempMin);
+            context.getReplicatedLog().snapshotPreCommit(tempMin, entry.getTerm());
+            context.getReplicatedLog().snapshotCommit();
+            setReplicatedToAllIndex(tempMin);
+        }
     }
 }

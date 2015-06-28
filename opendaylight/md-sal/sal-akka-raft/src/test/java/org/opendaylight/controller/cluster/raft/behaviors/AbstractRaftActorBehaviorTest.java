@@ -1,8 +1,12 @@
 package org.opendaylight.controller.cluster.raft.behaviors;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.testkit.JavaTestKit;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.AbstractActorTest;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
@@ -16,12 +20,6 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.controller.cluster.raft.utils.DoNothingActor;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
 
@@ -74,7 +72,7 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
             context.getTermInformation().update(1000, "test");
 
             AppendEntries appendEntries =
-                new AppendEntries(100, "leader-1", 0, 0, null, 101);
+                new AppendEntries(100, "leader-1", 0, 0, null, 101, -1);
 
             RaftActorBehavior behavior = createBehavior(context);
 
@@ -90,6 +88,7 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
             final Boolean out = new ExpectMsg<Boolean>(duration("1 seconds"),
                 "AppendEntriesReply") {
                 // do not put code outside this method, will run afterwards
+                @Override
                 protected Boolean match(Object in) {
                     if (in instanceof AppendEntriesReply) {
                         AppendEntriesReply reply = (AppendEntriesReply) in;
@@ -131,7 +130,7 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
                     new MockRaftActorContext.MockReplicatedLogEntry(1, 0, new MockRaftActorContext.MockPayload("zero")));
 
                 AppendEntries appendEntries =
-                    new AppendEntries(2, "leader-1", -1, 1, entries, 0);
+                    new AppendEntries(2, "leader-1", -1, 1, entries, 0, -1);
 
                 RaftActorBehavior behavior = createBehavior(context);
 
@@ -169,6 +168,7 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
         new JavaTestKit(getSystem()) {{
 
             new Within(duration("1 seconds")) {
+                @Override
                 protected void run() {
 
                     RaftActorBehavior behavior = createBehavior(
@@ -185,6 +185,7 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
                             new ExpectMsg<Boolean>(duration("1 seconds"),
                                 "RequestVoteReply") {
                                 // do not put code outside this method, will run afterwards
+                                @Override
                                 protected Boolean match(Object in) {
                                     if (in instanceof RequestVoteReply) {
                                         RequestVoteReply reply =
@@ -213,6 +214,7 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
         new JavaTestKit(getSystem()) {{
 
             new Within(duration("1 seconds")) {
+                @Override
                 protected void run() {
 
                     RaftActorContext actorContext =
@@ -238,6 +240,7 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
                             new ExpectMsg<Boolean>(duration("1 seconds"),
                                 "RequestVoteReply") {
                                 // do not put code outside this method, will run afterwards
+                                @Override
                                 protected Boolean match(Object in) {
                                     if (in instanceof RequestVoteReply) {
                                         RequestVoteReply reply =
@@ -268,6 +271,7 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
         new JavaTestKit(getSystem()) {{
 
             new Within(duration("1 seconds")) {
+                @Override
                 protected void run() {
 
                     RaftActorContext context =
@@ -284,6 +288,7 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
                         new ExpectMsg<Boolean>(duration("1 seconds"),
                             "RequestVoteReply") {
                             // do not put code outside this method, will run afterwards
+                            @Override
                             protected Boolean match(Object in) {
                                 if (in instanceof RequestVoteReply) {
                                     RequestVoteReply reply =
@@ -299,6 +304,52 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
                 }
             };
         }};
+    }
+
+    @Test
+    public void testPerformSnapshot() {
+        MockRaftActorContext context = new MockRaftActorContext("test", getSystem(), behaviorActor);
+        AbstractRaftActorBehavior abstractBehavior =  (AbstractRaftActorBehavior) createBehavior(context);
+        if (abstractBehavior instanceof Candidate) {
+            return;
+        }
+
+        context.getTermInformation().update(1, "test");
+
+        //log has 1 entry with replicatedToAllIndex = 0, does not do anything, returns the
+        context.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 1, 1).build());
+        context.setLastApplied(0);
+        abstractBehavior.performSnapshotWithoutCapture(0);
+        assertEquals(-1, abstractBehavior.getReplicatedToAllIndex());
+        assertEquals(1, context.getReplicatedLog().size());
+
+        //2 entries, lastApplied still 0, no purging.
+        context.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 2, 1).build());
+        context.setLastApplied(0);
+        abstractBehavior.performSnapshotWithoutCapture(0);
+        assertEquals(-1, abstractBehavior.getReplicatedToAllIndex());
+        assertEquals(2, context.getReplicatedLog().size());
+
+        //2 entries, lastApplied still 0, no purging.
+        context.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 2, 1).build());
+        context.setLastApplied(1);
+        abstractBehavior.performSnapshotWithoutCapture(0);
+        assertEquals(0, abstractBehavior.getReplicatedToAllIndex());
+        assertEquals(1, context.getReplicatedLog().size());
+
+        //5 entries, lastApplied =2 and replicatedIndex = 3, but since we want to keep the lastapplied, indices 0 and 1 will only get purged
+        context.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 5, 1).build());
+        context.setLastApplied(2);
+        abstractBehavior.performSnapshotWithoutCapture(3);
+        assertEquals(1, abstractBehavior.getReplicatedToAllIndex());
+        assertEquals(3, context.getReplicatedLog().size());
+
+        // scenario where Last applied > Replicated to all index (becoz of a slow follower)
+        context.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 3, 1).build());
+        context.setLastApplied(2);
+        abstractBehavior.performSnapshotWithoutCapture(1);
+        assertEquals(1, abstractBehavior.getReplicatedToAllIndex());
+        assertEquals(1, context.getReplicatedLog().size());
     }
 
     protected void assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(
@@ -347,7 +398,7 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
     }
 
     protected AppendEntries createAppendEntriesWithNewerTerm() {
-        return new AppendEntries(100, "leader-1", 0, 0, null, 1);
+        return new AppendEntries(100, "leader-1", 0, 0, null, 1, -1);
     }
 
     protected AppendEntriesReply createAppendEntriesReplyWithNewerTerm() {

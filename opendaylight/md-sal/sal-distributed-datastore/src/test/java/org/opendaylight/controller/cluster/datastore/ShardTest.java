@@ -1267,12 +1267,12 @@ public class ShardTest extends AbstractActorTest {
 
             waitUntilLeader(shard);
 
-            shard.tell(new CaptureSnapshot(-1,-1,-1,-1), getRef());
+            shard.tell(new CaptureSnapshot(-1,-1,-1,-1, -1, -1), getRef());
 
             assertEquals("Snapshot saved", true, latch.get().await(5, TimeUnit.SECONDS));
 
             latch.set(new CountDownLatch(1));
-            shard.tell(new CaptureSnapshot(-1,-1,-1,-1), getRef());
+            shard.tell(new CaptureSnapshot(-1,-1,-1,-1, -1, -1), getRef());
 
             assertEquals("Snapshot saved", true, latch.get().await(5, TimeUnit.SECONDS));
 

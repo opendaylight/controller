@@ -103,8 +103,6 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     private CaptureSnapshot captureSnapshot = null;
 
-    private volatile boolean hasSnapshotCaptureInitiated = false;
-
     private Stopwatch recoveryTimer;
 
     private int currentRecoveryBatchCount;
@@ -166,11 +164,15 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
                 onRecoveryComplete();
 
-                RaftActorBehavior oldBehavior = currentBehavior;
-                currentBehavior = new Follower(context);
-                handleBehaviorChange(oldBehavior, currentBehavior);
+                initializeBehavior();
             }
         }
+    }
+
+    protected void initializeBehavior() {
+        RaftActorBehavior oldBehavior = currentBehavior;
+        currentBehavior = new Follower(context);
+        handleBehaviorChange(oldBehavior, currentBehavior);
     }
 
     private void onRecoveredSnapshot(SnapshotOffer offer) {
@@ -276,9 +278,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             replicatedLog.lastIndex(), replicatedLog.snapshotIndex,
             replicatedLog.snapshotTerm, replicatedLog.size());
 
-        RaftActorBehavior oldBehavior = currentBehavior;
-        currentBehavior = new Follower(context);
-        handleBehaviorChange(oldBehavior, currentBehavior);
+        initializeBehavior();
     }
 
     @Override public void handleCommand(Object message) {
@@ -631,9 +631,13 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         //be greedy and remove entries from in-mem journal which are in the snapshot
         // and update snapshotIndex and snapshotTerm without waiting for the success,
 
-        context.getReplicatedLog().snapshotPreCommit(
-            captureSnapshot.getLastAppliedIndex(),
-            captureSnapshot.getLastAppliedTerm());
+        context.getReplicatedLog().snapshotPreCommit(captureSnapshot.getReplicatedToAllIndex(),
+                captureSnapshot.getReplicatedToAllTerm());
+
+        getCurrentBehavior().setReplicatedToAllIndex(captureSnapshot.getReplicatedToAllIndex());
+//        context.getReplicatedLog().snapshotPreCommit(
+//            captureSnapshot.getLastAppliedIndex(),
+//            captureSnapshot.getLastAppliedTerm());
 
         LOG.info("{}: Removed in-memory snapshotted entries, adjusted snaphsotIndex:{} " +
             "and term:{}", persistenceId(), captureSnapshot.getLastAppliedIndex(),
@@ -645,7 +649,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         }
 
         captureSnapshot = null;
-        hasSnapshotCaptureInitiated = false;
+        context.setSnapshotCaptureInitiated(false);
     }
 
     private class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
@@ -687,11 +691,6 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             appendAndPersist(null, null, replicatedLogEntry);
         }
 
-        @Override
-        public int dataSize() {
-            return dataSize;
-        }
-
         public void appendAndPersist(final ActorRef clientActor,
             final String identifier,
             final ReplicatedLogEntry replicatedLogEntry) {
@@ -718,7 +717,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                                 getRaftActorContext().getConfigParams().getSnapshotDataThresholdPercentage() / 100;
 
                         // when a snaphsot is being taken, captureSnapshot != null
-                        if (hasSnapshotCaptureInitiated == false &&
+                        if (!context.isSnapshotCaptureInitiated() &&
                                 ( journal.size() % context.getConfigParams().getSnapshotBatchCount() == 0 ||
                                         dataSize > dataThreshold)) {
 
@@ -741,10 +740,13 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                             }
 
                             // send a CaptureSnapshot to self to make the expensive operation async.
-                            getSelf().tell(new CaptureSnapshot(
-                                lastIndex(), lastTerm(), lastAppliedIndex, lastAppliedTerm),
+                            long replicatedToAllIndex = getCurrentBehavior().getReplicatedToAllIndex();
+                            ReplicatedLogEntry replicatedToAllEntry = context.getReplicatedLog().get(replicatedToAllIndex);
+                            getSelf().tell(new CaptureSnapshot(lastIndex(), lastTerm(), lastAppliedIndex, lastAppliedTerm,
+                                (replicatedToAllEntry != null ? replicatedToAllEntry.getIndex() : -1),
+                                (replicatedToAllEntry != null ? replicatedToAllEntry.getTerm() : -1)),
                                 null);
-                            hasSnapshotCaptureInitiated = true;
+                            context.setSnapshotCaptureInitiated(true);
                         }
                         // Send message for replication
                         if (clientActor != null) {

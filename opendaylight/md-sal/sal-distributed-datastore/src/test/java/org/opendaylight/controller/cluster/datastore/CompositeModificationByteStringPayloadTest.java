@@ -66,7 +66,7 @@ public class CompositeModificationByteStringPayloadTest {
         entries.add(new ReplicatedLogImplEntry(0, 1, payload));
 
 
-        assertNotNull(new AppendEntries(10, "foobar", 10, 10, entries, 10).toSerializable());
+        assertNotNull(new AppendEntries(10, "foobar", 10, 10, entries, 10, -1).toSerializable());
     }
 
 

@@ -56,6 +56,16 @@ public final class AppendEntriesMessages {
      */
     long getPrevLogTerm();
 
+    // optional int64 replicatedToAllIndex = 7;
+    /**
+     * <code>optional int64 replicatedToAllIndex = 7;</code>
+     */
+    boolean hasReplicatedToAllIndex();
+    /**
+     * <code>optional int64 replicatedToAllIndex = 7;</code>
+     */
+    long getReplicatedToAllIndex();
+
     // repeated .org.opendaylight.controller.cluster.raft.AppendEntries.ReplicatedLogEntry logEntries = 5;
     /**
      * <code>repeated .org.opendaylight.controller.cluster.raft.AppendEntries.ReplicatedLogEntry logEntries = 5;</code>
@@ -163,16 +173,21 @@ public final class AppendEntriesMessages {
               break;
             }
             case 42: {
-              if (!((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
+              if (!((mutable_bitField0_ & 0x00000020) == 0x00000020)) {
                 logEntries_ = new java.util.ArrayList<org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntry>();
-                mutable_bitField0_ |= 0x00000010;
+                mutable_bitField0_ |= 0x00000020;
               }
               logEntries_.add(input.readMessage(org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntry.PARSER, extensionRegistry));
               break;
             }
             case 48: {
-              bitField0_ |= 0x00000010;
+              bitField0_ |= 0x00000020;
               leaderCommit_ = input.readInt64();
+              break;
+            }
+            case 56: {
+              bitField0_ |= 0x00000010;
+              replicatedToAllIndex_ = input.readInt64();
               break;
             }
           }
@@ -183,7 +198,7 @@ public final class AppendEntriesMessages {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e.getMessage()).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
+        if (((mutable_bitField0_ & 0x00000020) == 0x00000020)) {
           logEntries_ = java.util.Collections.unmodifiableList(logEntries_);
         }
         this.unknownFields = unknownFields.build();
@@ -1476,6 +1491,22 @@ public final class AppendEntriesMessages {
       return prevLogTerm_;
     }
 
+    // optional int64 replicatedToAllIndex = 7;
+    public static final int REPLICATEDTOALLINDEX_FIELD_NUMBER = 7;
+    private long replicatedToAllIndex_;
+    /**
+     * <code>optional int64 replicatedToAllIndex = 7;</code>
+     */
+    public boolean hasReplicatedToAllIndex() {
+      return ((bitField0_ & 0x00000010) == 0x00000010);
+    }
+    /**
+     * <code>optional int64 replicatedToAllIndex = 7;</code>
+     */
+    public long getReplicatedToAllIndex() {
+      return replicatedToAllIndex_;
+    }
+
     // repeated .org.opendaylight.controller.cluster.raft.AppendEntries.ReplicatedLogEntry logEntries = 5;
     public static final int LOGENTRIES_FIELD_NUMBER = 5;
     private java.util.List<org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntry> logEntries_;
@@ -1519,7 +1550,7 @@ public final class AppendEntriesMessages {
      * <code>optional int64 leaderCommit = 6;</code>
      */
     public boolean hasLeaderCommit() {
-      return ((bitField0_ & 0x00000010) == 0x00000010);
+      return ((bitField0_ & 0x00000020) == 0x00000020);
     }
     /**
      * <code>optional int64 leaderCommit = 6;</code>
@@ -1533,6 +1564,7 @@ public final class AppendEntriesMessages {
       leaderId_ = "";
       prevLogIndex_ = 0L;
       prevLogTerm_ = 0L;
+      replicatedToAllIndex_ = 0L;
       logEntries_ = java.util.Collections.emptyList();
       leaderCommit_ = 0L;
     }
@@ -1569,8 +1601,11 @@ public final class AppendEntriesMessages {
       for (int i = 0; i < logEntries_.size(); i++) {
         output.writeMessage(5, logEntries_.get(i));
       }
-      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+      if (((bitField0_ & 0x00000020) == 0x00000020)) {
         output.writeInt64(6, leaderCommit_);
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        output.writeInt64(7, replicatedToAllIndex_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -1601,9 +1636,13 @@ public final class AppendEntriesMessages {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(5, logEntries_.get(i));
       }
-      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+      if (((bitField0_ & 0x00000020) == 0x00000020)) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(6, leaderCommit_);
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(7, replicatedToAllIndex_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -1730,14 +1769,16 @@ public final class AppendEntriesMessages {
         bitField0_ = (bitField0_ & ~0x00000004);
         prevLogTerm_ = 0L;
         bitField0_ = (bitField0_ & ~0x00000008);
+        replicatedToAllIndex_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000010);
         if (logEntriesBuilder_ == null) {
           logEntries_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000010);
+          bitField0_ = (bitField0_ & ~0x00000020);
         } else {
           logEntriesBuilder_.clear();
         }
         leaderCommit_ = 0L;
-        bitField0_ = (bitField0_ & ~0x00000020);
+        bitField0_ = (bitField0_ & ~0x00000040);
         return this;
       }
 
@@ -1782,17 +1823,21 @@ public final class AppendEntriesMessages {
           to_bitField0_ |= 0x00000008;
         }
         result.prevLogTerm_ = prevLogTerm_;
+        if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
+          to_bitField0_ |= 0x00000010;
+        }
+        result.replicatedToAllIndex_ = replicatedToAllIndex_;
         if (logEntriesBuilder_ == null) {
-          if (((bitField0_ & 0x00000010) == 0x00000010)) {
+          if (((bitField0_ & 0x00000020) == 0x00000020)) {
             logEntries_ = java.util.Collections.unmodifiableList(logEntries_);
-            bitField0_ = (bitField0_ & ~0x00000010);
+            bitField0_ = (bitField0_ & ~0x00000020);
           }
           result.logEntries_ = logEntries_;
         } else {
           result.logEntries_ = logEntriesBuilder_.build();
         }
-        if (((from_bitField0_ & 0x00000020) == 0x00000020)) {
-          to_bitField0_ |= 0x00000010;
+        if (((from_bitField0_ & 0x00000040) == 0x00000040)) {
+          to_bitField0_ |= 0x00000020;
         }
         result.leaderCommit_ = leaderCommit_;
         result.bitField0_ = to_bitField0_;
@@ -1825,11 +1870,14 @@ public final class AppendEntriesMessages {
         if (other.hasPrevLogTerm()) {
           setPrevLogTerm(other.getPrevLogTerm());
         }
+        if (other.hasReplicatedToAllIndex()) {
+          setReplicatedToAllIndex(other.getReplicatedToAllIndex());
+        }
         if (logEntriesBuilder_ == null) {
           if (!other.logEntries_.isEmpty()) {
             if (logEntries_.isEmpty()) {
               logEntries_ = other.logEntries_;
-              bitField0_ = (bitField0_ & ~0x00000010);
+              bitField0_ = (bitField0_ & ~0x00000020);
             } else {
               ensureLogEntriesIsMutable();
               logEntries_.addAll(other.logEntries_);
@@ -1842,7 +1890,7 @@ public final class AppendEntriesMessages {
               logEntriesBuilder_.dispose();
               logEntriesBuilder_ = null;
               logEntries_ = other.logEntries_;
-              bitField0_ = (bitField0_ & ~0x00000010);
+              bitField0_ = (bitField0_ & ~0x00000020);
               logEntriesBuilder_ =
                 com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
                    getLogEntriesFieldBuilder() : null;
@@ -2060,13 +2108,46 @@ public final class AppendEntriesMessages {
         return this;
       }
 
+      // optional int64 replicatedToAllIndex = 7;
+      private long replicatedToAllIndex_ ;
+      /**
+       * <code>optional int64 replicatedToAllIndex = 7;</code>
+       */
+      public boolean hasReplicatedToAllIndex() {
+        return ((bitField0_ & 0x00000010) == 0x00000010);
+      }
+      /**
+       * <code>optional int64 replicatedToAllIndex = 7;</code>
+       */
+      public long getReplicatedToAllIndex() {
+        return replicatedToAllIndex_;
+      }
+      /**
+       * <code>optional int64 replicatedToAllIndex = 7;</code>
+       */
+      public Builder setReplicatedToAllIndex(long value) {
+        bitField0_ |= 0x00000010;
+        replicatedToAllIndex_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int64 replicatedToAllIndex = 7;</code>
+       */
+      public Builder clearReplicatedToAllIndex() {
+        bitField0_ = (bitField0_ & ~0x00000010);
+        replicatedToAllIndex_ = 0L;
+        onChanged();
+        return this;
+      }
+
       // repeated .org.opendaylight.controller.cluster.raft.AppendEntries.ReplicatedLogEntry logEntries = 5;
       private java.util.List<org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntry> logEntries_ =
         java.util.Collections.emptyList();
       private void ensureLogEntriesIsMutable() {
-        if (!((bitField0_ & 0x00000010) == 0x00000010)) {
+        if (!((bitField0_ & 0x00000020) == 0x00000020)) {
           logEntries_ = new java.util.ArrayList<org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntry>(logEntries_);
-          bitField0_ |= 0x00000010;
+          bitField0_ |= 0x00000020;
          }
       }
 
@@ -2215,7 +2296,7 @@ public final class AppendEntriesMessages {
       public Builder clearLogEntries() {
         if (logEntriesBuilder_ == null) {
           logEntries_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000010);
+          bitField0_ = (bitField0_ & ~0x00000020);
           onChanged();
         } else {
           logEntriesBuilder_.clear();
@@ -2292,7 +2373,7 @@ public final class AppendEntriesMessages {
           logEntriesBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
               org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntry, org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntry.Builder, org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries.ReplicatedLogEntryOrBuilder>(
                   logEntries_,
-                  ((bitField0_ & 0x00000010) == 0x00000010),
+                  ((bitField0_ & 0x00000020) == 0x00000020),
                   getParentForChildren(),
                   isClean());
           logEntries_ = null;
@@ -2306,7 +2387,7 @@ public final class AppendEntriesMessages {
        * <code>optional int64 leaderCommit = 6;</code>
        */
       public boolean hasLeaderCommit() {
-        return ((bitField0_ & 0x00000020) == 0x00000020);
+        return ((bitField0_ & 0x00000040) == 0x00000040);
       }
       /**
        * <code>optional int64 leaderCommit = 6;</code>
@@ -2318,7 +2399,7 @@ public final class AppendEntriesMessages {
        * <code>optional int64 leaderCommit = 6;</code>
        */
       public Builder setLeaderCommit(long value) {
-        bitField0_ |= 0x00000020;
+        bitField0_ |= 0x00000040;
         leaderCommit_ = value;
         onChanged();
         return this;
@@ -2327,7 +2408,7 @@ public final class AppendEntriesMessages {
        * <code>optional int64 leaderCommit = 6;</code>
        */
       public Builder clearLeaderCommit() {
-        bitField0_ = (bitField0_ & ~0x00000020);
+        bitField0_ = (bitField0_ & ~0x00000040);
         leaderCommit_ = 0L;
         onChanged();
         return this;
@@ -2369,20 +2450,20 @@ public final class AppendEntriesMessages {
   static {
     java.lang.String[] descriptorData = {
       "\n\033AppendEntriesMessages.proto\022(org.opend" +
-      "aylight.controller.cluster.raft\"\227\003\n\rAppe" +
+      "aylight.controller.cluster.raft\"\265\003\n\rAppe" +
       "ndEntries\022\014\n\004term\030\001 \001(\003\022\020\n\010leaderId\030\002 \001(" +
       "\t\022\024\n\014prevLogIndex\030\003 \001(\003\022\023\n\013prevLogTerm\030\004" +
-      " \001(\003\022^\n\nlogEntries\030\005 \003(\0132J.org.opendayli" +
-      "ght.controller.cluster.raft.AppendEntrie" +
-      "s.ReplicatedLogEntry\022\024\n\014leaderCommit\030\006 \001" +
-      "(\003\032\304\001\n\022ReplicatedLogEntry\022\014\n\004term\030\001 \001(\003\022" +
-      "\r\n\005index\030\002 \001(\003\022`\n\004data\030\003 \001(\0132R.org.opend" +
-      "aylight.controller.cluster.raft.AppendEn",
-      "tries.ReplicatedLogEntry.Payload\032/\n\007Payl" +
-      "oad\022\036\n\026clientPayloadClassName\030\001 \001(\t*\004\010\002\020" +
-      "eBV\n;org.opendaylight.controller.protobu" +
-      "ff.messages.cluster.raftB\025AppendEntriesM" +
-      "essagesH\001"
+      " \001(\003\022\034\n\024replicatedToAllIndex\030\007 \001(\003\022^\n\nlo" +
+      "gEntries\030\005 \003(\0132J.org.opendaylight.contro" +
+      "ller.cluster.raft.AppendEntries.Replicat" +
+      "edLogEntry\022\024\n\014leaderCommit\030\006 \001(\003\032\304\001\n\022Rep" +
+      "licatedLogEntry\022\014\n\004term\030\001 \001(\003\022\r\n\005index\030\002" +
+      " \001(\003\022`\n\004data\030\003 \001(\0132R.org.opendaylight.co",
+      "ntroller.cluster.raft.AppendEntries.Repl" +
+      "icatedLogEntry.Payload\032/\n\007Payload\022\036\n\026cli" +
+      "entPayloadClassName\030\001 \001(\t*\004\010\002\020eBV\n;org.o" +
+      "pendaylight.controller.protobuff.message" +
+      "s.cluster.raftB\025AppendEntriesMessagesH\001"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -2394,7 +2475,7 @@ public final class AppendEntriesMessages {
           internal_static_org_opendaylight_controller_cluster_raft_AppendEntries_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_org_opendaylight_controller_cluster_raft_AppendEntries_descriptor,
-              new java.lang.String[] { "Term", "LeaderId", "PrevLogIndex", "PrevLogTerm", "LogEntries", "LeaderCommit", });
+              new java.lang.String[] { "Term", "LeaderId", "PrevLogIndex", "PrevLogTerm", "ReplicatedToAllIndex", "LogEntries", "LeaderCommit", });
           internal_static_org_opendaylight_controller_cluster_raft_AppendEntries_ReplicatedLogEntry_descriptor =
             internal_static_org_opendaylight_controller_cluster_raft_AppendEntries_descriptor.getNestedTypes().get(0);
           internal_static_org_opendaylight_controller_cluster_raft_AppendEntries_ReplicatedLogEntry_fieldAccessorTable = new
