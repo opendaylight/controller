@@ -814,6 +814,8 @@ public class RaftActorTest extends AbstractActorTest {
                 config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
 
                 DataPersistenceProviderMonitor dataPersistenceProviderMonitor = new DataPersistenceProviderMonitor();
+                CountDownLatch saveSnapshotLatch = new CountDownLatch(1);
+                dataPersistenceProviderMonitor.setSaveSnapshotLatch(saveSnapshotLatch );
 
                 TestActorRef<MockRaftActor> mockActorRef = TestActorRef.create(getSystem(), MockRaftActor.props(persistenceId,
                         Collections.EMPTY_MAP, Optional.<ConfigParams>of(config), dataPersistenceProviderMonitor), persistenceId);
@@ -841,6 +843,10 @@ public class RaftActorTest extends AbstractActorTest {
                 doReturn(3L).when(snapshot).getLastAppliedIndex();
 
                 mockRaftActor.onReceiveCommand(new ApplySnapshot(snapshot));
+
+                assertEquals("saveSnapshot called", true, saveSnapshotLatch.await(2, TimeUnit.SECONDS));
+
+                mockRaftActor.onReceiveCommand(new SaveSnapshotSuccess(new SnapshotMetadata("foo", 100, 100)));
 
                 verify(mockRaftActor.delegate).applySnapshot(eq(snapshotBytes));
 

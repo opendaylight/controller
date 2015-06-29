@@ -17,6 +17,7 @@ import akka.persistence.SaveSnapshotSuccess;
 import akka.persistence.SnapshotOffer;
 import akka.persistence.SnapshotSelectionCriteria;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Stopwatch;
 import com.google.protobuf.ByteString;
@@ -126,12 +127,24 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     @Override
     public void preStart() throws Exception {
-        SnapshotSupportImpl snapshotSupport = new SnapshotSupportImpl(context, persistence(), new Procedure<Void>() {
+        Procedure<Void> createSnapshotProcedure = new Procedure<Void>() {
             @Override
             public void apply(Void notUsed) {
                 createSnapshot();
             }
-        }, LOG);
+        };
+
+        Function<Snapshot, ReplicatedLog> applySnapshotFunction = new Function<Snapshot, ReplicatedLog>() {
+            @Override
+            public ReplicatedLog apply(Snapshot snapshot) {
+                applySnapshot(ByteString.copyFrom(snapshot.getState()));
+                replicatedLog = new ReplicatedLogImpl(snapshot);
+                return replicatedLog;
+            }
+        };
+
+        SnapshotSupportImpl snapshotSupport = new SnapshotSupportImpl(context, persistence(),
+                createSnapshotProcedure, applySnapshotFunction, LOG);
 
         context.setSnapshotSupport(snapshotSupport);
 
@@ -322,12 +335,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                     snapshot.getLastAppliedTerm()
                 );
             }
-            applySnapshot(ByteString.copyFrom(snapshot.getState()));
 
-            //clears the followers log, sets the snapshot index to ensure adjusted-index works
-            replicatedLog = new ReplicatedLogImpl(snapshot);
-            context.setReplicatedLog(replicatedLog);
-            context.setLastApplied(snapshot.getLastAppliedIndex());
+            context.getSnapshotSupport().apply(snapshot);
 
         } else if (message instanceof FindLeader) {
             getSender().tell(
