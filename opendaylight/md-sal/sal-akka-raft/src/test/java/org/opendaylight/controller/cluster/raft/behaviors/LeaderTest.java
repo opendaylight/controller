@@ -9,12 +9,12 @@ import akka.actor.Props;
 import akka.actor.Terminated;
 import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
-import com.google.common.base.Optional;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.google.protobuf.ByteString;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,8 +27,10 @@ import org.opendaylight.controller.cluster.raft.FollowerLogInformation;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
+import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogImplEntry;
 import org.opendaylight.controller.cluster.raft.SerializationUtils;
+import org.opendaylight.controller.cluster.raft.Snapshot;
 import org.opendaylight.controller.cluster.raft.SnapshotSupport;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyLogEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
@@ -255,8 +257,8 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
             //clears leaders log
             actorContext.getReplicatedLog().removeFrom(0);
 
-            final int followersLastIndex = 2;
-            final int snapshotIndex = 3;
+            final int commitIndex = 3;
+            final int snapshotIndex = 2;
             final int newEntryIndex = 4;
             final int snapshotTerm = 1;
             final int currentTerm = 2;
@@ -264,11 +266,14 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
             // set the snapshot variables in replicatedlog
             actorContext.getReplicatedLog().setSnapshotIndex(snapshotIndex);
             actorContext.getReplicatedLog().setSnapshotTerm(snapshotTerm);
-            actorContext.setCommitIndex(followersLastIndex);
+            actorContext.setCommitIndex(commitIndex);
             //set follower timeout to 2 mins, helps during debugging
             actorContext.setConfigParams(new MockConfigParamsImpl(120000L, 10));
 
             MockLeader leader = new MockLeader(actorContext);
+
+            leader.getFollower(followerActor.path().toString()).setMatchIndex(-1);
+            leader.getFollower(followerActor.path().toString()).setNextIndex(0);
 
             // new entry
             ReplicatedLogImplEntry entry =
@@ -279,7 +284,8 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
             leader.markFollowerActive(followerActor.path().toString());
 
             ByteString bs = toByteString(leadersSnapshot);
-            leader.setSnapshot(Optional.of(bs));
+            leader.setSnapshot(Snapshot.create(bs.toByteArray(), Collections.<ReplicatedLogEntry>emptyList(),
+                    commitIndex, snapshotTerm, commitIndex, snapshotTerm));
             leader.createFollowerToSnapshot(followerActor.path().toString(), bs);
 
             //send first chunk and no InstallSnapshotReply received yet
@@ -315,7 +321,7 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
 
             InstallSnapshot is = (InstallSnapshot) SerializationUtils.fromSerializable(isproto);
 
-            assertEquals(snapshotIndex, is.getLastIncludedIndex());
+            assertEquals(commitIndex, is.getLastIncludedIndex());
 
         }};
     }
@@ -434,7 +440,7 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
 
             Leader leader = new Leader(actorContext);
             // set the snapshot as absent and check if capture-snapshot is invoked.
-            leader.setSnapshot(Optional.<ByteString>absent());
+            leader.setSnapshot(null);
 
             // new entry
             ReplicatedLogImplEntry entry =
@@ -483,8 +489,8 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
             //clears leaders log
             actorContext.getReplicatedLog().removeFrom(0);
 
-            final int followersLastIndex = 2;
-            final int snapshotIndex = 3;
+            final int lastAppliedIndex = 3;
+            final int snapshotIndex = 2;
             final int newEntryIndex = 4;
             final int snapshotTerm = 1;
             final int currentTerm = 2;
@@ -493,7 +499,8 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
             actorContext.getReplicatedLog().setSnapshotIndex(snapshotIndex);
             actorContext.getReplicatedLog().setSnapshotTerm(snapshotTerm);
             actorContext.getTermInformation().update(currentTerm, leaderActor.path().toString());
-            actorContext.setCommitIndex(followersLastIndex);
+            actorContext.setCommitIndex(lastAppliedIndex);
+            actorContext.setLastApplied(lastAppliedIndex);
 
             Leader leader = new Leader(actorContext);
 
@@ -505,8 +512,14 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
                 new ReplicatedLogImplEntry(newEntryIndex, currentTerm,
                     new MockRaftActorContext.MockPayload("D"));
 
-            RaftActorBehavior raftBehavior = leader.handleMessage(senderActor,
-                new SendInstallSnapshot(toByteString(leadersSnapshot)));
+            leader.getFollower(followerActor.path().toString()).setMatchIndex(-1);
+            leader.getFollower(followerActor.path().toString()).setNextIndex(0);
+
+            Snapshot snapshot = Snapshot.create(toByteString(leadersSnapshot).toByteArray(),
+                    Collections.<ReplicatedLogEntry>emptyList(),
+                    lastAppliedIndex, snapshotTerm, lastAppliedIndex, snapshotTerm);
+
+            RaftActorBehavior raftBehavior = leader.handleMessage(leaderActor, new SendInstallSnapshot(snapshot));
 
             assertTrue(raftBehavior instanceof Leader);
 
@@ -522,8 +535,8 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
                             if (is.getData() == null) {
                                 return "InstallSnapshot data is null";
                             }
-                            if (is.getLastIncludedIndex() != snapshotIndex) {
-                                return is.getLastIncludedIndex() + "!=" + snapshotIndex;
+                            if (is.getLastIncludedIndex() != lastAppliedIndex) {
+                                return is.getLastIncludedIndex() + "!=" + lastAppliedIndex;
                             }
                             if (is.getLastIncludedTerm() != snapshotTerm) {
                                 return is.getLastIncludedTerm() + "!=" + snapshotTerm;
@@ -554,8 +567,8 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
             peerAddresses.put(followerActor.path().toString(),
                 followerActor.path().toString());
 
-            final int followersLastIndex = 2;
-            final int snapshotIndex = 3;
+            final int commitIndex = 3;
+            final int snapshotIndex = 2;
             final int newEntryIndex = 4;
             final int snapshotTerm = 1;
             final int currentTerm = 2;
@@ -563,9 +576,12 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
             MockRaftActorContext actorContext =
                 (MockRaftActorContext) createActorContext();
             actorContext.setPeerAddresses(peerAddresses);
-            actorContext.setCommitIndex(followersLastIndex);
+            actorContext.setCommitIndex(commitIndex);
 
             MockLeader leader = new MockLeader(actorContext);
+
+            leader.getFollower(followerActor.path().toString()).setMatchIndex(-1);
+            leader.getFollower(followerActor.path().toString()).setNextIndex(0);
 
             // Ignore initial heartbeat.
             expectMsgClass(duration("5 seconds"), AppendEntriesMessages.AppendEntries.class);
@@ -582,7 +598,8 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
             actorContext.getTermInformation().update(currentTerm, leaderActor.path().toString());
 
             ByteString bs = toByteString(leadersSnapshot);
-            leader.setSnapshot(Optional.of(bs));
+            leader.setSnapshot(Snapshot.create(bs.toByteArray(), Collections.<ReplicatedLogEntry>emptyList(),
+                    commitIndex, snapshotTerm, commitIndex, snapshotTerm));
             leader.createFollowerToSnapshot(followerActor.path().toString(), bs);
             while(!leader.getFollowerToSnapshot().isLastChunk(leader.getFollowerToSnapshot().getChunkIndex())) {
                 leader.getFollowerToSnapshot().getNextChunk();
@@ -602,9 +619,8 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
             assertEquals(leader.followerToLog.size(), 1);
             assertNotNull(leader.followerToLog.get(followerActor.path().toString()));
             FollowerLogInformation fli = leader.followerToLog.get(followerActor.path().toString());
-            assertEquals(snapshotIndex, fli.getMatchIndex().get());
-            assertEquals(snapshotIndex, fli.getMatchIndex().get());
-            assertEquals(snapshotIndex + 1, fli.getNextIndex().get());
+            assertEquals(commitIndex, fli.getMatchIndex().get());
+            assertEquals(commitIndex + 1, fli.getNextIndex().get());
         }};
     }
 
@@ -619,8 +635,8 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
             peerAddresses.put(followerActor.path().toString(),
                     followerActor.path().toString());
 
-            final int followersLastIndex = 2;
-            final int snapshotIndex = 3;
+            final int commitIndex = 3;
+            final int snapshotIndex = 2;
             final int snapshotTerm = 1;
             final int currentTerm = 2;
 
@@ -634,9 +650,12 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
                 }
             });
             actorContext.setPeerAddresses(peerAddresses);
-            actorContext.setCommitIndex(followersLastIndex);
+            actorContext.setCommitIndex(commitIndex);
 
             MockLeader leader = new MockLeader(actorContext);
+
+            leader.getFollower(followerActor.path().toString()).setMatchIndex(-1);
+            leader.getFollower(followerActor.path().toString()).setNextIndex(0);
 
             Map<String, String> leadersSnapshot = new HashMap<>();
             leadersSnapshot.put("1", "A");
@@ -649,9 +668,11 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
             actorContext.getTermInformation().update(currentTerm, leaderActor.path().toString());
 
             ByteString bs = toByteString(leadersSnapshot);
-            leader.setSnapshot(Optional.of(bs));
+            Snapshot snapshot = Snapshot.create(bs.toByteArray(), Collections.<ReplicatedLogEntry>emptyList(),
+                    commitIndex, snapshotTerm, commitIndex, snapshotTerm);
+            leader.setSnapshot(snapshot);
 
-            leader.handleMessage(leaderActor, new SendInstallSnapshot(bs));
+            leader.handleMessage(leaderActor, new SendInstallSnapshot(snapshot));
 
 
             MessageCollectorActor.getAllMatching(followerActor,
@@ -697,8 +718,8 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
                 peerAddresses.put(followerActor.path().toString(),
                         followerActor.path().toString());
 
-                final int followersLastIndex = 2;
-                final int snapshotIndex = 3;
+                final int commitIndex = 3;
+                final int snapshotIndex = 2;
                 final int snapshotTerm = 1;
                 final int currentTerm = 2;
 
@@ -712,9 +733,12 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
                     }
                 });
                 actorContext.setPeerAddresses(peerAddresses);
-                actorContext.setCommitIndex(followersLastIndex);
+                actorContext.setCommitIndex(commitIndex);
 
                 MockLeader leader = new MockLeader(actorContext);
+
+                leader.getFollower(followerActor.path().toString()).setMatchIndex(-1);
+                leader.getFollower(followerActor.path().toString()).setNextIndex(0);
 
                 Map<String, String> leadersSnapshot = new HashMap<>();
                 leadersSnapshot.put("1", "A");
@@ -727,9 +751,11 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
                 actorContext.getTermInformation().update(currentTerm, leaderActor.path().toString());
 
                 ByteString bs = toByteString(leadersSnapshot);
-                leader.setSnapshot(Optional.of(bs));
+                Snapshot snapshot = Snapshot.create(bs.toByteArray(), Collections.<ReplicatedLogEntry>emptyList(),
+                        commitIndex, snapshotTerm, commitIndex, snapshotTerm);
+                leader.setSnapshot(snapshot);
 
-                leader.handleMessage(leaderActor, new SendInstallSnapshot(bs));
+                leader.handleMessage(leaderActor, new SendInstallSnapshot(snapshot));
 
                 InstallSnapshotMessages.InstallSnapshot installSnapshot = MessageCollectorActor.getFirstMatching(
                         followerActor, InstallSnapshotMessages.InstallSnapshot.class);
@@ -770,8 +796,8 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
             peerAddresses.put("follower-reply",
                 followerActor.path().toString());
 
-            final int followersLastIndex = 2;
-            final int snapshotIndex = 3;
+            final int commitIndex = 3;
+            final int snapshotIndex = 2;
             final int snapshotTerm = 1;
             final int currentTerm = 2;
 
@@ -788,9 +814,12 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
 
             actorContext.setConfigParams(configParams);
             actorContext.setPeerAddresses(peerAddresses);
-            actorContext.setCommitIndex(followersLastIndex);
+            actorContext.setCommitIndex(commitIndex);
 
             MockLeader leader = new MockLeader(actorContext);
+
+            leader.getFollower("follower-reply").setMatchIndex(-1);
+            leader.getFollower("follower-reply").setNextIndex(0);
 
             Map<String, String> leadersSnapshot = new HashMap<>();
             leadersSnapshot.put("1", "A");
@@ -803,9 +832,11 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
             actorContext.getTermInformation().update(currentTerm, leaderActor.path().toString());
 
             ByteString bs = toByteString(leadersSnapshot);
-            leader.setSnapshot(Optional.of(bs));
+            Snapshot snapshot = Snapshot.create(bs.toByteArray(), Collections.<ReplicatedLogEntry>emptyList(),
+                    commitIndex, snapshotTerm, commitIndex, snapshotTerm);
+            leader.setSnapshot(snapshot);
 
-            leader.handleMessage(leaderActor, new SendInstallSnapshot(bs));
+            leader.handleMessage(leaderActor, new SendInstallSnapshot(snapshot));
 
             List<Object> objectList = MessageCollectorActor.getAllMatching(followerActor,
                 InstallSnapshotMessages.InstallSnapshot.class);

@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.raft;
 
 import akka.japi.Procedure;
 import akka.persistence.SnapshotSelectionCriteria;
+import com.google.common.base.Function;
 import com.google.protobuf.ByteString;
 import java.util.List;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
@@ -29,10 +30,14 @@ class SnapshotSupportImpl implements SnapshotSupport {
     private final Logger log;
     private long lastSequenceNumber;
     private CaptureSnapshot currentCaptureSnapshot;
+    private Snapshot applySnapshot;
+    private final Function<Snapshot, ReplicatedLog> applySnapshotFunction;
 
     SnapshotSupportImpl(RaftActorContext context, DataPersistenceProvider persistenceProvider,
-            Procedure<Void> createSnapshotProcedure, Logger log) {
+            Procedure<Void> createSnapshotProcedure, Function<Snapshot, ReplicatedLog> applySnapshotFunction,
+            Logger log) {
         this.createSnapshotProcedure = createSnapshotProcedure;
+        this.applySnapshotFunction = applySnapshotFunction;
         this.persistenceProvider = persistenceProvider;
         this.context = context;
         this.log = log;
@@ -69,21 +74,37 @@ class SnapshotSupportImpl implements SnapshotSupport {
 
     @Override
     public void rollback() {
-        context.getReplicatedLog().snapshotRollback();
+        if(applySnapshot == null) {
+            context.getReplicatedLog().snapshotRollback();
 
-        log.info("{}: Replicated Log rollbacked. Snapshot will be attempted in the next cycle." +
-            "snapshotIndex:{}, snapshotTerm:{}, log-size:{}", context.getId(),
-            context.getReplicatedLog().getSnapshotIndex(),
-            context.getReplicatedLog().getSnapshotTerm(),
-            context.getReplicatedLog().size());
+            log.info("{}: Replicated Log rollbacked. Snapshot will be attempted in the next cycle." +
+                    "snapshotIndex:{}, snapshotTerm:{}, log-size:{}", context.getId(),
+                    context.getReplicatedLog().getSnapshotIndex(),
+                    context.getReplicatedLog().getSnapshotTerm(),
+                    context.getReplicatedLog().size());
+        }
 
         currentCaptureSnapshot = null;
+        applySnapshot = null;
         lastSequenceNumber = -1;
     }
 
     @Override
     public void commit(long sequenceNumber) {
-        context.getReplicatedLog().snapshotCommit();
+        if(applySnapshot != null) {
+            try {
+                ReplicatedLog newReplicatedLog = applySnapshotFunction.apply(applySnapshot);
+
+                //clears the followers log, sets the snapshot index to ensure adjusted-index works
+                context.setReplicatedLog(newReplicatedLog);
+                context.setLastApplied(applySnapshot.getLastAppliedIndex());
+                context.setCommitIndex(applySnapshot.getLastAppliedIndex());
+            } catch (Exception e) {
+                log.error("Error applying snapshot", e);
+            }
+        } else {
+            context.getReplicatedLog().snapshotCommit();
+        }
 
         // Trim akka snapshots
         // FIXME : Not sure how exactly the SnapshotSelectionCriteria is applied
@@ -95,6 +116,7 @@ class SnapshotSupportImpl implements SnapshotSupport {
         persistenceProvider.deleteMessages(lastSequenceNumber);
 
         currentCaptureSnapshot = null;
+        applySnapshot = null;
         lastSequenceNumber = -1;
     }
 
@@ -156,10 +178,22 @@ class SnapshotSupportImpl implements SnapshotSupport {
 
         if (isLeader && localCaptureSnapshot.isInstallSnapshotInitiated()) {
             // this would be call straight to the leader and won't initiate in serialization
-            behavior.handleMessage(context.getActor(), new SendInstallSnapshot(stateInBytes));
+            behavior.handleMessage(context.getActor(), new SendInstallSnapshot(sn));
         }
 
         context.setSnapshotCaptureInitiated(false);
+    }
+
+    @Override
+    public void apply(Snapshot snapshot) {
+        applySnapshot = snapshot;
+
+        lastSequenceNumber = persistenceProvider.getLastSequenceNumber();
+
+        log.debug("{}: lastSequenceNumber prior to persisting applied snapshot: {}",
+                context.getId(), lastSequenceNumber);
+
+        persistenceProvider.saveSnapshot(snapshot);
     }
 
     @Override
