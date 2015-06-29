@@ -13,10 +13,12 @@ import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import com.google.common.base.Preconditions;
+import com.google.protobuf.ByteString;
 import com.google.protobuf.GeneratedMessage;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages;
 import org.opendaylight.controller.protobuff.messages.cluster.raft.test.MockPayloadMessages;
@@ -35,6 +37,25 @@ public class MockRaftActorContext implements RaftActorContext {
     private Map<String, String> peerAddresses = new HashMap();
     private ConfigParams configParams;
     private boolean snapshotCaptureInitiated;
+    private SnapshotSupport snapshotSupport = new SnapshotSupport() {
+
+        @Override
+        public void capture(long lastAppliedTerm, long lastAppliedIndex, long replicatedToAllIndex,
+                boolean isInstallSnapshotInitiated) {
+        }
+
+        @Override
+        public void rollback() {
+        }
+
+        @Override
+        public void persist(ByteString stateInBytes, RaftActorBehavior behavior, boolean isLeader) {
+        }
+
+        @Override
+        public void commit(long sequenceNumber) {
+        }
+    };
 
     public MockRaftActorContext(){
         electionTerm = null;
@@ -199,6 +220,15 @@ public class MockRaftActorContext implements RaftActorContext {
     @Override
     public boolean isSnapshotCaptureInitiated() {
         return snapshotCaptureInitiated;
+    }
+
+    @Override
+    public SnapshotSupport getSnapshotSupport() {
+        return snapshotSupport;
+    }
+
+    public void setSnapshotSupport(SnapshotSupport snapshotSupport) {
+        this.snapshotSupport = snapshotSupport;
     }
 
     public static class SimpleReplicatedLog extends AbstractReplicatedLogImpl {

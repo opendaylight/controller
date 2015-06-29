@@ -10,9 +10,8 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.japi.Procedure;
 import akka.persistence.SnapshotSelectionCriteria;
-import org.opendaylight.controller.cluster.DataPersistenceProvider;
-
 import java.util.concurrent.CountDownLatch;
+import org.opendaylight.controller.cluster.DataPersistenceProvider;
 
 /**
  * This class is intended for testing purposes. It just triggers CountDownLatch's in each method.
@@ -64,5 +63,10 @@ public class DataPersistenceProviderMonitor implements DataPersistenceProvider {
 
     public void setDeleteMessagesLatch(CountDownLatch deleteMessagesLatch) {
         this.deleteMessagesLatch = deleteMessagesLatch;
+    }
+
+    @Override
+    public long getLastSequenceNumber() {
+        return -1;
     }
 }
