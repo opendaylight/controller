@@ -26,5 +26,7 @@ public interface SnapshotSupport {
 
     void commit(long sequenceNumber);
 
+    void apply(Snapshot snapshot);
+
     long getLastSequenceNumber();
 }
