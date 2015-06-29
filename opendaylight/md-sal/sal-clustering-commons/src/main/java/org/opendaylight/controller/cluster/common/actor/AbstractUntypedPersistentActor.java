@@ -100,6 +100,11 @@ public abstract class AbstractUntypedPersistentActor extends UntypedPersistentAc
         public void deleteMessages(long sequenceNumber) {
             AbstractUntypedPersistentActor.this.deleteMessages(sequenceNumber);
         }
+
+        @Override
+        public long getLastSequenceNumber() {
+            return AbstractUntypedPersistentActor.this.lastSequenceNr();
+        }
     }
 
     protected class NonPersistentDataProvider implements DataPersistenceProvider {
@@ -134,6 +139,11 @@ public abstract class AbstractUntypedPersistentActor extends UntypedPersistentAc
         @Override
         public void deleteMessages(long sequenceNumber) {
 
+        }
+
+        @Override
+        public long getLastSequenceNumber() {
+            return -1;
         }
     }
 }

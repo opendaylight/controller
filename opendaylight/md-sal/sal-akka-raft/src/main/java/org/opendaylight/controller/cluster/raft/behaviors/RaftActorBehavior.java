@@ -62,4 +62,6 @@ public interface RaftActorBehavior extends AutoCloseable{
      * @return
      */
     long getReplicatedToAllIndex();
+
+    void performSnapshotWithoutCapture(final long snapshotCapturedIndex);
 }
