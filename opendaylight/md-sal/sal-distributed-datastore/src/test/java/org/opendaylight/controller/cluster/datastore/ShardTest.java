@@ -71,7 +71,6 @@ import org.opendaylight.controller.cluster.raft.Snapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyLogEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
-import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeader;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
@@ -1267,12 +1266,12 @@ public class ShardTest extends AbstractActorTest {
 
             waitUntilLeader(shard);
 
-            shard.tell(new CaptureSnapshot(-1,-1,-1,-1, -1, -1), getRef());
+            shard.underlyingActor().getRaftActorContext().getSnapshotSupport().capture(-1, -1, -1, false);
 
             assertEquals("Snapshot saved", true, latch.get().await(5, TimeUnit.SECONDS));
 
             latch.set(new CountDownLatch(1));
-            shard.tell(new CaptureSnapshot(-1,-1,-1,-1, -1, -1), getRef());
+            shard.underlyingActor().getRaftActorContext().getSnapshotSupport().capture(-1, -1, -1, false);
 
             assertEquals("Snapshot saved", true, latch.get().await(5, TimeUnit.SECONDS));
 
