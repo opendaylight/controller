@@ -459,7 +459,8 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      *
      * @param snapshotCapturedIndex
      */
-    protected void performSnapshotWithoutCapture(final long snapshotCapturedIndex) {
+    @Override
+    public void performSnapshotWithoutCapture(final long snapshotCapturedIndex) {
         //  we would want to keep the lastApplied as its used while capturing snapshots
         long lastApplied = context.getLastApplied();
         long tempMin = Math.min(snapshotCapturedIndex, (lastApplied > -1 ? lastApplied - 1 : -1));

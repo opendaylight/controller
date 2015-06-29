@@ -52,4 +52,8 @@ public interface DataPersistenceProvider {
      */
     void deleteMessages(long sequenceNumber);
 
+    /**
+     * Returns the last sequence number contained in the journal.
+     */
+    long getLastSequenceNumber();
 }

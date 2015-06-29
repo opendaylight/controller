@@ -41,6 +41,8 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     private boolean snapshotCaptureInitiated;
 
+    private SnapshotSupport snapshotSupport;
+
     public RaftActorContextImpl(ActorRef actor, UntypedActorContext context,
         String id,
         ElectionTerm termInformation, long commitIndex,
@@ -161,5 +163,18 @@ public class RaftActorContextImpl implements RaftActorContext {
         checkState(peerAddresses.containsKey(peerId), peerId + " is unknown");
 
         peerAddresses.put(peerId, peerAddress);
+    }
+
+    public boolean hasFollowers() {
+        return getPeerAddresses().keySet().size() > 0;
+    }
+
+    @Override
+    public SnapshotSupport getSnapshotSupport() {
+        return snapshotSupport;
+    }
+
+    void setSnapshotSupport(SnapshotSupport snapshotSupport) {
+        this.snapshotSupport = snapshotSupport;
     }
 }
