@@ -110,6 +110,11 @@ public class PruningDataTreeModification implements DataTreeModification {
     }
 
     @Override
+    public void resolve() {
+        delegate.resolve();
+    }
+
+    @Override
     public void applyToCursor(DataTreeModificationCursor dataTreeModificationCursor) {
         delegate.applyToCursor(dataTreeModificationCursor);
     }
