@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a7fa997_ee14e3f6",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RpcManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2015-06-29T19:53:20Z",
+      "side": 1,
+      "message": "this akka message might go even for empty map, do you want to send that?",
+      "range": {
+        "startLine": 120,
+        "startChar": 71,
+        "endLine": 120,
+        "endChar": 84
+      },
+      "revId": "ca10928997d45e158e6e29d26d1df2d5c386069e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_e1887124",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RpcManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2015-06-29T19:53:20Z",
+      "side": 1,
+      "message": "you can just use rpcImplementationMsg variable created above, no need to cast again.",
+      "range": {
+        "startLine": 132,
+        "startChar": 87,
+        "endLine": 132,
+        "endChar": 111
+      },
+      "revId": "ca10928997d45e158e6e29d26d1df2d5c386069e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_b73ab0cb",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/registry/RpcRegistry.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2015-06-29T19:53:20Z",
+      "side": 1,
+      "message": "A map in the message will replace the content of existing map, this needs changes",
+      "range": {
+        "startLine": 144,
+        "startChar": 36,
+        "endLine": 144,
+        "endChar": 56
+      },
+      "revId": "ca10928997d45e158e6e29d26d1df2d5c386069e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
