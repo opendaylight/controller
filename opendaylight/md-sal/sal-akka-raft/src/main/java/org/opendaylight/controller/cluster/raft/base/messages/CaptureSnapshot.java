@@ -8,6 +8,10 @@
 
 package org.opendaylight.controller.cluster.raft.base.messages;
 
+import java.util.Collections;
+import java.util.List;
+import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+
 public class CaptureSnapshot {
     private final long lastAppliedIndex;
     private final long lastAppliedTerm;
@@ -16,14 +20,19 @@ public class CaptureSnapshot {
     private final boolean installSnapshotInitiated;
     private final long replicatedToAllIndex;
     private final long replicatedToAllTerm;
+    private final List<ReplicatedLogEntry> unAppliedEntries;
+    private final long lastSequenceNumber;
 
-    public CaptureSnapshot(long lastIndex, long lastTerm,
-            long lastAppliedIndex, long lastAppliedTerm, long replicatedToAllIndex, long replicatedToAllTerm) {
-            this(lastIndex, lastTerm, lastAppliedIndex, lastAppliedTerm, replicatedToAllIndex , replicatedToAllTerm, false);
+    public CaptureSnapshot(long lastIndex, long lastTerm, long lastAppliedIndex, long lastAppliedTerm,
+            long replicatedToAllIndex, long replicatedToAllTerm, List<ReplicatedLogEntry> unAppliedEntries,
+            long lastSequenceNumber) {
+        this(lastIndex, lastTerm, lastAppliedIndex, lastAppliedTerm, replicatedToAllIndex, replicatedToAllTerm,
+                unAppliedEntries, lastSequenceNumber, false);
     }
 
-    public CaptureSnapshot(long lastIndex, long lastTerm,long lastAppliedIndex,
-            long lastAppliedTerm, long replicatedToAllIndex, long replicatedToAllTerm, boolean installSnapshotInitiated) {
+    public CaptureSnapshot(long lastIndex, long lastTerm, long lastAppliedIndex,
+            long lastAppliedTerm, long replicatedToAllIndex, long replicatedToAllTerm,
+            List<ReplicatedLogEntry> unAppliedEntries, long lastSequenceNumber, boolean installSnapshotInitiated) {
         this.lastIndex = lastIndex;
         this.lastTerm = lastTerm;
         this.lastAppliedIndex = lastAppliedIndex;
@@ -31,6 +40,8 @@ public class CaptureSnapshot {
         this.installSnapshotInitiated = installSnapshotInitiated;
         this.replicatedToAllIndex = replicatedToAllIndex;
         this.replicatedToAllTerm = replicatedToAllTerm;
+        this.unAppliedEntries = unAppliedEntries != null ? unAppliedEntries : Collections.<ReplicatedLogEntry>emptyList();
+        this.lastSequenceNumber = lastSequenceNumber;
     }
 
     public long getLastAppliedIndex() {
@@ -59,5 +70,24 @@ public class CaptureSnapshot {
 
     public long getReplicatedToAllTerm() {
         return replicatedToAllTerm;
+    }
+
+    public List<ReplicatedLogEntry> getUnAppliedEntries() {
+        return unAppliedEntries;
+    }
+
+    public long getLastSequenceNumber() {
+        return lastSequenceNumber;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("CaptureSnapshot [lastAppliedIndex=").append(lastAppliedIndex).append(", lastAppliedTerm=")
+                .append(lastAppliedTerm).append(", lastIndex=").append(lastIndex).append(", lastTerm=")
+                .append(lastTerm).append(", installSnapshotInitiated=").append(installSnapshotInitiated)
+                .append(", replicatedToAllIndex=").append(replicatedToAllIndex).append(", replicatedToAllTerm=")
+                .append(replicatedToAllTerm).append(", unAppliedEntries size=").append(unAppliedEntries.size()).append("]");
+        return builder.toString();
     }
 }

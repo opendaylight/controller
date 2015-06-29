@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.FollowerLogInformation;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
@@ -28,9 +29,9 @@ import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogImplEntry;
 import org.opendaylight.controller.cluster.raft.SerializationUtils;
+import org.opendaylight.controller.cluster.raft.SnapshotSupport;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyLogEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
-import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.InitiateInstallSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.IsolatedLeaderCheck;
 import org.opendaylight.controller.cluster.raft.base.messages.Replicate;
@@ -428,6 +429,9 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
             actorContext.setLastApplied(3);
             actorContext.setCommitIndex(followersLastIndex);
 
+            SnapshotSupport mockSnapshotSupport = Mockito.mock(SnapshotSupport.class);
+            actorContext.setSnapshotSupport(mockSnapshotSupport);
+
             Leader leader = new Leader(actorContext);
             // set the snapshot as absent and check if capture-snapshot is invoked.
             leader.setSnapshot(Optional.<ByteString>absent());
@@ -440,24 +444,19 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
             actorContext.getReplicatedLog().append(entry);
 
             // this should invoke a sendinstallsnapshot as followersLastIndex < snapshotIndex
-            RaftActorBehavior raftBehavior = leader.handleMessage(
-                leaderActor, new InitiateInstallSnapshot());
+            leader.handleMessage(leaderActor, new InitiateInstallSnapshot());
 
-            CaptureSnapshot cs = MessageCollectorActor.
-                getFirstMatching(leaderActor, CaptureSnapshot.class);
+            Mockito.verify(mockSnapshotSupport).capture(1, 3, -1, true);
 
-            assertNotNull(cs);
+            Mockito.reset(mockSnapshotSupport);
 
-            assertTrue(cs.isInstallSnapshotInitiated());
-            assertEquals(3, cs.getLastAppliedIndex());
-            assertEquals(1, cs.getLastAppliedTerm());
-            assertEquals(4, cs.getLastIndex());
-            assertEquals(2, cs.getLastTerm());
+            actorContext.setSnapshotCaptureInitiated(true);
 
             // if an initiate is started again when first is in progress, it shouldnt initiate Capture
-            raftBehavior = leader.handleMessage(leaderActor, new InitiateInstallSnapshot());
-            List<Object> captureSnapshots = MessageCollectorActor.getAllMatching(leaderActor, CaptureSnapshot.class);
-            assertEquals("CaptureSnapshot should not get invoked when  initiate is in progress", 1, captureSnapshots.size());
+            leader.handleMessage(leaderActor, new InitiateInstallSnapshot());
+
+            Mockito.verify(mockSnapshotSupport, Mockito.never()).capture(Mockito.anyLong(), Mockito.anyLong(),
+                    Mockito.anyLong(), Mockito.anyBoolean());
         }};
     }
 
