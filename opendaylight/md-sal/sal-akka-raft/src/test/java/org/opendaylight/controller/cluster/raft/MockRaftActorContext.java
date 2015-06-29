@@ -60,6 +60,10 @@ public class MockRaftActorContext implements RaftActorContext {
         public long getLastSequenceNumber() {
             return -1;
         }
+
+        @Override
+        public void apply(Snapshot snapshot) {
+        }
     };
 
     public MockRaftActorContext(){
