@@ -31,7 +31,6 @@ import org.opendaylight.controller.cluster.raft.FollowerLogInformationImpl;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
-import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.InitiateInstallSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.Replicate;
 import org.opendaylight.controller.cluster.raft.base.messages.SendHeartBeat;
@@ -592,13 +591,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         }
 
         boolean isInstallSnapshotInitiated = true;
-        long replicatedToAllIndex = super.getReplicatedToAllIndex();
-        ReplicatedLogEntry replicatedToAllEntry = context.getReplicatedLog().get(replicatedToAllIndex);
-        actor().tell(new CaptureSnapshot(lastIndex(), lastTerm(), lastAppliedIndex, lastAppliedTerm,
-            (replicatedToAllEntry != null ? replicatedToAllEntry.getIndex() : -1),
-            (replicatedToAllEntry != null ? replicatedToAllEntry.getTerm() : -1),
-            isInstallSnapshotInitiated), actor());
-        context.setSnapshotCaptureInitiated(true);
+        context.getSnapshotSupport().capture(lastAppliedTerm, lastAppliedIndex, getReplicatedToAllIndex(),
+                isInstallSnapshotInitiated);
     }
 
 

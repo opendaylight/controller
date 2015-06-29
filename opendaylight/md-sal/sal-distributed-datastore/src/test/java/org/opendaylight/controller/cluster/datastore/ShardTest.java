@@ -71,7 +71,6 @@ import org.opendaylight.controller.cluster.raft.Snapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyLogEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
-import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeader;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
@@ -383,23 +382,26 @@ public class ShardTest extends AbstractActorTest {
 
     @Test
     public void testApplyState() throws Exception {
+        new ShardTestKit(getSystem()) {{
+            TestActorRef<Shard> shard = TestActorRef.create(getSystem(), newShardProps(), "testApplyState");
 
-        TestActorRef<Shard> shard = TestActorRef.create(getSystem(), newShardProps(), "testApplyState");
+            waitUntilLeader(shard);
 
-        NormalizedNode<?, ?> node = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+            NormalizedNode<?, ?> node = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
 
-        MutableCompositeModification compMod = new MutableCompositeModification();
-        compMod.addModification(new WriteModification(TestModel.TEST_PATH, node, SCHEMA_CONTEXT));
-        Payload payload = new CompositeModificationPayload(compMod.toSerializable());
-        ApplyState applyState = new ApplyState(null, "test",
-                new ReplicatedLogImplEntry(1, 2, payload));
+            MutableCompositeModification compMod = new MutableCompositeModification();
+            compMod.addModification(new WriteModification(TestModel.TEST_PATH, node, SCHEMA_CONTEXT));
+            Payload payload = new CompositeModificationPayload(compMod.toSerializable());
+            ApplyState applyState = new ApplyState(null, "test",
+                    new ReplicatedLogImplEntry(1, 2, payload));
 
-        shard.underlyingActor().onReceiveCommand(applyState);
+            shard.underlyingActor().onReceiveCommand(applyState);
 
-        NormalizedNode<?,?> actual = readStore(shard, TestModel.TEST_PATH);
-        assertEquals("Applied state", node, actual);
+            NormalizedNode<?,?> actual = readStore(shard, TestModel.TEST_PATH);
+            assertEquals("Applied state", node, actual);
 
-        shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
+            shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
+        }};
     }
 
     @SuppressWarnings("serial")
@@ -1267,12 +1269,12 @@ public class ShardTest extends AbstractActorTest {
 
             waitUntilLeader(shard);
 
-            shard.tell(new CaptureSnapshot(-1,-1,-1,-1, -1, -1), getRef());
+            shard.underlyingActor().getRaftActorContext().getSnapshotSupport().capture(-1, -1, -1, false);
 
             assertEquals("Snapshot saved", true, latch.get().await(5, TimeUnit.SECONDS));
 
             latch.set(new CountDownLatch(1));
-            shard.tell(new CaptureSnapshot(-1,-1,-1,-1, -1, -1), getRef());
+            shard.underlyingActor().getRaftActorContext().getSnapshotSupport().capture(-1, -1, -1, false);
 
             assertEquals("Snapshot saved", true, latch.get().await(5, TimeUnit.SECONDS));
 
