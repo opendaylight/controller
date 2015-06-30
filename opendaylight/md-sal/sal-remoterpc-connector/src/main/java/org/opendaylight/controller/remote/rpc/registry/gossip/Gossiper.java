@@ -210,8 +210,8 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
             Integer randomIndex = ThreadLocalRandom.current().nextInt(0, clusterMembers.size());
             remoteMemberToGossipTo = clusterMembers.get(randomIndex);
         }
-        if(log.isDebugEnabled()) {
-            log.debug("Gossiping to [{}]", remoteMemberToGossipTo);
+        if(log.isTraceEnabled()) {
+            log.trace("Gossiping to [{}]", remoteMemberToGossipTo);
         }
         getLocalStatusAndSendTo(remoteMemberToGossipTo);
     }
@@ -251,8 +251,8 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
     void receiveGossip(GossipEnvelope envelope){
         //TODO: Add more validations
         if (!selfAddress.equals(envelope.to())) {
-            if(log.isDebugEnabled()) {
-                log.debug("Ignoring message intended for someone else. From [{}] to [{}]", envelope.from(), envelope.to());
+            if(log.isTraceEnabled()) {
+                log.trace("Ignoring message intended for someone else. From [{}] to [{}]", envelope.from(), envelope.to());
             }
             return;
         }
@@ -300,8 +300,8 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
         ActorSelection remoteRef = getContext().system().actorSelection(
                 remoteActorSystemAddress.toString() + getSelf().path().toStringWithoutAddress());
 
-        if(log.isDebugEnabled()) {
-            log.debug("Sending bucket versions to [{}]", remoteRef);
+        if(log.isTraceEnabled()) {
+            log.trace("Sending bucket versions to [{}]", remoteRef);
         }
 
         futureReply.map(getMapperToSendLocalStatus(remoteRef), getContext().dispatcher());
@@ -431,8 +431,8 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
             public Void apply(Object msg) {
                 if (msg instanceof GetBucketsByMembersReply) {
                     Map<Address, Bucket> buckets = ((GetBucketsByMembersReply) msg).getBuckets();
-                    if(log.isDebugEnabled()) {
-                        log.debug("Buckets to send from {}: {}", selfAddress, buckets);
+                    if(log.isTraceEnabled()) {
+                        log.trace("Buckets to send from {}: {}", selfAddress, buckets);
                     }
                     GossipEnvelope envelope = new GossipEnvelope(selfAddress, sender.path().address(), buckets);
                     sender.tell(envelope, getSelf());
