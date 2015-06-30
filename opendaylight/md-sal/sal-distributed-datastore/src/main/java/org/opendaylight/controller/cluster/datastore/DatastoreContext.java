@@ -32,7 +32,7 @@ public class DatastoreContext {
 
     private final InMemoryDOMDataStoreConfigProperties dataStoreProperties;
     private final Duration shardTransactionIdleTimeout;
-    private final int operationTimeoutInSeconds;
+    private final long operationTimeoutInMillis;
     private final String dataStoreMXBeanType;
     private final ConfigParams shardRaftConfig;
     private final int shardTransactionCommitTimeoutInSeconds;
@@ -50,7 +50,7 @@ public class DatastoreContext {
     }
 
     private DatastoreContext(InMemoryDOMDataStoreConfigProperties dataStoreProperties,
-            ConfigParams shardRaftConfig, String dataStoreMXBeanType, int operationTimeoutInSeconds,
+            ConfigParams shardRaftConfig, String dataStoreMXBeanType, long operationTimeoutInMillis,
             Duration shardTransactionIdleTimeout, int shardTransactionCommitTimeoutInSeconds,
             int shardTransactionCommitQueueCapacity, Timeout shardInitializationTimeout,
             Timeout shardLeaderElectionTimeout,
@@ -59,7 +59,7 @@ public class DatastoreContext {
         this.dataStoreProperties = dataStoreProperties;
         this.shardRaftConfig = shardRaftConfig;
         this.dataStoreMXBeanType = dataStoreMXBeanType;
-        this.operationTimeoutInSeconds = operationTimeoutInSeconds;
+        this.operationTimeoutInMillis = operationTimeoutInMillis;
         this.shardTransactionIdleTimeout = shardTransactionIdleTimeout;
         this.shardTransactionCommitTimeoutInSeconds = shardTransactionCommitTimeoutInSeconds;
         this.shardTransactionCommitQueueCapacity = shardTransactionCommitQueueCapacity;
@@ -88,8 +88,8 @@ public class DatastoreContext {
         return dataStoreMXBeanType;
     }
 
-    public int getOperationTimeoutInSeconds() {
-        return operationTimeoutInSeconds;
+    public long getOperationTimeoutInMillis() {
+        return operationTimeoutInMillis;
     }
 
     public ConfigParams getShardRaftConfig() {
@@ -135,7 +135,7 @@ public class DatastoreContext {
     public static class Builder {
         private InMemoryDOMDataStoreConfigProperties dataStoreProperties;
         private Duration shardTransactionIdleTimeout = Duration.create(10, TimeUnit.MINUTES);
-        private int operationTimeoutInSeconds = 5;
+        private long operationTimeoutInMillis = 5000;
         private String dataStoreMXBeanType;
         private String dataStoreType = "unknown";
         private int shardTransactionCommitTimeoutInSeconds = 30;
@@ -158,7 +158,12 @@ public class DatastoreContext {
         }
 
         public Builder operationTimeoutInSeconds(int operationTimeoutInSeconds) {
-            this.operationTimeoutInSeconds = operationTimeoutInSeconds;
+            this.operationTimeoutInMillis = TimeUnit.MILLISECONDS.convert(operationTimeoutInSeconds, TimeUnit.SECONDS);
+            return this;
+        }
+
+        public Builder operationTimeoutInMillis(long operationTimeoutInMillis) {
+            this.operationTimeoutInMillis = operationTimeoutInMillis;
             return this;
         }
 
@@ -266,7 +271,7 @@ public class DatastoreContext {
             }
 
             return new DatastoreContext(dataStoreProperties, raftConfig, dataStoreMXBeanType,
-                    operationTimeoutInSeconds, shardTransactionIdleTimeout,
+                    operationTimeoutInMillis, shardTransactionIdleTimeout,
                     shardTransactionCommitTimeoutInSeconds, shardTransactionCommitQueueCapacity,
                     shardInitializationTimeout, shardLeaderElectionTimeout,
                     persistent, configurationReader, shardElectionTimeoutFactor,
