@@ -14,6 +14,8 @@ import java.util.List;
  * Represents the ReplicatedLog that needs to be kept in sync by the RaftActor
  */
 public interface ReplicatedLog {
+    long NO_MAX_SIZE = -1;
+
     /**
      * Get a replicated log entry at the specified index
      *
@@ -93,10 +95,15 @@ public interface ReplicatedLog {
     List<ReplicatedLogEntry> getFrom(long index);
 
     /**
+     * Returns a list of log entries starting from the given index up to the given maximum of entries or
+     * the given maximum accumulated size, whichever comes first.
      *
-     * @param index the index of the log entry
+     * @param index the index of the first log entry to get
+     * @param maxEntries the maximum number of entries to get
+     * @param maxDataSize the maximum accumulated size of the log entries to get
+     * @return the List of entries meeting the criteria.
      */
-    List<ReplicatedLogEntry> getFrom(long index, int max);
+    List<ReplicatedLogEntry> getFrom(long index, int maxEntries, long maxDataSize);
 
     /**
      *
