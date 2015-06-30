@@ -455,10 +455,9 @@ public class Shard extends RaftActor {
         } else if (getLeader() != null) {
             getLeader().forward(message, getContext());
         } else {
-            getSender().tell(new akka.actor.Status.Failure(new NoShardLeaderException(
-                "Could not find shard leader so transaction cannot be created. This typically happens" +
-                " when the system is coming up or recovering and a leader is being elected. Try again" +
-                " later.")), getSelf());
+            getSender().tell(new akka.actor.Status.Failure(new NoShardLeaderException(String.format(
+                "Shard %s currently has no leader so a transaction cannot be created. Try again later.",
+                persistenceId()))), getSelf());
         }
     }
 
