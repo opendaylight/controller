@@ -125,6 +125,7 @@ public class TransactionProxyTest {
         doReturn(mockClusterWrapper).when(mockActorContext).getClusterWrapper();
         doReturn(mockClusterWrapper).when(mockActorContext).getClusterWrapper();
         doReturn(dataStoreContext).when(mockActorContext).getDatastoreContext();
+        doReturn(new Timeout(5, TimeUnit.SECONDS)).when(mockActorContext).getOperationTimeout();
 
         ShardStrategyFactory.setConfiguration(configuration);
     }

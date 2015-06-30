@@ -111,8 +111,8 @@ public class ActorContext {
         this.configuration = configuration;
         this.datastoreContext = datastoreContext;
 
-        operationDuration = Duration.create(datastoreContext.getOperationTimeoutInSeconds(),
-                TimeUnit.SECONDS);
+        operationDuration = Duration.create(datastoreContext.getOperationTimeoutInMillis(),
+                TimeUnit.MILLISECONDS);
         operationTimeout = new Timeout(operationDuration);
 
         Address selfAddress = clusterWrapper.getSelfAddress();
@@ -397,6 +397,10 @@ public class ActorContext {
 
     public FiniteDuration getOperationDuration() {
         return operationDuration;
+    }
+
+    public Timeout getOperationTimeout() {
+        return operationTimeout;
     }
 
     public boolean isPathLocal(String path) {
