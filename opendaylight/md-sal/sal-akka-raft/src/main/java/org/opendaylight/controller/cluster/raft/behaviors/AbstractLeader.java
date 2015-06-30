@@ -103,7 +103,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                 new FollowerLogInformationImpl(followerId,
                     new AtomicLong(context.getCommitIndex()),
                     new AtomicLong(-1),
-                    context.getConfigParams().getElectionTimeOutInterval());
+                    context.getConfigParams().getElectionTimeOutInterval(), context);
 
             followerToLog.put(followerId, followerLogInformation);
         }
@@ -236,12 +236,12 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             applyLogToStateMachine(context.getCommitIndex());
         }
 
-        //Send the next log entry immediately, if possible, no need to wait for heartbeat to trigger that event
-        sendUpdatesToFollower(followerId, followerLogInformation, false);
-
         if (!context.isSnapshotCaptureInitiated()) {
             purgeInMemoryLog();
         }
+
+        //Send the next log entry immediately, if possible, no need to wait for heartbeat to trigger that event
+        sendUpdatesToFollower(followerId, followerLogInformation, false);
 
         return this;
     }
@@ -482,9 +482,14 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                    LOG.debug("{}: sendAppendEntries: {} is present for follower {}", logName(),
                            followerNextIndex, followerId);
 
-                   // FIXME : Sending one entry at a time
-                   entries = context.getReplicatedLog().getFrom(followerNextIndex, 1);
-                   sendAppendEntries = true;
+                   if(followerLogInformation.okToReplicate()) {
+                       // Try to send all the entries in the journal but not exceeding the max data size
+                       // for a single AppendEntries message.
+                       int maxEntries = (int) context.getReplicatedLog().size();
+                       entries = context.getReplicatedLog().getFrom(followerNextIndex, maxEntries,
+                               context.getConfigParams().getSnapshotChunkSize());
+                       sendAppendEntries = true;
+                   }
 
                } else if (isFollowerActive && followerNextIndex >= 0 &&
                        leaderLastIndex > followerNextIndex && !context.isSnapshotCaptureInitiated()) {

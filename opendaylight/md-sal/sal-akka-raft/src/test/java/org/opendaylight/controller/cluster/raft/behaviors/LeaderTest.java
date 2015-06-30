@@ -9,6 +9,7 @@ import akka.actor.Props;
 import akka.actor.Terminated;
 import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.google.protobuf.ByteString;
 import java.io.ByteArrayOutputStream;
@@ -51,6 +52,9 @@ import org.opendaylight.controller.protobuff.messages.cluster.raft.InstallSnapsh
 import scala.concurrent.duration.FiniteDuration;
 
 public class LeaderTest extends AbstractRaftActorBehaviorTest {
+
+    static final String FOLLOWER_ID = "follower";
+    public static final String LEADER_ID = "leader";
 
     private final ActorRef leaderActor =
         getSystem().actorOf(Props.create(DoNothingActor.class));
@@ -234,6 +238,255 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
                 }
             };
         }};
+    }
+
+    private RaftActorBehavior sendReplicate(Leader leader, MockRaftActorContext actorContext, long index){
+        MockRaftActorContext.MockPayload payload = new MockRaftActorContext.MockPayload("foo");
+        MockRaftActorContext.MockReplicatedLogEntry newEntry = new MockRaftActorContext.MockReplicatedLogEntry(
+                1, index, payload);
+        actorContext.getReplicatedLog().append(newEntry);
+        return leader.handleMessage(leaderActor, new Replicate(null, null, newEntry));
+    }
+
+    @Test
+    public void testMultipleReplicateShouldNotCauseDuplicateAppendEntriesToBeSent() throws Exception {
+        TestActorRef<ForwardMessageToBehaviorActor> leaderActor = TestActorRef.create(getSystem(),
+                Props.create(ForwardMessageToBehaviorActor.class));
+
+        TestActorRef<ForwardMessageToBehaviorActor> followerActor = TestActorRef.create(getSystem(),
+                ForwardMessageToBehaviorActor.props());
+
+        MockRaftActorContext actorContext = createActorContextWithFollower(leaderActor, followerActor);
+        actorContext.setConfigParams(new DefaultConfigParamsImpl() {
+            @Override
+            public FiniteDuration getHeartBeatInterval() {
+                return FiniteDuration.apply(5, TimeUnit.SECONDS);
+            }
+        });
+
+        long term = 1;
+        actorContext.getTermInformation().update(term, "");
+
+        Leader leader = new Leader(actorContext);
+
+        leader.handleMessage(leaderActor, new SendHeartBeat());
+
+        MessageCollectorActor.expectFirstMatching(followerActor, AppendEntriesMessages.AppendEntries.class);
+
+        // The follower would normally reply - simulate that explicitly here.
+        long lastIndex = actorContext.getReplicatedLog().lastIndex();
+        leader.handleMessage(followerActor, new AppendEntriesReply(
+                FOLLOWER_ID, term, true, lastIndex, term));
+        assertEquals("isFollowerActive", true, leader.getFollower(FOLLOWER_ID).isFollowerActive());
+
+        followerActor.underlyingActor().clear();
+
+        for(int i=0;i<5;i++) {
+            sendReplicate(leader, actorContext, lastIndex+i+1);
+        }
+
+        List<AppendEntriesMessages.AppendEntries> allMessages = MessageCollectorActor.getAllMatching(followerActor,
+                AppendEntriesMessages.AppendEntries.class);
+        // We expect only 1 message to be sent because of two reasons,
+        // - an append entries reply was not received
+        // - the heartbeat interval has not expired
+        // In this scenario if multiple messages are sent they would likely be duplicates
+        assertEquals("The number of append entries collected should be 1", 1, allMessages.size());
+    }
+
+    @Test
+    public void testMultipleReplicateWithReplyShouldResultInAppendEntries() throws Exception {
+
+        TestActorRef<ForwardMessageToBehaviorActor> leaderActor = TestActorRef.create(getSystem(),
+                Props.create(ForwardMessageToBehaviorActor.class));
+
+        TestActorRef<ForwardMessageToBehaviorActor> followerActor = TestActorRef.create(getSystem(),
+                ForwardMessageToBehaviorActor.props());
+
+        MockRaftActorContext actorContext = createActorContextWithFollower(leaderActor, followerActor);
+        actorContext.setConfigParams(new DefaultConfigParamsImpl() {
+            @Override
+            public FiniteDuration getHeartBeatInterval() {
+                return FiniteDuration.apply(5, TimeUnit.SECONDS);
+            }
+        });
+
+        long term = 1;
+        actorContext.getTermInformation().update(term, "");
+
+        Leader leader = new Leader(actorContext);
+
+        // Leader will send an immediate heartbeat - ignore it.
+        MessageCollectorActor.expectFirstMatching(followerActor, AppendEntriesMessages.AppendEntries.class);
+
+        // The follower would normally reply - simulate that explicitly here.
+        long lastIndex = actorContext.getReplicatedLog().lastIndex();
+        leader.handleMessage(followerActor, new AppendEntriesReply(
+                FOLLOWER_ID, term, true, lastIndex, term));
+        assertEquals("isFollowerActive", true, leader.getFollower(FOLLOWER_ID).isFollowerActive());
+
+        followerActor.underlyingActor().clear();
+
+        for(int i=0;i<3;i++) {
+            sendReplicate(leader, actorContext, lastIndex+i+1);
+            leader.handleMessage(followerActor, new AppendEntriesReply(
+                    FOLLOWER_ID, term, true, lastIndex + i + 1, term));
+
+        }
+
+        for(int i=3;i<5;i++) {
+            sendReplicate(leader, actorContext, lastIndex + i + 1);
+        }
+
+        List<AppendEntriesMessages.AppendEntries> allMessages = MessageCollectorActor.getAllMatching(
+                followerActor, AppendEntriesMessages.AppendEntries.class);
+        // We expect 4 here because the first 3 replicate got a reply and so the 4th entry would
+        // get sent to the follower - but not the 5th
+        assertEquals("The number of append entries collected should be 4", 4, allMessages.size());
+
+        for(int i=0;i<4;i++) {
+            long expected = AppendEntries.fromSerializable(allMessages.get(i)).getEntries().get(0).getIndex();
+            assertEquals(expected, i+2);
+        }
+    }
+
+    @Test
+    public void testDuplicateAppendEntriesWillBeSentOnHeartBeat() throws Exception {
+        TestActorRef<ForwardMessageToBehaviorActor> leaderActor = TestActorRef.create(getSystem(),
+                Props.create(ForwardMessageToBehaviorActor.class));
+
+        TestActorRef<ForwardMessageToBehaviorActor> followerActor = TestActorRef.create(getSystem(),
+                ForwardMessageToBehaviorActor.props());
+
+        MockRaftActorContext actorContext = createActorContextWithFollower(leaderActor, followerActor);
+        actorContext.setConfigParams(new DefaultConfigParamsImpl() {
+            @Override
+            public FiniteDuration getHeartBeatInterval() {
+                return FiniteDuration.apply(500, TimeUnit.MILLISECONDS);
+            }
+        });
+
+        long term = 1;
+        actorContext.getTermInformation().update(term, "");
+
+        Leader leader = new Leader(actorContext);
+
+        leader.handleMessage(leaderActor, new SendHeartBeat());
+
+        MessageCollectorActor.expectFirstMatching(followerActor, AppendEntriesMessages.AppendEntries.class);
+
+        // The follower would normally reply - simulate that explicitly here.
+        long lastIndex = actorContext.getReplicatedLog().lastIndex();
+        leader.handleMessage(followerActor, new AppendEntriesReply(
+                FOLLOWER_ID, term, true, lastIndex, term));
+        assertEquals("isFollowerActive", true, leader.getFollower(FOLLOWER_ID).isFollowerActive());
+
+        followerActor.underlyingActor().clear();
+
+        sendReplicate(leader, actorContext, lastIndex+1);
+
+        // Wait slightly longer than heartbeat duration
+        Uninterruptibles.sleepUninterruptibly(750, TimeUnit.MILLISECONDS);
+
+        leader.handleMessage(leaderActor, new SendHeartBeat());
+
+        List<AppendEntriesMessages.AppendEntries> allMessages = MessageCollectorActor.getAllMatching(
+                followerActor, AppendEntriesMessages.AppendEntries.class);
+        assertEquals("The number of append entries collected should be 2", 2, allMessages.size());
+
+        assertEquals(1, AppendEntries.fromSerializable(allMessages.get(0)).getEntries().size());
+        assertEquals(lastIndex+1, AppendEntries.fromSerializable(allMessages.get(0)).getEntries().get(0).getIndex());
+        assertEquals(1, AppendEntries.fromSerializable(allMessages.get(1)).getEntries().size());
+        assertEquals(lastIndex+1, AppendEntries.fromSerializable(allMessages.get(0)).getEntries().get(0).getIndex());
+
+    }
+
+    @Test
+    public void testHeartbeatsAreAlwaysSentIfTheHeartbeatIntervalHasElapsed() throws Exception {
+        TestActorRef<ForwardMessageToBehaviorActor> leaderActor = TestActorRef.create(getSystem(),
+                Props.create(ForwardMessageToBehaviorActor.class));
+
+        TestActorRef<ForwardMessageToBehaviorActor> followerActor = TestActorRef.create(getSystem(),
+                ForwardMessageToBehaviorActor.props());
+
+        MockRaftActorContext actorContext = createActorContextWithFollower(leaderActor, followerActor);
+        actorContext.setConfigParams(new DefaultConfigParamsImpl() {
+            @Override
+            public FiniteDuration getHeartBeatInterval() {
+                return FiniteDuration.apply(100, TimeUnit.MILLISECONDS);
+            }
+        });
+
+        long term = 1;
+        actorContext.getTermInformation().update(term, "");
+
+        Leader leader = new Leader(actorContext);
+
+        leader.handleMessage(leaderActor, new SendHeartBeat());
+
+        MessageCollectorActor.expectFirstMatching(followerActor, AppendEntriesMessages.AppendEntries.class);
+
+        // The follower would normally reply - simulate that explicitly here.
+        long lastIndex = actorContext.getReplicatedLog().lastIndex();
+        leader.handleMessage(followerActor, new AppendEntriesReply(
+                FOLLOWER_ID, term, true, lastIndex, term));
+        assertEquals("isFollowerActive", true, leader.getFollower(FOLLOWER_ID).isFollowerActive());
+
+        followerActor.underlyingActor().clear();
+
+        for(int i=0;i<3;i++) {
+            Uninterruptibles.sleepUninterruptibly(150, TimeUnit.MILLISECONDS);
+            leader.handleMessage(leaderActor, new SendHeartBeat());
+        }
+
+        List<AppendEntriesMessages.AppendEntries> allMessages = MessageCollectorActor.getAllMatching(
+                followerActor, AppendEntriesMessages.AppendEntries.class);
+        assertEquals("The number of append entries collected should be 3", 3, allMessages.size());
+    }
+
+    @Test
+    public void testSendingReplicateImmediatelyAfterHeartbeatDoesReplicate() throws Exception {
+        TestActorRef<ForwardMessageToBehaviorActor> leaderActor = TestActorRef.create(getSystem(),
+                Props.create(ForwardMessageToBehaviorActor.class));
+
+        TestActorRef<ForwardMessageToBehaviorActor> followerActor = TestActorRef.create(getSystem(),
+                ForwardMessageToBehaviorActor.props());
+
+        MockRaftActorContext actorContext = createActorContextWithFollower(leaderActor, followerActor);
+        actorContext.setConfigParams(new DefaultConfigParamsImpl() {
+            @Override
+            public FiniteDuration getHeartBeatInterval() {
+                return FiniteDuration.apply(100, TimeUnit.MILLISECONDS);
+            }
+        });
+
+        long term = 1;
+        actorContext.getTermInformation().update(term, "");
+
+        Leader leader = new Leader(actorContext);
+
+        leader.handleMessage(leaderActor, new SendHeartBeat());
+
+        MessageCollectorActor.expectFirstMatching(followerActor, AppendEntriesMessages.AppendEntries.class);
+
+        // The follower would normally reply - simulate that explicitly here.
+        long lastIndex = actorContext.getReplicatedLog().lastIndex();
+        leader.handleMessage(followerActor, new AppendEntriesReply(
+                FOLLOWER_ID, term, true, lastIndex, term));
+        assertEquals("isFollowerActive", true, leader.getFollower(FOLLOWER_ID).isFollowerActive());
+
+        followerActor.underlyingActor().clear();
+
+        Uninterruptibles.sleepUninterruptibly(150, TimeUnit.MILLISECONDS);
+        leader.handleMessage(leaderActor, new SendHeartBeat());
+        sendReplicate(leader, actorContext, lastIndex+1);
+
+        List<AppendEntriesMessages.AppendEntries> allMessages = MessageCollectorActor.getAllMatching(
+                followerActor, AppendEntriesMessages.AppendEntries.class);
+        assertEquals("The number of append entries collected should be 2", 2, allMessages.size());
+
+        assertEquals(0, AppendEntries.fromSerializable(allMessages.get(0)).getEntries().size());
+        assertEquals(1, AppendEntries.fromSerializable(allMessages.get(1)).getEntries().size());
     }
 
     @Test
@@ -977,7 +1230,7 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
     }
 
     public static class ForwardMessageToBehaviorActor extends MessageCollectorActor {
-        AbstractRaftActorBehavior behavior;
+        RaftActorBehavior behavior;
 
         @Override public void onReceive(Object message) throws Exception {
             if(behavior != null) {
@@ -989,6 +1242,10 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
 
         public static Props props() {
             return Props.create(ForwardMessageToBehaviorActor.class);
+        }
+
+        public void setBehavior(RaftActorBehavior behavior){
+            this.behavior = behavior;
         }
     }
 
@@ -1097,6 +1354,8 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
 
             Leader leader = new Leader(leaderActorContext);
 
+            leader.handleMessage(leaderActor, new SendHeartBeat());
+
             // Initial heartbeat
             AppendEntries appendEntries = AppendEntries.fromSerializable(
                     MessageCollectorActor.expectFirstMatching(followerActor, AppendEntriesMessages.AppendEntries.class));
@@ -1140,6 +1399,294 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
 
             assertEquals(1, followerActorContext.getCommitIndex());
         }};
+    }
+
+    private MockRaftActorContext createActorContext(String id, ActorRef actorRef) {
+        DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
+        configParams.setHeartBeatInterval(new FiniteDuration(50, TimeUnit.MILLISECONDS));
+        configParams.setElectionTimeoutFactor(100000);
+        MockRaftActorContext context = new MockRaftActorContext(id, getSystem(), actorRef);
+        context.setConfigParams(configParams);
+        return context;
+    }
+
+    private MockRaftActorContext createFollowerActorContextWithLeader(ActorRef followerActor) {
+        MockRaftActorContext followerActorContext = createActorContext(FOLLOWER_ID, followerActor);
+        DefaultConfigParamsImpl followerConfig = new DefaultConfigParamsImpl();
+        followerConfig.setElectionTimeoutFactor(10000);
+        followerActorContext.setConfigParams(followerConfig);
+        followerActorContext.setPeerAddresses(ImmutableMap.of(LEADER_ID, leaderActor.path().toString()));
+        return followerActorContext;
+    }
+
+    private MockRaftActorContext createActorContextWithFollower(ActorRef leaderActor, ActorRef followerActor) {
+        MockRaftActorContext actorContext = createActorContext(LEADER_ID, leaderActor);
+        actorContext.setPeerAddresses(ImmutableMap.<String, String>builder().put(FOLLOWER_ID,
+                followerActor.path().toString()).build());
+        return actorContext;
+    }
+
+    @Test
+    public void testHandleAppendEntriesReplyFailureWithFollowersLogBehindTheLeader(){
+        TestActorRef<ForwardMessageToBehaviorActor> leaderActor = TestActorRef.create(getSystem(),
+                Props.create(ForwardMessageToBehaviorActor.class));
+
+        TestActorRef<ForwardMessageToBehaviorActor> followerActor = TestActorRef.create(getSystem(),
+                ForwardMessageToBehaviorActor.props());
+
+        MockRaftActorContext leaderActorContext = createActorContextWithFollower(leaderActor, followerActor);
+        ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setHeartBeatInterval(
+                new FiniteDuration(1000, TimeUnit.SECONDS));
+
+        leaderActorContext.setReplicatedLog(
+                new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 3, 1).build());
+        long leaderCommitIndex = 2;
+        leaderActorContext.setCommitIndex(leaderCommitIndex);
+        leaderActorContext.setLastApplied(leaderCommitIndex);
+
+        ReplicatedLogEntry leadersSecondLogEntry = leaderActorContext.getReplicatedLog().get(1);
+        ReplicatedLogEntry leadersThirdLogEntry = leaderActorContext.getReplicatedLog().get(2);
+
+        MockRaftActorContext followerActorContext = createFollowerActorContextWithLeader(followerActor);
+
+        followerActorContext.setReplicatedLog(
+                new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 1, 1).build());
+        followerActorContext.setCommitIndex(0);
+        followerActorContext.setLastApplied(0);
+
+        Follower follower = new Follower(followerActorContext);
+        followerActor.underlyingActor().setBehavior(follower);
+
+        Leader leader = new Leader(leaderActorContext);
+
+        leader.handleMessage(leaderActor, new SendHeartBeat());
+
+        AppendEntries appendEntries = AppendEntries.fromSerializable(
+                MessageCollectorActor.expectFirstMatching(followerActor, AppendEntriesMessages.AppendEntries.class));
+        AppendEntriesReply appendEntriesReply = MessageCollectorActor.expectFirstMatching(leaderActor, AppendEntriesReply.class);
+
+        MessageCollectorActor.clearMessages(followerActor);
+        MessageCollectorActor.clearMessages(leaderActor);
+
+        // Verify initial AppendEntries sent with the leader's current commit index.
+        assertEquals("getLeaderCommit", leaderCommitIndex, appendEntries.getLeaderCommit());
+        assertEquals("Log entries size", 0, appendEntries.getEntries().size());
+        assertEquals("getPrevLogIndex", 1, appendEntries.getPrevLogIndex());
+
+        leaderActor.underlyingActor().setBehavior(leader);
+
+        leader.handleMessage(followerActor, appendEntriesReply);
+
+        MessageCollectorActor.expectMatching(leaderActor, AppendEntriesReply.class, 1);
+        appendEntries = AppendEntries.fromSerializable(MessageCollectorActor.expectFirstMatching(
+                followerActor, AppendEntriesMessages.AppendEntries.class));
+
+        assertEquals("getLeaderCommit", leaderCommitIndex, appendEntries.getLeaderCommit());
+        assertEquals("getPrevLogIndex", -1, appendEntries.getPrevLogIndex());
+        assertEquals("Log entries size", 2, appendEntries.getEntries().size());
+
+        assertEquals("First entry index", 1, appendEntries.getEntries().get(0).getIndex());
+        assertEquals("First entry data", leadersSecondLogEntry.getData(),
+                appendEntries.getEntries().get(0).getData());
+        assertEquals("Second entry index", 2, appendEntries.getEntries().get(1).getIndex());
+        assertEquals("Second entry data", leadersThirdLogEntry.getData(),
+                appendEntries.getEntries().get(1).getData());
+
+        FollowerLogInformation followerInfo = leader.getFollower(FOLLOWER_ID);
+        assertEquals("getNextIndex", 3, followerInfo.getNextIndex().longValue());
+
+        List<ApplyState> applyStateList = MessageCollectorActor.expectMatching(followerActor, ApplyState.class, 2);
+
+        ApplyState applyState = applyStateList.get(0);
+        assertEquals("Follower's first ApplyState index", 1, applyState.getReplicatedLogEntry().getIndex());
+        assertEquals("Follower's first ApplyState term", 1, applyState.getReplicatedLogEntry().getTerm());
+        assertEquals("Follower's first ApplyState data", leadersSecondLogEntry.getData(),
+                applyState.getReplicatedLogEntry().getData());
+
+        applyState = applyStateList.get(1);
+        assertEquals("Follower's second ApplyState index", 2, applyState.getReplicatedLogEntry().getIndex());
+        assertEquals("Follower's second ApplyState term", 1, applyState.getReplicatedLogEntry().getTerm());
+        assertEquals("Follower's second ApplyState data", leadersThirdLogEntry.getData(),
+                applyState.getReplicatedLogEntry().getData());
+
+        assertEquals("Follower's commit index", 2, followerActorContext.getCommitIndex());
+        assertEquals("Follower's lastIndex", 2, followerActorContext.getReplicatedLog().lastIndex());
+    }
+
+    @Test
+    public void testHandleAppendEntriesReplyFailureWithFollowersLogEmpty() {
+        TestActorRef<ForwardMessageToBehaviorActor> leaderActor = TestActorRef.create(getSystem(),
+                Props.create(ForwardMessageToBehaviorActor.class));
+
+        TestActorRef<ForwardMessageToBehaviorActor> followerActor = TestActorRef.create(getSystem(),
+                ForwardMessageToBehaviorActor.props());
+
+        MockRaftActorContext leaderActorContext = createActorContextWithFollower(leaderActor, followerActor);
+        ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setHeartBeatInterval(
+                new FiniteDuration(1000, TimeUnit.SECONDS));
+
+        leaderActorContext.setReplicatedLog(
+                new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 2, 1).build());
+        long leaderCommitIndex = 1;
+        leaderActorContext.setCommitIndex(leaderCommitIndex);
+        leaderActorContext.setLastApplied(leaderCommitIndex);
+
+        ReplicatedLogEntry leadersFirstLogEntry = leaderActorContext.getReplicatedLog().get(0);
+        ReplicatedLogEntry leadersSecondLogEntry = leaderActorContext.getReplicatedLog().get(1);
+
+        MockRaftActorContext followerActorContext = createFollowerActorContextWithLeader(followerActor);
+
+        followerActorContext.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().build());
+        followerActorContext.setCommitIndex(-1);
+        followerActorContext.setLastApplied(-1);
+
+        Follower follower = new Follower(followerActorContext);
+        followerActor.underlyingActor().setBehavior(follower);
+
+        Leader leader = new Leader(leaderActorContext);
+
+        leader.handleMessage(leaderActor, new SendHeartBeat());
+
+        AppendEntries appendEntries = AppendEntries.fromSerializable(
+                MessageCollectorActor.expectFirstMatching(followerActor, AppendEntriesMessages.AppendEntries.class));
+        AppendEntriesReply appendEntriesReply = MessageCollectorActor.expectFirstMatching(leaderActor, AppendEntriesReply.class);
+
+        MessageCollectorActor.clearMessages(followerActor);
+        MessageCollectorActor.clearMessages(leaderActor);
+
+        // Verify initial AppendEntries sent with the leader's current commit index.
+        assertEquals("getLeaderCommit", leaderCommitIndex, appendEntries.getLeaderCommit());
+        assertEquals("Log entries size", 0, appendEntries.getEntries().size());
+        assertEquals("getPrevLogIndex", 0, appendEntries.getPrevLogIndex());
+
+        leaderActor.underlyingActor().setBehavior(leader);
+
+        leader.handleMessage(followerActor, appendEntriesReply);
+
+        MessageCollectorActor.expectMatching(leaderActor, AppendEntriesReply.class, 1);
+        appendEntries = AppendEntries.fromSerializable(MessageCollectorActor.expectFirstMatching(
+                followerActor, AppendEntriesMessages.AppendEntries.class));
+
+        assertEquals("getLeaderCommit", leaderCommitIndex, appendEntries.getLeaderCommit());
+        assertEquals("getPrevLogIndex", -1, appendEntries.getPrevLogIndex());
+        assertEquals("Log entries size", 2, appendEntries.getEntries().size());
+
+        assertEquals("First entry index", 0, appendEntries.getEntries().get(0).getIndex());
+        assertEquals("First entry data", leadersFirstLogEntry.getData(),
+                appendEntries.getEntries().get(0).getData());
+        assertEquals("Second entry index", 1, appendEntries.getEntries().get(1).getIndex());
+        assertEquals("Second entry data", leadersSecondLogEntry.getData(),
+                appendEntries.getEntries().get(1).getData());
+
+        FollowerLogInformation followerInfo = leader.getFollower(FOLLOWER_ID);
+        assertEquals("getNextIndex", 2, followerInfo.getNextIndex().longValue());
+
+        List<ApplyState> applyStateList = MessageCollectorActor.expectMatching(followerActor, ApplyState.class, 2);
+
+        ApplyState applyState = applyStateList.get(0);
+        assertEquals("Follower's first ApplyState index", 0, applyState.getReplicatedLogEntry().getIndex());
+        assertEquals("Follower's first ApplyState term", 1, applyState.getReplicatedLogEntry().getTerm());
+        assertEquals("Follower's first ApplyState data", leadersFirstLogEntry.getData(),
+                applyState.getReplicatedLogEntry().getData());
+
+        applyState = applyStateList.get(1);
+        assertEquals("Follower's second ApplyState index", 1, applyState.getReplicatedLogEntry().getIndex());
+        assertEquals("Follower's second ApplyState term", 1, applyState.getReplicatedLogEntry().getTerm());
+        assertEquals("Follower's second ApplyState data", leadersSecondLogEntry.getData(),
+                applyState.getReplicatedLogEntry().getData());
+
+        assertEquals("Follower's commit index", 1, followerActorContext.getCommitIndex());
+        assertEquals("Follower's lastIndex", 1, followerActorContext.getReplicatedLog().lastIndex());
+    }
+
+    @Test
+    public void testHandleAppendEntriesReplyFailureWithFollowersLogTermDifferent(){
+        TestActorRef<ForwardMessageToBehaviorActor> leaderActor = TestActorRef.create(getSystem(),
+                Props.create(ForwardMessageToBehaviorActor.class));
+
+        TestActorRef<ForwardMessageToBehaviorActor> followerActor = TestActorRef.create(getSystem(),
+                ForwardMessageToBehaviorActor.props());
+
+        MockRaftActorContext leaderActorContext = createActorContextWithFollower(leaderActor, followerActor);
+        ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setHeartBeatInterval(
+                new FiniteDuration(1000, TimeUnit.SECONDS));
+
+        leaderActorContext.setReplicatedLog(
+                new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 2, 2).build());
+        long leaderCommitIndex = 1;
+        leaderActorContext.setCommitIndex(leaderCommitIndex);
+        leaderActorContext.setLastApplied(leaderCommitIndex);
+
+        ReplicatedLogEntry leadersFirstLogEntry = leaderActorContext.getReplicatedLog().get(0);
+        ReplicatedLogEntry leadersSecondLogEntry = leaderActorContext.getReplicatedLog().get(1);
+
+        MockRaftActorContext followerActorContext = createFollowerActorContextWithLeader(followerActor);
+
+        followerActorContext.setReplicatedLog(
+                new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 1, 1).build());
+        followerActorContext.setCommitIndex(-1);
+        followerActorContext.setLastApplied(-1);
+
+        Follower follower = new Follower(followerActorContext);
+        followerActor.underlyingActor().setBehavior(follower);
+
+        Leader leader = new Leader(leaderActorContext);
+
+        leader.handleMessage(leaderActor, new SendHeartBeat());
+
+        AppendEntries appendEntries = AppendEntries.fromSerializable(
+                MessageCollectorActor.expectFirstMatching(followerActor, AppendEntriesMessages.AppendEntries.class));
+        AppendEntriesReply appendEntriesReply = MessageCollectorActor.expectFirstMatching(leaderActor, AppendEntriesReply.class);
+
+        MessageCollectorActor.clearMessages(followerActor);
+        MessageCollectorActor.clearMessages(leaderActor);
+
+        // Verify initial AppendEntries sent with the leader's current commit index.
+        assertEquals("getLeaderCommit", leaderCommitIndex, appendEntries.getLeaderCommit());
+        assertEquals("Log entries size", 0, appendEntries.getEntries().size());
+        assertEquals("getPrevLogIndex", 0, appendEntries.getPrevLogIndex());
+
+        leaderActor.underlyingActor().setBehavior(leader);
+
+        leader.handleMessage(followerActor, appendEntriesReply);
+
+        MessageCollectorActor.expectMatching(leaderActor, AppendEntriesReply.class, 1);
+        appendEntries = AppendEntries.fromSerializable(MessageCollectorActor.expectFirstMatching(
+                followerActor, AppendEntriesMessages.AppendEntries.class));
+
+        assertEquals("getLeaderCommit", leaderCommitIndex, appendEntries.getLeaderCommit());
+        assertEquals("getPrevLogIndex", -1, appendEntries.getPrevLogIndex());
+        assertEquals("Log entries size", 2, appendEntries.getEntries().size());
+
+        assertEquals("First entry index", 0, appendEntries.getEntries().get(0).getIndex());
+        assertEquals("First entry term", 2, appendEntries.getEntries().get(0).getTerm());
+        assertEquals("First entry data", leadersFirstLogEntry.getData(),
+                appendEntries.getEntries().get(0).getData());
+        assertEquals("Second entry index", 1, appendEntries.getEntries().get(1).getIndex());
+        assertEquals("Second entry term", 2, appendEntries.getEntries().get(1).getTerm());
+        assertEquals("Second entry data", leadersSecondLogEntry.getData(),
+                appendEntries.getEntries().get(1).getData());
+
+        FollowerLogInformation followerInfo = leader.getFollower(FOLLOWER_ID);
+        assertEquals("getNextIndex", 2, followerInfo.getNextIndex().longValue());
+
+        List<ApplyState> applyStateList = MessageCollectorActor.expectMatching(followerActor, ApplyState.class, 2);
+
+        ApplyState applyState = applyStateList.get(0);
+        assertEquals("Follower's first ApplyState index", 0, applyState.getReplicatedLogEntry().getIndex());
+        assertEquals("Follower's first ApplyState term", 2, applyState.getReplicatedLogEntry().getTerm());
+        assertEquals("Follower's first ApplyState data", leadersFirstLogEntry.getData(),
+                applyState.getReplicatedLogEntry().getData());
+
+        applyState = applyStateList.get(1);
+        assertEquals("Follower's second ApplyState index", 1, applyState.getReplicatedLogEntry().getIndex());
+        assertEquals("Follower's second ApplyState term", 2, applyState.getReplicatedLogEntry().getTerm());
+        assertEquals("Follower's second ApplyState data", leadersSecondLogEntry.getData(),
+                applyState.getReplicatedLogEntry().getData());
+
+        assertEquals("Follower's commit index", 1, followerActorContext.getCommitIndex());
+        assertEquals("Follower's lastIndex", 1, followerActorContext.getReplicatedLog().lastIndex());
+        assertEquals("Follower's lastTerm", 2, followerActorContext.getReplicatedLog().lastTerm());
     }
 
     @Test
@@ -1256,6 +1803,96 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
     }
 
     @Test
+    public void testFollowerCatchUpWithAppendEntriesMaxDataSizeExceeded() {
+        TestActorRef<ForwardMessageToBehaviorActor> leaderActor = TestActorRef.create(getSystem(),
+                Props.create(ForwardMessageToBehaviorActor.class));
+
+        TestActorRef<ForwardMessageToBehaviorActor> followerActor = TestActorRef.create(getSystem(),
+                ForwardMessageToBehaviorActor.props());
+
+        MockRaftActorContext leaderActorContext = createActorContextWithFollower(leaderActor, followerActor);
+        ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setHeartBeatInterval(
+                new FiniteDuration(1000, TimeUnit.SECONDS));
+        ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setSnaphotChunkSize(2);
+
+        leaderActorContext.setReplicatedLog(
+                new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 4, 1).build());
+        long leaderCommitIndex = 3;
+        leaderActorContext.setCommitIndex(leaderCommitIndex);
+        leaderActorContext.setLastApplied(leaderCommitIndex);
+
+        ReplicatedLogEntry leadersFirstLogEntry = leaderActorContext.getReplicatedLog().get(0);
+        ReplicatedLogEntry leadersSecondLogEntry = leaderActorContext.getReplicatedLog().get(1);
+        ReplicatedLogEntry leadersThirdLogEntry = leaderActorContext.getReplicatedLog().get(2);
+        ReplicatedLogEntry leadersFourthLogEntry = leaderActorContext.getReplicatedLog().get(3);
+
+        MockRaftActorContext followerActorContext = createFollowerActorContextWithLeader(followerActor);
+
+        followerActorContext.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().build());
+        followerActorContext.setCommitIndex(-1);
+        followerActorContext.setLastApplied(-1);
+
+        Follower follower = new Follower(followerActorContext);
+        followerActor.underlyingActor().setBehavior(follower);
+
+        Leader leader = new Leader(leaderActorContext);
+
+        leader.handleMessage(leaderActor, new SendHeartBeat());
+
+        AppendEntries appendEntries = AppendEntries.fromSerializable(
+                MessageCollectorActor.expectFirstMatching(followerActor, AppendEntriesMessages.AppendEntries.class));
+        AppendEntriesReply appendEntriesReply = MessageCollectorActor.expectFirstMatching(leaderActor, AppendEntriesReply.class);
+
+        MessageCollectorActor.clearMessages(followerActor);
+        MessageCollectorActor.clearMessages(leaderActor);
+
+        // Verify initial AppendEntries sent with the leader's current commit index.
+        assertEquals("getLeaderCommit", leaderCommitIndex, appendEntries.getLeaderCommit());
+        assertEquals("Log entries size", 0, appendEntries.getEntries().size());
+        assertEquals("getPrevLogIndex", 2, appendEntries.getPrevLogIndex());
+
+        leaderActor.underlyingActor().setBehavior(leader);
+
+        leader.handleMessage(followerActor, appendEntriesReply);
+
+        List<AppendEntriesMessages.AppendEntries> appendEntriesList = MessageCollectorActor.expectMatching(followerActor,
+                AppendEntriesMessages.AppendEntries.class, 2);
+        MessageCollectorActor.expectMatching(leaderActor, AppendEntriesReply.class, 2);
+
+        appendEntries = AppendEntries.fromSerializable(appendEntriesList.get(0));
+        assertEquals("getLeaderCommit", leaderCommitIndex, appendEntries.getLeaderCommit());
+        assertEquals("getPrevLogIndex", -1, appendEntries.getPrevLogIndex());
+        assertEquals("Log entries size", 2, appendEntries.getEntries().size());
+
+        assertEquals("First entry index", 0, appendEntries.getEntries().get(0).getIndex());
+        assertEquals("First entry data", leadersFirstLogEntry.getData(),
+                appendEntries.getEntries().get(0).getData());
+        assertEquals("Second entry index", 1, appendEntries.getEntries().get(1).getIndex());
+        assertEquals("Second entry data", leadersSecondLogEntry.getData(),
+                appendEntries.getEntries().get(1).getData());
+
+        appendEntries = AppendEntries.fromSerializable(appendEntriesList.get(1));
+        assertEquals("getLeaderCommit", leaderCommitIndex, appendEntries.getLeaderCommit());
+        assertEquals("getPrevLogIndex", -1, appendEntries.getPrevLogIndex());
+        assertEquals("Log entries size", 2, appendEntries.getEntries().size());
+
+        assertEquals("First entry index", 2, appendEntries.getEntries().get(0).getIndex());
+        assertEquals("First entry data", leadersThirdLogEntry.getData(),
+                appendEntries.getEntries().get(0).getData());
+        assertEquals("Second entry index", 3, appendEntries.getEntries().get(1).getIndex());
+        assertEquals("Second entry data", leadersFourthLogEntry.getData(),
+                appendEntries.getEntries().get(1).getData());
+
+        FollowerLogInformation followerInfo = leader.getFollower(FOLLOWER_ID);
+        assertEquals("getNextIndex", 4, followerInfo.getNextIndex().longValue());
+
+        MessageCollectorActor.expectMatching(followerActor, ApplyState.class, 4);
+
+        assertEquals("Follower's commit index", 3, followerActorContext.getCommitIndex());
+        assertEquals("Follower's lastIndex", 3, followerActorContext.getReplicatedLog().lastIndex());
+    }
+
+    @Test
     public void testHandleRequestVoteReply(){
         new JavaTestKit(getSystem()) {
             {
@@ -1344,101 +1981,6 @@ public class LeaderTest extends AbstractRaftActorBehaviorTest {
             Assert.assertTrue("Behavior not instance of IsolatedLeader when majority followers are inactive",
                 behavior instanceof IsolatedLeader);
 
-        }};
-    }
-
-
-    @Test
-    public void testAppendEntryCallAtEndofAppendEntryReply() throws Exception {
-        new JavaTestKit(getSystem()) {{
-
-            TestActorRef<MessageCollectorActor> leaderActor = TestActorRef.create(getSystem(),
-                    Props.create(MessageCollectorActor.class));
-
-            MockRaftActorContext leaderActorContext =
-                    new MockRaftActorContext("leader", getSystem(), leaderActor);
-
-            DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
-            //configParams.setHeartBeatInterval(new FiniteDuration(9, TimeUnit.SECONDS));
-            configParams.setIsolatedLeaderCheckInterval(new FiniteDuration(10, TimeUnit.SECONDS));
-
-            leaderActorContext.setConfigParams(configParams);
-
-            TestActorRef<ForwardMessageToBehaviorActor> followerActor = TestActorRef.create(getSystem(),
-                    ForwardMessageToBehaviorActor.props());
-
-            MockRaftActorContext followerActorContext =
-                    new MockRaftActorContext("follower-reply", getSystem(), followerActor);
-
-            followerActorContext.setConfigParams(configParams);
-
-            Follower follower = new Follower(followerActorContext);
-            followerActor.underlyingActor().behavior = follower;
-
-            Map<String, String> peerAddresses = new HashMap<>();
-            peerAddresses.put("follower-reply",
-                    followerActor.path().toString());
-
-            leaderActorContext.setPeerAddresses(peerAddresses);
-
-            leaderActorContext.getReplicatedLog().removeFrom(0);
-            leaderActorContext.setCommitIndex(-1);
-            leaderActorContext.setLastApplied(-1);
-
-            followerActorContext.getReplicatedLog().removeFrom(0);
-            followerActorContext.setCommitIndex(-1);
-            followerActorContext.setLastApplied(-1);
-
-            Leader leader = new Leader(leaderActorContext);
-
-            AppendEntriesReply appendEntriesReply = MessageCollectorActor.getFirstMatching(
-                    leaderActor, AppendEntriesReply.class);
-            assertNotNull(appendEntriesReply);
-            System.out.println("appendEntriesReply: "+appendEntriesReply);
-            leader.handleMessage(followerActor, appendEntriesReply);
-
-            // Clear initial heartbeat messages
-
-            leaderActor.underlyingActor().clear();
-            followerActor.underlyingActor().clear();
-
-            // create 3 entries
-            leaderActorContext.setReplicatedLog(
-                    new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 3, 1).build());
-            leaderActorContext.setCommitIndex(1);
-            leaderActorContext.setLastApplied(1);
-
-            Uninterruptibles.sleepUninterruptibly(leaderActorContext.getConfigParams().getHeartBeatInterval().toMillis(),
-                    TimeUnit.MILLISECONDS);
-
-            leader.handleMessage(leaderActor, new SendHeartBeat());
-
-            AppendEntries appendEntries = AppendEntries.fromSerializable(MessageCollectorActor.getFirstMatching(
-                    followerActor, AppendEntriesMessages.AppendEntries.class));
-            assertNotNull(appendEntries);
-
-            // Should send first log entry
-            assertEquals(1, appendEntries.getLeaderCommit());
-            assertEquals(0, appendEntries.getEntries().get(0).getIndex());
-            assertEquals(-1, appendEntries.getPrevLogIndex());
-
-            appendEntriesReply = MessageCollectorActor.getFirstMatching(leaderActor, AppendEntriesReply.class);
-            assertNotNull(appendEntriesReply);
-
-            assertEquals(1, appendEntriesReply.getLogLastTerm());
-            assertEquals(0, appendEntriesReply.getLogLastIndex());
-
-            followerActor.underlyingActor().clear();
-
-            leader.handleAppendEntriesReply(followerActor, appendEntriesReply);
-
-            appendEntries = AppendEntries.fromSerializable(MessageCollectorActor.getFirstMatching(
-                    followerActor, AppendEntriesMessages.AppendEntries.class));
-            assertNotNull(appendEntries);
-
-            // Should send second log entry
-            assertEquals(1, appendEntries.getLeaderCommit());
-            assertEquals(1, appendEntries.getEntries().get(0).getIndex());
         }};
     }
 

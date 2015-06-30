@@ -9,10 +9,9 @@
 package org.opendaylight.controller.cluster.raft;
 
 import com.google.common.base.Stopwatch;
-import scala.concurrent.duration.FiniteDuration;
-
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import scala.concurrent.duration.FiniteDuration;
 
 public class FollowerLogInformationImpl implements FollowerLogInformation{
 
@@ -24,17 +23,25 @@ public class FollowerLogInformationImpl implements FollowerLogInformation{
 
     private final Stopwatch stopwatch;
 
+    private final RaftActorContext context;
+
     private final long followerTimeoutMillis;
 
+    private long lastReplicatedIndex = -1L;
+
+    private final Stopwatch lastReplicatedStopwatch = new Stopwatch();
+
     public FollowerLogInformationImpl(String id, AtomicLong nextIndex,
-        AtomicLong matchIndex, FiniteDuration followerTimeoutDuration) {
+        AtomicLong matchIndex, FiniteDuration followerTimeoutDuration, RaftActorContext context) {
         this.id = id;
         this.nextIndex = nextIndex;
         this.matchIndex = matchIndex;
         this.stopwatch = new Stopwatch();
         this.followerTimeoutMillis = followerTimeoutDuration.toMillis();
+        this.context = context;
     }
 
+    @Override
     public long incrNextIndex(){
         return nextIndex.incrementAndGet();
     }
@@ -47,6 +54,7 @@ public class FollowerLogInformationImpl implements FollowerLogInformation{
         this.nextIndex.set(nextIndex);
     }
 
+    @Override
     public long incrMatchIndex(){
         return matchIndex.incrementAndGet();
     }
@@ -55,14 +63,17 @@ public class FollowerLogInformationImpl implements FollowerLogInformation{
         this.matchIndex.set(matchIndex);
     }
 
+    @Override
     public String getId() {
         return id;
     }
 
+    @Override
     public AtomicLong getNextIndex() {
         return nextIndex;
     }
 
+    @Override
     public AtomicLong getMatchIndex() {
         return matchIndex;
     }
@@ -91,5 +102,27 @@ public class FollowerLogInformationImpl implements FollowerLogInformation{
     @Override
     public long timeSinceLastActivity() {
         return stopwatch.elapsed(TimeUnit.MILLISECONDS);
+    }
+
+    @Override
+    public boolean okToReplicate() {
+        // Return false if we are trying to send duplicate data before the heartbeat interval
+        if(getNextIndex().longValue() == lastReplicatedIndex){
+            if(lastReplicatedStopwatch.elapsed(TimeUnit.MILLISECONDS) < context.getConfigParams()
+                    .getHeartBeatInterval().toMillis()){
+                return false;
+            }
+        }
+
+        resetLastReplicated();
+        return true;
+    }
+
+    private void resetLastReplicated(){
+        lastReplicatedIndex = getNextIndex().longValue();
+        if(lastReplicatedStopwatch.isRunning()){
+            lastReplicatedStopwatch.reset();
+        }
+        lastReplicatedStopwatch.start();
     }
 }

@@ -8,30 +8,28 @@
 package org.opendaylight.controller.cluster.raft;
 
 
-import com.google.common.base.Stopwatch;
-import com.google.common.util.concurrent.Uninterruptibles;
-import org.junit.Test;
-import scala.concurrent.duration.FiniteDuration;
-
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
-
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import com.google.common.base.Stopwatch;
+import com.google.common.util.concurrent.Uninterruptibles;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
+import org.junit.Test;
+import scala.concurrent.duration.FiniteDuration;
 
 public class FollowerLogInformationImplTest {
 
     @Test
     public void testIsFollowerActive() {
 
+        MockRaftActorContext context = new MockRaftActorContext();
+
         FiniteDuration timeoutDuration =
             new FiniteDuration(500, TimeUnit.MILLISECONDS);
 
         FollowerLogInformation followerLogInformation =
             new FollowerLogInformationImpl(
-                "follower1", new AtomicLong(10), new AtomicLong(9), timeoutDuration);
-
-
+                "follower1", new AtomicLong(10), new AtomicLong(9), timeoutDuration, context);
 
         assertFalse("Follower should be termed inactive before stopwatch starts",
             followerLogInformation.isFollowerActive());
@@ -62,5 +60,25 @@ public class FollowerLogInformationImplTest {
         Uninterruptibles.sleepUninterruptibly(millis, TimeUnit.MILLISECONDS);
         stopwatch.stop();
         return stopwatch.elapsed(TimeUnit.MILLISECONDS);
+    }
+
+    @Test
+    public void testOkToReplicate(){
+        MockRaftActorContext context = new MockRaftActorContext();
+        context.setConfigParams(new DefaultConfigParamsImpl());
+        context.setCommitIndex(9);
+        FollowerLogInformation followerLogInformation = new FollowerLogInformationImpl("follower1",
+                new AtomicLong(10), new AtomicLong(9), new FiniteDuration(500, TimeUnit.MILLISECONDS), context);
+
+        assertTrue(followerLogInformation.okToReplicate());
+        assertFalse(followerLogInformation.okToReplicate());
+
+        // wait for 150 milliseconds and it should work again
+        Uninterruptibles.sleepUninterruptibly(150, TimeUnit.MILLISECONDS);
+        assertTrue(followerLogInformation.okToReplicate());
+
+        //increment next index and try immediately and it should work again
+        followerLogInformation.incrNextIndex();
+        assertTrue(followerLogInformation.okToReplicate());
     }
 }
