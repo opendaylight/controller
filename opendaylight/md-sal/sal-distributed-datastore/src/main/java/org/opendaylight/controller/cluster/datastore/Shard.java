@@ -65,6 +65,7 @@ import org.opendaylight.controller.cluster.datastore.modification.MutableComposi
 import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec;
 import org.opendaylight.controller.cluster.notifications.RoleChangeNotifier;
 import org.opendaylight.controller.cluster.raft.RaftActor;
+import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationByteStringPayload;
@@ -451,14 +452,20 @@ public class Shard extends RaftActor {
 
     private void handleCreateTransaction(Object message) {
         if (isLeader()) {
-            createTransaction(CreateTransaction.fromSerializable(message));
+            if(getRaftState() == RaftState.IsolatedLeader) {
+                getSender().tell(new akka.actor.Status.Failure(new NoShardLeaderException(String.format(
+                        "Shard %s was the leader but has lost contact with all of its followers. Either all" +
+                        " other follower nodes are down or this node is isolated by a network partition.",
+                        persistenceId()))), getSelf());
+            } else {
+                createTransaction(CreateTransaction.fromSerializable(message));
+            }
         } else if (getLeader() != null) {
             getLeader().forward(message, getContext());
         } else {
-            getSender().tell(new akka.actor.Status.Failure(new NoShardLeaderException(
-                "Could not find shard leader so transaction cannot be created. This typically happens" +
-                " when the system is coming up or recovering and a leader is being elected. Try again" +
-                " later.")), getSelf());
+            getSender().tell(new akka.actor.Status.Failure(new NoShardLeaderException(String.format(
+                "Shard %s currently has no leader so a transaction cannot be created. Try again later.",
+                persistenceId()))), getSelf());
         }
     }
 
