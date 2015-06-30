@@ -11,6 +11,7 @@ package org.opendaylight.controller.cluster.datastore;
 import akka.actor.ActorSelection;
 import akka.dispatch.Mapper;
 import akka.dispatch.OnComplete;
+import akka.pattern.AskTimeoutException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.FinalizablePhantomReference;
 import com.google.common.base.FinalizableReferenceQueue;
@@ -89,12 +90,6 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
     private static final AtomicLong counter = new AtomicLong();
 
     private static final Logger LOG = LoggerFactory.getLogger(TransactionProxy.class);
-
-    /**
-     * Time interval in between transaction create retries.
-     */
-    private static final FiniteDuration CREATE_TX_TRY_INTERVAL =
-            FiniteDuration.create(1, TimeUnit.SECONDS);
 
     /**
      * Used to enqueue the PhantomReferences for read-only TransactionProxy instances. The
@@ -468,7 +463,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
     protected Future<Object> sendCreateTransaction(ActorSelection shard,
             Object serializedCreateMessage) {
         return actorContext.executeOperationAsync(shard, serializedCreateMessage,
-                actorContext.getTransactionCommitOperationTimeout());
+                actorContext.getDatastoreContext().getShardLeaderElectionTimeout());
     }
 
     @Override
@@ -574,9 +569,7 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
          */
         private volatile ActorSelection primaryShard;
 
-        private volatile int createTxTries = (int) (actorContext.getDatastoreContext().
-                getShardLeaderElectionTimeout().duration().toMillis() /
-                CREATE_TX_TRY_INTERVAL.toMillis());
+        private volatile int createTxTries = 3;
 
         private final String shardName;
 
@@ -632,16 +625,26 @@ public class TransactionProxy implements DOMStoreReadWriteTransaction {
 
         @Override
         public void onComplete(Throwable failure, Object response) {
-            if(failure instanceof NoShardLeaderException) {
+            // An AskTimeoutException will occur if the local shard forwards to a remote leader and
+            // the remote leader isn't available.
+            boolean retryCreateTransaction = primaryShard != null &&
+                    (failure instanceof NoShardLeaderException || failure instanceof AskTimeoutException);
+            if(retryCreateTransaction) {
                 // There's no leader for the shard yet - schedule and try again, unless we're out
                 // of retries. Note: createTxTries is volatile as it may be written by different
                 // threads however not concurrently, therefore decrementing it non-atomically here
                 // is ok.
                 if(--createTxTries > 0) {
-                    LOG.debug("Tx {} Shard {} has no leader yet - scheduling create Tx retry",
-                            identifier, shardName);
+                    long electionTimeout = actorContext.getDatastoreContext()
+                            .getShardLeaderElectionTimeout().duration().toMillis();
+                    FiniteDuration interval = FiniteDuration.create(
+                            failure instanceof AskTimeoutException ? 10 : electionTimeout,
+                                    TimeUnit.MILLISECONDS);
 
-                    actorContext.getActorSystem().scheduler().scheduleOnce(CREATE_TX_TRY_INTERVAL,
+                    LOG.debug("Tx {}: create tx on shard {} failed with exception {} - scheduling create Tx retry in {} ms",
+                            identifier, shardName, failure.getClass().getName(), interval.toMillis());
+
+                    actorContext.getActorSystem().scheduler().scheduleOnce(interval,
                             new Runnable() {
                                 @Override
                                 public void run() {

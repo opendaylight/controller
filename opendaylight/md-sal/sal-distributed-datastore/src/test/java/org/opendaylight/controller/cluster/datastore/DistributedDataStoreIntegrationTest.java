@@ -579,7 +579,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
 
             // Set the leader election timeout low for the test.
 
-            datastoreContextBuilder.shardLeaderElectionTimeout(1, TimeUnit.MILLISECONDS);
+            datastoreContextBuilder.shardLeaderElectionTimeout(100, TimeUnit.MILLISECONDS);
 
             DistributedDataStore dataStore = setupDistributedDataStore(testName, false, shardName);
 

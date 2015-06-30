@@ -111,8 +111,8 @@ public class ActorContext {
         this.configuration = configuration;
         this.datastoreContext = datastoreContext;
 
-        operationDuration = Duration.create(datastoreContext.getOperationTimeoutInSeconds(),
-                TimeUnit.SECONDS);
+        operationDuration = Duration.create(datastoreContext.getOperationTimeoutInMillis(),
+                TimeUnit.MILLISECONDS);
         operationTimeout = new Timeout(operationDuration);
 
         Address selfAddress = clusterWrapper.getSelfAddress();
