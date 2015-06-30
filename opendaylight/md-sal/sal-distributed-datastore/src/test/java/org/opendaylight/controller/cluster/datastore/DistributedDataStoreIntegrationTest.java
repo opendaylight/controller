@@ -36,6 +36,7 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCoh
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionChain;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -45,13 +46,13 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
 
     private final DatastoreContext.Builder datastoreContextBuilder =
-            DatastoreContext.newBuilder().shardHeartbeatIntervalInMillis(100);
+            DatastoreContext.newBuilder().shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(2);
 
     @Test
     public void testWriteTransactionWithSingleShard() throws Exception{
         new IntegrationTestKit(getSystem()) {{
             DistributedDataStore dataStore =
-                    setupDistributedDataStore("transactionIntegrationTest", "test-1");
+                    setupDistributedDataStore("testWriteTransactionWithSingleShard", "test-1");
 
             testWriteTransaction(dataStore, TestModel.TEST_PATH,
                     ImmutableNodes.containerNode(TestModel.TEST_QNAME));
@@ -570,16 +571,12 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
     public void testTransactionCommitFailureWithNoShardLeader() throws Throwable{
         new IntegrationTestKit(getSystem()) {{
             String testName = "testTransactionCommitFailureWithNoShardLeader";
-            String shardName = "test-1";
+            String shardName = "default";
 
-            // We don't want the shard to become the leader so prevent shard election from completing
-            // by setting the election timeout, which is based on the heartbeat interval, really high.
+            // Set the operation timeout low for the test.
 
-            datastoreContextBuilder.shardHeartbeatIntervalInMillis(30000);
-
-            // Set the leader election timeout low for the test.
-
-            datastoreContextBuilder.shardLeaderElectionTimeout(1, TimeUnit.MILLISECONDS);
+            datastoreContextBuilder.operationTimeoutInMillis(1);
+            datastoreContextBuilder.shardElectionTimeoutFactor(1);
 
             DistributedDataStore dataStore = setupDistributedDataStore(testName, false, shardName);
 
@@ -597,7 +594,7 @@ public class DistributedDataStoreIntegrationTest extends AbstractActorTest {
                 @Override
                 public void run() {
                     try {
-                        writeTx.write(TestModel.TEST_PATH,
+                        writeTx.write(YangInstanceIdentifier.of(QName.create("mock-ns", "2015-06-30", "mock")),
                                 ImmutableNodes.containerNode(TestModel.TEST_QNAME));
 
                         txCohort.set(writeTx.ready());
