@@ -12,6 +12,7 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.japi.Creator;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
@@ -95,7 +96,11 @@ public class RpcBroker extends AbstractUntypedActor {
 
                 @Override
                 public void onFailure(final Throwable t) {
-                    LOG.error("executeRpc for {} failed: {}", msg.getRpc(), t);
+                    LOG.error("executeRpc for {} failed with root cause: {}. For exception details, enable Debug logging.",
+                        msg.getRpc(), Throwables.getRootCause(t));
+                    if(LOG.isDebugEnabled()) {
+                        LOG.debug("Detailed exception for execute RPC failure :{}", t);
+                    }
                     sender.tell(new akka.actor.Status.Failure(t), self);
                 }
             });
