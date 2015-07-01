@@ -11,6 +11,7 @@ import akka.actor.ActorRef;
 import akka.actor.Status;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.ExecutionException;
@@ -54,6 +55,10 @@ public class ShardCommitCoordinator {
         // We use a LinkedList here to avoid synchronization overhead with concurrent queue impls
         // since this should only be accessed on the shard's dispatcher.
         queuedCohortEntries = new LinkedList<>();
+    }
+
+    int getQueueSize() {
+        return queuedCohortEntries.size();
     }
 
     /**
@@ -104,8 +109,8 @@ public class ShardCommitCoordinator {
         if(currentCohortEntry != null) {
             // There's already a Tx commit in progress - attempt to queue this entry to be
             // committed after the current Tx completes.
-            LOG.debug("Transaction {} is already in progress - queueing transaction {}",
-                    currentCohortEntry.getTransactionID(), transactionID);
+            LOG.debug("Transaction {} is already in progress - queueing transaction {}, queue size {}",
+                    currentCohortEntry.getTransactionID(), transactionID, queuedCohortEntries.size());
 
             if(queuedCohortEntries.size() < queueCapacity) {
                 queuedCohortEntries.offer(cohortEntry);
@@ -136,6 +141,8 @@ public class ShardCommitCoordinator {
             // state on a different thread outside of our dispatcher. Also, the data store
             // currently uses a same thread executor anyway.
             Boolean canCommit = cohortEntry.getCohort().canCommit().get();
+
+            LOG.debug("canCommit for {}: {}", cohortEntry.getTransactionID(), canCommit);
 
             cohortEntry.getCanCommitSender().tell(
                     canCommit ? CAN_COMMIT_REPLY_TRUE : CAN_COMMIT_REPLY_FALSE, cohortEntry.getShard());
@@ -203,8 +210,19 @@ public class ShardCommitCoordinator {
         }
 
         if(isCurrentTransaction(transactionID)) {
-            // Dequeue the next cohort entry waiting in the queue.
-            currentCohortEntry = queuedCohortEntries.poll();
+            LOG.debug("currentTransactionComplete: {}", transactionID);
+
+            currentCohortEntry = null;
+            Iterator<CohortEntry> iter = queuedCohortEntries.iterator();
+            while(iter.hasNext()) {
+                CohortEntry next = iter.next();
+                iter.remove();
+                if(!next.isAborted()) {
+                    currentCohortEntry = next;
+                    break;
+                }
+            }
+
             if(currentCohortEntry != null) {
                 currentCohortEntry.updateLastAccessTime();
                 doCanCommit(currentCohortEntry);
@@ -219,6 +237,7 @@ public class ShardCommitCoordinator {
         private ActorRef canCommitSender;
         private ActorRef shard;
         private long lastAccessTime;
+        private boolean aborted;
 
         CohortEntry(String transactionID, DOMStoreThreePhaseCommitCohort cohort,
                 Modification modification) {
@@ -261,6 +280,14 @@ public class ShardCommitCoordinator {
 
         void setShard(ActorRef shard) {
             this.shard = shard;
+        }
+
+        boolean isAborted() {
+            return aborted;
+        }
+
+        void setAborted(boolean aborted) {
+            this.aborted = aborted;
         }
     }
 }
