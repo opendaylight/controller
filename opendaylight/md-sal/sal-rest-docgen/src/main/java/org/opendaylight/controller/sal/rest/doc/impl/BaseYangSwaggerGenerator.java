@@ -372,6 +372,7 @@ public class BaseYangSwaggerGenerator {
             payload.setParamType("body");
             payload.setType("(" + rpcDefn.getQName().getLocalName() + ")input");
             operationSpec.setParameters(Collections.singletonList(payload));
+            operationSpec.setConsumes(OperationBuilder.CONSUMES_PUT_POST);
         }
 
         rpc.setOperations(Arrays.asList(operationSpec));
