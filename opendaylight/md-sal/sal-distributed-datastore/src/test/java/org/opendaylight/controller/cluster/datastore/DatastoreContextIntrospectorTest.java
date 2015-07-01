@@ -9,7 +9,7 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static org.junit.Assert.assertEquals;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_HEARTBEAT_INTERVAL_IN_MILLIS;
-import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_OPERATION_TIMEOUT_IN_SECONDS;
+import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_OPERATION_TIMEOUT_IN_MS;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SHARD_INITIALIZATION_TIMEOUT;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SHARD_SNAPSHOT_DATA_THRESHOLD_PERCENTAGE;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SHARD_TRANSACTION_IDLE_TIMEOUT;
@@ -57,7 +57,7 @@ public class DatastoreContextIntrospectorTest {
         context = introspector.getContext();
 
         assertEquals(31, context.getShardTransactionIdleTimeout().toMinutes());
-        assertEquals(26, context.getOperationTimeoutInSeconds());
+        assertEquals(26000, context.getOperationTimeoutInMillis());
         assertEquals(100, context.getShardTransactionCommitTimeoutInSeconds());
         assertEquals(199, context.getShardRaftConfig().getJournalRecoveryLogBatchSize());
         assertEquals(212, context.getShardRaftConfig().getSnapshotBatchCount());
@@ -89,7 +89,7 @@ public class DatastoreContextIntrospectorTest {
         context = introspector.getContext();
 
         assertEquals(32, context.getShardTransactionIdleTimeout().toMinutes());
-        assertEquals(27, context.getOperationTimeoutInSeconds());
+        assertEquals(27000, context.getOperationTimeoutInMillis());
         assertEquals(100, context.getShardTransactionCommitTimeoutInSeconds());
         assertEquals(199, context.getShardRaftConfig().getJournalRecoveryLogBatchSize());
         assertEquals(212, context.getShardRaftConfig().getSnapshotBatchCount());
@@ -141,7 +141,7 @@ public class DatastoreContextIntrospectorTest {
         assertEquals(199, context.getShardRaftConfig().getJournalRecoveryLogBatchSize());
         assertEquals(DEFAULT_SHARD_TX_COMMIT_TIMEOUT_IN_SECONDS, context.getShardTransactionCommitTimeoutInSeconds());
         assertEquals(212, context.getShardRaftConfig().getSnapshotBatchCount());
-        assertEquals(DEFAULT_OPERATION_TIMEOUT_IN_SECONDS, context.getOperationTimeoutInSeconds());
+        assertEquals(DEFAULT_OPERATION_TIMEOUT_IN_MS, context.getOperationTimeoutInMillis());
         assertEquals(DEFAULT_HEARTBEAT_INTERVAL_IN_MILLIS, context.getShardRaftConfig().getHeartBeatInterval().length());
         assertEquals(567, context.getShardTransactionCommitQueueCapacity());
         assertEquals(DEFAULT_SHARD_SNAPSHOT_DATA_THRESHOLD_PERCENTAGE,

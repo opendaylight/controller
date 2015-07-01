@@ -132,7 +132,7 @@ public class ActorContext {
     private void setCachedProperties() {
         txRateLimiter = new TransactionRateLimiter(this);
 
-        operationDuration = Duration.create(datastoreContext.getOperationTimeoutInSeconds(), TimeUnit.SECONDS);
+        operationDuration = Duration.create(datastoreContext.getOperationTimeoutInMillis(), TimeUnit.MILLISECONDS);
         operationTimeout = new Timeout(operationDuration);
 
         transactionCommitOperationTimeout =  new Timeout(Duration.create(
@@ -409,6 +409,10 @@ public class ActorContext {
 
     public FiniteDuration getOperationDuration() {
         return operationDuration;
+    }
+
+    public Timeout getOperationTimeout() {
+        return operationTimeout;
     }
 
     public boolean isPathLocal(String path) {

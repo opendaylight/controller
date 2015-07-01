@@ -30,7 +30,7 @@ public class DatastoreContext {
     public static final String METRICS_DOMAIN = "org.opendaylight.controller.cluster.datastore";
 
     public static final Duration DEFAULT_SHARD_TRANSACTION_IDLE_TIMEOUT = Duration.create(10, TimeUnit.MINUTES);
-    public static final int DEFAULT_OPERATION_TIMEOUT_IN_SECONDS = 5;
+    public static final int DEFAULT_OPERATION_TIMEOUT_IN_MS = 5000;
     public static final int DEFAULT_SHARD_TX_COMMIT_TIMEOUT_IN_SECONDS = 30;
     public static final int DEFAULT_JOURNAL_RECOVERY_BATCH_SIZE = 1000;
     public static final int DEFAULT_SNAPSHOT_BATCH_COUNT = 20000;
@@ -52,7 +52,7 @@ public class DatastoreContext {
 
     private InMemoryDOMDataStoreConfigProperties dataStoreProperties;
     private Duration shardTransactionIdleTimeout = DatastoreContext.DEFAULT_SHARD_TRANSACTION_IDLE_TIMEOUT;
-    private int operationTimeoutInSeconds = DEFAULT_OPERATION_TIMEOUT_IN_SECONDS;
+    private long operationTimeoutInMillis = DEFAULT_OPERATION_TIMEOUT_IN_MS;
     private String dataStoreMXBeanType;
     private int shardTransactionCommitTimeoutInSeconds = DEFAULT_SHARD_TX_COMMIT_TIMEOUT_IN_SECONDS;
     private int shardTransactionCommitQueueCapacity = DEFAULT_SHARD_TX_COMMIT_QUEUE_CAPACITY;
@@ -84,7 +84,7 @@ public class DatastoreContext {
     private DatastoreContext(DatastoreContext other) {
         this.dataStoreProperties = other.dataStoreProperties;
         this.shardTransactionIdleTimeout = other.shardTransactionIdleTimeout;
-        this.operationTimeoutInSeconds = other.operationTimeoutInSeconds;
+        this.operationTimeoutInMillis = other.operationTimeoutInMillis;
         this.dataStoreMXBeanType = other.dataStoreMXBeanType;
         this.shardTransactionCommitTimeoutInSeconds = other.shardTransactionCommitTimeoutInSeconds;
         this.shardTransactionCommitQueueCapacity = other.shardTransactionCommitQueueCapacity;
@@ -127,8 +127,8 @@ public class DatastoreContext {
         return dataStoreMXBeanType;
     }
 
-    public int getOperationTimeoutInSeconds() {
-        return operationTimeoutInSeconds;
+    public long getOperationTimeoutInMillis() {
+        return operationTimeoutInMillis;
     }
 
     public ConfigParams getShardRaftConfig() {
@@ -261,7 +261,12 @@ public class DatastoreContext {
         }
 
         public Builder operationTimeoutInSeconds(int operationTimeoutInSeconds) {
-            datastoreContext.operationTimeoutInSeconds = operationTimeoutInSeconds;
+            datastoreContext.operationTimeoutInMillis = TimeUnit.SECONDS.toMillis(operationTimeoutInSeconds);
+            return this;
+        }
+
+        public Builder operationTimeoutInMillis(long operationTimeoutInMillis) {
+            datastoreContext.operationTimeoutInMillis = operationTimeoutInMillis;
             return this;
         }
 
