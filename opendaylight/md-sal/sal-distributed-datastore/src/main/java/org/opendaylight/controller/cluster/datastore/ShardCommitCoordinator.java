@@ -77,6 +77,10 @@ class ShardCommitCoordinator {
         this.cacheExpiryTimeoutInMillis = cacheExpiryTimeoutInMillis;
     }
 
+    int getQueueSize() {
+        return queuedCohortEntries.size();
+    }
+
     void setQueueCapacity(int queueCapacity) {
         this.queueCapacity = queueCapacity;
     }
