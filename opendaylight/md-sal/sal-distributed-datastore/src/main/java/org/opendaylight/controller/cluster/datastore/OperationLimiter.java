@@ -28,7 +28,7 @@ public class OperationLimiter extends OnComplete<Object> {
     private final Semaphore semaphore;
     private final int maxPermits;
 
-    OperationLimiter(final TransactionIdentifier identifier, final int maxPermits, final int acquireTimeoutSeconds) {
+    OperationLimiter(final TransactionIdentifier identifier, final int maxPermits, final long acquireTimeoutSeconds) {
         this.identifier = Preconditions.checkNotNull(identifier);
 
         Preconditions.checkArgument(acquireTimeoutSeconds >= 0);

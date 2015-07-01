@@ -406,13 +406,10 @@ public class Shard extends RaftActor {
         commitCoordinator.handleCanCommit(canCommit.getTransactionID(), getSender(), this);
     }
 
-    private void noLeaderError(Object message) {
+    private void noLeaderError(String errMessage, Object message) {
         // TODO: rather than throwing an immediate exception, we could schedule a timer to try again to make
         // it more resilient in case we're in the process of electing a new leader.
-        getSender().tell(new akka.actor.Status.Failure(new NoShardLeaderException(String.format(
-            "Could not find the leader for shard %s. This typically happens" +
-            " when the system is coming up or recovering and a leader is being elected. Try again" +
-            " later.", persistenceId()))), getSelf());
+        getSender().tell(new akka.actor.Status.Failure(new NoShardLeaderException(errMessage, persistenceId())), getSelf());
     }
 
     private void handleBatchedModifications(BatchedModifications batched) {
@@ -445,7 +442,7 @@ public class Shard extends RaftActor {
                 LOG.debug("{}: Forwarding BatchedModifications to leader {}", persistenceId(), leader);
                 leader.forward(batched, getContext());
             } else {
-                noLeaderError(batched);
+                noLeaderError("Could not commit transaction " + batched.getTransactionID(), batched);
             }
         }
     }
@@ -466,7 +463,7 @@ public class Shard extends RaftActor {
                 message.setRemoteVersion(getCurrentBehavior().getLeaderPayloadVersion());
                 leader.forward(message, getContext());
             } else {
-                noLeaderError(message);
+                noLeaderError("Could not commit transaction " + message.getTransactionID(), message);
             }
         }
     }
@@ -516,10 +513,8 @@ public class Shard extends RaftActor {
         } else if (getLeader() != null) {
             getLeader().forward(message, getContext());
         } else {
-            getSender().tell(new akka.actor.Status.Failure(new NoShardLeaderException(String.format(
-                "Could not find leader for shard %s so transaction cannot be created. This typically happens" +
-                " when the system is coming up or recovering and a leader is being elected. Try again" +
-                " later.", persistenceId()))), getSelf());
+            getSender().tell(new akka.actor.Status.Failure(new NoShardLeaderException(
+                    "Could not create a shard transaction", persistenceId())), getSelf());
         }
     }
 

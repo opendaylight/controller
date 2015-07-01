@@ -5,7 +5,7 @@ import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEF
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_HEARTBEAT_INTERVAL_IN_MILLIS;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_ISOLATED_LEADER_CHECK_INTERVAL_IN_MILLIS;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_JOURNAL_RECOVERY_BATCH_SIZE;
-import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_OPERATION_TIMEOUT_IN_SECONDS;
+import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_OPERATION_TIMEOUT_IN_MS;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_PERSISTENT;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SHARD_BATCHED_MODIFICATION_COUNT;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SHARD_ELECTION_TIMEOUT_FACTOR;
@@ -29,7 +29,7 @@ public class DatastoreContextTest {
         DatastoreContext context = DatastoreContext.newBuilder().build();
 
         assertEquals(DEFAULT_SHARD_TRANSACTION_IDLE_TIMEOUT, context.getShardTransactionIdleTimeout());
-        assertEquals(DEFAULT_OPERATION_TIMEOUT_IN_SECONDS, context.getOperationTimeoutInSeconds());
+        assertEquals(DEFAULT_OPERATION_TIMEOUT_IN_MS, context.getOperationTimeoutInMillis());
         assertEquals(DEFAULT_SHARD_TX_COMMIT_TIMEOUT_IN_SECONDS, context.getShardTransactionCommitTimeoutInSeconds());
         assertEquals(DEFAULT_JOURNAL_RECOVERY_BATCH_SIZE, context.getShardRaftConfig().getJournalRecoveryLogBatchSize());
         assertEquals(DEFAULT_SNAPSHOT_BATCH_COUNT, context.getShardRaftConfig().getSnapshotBatchCount());
@@ -62,7 +62,7 @@ public class DatastoreContextTest {
 
         builder.shardTransactionIdleTimeout(DEFAULT_SHARD_TRANSACTION_IDLE_TIMEOUT.toMillis() + 1,
                 TimeUnit.MILLISECONDS);
-        builder.operationTimeoutInSeconds(DEFAULT_OPERATION_TIMEOUT_IN_SECONDS + 1);
+        builder.operationTimeoutInSeconds((int) (TimeUnit.MILLISECONDS.toSeconds(DEFAULT_OPERATION_TIMEOUT_IN_MS) + 1));
         builder.shardTransactionCommitTimeoutInSeconds(DEFAULT_SHARD_TX_COMMIT_TIMEOUT_IN_SECONDS + 1);
         builder.shardJournalRecoveryLogBatchSize(DEFAULT_JOURNAL_RECOVERY_BATCH_SIZE + 1);
         builder.shardSnapshotBatchCount(DEFAULT_SNAPSHOT_BATCH_COUNT + 1);
@@ -105,7 +105,8 @@ public class DatastoreContextTest {
     private void verifyCustomSettings(DatastoreContext context) {
         assertEquals(DEFAULT_SHARD_TRANSACTION_IDLE_TIMEOUT.toMillis() + 1,
                 context.getShardTransactionIdleTimeout().toMillis());
-        assertEquals(DEFAULT_OPERATION_TIMEOUT_IN_SECONDS + 1, context.getOperationTimeoutInSeconds());
+        assertEquals(TimeUnit.MILLISECONDS.toSeconds(DEFAULT_OPERATION_TIMEOUT_IN_MS) + 1,
+                TimeUnit.MILLISECONDS.toSeconds(context.getOperationTimeoutInMillis()));
         assertEquals(DEFAULT_SHARD_TX_COMMIT_TIMEOUT_IN_SECONDS + 1,
                 context.getShardTransactionCommitTimeoutInSeconds());
         assertEquals(DEFAULT_JOURNAL_RECOVERY_BATCH_SIZE + 1,
