@@ -19,6 +19,7 @@ import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.dispatch.Futures;
+import akka.util.Timeout;
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.CheckedFuture;
@@ -138,7 +139,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         }
 
         doReturn(Futures.failed(exToThrow)).when(mockActorContext).executeOperationAsync(
-                any(ActorSelection.class), any());
+                any(ActorSelection.class), any(), any(Timeout.class));
 
         TransactionProxy transactionProxy = new TransactionProxy(mockComponentFactory, READ_ONLY);
 
@@ -216,7 +217,8 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
             when(mockActorContext).findPrimaryShardAsync(eq(DefaultShardStrategy.DEFAULT_SHARD));
 
         doReturn(Futures.successful(new Object())).when(mockActorContext).executeOperationAsync(
-            eq(getSystem().actorSelection(actorRef.path())), eqCreateTransaction(memberName, READ_ONLY));
+            eq(getSystem().actorSelection(actorRef.path())), eqCreateTransaction(memberName, READ_ONLY),
+            any(Timeout.class));
 
         TransactionProxy transactionProxy = new TransactionProxy(mockComponentFactory, READ_ONLY);
 
@@ -334,7 +336,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         Promise<Object> createTxPromise = akka.dispatch.Futures.promise();
         doReturn(createTxPromise).when(mockActorContext).executeOperationAsync(
                 eq(getSystem().actorSelection(actorRef.path())),
-                eqCreateTransaction(memberName, READ_WRITE));
+                eqCreateTransaction(memberName, READ_WRITE), any(Timeout.class));
 
         doReturn(readSerializedDataReply(null)).when(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef)), eqSerializedReadData());
@@ -799,7 +801,8 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     }
 
     private void throttleOperation(TransactionProxyOperation operation, int outstandingOpsLimit, boolean shardFound){
-        throttleOperation(operation, outstandingOpsLimit, shardFound, TimeUnit.SECONDS.toNanos(mockActorContext.getDatastoreContext().getOperationTimeoutInSeconds()));
+        throttleOperation(operation, outstandingOpsLimit, shardFound, TimeUnit.MILLISECONDS.toNanos(
+                mockActorContext.getDatastoreContext().getOperationTimeoutInMillis()));
     }
 
     private PrimaryShardInfo newPrimaryShardInfo(ActorRef actorRef){
@@ -837,13 +840,10 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         }
 
         String actorPath = "akka.tcp://system@127.0.0.1:2550/user/tx-actor";
-        CreateTransactionReply createTransactionReply = CreateTransactionReply.newBuilder().
-                setTransactionId("txn-1").setTransactionActorPath(actorPath).
-                setMessageVersion(DataStoreVersions.CURRENT_VERSION).build();
 
-        doReturn(Futures.successful(createTransactionReply)).when(mockActorContext).
-                executeOperationAsync(eq(actorSystem.actorSelection(shardActorRef.path())),
-                        eqCreateTransaction(memberName, READ_WRITE));
+        doReturn(incompleteFuture()).when(mockActorContext).
+        executeOperationAsync(eq(actorSystem.actorSelection(shardActorRef.path())),
+                 eqCreateTransaction(memberName, READ_WRITE), any(Timeout.class));
 
         doReturn(true).when(mockActorContext).isPathLocal(actorPath);
 
@@ -890,7 +890,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         doReturn(Futures.successful(createTransactionReply)).when(mockActorContext).
                 executeOperationAsync(eq(actorSystem.actorSelection(shardActorRef.path())),
-                        eqCreateTransaction(memberName, READ_WRITE));
+                        eqCreateTransaction(memberName, READ_WRITE), any(Timeout.class));
 
         doReturn(true).when(mockActorContext).isPathLocal(anyString());
 
@@ -902,7 +902,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         long end = System.nanoTime();
 
-        long expected = TimeUnit.SECONDS.toNanos(mockActorContext.getDatastoreContext().getOperationTimeoutInSeconds());
+        long expected = TimeUnit.MILLISECONDS.toNanos(mockActorContext.getDatastoreContext().getOperationTimeoutInMillis());
         Assert.assertTrue(String.format("Expected elapsed time: %s. Actual: %s",
                 expected, (end-start)), (end - start) <= expected);
     }
@@ -925,7 +925,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         long end = System.nanoTime();
 
-        long expected = TimeUnit.SECONDS.toNanos(mockActorContext.getDatastoreContext().getOperationTimeoutInSeconds());
+        long expected = TimeUnit.MILLISECONDS.toNanos(mockActorContext.getDatastoreContext().getOperationTimeoutInMillis());
         Assert.assertTrue(String.format("Expected elapsed time: %s. Actual: %s",
                 expected, (end-start)), (end - start) <= expected);
     }
@@ -1310,9 +1310,6 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
                 expectBatchedModifications(1);
 
-                doReturn(incompleteFuture()).when(mockActorContext).executeOperationAsync(
-                        any(ActorSelection.class), any(ReadyTransaction.class));
-
                 transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
 
                 transactionProxy.ready();
@@ -1341,7 +1338,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
                 // Now ready should block for both transaction contexts
                 transactionProxy.ready();
             }
-        }, 1, true, TimeUnit.SECONDS.toNanos(mockActorContext.getDatastoreContext().getOperationTimeoutInSeconds()) * 2);
+        }, 1, true, TimeUnit.MILLISECONDS.toNanos(mockActorContext.getDatastoreContext().getOperationTimeoutInMillis()) * 2);
     }
 
     private void testModificationOperationBatching(TransactionType type) throws Exception {
@@ -1573,7 +1570,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         doReturn(Futures.successful(createTransactionReply(txActorRef, DataStoreVersions.CURRENT_VERSION))).when(mockActorContext).
                 executeOperationAsync(eq(actorSystem.actorSelection(shardActorRef.path())),
-                        eqCreateTransaction(memberName, TransactionType.READ_ONLY));
+                        eqCreateTransaction(memberName, TransactionType.READ_ONLY), any(Timeout.class));
 
         doReturn(readSerializedDataReply(expectedNode)).when(mockActorContext).executeOperationAsync(
                 eq(actorSelection(txActorRef)), eqSerializedReadData(YangInstanceIdentifier.builder().build()));

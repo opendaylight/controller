@@ -14,6 +14,7 @@ import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
@@ -51,7 +52,7 @@ class TransactionContextWrapper {
         this.identifier = Preconditions.checkNotNull(identifier);
         this.limiter = new OperationLimiter(identifier,
                 actorContext.getDatastoreContext().getShardBatchedModificationCount() + 1, // 1 extra permit for the ready operation
-                actorContext.getDatastoreContext().getOperationTimeoutInSeconds());
+                TimeUnit.MILLISECONDS.toSeconds(actorContext.getDatastoreContext().getOperationTimeoutInMillis()));
     }
 
     TransactionContext getTransactionContext() {
