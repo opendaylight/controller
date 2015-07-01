@@ -8,7 +8,6 @@
 
 package org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard;
 
-import akka.actor.ActorRef;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.google.common.base.Stopwatch;
@@ -20,16 +19,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import org.opendaylight.controller.cluster.datastore.Shard;
 import org.opendaylight.controller.cluster.raft.client.messages.FollowerInfo;
 import org.opendaylight.controller.cluster.raft.client.messages.GetOnDemandRaftState;
 import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
 import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
-import org.opendaylight.controller.md.sal.common.util.jmx.QueuedNotificationManagerMXBeanImpl;
-import org.opendaylight.controller.md.sal.common.util.jmx.ThreadExecutorStatsMXBeanImpl;
-import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
-import org.opendaylight.yangtools.util.concurrent.QueuedNotificationManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import scala.concurrent.Await;
 
 /**
@@ -39,8 +33,6 @@ import scala.concurrent.Await;
  */
 public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
     public static String JMX_CATEGORY_SHARD = "Shards";
-
-    private static final Logger LOG = LoggerFactory.getLogger(ShardStats.class);
 
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
@@ -63,13 +55,9 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
 
     private long abortTransactionsCount;
 
-    private ThreadExecutorStatsMXBeanImpl notificationExecutorStatsBean;
-
-    private QueuedNotificationManagerMXBeanImpl notificationManagerStatsBean;
-
     private boolean followerInitialSyncStatus = false;
 
-    private ActorRef shardActor;
+    private Shard shard;
 
     private String statRetrievalError;
 
@@ -83,15 +71,8 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
         super(shardName, mxBeanType, JMX_CATEGORY_SHARD);
     }
 
-    public void setNotificationManager(final QueuedNotificationManager<?, ?> manager) {
-        this.notificationManagerStatsBean = new QueuedNotificationManagerMXBeanImpl(manager,
-                "notification-manager", getMBeanType(), getMBeanCategory());
-
-        this.notificationExecutorStatsBean = ThreadExecutorStatsMXBeanImpl.create(manager.getExecutor());
-    }
-
-    public void setShardActor(ActorRef shardActor) {
-        this.shardActor = shardActor;
+    public void setShard(Shard shard) {
+        this.shard = shard;
     }
 
     private OnDemandRaftState getOnDemandRaftState() {
@@ -101,12 +82,12 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
             statRetrievalError = null;
             statRetrievalTime = null;
 
-            if(shardActor != null) {
+            if(shard != null) {
                 Timeout timeout = new Timeout(10, TimeUnit.SECONDS);
                 try {
                     Stopwatch timer = Stopwatch.createStarted();
 
-                    state = (OnDemandRaftState) Await.result(Patterns.ask(shardActor,
+                    state = (OnDemandRaftState) Await.result(Patterns.ask(shard.getSelf(),
                             GetOnDemandRaftState.INSTANCE, timeout), timeout.duration());
 
                     statRetrievalTime = timer.stop().toString();
@@ -303,10 +284,6 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
 
     }
 
-    public void setDataStore(final InMemoryDOMDataStore store) {
-        setNotificationManager(store.getDataChangeListenerNotificationManager());
-    }
-
     public void setFollowerInitialSyncStatus(boolean followerInitialSyncStatus) {
         this.followerInitialSyncStatus = followerInitialSyncStatus;
     }
@@ -361,5 +338,10 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
     @Override
     public String getLastLeadershipChangeTime() {
         return DATE_FORMAT.format(new Date(lastLeadershipChangeTime));
+    }
+
+    @Override
+    public int getPendingTxCommitQueueSize() {
+        return shard.getPendingTxCommitQueueSize();
     }
 }

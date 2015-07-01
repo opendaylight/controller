@@ -133,7 +133,7 @@ public class Shard extends RaftActor {
 
         shardMBean = ShardMBeanFactory.getShardStatsMBean(name.toString(),
                 datastoreContext.getDataStoreMXBeanType());
-        shardMBean.setShardActor(getSelf());
+        shardMBean.setShard(this);
 
         if (isMetricsCaptureEnabled()) {
             getContext().become(new MeteringBehavior(this));
@@ -272,6 +272,10 @@ public class Shard extends RaftActor {
         } finally {
             context.done();
         }
+    }
+
+    public int getPendingTxCommitQueueSize() {
+        return commitCoordinator.getQueueSize();
     }
 
     @Override

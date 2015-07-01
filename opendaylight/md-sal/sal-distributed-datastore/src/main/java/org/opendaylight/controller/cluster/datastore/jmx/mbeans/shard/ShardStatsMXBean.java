@@ -73,4 +73,6 @@ public interface ShardStatsMXBean {
    long getLeadershipChangeCount();
 
    String getLastLeadershipChangeTime();
+
+   int getPendingTxCommitQueueSize();
 }
