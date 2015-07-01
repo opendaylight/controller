@@ -82,7 +82,7 @@ import scala.concurrent.duration.FiniteDuration;
  */
 public class Shard extends RaftActor {
 
-    private static final Object TX_COMMIT_TIMEOUT_CHECK_MESSAGE = "txCommitTimeoutCheck";
+    protected static final Object TX_COMMIT_TIMEOUT_CHECK_MESSAGE = "txCommitTimeoutCheck";
 
     @VisibleForTesting
     static final Object GET_SHARD_MBEAN_MESSAGE = "getShardMBeanMessage";
@@ -480,38 +480,46 @@ public class Shard extends RaftActor {
     }
 
     void doAbortTransaction(final String transactionID, final ActorRef sender) {
-        final CohortEntry cohortEntry = commitCoordinator.getCohortEntryIfCurrent(transactionID);
+        CohortEntry cohortEntry = commitCoordinator.getCohortEntryIfCurrent(transactionID);
         if(cohortEntry != null) {
-            LOG.debug("{}: Aborting transaction {}", persistenceId(), transactionID);
-
             // We don't remove the cached cohort entry here (ie pass false) in case the Tx was
             // aborted during replication in which case we may still commit locally if replication
             // succeeds.
             commitCoordinator.currentTransactionComplete(transactionID, false);
-
-            final ListenableFuture<Void> future = cohortEntry.getCohort().abort();
-            final ActorRef self = getSelf();
-
-            Futures.addCallback(future, new FutureCallback<Void>() {
-                @Override
-                public void onSuccess(final Void v) {
-                    shardMBean.incrementAbortTransactionsCount();
-
-                    if(sender != null) {
-                        sender.tell(AbortTransactionReply.INSTANCE.toSerializable(), self);
-                    }
-                }
-
-                @Override
-                public void onFailure(final Throwable t) {
-                    LOG.error("{}: An exception happened during abort", persistenceId(), t);
-
-                    if(sender != null) {
-                        sender.tell(new akka.actor.Status.Failure(t), self);
-                    }
-                }
-            });
+        } else {
+            cohortEntry = commitCoordinator.getAndRemoveCohortEntry(transactionID);
         }
+
+        if(cohortEntry == null) {
+            return;
+        }
+
+        cohortEntry.abort();
+
+        LOG.debug("{}: Aborting transaction {}", persistenceId(), transactionID);
+
+        final ListenableFuture<Void> future = cohortEntry.getCohort().abort();
+        final ActorRef self = getSelf();
+
+        Futures.addCallback(future, new FutureCallback<Void>() {
+            @Override
+            public void onSuccess(Void v) {
+                shardMBean.incrementAbortTransactionsCount();
+
+                if(sender != null) {
+                    sender.tell(new AbortTransactionReply().toSerializable(), self);
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                LOG.error("{}: An exception happened during abort", persistenceId(), t);
+
+                if(sender != null) {
+                    sender.tell(new akka.actor.Status.Failure(t), self);
+                }
+            }
+        });
     }
 
     private void handleCreateTransaction(final Object message) {

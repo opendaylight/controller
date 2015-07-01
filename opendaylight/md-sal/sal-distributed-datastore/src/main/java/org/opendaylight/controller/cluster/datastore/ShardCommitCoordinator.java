@@ -96,6 +96,10 @@ class ShardCommitCoordinator {
     private boolean queueCohortEntry(CohortEntry cohortEntry, ActorRef sender, Shard shard) {
         if(queuedCohortEntries.size() < queueCapacity) {
             queuedCohortEntries.offer(cohortEntry);
+
+            log.debug("{}: Enqueued transaction {}, queue size {}", name, cohortEntry.getTransactionID(),
+                    queuedCohortEntries.size());
+
             return true;
         } else {
             cohortCache.remove(cohortEntry.getTransactionID());
@@ -477,12 +481,12 @@ class ShardCommitCoordinator {
             } else if(next.isExpired(cacheExpiryTimeoutInMillis)) {
                 log.warn("{}: canCommit for transaction {} was not received within {} ms - entry removed from cache",
                         name, next.getTransactionID(), cacheExpiryTimeoutInMillis);
-
-                iter.remove();
-                cohortCache.remove(next.getTransactionID());
-            } else {
+            } else if(!next.isAborted()) {
                 break;
             }
+
+            iter.remove();
+            cohortCache.remove(next.getTransactionID());
         }
     }
 
@@ -504,6 +508,7 @@ class ShardCommitCoordinator {
         private boolean doImmediateCommit;
         private final Stopwatch lastAccessTimer = Stopwatch.createStarted();
         private int totalBatchedModificationsReceived;
+        private boolean aborted;
 
         CohortEntry(String transactionID, ReadWriteShardDataTreeTransaction transaction) {
             this.transaction = Preconditions.checkNotNull(transaction);
@@ -591,6 +596,15 @@ class ShardCommitCoordinator {
 
         void setShard(Shard shard) {
             this.shard = shard;
+        }
+
+
+        boolean isAborted() {
+            return aborted;
+        }
+
+        void abort() {
+            aborted = true;
         }
 
         @Override
