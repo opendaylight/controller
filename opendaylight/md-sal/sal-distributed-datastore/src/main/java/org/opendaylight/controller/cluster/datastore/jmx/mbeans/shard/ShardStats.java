@@ -58,6 +58,8 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
 
     private volatile long lastCommittedTransactionTime;
 
+    private volatile int pendingTxCommitQueueSize;
+
     private final AtomicLong failedTransactionsCount = new AtomicLong();
 
     private final AtomicLong failedReadTransactionsCount = new AtomicLong();
@@ -321,5 +323,14 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
     @Override
     public long getInMemoryJournalLogSize() {
         return logSize;
+    }
+
+    @Override
+    public int getPendingTxCommitQueueSize() {
+        return pendingTxCommitQueueSize;
+    }
+
+    public void setTransactionCommitQueueSize(int transactionCommitQueueSize) {
+        this.pendingTxCommitQueueSize = transactionCommitQueueSize;
     }
 }

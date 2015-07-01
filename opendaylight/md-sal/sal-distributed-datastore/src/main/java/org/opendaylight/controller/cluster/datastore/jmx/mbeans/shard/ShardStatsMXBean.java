@@ -60,4 +60,6 @@ public interface ShardStatsMXBean {
    long getInMemoryJournalDataSize();
 
    long getInMemoryJournalLogSize();
+
+   int getPendingTxCommitQueueSize();
 }
