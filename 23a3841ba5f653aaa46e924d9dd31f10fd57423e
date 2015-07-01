@@ -16,6 +16,24 @@
       "revId": "23a3841ba5f653aaa46e924d9dd31f10fd57423e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_322c6b02",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContext.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-07-01T01:09:45Z",
+      "side": 1,
+      "message": "I know - Li code uses WordUtils and I had copied it here but I got errors in the feature-mdsal tests complaining that it couldn\u0027t find org.apache.commons.lang v2.6 or v3.0 (or something like that) so I needed to get a successful verify build so I removed the use of WordUtils. I didn\u0027t try StringUtils.",
+      "parentUuid": "7a7fa997_cfff9033",
+      "revId": "23a3841ba5f653aaa46e924d9dd31f10fd57423e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
