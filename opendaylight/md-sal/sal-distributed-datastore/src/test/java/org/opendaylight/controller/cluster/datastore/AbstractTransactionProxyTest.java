@@ -404,7 +404,12 @@ public abstract class AbstractTransactionProxyTest {
             future.checkedGet(5, TimeUnit.SECONDS);
             fail("Expected ReadFailedException");
         } catch(ReadFailedException e) {
-            throw e.getCause();
+            assertNotNull("Expected a cause", e.getCause());
+            if(e.getCause().getCause() != null) {
+                throw e.getCause().getCause();
+            } else {
+                throw e.getCause();
+            }
         }
     }
 
