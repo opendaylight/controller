@@ -36,7 +36,7 @@ public class DatastoreConfigurationMXBeanImpl extends AbstractMXBean implements 
 
     @Override
     public long getOperationTimeoutInSeconds() {
-        return context.getOperationTimeoutInSeconds();
+        return TimeUnit.MILLISECONDS.toSeconds(context.getOperationTimeoutInMillis());
     }
 
     @Override

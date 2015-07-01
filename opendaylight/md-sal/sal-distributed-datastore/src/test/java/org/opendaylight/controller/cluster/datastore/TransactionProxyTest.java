@@ -799,7 +799,8 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
     }
 
     private void throttleOperation(TransactionProxyOperation operation, int outstandingOpsLimit, boolean shardFound){
-        throttleOperation(operation, outstandingOpsLimit, shardFound, TimeUnit.SECONDS.toNanos(mockActorContext.getDatastoreContext().getOperationTimeoutInSeconds()));
+        throttleOperation(operation, outstandingOpsLimit, shardFound, TimeUnit.MILLISECONDS.toNanos(
+                mockActorContext.getDatastoreContext().getOperationTimeoutInMillis()));
     }
 
     private PrimaryShardInfo newPrimaryShardInfo(ActorRef actorRef){
@@ -902,7 +903,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         long end = System.nanoTime();
 
-        long expected = TimeUnit.SECONDS.toNanos(mockActorContext.getDatastoreContext().getOperationTimeoutInSeconds());
+        long expected = TimeUnit.MILLISECONDS.toNanos(mockActorContext.getDatastoreContext().getOperationTimeoutInMillis());
         Assert.assertTrue(String.format("Expected elapsed time: %s. Actual: %s",
                 expected, (end-start)), (end - start) <= expected);
     }
@@ -925,7 +926,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
 
         long end = System.nanoTime();
 
-        long expected = TimeUnit.SECONDS.toNanos(mockActorContext.getDatastoreContext().getOperationTimeoutInSeconds());
+        long expected = TimeUnit.MILLISECONDS.toNanos(mockActorContext.getDatastoreContext().getOperationTimeoutInMillis());
         Assert.assertTrue(String.format("Expected elapsed time: %s. Actual: %s",
                 expected, (end-start)), (end - start) <= expected);
     }
@@ -1341,7 +1342,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
                 // Now ready should block for both transaction contexts
                 transactionProxy.ready();
             }
-        }, 1, true, TimeUnit.SECONDS.toNanos(mockActorContext.getDatastoreContext().getOperationTimeoutInSeconds()) * 2);
+        }, 1, true, TimeUnit.MILLISECONDS.toNanos(mockActorContext.getDatastoreContext().getOperationTimeoutInMillis()) * 2);
     }
 
     private void testModificationOperationBatching(TransactionType type) throws Exception {
