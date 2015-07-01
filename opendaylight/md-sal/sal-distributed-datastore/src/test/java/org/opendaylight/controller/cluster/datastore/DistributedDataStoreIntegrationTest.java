@@ -2,6 +2,7 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -34,6 +35,8 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.exceptions.NotInitializedException;
+import org.opendaylight.controller.cluster.datastore.messages.FindLocalShard;
+import org.opendaylight.controller.cluster.datastore.messages.LocalShardFound;
 import org.opendaylight.controller.cluster.datastore.utils.MockDataChangeListener;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
@@ -614,13 +617,17 @@ public class DistributedDataStoreIntegrationTest {
             // by setting the election timeout, which is based on the heartbeat interval, really high.
 
             datastoreContextBuilder.shardHeartbeatIntervalInMillis(30000);
-            datastoreContextBuilder.shardInitializationTimeout(300, TimeUnit.MILLISECONDS);
-
-            // Set the leader election timeout low for the test.
-
-            datastoreContextBuilder.shardLeaderElectionTimeout(1, TimeUnit.MILLISECONDS);
 
             DistributedDataStore dataStore = setupDistributedDataStore(testName, false, shardName);
+
+            Object result = dataStore.getActorContext().executeOperation(dataStore.getActorContext().getShardManager(),
+                    new FindLocalShard(shardName, true));
+            assertTrue("Expected LocalShardFound. Actual: " + result, result instanceof LocalShardFound);
+
+            // The ShardManager uses the election timeout for FindPrimary so reset it low so it will timeout quickly.
+
+            datastoreContextBuilder.shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(1);
+            dataStore.onDatastoreContextUpdated(datastoreContextBuilder.build());
 
             // Create the write Tx.
 

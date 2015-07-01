@@ -80,7 +80,8 @@ public class ShardManagerTest extends AbstractActorTest {
     private static TestActorRef<MessageCollectorActor> mockShardActor;
 
     private final DatastoreContext.Builder datastoreContextBuilder = DatastoreContext.newBuilder().
-            dataStoreType(shardMrgIDSuffix).shardInitializationTimeout(600, TimeUnit.MILLISECONDS);
+            dataStoreType(shardMrgIDSuffix).shardInitializationTimeout(600, TimeUnit.MILLISECONDS)
+                   .shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(6);
 
     private static ActorRef newMockShardActor(ActorSystem system, String shardName, String memberName) {
         String name = new ShardIdentifier(shardName, memberName,"config").toString();
@@ -335,6 +336,22 @@ public class ShardManagerTest extends AbstractActorTest {
             shardManager.tell(new ActorInitialized(), mockShardActor);
             shardManager.tell(new RoleChangeNotification("member-1-shard-default-" + shardMrgIDSuffix,
                     null, RaftState.Candidate.name()), mockShardActor);
+
+            shardManager.tell(new FindPrimary(Shard.DEFAULT_NAME, true), getRef());
+
+            expectMsgClass(duration("2 seconds"), NoShardLeaderException.class);
+        }};
+    }
+
+    @Test
+    public void testOnReceiveFindPrimaryWaitForReadyWithIsolatedLeaderShard() throws Exception {
+        new JavaTestKit(getSystem()) {{
+            final ActorRef shardManager = getSystem().actorOf(newPropsShardMgrWithMockShardActor());
+
+            shardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
+            shardManager.tell(new ActorInitialized(), mockShardActor);
+            shardManager.tell(new RoleChangeNotification("member-1-shard-default-" + shardMrgIDSuffix,
+                    null, RaftState.IsolatedLeader.name()), mockShardActor);
 
             shardManager.tell(new FindPrimary(Shard.DEFAULT_NAME, true), getRef());
 
