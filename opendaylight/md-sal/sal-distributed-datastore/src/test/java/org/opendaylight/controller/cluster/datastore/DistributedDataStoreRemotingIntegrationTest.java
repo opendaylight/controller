@@ -9,19 +9,25 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Address;
 import akka.actor.AddressFromURIString;
 import akka.cluster.Cluster;
+import akka.pattern.AskTimeoutException;
 import akka.testkit.JavaTestKit;
 import com.google.common.base.Optional;
+import com.google.common.util.concurrent.Uninterruptibles;
 import com.typesafe.config.ConfigFactory;
 import java.math.BigInteger;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
+import org.opendaylight.controller.cluster.datastore.exceptions.ShardLeaderNotRespondingException;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyLocalTransaction;
 import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
@@ -58,10 +64,12 @@ public class DistributedDataStoreRemotingIntegrationTest {
     private static final Address MEMBER_1_ADDRESS = AddressFromURIString.parse("akka.tcp://cluster-test@127.0.0.1:2558");
     private static final Address MEMBER_2_ADDRESS = AddressFromURIString.parse("akka.tcp://cluster-test@127.0.0.1:2559");
 
-    private static final String MODULE_SHARDS_CONFIG = "module-shards-member1-and-2.conf";
+    private static final String MODULE_SHARDS_CONFIG_2 = "module-shards-member1-and-2.conf";
+    private static final String MODULE_SHARDS_CONFIG_3 = "module-shards-member1-and-2-and-3.conf";
 
     private ActorSystem leaderSystem;
     private ActorSystem followerSystem;
+    private ActorSystem follower2System;
 
     private final DatastoreContext.Builder leaderDatastoreContextBuilder =
             DatastoreContext.newBuilder().shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(1);
@@ -81,21 +89,29 @@ public class DistributedDataStoreRemotingIntegrationTest {
 
         followerSystem = ActorSystem.create("cluster-test", ConfigFactory.load().getConfig("Member2"));
         Cluster.get(followerSystem).join(MEMBER_1_ADDRESS);
+
+        follower2System = ActorSystem.create("cluster-test", ConfigFactory.load().getConfig("Member3"));
+        Cluster.get(follower2System).join(MEMBER_1_ADDRESS);
     }
 
     @After
     public void tearDownClass() {
         JavaTestKit.shutdownActorSystem(leaderSystem);
         JavaTestKit.shutdownActorSystem(followerSystem);
+        JavaTestKit.shutdownActorSystem(follower2System);
     }
 
     private void initDatastores(String type) {
+        initDatastores(type, MODULE_SHARDS_CONFIG_2);
+    }
+
+    private void initDatastores(String type, String moduleShardsConfig) {
         leaderTestKit = new IntegrationTestKit(leaderSystem, leaderDatastoreContextBuilder);
 
-        followerTestKit = new IntegrationTestKit(followerSystem, followerDatastoreContextBuilder);
-        followerDistributedDataStore = followerTestKit.setupDistributedDataStore(type, MODULE_SHARDS_CONFIG, false, SHARD_NAMES);
+        leaderDistributedDataStore = leaderTestKit.setupDistributedDataStore(type, moduleShardsConfig, false, SHARD_NAMES);
 
-        leaderDistributedDataStore = leaderTestKit.setupDistributedDataStore(type, MODULE_SHARDS_CONFIG, false, SHARD_NAMES);
+        followerTestKit = new IntegrationTestKit(followerSystem, followerDatastoreContextBuilder);
+        followerDistributedDataStore = followerTestKit.setupDistributedDataStore(type, moduleShardsConfig, false, SHARD_NAMES);
 
         leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(), SHARD_NAMES);
     }
@@ -392,7 +408,7 @@ public class DistributedDataStoreRemotingIntegrationTest {
                 shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(5);
         IntegrationTestKit newMember1TestKit = new IntegrationTestKit(leaderSystem, newMember1Builder);
         DistributedDataStore newMember1Datastore = newMember1TestKit.
-                    setupDistributedDataStore(testName, MODULE_SHARDS_CONFIG, false, SHARD_NAMES);
+                    setupDistributedDataStore(testName, MODULE_SHARDS_CONFIG_2, false, SHARD_NAMES);
 
         followerTestKit.waitUntilLeader(followerDistributedDataStore.getActorContext(), SHARD_NAMES);
 
@@ -433,5 +449,97 @@ public class DistributedDataStoreRemotingIntegrationTest {
         followerTestKit.expectMsgClass(CommitTransactionReply.SERIALIZABLE_CLASS);
 
         verifyCars(leaderDistributedDataStore.newReadOnlyTransaction(), car);
+    }
+
+    @Test(expected=AskTimeoutException.class)
+    public void testReadWriteTransactionWithShardLeaderNotResponding() throws Throwable {
+        followerDatastoreContextBuilder.shardElectionTimeoutFactor(30);
+        initDatastores("testReadWriteTransactionWithShardLeaderNotResponding");
+
+        // Do an initial read to get the primary shard info cached.
+
+        DOMStoreReadTransaction readTx = followerDistributedDataStore.newReadOnlyTransaction();
+        readTx.read(CarsModel.BASE_PATH).checkedGet(5, TimeUnit.SECONDS);
+
+        // Shutdown the leader and try to create a new tx.
+
+        JavaTestKit.shutdownActorSystem(leaderSystem, null, true);
+
+        followerDatastoreContextBuilder.operationTimeoutInMillis(50).shardElectionTimeoutFactor(1);
+        followerDistributedDataStore.onDatastoreContextUpdated(followerDatastoreContextBuilder.build());
+
+        DOMStoreReadWriteTransaction rwTx = followerDistributedDataStore.newReadWriteTransaction();
+
+        rwTx.write(CarsModel.BASE_PATH, CarsModel.emptyContainer());
+
+        try {
+            followerTestKit.doCommit(rwTx.ready());
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+            assertTrue("Expected ShardLeaderNotRespondingException cause. Actual: " + e.getCause(),
+                    e.getCause() instanceof ShardLeaderNotRespondingException);
+            assertNotNull("Expected a nested cause", e.getCause().getCause());
+            throw e.getCause().getCause();
+        }
+    }
+
+    @Test(expected=NoShardLeaderException.class)
+    public void testReadWriteTransactionWithCreateTxFailureDueToNoLeader() throws Throwable {
+        initDatastores("testReadWriteTransactionWithCreateTxFailureDueToNoLeader");
+
+        // Do an initial read to get the primary shard info cached.
+
+        DOMStoreReadTransaction readTx = followerDistributedDataStore.newReadOnlyTransaction();
+        readTx.read(CarsModel.BASE_PATH).checkedGet(5, TimeUnit.SECONDS);
+
+        // Shutdown the leader and try to create a new tx.
+
+        JavaTestKit.shutdownActorSystem(leaderSystem, null, true);
+
+        Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
+
+        followerDatastoreContextBuilder.operationTimeoutInMillis(10).shardElectionTimeoutFactor(1);
+        followerDistributedDataStore.onDatastoreContextUpdated(followerDatastoreContextBuilder.build());
+
+        DOMStoreReadWriteTransaction rwTx = followerDistributedDataStore.newReadWriteTransaction();
+
+        rwTx.write(CarsModel.BASE_PATH, CarsModel.emptyContainer());
+
+        try {
+            followerTestKit.doCommit(rwTx.ready());
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+            throw e.getCause();
+        }
+    }
+
+    @Test
+    public void testReadWriteTransactionRetryWithInitialAskTimeoutExOnCreateTx() throws Exception {
+        followerDatastoreContextBuilder.shardElectionTimeoutFactor(30);
+        String testName = "testReadWriteTransactionRetryWithInitialAskTimeoutExOnCreateTx";
+        initDatastores(testName, MODULE_SHARDS_CONFIG_3);
+
+        DatastoreContext.Builder follower2DatastoreContextBuilder = DatastoreContext.newBuilder().
+                shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(5);
+        IntegrationTestKit follower2TestKit = new IntegrationTestKit(follower2System, follower2DatastoreContextBuilder);
+        follower2TestKit.setupDistributedDataStore(testName, MODULE_SHARDS_CONFIG_3, false, SHARD_NAMES);
+
+        // Do an initial read to get the primary shard info cached.
+
+        DOMStoreReadTransaction readTx = followerDistributedDataStore.newReadOnlyTransaction();
+        readTx.read(CarsModel.BASE_PATH).checkedGet(5, TimeUnit.SECONDS);
+
+        // Shutdown the leader and try to create a new tx.
+
+        JavaTestKit.shutdownActorSystem(leaderSystem, null, true);
+
+        followerDatastoreContextBuilder.operationTimeoutInMillis(500);
+        followerDistributedDataStore.onDatastoreContextUpdated(followerDatastoreContextBuilder.build());
+
+        DOMStoreReadWriteTransaction rwTx = followerDistributedDataStore.newReadWriteTransaction();
+
+        rwTx.write(CarsModel.BASE_PATH, CarsModel.emptyContainer());
+
+        followerTestKit.doCommit(rwTx.ready());
     }
 }
