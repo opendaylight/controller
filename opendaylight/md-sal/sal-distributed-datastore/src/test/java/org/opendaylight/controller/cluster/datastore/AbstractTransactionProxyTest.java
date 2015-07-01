@@ -23,6 +23,7 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.dispatch.Futures;
 import akka.testkit.JavaTestKit;
+import akka.util.Timeout;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.base.Objects;
@@ -131,7 +132,9 @@ public abstract class AbstractTransactionProxyTest {
 
     protected final String memberName = "mock-member";
 
-    protected final Builder dataStoreContextBuilder = DatastoreContext.newBuilder().operationTimeoutInSeconds(2);
+    private final int operationTimeoutInSeconds = 2;
+    protected final Builder dataStoreContextBuilder = DatastoreContext.newBuilder()
+            .operationTimeoutInSeconds(operationTimeoutInSeconds);
 
     @BeforeClass
     public static void setUpClass() throws IOException {
@@ -159,6 +162,7 @@ public abstract class AbstractTransactionProxyTest {
         doReturn(getSystem().dispatchers().defaultGlobalDispatcher()).when(mockActorContext).getClientDispatcher();
         doReturn(memberName).when(mockActorContext).getCurrentMemberName();
         doReturn(schemaContext).when(mockActorContext).getSchemaContext();
+        doReturn(new Timeout(operationTimeoutInSeconds, TimeUnit.SECONDS)).when(mockActorContext).getOperationTimeout();
         doReturn(mockClusterWrapper).when(mockActorContext).getClusterWrapper();
         doReturn(mockClusterWrapper).when(mockActorContext).getClusterWrapper();
         doReturn(dataStoreContextBuilder.build()).when(mockActorContext).getDatastoreContext();
@@ -380,7 +384,7 @@ public abstract class AbstractTransactionProxyTest {
 
             doReturn(Futures.successful(createTransactionReply(txActorRef, transactionVersion))).when(mockActorContext).
                 executeOperationAsync(eq(actorSystem.actorSelection(shardActorRef.path())),
-                        eqCreateTransaction(prefix, type));
+                        eqCreateTransaction(prefix, type), any(Timeout.class));
         }
 
         return txActorRef;
@@ -404,7 +408,12 @@ public abstract class AbstractTransactionProxyTest {
             future.checkedGet(5, TimeUnit.SECONDS);
             fail("Expected ReadFailedException");
         } catch(ReadFailedException e) {
-            throw e.getCause();
+            assertNotNull("Expected a cause", e.getCause());
+            if(e.getCause().getCause() != null) {
+                throw e.getCause().getCause();
+            } else {
+                throw e.getCause();
+            }
         }
     }
 
