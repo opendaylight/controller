@@ -21,6 +21,12 @@ public final class OperationBuilder {
     public static final String OPERATIONAL = "(operational)";
     public static final String CONFIG = "(config)";
 
+    public static final List<String> CONSUMES_PUT_POST = new ArrayList<>();
+    static {
+        CONSUMES_PUT_POST.add("application/json");
+        CONSUMES_PUT_POST.add("application/xml");
+    }
+
     public static class Get {
 
         protected Operation spec;
@@ -57,6 +63,7 @@ public final class OperationBuilder {
             spec = new Operation();
             spec.setType(CONFIG + nodeName);
             spec.setNotes(description);
+            spec.setConsumes(CONSUMES_PUT_POST);
         }
 
         public Put pathParams(List<Parameter> params) {
@@ -85,6 +92,7 @@ public final class OperationBuilder {
             super(nodeName, description);
             this.dataNodeContainer = dataNodeContainer;
             spec.setType(CONFIG + nodeName + METHOD_NAME);
+            spec.setConsumes(CONSUMES_PUT_POST);
         }
 
         @Override
