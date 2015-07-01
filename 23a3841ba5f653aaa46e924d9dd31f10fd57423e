@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a7fa997_cfff9033",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContext.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-07-01T00:48:38Z",
+      "side": 1,
+      "message": "apache commons StringUtils has a similar method - in case we want to reuse that instead. I believe we already depend on commons.",
+      "revId": "23a3841ba5f653aaa46e924d9dd31f10fd57423e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
