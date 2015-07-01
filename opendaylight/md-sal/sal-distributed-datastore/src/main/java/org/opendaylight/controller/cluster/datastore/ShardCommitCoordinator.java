@@ -21,6 +21,7 @@ import java.util.Queue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.datastore.compat.BackwardsCompatibleThreePhaseCommitCohort;
+import org.opendaylight.controller.cluster.datastore.messages.AbortTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModificationsReply;
 import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransactionReply;
@@ -30,6 +31,7 @@ import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionRe
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
 import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.slf4j.Logger;
 
 /**
@@ -96,6 +98,10 @@ class ShardCommitCoordinator {
     private boolean queueCohortEntry(CohortEntry cohortEntry, ActorRef sender, Shard shard) {
         if(queuedCohortEntries.size() < queueCapacity) {
             queuedCohortEntries.offer(cohortEntry);
+
+            log.debug("{}: Enqueued transaction {}, queue size {}", name, cohortEntry.getTransactionID(),
+                    queuedCohortEntries.size());
+
             return true;
         } else {
             cohortCache.remove(cohortEntry.getTransactionID());
@@ -314,10 +320,7 @@ class ShardCommitCoordinator {
     private void doCanCommit(final CohortEntry cohortEntry) {
         boolean canCommit = false;
         try {
-            // We block on the future here so we don't have to worry about possibly accessing our
-            // state on a different thread outside of our dispatcher. Also, the data store
-            // currently uses a same thread executor anyway.
-            canCommit = cohortEntry.getCohort().canCommit().get();
+            canCommit = cohortEntry.canCommit();
 
             log.debug("{}: canCommit for {}: {}", name, cohortEntry.getTransactionID(), canCommit);
 
@@ -361,10 +364,7 @@ class ShardCommitCoordinator {
         // normally fail since we ensure only one concurrent 3-phase commit.
 
         try {
-            // We block on the future here so we don't have to worry about possibly accessing our
-            // state on a different thread outside of our dispatcher. Also, the data store
-            // currently uses a same thread executor anyway.
-            cohortEntry.getCohort().preCommit().get();
+            cohortEntry.preCommit();
 
             cohortEntry.getShard().continueCommit(cohortEntry);
 
@@ -407,6 +407,41 @@ class ShardCommitCoordinator {
 
         cohortEntry.setReplySender(sender);
         return doCommit(cohortEntry);
+    }
+
+    void handleAbort(final String transactionID, final ActorRef sender, final Shard shard) {
+        CohortEntry cohortEntry = getCohortEntryIfCurrent(transactionID);
+        if(cohortEntry != null) {
+            // We don't remove the cached cohort entry here (ie pass false) in case the Tx was
+            // aborted during replication in which case we may still commit locally if replication
+            // succeeds.
+            currentTransactionComplete(transactionID, false);
+        } else {
+            cohortEntry = getAndRemoveCohortEntry(transactionID);
+        }
+
+        if(cohortEntry == null) {
+            return;
+        }
+
+        log.debug("{}: Aborting transaction {}", name, transactionID);
+
+        final ActorRef self = shard.getSelf();
+        try {
+            cohortEntry.abort();
+
+            shard.getShardMBean().incrementAbortTransactionsCount();
+
+            if(sender != null) {
+                sender.tell(new AbortTransactionReply().toSerializable(), self);
+            }
+        } catch (Exception e) {
+            log.error("{}: An exception happened during abort", name, e);
+
+            if(sender != null) {
+                sender.tell(new akka.actor.Status.Failure(e), self);
+            }
+        }
     }
 
     /**
@@ -483,12 +518,12 @@ class ShardCommitCoordinator {
             } else if(next.isExpired(cacheExpiryTimeoutInMillis)) {
                 log.warn("{}: canCommit for transaction {} was not received within {} ms - entry removed from cache",
                         name, next.getTransactionID(), cacheExpiryTimeoutInMillis);
-
-                iter.remove();
-                cohortCache.remove(next.getTransactionID());
-            } else {
+            } else if(!next.isAborted()) {
                 break;
             }
+
+            iter.remove();
+            cohortCache.remove(next.getTransactionID());
         }
     }
 
@@ -511,6 +546,7 @@ class ShardCommitCoordinator {
         private boolean doImmediateCommit;
         private final Stopwatch lastAccessTimer = Stopwatch.createStarted();
         private int totalBatchedModificationsReceived;
+        private boolean aborted;
 
         CohortEntry(String transactionID, ReadWriteShardDataTreeTransaction transaction) {
             this.transaction = Preconditions.checkNotNull(transaction);
@@ -539,8 +575,8 @@ class ShardCommitCoordinator {
             return transactionID;
         }
 
-        ShardDataTreeCohort getCohort() {
-            return cohort;
+        DataTreeCandidate getCandidate() {
+            return cohort.getCandidate();
         }
 
         int getTotalBatchedModificationsReceived() {
@@ -563,6 +599,28 @@ class ShardCommitCoordinator {
                         }
                 }
             }
+        }
+
+        boolean canCommit() throws InterruptedException, ExecutionException {
+            // We block on the future here (and also preCommit(), commit(), abort()) so we don't have to worry
+            // about possibly accessing our state on a different thread outside of our dispatcher.
+            // TODO: the ShardDataTreeCohort returns immediate Futures anyway which begs the question - why
+            // bother even returning Futures from ShardDataTreeCohort if we have to treat them synchronously
+            // anyway?. The Futures are really a remnant from when we were using the InMemoryDataBroker.
+            return cohort.canCommit().get();
+        }
+
+        void preCommit() throws InterruptedException, ExecutionException {
+            cohort.preCommit().get();
+        }
+
+        void commit() throws InterruptedException, ExecutionException {
+            cohort.commit().get();
+        }
+
+        void abort() throws InterruptedException, ExecutionException {
+            aborted = true;
+            cohort.abort().get();
         }
 
         void ready(CohortDecorator cohortDecorator, boolean doImmediateCommit) {
@@ -608,6 +666,11 @@ class ShardCommitCoordinator {
 
         void setShard(Shard shard) {
             this.shard = shard;
+        }
+
+
+        boolean isAborted() {
+            return aborted;
         }
 
         @Override
