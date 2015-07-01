@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a7fa997_03479f20",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 637,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-07-01T22:26:24Z",
+      "side": 1,
+      "message": "For the retry logic to work in the AskTimeoutException case you are making an assumption that operationTimeout will always be less than election timeout * 2. I think that could possibly create problems in some cases. For example I know that many times I have recommended incrementing the operation timeout to a large number when doing say netconf scale test.",
+      "revId": "085cb9b7dafb5211f89ae0d97aae1f03aca75e0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
