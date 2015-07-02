@@ -87,6 +87,7 @@ class SnapshotSupportImpl implements SnapshotSupport {
         currentCaptureSnapshot = null;
         applySnapshot = null;
         lastSequenceNumber = -1;
+        context.setSnapshotCaptureInitiated(false);
     }
 
     @Override
@@ -118,6 +119,7 @@ class SnapshotSupportImpl implements SnapshotSupport {
         currentCaptureSnapshot = null;
         applySnapshot = null;
         lastSequenceNumber = -1;
+        context.setSnapshotCaptureInitiated(false);
     }
 
     @Override
@@ -134,20 +136,32 @@ class SnapshotSupportImpl implements SnapshotSupport {
 
         persistenceProvider.saveSnapshot(sn);
 
-        log.info("{}: Persisting of snapshot done:{}", context.getId(), sn.getLogMessage());
+        log.info("{}: Persisting of snapshot done: {}", context.getId(), sn.getLogMessage());
 
         long dataThreshold = Runtime.getRuntime().totalMemory() *
                 context.getConfigParams().getSnapshotDataThresholdPercentage() / 100;
-        if (context.getReplicatedLog().dataSize() > dataThreshold) {
+        boolean dataSizeThresholdExceeded = context.getReplicatedLog().dataSize() > dataThreshold;
+
+        boolean logSizeExceededSnapshotBatchCount =
+                context.getReplicatedLog().size() >= context.getConfigParams().getSnapshotBatchCount();
+
+        if (dataSizeThresholdExceeded || logSizeExceededSnapshotBatchCount) {
             if(log.isDebugEnabled()) {
-                log.debug("{}: dataSize {} exceeds dataThreshold {} - doing snapshotPreCommit with index {}",
-                        context.getId(), context.getReplicatedLog().dataSize(), dataThreshold,
-                        localCaptureSnapshot.getLastAppliedIndex());
+                if(dataSizeThresholdExceeded) {
+                    log.debug("{}: log data size {} exceeds the memory threshold {} - doing snapshotPreCommit with index {}",
+                            context.getId(), context.getReplicatedLog().dataSize(), dataThreshold,
+                            localCaptureSnapshot.getLastAppliedIndex());
+                } else {
+                    log.debug("{}: log size {} exceeds the snapshot batch count {} - doing snapshotPreCommit with index {}",
+                            context.getId(), context.getReplicatedLog().size(),
+                            context.getConfigParams().getSnapshotBatchCount(), localCaptureSnapshot.getLastAppliedIndex());
+                }
             }
 
-            // if memory is less, clear the log based on lastApplied.
-            // this could/should only happen if one of the followers is down
-            // as normally we keep removing from the log when its replicated to all.
+            // We either exceeded the memory threshold or the log size exceeded the snapshot batch
+            // count so, to keep the log memory footprint in check, clear the log based on lastApplied.
+            // This could/should only happen if one of the followers is down as normally we keep
+            // removing from the log as entries are replicated to all.
             context.getReplicatedLog().snapshotPreCommit(localCaptureSnapshot.getLastAppliedIndex(),
                     localCaptureSnapshot.getLastAppliedTerm());
 
@@ -172,16 +186,14 @@ class SnapshotSupportImpl implements SnapshotSupport {
                     context.getReplicatedLog().getSnapshotTerm());
         }
 
-        log.info("{}: Removed in-memory snapshotted entries, adjusted snaphsotIndex:{} " +
-            "and term:{}", context.getId(), localCaptureSnapshot.getLastAppliedIndex(),
-            localCaptureSnapshot.getLastAppliedTerm());
+        log.info("{}: Removed in-memory snapshotted entries, adjusted snaphsotIndex: {} " +
+            "and term: {}", context.getId(), context.getReplicatedLog().getSnapshotIndex(),
+            context.getReplicatedLog().getSnapshotTerm());
 
         if (isLeader && localCaptureSnapshot.isInstallSnapshotInitiated()) {
             // this would be call straight to the leader and won't initiate in serialization
             behavior.handleMessage(context.getActor(), new SendInstallSnapshot(sn));
         }
-
-        context.setSnapshotCaptureInitiated(false);
     }
 
     @Override
