@@ -40,6 +40,7 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
     private final List<Future<ActorSelection>> cohortFutures;
     private volatile List<ActorSelection> cohorts;
     private final String transactionId;
+    private volatile OperationCallback commitOperationCallback;
 
     public ThreePhaseCommitCohortProxy(ActorContext actorContext,
             List<Future<ActorSelection>> cohortFutures, String transactionId) {
@@ -110,6 +111,11 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
             return;
         }
 
+        commitOperationCallback = cohortFutures.isEmpty() ? OperationCallback.NO_OP_CALLBACK :
+            new TransactionRateLimitingCallback(actorContext);
+
+        commitOperationCallback.run();
+
         final Object message = new CanCommitTransaction(transactionId).toSerializable();
 
         final Iterator<ActorSelection> iterator = cohorts.iterator();
@@ -122,8 +128,13 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
                         LOG.debug("Tx {}: a canCommit cohort Future failed: {}", transactionId, failure);
                     }
                     returnFuture.setException(failure);
+                    commitOperationCallback.failure();
                     return;
                 }
+
+                // Only the first call to pause takes effect - subsequent calls before resume are no-ops. So
+                // this means we'll only time the first transaction canCommit which should be fine.
+                commitOperationCallback.pause();
 
                 boolean result = true;
                 if (response.getClass().equals(CanCommitTransactionReply.SERIALIZABLE_CLASS)) {
@@ -191,8 +202,8 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
 
     @Override
     public ListenableFuture<Void> commit() {
-        OperationCallback operationCallback = cohortFutures.isEmpty() ? OperationCallback.NO_OP_CALLBACK :
-                new TransactionRateLimitingCallback(actorContext);
+        OperationCallback operationCallback = commitOperationCallback != null ? commitOperationCallback :
+            OperationCallback.NO_OP_CALLBACK;
 
         return voidOperation("commit", new CommitTransaction(transactionId).toSerializable(),
                 CommitTransactionReply.SERIALIZABLE_CLASS, true, operationCallback);
@@ -250,7 +261,7 @@ public class ThreePhaseCommitCohortProxy extends AbstractThreePhaseCommitCohort<
             LOG.debug("Tx {} finish {}", transactionId, operationName);
         }
 
-        callback.run();
+        callback.resume();
 
         Future<Iterable<Object>> combinedFuture = invokeCohorts(message);
 
