@@ -9,7 +9,9 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import com.codahale.metrics.Timer;
-import com.google.common.base.Preconditions;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Ticker;
+import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 
 /**
@@ -17,8 +19,11 @@ import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
  * transaction
  */
 public class TransactionRateLimitingCallback implements OperationCallback{
+    private static Ticker TICKER = Ticker.systemTicker();
+
     private final Timer commitTimer;
-    private Timer.Context timerContext;
+    private volatile long startTime;
+    private volatile long elapsedTime;
 
     TransactionRateLimitingCallback(ActorContext actorContext){
         commitTimer = actorContext.getOperationTimer(ActorContext.COMMIT);
@@ -26,13 +31,23 @@ public class TransactionRateLimitingCallback implements OperationCallback{
 
     @Override
     public void run() {
-        timerContext = commitTimer.time();
+        resume();
+    }
+
+    @Override
+    public void pause() {
+        elapsedTime += TICKER.read() - startTime;
+    }
+
+    @Override
+    public void resume() {
+        startTime = TICKER.read();
     }
 
     @Override
     public void success() {
-        Preconditions.checkState(timerContext != null, "Call run before success");
-        timerContext.stop();
+        pause();
+        commitTimer.update(elapsedTime, TimeUnit.NANOSECONDS);
     }
 
     @Override
@@ -42,4 +57,8 @@ public class TransactionRateLimitingCallback implements OperationCallback{
         // not going to be useful - so we leave it as it is
     }
 
+    @VisibleForTesting
+    static void setTicker(Ticker ticker) {
+        TICKER = ticker;
+    }
 }
