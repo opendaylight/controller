@@ -23,6 +23,14 @@ interface OperationCallback {
         @Override
         public void failure() {
         }
+
+        @Override
+        public void pause() {
+        }
+
+        @Override
+        public void resume() {
+        }
     };
 
     class Reference extends AtomicReference<OperationCallback> {
@@ -34,6 +42,8 @@ interface OperationCallback {
     }
 
     void run();
+    void pause();
+    void resume();
     void success();
     void failure();
 }
