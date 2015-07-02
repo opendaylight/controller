@@ -1,0 +1,7 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+2: Tony Tkacik <ttkacik@cisco.com>
+Submitted-by: Tony Tkacik <ttkacik@cisco.com>
+Submitted-at: Thu, 02 Jul 2015 11:14:34 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/23044
+Project: controller
+Branch: refs/heads/stable/lithium
