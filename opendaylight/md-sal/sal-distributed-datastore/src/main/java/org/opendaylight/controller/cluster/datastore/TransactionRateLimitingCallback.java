@@ -9,7 +9,7 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import com.codahale.metrics.Timer;
-import com.google.common.base.Preconditions;
+import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 
 /**
@@ -18,7 +18,8 @@ import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
  */
 public class TransactionRateLimitingCallback implements OperationCallback{
     private final Timer commitTimer;
-    private Timer.Context timerContext;
+    private volatile long startTime;
+    private volatile long elapsedTime;
 
     TransactionRateLimitingCallback(ActorContext actorContext){
         commitTimer = actorContext.getOperationTimer(ActorContext.COMMIT);
@@ -26,13 +27,23 @@ public class TransactionRateLimitingCallback implements OperationCallback{
 
     @Override
     public void run() {
-        timerContext = commitTimer.time();
+        resume();
+    }
+
+    @Override
+    public void pause() {
+        elapsedTime += System.nanoTime() - startTime;
+    }
+
+    @Override
+    public void resume() {
+        startTime = System.nanoTime();
     }
 
     @Override
     public void success() {
-        Preconditions.checkState(timerContext != null, "Call run before success");
-        timerContext.stop();
+        pause();
+        commitTimer.update(elapsedTime, TimeUnit.NANOSECONDS);
     }
 
     @Override
@@ -41,5 +52,4 @@ public class TransactionRateLimitingCallback implements OperationCallback{
         // the default transaction commit timeout. Using the timeout information to figure out the rate limit is
         // not going to be useful - so we leave it as it is
     }
-
 }

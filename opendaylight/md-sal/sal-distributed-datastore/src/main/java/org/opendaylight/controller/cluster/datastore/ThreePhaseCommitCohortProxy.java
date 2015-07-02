@@ -44,6 +44,7 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
     private final List<Future<ActorSelection>> cohortFutures;
     private volatile List<ActorSelection> cohorts;
     private final String transactionId;
+    private volatile OperationCallback commitOperationCallback;
 
     public ThreePhaseCommitCohortProxy(ActorContext actorContext,
             List<Future<ActorSelection>> cohortFutures, String transactionId) {
@@ -104,6 +105,12 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
         if(LOG.isDebugEnabled()) {
             LOG.debug("Tx {} finishCanCommit", transactionId);
         }
+
+        commitOperationCallback = cohortFutures.isEmpty() ? OperationCallback.NO_OP_CALLBACK :
+            new TransactionRateLimitingCallback(actorContext);
+
+        commitOperationCallback.run();
+
         // The last phase of canCommit is to invoke all the cohort actors asynchronously to perform
         // their canCommit processing. If any one fails then we'll fail canCommit.
 
@@ -118,8 +125,11 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
                         LOG.debug("Tx {}: a canCommit cohort Future failed: {}", transactionId, failure);
                     }
                     returnFuture.setException(failure);
+                    commitOperationCallback.failure();
                     return;
                 }
+
+                commitOperationCallback.pause();
 
                 boolean result = true;
                 for(Object response: responses) {
@@ -180,11 +190,11 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
 
     @Override
     public ListenableFuture<Void> commit() {
-        OperationCallback operationCallback = cohortFutures.isEmpty() ? OperationCallback.NO_OP_CALLBACK :
-            new TransactionRateLimitingCallback(actorContext);
+        OperationCallback callback = commitOperationCallback != null ? commitOperationCallback :
+            OperationCallback.NO_OP_CALLBACK;
 
         return voidOperation("commit",  new CommitTransaction(transactionId).toSerializable(),
-                CommitTransactionReply.SERIALIZABLE_CLASS, true, operationCallback);
+                CommitTransactionReply.SERIALIZABLE_CLASS, true, callback);
     }
 
     private ListenableFuture<Void> voidOperation(final String operationName, final Object message,
@@ -239,7 +249,7 @@ public class ThreePhaseCommitCohortProxy implements DOMStoreThreePhaseCommitCoho
             LOG.debug("Tx {} finish {}", transactionId, operationName);
         }
 
-        callback.run();
+        callback.resume();
 
         Future<Iterable<Object>> combinedFuture = invokeCohorts(message);
 
