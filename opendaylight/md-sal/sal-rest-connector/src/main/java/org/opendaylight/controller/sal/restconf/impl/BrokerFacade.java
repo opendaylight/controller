@@ -47,12 +47,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class BrokerFacade {
-    private final static Logger LOG = LoggerFactory.getLogger(BrokerFacade.class);
+    private static final Logger LOG = LoggerFactory.getLogger(BrokerFacade.class);
 
-    private final static BrokerFacade INSTANCE = new BrokerFacade();
+    private static final BrokerFacade INSTANCE = new BrokerFacade();
     private volatile DOMRpcService rpcService;
     private volatile ConsumerSession context;
     private DOMDataBroker domDataBroker;
+
+    private final String baseErrMsg = "DOM data broker service isn't available for mount point ";
+
+    private final String stringViaRestconf = " via Restconf: {}";
 
     private BrokerFacade() {
     }
@@ -86,7 +90,7 @@ public class BrokerFacade {
         if (domDataBrokerService.isPresent()) {
             return readDataViaTransaction(domDataBrokerService.get().newReadOnlyTransaction(), CONFIGURATION, path);
         }
-        final String errMsg = "DOM data broker service isn't available for mount point " + path;
+        final String errMsg = baseErrMsg + path;
         LOG.warn(errMsg);
         throw new RestconfDocumentedException(errMsg);
     }
@@ -102,7 +106,7 @@ public class BrokerFacade {
         if (domDataBrokerService.isPresent()) {
             return readDataViaTransaction(domDataBrokerService.get().newReadOnlyTransaction(), OPERATIONAL, path);
         }
-        final String errMsg = "DOM data broker service isn't available for mount point " + path;
+        final String errMsg = baseErrMsg + path;
         LOG.warn(errMsg);
         throw new RestconfDocumentedException(errMsg);
     }
@@ -121,7 +125,7 @@ public class BrokerFacade {
             return putDataViaTransaction(domDataBrokerService.get().newReadWriteTransaction(), CONFIGURATION, path,
                     payload, mountPoint.getSchemaContext());
         }
-        final String errMsg = "DOM data broker service isn't available for mount point " + path;
+        final String errMsg = baseErrMsg + path;
         LOG.warn(errMsg);
         throw new RestconfDocumentedException(errMsg);
     }
@@ -140,7 +144,7 @@ public class BrokerFacade {
             return postDataViaTransaction(domDataBrokerService.get().newReadWriteTransaction(), CONFIGURATION, path,
                     payload, mountPoint.getSchemaContext());
         }
-        final String errMsg = "DOM data broker service isn't available for mount point " + path;
+        final String errMsg = baseErrMsg + path;
         LOG.warn(errMsg);
         throw new RestconfDocumentedException(errMsg);
     }
@@ -158,7 +162,7 @@ public class BrokerFacade {
         if (domDataBrokerService.isPresent()) {
             return deleteDataViaTransaction(domDataBrokerService.get().newWriteOnlyTransaction(), CONFIGURATION, path);
         }
-        final String errMsg = "DOM data broker service isn't available for mount point " + path;
+        final String errMsg = baseErrMsg + path;
         LOG.warn(errMsg);
         throw new RestconfDocumentedException(errMsg);
     }
@@ -189,7 +193,7 @@ public class BrokerFacade {
 
     private NormalizedNode<?, ?> readDataViaTransaction(final DOMDataReadTransaction transaction,
             final LogicalDatastoreType datastore, final YangInstanceIdentifier path) {
-        LOG.trace("Read " + datastore.name() + " via Restconf: {}", path);
+        LOG.trace("Read " + datastore.name() + stringViaRestconf, path);
         final ListenableFuture<Optional<NormalizedNode<?, ?>>> listenableFuture = transaction.read(datastore, path);
         if (listenableFuture != null) {
             Optional<NormalizedNode<?, ?>> optional;
@@ -197,14 +201,12 @@ public class BrokerFacade {
                 LOG.debug("Reading result data from transaction.");
                 optional = listenableFuture.get();
             } catch (InterruptedException | ExecutionException e) {
-                LOG.warn("Exception by reading " + datastore.name() + " via Restconf: {}", path, e);
+                LOG.warn("Exception by reading " + datastore.name() + stringViaRestconf, path, e);
                 throw new RestconfDocumentedException("Problem to get data from transaction.", e.getCause());
 
             }
-            if (optional != null) {
-                if (optional.isPresent()) {
+            if (optional != null && optional.isPresent()) {
                     return optional.get();
-                }
             }
         }
         return null;
@@ -251,7 +253,7 @@ public class BrokerFacade {
     private CheckedFuture<Void, TransactionCommitFailedException> putDataViaTransaction(
             final DOMDataReadWriteTransaction writeTransaction, final LogicalDatastoreType datastore,
             final YangInstanceIdentifier path, final NormalizedNode<?, ?> payload, final SchemaContext schemaContext) {
-        LOG.trace("Put " + datastore.name() + " via Restconf: {}", path);
+        LOG.trace("Put " + datastore.name() + stringViaRestconf, path);
         ensureParentsByMerge(datastore, path, writeTransaction, schemaContext);
         writeTransaction.put(datastore, path, payload);
         return writeTransaction.submit();
@@ -260,7 +262,7 @@ public class BrokerFacade {
     private CheckedFuture<Void, TransactionCommitFailedException> deleteDataViaTransaction(
             final DOMDataWriteTransaction writeTransaction, final LogicalDatastoreType datastore,
             final YangInstanceIdentifier path) {
-        LOG.trace("Delete " + datastore.name() + " via Restconf: {}", path);
+        LOG.trace("Delete " + datastore.name() + stringViaRestconf, path);
         writeTransaction.delete(datastore, path);
         return writeTransaction.submit();
     }
