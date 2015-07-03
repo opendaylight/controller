@@ -48,41 +48,41 @@ import org.opendaylight.controller.sal.restconf.impl.NormalizedNodeContext;
 @Path("/")
 public interface RestconfService {
 
-    public static final String XML = "+xml";
-    public static final String JSON = "+json";
+    String XML = "+xml";
+    String JSON = "+json";
 
     @GET
-    public Object getRoot();
+    Object getRoot();
 
     @GET
     @Path("/modules")
     @Produces({ Draft02.MediaTypes.API + JSON, Draft02.MediaTypes.API + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public NormalizedNodeContext getModules(@Context UriInfo uriInfo);
+    NormalizedNodeContext getModules(@Context UriInfo uriInfo);
 
     @GET
     @Path("/modules/{identifier:.+}")
     @Produces({ Draft02.MediaTypes.API + JSON, Draft02.MediaTypes.API + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public NormalizedNodeContext getModules(@PathParam("identifier") String identifier, @Context UriInfo uriInfo);
+    NormalizedNodeContext getModules(@PathParam("identifier") String identifier, @Context UriInfo uriInfo);
 
     @GET
     @Path("/modules/module/{identifier:.+}")
     @Produces({ Draft02.MediaTypes.API + JSON, Draft02.MediaTypes.API + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public NormalizedNodeContext getModule(@PathParam("identifier") String identifier, @Context UriInfo uriInfo);
+    NormalizedNodeContext getModule(@PathParam("identifier") String identifier, @Context UriInfo uriInfo);
 
     @GET
     @Path("/operations")
     @Produces({ Draft02.MediaTypes.API + JSON, Draft02.MediaTypes.API + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public NormalizedNodeContext getOperations(@Context UriInfo uriInfo);
+    NormalizedNodeContext getOperations(@Context UriInfo uriInfo);
 
     @GET
     @Path("/operations/{identifier:.+}")
     @Produces({ Draft02.MediaTypes.API + JSON, Draft02.MediaTypes.API + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public NormalizedNodeContext getOperations(@PathParam("identifier") String identifier, @Context UriInfo uriInfo);
+    NormalizedNodeContext getOperations(@PathParam("identifier") String identifier, @Context UriInfo uriInfo);
 
     @POST
     @Path("/operations/{identifier:.+}")
@@ -92,7 +92,7 @@ public interface RestconfService {
     @Consumes({ Draft02.MediaTypes.OPERATION + JSON, Draft02.MediaTypes.OPERATION + XML,
             Draft02.MediaTypes.DATA + JSON, Draft02.MediaTypes.DATA + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public NormalizedNodeContext invokeRpc(@Encoded @PathParam("identifier") String identifier, NormalizedNodeContext payload,
+    NormalizedNodeContext invokeRpc(@Encoded @PathParam("identifier") String identifier, NormalizedNodeContext payload,
             @Context UriInfo uriInfo);
 
     @POST
@@ -100,54 +100,54 @@ public interface RestconfService {
     @Produces({ Draft02.MediaTypes.OPERATION + JSON, Draft02.MediaTypes.OPERATION + XML,
             Draft02.MediaTypes.DATA + JSON, Draft02.MediaTypes.DATA + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public NormalizedNodeContext invokeRpc(@Encoded @PathParam("identifier") String identifier,
+    NormalizedNodeContext invokeRpc(@Encoded @PathParam("identifier") String identifier,
             @DefaultValue("") String noPayload, @Context UriInfo uriInfo);
 
     @GET
     @Path("/config/{identifier:.+}")
     @Produces({ Draft02.MediaTypes.DATA + JSON, Draft02.MediaTypes.DATA + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public NormalizedNodeContext readConfigurationData(@Encoded @PathParam("identifier") String identifier,
+    NormalizedNodeContext readConfigurationData(@Encoded @PathParam("identifier") String identifier,
             @Context UriInfo uriInfo);
 
     @GET
     @Path("/operational/{identifier:.+}")
     @Produces({ Draft02.MediaTypes.DATA + JSON, Draft02.MediaTypes.DATA + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public NormalizedNodeContext readOperationalData(@Encoded @PathParam("identifier") String identifier,
+    NormalizedNodeContext readOperationalData(@Encoded @PathParam("identifier") String identifier,
             @Context UriInfo uriInfo);
 
     @PUT
     @Path("/config/{identifier:.+}")
     @Consumes({ Draft02.MediaTypes.DATA + JSON, Draft02.MediaTypes.DATA + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Response updateConfigurationData(@Encoded @PathParam("identifier") String identifier, NormalizedNodeContext payload);
+    Response updateConfigurationData(@Encoded @PathParam("identifier") String identifier, NormalizedNodeContext payload);
 
     @POST
     @Path("/config/{identifier:.+}")
     @Consumes({ Draft02.MediaTypes.DATA + JSON, Draft02.MediaTypes.DATA + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Response createConfigurationData(@Encoded @PathParam("identifier") String identifier, NormalizedNodeContext payload,
+    Response createConfigurationData(@Encoded @PathParam("identifier") String identifier, NormalizedNodeContext payload,
             @Context UriInfo uriInfo);
 
     @POST
     @Path("/config")
     @Consumes({ Draft02.MediaTypes.DATA + JSON, Draft02.MediaTypes.DATA + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public Response createConfigurationData(NormalizedNodeContext payload, @Context UriInfo uriInfo);
+    Response createConfigurationData(NormalizedNodeContext payload, @Context UriInfo uriInfo);
 
     @DELETE
     @Path("/config/{identifier:.+}")
-    public Response deleteConfigurationData(@Encoded @PathParam("identifier") String identifier);
+    Response deleteConfigurationData(@Encoded @PathParam("identifier") String identifier);
 
     @GET
     @Path("/streams/stream/{identifier:.+}")
-    public Response subscribeToStream(@Encoded @PathParam("identifier") String identifier, @Context UriInfo uriInfo);
+    Response subscribeToStream(@Encoded @PathParam("identifier") String identifier, @Context UriInfo uriInfo);
 
     @GET
     @Path("/streams")
     @Produces({ Draft02.MediaTypes.API + JSON, Draft02.MediaTypes.API + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
-    public NormalizedNodeContext getAvailableStreams(@Context UriInfo uriInfo);
+    NormalizedNodeContext getAvailableStreams(@Context UriInfo uriInfo);
 
 }

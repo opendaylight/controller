@@ -113,8 +113,6 @@ public class RestconfImpl implements RestconfService {
 
     private static final String SAL_REMOTE_NAMESPACE = "urn:opendaylight:params:xml:ns:yang:controller:md:sal:remote";
 
-    private static final String SAL_REMOTE_RPC_SUBSRCIBE = "create-data-change-event-subscription";
-
     private BrokerFacade broker;
 
     private ControllerContext controllerContext;
@@ -465,9 +463,7 @@ public class RestconfImpl implements RestconfService {
         }
         try {
             final DOMRpcResult retValue = response.get();
-            if (retValue.getErrors() == null || retValue.getErrors().isEmpty()) {
-                return retValue;
-            }
+            if (retValue.getErrors() == null || retValue.getErrors().isEmpty()) { return retValue; }
             LOG.debug("RpcError message", retValue.getErrors());
             throw new RestconfDocumentedException("RpcError message", null, retValue.getErrors());
         } catch (final InterruptedException e) {
@@ -476,23 +472,28 @@ public class RestconfImpl implements RestconfService {
             throw new RestconfDocumentedException(errMsg, ErrorType.RPC, ErrorTag.PARTIAL_OPERATION);
         } catch (final ExecutionException e) {
             LOG.debug("Execution RpcError: ", e);
-            Throwable cause = e.getCause();
-            if (cause != null) {
-                while (cause.getCause() != null) {
-                    cause = cause.getCause();
-                }
-
-                if (cause instanceof IllegalArgumentException) {
-                    throw new RestconfDocumentedException(cause.getMessage(), ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
-                }
-                throw new RestconfDocumentedException("The operation encountered an unexpected error while executing.",cause);
-            }
-            throw new RestconfDocumentedException("The operation encountered an unexpected error while executing.", e);
+            final Throwable cause = e.getCause();
+            checkCause(cause, e);
         } catch (final CancellationException e) {
             final String errMsg = "The operation was cancelled while executing.";
             LOG.debug("Cancel RpcExecution: " + errMsg, e);
             throw new RestconfDocumentedException(errMsg, ErrorType.RPC, ErrorTag.PARTIAL_OPERATION);
         }
+        return null;
+    }
+
+    private static void checkCause(Throwable cause, final ExecutionException e) {
+        if (cause != null) {
+            while (cause.getCause() != null) {
+                cause = cause.getCause();
+            }
+
+            if (cause instanceof IllegalArgumentException) { throw new RestconfDocumentedException(cause.getMessage(),
+                    ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE); }
+            throw new RestconfDocumentedException("The operation encountered an unexpected error while executing.",
+                    cause);
+        }
+        throw new RestconfDocumentedException("The operation encountered an unexpected error while executing.", e);
     }
 
     private static void validateInput(final SchemaNode inputSchema, final NormalizedNodeContext payload) {
@@ -503,12 +504,6 @@ public class RestconfImpl implements RestconfService {
             // did not expect any input
             throw new RestconfDocumentedException("No input expected.", ErrorType.PROTOCOL, ErrorTag.MALFORMED_MESSAGE);
         }
-        // else
-        // {
-        // TODO: Validate "mandatory" and "config" values here??? Or should those be
-        // those be
-        // validate in a more central location inside MD-SAL core.
-        // }
     }
 
     private CheckedFuture<DOMRpcResult, DOMRpcException> invokeSalRemoteRpcSubscribeRPC(final NormalizedNodeContext payload) {
@@ -569,7 +564,7 @@ public class RestconfImpl implements RestconfService {
             throw new RestconfDocumentedException("Content must be empty.", ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
         }
 
-        String identifierEncoded = null;
+        String identifierEncoded;
         DOMMountPoint mountPoint = null;
         final SchemaContext schemaContext;
         if (identifier.contains(ControllerContext.MOUNT)) {
@@ -579,10 +574,9 @@ public class RestconfImpl implements RestconfService {
             schemaContext = mountPoint.getSchemaContext();
             final int startOfRemoteRpcName = identifier.lastIndexOf(ControllerContext.MOUNT)
                     + ControllerContext.MOUNT.length() + 1;
-            final String remoteRpcName = identifier.substring(startOfRemoteRpcName);
-            identifierEncoded = remoteRpcName;
+            identifierEncoded = identifier.substring(startOfRemoteRpcName);
 
-        } else if (identifier.indexOf("/") != CHAR_NOT_FOUND) {
+        } else if (identifier.indexOf('/') != CHAR_NOT_FOUND) {
             final String slashErrorMsg = String.format("Identifier %n%s%ncan\'t contain slash "
                     + "character (/).%nIf slash is part of identifier name then use %%2F placeholder.", identifier);
             LOG.debug(slashErrorMsg);
@@ -595,12 +589,33 @@ public class RestconfImpl implements RestconfService {
         final String identifierDecoded = controllerContext.urlPathArgDecode(identifierEncoded);
 
         RpcDefinition rpc = null;
-        if (mountPoint == null) {
-            rpc = controllerContext.getRpcDefinition(identifierDecoded);
-        } else {
-            rpc = findRpc(mountPoint.getSchemaContext(), identifierDecoded);
-        }
+        rpc = setRpc(rpc, mountPoint, identifierDecoded);
 
+        checkRpc(rpc, identifierDecoded);
+
+        final CheckedFuture<DOMRpcResult, DOMRpcException> response;
+        response = setResponse(mountPoint, rpc);
+
+        final DOMRpcResult result = checkRpcResponse(response);
+
+        return new NormalizedNodeContext(new InstanceIdentifierContext<>(null, rpc, mountPoint, schemaContext),
+                result.getResult(), QueryParametersParser.parseWriterParameters(uriInfo));
+    }
+
+    private CheckedFuture<DOMRpcResult, DOMRpcException> setResponse(final DOMMountPoint mountPoint,
+            final RpcDefinition rpc) {
+        if (mountPoint != null) {
+            final Optional<DOMRpcService> mountRpcServices = mountPoint.getService(DOMRpcService.class);
+            if ( ! mountRpcServices.isPresent()) {
+                throw new RestconfDocumentedException("Rpc service is missing.");
+            }
+            return mountRpcServices.get().invokeRpc(rpc.getPath(), null);
+        } else {
+            return broker.invokeRpc(rpc.getPath(), null);
+        }
+    }
+
+    private void checkRpc(final RpcDefinition rpc, final String identifierDecoded) {
         if (rpc == null) {
             LOG.debug("RPC " + identifierDecoded + " does not exist.");
             throw new RestconfDocumentedException("RPC does not exist.", ErrorType.RPC, ErrorTag.UNKNOWN_ELEMENT);
@@ -611,22 +626,15 @@ public class RestconfImpl implements RestconfService {
             // FIXME : find a correct Error from specification
             throw new IllegalStateException("RPC " + rpc + " does'n need input value!");
         }
+    }
 
-        final CheckedFuture<DOMRpcResult, DOMRpcException> response;
-        if (mountPoint != null) {
-            final Optional<DOMRpcService> mountRpcServices = mountPoint.getService(DOMRpcService.class);
-            if ( ! mountRpcServices.isPresent()) {
-                throw new RestconfDocumentedException("Rpc service is missing.");
-            }
-            response = mountRpcServices.get().invokeRpc(rpc.getPath(), null);
-        } else {
-            response = broker.invokeRpc(rpc.getPath(), null);
+    private RpcDefinition setRpc(final RpcDefinition rpc, final DOMMountPoint mountPoint, final String identifierDecoded) {
+        if (mountPoint == null) {
+            return controllerContext.getRpcDefinition(identifierDecoded);
         }
-
-        final DOMRpcResult result = checkRpcResponse(response);
-
-        return new NormalizedNodeContext(new InstanceIdentifierContext<>(null, rpc, mountPoint, schemaContext),
-                result.getResult(), QueryParametersParser.parseWriterParameters(uriInfo));
+        else {
+            return findRpc(mountPoint.getSchemaContext(), identifierDecoded);
+        }
     }
 
     private static RpcDefinition findRpc(final SchemaContext schemaContext, final String identifierDecoded) {
@@ -721,18 +729,15 @@ public class RestconfImpl implements RestconfService {
                 }
 
                 break;
-            } catch (final TransactionCommitFailedException e) {
-                if(e instanceof OptimisticLockFailedException) {
-                    if(--tries <= 0) {
-                        LOG.debug("Got OptimisticLockFailedException on last try - failing " + identifier);
-                        throw new RestconfDocumentedException(e.getMessage(), e, e.getErrorList());
-                    }
-
-                    LOG.debug("Got OptimisticLockFailedException - trying again " + identifier);
-                } else {
-                    LOG.debug("Update ConfigDataStore fail " + identifier, e);
+            } catch (final OptimisticLockFailedException e) {
+                if(--tries <= 0) {
+                    LOG.debug("Got OptimisticLockFailedException on last try - failing " + identifier);
                     throw new RestconfDocumentedException(e.getMessage(), e, e.getErrorList());
                 }
+                LOG.debug("Got OptimisticLockFailedException - trying again " + identifier);
+            } catch (final TransactionCommitFailedException e) {
+                LOG.debug("Update ConfigDataStore fail " + identifier, e);
+                throw new RestconfDocumentedException(e.getMessage(), e, e.getErrorList());
             }
         }
 
@@ -873,14 +878,14 @@ public class RestconfImpl implements RestconfService {
 
         final ResponseBuilder responseBuilder = Response.status(Status.NO_CONTENT);
         // FIXME: Provide path to result.
-        final URI location = resolveLocation(uriInfo, "", mountPoint, normalizedII);
+        final URI location = resolveLocation(uriInfo, mountPoint, normalizedII);
         if (location != null) {
             responseBuilder.location(location);
         }
         return responseBuilder.build();
     }
 
-    private URI resolveLocation(final UriInfo uriInfo, final String uriBehindBase, final DOMMountPoint mountPoint, final YangInstanceIdentifier normalizedII) {
+    private URI resolveLocation(final UriInfo uriInfo, final DOMMountPoint mountPoint, final YangInstanceIdentifier normalizedII) {
         final UriBuilder uriBuilder = uriInfo.getBaseUriBuilder();
         uriBuilder.path("config");
         try {
@@ -958,7 +963,7 @@ public class RestconfImpl implements RestconfService {
         try {
             final WebSocketServer webSocketServerInstance = WebSocketServer.getInstance();
             notificationPort = webSocketServerInstance.getPort();
-        } catch (final NullPointerException e) {
+        } catch (final IllegalStateException e) {
             WebSocketServer.createInstance(NOTIFICATION_PORT);
         }
         final UriBuilder uriToWebsocketServerBuilder = uriBuilder.port(notificationPort).scheme("ws");
@@ -1121,7 +1126,7 @@ public class RestconfImpl implements RestconfService {
         final DataSchemaNode replaySupportSchemaNode = Iterables.getFirst(instanceDataChildrenByName, null);
         Preconditions.checkState(replaySupportSchemaNode instanceof LeafSchemaNode);
         streamNodeValues.withChild(Builders.leafBuilder((LeafSchemaNode) replaySupportSchemaNode)
-                .withValue(Boolean.valueOf(true)).build());
+                .withValue(true).build());
 
         instanceDataChildrenByName = ControllerContext.findInstanceDataChildrenByName(
                 (listStreamSchemaNode), "replay-log-creation-time");
