@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- vi: set et smarttab sw=4 tabstop=4: -->
+<!--
+ Copyright (c) 2013 Cisco Systems, Inc. and others.  All rights reserved.
+
+ This program and the accompanying materials are made available under the
+ terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ and is available at http://www.eclipse.org/legal/epl-v10.html
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <parent>
+      <groupId>org.opendaylight.controller.model</groupId>
+      <artifactId>model-parent</artifactId>
+      <version>1.3.0-SNAPSHOT</version>
+  </parent>
+  <artifactId>i2rs-yang-network-topo</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+  <modelVersion>4.0.0</modelVersion>
+  <name>${project.artifactId}</name>
+  <description>${project.artifactId}</description>
+
+  <dependencyManagement>
+      <dependencies>
+      <dependency>
+        <groupId>org.opendaylight.yangtools</groupId>
+        <artifactId>yangtools-artifacts</artifactId>
+        <version>0.8.0-SNAPSHOT</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+      <dependency>
+          <groupId>org.opendaylight.yangtools.model</groupId>
+          <artifactId>ietf-inet-types</artifactId>
+      </dependency>
+      <dependency>
+          <groupId>org.opendaylight.yangtools.model</groupId>
+          <artifactId>ietf-yang-types</artifactId>
+      </dependency>
+  </dependencies>
+
+</project>
