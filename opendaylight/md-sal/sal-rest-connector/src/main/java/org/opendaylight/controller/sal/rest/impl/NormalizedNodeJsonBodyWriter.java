@@ -17,7 +17,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.net.URI;
 import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyWriter;
@@ -62,9 +61,9 @@ public class NormalizedNodeJsonBodyWriter implements MessageBodyWriter<Normalize
 
     @Override
     public void writeTo(final NormalizedNodeContext t, final Class<?> type, final Type genericType, final Annotation[] annotations,
-            final MediaType mediaType, final MultivaluedMap<String, Object> httpHeaders, final OutputStream entityStream)
-                    throws IOException, WebApplicationException {
-        NormalizedNode<?, ?> data = t.getData();
+ final MediaType mediaType,
+            final MultivaluedMap<String, Object> httpHeaders, final OutputStream entityStream) throws IOException {
+        final NormalizedNode<?, ?> data = t.getData();
         if (data == null) {
             return;
         }
@@ -72,7 +71,7 @@ public class NormalizedNodeJsonBodyWriter implements MessageBodyWriter<Normalize
         @SuppressWarnings("unchecked")
         final InstanceIdentifierContext<SchemaNode> context = (InstanceIdentifierContext<SchemaNode>) t.getInstanceIdentifierContext();
 
-        SchemaPath path = context.getSchemaNode().getPath();
+        final SchemaPath path = context.getSchemaNode().getPath();
         final JsonWriter jsonWriter = createJsonWriter(entityStream, t.getWriterParameters().isPrettyPrint());
         jsonWriter.beginObject();
         writeNormalizedNode(jsonWriter,path,context,data, t.getWriterParameters().getDepth());
@@ -80,8 +79,8 @@ public class NormalizedNodeJsonBodyWriter implements MessageBodyWriter<Normalize
         jsonWriter.flush();
     }
 
-    private void writeNormalizedNode(JsonWriter jsonWriter, SchemaPath path,
-            InstanceIdentifierContext<SchemaNode> context, NormalizedNode<?, ?> data, Optional<Integer> depth) throws
+    private void writeNormalizedNode(final JsonWriter jsonWriter, SchemaPath path,
+            final InstanceIdentifierContext<SchemaNode> context, NormalizedNode<?, ?> data, final Optional<Integer> depth) throws
             IOException {
         final RestconfNormalizedNodeWriter nnWriter;
         if (SchemaPath.ROOT.equals(path)) {
@@ -121,7 +120,7 @@ public class NormalizedNodeJsonBodyWriter implements MessageBodyWriter<Normalize
     }
 
     private RestconfNormalizedNodeWriter createNormalizedNodeWriter(final InstanceIdentifierContext<SchemaNode> context,
-            final SchemaPath path, final JsonWriter jsonWriter, Optional<Integer> depth) {
+            final SchemaPath path, final JsonWriter jsonWriter, final Optional<Integer> depth) {
 
         final SchemaNode schema = context.getSchemaNode();
         final JSONCodecFactory codecs = getCodecFactory(context);
@@ -144,7 +143,7 @@ public class NormalizedNodeJsonBodyWriter implements MessageBodyWriter<Normalize
         }
     }
 
-    private JsonWriter createJsonWriter(final OutputStream entityStream, boolean prettyPrint) {
+    private JsonWriter createJsonWriter(final OutputStream entityStream, final boolean prettyPrint) {
         if (prettyPrint) {
             return JsonWriterFactory.createJsonWriter(new OutputStreamWriter(entityStream, Charsets.UTF_8),
                     DEFAULT_INDENT_SPACES_NUM);

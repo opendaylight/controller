@@ -25,7 +25,7 @@ public final class RestUtil {
     public static final String DQUOTE = "\"";
     private static final Pattern PREDICATE_PATTERN = Pattern.compile("\\[(.*?)\\]");
 
-    public final static TypeDefinition<?> resolveBaseTypeFrom(final TypeDefinition<?> type) {
+    public static TypeDefinition<?> resolveBaseTypeFrom(final TypeDefinition<?> type) {
         TypeDefinition<?> superType = type;
         while (superType.getBaseType() != null) {
             superType = superType.getBaseType();
@@ -39,7 +39,8 @@ public final class RestUtil {
             return null;
         }
         final String[] xPathParts = valueTrimmed.split("/");
-        if (xPathParts.length < 2) { // must be at least "/pr:node"
+        // must be at least "/pr:node"
+        if (xPathParts.length < 2) {
             return null;
         }
         final IdentityValuesDTO identityValuesDTO = new IdentityValuesDTO(value);
@@ -64,7 +65,7 @@ public final class RestUtil {
     }
 
     private static String getIdAndPrefixAsStr(final String pathPart) {
-        final int predicateStartIndex = pathPart.indexOf("[");
+        final int predicateStartIndex = pathPart.indexOf('[');
         return predicateStartIndex == -1 ? pathPart : pathPart.substring(0, predicateStartIndex);
     }
 
@@ -95,10 +96,11 @@ public final class RestUtil {
             predicates.add(matcher.group(1).trim());
         }
         for (final String predicate : predicates) {
-            final int indexOfEqualityMark = predicate.indexOf("=");
+            final int indexOfEqualityMark = predicate.indexOf('=');
             if (indexOfEqualityMark != -1) {
                 final String predicateValue = toPredicateValue(predicate.substring(indexOfEqualityMark + 1));
-                if (predicate.startsWith(".")) { // it is leaf-list
+                // it is leaf-list
+                if (predicate.startsWith(".")) {
                     if (predicateValue == null) {
                         return null;
                     }
@@ -124,8 +126,8 @@ public final class RestUtil {
         return null;
     }
 
-    public interface PrefixesMaping {
-        public String getNamespace(String prefix);
+    interface PrefixesMaping {
+        String getNamespace(String prefix);
     }
 
     public static class PrefixMapingFromXml implements PrefixesMaping {

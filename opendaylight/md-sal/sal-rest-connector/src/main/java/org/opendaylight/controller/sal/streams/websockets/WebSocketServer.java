@@ -13,16 +13,17 @@ import org.slf4j.LoggerFactory;
 /**
  * {@link WebSocketServer} is responsible to start and stop web socket server
  */
-public class WebSocketServer implements Runnable {
+public final class WebSocketServer implements Runnable {
 
-    private static final Logger logger = LoggerFactory.getLogger(WebSocketServer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(WebSocketServer.class);
     public static final int DEFAULT_PORT = 8181;
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
     private static WebSocketServer instance = null;
     private int port = DEFAULT_PORT;
+    private static final int LOWER_LIMIT_PORT = 1024;
 
-    private WebSocketServer(int port) {
+    private WebSocketServer(final int port) {
         this.port = port;
     }
 
@@ -33,9 +34,10 @@ public class WebSocketServer implements Runnable {
      *            TCP port used for this server
      * @return instance of {@link WebSocketServer}
      */
-    public static WebSocketServer createInstance(int port) {
+    public static WebSocketServer createInstance(final int port) {
         Preconditions.checkState(instance == null, "createInstance() has already been called");
-        Preconditions.checkArgument(port > 1024, "Privileged port (below 1024) is not allowed");
+        Preconditions.checkArgument(port > LOWER_LIMIT_PORT, "Privileged port (below " + LOWER_LIMIT_PORT
+                + ") is not allowed");
 
         instance = new WebSocketServer(port);
         return instance;
@@ -54,7 +56,7 @@ public class WebSocketServer implements Runnable {
      * @return instance of {@link WebSocketServer}
      */
     public static WebSocketServer getInstance() {
-        Preconditions.checkNotNull(instance, "createInstance() must be called prior to getInstance()");
+        Preconditions.checkState(instance != null, "createInstance() must be called prior to getInstance()");
         return instance;
     }
 
@@ -73,15 +75,15 @@ public class WebSocketServer implements Runnable {
         bossGroup = new NioEventLoopGroup();
         workerGroup = new NioEventLoopGroup();
         try {
-            ServerBootstrap b = new ServerBootstrap();
+            final ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
                     .childHandler(new WebSocketServerInitializer());
 
-            Channel ch = b.bind(port).sync().channel();
-            logger.info("Web socket server started at port {}.", port);
+            final Channel ch = b.bind(port).sync().channel();
+            LOG.info("Web socket server started at port {}.", port);
 
             ch.closeFuture().sync();
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             // NOOP
         } finally {
             stop();
