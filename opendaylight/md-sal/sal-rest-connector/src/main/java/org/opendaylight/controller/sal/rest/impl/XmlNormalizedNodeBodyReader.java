@@ -19,7 +19,6 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyReader;
@@ -59,7 +58,7 @@ import org.w3c.dom.Element;
     MediaType.APPLICATION_XML, MediaType.TEXT_XML })
 public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsProvider implements MessageBodyReader<NormalizedNodeContext> {
 
-    private final static Logger LOG = LoggerFactory.getLogger(XmlNormalizedNodeBodyReader.class);
+    private static final Logger LOG = LoggerFactory.getLogger(XmlNormalizedNodeBodyReader.class);
     private static final DocumentBuilderFactory BUILDERFACTORY;
 
     static {
@@ -89,8 +88,7 @@ public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPro
     @Override
     public NormalizedNodeContext readFrom(final Class<NormalizedNodeContext> type, final Type genericType,
             final Annotation[] annotations, final MediaType mediaType,
-            final MultivaluedMap<String, String> httpHeaders, final InputStream entityStream) throws IOException,
-            WebApplicationException {
+            final MultivaluedMap<String, String> httpHeaders, final InputStream entityStream) throws IOException {
         try {
             final InstanceIdentifierContext<?> path = getInstanceIdentifierContext();
 
@@ -124,19 +122,15 @@ public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPro
         final SchemaNode schemaNodeContext = pathContext.getSchemaNode();
         DataSchemaNode schemaNode;
         boolean isRpc = false;
+
         if (schemaNodeContext instanceof RpcDefinition) {
-            schemaNode = ((RpcDefinition) schemaNodeContext).getInput();
             isRpc = true;
-        } else if (schemaNodeContext instanceof DataSchemaNode) {
-            schemaNode = (DataSchemaNode) schemaNodeContext;
-        } else {
-            throw new IllegalStateException("Unknow SchemaNode");
         }
+        schemaNode = getDataSchemaNodeFromSchemaContext(schemaNodeContext);
 
         final String docRootElm = doc.getDocumentElement().getLocalName();
         final List<YangInstanceIdentifier.PathArgument> iiToDataList = new ArrayList<>();
         InstanceIdentifierContext<? extends SchemaNode> outIIContext;
-
 
         // FIXME the factory instance should be cached if the schema context is the same
         final DomToNormalizedNodeParserFactory parserFactory =
@@ -161,7 +155,6 @@ public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPro
         }
 
         NormalizedNode<?, ?> parsed = null;
-
         if(schemaNode instanceof ContainerSchemaNode) {
             parsed = parserFactory.getContainerNodeParser().parse(Collections.singletonList(doc.getDocumentElement()), (ContainerSchemaNode) schemaNode);
         } else if(schemaNode instanceof ListSchemaNode) {
@@ -182,9 +175,21 @@ public class XmlNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPro
         return new NormalizedNodeContext(outIIContext, parsed);
     }
 
+    private DataSchemaNode getDataSchemaNodeFromSchemaContext(final SchemaNode schemaNodeContext) {
+        if (schemaNodeContext instanceof RpcDefinition) {
+            return ((RpcDefinition) schemaNodeContext).getInput();
+        }
+        else if (schemaNodeContext instanceof DataSchemaNode) {
+            return (DataSchemaNode) schemaNodeContext;
+        }
+        else {
+            throw new IllegalStateException("Unknow SchemaNode");
+        }
+    }
+
     private static Deque<Object> findPathToSchemaNodeByName(final DataSchemaNode schemaNode, final String elementName) {
         final Deque<Object> result = new ArrayDeque<>();
-        final ArrayList<ChoiceSchemaNode> choiceSchemaNodes = new ArrayList<>();
+        final List<ChoiceSchemaNode> choiceSchemaNodes = new ArrayList<>();
         final Collection<DataSchemaNode> children = ((DataNodeContainer) schemaNode).getChildNodes();
         for (final DataSchemaNode child : children) {
             if (child instanceof ChoiceSchemaNode) {

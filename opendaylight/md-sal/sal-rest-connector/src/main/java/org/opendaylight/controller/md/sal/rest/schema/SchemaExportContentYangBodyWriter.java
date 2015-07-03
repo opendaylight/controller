@@ -13,7 +13,6 @@ import java.io.PrintWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyWriter;
@@ -38,8 +37,7 @@ public class SchemaExportContentYangBodyWriter implements MessageBodyWriter<Sche
     @Override
     public void writeTo(final SchemaExportContext t, final Class<?> type, final Type genericType,
             final Annotation[] annotations, final MediaType mediaType,
-            final MultivaluedMap<String, Object> httpHeaders, final OutputStream entityStream) throws IOException,
-            WebApplicationException {
+            final MultivaluedMap<String, Object> httpHeaders, final OutputStream entityStream) throws IOException {
         final PrintWriter writer = new PrintWriter(entityStream);
         writer.write(t.getModule().getSource());
 
