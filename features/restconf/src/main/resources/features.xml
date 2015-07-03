@@ -125,16 +125,4 @@
         <bundle>wrap:mvn:org.json/json/${org.json.version}</bundle>
     </feature>
 
-    <feature name='odl-toaster-rest' version='${project.version}'>
-        <feature version='${project.version}'>odl-restconf</feature>
-        <feature version='${project.version}'>odl-toaster</feature>
-    </feature>
-
-    <feature name='odl-toaster-ui' version='${project.version}'>
-        <feature version='${project.version}'>odl-mdsal-apidocs</feature>
-        <feature version='${project.version}'>odl-mdsal-xsql</feature>
-        <feature version='${project.version}'>odl-toaster-rest</feature>
-    </feature>
-    <!-- Optional TODO: Remove TODO Comments -->
-
 </features>

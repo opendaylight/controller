@@ -13,7 +13,6 @@
         <feature version='${project.version}'>odl-mdsal-broker</feature>
         <feature version='${project.version}'>odl-mdsal-broker-local</feature>
         <feature version='${project.version}'>odl-mdsal-xsql</feature>
-        <feature version='${project.version}'>odl-toaster</feature>
     </feature>
     <feature name='odl-mdsal-common' version='${mdsal.version}' description="OpenDaylight :: Config :: All">
       <feature version='${yangtools.version}'>odl-yangtools-data-binding</feature>
@@ -57,15 +56,6 @@
         <bundle>mvn:org.opendaylight.controller/sal-connector-api/${project.version}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-inmemory-datastore/${project.version}</bundle>
         <configfile finalname="${config.configfile.directory}/${config.mdsal.configfile}">mvn:org.opendaylight.controller/md-sal-config/${mdsal.version}/xml/config</configfile>
-    </feature>
-    <feature name='odl-toaster' version='${project.version}' description="OpenDaylight :: Toaster">
-        <feature version='${yangtools.version}'>odl-yangtools-common</feature>
-        <feature version='${yangtools.version}'>odl-yangtools-binding</feature>
-        <feature version='${project.version}'>odl-mdsal-broker</feature>
-        <bundle>mvn:org.opendaylight.controller.samples/sample-toaster/${project.version}</bundle>
-        <bundle>mvn:org.opendaylight.controller.samples/sample-toaster-consumer/${project.version}</bundle>
-        <bundle>mvn:org.opendaylight.controller.samples/sample-toaster-provider/${project.version}</bundle>
-        <configfile finalname="${config.configfile.directory}/${config.toaster.configfile}">mvn:org.opendaylight.controller.samples/toaster-config/${project.version}/xml/config</configfile>
     </feature>
     <feature name ='odl-mdsal-xsql' version='${project.version}'>
         <feature version='${project.version}'>odl-mdsal-broker</feature>
