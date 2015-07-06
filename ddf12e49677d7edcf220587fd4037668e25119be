@@ -1,0 +1,95 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a7fa997_b2b710d8",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/ControllerContext.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 531,
+      "author": {
+        "id": 994
+      },
+      "writtenOn": "2015-07-06T13:16:57Z",
+      "side": 1,
+      "message": "Please don\u0027t join throw to same line with if",
+      "revId": "ddf12e49677d7edcf220587fd4037668e25119be",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_b2bb90e4",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/NormalizedDataPrunner.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 994
+      },
+      "writtenOn": "2015-07-06T13:16:57Z",
+      "side": 1,
+      "message": "Please, move return to new line.",
+      "revId": "ddf12e49677d7edcf220587fd4037668e25119be",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_92b8d4e6",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/NormalizedDataPrunner.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 994
+      },
+      "writtenOn": "2015-07-06T13:16:57Z",
+      "side": 1,
+      "message": "could be joined to Builders.unkeyedListBuilder().withoutNodeIdentfier",
+      "revId": "ddf12e49677d7edcf220587fd4037668e25119be",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_7283b804",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/streams/listeners/ListenerAdapter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 994
+      },
+      "writtenOn": "2015-07-06T13:16:57Z",
+      "side": 1,
+      "message": "synchronize this method because SimpleDateFormat is not thread safe.",
+      "range": {
+        "startLine": 254,
+        "startChar": 11,
+        "endLine": 254,
+        "endChar": 12
+      },
+      "revId": "ddf12e49677d7edcf220587fd4037668e25119be",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_327d401d",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/streams/websockets/WebSocketServerInitializer.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 994
+      },
+      "writtenOn": "2015-07-06T13:16:57Z",
+      "side": 1,
+      "message": "could be static ?",
+      "revId": "ddf12e49677d7edcf220587fd4037668e25119be",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
