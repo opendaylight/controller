@@ -13,7 +13,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import java.io.FileNotFoundException;
@@ -24,11 +23,9 @@ import java.net.URISyntaxException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.common.api.data.OptimisticLockFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
@@ -47,7 +44,6 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
-@Ignore
 public class RestPutOperationTest extends JerseyTest {
 
     private static String xmlData;
@@ -113,14 +109,12 @@ public class RestPutOperationTest extends JerseyTest {
     @Test
     public void putConfigStatusCodesEmptyBody() throws UnsupportedEncodingException {
         final String uri = "/config/ietf-interfaces:interfaces/interface/eth0";
-        @SuppressWarnings("unused")
-        final Response resp = target(uri).request(MediaType.APPLICATION_JSON).put(
+        target(uri).request(MediaType.APPLICATION_JSON).put(
                 Entity.entity("", MediaType.APPLICATION_JSON));
         assertEquals(400, put(uri, MediaType.APPLICATION_JSON, ""));
     }
 
     @Test
-    @Ignore // jenkins has problem with JerseyTest - we expecting problems with singletons ControllerContext as schemaContext holder
     public void testRpcResultCommitedToStatusCodesWithMountPoint() throws UnsupportedEncodingException,
             FileNotFoundException, URISyntaxException {
 
@@ -183,14 +177,14 @@ public class RestPutOperationTest extends JerseyTest {
     }
 
     @Test
-    @Ignore // jenkins has problem with JerseyTest - we expecting problems with singletons ControllerContext as schemaContext holder
     public void putWithTransactionCommitFailedException() throws UnsupportedEncodingException {
 
         final String uri = "/config/ietf-interfaces:interfaces/interface/eth0";
 
         doThrow(TransactionCommitFailedException.class).
             when(brokerFacade).commitConfigurationDataPut(
-                (SchemaContext)null, any(YangInstanceIdentifier.class), any(NormalizedNode.class));
+                (SchemaContext) any(null),
+                any(YangInstanceIdentifier.class), any(NormalizedNode.class));
 
         assertEquals(500, put(uri, MediaType.APPLICATION_XML, xmlData));
     }
