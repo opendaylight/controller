@@ -75,7 +75,7 @@ public class RestconfDocumentedExceptionMapper implements ExceptionMapper<Restco
     private static final XMLOutputFactory XML_FACTORY;
 
     static {
-        XML_FACTORY = XMLOutputFactory.newFactory();
+        XML_FACTORY = XMLOutputFactory.newInstance();
         XML_FACTORY.setProperty(XMLOutputFactory.IS_REPAIRING_NAMESPACES, true);
     }
 
