@@ -16,7 +16,7 @@ public class QueryParametersParser {
         PRETTY_PRINT("prettyPrint"),
         DEPTH("depth");
 
-        private String uriParameterName;
+        private final String uriParameterName;
 
         UriParameters(final String uriParameterName) {
             this.uriParameterName = uriParameterName;
@@ -30,6 +30,10 @@ public class QueryParametersParser {
 
     public static WriterParameters parseWriterParameters(final UriInfo info) {
         WriterParameters.WriterParametersBuilder wpBuilder = new WriterParameters.WriterParametersBuilder();
+        if(info == null) {
+            return wpBuilder.build();
+        }
+
         String param = info.getQueryParameters(false).getFirst(UriParameters.DEPTH.toString());
         if (!Strings.isNullOrEmpty(param) && !"unbounded".equals(param)) {
             try {

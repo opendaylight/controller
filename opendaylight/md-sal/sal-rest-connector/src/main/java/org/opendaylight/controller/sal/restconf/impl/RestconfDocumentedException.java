@@ -11,13 +11,10 @@ package org.opendaylight.controller.sal.restconf.impl;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-
 import java.util.Collection;
 import java.util.List;
-
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
-
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcError;
@@ -60,6 +57,22 @@ public class RestconfDocumentedException extends WebApplicationException {
      */
     public RestconfDocumentedException(String message, ErrorType errorType, ErrorTag errorTag) {
         this(null, new RestconfError(errorType, errorTag, message));
+    }
+
+    /**
+     * Constructs an instance with an error message, error type, error tag and exception cause.
+     *
+     * @param message
+     *            A string which provides a plain text string describing the error.
+     * @param errorType
+     *            The enumerated type indicating the layer where the error occurred.
+     * @param errorTag
+     *            The enumerated tag representing a more specific error cause.
+     * @param cause
+     *            The underlying exception cause.
+     */
+    public RestconfDocumentedException(String message, ErrorType errorType, ErrorTag errorTag, Throwable cause) {
+        this(cause, new RestconfError(errorType, errorTag, message, null, RestconfError.toErrorInfo(cause)));
     }
 
     /**
