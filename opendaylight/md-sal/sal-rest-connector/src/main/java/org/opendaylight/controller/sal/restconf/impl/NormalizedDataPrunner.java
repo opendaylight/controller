@@ -33,19 +33,27 @@ import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.CollectionNo
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeAttrBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeBuilder;
 
-class NormalizedDataPrunner {
+public class NormalizedDataPrunner {
 
     public DataContainerChild<?, ?> pruneDataAtDepth(final DataContainerChild<?, ?> node, final Integer depth) {
         if (depth == null) {
             return node;
         }
 
-        if (node instanceof LeafNode || node instanceof LeafSetNode || node instanceof AnyXmlNode
-                || node instanceof OrderedLeafSetNode) {
+        if ((node instanceof LeafNode) || (node instanceof LeafSetNode) || (node instanceof AnyXmlNode)
+                || (node instanceof OrderedLeafSetNode)) {
             return node;
-        } else if (node instanceof MixinNode) {
+        }
+        else {
+            return processOther(node, depth);
+        }
+    }
+
+    private DataContainerChild<?, ?> processOther(final DataContainerChild<?, ?> node, final Integer depth) {
+        if (node instanceof MixinNode) {
             return processMixinNode(node, depth);
-        } else if (node instanceof DataContainerNode) {
+        }
+        else if (node instanceof DataContainerNode) {
             return processContainerNode(node, depth);
         }
         throw new IllegalStateException("Unexpected Mixin node occured why pruning data to requested depth");
@@ -54,13 +62,17 @@ class NormalizedDataPrunner {
     private DataContainerChild<?, ?> processMixinNode(final NormalizedNode<?, ?> node, final Integer depth) {
         if (node instanceof AugmentationNode) {
             return processAugmentationNode(node, depth);
-        } else if (node instanceof ChoiceNode) {
+        }
+        else if (node instanceof ChoiceNode) {
             return processChoiceNode(node, depth);
-        } else if (node instanceof OrderedMapNode) {
+        }
+        else if (node instanceof OrderedMapNode) {
             return processOrderedMapNode(node, depth);
-        } else if (node instanceof MapNode) {
+        }
+        else if (node instanceof MapNode) {
             return processMapNode(node, depth);
-        } else if (node instanceof UnkeyedListNode) {
+        }
+        else if (node instanceof UnkeyedListNode) {
             return processUnkeyedListNode(node, depth);
         }
         throw new IllegalStateException("Unexpected Mixin node occured why pruning data to requested depth");
@@ -68,7 +80,7 @@ class NormalizedDataPrunner {
 
     private DataContainerChild<?, ?> processContainerNode(final NormalizedNode<?, ?> node, final Integer depth) {
         final ContainerNode containerNode = (ContainerNode) node;
-        DataContainerNodeAttrBuilder<NodeIdentifier, ContainerNode> newContainerBuilder = Builders.containerBuilder()
+        final DataContainerNodeAttrBuilder<NodeIdentifier, ContainerNode> newContainerBuilder = Builders.containerBuilder()
                 .withNodeIdentifier(containerNode.getIdentifier());
         if (depth > 1) {
             processDataContainerChild((DataContainerNode<?>) node, depth, newContainerBuilder);
@@ -78,7 +90,7 @@ class NormalizedDataPrunner {
 
     private DataContainerChild<?, ?> processChoiceNode(final NormalizedNode<?, ?> node, final Integer depth) {
         final ChoiceNode choiceNode = (ChoiceNode) node;
-        DataContainerNodeBuilder<NodeIdentifier, ChoiceNode> newChoiceBuilder = Builders.choiceBuilder()
+        final DataContainerNodeBuilder<NodeIdentifier, ChoiceNode> newChoiceBuilder = Builders.choiceBuilder()
                 .withNodeIdentifier(choiceNode.getIdentifier());
 
         processDataContainerChild((DataContainerNode<?>) node, depth, newChoiceBuilder);
@@ -88,7 +100,7 @@ class NormalizedDataPrunner {
 
     private DataContainerChild<?, ?> processAugmentationNode(final NormalizedNode<?, ?> node, final Integer depth) {
         final AugmentationNode augmentationNode = (AugmentationNode) node;
-        DataContainerNodeBuilder<AugmentationIdentifier, ? extends DataContainerChild<?, ?>> newAugmentationBuilder = Builders
+        final DataContainerNodeBuilder<AugmentationIdentifier, ? extends DataContainerChild<?, ?>> newAugmentationBuilder = Builders
                 .augmentationBuilder().withNodeIdentifier(augmentationNode.getIdentifier());
 
         processDataContainerChild((DataContainerNode<?>) node, depth, newAugmentationBuilder);
@@ -101,20 +113,19 @@ class NormalizedDataPrunner {
             final Integer depth,
             final DataContainerNodeBuilder<? extends YangInstanceIdentifier.PathArgument, ? extends DataContainerNode<?>> newBuilder) {
 
-        for (DataContainerChild<? extends PathArgument, ?> nodeValue : node.getValue()) {
+        for (final DataContainerChild<? extends PathArgument, ?> nodeValue : node.getValue()) {
             newBuilder.withChild(pruneDataAtDepth(nodeValue, depth - 1));
         }
-
     }
 
     private DataContainerChild<?, ?> processUnkeyedListNode(final NormalizedNode<?, ?> node, final Integer depth) {
-        CollectionNodeBuilder<UnkeyedListEntryNode, UnkeyedListNode> newUnkeyedListBuilder = Builders
-                .unkeyedListBuilder();
+        final CollectionNodeBuilder<UnkeyedListEntryNode, UnkeyedListNode> newUnkeyedListBuilder = Builders
+                .unkeyedListBuilder().withNodeIdentifier((NodeIdentifier) node.getIdentifier());
         if (depth > 1) {
-            for (UnkeyedListEntryNode oldUnkeyedListEntry : ((UnkeyedListNode) node).getValue()) {
-                DataContainerNodeAttrBuilder<NodeIdentifier, UnkeyedListEntryNode> newUnkeyedListEntry = Builders
+            for (final UnkeyedListEntryNode oldUnkeyedListEntry : ((UnkeyedListNode) node).getValue()) {
+                final DataContainerNodeAttrBuilder<NodeIdentifier, UnkeyedListEntryNode> newUnkeyedListEntry = Builders
                         .unkeyedListEntryBuilder().withNodeIdentifier(oldUnkeyedListEntry.getIdentifier());
-                for (DataContainerChild<? extends PathArgument, ?> oldUnkeyedListEntryValue : oldUnkeyedListEntry
+                for (final DataContainerChild<? extends PathArgument, ?> oldUnkeyedListEntryValue : oldUnkeyedListEntry
                         .getValue()) {
                     newUnkeyedListEntry.withChild(pruneDataAtDepth(oldUnkeyedListEntryValue, depth - 1));
                 }
@@ -125,24 +136,26 @@ class NormalizedDataPrunner {
     }
 
     private DataContainerChild<?, ?> processOrderedMapNode(final NormalizedNode<?, ?> node, final Integer depth) {
-        CollectionNodeBuilder<MapEntryNode, OrderedMapNode> newOrderedMapNodeBuilder = Builders.orderedMapBuilder();
+        final CollectionNodeBuilder<MapEntryNode, OrderedMapNode> newOrderedMapNodeBuilder = Builders
+                .orderedMapBuilder().withNodeIdentifier((NodeIdentifier) node.getIdentifier());
         processMapEntries(node, depth, newOrderedMapNodeBuilder);
         return newOrderedMapNodeBuilder.build();
     }
 
     private DataContainerChild<?, ?> processMapNode(final NormalizedNode<?, ?> node, final Integer depth) {
-        CollectionNodeBuilder<MapEntryNode, MapNode> newMapNodeBuilder = Builders.mapBuilder();
+        final CollectionNodeBuilder<MapEntryNode, MapNode> newMapNodeBuilder = Builders.mapBuilder();
+        newMapNodeBuilder.withNodeIdentifier((NodeIdentifier) node.getIdentifier());
         processMapEntries(node, depth, newMapNodeBuilder);
         return newMapNodeBuilder.build();
     }
 
     private void processMapEntries(final NormalizedNode<?, ?> node, final Integer depth,
-            CollectionNodeBuilder<MapEntryNode, ? extends MapNode> newOrderedMapNodeBuilder) {
+            final CollectionNodeBuilder<MapEntryNode, ? extends MapNode> newOrderedMapNodeBuilder) {
         if (depth > 1) {
-            for (MapEntryNode oldMapEntryNode : ((MapNode) node).getValue()) {
-                DataContainerNodeAttrBuilder<NodeIdentifierWithPredicates, MapEntryNode> newMapEntryNodeBuilder = Builders
+            for (final MapEntryNode oldMapEntryNode : ((MapNode) node).getValue()) {
+                final DataContainerNodeAttrBuilder<NodeIdentifierWithPredicates, MapEntryNode> newMapEntryNodeBuilder = Builders
                         .mapEntryBuilder().withNodeIdentifier(oldMapEntryNode.getIdentifier());
-                for (DataContainerChild<? extends PathArgument, ?> mapEntryNodeValue : oldMapEntryNode.getValue()) {
+                for (final DataContainerChild<? extends PathArgument, ?> mapEntryNodeValue : oldMapEntryNode.getValue()) {
                     newMapEntryNodeBuilder.withChild(pruneDataAtDepth(mapEntryNodeValue, depth - 1));
                 }
                 newOrderedMapNodeBuilder.withChild(newMapEntryNodeBuilder.build());

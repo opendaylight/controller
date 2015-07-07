@@ -81,7 +81,7 @@ public class ListenerAdapter implements DOMDataChangeListener {
      */
     ListenerAdapter(final YangInstanceIdentifier path, final String streamName) {
         Preconditions.checkNotNull(path);
-        Preconditions.checkArgument(streamName != null && !streamName.isEmpty());
+        Preconditions.checkArgument((streamName != null) && !streamName.isEmpty());
         this.path = path;
         this.streamName = streamName;
         eventBus = new AsyncEventBus(Executors.newSingleThreadExecutor());
@@ -251,7 +251,7 @@ public class ListenerAdapter implements DOMDataChangeListener {
      *            Date
      * @return Data specified by RFC3339.
      */
-    private String toRFC3339(final Date d) {
+    private synchronized String toRFC3339(final Date d) {
         return RFC3339_PATTERN.matcher(rfc3339.format(d)).replaceAll("$1:$2");
     }
 
@@ -264,6 +264,7 @@ public class ListenerAdapter implements DOMDataChangeListener {
         try {
             bob = DBF.newDocumentBuilder();
         } catch (final ParserConfigurationException e) {
+            LOG.error("Exception when trying to create document builder: " + e);
             return null;
         }
         return bob.newDocument();
@@ -306,7 +307,7 @@ public class ListenerAdapter implements DOMDataChangeListener {
      */
     private void addValuesFromDataToElement(final Document doc, final Set<YangInstanceIdentifier> data, final Element element,
             final Operation operation) {
-        if (data == null || data.isEmpty()) {
+        if ((data == null) || data.isEmpty()) {
             return;
         }
         for (final YangInstanceIdentifier path : data) {
@@ -465,7 +466,7 @@ public class ListenerAdapter implements DOMDataChangeListener {
     /**
      * Removes all subscribers and unregisters event bus change recorder form event bus.
      */
-    public void close() throws Exception {
+    public void close() {
         subscribers = new ConcurrentSet<>();
         registration.close();
         registration = null;
@@ -547,5 +548,4 @@ public class ListenerAdapter implements DOMDataChangeListener {
             this.value = value;
         }
     }
-
 }
