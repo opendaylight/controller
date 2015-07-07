@@ -59,6 +59,15 @@ module car {
       	uses car-entry;
       }
     }
-
     
+    rpc stress-test {
+        input {
+            leaf rate {
+              type uint16;
+            }
+        }
+    }
+    
+    rpc stop-stress-test {
+    }
 }
