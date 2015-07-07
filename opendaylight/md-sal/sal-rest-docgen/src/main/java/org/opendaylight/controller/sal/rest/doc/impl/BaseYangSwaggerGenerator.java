@@ -388,13 +388,15 @@ public class BaseYangSwaggerGenerator {
 
         SortedSet<Module> sortedModules = new TreeSet<>(new Comparator<Module>() {
             @Override
-            public int compare(Module o1, Module o2) {
-                int result = o1.getName().compareTo(o2.getName());
+            public int compare(Module module1, Module module2) {
+                int result = module1.getName().compareTo(module2.getName());
                 if (result == 0) {
-                    result = o1.getRevision().compareTo(o2.getRevision());
+                    Date module1Revision = module1.getRevision() != null ? module1.getRevision() : new Date(0);
+                    Date module2Revision = module2.getRevision() != null ? module2.getRevision() : new Date(0);
+                    result = module1Revision.compareTo(module2Revision);
                 }
                 if (result == 0) {
-                    result = o1.getNamespace().compareTo(o2.getNamespace());
+                    result = module1.getNamespace().compareTo(module2.getNamespace());
                 }
                 return result;
             }
