@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a7fa997_a57105e2",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 455,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-07-07T22:06:01Z",
+      "side": 1,
+      "message": "I think we may want to allow read-only transactions atleast in this case.",
+      "revId": "175447629d61b8eb9f98c5646cde37bb5d3e109b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
