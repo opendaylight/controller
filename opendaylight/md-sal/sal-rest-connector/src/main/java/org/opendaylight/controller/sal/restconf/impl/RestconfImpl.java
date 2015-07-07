@@ -881,7 +881,7 @@ public class RestconfImpl implements RestconfService {
             throw e;
         } catch (final Exception e) {
             final String errMsg = "Error creating data ";
-            LOG.info(errMsg + uriInfo.getPath(), e);
+            LOG.info(errMsg + (uriInfo != null ? uriInfo.getPath() : ""), e);
             throw new RestconfDocumentedException(errMsg, e);
         }
 
@@ -895,6 +895,11 @@ public class RestconfImpl implements RestconfService {
     }
 
     private URI resolveLocation(final UriInfo uriInfo, final String uriBehindBase, final DOMMountPoint mountPoint, final YangInstanceIdentifier normalizedII) {
+        if(uriInfo == null) {
+            // This is null if invoked internally
+            return null;
+        }
+
         final UriBuilder uriBuilder = uriInfo.getBaseUriBuilder();
         uriBuilder.path("config");
         try {

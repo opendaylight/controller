@@ -1,0 +1,7 @@
+{
+    "input" :
+    {
+     "toaster:toasterDoneness" : "10",
+     "toaster:toasterToastType": "wheat-bread" 
+    }
+}
