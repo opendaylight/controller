@@ -24,6 +24,7 @@ import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.Provider;
 import org.opendaylight.controller.sal.rest.api.Draft02;
 import org.opendaylight.controller.sal.rest.api.RestconfService;
+import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.InstanceIdentifierContext;
 import org.opendaylight.controller.sal.restconf.impl.NormalizedNodeContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
@@ -64,79 +65,103 @@ public class JsonNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPr
     @Override
     public NormalizedNodeContext readFrom(final Class<NormalizedNodeContext> type, final Type genericType,
             final Annotation[] annotations, final MediaType mediaType,
-            final MultivaluedMap<String, String> httpHeaders, final InputStream entityStream) throws IOException,
-            WebApplicationException {
+            final MultivaluedMap<String, String> httpHeaders, final InputStream entityStream)
+                    throws WebApplicationException, IOException {
         try {
-            final InstanceIdentifierContext<?> path = getInstanceIdentifierContext();
-            if (entityStream.available() < 1) {
-                return new NormalizedNodeContext(path, null);
-            }
-            final NormalizedNodeResult resultHolder = new NormalizedNodeResult();
-            final NormalizedNodeStreamWriter writer = ImmutableNormalizedNodeStreamWriter.from(resultHolder);
+            return readFrom(getInstanceIdentifierContext(), entityStream, isPost());
+        } catch (final Exception e) {
+            propagateExceptionAs(e);
+            return null; // no-op
+        }
+    }
 
-            final SchemaNode parentSchema;
-            if(isPost()) {
-                // FIXME: We need dispatch for RPC.
-                parentSchema = path.getSchemaNode();
-            } else if(path.getSchemaNode() instanceof SchemaContext) {
-                parentSchema = path.getSchemaContext();
-            } else {
-                if (SchemaPath.ROOT.equals(path.getSchemaNode().getPath().getParent())) {
-                    parentSchema = path.getSchemaContext();
-                } else {
-                    parentSchema = SchemaContextUtil.findDataSchemaNode(path.getSchemaContext(), path.getSchemaNode().getPath().getParent());
-                }
-            }
+    private static void propagateExceptionAs(Exception e) throws RestconfDocumentedException {
+        if(e instanceof RestconfDocumentedException) {
+            throw (RestconfDocumentedException)e;
+        }
 
-            final JsonParserStream jsonParser = JsonParserStream.create(writer, path.getSchemaContext(), parentSchema);
-            final JsonReader reader = new JsonReader(new InputStreamReader(entityStream));
-            jsonParser.parse(reader);
-
-            NormalizedNode<?, ?> result = resultHolder.getResult();
-            final List<YangInstanceIdentifier.PathArgument> iiToDataList = new ArrayList<>();
-            InstanceIdentifierContext<? extends SchemaNode> newIIContext;
-
-            while (result instanceof AugmentationNode || result instanceof ChoiceNode) {
-                final Object childNode = ((DataContainerNode) result).getValue().iterator().next();
-                if (isPost()) {
-                    iiToDataList.add(result.getIdentifier());
-                }
-                result = (NormalizedNode<?, ?>) childNode;
-            }
-
-            if (isPost()) {
-                if (result instanceof MapEntryNode) {
-                    iiToDataList.add(new YangInstanceIdentifier.NodeIdentifier(result.getNodeType()));
-                    iiToDataList.add(result.getIdentifier());
-                } else {
-                    iiToDataList.add(result.getIdentifier());
-                }
-            } else {
-                if (result instanceof MapNode) {
-                    result = Iterables.getOnlyElement(((MapNode) result).getValue());
-                }
-            }
-
-            final YangInstanceIdentifier fullIIToData = YangInstanceIdentifier.create(Iterables.concat(
-                            path.getInstanceIdentifier().getPathArguments(), iiToDataList));
-
-            newIIContext = new InstanceIdentifierContext<>(fullIIToData, path.getSchemaNode(), path.getMountPoint(),
-                    path.getSchemaContext());
-
-            return new NormalizedNodeContext(newIIContext, result);
-        } catch (final RestconfDocumentedException e) {
-            throw e;
-        } catch (final ResultAlreadySetException e) {
+        if(e instanceof ResultAlreadySetException) {
             LOG.debug("Error parsing json input:", e);
 
             throw new RestconfDocumentedException("Error parsing json input: Failed to create new parse result data. " +
                     "Are you creating multiple resources/subresources in POST request?");
-        } catch (final Exception e) {
-            LOG.debug("Error parsing json input", e);
-
-            throw new RestconfDocumentedException("Error parsing input: " + e.getMessage(), ErrorType.PROTOCOL,
-                    ErrorTag.MALFORMED_MESSAGE);
         }
+
+        LOG.debug("Error parsing json input", e);
+
+        throw new RestconfDocumentedException("Error parsing input: " + e.getMessage(), ErrorType.PROTOCOL,
+                ErrorTag.MALFORMED_MESSAGE, e);
+    }
+
+    public static NormalizedNodeContext readFrom(final String uriPath, final InputStream entityStream,
+            final boolean isPost) throws RestconfDocumentedException {
+
+        try {
+            return readFrom(ControllerContext.getInstance().toInstanceIdentifier(uriPath), entityStream, isPost);
+        } catch (final Exception e) {
+            propagateExceptionAs(e);
+            return null; // no-op
+        }
+    }
+
+    private static NormalizedNodeContext readFrom(final InstanceIdentifierContext<?> path, final InputStream entityStream,
+            final boolean isPost) throws IOException {
+        if (entityStream.available() < 1) {
+            return new NormalizedNodeContext(path, null);
+        }
+        final NormalizedNodeResult resultHolder = new NormalizedNodeResult();
+        final NormalizedNodeStreamWriter writer = ImmutableNormalizedNodeStreamWriter.from(resultHolder);
+
+        final SchemaNode parentSchema;
+        if(isPost) {
+            // FIXME: We need dispatch for RPC.
+            parentSchema = path.getSchemaNode();
+        } else if(path.getSchemaNode() instanceof SchemaContext) {
+            parentSchema = path.getSchemaContext();
+        } else {
+            if (SchemaPath.ROOT.equals(path.getSchemaNode().getPath().getParent())) {
+                parentSchema = path.getSchemaContext();
+            } else {
+                parentSchema = SchemaContextUtil.findDataSchemaNode(path.getSchemaContext(), path.getSchemaNode().getPath().getParent());
+            }
+        }
+
+        final JsonParserStream jsonParser = JsonParserStream.create(writer, path.getSchemaContext(), parentSchema);
+        final JsonReader reader = new JsonReader(new InputStreamReader(entityStream));
+        jsonParser.parse(reader);
+
+        NormalizedNode<?, ?> result = resultHolder.getResult();
+        final List<YangInstanceIdentifier.PathArgument> iiToDataList = new ArrayList<>();
+        InstanceIdentifierContext<? extends SchemaNode> newIIContext;
+
+        while (result instanceof AugmentationNode || result instanceof ChoiceNode) {
+            final Object childNode = ((DataContainerNode) result).getValue().iterator().next();
+            if (isPost) {
+                iiToDataList.add(result.getIdentifier());
+            }
+            result = (NormalizedNode<?, ?>) childNode;
+        }
+
+        if (isPost) {
+            if (result instanceof MapEntryNode) {
+                iiToDataList.add(new YangInstanceIdentifier.NodeIdentifier(result.getNodeType()));
+                iiToDataList.add(result.getIdentifier());
+            } else {
+                iiToDataList.add(result.getIdentifier());
+            }
+        } else {
+            if (result instanceof MapNode) {
+                result = Iterables.getOnlyElement(((MapNode) result).getValue());
+            }
+        }
+
+        final YangInstanceIdentifier fullIIToData = YangInstanceIdentifier.create(Iterables.concat(
+                path.getInstanceIdentifier().getPathArguments(), iiToDataList));
+
+        newIIContext = new InstanceIdentifierContext<>(fullIIToData, path.getSchemaNode(), path.getMountPoint(),
+                path.getSchemaContext());
+
+        return new NormalizedNodeContext(newIIContext, result);
     }
 }
 

@@ -1,0 +1,30 @@
+module sal-restconf-service {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:sal:restconf:service";
+    prefix "sal-restconf-service";
+
+    import config { prefix config; revision-date 2013-04-05; }
+
+    description "Definition for the internal restconf service";
+
+    revision "2015-07-08" {
+        description "Initial revision";
+    }
+
+    identity json-restconf-service {
+        base "config:service-type";
+        config:java-class "org.opendaylight.controller.restconf.api.JSONRestconfService";
+    }
+
+    identity json-restconf-service-impl {
+        base config:module-type;
+        config:provided-service json-restconf-service;
+        config:java-name-prefix JSONRestconfService;
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+        case json-restconf-service-impl {
+            when "/config:modules/config:module/config:type = 'json-restconf-service-impl'";
+        }
+    }
+}
