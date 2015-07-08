@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a7fa997_be2d9648",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardCommitCoordinator.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 554,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-07-08T15:49:42Z",
+      "side": 1,
+      "message": "Is this over formatted? The try seems to be after 8 spaces.",
+      "revId": "90b7062e7eb03085945d042d2a255b64cb3ca1e6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
