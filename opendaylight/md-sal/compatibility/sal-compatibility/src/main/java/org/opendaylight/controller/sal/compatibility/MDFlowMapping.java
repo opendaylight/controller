@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2014-2015 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -124,6 +124,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.Upda
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.flow.update.OriginalFlowBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.flow.update.UpdatedFlowBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.FlowCookie;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.FlowModFlags;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.Instructions;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.flow.InstructionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.types.rev131026.instruction.instruction.ApplyActionsCaseBuilder;
@@ -176,11 +177,15 @@ public final class MDFlowMapping {
     private static FlowBuilder internalToMDFlow(final Flow sourceFlow) {
         Preconditions.checkArgument(sourceFlow != null);
 
+        // Instruct switch to let controller know when flow is removed.
+        FlowModFlags flags = new FlowModFlags(false, false, false, false, true);
+
         return new FlowBuilder()
         .setHardTimeout(Integer.valueOf(sourceFlow.getHardTimeout()))
         .setIdleTimeout(Integer.valueOf(sourceFlow.getIdleTimeout()))
         .setCookie(new FlowCookie(BigInteger.valueOf(sourceFlow.getId())))
         .setPriority(Integer.valueOf((sourceFlow.getPriority())))
+        .setFlags(flags)
         .setInstructions(MDFlowMapping.toApplyInstruction(toMDActions(sourceFlow.getActions())))
         .setMatch(FromSalConversionsUtils.toMatch(sourceFlow.getMatch()));
     }
