@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a7fa997_2cb71988",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 434,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-07-09T18:22:50Z",
+      "side": 1,
+      "message": "I don\u0027t quite like the idea of the CohortEntry.setAborted being exposed like this - in fact now that I think of it I don\u0027t quite like the idea CohortEntry.getCohort being exposed as well. \n\nA cleaner approach may be to just add an abort on CohortEntry which returns a future and hide the details in there.",
+      "revId": "a6e12d5e1444729a3b50d595ad3db05d83f7e3ce",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
