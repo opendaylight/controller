@@ -98,9 +98,14 @@
         <bundle>mvn:com.google.code.gson/gson/${gson.version}</bundle>
         <bundle>mvn:org.opendaylight.yangtools/yang-data-codec-gson/${yangtools.version}</bundle>
         <bundle>mvn:org.opendaylight.yangtools/yang-model-export/${yangtools.version}</bundle>
+        <bundle>mvn:org.glassfish.jersey.core/jersey-common/${jersey2.4.version}</bundle>
+        <bundle>mvn:org.glassfish.jersey.core/jersey-server/${jersey2.4.version}</bundle>
+        <bundle>mvn:org.glassfish.jersey.containers/jersey-container-servlet-core/${jersey2.4.version}</bundle>
+<!-- FIXME - remove jersey 1.7 dependencies
         <bundle>mvn:com.sun.jersey/jersey-core/${jersey.version}</bundle>
         <bundle>mvn:com.sun.jersey/jersey-server/${jersey.version}</bundle>
         <bundle>mvn:com.sun.jersey/jersey-servlet/${jersey.version}</bundle>
+-->
         <bundle>mvn:io.netty/netty-buffer/${netty.version}</bundle>
         <bundle>mvn:io.netty/netty-codec/${netty.version}</bundle>
         <bundle>mvn:io.netty/netty-codec-http/${netty.version}</bundle>
@@ -119,9 +124,14 @@
         <bundle>mvn:com.fasterxml.jackson.module/jackson-module-jaxb-annotations/${jackson.version}</bundle>
         <bundle>mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-base/${jackson.version}</bundle>
         <bundle>mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-json-provider/${jackson.version}</bundle>
+        <bundle>mvn:org.glassfish.jersey.core/jersey-common/${jersey2.4.version}</bundle>
+        <bundle>mvn:org.glassfish.jersey.core/jersey-server/${jersey2.4.version}</bundle>
+        <bundle>mvn:org.glassfish.jersey.containers/jersey-container-servlet-core/${jersey2.4.version}</bundle>
+<!-- FIXME - remove jersey 1.7 dependencies
         <bundle>mvn:com.sun.jersey/jersey-core/${jersey.version}</bundle>
         <bundle>mvn:com.sun.jersey/jersey-server/${jersey.version}</bundle>
         <bundle>mvn:com.sun.jersey/jersey-servlet/${jersey.version}</bundle>
+-->
         <bundle>wrap:mvn:org.json/json/${org.json.version}</bundle>
     </feature>
 
