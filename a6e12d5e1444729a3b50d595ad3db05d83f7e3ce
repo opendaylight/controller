@@ -16,6 +16,24 @@
       "revId": "a6e12d5e1444729a3b50d595ad3db05d83f7e3ce",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_ec5e0145",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 434,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-07-09T18:38:27Z",
+      "side": 1,
+      "message": "I have a lithium patch where I added an abort method, although it sets a flag. I can look into doing as you suggest.",
+      "parentUuid": "7a7fa997_2cb71988",
+      "revId": "a6e12d5e1444729a3b50d595ad3db05d83f7e3ce",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
