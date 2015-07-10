@@ -16,6 +16,24 @@
       "revId": "bc6d06b5f57d094290979b9ce2cd0e904a1c1b86",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_329a1264",
+        "filename": "karaf/opendaylight-karaf-resources/src/main/resources/etc/custom.properties",
+        "patchSetId": 4
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 773
+      },
+      "writtenOn": "2015-07-10T13:46:47Z",
+      "side": 1,
+      "message": "flaviof, what does this mean with the ovsdb.l3.fwd.enabled\u003dfalse by default? If the config ignored?",
+      "parentUuid": "9a6a9dd7_474e1ac3",
+      "revId": "bc6d06b5f57d094290979b9ce2cd0e904a1c1b86",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
