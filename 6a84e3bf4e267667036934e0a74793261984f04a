@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a7fa997_d21b9ec8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shard/ShardMBeanFactory.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-07-10T14:22:38Z",
+      "side": 1,
+      "message": "I changed this to return a new instance each time and not cache since the Shard owns the lifecyle once obtained (i.e. it unregisters it on actor shutdown). The Cache used weakValues so it\u0027s possible, if a Shard was restarted, the new Shard instance could get a stale instance. Also since the ShardStats now holds a reference to the Shard instance, it would never GC with the Cache holding on to the ShardStats reference. I could\u0027ve added a remove method to this class but I don\u0027t see the benefit of caching in this class since each Shard instance should get it\u0027s own ShardStats instance. Removing the Cache simplifies things.",
+      "revId": "6a84e3bf4e267667036934e0a74793261984f04a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
