@@ -34,6 +34,24 @@
       "revId": "bc6d06b5f57d094290979b9ce2cd0e904a1c1b86",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_5510d8a7",
+        "filename": "karaf/opendaylight-karaf-resources/src/main/resources/etc/custom.properties",
+        "patchSetId": 4
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 2981
+      },
+      "writtenOn": "2015-07-10T18:11:16Z",
+      "side": 1,
+      "message": "Yes Sam; the l3.arp.responder configuration takes effect only if l3.fwd.enabled is true. It is intended to work as a  sub-l3 fwding feature.",
+      "parentUuid": "7a7fa997_329a1264",
+      "revId": "bc6d06b5f57d094290979b9ce2cd0e904a1c1b86",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
