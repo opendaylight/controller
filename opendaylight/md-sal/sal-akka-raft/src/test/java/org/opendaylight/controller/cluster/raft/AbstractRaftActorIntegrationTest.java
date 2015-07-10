@@ -178,7 +178,9 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
     protected long initialTerm = 5;
     protected long currentTerm;
 
-    protected List<Object> expSnapshotState = new ArrayList<>();
+    protected int snapshotBatchCount = 4;
+
+    protected List<MockPayload> expSnapshotState = new ArrayList<>();
 
     @After
     public void tearDown() {
@@ -191,7 +193,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         configParams.setHeartBeatInterval(new FiniteDuration(100, TimeUnit.MILLISECONDS));
         configParams.setElectionTimeoutFactor(1);
-        configParams.setSnapshotBatchCount(4);
+        configParams.setSnapshotBatchCount(snapshotBatchCount);
         configParams.setSnapshotDataThresholdPercentage(70);
         configParams.setIsolatedLeaderCheckInterval(new FiniteDuration(1, TimeUnit.DAYS));
         return configParams;
@@ -251,7 +253,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
 
     @SuppressWarnings("unchecked")
     protected void verifySnapshot(String prefix, Snapshot snapshot, long lastAppliedTerm,
-            int lastAppliedIndex, long lastTerm, long lastIndex)
+            long lastAppliedIndex, long lastTerm, long lastIndex)
                     throws Exception {
         assertEquals(prefix + " Snapshot getLastAppliedTerm", lastAppliedTerm, snapshot.getLastAppliedTerm());
         assertEquals(prefix + " Snapshot getLastAppliedIndex", lastAppliedIndex, snapshot.getLastAppliedIndex());
@@ -259,7 +261,8 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         assertEquals(prefix + " Snapshot getLastIndex", lastIndex, snapshot.getLastIndex());
 
         List<Object> actualState = (List<Object>)MockRaftActor.toObject(snapshot.getState());
-        assertEquals(prefix + " Snapshot getState size", expSnapshotState.size(), actualState.size());
+        assertEquals(String.format("%s Snapshot getState size. Expected %s: . Actual: %s", prefix, expSnapshotState,
+                actualState), expSnapshotState.size(), actualState.size());
         for(int i = 0; i < expSnapshotState.size(); i++) {
             assertEquals(prefix + " Snapshot state " + i, expSnapshotState.get(i), actualState.get(i));
         }
@@ -308,5 +311,33 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
 
     protected String testActorPath(String id){
         return "akka://test/user" + id;
+    }
+
+    protected void verifyLeadersTrimmedLog(long lastIndex) {
+        verifyTrimmedLog("Leader", leaderActor, lastIndex, lastIndex - 1);
+    }
+
+    protected void verifyLeadersTrimmedLog(long lastIndex, long replicatedToAllIndex) {
+        verifyTrimmedLog("Leader", leaderActor, lastIndex, replicatedToAllIndex);
+    }
+
+    protected void verifyFollowersTrimmedLog(int num, TestActorRef<TestRaftActor> actorRef, long lastIndex) {
+        verifyTrimmedLog("Follower " + num, actorRef, lastIndex, lastIndex - 1);
+    }
+
+    protected void verifyTrimmedLog(String name, TestActorRef<TestRaftActor> actorRef, long lastIndex,
+            long replicatedToAllIndex) {
+        TestRaftActor actor = actorRef.underlyingActor();
+        RaftActorContext context = actor.getRaftActorContext();
+        long snapshotIndex = lastIndex - 1;
+        assertEquals(name + " snapshot term", snapshotIndex < 0 ? -1 : currentTerm,
+                context.getReplicatedLog().getSnapshotTerm());
+        assertEquals(name + " snapshot index", snapshotIndex, context.getReplicatedLog().getSnapshotIndex());
+        assertEquals(name + " journal log size", 1, context.getReplicatedLog().size());
+        assertEquals(name + " journal last index", lastIndex, context.getReplicatedLog().lastIndex());
+        assertEquals(name + " commit index", lastIndex, context.getCommitIndex());
+        assertEquals(name + " last applied", lastIndex, context.getLastApplied());
+        assertEquals(name + " replicatedToAllIndex", replicatedToAllIndex,
+                actor.getCurrentBehavior().getReplicatedToAllIndex());
     }
 }
