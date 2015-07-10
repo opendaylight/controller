@@ -114,7 +114,7 @@ public class SnapshotManager implements SnapshotState {
 
         @Override
         public boolean isCapturing() {
-            return false;
+            return true;
         }
 
         @Override
@@ -187,6 +187,11 @@ public class SnapshotManager implements SnapshotState {
     }
 
     private class Idle extends AbstractSnapshotState {
+
+        @Override
+        public boolean isCapturing() {
+            return false;
+        }
 
         private boolean capture(ReplicatedLogEntry lastLogEntry, long replicatedToAllIndex, String targetFollower) {
             TermInformationReader lastAppliedTermInfoReader =
@@ -271,11 +276,6 @@ public class SnapshotManager implements SnapshotState {
     private class Creating extends AbstractSnapshotState {
 
         @Override
-        public boolean isCapturing() {
-            return true;
-        }
-
-        @Override
         public void persist(byte[] snapshotBytes, RaftActorBehavior currentBehavior, long totalMemory) {
             // create a snapshot object from the state provided and save it
             // when snapshot is saved async, SaveSnapshotSuccess is raised.
@@ -287,21 +287,32 @@ public class SnapshotManager implements SnapshotState {
 
             context.getPersistenceProvider().saveSnapshot(snapshot);
 
-            LOG.info("{}: Persisting of snapshot done:{}", persistenceId(), snapshot.getLogMessage());
+            LOG.info("{}: Persisting of snapshot done: {}", persistenceId(), snapshot.getLogMessage());
 
             long dataThreshold = totalMemory *
                     context.getConfigParams().getSnapshotDataThresholdPercentage() / 100;
-            if (context.getReplicatedLog().dataSize() > dataThreshold) {
+            boolean dataSizeThresholdExceeded = context.getReplicatedLog().dataSize() > dataThreshold;
 
+            boolean logSizeExceededSnapshotBatchCount =
+                    context.getReplicatedLog().size() >= context.getConfigParams().getSnapshotBatchCount();
+LOG.debug("Log size: {}, getSnapshotBatchCount: {}",context.getReplicatedLog().size(),context.getConfigParams().getSnapshotBatchCount());
+            if (dataSizeThresholdExceeded || logSizeExceededSnapshotBatchCount) {
                 if(LOG.isDebugEnabled()) {
-                    LOG.debug("{}: dataSize {} exceeds dataThreshold {} - doing snapshotPreCommit with index {}",
-                            persistenceId(), context.getReplicatedLog().dataSize(), dataThreshold,
-                            captureSnapshot.getLastAppliedIndex());
+                    if(dataSizeThresholdExceeded) {
+                        LOG.debug("{}: log data size {} exceeds the memory threshold {} - doing snapshotPreCommit with index {}",
+                                context.getId(), context.getReplicatedLog().dataSize(), dataThreshold,
+                                captureSnapshot.getLastAppliedIndex());
+                    } else {
+                        LOG.debug("{}: log size {} exceeds the snapshot batch count {} - doing snapshotPreCommit with index {}",
+                                context.getId(), context.getReplicatedLog().size(),
+                                context.getConfigParams().getSnapshotBatchCount(), captureSnapshot.getLastAppliedIndex());
+                    }
                 }
 
-                // if memory is less, clear the log based on lastApplied.
-                // this could/should only happen if one of the followers is down
-                // as normally we keep removing from the log when its replicated to all.
+                // We either exceeded the memory threshold or the log size exceeded the snapshot batch
+                // count so, to keep the log memory footprint in check, clear the log based on lastApplied.
+                // This could/should only happen if one of the followers is down as normally we keep
+                // removing from the log as entries are replicated to all.
                 context.getReplicatedLog().snapshotPreCommit(captureSnapshot.getLastAppliedIndex(),
                         captureSnapshot.getLastAppliedTerm());
 
@@ -326,9 +337,9 @@ public class SnapshotManager implements SnapshotState {
                         context.getReplicatedLog().getSnapshotTerm());
             }
 
-            LOG.info("{}: Removed in-memory snapshotted entries, adjusted snaphsotIndex:{} " +
-                            "and term:{}", persistenceId(), captureSnapshot.getLastAppliedIndex(),
-                    captureSnapshot.getLastAppliedTerm());
+            LOG.info("{}: Removed in-memory snapshotted entries, adjusted snaphsotIndex: {} " +
+                    "and term: {}", context.getId(), context.getReplicatedLog().getSnapshotIndex(),
+                    context.getReplicatedLog().getSnapshotTerm());
 
             if (context.getId().equals(currentBehavior.getLeaderId())
                     && captureSnapshot.isInstallSnapshotInitiated()) {
