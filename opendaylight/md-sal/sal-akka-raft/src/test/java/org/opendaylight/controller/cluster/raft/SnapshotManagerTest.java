@@ -67,6 +67,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         doReturn(new HashMap<>()).when(mockRaftActorContext).getPeerAddresses();
         doReturn(mockConfigParams).when(mockRaftActorContext).getConfigParams();
         doReturn(10L).when(mockConfigParams).getSnapshotBatchCount();
+        doReturn(70).when(mockConfigParams).getSnapshotDataThresholdPercentage();
         doReturn(mockReplicatedLog).when(mockRaftActorContext).getReplicatedLog();
         doReturn("123").when(mockRaftActorContext).getId();
         doReturn(mockDataPersistenceProvider).when(mockRaftActorContext).getPersistenceProvider();
@@ -257,7 +258,6 @@ public class SnapshotManagerTest extends AbstractActorTest {
         verify(mockRaftActorBehavior).setReplicatedToAllIndex(9);
     }
 
-
     @Test
     public void testPersistWhenReplicatedLogDataSizeGreaterThanThreshold(){
         doReturn(Integer.MAX_VALUE).when(mockReplicatedLog).dataSize();
@@ -271,6 +271,34 @@ public class SnapshotManagerTest extends AbstractActorTest {
         verify(mockDataPersistenceProvider).saveSnapshot(any(Snapshot.class));
 
         verify(mockReplicatedLog).snapshotPreCommit(9L, 6L);
+
+        verify(mockRaftActorBehavior, never()).setReplicatedToAllIndex(anyLong());
+    }
+
+    @Test
+    public void testPersistWhenReplicatedLogSizeExceedsSnapshotBatchCount() {
+        doReturn(10L).when(mockReplicatedLog).size(); // matches snapshotBatchCount
+        doReturn(100).when(mockReplicatedLog).dataSize();
+
+        doReturn(5L).when(mockReplicatedLog).getSnapshotIndex();
+        doReturn(5L).when(mockReplicatedLog).getSnapshotTerm();
+
+        long replicatedToAllIndex = 1;
+        ReplicatedLogEntry replicatedLogEntry = mock(ReplicatedLogEntry.class);
+        doReturn(replicatedLogEntry).when(mockReplicatedLog).get(replicatedToAllIndex);
+        doReturn(6L).when(replicatedLogEntry).getTerm();
+        doReturn(replicatedToAllIndex).when(replicatedLogEntry).getIndex();
+
+        snapshotManager.capture(new MockRaftActorContext.MockReplicatedLogEntry(6, 9,
+                new MockRaftActorContext.MockPayload()), replicatedToAllIndex);
+
+        snapshotManager.persist(new byte[]{}, mockRaftActorBehavior, 2000000L);
+
+        verify(mockDataPersistenceProvider).saveSnapshot(any(Snapshot.class));
+
+        verify(mockReplicatedLog).snapshotPreCommit(9L, 6L);
+
+        verify(mockRaftActorBehavior).setReplicatedToAllIndex(replicatedToAllIndex);
     }
 
     @Test
@@ -286,6 +314,8 @@ public class SnapshotManagerTest extends AbstractActorTest {
         byte[] bytes = new byte[] {1,2,3,4,5,6,7,8,9,10};
 
         snapshotManager.persist(bytes, mockRaftActorBehavior, Runtime.getRuntime().totalMemory());
+
+        assertEquals(true, snapshotManager.isCapturing());
 
         verify(mockDataPersistenceProvider).saveSnapshot(any(Snapshot.class));
 
@@ -340,7 +370,11 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         snapshotManager.persist(new byte[]{}, mockRaftActorBehavior, Runtime.getRuntime().totalMemory());
 
+        assertEquals(true, snapshotManager.isCapturing());
+
         snapshotManager.commit(100L, mockRaftActorBehavior);
+
+        assertEquals(false, snapshotManager.isCapturing());
 
         verify(mockReplicatedLog).snapshotCommit();
 

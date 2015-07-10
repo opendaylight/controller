@@ -1,9 +1,9 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
@@ -582,7 +582,7 @@ public class RaftActorTest extends AbstractActorTest {
                 leaderActor.getRaftActorContext().getSnapshotManager().persist(snapshotBytes.toByteArray(),
                         leader, Runtime.getRuntime().totalMemory());
 
-                assertFalse(leaderActor.getRaftActorContext().getSnapshotManager().isCapturing());
+                assertTrue(leaderActor.getRaftActorContext().getSnapshotManager().isCapturing());
 
                 // The commit is needed to complete the snapshot creation process
                 leaderActor.getRaftActorContext().getSnapshotManager().commit(-1, leader);
@@ -686,7 +686,7 @@ public class RaftActorTest extends AbstractActorTest {
                         new MockRaftActorContext.MockPayload("foo-3"),
                         new MockRaftActorContext.MockPayload("foo-4")));
                 followerActor.onReceiveCommand(new CaptureSnapshotReply(snapshotBytes.toByteArray()));
-                assertFalse(followerActor.getRaftActorContext().getSnapshotManager().isCapturing());
+                assertTrue(followerActor.getRaftActorContext().getSnapshotManager().isCapturing());
 
                 // The commit is needed to complete the snapshot creation process
                 followerActor.getRaftActorContext().getSnapshotManager().commit(-1, follower);
@@ -787,7 +787,7 @@ public class RaftActorTest extends AbstractActorTest {
                         new MockRaftActorContext.MockPayload("foo-3"),
                         new MockRaftActorContext.MockPayload("foo-4")));
                 leaderActor.onReceiveCommand(new CaptureSnapshotReply(snapshotBytes.toByteArray()));
-                assertFalse(leaderActor.getRaftActorContext().getSnapshotManager().isCapturing());
+                assertTrue(leaderActor.getRaftActorContext().getSnapshotManager().isCapturing());
 
                 assertEquals("Real snapshot didn't clear the log till replicatedToAllIndex", 0, leaderActor.getReplicatedLog().size());
 
@@ -831,15 +831,16 @@ public class RaftActorTest extends AbstractActorTest {
             leaderActor.setCurrentBehavior(leader);
             assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
 
-            // Persist another entry (this will cause a CaptureSnapshot to be triggered
-            leaderActor.persistData(mockActorRef, "x", new MockRaftActorContext.MockPayload("duh"));
+            // Simulate an install snaphost to a follower.
+            leaderActor.getRaftActorContext().getSnapshotManager().captureToInstall(
+                    leaderActor.getReplicatedLog().last(), -1, "member1");
 
             // Now send a CaptureSnapshotReply
             mockActorRef.tell(new CaptureSnapshotReply(fromObject("foo").toByteArray()), mockActorRef);
 
             // Trimming log in this scenario is a no-op
             assertEquals(-1, leaderActor.getReplicatedLog().getSnapshotIndex());
-            assertFalse(leaderActor.getRaftActorContext().getSnapshotManager().isCapturing());
+            assertTrue(leaderActor.getRaftActorContext().getSnapshotManager().isCapturing());
             assertEquals(-1, leader.getReplicatedToAllIndex());
 
         }};
@@ -882,7 +883,7 @@ public class RaftActorTest extends AbstractActorTest {
 
             // Trimming log in this scenario is a no-op
             assertEquals(3, leaderActor.getReplicatedLog().getSnapshotIndex());
-            assertFalse(leaderActor.getRaftActorContext().getSnapshotManager().isCapturing());
+            assertTrue(leaderActor.getRaftActorContext().getSnapshotManager().isCapturing());
             assertEquals(3, leader.getReplicatedToAllIndex());
 
         }};
