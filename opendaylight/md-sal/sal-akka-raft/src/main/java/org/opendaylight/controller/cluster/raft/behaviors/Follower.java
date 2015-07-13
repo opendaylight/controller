@@ -114,55 +114,16 @@ public class Follower extends AbstractRaftActorBehavior {
             return this;
         }
 
-        // 1. Reply false if term < currentTerm (§5.1)
-        // This is handled in the appendEntries method of the base class
-
         // If we got here then we do appear to be talking to the leader
         leaderId = appendEntries.getLeaderId();
 
         setLeaderPayloadVersion(appendEntries.getPayloadVersion());
 
-        // 2. Reply false if log doesn’t contain an entry at prevLogIndex
-        // whose term matches prevLogTerm (§5.3)
-
-        long prevLogTerm = getLogEntryTerm(appendEntries.getPrevLogIndex());
-        boolean prevEntryPresent = isLogEntryPresent(appendEntries.getPrevLogIndex());
-
         updateInitialSyncStatus(appendEntries.getLeaderCommit(), appendEntries.getLeaderId());
-
-        boolean outOfSync = true;
-
         // First check if the logs are in sync or not
         long lastIndex = lastIndex();
-        if (lastIndex == -1 && appendEntries.getPrevLogIndex() != -1) {
 
-            // The follower's log is out of sync because the leader does have
-            // an entry at prevLogIndex and this follower has no entries in
-            // it's log.
-
-            LOG.debug("{}: The followers log is empty and the senders prevLogIndex is {}",
-                        logName(), appendEntries.getPrevLogIndex());
-        } else if (lastIndex > -1 && appendEntries.getPrevLogIndex() != -1 && !prevEntryPresent) {
-
-            // The follower's log is out of sync because the Leader's
-            // prevLogIndex entry was not found in it's log
-
-            LOG.debug("{}: The log is not empty but the prevLogIndex {} was not found in it",
-                        logName(), appendEntries.getPrevLogIndex());
-        } else if (lastIndex > -1 && prevEntryPresent && prevLogTerm != appendEntries.getPrevLogTerm()) {
-
-            // The follower's log is out of sync because the Leader's
-            // prevLogIndex entry does exist in the follower's log but it has
-            // a different term in it
-
-            LOG.debug(
-                "{}: Cannot append entries because previous entry term {}  is not equal to append entries prevLogTerm {}",
-                 logName(), prevLogTerm, appendEntries.getPrevLogTerm());
-        } else {
-            outOfSync = false;
-        }
-
-        if (outOfSync) {
+        if (isOutOfSync(appendEntries)) {
             // We found that the log was out of sync so just send a negative
             // reply and return
 
@@ -267,6 +228,59 @@ public class Follower extends AbstractRaftActorBehavior {
         }
 
         return this;
+    }
+
+    private boolean isOutOfSync(AppendEntries appendEntries) {
+
+        long prevLogTerm = getLogEntryTerm(appendEntries.getPrevLogIndex());
+        boolean prevEntryPresent = isLogEntryPresent(appendEntries.getPrevLogIndex());
+        long lastIndex = lastIndex();
+        int numLogEntries = appendEntries.getEntries() != null ? appendEntries.getEntries().size() : 0;
+        boolean outOfSync = true;
+
+        if (lastIndex == -1 && appendEntries.getPrevLogIndex() != -1) {
+
+            // The follower's log is out of sync because the leader does have
+            // an entry at prevLogIndex and this follower has no entries in
+            // it's log.
+
+            LOG.debug("{}: The followers log is empty and the senders prevLogIndex is {}",
+                        logName(), appendEntries.getPrevLogIndex());
+        } else if (lastIndex > -1 && appendEntries.getPrevLogIndex() != -1 && !prevEntryPresent) {
+
+            // The follower's log is out of sync because the Leader's
+            // prevLogIndex entry was not found in it's log
+
+            LOG.debug("{}: The log is not empty but the prevLogIndex {} was not found in it",
+                        logName(), appendEntries.getPrevLogIndex());
+        } else if (lastIndex > -1 && prevEntryPresent && prevLogTerm != appendEntries.getPrevLogTerm()) {
+
+            // The follower's log is out of sync because the Leader's
+            // prevLogIndex entry does exist in the follower's log but it has
+            // a different term in it
+
+            LOG.debug(
+                    "{}: Cannot append entries because previous entry term {}  is not equal to append entries prevLogTerm {}",
+                    logName(), prevLogTerm, appendEntries.getPrevLogTerm());
+        } else if(appendEntries.getPrevLogIndex() == -1 && appendEntries.getPrevLogTerm() == -1
+                && appendEntries.getReplicatedToAllIndex() != -1
+                && !isLogEntryPresent(appendEntries.getReplicatedToAllIndex())) {
+            // This append entry comes from a leader who has it's log aggressively trimmed and so does not have
+            // the previous entry in it's in-memory journal
+
+            LOG.debug(
+                    "{}: Cannot append entries because the replicatedToAllIndex {} does not appear to be in the in-memory journal",
+                    logName(), appendEntries.getReplicatedToAllIndex());
+        } else if(appendEntries.getPrevLogIndex() == -1 && appendEntries.getPrevLogTerm() == -1
+                && appendEntries.getReplicatedToAllIndex() != -1 && numLogEntries > 0 &&
+                !isLogEntryPresent(appendEntries.getEntries().get(0).getIndex() - 1)){
+            LOG.debug(
+                    "{}: Cannot append entries because the calculated previousIndex {} was not found in the in-memory journal",
+                    logName(), appendEntries.getEntries().get(0).getIndex() - 1);
+        } else {
+            outOfSync = false;
+        }
+        return outOfSync;
     }
 
     @Override protected RaftActorBehavior handleAppendEntriesReply(ActorRef sender,
