@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 
 import akka.actor.ActorRef;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Optional;
 import java.util.ArrayList;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
@@ -132,6 +133,13 @@ public class Follower extends AbstractRaftActorBehavior {
 
         boolean outOfSync = true;
 
+        final Optional<ReplicatedLogEntry> firstEntry;
+        if(numLogEntries > 0) {
+            firstEntry = Optional.of(appendEntries.getEntries().get(0));
+        } else {
+            firstEntry = Optional.absent();
+        }
+
         // First check if the logs are in sync or not
         long lastIndex = lastIndex();
         if (lastIndex == -1 && appendEntries.getPrevLogIndex() != -1) {
@@ -156,8 +164,26 @@ public class Follower extends AbstractRaftActorBehavior {
             // a different term in it
 
             LOG.debug(
-                "{}: Cannot append entries because previous entry term {}  is not equal to append entries prevLogTerm {}",
-                 logName(), prevLogTerm, appendEntries.getPrevLogTerm());
+                    "{}: Cannot append entries because previous entry term {}  is not equal to append entries prevLogTerm {}",
+                    logName(), prevLogTerm, appendEntries.getPrevLogTerm());
+        } else if(appendEntries.getPrevLogIndex() == -1 && appendEntries.getPrevLogTerm() == -1
+                && appendEntries.getReplicatedToAllIndex() != -1
+                && !isLogEntryPresent(appendEntries.getReplicatedToAllIndex())) {
+            // This append entry comes from a leader who has it's log aggressively trimmed and so does not have
+            // the previous entry in it's in-memory journal
+
+            LOG.debug(
+                    "{}: Cannot append entries because the replicatedToAllIndex {} does not appear to be in the in-memory journal",
+                    logName(), appendEntries.getReplicatedToAllIndex());
+        } else if(appendEntries.getPrevLogIndex() == -1 && appendEntries.getPrevLogTerm() == -1
+                && appendEntries.getReplicatedToAllIndex() != -1
+                && firstEntry.isPresent()
+                && !isLogEntryPresent(firstEntry.get().getIndex() - 1)){
+
+            LOG.debug(
+                    "{}: Cannot append entries because the calculated previousIndex {} was not found in the in-memory journal",
+                    logName(), firstEntry.get().getIndex() - 1);
+
         } else {
             outOfSync = false;
         }
