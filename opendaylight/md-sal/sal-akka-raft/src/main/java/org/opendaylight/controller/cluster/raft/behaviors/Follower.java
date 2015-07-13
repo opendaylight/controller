@@ -156,8 +156,31 @@ public class Follower extends AbstractRaftActorBehavior {
             // a different term in it
 
             LOG.debug(
-                "{}: Cannot append entries because previous entry term {}  is not equal to append entries prevLogTerm {}",
-                 logName(), prevLogTerm, appendEntries.getPrevLogTerm());
+                    "{}: Cannot append entries because previous entry term {}  is not equal to append entries prevLogTerm {}",
+                    logName(), prevLogTerm, appendEntries.getPrevLogTerm());
+        } else if(appendEntries.getPrevLogIndex() == -1 && appendEntries.getPrevLogTerm() == -1
+                && appendEntries.getReplicatedToAllIndex() != -1
+                && !isLogEntryPresent(appendEntries.getReplicatedToAllIndex())) {
+            // This append entry comes from a leader who has it's log aggressively trimmed and so does not have
+            // the previous entry in it's in-memory journal
+
+            LOG.debug(
+                    "{}: Cannot append entries because the replicatedToAllIndex {} does not appear to be in the in-memory journal",
+                    logName(), appendEntries.getReplicatedToAllIndex());
+        } else if(appendEntries.getPrevLogIndex() == -1 && appendEntries.getPrevLogTerm() == -1
+                && appendEntries.getReplicatedToAllIndex() != -1){
+
+            if(numLogEntries > 0){
+                ReplicatedLogEntry firstEntry = appendEntries.getEntries().get(0);
+                if(firstEntry != null && !isLogEntryPresent(firstEntry.getIndex() - 1)){
+                    LOG.debug(
+                            "{}: Cannot append entries because the calculated previousIndex {} was not found in the in-memory journal",
+                            logName(), firstEntry.getIndex() - 1);
+                } else {
+                    outOfSync = false;
+                }
+            }
+
         } else {
             outOfSync = false;
         }
