@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a7fa997_49cb5ca5",
+        "filename": "opendaylight/netconf/netconf-testtool/src/main/java/org/opendaylight/controller/netconf/test/tool/Main.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2015-07-14T13:54:55Z",
+      "side": 1,
+      "message": "Misplaced paste?",
+      "range": {
+        "startLine": 119,
+        "startChar": 54,
+        "endLine": 119,
+        "endChar": 66
+      },
+      "revId": "7f8f509a7bcf6b904e4f9d8a8bc3d31f5a4ab1de",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_69ce58b6",
+        "filename": "opendaylight/netconf/netconf-testtool/src/main/java/org/opendaylight/controller/netconf/test/tool/Main.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2015-07-14T13:54:55Z",
+      "side": 1,
+      "message": "Misplaced paste?",
+      "range": {
+        "startLine": 139,
+        "startChar": 68,
+        "endLine": 139,
+        "endChar": 75
+      },
+      "revId": "7f8f509a7bcf6b904e4f9d8a8bc3d31f5a4ab1de",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
