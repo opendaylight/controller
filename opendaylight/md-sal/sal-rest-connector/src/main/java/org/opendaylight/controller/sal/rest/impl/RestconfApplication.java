@@ -25,8 +25,8 @@ public class RestconfApplication extends Application {
     public Set<Class<?>> getClasses() {
         return ImmutableSet.<Class<?>> builder()
                 .add(RestconfDocumentedExceptionMapper.class)
-                .add(XmlNormalizedNodeBodyReader.class)
                 .add(JsonNormalizedNodeBodyReader.class)
+                .add(XmlNormalizedNodeBodyReader.class)
                 .add(NormalizedNodeJsonBodyWriter.class)
                 .add(NormalizedNodeXmlBodyWriter.class)
                 .add(SchemaExportContentYinBodyWriter.class)

@@ -312,6 +312,7 @@
         <version>${jersey.version}</version>
       </dependency>
       <!-- Jersey for JAXRS -->
+<!--  FIXME - remove all dependencies for jersey1.17 -->
       <dependency>
         <groupId>com.sun.jersey</groupId>
         <artifactId>jersey-core</artifactId>
@@ -1183,6 +1184,7 @@
         <type>xml</type>
         <scope>runtime</scope>
       </dependency>
+<!-- FIXME - move to jersey-servlet 3.x -->
       <dependency>
         <groupId>org.opendaylight.controller.thirdparty</groupId>
         <artifactId>com.sun.jersey.jersey-servlet</artifactId>

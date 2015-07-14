@@ -132,6 +132,7 @@
       <artifactId>gson</artifactId>
     </dependency>
 
+<!-- FIXME - remove all dependencies for jersey 1.7
     <dependency>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-core</artifactId>
@@ -144,6 +145,7 @@
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-servlet</artifactId>
     </dependency>
+-->
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty-buffer</artifactId>
