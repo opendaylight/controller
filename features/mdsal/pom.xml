@@ -60,6 +60,7 @@
     </dependency>
 
     <!-- Jersey -->
+<!-- FIXME - remove all dependencies for jersey 1.7 -->
     <dependency>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-core</artifactId>

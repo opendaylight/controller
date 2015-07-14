@@ -9,6 +9,10 @@
   <artifactId>sal-rest-connector</artifactId>
   <packaging>bundle</packaging>
 
+  <properties>
+    <jersey2version>2.10</jersey2version>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
@@ -130,6 +134,26 @@
       <artifactId>mockito-all</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.glassfish.jersey.core</groupId>
+      <artifactId>jersey-common</artifactId>
+      <version>${jersey2version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jersey.core</groupId>
+      <artifactId>jersey-server</artifactId>
+      <version>${jersey2version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jersey.containers</groupId>
+      <artifactId>jersey-container-servlet-core</artifactId>
+      <version>${jersey2version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jersey.containers</groupId>
+      <artifactId>jersey-container-servlet</artifactId>
+      <version>${jersey2version}</version>
+    </dependency>
   </dependencies>
 
   <build>
@@ -148,7 +172,8 @@
               org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.rest.connector.rev140724.*,
             </Private-Package>
             <Import-Package>*,
-            com.sun.jersey.spi.container.servlet, org.eclipse.jetty.servlets</Import-Package>
+              org.glassfish.jersey.servlet,
+              org.eclipse.jetty.servlets</Import-Package>
             <Embed-Dependency>stax-utils</Embed-Dependency>
             <Web-ContextPath>/restconf</Web-ContextPath>
           </instructions>
