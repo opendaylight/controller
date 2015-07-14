@@ -37,7 +37,6 @@
     <module>netconf-connector-config</module>
     <module>netconf-mdsal-config</module>
     <module>netconf-auth</module>
-    <module>netconf-usermanager</module>
     <module>netconf-testtool</module>
     <module>netconf-notifications-impl</module>
     <module>netconf-notifications-api</module>
