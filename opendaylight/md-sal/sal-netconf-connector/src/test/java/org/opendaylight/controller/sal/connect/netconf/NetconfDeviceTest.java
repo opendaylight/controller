@@ -24,6 +24,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Futures;
 import java.io.InputStream;
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -271,7 +272,7 @@ public class NetconfDeviceTest {
     }
 
     public RemoteDeviceId getId() {
-        return new RemoteDeviceId("test-D");
+        return new RemoteDeviceId("test-D", InetSocketAddress.createUnresolved("localhost", 22));
     }
 
     public ExecutorService getExecutor() {
