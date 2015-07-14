@@ -72,10 +72,6 @@
           <artifactId>config-api</artifactId>
       </dependency>
       <dependency>
-          <groupId>org.opendaylight.yangtools</groupId>
-          <artifactId>yang-data-operations</artifactId>
-      </dependency>
-      <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>ietf-netconf</artifactId>
       </dependency>
