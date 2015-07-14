@@ -37,26 +37,14 @@ public final class RemoteDeviceId {
     private InetSocketAddress address;
     private Host host;
 
-    @Deprecated
-    public RemoteDeviceId(final ModuleIdentifier identifier) {
-        this(Preconditions.checkNotNull(identifier).getInstanceName());
-    }
-
-    public RemoteDeviceId(final ModuleIdentifier identifier, Host host) {
-        this(identifier);
-        this.host = host;
-    }
-
     public RemoteDeviceId(final ModuleIdentifier identifier, InetSocketAddress address) {
-        this(identifier);
+        this(Preconditions.checkNotNull(identifier).getInstanceName());
         this.address = address;
         this.host = buildHost();
     }
 
-    @Deprecated
-    public RemoteDeviceId(final String name) {
-        Preconditions.checkNotNull(name);
-        this.name = name;
+    private RemoteDeviceId(final String name) {
+        this.name = Preconditions.checkNotNull(name);
         this.key = new NodeKey(new NodeId(name));
         this.path = createBIPath(name);
         this.bindingPath = createBindingPath(key);

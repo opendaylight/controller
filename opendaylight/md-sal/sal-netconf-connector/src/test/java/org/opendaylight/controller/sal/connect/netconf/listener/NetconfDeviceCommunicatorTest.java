@@ -85,7 +85,7 @@ public class NetconfDeviceCommunicatorTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks( this );
 
-        communicator = new NetconfDeviceCommunicator( new RemoteDeviceId( "test" ), mockDevice);
+        communicator = new NetconfDeviceCommunicator( new RemoteDeviceId( "test", InetSocketAddress.createUnresolved("localhost", 22)), mockDevice);
     }
 
     @SuppressWarnings("unchecked")
@@ -383,7 +383,7 @@ public class NetconfDeviceCommunicatorTest {
         final EventLoopGroup group = new NioEventLoopGroup();
         final Timer time = new HashedWheelTimer();
         try {
-            final NetconfDeviceCommunicator listener = new NetconfDeviceCommunicator(new RemoteDeviceId("test"), device);
+            final NetconfDeviceCommunicator listener = new NetconfDeviceCommunicator(new RemoteDeviceId("test", InetSocketAddress.createUnresolved("localhost", 22)), device);
             final NetconfReconnectingClientConfiguration cfg = NetconfReconnectingClientConfigurationBuilder.create()
                     .withAddress(new InetSocketAddress("localhost", 65000))
                     .withReconnectStrategy(reconnectStrategy)
