@@ -201,7 +201,7 @@ public class NetconfITSecureTest extends AbstractNetconfConfigTest {
         RemoteDevice<NetconfSessionPreferences, NetconfMessage, NetconfDeviceCommunicator> mockedRemoteDevice = mock(RemoteDevice.class);
         doNothing().when(mockedRemoteDevice).onRemoteSessionUp(any(NetconfSessionPreferences.class), any(NetconfDeviceCommunicator.class));
         doNothing().when(mockedRemoteDevice).onRemoteSessionDown();
-        return new NetconfDeviceCommunicator(new RemoteDeviceId("secure-test"), mockedRemoteDevice);
+        return new NetconfDeviceCommunicator(new RemoteDeviceId("secure-test", InetSocketAddress.createUnresolved("localhost", 22)), mockedRemoteDevice);
     }
 
     public AuthProvider getAuthProvider() throws Exception {
