@@ -93,9 +93,7 @@ public final class RemoteDeviceId {
     }
 
     private Host buildHost() {
-        return address.getAddress().getHostAddress() != null
-                ? HostBuilder.getDefaultInstance(address.getAddress().getHostAddress())
-                : HostBuilder.getDefaultInstance(address.getAddress().getHostName());
+        return HostBuilder.getDefaultInstance(address.getHostString());
     }
 
     public String getName() {
