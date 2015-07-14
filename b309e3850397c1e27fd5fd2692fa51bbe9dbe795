@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a7fa997_69809846",
+        "filename": "features/netconf-connector/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 2759
+      },
+      "writtenOn": "2015-07-14T13:44:54Z",
+      "side": 1,
+      "message": "I thought there was a decision when lithium was branched and we were bumping master that aaa features was going to be left removed from controller?\n\nThis is because this creates a cyclic dependency between controller and aaa causing neither repos to be able to build without the other.",
+      "revId": "b309e3850397c1e27fd5fd2692fa51bbe9dbe795",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
