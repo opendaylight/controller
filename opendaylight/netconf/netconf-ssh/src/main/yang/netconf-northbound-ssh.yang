@@ -9,6 +9,7 @@ module netconf-northbound-ssh {
     import threadpool {prefix th;}
     import netty {prefix netty;}
     import ietf-inet-types { prefix inet; revision-date 2010-09-24; }
+    import netconf-auth { prefix na; revision-date 2015-07-15; }
 
     organization "Cisco Systems, Inc.";
 
@@ -76,17 +77,13 @@ module netconf-northbound-ssh {
                 }
             }
 
-            // FIXME use auth provider from aaa instead
-            leaf username {
-                description "Specifies username credential";
-                type string;
+            container auth-provider {
+                uses config:service-ref {
+                    refine type {
+                        config:required-identity na:netconf-auth-provider;
+                    }
+                }
             }
-
-            leaf password {
-                description "Specifies password credential";
-                type string;
-            }
-
 
         }
     }

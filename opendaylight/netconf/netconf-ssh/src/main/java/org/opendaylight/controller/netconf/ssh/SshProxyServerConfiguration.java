@@ -12,16 +12,16 @@ import com.google.common.base.Preconditions;
 import io.netty.channel.local.LocalAddress;
 import java.net.InetSocketAddress;
 import org.apache.sshd.common.KeyPairProvider;
-import org.apache.sshd.server.PasswordAuthenticator;
+import org.opendaylight.controller.netconf.auth.AuthProvider;
 
 public final class SshProxyServerConfiguration {
     private final InetSocketAddress bindingAddress;
     private final LocalAddress localAddress;
-    private final PasswordAuthenticator authenticator;
+    private final AuthProvider authenticator;
     private final KeyPairProvider keyPairProvider;
     private final int idleTimeout;
 
-    SshProxyServerConfiguration(final InetSocketAddress bindingAddress, final LocalAddress localAddress, final PasswordAuthenticator authenticator, final KeyPairProvider keyPairProvider, final int idleTimeout) {
+    SshProxyServerConfiguration(final InetSocketAddress bindingAddress, final LocalAddress localAddress, final AuthProvider authenticator, final KeyPairProvider keyPairProvider, final int idleTimeout) {
         this.bindingAddress = Preconditions.checkNotNull(bindingAddress);
         this.localAddress = Preconditions.checkNotNull(localAddress);
         this.authenticator = Preconditions.checkNotNull(authenticator);
@@ -39,7 +39,7 @@ public final class SshProxyServerConfiguration {
         return localAddress;
     }
 
-    public PasswordAuthenticator getAuthenticator() {
+    public AuthProvider getAuthenticator() {
         return authenticator;
     }
 

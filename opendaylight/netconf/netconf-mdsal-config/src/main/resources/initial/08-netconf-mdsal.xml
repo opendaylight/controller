@@ -107,9 +107,10 @@
                   <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:config:netconf:northbound">prefix:netconf-server-dispatcher</type>
                   <name>netconf-mdsal-server-dispatcher</name>
               </dispatcher>
-
-              <username>admin</username>
-              <password>admin</password>
+              <auth-provider xmlns="urn:opendaylight:params:xml:ns:yang:controller:netconf:northbound:ssh">
+                  <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:config:netconf:auth">prefix:netconf-auth-provider</type>
+                  <name>default-auth-provider</name>
+              </auth-provider>
           </module>
 
 

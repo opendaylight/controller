@@ -11,12 +11,12 @@ package org.opendaylight.controller.netconf.ssh;
 import io.netty.channel.local.LocalAddress;
 import java.net.InetSocketAddress;
 import org.apache.sshd.common.KeyPairProvider;
-import org.apache.sshd.server.PasswordAuthenticator;
+import org.opendaylight.controller.netconf.auth.AuthProvider;
 
 public final class SshProxyServerConfigurationBuilder {
     private InetSocketAddress bindingAddress;
     private LocalAddress localAddress;
-    private PasswordAuthenticator authenticator;
+    private AuthProvider authenticator;
     private KeyPairProvider keyPairProvider;
     private int idleTimeout;
 
@@ -30,7 +30,7 @@ public final class SshProxyServerConfigurationBuilder {
         return this;
     }
 
-    public SshProxyServerConfigurationBuilder setAuthenticator(final PasswordAuthenticator authenticator) {
+    public SshProxyServerConfigurationBuilder setAuthenticator(final AuthProvider authenticator) {
         this.authenticator = authenticator;
         return this;
     }

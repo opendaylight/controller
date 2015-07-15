@@ -8,9 +8,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.concurrent.Executors;
-import org.apache.sshd.server.PasswordAuthenticator;
 import org.apache.sshd.server.keyprovider.PEMGeneratorHostKeyProvider;
-import org.apache.sshd.server.session.ServerSession;
 import org.opendaylight.controller.netconf.api.NetconfServerDispatcher;
 import org.opendaylight.controller.netconf.ssh.SshProxyServer;
 import org.opendaylight.controller.netconf.ssh.SshProxyServerConfigurationBuilder;
@@ -47,7 +45,7 @@ public class NetconfNorthboundSshModule extends org.opendaylight.controller.conf
         final SshProxyServerConfigurationBuilder sshProxyServerConfigurationBuilder = new SshProxyServerConfigurationBuilder();
         sshProxyServerConfigurationBuilder.setBindingAddress(bindingAddress);
         sshProxyServerConfigurationBuilder.setLocalAddress(localAddress);
-        sshProxyServerConfigurationBuilder.setAuthenticator(new UserAuthenticator(getUsername(), getPassword()));
+        sshProxyServerConfigurationBuilder.setAuthenticator(getAuthProviderDependency());
         sshProxyServerConfigurationBuilder.setIdleTimeout(Integer.MAX_VALUE);
         sshProxyServerConfigurationBuilder.setKeyPairProvider(new PEMGeneratorHostKeyProvider());
 
@@ -99,24 +97,6 @@ public class NetconfNorthboundSshModule extends org.opendaylight.controller.conf
             } else {
                 localServer.cancel(true);
             }
-        }
-    }
-
-
-    private static final class UserAuthenticator implements PasswordAuthenticator {
-
-        private final String username;
-        private final String password;
-
-        public UserAuthenticator(final String username, final String password) {
-            this.username = username;
-            this.password = password;
-        }
-
-        @Override
-        public boolean authenticate(final String username, final String password, final ServerSession session) {
-            // FIXME use aaa stuff here instead
-            return this.username.equals(username) && this.password.equals(password);
         }
     }
 }
