@@ -22,6 +22,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import org.opendaylight.controller.sal.restconf.impl.NormalizedNodeContext;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.apache.shiro.authz.annotation.RequiresRoles;
 
 /**
  * The URI hierarchy for the RESTCONF resources consists of an entry point container, 4 top-level resources, and 1
@@ -46,6 +48,7 @@ import org.opendaylight.controller.sal.restconf.impl.NormalizedNodeContext;
  * </ul>
  */
 @Path("/")
+@RequiresPermissions("protected:read")
 public interface RestconfService {
 
     public static final String XML = "+xml";
@@ -92,6 +95,7 @@ public interface RestconfService {
     @Consumes({ Draft02.MediaTypes.OPERATION + JSON, Draft02.MediaTypes.OPERATION + XML,
             Draft02.MediaTypes.DATA + JSON, Draft02.MediaTypes.DATA + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    @RequiresPermissions("protected:write")
     public NormalizedNodeContext invokeRpc(@Encoded @PathParam("identifier") String identifier, NormalizedNodeContext payload,
             @Context UriInfo uriInfo);
 
@@ -100,6 +104,7 @@ public interface RestconfService {
     @Produces({ Draft02.MediaTypes.OPERATION + JSON, Draft02.MediaTypes.OPERATION + XML,
             Draft02.MediaTypes.DATA + JSON, Draft02.MediaTypes.DATA + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    @RequiresPermissions("protected:write")
     @Deprecated // method isn't use anywhere
     public NormalizedNodeContext invokeRpc(@Encoded @PathParam("identifier") String identifier,
             @DefaultValue("") String noPayload, @Context UriInfo uriInfo);
@@ -122,12 +127,14 @@ public interface RestconfService {
     @Path("/config/{identifier:.+}")
     @Consumes({ Draft02.MediaTypes.DATA + JSON, Draft02.MediaTypes.DATA + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    @RequiresPermissions("protected:write")
     public Response updateConfigurationData(@Encoded @PathParam("identifier") String identifier, NormalizedNodeContext payload);
 
     @POST
     @Path("/config/{identifier:.+}")
     @Consumes({ Draft02.MediaTypes.DATA + JSON, Draft02.MediaTypes.DATA + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    @RequiresPermissions("protected:write")
     public Response createConfigurationData(@Encoded @PathParam("identifier") String identifier, NormalizedNodeContext payload,
             @Context UriInfo uriInfo);
 
@@ -135,10 +142,12 @@ public interface RestconfService {
     @Path("/config")
     @Consumes({ Draft02.MediaTypes.DATA + JSON, Draft02.MediaTypes.DATA + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    @RequiresPermissions("protected:write")
     public Response createConfigurationData(NormalizedNodeContext payload, @Context UriInfo uriInfo);
 
     @DELETE
     @Path("/config/{identifier:.+}")
+    @RequiresPermissions("protected:write")
     public Response deleteConfigurationData(@Encoded @PathParam("identifier") String identifier);
 
     @GET
@@ -149,6 +158,7 @@ public interface RestconfService {
     @Path("/streams")
     @Produces({ Draft02.MediaTypes.API + JSON, Draft02.MediaTypes.API + XML, MediaType.APPLICATION_JSON,
             MediaType.APPLICATION_XML, MediaType.TEXT_XML })
+    @RequiresRoles("admin")
     public NormalizedNodeContext getAvailableStreams(@Context UriInfo uriInfo);
 
 }
