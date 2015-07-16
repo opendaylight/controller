@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
@@ -13,18 +13,15 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
+import com.google.common.base.Optional;
 import java.io.InputStream;
-
 import javax.ws.rs.core.MediaType;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
-import org.opendaylight.controller.sal.rest.impl.XmlNormalizedNodeBodyReader;
-import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
-import org.opendaylight.controller.sal.restconf.impl.NormalizedNodeContext;
+import org.opendaylight.controller.rest.common.NormalizedNodeContext;
+import org.opendaylight.controller.rest.providers.XmlNormalizedNodeBodyReader;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
@@ -34,8 +31,6 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNodes;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-
-import com.google.common.base.Optional;
 
 /**
  * sal-rest-connector org.opendaylight.controller.sal.rest.impl.test.providers
@@ -51,10 +46,9 @@ public class TestXmlBodyReaderMountPoint extends AbstractBodyReaderTest {
     private final XmlNormalizedNodeBodyReader xmlBodyReader;
     private static SchemaContext schemaContext;
 
-    public TestXmlBodyReaderMountPoint() throws NoSuchFieldException,
-            SecurityException {
+    public TestXmlBodyReaderMountPoint() throws NoSuchFieldException, SecurityException {
         super();
-        xmlBodyReader = new XmlNormalizedNodeBodyReader();
+        xmlBodyReader = new XmlNormalizedNodeBodyReader(schemaController);
     }
 
     @Override
@@ -75,8 +69,8 @@ public class TestXmlBodyReaderMountPoint extends AbstractBodyReaderTest {
         when(mockMountService.getMountPoint(any(YangInstanceIdentifier.class)))
                 .thenReturn(Optional.of(mountInstance));
 
-        ControllerContext.getInstance().setMountService(mockMountService);
-        controllerContext.setSchemas(schemaContext);
+        schemaController.setMountService(mockMountService);
+        schemaController.setSchemas(schemaContext);
     }
 
     @Test

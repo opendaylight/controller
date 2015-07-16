@@ -23,14 +23,15 @@ import org.glassfish.jersey.test.JerseyTest;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.opendaylight.controller.sal.rest.impl.JsonNormalizedNodeBodyReader;
-import org.opendaylight.controller.sal.rest.impl.NormalizedNodeJsonBodyWriter;
-import org.opendaylight.controller.sal.rest.impl.NormalizedNodeXmlBodyWriter;
-import org.opendaylight.controller.sal.rest.impl.RestconfDocumentedExceptionMapper;
-import org.opendaylight.controller.sal.rest.impl.XmlNormalizedNodeBodyReader;
-import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
-import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
-import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
+import org.opendaylight.controller.rest.connector.impl.RestBrokerFacadeImpl;
+import org.opendaylight.controller.rest.connector.impl.RestSchemaControllerImpl;
+import org.opendaylight.controller.rest.errors.RestconfDocumentedExceptionMapper;
+import org.opendaylight.controller.rest.providers.JsonNormalizedNodeBodyReader;
+import org.opendaylight.controller.rest.providers.NormalizedNodeJsonBodyWriter;
+import org.opendaylight.controller.rest.providers.NormalizedNodeXmlBodyWriter;
+import org.opendaylight.controller.rest.providers.XmlNormalizedNodeBodyReader;
+import org.opendaylight.controller.rest.services.RestconfServiceBase;
+import org.opendaylight.controller.rest.services.impl.RestconfServiceBaseImpl;
 import org.opendaylight.controller.sal.restconf.impl.test.TestUtils;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.w3c.dom.Document;
@@ -39,19 +40,18 @@ import org.w3c.dom.Node;
 
 public class RestStream extends JerseyTest {
 
-    private static BrokerFacade brokerFacade;
-    private static RestconfImpl restconfImpl;
+    private static RestBrokerFacadeImpl brokerFacade;
+    private static RestconfServiceBase restconfImpl;
     private static SchemaContext schemaContextYangsIetf;
+    private static RestSchemaControllerImpl controllerContext;
 
     @BeforeClass
     public static void init() throws FileNotFoundException {
         schemaContextYangsIetf = TestUtils.loadSchemaContext("/full-versions/yangs");
-        final ControllerContext controllerContext = ControllerContext.getInstance();
+        controllerContext = new RestSchemaControllerImpl();
         controllerContext.setSchemas(schemaContextYangsIetf);
-        brokerFacade = mock(BrokerFacade.class);
-        restconfImpl = RestconfImpl.getInstance();
-        restconfImpl.setBroker(brokerFacade);
-        restconfImpl.setControllerContext(controllerContext);
+        brokerFacade = mock(RestBrokerFacadeImpl.class);
+        restconfImpl = new RestconfServiceBaseImpl(brokerFacade, controllerContext);
     }
 
     @Override
@@ -63,7 +63,8 @@ public class RestStream extends JerseyTest {
         // set(TestProperties.RECORD_LOG_LEVEL, Level.ALL.intValue());
         ResourceConfig resourceConfig = new ResourceConfig();
         resourceConfig = resourceConfig.registerInstances(restconfImpl, new NormalizedNodeJsonBodyWriter(),
-                new NormalizedNodeXmlBodyWriter(), new XmlNormalizedNodeBodyReader(), new JsonNormalizedNodeBodyReader());
+                new NormalizedNodeXmlBodyWriter(), new XmlNormalizedNodeBodyReader(controllerContext),
+                new JsonNormalizedNodeBodyReader(controllerContext));
         resourceConfig.registerClasses(RestconfDocumentedExceptionMapper.class);
         return resourceConfig;
     }

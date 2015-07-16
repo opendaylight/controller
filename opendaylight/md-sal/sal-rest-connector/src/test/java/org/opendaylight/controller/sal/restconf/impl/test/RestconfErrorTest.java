@@ -11,16 +11,15 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
-
 import java.util.HashMap;
 import java.util.Map;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.junit.Test;
-import org.opendaylight.controller.sal.restconf.impl.RestconfError;
-import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
-import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
+import org.opendaylight.controller.rest.errors.RestconfError;
+import org.opendaylight.controller.rest.errors.RestconfError.ErrorTag;
+import org.opendaylight.controller.rest.errors.RestconfError.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 
