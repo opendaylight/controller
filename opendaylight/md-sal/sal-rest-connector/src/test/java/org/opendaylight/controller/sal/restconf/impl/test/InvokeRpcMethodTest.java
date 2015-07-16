@@ -18,7 +18,6 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
-
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
@@ -41,15 +40,17 @@ import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcImplementationNotAvailableException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.md.sal.dom.spi.DefaultDOMRpcResult;
-import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
-import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
-import org.opendaylight.controller.sal.restconf.impl.InstanceIdentifierContext;
-import org.opendaylight.controller.sal.restconf.impl.NormalizedNodeContext;
-import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
-import org.opendaylight.controller.sal.restconf.impl.RestconfError;
-import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
-import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
-import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
+import org.opendaylight.controller.rest.common.InstanceIdentifierContext;
+import org.opendaylight.controller.rest.common.NormalizedNodeContext;
+import org.opendaylight.controller.rest.connector.RestBrokerFacade;
+import org.opendaylight.controller.rest.connector.impl.RestBrokerFacadeImpl;
+import org.opendaylight.controller.rest.connector.impl.RestSchemaControllerImpl;
+import org.opendaylight.controller.rest.errors.RestconfDocumentedException;
+import org.opendaylight.controller.rest.errors.RestconfError;
+import org.opendaylight.controller.rest.errors.RestconfError.ErrorTag;
+import org.opendaylight.controller.rest.errors.RestconfError.ErrorType;
+import org.opendaylight.controller.rest.services.RestconfServiceOperations;
+import org.opendaylight.controller.rest.services.impl.RestconfServiceOperationsImpl;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
@@ -71,8 +72,9 @@ import org.opendaylight.yangtools.yang.model.util.SchemaNodeUtils;
 
 public class InvokeRpcMethodTest {
 
-    private RestconfImpl restconfImpl = null;
-    private static ControllerContext controllerContext = null;
+    private RestconfServiceOperations restOperServ;
+    private RestBrokerFacade brokerMock;
+    private static RestSchemaControllerImpl schemaController = null;
     private static UriInfo uriInfo;
 
 
@@ -84,8 +86,8 @@ public class InvokeRpcMethodTest {
         final Module module = TestUtils.resolveModule("invoke-rpc-module", allModules);
         assertNotNull(module);
         final SchemaContext schemaContext = TestUtils.loadSchemaContext(allModules);
-        controllerContext = spy(ControllerContext.getInstance());
-        controllerContext.setSchemas(schemaContext);
+        schemaController = spy(new RestSchemaControllerImpl());
+        schemaController.setSchemas(schemaContext);
         uriInfo = mock(UriInfo.class);
         final MultivaluedMap<String, String> map = new MultivaluedHashMap<>();
         map.put("prettyPrint", Collections.singletonList("true"));
@@ -94,8 +96,8 @@ public class InvokeRpcMethodTest {
 
     @Before
     public void initMethod() {
-        restconfImpl = RestconfImpl.getInstance();
-        restconfImpl.setControllerContext(controllerContext);
+        brokerMock = mock(RestBrokerFacade.class);
+        restOperServ = new RestconfServiceOperationsImpl(brokerMock, schemaController);
     }
 
     /**
@@ -106,29 +108,22 @@ public class InvokeRpcMethodTest {
     @Test
     @Ignore
     public void invokeRpcMethodTest() {
-        final ControllerContext contContext = controllerContext;
         try {
-            contContext.findModuleNameByNamespace(new URI("invoke:rpc:module"));
+            schemaController.findModuleNameByNamespace(new URI("invoke:rpc:module"));
         } catch (final URISyntaxException e) {
             assertTrue("Uri wasn't created sucessfuly", false);
         }
 
-        final BrokerFacade mockedBrokerFacade = mock(BrokerFacade.class);
-
-        final RestconfImpl restconf = RestconfImpl.getInstance();
-        restconf.setBroker(mockedBrokerFacade);
-        restconf.setControllerContext(contContext);
-
         final NormalizedNodeContext payload = prepareDomPayload();
 
-        final NormalizedNodeContext rpcResponse = restconf.invokeRpc("invoke-rpc-module:rpc-test", payload, uriInfo);
+        final NormalizedNodeContext rpcResponse = restOperServ.invokeRpc("invoke-rpc-module:rpc-test", payload, uriInfo);
         assertTrue(rpcResponse != null);
         assertTrue(rpcResponse.getData() == null);
 
     }
 
     private NormalizedNodeContext prepareDomPayload() {
-        final SchemaContext schema = controllerContext.getGlobalSchema();
+        final SchemaContext schema = schemaController.getGlobalSchema();
         final Module rpcModule = schema.findModuleByName("invoke-rpc-module", null);
         assertNotNull(rpcModule);
         final QName rpcQName = QName.create(rpcModule.getQNameModule(), "rpc-test");
@@ -165,17 +160,13 @@ public class InvokeRpcMethodTest {
         final DOMRpcException exception = new DOMRpcImplementationNotAvailableException("testExeption");
         final CheckedFuture<DOMRpcResult, DOMRpcException> future = Futures.immediateFailedCheckedFuture(exception);
 
-        final BrokerFacade brokerFacade = mock(BrokerFacade.class);
-
         final QName qname = QName.create("(http://netconfcentral.org/ns/toaster?revision=2009-11-20)cancel-toast");
         final SchemaPath type = SchemaPath.create(true, qname);
 
-        when(brokerFacade.invokeRpc(eq(type), any(NormalizedNode.class))).thenReturn(future);
-
-        restconfImpl.setBroker(brokerFacade);
+        when(brokerMock.invokeRpc(eq(type), any(NormalizedNode.class))).thenReturn(future);
 
         try {
-            restconfImpl.invokeRpc("toaster:cancel-toast", "", uriInfo);
+            restOperServ.invokeRpc("toaster:cancel-toast", "", uriInfo);
             fail("Expected an exception to be thrown.");
         } catch (final RestconfDocumentedException e) {
             verifyRestconfDocumentedException(e, 0, ErrorType.APPLICATION, ErrorTag.OPERATION_FAILED,
@@ -219,13 +210,12 @@ public class InvokeRpcMethodTest {
         final SchemaPath path = SchemaPath.create(true,
                 QName.create("(http://netconfcentral.org/ns/toaster?revision=2009-11-20)cancel-toast"));
 
-        final BrokerFacade brokerFacade = mock(BrokerFacade.class);
+        final RestBrokerFacadeImpl brokerFacade = mock(RestBrokerFacadeImpl.class);
         when(brokerFacade.invokeRpc(eq(path), any(NormalizedNode.class))).thenReturn(future);
-
-        restconfImpl.setBroker(brokerFacade);
+        final RestconfServiceOperations operServices = new RestconfServiceOperationsImpl(brokerFacade, schemaController);
 
         try {
-            restconfImpl.invokeRpc("toaster:cancel-toast", "", uriInfo);
+            operServices.invokeRpc("toaster:cancel-toast", "", uriInfo);
             fail("Expected an exception to be thrown.");
         } catch (final RestconfDocumentedException e) {
             verifyRestconfDocumentedException(e, 0, ErrorType.TRANSPORT, ErrorTag.OPERATION_FAILED, Optional.of("foo"),
@@ -244,12 +234,12 @@ public class InvokeRpcMethodTest {
         final QName qname = QName.create("(http://netconfcentral.org/ns/toaster?revision=2009-11-20)cancel-toast");
         final SchemaPath path = SchemaPath.create(true, qname);
 
-        final BrokerFacade brokerFacade = mock(BrokerFacade.class);
+        final RestBrokerFacadeImpl brokerFacade = mock(RestBrokerFacadeImpl.class);
         when(brokerFacade.invokeRpc(eq(path), any (NormalizedNode.class))).thenReturn(future);
 
-        restconfImpl.setBroker(brokerFacade);
+        // restconfImpl.setBroker(brokerFacade);
 
-        final NormalizedNodeContext output = restconfImpl.invokeRpc("toaster:cancel-toast", "", uriInfo);
+        final NormalizedNodeContext output = restOperServ.invokeRpc("toaster:cancel-toast", "", uriInfo);
         assertNotNull(output);
         assertEquals(null, output.getData());
         // additional validation in the fact that the restconfImpl does not
@@ -259,7 +249,7 @@ public class InvokeRpcMethodTest {
     @Test
     public void testInvokeRpcMethodExpectingNoPayloadButProvidePayload() {
         try {
-            restconfImpl.invokeRpc("toaster:cancel-toast", " a payload ", uriInfo);
+            restOperServ.invokeRpc("toaster:cancel-toast", " a payload ", uriInfo);
             fail("Expected an exception");
         } catch (final RestconfDocumentedException e) {
             verifyRestconfDocumentedException(e, 0, ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE,
@@ -270,7 +260,7 @@ public class InvokeRpcMethodTest {
     @Test
     public void testInvokeRpcMethodWithBadMethodName() {
         try {
-            restconfImpl.invokeRpc("toaster:bad-method", "", uriInfo);
+            restOperServ.invokeRpc("toaster:bad-method", "", uriInfo);
             fail("Expected an exception");
         } catch (final RestconfDocumentedException e) {
             verifyRestconfDocumentedException(e, 0, ErrorType.RPC, ErrorTag.UNKNOWN_ELEMENT,
@@ -286,7 +276,7 @@ public class InvokeRpcMethodTest {
         final SchemaPath path = SchemaPath.create(true,
                 QName.create("(http://netconfcentral.org/ns/toaster?revision=2009-11-20)make-toast"));
 
-        final SchemaContext schemaContext = controllerContext.getGlobalSchema();
+        final SchemaContext schemaContext = schemaController.getGlobalSchema();
         final Module rpcModule = schemaContext.findModuleByName("toaster", null);
         assertNotNull(rpcModule);
         final QName rpcQName = QName.create(rpcModule.getQNameModule(), "make-toast");
@@ -313,11 +303,11 @@ public class InvokeRpcMethodTest {
         final NormalizedNodeContext payload = new NormalizedNodeContext(new InstanceIdentifierContext<>(null, rpcInputSchemaNode,
                 null, schemaContext), containerBuilder.build());
 
-        final BrokerFacade brokerFacade = mock(BrokerFacade.class);
+        final RestBrokerFacadeImpl brokerFacade = mock(RestBrokerFacadeImpl.class);
         when(brokerFacade.invokeRpc(eq(path), any(NormalizedNode.class))).thenReturn(future);
-        restconfImpl.setBroker(brokerFacade);
+        // restconfImpl.setBroker(brokerFacade);
 
-        final NormalizedNodeContext output = restconfImpl.invokeRpc("toaster:make-toast", payload, uriInfo);
+        final NormalizedNodeContext output = restOperServ.invokeRpc("toaster:make-toast", payload, uriInfo);
         assertNotNull(output);
         assertEquals(null, output.getData());
         // additional validation in the fact that the restconfImpl does not
@@ -327,7 +317,7 @@ public class InvokeRpcMethodTest {
     @Test
     public void testThrowExceptionWhenSlashInModuleName() {
         try {
-            restconfImpl.invokeRpc("toaster/slash", "", uriInfo);
+            restOperServ.invokeRpc("toaster/slash", "", uriInfo);
             fail("Expected an exception.");
         } catch (final RestconfDocumentedException e) {
             verifyRestconfDocumentedException(e, 0, ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE,
@@ -337,7 +327,7 @@ public class InvokeRpcMethodTest {
 
     @Test
     public void testInvokeRpcWithNoPayloadWithOutput_Success() {
-        final SchemaContext schema = controllerContext.getGlobalSchema();
+        final SchemaContext schema = schemaController.getGlobalSchema();
         final Module rpcModule = schema.findModuleByName("toaster", null);
         assertNotNull(rpcModule);
         final QName rpcQName = QName.create(rpcModule.getQNameModule(), "testOutput");
@@ -370,12 +360,12 @@ public class InvokeRpcMethodTest {
         final DOMRpcResult result = new DefaultDOMRpcResult(container);
         final CheckedFuture<DOMRpcResult, DOMRpcException> future = Futures.immediateCheckedFuture(result);
 
-        final BrokerFacade brokerFacade = mock(BrokerFacade.class);
+        final RestBrokerFacadeImpl brokerFacade = mock(RestBrokerFacadeImpl.class);
         when(brokerFacade.invokeRpc(eq(rpcDef.getPath()), any(NormalizedNode.class))).thenReturn(future);
 
-        restconfImpl.setBroker(brokerFacade);
+        final RestconfServiceOperations operServ = new RestconfServiceOperationsImpl(brokerFacade, schemaController);
 
-        final NormalizedNodeContext output = restconfImpl.invokeRpc("toaster:testOutput", "", uriInfo);
+        final NormalizedNodeContext output = operServ.invokeRpc("toaster:testOutput", "", uriInfo);
         assertNotNull(output);
         assertNotNull(output.getData());
         assertSame(container, output.getData());

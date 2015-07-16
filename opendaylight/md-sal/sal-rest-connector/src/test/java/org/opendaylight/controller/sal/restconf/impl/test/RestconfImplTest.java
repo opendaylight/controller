@@ -13,16 +13,18 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
-
 import java.io.FileNotFoundException;
 import java.text.ParseException;
 import java.util.Set;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
-import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
-import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
+import org.mockito.Mockito;
+import org.opendaylight.controller.rest.connector.RestBrokerFacade;
+import org.opendaylight.controller.rest.connector.impl.RestBrokerFacadeImpl;
+import org.opendaylight.controller.rest.connector.impl.RestSchemaControllerImpl;
+import org.opendaylight.controller.rest.services.RestconfServiceData;
+import org.opendaylight.controller.rest.services.impl.RestconfServiceDataImpl;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
@@ -34,23 +36,23 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
  */
 public class RestconfImplTest {
 
-    private RestconfImpl restconfImpl = null;
-    private static ControllerContext controllerContext = null;
+    private RestconfServiceData restDataServ = null;
+    private static RestSchemaControllerImpl controllerContext = null;
 
     @BeforeClass
     public static void init() throws FileNotFoundException {
         final Set<Module> allModules = TestUtils.loadModulesFrom("/full-versions/yangs");
         assertNotNull(allModules);
         final SchemaContext schemaContext = TestUtils.loadSchemaContext(allModules);
-        controllerContext = spy(ControllerContext.getInstance());
+        controllerContext = spy(new RestSchemaControllerImpl());
         controllerContext.setSchemas(schemaContext);
 
     }
 
     @Before
     public void initMethod() {
-        restconfImpl = RestconfImpl.getInstance();
-        restconfImpl.setControllerContext(controllerContext);
+        final RestBrokerFacade broker = Mockito.mock(RestBrokerFacade.class);
+        restDataServ = new RestconfServiceDataImpl(broker, controllerContext);
     }
 
     @SuppressWarnings("unchecked")
@@ -59,7 +61,7 @@ public class RestconfImplTest {
         @SuppressWarnings("rawtypes")
         final
         NormalizedNode normalizedNodeData = TestUtils.prepareNormalizedNodeWithIetfInterfacesInterfacesData();
-        final BrokerFacade brokerFacade = mock(BrokerFacade.class);
+        final RestBrokerFacadeImpl brokerFacade = mock(RestBrokerFacadeImpl.class);
         when(brokerFacade.readOperationalData(any(YangInstanceIdentifier.class))).thenReturn(normalizedNodeData);
         assertEquals(normalizedNodeData,
                 brokerFacade.readOperationalData(null));

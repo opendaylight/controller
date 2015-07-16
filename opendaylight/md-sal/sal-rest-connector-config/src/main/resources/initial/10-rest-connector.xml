@@ -12,7 +12,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <modules xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
         <!-- default OF-switch-connection-provider (port 6633) -->
         <module>
-          <type xmlns:rest="urn:opendaylight:params:xml:ns:yang:controller:md:sal:rest:connector">rest:rest-connector-impl</type>
+          <type xmlns:rest="urn:opendaylight:params:xml:ns:yang:controller:rest:connector">rest:rest-connector-impl</type>
           <name>rest-connector-default-impl</name>
           <websocket-port>8185</websocket-port>
           <dom-broker>
@@ -24,7 +24,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 
       <services xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
         <service>
-          <type xmlns:rest="urn:opendaylight:params:xml:ns:yang:controller:md:sal:rest:connector">rest:rest-connector</type>
+          <type xmlns:rest="urn:opendaylight:params:xml:ns:yang:controller:rest:connector">rest:rest-connector</type>
           <instance>
             <name>rest-connector-default</name>
             <provider>
@@ -36,6 +36,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     </data>
   </configuration>
   <required-capabilities>
-      <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:rest:connector?module=opendaylight-rest-connector&amp;revision=2014-07-24</capability>
+      <capability>urn:opendaylight:params:xml:ns:yang:controller:rest:connector?module=opendaylight-rest-connector&amp;revision=2014-07-24</capability>
   </required-capabilities>
 </snapshot>

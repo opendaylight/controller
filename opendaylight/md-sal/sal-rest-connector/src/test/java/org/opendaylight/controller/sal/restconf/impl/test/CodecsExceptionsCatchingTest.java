@@ -11,27 +11,29 @@ import org.glassfish.jersey.test.JerseyTest;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.opendaylight.controller.sal.rest.impl.JsonNormalizedNodeBodyReader;
-import org.opendaylight.controller.sal.rest.impl.NormalizedNodeJsonBodyWriter;
-import org.opendaylight.controller.sal.rest.impl.NormalizedNodeXmlBodyWriter;
-import org.opendaylight.controller.sal.rest.impl.RestconfDocumentedExceptionMapper;
-import org.opendaylight.controller.sal.rest.impl.XmlNormalizedNodeBodyReader;
-import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
-import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
+import org.mockito.Mockito;
+import org.opendaylight.controller.rest.connector.RestBrokerFacade;
+import org.opendaylight.controller.rest.connector.impl.RestSchemaControllerImpl;
+import org.opendaylight.controller.rest.errors.RestconfDocumentedExceptionMapper;
+import org.opendaylight.controller.rest.providers.JsonNormalizedNodeBodyReader;
+import org.opendaylight.controller.rest.providers.NormalizedNodeJsonBodyWriter;
+import org.opendaylight.controller.rest.providers.NormalizedNodeXmlBodyWriter;
+import org.opendaylight.controller.rest.providers.XmlNormalizedNodeBodyReader;
+import org.opendaylight.controller.rest.services.RestconfServiceData;
+import org.opendaylight.controller.rest.services.impl.RestconfServiceDataImpl;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public class CodecsExceptionsCatchingTest extends JerseyTest {
 
-    private static RestconfImpl restConf;
-    private static ControllerContext controllerContext = ControllerContext.getInstance();
+    private static RestconfServiceData restDataServ;
+    private static RestSchemaControllerImpl controllerContext = new RestSchemaControllerImpl();
 
     @BeforeClass
     public static void init() throws FileNotFoundException {
-        restConf = RestconfImpl.getInstance();
-        controllerContext = ControllerContext.getInstance();
+        final RestBrokerFacade broker = Mockito.mock(RestBrokerFacade.class);
         final SchemaContext schemaContext = TestUtils.loadSchemaContext("/decoding-exception/yang");
         controllerContext.setGlobalSchema(schemaContext);
-        restConf.setControllerContext(controllerContext);
+        restDataServ = new RestconfServiceDataImpl(broker, controllerContext);
     }
 
     @Override
@@ -42,8 +44,9 @@ public class CodecsExceptionsCatchingTest extends JerseyTest {
         // enable(TestProperties.RECORD_LOG_LEVEL);
         // set(TestProperties.RECORD_LOG_LEVEL, Level.ALL.intValue());
         ResourceConfig resourceConfig = new ResourceConfig();
-        resourceConfig = resourceConfig.registerInstances(restConf, new NormalizedNodeJsonBodyWriter(),
-                new NormalizedNodeXmlBodyWriter(), new XmlNormalizedNodeBodyReader(), new JsonNormalizedNodeBodyReader());
+        resourceConfig = resourceConfig.registerInstances(restDataServ, new NormalizedNodeJsonBodyWriter(),
+                new NormalizedNodeXmlBodyWriter(), new XmlNormalizedNodeBodyReader(controllerContext),
+                new JsonNormalizedNodeBodyReader(controllerContext));
         resourceConfig.registerClasses(RestconfDocumentedExceptionMapper.class);
         return resourceConfig;
     }

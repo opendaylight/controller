@@ -18,12 +18,13 @@ import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.rest.common.TestRestconfUtils;
-import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
-import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
-import org.opendaylight.controller.sal.restconf.impl.InstanceIdentifierContext;
-import org.opendaylight.controller.sal.restconf.impl.NormalizedNodeContext;
-import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
-import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
+import org.opendaylight.controller.rest.common.InstanceIdentifierContext;
+import org.opendaylight.controller.rest.common.NormalizedNodeContext;
+import org.opendaylight.controller.rest.connector.impl.RestBrokerFacadeImpl;
+import org.opendaylight.controller.rest.connector.impl.RestSchemaControllerImpl;
+import org.opendaylight.controller.rest.errors.RestconfDocumentedException;
+import org.opendaylight.controller.rest.services.RestconfServiceData;
+import org.opendaylight.controller.rest.services.impl.RestconfServiceDataImpl;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
@@ -44,20 +45,21 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 @RunWith(MockitoJUnitRunner.class)
 public class RestPutConfigTest {
 
-    private RestconfImpl restconfService;
-    private ControllerContext controllerCx;
+    // private RestconfImpl restconfService;
+    private RestconfServiceData restServiceData;
+    private RestSchemaControllerImpl controllerCx;
     private SchemaContext schemaCx;
 
     @Mock
-    private BrokerFacade brokerFacade;
+    private RestBrokerFacadeImpl brokerFacade;
 
     @Before
     public void init() {
-        restconfService = RestconfImpl.getInstance();
-        controllerCx = ControllerContext.getInstance();
+        // restconfService = RestconfImpl.getInstance();
+        controllerCx = new RestSchemaControllerImpl();
         schemaCx = TestRestconfUtils.loadSchemaContext("/test-config-data/yang1/", null);
         controllerCx.setSchemas(schemaCx);
-        restconfService.setControllerContext(controllerCx);
+        restServiceData = new RestconfServiceDataImpl(brokerFacade, controllerCx);
     }
 
     @Test
@@ -74,7 +76,7 @@ public class RestPutConfigTest {
 
         mockingBrokerPut(iiCx.getInstanceIdentifier(), data);
 
-        restconfService.updateConfigurationData(identifier, payload);
+        restServiceData.updateConfigurationData(identifier, payload);
     }
 
     @Test
@@ -91,7 +93,7 @@ public class RestPutConfigTest {
 
         mockingBrokerPut(iiCx.getInstanceIdentifier(), data);
 
-        restconfService.updateConfigurationData(identifier, payload);
+        restServiceData.updateConfigurationData(identifier, payload);
     }
 
     @Test(expected=RestconfDocumentedException.class)
@@ -114,12 +116,12 @@ public class RestPutConfigTest {
 
         mockingBrokerPut(iiCx.getInstanceIdentifier(), data);
 
-        restconfService.updateConfigurationData(identifier, payload);
+        restServiceData.updateConfigurationData(identifier, payload);
     }
 
     private void mockingBrokerPut(final YangInstanceIdentifier yii, final NormalizedNode<?, ?> data) {
         final CheckedFuture<Void, TransactionCommitFailedException> checkedFuture = Futures.immediateCheckedFuture(null);
         Mockito.when(brokerFacade.commitConfigurationDataPut(schemaCx, yii, data)).thenReturn(checkedFuture);
-        restconfService.setBroker(brokerFacade);
+        // restconfService.setBroker(brokerFacade);
     }
 }
