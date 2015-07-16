@@ -60,6 +60,8 @@
     </dependency>
 
     <!-- Jersey -->
+<!-- FIXME remove dependencies for jersey 1.17 -->
+<!-- 
     <dependency>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-core</artifactId>
@@ -72,6 +74,7 @@
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-servlet</artifactId>
     </dependency>
+ -->
 
     <!-- Netty -->
     <dependency>

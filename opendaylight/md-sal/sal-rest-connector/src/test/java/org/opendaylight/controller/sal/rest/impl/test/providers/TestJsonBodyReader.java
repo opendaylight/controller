@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
@@ -18,8 +18,8 @@ import java.net.URI;
 import javax.ws.rs.core.MediaType;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.opendaylight.controller.sal.rest.impl.JsonNormalizedNodeBodyReader;
-import org.opendaylight.controller.sal.restconf.impl.NormalizedNodeContext;
+import org.opendaylight.controller.rest.common.NormalizedNodeContext;
+import org.opendaylight.controller.rest.providers.JsonNormalizedNodeBodyReader;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
@@ -48,7 +48,7 @@ public class TestJsonBodyReader extends AbstractBodyReaderTest {
 
     public TestJsonBodyReader () throws NoSuchFieldException, SecurityException {
         super();
-        jsonBodyReader = new JsonNormalizedNodeBodyReader();
+        jsonBodyReader = new JsonNormalizedNodeBodyReader(schemaController);
     }
 
     @Override
@@ -61,7 +61,7 @@ public class TestJsonBodyReader extends AbstractBodyReaderTest {
         schemaContext = schemaContextLoader("/instanceidentifier/yang", schemaContext);
         schemaContext = schemaContextLoader("/modules", schemaContext);
         schemaContext = schemaContextLoader("/invoke-rpc", schemaContext);
-        controllerContext.setSchemas(schemaContext);
+        schemaController.setSchemas(schemaContext);
     }
 
     @Test
@@ -81,7 +81,7 @@ public class TestJsonBodyReader extends AbstractBodyReaderTest {
     @Test
     public void moduleSubContainerDataPutTest() throws Exception {
         final DataSchemaNode dataSchemaNode = schemaContext.getDataChildByName("cont");
-        QName cont1QName = QName.create(dataSchemaNode.getQName(), "cont1");
+        final QName cont1QName = QName.create(dataSchemaNode.getQName(), "cont1");
         final YangInstanceIdentifier dataII = YangInstanceIdentifier.of(dataSchemaNode.getQName()).node(cont1QName);
         final DataSchemaNode dataSchemaNodeOnPath = ((DataNodeContainer) dataSchemaNode).getDataChildByName(cont1QName);
         final String uri = "instance-identifier-module:cont/cont1";
@@ -97,7 +97,7 @@ public class TestJsonBodyReader extends AbstractBodyReaderTest {
     @Test
     public void moduleSubContainerDataPostTest() throws Exception {
         final DataSchemaNode dataSchemaNode = schemaContext.getDataChildByName("cont");
-        QName cont1QName = QName.create(dataSchemaNode.getQName(), "cont1");
+        final QName cont1QName = QName.create(dataSchemaNode.getQName(), "cont1");
         final YangInstanceIdentifier dataII = YangInstanceIdentifier.of(dataSchemaNode.getQName()).node(cont1QName);
         final String uri = "instance-identifier-module:cont";
         mockBodyReader(uri, jsonBodyReader, true);
@@ -113,8 +113,8 @@ public class TestJsonBodyReader extends AbstractBodyReaderTest {
     public void moduleSubContainerAugmentDataPostTest() throws Exception {
         final DataSchemaNode dataSchemaNode = schemaContext.getDataChildByName("cont");
         final Module augmentModule = schemaContext.findModuleByNamespace(new URI("augment:module")).iterator().next();
-        QName contAugmentQName = QName.create(augmentModule.getQNameModule(), "cont-augment");
-        YangInstanceIdentifier.AugmentationIdentifier augII = new YangInstanceIdentifier.AugmentationIdentifier(
+        final QName contAugmentQName = QName.create(augmentModule.getQNameModule(), "cont-augment");
+        final YangInstanceIdentifier.AugmentationIdentifier augII = new YangInstanceIdentifier.AugmentationIdentifier(
                 Sets.newHashSet(contAugmentQName));
         final YangInstanceIdentifier dataII = YangInstanceIdentifier.of(dataSchemaNode.getQName())
                 .node(augII).node(contAugmentQName);
@@ -133,12 +133,12 @@ public class TestJsonBodyReader extends AbstractBodyReaderTest {
     public void moduleSubContainerChoiceAugmentDataPostTest() throws Exception {
         final DataSchemaNode dataSchemaNode = schemaContext.getDataChildByName("cont");
         final Module augmentModule = schemaContext.findModuleByNamespace(new URI("augment:module")).iterator().next();
-        QName augmentChoice1QName = QName.create(augmentModule.getQNameModule(), "augment-choice1");
-        QName augmentChoice2QName = QName.create(augmentChoice1QName, "augment-choice2");
+        final QName augmentChoice1QName = QName.create(augmentModule.getQNameModule(), "augment-choice1");
+        final QName augmentChoice2QName = QName.create(augmentChoice1QName, "augment-choice2");
         final QName containerQName = QName.create(augmentChoice1QName, "case-choice-case-container1");
-        YangInstanceIdentifier.AugmentationIdentifier augChoice1II = new YangInstanceIdentifier.AugmentationIdentifier(
+        final YangInstanceIdentifier.AugmentationIdentifier augChoice1II = new YangInstanceIdentifier.AugmentationIdentifier(
                 Sets.newHashSet(augmentChoice1QName));
-        YangInstanceIdentifier.AugmentationIdentifier augChoice2II = new YangInstanceIdentifier.AugmentationIdentifier(
+        final YangInstanceIdentifier.AugmentationIdentifier augChoice2II = new YangInstanceIdentifier.AugmentationIdentifier(
                 Sets.newHashSet(augmentChoice2QName));
         final YangInstanceIdentifier dataII = YangInstanceIdentifier.of(dataSchemaNode.getQName())
                 .node(augChoice1II).node(augmentChoice1QName).node(augChoice2II).node(augmentChoice2QName)

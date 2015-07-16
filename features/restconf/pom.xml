@@ -131,18 +131,13 @@
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
     </dependency>
-
     <dependency>
-      <groupId>com.sun.jersey</groupId>
-      <artifactId>jersey-core</artifactId>
+      <groupId>javax.ws.rs</groupId>
+      <artifactId>javax.ws.rs-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.sun.jersey</groupId>
-      <artifactId>jersey-server</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.sun.jersey</groupId>
-      <artifactId>jersey-servlet</artifactId>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
     </dependency>
     <dependency>
       <groupId>io.netty</groupId>
@@ -177,7 +172,7 @@
       <classifier>config</classifier>
     </dependency>
 
-        <dependency>
+    <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-annotations</artifactId>
     </dependency>
@@ -213,6 +208,11 @@
     <dependency>
         <groupId>org.opendaylight.yangtools</groupId>
         <artifactId>yang-data-codec-gson</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.opendaylight.yangtools</groupId>
+        <artifactId>yang-model-export</artifactId>
+        <version>${yangtools.version}</version>
     </dependency>
 
     <dependency>
