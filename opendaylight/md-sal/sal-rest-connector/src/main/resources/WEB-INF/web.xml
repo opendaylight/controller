@@ -10,13 +10,35 @@
             <param-name>javax.ws.rs.Application</param-name>
             <param-value>org.opendaylight.controller.sal.rest.impl.RestconfApplication</param-value>
         </init-param>
-        <!-- AAA Auth Filter -->
         <init-param>
-            <param-name>com.sun.jersey.spi.container.ContainerRequestFilters</param-name>
-            <param-value> org.opendaylight.aaa.sts.TokenAuthFilter</param-value>
+            <param-name>com.sun.jersey.spi.container.ResourceFilters</param-name>
+            <param-value>org.secnod.shiro.jersey.ShiroResourceFilterFactory</param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
+
+    <context-param>
+        <param-name>shiroConfigLocations</param-name>
+        <param-value>file:/shiro.ini</param-value>
+    </context-param>
+
+    <listener>
+        <listener-class>org.apache.shiro.web.env.EnvironmentLoaderListener</listener-class>
+    </listener>
+
+    <filter>
+        <filter-name>ShiroFilter</filter-name>
+        <filter-class>org.apache.shiro.web.servlet.ShiroFilter</filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>ShiroFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+        <dispatcher>INCLUDE</dispatcher>
+        <dispatcher>ERROR</dispatcher>
+    </filter-mapping>
 
     <servlet-mapping>
         <servlet-name>JAXRSRestconf</servlet-name>
