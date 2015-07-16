@@ -17,9 +17,9 @@ import javax.ws.rs.core.MediaType;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.rest.common.TestRestconfUtils;
-import org.opendaylight.controller.sal.rest.impl.NormalizedNodeJsonBodyWriter;
+import org.opendaylight.controller.rest.common.NormalizedNodeContext;
+import org.opendaylight.controller.rest.providers.NormalizedNodeJsonBodyWriter;
 import org.opendaylight.controller.sal.rest.impl.test.providers.AbstractBodyReaderTest;
-import org.opendaylight.controller.sal.restconf.impl.NormalizedNodeContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public class NnToJsonWithAugmentTest extends AbstractBodyReaderTest {
@@ -37,7 +37,7 @@ public class NnToJsonWithAugmentTest extends AbstractBodyReaderTest {
     public static void initialize() {
         schemaContext = schemaContextLoader("/nn-to-json/augmentation",
                 schemaContext);
-        controllerContext.setSchemas(schemaContext);
+        restSchemaCx.setSchemas(schemaContext);
     }
 
     @Test
@@ -47,7 +47,8 @@ public class NnToJsonWithAugmentTest extends AbstractBodyReaderTest {
         final String pathToInputFile = "/nn-to-json/augmentation/xml/data.xml";
 
         final NormalizedNodeContext testNN = TestRestconfUtils
-                .loadNormalizedContextFromXmlFile(pathToInputFile, uri);
+.loadNormalizedContextFromXmlFile(pathToInputFile, uri,
+                restSchemaCx);
 
         final OutputStream output = new ByteArrayOutputStream();
         xmlBodyWriter

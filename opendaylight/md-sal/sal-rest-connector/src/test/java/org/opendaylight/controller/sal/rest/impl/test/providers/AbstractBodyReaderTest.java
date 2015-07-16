@@ -11,21 +11,18 @@ package org.opendaylight.controller.sal.rest.impl.test.providers;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
 import java.lang.reflect.Field;
 import java.util.Collections;
-
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.UriInfo;
-
 import org.opendaylight.controller.md.sal.rest.common.TestRestconfUtils;
-import org.opendaylight.controller.sal.rest.api.RestconfConstants;
-import org.opendaylight.controller.sal.rest.impl.AbstractIdentifierAwareJaxRsProvider;
-import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
-import org.opendaylight.controller.sal.restconf.impl.NormalizedNodeContext;
+import org.opendaylight.controller.rest.common.NormalizedNodeContext;
+import org.opendaylight.controller.rest.common.RestconfConstants;
+import org.opendaylight.controller.rest.connector.impl.RestSchemaContextImpl;
+import org.opendaylight.controller.rest.providers.AbstractIdentifierAwareJaxRsProvider;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 /**
@@ -39,8 +36,9 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
  */
 public abstract class AbstractBodyReaderTest {
 
-    protected final static ControllerContext controllerContext = ControllerContext
-            .getInstance();
+    // protected final static RestSchemaContextImpl controllerContext = RestSchemaContextImpl
+    // .getInstance();
+    protected final static RestSchemaContextImpl restSchemaCx = new RestSchemaContextImpl();
     protected final MediaType mediaType;
     private static Field uriField;
     private static Field requestField;

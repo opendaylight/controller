@@ -20,10 +20,10 @@ import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import org.opendaylight.controller.rest.common.InstanceIdentifierContext;
+import org.opendaylight.controller.rest.common.NormalizedNodeContext;
+import org.opendaylight.controller.rest.connector.RestSchemaContext;
 import org.opendaylight.controller.sal.rest.impl.test.providers.TestJsonBodyWriter;
-import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
-import org.opendaylight.controller.sal.restconf.impl.InstanceIdentifierContext;
-import org.opendaylight.controller.sal.restconf.impl.NormalizedNodeContext;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.codec.xml.XmlUtils;
 import org.opendaylight.yangtools.yang.data.impl.schema.transform.dom.parser.DomToNormalizedNodeParserFactory;
@@ -102,8 +102,9 @@ public class TestRestconfUtils {
         throw new AbstractMethodError("Not implemented yet");
     }
 
-    public static NormalizedNodeContext loadNormalizedContextFromXmlFile(final String pathToInputFile, final String uri) {
-        final InstanceIdentifierContext<?> iiContext = ControllerContext.getInstance().toInstanceIdentifier(uri);
+    public static NormalizedNodeContext loadNormalizedContextFromXmlFile(final String pathToInputFile,
+            final String uri, final RestSchemaContext restSchemaCx) {
+        final InstanceIdentifierContext<?> iiContext = restSchemaCx.toInstanceIdentifier(uri);
         final InputStream inputStream = TestJsonBodyWriter.class.getResourceAsStream(pathToInputFile);
         try {
             final DocumentBuilder dBuilder = BUILDERFACTORY.newDocumentBuilder();

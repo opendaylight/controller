@@ -17,11 +17,11 @@ import java.util.List;
 import javax.ws.rs.core.MediaType;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.opendaylight.controller.sal.rest.impl.NormalizedNodeXmlBodyWriter;
+import org.opendaylight.controller.rest.common.InstanceIdentifierContext;
+import org.opendaylight.controller.rest.common.NormalizedNodeContext;
+import org.opendaylight.controller.rest.connector.impl.RestSchemaContextImpl;
+import org.opendaylight.controller.rest.providers.NormalizedNodeXmlBodyWriter;
 import org.opendaylight.controller.sal.rest.impl.test.providers.AbstractBodyReaderTest;
-import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
-import org.opendaylight.controller.sal.restconf.impl.InstanceIdentifierContext;
-import org.opendaylight.controller.sal.restconf.impl.NormalizedNodeContext;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
@@ -57,7 +57,7 @@ public class NnInstanceIdentifierToXmlTest extends AbstractBodyReaderTest {
     public static void initialization() throws URISyntaxException {
         schemaContext = schemaContextLoader("/instanceidentifier/yang",
                 schemaContext);
-        controllerContext.setSchemas(schemaContext);
+        restSchemaCx.setSchemas(schemaContext);
     }
 
     @Test
@@ -120,7 +120,7 @@ public class NnInstanceIdentifierToXmlTest extends AbstractBodyReaderTest {
         final DataContainerNodeAttrBuilder<NodeIdentifier, ContainerNode> dataCont1 = Builders
                 .containerBuilder((ContainerSchemaNode) schemaCont1);
 
-        final List<DataSchemaNode> instanceLfLst11 = ControllerContext
+        final List<DataSchemaNode> instanceLfLst11 = RestSchemaContextImpl
                 .findInstanceDataChildrenByName(
                         (DataNodeContainer) schemaCont1, lflst11.getLocalName());
 
@@ -134,7 +134,7 @@ public class NnInstanceIdentifierToXmlTest extends AbstractBodyReaderTest {
                 .withValue("lflst11 value").build());
         dataCont1.withChild(lfLst11Data.build());
 
-        final List<DataSchemaNode> instanceLf11 = ControllerContext
+        final List<DataSchemaNode> instanceLf11 = RestSchemaContextImpl
                 .findInstanceDataChildrenByName(
                         (DataNodeContainer) schemaCont1, lf11.getLocalName());
         final DataSchemaNode lf11Schema = Iterables.getFirst(instanceLf11, null);
@@ -219,7 +219,7 @@ public class NnInstanceIdentifierToXmlTest extends AbstractBodyReaderTest {
         final DataContainerNodeAttrBuilder<NodeIdentifier, ContainerNode> dataCont1 = Builders
                 .containerBuilder((ContainerSchemaNode) schemaCont1);
 
-        final List<DataSchemaNode> instanceLst11 = ControllerContext
+        final List<DataSchemaNode> instanceLst11 = RestSchemaContextImpl
                 .findInstanceDataChildrenByName(
                         (DataNodeContainer) schemaCont1, lst11.getLocalName());
         final DataSchemaNode lst11Schema = Iterables.getFirst(instanceLst11, null);
@@ -258,7 +258,7 @@ public class NnInstanceIdentifierToXmlTest extends AbstractBodyReaderTest {
             final QName qname,
             final CollectionNodeBuilder<MapEntryNode, MapNode> dataLst11, final Object value) {
 
-        final List<DataSchemaNode> instanceLf = ControllerContext
+        final List<DataSchemaNode> instanceLf = RestSchemaContextImpl
                 .findInstanceDataChildrenByName(
                         (DataNodeContainer) lst11Schema, qname.getLocalName());
         final DataSchemaNode schemaLf = Iterables.getFirst(instanceLf, null);

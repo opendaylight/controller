@@ -8,7 +8,6 @@
 package org.opendaylight.controller.sal.restconf.impl.nn.to.xml.test;
 
 import static org.junit.Assert.assertTrue;
-
 import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -19,11 +18,11 @@ import javax.ws.rs.core.MediaType;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.opendaylight.controller.sal.rest.impl.NormalizedNodeXmlBodyWriter;
+import org.opendaylight.controller.rest.common.InstanceIdentifierContext;
+import org.opendaylight.controller.rest.common.NormalizedNodeContext;
+import org.opendaylight.controller.rest.connector.impl.RestSchemaContextImpl;
+import org.opendaylight.controller.rest.providers.NormalizedNodeXmlBodyWriter;
 import org.opendaylight.controller.sal.rest.impl.test.providers.AbstractBodyReaderTest;
-import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
-import org.opendaylight.controller.sal.restconf.impl.InstanceIdentifierContext;
-import org.opendaylight.controller.sal.restconf.impl.NormalizedNodeContext;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
@@ -69,7 +68,7 @@ public class NnToXmlTest extends AbstractBodyReaderTest {
     @BeforeClass
     public static void initialization() {
         schemaContext = schemaContextLoader("/nn-to-xml/yang", schemaContext);
-        controllerContext.setSchemas(schemaContext);
+        restSchemaCx.setSchemas(schemaContext);
     }
 
     @Test
@@ -329,7 +328,7 @@ public class NnToXmlTest extends AbstractBodyReaderTest {
         final DataContainerNodeAttrBuilder<NodeIdentifier, ContainerNode> contData = Builders
                 .containerBuilder((ContainerSchemaNode) contSchema);
 
-        final List<DataSchemaNode> instanceLf = ControllerContext
+        final List<DataSchemaNode> instanceLf = RestSchemaContextImpl
                 .findInstanceDataChildrenByName((DataNodeContainer) contSchema,
                         lf.getLocalName());
         final DataSchemaNode schemaLf = Iterables.getFirst(instanceLf, null);
@@ -368,7 +367,7 @@ public class NnToXmlTest extends AbstractBodyReaderTest {
         final DataContainerNodeAttrBuilder<NodeIdentifier, ContainerNode> contData = Builders
                 .containerBuilder((ContainerSchemaNode) contSchema);
 
-        List<DataSchemaNode> instanceLf = ControllerContext
+        List<DataSchemaNode> instanceLf = RestSchemaContextImpl
                 .findInstanceDataChildrenByName((DataNodeContainer) contSchema,
                         lfBoolean.getLocalName());
         DataSchemaNode schemaLf = Iterables.getFirst(instanceLf, null);
@@ -376,7 +375,7 @@ public class NnToXmlTest extends AbstractBodyReaderTest {
         contData.withChild(Builders.leafBuilder((LeafSchemaNode) schemaLf)
                 .withValue(Boolean.TRUE).build());
 
-        instanceLf = ControllerContext.findInstanceDataChildrenByName(
+        instanceLf = RestSchemaContextImpl.findInstanceDataChildrenByName(
                 (DataNodeContainer) contSchema, lfLfref.getLocalName());
         schemaLf = Iterables.getFirst(instanceLf, null);
 
@@ -414,7 +413,7 @@ public class NnToXmlTest extends AbstractBodyReaderTest {
             value = "no qname value";
         }
 
-        final List<DataSchemaNode> instanceLf = ControllerContext
+        final List<DataSchemaNode> instanceLf = RestSchemaContextImpl
                 .findInstanceDataChildrenByName(
                         (DataNodeContainer) cont1Schema, lf11.getLocalName());
         final DataSchemaNode schemaLf = Iterables.getFirst(instanceLf, null);

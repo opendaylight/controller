@@ -18,7 +18,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
@@ -42,13 +41,13 @@ import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
+import org.opendaylight.controller.rest.connector.impl.RestBrokerFacadeImpl;
+import org.opendaylight.controller.rest.connector.impl.RestSchemaContextImpl;
+import org.opendaylight.controller.rest.errors.RestconfDocumentedException;
+import org.opendaylight.controller.rest.errors.RestconfError;
+import org.opendaylight.controller.rest.streams.listeners.ListenerAdapter;
+import org.opendaylight.controller.rest.streams.listeners.Notificator;
 import org.opendaylight.controller.sal.core.api.Broker.ConsumerSession;
-import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
-import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
-import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
-import org.opendaylight.controller.sal.restconf.impl.RestconfError;
-import org.opendaylight.controller.sal.streams.listeners.ListenerAdapter;
-import org.opendaylight.controller.sal.streams.listeners.Notificator;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -77,7 +76,8 @@ public class BrokerFacadeTest {
     @Mock
     DOMMountPoint mockMountInstance;
 
-    BrokerFacade brokerFacade = BrokerFacade.getInstance();
+    // BrokerFacade brokerFacade = BrokerFacade.getInstance();
+    RestBrokerFacadeImpl brokerFacade = new RestBrokerFacadeImpl(domDataBroker);
 
     NormalizedNode<?, ?> dummyNode = createDummyNode("test:module", "2014-01-09", "interfaces");
     CheckedFuture<Optional<NormalizedNode<?, ?>>,ReadFailedException> dummyNodeInFuture = wrapDummyNode(dummyNode);
@@ -97,18 +97,20 @@ public class BrokerFacadeTest {
     @Mock
     DOMDataReadWriteTransaction rwTransaction;
 
+    RestSchemaContextImpl schemaCx = new RestSchemaContextImpl();
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         // TODO it is started before every test method
-        brokerFacade.setDomDataBroker(domDataBroker);
-        brokerFacade.setRpcService(mockRpcService);
-        brokerFacade.setContext(context);
+        // brokerFacade.setDomDataBroker(domDataBroker);
+        // brokerFacade.setRpcService(mockRpcService);
+        // brokerFacade.setContext(context);
         when(domDataBroker.newReadOnlyTransaction()).thenReturn(rTransaction);
         when(domDataBroker.newWriteOnlyTransaction()).thenReturn(wTransaction);
         when(domDataBroker.newReadWriteTransaction()).thenReturn(rwTransaction);
 
-        ControllerContext.getInstance().setSchemas(TestUtils.loadSchemaContext("/full-versions/test-module"));
+        schemaCx.setSchemas(TestUtils.loadSchemaContext("/full-versions/test-module"));
 
     }
 
@@ -151,7 +153,8 @@ public class BrokerFacadeTest {
 
     @Test(expected = RestconfDocumentedException.class)
     public void testReadOperationalDataWithNoDataBroker() {
-        brokerFacade.setDomDataBroker(null);
+        final RestBrokerFacadeImpl brokerFacade = new RestBrokerFacadeImpl(null);
+        // brokerFacade.setDomDataBroker(null);
 
         brokerFacade.readOperationalData(instanceID);
     }
@@ -170,7 +173,7 @@ public class BrokerFacadeTest {
 
     @Test(expected = RestconfDocumentedException.class)
     public void testInvokeRpcWithNoConsumerSession() {
-        brokerFacade.setContext(null);
+        // brokerFacade.setContext(null);
         brokerFacade.invokeRpc(type, dummyNode);
     }
 
@@ -250,7 +253,7 @@ public class BrokerFacadeTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testRegisterToListenDataChanges() {
-        final ListenerAdapter listener = Notificator.createListener(instanceID, "stream");
+        final ListenerAdapter listener = Notificator.createListener(instanceID, "stream", schemaCx);
 
         final ListenerRegistration<DOMDataChangeListener> mockRegistration = mock(ListenerRegistration.class);
 

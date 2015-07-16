@@ -13,7 +13,6 @@ import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
 import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.CheckedFuture;
 import java.io.FileNotFoundException;
@@ -22,15 +21,16 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
-import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
-import org.opendaylight.controller.sal.restconf.impl.InstanceIdentifierContext;
-import org.opendaylight.controller.sal.restconf.impl.NormalizedNodeContext;
-import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
-import org.opendaylight.controller.sal.restconf.impl.RestconfError;
-import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
-import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
-import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
+import org.opendaylight.controller.rest.common.InstanceIdentifierContext;
+import org.opendaylight.controller.rest.common.NormalizedNodeContext;
+import org.opendaylight.controller.rest.connector.impl.RestBrokerFacadeImpl;
+import org.opendaylight.controller.rest.connector.impl.RestSchemaContextImpl;
+import org.opendaylight.controller.rest.errors.RestconfDocumentedException;
+import org.opendaylight.controller.rest.errors.RestconfError;
+import org.opendaylight.controller.rest.errors.RestconfError.ErrorTag;
+import org.opendaylight.controller.rest.errors.RestconfError.ErrorType;
+import org.opendaylight.controller.rest.services.RestconfServiceData;
+import org.opendaylight.controller.rest.services.impl.RestconfServiceDataImpl;
 import org.opendaylight.controller.sal.restconf.impl.test.TestUtils;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -50,8 +50,8 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public class RestPutListDataTest {
 
-    private static BrokerFacade brokerFacade;
-    private static RestconfImpl restconfImpl;
+    private static RestBrokerFacadeImpl brokerFacade;
+    private static RestconfServiceData restDataService;
     private static SchemaContext schemaContextTestModule;
 
     private static final String TEST_MODULE_NS_STRING = "test:module";
@@ -64,13 +64,12 @@ public class RestPutListDataTest {
 
     @Before
     public void initialize() throws FileNotFoundException {
-        final ControllerContext controllerContext = ControllerContext.getInstance();
+        // final RestSchemaContextImpl controllerContext = RestSchemaContextImpl.getInstance();
+        final RestSchemaContextImpl controllerContext = new RestSchemaContextImpl();
         schemaContextTestModule = TestUtils.loadSchemaContext("/full-versions/test-module");
         controllerContext.setSchemas(schemaContextTestModule);
-        brokerFacade = mock(BrokerFacade.class);
-        restconfImpl = RestconfImpl.getInstance();
-        restconfImpl.setBroker(brokerFacade);
-        restconfImpl.setControllerContext(controllerContext);
+        brokerFacade = mock(RestBrokerFacadeImpl.class);
+        restDataService = new RestconfServiceDataImpl(brokerFacade, controllerContext);
         when(brokerFacade.commitConfigurationDataPut(any(SchemaContext.class), any(YangInstanceIdentifier.class), any(NormalizedNode.class)))
                 .thenReturn(mock(CheckedFuture.class));
     }
@@ -167,7 +166,7 @@ public class RestPutListDataTest {
         final DataContainerNodeAttrBuilder<NodeIdentifierWithPredicates, MapEntryNode> testNodeContainer =
                 Builders.mapEntryBuilder((ListSchemaNode) testNodeSchemaNode);
 
-        List<DataSchemaNode> testChildren = ControllerContext.findInstanceDataChildrenByName(
+        List<DataSchemaNode> testChildren = RestSchemaContextImpl.findInstanceDataChildrenByName(
                 (ListSchemaNode) testNodeSchemaNode, key1.getLocalName());
         assertTrue(testChildren != null);
         final DataSchemaNode testLeafKey1SchemaNode = Iterables.getFirst(testChildren, null);
@@ -179,7 +178,7 @@ public class RestPutListDataTest {
         testNodeContainer.withChild(leafKey1.build());
 
         if (payloadKey2 != null) {
-            testChildren = ControllerContext.findInstanceDataChildrenByName(
+            testChildren = RestSchemaContextImpl.findInstanceDataChildrenByName(
                     (ListSchemaNode) testNodeSchemaNode, key2.getLocalName());
             assertTrue(testChildren != null);
             final DataSchemaNode testLeafKey2SchemaNode = Iterables.getFirst(testChildren, null);
@@ -194,7 +193,7 @@ public class RestPutListDataTest {
         final NormalizedNodeContext testCompositeContext = new NormalizedNodeContext(new InstanceIdentifierContext<>(
                 null, testNodeSchemaNode, null, schemaContextTestModule), testNodeContainer.build());
 
-        restconfImpl.updateConfigurationData(toUri(uriKey1, uriKey2), testCompositeContext);
+        restDataService.updateConfigurationData(toUri(uriKey1, uriKey2), testCompositeContext);
     }
 
     public void putListDataWithWrapperTest(final String uriKey1, final String uriKey2, final String payloadKey1,

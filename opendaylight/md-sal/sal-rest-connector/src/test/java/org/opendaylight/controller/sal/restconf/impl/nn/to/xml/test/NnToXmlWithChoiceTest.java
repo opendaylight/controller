@@ -15,11 +15,11 @@ import java.util.List;
 import javax.ws.rs.core.MediaType;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.opendaylight.controller.sal.rest.impl.NormalizedNodeXmlBodyWriter;
+import org.opendaylight.controller.rest.common.InstanceIdentifierContext;
+import org.opendaylight.controller.rest.common.NormalizedNodeContext;
+import org.opendaylight.controller.rest.connector.impl.RestSchemaContextImpl;
+import org.opendaylight.controller.rest.providers.NormalizedNodeXmlBodyWriter;
 import org.opendaylight.controller.sal.rest.impl.test.providers.AbstractBodyReaderTest;
-import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
-import org.opendaylight.controller.sal.restconf.impl.InstanceIdentifierContext;
-import org.opendaylight.controller.sal.restconf.impl.NormalizedNodeContext;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ChoiceNode;
@@ -48,7 +48,7 @@ public class NnToXmlWithChoiceTest extends AbstractBodyReaderTest {
     @BeforeClass
     public static void initialization() {
         schemaContext = schemaContextLoader("/nn-to-xml/choice", schemaContext);
-        controllerContext.setSchemas(schemaContext);
+        restSchemaCx.setSchemas(schemaContext);
     }
 
     @Test
@@ -88,7 +88,7 @@ public class NnToXmlWithChoiceTest extends AbstractBodyReaderTest {
         final DataContainerNodeBuilder<NodeIdentifier, ChoiceNode> dataChoice = Builders
                 .choiceBuilder((ChoiceSchemaNode) choiceSchemaNode);
 
-        final List<DataSchemaNode> instanceLf = ControllerContext
+        final List<DataSchemaNode> instanceLf = RestSchemaContextImpl
                 .findInstanceDataChildrenByName(
                         (DataNodeContainer) contSchemaNode, lf.getLocalName());
         final DataSchemaNode schemaLf = Iterables.getFirst(instanceLf, null);

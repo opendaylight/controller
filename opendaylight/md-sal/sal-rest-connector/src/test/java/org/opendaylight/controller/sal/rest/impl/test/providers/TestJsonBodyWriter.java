@@ -9,18 +9,15 @@
 package org.opendaylight.controller.sal.rest.impl.test.providers;
 
 import static org.junit.Assert.assertTrue;
-
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-
 import javax.ws.rs.core.MediaType;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.opendaylight.controller.sal.rest.impl.JsonNormalizedNodeBodyReader;
-import org.opendaylight.controller.sal.rest.impl.NormalizedNodeJsonBodyWriter;
-import org.opendaylight.controller.sal.restconf.impl.NormalizedNodeContext;
+import org.opendaylight.controller.rest.common.NormalizedNodeContext;
+import org.opendaylight.controller.rest.providers.JsonNormalizedNodeBodyReader;
+import org.opendaylight.controller.rest.providers.NormalizedNodeJsonBodyWriter;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 /**
@@ -41,7 +38,7 @@ public class TestJsonBodyWriter extends AbstractBodyReaderTest {
     public TestJsonBodyWriter() throws NoSuchFieldException, SecurityException {
         super();
         jsonBodyWriter = new NormalizedNodeJsonBodyWriter();
-        jsonBodyReader = new JsonNormalizedNodeBodyReader();
+        jsonBodyReader = new JsonNormalizedNodeBodyReader(restSchemaCx);
     }
 
     @Override
@@ -56,7 +53,7 @@ public class TestJsonBodyWriter extends AbstractBodyReaderTest {
                 schemaContext);
         schemaContext = schemaContextLoader("/modules", schemaContext);
         schemaContext = schemaContextLoader("/invoke-rpc", schemaContext);
-        controllerContext.setSchemas(schemaContext);
+        restSchemaCx.setSchemas(schemaContext);
     }
 
     @Test

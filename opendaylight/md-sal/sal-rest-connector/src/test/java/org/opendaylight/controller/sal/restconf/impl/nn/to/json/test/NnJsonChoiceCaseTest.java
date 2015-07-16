@@ -7,9 +7,9 @@ import javax.ws.rs.core.MediaType;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.rest.common.TestRestconfUtils;
-import org.opendaylight.controller.sal.rest.impl.NormalizedNodeJsonBodyWriter;
+import org.opendaylight.controller.rest.common.NormalizedNodeContext;
+import org.opendaylight.controller.rest.providers.NormalizedNodeJsonBodyWriter;
 import org.opendaylight.controller.sal.rest.impl.test.providers.AbstractBodyReaderTest;
-import org.opendaylight.controller.sal.restconf.impl.NormalizedNodeContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public class NnJsonChoiceCaseTest extends AbstractBodyReaderTest {
@@ -26,7 +26,7 @@ public class NnJsonChoiceCaseTest extends AbstractBodyReaderTest {
     @BeforeClass
     public static void initialization() {
         schemaContext = schemaContextLoader("/nn-to-json/choice", schemaContext);
-        controllerContext.setSchemas(schemaContext);
+        restSchemaCx.setSchemas(schemaContext);
     }
 
     /**
@@ -162,7 +162,8 @@ public class NnJsonChoiceCaseTest extends AbstractBodyReaderTest {
     private String getJson(final String xmlPath) throws Exception {
         final String uri = "choice-case-test:cont";
         final NormalizedNodeContext testNN = TestRestconfUtils
-                .loadNormalizedContextFromXmlFile(xmlPath, uri);
+.loadNormalizedContextFromXmlFile(xmlPath, uri,
+                restSchemaCx);
 
         final OutputStream output = new ByteArrayOutputStream();
         jsonBodyWriter.writeTo(testNN, null, null, null, mediaType, null,

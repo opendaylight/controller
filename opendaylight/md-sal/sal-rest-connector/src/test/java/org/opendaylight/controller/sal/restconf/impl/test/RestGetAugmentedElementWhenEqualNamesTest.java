@@ -10,20 +10,19 @@ package org.opendaylight.controller.sal.restconf.impl.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
 import java.io.FileNotFoundException;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
-import org.opendaylight.controller.sal.restconf.impl.InstanceIdentifierContext;
-import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
+import org.opendaylight.controller.rest.common.InstanceIdentifierContext;
+import org.opendaylight.controller.rest.connector.impl.RestSchemaContextImpl;
+import org.opendaylight.controller.rest.errors.RestconfDocumentedException;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public class RestGetAugmentedElementWhenEqualNamesTest {
 
-    private static ControllerContext controllerContext = ControllerContext.getInstance();
+    private static RestSchemaContextImpl controllerContext = new RestSchemaContextImpl();
 
     @Rule
     public ExpectedException exception = ExpectedException.none();

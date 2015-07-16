@@ -12,18 +12,15 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
 import java.io.IOException;
 import java.io.InputStream;
-
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
-
 import org.junit.Test;
-import org.opendaylight.controller.sal.rest.impl.JsonNormalizedNodeBodyReader;
+import org.opendaylight.controller.rest.common.NormalizedNodeContext;
+import org.opendaylight.controller.rest.errors.RestconfDocumentedException;
+import org.opendaylight.controller.rest.providers.JsonNormalizedNodeBodyReader;
 import org.opendaylight.controller.sal.rest.impl.test.providers.AbstractBodyReaderTest;
-import org.opendaylight.controller.sal.restconf.impl.NormalizedNodeContext;
-import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
@@ -38,7 +35,7 @@ public class JsonToNnTest extends AbstractBodyReaderTest {
 
     public static void initialize(final String path, SchemaContext schemaContext) {
         schemaContext = schemaContextLoader(path, schemaContext);
-        controllerContext.setSchemas(schemaContext);
+        restSchemaCx.setSchemas(schemaContext);
     }
 
     @Test
@@ -108,7 +105,7 @@ public class JsonToNnTest extends AbstractBodyReaderTest {
             IOException, NoSuchFieldException, SecurityException,
             IllegalArgumentException, IllegalAccessException {
 
-        jsonBodyReader = new JsonNormalizedNodeBodyReader();
+        jsonBodyReader = new JsonNormalizedNodeBodyReader(restSchemaCx);
         initialize("/json-to-nn/simple-list-yang/1", schemaContext);
         mockBodyReader("simple-list-yang1:lst", jsonBodyReader, false);
 
@@ -183,7 +180,7 @@ public class JsonToNnTest extends AbstractBodyReaderTest {
 
         assertTrue(dataTree.contains("lflst2 45"));
 
-        jsonBodyReader = new JsonNormalizedNodeBodyReader();
+        jsonBodyReader = new JsonNormalizedNodeBodyReader(restSchemaCx);
         RestconfDocumentedException exception = null;
         mockBodyReader("array-with-null-yang:cont", jsonBodyReader, false);
         final InputStream inputStream = this.getClass().getResourceAsStream(
@@ -282,7 +279,7 @@ public class JsonToNnTest extends AbstractBodyReaderTest {
     }
 
     private NormalizedNodeContext prepareNNC(final String jsonPath, final String uri) {
-        jsonBodyReader = new JsonNormalizedNodeBodyReader();
+        jsonBodyReader = new JsonNormalizedNodeBodyReader(restSchemaCx);
         try {
             mockBodyReader(uri, jsonBodyReader, false);
         } catch (NoSuchFieldException | SecurityException
@@ -338,7 +335,7 @@ public class JsonToNnTest extends AbstractBodyReaderTest {
     public void unsupportedDataFormatTest() throws NoSuchFieldException,
             SecurityException, IllegalArgumentException,
             IllegalAccessException, WebApplicationException, IOException {
-        jsonBodyReader = new JsonNormalizedNodeBodyReader();
+        jsonBodyReader = new JsonNormalizedNodeBodyReader(restSchemaCx);
         initialize("/json-to-nn/simple-list-yang/1", schemaContext);
         mockBodyReader("simple-list-yang1:lst", jsonBodyReader, false);
 
@@ -364,7 +361,7 @@ public class JsonToNnTest extends AbstractBodyReaderTest {
             SecurityException, IllegalArgumentException,
             IllegalAccessException, WebApplicationException, IOException {
 
-        jsonBodyReader = new JsonNormalizedNodeBodyReader();
+        jsonBodyReader = new JsonNormalizedNodeBodyReader(restSchemaCx);
         initialize("/json-to-nn/simple-list-yang/4", schemaContext);
         mockBodyReader("array-with-null-yang:cont", jsonBodyReader, false);
 

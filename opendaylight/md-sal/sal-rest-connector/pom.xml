@@ -83,8 +83,22 @@
       <artifactId>slf4j-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.jboss.resteasy</groupId>
-      <artifactId>jaxrs-api</artifactId>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>javax.ws.rs</groupId>
+      <artifactId>javax.ws.rs-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.eclipsesource.jaxrs</groupId>
+      <artifactId>jersey-all</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jersey.containers</groupId>
+      <artifactId>jersey-container-servlet</artifactId>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -94,6 +108,14 @@
     <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>yang-data-codec-gson</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.compendium</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
@@ -141,16 +163,25 @@
         <configuration>
           <instructions>
             <Bundle-Name>MD SAL Restconf Connector</Bundle-Name>
-            <Private-Package>org.opendaylight.controller.sal.rest.*,
+            <Private-Package>
+              org.opendaylight.controller.rest.*,
+              org.opendaylight.controller.sal.rest.*,
               org.opendaylight.controller.sal.restconf.rpc.*,
               org.opendaylight.controller.sal.restconf.impl,
               org.opendaylight.controller.md.sal.rest.common.*,
-              org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.rest.connector.rev140724.*,
+              org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.rest.connector.rev140724.*,
             </Private-Package>
-            <Import-Package>*,
-            com.sun.jersey.spi.container.servlet, org.eclipse.jetty.servlets</Import-Package>
+            <Import-Package>
+                javax.ws.rs.core,
+                javax.ws.rs.ext,
+                org.glassfish.jersey.internal,
+                org.glassfish.jersey.server,
+                org.glassfish.jersey.server.spi,
+                org.glassfish.jersey.servlet,
+                javax.servlet.*;version="[2.3.0,4.0.0)";resolution:=optional,
+                *
+            </Import-Package>
             <Embed-Dependency>stax-utils</Embed-Dependency>
-            <Web-ContextPath>/restconf</Web-ContextPath>
           </instructions>
         </configuration>
       </plugin>

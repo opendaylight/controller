@@ -48,16 +48,16 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
-import org.opendaylight.controller.sal.rest.impl.JsonNormalizedNodeBodyReader;
-import org.opendaylight.controller.sal.rest.impl.NormalizedNodeJsonBodyWriter;
-import org.opendaylight.controller.sal.rest.impl.NormalizedNodeXmlBodyWriter;
-import org.opendaylight.controller.sal.rest.impl.RestconfApplication;
-import org.opendaylight.controller.sal.rest.impl.RestconfDocumentedExceptionMapper;
-import org.opendaylight.controller.sal.rest.impl.XmlNormalizedNodeBodyReader;
-import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
-import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
-import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
-import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
+import org.opendaylight.controller.rest.connector.impl.RestBrokerFacadeImpl;
+import org.opendaylight.controller.rest.connector.impl.RestSchemaContextImpl;
+import org.opendaylight.controller.rest.errors.RestconfDocumentedException;
+import org.opendaylight.controller.rest.errors.RestconfDocumentedExceptionMapper;
+import org.opendaylight.controller.rest.providers.JsonNormalizedNodeBodyReader;
+import org.opendaylight.controller.rest.providers.NormalizedNodeJsonBodyWriter;
+import org.opendaylight.controller.rest.providers.NormalizedNodeXmlBodyWriter;
+import org.opendaylight.controller.rest.providers.XmlNormalizedNodeBodyReader;
+import org.opendaylight.controller.rest.services.RestconfServiceData;
+import org.opendaylight.controller.rest.services.impl.RestconfServiceDataImpl;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
@@ -86,8 +86,8 @@ public class RestGetOperationTest extends JerseyTest {
         }
     }
 
-    private static BrokerFacade brokerFacade;
-    private static RestconfImpl restconfImpl;
+    private static RestBrokerFacadeImpl brokerFacade;
+    private static RestconfServiceData restServiceData;
     private static SchemaContext schemaContextYangsIetf;
     private static SchemaContext schemaContextTestModule;
     @SuppressWarnings("rawtypes")
@@ -96,15 +96,16 @@ public class RestGetOperationTest extends JerseyTest {
     private static SchemaContext schemaContextModules;
     private static SchemaContext schemaContextBehindMountPoint;
 
+    private static RestSchemaContextImpl controllerContext;
+
     private static final String RESTCONF_NS = "urn:ietf:params:xml:ns:yang:ietf-restconf";
 
     @BeforeClass
     public static void init() throws FileNotFoundException, ParseException {
         schemaContextYangsIetf = TestUtils.loadSchemaContext("/full-versions/yangs");
         schemaContextTestModule = TestUtils.loadSchemaContext("/full-versions/test-module");
-        brokerFacade = mock(BrokerFacade.class);
-        restconfImpl = RestconfImpl.getInstance();
-        restconfImpl.setBroker(brokerFacade);
+        brokerFacade = mock(RestBrokerFacadeImpl.class);
+        restServiceData = new RestconfServiceDataImpl(brokerFacade, controllerContext);
         answerFromGet = TestUtils.prepareNormalizedNodeWithIetfInterfacesInterfacesData();
 
         schemaContextModules = TestUtils.loadSchemaContext("/modules");
@@ -119,17 +120,18 @@ public class RestGetOperationTest extends JerseyTest {
         // enable(TestProperties.RECORD_LOG_LEVEL);
         // set(TestProperties.RECORD_LOG_LEVEL, Level.ALL.intValue());
         ResourceConfig resourceConfig = new ResourceConfig();
-        resourceConfig = resourceConfig.registerInstances(restconfImpl, new NormalizedNodeJsonBodyWriter(),
-                new NormalizedNodeXmlBodyWriter(), new XmlNormalizedNodeBodyReader(), new JsonNormalizedNodeBodyReader());
+        resourceConfig = resourceConfig.registerInstances(restServiceData, new NormalizedNodeJsonBodyWriter(),
+                new NormalizedNodeXmlBodyWriter(), new XmlNormalizedNodeBodyReader(controllerContext),
+                new JsonNormalizedNodeBodyReader(controllerContext));
         resourceConfig.registerClasses(RestconfDocumentedExceptionMapper.class);
-        resourceConfig.registerClasses(new RestconfApplication().getClasses());
+        // resourceConfig.registerClasses(new RestconfApplication().getClasses());
         return resourceConfig;
     }
 
     private void setControllerContext(final SchemaContext schemaContext) {
-        final ControllerContext controllerContext = ControllerContext.getInstance();
+        final RestSchemaContextImpl controllerContext = new RestSchemaContextImpl();
         controllerContext.setSchemas(schemaContext);
-        restconfImpl.setControllerContext(controllerContext);
+        // restconfImpl.setControllerContext(controllerContext);
     }
 
     /**
@@ -173,7 +175,7 @@ public class RestGetOperationTest extends JerseyTest {
         final DOMMountPointService mockMountService = mock(DOMMountPointService.class);
         when(mockMountService.getMountPoint(any(YangInstanceIdentifier.class))).thenReturn(Optional.of(mountInstance));
 
-        ControllerContext.getInstance().setMountService(mockMountService);
+        controllerContext.setMountService(mockMountService);
 
         String uri = "/config/ietf-interfaces:interfaces/interface/0/yang-ext:mount/test-module:cont/cont1";
         assertEquals(200, get(uri, MediaType.APPLICATION_XML));
@@ -188,7 +190,7 @@ public class RestGetOperationTest extends JerseyTest {
      * Slashes in URI behind mount point. lst1 element with key GigabitEthernet0%2F0%2F0%2F0 (GigabitEthernet0/0/0/0) is
      * requested via GET HTTP operation. It is tested whether %2F character is replaced with simple / in
      * InstanceIdentifier parameter in method
-     * {@link BrokerFacade#readConfigurationData(DOMMountPoint, YangInstanceIdentifier)} which is called in
+     * {@link RestBrokerFacadeImpl#readConfigurationData(DOMMountPoint, YangInstanceIdentifier)} which is called in
      * method {@link RestconfImpl#readConfigurationData}
      *
      * @throws ParseException
@@ -204,7 +206,7 @@ public class RestGetOperationTest extends JerseyTest {
         final DOMMountPointService mockMountService = mock(DOMMountPointService.class);
         when(mockMountService.getMountPoint(any(YangInstanceIdentifier.class))).thenReturn(Optional.of(mountInstance));
 
-        ControllerContext.getInstance().setMountService(mockMountService);
+        controllerContext.setMountService(mockMountService);
 
         final String uri = "/config/ietf-interfaces:interfaces/interface/0/yang-ext:mount/test-module:cont/lst1/GigabitEthernet0%2F0%2F0%2F0";
         assertEquals(200, get(uri, MediaType.APPLICATION_XML));
@@ -236,7 +238,7 @@ public class RestGetOperationTest extends JerseyTest {
         final DOMMountPointService mockMountService = mock(DOMMountPointService.class);
         when(mockMountService.getMountPoint(any(YangInstanceIdentifier.class))).thenReturn(Optional.of(mountInstance));
 
-        ControllerContext.getInstance().setMountService(mockMountService);
+        controllerContext.setMountService(mockMountService);
 
         final String uri = "/config/ietf-interfaces:interfaces/interface/0/yang-ext:mount/test-module:cont";
         assertEquals(200, get(uri, MediaType.APPLICATION_XML));
@@ -245,9 +247,9 @@ public class RestGetOperationTest extends JerseyTest {
     // /modules
     @Test
     public void getModulesTest() throws UnsupportedEncodingException, FileNotFoundException {
-        final ControllerContext controllerContext = ControllerContext.getInstance();
+        final RestSchemaContextImpl controllerContext = new RestSchemaContextImpl();
         controllerContext.setGlobalSchema(schemaContextModules);
-        restconfImpl.setControllerContext(controllerContext);
+        // restconfImpl.setControllerContext(controllerContext);
 
         final String uri = "/modules";
 
@@ -365,7 +367,7 @@ public class RestGetOperationTest extends JerseyTest {
         final DOMMountPointService mockMountService = mock(DOMMountPointService.class);
         when(mockMountService.getMountPoint(any(YangInstanceIdentifier.class))).thenReturn(Optional.of(mountInstance));
 
-        ControllerContext.getInstance().setMountService(mockMountService);
+        controllerContext.setMountService(mockMountService);
 
         final String uri = "/operations/ietf-interfaces:interfaces/interface/0/yang-ext:mount/";
 
@@ -427,7 +429,7 @@ public class RestGetOperationTest extends JerseyTest {
         final DOMMountPointService mockMountService = mock(DOMMountPointService.class);
         when(mockMountService.getMountPoint(any(YangInstanceIdentifier.class))).thenReturn(Optional.of(mountInstance));
 
-        ControllerContext.getInstance().setMountService(mockMountService);
+        controllerContext.setMountService(mockMountService);
 
         final String uri = "/modules/ietf-interfaces:interfaces/interface/0/yang-ext:mount/";
 
@@ -460,7 +462,7 @@ public class RestGetOperationTest extends JerseyTest {
         final DOMMountPointService mockMountService = mock(DOMMountPointService.class);
         when(mockMountService.getMountPoint(any(YangInstanceIdentifier.class))).thenReturn(Optional.of(mountInstance));
 
-        ControllerContext.getInstance().setMountService(mockMountService);
+        controllerContext.setMountService(mockMountService);
 
         final String uri = "/modules/module/ietf-interfaces:interfaces/interface/0/yang-ext:mount/module1-behind-mount-point/2014-02-03";
 
@@ -718,7 +720,7 @@ public class RestGetOperationTest extends JerseyTest {
             final YangInstanceIdentifier ii = YangInstanceIdentifier.builder().node(qNameDepth1Cont).build();
             final NormalizedNode value = (Builders.containerBuilder().withNodeIdentifier(new NodeIdentifier(qNameDepth1Cont)).build());
             when(brokerFacade.readConfigurationData(eq(ii))).thenReturn(value);
-            restconfImpl.readConfigurationData("nested-module:depth1-cont", uriInfo);
+            restServiceData.readConfigurationData("nested-module:depth1-cont", uriInfo);
             fail("Expected RestconfDocumentedException");
         } catch (final RestconfDocumentedException e) {
             assertTrue("Unexpected error message: " + e.getErrors().get(0).getErrorMessage(), e.getErrors().get(0)

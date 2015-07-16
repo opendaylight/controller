@@ -19,11 +19,11 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.opendaylight.controller.sal.rest.impl.NormalizedNodeXmlBodyWriter;
+import org.opendaylight.controller.rest.common.InstanceIdentifierContext;
+import org.opendaylight.controller.rest.common.NormalizedNodeContext;
+import org.opendaylight.controller.rest.connector.impl.RestSchemaContextImpl;
+import org.opendaylight.controller.rest.providers.NormalizedNodeXmlBodyWriter;
 import org.opendaylight.controller.sal.rest.impl.test.providers.AbstractBodyReaderTest;
-import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
-import org.opendaylight.controller.sal.restconf.impl.InstanceIdentifierContext;
-import org.opendaylight.controller.sal.restconf.impl.NormalizedNodeContext;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
@@ -51,7 +51,7 @@ public class NnToXmlWithDataFromSeveralModulesTest extends
     public static void initialize() {
         schemaContext = schemaContextLoader(
                 "/nn-to-xml/data-of-several-modules/yang", schemaContext);
-        controllerContext.setSchemas(schemaContext);
+        restSchemaCx.setSchemas(schemaContext);
     }
 
     @Test
@@ -134,7 +134,7 @@ public class NnToXmlWithDataFromSeveralModulesTest extends
                 .containerBuilder((ContainerSchemaNode) contSchemaNode);
 
         Preconditions.checkState(contSchemaNode instanceof ContainerSchemaNode);
-        final List<DataSchemaNode> instanceLf1_m1 = ControllerContext
+        final List<DataSchemaNode> instanceLf1_m1 = RestSchemaContextImpl
                 .findInstanceDataChildrenByName(
                         (DataNodeContainer) contSchemaNode,
                         lf1Qname.getLocalName());
