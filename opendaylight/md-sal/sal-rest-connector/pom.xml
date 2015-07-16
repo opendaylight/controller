@@ -114,6 +114,31 @@
       <scope>test</scope>
     </dependency>
 
+    <dependency>
+      <groupId>org.apache.shiro</groupId>
+      <artifactId>shiro-core</artifactId>
+      <version>1.2.3</version>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.shiro</groupId>
+        <artifactId>shiro-web</artifactId>
+        <version>1.2.3</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.7.12</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-beanutils</groupId>
+      <artifactId>commons-beanutils</artifactId>
+      <version>1.8.3</version>
+    </dependency>
+    <dependency>
+        <groupId>org.secnod.shiro</groupId>
+        <artifactId>shiro-jersey</artifactId>
+        <version>0.1.0</version>
+    </dependency>
     <!-- Testing Dependencies -->
     <dependency>
       <groupId>junit</groupId>
@@ -148,7 +173,8 @@
               org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.rest.connector.rev140724.*,
             </Private-Package>
             <Import-Package>*,
-            com.sun.jersey.spi.container.servlet, org.eclipse.jetty.servlets</Import-Package>
+            com.sun.jersey.spi.container.servlet, org.eclipse.jetty.servlets, org.apache.shiro.web.env, org.apache.shiro.web.servlet,
+            org.apache.commons.beanutils</Import-Package>
             <Embed-Dependency>stax-utils</Embed-Dependency>
             <Web-ContextPath>/restconf</Web-ContextPath>
           </instructions>
