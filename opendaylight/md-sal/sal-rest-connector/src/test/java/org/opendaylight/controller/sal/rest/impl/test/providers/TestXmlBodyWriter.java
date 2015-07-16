@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
@@ -9,17 +9,14 @@
 package org.opendaylight.controller.sal.rest.impl.test.providers;
 
 import static org.junit.Assert.assertTrue;
-
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
-
 import javax.ws.rs.core.MediaType;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.rest.common.TestRestconfUtils;
-import org.opendaylight.controller.sal.rest.impl.NormalizedNodeXmlBodyWriter;
-import org.opendaylight.controller.sal.restconf.impl.NormalizedNodeContext;
+import org.opendaylight.controller.rest.common.NormalizedNodeContext;
+import org.opendaylight.controller.rest.providers.NormalizedNodeXmlBodyWriter;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 /**
@@ -53,15 +50,15 @@ public class TestXmlBodyWriter extends AbstractBodyReaderTest {
                 schemaContext);
         schemaContext = schemaContextLoader("/modules", schemaContext);
         schemaContext = schemaContextLoader("/invoke-rpc", schemaContext);
-        controllerContext.setSchemas(schemaContext);
+        schemaController.setSchemas(schemaContext);
     }
 
     @Test
     public void rpcModuleInputTest() throws Exception {
         final String uri = "invoke-rpc-module:rpc-test";
         final String pathToInputFile = "/invoke-rpc/xml/rpc-output.xml";
-        final NormalizedNodeContext nnContext = TestRestconfUtils
-                .loadNormalizedContextFromXmlFile(pathToInputFile, uri);
+        final NormalizedNodeContext nnContext = TestRestconfUtils.loadNormalizedContextFromXmlFile(pathToInputFile,
+                uri, schemaController);
         final OutputStream output = new ByteArrayOutputStream();
         xmlBodyWriter.writeTo(nnContext, null, null, null, mediaType, null,
                 output);

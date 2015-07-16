@@ -13,7 +13,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
@@ -26,11 +25,10 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
-import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
-import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
-import org.opendaylight.controller.sal.restconf.impl.InstanceIdentifierContext;
-import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
-import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
+import org.opendaylight.controller.rest.common.InstanceIdentifierContext;
+import org.opendaylight.controller.rest.connector.impl.RestBrokerFacadeImpl;
+import org.opendaylight.controller.rest.connector.impl.RestSchemaControllerImpl;
+import org.opendaylight.controller.rest.errors.RestconfDocumentedException;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
@@ -38,7 +36,8 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public class URITest {
 
-    private static final ControllerContext controllerContext = ControllerContext.getInstance();
+    // private static final RestSchemaContextImpl controllerContext = RestSchemaContextImpl.getInstance();
+    private static final RestSchemaControllerImpl controllerContext = new RestSchemaControllerImpl();
 
     @Rule
     public ExpectedException exception = ExpectedException.none();
@@ -138,10 +137,8 @@ public class URITest {
         assertTrue(Iterables.isEmpty(instanceIdentifier.getInstanceIdentifier().getPathArguments()));
     }
 
-    @Test
+    @Test(expected = NullPointerException.class)
     public void testMountPointWithoutMountService() throws FileNotFoundException {
-        exception.expect(RestconfDocumentedException.class);
-
         controllerContext.setMountService(null);
         controllerContext.toInstanceIdentifier("simple-nodes:users/yang-ext:mount/test-interface2:class/student/name");
     }
@@ -157,10 +154,10 @@ public class URITest {
     public void initMountService(final boolean withSchema) {
         final DOMMountPointService mountService = mock(DOMMountPointService.class);
         controllerContext.setMountService(mountService);
-        final BrokerFacade brokerFacade = mock(BrokerFacade.class);
-        final RestconfImpl restconfImpl = RestconfImpl.getInstance();
-        restconfImpl.setBroker(brokerFacade);
-        restconfImpl.setControllerContext(controllerContext);
+        final RestBrokerFacadeImpl brokerFacade = mock(RestBrokerFacadeImpl.class);
+        // final RestconfImpl restconfImpl = RestconfImpl.getInstance();
+        // restconfImpl.setBroker(brokerFacade);
+        // restconfImpl.setControllerContext(controllerContext);
 
         final Set<Module> modules2 = TestUtils.loadModulesFrom("/test-config-data/yang2");
         final SchemaContext schemaContext2 = TestUtils.loadSchemaContext(modules2);

@@ -13,7 +13,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import java.io.FileNotFoundException;
@@ -34,15 +33,16 @@ import org.opendaylight.controller.md.sal.common.api.data.OptimisticLockFailedEx
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
-import org.opendaylight.controller.sal.rest.impl.JsonNormalizedNodeBodyReader;
-import org.opendaylight.controller.sal.rest.impl.NormalizedNodeJsonBodyWriter;
-import org.opendaylight.controller.sal.rest.impl.NormalizedNodeXmlBodyWriter;
-import org.opendaylight.controller.sal.rest.impl.RestconfDocumentedExceptionMapper;
-import org.opendaylight.controller.sal.rest.impl.XmlNormalizedNodeBodyReader;
-import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
-import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
-import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
-import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
+import org.opendaylight.controller.rest.connector.impl.RestBrokerFacadeImpl;
+import org.opendaylight.controller.rest.connector.impl.RestSchemaControllerImpl;
+import org.opendaylight.controller.rest.errors.RestconfDocumentedException;
+import org.opendaylight.controller.rest.errors.RestconfDocumentedExceptionMapper;
+import org.opendaylight.controller.rest.providers.JsonNormalizedNodeBodyReader;
+import org.opendaylight.controller.rest.providers.NormalizedNodeJsonBodyWriter;
+import org.opendaylight.controller.rest.providers.NormalizedNodeXmlBodyWriter;
+import org.opendaylight.controller.rest.providers.XmlNormalizedNodeBodyReader;
+import org.opendaylight.controller.rest.services.RestconfServiceData;
+import org.opendaylight.controller.rest.services.impl.RestconfServiceDataImpl;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -54,21 +54,20 @@ public class RestPutOperationTest extends JerseyTest {
     private static String xmlData2;
     private static String xmlData3;
 
-    private static BrokerFacade brokerFacade;
-    private static RestconfImpl restconfImpl;
+    private static RestBrokerFacadeImpl brokerFacade;
+    private static RestconfServiceData restconfImpl;
     private static SchemaContext schemaContextYangsIetf;
     private static SchemaContext schemaContextTestModule;
+    private static RestSchemaControllerImpl controllerContext;
 
     @BeforeClass
     public static void init() throws IOException {
         schemaContextYangsIetf = TestUtils.loadSchemaContext("/full-versions/yangs");
         schemaContextTestModule = TestUtils.loadSchemaContext("/full-versions/test-module");
-        final ControllerContext controllerContext = ControllerContext.getInstance();
+        controllerContext = new RestSchemaControllerImpl();
         controllerContext.setSchemas(schemaContextYangsIetf);
-        brokerFacade = mock(BrokerFacade.class);
-        restconfImpl = RestconfImpl.getInstance();
-        restconfImpl.setBroker(brokerFacade);
-        restconfImpl.setControllerContext(controllerContext);
+        brokerFacade = mock(RestBrokerFacadeImpl.class);
+        restconfImpl = new RestconfServiceDataImpl(brokerFacade, controllerContext);
         loadData();
     }
 
@@ -89,8 +88,9 @@ public class RestPutOperationTest extends JerseyTest {
         // enable(TestProperties.RECORD_LOG_LEVEL);
         // set(TestProperties.RECORD_LOG_LEVEL, Level.ALL.intValue());
         ResourceConfig resourceConfig = new ResourceConfig();
-        resourceConfig = resourceConfig.registerInstances(restconfImpl,new XmlNormalizedNodeBodyReader(),
-                new NormalizedNodeXmlBodyWriter(), new JsonNormalizedNodeBodyReader(), new NormalizedNodeJsonBodyWriter());
+        resourceConfig = resourceConfig.registerInstances(restconfImpl, new XmlNormalizedNodeBodyReader(
+                controllerContext), new NormalizedNodeXmlBodyWriter(), new JsonNormalizedNodeBodyReader(
+                controllerContext), new NormalizedNodeJsonBodyWriter());
         resourceConfig.registerClasses(RestconfDocumentedExceptionMapper.class);
         return resourceConfig;
     }
@@ -136,7 +136,7 @@ public class RestPutOperationTest extends JerseyTest {
         final DOMMountPointService mockMountService = mock(DOMMountPointService.class);
         when(mockMountService.getMountPoint(any(YangInstanceIdentifier.class))).thenReturn(Optional.of(mountInstance));
 
-        ControllerContext.getInstance().setMountService(mockMountService);
+        controllerContext.setMountService(mockMountService);
 
         String uri = "/config/ietf-interfaces:interfaces/interface/0/yang-ext:mount/test-module:cont";
         assertEquals(200, put(uri, MediaType.APPLICATION_XML, xmlData2));
@@ -158,7 +158,7 @@ public class RestPutOperationTest extends JerseyTest {
         final DOMMountPointService mockMountService = mock(DOMMountPointService.class);
         when(mockMountService.getMountPoint(any(YangInstanceIdentifier.class))).thenReturn(Optional.of(mountInstance));
 
-        ControllerContext.getInstance().setMountService(mockMountService);
+        controllerContext.setMountService(mockMountService);
 
         final String uri = "/config/ietf-interfaces:interfaces/yang-ext:mount";
         assertEquals(200, put(uri, MediaType.APPLICATION_XML, xmlData3));
