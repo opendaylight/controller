@@ -9,6 +9,27 @@
 */
 package org.opendaylight.controller.config.yang.md.sal.rest.connector;
 
+import org.opendaylight.controller.config.api.DependencyResolver;
+import org.opendaylight.controller.config.api.ModuleIdentifier;
+import org.osgi.framework.BundleContext;
+
+/**
+ * Generated config subsystem RestConnectorModuleFactory class.
+ * ModuleFactory is responsible for loading Module to OSGi container.
+ */
 public class RestConnectorModuleFactory extends org.opendaylight.controller.config.yang.md.sal.rest.connector.AbstractRestConnectorModuleFactory {
 
+    @Override
+    public RestConnectorModule instantiateModule(final String instanceName,
+            final DependencyResolver dependencyResolver, final RestConnectorModule oldModule,
+            final AutoCloseable oldInstance, final BundleContext bundleContext) {
+        return new RestConnectorModule(new ModuleIdentifier(NAME, instanceName), dependencyResolver, oldModule,
+                oldInstance, bundleContext);
+    }
+
+    @Override
+    public RestConnectorModule instantiateModule(final String instanceName,
+            final DependencyResolver dependencyResolver, final BundleContext bundleContext) {
+        return new RestConnectorModule(new ModuleIdentifier(NAME, instanceName), dependencyResolver, bundleContext);
+    }
 }

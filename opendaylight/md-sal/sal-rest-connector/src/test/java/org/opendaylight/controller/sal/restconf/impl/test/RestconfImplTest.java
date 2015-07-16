@@ -13,7 +13,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
-
 import java.io.FileNotFoundException;
 import java.text.ParseException;
 import java.util.Set;
@@ -34,7 +33,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
  */
 public class RestconfImplTest {
 
-    private RestconfImpl restconfImpl = null;
+    private final RestconfImpl restconfImpl = null;
     private static ControllerContext controllerContext = null;
 
     @BeforeClass
@@ -49,8 +48,8 @@ public class RestconfImplTest {
 
     @Before
     public void initMethod() {
-        restconfImpl = RestconfImpl.getInstance();
-        restconfImpl.setControllerContext(controllerContext);
+        // restconfImpl = RestconfImpl.getInstance();
+        // restconfImpl.setControllerContext(controllerContext);
     }
 
     @SuppressWarnings("unchecked")

@@ -49,9 +49,9 @@ public class RestStream extends JerseyTest {
         final ControllerContext controllerContext = ControllerContext.getInstance();
         controllerContext.setSchemas(schemaContextYangsIetf);
         brokerFacade = mock(BrokerFacade.class);
-        restconfImpl = RestconfImpl.getInstance();
-        restconfImpl.setBroker(brokerFacade);
-        restconfImpl.setControllerContext(controllerContext);
+        // restconfImpl = RestconfImpl.getInstance();
+        // restconfImpl.setBroker(brokerFacade);
+        // restconfImpl.setControllerContext(controllerContext);
     }
 
     @Override

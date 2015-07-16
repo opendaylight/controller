@@ -13,7 +13,6 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.opendaylight.yangtools.yang.common.SimpleDateFormatUtil.getRevisionFormat;
-
 import java.io.FileNotFoundException;
 import java.text.ParseException;
 import java.util.Date;
@@ -57,12 +56,12 @@ public class URIParametersParsing {
 
     @Before
     public void init() throws FileNotFoundException {
-        restconf = RestconfImpl.getInstance();
+        // restconf = RestconfImpl.getInstance();
         mockedBrokerFacade = mock(BrokerFacade.class);
         controllerContext = ControllerContext.getInstance();
         controllerContext.setSchemas(TestUtils.loadSchemaContext("/datastore-and-scope-specification"));
-        restconf.setControllerContext(controllerContext);
-        restconf.setBroker(mockedBrokerFacade);
+        // restconf.setControllerContext(controllerContext);
+        // restconf.setBroker(mockedBrokerFacade);
     }
 
     @Test

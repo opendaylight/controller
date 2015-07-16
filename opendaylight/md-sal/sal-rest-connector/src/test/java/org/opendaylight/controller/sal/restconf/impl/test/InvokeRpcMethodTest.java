@@ -18,7 +18,6 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
-
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
@@ -71,7 +70,7 @@ import org.opendaylight.yangtools.yang.model.util.SchemaNodeUtils;
 
 public class InvokeRpcMethodTest {
 
-    private RestconfImpl restconfImpl = null;
+    private final RestconfImpl restconfImpl = null;
     private static ControllerContext controllerContext = null;
     private static UriInfo uriInfo;
 
@@ -94,8 +93,8 @@ public class InvokeRpcMethodTest {
 
     @Before
     public void initMethod() {
-        restconfImpl = RestconfImpl.getInstance();
-        restconfImpl.setControllerContext(controllerContext);
+        // restconfImpl = RestconfImpl.getInstance();
+        // restconfImpl.setControllerContext(controllerContext);
     }
 
     /**
@@ -115,9 +114,10 @@ public class InvokeRpcMethodTest {
 
         final BrokerFacade mockedBrokerFacade = mock(BrokerFacade.class);
 
-        final RestconfImpl restconf = RestconfImpl.getInstance();
-        restconf.setBroker(mockedBrokerFacade);
-        restconf.setControllerContext(contContext);
+        final RestconfImpl restconf = null;
+        // final RestconfImpl restconf = RestconfImpl.getInstance();
+        // restconf.setBroker(mockedBrokerFacade);
+        // restconf.setControllerContext(contContext);
 
         final NormalizedNodeContext payload = prepareDomPayload();
 
@@ -172,7 +172,7 @@ public class InvokeRpcMethodTest {
 
         when(brokerFacade.invokeRpc(eq(type), any(NormalizedNode.class))).thenReturn(future);
 
-        restconfImpl.setBroker(brokerFacade);
+        // restconfImpl.setBroker(brokerFacade);
 
         try {
             restconfImpl.invokeRpc("toaster:cancel-toast", "", uriInfo);
@@ -222,7 +222,7 @@ public class InvokeRpcMethodTest {
         final BrokerFacade brokerFacade = mock(BrokerFacade.class);
         when(brokerFacade.invokeRpc(eq(path), any(NormalizedNode.class))).thenReturn(future);
 
-        restconfImpl.setBroker(brokerFacade);
+        // restconfImpl.setBroker(brokerFacade);
 
         try {
             restconfImpl.invokeRpc("toaster:cancel-toast", "", uriInfo);
@@ -247,7 +247,7 @@ public class InvokeRpcMethodTest {
         final BrokerFacade brokerFacade = mock(BrokerFacade.class);
         when(brokerFacade.invokeRpc(eq(path), any (NormalizedNode.class))).thenReturn(future);
 
-        restconfImpl.setBroker(brokerFacade);
+        // restconfImpl.setBroker(brokerFacade);
 
         final NormalizedNodeContext output = restconfImpl.invokeRpc("toaster:cancel-toast", "", uriInfo);
         assertNotNull(output);
@@ -315,7 +315,7 @@ public class InvokeRpcMethodTest {
 
         final BrokerFacade brokerFacade = mock(BrokerFacade.class);
         when(brokerFacade.invokeRpc(eq(path), any(NormalizedNode.class))).thenReturn(future);
-        restconfImpl.setBroker(brokerFacade);
+        // restconfImpl.setBroker(brokerFacade);
 
         final NormalizedNodeContext output = restconfImpl.invokeRpc("toaster:make-toast", payload, uriInfo);
         assertNotNull(output);
@@ -373,7 +373,7 @@ public class InvokeRpcMethodTest {
         final BrokerFacade brokerFacade = mock(BrokerFacade.class);
         when(brokerFacade.invokeRpc(eq(rpcDef.getPath()), any(NormalizedNode.class))).thenReturn(future);
 
-        restconfImpl.setBroker(brokerFacade);
+        // restconfImpl.setBroker(brokerFacade);
 
         final NormalizedNodeContext output = restconfImpl.invokeRpc("toaster:testOutput", "", uriInfo);
         assertNotNull(output);

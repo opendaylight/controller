@@ -13,7 +13,6 @@ import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
 import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.CheckedFuture;
 import java.io.FileNotFoundException;
@@ -68,9 +67,9 @@ public class RestPutListDataTest {
         schemaContextTestModule = TestUtils.loadSchemaContext("/full-versions/test-module");
         controllerContext.setSchemas(schemaContextTestModule);
         brokerFacade = mock(BrokerFacade.class);
-        restconfImpl = RestconfImpl.getInstance();
-        restconfImpl.setBroker(brokerFacade);
-        restconfImpl.setControllerContext(controllerContext);
+        // restconfImpl = RestconfImpl.getInstance();
+        // restconfImpl.setBroker(brokerFacade);
+        // restconfImpl.setControllerContext(controllerContext);
         when(brokerFacade.commitConfigurationDataPut(any(SchemaContext.class), any(YangInstanceIdentifier.class), any(NormalizedNode.class)))
                 .thenReturn(mock(CheckedFuture.class));
     }

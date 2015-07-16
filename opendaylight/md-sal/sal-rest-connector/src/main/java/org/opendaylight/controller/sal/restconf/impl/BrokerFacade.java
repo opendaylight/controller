@@ -30,7 +30,6 @@ import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
-import org.opendaylight.controller.sal.core.api.Broker.ConsumerSession;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorTag;
 import org.opendaylight.controller.sal.restconf.impl.RestconfError.ErrorType;
 import org.opendaylight.controller.sal.streams.listeners.ListenerAdapter;
@@ -49,28 +48,19 @@ import org.slf4j.LoggerFactory;
 public class BrokerFacade {
     private final static Logger LOG = LoggerFactory.getLogger(BrokerFacade.class);
 
-    private final static BrokerFacade INSTANCE = new BrokerFacade();
     private volatile DOMRpcService rpcService;
-    private volatile ConsumerSession context;
-    private DOMDataBroker domDataBroker;
+    private final DOMDataBroker domDataBroker;
 
-    private BrokerFacade() {
+    public BrokerFacade(final DOMDataBroker domDataBroker) {
+        this.domDataBroker = Preconditions.checkNotNull(domDataBroker);
     }
 
     public void setRpcService(final DOMRpcService router) {
         rpcService = router;
     }
 
-    public void setContext(final ConsumerSession context) {
-        this.context = context;
-    }
-
-    public static BrokerFacade getInstance() {
-        return BrokerFacade.INSTANCE;
-    }
-
     private void checkPreconditions() {
-        if (context == null || domDataBroker == null) {
+        if (domDataBroker == null) {
             throw new RestconfDocumentedException(Status.SERVICE_UNAVAILABLE);
         }
     }
@@ -263,10 +253,6 @@ public class BrokerFacade {
         LOG.trace("Delete " + datastore.name() + " via Restconf: {}", path);
         writeTransaction.delete(datastore, path);
         return writeTransaction.submit();
-    }
-
-    public void setDomDataBroker(final DOMDataBroker domDataBroker) {
-        this.domDataBroker = domDataBroker;
     }
 
     private void ensureParentsByMerge(final LogicalDatastoreType store,

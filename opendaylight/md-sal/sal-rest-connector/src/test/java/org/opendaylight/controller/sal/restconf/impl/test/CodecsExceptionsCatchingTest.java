@@ -27,11 +27,11 @@ public class CodecsExceptionsCatchingTest extends JerseyTest {
 
     @BeforeClass
     public static void init() throws FileNotFoundException {
-        restConf = RestconfImpl.getInstance();
+        // restConf = RestconfImpl.getInstance();
         controllerContext = ControllerContext.getInstance();
         final SchemaContext schemaContext = TestUtils.loadSchemaContext("/decoding-exception/yang");
         controllerContext.setGlobalSchema(schemaContext);
-        restConf.setControllerContext(controllerContext);
+        // restConf.setControllerContext(controllerContext);
     }
 
     @Override

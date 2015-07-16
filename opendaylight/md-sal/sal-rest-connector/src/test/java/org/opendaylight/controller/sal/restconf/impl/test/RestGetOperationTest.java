@@ -51,7 +51,6 @@ import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
 import org.opendaylight.controller.sal.rest.impl.JsonNormalizedNodeBodyReader;
 import org.opendaylight.controller.sal.rest.impl.NormalizedNodeJsonBodyWriter;
 import org.opendaylight.controller.sal.rest.impl.NormalizedNodeXmlBodyWriter;
-import org.opendaylight.controller.sal.rest.impl.RestconfApplication;
 import org.opendaylight.controller.sal.rest.impl.RestconfDocumentedExceptionMapper;
 import org.opendaylight.controller.sal.rest.impl.XmlNormalizedNodeBodyReader;
 import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
@@ -103,8 +102,9 @@ public class RestGetOperationTest extends JerseyTest {
         schemaContextYangsIetf = TestUtils.loadSchemaContext("/full-versions/yangs");
         schemaContextTestModule = TestUtils.loadSchemaContext("/full-versions/test-module");
         brokerFacade = mock(BrokerFacade.class);
-        restconfImpl = RestconfImpl.getInstance();
-        restconfImpl.setBroker(brokerFacade);
+        // restconfImpl = new RestconfImpl(brokerFacade, controllerContext);
+        // restconfImpl = RestconfImpl.getInstance();
+        // restconfImpl.setBroker(brokerFacade);
         answerFromGet = TestUtils.prepareNormalizedNodeWithIetfInterfacesInterfacesData();
 
         schemaContextModules = TestUtils.loadSchemaContext("/modules");
@@ -122,14 +122,14 @@ public class RestGetOperationTest extends JerseyTest {
         resourceConfig = resourceConfig.registerInstances(restconfImpl, new NormalizedNodeJsonBodyWriter(),
                 new NormalizedNodeXmlBodyWriter(), new XmlNormalizedNodeBodyReader(), new JsonNormalizedNodeBodyReader());
         resourceConfig.registerClasses(RestconfDocumentedExceptionMapper.class);
-        resourceConfig.registerClasses(new RestconfApplication().getClasses());
+        // resourceConfig.registerClasses(new RestconfApplication().getClasses());
         return resourceConfig;
     }
 
     private void setControllerContext(final SchemaContext schemaContext) {
         final ControllerContext controllerContext = ControllerContext.getInstance();
         controllerContext.setSchemas(schemaContext);
-        restconfImpl.setControllerContext(controllerContext);
+        // restconfImpl.setControllerContext(controllerContext);
     }
 
     /**
@@ -247,7 +247,7 @@ public class RestGetOperationTest extends JerseyTest {
     public void getModulesTest() throws UnsupportedEncodingException, FileNotFoundException {
         final ControllerContext controllerContext = ControllerContext.getInstance();
         controllerContext.setGlobalSchema(schemaContextModules);
-        restconfImpl.setControllerContext(controllerContext);
+        // restconfImpl.setControllerContext(controllerContext);
 
         final String uri = "/modules";
 

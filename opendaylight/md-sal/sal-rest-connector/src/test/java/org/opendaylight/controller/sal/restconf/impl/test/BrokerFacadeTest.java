@@ -18,7 +18,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
@@ -77,7 +76,8 @@ public class BrokerFacadeTest {
     @Mock
     DOMMountPoint mockMountInstance;
 
-    BrokerFacade brokerFacade = BrokerFacade.getInstance();
+    // BrokerFacade brokerFacade = BrokerFacade.getInstance();
+    BrokerFacade brokerFacade = new BrokerFacade(domDataBroker);
 
     NormalizedNode<?, ?> dummyNode = createDummyNode("test:module", "2014-01-09", "interfaces");
     CheckedFuture<Optional<NormalizedNode<?, ?>>,ReadFailedException> dummyNodeInFuture = wrapDummyNode(dummyNode);
@@ -101,9 +101,9 @@ public class BrokerFacadeTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         // TODO it is started before every test method
-        brokerFacade.setDomDataBroker(domDataBroker);
-        brokerFacade.setRpcService(mockRpcService);
-        brokerFacade.setContext(context);
+        // brokerFacade.setDomDataBroker(domDataBroker);
+        // brokerFacade.setRpcService(mockRpcService);
+        // brokerFacade.setContext(context);
         when(domDataBroker.newReadOnlyTransaction()).thenReturn(rTransaction);
         when(domDataBroker.newWriteOnlyTransaction()).thenReturn(wTransaction);
         when(domDataBroker.newReadWriteTransaction()).thenReturn(rwTransaction);
@@ -151,7 +151,8 @@ public class BrokerFacadeTest {
 
     @Test(expected = RestconfDocumentedException.class)
     public void testReadOperationalDataWithNoDataBroker() {
-        brokerFacade.setDomDataBroker(null);
+        final BrokerFacade brokerFacade = new BrokerFacade(null);
+        // brokerFacade.setDomDataBroker(null);
 
         brokerFacade.readOperationalData(instanceID);
     }
@@ -170,7 +171,7 @@ public class BrokerFacadeTest {
 
     @Test(expected = RestconfDocumentedException.class)
     public void testInvokeRpcWithNoConsumerSession() {
-        brokerFacade.setContext(null);
+        // brokerFacade.setContext(null);
         brokerFacade.invokeRpc(type, dummyNode);
     }
 

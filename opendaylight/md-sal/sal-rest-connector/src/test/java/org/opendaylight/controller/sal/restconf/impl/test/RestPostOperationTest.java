@@ -14,7 +14,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.opendaylight.controller.sal.restconf.impl.test.RestOperationUtils.XML;
-
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.CheckedFuture;
@@ -76,8 +75,8 @@ public class RestPostOperationTest extends JerseyTest {
         schemaContextYangsIetf = TestUtils.loadSchemaContext("/full-versions/yangs");
         schemaContextTestModule = TestUtils.loadSchemaContext("/full-versions/test-module");
         brokerFacade = mock(BrokerFacade.class);
-        restconfImpl = RestconfImpl.getInstance();
-        restconfImpl.setBroker(brokerFacade);
+        // restconfImpl = RestconfImpl.getInstance();
+        // restconfImpl.setBroker(brokerFacade);
 
         final Set<Module> modules = TestUtils.loadModulesFrom("/test-config-data/yang1");
         schemaContext = TestUtils.loadSchemaContext(modules);
@@ -102,7 +101,7 @@ public class RestPostOperationTest extends JerseyTest {
     private void setSchemaControllerContext(final SchemaContext schema) {
         final ControllerContext context = ControllerContext.getInstance();
         context.setSchemas(schema);
-        restconfImpl.setControllerContext(context);
+        // restconfImpl.setControllerContext(context);
     }
 
     @SuppressWarnings("unchecked")
@@ -183,9 +182,9 @@ public class RestPostOperationTest extends JerseyTest {
         mountService = mock(DOMMountPointService.class);
         controllerContext.setMountService(mountService);
         brokerFacade = mock(BrokerFacade.class);
-        restconfImpl = RestconfImpl.getInstance();
-        restconfImpl.setBroker(brokerFacade);
-        restconfImpl.setControllerContext(controllerContext);
+        // restconfImpl = RestconfImpl.getInstance();
+        // restconfImpl.setBroker(brokerFacade);
+        // restconfImpl.setControllerContext(controllerContext);
     }
 
     private int post(final String uri, final String mediaType, final String data) {

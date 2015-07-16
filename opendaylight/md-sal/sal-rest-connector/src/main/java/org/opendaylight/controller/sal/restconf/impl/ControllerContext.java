@@ -68,7 +68,7 @@ import org.opendaylight.yangtools.yang.model.util.SchemaContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ControllerContext implements SchemaContextListener {
+public class ControllerContext implements SchemaContextListener, AutoCloseable {
     private final static Logger LOG = LoggerFactory.getLogger(ControllerContext.class);
 
     private final static ControllerContext INSTANCE = new ControllerContext();
@@ -765,7 +765,7 @@ public class ControllerContext implements SchemaContextListener {
         if (baseType instanceof LeafrefTypeDefinition) {
             typedef = SchemaContextUtil.getBaseTypeForLeafRef((LeafrefTypeDefinition) baseType, globalSchema, node);
         }
-        Codec<Object, Object> codec = RestCodec.from(typedef, mountPoint);
+        final Codec<Object, Object> codec = RestCodec.from(typedef, mountPoint);
         Object decoded = codec.deserialize(urlDecoded);
         String additionalInfo = "";
         if (decoded == null) {
@@ -974,6 +974,12 @@ public class ControllerContext implements SchemaContextListener {
 
     public DataNormalizationOperation<?> getRootOperation() {
         return dataNormalizer.getRootOperation();
+    }
+
+    @Override
+    public void close() throws Exception {
+        // TODO Auto-generated method stub
+
     }
 
 }

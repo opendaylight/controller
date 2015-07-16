@@ -53,11 +53,11 @@ public class RestPutConfigTest {
 
     @Before
     public void init() {
-        restconfService = RestconfImpl.getInstance();
+        // restconfService = RestconfImpl.getInstance();
         controllerCx = ControllerContext.getInstance();
         schemaCx = TestRestconfUtils.loadSchemaContext("/test-config-data/yang1/", null);
         controllerCx.setSchemas(schemaCx);
-        restconfService.setControllerContext(controllerCx);
+        // restconfService.setControllerContext(controllerCx);
     }
 
     @Test
@@ -120,6 +120,6 @@ public class RestPutConfigTest {
     private void mockingBrokerPut(final YangInstanceIdentifier yii, final NormalizedNode<?, ?> data) {
         final CheckedFuture<Void, TransactionCommitFailedException> checkedFuture = Futures.immediateCheckedFuture(null);
         Mockito.when(brokerFacade.commitConfigurationDataPut(schemaCx, yii, data)).thenReturn(checkedFuture);
-        restconfService.setBroker(brokerFacade);
+        // restconfService.setBroker(brokerFacade);
     }
 }

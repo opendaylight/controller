@@ -33,16 +33,15 @@ public class StatisticsRestconfServiceWrapper implements RestconfService {
     AtomicLong failurePut = new AtomicLong();
     AtomicLong failureDelete = new AtomicLong();
 
-    private static final StatisticsRestconfServiceWrapper INSTANCE = new StatisticsRestconfServiceWrapper(RestconfImpl.getInstance());
-
     final RestconfService delegate;
 
-    private StatisticsRestconfServiceWrapper(final RestconfService delegate) {
+    /**
+     * RestconfService wrapper class calculate and provided Request/Response statistics
+     *
+     * @param delegate
+     */
+    public StatisticsRestconfServiceWrapper(final RestconfService delegate) {
         this.delegate = delegate;
-    }
-
-    public static StatisticsRestconfServiceWrapper getInstance() {
-        return INSTANCE;
     }
 
     @Override
@@ -99,7 +98,7 @@ public class StatisticsRestconfServiceWrapper implements RestconfService {
             else {
                 failureGetConfig.incrementAndGet();
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             failureGetConfig.incrementAndGet();
             throw e;
         }
@@ -118,7 +117,7 @@ public class StatisticsRestconfServiceWrapper implements RestconfService {
             else {
                 failureGetOperational.incrementAndGet();
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             failureGetOperational.incrementAndGet();
             throw e;
         }
@@ -137,7 +136,7 @@ public class StatisticsRestconfServiceWrapper implements RestconfService {
             else {
                 failurePut.incrementAndGet();
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             failurePut.incrementAndGet();
             throw e;
         }
@@ -156,7 +155,7 @@ public class StatisticsRestconfServiceWrapper implements RestconfService {
             else {
                 failurePost.incrementAndGet();
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             failurePost.incrementAndGet();
             throw e;
         }
@@ -175,7 +174,7 @@ public class StatisticsRestconfServiceWrapper implements RestconfService {
             else {
                 failurePost.incrementAndGet();
             }
-        }catch (Exception e) {
+        }catch (final Exception e) {
             failurePost.incrementAndGet();
             throw e;
         }
@@ -194,7 +193,7 @@ public class StatisticsRestconfServiceWrapper implements RestconfService {
             else {
                 failureDelete.incrementAndGet();
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             failureDelete.incrementAndGet();
             throw e;
         }

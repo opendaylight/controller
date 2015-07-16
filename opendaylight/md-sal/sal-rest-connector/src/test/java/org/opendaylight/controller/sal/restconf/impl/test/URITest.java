@@ -13,7 +13,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
@@ -30,7 +29,6 @@ import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.InstanceIdentifierContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
-import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.ContainerSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
@@ -158,9 +156,9 @@ public class URITest {
         final DOMMountPointService mountService = mock(DOMMountPointService.class);
         controllerContext.setMountService(mountService);
         final BrokerFacade brokerFacade = mock(BrokerFacade.class);
-        final RestconfImpl restconfImpl = RestconfImpl.getInstance();
-        restconfImpl.setBroker(brokerFacade);
-        restconfImpl.setControllerContext(controllerContext);
+        // final RestconfImpl restconfImpl = RestconfImpl.getInstance();
+        // restconfImpl.setBroker(brokerFacade);
+        // restconfImpl.setControllerContext(controllerContext);
 
         final Set<Module> modules2 = TestUtils.loadModulesFrom("/test-config-data/yang2");
         final SchemaContext schemaContext2 = TestUtils.loadSchemaContext(modules2);

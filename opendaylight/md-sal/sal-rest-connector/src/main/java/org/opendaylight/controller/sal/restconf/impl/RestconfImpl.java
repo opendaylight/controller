@@ -101,9 +101,8 @@ import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RestconfImpl implements RestconfService {
 
-    private static final RestconfImpl INSTANCE = new RestconfImpl();
+public class RestconfImpl implements RestconfService {
 
     private static final int NOTIFICATION_PORT = 8181;
 
@@ -117,9 +116,9 @@ public class RestconfImpl implements RestconfService {
 
     private static final String SAL_REMOTE_RPC_SUBSRCIBE = "create-data-change-event-subscription";
 
-    private BrokerFacade broker;
+    private final BrokerFacade broker;
 
-    private ControllerContext controllerContext;
+    private final ControllerContext controllerContext;
 
     private static final Logger LOG = LoggerFactory.getLogger(RestconfImpl.class);
 
@@ -161,19 +160,9 @@ public class RestconfImpl implements RestconfService {
         }
     }
 
-    public void setBroker(final BrokerFacade broker) {
-        this.broker = broker;
-    }
-
-    public void setControllerContext(final ControllerContext controllerContext) {
-        this.controllerContext = controllerContext;
-    }
-
-    private RestconfImpl() {
-    }
-
-    public static RestconfImpl getInstance() {
-        return INSTANCE;
+    public RestconfImpl(final BrokerFacade broker, final ControllerContext controllerContext) {
+        this.controllerContext = Preconditions.checkNotNull(controllerContext);
+        this.broker = Preconditions.checkNotNull(broker);
     }
 
     @Override
