@@ -26,7 +26,7 @@ public class JaxbContextResolver implements ContextResolver<ObjectMapper> {
 
     private final ObjectMapper ctx;
 
-    public JaxbContextResolver() {
+    public JaxbContextResolver() {        
         ctx = new ObjectMapper();
         ctx.registerModule(new JsonOrgModule());
         ctx.getSerializationConfig().withSerializationInclusion(JsonInclude.Include.ALWAYS);

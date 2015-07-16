@@ -93,13 +93,12 @@ public class RestconfDocumentedExceptionMapper implements ExceptionMapper<Restco
         LOG.debug("In toResponse: {}", exception.getMessage());
 
         final List<MediaType> accepts = headers.getAcceptableMediaTypes();
-        accepts.remove(MediaType.WILDCARD_TYPE);
 
         LOG.debug("Accept headers: {}", accepts);
 
         final MediaType mediaType;
-        if (accepts != null && accepts.size() > 0) {
-            mediaType = accepts.get(0); // just pick the first one
+        if (accepts != null && !accepts.contains(MediaType.WILDCARD_TYPE)) {
+            mediaType = accepts.get(0); // just pick the first non wildcarded one
         } else {
             // Default to the content type if there's no Accept header
             mediaType = MediaType.APPLICATION_JSON_TYPE;
