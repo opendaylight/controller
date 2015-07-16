@@ -13,7 +13,6 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.opendaylight.yangtools.yang.common.SimpleDateFormatUtil.getRevisionFormat;
-
 import java.io.FileNotFoundException;
 import java.text.ParseException;
 import java.util.Date;
@@ -26,13 +25,14 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
-import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
-import org.opendaylight.controller.sal.restconf.impl.InstanceIdentifierContext;
-import org.opendaylight.controller.sal.restconf.impl.NormalizedNodeContext;
-import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
-import org.opendaylight.controller.sal.streams.listeners.ListenerAdapter;
-import org.opendaylight.controller.sal.streams.listeners.Notificator;
+import org.opendaylight.controller.rest.common.InstanceIdentifierContext;
+import org.opendaylight.controller.rest.common.NormalizedNodeContext;
+import org.opendaylight.controller.rest.connector.impl.RestBrokerFacadeImpl;
+import org.opendaylight.controller.rest.connector.impl.RestSchemaControllerImpl;
+import org.opendaylight.controller.rest.services.RestconfServiceOperations;
+import org.opendaylight.controller.rest.services.impl.RestconfServiceOperationsImpl;
+import org.opendaylight.controller.rest.streams.listeners.ListenerAdapter;
+import org.opendaylight.controller.rest.streams.listeners.Notificator;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.InstanceIdentifierBuilder;
@@ -51,18 +51,16 @@ import org.opendaylight.yangtools.yang.model.util.SchemaNodeUtils;
 
 public class URIParametersParsing {
 
-    private RestconfImpl restconf;
-    private BrokerFacade mockedBrokerFacade;
-    private ControllerContext controllerContext;
+    private RestconfServiceOperations restconf;
+    private RestBrokerFacadeImpl mockedBrokerFacade;
+    private RestSchemaControllerImpl controllerContext;
 
     @Before
     public void init() throws FileNotFoundException {
-        restconf = RestconfImpl.getInstance();
-        mockedBrokerFacade = mock(BrokerFacade.class);
-        controllerContext = ControllerContext.getInstance();
+        mockedBrokerFacade = mock(RestBrokerFacadeImpl.class);
+        controllerContext = new RestSchemaControllerImpl();
         controllerContext.setSchemas(TestUtils.loadSchemaContext("/datastore-and-scope-specification"));
-        restconf.setControllerContext(controllerContext);
-        restconf.setBroker(mockedBrokerFacade);
+        restconf = new RestconfServiceOperationsImpl(mockedBrokerFacade, controllerContext);
     }
 
     @Test
@@ -86,7 +84,7 @@ public class URIParametersParsing {
         final String datastoreValue = datastore == null ? "CONFIGURATION" : datastore;
         final String scopeValue = scope == null ? "BASE" : scope + "";
         Notificator.createListener(iiBuilder.build(), "dummyStreamName/datastore=" + datastoreValue + "/scope="
-                + scopeValue);
+                + scopeValue, controllerContext);
 
         final UriInfo mockedUriInfo = mock(UriInfo.class);
         @SuppressWarnings("unchecked")

@@ -12,18 +12,15 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
 import java.io.IOException;
 import java.io.InputStream;
-
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
-
 import org.junit.Test;
-import org.opendaylight.controller.sal.rest.impl.JsonNormalizedNodeBodyReader;
+import org.opendaylight.controller.rest.common.NormalizedNodeContext;
+import org.opendaylight.controller.rest.errors.RestconfDocumentedException;
+import org.opendaylight.controller.rest.providers.JsonNormalizedNodeBodyReader;
 import org.opendaylight.controller.sal.rest.impl.test.providers.AbstractBodyReaderTest;
-import org.opendaylight.controller.sal.restconf.impl.NormalizedNodeContext;
-import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
@@ -38,24 +35,24 @@ public class JsonToNnTest extends AbstractBodyReaderTest {
 
     public static void initialize(final String path, SchemaContext schemaContext) {
         schemaContext = schemaContextLoader(path, schemaContext);
-        controllerContext.setSchemas(schemaContext);
+        schemaController.setSchemas(schemaContext);
     }
 
     @Test
-    public void simpleListTest() {
+    public void simpleListTest() throws Exception {
         simpleTest("/json-to-nn/simple-list.json",
                 "/json-to-nn/simple-list-yang/1", "lst", "simple-list-yang1");
     }
 
     @Test
-    public void simpleContainerTest() {
+    public void simpleContainerTest() throws Exception {
         simpleTest("/json-to-nn/simple-container.json",
                 "/json-to-nn/simple-container-yang", "cont",
                 "simple-container-yang");
     }
 
     @Test
-    public void multipleItemsInLeafListTest() {
+    public void multipleItemsInLeafListTest() throws Exception {
 
         initialize("/json-to-nn/simple-list-yang/1", schemaContext);
 
@@ -72,7 +69,7 @@ public class JsonToNnTest extends AbstractBodyReaderTest {
     }
 
     @Test
-    public void multipleItemsInListTest() {
+    public void multipleItemsInListTest() throws Exception {
         initialize("/json-to-nn/simple-list-yang/3", schemaContext);
 
         final NormalizedNodeContext normalizedNodeContext = prepareNNC(
@@ -87,7 +84,7 @@ public class JsonToNnTest extends AbstractBodyReaderTest {
     }
 
     @Test
-    public void nullArrayToSimpleNodeWithNullValueTest() {
+    public void nullArrayToSimpleNodeWithNullValueTest() throws Exception {
         initialize("/json-to-nn/simple-list-yang/4", schemaContext);
 
         final NormalizedNodeContext normalizedNodeContext = prepareNNC(
@@ -104,11 +101,9 @@ public class JsonToNnTest extends AbstractBodyReaderTest {
     }
 
     @Test
-    public void incorrectTopLevelElementsTest() throws WebApplicationException,
-            IOException, NoSuchFieldException, SecurityException,
-            IllegalArgumentException, IllegalAccessException {
+    public void incorrectTopLevelElementsTest() throws Exception {
 
-        jsonBodyReader = new JsonNormalizedNodeBodyReader();
+        jsonBodyReader = new JsonNormalizedNodeBodyReader(schemaController);
         initialize("/json-to-nn/simple-list-yang/1", schemaContext);
         mockBodyReader("simple-list-yang1:lst", jsonBodyReader, false);
 
@@ -163,9 +158,7 @@ public class JsonToNnTest extends AbstractBodyReaderTest {
     }
 
     @Test
-    public void emptyDataReadTest() throws WebApplicationException,
-            IOException, NoSuchFieldException, SecurityException,
-            IllegalArgumentException, IllegalAccessException {
+    public void emptyDataReadTest() throws Exception {
 
         initialize("/json-to-nn/simple-list-yang/4", schemaContext);
 
@@ -183,7 +176,7 @@ public class JsonToNnTest extends AbstractBodyReaderTest {
 
         assertTrue(dataTree.contains("lflst2 45"));
 
-        jsonBodyReader = new JsonNormalizedNodeBodyReader();
+        jsonBodyReader = new JsonNormalizedNodeBodyReader(schemaController);
         RestconfDocumentedException exception = null;
         mockBodyReader("array-with-null-yang:cont", jsonBodyReader, false);
         final InputStream inputStream = this.getClass().getResourceAsStream(
@@ -201,9 +194,7 @@ public class JsonToNnTest extends AbstractBodyReaderTest {
     }
 
     @Test
-    public void testJsonBlankInput() throws NoSuchFieldException,
-            SecurityException, IllegalArgumentException,
-            IllegalAccessException, WebApplicationException, IOException {
+    public void testJsonBlankInput() throws Exception {
         initialize("/json-to-nn/simple-list-yang/4", schemaContext);
         final NormalizedNodeContext normalizedNodeContext = prepareNNC("",
                 "array-with-null-yang:cont");
@@ -211,9 +202,7 @@ public class JsonToNnTest extends AbstractBodyReaderTest {
     }
 
     @Test
-    public void notSupplyNamespaceIfAlreadySupplied()
-            throws WebApplicationException, IOException, NoSuchFieldException,
-            SecurityException, IllegalArgumentException, IllegalAccessException {
+    public void notSupplyNamespaceIfAlreadySupplied() throws Exception {
 
         initialize("/json-to-nn/simple-list-yang/1", schemaContext);
 
@@ -240,7 +229,7 @@ public class JsonToNnTest extends AbstractBodyReaderTest {
     }
 
     @Test
-    public void dataAugmentedTest() {
+    public void dataAugmentedTest() throws Exception {
 
         initialize("/common/augment/yang", schemaContext);
 
@@ -268,8 +257,8 @@ public class JsonToNnTest extends AbstractBodyReaderTest {
         assertTrue(dataTree.contains("lf11 lf11 value from b"));
     }
 
-    private void simpleTest(final String jsonPath, final String yangPath,
-            final String topLevelElementName, final String moduleName) {
+    private void simpleTest(final String jsonPath, final String yangPath, final String topLevelElementName,
+            final String moduleName) throws Exception {
 
         initialize(yangPath, schemaContext);
 
@@ -281,8 +270,8 @@ public class JsonToNnTest extends AbstractBodyReaderTest {
         verifyNormaluizedNodeContext(normalizedNodeContext, topLevelElementName);
     }
 
-    private NormalizedNodeContext prepareNNC(final String jsonPath, final String uri) {
-        jsonBodyReader = new JsonNormalizedNodeBodyReader();
+    private NormalizedNodeContext prepareNNC(final String jsonPath, final String uri) throws Exception {
+        jsonBodyReader = new JsonNormalizedNodeBodyReader(schemaController);
         try {
             mockBodyReader(uri, jsonBodyReader, false);
         } catch (NoSuchFieldException | SecurityException
@@ -335,10 +324,8 @@ public class JsonToNnTest extends AbstractBodyReaderTest {
     }
 
     @Test
-    public void unsupportedDataFormatTest() throws NoSuchFieldException,
-            SecurityException, IllegalArgumentException,
-            IllegalAccessException, WebApplicationException, IOException {
-        jsonBodyReader = new JsonNormalizedNodeBodyReader();
+    public void unsupportedDataFormatTest() throws Exception {
+        jsonBodyReader = new JsonNormalizedNodeBodyReader(schemaController);
         initialize("/json-to-nn/simple-list-yang/1", schemaContext);
         mockBodyReader("simple-list-yang1:lst", jsonBodyReader, false);
 
@@ -360,11 +347,9 @@ public class JsonToNnTest extends AbstractBodyReaderTest {
     }
 
     @Test
-    public void invalidUriCharacterInValue() throws NoSuchFieldException,
-            SecurityException, IllegalArgumentException,
-            IllegalAccessException, WebApplicationException, IOException {
+    public void invalidUriCharacterInValue() throws Exception {
 
-        jsonBodyReader = new JsonNormalizedNodeBodyReader();
+        jsonBodyReader = new JsonNormalizedNodeBodyReader(schemaController);
         initialize("/json-to-nn/simple-list-yang/4", schemaContext);
         mockBodyReader("array-with-null-yang:cont", jsonBodyReader, false);
 
