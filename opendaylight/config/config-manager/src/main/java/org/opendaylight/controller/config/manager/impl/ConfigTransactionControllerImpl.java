@@ -29,6 +29,7 @@ import javax.management.ObjectName;
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.ValidationException;
+import org.opendaylight.controller.config.api.annotations.ServiceInterfaceAnnotation;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.config.manager.impl.dependencyresolver.DependencyResolverManager;
 import org.opendaylight.controller.config.manager.impl.dependencyresolver.ModuleInternalTransactionalInfo;
@@ -39,6 +40,7 @@ import org.opendaylight.controller.config.manager.impl.factoriesresolver.Hierarc
 import org.opendaylight.controller.config.manager.impl.jmx.TransactionModuleJMXRegistrator;
 import org.opendaylight.controller.config.manager.impl.jmx.TransactionModuleJMXRegistrator.TransactionModuleJMXRegistration;
 import org.opendaylight.controller.config.manager.impl.osgi.mapping.BindingContextProvider;
+import org.opendaylight.controller.config.manager.impl.util.InterfacesHelper;
 import org.opendaylight.controller.config.spi.Module;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.opendaylight.yangtools.concepts.Identifiable;
@@ -143,12 +145,23 @@ class ConfigTransactionControllerImpl implements
             for (Module module : defaultModules) {
                 // ensure default module to be registered to jmx even if its module factory does not use dependencyResolverFactory
                 DependencyResolver dependencyResolver = dependencyResolverManager.getOrCreate(module.getIdentifier());
+                final ObjectName objectName;
                 try {
                     boolean defaultBean = true;
-                    putConfigBeanToJMXAndInternalMaps(module.getIdentifier(), module, moduleFactory, null,
+                    objectName = putConfigBeanToJMXAndInternalMaps(module.getIdentifier(), module, moduleFactory, null,
                             dependencyResolver, defaultBean, bundleContext);
                 } catch (InstanceAlreadyExistsException e) {
                     throw new IllegalStateException(e);
+                }
+
+                // register default module as every possible service
+                final Set<ServiceInterfaceAnnotation> serviceInterfaceAnnotations = InterfacesHelper.getServiceInterfaceAnnotations(moduleFactory);
+                for (String qname : InterfacesHelper.getQNames(serviceInterfaceAnnotations)) {
+                    try {
+                        saveServiceReference(qname, module.getIdentifier().getInstanceName(), objectName);
+                    } catch (InstanceNotFoundException e) {
+                        throw new IllegalStateException("Unable to register default module instance " + module + " as a service of " + qname, e);
+                    }
                 }
             }
         }
@@ -157,6 +170,18 @@ class ConfigTransactionControllerImpl implements
         for (ModuleFactory removedFactory : toBeRemoved) {
             List<ModuleIdentifier> modulesOfRemovedFactory = dependencyResolverManager.findAllByFactory(removedFactory);
             for (ModuleIdentifier name : modulesOfRemovedFactory) {
+                // remove service refs
+                final ModuleFactory moduleFactory = dependencyResolverManager.findModuleInternalTransactionalInfo(name).getModuleFactory();
+                final Set<ServiceInterfaceAnnotation> serviceInterfaceAnnotations = InterfacesHelper.getServiceInterfaceAnnotations(moduleFactory);
+                for (String qname : InterfacesHelper.getQNames(serviceInterfaceAnnotations)) {
+                    try {
+                        removeServiceReference(qname, name.getInstanceName());
+                    } catch (InstanceNotFoundException e) {
+                        throw new IllegalStateException("Unable to UNregister default module instance " + name + " as a service of " + qname, e);
+                    }
+                }
+
+                // close module
                 destroyModule(name);
             }
         }
