@@ -18,6 +18,8 @@ import org.opendaylight.controller.sal.restconf.impl.BrokerFacade;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
 import org.opendaylight.controller.sal.restconf.impl.StatisticsRestconfServiceWrapper;
+import org.secnod.shiro.jersey.SubjectInjectableProvider;
+import org.secnod.shiro.jaxrs.ShiroExceptionMapper;
 
 public class RestconfApplication extends Application {
 
@@ -47,6 +49,8 @@ public class RestconfApplication extends Application {
         singletons.add(brokerFacade);
         singletons.add(schemaRetrieval);
         singletons.add(new RestconfCompositeWrapper(StatisticsRestconfServiceWrapper.getInstance(), schemaRetrieval));
+        singletons.add(new SubjectInjectableProvider());
+        singletons.add(new ShiroExceptionMapper());
 //        singletons.add(StructuredDataToXmlProvider.INSTANCE);
 //        singletons.add(StructuredDataToJsonProvider.INSTANCE);
 //        singletons.add(JsonToCompositeNodeProvider.INSTANCE);
