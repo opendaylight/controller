@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a7fa997_8b82c192",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/config/yang/sal/restconf/service/JSONRestconfServiceModule.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2015-07-20T18:34:27Z",
+      "side": 1,
+      "message": "We need license information",
+      "revId": "b6e859120dd907c08ea102f6e13f752b3f684675",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_ab7d3db3",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/config/yang/sal/restconf/service/JSONRestconfServiceModuleFactory.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2015-07-20T18:34:27Z",
+      "side": 1,
+      "message": "Should update the license information with EPL",
+      "revId": "b6e859120dd907c08ea102f6e13f752b3f684675",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_4b334914",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/restconf/api/JSONRestconfService.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2015-07-20T18:34:27Z",
+      "side": 1,
+      "message": "put and post can technically return a value -- are we choosing void return type here because we are stating that our restconf implementation for put and post never return valid strings?\n\nSame comment applied to post below.",
+      "revId": "b6e859120dd907c08ea102f6e13f752b3f684675",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_8b59615c",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/restconf/api/JSONRestconfService.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2015-07-20T18:34:27Z",
+      "side": 1,
+      "message": "Is this for testing or production? If production I would think returning a future would be better.",
+      "revId": "b6e859120dd907c08ea102f6e13f752b3f684675",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_ab545d21",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/restconf/api/JSONRestconfService.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2015-07-20T18:34:27Z",
+      "side": 1,
+      "message": "Same comment here about future.",
+      "revId": "b6e859120dd907c08ea102f6e13f752b3f684675",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_6b364505",
+        "filename": "opendaylight/md-sal/sal-rest-connector/src/main/java/org/opendaylight/controller/sal/restconf/impl/RestconfImpl.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 871,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2015-07-20T18:34:27Z",
+      "side": 1,
+      "message": "looks like we lost some debug ability here -- likely because the uriInfo can be null internally. Can we do a null check and add the path if is null?",
+      "revId": "b6e859120dd907c08ea102f6e13f752b3f684675",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
