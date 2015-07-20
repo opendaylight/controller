@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.sal.rest.doc.jaxrs;
 
+import com.fasterxml.jackson.databind.SerializationFeature;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
@@ -29,6 +30,7 @@ public class JaxbContextResolver implements ContextResolver<ObjectMapper> {
     public JaxbContextResolver() {
         ctx = new ObjectMapper();
         ctx.registerModule(new JsonOrgModule());
+        ctx.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
         ctx.getSerializationConfig().withSerializationInclusion(JsonInclude.Include.ALWAYS);
     }
 

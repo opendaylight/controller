@@ -34,6 +34,13 @@
       <artifactId>commons-lang3</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>org.glassfish.jersey.media</groupId>
+      <artifactId>jersey-media-json-jackson</artifactId>
+      <version>${jersey2.version}</version>
+    </dependency>
+
+
     <!-- Jax rs -->
     <dependency>
       <groupId>org.jboss.resteasy</groupId>
@@ -95,6 +102,26 @@
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>yang-data-api</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.glassfish.jersey.core</groupId>
+      <artifactId>jersey-common</artifactId>
+      <version>${jersey2.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jersey.core</groupId>
+      <artifactId>jersey-server</artifactId>
+      <version>${jersey2.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jersey.containers</groupId>
+      <artifactId>jersey-container-servlet-core</artifactId>
+      <version>${jersey2.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jersey.containers</groupId>
+      <artifactId>jersey-container-servlet</artifactId>
+      <version>${jersey2.version}</version>
+    </dependency>
   </dependencies>
 
   <build>
@@ -111,7 +138,7 @@
               !org.apache.maven.project,
               !org.opendaylight.yangtools.yang2sources.spi,
               *,
-              com.sun.jersey.spi.container.servlet, org.eclipse.jetty.servlets
+              org.glassfish.jersey.servlet, org.eclipse.jetty.servlets
             </Import-Package>
             <Bundle-Activator>org.opendaylight.controller.sal.rest.doc.DocProvider</Bundle-Activator>
             <Web-ContextPath>/apidoc</Web-ContextPath>
