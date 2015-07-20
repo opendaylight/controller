@@ -96,6 +96,45 @@
       <artifactId>yang-data-codec-gson</artifactId>
     </dependency>
     <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
+      <version>${javax.servlet.api.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>javax.ws.rs</groupId>
+      <artifactId>javax.ws.rs-api</artifactId>
+      <version>${javax.ws.rs-api.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jersey.core</groupId>
+      <artifactId>jersey-common</artifactId>
+      <version>${jersey2.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jersey.core</groupId>
+      <artifactId>jersey-server</artifactId>
+      <version>${jersey2.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jersey.containers</groupId>
+      <artifactId>jersey-container-servlet-core</artifactId>
+      <version>${jersey2.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jersey.containers</groupId>
+      <artifactId>jersey-container-servlet</artifactId>
+      <version>${jersey2.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.compendium</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>yang-model-export</artifactId>
       <!-- FIXME: remove explicit version, once model export package is part of yangtools-artefacts -->
@@ -147,10 +186,17 @@
               org.opendaylight.controller.md.sal.rest.common.*,
               org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.rest.connector.rev140724.*,
             </Private-Package>
-            <Import-Package>*,
-            com.sun.jersey.spi.container.servlet, org.eclipse.jetty.servlets</Import-Package>
+            <Import-Package>
+              javax.ws.rs.core,
+              javax.ws.rs.ext,
+              org.glassfish.jersey.internal,
+              org.glassfish.jersey.server,
+              org.glassfish.jersey.server.spi,
+              org.glassfish.jersey.servlet,
+              javax.servlet.*;version="[2.3.0,4.0.0)";resolution:=optional,
+              *
+            </Import-Package>
             <Embed-Dependency>stax-utils</Embed-Dependency>
-            <Web-ContextPath>/restconf</Web-ContextPath>
           </instructions>
         </configuration>
       </plugin>

@@ -7,21 +7,29 @@
  */
 package org.opendaylight.controller.sal.rest.doc;
 
+import com.google.common.base.Preconditions;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import javax.servlet.ServletException;
+import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.servlet.ServletContainer;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
 import org.opendaylight.controller.sal.core.api.Broker;
 import org.opendaylight.controller.sal.core.api.Provider;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.controller.sal.core.api.mount.MountProvisionListener;
 import org.opendaylight.controller.sal.rest.doc.impl.ApiDocGenerator;
+import org.opendaylight.controller.sal.rest.doc.impl.ApiDocServiceImpl;
+import org.opendaylight.controller.sal.rest.doc.jaxrs.JaxbContextResolver;
 import org.opendaylight.controller.sal.rest.doc.mountpoints.MountPointSwagger;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.http.HttpService;
+import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
@@ -31,10 +39,13 @@ public class DocProvider implements BundleActivator, ServiceTrackerCustomizer<Br
         Provider, AutoCloseable {
 
     private final Logger _logger = LoggerFactory.getLogger(DocProvider.class);
+    private static final String APIDOC_BASE_PATH = "/apidoc";
 
     private ServiceTracker<Broker, Broker> brokerServiceTracker;
     private BundleContext bundleContext;
     private Broker.ProviderSession session;
+    private HttpService httpService;
+
 
     private final List<AutoCloseable> toClose = new LinkedList<>();
 
@@ -71,6 +82,21 @@ public class DocProvider implements BundleActivator, ServiceTrackerCustomizer<Br
         bundleContext = context;
         brokerServiceTracker = new ServiceTracker<>(context, Broker.class, this);
         brokerServiceTracker.open();
+//        Preconditions.checkState((!session.isClosed()), "Session is closed.");
+        final ServiceReference<?> ref = bundleContext.getServiceReference(HttpService.class.getName());
+        httpService = (HttpService) bundleContext.getService(ref);
+        ResourceConfig rc = new ResourceConfig();
+        rc.setApplicationName("JAXRSApiDoc");
+        rc.register(JaxbContextResolver.class);
+        rc.register(ApiDocServiceImpl.class);
+        try {
+            httpService.registerServlet(APIDOC_BASE_PATH, new ServletContainer(rc), null, null);
+        } catch (ServletException | NamespaceException e) {
+            _logger.error("REST_CONNECTOR BUNDLE: unexpected error, restconf servlet was not registred", e);
+            return;
+        }
+
+        _logger.info("REST_CONNECTOR BUNDLE: restconf servlet registered");
     }
 
     @Override
@@ -88,6 +114,8 @@ public class DocProvider implements BundleActivator, ServiceTrackerCustomizer<Br
                 close.close();
             }
         }
+
+        httpService.unregister(APIDOC_BASE_PATH);
     }
 
     @Override

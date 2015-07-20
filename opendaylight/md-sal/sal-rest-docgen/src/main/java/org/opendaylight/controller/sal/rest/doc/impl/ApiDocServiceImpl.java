@@ -35,12 +35,6 @@ import org.opendaylight.controller.sal.rest.doc.swagger.ResourceList;
  */
 public class ApiDocServiceImpl implements ApiDocService {
 
-    private static final ApiDocService INSTANCE = new ApiDocServiceImpl();
-
-    public static ApiDocService getInstance() {
-        return INSTANCE;
-    }
-
     /**
      * Generates index document for Swagger UI. This document lists out all
      * modules with link to get APIs for each module. The API for each module is

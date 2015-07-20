@@ -10,6 +10,9 @@ package org.opendaylight.controller.sal.restconf.impl;
 import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Collections;
+import javax.servlet.ServletException;
+import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.servlet.ServletContainer;
 import org.opendaylight.controller.config.yang.md.sal.rest.connector.Config;
 import org.opendaylight.controller.config.yang.md.sal.rest.connector.Delete;
 import org.opendaylight.controller.config.yang.md.sal.rest.connector.Get;
@@ -21,23 +24,43 @@ import org.opendaylight.controller.config.yang.md.sal.rest.connector.Rpcs;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
+import org.opendaylight.controller.md.sal.rest.schema.SchemaExportContentYangBodyWriter;
+import org.opendaylight.controller.md.sal.rest.schema.SchemaExportContentYinBodyWriter;
+import org.opendaylight.controller.md.sal.rest.schema.SchemaRetrievalServiceImpl;
 import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 import org.opendaylight.controller.sal.core.api.Provider;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.controller.sal.rest.api.RestConnector;
+import org.opendaylight.controller.sal.rest.impl.JsonNormalizedNodeBodyReader;
+import org.opendaylight.controller.sal.rest.impl.NormalizedNodeJsonBodyWriter;
+import org.opendaylight.controller.sal.rest.impl.NormalizedNodeXmlBodyWriter;
+import org.opendaylight.controller.sal.rest.impl.RestconfCompositeWrapper;
+import org.opendaylight.controller.sal.rest.impl.RestconfDocumentedExceptionMapper;
+import org.opendaylight.controller.sal.rest.impl.XmlNormalizedNodeBodyReader;
 import org.opendaylight.controller.sal.streams.websockets.WebSocketServer;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.http.HttpService;
+import org.osgi.service.http.NamespaceException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RestconfProviderImpl implements Provider, AutoCloseable, RestConnector, RestConnectorRuntimeMXBean {
+    private static final Logger LOG = LoggerFactory.getLogger(RestconfProviderImpl.class);
+    private static final String REST_CONNECTOR_BASE_PATH = "/restconf";
 
     private final StatisticsRestconfServiceWrapper stats = StatisticsRestconfServiceWrapper.getInstance();
     private ListenerRegistration<SchemaContextListener> listenerRegistration;
-    private PortNumber port;
+    private final PortNumber port;
+    private final BundleContext bundleContext;
     private Thread webSocketServerThread;
+    private HttpService httpService;
 
-    public void setWebsocketPort(final PortNumber port) {
+    public RestconfProviderImpl(final BundleContext bundleContext, final PortNumber port) {
+        this.bundleContext = bundleContext;
         this.port = port;
     }
 
@@ -58,6 +81,38 @@ public class RestconfProviderImpl implements Provider, AutoCloseable, RestConnec
         webSocketServerThread = new Thread(WebSocketServer.createInstance(port.getValue().intValue()));
         webSocketServerThread.setName("Web socket server on port " + port);
         webSocketServerThread.start();
+
+        final ServiceReference<?> ref = bundleContext.getServiceReference(HttpService.class.getName());
+        httpService = (HttpService) bundleContext.getService(ref);
+
+        final ResourceConfig rc = new ResourceConfig();
+        rc.register(RestconfDocumentedExceptionMapper.class);
+        rc.register(XmlNormalizedNodeBodyReader.class);
+        rc.register(JsonNormalizedNodeBodyReader.class);
+        rc.register(NormalizedNodeJsonBodyWriter.class);
+        rc.register(NormalizedNodeXmlBodyWriter.class);
+        rc.register(SchemaExportContentYinBodyWriter.class);
+        rc.register(SchemaExportContentYangBodyWriter.class);
+
+        final ControllerContext controllerContext = ControllerContext.getInstance();
+        final BrokerFacade brokerFacade = BrokerFacade.getInstance();
+        final RestconfImpl restconfImpl = RestconfImpl.getInstance();
+        final SchemaRetrievalServiceImpl schemaRetrieval = new SchemaRetrievalServiceImpl(controllerContext);
+        restconfImpl.setBroker(brokerFacade);
+        restconfImpl.setControllerContext(controllerContext);
+        rc.register(controllerContext);
+        rc.register(brokerFacade);
+        rc.register(schemaRetrieval);
+        rc.register(new RestconfCompositeWrapper(StatisticsRestconfServiceWrapper.getInstance(), schemaRetrieval));
+
+        try {
+            httpService.registerServlet(REST_CONNECTOR_BASE_PATH, new ServletContainer(rc), null, null);
+        } catch (ServletException | NamespaceException e) {
+            LOG.error("REST_CONNECTOR BUNDLE: unexpected error, restconf servlet was not registred", e);
+            return;
+        }
+
+        LOG.info("REST_CONNECTOR BUNDLE: restconf servlet registered");
     }
 
     @Override
@@ -74,6 +129,10 @@ public class RestconfProviderImpl implements Provider, AutoCloseable, RestConnec
 
         WebSocketServer.destroyInstance();
         webSocketServerThread.interrupt();
+
+        if (httpService != null) {
+            httpService.unregister(REST_CONNECTOR_BASE_PATH);
+        }
     }
 
     @Override
