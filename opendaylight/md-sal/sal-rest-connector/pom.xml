@@ -96,6 +96,33 @@
       <artifactId>yang-data-codec-gson</artifactId>
     </dependency>
     <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>javax.ws.rs</groupId>
+      <artifactId>javax.ws.rs-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.eclipsesource.jaxrs</groupId>
+      <artifactId>jersey-all</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <!--<dependency>-->
+      <!--<groupId>org.glassfish.jersey.containers</groupId>-->
+      <!--<artifactId>jersey-container-servlet</artifactId>-->
+      <!--<version>${jersey2.version}</version>-->
+    <!--</dependency>-->
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.compendium</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>yang-model-export</artifactId>
       <!-- FIXME: remove explicit version, once model export package is part of yangtools-artefacts -->
@@ -147,10 +174,11 @@
               org.opendaylight.controller.md.sal.rest.common.*,
               org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.rest.connector.rev140724.*,
             </Private-Package>
-            <Import-Package>*,
-            com.sun.jersey.spi.container.servlet, org.eclipse.jetty.servlets</Import-Package>
+            <Import-Package>
+              org.glassfish.jersey.internal,
+              *
+            </Import-Package>
             <Embed-Dependency>stax-utils</Embed-Dependency>
-            <Web-ContextPath>/restconf</Web-ContextPath>
           </instructions>
         </configuration>
       </plugin>

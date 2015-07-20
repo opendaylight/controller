@@ -20,6 +20,10 @@
       <artifactId>jackson-databind</artifactId>
     </dependency>
     <dependency>
+      <groupId>com.fasterxml.jackson.jaxrs</groupId>
+      <artifactId>jackson-jaxrs-json-provider</artifactId>
+    </dependency>
+    <dependency>
       <groupId>com.fasterxml.jackson.datatype</groupId>
       <artifactId>jackson-datatype-json-org</artifactId>
     </dependency>
@@ -33,6 +37,7 @@
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
     </dependency>
+
 
     <!-- Jax rs -->
     <dependency>
@@ -73,8 +78,22 @@
     </dependency>
 
     <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>javax.ws.rs</groupId>
+      <artifactId>javax.ws.rs-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.compendium</artifactId>
     </dependency>
 
     <dependency>
@@ -95,6 +114,16 @@
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>yang-data-api</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.eclipsesource.jaxrs</groupId>
+      <artifactId>jersey-all</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <!--<dependency>-->
+      <!--<groupId>org.glassfish.jersey.containers</groupId>-->
+      <!--<artifactId>jersey-container-servlet</artifactId>-->
+      <!--<version>${jersey2.version}</version>-->
+    <!--</dependency>-->
   </dependencies>
 
   <build>
@@ -107,14 +136,11 @@
 
           <instructions>
             <Bundle-Name>MD SAL Rest Api Doc Generator</Bundle-Name>
-            <Import-Package>!org.apache.maven.plugin.logging,
-              !org.apache.maven.project,
-              !org.opendaylight.yangtools.yang2sources.spi,
-              *,
-              com.sun.jersey.spi.container.servlet, org.eclipse.jetty.servlets
+            <Import-Package>
+              org.glassfish.jersey.internal,
+              *
             </Import-Package>
             <Bundle-Activator>org.opendaylight.controller.sal.rest.doc.DocProvider</Bundle-Activator>
-            <Web-ContextPath>/apidoc</Web-ContextPath>
           </instructions>
 
         </configuration>
