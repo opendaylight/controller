@@ -451,10 +451,15 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                 logIndex)
         );
 
-        if (followerToLog.isEmpty()) {
+        boolean applyModificationToState = followerToLog.isEmpty()
+                || context.getCustomizableRaftBehavior().applyModificationToStateBeforeConsensus();
+
+        if(applyModificationToState){
             context.setCommitIndex(logIndex);
             applyLogToStateMachine(logIndex);
-        } else {
+        }
+
+        if (!followerToLog.isEmpty()) {
             sendAppendEntries(0, false);
         }
     }

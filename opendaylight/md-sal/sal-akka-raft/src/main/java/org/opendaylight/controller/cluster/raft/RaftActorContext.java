@@ -195,4 +195,11 @@ public interface RaftActorContext {
      * @return the payload version to be used when replicating data
      */
     short getPayloadVersion();
+
+    /**
+     * Gets an implementation of the CustomizableRaftBehavior so that the Raft code can be adapted
+     *
+     * @return
+     */
+    CustomizableRaftBehavior getCustomizableRaftBehavior();
 }
