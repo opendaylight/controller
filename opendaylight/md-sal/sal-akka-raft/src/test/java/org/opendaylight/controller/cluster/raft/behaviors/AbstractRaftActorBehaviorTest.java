@@ -15,6 +15,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.AbstractActorTest;
+import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
@@ -348,5 +349,20 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
 
     protected void logStart(String name) {
         LoggerFactory.getLogger(LeaderTest.class).info("Starting " + name);
+    }
+
+    protected RaftPolicy createRaftPolicy(final boolean automaticElectionsEnabled,
+                                          final boolean applyModificationToStateBeforeConsensus){
+        return new RaftPolicy() {
+            @Override
+            public boolean automaticElectionsEnabled() {
+                return automaticElectionsEnabled;
+            }
+
+            @Override
+            public boolean applyModificationToStateBeforeConsensus() {
+                return applyModificationToStateBeforeConsensus;
+            }
+        };
     }
 }
