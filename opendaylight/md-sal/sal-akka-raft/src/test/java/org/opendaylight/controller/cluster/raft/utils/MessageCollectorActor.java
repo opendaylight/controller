@@ -108,6 +108,7 @@ public class MessageCollectorActor extends UntypedActor {
         return expectFirstMatching(actor, clazz, 5000);
     }
 
+
     public static <T> T expectFirstMatching(ActorRef actor, Class<T> clazz, long timeout) {
         int count = (int) (timeout / 50);
         for(int i = 0; i < count; i++) {
@@ -146,6 +147,28 @@ public class MessageCollectorActor extends UntypedActor {
         Assert.fail(String.format("Expected specific message of type %s. Last message received was: %s", clazz, lastMessage));
         return null;
     }
+
+    public static <T> void assertNoneMatching(ActorRef actor, Class<T> clazz) {
+        assertNoneMatching(actor, clazz, 5000);
+    }
+
+    public static <T> void assertNoneMatching(ActorRef actor, Class<T> clazz, long timeout) {
+        int count = (int) (timeout / 50);
+        for(int i = 0; i < count; i++) {
+            try {
+                T message = getFirstMatching(actor, clazz);
+                if(message != null) {
+                    Assert.fail("Unexpected message received" +  message.toString());
+                    return;
+                }
+            } catch (Exception e) {}
+
+            Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
+        }
+
+        return;
+    }
+
 
     public static <T> List<T> getAllMatching(ActorRef actor, Class<T> clazz) throws Exception {
         List<Object> allMessages = getAllMessages(actor);

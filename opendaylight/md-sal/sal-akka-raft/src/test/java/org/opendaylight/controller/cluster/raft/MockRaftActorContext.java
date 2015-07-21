@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.Map;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.NonPersistentDataProvider;
+import org.opendaylight.controller.cluster.raft.policy.DefaultRaftPolicy;
+import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages;
 import org.opendaylight.controller.protobuff.messages.cluster.raft.test.MockPayloadMessages;
@@ -42,6 +44,7 @@ public class MockRaftActorContext implements RaftActorContext {
     private SnapshotManager snapshotManager;
     private DataPersistenceProvider persistenceProvider = new NonPersistentDataProvider();
     private short payloadVersion;
+    private RaftPolicy raftPolicy = DefaultRaftPolicy.INSTANCE;
 
     public MockRaftActorContext(){
         electionTerm = new ElectionTerm() {
@@ -236,6 +239,15 @@ public class MockRaftActorContext implements RaftActorContext {
     @Override
     public short getPayloadVersion() {
         return payloadVersion;
+    }
+
+    @Override
+    public RaftPolicy getRaftPolicy() {
+        return this.raftPolicy;
+    }
+
+    public void setRaftPolicy(RaftPolicy raftPolicy){
+        this.raftPolicy = raftPolicy;
     }
 
     public void setPayloadVersion(short payloadVersion) {

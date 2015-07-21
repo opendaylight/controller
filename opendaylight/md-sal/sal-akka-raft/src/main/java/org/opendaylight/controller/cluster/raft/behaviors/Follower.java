@@ -48,10 +48,12 @@ public class Follower extends AbstractRaftActorBehavior {
 
         initialSyncStatusTracker = new InitialSyncStatusTracker(context.getActor());
 
-        if(context.getPeerAddresses().isEmpty()){
-            actor().tell(ELECTION_TIMEOUT, actor());
-        } else {
-            scheduleElection(electionDuration());
+        if(context.getRaftPolicy().automaticElectionsEnabled()) {
+            if (context.getPeerAddresses().isEmpty()) {
+                actor().tell(ELECTION_TIMEOUT, actor());
+            } else {
+                scheduleElection(electionDuration());
+            }
         }
 
     }
