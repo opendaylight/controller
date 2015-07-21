@@ -42,6 +42,7 @@ public class MockRaftActorContext implements RaftActorContext {
     private SnapshotManager snapshotManager;
     private DataPersistenceProvider persistenceProvider = new NonPersistentDataProvider();
     private short payloadVersion;
+    private CustomizableRaftBehavior customizableRaftBehavior = DefaultRaftBehavior.INSTANCE;
 
     public MockRaftActorContext(){
         electionTerm = new ElectionTerm() {
@@ -236,6 +237,15 @@ public class MockRaftActorContext implements RaftActorContext {
     @Override
     public short getPayloadVersion() {
         return payloadVersion;
+    }
+
+    @Override
+    public CustomizableRaftBehavior getCustomizableRaftBehavior() {
+        return this.customizableRaftBehavior;
+    }
+
+    public void setCustomizableRaftBehavior(CustomizableRaftBehavior customizableRaftBehavior){
+        this.customizableRaftBehavior = customizableRaftBehavior;
     }
 
     public void setPayloadVersion(short payloadVersion) {

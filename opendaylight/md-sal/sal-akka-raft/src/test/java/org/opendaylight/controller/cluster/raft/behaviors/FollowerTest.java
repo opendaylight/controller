@@ -782,6 +782,17 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
         assertTrue(elapsed < context.getConfigParams().getElectionTimeOutInterval().toMillis());
     }
 
+    @Test
+    public void testFollowerDoesNotScheduleAnElectionIfAutomaticElectionsAreDisabled(){
+        MockRaftActorContext context = createActorContext();
+        context.setCustomizableRaftBehavior(createCustomBehavior(false, false));
+
+        follower = createBehavior(context);
+
+        MessageCollectorActor.assertNoneMatching(followerActor, ElectionTimeout.class);
+    }
+
+
     public ByteString getNextChunk (ByteString bs, int offset, int chunkSize){
         int snapshotLength = bs.size();
         int start = offset;
