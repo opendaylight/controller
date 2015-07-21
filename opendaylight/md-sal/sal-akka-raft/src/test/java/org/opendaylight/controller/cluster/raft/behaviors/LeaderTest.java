@@ -170,6 +170,45 @@ public class LeaderTest extends AbstractLeaderTest {
         assertEquals("Entry getIndex", lastIndex + 1, appendEntries.getEntries().get(0).getIndex());
         assertEquals("Entry getTerm", term, appendEntries.getEntries().get(0).getTerm());
         assertEquals("Entry payload", "foo", appendEntries.getEntries().get(0).getData().toString());
+        assertEquals("Commit Index", lastIndex, actorContext.getCommitIndex());
+    }
+
+    @Test
+    public void testHandleReplicateMessageCommitIndexIncrementedBeforeConsensus() throws Exception {
+        logStart("testHandleReplicateMessageCommitIndexIncrementedBeforeConsensus");
+
+        MockRaftActorContext actorContext = createActorContextWithFollower();
+        actorContext.setRaftPolicy(createRaftPolicy(true, true));
+
+        long term = 1;
+        actorContext.getTermInformation().update(term, "");
+
+        leader = new Leader(actorContext);
+
+        // Leader will send an immediate heartbeat - ignore it.
+        MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
+
+        // The follower would normally reply - simulate that explicitly here.
+        long lastIndex = actorContext.getReplicatedLog().lastIndex();
+        leader.handleMessage(followerActor, new AppendEntriesReply(
+                FOLLOWER_ID, term, true, lastIndex, term, (short) 0));
+        assertEquals("isFollowerActive", true, leader.getFollower(FOLLOWER_ID).isFollowerActive());
+
+        followerActor.underlyingActor().clear();
+
+        RaftActorBehavior raftBehavior = sendReplicate(actorContext, lastIndex + 1);
+
+        // State should not change
+        assertTrue(raftBehavior instanceof Leader);
+
+        AppendEntries appendEntries = MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
+        assertEquals("getPrevLogIndex", lastIndex, appendEntries.getPrevLogIndex());
+        assertEquals("getPrevLogTerm", term, appendEntries.getPrevLogTerm());
+        assertEquals("Entries size", 1, appendEntries.getEntries().size());
+        assertEquals("Entry getIndex", lastIndex + 1, appendEntries.getEntries().get(0).getIndex());
+        assertEquals("Entry getTerm", term, appendEntries.getEntries().get(0).getTerm());
+        assertEquals("Entry payload", "foo", appendEntries.getEntries().get(0).getData().toString());
+        assertEquals("Commit Index", lastIndex+1, actorContext.getCommitIndex());
     }
 
     @Test
