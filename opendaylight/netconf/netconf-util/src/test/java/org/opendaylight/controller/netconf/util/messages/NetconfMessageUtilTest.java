@@ -21,6 +21,12 @@ public class NetconfMessageUtilTest {
     @Test
     public void testNetconfMessageUtil() throws Exception {
         Document okMessage = XmlFileLoader.xmlFileToDocument("netconfMessages/rpc-reply_ok.xml");
+        Document randomMessage = XmlFileLoader.xmlFileToDocument("netconfMessages/editConfig.xml");
+        //Document randomMessage2 = XmlFileLoader.xmlFileToDocument("netconfMessages");
+
+        assertFalse(NetconfMessageUtil.isOKMessage(new NetconfMessage(randomMessage)));
+        //assertFalse(NetconfMessageUtil.isErrorMessage(new NetconfMessage(new Document() {})));
+
         assertTrue(NetconfMessageUtil.isOKMessage(new NetconfMessage(okMessage)));
         assertFalse(NetconfMessageUtil.isErrorMessage(new NetconfMessage(okMessage)));
 

@@ -45,6 +45,11 @@
     <module>netconf-artifacts</module>
   </modules>
 
+  <properties>
+      <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+      <sonar.language>java</sonar.language>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.osgi</groupId>
@@ -65,6 +70,11 @@
   <build>
     <pluginManagement>
       <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-plugin-plugin</artifactId>
+          <version>3.4</version>
+        </plugin>
         <plugin>
           <groupId>org.apache.felix</groupId>
           <artifactId>maven-bundle-plugin</artifactId>
@@ -112,6 +122,25 @@
 
     </pluginManagement>
     <plugins>
+      <plugin>
+            <artifactId>maven-deploy-plugin</artifactId>
+            <configuration>
+                <skip>true</skip>
+            </configuration>
+      </plugin>
+      <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <executions>
+                <execution>
+                    <id>aggregate</id>
+                    <goals>
+                        <goal>aggregate</goal>
+                    </goals>
+                    <phase>site</phase>
+                </execution>
+            </executions>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>

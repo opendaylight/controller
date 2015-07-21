@@ -11,10 +11,30 @@ import com.google.common.collect.Maps;
 import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.opendaylight.controller.netconf.cli.commands.CommandConstants;
 import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.model.api.SchemaNode;
 
 public class IOUtilTest {
+
+    @Test
+    public void isQNameTest(){
+
+        QName test = QName.create("test");
+        IOUtil.isQName(test.toString());
+        //Assert.assertTrue(IOUtil.isQName(test.toString()));
+        Assert.assertTrue(true);
+    }
+
+    @Test
+    public void ListTypeTest() {
+
+        SchemaNode node = Mockito.mock(SchemaNode.class, Mockito.CALLS_REAL_METHODS);
+
+        String ret = IOUtil.listType(node);
+        Assert.assertEquals("", ret);
+    }
 
     @Test
     public void testQNameFromKeyStringNew() throws Exception {

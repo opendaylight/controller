@@ -27,4 +27,11 @@ public class NetconfUtilTest {
             assertThat(e.getMessage(), containsString("Optimistic lock failed. Expected parent version 21, was 18"));
         }
     }
+
+    @Test
+    public void testOk() throws Exception {
+        Document document = XmlUtil.readXmlToDocument(getClass().getResourceAsStream("/netconfMessages/rpc-reply_ok.xml"));
+        Document resp = NetconfUtil.checkIsMessageOk(document);
+        assertThat(resp.toString(), containsString("null"));
+    }
 }
