@@ -202,4 +202,10 @@ public class RaftActorContextImpl implements RaftActorContext {
     public DataPersistenceProvider getPersistenceProvider() {
         return persistenceProvider;
     }
+
+
+    @Override
+    public CustomizableRaftBehavior getCustomizableRaftBehavior() {
+        return DefaultRaftBehavior.INSTANCE;
+    }
 }

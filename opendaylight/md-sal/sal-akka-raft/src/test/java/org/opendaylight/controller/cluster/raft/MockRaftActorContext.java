@@ -238,6 +238,11 @@ public class MockRaftActorContext implements RaftActorContext {
         return payloadVersion;
     }
 
+    @Override
+    public CustomizableRaftBehavior getCustomizableRaftBehavior() {
+        return DefaultRaftBehavior.INSTANCE;
+    }
+
     public void setPayloadVersion(short payloadVersion) {
         this.payloadVersion = payloadVersion;
     }

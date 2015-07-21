@@ -181,4 +181,11 @@ public interface RaftActorContext {
     void setTotalMemoryRetriever(Supplier<Long> retriever);
 
     short getPayloadVersion();
+
+    /**
+     * Gets an implementation of the CustomizableRaftBehavior so that the Raft code can be adapted
+     *
+     * @return
+     */
+    CustomizableRaftBehavior getCustomizableRaftBehavior();
 }
