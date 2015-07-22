@@ -7,7 +7,14 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import com.google.common.base.Strings;
+import com.google.common.base.Supplier;
+import com.google.common.base.Suppliers;
 import java.util.concurrent.TimeUnit;
+import org.opendaylight.controller.cluster.raft.policy.DefaultRaftPolicy;
+import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import scala.concurrent.duration.FiniteDuration;
 
 /**
@@ -16,6 +23,8 @@ import scala.concurrent.duration.FiniteDuration;
  * If no implementation is provided for ConfigParams, then this will be used.
  */
 public class DefaultConfigParamsImpl implements ConfigParams {
+
+    private static final Logger LOG = LoggerFactory.getLogger(DefaultConfigParamsImpl.class);
 
     private static final int SNAPSHOT_BATCH_COUNT = 20000;
 
@@ -52,6 +61,9 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     private int snaphotChunkSize = SNAPSHOT_CHUNK_SIZE;
 
     private long electionTimeoutFactor = 2;
+    private String customRaftPolicyImplementationClass;
+
+    Supplier<RaftPolicy> policySupplier = Suppliers.memoize(new PolicySupplier());
 
     public void setHeartBeatInterval(FiniteDuration heartBeatInterval) {
         this.heartBeatInterval = heartBeatInterval;
@@ -81,6 +93,10 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     public void setElectionTimeoutFactor(long electionTimeoutFactor){
         this.electionTimeoutFactor = electionTimeoutFactor;
         electionTimeOutInterval = null;
+    }
+
+    public void setCustomRaftPolicyImplementationClass(String customRaftPolicyImplementationClass){
+        this.customRaftPolicyImplementationClass = customRaftPolicyImplementationClass;
     }
 
     @Override
@@ -131,5 +147,32 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     @Override
     public long getElectionTimeoutFactor() {
         return electionTimeoutFactor;
+    }
+
+    @Override
+    public RaftPolicy getRaftPolicy() {
+        return policySupplier.get();
+    }
+
+    private class PolicySupplier implements Supplier<RaftPolicy>{
+        @Override
+        public RaftPolicy get() {
+            if(Strings.isNullOrEmpty(DefaultConfigParamsImpl.this.customRaftPolicyImplementationClass)){
+                return DefaultRaftPolicy.INSTANCE;
+            }
+            try {
+                String className = DefaultConfigParamsImpl.this.customRaftPolicyImplementationClass;
+                Class c = Class.forName(className);
+                RaftPolicy obj = (RaftPolicy)c.newInstance();
+                return obj;
+            } catch (Exception e) {
+                if(LOG.isDebugEnabled()) {
+                    LOG.error("Could not create custom raft policy, will stick with default", e);
+                } else {
+                    LOG.error("Could not create custom raft policy, will stick with default : cause = {}", e.getMessage());
+                }
+            }
+            return DefaultRaftPolicy.INSTANCE;
+        }
     }
 }
