@@ -39,15 +39,14 @@ public interface RaftActorBehavior extends AutoCloseable{
     RaftActorBehavior handleMessage(ActorRef sender, Object message);
 
     /**
-     * The state associated with a given behavior
      *
-     * @return
+     * @return The state associated with a given behavior
      */
     RaftState state();
 
     /**
      *
-     * @return
+     * @return The Id of the Leader if known else null
      */
     String getLeaderId();
 
@@ -58,13 +57,12 @@ public interface RaftActorBehavior extends AutoCloseable{
     void setReplicatedToAllIndex(long replicatedToAllIndex);
 
     /**
-     * getting the index of the log entry which is replicated to all nodes
-     * @return
+     * @return the index of the log entry which is replicated to all nodes
      */
     long getReplicatedToAllIndex();
 
     /**
-     * Returns the leader's payload data version.
+     * @return the leader's payload data version.
      */
     short getLeaderPayloadVersion();
 }

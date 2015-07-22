@@ -15,32 +15,26 @@ import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payloa
  */
 public interface ReplicatedLogEntry {
     /**
-     * The data stored in that entry
      *
-     * @return
+     * @return The payload/data to be replicated
      */
     Payload getData();
 
     /**
-     * The term stored in that entry
      *
-     * @return
+     * @return The term of the entry
      */
     long getTerm();
 
     /**
-     * The index of the entry
      *
-     * @return
+     * @return The index of the entry
      */
     long getIndex();
 
     /**
-     * The size of the entry in bytes.
      *
-     * An approximate number may be good enough.
-     *
-     * @return
+     * @return The size of the entry in bytes. An approximate number may be good enough.
      */
     int size();
 }
