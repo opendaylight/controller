@@ -24,10 +24,6 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-binding-config</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-binding-util</artifactId>
     </dependency>
     <dependency>
@@ -119,21 +115,12 @@
           <instructions>
             <Bundle-Name>${project.groupId}.${project.artifactId}</Bundle-Name>
             <Export-Package>
-                            org.opendaylight.controller.sal.binding.spi.*,
-                            org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.binding.impl.rev131028.*,
-                            org.opendaylight.controller.config.yang.md.sal.binding.impl
-            </Export-Package>
-            <Private-Package>
                             org.opendaylight.controller.sal.binding.impl,
-                            org.opendaylight.controller.sal.binding.impl.*,
-                            org.opendaylight.controller.sal.binding.codegen,
-                            org.opendaylight.controller.sal.binding.codegen.*,
                             org.opendaylight.controller.md.sal.binding.impl,
                             org.opendaylight.controller.md.sal.binding.compat,
                             org.opendaylight.controller.md.sal.binding.spi,
-              <!--org.opendaylight.controller.sal.binding.dom.*,-->
-                            org.opendaylight.controller.sal.binding.osgi.*
-            </Private-Package>
+                            org.opendaylight.controller.sal.binding.codegen.impl,
+            </Export-Package>
           </instructions>
         </configuration>
       </plugin>

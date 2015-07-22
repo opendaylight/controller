@@ -17,6 +17,7 @@
     <module>toaster-provider</module>
     <module>toaster-config</module>
     <module>clustering-test-app</module>
+    <module>toaster-it</module>
   </modules>
   <scm>
     <connection>scm:git:http://git.opendaylight.org/gerrit/controller.git</connection>
@@ -25,15 +26,4 @@
     <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:MD-SAL</url>
   </scm>
 
-  <profiles>
-    <profile>
-      <id>integrationtests</id>
-      <activation>
-        <activeByDefault>false</activeByDefault>
-      </activation>
-      <modules>
-        <module>toaster-it</module>
-      </modules>
-    </profile>
-  </profiles>
 </project>
