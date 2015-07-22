@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a7fa997_bf0fb42d",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-07-22T22:54:32Z",
+      "side": 1,
+      "message": "I just moved this block into a separate method.",
+      "revId": "42940a32d49c6af1dbc004e6be66f120f65bc54b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
