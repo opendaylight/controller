@@ -18,7 +18,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Supplier;
 import java.util.Map;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
-import org.opendaylight.controller.cluster.raft.policy.DefaultRaftPolicy;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.slf4j.Logger;
 
@@ -208,6 +207,6 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     @Override
     public RaftPolicy getRaftPolicy() {
-        return DefaultRaftPolicy.INSTANCE;
+        return configParams.getRaftPolicy();
     }
 }
