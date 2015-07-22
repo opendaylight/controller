@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import scala.concurrent.duration.FiniteDuration;
 
 /**
@@ -84,4 +85,11 @@ public interface ConfigParams {
      */
     long getElectionTimeoutFactor();
 
+
+    /**
+     *
+     * @return A instance of org.opendaylight.controller.cluster.raft.CustomizableRaftBehavior or an instance of the
+     * DefaultRaftBehavior
+     */
+    RaftPolicy getCustomRaftPolicy();
 }
