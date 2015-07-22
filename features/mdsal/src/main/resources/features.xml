@@ -34,11 +34,13 @@
         <bundle>mvn:org.opendaylight.controller/sal-core-spi/${project.version}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-broker-impl/${project.version}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-binding-api/${project.version}</bundle>
-        <bundle>mvn:org.opendaylight.controller/sal-binding-config/${project.version}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-binding-broker-impl/${project.version}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-binding-util/${project.version}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-connector-api/${project.version}</bundle>
+        <bundle>mvn:org.opendaylight.controller/sal-dom-config/${project.version}</bundle>
+        <bundle>mvn:org.opendaylight.controller/sal-binding-config/${project.version}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-inmemory-datastore/${project.version}</bundle>
+        <bundle>mvn:org.opendaylight.controller/sal-dom-broker-config/${project.version}</bundle>
         <configfile finalname="${config.configfile.directory}/${config.mdsal.configfile}">mvn:org.opendaylight.controller/md-sal-config/${mdsal.version}/xml/config</configfile>
     </feature>
     <feature name='odl-toaster' version='${project.version}' description="OpenDaylight :: Toaster">
