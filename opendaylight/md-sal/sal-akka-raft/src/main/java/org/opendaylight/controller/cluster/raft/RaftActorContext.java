@@ -26,15 +26,15 @@ import org.slf4j.Logger;
 public interface RaftActorContext {
     /**
      * Create a new local actor
-      * @param props
-     * @return
+     * @param props
+     * @return a reference to the newly created actor
      */
     ActorRef actorOf(Props props);
 
     /**
      * Create a actor selection
      * @param path
-     * @return
+     * @return an actor selection for the given actor path
      */
     ActorSelection actorSelection(String path);
 
@@ -42,54 +42,47 @@ public interface RaftActorContext {
      * Get the identifier for the RaftActor. This identifier represents the
      * name of the actor whose common state is being shared. For example the
      * id could be 'inventory'
+     *
      * @return the identifier
      */
     String getId();
 
     /**
-     * A reference to the RaftActor itself. This could be used to send messages
+     * @return A reference to the RaftActor itself. This could be used to send messages
      * to the RaftActor
-     * @return
      */
     ActorRef getActor();
 
     /**
-     * Get the ElectionTerm information
-     * @return
+     * @return the ElectionTerm information
      */
     ElectionTerm getTermInformation();
 
     /**
-     * index of highest log entry known to be
-     * committed (initialized to 0, increases
-     *    monotonically)
-     * @return
+     * @return index of highest log entry known to be committed (initialized to 0, increases monotonically)
      */
     long getCommitIndex();
 
 
     /**
-     *
+     * @param commitIndex new commit index
      */
     void setCommitIndex(long commitIndex);
 
     /**
-     * index of highest log entry applied to state
-     * machine (initialized to 0, increases
-     *    monotonically)
-     * @return
+     * @return index of highest log entry applied to state machine (initialized to 0, increases monotonically)
      */
     long getLastApplied();
 
 
     /**
-     *
+     * @param lastApplied the index of the last log entry that was applied to the state
      */
     void setLastApplied(long lastApplied);
 
     /**
      *
-     * @param replicatedLog
+     * @param replicatedLog the replicated log of the current RaftActor
      */
     void setReplicatedLog(ReplicatedLog replicatedLog);
 
@@ -104,16 +97,12 @@ public interface RaftActorContext {
     ActorSystem getActorSystem();
 
     /**
-     * Get the logger to be used for logging messages
-     *
-     * @return
+     * @return the logger to be used for logging messages to a log file
      */
     Logger getLogger();
 
     /**
-     * Get a mapping of peerId's to their addresses
-     *
-     * @return
+     * @return a mapping of peerId's to their addresses
      *
      */
     Map<String, String> getPeerAddresses();
@@ -130,6 +119,7 @@ public interface RaftActorContext {
 
     /**
      * Add to actor peers
+     *
      * @param name
      * @param address
      */
@@ -169,16 +159,40 @@ public interface RaftActorContext {
      */
     ConfigParams getConfigParams();
 
+    /**
+     *
+     * @return the SnapshotManager for this RaftActor
+     */
     SnapshotManager getSnapshotManager();
 
+    /**
+     *
+     * @return the DataPersistenceProvider for this RaftActor
+     */
     DataPersistenceProvider getPersistenceProvider();
 
+    /**
+     *
+     * @return true if the RaftActor has followers else false
+     */
     boolean hasFollowers();
 
+    /**
+     *
+     * @return the total memory used by the ReplicatedLog
+     */
     long getTotalMemory();
 
+    /**
+     *
+     * @param retriever a supplier of the total memory metric
+     */
     @VisibleForTesting
     void setTotalMemoryRetriever(Supplier<Long> retriever);
 
+    /**
+     *
+     * @return the payload version to be used when replicating data
+     */
     short getPayloadVersion();
 }

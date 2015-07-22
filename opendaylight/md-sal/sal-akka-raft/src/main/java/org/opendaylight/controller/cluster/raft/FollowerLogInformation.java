@@ -14,13 +14,15 @@ public interface FollowerLogInformation {
 
     /**
      * Increment the value of the nextIndex
-     * @return
+     *
+     * @return the new value of nextIndex
      */
     long incrNextIndex();
 
     /**
      * Decrement the value of the nextIndex
-     * @return
+     *
+     * @return the new value of nextIndex
      */
     long decrNextIndex();
 
@@ -35,7 +37,8 @@ public interface FollowerLogInformation {
 
     /**
      * Increment the value of the matchIndex
-     * @return
+     *
+     * @return the new value of matchIndex
      */
     long incrMatchIndex();
 
@@ -49,28 +52,25 @@ public interface FollowerLogInformation {
     boolean setMatchIndex(long matchIndex);
 
     /**
-     * The identifier of the follower
-     * This could simply be the url of the remote actor
+     *
+     * @return the identifier of the follower. This could simply be the url of the remote actor.
      */
     String getId();
 
     /**
-     * for each server, index of the next log entry
-     * to send to that server (initialized to leader
-     *    last log index + 1)
+     * @return index of the next log entry to send to that server (initialized to leader last log index + 1)
      */
     long getNextIndex();
 
     /**
-     * for each server, index of highest log entry
-     * known to be replicated on server
-     *    (initialized to 0, increases monotonically)
+     * @return index of highest log entry known to be replicated on server (initialized to 0, increases monotonically)
      */
     long getMatchIndex();
 
     /**
      * Checks if the follower is active by comparing the last updated with the duration
-     * @return boolean
+     *
+     * @return true if follower is active, false otherwise
      */
     boolean isFollowerActive();
 
@@ -87,19 +87,20 @@ public interface FollowerLogInformation {
 
     /**
      * This will return the active time of follower, since it was last reset
-     * @return time in milliseconds
+     *
+     * @return time in milliseconds since the last activity from the follower
      */
     long timeSinceLastActivity();
 
     /**
      * This method checks if it is ok to replicate
      *
-     * @return true if it is ok to replicate
+     * @return true if it is ok to replicate, false otherwise
      */
     boolean okToReplicate();
 
     /**
-     * Returns the payload data version of the follower.
+     * @return the payload data version of the follower.
      */
     short getPayloadVersion();
 
