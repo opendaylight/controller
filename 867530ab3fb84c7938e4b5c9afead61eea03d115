@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a7fa997_296052a4",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-07-22T13:29:43Z",
+      "side": 1,
+      "message": "Since firstEntry is local we don\u0027t really need to use Optional here. Not a big deal but it does add a little memory overhead when there are entries. What do you think?",
+      "revId": "867530ab3fb84c7938e4b5c9afead61eea03d115",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
