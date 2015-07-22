@@ -12,8 +12,7 @@ import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 
 public interface SnapshotState {
     /**
-     * Should return true when a snapshot is being captured
-     * @return
+     * @return true when a snapshot is being captured
      */
     boolean isCapturing();
 
