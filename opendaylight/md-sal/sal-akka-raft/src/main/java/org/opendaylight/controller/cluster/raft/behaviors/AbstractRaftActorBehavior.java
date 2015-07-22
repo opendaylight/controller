@@ -106,7 +106,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      *
      * @param sender         The actor that sent this message
      * @param appendEntries  The AppendEntries message
-     * @return
+     * @return a new behavior if it was changed or the current behavior
      */
     protected abstract RaftActorBehavior handleAppendEntries(ActorRef sender,
         AppendEntries appendEntries);
@@ -118,7 +118,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      *
      * @param sender
      * @param appendEntries
-     * @return
+     * @return a new behavior if it was changed or the current behavior
      */
     protected RaftActorBehavior appendEntries(ActorRef sender,
         AppendEntries appendEntries) {
@@ -151,7 +151,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      *
      * @param sender             The actor that sent this message
      * @param appendEntriesReply The AppendEntriesReply message
-     * @return
+     * @return a new behavior if it was changed or the current behavior
      */
     protected abstract RaftActorBehavior handleAppendEntriesReply(ActorRef sender,
         AppendEntriesReply appendEntriesReply);
@@ -162,7 +162,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      *
      * @param sender
      * @param requestVote
-     * @return
+     * @return a new behavior if it was changed or the current behavior
      */
     protected RaftActorBehavior requestVote(ActorRef sender, RequestVote requestVote) {
 
@@ -221,15 +221,14 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      *
      * @param sender           The actor that sent this message
      * @param requestVoteReply The RequestVoteReply message
-     * @return
+     * @return a new behavior if it was changed or the current behavior
      */
     protected abstract RaftActorBehavior handleRequestVoteReply(ActorRef sender,
         RequestVoteReply requestVoteReply);
 
     /**
-     * Creates a random election duration
      *
-     * @return
+     * @return a random election duration
      */
     protected FiniteDuration electionDuration() {
         long variance = new Random().nextInt(context.getConfigParams().getElectionTimeVariance());
@@ -249,7 +248,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
     /**
      * schedule a new election
      *
-     * @param interval
+     * @param interval the duration after which we should trigger a new election
      */
     protected void scheduleElection(FiniteDuration interval) {
         stopElection();
@@ -263,62 +262,52 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
     }
 
     /**
-     * Get the current term
-     * @return
+     * @return the current term
      */
     protected long currentTerm() {
         return context.getTermInformation().getCurrentTerm();
     }
 
     /**
-     * Get the candidate for whom we voted in the current term
-     * @return
+     * @return the candidate for whom we voted in the current term
      */
     protected String votedFor() {
         return context.getTermInformation().getVotedFor();
     }
 
     /**
-     * Get the actor associated with this behavior
-     * @return
+     * @return the actor associated with this behavior
      */
     protected ActorRef actor() {
         return context.getActor();
     }
 
     /**
-     * Get the term from the last entry in the log
      *
-     * @return
+     * @return the term from the last entry in the log
      */
     protected long lastTerm() {
         return context.getReplicatedLog().lastTerm();
     }
 
     /**
-     * Get the index from the last entry in the log
-     *
-     * @return
+     * @return the index from the last entry in the log
      */
     protected long lastIndex() {
         return context.getReplicatedLog().lastIndex();
     }
 
     /**
-     * Find the client request tracker for a specific logIndex
-     *
      * @param logIndex
-     * @return
+     * @return the client request tracker for the specified logIndex
      */
     protected ClientRequestTracker findClientRequestTracker(long logIndex) {
         return null;
     }
 
     /**
-     * Find the client request tracker for a specific logIndex
-     *
      * @param logIndex
-     * @return
+     * @return the client request tracker for the specified logIndex
      */
     protected ClientRequestTracker removeClientRequestTracker(long logIndex) {
         return null;
@@ -326,9 +315,8 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
 
 
     /**
-     * Find the log index from the previous to last entry in the log
      *
-     * @return
+     * @return log index from the previous to last entry in the log
      */
     protected long prevLogIndex(long index){
         ReplicatedLogEntry prevEntry =
@@ -340,8 +328,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
     }
 
     /**
-     * Find the log term from the previous to last entry in the log
-     * @return
+     * @return log term from the previous to last entry in the log
      */
     protected long prevLogTerm(long index){
         ReplicatedLogEntry prevEntry =

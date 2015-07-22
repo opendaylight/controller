@@ -12,22 +12,21 @@ import akka.actor.ActorRef;
 
 public interface ClientRequestTracker {
     /**
-     * The client actor who is waiting for a response
      *
-     * @return
+     * @return the client actor that should be sent a response when consensus is achieved
      */
     ActorRef getClientActor();
 
     /**
      *
-     * @return
+     * @return the identifier of the object that is to be replicated. For example a transaction identifier in the case
+     * of a transaction
      */
     String getIdentifier();
 
     /**
-     * The index of the log entry which needs to be replicated
      *
-     * @return
+     * @return the index of the log entry that is to be replicated
      */
     long getIndex();
 

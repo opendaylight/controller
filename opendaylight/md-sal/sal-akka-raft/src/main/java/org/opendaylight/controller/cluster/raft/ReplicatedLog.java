@@ -57,7 +57,7 @@ public interface ReplicatedLog {
      * The persisted information would then be used during recovery to properly
      * reconstruct the state of the in-memory replicated log
      *
-     * @param the index of the first log entry to remove
+     * @param index the index of the first log entry to remove
      */
     void removeFromAndPersist(long index);
 
@@ -105,7 +105,7 @@ public interface ReplicatedLog {
 
     /**
      *
-     * @return
+     * @return the number of entries in the journal
      */
     long size();
 
