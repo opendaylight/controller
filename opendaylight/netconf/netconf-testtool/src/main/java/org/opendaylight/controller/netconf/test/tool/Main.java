@@ -80,6 +80,9 @@ public final class Main {
         @Arg(dest = "notification-file")
         public File notificationFile;
 
+        @Arg(dest = "md-sal")
+        public boolean mdSal;
+
         static ArgumentParser getParser() {
             final ArgumentParser parser = ArgumentParsers.newArgumentParser("netconf testool");
 
@@ -148,6 +151,12 @@ public final class Main {
                     .setDefault(false)
                     .help("Whether to use debug log level instead of INFO")
                     .dest("debug");
+
+            parser.addArgument("--md-sal")
+                    .type(Boolean.class)
+                    .setDefault(false)
+                    .help("Whether to use md-sal datastore instead of default simulated datastore.")
+                    .dest("md-sal");
 
             return parser;
         }
