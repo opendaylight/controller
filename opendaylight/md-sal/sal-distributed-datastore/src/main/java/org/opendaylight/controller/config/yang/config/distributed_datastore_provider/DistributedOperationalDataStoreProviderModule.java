@@ -68,6 +68,7 @@ public class DistributedOperationalDataStoreProviderModule extends
                 .shardCommitQueueExpiryTimeoutInSeconds(
                         props.getShardCommitQueueExpiryTimeoutInSeconds().getValue().intValue())
                 .transactionDebugContextEnabled(props.getTransactionDebugContextEnabled())
+                .customRaftBehaviorImplementation(props.getCustomRaftBehaviorImplementation())
                 .build();
 
         return DistributedDataStoreFactory.createInstance(getOperationalSchemaServiceDependency(),

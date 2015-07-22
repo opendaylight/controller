@@ -84,4 +84,11 @@ public interface ConfigParams {
      */
     long getElectionTimeoutFactor();
 
+
+    /**
+     *
+     * @return A instance of org.opendaylight.controller.cluster.raft.CustomizableRaftBehavior or an instance of the
+     * DefaultRaftBehavior
+     */
+    CustomizableRaftBehavior getCustomRaftBehavior();
 }

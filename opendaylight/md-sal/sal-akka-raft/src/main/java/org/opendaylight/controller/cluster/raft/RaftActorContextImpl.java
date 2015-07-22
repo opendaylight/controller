@@ -206,6 +206,6 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     @Override
     public CustomizableRaftBehavior getCustomizableRaftBehavior() {
-        return DefaultRaftBehavior.INSTANCE;
+        return configParams.getCustomRaftBehavior();
     }
 }

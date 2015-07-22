@@ -67,6 +67,7 @@ public class DatastoreContext {
     private boolean writeOnlyTransactionOptimizationsEnabled = true;
     private long shardCommitQueueExpiryTimeoutInMillis = DEFAULT_SHARD_COMMIT_QUEUE_EXPIRY_TIMEOUT_IN_MS;
     private boolean transactionDebugContextEnabled = false;
+    private String customRaftBehaviorImplementation = "";
 
     public static Set<String> getGlobalDatastoreTypes() {
         return globalDatastoreTypes;
@@ -98,6 +99,7 @@ public class DatastoreContext {
         this.writeOnlyTransactionOptimizationsEnabled = other.writeOnlyTransactionOptimizationsEnabled;
         this.shardCommitQueueExpiryTimeoutInMillis = other.shardCommitQueueExpiryTimeoutInMillis;
         this.transactionDebugContextEnabled = other.transactionDebugContextEnabled;
+        this.customRaftBehaviorImplementation = other.customRaftBehaviorImplementation;
 
         setShardJournalRecoveryLogBatchSize(other.raftConfig.getJournalRecoveryLogBatchSize());
         setSnapshotBatchCount(other.raftConfig.getSnapshotBatchCount());
@@ -212,6 +214,10 @@ public class DatastoreContext {
 
     public boolean isTransactionDebugContextEnabled() {
         return transactionDebugContextEnabled;
+    }
+
+    public String getCustomRaftBehaviorImplementation(){
+        return customRaftBehaviorImplementation;
     }
 
     public static class Builder {
@@ -410,6 +416,11 @@ public class DatastoreContext {
             }
 
             return datastoreContext;
+        }
+
+        public Builder customRaftBehaviorImplementation(String customRaftBehaviorImplementation) {
+            datastoreContext.customRaftBehaviorImplementation = customRaftBehaviorImplementation;
+            return this;
         }
     }
 }

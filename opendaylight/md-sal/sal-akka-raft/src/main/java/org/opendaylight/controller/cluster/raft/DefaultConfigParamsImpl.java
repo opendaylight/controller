@@ -7,7 +7,12 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import com.google.common.base.Strings;
+import com.google.common.base.Supplier;
+import com.google.common.base.Suppliers;
 import java.util.concurrent.TimeUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import scala.concurrent.duration.FiniteDuration;
 
 /**
@@ -16,6 +21,8 @@ import scala.concurrent.duration.FiniteDuration;
  * If no implementation is provided for ConfigParams, then this will be used.
  */
 public class DefaultConfigParamsImpl implements ConfigParams {
+
+    private static final Logger LOG = LoggerFactory.getLogger(DefaultConfigParamsImpl.class);
 
     private static final int SNAPSHOT_BATCH_COUNT = 20000;
 
@@ -52,6 +59,9 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     private int snaphotChunkSize = SNAPSHOT_CHUNK_SIZE;
 
     private long electionTimeoutFactor = 2;
+    private String customRaftActorImplementation;
+
+    Supplier<CustomizableRaftBehavior> behaviorSupplier = Suppliers.memoize(new BehaviorSupplier());
 
     public void setHeartBeatInterval(FiniteDuration heartBeatInterval) {
         this.heartBeatInterval = heartBeatInterval;
@@ -81,6 +91,10 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     public void setElectionTimeoutFactor(long electionTimeoutFactor){
         this.electionTimeoutFactor = electionTimeoutFactor;
         electionTimeOutInterval = null;
+    }
+
+    public void setCustomRaftActorImplementation(String customRaftActorImplementation){
+        this.customRaftActorImplementation = customRaftActorImplementation;
     }
 
     @Override
@@ -131,5 +145,32 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     @Override
     public long getElectionTimeoutFactor() {
         return electionTimeoutFactor;
+    }
+
+    @Override
+    public CustomizableRaftBehavior getCustomRaftBehavior() {
+        return behaviorSupplier.get();
+    }
+
+    private class BehaviorSupplier implements Supplier<CustomizableRaftBehavior>{
+        @Override
+        public CustomizableRaftBehavior get() {
+            if(Strings.isNullOrEmpty(DefaultConfigParamsImpl.this.customRaftActorImplementation)){
+                return DefaultRaftBehavior.INSTANCE;
+            }
+            try {
+                String className = DefaultConfigParamsImpl.this.customRaftActorImplementation;
+                Class c = Class.forName(className);
+                CustomizableRaftBehavior obj = (CustomizableRaftBehavior)c.newInstance();
+                return obj;
+            } catch (Exception e) {
+                if(LOG.isDebugEnabled()) {
+                    LOG.error("Could not create custom raft behavior, will stick with default", e);
+                } else {
+                    LOG.error("Could not create custom raft behavior, will stick with default");
+                }
+            }
+            return DefaultRaftBehavior.INSTANCE;
+        }
     }
 }
