@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a7fa997_dc8ac1be",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/CustomizableRaftBehavior.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-07-22T02:45:05Z",
+      "side": 1,
+      "message": "We already use the term \"behavior\" to describe the Follower, Candidate and Leader functionality. How about using the term \"strategy\" for this? So call this interface RaftStrategy with DefaultRaftStrategy and put them into org.opendaylight.controller.cluster.raft.strategy package? I think this would make it consistent with the ...cluster.raft.behavior package. What do you think?",
+      "revId": "c185c93f458a860982fe17ba52c66b4761f09b83",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
