@@ -126,7 +126,7 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-broker-impl</artifactId>
+      <artifactId>sal-dom-broker-config</artifactId>
     </dependency>
 
     <dependency>
