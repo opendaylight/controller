@@ -67,6 +67,7 @@ public class DistributedConfigDataStoreProviderModule extends
                 .shardCommitQueueExpiryTimeoutInSeconds(
                         props.getShardCommitQueueExpiryTimeoutInSeconds().getValue().intValue())
                 .transactionDebugContextEnabled(props.getTransactionDebugContextEnabled())
+                .customRaftPolicyImplementation(props.getCustomRaftPolicyImplementation())
                 .build();
 
         return DistributedDataStoreFactory.createInstance(getConfigSchemaServiceDependency(),
