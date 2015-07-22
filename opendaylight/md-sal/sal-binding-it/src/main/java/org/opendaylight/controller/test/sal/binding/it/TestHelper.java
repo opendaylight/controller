@@ -93,18 +93,24 @@ public class TestHelper {
                 mavenBundle(YANGTOOLS, "binding-data-codec").versionAsInProject(),
                 mavenBundle(YANGTOOLS + ".thirdparty", "antlr4-runtime-osgi-nohead").versionAsInProject(), // //
 
-                mavenBundle(CONTROLLER, "sal-core-api").versionAsInProject().update(), //
-                mavenBundle(CONTROLLER, "sal-binding-api").versionAsInProject(), // //
-                mavenBundle(CONTROLLER, "sal-binding-config").versionAsInProject(), //
-                mavenBundle(CONTROLLER, "sal-binding-broker-impl").versionAsInProject(), // //
                 mavenBundle(CONTROLLER, "sal-binding-util").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "sal-common-util").versionAsInProject(), // //
 
 
-                mavenBundle("com.lmax", "disruptor").versionAsInProject(),
-                mavenBundle(CONTROLLER, "sal-inmemory-datastore").versionAsInProject(), //
+                mavenBundle(CONTROLLER, "sal-core-api").versionAsInProject().update(), //
+                mavenBundle(CONTROLLER, "sal-binding-api").versionAsInProject(), // //
+
+                mavenBundle("com.lmax", "disruptor").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "sal-broker-impl").versionAsInProject(), // //
+                mavenBundle(CONTROLLER, "sal-dom-config").versionAsInProject(), // //
+
+                mavenBundle(CONTROLLER, "sal-inmemory-datastore").versionAsInProject(), //
+                mavenBundle(CONTROLLER, "sal-dom-broker-config").versionAsInProject(), // //
+
                 mavenBundle(CONTROLLER, "sal-core-spi").versionAsInProject().update(), //
+
+                mavenBundle(CONTROLLER, "sal-binding-broker-impl").versionAsInProject(), // //
+                mavenBundle(CONTROLLER, "sal-binding-config").versionAsInProject(), //
 
                 systemProperty("netconf.config.persister.active").value("1"), //
                 systemProperty("netconf.config.persister.1.storageAdapterClass").value(

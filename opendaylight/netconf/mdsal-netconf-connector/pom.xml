@@ -47,10 +47,15 @@
           <groupId>org.opendaylight.yangtools</groupId>
           <artifactId>object-cache-noop</artifactId>
       </dependency>
-      <dependency>
+    <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-core-api</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>sal-dom-config</artifactId>
+    </dependency>
+
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>commons.logback_settings</artifactId>
