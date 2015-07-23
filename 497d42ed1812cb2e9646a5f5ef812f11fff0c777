@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a7fa997_1f84a85c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/FollowerTest.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 792,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-07-23T01:54:13Z",
+      "side": 1,
+      "message": "This will wait 5 sec for a successful test. Can we shorten the time by making the election timeout say 100 ms and passing 500 ms to assertNoneMatching?",
+      "revId": "497d42ed1812cb2e9646a5f5ef812f11fff0c777",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
