@@ -130,7 +130,7 @@ public final class ShardedDOMDataTree implements DOMDataTreeService, DOMDataTree
         for (final DOMDataTreeIdentifier s : producer.getSubtrees()) {
             final DOMDataTreeProducer r = idToProducer.remove(s);
             if (!producer.equals(r)) {
-                LOG.error("Removed producer %s on subtree %s while removing %s", r, s, producer);
+                LOG.error("Removed producer {} on subtree {} while removing {}", r, s, producer);
             }
         }
     }
@@ -139,7 +139,7 @@ public final class ShardedDOMDataTree implements DOMDataTreeService, DOMDataTree
     private DOMDataTreeProducer createProducer(final Map<DOMDataTreeIdentifier, DOMDataTreeShard> shardMap) {
         // Record the producer's attachment points
         final DOMDataTreeProducer ret = ShardedDOMDataTreeProducer.create(this, shardMap);
-        for (final DOMDataTreeIdentifier s : shardMap.keySet()) {
+        for (DOMDataTreeIdentifier s : shardMap.keySet()) {
             idToProducer.put(s, ret);
         }
 
