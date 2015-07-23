@@ -12,7 +12,8 @@ import com.google.common.util.concurrent.ListenableFuture;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 
 /**
- * A {@link Future} used to report the status of an future {@link java.util.concurrent.Future}.
+ * A {@link java.util.concurrent.Future} used to report the status of an future
+ * {@link java.util.concurrent.Future}.
  */
 final class PingPongFuture extends AbstractCheckedFuture<Void, TransactionCommitFailedException> {
   protected PingPongFuture(final ListenableFuture<Void> delegate) {
@@ -24,7 +25,7 @@ final class PingPongFuture extends AbstractCheckedFuture<Void, TransactionCommit
     if (e.getCause() instanceof TransactionCommitFailedException){
       return (TransactionCommitFailedException) e.getCause();
     } else {
-      return new TransactionCommitFailedException(e.getMessage(), e.getCause(), null);
+            return new TransactionCommitFailedException(e.getMessage(), e.getCause());
     }
   }
 }

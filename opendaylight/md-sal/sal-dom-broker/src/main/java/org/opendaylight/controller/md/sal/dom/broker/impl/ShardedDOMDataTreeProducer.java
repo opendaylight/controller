@@ -54,13 +54,13 @@ final class ShardedDOMDataTreeProducer implements DOMDataTreeProducer {
         final Builder<DOMDataTreeShard, DOMStoreTransactionChain> cb = ImmutableBiMap.builder();
         final Queue<Exception> es = new LinkedList<>();
 
-        for (DOMDataTreeShard s : shards) {
+        for (final DOMDataTreeShard s : shards) {
             if (s instanceof DOMStore) {
                 try {
                     final DOMStoreTransactionChain c = ((DOMStore)s).createTransactionChain();
                     LOG.trace("Using DOMStore chain {} to access shard {}", c, s);
                     cb.put(s, c);
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     LOG.error("Failed to instantiate chain for shard {}", s, e);
                     es.add(e);
                 }
@@ -72,11 +72,11 @@ final class ShardedDOMDataTreeProducer implements DOMDataTreeProducer {
 
         // An error was encountered, close chains and report the error
         if (shardToChain.size() != shards.size()) {
-            for (DOMStoreTransactionChain c : shardToChain.values()) {
+            for (final DOMStoreTransactionChain c : shardToChain.values()) {
                 try {
                     c.close();
-                } catch (Exception e) {
-                    LOG.warn("Exception raised while closing chain %s", c, e);
+                } catch (final Exception e) {
+                    LOG.warn("Exception raised while closing chain {}", c, e);
                 }
             }
 
@@ -98,13 +98,13 @@ final class ShardedDOMDataTreeProducer implements DOMDataTreeProducer {
 
         // Allocate backing transactions
         final Map<DOMDataTreeShard, DOMStoreWriteTransaction> shardToTx = new HashMap<>();
-        for (Entry<DOMDataTreeShard, DOMStoreTransactionChain> e : shardToChain.entrySet()) {
+        for (final Entry<DOMDataTreeShard, DOMStoreTransactionChain> e : shardToChain.entrySet()) {
             shardToTx.put(e.getKey(), e.getValue().newWriteOnlyTransaction());
         }
 
         // Create the ID->transaction map
         final ImmutableMap.Builder<DOMDataTreeIdentifier, DOMStoreWriteTransaction> b = ImmutableMap.builder();
-        for (Entry<DOMDataTreeIdentifier, DOMDataTreeShard> e : idToShard.entrySet()) {
+        for (final Entry<DOMDataTreeIdentifier, DOMDataTreeShard> e : idToShard.entrySet()) {
             b.put(e.getKey(), shardToTx.get(e.getValue()));
         }
 
@@ -115,7 +115,7 @@ final class ShardedDOMDataTreeProducer implements DOMDataTreeProducer {
 
     @GuardedBy("this")
     private boolean haveSubtree(final DOMDataTreeIdentifier subtree) {
-        for (DOMDataTreeIdentifier i : idToShard.keySet()) {
+        for (final DOMDataTreeIdentifier i : idToShard.keySet()) {
             if (i.contains(subtree)) {
                 return true;
             }
@@ -126,7 +126,7 @@ final class ShardedDOMDataTreeProducer implements DOMDataTreeProducer {
 
     @GuardedBy("this")
     private DOMDataTreeProducer lookupChild(final DOMDataTreeIdentifier s) {
-        for (Entry<DOMDataTreeIdentifier, DOMDataTreeProducer> e : children.entrySet()) {
+        for (final Entry<DOMDataTreeIdentifier, DOMDataTreeProducer> e : children.entrySet()) {
             if (e.getKey().contains(s)) {
                 return e.getValue();
             }
@@ -140,7 +140,7 @@ final class ShardedDOMDataTreeProducer implements DOMDataTreeProducer {
         Preconditions.checkState(!closed, "Producer is already closed");
         Preconditions.checkState(openTx == null, "Transaction %s is still open", openTx);
 
-        for (DOMDataTreeIdentifier s : subtrees) {
+        for (final DOMDataTreeIdentifier s : subtrees) {
             // Check if the subtree was visible at any time
             if (!haveSubtree(s)) {
                 throw new IllegalArgumentException(String.format("Subtree %s was never available in producer %s", s, this));
@@ -151,7 +151,7 @@ final class ShardedDOMDataTreeProducer implements DOMDataTreeProducer {
             Preconditions.checkArgument(child == null, "Subtree %s is delegated to child producer %s", s, child);
 
             // Check if part of the requested subtree is not delegated to a child.
-            for (DOMDataTreeIdentifier c : children.keySet()) {
+            for (final DOMDataTreeIdentifier c : children.keySet()) {
                 if (s.contains(c)) {
                     throw new IllegalArgumentException(String.format("Subtree %s cannot be delegated as it is superset of already-delegated %s", s, c));
                 }
@@ -161,7 +161,7 @@ final class ShardedDOMDataTreeProducer implements DOMDataTreeProducer {
         final DOMDataTreeProducer ret = dataTree.createProducer(this, subtrees);
         final ImmutableMap.Builder<DOMDataTreeIdentifier, DOMDataTreeProducer> cb = ImmutableMap.builder();
         cb.putAll(children);
-        for (DOMDataTreeIdentifier s : subtrees) {
+        for (final DOMDataTreeIdentifier s : subtrees) {
             cb.put(s, ret);
         }
 

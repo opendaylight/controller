@@ -12,6 +12,11 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.ImmutableClassToInstanceMap;
 import com.google.common.util.concurrent.CheckedFuture;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcAvailabilityListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcIdentifier;
@@ -31,12 +36,6 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 
 public class BrokerImpl implements Broker, DOMRpcProviderService, DOMRpcService, AutoCloseable {
     private final static Logger log = LoggerFactory.getLogger(BrokerImpl.class);
@@ -74,7 +73,7 @@ public class BrokerImpl implements Broker, DOMRpcProviderService, DOMRpcService,
     // Validation
     private void checkPredicates(final Provider prov) {
         Preconditions.checkNotNull(prov, "Provider should not be null.");
-        for (ProviderContextImpl session : providerSessions) {
+        for (final ProviderContextImpl session : providerSessions) {
             if (prov.equals(session.getProvider())) {
                 throw new IllegalStateException("Provider already registered");
             }
@@ -84,7 +83,7 @@ public class BrokerImpl implements Broker, DOMRpcProviderService, DOMRpcService,
 
     private void checkPredicates(final Consumer cons) {
         Preconditions.checkNotNull(cons, "Consumer should not be null.");
-        for (ConsumerContextImpl session : sessions) {
+        for (final ConsumerContextImpl session : sessions) {
             if (cons.equals(session.getConsumer())) {
                 throw new IllegalStateException("Consumer already registered");
             }
@@ -93,12 +92,12 @@ public class BrokerImpl implements Broker, DOMRpcProviderService, DOMRpcService,
 
     // Private Factory methods
     private ConsumerContextImpl newSessionFor(final Consumer provider) {
-        ConsumerContextImpl ret = new ConsumerContextImpl(provider, this);
+        final ConsumerContextImpl ret = new ConsumerContextImpl(provider, this);
         return ret;
     }
 
     private ProviderContextImpl newSessionFor(final Provider provider) {
-        ProviderContextImpl ret = new ProviderContextImpl(provider, this);
+        final ProviderContextImpl ret = new ProviderContextImpl(provider, this);
         return ret;
     }
 
@@ -152,7 +151,7 @@ public class BrokerImpl implements Broker, DOMRpcProviderService, DOMRpcService,
 
 
     @Override
-    public ConsumerSession registerConsumer(Consumer consumer) {
+    public ConsumerSession registerConsumer(final Consumer consumer) {
         checkPredicates(consumer);
         log.trace("Registering consumer {}", consumer);
         final ConsumerContextImpl session = newSessionFor(consumer);
@@ -163,7 +162,7 @@ public class BrokerImpl implements Broker, DOMRpcProviderService, DOMRpcService,
 
 
     @Override
-    public ProviderSession registerProvider(Provider provider) {
+    public ProviderSession registerProvider(final Provider provider) {
         checkPredicates(provider);
         final ProviderContextImpl session = newSessionFor(provider);
         provider.onSessionInitiated(session);
