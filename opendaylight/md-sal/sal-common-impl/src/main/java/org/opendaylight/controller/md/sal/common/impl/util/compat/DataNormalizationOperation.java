@@ -42,6 +42,7 @@ import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaNode;
+import org.opendaylight.yangtools.yang.model.util.EffectiveAugmentationSchema;
 
 @Deprecated
 public abstract class DataNormalizationOperation<T extends PathArgument> implements Identifiable<T> {
@@ -201,7 +202,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         private DataNormalizationOperation<?> register(final DataNormalizationOperation<?> potential) {
             if (potential != null) {
                 byArg.put(potential.getIdentifier(), potential);
-                for (QName qName : potential.getQNameIdentifiers()) {
+                for (final QName qName : potential.getQNameIdentifiers()) {
                     byQName.put(qName, potential);
                 }
             }
@@ -222,9 +223,9 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
 
         @Override
         public NormalizedNode<?, ?> createDefault(final PathArgument currentArg) {
-            DataContainerNodeAttrBuilder<NodeIdentifierWithPredicates, MapEntryNode> builder = Builders
+            final DataContainerNodeAttrBuilder<NodeIdentifierWithPredicates, MapEntryNode> builder = Builders
                     .mapEntryBuilder().withNodeIdentifier((NodeIdentifierWithPredicates) currentArg);
-            for (Entry<QName, Object> keyValue : ((NodeIdentifierWithPredicates) currentArg).getKeyValues().entrySet()) {
+            for (final Entry<QName, Object> keyValue : ((NodeIdentifierWithPredicates) currentArg).getKeyValues().entrySet()) {
                 builder.addChild(Builders.leafBuilder()
                         //
                         .withNodeIdentifier(new NodeIdentifier(keyValue.getKey())).withValue(keyValue.getValue())
@@ -341,12 +342,12 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
         @Override
         protected DataNormalizationOperation<?> fromLocalSchemaAndQName(final DataNodeContainer schema, final QName child)
                 throws DataNormalizationException {
-            Optional<DataSchemaNode> potential = findChildSchemaNode(schema, child);
+            final Optional<DataSchemaNode> potential = findChildSchemaNode(schema, child);
             if (!potential.isPresent()) {
                 return null;
             }
 
-            DataSchemaNode result = potential.get();
+            final DataSchemaNode result = potential.get();
             // We try to look up if this node was added by augmentation
             if ((schema instanceof DataSchemaNode) && result.isAugmenting()) {
                 return fromAugmentation(schema, (AugmentationTarget) schema, result);
@@ -452,14 +453,14 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
 
         protected ChoiceNodeNormalization(final ChoiceSchemaNode schema) {
             super(new NodeIdentifier(schema.getQName()),schema);
-            ImmutableMap.Builder<QName, DataNormalizationOperation<?>> byQNameBuilder = ImmutableMap.builder();
-            ImmutableMap.Builder<PathArgument, DataNormalizationOperation<?>> byArgBuilder = ImmutableMap.builder();
+            final ImmutableMap.Builder<QName, DataNormalizationOperation<?>> byQNameBuilder = ImmutableMap.builder();
+            final ImmutableMap.Builder<PathArgument, DataNormalizationOperation<?>> byArgBuilder = ImmutableMap.builder();
 
-            for (ChoiceCaseNode caze : schema.getCases()) {
-                for (DataSchemaNode cazeChild : caze.getChildNodes()) {
-                    DataNormalizationOperation<?> childOp = fromDataSchemaNode(cazeChild);
+            for (final ChoiceCaseNode caze : schema.getCases()) {
+                for (final DataSchemaNode cazeChild : caze.getChildNodes()) {
+                    final DataNormalizationOperation<?> childOp = fromDataSchemaNode(cazeChild);
                     byArgBuilder.put(childOp.getIdentifier(), childOp);
-                    for (QName qname : childOp.getQNameIdentifiers()) {
+                    for (final QName qname : childOp.getQNameIdentifiers()) {
                         byQNameBuilder.put(qname, childOp);
                     }
                 }
@@ -514,7 +515,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
     private static final Optional<DataSchemaNode> findChildSchemaNode(final DataNodeContainer parent,final QName child) {
         DataSchemaNode potential = parent.getDataChildByName(child);
         if (potential == null) {
-            Iterable<ChoiceSchemaNode> choices = FluentIterable.from(parent.getChildNodes()).filter(ChoiceSchemaNode.class);
+            final Iterable<ChoiceSchemaNode> choices = FluentIterable.from(parent.getChildNodes()).filter(ChoiceSchemaNode.class);
             potential = findChoice(choices, child);
         }
         return Optional.fromNullable(potential);
@@ -523,12 +524,12 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
     private static DataNormalizationOperation<?> fromSchemaAndQNameChecked(final DataNodeContainer schema,
             final QName child) throws DataNormalizationException {
 
-        Optional<DataSchemaNode> potential = findChildSchemaNode(schema, child);
+        final Optional<DataSchemaNode> potential = findChildSchemaNode(schema, child);
         if (!potential.isPresent()) {
             throw new DataNormalizationException(String.format("Supplied QName %s is not valid according to schema %s, potential children nodes: %s", child, schema,schema.getChildNodes()));
         }
 
-        DataSchemaNode result = potential.get();
+        final DataSchemaNode result = potential.get();
         // We try to look up if this node was added by augmentation
         if ((schema instanceof DataSchemaNode) && result.isAugmenting()) {
             return fromAugmentation(schema, (AugmentationTarget) schema, result);
@@ -538,8 +539,8 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
 
     private static ChoiceSchemaNode findChoice(final Iterable<ChoiceSchemaNode> choices, final QName child) {
         ChoiceSchemaNode foundChoice = null;
-        choiceLoop: for (ChoiceSchemaNode choice : choices) {
-            for (ChoiceCaseNode caze : choice.getCases()) {
+        choiceLoop: for (final ChoiceSchemaNode choice : choices) {
+            for (final ChoiceCaseNode caze : choice.getCases()) {
                 if (findChildSchemaNode(caze, child).isPresent()) {
                     foundChoice = choice;
                     break choiceLoop;
@@ -550,19 +551,19 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
     }
 
     public static AugmentationIdentifier augmentationIdentifierFrom(final AugmentationSchema augmentation) {
-        ImmutableSet.Builder<QName> potentialChildren = ImmutableSet.builder();
-        for (DataSchemaNode child : augmentation.getChildNodes()) {
+        final ImmutableSet.Builder<QName> potentialChildren = ImmutableSet.builder();
+        for (final DataSchemaNode child : augmentation.getChildNodes()) {
             potentialChildren.add(child.getQName());
         }
         return new AugmentationIdentifier(potentialChildren.build());
     }
 
     private static DataNodeContainer augmentationProxy(final AugmentationSchema augmentation, final DataNodeContainer schema) {
-        Set<DataSchemaNode> children = new HashSet<>();
-        for (DataSchemaNode augNode : augmentation.getChildNodes()) {
+        final Set<DataSchemaNode> children = new HashSet<>();
+        for (final DataSchemaNode augNode : augmentation.getChildNodes()) {
             children.add(schema.getDataChildByName(augNode.getQName()));
         }
-        return new DataSchemaContainerProxy(children);
+        return new EffectiveAugmentationSchema(augmentation, children);
     }
 
     /**
@@ -582,8 +583,8 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
     private static DataNormalizationOperation<?> fromAugmentation(final DataNodeContainer parent,
             final AugmentationTarget parentAug, final DataSchemaNode child) {
         AugmentationSchema augmentation = null;
-        for (AugmentationSchema aug : parentAug.getAvailableAugmentations()) {
-            DataSchemaNode potential = aug.getDataChildByName(child.getQName());
+        for (final AugmentationSchema aug : parentAug.getAvailableAugmentations()) {
+            final DataSchemaNode potential = aug.getDataChildByName(child.getQName());
             if (potential != null) {
                 augmentation = aug;
                 break;
@@ -616,7 +617,7 @@ public abstract class DataNormalizationOperation<T extends PathArgument> impleme
     }
 
     private static DataNormalizationOperation<?> fromListSchemaNode(final ListSchemaNode potential) {
-        List<QName> keyDefinition = potential.getKeyDefinition();
+        final List<QName> keyDefinition = potential.getKeyDefinition();
         if(keyDefinition == null || keyDefinition.isEmpty()) {
             return new UnkeyedListMixinNormalization(potential);
         }
