@@ -9,7 +9,6 @@ package org.opendaylight.controller.sal.binding.api.data;
 
 import java.util.EventListener;
 import java.util.concurrent.Future;
-
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.md.sal.common.api.data.DataModification;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
@@ -29,7 +28,8 @@ import org.opendaylight.yangtools.yang.common.RpcResult;
  *
  */
 @Deprecated
-public interface DataModificationTransaction extends DataModification<InstanceIdentifier<? extends DataObject>, DataObject> {
+public interface DataModificationTransaction extends
+        DataModification<InstanceIdentifier<? extends DataObject>, DataObject> {
     /**
      * Returns an unique identifier for transaction
      *
