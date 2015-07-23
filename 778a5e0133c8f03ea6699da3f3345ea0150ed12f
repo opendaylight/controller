@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7a7fa997_5f0460bf",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/ConfigParams.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-07-23T04:26:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a7fa997_df6f10c4",
+      "revId": "778a5e0133c8f03ea6699da3f3345ea0150ed12f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a7fa997_3f796493",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/DefaultConfigParamsImpl.java",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2015-07-23T01:46:20Z",
       "side": 1,
       "message": "Can we name this setRaftPolicyImplementationClass?",
+      "revId": "778a5e0133c8f03ea6699da3f3345ea0150ed12f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_9f21984f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/DefaultConfigParamsImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-07-23T04:26:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a7fa997_3f796493",
       "revId": "778a5e0133c8f03ea6699da3f3345ea0150ed12f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "7a7fa997_ffe1acfe",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/DefaultConfigParamsImplTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-07-23T04:26:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a7fa997_ff720cac",
+      "revId": "778a5e0133c8f03ea6699da3f3345ea0150ed12f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a7fa997_9f6998c0",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/DefaultConfigParamsImplTest.java",
         "patchSetId": 2
@@ -64,6 +118,24 @@
       "writtenOn": "2015-07-23T01:46:20Z",
       "side": 1,
       "message": "Rename to testGetRaftPolicyWithInvalidClassName? And similarly with the rest?",
+      "revId": "778a5e0133c8f03ea6699da3f3345ea0150ed12f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_dfde303f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/DefaultConfigParamsImplTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-07-23T04:26:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a7fa997_9f6998c0",
       "revId": "778a5e0133c8f03ea6699da3f3345ea0150ed12f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "7a7fa997_9fe8b8e3",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/utils/TestCustomRaftBehavior.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-07-23T04:26:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a7fa997_bf6494e5",
+      "revId": "778a5e0133c8f03ea6699da3f3345ea0150ed12f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a7fa997_9fb0b844",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContext.java",
         "patchSetId": 2
@@ -98,6 +188,24 @@
       "writtenOn": "2015-07-23T01:46:20Z",
       "side": 1,
       "message": "Shouldn\u0027t customRaftPolicyImplementation be set in the raftConfig like the ones below?",
+      "revId": "778a5e0133c8f03ea6699da3f3345ea0150ed12f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_9fcf587f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContext.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-07-23T04:26:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a7fa997_9fb0b844",
       "revId": "778a5e0133c8f03ea6699da3f3345ea0150ed12f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "7a7fa997_df839002",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/policy/TestOnlyRaftPolicy.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-07-23T04:26:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a7fa997_5f6300dc",
+      "revId": "778a5e0133c8f03ea6699da3f3345ea0150ed12f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a7fa997_7f5efc13",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/policy/TwoNodeClusterRaftPolicy.java",
         "patchSetId": 2
@@ -132,6 +258,24 @@
       "writtenOn": "2015-07-23T01:46:20Z",
       "side": 1,
       "message": "Javadocs?",
+      "revId": "778a5e0133c8f03ea6699da3f3345ea0150ed12f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_ff868c12",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/policy/TwoNodeClusterRaftPolicy.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-07-23T04:26:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a7fa997_7f5efc13",
       "revId": "778a5e0133c8f03ea6699da3f3345ea0150ed12f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
