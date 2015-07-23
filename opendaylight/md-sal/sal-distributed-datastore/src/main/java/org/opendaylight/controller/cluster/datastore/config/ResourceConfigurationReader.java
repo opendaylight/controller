@@ -16,4 +16,7 @@ public class ResourceConfigurationReader implements ConfigurationReader {
     public Config read() {
         return ConfigFactory.load();
     }
+    @Override
+    public void setConfigPath(String path)
+    {}
 }

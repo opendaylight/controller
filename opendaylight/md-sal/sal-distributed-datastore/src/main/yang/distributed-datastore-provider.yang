@@ -214,6 +214,12 @@ module distributed-datastore-provider {
              description "Enable or disable transaction context debug. This will log the call site trace for
                           transactions that fail";
          }
+         leaf cluster_config_path {
+             default "./configuration/initial/";
+             type string;
+             description "The configuration path for the akka configuration file. The 
+                          configured path will be used when the controller node restarts.";
+         }
     }
 
     // Augments the 'configuration' choice node under modules/module.

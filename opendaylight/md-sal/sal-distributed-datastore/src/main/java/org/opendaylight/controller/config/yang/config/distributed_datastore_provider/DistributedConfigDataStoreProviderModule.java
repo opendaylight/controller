@@ -3,6 +3,7 @@ package org.opendaylight.controller.config.yang.config.distributed_datastore_pro
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStoreFactory;
 import org.osgi.framework.BundleContext;
+import org.opendaylight.controller.cluster.common.actor.DefaultAkkaConfigurationReader;
 
 public class DistributedConfigDataStoreProviderModule extends
     org.opendaylight.controller.config.yang.config.distributed_datastore_provider.AbstractDistributedConfigDataStoreProviderModule {
@@ -39,6 +40,7 @@ public class DistributedConfigDataStoreProviderModule extends
             props = new ConfigProperties();
         }
 
+        DefaultAkkaConfigurationReader.setConfigPath(props.getClusterConfigPath());
         DatastoreContext datastoreContext = DatastoreContext.newBuilder()
                 .dataStoreType("config")
                 .maxShardDataChangeExecutorPoolSize(props.getMaxShardDataChangeExecutorPoolSize().getValue().intValue())
@@ -67,6 +69,7 @@ public class DistributedConfigDataStoreProviderModule extends
                 .shardCommitQueueExpiryTimeoutInSeconds(
                         props.getShardCommitQueueExpiryTimeoutInSeconds().getValue().intValue())
                 .transactionDebugContextEnabled(props.getTransactionDebugContextEnabled())
+                .clusterConfigPath(props.getClusterConfigPath())
                 .build();
 
         return DistributedDataStoreFactory.createInstance(getConfigSchemaServiceDependency(),

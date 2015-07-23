@@ -12,4 +12,5 @@ import com.typesafe.config.Config;
 
 public interface ConfigurationReader {
     Config read();
+    void setConfigPath(String path);
 }
