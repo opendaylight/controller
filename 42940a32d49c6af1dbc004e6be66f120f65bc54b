@@ -34,6 +34,23 @@
       "revId": "42940a32d49c6af1dbc004e6be66f120f65bc54b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_9f40b8a6",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 278,
+      "author": {
+        "id": 1676
+      },
+      "writtenOn": "2015-07-23T06:56:43Z",
+      "side": 1,
+      "message": "The last condition checks that a log entry of the previous index to the appendEntry is present in the follower\u0027s log or not.\nShouldnt this condition itself be sufficient to find an out-of-sync new follower.\n\nWhy do we need the previous check for the replicatedToAll to be present?\n\nIf i am not wrong, if this follower might have received an append entry (with that replicatedToAllIndex), it might have performed a trim (provided that index is applied as well) and it wont be present in the log.",
+      "revId": "42940a32d49c6af1dbc004e6be66f120f65bc54b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
