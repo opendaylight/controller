@@ -14,10 +14,6 @@ import com.google.common.collect.ImmutableClassToInstanceMap;
 import java.util.concurrent.ExecutorService;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.MountPoint;
-import org.opendaylight.controller.md.sal.common.api.RegistrationListener;
-import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandler;
-import org.opendaylight.controller.md.sal.common.api.data.DataCommitHandlerRegistration;
-import org.opendaylight.controller.md.sal.common.api.data.DataReader;
 import org.opendaylight.controller.md.sal.common.api.routing.RouteChangeListener;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RoutedRpcRegistration;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RpcRegistration;
@@ -30,11 +26,9 @@ import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.controller.sal.binding.api.data.DataBrokerService;
 import org.opendaylight.controller.sal.binding.api.data.DataChangeListener;
 import org.opendaylight.controller.sal.binding.api.data.DataModificationTransaction;
-import org.opendaylight.controller.sal.binding.api.data.DataProviderService;
 import org.opendaylight.controller.sal.binding.api.mount.MountProviderInstance;
 import org.opendaylight.controller.sal.binding.api.rpc.RpcContextIdentifier;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
-import org.opendaylight.yangtools.concepts.Registration;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.Notification;
@@ -136,24 +130,6 @@ public class HydrogenMountInstanceAdapter implements MountProviderInstance {
     @Override
     public void publish(final Notification notification, final ExecutorService executor) {
         service(NotificationProviderService.class).publish(notification);
-    }
-
-    @Override
-    public Registration registerCommitHandler(final InstanceIdentifier<? extends DataObject> arg0,
-            final DataCommitHandler<InstanceIdentifier<? extends DataObject>, DataObject> arg1) {
-        return service(DataProviderService.class).registerCommitHandler(arg0, arg1);
-    }
-
-    @Override
-    public ListenerRegistration<RegistrationListener<DataCommitHandlerRegistration<InstanceIdentifier<? extends DataObject>, DataObject>>> registerCommitHandlerListener(
-            final RegistrationListener<DataCommitHandlerRegistration<InstanceIdentifier<? extends DataObject>, DataObject>> arg0) {
-        return service(DataProviderService.class).registerCommitHandlerListener(arg0);
-    }
-
-    @Override
-    public Registration registerDataReader(final InstanceIdentifier<? extends DataObject> path,
-            final DataReader<InstanceIdentifier<? extends DataObject>, DataObject> reader) {
-        return service(DataProviderService.class).registerDataReader(path, reader);
     }
 
     @Override
