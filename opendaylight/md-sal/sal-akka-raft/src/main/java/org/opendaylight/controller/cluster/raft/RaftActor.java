@@ -16,6 +16,7 @@ import akka.persistence.SnapshotSelectionCriteria;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
+import com.google.common.base.Supplier;
 import com.google.common.collect.Lists;
 import java.io.Serializable;
 import java.util.Collection;
@@ -36,6 +37,7 @@ import org.opendaylight.controller.cluster.raft.base.messages.ApplyJournalEntrie
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.InitiateCaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.Replicate;
+import org.opendaylight.controller.cluster.raft.base.messages.SwitchBehavior;
 import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader;
 import org.opendaylight.controller.cluster.raft.behaviors.DelegatingRaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.behaviors.Follower;
@@ -115,6 +117,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     private final BehaviorStateHolder reusableBehaviorStateHolder = new BehaviorStateHolder();
 
+    private final SwitchBehaviorSupplier reusableSwitchBehaviorSupplier = new SwitchBehaviorSupplier();
+
     public RaftActor(String id, Map<String, String> peerAddresses,
          Optional<ConfigParams> configParams, short payloadVersion) {
 
@@ -191,7 +195,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     @Override
-    public void handleCommand(Object message) {
+    public void handleCommand(final Object message) {
         if (message instanceof ApplyState){
             ApplyState applyState = (ApplyState) message;
 
@@ -237,13 +241,31 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             onGetOnDemandRaftStats();
         } else if(message instanceof InitiateCaptureSnapshot) {
             captureSnapshot();
+        } else if(message instanceof SwitchBehavior){
+            switchBehavior(((SwitchBehavior) message));
         } else if(!snapshotSupport.handleSnapshotMessage(message)) {
-            reusableBehaviorStateHolder.init(getCurrentBehavior());
-
-            setCurrentBehavior(currentBehavior.handleMessage(getSender(), message));
-
-            handleBehaviorChange(reusableBehaviorStateHolder, getCurrentBehavior());
+            switchBehavior(reusableSwitchBehaviorSupplier.handleMessage(getSender(), message));
         }
+    }
+
+    private void switchBehavior(SwitchBehavior message) {
+        if(!getRaftActorContext().getRaftPolicy().automaticElectionsEnabled()) {
+            RaftState newState = message.getNewState();
+            if( newState == RaftState.Leader || newState == RaftState.Follower) {
+                switchBehavior(reusableSwitchBehaviorSupplier.handleMessage(getSender(), message));
+                getRaftActorContext().getTermInformation().updateAndPersist(message.getNewTerm(), "");
+            } else {
+                LOG.warn("Switching to behavior : {} - not supported", newState);
+            }
+        }
+    }
+
+    private void switchBehavior(Supplier<RaftActorBehavior> supplier){
+        reusableBehaviorStateHolder.init(getCurrentBehavior());
+
+        setCurrentBehavior(supplier.get());
+
+        handleBehaviorChange(reusableBehaviorStateHolder, getCurrentBehavior());
     }
 
     protected RaftActorSnapshotMessageSupport newRaftActorSnapshotMessageSupport() {
@@ -667,6 +689,25 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
         short getLeaderPayloadVersion() {
             return leaderPayloadVersion;
+        }
+    }
+
+    private class SwitchBehaviorSupplier implements Supplier<RaftActorBehavior> {
+        private Object message;
+        private ActorRef sender;
+
+        public SwitchBehaviorSupplier handleMessage(ActorRef sender, Object message){
+            this.sender = sender;
+            this.message = message;
+            return this;
+        }
+
+        @Override
+        public RaftActorBehavior get() {
+            if(this.message instanceof SwitchBehavior){
+                return ((SwitchBehavior) message).getNewState().createBehavior(getRaftActorContext());
+            }
+            return currentBehavior.handleMessage(sender, message);
         }
     }
 }

@@ -65,4 +65,13 @@ public interface RaftActorBehavior extends AutoCloseable{
      * @return the leader's payload data version.
      */
     short getLeaderPayloadVersion();
+
+    /**
+     * switchBehavior makes sure that the current behavior is shutdown before it switches to the new
+     * behavior
+     *
+     * @param behavior The new behavior to switch to
+     * @return The new behavior
+     */
+    RaftActorBehavior switchBehavior(RaftActorBehavior behavior);
 }

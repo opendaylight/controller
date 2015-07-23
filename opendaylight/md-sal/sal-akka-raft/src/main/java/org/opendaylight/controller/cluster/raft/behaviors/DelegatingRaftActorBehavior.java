@@ -60,4 +60,9 @@ public class DelegatingRaftActorBehavior implements RaftActorBehavior {
     public short getLeaderPayloadVersion() {
         return delegate.getLeaderPayloadVersion();
     }
+
+    @Override
+    public RaftActorBehavior switchBehavior(RaftActorBehavior behavior) {
+        return delegate.switchBehavior(behavior);
+    }
 }

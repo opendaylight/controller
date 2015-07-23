@@ -425,7 +425,8 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
         this.leaderPayloadVersion = leaderPayloadVersion;
     }
 
-    protected RaftActorBehavior switchBehavior(RaftActorBehavior behavior) {
+    @Override
+    public RaftActorBehavior switchBehavior(RaftActorBehavior behavior) {
         LOG.info("{} :- Switching from behavior {} to {}", logName(), this.state(), behavior.state());
         try {
             close();
