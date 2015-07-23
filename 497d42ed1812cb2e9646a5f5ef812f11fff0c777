@@ -16,6 +16,24 @@
       "revId": "497d42ed1812cb2e9646a5f5ef812f11fff0c777",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_ff13ec0a",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/FollowerTest.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 792,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-07-23T03:39:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a7fa997_1f84a85c",
+      "revId": "497d42ed1812cb2e9646a5f5ef812f11fff0c777",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
