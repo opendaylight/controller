@@ -178,7 +178,7 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
      * @param tx Transaction which needs processing.
      */
     @GuardedBy("this")
-    private void processTransaction(final @Nonnull PingPongTransaction tx) {
+    private void processTransaction(@Nonnull final PingPongTransaction tx) {
         if (failed) {
             LOG.debug("Cancelling transaction {}", tx);
             tx.getTransaction().cancel();
@@ -226,7 +226,7 @@ public final class PingPongTransactionChain implements DOMTransactionChain {
         tx.onFailure(t);
     }
 
-    private void readyTransaction(final @Nonnull PingPongTransaction tx) {
+    private void readyTransaction(@Nonnull final PingPongTransaction tx) {
         // First mark the transaction as not locked.
         final boolean lockedMatch = LOCKED_UPDATER.compareAndSet(this, tx, null);
         Preconditions.checkState(lockedMatch, "Attempted to submit transaction %s while we have %s", tx, lockedTx);
