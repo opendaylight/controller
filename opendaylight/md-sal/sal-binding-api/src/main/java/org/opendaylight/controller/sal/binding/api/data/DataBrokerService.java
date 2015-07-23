@@ -7,8 +7,6 @@
  */
 package org.opendaylight.controller.sal.binding.api.data;
 
-import org.opendaylight.controller.md.sal.common.api.data.DataChangePublisher;
-import org.opendaylight.controller.md.sal.common.api.data.DataModificationTransactionFactory;
 import org.opendaylight.controller.md.sal.common.api.data.DataReader;
 import org.opendaylight.controller.sal.binding.api.BindingAwareService;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
@@ -24,11 +22,8 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
  * @deprecated Replaced by newer better documented version {@link org.opendaylight.controller.md.sal.binding.api.DataBroker}
  */
 @Deprecated
-public interface DataBrokerService extends //
-        BindingAwareService, //
-        DataModificationTransactionFactory<InstanceIdentifier<? extends DataObject>, DataObject>, //
-        DataReader<InstanceIdentifier<? extends DataObject>, DataObject>, //
-        DataChangePublisher<InstanceIdentifier<? extends DataObject>, DataObject, DataChangeListener> {
+public interface DataBrokerService extends BindingAwareService,
+        DataReader<InstanceIdentifier<? extends DataObject>, DataObject> {
     /**
      * Creates a data modification transaction.
      *
@@ -40,7 +35,6 @@ public interface DataBrokerService extends //
      *          {@link org.opendaylight.controller.md.sal.binding.api.DataBroker#newWriteOnlyTransaction().
      */
     @Deprecated
-    @Override
     DataModificationTransaction beginTransaction();
 
     /**
@@ -52,8 +46,8 @@ public interface DataBrokerService extends //
      * @deprecated Please use {@link org.opendaylight.controller.md.sal.binding.api.DataBroker#newReadOnlyTransaction()}
      *
      */
-    @Deprecated
     @Override
+    @Deprecated
     public DataObject readConfigurationData(InstanceIdentifier<? extends DataObject> path);
 
     /**
@@ -63,8 +57,8 @@ public interface DataBrokerService extends //
      *
      * @deprecated Please use {@link org.opendaylight.controller.md.sal.binding.api.DataBroker#newReadOnlyTransaction()}
      */
-    @Deprecated
     @Override
+    @Deprecated
     public DataObject readOperationalData(InstanceIdentifier<? extends DataObject> path);
 
     /**
@@ -76,7 +70,6 @@ public interface DataBrokerService extends //
      * which provides more fine-grained registration options.
      */
     @Deprecated
-    @Override
     public ListenerRegistration<DataChangeListener> registerDataChangeListener(
             InstanceIdentifier<? extends DataObject> path, DataChangeListener listener);
 }
