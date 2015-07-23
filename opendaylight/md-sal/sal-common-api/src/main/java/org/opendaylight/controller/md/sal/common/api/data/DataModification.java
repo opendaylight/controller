@@ -8,7 +8,6 @@
 package org.opendaylight.controller.md.sal.common.api.data;
 
 import java.util.concurrent.Future;
-
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.yangtools.concepts.Path;
 import org.opendaylight.yangtools.yang.common.RpcResult;
