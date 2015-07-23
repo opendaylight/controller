@@ -9,7 +9,6 @@ package org.opendaylight.controller.sal.core.api;
 
 import java.util.Collection;
 import java.util.Collections;
-
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -21,28 +20,29 @@ public abstract class AbstractProvider implements BundleActivator, Provider,Serv
     private Broker broker;
     private BundleContext context;
     private ServiceTracker<Broker, Broker> tracker;
+
     @Override
     public Collection<ProviderFunctionality> getProviderFunctionality() {
         return Collections.emptySet();
     }
 
     @Override
-    public final void start(BundleContext context) throws Exception {
+    public final void start(final BundleContext context) throws Exception {
         this.context = context;
         this.startImpl(context);
         tracker = new ServiceTracker<>(context, Broker.class, this);
         tracker.open();
     }
 
-    protected void startImpl(BundleContext context) {
+    protected void startImpl(final BundleContext context) {
         // NOOP
     }
-    protected void stopImpl(BundleContext context) {
+    protected void stopImpl(final BundleContext context) {
         // NOOP
     }
 
     @Override
-    public final void stop(BundleContext context) throws Exception {
+    public final void stop(final BundleContext context) throws Exception {
         broker = null;
         tracker.close();
         tracker = null;
@@ -50,7 +50,7 @@ public abstract class AbstractProvider implements BundleActivator, Provider,Serv
     }
 
     @Override
-    public Broker addingService(ServiceReference<Broker> reference) {
+    public Broker addingService(final ServiceReference<Broker> reference) {
         if(broker == null) {
             broker = context.getService(reference);
             broker.registerProvider(this, context);
@@ -61,12 +61,12 @@ public abstract class AbstractProvider implements BundleActivator, Provider,Serv
     }
 
     @Override
-    public void modifiedService(ServiceReference<Broker> reference, Broker service) {
+    public void modifiedService(final ServiceReference<Broker> reference, final Broker service) {
         // NOOP
     }
 
     @Override
-    public void removedService(ServiceReference<Broker> reference, Broker service) {
+    public void removedService(final ServiceReference<Broker> reference, final Broker service) {
         stopImpl(context);
     }
 

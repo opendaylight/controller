@@ -28,7 +28,7 @@ public final class TransactionCommitFailedExceptionMapper
         super( opName, TransactionCommitFailedException.class );
     }
 
-    public static final TransactionCommitFailedExceptionMapper create(final String opName) {
+    public static TransactionCommitFailedExceptionMapper create(final String opName) {
         return new TransactionCommitFailedExceptionMapper(opName);
     }
 
