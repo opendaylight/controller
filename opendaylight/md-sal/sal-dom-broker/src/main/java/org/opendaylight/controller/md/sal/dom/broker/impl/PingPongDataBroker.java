@@ -33,7 +33,7 @@ public final class PingPongDataBroker extends ForwardingDOMDataBroker implements
      *
      * @param delegate Backend broker, may not be null.
      */
-    public PingPongDataBroker(final @Nonnull DOMDataBroker delegate) {
+    public PingPongDataBroker(@Nonnull final DOMDataBroker delegate) {
         this.delegate = Preconditions.checkNotNull(delegate);
     }
 
