@@ -51,6 +51,24 @@
       "revId": "42940a32d49c6af1dbc004e6be66f120f65bc54b",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_fd277462",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 278,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-07-23T18:58:04Z",
+      "side": 1,
+      "message": "It should - but I wanted to distinguish the two conditions for diagnostic purposes.",
+      "parentUuid": "7a7fa997_9f40b8a6",
+      "revId": "42940a32d49c6af1dbc004e6be66f120f65bc54b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
