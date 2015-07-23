@@ -17,6 +17,7 @@ import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.actor.Terminated;
 import akka.japi.Procedure;
+import akka.persistence.RecoveryCompleted;
 import akka.persistence.SaveSnapshotFailure;
 import akka.persistence.SaveSnapshotSuccess;
 import akka.persistence.SnapshotMetadata;
@@ -51,6 +52,7 @@ import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.base.messages.DeleteEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.SendHeartBeat;
+import org.opendaylight.controller.cluster.raft.base.messages.SwitchBehavior;
 import org.opendaylight.controller.cluster.raft.base.messages.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.behaviors.Follower;
 import org.opendaylight.controller.cluster.raft.behaviors.Leader;
@@ -673,7 +675,7 @@ public class RaftActorTest extends AbstractActorTest {
                                 (ReplicatedLogEntry) new MockRaftActorContext.MockReplicatedLogEntry(1, 7,
                                         new MockRaftActorContext.MockPayload("foo-7"))
                         );
-                followerActor.onReceiveCommand(new AppendEntries(1, leaderId, 6, 1, entries, 6, 6, (short)0));
+                followerActor.onReceiveCommand(new AppendEntries(1, leaderId, 6, 1, entries, 6, 6, (short) 0));
                 assertEquals(8, followerActor.getReplicatedLog().size());
 
                 assertEquals(RaftState.Follower, followerActor.getCurrentBehavior().state());
@@ -701,7 +703,7 @@ public class RaftActorTest extends AbstractActorTest {
                                         new MockRaftActorContext.MockPayload("foo-7"))
                         );
                 // send an additional entry 8 with leaderCommit = 7
-                followerActor.onReceiveCommand(new AppendEntries(1, leaderId, 7, 1, entries, 7, 7, (short)0));
+                followerActor.onReceiveCommand(new AppendEntries(1, leaderId, 7, 1, entries, 7, 7, (short) 0));
 
                 // 7 and 8, as lastapplied is 7
                 assertEquals(2, followerActor.getReplicatedLog().size());
@@ -759,7 +761,7 @@ public class RaftActorTest extends AbstractActorTest {
                 assertEquals(5, leaderActor.getReplicatedLog().size());
                 assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
 
-                leaderActor.onReceiveCommand(new AppendEntriesReply(follower1Id, 1, true, 9, 1, (short)0));
+                leaderActor.onReceiveCommand(new AppendEntriesReply(follower1Id, 1, true, 9, 1, (short) 0));
                 assertEquals(5, leaderActor.getReplicatedLog().size());
                 assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
 
@@ -792,7 +794,7 @@ public class RaftActorTest extends AbstractActorTest {
                 assertEquals("Real snapshot didn't clear the log till replicatedToAllIndex", 0, leaderActor.getReplicatedLog().size());
 
                 //reply from a slow follower after should not raise errors
-                leaderActor.onReceiveCommand(new AppendEntriesReply(follower2Id, 1, true, 5, 1, (short)0));
+                leaderActor.onReceiveCommand(new AppendEntriesReply(follower2Id, 1, true, 5, 1, (short) 0));
                 assertEquals(0, leaderActor.getReplicatedLog().size());
             }
         };
@@ -887,6 +889,50 @@ public class RaftActorTest extends AbstractActorTest {
             assertEquals(3, leader.getReplicatedToAllIndex());
 
         }};
+    }
+
+    @Test
+    public void testSwitchBehavior(){
+        String persistenceId = factory.generateActorId("leader-");
+        DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+        config.setCustomRaftPolicyImplementationClass("org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy");
+        config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
+        config.setIsolatedLeaderCheckInterval(new FiniteDuration(1, TimeUnit.DAYS));
+        config.setSnapshotBatchCount(5);
+
+        DataPersistenceProvider dataPersistenceProvider = new NonPersistentDataProvider();
+
+        Map<String, String> peerAddresses = ImmutableMap.<String, String>builder().build();
+
+        TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(
+                MockRaftActor.props(persistenceId, peerAddresses,
+                        Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
+
+        MockRaftActor leaderActor = mockActorRef.underlyingActor();
+
+        leaderActor.handleRecover(RecoveryCompleted.getInstance());
+
+        leaderActor.handleCommand(new SwitchBehavior(RaftState.Follower, 100));
+
+        assertEquals(100, leaderActor.getRaftActorContext().getTermInformation().getCurrentTerm());
+        assertEquals(RaftState.Follower, leaderActor.getCurrentBehavior().state());
+
+        leaderActor.handleCommand(new SwitchBehavior(RaftState.Leader, 110));
+
+        assertEquals(110, leaderActor.getRaftActorContext().getTermInformation().getCurrentTerm());
+        assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
+
+        leaderActor.handleCommand(new SwitchBehavior(RaftState.Candidate, 125));
+
+        assertEquals(110, leaderActor.getRaftActorContext().getTermInformation().getCurrentTerm());
+        assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
+
+        leaderActor.handleCommand(new SwitchBehavior(RaftState.IsolatedLeader, 125));
+
+        assertEquals(110, leaderActor.getRaftActorContext().getTermInformation().getCurrentTerm());
+        assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
+
+
     }
 
     public static ByteString fromObject(Object snapshot) throws Exception {
