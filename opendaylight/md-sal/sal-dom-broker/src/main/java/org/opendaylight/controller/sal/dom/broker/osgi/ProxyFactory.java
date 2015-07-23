@@ -26,28 +26,28 @@ public class ProxyFactory {
         return ((T) _createProxyImpl);
     }
 
-    private static Object _createProxyImpl(final ServiceReference<?> ref,
+    private static Object createProxyImpl(final ServiceReference<?> ref,
             final DOMMountPointService service) {
 
         return new DOMMountPointServiceProxy(
                 ((ServiceReference<DOMMountPointService>) ref), service);
     }
 
-    private static Object _createProxyImpl(final ServiceReference<?> ref,
+    private static Object createProxyImpl(final ServiceReference<?> ref,
             final SchemaService service) {
 
         return new SchemaServiceProxy(((ServiceReference<SchemaService>) ref),
                 service);
     }
 
-    private static DOMDataBrokerProxy _createProxyImpl(
+    private static DOMDataBrokerProxy createProxyImpl(
             final ServiceReference<?> ref, final DOMDataBroker service) {
 
         return new DOMDataBrokerProxy(((ServiceReference<DOMDataBroker>) ref),
                 service);
     }
 
-    private static Object _createProxyImpl(final ServiceReference<?> reference,
+    private static Object createProxyImplFallback(final ServiceReference<?> reference,
             final BrokerService service) {
 
        return service;
@@ -57,13 +57,13 @@ public class ProxyFactory {
             final BrokerService service) {
 
         if (service instanceof DOMDataBroker) {
-            return _createProxyImpl(ref, (DOMDataBroker) service);
+            return createProxyImpl(ref, (DOMDataBroker) service);
         } else if (service instanceof SchemaService) {
-            return _createProxyImpl(ref, (SchemaService) service);
+            return createProxyImpl(ref, (SchemaService) service);
         } else if (service instanceof DOMMountPointService) {
-            return _createProxyImpl(ref, (DOMMountPointService) service);
+            return createProxyImpl(ref, (DOMMountPointService) service);
         } else if (service != null) {
-            return _createProxyImpl(ref, service);
+            return createProxyImplFallback(ref, service);
         } else {
             throw new IllegalArgumentException("Unhandled parameter types: "
                     + Arrays.<Object> asList(ref, service).toString());

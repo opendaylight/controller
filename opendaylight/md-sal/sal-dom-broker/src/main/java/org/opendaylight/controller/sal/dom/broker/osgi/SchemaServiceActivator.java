@@ -9,7 +9,6 @@ package org.opendaylight.controller.sal.dom.broker.osgi;
 
 import java.util.Hashtable;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
-import org.opendaylight.controller.sal.dom.broker.GlobalBundleScanningSchemaServiceImpl;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
