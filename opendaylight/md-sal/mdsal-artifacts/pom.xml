@@ -138,15 +138,6 @@
               <scope>runtime</scope>
             </dependency>
 
-            <!-- FIXME: These below need splitting up -->
-
-            <!-- AD-SAL compatibility -->
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>sal-compatibility</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
             <!-- Base model augmentations -->
             <dependency>
                 <groupId>org.opendaylight.controller.model</groupId>
@@ -195,48 +186,6 @@
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>sal-akka-raft-example</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <!-- OpenFlow stuff -->
-            <dependency>
-                <groupId>org.opendaylight.controller.md</groupId>
-                <artifactId>forwardingrules-manager</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opendaylight.controller.md</groupId>
-                <artifactId>inventory-manager</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opendaylight.controller.md</groupId>
-                <artifactId>statistics-manager</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opendaylight.controller.md</groupId>
-                <artifactId>topology-lldp-discovery</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opendaylight.controller.md</groupId>
-                <artifactId>topology-manager</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opendaylight.controller.model</groupId>
-                <artifactId>model-flow-base</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opendaylight.controller.model</groupId>
-                <artifactId>model-flow-service</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opendaylight.controller.model</groupId>
-                <artifactId>model-flow-statistics</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
