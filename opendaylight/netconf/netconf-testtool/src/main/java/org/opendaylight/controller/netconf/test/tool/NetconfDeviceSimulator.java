@@ -69,6 +69,7 @@ import org.opendaylight.controller.netconf.monitoring.osgi.NetconfMonitoringOper
 import org.opendaylight.controller.netconf.ssh.SshProxyServer;
 import org.opendaylight.controller.netconf.ssh.SshProxyServerConfiguration;
 import org.opendaylight.controller.netconf.ssh.SshProxyServerConfigurationBuilder;
+import org.opendaylight.controller.netconf.util.capability.BasicCapability;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.repo.api.SchemaResolutionException;
 import org.opendaylight.yangtools.yang.model.repo.api.SchemaSourceException;
@@ -164,6 +165,8 @@ public class NetconfDeviceSimulator implements Closeable {
                         schemaContext) :
                 new SimulatedOperationProvider(idProvider, capabilities,
                         notificationsFile);
+
+        capabilities.add(new BasicCapability("urn:ietf:params:netconf:capability:candidate:1.0"));
 
         final NetconfMonitoringService monitoringService1 = new DummyMonitoringService(
                 capabilities);
