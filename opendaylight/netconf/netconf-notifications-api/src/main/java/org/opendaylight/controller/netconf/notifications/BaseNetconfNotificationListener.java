@@ -21,7 +21,7 @@ public interface BaseNetconfNotificationListener {
     /**
      * Callback used to notify about a change in used capabilities
      */
-    void onCapabilityChanged(NetconfCapabilityChange capabilityChange);
+    void onCapabilityChanged(final NetconfCapabilityChange capabilityChange);
 
     // TODO add other base notifications
 

@@ -7,7 +7,6 @@
     <repository>mvn:org.opendaylight.controller/features-config/${config.version}/xml/features</repository>
     <repository>mvn:org.opendaylight.controller/features-config-persister/${config.version}/xml/features</repository>
     <repository>mvn:org.opendaylight.controller/features-config-netty/${config.version}/xml/features</repository>
-    <repository>mvn:org.opendaylight.controller/features-netconf/${netconf.version}/xml/features</repository>
     <repository>mvn:org.opendaylight.controller/features-akka/${commons.opendaylight.version}/xml/features</repository>
     <feature name='odl-mdsal-all' version='${project.version}' description="OpenDaylight :: MDSAL :: All">
         <feature version='${project.version}'>odl-mdsal-broker</feature>
@@ -21,22 +20,6 @@
       <bundle>mvn:org.opendaylight.controller/sal-common-api/${mdsal.version}</bundle>
       <bundle>mvn:org.opendaylight.controller/sal-common-impl/${mdsal.version}</bundle>
       <bundle>mvn:org.opendaylight.controller/sal-common-util/${mdsal.version}</bundle>
-    </feature>
-
-    <!-- TODO move to netconf features, however there are some weird dependencies on features-config-persister all over that cause cyclic dependencies-->
-    <feature name='odl-netconf-mdsal' version='${project.version}' description="OpenDaylight :: Netconf :: Mdsal">
-        <feature version='${config.version}'>odl-config-all</feature>
-        <feature version='${netconf.version}'>odl-netconf-all</feature>
-        <feature version='${config.version}'>odl-config-netty</feature>
-        <bundle>mvn:org.opendaylight.controller/netconf-tcp/${netconf.version}</bundle>
-        <bundle>mvn:org.opendaylight.controller/netconf-ssh/${netconf.version}</bundle>
-        <feature version='${mdsal.version}'>odl-mdsal-broker</feature>
-        <bundle>mvn:org.opendaylight.controller/mdsal-netconf-connector/${netconf.version}</bundle>
-        <bundle>mvn:org.opendaylight.controller/mdsal-netconf-monitoring/${netconf.version}</bundle>
-        <!-- TODO 01-netconf.xml file requires netconf-config-dispatcher to be present and its part of netconf-connector features. Clean Up-->
-        <bundle>mvn:org.opendaylight.controller/netconf-config-dispatcher/${config.version}</bundle>
-        <configfile finalname='${config.configfile.directory}/${config.netconf.client.configfile}'>mvn:org.opendaylight.controller/netconf-config/${netconf.version}/xml/config</configfile>
-        <configfile finalname='${config.configfile.directory}/${config.netconf.mdsal.configfile}'>mvn:org.opendaylight.controller/netconf-mdsal-config/${netconf.version}/xml/config</configfile>
     </feature>
 
     <feature name='odl-mdsal-broker-local' version='${project.version}' description="OpenDaylight :: MDSAL :: Broker">
@@ -112,5 +95,16 @@
         <bundle>mvn:org.opendaylight.controller.samples/clustering-it-model/${project.version}</bundle>
         <bundle>mvn:org.opendaylight.controller.samples/clustering-it-provider/${project.version}</bundle>
         <configfile finalname="${config.configfile.directory}/20-clustering-test-app.xml">mvn:org.opendaylight.controller.samples/clustering-it-config/${project.version}/xml/config</configfile>
+    </feature>
+
+    <!-- FIXME decouple messagebus code into messagebus and messagebus netconf -->
+    <feature name='odl-message-bus' version='${project.version}'>
+        <!--<feature version='${project.version}'>odl-netconf-connector</feature>-->
+        <bundle>mvn:org.opendaylight.controller.model/model-inventory/${mdsal.version}</bundle>
+        <feature version='${project.version}'>odl-mdsal-broker</feature>
+        <bundle>mvn:org.opendaylight.controller/messagebus-api/${project.version}</bundle>
+        <bundle>mvn:org.opendaylight.controller/messagebus-spi/${project.version}</bundle>
+        <bundle>mvn:org.opendaylight.controller/messagebus-impl/${project.version}</bundle>
+        <configfile finalname="${config.configfile.directory}/05-message-bus.xml">mvn:org.opendaylight.controller/messagebus-config/${project.version}/xml/config</configfile>
     </feature>
 </features>

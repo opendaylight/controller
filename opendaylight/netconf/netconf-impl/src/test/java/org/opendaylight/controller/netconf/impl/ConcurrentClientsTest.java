@@ -16,6 +16,7 @@ import static org.mockito.Matchers.anySetOf;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -28,7 +29,6 @@ import io.netty.util.concurrent.GlobalEventExecutor;
 import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.management.ManagementFactory;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Arrays;
@@ -49,8 +49,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.opendaylight.controller.netconf.api.Capability;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.config.util.capability.Capability;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
+import org.opendaylight.controller.config.util.xml.XmlUtil;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.monitoring.CapabilityListener;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
@@ -71,7 +72,6 @@ import org.opendaylight.controller.netconf.nettyutil.handler.exi.NetconfStartExi
 import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessageAdditionalHeader;
 import org.opendaylight.controller.netconf.util.messages.NetconfMessageUtil;
 import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.protocol.framework.NeverReconnectStrategy;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state.CapabilitiesBuilder;
@@ -114,8 +114,6 @@ public class ConcurrentClientsTest {
     private EventLoopGroup nettyGroup;
     private NetconfClientDispatcher netconfClientDispatcher;
 
-    private DefaultCommitNotificationProducer commitNot;
-
     HashedWheelTimer hashedWheelTimer;
     private TestingNetconfOperation testingNetconfOperation;
 
@@ -129,8 +127,7 @@ public class ConcurrentClientsTest {
 
             }
         }).when(monitoring).registerListener(any(NetconfMonitoringService.MonitoringListener.class));
-        doNothing().when(monitoring).onCapabilitiesAdded(anySetOf(Capability.class));
-        doNothing().when(monitoring).onCapabilitiesRemoved(anySetOf(Capability.class));
+        doNothing().when(monitoring).onCapabilitiesChanged(anySetOf(Capability.class), anySetOf(Capability.class));
         doReturn(new CapabilitiesBuilder().setCapability(Collections.<Uri>emptyList()).build()).when(monitoring).getCapabilities();
         return monitoring;
     }
@@ -164,9 +161,7 @@ public class ConcurrentClientsTest {
         SessionIdProvider idProvider = new SessionIdProvider();
 
         NetconfServerSessionNegotiatorFactory serverNegotiatorFactory = new NetconfServerSessionNegotiatorFactory(
-                hashedWheelTimer, factoriesListener, idProvider, 5000, commitNot, createMockedMonitoringService(), serverCaps);
-
-        commitNot = new DefaultCommitNotificationProducer(ManagementFactory.getPlatformMBeanServer());
+                hashedWheelTimer, factoriesListener, idProvider, 5000, createMockedMonitoringService(), serverCaps);
 
         NetconfServerDispatcherImpl.ServerChannelInitializer serverChannelInitializer = new NetconfServerDispatcherImpl.ServerChannelInitializer(serverNegotiatorFactory);
         final NetconfServerDispatcherImpl dispatch = new NetconfServerDispatcherImpl(serverChannelInitializer, nettyGroup, nettyGroup);
@@ -177,7 +172,6 @@ public class ConcurrentClientsTest {
 
     @After
     public void tearDown(){
-        commitNot.close();
         hashedWheelTimer.stop();
         try {
             nettyGroup.shutdownGracefully().get();
@@ -247,7 +241,7 @@ public class ConcurrentClientsTest {
         }
 
         @Override
-        public Document handle(Document requestMessage, NetconfOperationChainedExecution subsequentOperation) throws NetconfDocumentedException {
+        public Document handle(Document requestMessage, NetconfOperationChainedExecution subsequentOperation) throws DocumentedException {
             try {
                 LOG.info("Handling netconf message from test {}", XmlUtil.toString(requestMessage));
                 counter.getAndIncrement();

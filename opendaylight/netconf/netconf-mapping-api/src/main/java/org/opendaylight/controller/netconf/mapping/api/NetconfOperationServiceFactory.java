@@ -9,7 +9,7 @@
 package org.opendaylight.controller.netconf.mapping.api;
 
 import java.util.Set;
-import org.opendaylight.controller.netconf.api.Capability;
+import org.opendaylight.controller.config.util.capability.Capability;
 import org.opendaylight.controller.netconf.api.monitoring.CapabilityListener;
 
 /**

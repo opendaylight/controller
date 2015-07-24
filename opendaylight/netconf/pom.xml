@@ -16,7 +16,6 @@
 
   <modules>
     <module>netconf-api</module>
-    <module>netconf-cli</module>
     <module>netconf-config</module>
     <module>netconf-impl</module>
     <module>config-netconf-connector</module>
@@ -24,22 +23,21 @@
     <module>mdsal-netconf-monitoring</module>
     <module>netconf-util</module>
     <module>netconf-netty-util</module>
-    <module>config-persister-impl</module>
     <module>netconf-mapping-api</module>
     <module>netconf-client</module>
+    <module>netconf-config-dispatcher</module>
     <module>netconf-ssh</module>
     <module>netconf-tcp</module>
     <module>netconf-monitoring</module>
-    <module>ietf-netconf</module>
-    <module>ietf-netconf-monitoring</module>
-    <module>ietf-netconf-notifications</module>
-    <module>ietf-netconf-monitoring-extension</module>
     <module>netconf-connector-config</module>
     <module>netconf-mdsal-config</module>
     <module>netconf-auth</module>
-    <module>netconf-testtool</module>
     <module>netconf-notifications-impl</module>
     <module>netconf-notifications-api</module>
+    <module>sal-netconf-connector</module>
+    <module>features</module>
+    <module>models</module>
+    <module>tools</module>
 
     <module>netconf-artifacts</module>
   </modules>
@@ -77,35 +75,37 @@
         <plugin>
           <groupId>org.opendaylight.yangtools</groupId>
           <artifactId>yang-maven-plugin</artifactId>
-          <version>${yangtools.version}</version>
-          <dependencies>
-            <dependency>
-              <groupId>org.opendaylight.yangtools</groupId>
-              <artifactId>maven-sal-api-gen-plugin</artifactId>
-              <version>${yangtools.version}</version>
-            </dependency>
-          </dependencies>
           <executions>
             <execution>
+              <id>config</id>
               <goals>
                 <goal>generate-sources</goal>
               </goals>
               <configuration>
-                <yangFilesRootDir>src/main/yang</yangFilesRootDir>
                 <codeGenerators>
+                  <generator>
+                    <codeGeneratorClass>org.opendaylight.controller.config.yangjmxgenerator.plugin.JMXGenerator</codeGeneratorClass>
+                    <outputBaseDir>${jmxGeneratorPath}</outputBaseDir>
+                    <additionalConfiguration>
+                      <namespaceToPackage1>urn:opendaylight:params:xml:ns:yang:controller==org.opendaylight.controller.config.yang</namespaceToPackage1>
+                    </additionalConfiguration>
+                  </generator>
                   <generator>
                     <codeGeneratorClass>org.opendaylight.yangtools.maven.sal.api.gen.plugin.CodeGeneratorImpl</codeGeneratorClass>
                     <outputBaseDir>${salGeneratorPath}</outputBaseDir>
-                  </generator>
-                  <generator>
-                    <codeGeneratorClass>org.opendaylight.yangtools.yang.unified.doc.generator.maven.DocumentationGeneratorImpl</codeGeneratorClass>
-                    <outputBaseDir>${project.build.directory}/site/models</outputBaseDir>
                   </generator>
                 </codeGenerators>
                 <inspectDependencies>true</inspectDependencies>
               </configuration>
             </execution>
           </executions>
+          <dependencies>
+            <dependency>
+              <groupId>org.opendaylight.controller</groupId>
+              <artifactId>yang-jmx-generator-plugin</artifactId>
+              <version>${config.version}</version>
+            </dependency>
+          </dependencies>
         </plugin>
       </plugins>
 

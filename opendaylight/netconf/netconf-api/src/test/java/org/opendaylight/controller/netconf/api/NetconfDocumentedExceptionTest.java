@@ -21,9 +21,7 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorSeverity;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorTag;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorType;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -63,10 +61,10 @@ public class NetconfDocumentedExceptionTest {
     @Test
     public void testToAndFromXMLDocument() throws XPathExpressionException {
         String errorMessage = "mock error message";
-        NetconfDocumentedException ex = new NetconfDocumentedException( errorMessage, null,
-                                                                        ErrorType.protocol,
-                                                                        ErrorTag.data_exists,
-                                                                        ErrorSeverity.warning,
+        DocumentedException ex = new NetconfDocumentedException( errorMessage, null,
+                                                                        DocumentedException.ErrorType.protocol,
+                                                                        DocumentedException.ErrorTag.data_exists,
+                                                                        DocumentedException.ErrorSeverity.warning,
                                                                         ImmutableMap.of( "foo", "bar" ) );
 
         Document doc = ex.toXMLDocument();
@@ -82,17 +80,17 @@ public class NetconfDocumentedExceptionTest {
 
         Node errorTypeNode = getNode( "netconf:error-type", rpcErrorNode );
         assertNotNull( "error-type not found", errorTypeNode );
-        assertEquals( "error-type", ErrorType.protocol.getTagValue(),
+        assertEquals( "error-type", DocumentedException.ErrorType.protocol.getTagValue(),
                       errorTypeNode.getTextContent() );
 
         Node errorTagNode = getNode( "netconf:error-tag", rpcErrorNode );
         assertNotNull( "error-tag not found", errorTagNode );
-        assertEquals( "error-tag", ErrorTag.data_exists.getTagValue(),
+        assertEquals( "error-tag", DocumentedException.ErrorTag.data_exists.getTagValue(),
                       errorTagNode.getTextContent() );
 
         Node errorSeverityNode = getNode( "netconf:error-severity", rpcErrorNode );
         assertNotNull( "error-severity not found", errorSeverityNode );
-        assertEquals( "error-severity", ErrorSeverity.warning.getTagValue(),
+        assertEquals( "error-severity", DocumentedException.ErrorSeverity.warning.getTagValue(),
                       errorSeverityNode.getTextContent() );
 
         Node errorInfoNode = getNode( "netconf:error-info/netconf:foo", rpcErrorNode );
@@ -105,12 +103,12 @@ public class NetconfDocumentedExceptionTest {
 
         // Test fromXMLDocument
 
-        ex = NetconfDocumentedException.fromXMLDocument( doc );
+        ex = DocumentedException.fromXMLDocument( doc );
 
         assertNotNull( "NetconfDocumentedException is null", ex );
-        assertEquals( "getErrorSeverity", ErrorSeverity.warning, ex.getErrorSeverity() );
-        assertEquals( "getErrorTag", ErrorTag.data_exists, ex.getErrorTag() );
-        assertEquals( "getErrorType", ErrorType.protocol, ex.getErrorType() );
+        assertEquals( "getErrorSeverity", DocumentedException.ErrorSeverity.warning, ex.getErrorSeverity() );
+        assertEquals( "getErrorTag", DocumentedException.ErrorTag.data_exists, ex.getErrorTag() );
+        assertEquals( "getErrorType", DocumentedException.ErrorType.protocol, ex.getErrorType() );
         assertEquals( "getLocalizedMessage", errorMessage, ex.getLocalizedMessage() );
         assertEquals( "getErrorInfo", ImmutableMap.of( "foo", "bar" ), ex.getErrorInfo() );
     }

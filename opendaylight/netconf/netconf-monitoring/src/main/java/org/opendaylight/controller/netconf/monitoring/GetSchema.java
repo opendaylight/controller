@@ -11,13 +11,12 @@ package org.opendaylight.controller.netconf.monitoring;
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import java.util.Map;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
+import org.opendaylight.controller.config.util.xml.XmlElement;
+import org.opendaylight.controller.config.util.xml.XmlUtil;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
-import org.opendaylight.controller.netconf.util.exception.MissingNameSpaceException;
 import org.opendaylight.controller.netconf.util.mapping.AbstractSingletonNetconfOperation;
-import org.opendaylight.controller.netconf.util.xml.XmlElement;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -47,7 +46,7 @@ public class GetSchema extends AbstractSingletonNetconfOperation {
     }
 
     @Override
-    protected Element handleWithNoSubsequentOperations(final Document document, final XmlElement xml) throws NetconfDocumentedException {
+    protected Element handleWithNoSubsequentOperations(final Document document, final XmlElement xml) throws DocumentedException {
         final GetSchemaEntry entry;
 
         entry = new GetSchemaEntry(xml);
@@ -58,10 +57,10 @@ public class GetSchema extends AbstractSingletonNetconfOperation {
         } catch (final IllegalStateException e) {
             final Map<String, String> errorInfo = Maps.newHashMap();
             errorInfo.put(entry.identifier, e.getMessage());
-            LOG.warn("Rpc error: {}", NetconfDocumentedException.ErrorTag.operation_failed, e);
-            throw new NetconfDocumentedException(e.getMessage(), NetconfDocumentedException.ErrorType.application,
-                    NetconfDocumentedException.ErrorTag.operation_failed,
-                    NetconfDocumentedException.ErrorSeverity.error, errorInfo);
+            LOG.warn("Rpc error: {}", DocumentedException.ErrorTag.operation_failed, e);
+            throw new DocumentedException(e.getMessage(), DocumentedException.ErrorType.application,
+                    DocumentedException.ErrorTag.operation_failed,
+                    DocumentedException.ErrorSeverity.error, errorInfo);
         }
 
         final Element getSchemaResult;
@@ -76,16 +75,16 @@ public class GetSchema extends AbstractSingletonNetconfOperation {
         private final String identifier;
         private final Optional<String> version;
 
-        GetSchemaEntry(final XmlElement getSchemaElement) throws NetconfDocumentedException {
+        GetSchemaEntry(final XmlElement getSchemaElement) throws DocumentedException {
             getSchemaElement.checkName(GET_SCHEMA);
             getSchemaElement.checkNamespace(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_YANG_IETF_NETCONF_MONITORING);
 
             XmlElement identifierElement = null;
             try {
                 identifierElement = getSchemaElement.getOnlyChildElementWithSameNamespace(IDENTIFIER);
-            } catch (final MissingNameSpaceException e) {
+            } catch (final DocumentedException e) {
                 LOG.trace("Can't get identifier element as only child element with same namespace due to ",e);
-                throw NetconfDocumentedException.wrap(e);
+                throw DocumentedException.wrap(e);
             }
             identifier = identifierElement.getTextContent();
             final Optional<XmlElement> versionElement = getSchemaElement
