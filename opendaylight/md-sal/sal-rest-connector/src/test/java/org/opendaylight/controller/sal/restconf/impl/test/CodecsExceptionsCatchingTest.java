@@ -2,6 +2,7 @@ package org.opendaylight.controller.sal.restconf.impl.test;
 
 import static org.junit.Assert.assertTrue;
 import java.io.FileNotFoundException;
+import java.net.URISyntaxException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
@@ -19,6 +20,7 @@ import org.opendaylight.controller.sal.rest.impl.XmlNormalizedNodeBodyReader;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 
 public class CodecsExceptionsCatchingTest extends JerseyTest {
 
@@ -26,7 +28,7 @@ public class CodecsExceptionsCatchingTest extends JerseyTest {
     private static ControllerContext controllerContext = ControllerContext.getInstance();
 
     @BeforeClass
-    public static void init() throws FileNotFoundException {
+    public static void init() throws FileNotFoundException, URISyntaxException, ReactorException {
         restConf = RestconfImpl.getInstance();
         controllerContext = ControllerContext.getInstance();
         final SchemaContext schemaContext = TestUtils.loadSchemaContext("/decoding-exception/yang");

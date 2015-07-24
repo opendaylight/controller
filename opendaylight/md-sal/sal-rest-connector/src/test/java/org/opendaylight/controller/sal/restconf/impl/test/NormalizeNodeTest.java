@@ -7,12 +7,14 @@
  */
 package org.opendaylight.controller.sal.restconf.impl.test;
 
+import java.net.URISyntaxException;
 import org.junit.BeforeClass;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 
 public class NormalizeNodeTest extends YangAndXmlAndDataSchemaLoader {
 
     @BeforeClass
-    public static void initialization() {
+    public static void initialization() throws URISyntaxException, ReactorException {
         dataLoad("/normalize-node/yang/");
     }
 

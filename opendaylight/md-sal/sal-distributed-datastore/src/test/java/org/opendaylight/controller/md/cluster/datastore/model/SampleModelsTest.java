@@ -13,10 +13,11 @@ import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec;
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 
 public class SampleModelsTest {
     @Test
-    public void testPeopleModel(){
+    public void testPeopleModel() throws ReactorException {
         final NormalizedNode<?, ?> expected = PeopleModel.create();
 
 
@@ -36,7 +37,7 @@ public class SampleModelsTest {
 
 
     @Test
-    public void testCarsModel(){
+    public void testCarsModel() throws ReactorException {
         final NormalizedNode<?, ?> expected = CarsModel.create();
 
 

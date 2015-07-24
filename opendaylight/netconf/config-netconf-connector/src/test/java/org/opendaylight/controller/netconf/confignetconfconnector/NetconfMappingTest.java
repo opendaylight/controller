@@ -120,10 +120,10 @@ import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.test.types.rev131127.TestIdentity1;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.test.types.rev131127.TestIdentity2;
 import org.opendaylight.yangtools.sal.binding.generator.util.BindingRuntimeContext;
-import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
-import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
+import org.opendaylight.yangtools.yang.parser.stmt.reactor.CrossSourceStatementReactor;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangInferencePipeline;
 import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
@@ -730,12 +730,13 @@ public class NetconfMappingTest extends AbstractConfigTest {
     }
 
     private Map<String, Map<String, ModuleMXBeanEntry>> getMbes() throws Exception {
-        final List<InputStream> yangDependencies = getYangs();
 
         final Map<String, Map<String, ModuleMXBeanEntry>> mBeanEntries = Maps.newHashMap();
 
-        YangParserImpl yangParser = new YangParserImpl();
-        final SchemaContext schemaContext = yangParser.resolveSchemaContext(new HashSet<>(yangParser.parseYangModelsFromStreamsMapped(yangDependencies).values()));
+        CrossSourceStatementReactor.BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR
+                .newBuild();
+        final SchemaContext schemaContext = reactor.buildEffective(getYangs());
+
         YangStoreService yangStoreService = new YangStoreService(new SchemaContextProvider() {
             @Override
             public SchemaContext getSchemaContext() {
@@ -766,13 +767,9 @@ public class NetconfMappingTest extends AbstractConfigTest {
     }
 
     private SchemaContext getSchemaContext() throws Exception {
-        final List<InputStream> yangDependencies = getYangs();
-        YangParserImpl parser = new YangParserImpl();
-
-        Set<Module> allYangModules = parser.parseYangModelsFromStreams(yangDependencies);
-
-        return parser.resolveSchemaContext(Sets
-                .newHashSet(allYangModules));
+        CrossSourceStatementReactor.BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR
+                .newBuild();
+        return reactor.buildEffective(getYangs());
     }
 
     @Test

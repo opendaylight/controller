@@ -10,9 +10,11 @@ package org.opendaylight.controller.sal.restconf.impl.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.net.URISyntaxException;
 import java.util.Set;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 
 public abstract class YangAndXmlAndDataSchemaLoader {
 
@@ -22,12 +24,12 @@ public abstract class YangAndXmlAndDataSchemaLoader {
     protected static String searchedDataSchemaName;
     protected static String schemaNodePath;
 
-    protected static void dataLoad(String yangPath) {
+    protected static void dataLoad(String yangPath) throws URISyntaxException, ReactorException {
         dataLoad(yangPath, 1, null, null);
     }
 
-    protected static void dataLoad(String yangPath, int modulesNumber, String moduleName, String dataSchemaName) {
-        modules = TestUtils.loadModulesFrom(yangPath);
+    protected static void dataLoad(String yangPath, int modulesNumber, String moduleName, String dataSchemaName) throws URISyntaxException, ReactorException {
+        modules = TestUtils.loadModulesFromDirPath(yangPath);
         assertEquals(modulesNumber, modules.size());
         Module module = TestUtils.resolveModule(moduleName, modules);
         searchedModuleName = module == null ? "" : module.getName();
