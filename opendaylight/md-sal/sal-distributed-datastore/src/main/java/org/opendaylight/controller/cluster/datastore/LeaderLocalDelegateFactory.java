@@ -60,8 +60,9 @@ abstract class LeaderLocalDelegateFactory<M, D, I> extends DelegateFactory<M, D,
      * Invoked whenever the local shard's leadership role changes.
      *
      * @param isLeader true if the shard has become leader, false if it has
-     *                 become a follower.
+ *                 become a follower.
+     * @param hasLeader true if the shard knows about leader ID
      */
-    abstract void onLeadershipChange(boolean isLeader);
-    abstract void onMessage(M message, boolean isLeader);
+    abstract void onLeadershipChange(boolean isLeader, boolean hasLeader);
+    abstract void onMessage(M message, boolean isLeader, boolean hasLeader);
 }
