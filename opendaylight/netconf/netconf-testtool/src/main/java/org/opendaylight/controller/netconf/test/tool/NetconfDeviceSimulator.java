@@ -165,6 +165,8 @@ public class NetconfDeviceSimulator implements Closeable {
                 new SimulatedOperationProvider(idProvider, capabilities,
                         notificationsFile);
 
+        capabilities.add(new BasicCapability("urn:ietf:params:netconf:capability:candidate:1.0"));
+
         final NetconfMonitoringService monitoringService1 = new DummyMonitoringService(
                 capabilities);
 
