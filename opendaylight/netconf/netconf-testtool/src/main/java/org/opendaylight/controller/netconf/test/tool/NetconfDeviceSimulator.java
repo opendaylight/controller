@@ -94,6 +94,7 @@ import org.opendaylight.controller.netconf.test.tool.rpc.SimulatedGet;
 import org.opendaylight.controller.netconf.test.tool.rpc.SimulatedGetConfig;
 import org.opendaylight.controller.netconf.test.tool.rpc.SimulatedLock;
 import org.opendaylight.controller.netconf.test.tool.rpc.SimulatedUnLock;
+import org.opendaylight.controller.netconf.util.capability.BasicCapability;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.NetconfState;
@@ -208,6 +209,8 @@ public class NetconfDeviceSimulator implements Closeable {
                         schemaContext) :
                 new SimulatedOperationProvider(idProvider, capabilities,
                         notificationsFile);
+
+        capabilities.add(new BasicCapability("urn:ietf:params:netconf:capability:candidate:1.0"));
 
         final NetconfMonitoringService monitoringService1 = new DummyMonitoringService(
                 capabilities);
