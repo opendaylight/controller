@@ -27,14 +27,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import org.junit.Test;
-import org.opendaylight.controller.netconf.api.Capability;
+import org.opendaylight.controller.config.util.capability.Capability;
+import org.opendaylight.controller.config.util.xml.XmlUtil;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.monitoring.CapabilityListener;
 import org.opendaylight.controller.netconf.client.TestingNetconfClient;
 import org.opendaylight.controller.netconf.impl.osgi.AggregatedNetconfOperationServiceFactory;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
 import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.w3c.dom.Document;
 
 public class NetconfITMonitoringTest extends AbstractNetconfConfigTest {
@@ -61,7 +61,6 @@ public class NetconfITMonitoringTest extends AbstractNetconfConfigTest {
             assertSessionElementsInResponse(response.getDocument(), 1);
         }
     }
-
 
     @Test(timeout = 13 * 10000)
     public void testClientHelloWithAuth() throws Exception {

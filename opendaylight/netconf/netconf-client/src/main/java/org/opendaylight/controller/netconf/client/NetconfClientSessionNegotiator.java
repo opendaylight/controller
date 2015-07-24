@@ -20,6 +20,7 @@ import io.netty.util.concurrent.Promise;
 import java.util.Collection;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
+import org.opendaylight.controller.config.util.xml.XmlUtil;
 import org.opendaylight.controller.netconf.api.NetconfClientSessionPreferences;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
@@ -30,7 +31,6 @@ import org.opendaylight.controller.netconf.nettyutil.handler.exi.NetconfStartExi
 import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessage;
 import org.opendaylight.controller.netconf.util.messages.NetconfMessageUtil;
 import org.opendaylight.controller.netconf.util.xml.XMLNetconfUtil;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;

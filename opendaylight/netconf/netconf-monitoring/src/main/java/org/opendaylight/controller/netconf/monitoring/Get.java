@@ -8,7 +8,9 @@
 package org.opendaylight.controller.netconf.monitoring;
 
 import java.util.Collections;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
+import org.opendaylight.controller.config.util.xml.XmlElement;
+import org.opendaylight.controller.config.util.xml.XmlMappingConstants;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
@@ -16,7 +18,6 @@ import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedEx
 import org.opendaylight.controller.netconf.monitoring.xml.JaxBSerializer;
 import org.opendaylight.controller.netconf.monitoring.xml.model.NetconfState;
 import org.opendaylight.controller.netconf.util.mapping.AbstractNetconfOperation;
-import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -33,9 +34,9 @@ public class Get extends AbstractNetconfOperation {
     }
 
     private Element getPlaceholder(final Document innerResult)
-            throws NetconfDocumentedException {
+            throws DocumentedException {
         final XmlElement rootElement = XmlElement.fromDomElementWithExpected(
-                innerResult.getDocumentElement(), XmlNetconfConstants.RPC_REPLY_KEY, XmlNetconfConstants.RFC4741_TARGET_NAMESPACE);
+                innerResult.getDocumentElement(), XmlMappingConstants.RPC_REPLY_KEY, XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
         return rootElement.getOnlyChildElement(XmlNetconfConstants.DATA_KEY).getDomElement();
     }
 
@@ -51,12 +52,12 @@ public class Get extends AbstractNetconfOperation {
 
     @Override
     public Document handle(final Document requestMessage, final NetconfOperationChainedExecution subsequentOperation)
-            throws NetconfDocumentedException {
+            throws DocumentedException {
         if (subsequentOperation.isExecutionTermination()){
-            throw new NetconfDocumentedException(String.format("Subsequent netconf operation expected by %s", this),
-                    NetconfDocumentedException.ErrorType.application,
-                    NetconfDocumentedException.ErrorTag.operation_failed,
-                    NetconfDocumentedException.ErrorSeverity.error);
+            throw new DocumentedException(String.format("Subsequent netconf operation expected by %s", this),
+                    DocumentedException.ErrorType.application,
+                    DocumentedException.ErrorTag.operation_failed,
+                    DocumentedException.ErrorSeverity.error);
         }
 
         try {
@@ -74,16 +75,16 @@ public class Get extends AbstractNetconfOperation {
             final String errorMessage = "Get operation for netconf-state subtree failed";
             LOG.warn(errorMessage, e);
 
-            throw new NetconfDocumentedException(errorMessage, NetconfDocumentedException.ErrorType.application,
-                    NetconfDocumentedException.ErrorTag.operation_failed,
-                    NetconfDocumentedException.ErrorSeverity.error,
-                    Collections.singletonMap(NetconfDocumentedException.ErrorSeverity.error.toString(), e.getMessage()));
+            throw new DocumentedException(errorMessage, DocumentedException.ErrorType.application,
+                    DocumentedException.ErrorTag.operation_failed,
+                    DocumentedException.ErrorSeverity.error,
+                    Collections.singletonMap(DocumentedException.ErrorSeverity.error.toString(), e.getMessage()));
         }
     }
 
     @Override
     protected Element handle(final Document document, final XmlElement message, final NetconfOperationChainedExecution subsequentOperation)
-            throws NetconfDocumentedException {
+            throws DocumentedException {
         throw new UnsupportedOperationException("Never gets called");
     }
 }

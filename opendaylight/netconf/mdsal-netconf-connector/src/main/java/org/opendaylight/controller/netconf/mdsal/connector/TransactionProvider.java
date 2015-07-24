@@ -13,13 +13,13 @@ import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
 import java.util.ArrayList;
 import java.util.List;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
+import org.opendaylight.controller.config.util.xml.DocumentedException.ErrorSeverity;
+import org.opendaylight.controller.config.util.xml.DocumentedException.ErrorTag;
+import org.opendaylight.controller.config.util.xml.DocumentedException.ErrorType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorSeverity;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorTag;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,9 +71,9 @@ public class TransactionProvider implements AutoCloseable{
         return candidateTransaction;
     }
 
-    public synchronized boolean commitTransaction() throws NetconfDocumentedException {
+    public synchronized boolean commitTransaction() throws DocumentedException {
         if (!getCandidateTransaction().isPresent()) {
-            throw new NetconfDocumentedException(NO_TRANSACTION_FOUND_FOR_SESSION + netconfSessionIdForReporting,
+            throw new DocumentedException(NO_TRANSACTION_FOUND_FOR_SESSION + netconfSessionIdForReporting,
                     ErrorType.application, ErrorTag.operation_failed, ErrorSeverity.error);
         }
 
@@ -82,7 +82,7 @@ public class TransactionProvider implements AutoCloseable{
             future.checkedGet();
         } catch (TransactionCommitFailedException e) {
             LOG.debug("Transaction {} failed on", candidateTransaction, e);
-            throw new NetconfDocumentedException("Transaction commit failed on " + e.getMessage() + " " + netconfSessionIdForReporting,
+            throw new DocumentedException("Transaction commit failed on " + e.getMessage() + " " + netconfSessionIdForReporting,
                     ErrorType.application, ErrorTag.operation_failed, ErrorSeverity.error);
         }
         allOpenReadWriteTransactions.remove(candidateTransaction);
@@ -106,7 +106,7 @@ public class TransactionProvider implements AutoCloseable{
         return runningTransaction;
     }
 
-    public synchronized boolean commitRunningTransaction(DOMDataReadWriteTransaction tx) throws NetconfDocumentedException {
+    public synchronized boolean commitRunningTransaction(DOMDataReadWriteTransaction tx) throws DocumentedException {
         allOpenReadWriteTransactions.remove(tx);
 
         CheckedFuture<Void, TransactionCommitFailedException> future = tx.submit();
@@ -114,7 +114,7 @@ public class TransactionProvider implements AutoCloseable{
             future.checkedGet();
         } catch (TransactionCommitFailedException e) {
             LOG.debug("Transaction {} failed on", tx, e);
-            throw new NetconfDocumentedException("Transaction commit failed on " + e.getMessage() + " " + netconfSessionIdForReporting,
+            throw new DocumentedException("Transaction commit failed on " + e.getMessage() + " " + netconfSessionIdForReporting,
                     ErrorType.application, ErrorTag.operation_failed, ErrorSeverity.error);
         }
 

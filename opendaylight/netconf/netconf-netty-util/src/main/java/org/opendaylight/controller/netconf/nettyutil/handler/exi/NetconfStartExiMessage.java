@@ -10,9 +10,9 @@ package org.opendaylight.controller.netconf.nettyutil.handler.exi;
 
 import com.google.common.collect.Lists;
 import java.util.List;
+import org.opendaylight.controller.config.util.xml.XmlUtil;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.openexi.proc.common.EXIOptions;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

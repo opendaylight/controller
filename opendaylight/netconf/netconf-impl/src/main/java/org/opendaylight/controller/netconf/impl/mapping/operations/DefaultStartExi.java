@@ -7,21 +7,22 @@
  */
 package org.opendaylight.controller.netconf.impl.mapping.operations;
 
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorSeverity;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorTag;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorType;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
+import org.opendaylight.controller.config.util.xml.DocumentedException.ErrorSeverity;
+import org.opendaylight.controller.config.util.xml.DocumentedException.ErrorTag;
+import org.opendaylight.controller.config.util.xml.DocumentedException.ErrorType;
+import org.opendaylight.controller.config.util.xml.XmlElement;
+import org.opendaylight.controller.config.util.xml.XmlUtil;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.impl.NetconfServerSession;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedExecution;
 import org.opendaylight.controller.netconf.util.mapping.AbstractSingletonNetconfOperation;
-import org.opendaylight.controller.netconf.util.xml.XmlElement;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
 public class DefaultStartExi extends AbstractSingletonNetconfOperation implements DefaultNetconfOperation {
     public static final String START_EXI = "start-exi";
 
@@ -34,7 +35,7 @@ public class DefaultStartExi extends AbstractSingletonNetconfOperation implement
 
     @Override
     public Document handle(final Document message,
-                           final NetconfOperationChainedExecution subsequentOperation) throws NetconfDocumentedException {
+                           final NetconfOperationChainedExecution subsequentOperation) throws DocumentedException {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Received start-exi message {} ", XmlUtil.toString(message));
         }
@@ -42,7 +43,7 @@ public class DefaultStartExi extends AbstractSingletonNetconfOperation implement
         try {
             netconfSession.startExiCommunication(new NetconfMessage(message));
         } catch (IllegalArgumentException e) {
-            throw new NetconfDocumentedException("Failed to parse EXI parameters", ErrorType.protocol,
+            throw new DocumentedException("Failed to parse EXI parameters", ErrorType.protocol,
                     ErrorTag.operation_failed, ErrorSeverity.error);
         }
 
@@ -50,7 +51,7 @@ public class DefaultStartExi extends AbstractSingletonNetconfOperation implement
     }
 
     @Override
-    protected Element handleWithNoSubsequentOperations(final Document document, final XmlElement operationElement) throws NetconfDocumentedException {
+    protected Element handleWithNoSubsequentOperations(final Document document, final XmlElement operationElement) throws DocumentedException {
         Element getSchemaResult = document.createElementNS( XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0, XmlNetconfConstants.OK);
         LOG.trace("{} operation successful", START_EXI);
         return getSchemaResult;
