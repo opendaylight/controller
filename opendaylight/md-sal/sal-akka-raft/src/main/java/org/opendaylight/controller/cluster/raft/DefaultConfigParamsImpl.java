@@ -158,10 +158,12 @@ public class DefaultConfigParamsImpl implements ConfigParams {
         @Override
         public RaftPolicy get() {
             if(Strings.isNullOrEmpty(DefaultConfigParamsImpl.this.customRaftPolicyImplementationClass)){
+                LOG.debug("No custom RaftPolicy specified. Using DefaultRaftPolicy");
                 return DefaultRaftPolicy.INSTANCE;
             }
             try {
                 String className = DefaultConfigParamsImpl.this.customRaftPolicyImplementationClass;
+                LOG.info("Trying to use custom RaftPolicy {}", className);
                 Class c = Class.forName(className);
                 RaftPolicy obj = (RaftPolicy)c.newInstance();
                 return obj;
