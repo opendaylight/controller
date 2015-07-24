@@ -11,8 +11,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
+import com.google.inject.Inject;
 import java.util.concurrent.Future;
-
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.ConsumerContext;
@@ -28,8 +28,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.common.RpcResult;
-
-import com.google.inject.Inject;
 
 /**
  * covers creating, reading and deleting of an item in dataStore
@@ -84,7 +82,6 @@ public class DataServiceIT extends AbstractIT {
         UnorderedList readedData = (UnorderedList) consumerDataService.readConfigurationData(node1);
         assertNotNull(readedData);
         assertEquals(nodeData1.getKey(), readedData.getKey());
-
 
         DataModificationTransaction transaction2 = consumerDataService.beginTransaction();
         assertNotNull(transaction2);

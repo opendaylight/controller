@@ -18,10 +18,10 @@ import static org.mockito.Mockito.mock;
 import com.google.common.base.Optional;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
+import org.opendaylight.controller.config.util.xml.XmlElement;
+import org.opendaylight.controller.config.util.xml.XmlUtil;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
-import org.opendaylight.controller.netconf.util.xml.XmlElement;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.w3c.dom.Document;
 
 public class GetSchemaTest {
@@ -44,7 +44,7 @@ public class GetSchemaTest {
                 "    </get-schema>";
     }
 
-    @Test(expected = NetconfDocumentedException.class)
+    @Test(expected = DocumentedException.class)
     public void testDefaultGetSchema() throws Exception {
         GetSchema schema = new GetSchema(cap);
         doThrow(IllegalStateException.class).when(cap).getSchemaForCapability(anyString(), any(Optional.class));

@@ -10,20 +10,23 @@ package org.opendaylight.controller.netconf.impl.osgi;
 import io.netty.channel.local.LocalAddress;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.util.HashedWheelTimer;
-import java.lang.management.ManagementFactory;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
-import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
 import org.opendaylight.controller.netconf.impl.NetconfServerDispatcherImpl;
 import org.opendaylight.controller.netconf.impl.NetconfServerSessionNegotiatorFactory;
 import org.opendaylight.controller.netconf.impl.SessionIdProvider;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactoryListener;
+import org.opendaylight.controller.netconf.notifications.BaseNotificationPublisherRegistration;
+import org.opendaylight.controller.netconf.notifications.NetconfNotificationCollector;
 import org.opendaylight.controller.netconf.util.osgi.NetconfConfigUtil;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,38 +35,62 @@ public class NetconfImplActivator implements BundleActivator {
     private static final Logger LOG = LoggerFactory.getLogger(NetconfImplActivator.class);
 
     private NetconfOperationServiceFactoryTracker factoriesTracker;
-    private DefaultCommitNotificationProducer commitNot;
     private NioEventLoopGroup eventLoopGroup;
     private HashedWheelTimer timer;
     private ServiceRegistration<NetconfMonitoringService> regMonitoring;
 
+    private BaseNotificationPublisherRegistration listenerReg;
+
     @Override
     public void start(final BundleContext context)  {
+        try {
+            AggregatedNetconfOperationServiceFactory factoriesListener = new AggregatedNetconfOperationServiceFactory();
+            startOperationServiceFactoryTracker(context, factoriesListener);
 
-        AggregatedNetconfOperationServiceFactory factoriesListener = new AggregatedNetconfOperationServiceFactory();
-        startOperationServiceFactoryTracker(context, factoriesListener);
+            SessionIdProvider idProvider = new SessionIdProvider();
+            timer = new HashedWheelTimer();
+            long connectionTimeoutMillis = NetconfConfigUtil.extractTimeoutMillis(context);
 
-        SessionIdProvider idProvider = new SessionIdProvider();
-        timer = new HashedWheelTimer();
-        long connectionTimeoutMillis = NetconfConfigUtil.extractTimeoutMillis(context);
+            final NetconfMonitoringServiceImpl monitoringService = startMonitoringService(context, factoriesListener);
 
+            NetconfServerSessionNegotiatorFactory serverNegotiatorFactory = new NetconfServerSessionNegotiatorFactory(
+                    timer, factoriesListener, idProvider, connectionTimeoutMillis, monitoringService);
 
-        commitNot = new DefaultCommitNotificationProducer(ManagementFactory.getPlatformMBeanServer());
+            eventLoopGroup = new NioEventLoopGroup();
 
-        NetconfMonitoringService monitoringService = startMonitoringService(context, factoriesListener);
+            NetconfServerDispatcherImpl.ServerChannelInitializer serverChannelInitializer = new NetconfServerDispatcherImpl.ServerChannelInitializer(
+                    serverNegotiatorFactory);
+            NetconfServerDispatcherImpl dispatch = new NetconfServerDispatcherImpl(serverChannelInitializer, eventLoopGroup, eventLoopGroup);
 
-        NetconfServerSessionNegotiatorFactory serverNegotiatorFactory = new NetconfServerSessionNegotiatorFactory(
-                timer, factoriesListener, idProvider, connectionTimeoutMillis, commitNot, monitoringService);
+            LocalAddress address = NetconfConfigUtil.getNetconfLocalAddress();
+            LOG.trace("Starting local netconf server at {}", address);
+            dispatch.createLocalServer(address);
 
-        eventLoopGroup = new NioEventLoopGroup();
+            final ServiceTracker<NetconfNotificationCollector, NetconfNotificationCollector> notificationServiceTracker =
+                    new ServiceTracker<>(context, NetconfNotificationCollector.class, new ServiceTrackerCustomizer<NetconfNotificationCollector, NetconfNotificationCollector>() {
+                        @Override
+                        public NetconfNotificationCollector addingService(ServiceReference<NetconfNotificationCollector> reference) {
+                            listenerReg = context.getService(reference).registerBaseNotificationPublisher();
+                            monitoringService.setNotificationPublisher(listenerReg);
+                            return null;
+                        }
 
-        NetconfServerDispatcherImpl.ServerChannelInitializer serverChannelInitializer = new NetconfServerDispatcherImpl.ServerChannelInitializer(
-                serverNegotiatorFactory);
-        NetconfServerDispatcherImpl dispatch = new NetconfServerDispatcherImpl(serverChannelInitializer, eventLoopGroup, eventLoopGroup);
+                        @Override
+                        public void modifiedService(ServiceReference<NetconfNotificationCollector> reference, NetconfNotificationCollector service) {
 
-        LocalAddress address = NetconfConfigUtil.getNetconfLocalAddress();
-        LOG.trace("Starting local netconf server at {}", address);
-        dispatch.createLocalServer(address);
+                        }
+
+                        @Override
+                        public void removedService(ServiceReference<NetconfNotificationCollector> reference, NetconfNotificationCollector service) {
+                            listenerReg.close();
+                            listenerReg = null;
+                            monitoringService.setNotificationPublisher(listenerReg);
+                        }
+                    });
+            notificationServiceTracker.open();
+        } catch (Exception e) {
+            LOG.warn("Unable to start NetconfImplActivator", e);
+        }
     }
 
     private void startOperationServiceFactoryTracker(BundleContext context, NetconfOperationServiceFactoryListener factoriesListener) {
@@ -83,7 +110,6 @@ public class NetconfImplActivator implements BundleActivator {
     public void stop(final BundleContext context) {
         LOG.info("Shutting down netconf because YangStoreService service was removed");
 
-        commitNot.close();
         eventLoopGroup.shutdownGracefully(0, 1, TimeUnit.SECONDS);
         timer.stop();
 

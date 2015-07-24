@@ -8,7 +8,7 @@
 package org.opendaylight.controller.netconf.nettyutil.handler.exi;
 
 import com.google.common.base.Preconditions;
-import org.opendaylight.controller.netconf.util.xml.XmlElement;
+import org.opendaylight.controller.config.util.xml.XmlElement;
 import org.openexi.proc.common.AlignmentType;
 import org.openexi.proc.common.EXIOptions;
 import org.openexi.proc.common.EXIOptionsException;

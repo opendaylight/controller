@@ -21,14 +21,15 @@ import java.util.Map;
 import javax.management.ObjectName;
 import org.junit.Before;
 import org.junit.Test;
+import org.opendaylight.controller.config.facade.xml.mapping.attributes.fromxml.AttributeConfigElement;
+import org.opendaylight.controller.config.facade.xml.mapping.config.ServiceRegistryWrapper;
+import org.opendaylight.controller.config.facade.xml.strategy.MergeEditConfigStrategy;
 import org.opendaylight.controller.config.manager.impl.AbstractConfigTest;
 import org.opendaylight.controller.config.manager.impl.factoriesresolver.HardcodedModuleFactoriesResolver;
 import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
 import org.opendaylight.controller.config.yang.test.impl.MultipleDependenciesModule;
 import org.opendaylight.controller.config.yang.test.impl.MultipleDependenciesModuleFactory;
 import org.opendaylight.controller.config.yang.test.impl.MultipleDependenciesModuleMXBean;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.AttributeConfigElement;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ServiceRegistryWrapper;
 
 public class MergeEditConfigStrategyTest extends AbstractConfigTest {
     private static final MultipleDependenciesModuleFactory factory = new MultipleDependenciesModuleFactory();

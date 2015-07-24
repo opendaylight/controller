@@ -9,11 +9,7 @@ package org.opendaylight.controller.netconf.it;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anySetOf;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
+
 import com.google.common.io.ByteStreams;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -36,6 +32,9 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.Before;
+import org.opendaylight.controller.config.facade.xml.ConfigSubsystemFacadeFactory;
+import org.opendaylight.controller.config.facade.xml.osgi.EnumResolver;
+import org.opendaylight.controller.config.facade.xml.osgi.YangStoreService;
 import org.opendaylight.controller.config.manager.impl.AbstractConfigTest;
 import org.opendaylight.controller.config.manager.impl.factoriesresolver.HardcodedModuleFactoriesResolver;
 import org.opendaylight.controller.config.spi.ModuleFactory;
@@ -50,10 +49,7 @@ import org.opendaylight.controller.netconf.client.NetconfClientDispatcherImpl;
 import org.opendaylight.controller.netconf.client.SimpleNetconfClientSessionListener;
 import org.opendaylight.controller.netconf.client.conf.NetconfClientConfiguration;
 import org.opendaylight.controller.netconf.client.conf.NetconfClientConfigurationBuilder;
-import org.opendaylight.controller.netconf.confignetconfconnector.osgi.EnumResolver;
 import org.opendaylight.controller.netconf.confignetconfconnector.osgi.NetconfOperationServiceFactoryImpl;
-import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreService;
-import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
 import org.opendaylight.controller.netconf.impl.NetconfServerDispatcherImpl;
 import org.opendaylight.controller.netconf.impl.NetconfServerSessionNegotiatorFactory;
 import org.opendaylight.controller.netconf.impl.SessionIdProvider;
@@ -62,15 +58,13 @@ import org.opendaylight.controller.netconf.impl.osgi.NetconfMonitoringServiceImp
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
 import org.opendaylight.controller.netconf.monitoring.osgi.NetconfMonitoringActivator;
 import org.opendaylight.controller.netconf.monitoring.osgi.NetconfMonitoringOperationService;
-import org.opendaylight.controller.netconf.notifications.BaseNetconfNotificationListener;
 import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
 import org.opendaylight.protocol.framework.NeverReconnectStrategy;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.notifications.rev120206.NetconfCapabilityChange;
+import org.opendaylight.yangtools.sal.binding.generator.util.BindingRuntimeContext;
 import org.opendaylight.yangtools.yang.binding.BindingMapping;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
 import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
-import org.w3c.dom.Element;
 
 public abstract class AbstractNetconfConfigTest extends AbstractConfigTest {
 
@@ -84,6 +78,7 @@ public abstract class AbstractNetconfConfigTest extends AbstractConfigTest {
                                         new IdentityTestModuleFactory(),
                                         new MultipleDependenciesModuleFactory() };
 
+    protected ConfigSubsystemFacadeFactory configSubsystemFacadeFactory;
     private EventLoopGroup nettyThreadgroup;
     private HashedWheelTimer hashedWheelTimer;
 
@@ -109,7 +104,8 @@ public abstract class AbstractNetconfConfigTest extends AbstractConfigTest {
 
         final AggregatedNetconfOperationServiceFactory factoriesListener = new AggregatedNetconfOperationServiceFactory();
         final NetconfMonitoringService netconfMonitoringService = getNetconfMonitoringService(factoriesListener);
-        factoriesListener.onAddNetconfOperationServiceFactory(new NetconfOperationServiceFactoryImpl(getYangStore()));
+        configSubsystemFacadeFactory = new ConfigSubsystemFacadeFactory(configRegistryClient, configRegistryClient, getYangStore());
+        factoriesListener.onAddNetconfOperationServiceFactory(new NetconfOperationServiceFactoryImpl(configSubsystemFacadeFactory));
         factoriesListener.onAddNetconfOperationServiceFactory(new NetconfMonitoringActivator.NetconfMonitoringOperationServiceFactory(new NetconfMonitoringOperationService(netconfMonitoringService)));
 
         for (final NetconfOperationServiceFactory netconfOperationServiceFactory : getAdditionalServiceFactories(factoriesListener)) {
@@ -139,7 +135,7 @@ public abstract class AbstractNetconfConfigTest extends AbstractConfigTest {
     }
 
     private Channel startNetconfTcpServer(final AggregatedNetconfOperationServiceFactory listener, final NetconfMonitoringService monitoring) throws Exception {
-        final NetconfServerDispatcherImpl dispatch = createDispatcher(listener, monitoring, getNotificationProducer());
+        final NetconfServerDispatcherImpl dispatch = createDispatcher(listener, monitoring);
 
         final ChannelFuture s;
         if(getTcpServerAddress() instanceof LocalAddress) {
@@ -149,13 +145,6 @@ public abstract class AbstractNetconfConfigTest extends AbstractConfigTest {
         }
         s.await(RESOURCE_TIMEOUT_MINUTES, TimeUnit.MINUTES);
         return s.channel();
-    }
-
-    protected DefaultCommitNotificationProducer getNotificationProducer() {
-        final DefaultCommitNotificationProducer notificationProducer = mock(DefaultCommitNotificationProducer.class);
-        doNothing().when(notificationProducer).close();
-        doNothing().when(notificationProducer).sendCommitNotification(anyString(), any(Element.class), anySetOf(String.class));
-        return notificationProducer;
     }
 
     protected Iterable<NetconfOperationServiceFactory> getAdditionalServiceFactories(final AggregatedNetconfOperationServiceFactory factoriesListener) throws Exception {
@@ -174,7 +163,7 @@ public abstract class AbstractNetconfConfigTest extends AbstractConfigTest {
 
     private HardcodedYangStoreService getYangStore() throws IOException {
         final Collection<InputStream> yangDependencies = getBasicYangs();
-        return new HardcodedYangStoreService(yangDependencies);
+        return new HardcodedYangStoreService(yangDependencies, getBindingRuntimeContext());
     }
 
     static Collection<InputStream> getBasicYangs() throws IOException {
@@ -203,12 +192,11 @@ public abstract class AbstractNetconfConfigTest extends AbstractConfigTest {
     }
 
     protected NetconfServerDispatcherImpl createDispatcher(
-            final AggregatedNetconfOperationServiceFactory factoriesListener, final NetconfMonitoringService sessionMonitoringService,
-            final DefaultCommitNotificationProducer commitNotifier) {
+            final AggregatedNetconfOperationServiceFactory factoriesListener, final NetconfMonitoringService sessionMonitoringService) {
         final SessionIdProvider idProvider = new SessionIdProvider();
 
         final NetconfServerSessionNegotiatorFactory serverNegotiatorFactory = new NetconfServerSessionNegotiatorFactory(
-                hashedWheelTimer, factoriesListener, idProvider, SERVER_CONNECTION_TIMEOUT_MILLIS, commitNotifier, sessionMonitoringService);
+                hashedWheelTimer, factoriesListener, idProvider, SERVER_CONNECTION_TIMEOUT_MILLIS, sessionMonitoringService);
 
         final NetconfServerDispatcherImpl.ServerChannelInitializer serverChannelInitializer = new NetconfServerDispatcherImpl.ServerChannelInitializer(
                 serverNegotiatorFactory);
@@ -243,18 +231,15 @@ public abstract class AbstractNetconfConfigTest extends AbstractConfigTest {
     }
 
     public static final class HardcodedYangStoreService extends YangStoreService {
-        public HardcodedYangStoreService(final Collection<? extends InputStream> inputStreams) throws IOException {
+        public HardcodedYangStoreService(final Collection<? extends InputStream> inputStreams, final BindingRuntimeContext bindingRuntimeContext) throws IOException {
             super(new SchemaContextProvider() {
                 @Override
                 public SchemaContext getSchemaContext() {
                     return getSchema(inputStreams);
                 }
-            }, new BaseNetconfNotificationListener() {
-                @Override
-                public void onCapabilityChanged(final NetconfCapabilityChange capabilityChange) {
-                    // NOOP
-                }
             });
+
+            refresh(bindingRuntimeContext);
         }
 
         private static SchemaContext getSchema(final Collection<? extends InputStream> inputStreams) {

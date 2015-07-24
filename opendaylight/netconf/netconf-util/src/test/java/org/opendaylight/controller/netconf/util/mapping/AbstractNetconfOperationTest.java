@@ -16,12 +16,12 @@ import static org.mockito.Mockito.mock;
 import java.io.IOException;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
+import org.opendaylight.controller.config.util.xml.XmlElement;
+import org.opendaylight.controller.config.util.xml.XmlUtil;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedExecution;
 import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
-import org.opendaylight.controller.netconf.util.xml.XmlElement;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -43,7 +43,7 @@ public class AbstractNetconfOperationTest {
         }
 
         @Override
-        protected Element handle(Document document, XmlElement message, NetconfOperationChainedExecution subsequentOperation) throws NetconfDocumentedException {
+        protected Element handle(Document document, XmlElement message, NetconfOperationChainedExecution subsequentOperation) throws DocumentedException{
             this.handleRun = true;
             try {
                 return XmlUtil.readXmlToElement("<element/>");

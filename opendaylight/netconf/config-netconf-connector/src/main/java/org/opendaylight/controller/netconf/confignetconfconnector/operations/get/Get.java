@@ -8,31 +8,11 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.operations.get;
 
-import com.google.common.collect.Maps;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import javax.management.ObjectName;
-import org.opendaylight.controller.config.util.ConfigRegistryClient;
-import org.opendaylight.controller.config.util.ConfigTransactionClient;
-import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
-import org.opendaylight.controller.config.yangjmxgenerator.RuntimeBeanEntry;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.config.facade.xml.ConfigSubsystemFacade;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
+import org.opendaylight.controller.config.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.InstanceConfig;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ModuleConfig;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.runtime.InstanceRuntime;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.runtime.ModuleRuntime;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.runtime.Runtime;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.AbstractConfigNetconfOperation;
-import org.opendaylight.controller.netconf.confignetconfconnector.operations.Datastore;
-import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfig;
-import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreContext;
-import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
-import org.opendaylight.controller.netconf.util.exception.MissingNameSpaceException;
-import org.opendaylight.controller.netconf.util.exception.UnexpectedElementException;
-import org.opendaylight.controller.netconf.util.exception.UnexpectedNamespaceException;
-import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -40,70 +20,13 @@ import org.w3c.dom.Element;
 
 public class Get extends AbstractConfigNetconfOperation {
 
-    private final TransactionProvider transactionProvider;
-    private final YangStoreContext yangStoreSnapshot;
     private static final Logger LOG = LoggerFactory.getLogger(Get.class);
 
-    public Get(final TransactionProvider transactionProvider, YangStoreContext yangStoreSnapshot, ConfigRegistryClient configRegistryClient,
-               String netconfSessionIdForReporting) {
-        super(configRegistryClient, netconfSessionIdForReporting);
-        this.transactionProvider = transactionProvider;
-        this.yangStoreSnapshot = yangStoreSnapshot;
+    public Get(final ConfigSubsystemFacade configSubsystemFacade, final String netconfSessionIdForReporting) {
+        super(configSubsystemFacade, netconfSessionIdForReporting);
     }
 
-    private Map<String, Map<String, ModuleRuntime>> createModuleRuntimes(ConfigRegistryClient configRegistryClient,
-            Map<String, Map<String, ModuleMXBeanEntry>> mBeanEntries) {
-        Map<String, Map<String, ModuleRuntime>> retVal = Maps.newHashMap();
-
-        for (Map.Entry<String, Map<String, ModuleMXBeanEntry>> namespaceToModuleEntry : mBeanEntries.entrySet()) {
-
-            Map<String, ModuleRuntime> innerMap = Maps.newHashMap();
-            Map<String, ModuleMXBeanEntry> entriesFromNamespace = namespaceToModuleEntry.getValue();
-            for (Map.Entry<String, ModuleMXBeanEntry> moduleToMXEntry : entriesFromNamespace.entrySet()) {
-
-                ModuleMXBeanEntry mbe = moduleToMXEntry.getValue();
-
-                Map<RuntimeBeanEntry, InstanceConfig> cache = Maps.newHashMap();
-                RuntimeBeanEntry root = null;
-                for (RuntimeBeanEntry rbe : mbe.getRuntimeBeans()) {
-                    cache.put(rbe, new InstanceConfig(configRegistryClient, rbe.getYangPropertiesToTypesMap(), mbe.getNullableDummyContainerName()));
-                    if (rbe.isRoot()){
-                        root = rbe;
-                    }
-                }
-
-                if (root == null){
-                    continue;
-                }
-
-                InstanceRuntime rootInstanceRuntime = createInstanceRuntime(root, cache);
-                ModuleRuntime moduleRuntime = new ModuleRuntime(rootInstanceRuntime);
-                innerMap.put(moduleToMXEntry.getKey(), moduleRuntime);
-            }
-
-            retVal.put(namespaceToModuleEntry.getKey(), innerMap);
-        }
-        return retVal;
-    }
-
-    private InstanceRuntime createInstanceRuntime(RuntimeBeanEntry root, Map<RuntimeBeanEntry, InstanceConfig> cache) {
-        Map<String, InstanceRuntime> children = Maps.newHashMap();
-        for (RuntimeBeanEntry child : root.getChildren()) {
-            children.put(child.getJavaNamePrefix(), createInstanceRuntime(child, cache));
-        }
-
-        return new InstanceRuntime(cache.get(root), children, createJmxToYangMap(root.getChildren()));
-    }
-
-    private Map<String, String> createJmxToYangMap(List<RuntimeBeanEntry> children) {
-        Map<String, String> jmxToYangNamesForChildRbe = Maps.newHashMap();
-        for (RuntimeBeanEntry rbe : children) {
-            jmxToYangNamesForChildRbe.put(rbe.getJavaNamePrefix(), rbe.getYangName());
-        }
-        return jmxToYangNamesForChildRbe;
-    }
-
-    private static void checkXml(XmlElement xml) throws UnexpectedElementException, UnexpectedNamespaceException, MissingNameSpaceException {
+    private static void checkXml(XmlElement xml) throws DocumentedException {
         xml.checkName(XmlNetconfConstants.GET);
         xml.checkNamespace(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
 
@@ -116,33 +39,10 @@ public class Get extends AbstractConfigNetconfOperation {
     }
 
     @Override
-    protected Element handleWithNoSubsequentOperations(Document document, XmlElement xml) throws NetconfDocumentedException {
+    protected Element handleWithNoSubsequentOperations(Document document, XmlElement xml) throws DocumentedException {
         checkXml(xml);
-
-        final ObjectName testTransaction = transactionProvider.getOrCreateReadTransaction();
-        final ConfigTransactionClient registryClient = getConfigRegistryClient().getConfigTransactionClient(testTransaction);
-
-        try {
-            // Runtime beans are not parts of transactions and have to be queried against the central registry
-            final Set<ObjectName> runtimeBeans = getConfigRegistryClient().lookupRuntimeBeans();
-
-            final Set<ObjectName> configBeans = Datastore.getInstanceQueryStrategy(Datastore.running, transactionProvider)
-                    .queryInstances(getConfigRegistryClient());
-
-            final Map<String, Map<String, ModuleRuntime>> moduleRuntimes = createModuleRuntimes(getConfigRegistryClient(),
-                    yangStoreSnapshot.getModuleMXBeanEntryMap());
-            final Map<String, Map<String, ModuleConfig>> moduleConfigs = EditConfig.transformMbeToModuleConfigs(
-                    registryClient, yangStoreSnapshot.getModuleMXBeanEntryMap());
-
-            final Runtime runtime = new Runtime(moduleRuntimes, moduleConfigs);
-
-            final Element element = runtime.toXml(runtimeBeans, configBeans, document, yangStoreSnapshot.getEnumResolver());
-
-            LOG.trace("{} operation successful", XmlNetconfConstants.GET);
-
-            return element;
-        } finally {
-            transactionProvider.closeReadTransaction();
-        }
+        final Element element = getConfigSubsystemFacade().get(document);
+        LOG.trace("{} operation successful", XmlNetconfConstants.GET);
+        return element;
     }
 }

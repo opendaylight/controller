@@ -26,6 +26,7 @@ import org.opendaylight.controller.config.api.jmx.CommitStatus;
 import org.opendaylight.controller.config.api.jmx.ConfigRegistryMXBean;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.config.api.jmx.ServiceReferenceMXBean;
+import org.opendaylight.controller.config.api.jmx.constants.ConfigRegistryConstants;
 
 public class ConfigRegistryJMXClient implements ConfigRegistryClient {
     private final ConfigRegistryMXBean configRegistryMXBeanProxy;
@@ -33,15 +34,22 @@ public class ConfigRegistryJMXClient implements ConfigRegistryClient {
     private final MBeanServer configMBeanServer;
 
     public ConfigRegistryJMXClient(MBeanServer configMBeanServer) {
+        this(configMBeanServer, OBJECT_NAME);
+    }
+
+    private ConfigRegistryJMXClient(MBeanServer configMBeanServer, ObjectName configRegistryON) {
         this.configMBeanServer = configMBeanServer;
-        configRegistryON = OBJECT_NAME;
-        Set<ObjectInstance> searchResult = configMBeanServer.queryMBeans(
-                configRegistryON, null);
+        this.configRegistryON = configRegistryON;
+        Set<ObjectInstance> searchResult = configMBeanServer.queryMBeans(configRegistryON, null);
         if (!(searchResult.size() == 1)) {
             throw new IllegalStateException("Config registry not found");
         }
         configRegistryMXBeanProxy = JMX.newMXBeanProxy(configMBeanServer, configRegistryON, ConfigRegistryMXBean.class,
                 false);
+    }
+
+    public static ConfigRegistryJMXClient createWithoutNotifications(MBeanServer configMBeanServer) {
+        return new ConfigRegistryJMXClient(configMBeanServer, ConfigRegistryConstants.OBJECT_NAME_NO_NOTIFICATIONS);
     }
 
     @Override

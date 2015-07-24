@@ -8,14 +8,14 @@
 
 package org.opendaylight.controller.netconf.impl.osgi;
 
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
 import org.opendaylight.controller.netconf.impl.NetconfServerSession;
 import org.w3c.dom.Document;
 
 public interface NetconfOperationRouter extends AutoCloseable {
 
     Document onNetconfMessage(Document message, NetconfServerSession session)
-            throws NetconfDocumentedException;
+            throws DocumentedException;
 
 
 }

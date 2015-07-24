@@ -9,25 +9,19 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.osgi;
 
 import java.util.Set;
-import org.opendaylight.controller.config.util.ConfigRegistryJMXClient;
-import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
+import org.opendaylight.controller.config.facade.xml.ConfigSubsystemFacade;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
 
-/**
- * Manages life cycle of {@link YangStoreContext}.
- */
 public class NetconfOperationServiceImpl implements NetconfOperationService {
 
     private final NetconfOperationProvider operationProvider;
-    private final TransactionProvider transactionProvider;
+    private ConfigSubsystemFacade configSubsystemFacade;
 
-    public NetconfOperationServiceImpl(final YangStoreService yangStoreService, final ConfigRegistryJMXClient jmxClient,
+    public NetconfOperationServiceImpl(final ConfigSubsystemFacade configSubsystemFacade,
             final String netconfSessionIdForReporting) {
-
-        transactionProvider = new TransactionProvider(jmxClient, netconfSessionIdForReporting);
-        operationProvider = new NetconfOperationProvider(yangStoreService, jmxClient, transactionProvider,
-                netconfSessionIdForReporting);
+        this.configSubsystemFacade = configSubsystemFacade;
+        operationProvider = new NetconfOperationProvider(configSubsystemFacade, netconfSessionIdForReporting);
     }
 
     @Override
@@ -37,7 +31,7 @@ public class NetconfOperationServiceImpl implements NetconfOperationService {
 
     @Override
     public void close() {
-        transactionProvider.close();
+        configSubsystemFacade.close();
     }
 
 }

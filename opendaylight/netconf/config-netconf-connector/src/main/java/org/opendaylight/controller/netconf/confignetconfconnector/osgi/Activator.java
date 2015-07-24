@@ -8,14 +8,11 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.osgi;
 
-import static com.google.common.base.Preconditions.checkState;
-
 import java.util.Dictionary;
 import java.util.Hashtable;
+import org.opendaylight.controller.config.facade.xml.ConfigSubsystemFacadeFactory;
 import org.opendaylight.controller.netconf.api.util.NetconfConstants;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
-import org.opendaylight.yangtools.sal.binding.generator.util.BindingRuntimeContext;
-import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -29,74 +26,50 @@ public class Activator implements BundleActivator {
 
     private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
 
-    private BundleContext context;
     private ServiceRegistration<?> osgiRegistration;
-    private ConfigRegistryLookupThread configRegistryLookup = null;
 
     @Override
     public void start(final BundleContext context) throws Exception {
-        this.context = context;
+        ServiceTrackerCustomizer<ConfigSubsystemFacadeFactory, ConfigSubsystemFacadeFactory> schemaServiceTrackerCustomizer = new ServiceTrackerCustomizer<ConfigSubsystemFacadeFactory, ConfigSubsystemFacadeFactory>() {
 
-        ServiceTrackerCustomizer<SchemaContextProvider, ConfigRegistryLookupThread> customizer = new ServiceTrackerCustomizer<SchemaContextProvider, ConfigRegistryLookupThread>() {
             @Override
-            public ConfigRegistryLookupThread addingService(ServiceReference<SchemaContextProvider> reference) {
-                LOG.debug("Got addingService(SchemaContextProvider) event, starting ConfigRegistryLookupThread");
-                checkState(configRegistryLookup == null, "More than one onYangStoreAdded received");
-
-                SchemaContextProvider schemaContextProvider = reference.getBundle().getBundleContext().getService(reference);
-
-                YangStoreService yangStoreService = new YangStoreService(schemaContextProvider, context);
-                configRegistryLookup = new ConfigRegistryLookupThread(yangStoreService);
-                configRegistryLookup.start();
-                return configRegistryLookup;
+            public ConfigSubsystemFacadeFactory addingService(ServiceReference<ConfigSubsystemFacadeFactory> reference) {
+                LOG.debug("Got addingService(SchemaContextProvider) event");
+                // Yang store service should not be registered multiple times
+                ConfigSubsystemFacadeFactory configSubsystemFacade = reference.getBundle().getBundleContext().getService(reference);
+                osgiRegistration = startNetconfServiceFactory(configSubsystemFacade, context);
+                return configSubsystemFacade;
             }
 
             @Override
-            public void modifiedService(ServiceReference<SchemaContextProvider> reference, ConfigRegistryLookupThread configRegistryLookup) {
-                LOG.debug("Got modifiedService(SchemaContextProvider) event");
-                final BindingRuntimeContext runtimeContext = (BindingRuntimeContext) reference.getProperty(BindingRuntimeContext.class.getName());
-                LOG.debug("BindingRuntimeContext retrieved as {}", runtimeContext);
-                configRegistryLookup.yangStoreService.refresh(runtimeContext);
-
+            public void modifiedService(ServiceReference<ConfigSubsystemFacadeFactory> reference, ConfigSubsystemFacadeFactory service) {
+                LOG.warn("Config manager facade was modified unexpectedly");
             }
 
             @Override
-            public void removedService(ServiceReference<SchemaContextProvider> reference, ConfigRegistryLookupThread configRegistryLookup) {
-                configRegistryLookup.interrupt();
-                if (osgiRegistration != null) {
-                    osgiRegistration.unregister();
-                }
-                osgiRegistration = null;
-                Activator.this.configRegistryLookup = null;
+            public void removedService(ServiceReference<ConfigSubsystemFacadeFactory> reference, ConfigSubsystemFacadeFactory service) {
+                LOG.warn("Config manager facade was removed unexpectedly");
             }
         };
 
-        ServiceTracker<SchemaContextProvider, ConfigRegistryLookupThread> listenerTracker = new ServiceTracker<>(context, SchemaContextProvider.class, customizer);
-        listenerTracker.open();
+        ServiceTracker<ConfigSubsystemFacadeFactory, ConfigSubsystemFacadeFactory> schemaContextProviderServiceTracker =
+                new ServiceTracker<>(context, ConfigSubsystemFacadeFactory.class, schemaServiceTrackerCustomizer);
+        schemaContextProviderServiceTracker.open();
     }
 
     @Override
-    public void stop(BundleContext context) {
-        if (configRegistryLookup != null) {
-            configRegistryLookup.interrupt();
+    public void stop(final BundleContext bundleContext) throws Exception {
+        if (osgiRegistration != null) {
+            osgiRegistration.unregister();
         }
     }
 
-    private class ConfigRegistryLookupThread extends Thread {
-        private final YangStoreService yangStoreService;
-
-        private ConfigRegistryLookupThread(YangStoreService yangStoreService) {
-            super("config-registry-lookup");
-            this.yangStoreService = yangStoreService;
-        }
-
-        @Override
-        public void run() {
-            NetconfOperationServiceFactoryImpl factory = new NetconfOperationServiceFactoryImpl(yangStoreService);
-            LOG.debug("Registering into OSGi");
-            Dictionary<String, String> properties = new Hashtable<>();
-            properties.put(NetconfConstants.SERVICE_NAME, NetconfConstants.CONFIG_NETCONF_CONNECTOR);
-            osgiRegistration = context.registerService(NetconfOperationServiceFactory.class, factory, properties);
-        }
+    private ServiceRegistration<NetconfOperationServiceFactory> startNetconfServiceFactory(final ConfigSubsystemFacadeFactory configSubsystemFacade, final BundleContext context) {
+        final NetconfOperationServiceFactoryImpl netconfOperationServiceFactory = new NetconfOperationServiceFactoryImpl(configSubsystemFacade);
+        // Add properties to autowire with netconf-impl instance for cfg subsystem
+        final Dictionary<String, String> properties = new Hashtable<>();
+        properties.put(NetconfConstants.SERVICE_NAME, NetconfConstants.CONFIG_NETCONF_CONNECTOR);
+        return context.registerService(NetconfOperationServiceFactory.class, netconfOperationServiceFactory, properties);
     }
+
 }

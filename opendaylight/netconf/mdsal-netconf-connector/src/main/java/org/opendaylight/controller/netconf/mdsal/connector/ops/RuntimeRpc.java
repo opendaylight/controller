@@ -22,22 +22,22 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.dom.DOMResult;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
+import org.opendaylight.controller.config.util.xml.DocumentedException.ErrorSeverity;
+import org.opendaylight.controller.config.util.xml.DocumentedException.ErrorTag;
+import org.opendaylight.controller.config.util.xml.DocumentedException.ErrorType;
+import org.opendaylight.controller.config.util.xml.XmlElement;
+import org.opendaylight.controller.config.util.xml.XmlMappingConstants;
+import org.opendaylight.controller.config.util.xml.XmlUtil;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorSeverity;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorTag;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorType;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedExecution;
 import org.opendaylight.controller.netconf.mdsal.connector.CurrentSchemaContext;
 import org.opendaylight.controller.netconf.util.OrderedNormalizedNodeWriter;
-import org.opendaylight.controller.netconf.util.exception.MissingNameSpaceException;
 import org.opendaylight.controller.netconf.util.mapping.AbstractSingletonNetconfOperation;
-import org.opendaylight.controller.netconf.util.xml.XmlElement;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -124,15 +124,15 @@ public class RuntimeRpc extends AbstractSingletonNetconfOperation {
     }
 
     @Override
-    protected Element handleWithNoSubsequentOperations(final Document document, final XmlElement operationElement) throws NetconfDocumentedException {
+    protected Element handleWithNoSubsequentOperations(final Document document, final XmlElement operationElement) throws DocumentedException {
 
         final String netconfOperationName = operationElement.getName();
         final String netconfOperationNamespace;
         try {
             netconfOperationNamespace = operationElement.getNamespace();
-        } catch (MissingNameSpaceException e) {
+        } catch (DocumentedException e) {
             LOG.debug("Cannot retrieve netconf operation namespace from message due to ", e);
-            throw new NetconfDocumentedException("Cannot retrieve netconf operation namespace from message",
+            throw new DocumentedException("Cannot retrieve netconf operation namespace from message",
                     ErrorType.protocol, ErrorTag.unknown_namespace, ErrorSeverity.error);
         }
 
@@ -140,7 +140,7 @@ public class RuntimeRpc extends AbstractSingletonNetconfOperation {
         final Optional<Module> moduleOptional = getModule(namespaceURI);
 
         if (!moduleOptional.isPresent()) {
-            throw new NetconfDocumentedException("Unable to find module in Schema Context with namespace and name : " +
+            throw new DocumentedException("Unable to find module in Schema Context with namespace and name : " +
                     namespaceURI + " " + netconfOperationName + schemaContext.getCurrentContext(),
                     ErrorType.application, ErrorTag.bad_element, ErrorSeverity.error);
         }
@@ -148,7 +148,7 @@ public class RuntimeRpc extends AbstractSingletonNetconfOperation {
         final Optional<RpcDefinition> rpcDefinitionOptional = getRpcDefinitionFromModule(moduleOptional.get(), namespaceURI, netconfOperationName);
 
         if (!rpcDefinitionOptional.isPresent()) {
-            throw new NetconfDocumentedException("Unable to find RpcDefinition with namespace and name : " + namespaceURI + " " + netconfOperationName,
+            throw new DocumentedException("Unable to find RpcDefinition with namespace and name : " + namespaceURI + " " + netconfOperationName,
                     ErrorType.application, ErrorTag.bad_element, ErrorSeverity.error);
         }
 
@@ -164,13 +164,13 @@ public class RuntimeRpc extends AbstractSingletonNetconfOperation {
             }
             return (Element) transformNormalizedNode(document, result.getResult(), rpcDefinition.getOutput().getPath());
         } catch (DOMRpcException e) {
-            throw NetconfDocumentedException.wrap(e);
+            throw DocumentedException.wrap(e);
         }
     }
 
     @Override
     public Document handle(final Document requestMessage,
-                           final NetconfOperationChainedExecution subsequentOperation) throws NetconfDocumentedException {
+                           final NetconfOperationChainedExecution subsequentOperation) throws DocumentedException {
 
         final XmlElement requestElement = getRequestElementWithCheck(requestMessage);
 
@@ -180,7 +180,7 @@ public class RuntimeRpc extends AbstractSingletonNetconfOperation {
         final Map<String, Attr> attributes = requestElement.getAttributes();
 
         final Element response = handle(document, operationElement, subsequentOperation);
-        final Element rpcReply = XmlUtil.createElement(document, XmlNetconfConstants.RPC_REPLY_KEY, Optional.of(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0));
+        final Element rpcReply = XmlUtil.createElement(document, XmlMappingConstants.RPC_REPLY_KEY, Optional.of(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0));
 
         if(XmlElement.fromDomElement(response).hasNamespace()) {
             rpcReply.appendChild(response);
@@ -204,7 +204,7 @@ public class RuntimeRpc extends AbstractSingletonNetconfOperation {
 
     //TODO move all occurences of this method in mdsal netconf(and xml factories) to a utility class
     private Node transformNormalizedNode(final Document document, final NormalizedNode<?, ?> data, final SchemaPath rpcOutputPath) {
-        final DOMResult result = new DOMResult(document.createElement(XmlNetconfConstants.RPC_REPLY_KEY));
+        final DOMResult result = new DOMResult(document.createElement(XmlMappingConstants.RPC_REPLY_KEY));
 
         final XMLStreamWriter xmlWriter = getXmlStreamWriter(result);
 
