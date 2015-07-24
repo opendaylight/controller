@@ -25,12 +25,6 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
-      <artifactId>features-netconf</artifactId>
-      <classifier>features</classifier>
-      <type>xml</type>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
       <artifactId>features-config</artifactId>
       <classifier>features</classifier>
       <type>xml</type>
@@ -38,6 +32,14 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>config-persister-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>config-manager-facade-xml</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>config-util</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
@@ -50,14 +52,6 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>config-persister-feature-adapter</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>netconf-util</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>netconf-mapping-api</artifactId>
     </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>

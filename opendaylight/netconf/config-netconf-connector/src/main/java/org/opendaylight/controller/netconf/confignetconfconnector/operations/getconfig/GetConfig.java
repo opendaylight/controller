@@ -9,24 +9,12 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.operations.getconfig;
 
 import com.google.common.base.Optional;
-import java.util.Set;
-import javax.management.ObjectName;
-import org.opendaylight.controller.config.util.ConfigRegistryClient;
-import org.opendaylight.controller.config.util.ConfigTransactionClient;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.config.facade.xml.ConfigSubsystemFacade;
+import org.opendaylight.controller.config.facade.xml.Datastore;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
+import org.opendaylight.controller.config.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.Config;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.config.ServiceRegistryWrapper;
 import org.opendaylight.controller.netconf.confignetconfconnector.operations.AbstractConfigNetconfOperation;
-import org.opendaylight.controller.netconf.confignetconfconnector.operations.Datastore;
-import org.opendaylight.controller.netconf.confignetconfconnector.operations.editconfig.EditConfig;
-import org.opendaylight.controller.netconf.confignetconfconnector.osgi.YangStoreContext;
-import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
-import org.opendaylight.controller.netconf.util.exception.MissingNameSpaceException;
-import org.opendaylight.controller.netconf.util.exception.UnexpectedElementException;
-import org.opendaylight.controller.netconf.util.exception.UnexpectedNamespaceException;
-import org.opendaylight.controller.netconf.util.xml.XmlElement;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -36,23 +24,16 @@ public class GetConfig extends AbstractConfigNetconfOperation {
 
     public static final String GET_CONFIG = "get-config";
 
-    private final YangStoreContext yangStoreSnapshot;
     private final Optional<String> maybeNamespace;
-
-    private final TransactionProvider transactionProvider;
 
     private static final Logger LOG = LoggerFactory.getLogger(GetConfig.class);
 
-    public GetConfig(YangStoreContext yangStoreSnapshot, Optional<String> maybeNamespace,
-            TransactionProvider transactionProvider, ConfigRegistryClient configRegistryClient,
-            String netconfSessionIdForReporting) {
-        super(configRegistryClient, netconfSessionIdForReporting);
-        this.yangStoreSnapshot = yangStoreSnapshot;
+    public GetConfig(final ConfigSubsystemFacade configSubsystemFacade, final Optional<String> maybeNamespace, final String netconfSessionIdForReporting) {
+        super(configSubsystemFacade, netconfSessionIdForReporting);
         this.maybeNamespace = maybeNamespace;
-        this.transactionProvider = transactionProvider;
     }
 
-    public static Datastore fromXml(XmlElement xml) throws UnexpectedNamespaceException, UnexpectedElementException, MissingNameSpaceException, NetconfDocumentedException {
+    public static Datastore fromXml(XmlElement xml) throws DocumentedException {
 
         xml.checkName(GET_CONFIG);
         xml.checkNamespace(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
@@ -70,49 +51,13 @@ public class GetConfig extends AbstractConfigNetconfOperation {
 
     }
 
-    private Element getResponseInternal(final Document document, final ConfigRegistryClient configRegistryClient,
-            final Datastore source) {
-
-        final ConfigTransactionClient registryClient;
-        // Read current state from a transaction, if running is source, then start new transaction just for reading
-        // in case of candidate, get current transaction representing candidate
-        if(source == Datastore.running) {
-            final ObjectName readTx = transactionProvider.getOrCreateReadTransaction();
-            registryClient = getConfigRegistryClient().getConfigTransactionClient(readTx);
-        } else {
-            registryClient  = getConfigRegistryClient().getConfigTransactionClient(transactionProvider.getOrCreateTransaction());
-        }
-
-        try {
-            Element dataElement = XmlUtil.createElement(document, XmlNetconfConstants.DATA_KEY, Optional.<String>absent());
-            final Set<ObjectName> instances = Datastore.getInstanceQueryStrategy(source, this.transactionProvider)
-                    .queryInstances(configRegistryClient);
-
-            final Config configMapping = new Config(EditConfig.transformMbeToModuleConfigs(registryClient,
-                    yangStoreSnapshot.getModuleMXBeanEntryMap()), yangStoreSnapshot.getEnumResolver());
-
-            ServiceRegistryWrapper serviceTracker = new ServiceRegistryWrapper(registryClient);
-            dataElement = configMapping.toXml(instances, this.maybeNamespace, document, dataElement, serviceTracker);
-
-            LOG.trace("{} operation successful", GET_CONFIG);
-
-            return dataElement;
-        } finally {
-            if(source == Datastore.running) {
-                transactionProvider.closeReadTransaction();
-            }
-        }
-    }
-
     @Override
     protected String getOperationName() {
         return GET_CONFIG;
     }
 
     @Override
-    public Element handleWithNoSubsequentOperations(Document document, XmlElement xml) throws NetconfDocumentedException {
-        Datastore source;
-        source = fromXml(xml);
-        return getResponseInternal(document, getConfigRegistryClient(), source);
+    public Element handleWithNoSubsequentOperations(Document document, XmlElement xml) throws DocumentedException {
+        return getConfigSubsystemFacade().getConfiguration(document, fromXml(xml), maybeNamespace);
     }
 }

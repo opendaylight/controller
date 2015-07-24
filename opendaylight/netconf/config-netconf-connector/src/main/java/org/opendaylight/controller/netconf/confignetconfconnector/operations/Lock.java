@@ -9,13 +9,12 @@
 package org.opendaylight.controller.netconf.confignetconfconnector.operations;
 
 import com.google.common.base.Optional;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.config.facade.xml.Datastore;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
+import org.opendaylight.controller.config.util.xml.XmlElement;
+import org.opendaylight.controller.config.util.xml.XmlUtil;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
-import org.opendaylight.controller.netconf.util.exception.MissingNameSpaceException;
-import org.opendaylight.controller.netconf.util.exception.UnexpectedNamespaceException;
 import org.opendaylight.controller.netconf.util.mapping.AbstractLastNetconfOperation;
-import org.opendaylight.controller.netconf.util.xml.XmlElement;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -37,7 +36,7 @@ public class Lock extends AbstractLastNetconfOperation {
     }
 
     @Override
-    protected Element handleWithNoSubsequentOperations(final Document document, final XmlElement operationElement) throws NetconfDocumentedException {
+    protected Element handleWithNoSubsequentOperations(final Document document, final XmlElement operationElement) throws DocumentedException {
         final Datastore targetDatastore = extractTargetParameter(operationElement);
         if(targetDatastore == Datastore.candidate) {
             // Since candidate datastore instances are allocated per session and not accessible anywhere else, no need to lock
@@ -47,19 +46,13 @@ public class Lock extends AbstractLastNetconfOperation {
         }
 
         // Not supported running lock
-        throw new NetconfDocumentedException("Unable to lock " + Datastore.running + " datastore", NetconfDocumentedException.ErrorType.application,
-                NetconfDocumentedException.ErrorTag.operation_not_supported, NetconfDocumentedException.ErrorSeverity.error);
+        throw new DocumentedException("Unable to lock " + Datastore.running + " datastore", DocumentedException.ErrorType.application,
+                DocumentedException.ErrorTag.operation_not_supported, DocumentedException.ErrorSeverity.error);
     }
 
-    static Datastore extractTargetParameter(final XmlElement operationElement) throws NetconfDocumentedException {
-        final XmlElement targetChildNode;
-        try {
-            final XmlElement targetElement = operationElement.getOnlyChildElementWithSameNamespace(TARGET_KEY);
-            targetChildNode = targetElement.getOnlyChildElementWithSameNamespace();
-        } catch (final MissingNameSpaceException | UnexpectedNamespaceException e) {
-            LOG.trace("Can't get only child element with same namespace", e);
-            throw NetconfDocumentedException.wrap(e);
-        }
+    static Datastore extractTargetParameter(final XmlElement operationElement) throws DocumentedException {
+        final XmlElement targetElement = operationElement.getOnlyChildElementWithSameNamespace(TARGET_KEY);
+        final XmlElement targetChildNode = targetElement.getOnlyChildElementWithSameNamespace();
 
         return Datastore.valueOf(targetChildNode.getName());
     }

@@ -17,7 +17,7 @@ import org.opendaylight.controller.md.sal.binding.api.MountPointService;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPointService;
 import org.opendaylight.controller.md.sal.dom.api.DOMNotificationPublishService;
 import org.opendaylight.controller.messagebus.app.impl.EventSourceTopology;
-import org.opendaylight.controller.messagebus.eventsources.netconf.NetconfEventSourceManager;
+//import org.opendaylight.controller.messagebus.eventsources.netconf.NetconfEventSourceManager;
 import org.opendaylight.controller.messagebus.spi.EventSource;
 import org.opendaylight.controller.messagebus.spi.EventSourceRegistration;
 import org.opendaylight.controller.messagebus.spi.EventSourceRegistry;
@@ -67,14 +67,14 @@ public class MessageBusAppImplModule extends org.opendaylight.controller.config.
         final RpcProviderRegistry rpcRegistry = bindingCtx.getSALService(RpcProviderRegistry.class);
         final MountPointService mountPointService = bindingCtx.getSALService(MountPointService.class);
         final EventSourceRegistryWrapper eventSourceRegistryWrapper = new EventSourceRegistryWrapper(new EventSourceTopology(dataBroker, rpcRegistry));
-        final NetconfEventSourceManager netconfEventSourceManager
-                = NetconfEventSourceManager.create(dataBroker,
-                        domPublish,
-                        domMount,
-                        mountPointService,
-                        eventSourceRegistryWrapper,
-                        getNamespaceToStream());
-        eventSourceRegistryWrapper.addAutoCloseable(netconfEventSourceManager);
+//        final NetconfEventSourceManager netconfEventSourceManager
+//                = NetconfEventSourceManager.create(dataBroker,
+//                        domPublish,
+//                        domMount,
+//                        mountPointService,
+//                        eventSourceRegistryWrapper,
+//                        getNamespaceToStream());
+//        eventSourceRegistryWrapper.addAutoCloseable(netconfEventSourceManager);
         LOGGER.info("Messagebus initialized");
         return eventSourceRegistryWrapper;
 

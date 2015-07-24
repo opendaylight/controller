@@ -14,10 +14,11 @@ import com.google.common.collect.Collections2;
 import java.util.Collection;
 import java.util.List;
 import javax.annotation.Nonnull;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
+import org.opendaylight.controller.config.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
-import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -40,7 +41,11 @@ public final class NetconfMessageUtil {
         if(xmlElement.getChildElements().size() != 1) {
             return false;
         }
-        return xmlElement.getOnlyChildElement().getName().equals(XmlNetconfConstants.OK);
+        try {
+            return xmlElement.getOnlyChildElement().getName().equals(XmlNetconfConstants.OK);
+        } catch (DocumentedException e) {
+            throw new NetconfDocumentedException(e);
+        }
     }
 
     public static boolean isErrorMessage(NetconfMessage message) throws NetconfDocumentedException {
@@ -55,7 +60,11 @@ public final class NetconfMessageUtil {
         if(xmlElement.getChildElements().size() != 1) {
             return false;
         }
-        return xmlElement.getOnlyChildElement().getName().equals(XmlNetconfConstants.RPC_ERROR);
+        try {
+            return xmlElement.getOnlyChildElement().getName().equals(DocumentedException.RPC_ERROR);
+        } catch (DocumentedException e) {
+            throw new NetconfDocumentedException(e);
+        }
     }
 
     public static Collection<String> extractCapabilitiesFromHello(Document doc) throws NetconfDocumentedException {
@@ -74,7 +83,7 @@ public final class NetconfMessageUtil {
                 // Trim possible leading/tailing whitespace
                 try {
                     return input.getTextContent().trim();
-                } catch (NetconfDocumentedException e) {
+                } catch (DocumentedException e) {
                     LOG.trace("Error fetching input text content",e);
                     return null;
                 }

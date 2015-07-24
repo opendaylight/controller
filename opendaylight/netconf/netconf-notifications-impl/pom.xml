@@ -58,6 +58,7 @@
                 <configuration>
                     <instructions>
                         <Bundle-Activator>org.opendaylight.controller.netconf.notifications.impl.osgi.Activator</Bundle-Activator>
+                        <Export-Package>org.opendaylight.controller.netconf.notifications.impl.*</Export-Package>
                     </instructions>
                 </configuration>
             </plugin>

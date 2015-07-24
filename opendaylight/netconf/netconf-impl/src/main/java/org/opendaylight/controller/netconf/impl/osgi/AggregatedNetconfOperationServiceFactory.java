@@ -17,18 +17,22 @@ import com.google.common.collect.Sets;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import org.opendaylight.controller.netconf.api.Capability;
+import org.opendaylight.controller.config.util.capability.Capability;
 import org.opendaylight.controller.netconf.api.monitoring.CapabilityListener;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactoryListener;
 import org.opendaylight.controller.netconf.util.CloseableUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * NetconfOperationService aggregator. Makes a collection of operation services accessible as one.
  */
 public class AggregatedNetconfOperationServiceFactory implements NetconfOperationServiceFactory, NetconfOperationServiceFactoryListener, AutoCloseable {
+
+    private static final Logger LOG = LoggerFactory.getLogger(AggregatedNetconfOperationServiceFactory.class);
 
     private final Set<NetconfOperationServiceFactory> factories = new HashSet<>();
     private final Multimap<NetconfOperationServiceFactory, AutoCloseable> registrations = HashMultimap.create();
@@ -52,7 +56,7 @@ public class AggregatedNetconfOperationServiceFactory implements NetconfOperatio
             try {
                 autoCloseable.close();
             } catch (Exception e) {
-                // FIXME Issue warning
+                LOG.warn("Unable to close listener registration", e);
             }
         }
 

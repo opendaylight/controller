@@ -71,18 +71,6 @@
           <instructions>
             <Fragment-Host>${project.groupId}.config-persister-impl</Fragment-Host>
             <Provide-Capability>org.opendaylight.controller.config.persister.storage.adapter</Provide-Capability>
-            <Import-Package>com.google.common.base,
-                            com.google.common.io,
-                            org.opendaylight.controller.config.persist.api,
-                            org.slf4j,
-                            com.google.common.collect,
-                            javax.xml.bind,
-                            javax.xml.bind.annotation,
-                            javax.xml.bind.annotation.adapters,
-                            javax.xml.transform,
-                            javax.xml.transform.stream,
-                            org.eclipse.persistence.jaxb,
-                            org.apache.commons.lang3</Import-Package>
             <Private-Package>org.opendaylight.controller.config.persist.storage.file.xml.model,</Private-Package>
           </instructions>
         </configuration>

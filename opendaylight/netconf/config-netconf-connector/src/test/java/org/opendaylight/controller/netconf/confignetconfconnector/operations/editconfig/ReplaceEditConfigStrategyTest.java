@@ -23,8 +23,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.opendaylight.controller.config.facade.xml.mapping.attributes.fromxml.AttributeConfigElement;
+import org.opendaylight.controller.config.facade.xml.strategy.ReplaceEditConfigStrategy;
 import org.opendaylight.controller.config.util.ConfigTransactionClient;
-import org.opendaylight.controller.netconf.confignetconfconnector.mapping.attributes.fromxml.AttributeConfigElement;
 
 public class ReplaceEditConfigStrategyTest {
 
