@@ -19,11 +19,20 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
+      <artifactId>config-manager-facade-xml</artifactId>
+      <version>0.4.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
       <artifactId>config-util</artifactId>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>netconf-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>netconf-impl</artifactId>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
@@ -58,12 +67,12 @@
       <artifactId>binding-generator-impl</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.core</artifactId>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
+      <artifactId>slf4j-simple</artifactId>
     </dependency>
     <dependency>
       <groupId>xmlunit</groupId>
@@ -78,11 +87,6 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>config-manager</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>netconf-impl</artifactId>
       <scope>test</scope>
     </dependency>
 
@@ -108,12 +112,6 @@
         <configuration>
           <instructions>
             <Bundle-Activator>org.opendaylight.controller.netconf.confignetconfconnector.osgi.Activator</Bundle-Activator>
-            <Private-Package>org.opendaylight.controller.netconf.confignetconfconnector.mapping.*,
-                            org.opendaylight.controller.netconf.confignetconfconnector.operations.*,
-                            org.opendaylight.controller.netconf.confignetconfconnector.transactions,
-                            org.opendaylight.controller.netconf.confignetconfconnector.util,
-                            org.opendaylight.controller.netconf.confignetconfconnector.osgi,
-                            org.opendaylight.controller.netconf.confignetconfconnector.exception,</Private-Package>
           </instructions>
         </configuration>
       </plugin>

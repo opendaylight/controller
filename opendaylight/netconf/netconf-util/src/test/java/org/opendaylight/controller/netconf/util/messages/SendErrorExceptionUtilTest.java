@@ -19,7 +19,7 @@ import io.netty.channel.ChannelFuture;
 import io.netty.util.concurrent.GenericFutureListener;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
@@ -30,7 +30,7 @@ public class SendErrorExceptionUtilTest {
     NetconfSession netconfSession;
     ChannelFuture channelFuture;
     Channel channel;
-    private NetconfDocumentedException exception;
+    private DocumentedException exception;
 
     @Before
     public void setUp() throws Exception {
@@ -40,7 +40,7 @@ public class SendErrorExceptionUtilTest {
         doReturn(channelFuture).when(netconfSession).sendMessage(any(NetconfMessage.class));
         doReturn(channelFuture).when(channelFuture).addListener(any(GenericFutureListener.class));
         doReturn(channelFuture).when(channel).writeAndFlush(any(NetconfMessage.class));
-        exception = new NetconfDocumentedException("err");
+        exception = new DocumentedException("err");
     }
 
     @Test

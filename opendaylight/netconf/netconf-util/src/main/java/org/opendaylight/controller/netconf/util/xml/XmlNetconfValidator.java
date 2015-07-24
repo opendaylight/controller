@@ -15,6 +15,7 @@ import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.Validator;
+import org.opendaylight.controller.config.util.xml.XmlUtil;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 

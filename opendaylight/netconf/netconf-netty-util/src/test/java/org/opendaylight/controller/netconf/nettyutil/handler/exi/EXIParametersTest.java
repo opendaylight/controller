@@ -14,8 +14,8 @@ import java.util.Arrays;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.opendaylight.controller.netconf.util.xml.XmlElement;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
+import org.opendaylight.controller.config.util.xml.XmlElement;
+import org.opendaylight.controller.config.util.xml.XmlUtil;
 import org.openexi.proc.common.AlignmentType;
 import org.openexi.proc.common.EXIOptions;
 

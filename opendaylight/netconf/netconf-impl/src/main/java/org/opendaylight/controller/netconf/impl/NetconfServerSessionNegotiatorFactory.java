@@ -8,7 +8,9 @@
 
 package org.opendaylight.controller.netconf.impl;
 
+import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import io.netty.channel.Channel;
@@ -19,7 +21,6 @@ import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfServerSessionPreferences;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
-import org.opendaylight.controller.netconf.impl.mapping.operations.DefaultCommit;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationRouter;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationRouterImpl;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
@@ -28,6 +29,8 @@ import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessage;
 import org.opendaylight.protocol.framework.SessionListenerFactory;
 import org.opendaylight.protocol.framework.SessionNegotiator;
 import org.opendaylight.protocol.framework.SessionNegotiatorFactory;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state.Capabilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +47,6 @@ public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorF
     private final SessionIdProvider idProvider;
     private final NetconfOperationServiceFactory aggregatedOpService;
     private final long connectionTimeoutMillis;
-    private final CommitNotifier commitNotificationProducer;
     private final NetconfMonitoringService monitoringService;
     private static final Logger LOG = LoggerFactory.getLogger(NetconfServerSessionNegotiatorFactory.class);
     private final Set<String> baseCapabilities;
@@ -52,21 +54,18 @@ public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorF
     // TODO too many params, refactor
     public NetconfServerSessionNegotiatorFactory(final Timer timer, final NetconfOperationServiceFactory netconfOperationProvider,
                                                  final SessionIdProvider idProvider, final long connectionTimeoutMillis,
-                                                 final CommitNotifier commitNot,
                                                  final NetconfMonitoringService monitoringService) {
-        this(timer, netconfOperationProvider, idProvider, connectionTimeoutMillis, commitNot, monitoringService, DEFAULT_BASE_CAPABILITIES);
+        this(timer, netconfOperationProvider, idProvider, connectionTimeoutMillis, monitoringService, DEFAULT_BASE_CAPABILITIES);
     }
 
     // TODO too many params, refactor
     public NetconfServerSessionNegotiatorFactory(final Timer timer, final NetconfOperationServiceFactory netconfOperationProvider,
                                                  final SessionIdProvider idProvider, final long connectionTimeoutMillis,
-                                                 final CommitNotifier commitNot,
                                                  final NetconfMonitoringService monitoringService, final Set<String> baseCapabilities) {
         this.timer = timer;
         this.aggregatedOpService = netconfOperationProvider;
         this.idProvider = idProvider;
         this.connectionTimeoutMillis = connectionTimeoutMillis;
-        this.commitNotificationProducer = commitNot;
         this.monitoringService = monitoringService;
         this.baseCapabilities = validateBaseCapabilities(baseCapabilities);
     }
@@ -115,13 +114,22 @@ public class NetconfServerSessionNegotiatorFactory implements SessionNegotiatorF
         final NetconfOperationService service =
                 this.aggregatedOpService.createService(netconfSessionIdForReporting);
         final NetconfOperationRouter operationRouter =
-                new NetconfOperationRouterImpl(service, commitNotificationProducer, monitoringService, netconfSessionIdForReporting);
+                new NetconfOperationRouterImpl(service, monitoringService, netconfSessionIdForReporting);
         return new NetconfServerSessionListener(operationRouter, monitoringService, service);
 
     }
 
     private NetconfHelloMessage createHelloMessage(final long sessionId, final NetconfMonitoringService capabilityProvider) throws NetconfDocumentedException {
-        return NetconfHelloMessage.createServerHello(Sets.union(DefaultCommit.transformCapabilities(capabilityProvider.getCapabilities()), baseCapabilities), sessionId);
+        return NetconfHelloMessage.createServerHello(Sets.union(transformCapabilities(capabilityProvider.getCapabilities()), baseCapabilities), sessionId);
+    }
+
+    public static Set<String> transformCapabilities(final Capabilities capabilities) {
+        return Sets.newHashSet(Collections2.transform(capabilities.getCapability(), new Function<Uri, String>() {
+            @Override
+            public String apply(final Uri uri) {
+                return uri.getValue();
+            }
+        }));
     }
 
 }

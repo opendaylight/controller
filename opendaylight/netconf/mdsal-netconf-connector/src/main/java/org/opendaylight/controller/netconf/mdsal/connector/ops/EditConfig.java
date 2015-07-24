@@ -14,20 +14,20 @@ import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
+import org.opendaylight.controller.config.util.xml.DocumentedException.ErrorSeverity;
+import org.opendaylight.controller.config.util.xml.DocumentedException.ErrorTag;
+import org.opendaylight.controller.config.util.xml.DocumentedException.ErrorType;
+import org.opendaylight.controller.config.util.xml.XmlElement;
+import org.opendaylight.controller.config.util.xml.XmlUtil;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorSeverity;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorTag;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorType;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.mdsal.connector.CurrentSchemaContext;
 import org.opendaylight.controller.netconf.mdsal.connector.TransactionProvider;
 import org.opendaylight.controller.netconf.mdsal.connector.ops.DataTreeChangeTracker.DataTreeChange;
 import org.opendaylight.controller.netconf.util.mapping.AbstractSingletonNetconfOperation;
-import org.opendaylight.controller.netconf.util.xml.XmlElement;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.yangtools.yang.data.api.ModifyAction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -61,10 +61,10 @@ public class EditConfig extends AbstractSingletonNetconfOperation {
     }
 
     @Override
-    protected Element handleWithNoSubsequentOperations(final Document document, final XmlElement operationElement) throws NetconfDocumentedException {
+    protected Element handleWithNoSubsequentOperations(final Document document, final XmlElement operationElement) throws DocumentedException {
         final Datastore targetDatastore = extractTargetParameter(operationElement);
         if (targetDatastore == Datastore.running) {
-            throw new NetconfDocumentedException("edit-config on running datastore is not supported",
+            throw new DocumentedException("edit-config on running datastore is not supported",
                     ErrorType.protocol,
                     ErrorTag.operation_not_supported,
                     ErrorSeverity.error);
@@ -88,7 +88,7 @@ public class EditConfig extends AbstractSingletonNetconfOperation {
         return XmlUtil.createElement(document, XmlNetconfConstants.OK, Optional.<String>absent());
     }
 
-    private void executeOperations(final DataTreeChangeTracker changeTracker) throws NetconfDocumentedException {
+    private void executeOperations(final DataTreeChangeTracker changeTracker) throws DocumentedException {
         final DOMDataReadWriteTransaction rwTx = transactionProvider.getOrCreateTransaction();
         final List<DataTreeChange> aa = changeTracker.getDataTreeChanges();
         final ListIterator<DataTreeChange> iterator = aa.listIterator(aa.size());
@@ -99,7 +99,7 @@ public class EditConfig extends AbstractSingletonNetconfOperation {
         }
     }
 
-    private void executeChange(final DOMDataReadWriteTransaction rwtx, final DataTreeChange change) throws NetconfDocumentedException {
+    private void executeChange(final DOMDataReadWriteTransaction rwtx, final DataTreeChange change) throws DocumentedException {
         switch (change.getAction()) {
         case NONE:
             return;
@@ -110,7 +110,7 @@ public class EditConfig extends AbstractSingletonNetconfOperation {
             try {
                 final Optional<NormalizedNode<?, ?>> readResult = rwtx.read(LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.create(change.getPath())).checkedGet();
                 if (readResult.isPresent()) {
-                    throw new NetconfDocumentedException("Data already exists, cannot execute CREATE operation", ErrorType.protocol, ErrorTag.data_exists, ErrorSeverity.error);
+                    throw new DocumentedException("Data already exists, cannot execute CREATE operation", ErrorType.protocol, ErrorTag.data_exists, ErrorSeverity.error);
                 }
                 rwtx.put(LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.create(change.getPath()), change.getChangeRoot());
             } catch (ReadFailedException e) {
@@ -124,7 +124,7 @@ public class EditConfig extends AbstractSingletonNetconfOperation {
             try {
                 final Optional<NormalizedNode<?, ?>> readResult = rwtx.read(LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.create(change.getPath())).checkedGet();
                 if (!readResult.isPresent()) {
-                    throw new NetconfDocumentedException("Data is missing, cannot execute DELETE operation", ErrorType.protocol, ErrorTag.data_missing, ErrorSeverity.error);
+                    throw new DocumentedException("Data is missing, cannot execute DELETE operation", ErrorType.protocol, ErrorTag.data_missing, ErrorSeverity.error);
                 }
                 rwtx.delete(LogicalDatastoreType.CONFIGURATION, YangInstanceIdentifier.create(change.getPath()));
             } catch (ReadFailedException e) {
@@ -160,7 +160,7 @@ public class EditConfig extends AbstractSingletonNetconfOperation {
         throw new UnsupportedOperationException("implement exception if parse fails");
     }
 
-    private Optional<DataSchemaNode> getSchemaNodeFromNamespace(final String namespace, final XmlElement element) throws NetconfDocumentedException{
+    private Optional<DataSchemaNode> getSchemaNodeFromNamespace(final String namespace, final XmlElement element) throws DocumentedException{
         Optional<DataSchemaNode> dataSchemaNode = Optional.absent();
         try {
             //returns module with newest revision since findModuleByNamespace returns a set of modules and we only need the newest one
@@ -169,7 +169,7 @@ public class EditConfig extends AbstractSingletonNetconfOperation {
             if (schemaNode != null) {
                 dataSchemaNode = Optional.of(module.getDataChildByName(element.getName()));
             } else {
-                throw new NetconfDocumentedException("Unable to find node with namespace: " + namespace + "in module: " + module.toString(),
+                throw new DocumentedException("Unable to find node with namespace: " + namespace + "in module: " + module.toString(),
                         ErrorType.application,
                         ErrorTag.unknown_namespace,
                         ErrorSeverity.error);
@@ -181,25 +181,25 @@ public class EditConfig extends AbstractSingletonNetconfOperation {
         return dataSchemaNode;
     }
 
-    private Datastore extractTargetParameter(final XmlElement operationElement) throws NetconfDocumentedException {
+    private Datastore extractTargetParameter(final XmlElement operationElement) throws DocumentedException {
         final NodeList elementsByTagName = operationElement.getDomElement().getElementsByTagName(TARGET_KEY);
         // Direct lookup instead of using XmlElement class due to performance
         if (elementsByTagName.getLength() == 0) {
-            throw new NetconfDocumentedException("Missing target element", ErrorType.rpc, ErrorTag.missing_attribute, ErrorSeverity.error);
+            throw new DocumentedException("Missing target element", ErrorType.rpc, ErrorTag.missing_attribute, ErrorSeverity.error);
         } else if (elementsByTagName.getLength() > 1) {
-            throw new NetconfDocumentedException("Multiple target elements", ErrorType.rpc, ErrorTag.unknown_attribute, ErrorSeverity.error);
+            throw new DocumentedException("Multiple target elements", ErrorType.rpc, ErrorTag.unknown_attribute, ErrorSeverity.error);
         } else {
             final XmlElement targetChildNode = XmlElement.fromDomElement((Element) elementsByTagName.item(0)).getOnlyChildElement();
             return Datastore.valueOf(targetChildNode.getName());
         }
     }
 
-    private ModifyAction getDefaultOperation(final XmlElement operationElement) throws NetconfDocumentedException {
+    private ModifyAction getDefaultOperation(final XmlElement operationElement) throws DocumentedException {
         final NodeList elementsByTagName = operationElement.getDomElement().getElementsByTagName(DEFAULT_OPERATION_KEY);
         if(elementsByTagName.getLength() == 0) {
             return ModifyAction.MERGE;
         } else if(elementsByTagName.getLength() > 1) {
-            throw new NetconfDocumentedException("Multiple " + DEFAULT_OPERATION_KEY + " elements",
+            throw new DocumentedException("Multiple " + DEFAULT_OPERATION_KEY + " elements",
                     ErrorType.rpc, ErrorTag.unknown_attribute, ErrorSeverity.error);
         } else {
             return ModifyAction.fromXmlValue(elementsByTagName.item(0).getTextContent());
@@ -207,10 +207,10 @@ public class EditConfig extends AbstractSingletonNetconfOperation {
 
     }
 
-    private XmlElement getElement(final XmlElement operationElement, String elementName) throws NetconfDocumentedException {
+    private XmlElement getElement(final XmlElement operationElement, String elementName) throws DocumentedException {
         final Optional<XmlElement> childNode = operationElement.getOnlyChildElementOptionally(elementName);
         if (!childNode.isPresent()) {
-            throw new NetconfDocumentedException(elementName + " element is missing",
+            throw new DocumentedException(elementName + " element is missing",
                     ErrorType.protocol,
                     ErrorTag.missing_element,
                     ErrorSeverity.error);

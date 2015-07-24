@@ -9,11 +9,10 @@
 package org.opendaylight.controller.netconf.api.monitoring;
 
 import java.util.Set;
-import org.opendaylight.controller.netconf.api.Capability;
+import org.opendaylight.controller.config.util.capability.Capability;
 
 public interface CapabilityListener {
 
-    void onCapabilitiesAdded(Set<Capability> addedCaps);
+    void onCapabilitiesChanged(Set<Capability> added, Set<Capability> removed);
 
-    void onCapabilitiesRemoved(Set<Capability> removedCaps);
 }

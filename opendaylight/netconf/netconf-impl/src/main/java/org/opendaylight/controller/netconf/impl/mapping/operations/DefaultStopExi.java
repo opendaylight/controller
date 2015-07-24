@@ -7,12 +7,12 @@
  */
 package org.opendaylight.controller.netconf.impl.mapping.operations;
 
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
+import org.opendaylight.controller.config.util.xml.XmlElement;
+import org.opendaylight.controller.config.util.xml.XmlUtil;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.impl.NetconfServerSession;
 import org.opendaylight.controller.netconf.util.mapping.AbstractSingletonNetconfOperation;
-import org.opendaylight.controller.netconf.util.xml.XmlElement;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -31,7 +31,7 @@ public class DefaultStopExi extends AbstractSingletonNetconfOperation implements
     }
 
     @Override
-    protected Element handleWithNoSubsequentOperations(Document document, XmlElement operationElement) throws NetconfDocumentedException {
+    protected Element handleWithNoSubsequentOperations(Document document, XmlElement operationElement) throws DocumentedException {
         LOG.debug("Received stop-exi message {} ", XmlUtil.toString(operationElement));
 
         netconfSession.stopExiCommunication();

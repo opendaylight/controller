@@ -103,10 +103,6 @@
 
     <!-- OpenDaylight -->
     <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>netconf-util</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>util</artifactId>
     </dependency>

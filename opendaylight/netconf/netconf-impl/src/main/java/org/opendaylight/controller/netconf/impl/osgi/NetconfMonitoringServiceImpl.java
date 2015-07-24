@@ -19,15 +19,19 @@ import com.google.common.collect.Sets;
 import io.netty.util.internal.ConcurrentSet;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nonnull;
-import org.opendaylight.controller.netconf.api.Capability;
+import org.opendaylight.controller.config.util.capability.BasicCapability;
+import org.opendaylight.controller.config.util.capability.Capability;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfManagementSession;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
+import org.opendaylight.controller.netconf.notifications.BaseNotificationPublisherRegistration;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Uri;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.NetconfState;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.NetconfStateBuilder;
@@ -42,6 +46,10 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.mon
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state.schemas.SchemaBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state.schemas.SchemaKey;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state.sessions.Session;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.notifications.rev120206.NetconfCapabilityChange;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.notifications.rev120206.NetconfCapabilityChangeBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.notifications.rev120206.changed.by.parms.ChangedByBuilder;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.notifications.rev120206.changed.by.parms.changed.by.server.or.user.ServerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,6 +76,7 @@ public class NetconfMonitoringServiceImpl implements NetconfMonitoringService, A
     private final Map<Uri, Capability> capabilities = new ConcurrentHashMap<>();
 
     private final Set<MonitoringListener> listeners = Sets.newHashSet();
+    private volatile BaseNotificationPublisherRegistration notificationPublisher;
 
     public NetconfMonitoringServiceImpl(final NetconfOperationServiceFactory netconfOperationProvider) {
         this.netconfOperationProvider = netconfOperationProvider;
@@ -222,11 +231,48 @@ public class NetconfMonitoringServiceImpl implements NetconfMonitoringService, A
         return b.build();
     }
 
+    public static Set<Capability> setupCapabilities(final Set<Capability> caps) {
+        Set<Capability> capabilities = new HashSet<>(caps);
+        capabilities.add(new BasicCapability("urn:ietf:params:netconf:capability:candidate:1.0"));
+        // TODO rollback on error not supported EditConfigXmlParser:100
+        // [RFC6241] 8.5.  Rollback-on-Error Capability
+        // capabilities.add(new BasicCapability("urn:ietf:params:netconf:capability:rollback-on-error:1.0"));
+        return capabilities;
+    }
+
     @Override
-    public synchronized void onCapabilitiesAdded(final Set<Capability> addedCaps) {
-        // FIXME howto check for duplicates
-        this.capabilities.putAll(Maps.uniqueIndex(addedCaps, CAPABILITY_TO_URI));
+    public synchronized void close() throws Exception {
+        listeners.clear();
+        sessions.clear();
+        capabilities.clear();
+    }
+
+    @Override
+    public void onCapabilitiesChanged(Set<Capability> added, Set<Capability> removed) {
+        onCapabilitiesAdded(added);
+        onCapabilitiesRemoved(removed);
         notifyListeners();
+
+        // publish notification to notification collector about changed capabilities
+        if (notificationPublisher != null) {
+            notificationPublisher.onCapabilityChanged(computeDiff(added, removed));
+        }
+    }
+
+    static NetconfCapabilityChange computeDiff(final Set<Capability> removed, final Set<Capability> added) {
+        final NetconfCapabilityChangeBuilder netconfCapabilityChangeBuilder = new NetconfCapabilityChangeBuilder();
+        netconfCapabilityChangeBuilder.setChangedBy(new ChangedByBuilder().setServerOrUser(new ServerBuilder().setServer(true).build()).build());
+        netconfCapabilityChangeBuilder.setDeletedCapability(Lists.newArrayList(Collections2.transform(removed, CAPABILITY_TO_URI)));
+        netconfCapabilityChangeBuilder.setAddedCapability(Lists.newArrayList(Collections2.transform(added, CAPABILITY_TO_URI)));
+        // TODO modified should be computed ... but why ?
+        netconfCapabilityChangeBuilder.setModifiedCapability(Collections.<Uri>emptyList());
+        return netconfCapabilityChangeBuilder.build();
+    }
+
+
+    private synchronized void onCapabilitiesAdded(final Set<Capability> addedCaps) {
+        // FIXME howto check for duplicates
+        this.capabilities.putAll(Maps.uniqueIndex(setupCapabilities(addedCaps), CAPABILITY_TO_URI));
     }
 
     private void notifyListeners() {
@@ -235,18 +281,13 @@ public class NetconfMonitoringServiceImpl implements NetconfMonitoringService, A
         }
     }
 
-    @Override
-    public synchronized void onCapabilitiesRemoved(final Set<Capability> addedCaps) {
+    private synchronized void onCapabilitiesRemoved(final Set<Capability> addedCaps) {
         for (final Capability addedCap : addedCaps) {
-            capabilities.remove(addedCap.getCapabilityUri());
+            capabilities.remove(CAPABILITY_TO_URI.apply(addedCap));
         }
-        notifyListeners();
     }
 
-    @Override
-    public synchronized void close() throws Exception {
-        listeners.clear();
-        sessions.clear();
-        capabilities.clear();
+    public void setNotificationPublisher(final BaseNotificationPublisherRegistration notificationPublisher) {
+        this.notificationPublisher = notificationPublisher;
     }
 }
