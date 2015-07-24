@@ -15,10 +15,8 @@
     <module>config-persister</module>
     <module>config-netty</module>
     <module>mdsal</module>
-    <module>netconf</module>
     <module>protocol-framework</module>
     <module>akka</module>
-    <module>netconf-connector</module>
     <module>restconf</module>
     <module>extras</module>
   </modules>

@@ -77,7 +77,7 @@ public class NetconfNotificationManager implements NetconfNotificationCollector,
     @Override
     public synchronized void onNotification(final StreamNameType stream, final NetconfNotification notification) {
         LOG.debug("Notification of type {} detected", stream);
-        if(LOG.isTraceEnabled()) {
+        if (LOG.isTraceEnabled()) {
             LOG.debug("Notification of type {} detected: {}", stream, notification);
         }
 
@@ -129,7 +129,7 @@ public class NetconfNotificationManager implements NetconfNotificationCollector,
         return new NotificationRegistration() {
             @Override
             public void close() {
-                synchronized(NetconfNotificationManager.this) {
+                synchronized (NetconfNotificationManager.this) {
                     streamListeners.remove(listener);
                 }
             }
@@ -160,11 +160,11 @@ public class NetconfNotificationManager implements NetconfNotificationCollector,
         final StreamNameType streamName = stream.getName();
 
         LOG.debug("Notification publisher registered for stream: {}", streamName);
-        if(LOG.isTraceEnabled()) {
+        if (LOG.isTraceEnabled()) {
             LOG.trace("Notification publisher registered for stream: {}", stream);
         }
 
-        if(streamMetadata.containsKey(streamName)) {
+        if (streamMetadata.containsKey(streamName)) {
             LOG.warn("Notification stream {} already registered as: {}. Will be reused", streamName, streamMetadata.get(streamName));
         } else {
             streamMetadata.put(streamName, stream);
@@ -206,6 +206,7 @@ public class NetconfNotificationManager implements NetconfNotificationCollector,
             streamListener.onStreamRegistered(stream);
         }
     }
+
     private synchronized void notifyStreamRemoved(final StreamNameType stream) {
         for (final NetconfNotificationStreamListener streamListener : streamListeners) {
             streamListener.onStreamUnregistered(stream);
@@ -254,13 +255,14 @@ public class NetconfNotificationManager implements NetconfNotificationCollector,
             baseRegistration.close();
         }
 
+        private static NetconfNotification serializeNotification(final NetconfCapabilityChange capabilityChange) {
+            return NotificationsTransformUtil.transform(capabilityChange);
+        }
+
         @Override
         public void onCapabilityChanged(final NetconfCapabilityChange capabilityChange) {
             baseRegistration.onNotification(BASE_STREAM_NAME, serializeNotification(capabilityChange));
-        }
-
-        private static NetconfNotification serializeNotification(final NetconfCapabilityChange capabilityChange) {
-            return NotificationsTransformUtil.transform(capabilityChange);
+//            baseRegistration.onNotification(BASE_STREAM_NAME, serializeNotification(computeDiff(removed, added)));
         }
     }
 

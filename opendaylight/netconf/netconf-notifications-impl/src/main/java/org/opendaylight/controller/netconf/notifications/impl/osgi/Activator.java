@@ -13,7 +13,8 @@ import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Set;
-import org.opendaylight.controller.netconf.api.Capability;
+import org.opendaylight.controller.config.util.capability.BasicCapability;
+import org.opendaylight.controller.config.util.capability.Capability;
 import org.opendaylight.controller.netconf.api.monitoring.CapabilityListener;
 import org.opendaylight.controller.netconf.api.util.NetconfConstants;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
@@ -24,12 +25,15 @@ import org.opendaylight.controller.netconf.notifications.NetconfNotificationColl
 import org.opendaylight.controller.netconf.notifications.impl.NetconfNotificationManager;
 import org.opendaylight.controller.netconf.notifications.impl.ops.CreateSubscription;
 import org.opendaylight.controller.netconf.notifications.impl.ops.Get;
-import org.opendaylight.controller.netconf.util.capability.BasicCapability;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Activator implements BundleActivator {
+
+    private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
 
     private ServiceRegistration<NetconfNotificationCollector> netconfNotificationCollectorServiceRegistration;
     private ServiceRegistration<NetconfOperationServiceFactory> operationaServiceRegistration;
@@ -51,11 +55,11 @@ public class Activator implements BundleActivator {
 
             @Override
             public AutoCloseable registerCapabilityListener(final CapabilityListener listener) {
-                listener.onCapabilitiesAdded(capabilities);
+                listener.onCapabilitiesChanged(capabilities, Collections.<Capability>emptySet());
                 return new AutoCloseable() {
                     @Override
                     public void close() {
-                        listener.onCapabilitiesRemoved(capabilities);
+                        listener.onCapabilitiesChanged(Collections.<Capability>emptySet(), capabilities);
                     }
                 };
             }
@@ -65,7 +69,6 @@ public class Activator implements BundleActivator {
                 return new NetconfOperationService() {
 
                     private final CreateSubscription createSubscription = new CreateSubscription(netconfSessionIdForReporting, netconfNotificationManager);
-
 
                     @Override
                     public Set<NetconfOperation> getNetconfOperations() {
@@ -85,7 +88,6 @@ public class Activator implements BundleActivator {
         final Dictionary<String, String> properties = new Hashtable<>();
         properties.put(NetconfConstants.SERVICE_NAME, NetconfConstants.NETCONF_MONITORING);
         operationaServiceRegistration = context.registerService(NetconfOperationServiceFactory.class, netconfOperationServiceFactory, properties);
-
     }
 
     @Override

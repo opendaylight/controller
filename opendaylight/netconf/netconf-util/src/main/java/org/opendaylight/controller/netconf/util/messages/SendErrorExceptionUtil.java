@@ -12,11 +12,12 @@ import com.google.common.base.Preconditions;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
+import org.opendaylight.controller.config.util.xml.XmlMappingConstants;
+import org.opendaylight.controller.config.util.xml.XmlUtil;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Attr;
@@ -30,21 +31,21 @@ public final class SendErrorExceptionUtil {
     private SendErrorExceptionUtil() {}
 
     public static void sendErrorMessage(final NetconfSession session,
-            final NetconfDocumentedException sendErrorException) {
+            final DocumentedException sendErrorException) {
         LOG.trace("Sending error {}", sendErrorException.getMessage(), sendErrorException);
         final Document errorDocument = createDocument(sendErrorException);
         ChannelFuture f = session.sendMessage(new NetconfMessage(errorDocument));
         f.addListener(new SendErrorVerifyingListener(sendErrorException));
     }
 
-    public static void sendErrorMessage(final Channel channel, final NetconfDocumentedException sendErrorException) {
+    public static void sendErrorMessage(final Channel channel, final DocumentedException sendErrorException) {
         LOG.trace("Sending error {}", sendErrorException.getMessage(), sendErrorException);
         final Document errorDocument = createDocument(sendErrorException);
         ChannelFuture f = channel.writeAndFlush(new NetconfMessage(errorDocument));
         f.addListener(new SendErrorVerifyingListener(sendErrorException));
     }
 
-    public static void sendErrorMessage(final NetconfSession session, final NetconfDocumentedException sendErrorException,
+    public static void sendErrorMessage(final NetconfSession session, final DocumentedException sendErrorException,
             final NetconfMessage incommingMessage) {
         final Document errorDocument = createDocument(sendErrorException);
         if (LOG.isTraceEnabled()) {
@@ -57,15 +58,15 @@ public final class SendErrorExceptionUtil {
     }
 
     private static void tryToCopyAttributes(final Document incommingDocument, final Document errorDocument,
-            final NetconfDocumentedException sendErrorException) {
+            final DocumentedException sendErrorException) {
         try {
             final Element incommingRpc = incommingDocument.getDocumentElement();
             Preconditions.checkState(incommingRpc.getTagName().equals(XmlNetconfConstants.RPC_KEY), "Missing %s element",
                     XmlNetconfConstants.RPC_KEY);
 
             final Element rpcReply = errorDocument.getDocumentElement();
-            Preconditions.checkState(rpcReply.getTagName().equals(XmlNetconfConstants.RPC_REPLY_KEY), "Missing %s element",
-                    XmlNetconfConstants.RPC_REPLY_KEY);
+            Preconditions.checkState(rpcReply.getTagName().equals(XmlMappingConstants.RPC_REPLY_KEY), "Missing %s element",
+                    XmlMappingConstants.RPC_REPLY_KEY);
 
             final NamedNodeMap incomingAttributes = incommingRpc.getAttributes();
             for (int i = 0; i < incomingAttributes.getLength(); i++) {
@@ -82,7 +83,7 @@ public final class SendErrorExceptionUtil {
         }
     }
 
-    private static Document createDocument(final NetconfDocumentedException sendErrorException) {
+    private static Document createDocument(final DocumentedException sendErrorException) {
         return sendErrorException.toXMLDocument();
     }
 
@@ -90,9 +91,9 @@ public final class SendErrorExceptionUtil {
      * Checks if netconf error was sent successfully.
      */
     private static final class SendErrorVerifyingListener implements ChannelFutureListener {
-        private final NetconfDocumentedException sendErrorException;
+        private final DocumentedException sendErrorException;
 
-        public SendErrorVerifyingListener(final NetconfDocumentedException sendErrorException) {
+        public SendErrorVerifyingListener(final DocumentedException sendErrorException) {
             this.sendErrorException = sendErrorException;
         }
 

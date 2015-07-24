@@ -11,11 +11,11 @@ package org.opendaylight.controller.netconf.impl;
 import com.google.common.base.Optional;
 import java.io.IOException;
 import java.util.Map;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
+import org.opendaylight.controller.config.util.xml.XmlElement;
+import org.opendaylight.controller.config.util.xml.XmlUtil;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.util.mapping.AbstractNetconfOperation.OperationNameAndNamespace;
-import org.opendaylight.controller.netconf.util.xml.XmlElement;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Attr;
@@ -30,7 +30,7 @@ import org.xml.sax.SAXException;
 public class SubtreeFilter {
     private static final Logger LOG = LoggerFactory.getLogger(SubtreeFilter.class);
 
-    static Document applySubtreeFilter(Document requestDocument, Document rpcReply) throws NetconfDocumentedException {
+    static Document applySubtreeFilter(Document requestDocument, Document rpcReply) throws DocumentedException {
         OperationNameAndNamespace operationNameAndNamespace = new OperationNameAndNamespace(requestDocument);
         if (XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0.equals(operationNameAndNamespace.getNamespace()) &&
                 XmlNetconfConstants.GET.equals(operationNameAndNamespace.getOperationName()) ||
@@ -48,7 +48,7 @@ public class SubtreeFilter {
                 rpcReply = XmlUtil.readXmlToDocument(XmlUtil.toString(rpcReply, true));
             } catch (SAXException | IOException e) {
                 LOG.error("Cannot transform document", e);
-                throw new NetconfDocumentedException("Cannot transform document" + e);
+                throw new DocumentedException("Cannot transform document" + e);
             }
             XmlElement filter = maybeFilter.get();
             if ("subtree".equals(filter.getAttribute("type"))||
@@ -62,13 +62,13 @@ public class SubtreeFilter {
         return rpcReply; // return identical document
     }
 
-    private static Document filtered(XmlElement filter, Document originalReplyDocument) throws NetconfDocumentedException {
+    private static Document filtered(XmlElement filter, Document originalReplyDocument) throws DocumentedException {
         Document result = XmlUtil.newDocument();
         // even if filter is empty, copy /rpc/data
         Element rpcReply = originalReplyDocument.getDocumentElement();
         Node rpcReplyDst = result.importNode(rpcReply, false);
         result.appendChild(rpcReplyDst);
-        XmlElement dataSrc = XmlElement.fromDomElement(rpcReply).getOnlyChildElement("data", XmlNetconfConstants.RFC4741_TARGET_NAMESPACE);
+        XmlElement dataSrc = XmlElement.fromDomElement(rpcReply).getOnlyChildElement("data", XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
         Element dataDst = (Element) result.importNode(dataSrc.getDomElement(), false);
         rpcReplyDst.appendChild(dataDst);
         addSubtree(filter, dataSrc, XmlElement.fromDomElement(dataDst));
@@ -76,7 +76,7 @@ public class SubtreeFilter {
         return result;
     }
 
-    private static void addSubtree(XmlElement filter, XmlElement src, XmlElement dst) throws NetconfDocumentedException {
+    private static void addSubtree(XmlElement filter, XmlElement src, XmlElement dst) throws DocumentedException {
         for (XmlElement srcChild : src.getChildElements()) {
             for (XmlElement filterChild : filter.getChildElements()) {
                 addSubtree2(filterChild, srcChild, dst);
@@ -84,7 +84,7 @@ public class SubtreeFilter {
         }
     }
 
-    private static MatchingResult addSubtree2(XmlElement filter, XmlElement src, XmlElement dstParent) throws NetconfDocumentedException {
+    private static MatchingResult addSubtree2(XmlElement filter, XmlElement src, XmlElement dstParent) throws DocumentedException {
         Document document = dstParent.getDomElement().getOwnerDocument();
         MatchingResult matches = matches(src, filter);
         if (matches != MatchingResult.NO_MATCH && matches != MatchingResult.CONTENT_MISMATCH) {
@@ -126,7 +126,7 @@ public class SubtreeFilter {
      * Shallow compare src node to filter: tag name and namespace must match.
      * If filter node has no children and has text content, it also must match.
      */
-    private static MatchingResult matches(XmlElement src, XmlElement filter) throws NetconfDocumentedException {
+    private static MatchingResult matches(XmlElement src, XmlElement filter) throws DocumentedException {
         boolean tagMatch = src.getName().equals(filter.getName()) &&
                 src.getNamespaceOptionally().equals(filter.getNamespaceOptionally());
         MatchingResult result = null;
@@ -166,7 +166,7 @@ public class SubtreeFilter {
         return result;
     }
 
-    private static boolean prefixedContentMatches(final XmlElement filter, final XmlElement src) throws NetconfDocumentedException {
+    private static boolean prefixedContentMatches(final XmlElement filter, final XmlElement src) throws DocumentedException {
         final Map.Entry<String, String> prefixToNamespaceOfFilter;
         final Map.Entry<String, String> prefixToNamespaceOfSrc;
         try {

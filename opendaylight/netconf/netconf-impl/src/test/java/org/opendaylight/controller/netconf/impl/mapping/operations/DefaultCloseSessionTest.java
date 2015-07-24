@@ -16,20 +16,22 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.util.concurrent.GenericFutureListener;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
+import org.opendaylight.controller.config.util.xml.XmlElement;
+import org.opendaylight.controller.config.util.xml.XmlUtil;
 import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfTerminationReason;
 import org.opendaylight.controller.netconf.impl.NetconfServerSession;
 import org.opendaylight.controller.netconf.impl.NetconfServerSessionListener;
 import org.opendaylight.controller.netconf.util.messages.NetconfHelloMessageAdditionalHeader;
-import org.opendaylight.controller.netconf.util.xml.XmlElement;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.w3c.dom.Document;
 
 public class DefaultCloseSessionTest {
@@ -70,7 +72,7 @@ public class DefaultCloseSessionTest {
         verify(listener).onSessionTerminated(any(NetconfServerSession.class), any(NetconfTerminationReason.class));
     }
 
-    @Test(expected = NetconfDocumentedException.class)
+    @Test(expected = DocumentedException.class)
     public void testDefaultCloseSession2() throws Exception {
         AutoCloseable res = mock(AutoCloseable.class);
         doThrow(NetconfDocumentedException.class).when(res).close();
