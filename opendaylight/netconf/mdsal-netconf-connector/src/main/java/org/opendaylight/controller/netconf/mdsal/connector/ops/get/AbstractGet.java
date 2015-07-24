@@ -22,15 +22,15 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.dom.DOMResult;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorSeverity;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorTag;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorType;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
+import org.opendaylight.controller.config.util.xml.DocumentedException.ErrorSeverity;
+import org.opendaylight.controller.config.util.xml.DocumentedException.ErrorTag;
+import org.opendaylight.controller.config.util.xml.DocumentedException.ErrorType;
+import org.opendaylight.controller.config.util.xml.XmlElement;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.mdsal.connector.CurrentSchemaContext;
 import org.opendaylight.controller.netconf.mdsal.connector.ops.Datastore;
 import org.opendaylight.controller.netconf.util.mapping.AbstractSingletonNetconfOperation;
-import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
@@ -128,7 +128,7 @@ public abstract class AbstractGet extends AbstractSingletonNetconfOperation {
         }
     }
 
-    private DataSchemaNode getSchemaNodeFromNamespace(final XmlElement element) throws NetconfDocumentedException {
+    private DataSchemaNode getSchemaNodeFromNamespace(final XmlElement element) throws DocumentedException {
 
         try {
             final Module module = schemaContext.getCurrentContext().findModuleByNamespaceAndRevision(new URI(element.getNamespace()), null);
@@ -142,7 +142,7 @@ public abstract class AbstractGet extends AbstractSingletonNetconfOperation {
             throw new IllegalArgumentException("Unable to parse element namespace, this should not happen since " +
                     "namespace of an xml element is valid and if the xml was parsed then the URI should be as well");
         }
-        throw new NetconfDocumentedException("Unable to find node with namespace: " + element.getNamespace() + "in schema context: " + schemaContext.getCurrentContext().toString(),
+        throw new DocumentedException("Unable to find node with namespace: " + element.getNamespace() + "in schema context: " + schemaContext.getCurrentContext().toString(),
                 ErrorType.application,
                 ErrorTag.unknown_namespace,
                 ErrorSeverity.error);
@@ -163,9 +163,9 @@ public abstract class AbstractGet extends AbstractSingletonNetconfOperation {
      * @return if Filter is present and not empty returns Optional of the InstanceIdentifier to the read location in datastore.
      *          empty filter returns Optional.absent() which should equal an empty <data/> container in the response.
      *         if filter is not present we want to read the entire datastore - return ROOT.
-     * @throws NetconfDocumentedException
+     * @throws DocumentedException
      */
-    protected Optional<YangInstanceIdentifier> getDataRootFromFilter(XmlElement operationElement) throws NetconfDocumentedException {
+    protected Optional<YangInstanceIdentifier> getDataRootFromFilter(XmlElement operationElement) throws DocumentedException {
         Optional<XmlElement> filterElement = operationElement.getOnlyChildElementOptionally(FILTER);
         if (filterElement.isPresent()) {
             if (filterElement.get().getChildElements().size() == 0) {
@@ -178,10 +178,10 @@ public abstract class AbstractGet extends AbstractSingletonNetconfOperation {
     }
 
     @VisibleForTesting
-    protected YangInstanceIdentifier getInstanceIdentifierFromFilter(XmlElement filterElement) throws NetconfDocumentedException {
+    protected YangInstanceIdentifier getInstanceIdentifierFromFilter(XmlElement filterElement) throws DocumentedException {
 
         if (filterElement.getChildElements().size() != 1) {
-            throw new NetconfDocumentedException("Multiple filter roots not supported yet",
+            throw new DocumentedException("Multiple filter roots not supported yet",
                     ErrorType.application, ErrorTag.operation_not_supported, ErrorSeverity.error);
         }
 
@@ -202,7 +202,7 @@ public abstract class AbstractGet extends AbstractSingletonNetconfOperation {
         return path;
     }
 
-    private NormalizedNode filterToNormalizedNode(XmlElement element, DataSchemaNode schemaNode) throws NetconfDocumentedException {
+    private NormalizedNode filterToNormalizedNode(XmlElement element, DataSchemaNode schemaNode) throws DocumentedException {
         DomToNormalizedNodeParserFactory parserFactory = DomToNormalizedNodeParserFactory
                 .getInstance(DomUtils.defaultValueCodecProvider(), schemaContext.getCurrentContext());
 
@@ -213,7 +213,7 @@ public abstract class AbstractGet extends AbstractSingletonNetconfOperation {
         } else if (schemaNode instanceof ListSchemaNode) {
             parsedNode = parserFactory.getMapNodeParser().parse(Collections.singletonList(element.getDomElement()), (ListSchemaNode) schemaNode);
         } else {
-            throw new NetconfDocumentedException("Schema node of the top level element is not an instance of container or list",
+            throw new DocumentedException("Schema node of the top level element is not an instance of container or list",
                     ErrorType.application, ErrorTag.unknown_element, ErrorSeverity.error);
         }
         return parsedNode;
@@ -230,24 +230,24 @@ public abstract class AbstractGet extends AbstractSingletonNetconfOperation {
             return datastore;
         }
 
-        static GetConfigExecution fromXml(final XmlElement xml, final String operationName) throws NetconfDocumentedException {
+        static GetConfigExecution fromXml(final XmlElement xml, final String operationName) throws DocumentedException {
             try {
                 validateInputRpc(xml, operationName);
-            } catch (final NetconfDocumentedException e) {
-                throw new NetconfDocumentedException("Incorrect RPC: " + e.getMessage(), e.getErrorType(), e.getErrorTag(), e.getErrorSeverity(), e.getErrorInfo());
+            } catch (final DocumentedException e) {
+                throw new DocumentedException("Incorrect RPC: " + e.getMessage(), e.getErrorType(), e.getErrorTag(), e.getErrorSeverity(), e.getErrorInfo());
             }
 
             final Optional<Datastore> sourceDatastore;
             try {
                 sourceDatastore = parseSource(xml);
-            } catch (final NetconfDocumentedException e) {
-                throw new NetconfDocumentedException("Get-config source attribute error: " + e.getMessage(), e.getErrorType(), e.getErrorTag(), e.getErrorSeverity(), e.getErrorInfo());
+            } catch (final DocumentedException e) {
+                throw new DocumentedException("Get-config source attribute error: " + e.getMessage(), e.getErrorType(), e.getErrorTag(), e.getErrorSeverity(), e.getErrorInfo());
             }
 
             return new GetConfigExecution(sourceDatastore);
         }
 
-        private static Optional<Datastore> parseSource(final XmlElement xml) throws NetconfDocumentedException {
+        private static Optional<Datastore> parseSource(final XmlElement xml) throws DocumentedException {
             final Optional<XmlElement> sourceElement = xml.getOnlyChildElementOptionally(XmlNetconfConstants.SOURCE_KEY,
                     XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
 
@@ -255,7 +255,7 @@ public abstract class AbstractGet extends AbstractSingletonNetconfOperation {
                     Optional.of(Datastore.valueOf(sourceElement.get().getOnlyChildElement().getName())) : Optional.<Datastore>absent();
         }
 
-        private static void validateInputRpc(final XmlElement xml, String operationName) throws NetconfDocumentedException{
+        private static void validateInputRpc(final XmlElement xml, String operationName) throws DocumentedException{
             xml.checkName(operationName);
             xml.checkNamespace(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
         }

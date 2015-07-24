@@ -11,7 +11,8 @@ package org.opendaylight.controller.netconf.impl;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
+import org.opendaylight.controller.config.util.xml.XmlUtil;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfSessionListener;
 import org.opendaylight.controller.netconf.api.NetconfTerminationReason;
@@ -19,7 +20,6 @@ import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringServi
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.impl.osgi.NetconfOperationRouter;
 import org.opendaylight.controller.netconf.util.messages.SendErrorExceptionUtil;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -92,7 +92,7 @@ public class NetconfServerSessionListener implements NetconfSessionListener<Netc
             LOG.error("Unexpected exception", e);
             session.onIncommingRpcFail();
             throw new IllegalStateException("Unable to process incoming message " + netconfMessage, e);
-        } catch (NetconfDocumentedException e) {
+        } catch (DocumentedException e) {
             LOG.trace("Error occurred while processing message",e);
             session.onOutgoingRpcError();
             session.onIncommingRpcFail();
@@ -101,7 +101,7 @@ public class NetconfServerSessionListener implements NetconfSessionListener<Netc
     }
 
     private NetconfMessage processDocument(final NetconfMessage netconfMessage, final NetconfServerSession session)
-            throws NetconfDocumentedException {
+            throws DocumentedException {
 
         final Document incomingDocument = netconfMessage.getDocument();
         final Node rootNode = incomingDocument.getDocumentElement();
@@ -126,14 +126,14 @@ public class NetconfServerSessionListener implements NetconfSessionListener<Netc
              * unexpected element Description: An unexpected element is present.
              */
             // TODO add message to error info
-            throw new NetconfDocumentedException("Unknown tag " + rootNode.getNodeName(),
-                    NetconfDocumentedException.ErrorType.protocol, NetconfDocumentedException.ErrorTag.unknown_element,
-                    NetconfDocumentedException.ErrorSeverity.error, ImmutableMap.of("bad-element",
+            throw new DocumentedException("Unknown tag " + rootNode.getNodeName(),
+                    DocumentedException.ErrorType.protocol, DocumentedException.ErrorTag.unknown_element,
+                    DocumentedException.ErrorSeverity.error, ImmutableMap.of("bad-element",
                             rootNode.getNodeName()));
         }
     }
 
-    private static void checkMessageId(final Node rootNode) throws NetconfDocumentedException {
+    private static void checkMessageId(final Node rootNode) throws DocumentedException {
 
         NamedNodeMap attributes = rootNode.getAttributes();
 
@@ -145,10 +145,10 @@ public class NetconfServerSessionListener implements NetconfSessionListener<Netc
             return;
         }
 
-        throw new NetconfDocumentedException("Missing attribute" + rootNode.getNodeName(),
-                NetconfDocumentedException.ErrorType.protocol, NetconfDocumentedException.ErrorTag.missing_attribute,
-                NetconfDocumentedException.ErrorSeverity.error,
-                ImmutableMap.of(NetconfDocumentedException.ErrorTag.missing_attribute.toString(),
+        throw new DocumentedException("Missing attribute" + rootNode.getNodeName(),
+                DocumentedException.ErrorType.protocol, DocumentedException.ErrorTag.missing_attribute,
+                DocumentedException.ErrorSeverity.error,
+                ImmutableMap.of(DocumentedException.ErrorTag.missing_attribute.toString(),
                         XmlNetconfConstants.MESSAGE_ID));
     }
 }

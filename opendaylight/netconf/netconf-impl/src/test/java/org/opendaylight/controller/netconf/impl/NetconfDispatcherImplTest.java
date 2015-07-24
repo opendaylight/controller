@@ -12,7 +12,6 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.util.HashedWheelTimer;
-import java.lang.management.ManagementFactory;
 import java.net.InetSocketAddress;
 import org.junit.After;
 import org.junit.Before;
@@ -23,7 +22,6 @@ public class NetconfDispatcherImplTest {
 
     private EventLoopGroup nettyGroup;
     private NetconfServerDispatcherImpl dispatch;
-    private DefaultCommitNotificationProducer commitNot;
     private HashedWheelTimer hashedWheelTimer;
 
 
@@ -31,14 +29,12 @@ public class NetconfDispatcherImplTest {
     public void setUp() throws Exception {
         nettyGroup = new NioEventLoopGroup();
 
-        commitNot = new DefaultCommitNotificationProducer(
-                ManagementFactory.getPlatformMBeanServer());
         AggregatedNetconfOperationServiceFactory factoriesListener = new AggregatedNetconfOperationServiceFactory();
 
         SessionIdProvider idProvider = new SessionIdProvider();
         hashedWheelTimer = new HashedWheelTimer();
         NetconfServerSessionNegotiatorFactory serverNegotiatorFactory = new NetconfServerSessionNegotiatorFactory(
-                hashedWheelTimer, factoriesListener, idProvider, 5000, commitNot, ConcurrentClientsTest.createMockedMonitoringService());
+                hashedWheelTimer, factoriesListener, idProvider, 5000, ConcurrentClientsTest.createMockedMonitoringService());
 
         NetconfServerDispatcherImpl.ServerChannelInitializer serverChannelInitializer = new NetconfServerDispatcherImpl.ServerChannelInitializer(serverNegotiatorFactory);
 
@@ -49,7 +45,6 @@ public class NetconfDispatcherImplTest {
     @After
     public void tearDown() throws Exception {
         hashedWheelTimer.stop();
-        commitNot.close();
         nettyGroup.shutdownGracefully();
     }
 

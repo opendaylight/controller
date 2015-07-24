@@ -24,6 +24,7 @@ public interface ConfigRegistry extends LookupRegistry, ServiceReferenceReadable
      * ConfigRegisry is registered.
      */
     public static final ObjectName OBJECT_NAME = ConfigRegistryConstants.OBJECT_NAME;
+    public static final ObjectName OBJECT_NAME_NO_NOTIFICATIONS = ConfigRegistryConstants.OBJECT_NAME_NO_NOTIFICATIONS;
 
     /**
      * Opens new configuration transaction.
@@ -64,6 +65,5 @@ public interface ConfigRegistry extends LookupRegistry, ServiceReferenceReadable
      * @return module factory names available in the system
      */
     Set<String> getAvailableModuleNames();
-
 
 }

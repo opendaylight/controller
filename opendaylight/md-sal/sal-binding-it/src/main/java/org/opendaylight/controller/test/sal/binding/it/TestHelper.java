@@ -49,45 +49,19 @@ public class TestHelper {
                 mavenBundle("commons-codec", "commons-codec").versionAsInProject(),
 
                 systemPackages("sun.nio.ch", "sun.misc"),
-                mavenBundle("io.netty", "netty-common").versionAsInProject(), //
-                mavenBundle("io.netty", "netty-buffer").versionAsInProject(), //
-                mavenBundle("io.netty", "netty-handler").versionAsInProject(), //
-                mavenBundle("io.netty", "netty-codec").versionAsInProject(), //
-                mavenBundle("io.netty", "netty-transport").versionAsInProject(), //
 
                 mavenBundle(CONTROLLER, "config-manager").versionAsInProject(), // //
                 mavenBundle(CONTROLLER, "config-util").versionAsInProject(), // //
                 mavenBundle("commons-io", "commons-io").versionAsInProject(), //
-                mavenBundle(CONTROLLER, "config-manager").versionAsInProject(), //
+                mavenBundle(CONTROLLER, "config-manager-facade-xml").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "yang-jmx-generator").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "logback-config").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "config-persister-api").versionAsInProject(), //
-                mavenBundle(CONTROLLER, "netconf-api").versionAsInProject(), //
-                mavenBundle(CONTROLLER, "ietf-netconf-monitoring").versionAsInProject(), //
-                mavenBundle(CONTROLLER, "ietf-netconf-monitoring-extension").versionAsInProject(), //
-                mavenBundle(CONTROLLER, "netconf-monitoring").versionAsInProject(), //
-
-                mavenBundle(CONTROLLER, "netty-config-api").versionAsInProject(), //
-                mavenBundle(CONTROLLER, "protocol-framework").versionAsInProject(), //
-
-                mavenBundle(CONTROLLER, "netconf-client").versionAsInProject(), //
-                mavenBundle(CONTROLLER, "netconf-util").versionAsInProject(), //
-                mavenBundle(CONTROLLER, "netconf-netty-util").versionAsInProject(), //
-                mavenBundle("org.apache.sshd", "sshd-core").versionAsInProject(), //
-                mavenBundle("openexi", "nagasena").versionAsInProject(), //
-                mavenBundle("openexi", "nagasena-rta").versionAsInProject(), //
-                mavenBundle(CONTROLLER, "netconf-mapping-api").versionAsInProject(), //
 
                 mavenBundle(CONTROLLER, "config-persister-impl").versionAsInProject(), //
 
                 mavenBundle("org.apache.servicemix.bundles", "org.apache.servicemix.bundles.xerces", "2.11.0_1"),
                 mavenBundle("org.eclipse.birt.runtime.3_7_1", "org.apache.xml.resolver", "1.2.0"),
-
-                mavenBundle(CONTROLLER, "config-netconf-connector").versionAsInProject(), //
-                mavenBundle(CONTROLLER, "netconf-notifications-api").versionAsInProject(), //
-                mavenBundle(CONTROLLER, "ietf-netconf").versionAsInProject(), //
-                mavenBundle(CONTROLLER, "ietf-netconf-notifications").versionAsInProject(), //
-                mavenBundle(CONTROLLER, "netconf-impl").versionAsInProject(), //
 
                 mavenBundle(CONTROLLER, "config-persister-file-xml-adapter").versionAsInProject().noStart(),
                 mavenBundle("org.eclipse.persistence", "org.eclipse.persistence.moxy").versionAsInProject(),
@@ -132,11 +106,6 @@ public class TestHelper {
                 mavenBundle(CONTROLLER, "sal-broker-impl").versionAsInProject(), // //
                 mavenBundle(CONTROLLER, "sal-core-spi").versionAsInProject().update(), //
 
-
-                systemProperty("netconf.tcp.address").value("0.0.0.0"), //
-                systemProperty("netconf.tcp.port").value("18383"), //
-                systemProperty("netconf.tcp.client.address").value("127.0.0.1"), //
-                systemProperty("netconf.tcp.client.port").value("18383"), //
                 systemProperty("netconf.config.persister.active").value("1"), //
                 systemProperty("netconf.config.persister.1.storageAdapterClass").value(
                         "org.opendaylight.controller.config.persist.storage.file.xml.XmlFileStorageAdapter"), //

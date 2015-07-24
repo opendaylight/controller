@@ -40,20 +40,20 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
+import org.opendaylight.controller.config.util.xml.DocumentedException.ErrorSeverity;
+import org.opendaylight.controller.config.util.xml.DocumentedException.ErrorTag;
+import org.opendaylight.controller.config.util.xml.DocumentedException.ErrorType;
+import org.opendaylight.controller.config.util.xml.XmlUtil;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcAvailabilityListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 import org.opendaylight.controller.md.sal.dom.spi.DefaultDOMRpcResult;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorSeverity;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorTag;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorType;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedExecution;
 import org.opendaylight.controller.netconf.mdsal.connector.CurrentSchemaContext;
 import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.common.RpcError;
@@ -225,7 +225,7 @@ public class RuntimeRpcTest {
         try {
             rpc.handle(rpcDocument, NetconfOperationChainedExecution.EXECUTION_TERMINATION_POINT);
             fail("should have failed with rpc invocation not implemented yet");
-        } catch (NetconfDocumentedException e) {
+        } catch (DocumentedException e) {
             assertTrue(e.getErrorType() == ErrorType.application);
             assertTrue(e.getErrorSeverity() == ErrorSeverity.error);
             assertTrue(e.getErrorTag() == ErrorTag.operation_failed);
@@ -253,7 +253,7 @@ public class RuntimeRpcTest {
         try {
             rpc.handle(rpcDocument, NetconfOperationChainedExecution.EXECUTION_TERMINATION_POINT);
             fail("Should have failed, rpc has bad namespace");
-        } catch (NetconfDocumentedException e) {
+        } catch (DocumentedException e) {
             assertTrue(e.getErrorSeverity() == ErrorSeverity.error);
             assertTrue(e.getErrorTag() == ErrorTag.bad_element);
             assertTrue(e.getErrorType() == ErrorType.application);

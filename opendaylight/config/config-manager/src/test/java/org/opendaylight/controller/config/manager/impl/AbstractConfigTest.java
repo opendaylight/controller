@@ -41,6 +41,7 @@ import org.opendaylight.controller.config.manager.impl.factoriesresolver.ModuleF
 import org.opendaylight.controller.config.manager.impl.jmx.BaseJMXRegistrator;
 import org.opendaylight.controller.config.manager.impl.jmx.ConfigRegistryJMXRegistrator;
 import org.opendaylight.controller.config.manager.impl.jmx.InternalJMXRegistrator;
+import org.opendaylight.controller.config.manager.impl.jmx.JMXNotifierConfigRegistry;
 import org.opendaylight.controller.config.manager.impl.osgi.mapping.BindingContextProvider;
 import org.opendaylight.controller.config.manager.testingservices.scheduledthreadpool.TestingScheduledThreadPoolImpl;
 import org.opendaylight.controller.config.manager.testingservices.threadpool.TestingFixedThreadPool;
@@ -66,6 +67,7 @@ public abstract class AbstractConfigTest extends
         AbstractLockedPlatformMBeanServerTest {
     protected ConfigRegistryJMXRegistrator configRegistryJMXRegistrator;
     protected ConfigRegistryImpl configRegistry;
+    private JMXNotifierConfigRegistry notifyingConfigRegistry;
     protected ConfigRegistryJMXClient configRegistryClient;
     protected BaseJMXRegistrator baseJmxRegistrator;
     protected InternalJMXRegistrator internalJmxRegistrator;
@@ -137,9 +139,11 @@ public abstract class AbstractConfigTest extends
                 return getBindingRuntimeContext();
             }
         });
+        notifyingConfigRegistry = new JMXNotifierConfigRegistry(this.configRegistry, platformMBeanServer);
 
         try {
-            configRegistryJMXRegistrator.registerToJMX(configRegistry);
+            configRegistryJMXRegistrator.registerToJMXNoNotifications(configRegistry);
+            configRegistryJMXRegistrator.registerToJMX(notifyingConfigRegistry);
         } catch (InstanceAlreadyExistsException e) {
             throw new RuntimeException(e);
         }
@@ -157,6 +161,7 @@ public abstract class AbstractConfigTest extends
     @After
     public final void cleanUpConfigTransactionManagerImpl() {
         configRegistryJMXRegistrator.close();
+        notifyingConfigRegistry.close();
         configRegistry.close();
         TestingFixedThreadPool.cleanUp();
         TestingScheduledThreadPoolImpl.cleanUp();

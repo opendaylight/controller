@@ -11,15 +11,15 @@ package org.opendaylight.controller.netconf.mdsal.connector.ops;
 import com.google.common.base.Optional;
 import java.util.HashMap;
 import java.util.Map;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorSeverity;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorTag;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorType;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
+import org.opendaylight.controller.config.util.xml.DocumentedException.ErrorSeverity;
+import org.opendaylight.controller.config.util.xml.DocumentedException.ErrorTag;
+import org.opendaylight.controller.config.util.xml.DocumentedException.ErrorType;
+import org.opendaylight.controller.config.util.xml.XmlElement;
+import org.opendaylight.controller.config.util.xml.XmlUtil;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.mdsal.connector.TransactionProvider;
 import org.opendaylight.controller.netconf.util.mapping.AbstractSingletonNetconfOperation;
-import org.opendaylight.controller.netconf.util.xml.XmlElement;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -39,7 +39,7 @@ public class DiscardChanges extends AbstractSingletonNetconfOperation {
     }
 
     @Override
-    protected Element handleWithNoSubsequentOperations(final Document document, final XmlElement operationElement) throws NetconfDocumentedException {
+    protected Element handleWithNoSubsequentOperations(final Document document, final XmlElement operationElement) throws DocumentedException {
 
         try {
             transactionProvider.abortTransaction();
@@ -49,7 +49,7 @@ public class DiscardChanges extends AbstractSingletonNetconfOperation {
             errorInfo
                     .put(ErrorTag.operation_failed.name(),
                             "Operation failed. Use 'get-config' or 'edit-config' before triggering 'discard-changes' operation");
-            throw new NetconfDocumentedException(e.getMessage(), e, ErrorType.application, ErrorTag.operation_failed,
+            throw new DocumentedException(e.getMessage(), e, ErrorType.application, ErrorTag.operation_failed,
                     ErrorSeverity.error, errorInfo);
         }
         return XmlUtil.createElement(document, XmlNetconfConstants.OK, Optional.<String>absent());

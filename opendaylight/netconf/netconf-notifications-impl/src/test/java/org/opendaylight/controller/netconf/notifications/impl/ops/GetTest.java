@@ -11,7 +11,7 @@ package org.opendaylight.controller.netconf.notifications.impl.ops;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import org.junit.Test;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
+import org.opendaylight.controller.config.util.xml.XmlUtil;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf.notification._1._0.rev080714.StreamNameType;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netmod.notification.rev080714.netconf.Streams;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netmod.notification.rev080714.netconf.StreamsBuilder;
