@@ -13,6 +13,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import java.util.Collections;
 import java.util.Set;
 import javax.annotation.Nullable;
@@ -68,12 +69,16 @@ public class DummyMonitoringService implements NetconfMonitoringService {
         this.capabilities = new CapabilitiesBuilder().setCapability(
                 Lists.newArrayList(Collections2.transform(capabilities, CAPABILITY_URI_FUNCTION))).build();
 
+        Set<Capability> moduleCapabilities = Sets.newHashSet();
         this.capabilityMultiMap = ArrayListMultimap.create();
         for (Capability cap : capabilities) {
-            capabilityMultiMap.put(cap.getModuleName().get(), cap);
+            if(cap.getModuleName().isPresent()) {
+                capabilityMultiMap.put(cap.getModuleName().get(), cap);
+                moduleCapabilities.add(cap);
+            }
         }
 
-        this.schemas = new SchemasBuilder().setSchema(Lists.newArrayList(Collections2.transform(capabilities, CAPABILITY_SCHEMA_FUNCTION))).build();
+        this.schemas = new SchemasBuilder().setSchema(Lists.newArrayList(Collections2.transform(moduleCapabilities, CAPABILITY_SCHEMA_FUNCTION))).build();
     }
 
     @Override
