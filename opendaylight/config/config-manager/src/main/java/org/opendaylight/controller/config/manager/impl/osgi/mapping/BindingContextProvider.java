@@ -26,12 +26,12 @@ public class BindingContextProvider implements AutoCloseable {
     }
 
     public synchronized BindingRuntimeContext getBindingContext() {
-        Preconditions.checkState(current != null, "Binding context not yet initialized");
+        Preconditions.checkState(this.current != null, "Binding context not yet initialized");
         return this.current;
     }
 
     @Override
     public synchronized void close() throws Exception {
-        current = null;
+        this.current = null;
     }
 }

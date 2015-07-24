@@ -41,6 +41,14 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
+      <artifactId>config-manager-facade-xml</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>config-util</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
       <artifactId>config-persister-file-xml-adapter</artifactId>
     </dependency>
     <dependency>

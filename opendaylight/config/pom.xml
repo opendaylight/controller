@@ -22,6 +22,7 @@
     <module>config-persister-api</module>
     <module>config-persister-file-xml-adapter</module>
     <module>config-persister-feature-adapter</module>
+    <module>config-manager-facade-xml</module>
     <module>yang-jmx-generator</module>
     <module>yang-jmx-generator-plugin</module>
     <module>yang-test</module>
@@ -36,12 +37,12 @@
     <module>yang-test-plugin</module>
     <module>shutdown-api</module>
     <module>shutdown-impl</module>
-    <module>netconf-config-dispatcher</module>
     <module>config-module-archetype</module>
     <module>config-netty-config</module>
 
     <module>config-artifacts</module>
     <module>config-parent</module>
+    <module>config-persister-impl</module>
   </modules>
 
   <dependencies>
