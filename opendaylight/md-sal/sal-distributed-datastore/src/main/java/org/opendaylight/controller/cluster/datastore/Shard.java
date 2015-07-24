@@ -221,7 +221,7 @@ public class Shard extends RaftActor {
 
         if(context.error().isPresent()){
             LOG.trace("{} : AppendEntriesReply failed to arrive at the expected interval {}", persistenceId(),
-                    context.error());
+                context.error());
         }
 
         try {
@@ -243,9 +243,9 @@ public class Shard extends RaftActor {
             } else if (CloseTransactionChain.SERIALIZABLE_CLASS.isInstance(message)) {
                 closeTransactionChain(CloseTransactionChain.fromSerializable(message));
             } else if (message instanceof RegisterChangeListener) {
-                changeSupport.onMessage((RegisterChangeListener) message, isLeader());
+                changeSupport.onMessage((RegisterChangeListener) message, isLeader(), hasLeader());
             } else if (message instanceof RegisterDataTreeChangeListener) {
-                treeChangeSupport.onMessage((RegisterDataTreeChangeListener) message, isLeader());
+                treeChangeSupport.onMessage((RegisterDataTreeChangeListener) message, isLeader(), hasLeader());
             } else if (message instanceof UpdateSchemaContext) {
                 updateSchemaContext((UpdateSchemaContext) message);
             } else if (message instanceof PeerAddressResolved) {
@@ -269,6 +269,10 @@ public class Shard extends RaftActor {
         } finally {
             context.done();
         }
+    }
+
+    private boolean hasLeader() {
+        return getLeaderId() != null;
     }
 
     public int getPendingTxCommitQueueSize() {
@@ -655,8 +659,9 @@ public class Shard extends RaftActor {
     @Override
     protected void onStateChanged() {
         boolean isLeader = isLeader();
-        changeSupport.onLeadershipChange(isLeader);
-        treeChangeSupport.onLeadershipChange(isLeader);
+        boolean hasLeader = hasLeader();
+        changeSupport.onLeadershipChange(isLeader, hasLeader);
+        treeChangeSupport.onLeadershipChange(isLeader, hasLeader);
 
         // If this actor is no longer the leader close all the transaction chains
         if (!isLeader) {

@@ -42,6 +42,7 @@ import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
+import org.opendaylight.controller.md.sal.dom.api.ClusteredDOMDataChangeListener;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import scala.concurrent.ExecutionContextExecutor;
@@ -95,6 +96,7 @@ public class DataChangeListenerRegistrationProxyTest extends AbstractActorTest {
             RegisterChangeListener registerMsg = expectMsgClass(timeout, RegisterChangeListener.class);
             Assert.assertEquals("getPath", path, registerMsg.getPath());
             Assert.assertEquals("getScope", scope, registerMsg.getScope());
+            Assert.assertEquals("isRegisterOnAllInstances", false, registerMsg.isRegisterOnAllInstances());
 
             reply(new RegisterChangeListenerReply(getRef()));
 
@@ -104,6 +106,64 @@ public class DataChangeListenerRegistrationProxyTest extends AbstractActorTest {
 
             Assert.assertEquals("getListenerRegistrationActor", getSystem().actorSelection(getRef().path()),
                     proxy.getListenerRegistrationActor());
+
+            watch(proxy.getDataChangeListenerActor());
+
+            proxy.close();
+
+            // The listener registration actor should get a Close message
+            expectMsgClass(timeout, CloseDataChangeListenerRegistration.SERIALIZABLE_CLASS);
+
+            // The DataChangeListener actor should be terminated
+            expectMsgClass(timeout, Terminated.class);
+
+            proxy.close();
+
+            expectNoMsg();
+        }};
+    }
+
+    @Test(timeout=10000)
+    public void testSuccessfulRegistrationForClusteredListener() {
+        new JavaTestKit(getSystem()) {{
+            ActorContext actorContext = new ActorContext(getSystem(), getRef(),
+                mock(ClusterWrapper.class), mock(Configuration.class));
+
+            AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> mockClusteredListener =
+                Mockito.mock(ClusteredDOMDataChangeListener.class);
+
+            final DataChangeListenerRegistrationProxy proxy = new DataChangeListenerRegistrationProxy(
+                "shard-1", actorContext, mockClusteredListener);
+
+            final YangInstanceIdentifier path = YangInstanceIdentifier.of(TestModel.TEST_QNAME);
+            final DataChangeScope scope = AsyncDataBroker.DataChangeScope.ONE;
+            new Thread() {
+                @Override
+                public void run() {
+                    proxy.init(path, scope);
+                }
+
+            }.start();
+
+            FiniteDuration timeout = duration("5 seconds");
+            FindLocalShard findLocalShard = expectMsgClass(timeout, FindLocalShard.class);
+            Assert.assertEquals("getShardName", "shard-1", findLocalShard.getShardName());
+
+            reply(new LocalShardFound(getRef()));
+
+            RegisterChangeListener registerMsg = expectMsgClass(timeout, RegisterChangeListener.class);
+            Assert.assertEquals("getPath", path, registerMsg.getPath());
+            Assert.assertEquals("getScope", scope, registerMsg.getScope());
+            Assert.assertEquals("isRegisterOnAllInstances", true, registerMsg.isRegisterOnAllInstances());
+
+            reply(new RegisterChangeListenerReply(getRef()));
+
+            for(int i = 0; (i < 20 * 5) && proxy.getListenerRegistrationActor() == null; i++) {
+                Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
+            }
+
+            Assert.assertEquals("getListenerRegistrationActor", getSystem().actorSelection(getRef().path()),
+                proxy.getListenerRegistrationActor());
 
             watch(proxy.getDataChangeListenerActor());
 

@@ -24,14 +24,16 @@ public class RegisterChangeListener implements SerializableMessage {
     private final YangInstanceIdentifier path;
     private final ActorRef dataChangeListener;
     private final AsyncDataBroker.DataChangeScope scope;
+    private final boolean registerOnAllInstances;
 
 
     public RegisterChangeListener(YangInstanceIdentifier path,
         ActorRef dataChangeListener,
-        AsyncDataBroker.DataChangeScope scope) {
+        AsyncDataBroker.DataChangeScope scope, boolean registerOnAllInstances) {
         this.path = path;
         this.dataChangeListener = dataChangeListener;
         this.scope = scope;
+        this.registerOnAllInstances = registerOnAllInstances;
     }
 
     public YangInstanceIdentifier getPath() {
@@ -47,20 +49,23 @@ public class RegisterChangeListener implements SerializableMessage {
         return dataChangeListener.path();
     }
 
+    public boolean isRegisterOnAllInstances() {
+        return registerOnAllInstances;
+    }
 
     @Override
     public ListenerRegistrationMessages.RegisterChangeListener toSerializable() {
       return ListenerRegistrationMessages.RegisterChangeListener.newBuilder()
           .setInstanceIdentifierPath(InstanceIdentifierUtils.toSerializable(path))
           .setDataChangeListenerActorPath(Serialization.serializedActorPath(dataChangeListener))
-          .setDataChangeScope(scope.ordinal()).build();
+          .setDataChangeScope(scope.ordinal()).setRegisterOnAllInstances(registerOnAllInstances).build();
     }
 
   public static RegisterChangeListener fromSerializable(ActorSystem actorSystem, Object serializable){
     ListenerRegistrationMessages.RegisterChangeListener o = (ListenerRegistrationMessages.RegisterChangeListener) serializable;
     return new RegisterChangeListener(InstanceIdentifierUtils.fromSerializable(o.getInstanceIdentifierPath()),
                                                 actorSystem.provider().resolveActorRef(o.getDataChangeListenerActorPath()),
-                                              AsyncDataBroker.DataChangeScope.values()[o.getDataChangeScope()]);
+                                              AsyncDataBroker.DataChangeScope.values()[o.getDataChangeScope()], o.getRegisterOnAllInstances());
   }
 
 
