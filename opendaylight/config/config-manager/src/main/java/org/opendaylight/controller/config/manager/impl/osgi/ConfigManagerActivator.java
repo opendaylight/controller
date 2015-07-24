@@ -15,8 +15,10 @@ import java.util.Arrays;
 import java.util.List;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.MBeanServer;
+import org.opendaylight.controller.config.api.ConfigRegistry;
 import org.opendaylight.controller.config.manager.impl.ConfigRegistryImpl;
 import org.opendaylight.controller.config.manager.impl.jmx.ConfigRegistryJMXRegistrator;
+import org.opendaylight.controller.config.manager.impl.jmx.JMXNotifierConfigRegistry;
 import org.opendaylight.controller.config.manager.impl.osgi.mapping.BindingContextProvider;
 import org.opendaylight.controller.config.manager.impl.osgi.mapping.ModuleInfoBundleTracker;
 import org.opendaylight.controller.config.manager.impl.osgi.mapping.RefreshingSCPModuleInfoRegistry;
@@ -35,7 +37,6 @@ public class ConfigManagerActivator implements BundleActivator {
 
     @Override
     public void start(final BundleContext context) {
-
         ModuleInfoBackedContext moduleInfoBackedContext = ModuleInfoBackedContext.create();// the inner strategy is backed by thread context cl?
 
         BindingContextProvider bindingContextProvider = new BindingContextProvider();
@@ -44,7 +45,6 @@ public class ConfigManagerActivator implements BundleActivator {
                 moduleInfoBackedContext, moduleInfoBackedContext, moduleInfoBackedContext, bindingContextProvider, context);
 
         ModuleInfoBundleTracker moduleInfoBundleTracker = new ModuleInfoBundleTracker(moduleInfoRegistryWrapper);
-
 
         // start config registry
         BundleContextBackedModuleFactoriesResolver bundleContextBackedModuleFactoriesResolver = new BundleContextBackedModuleFactoriesResolver(
@@ -63,14 +63,26 @@ public class ConfigManagerActivator implements BundleActivator {
                 primaryModuleFactoryBundleTracker, moduleInfoBundleTracker);
         bundleTracker.open();
 
+        // Wrap config registry with JMX notification publishing adapter
+        final JMXNotifierConfigRegistry notifyingConfigRegistry =
+                new JMXNotifierConfigRegistry(configRegistry, configMBeanServer);
+
         // register config registry to OSGi
         AutoCloseable clsReg = registerService(context, moduleInfoBackedContext, GeneratedClassLoadingStrategy.class);
-        AutoCloseable configRegReg = registerService(context, configRegistry, ConfigRegistryImpl.class);
+        AutoCloseable configRegReg = registerService(context, notifyingConfigRegistry, ConfigRegistry.class);
 
         // register config registry to jmx
         ConfigRegistryJMXRegistrator configRegistryJMXRegistrator = new ConfigRegistryJMXRegistrator(configMBeanServer);
         try {
-            configRegistryJMXRegistrator.registerToJMX(configRegistry);
+            configRegistryJMXRegistrator.registerToJMXNoNotifications(configRegistry);
+        } catch (InstanceAlreadyExistsException e) {
+            throw new IllegalStateException("Config Registry was already registered to JMX", e);
+        }
+
+        // register config registry to jmx
+        final ConfigRegistryJMXRegistrator configRegistryJMXRegistratorWithNotifications = new ConfigRegistryJMXRegistrator(configMBeanServer);
+        try {
+            configRegistryJMXRegistrator.registerToJMX(notifyingConfigRegistry);
         } catch (InstanceAlreadyExistsException e) {
             throw new IllegalStateException("Config Registry was already registered to JMX", e);
         }
@@ -80,8 +92,8 @@ public class ConfigManagerActivator implements BundleActivator {
                 blankTransactionServiceTracker);
         serviceTracker.open();
 
-        List<AutoCloseable> list = Arrays.asList(
-                bindingContextProvider, clsReg,configRegistry, wrap(bundleTracker), configRegReg, configRegistryJMXRegistrator, wrap(serviceTracker));
+        List<AutoCloseable> list = Arrays.asList(bindingContextProvider, clsReg, configRegistry, wrap(bundleTracker),
+                configRegReg, configRegistryJMXRegistrator, configRegistryJMXRegistratorWithNotifications, wrap(serviceTracker));
         autoCloseable = OsgiRegistrationUtil.aggregate(list);
     }
 
