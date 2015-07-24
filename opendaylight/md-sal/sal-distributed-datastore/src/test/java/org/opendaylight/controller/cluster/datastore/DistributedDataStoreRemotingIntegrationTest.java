@@ -68,6 +68,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.CollectionNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 
 /**
  * End-to-end distributed data store tests that exercise remote shards and transactions.
@@ -118,11 +119,11 @@ public class DistributedDataStoreRemotingIntegrationTest {
         JavaTestKit.shutdownActorSystem(follower2System);
     }
 
-    private void initDatastores(String type) {
+    private void initDatastores(String type) throws ReactorException {
         initDatastores(type, MODULE_SHARDS_CONFIG_2);
     }
 
-    private void initDatastores(String type, String moduleShardsConfig) {
+    private void initDatastores(String type, String moduleShardsConfig) throws ReactorException {
         leaderTestKit = new IntegrationTestKit(leaderSystem, leaderDatastoreContextBuilder);
 
         leaderDistributedDataStore = leaderTestKit.setupDistributedDataStore(type, moduleShardsConfig, false, SHARD_NAMES);

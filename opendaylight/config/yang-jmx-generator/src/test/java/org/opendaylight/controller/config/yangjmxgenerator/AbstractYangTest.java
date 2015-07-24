@@ -27,7 +27,8 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.IdentitySchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
+import org.opendaylight.yangtools.yang.parser.stmt.reactor.CrossSourceStatementReactor;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangInferencePipeline;
 
 public abstract class AbstractYangTest {
     protected SchemaContext context;
@@ -53,16 +54,11 @@ public abstract class AbstractYangTest {
                 "/config-bgp-listener-impl.yang", "/ietf-inet-types.yang",
                 "/config-jmx-it.yang", "/config-jmx-it-impl.yang",
                 "/test-config-files.yang", "/test-config-files1.yang"));
-
         yangISs.addAll(getConfigApiYangInputStreams());
 
-        YangParserImpl parser = new YangParserImpl();
-        Set<Module> modulesToBuild = parser.parseYangModelsFromStreams(yangISs);
-        // close ISs
-        for (InputStream is : yangISs) {
-            is.close();
-        }
-        context = parser.resolveSchemaContext(modulesToBuild);
+        CrossSourceStatementReactor.BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR.newBuild();
+        context = reactor.buildEffective(yangISs);
+
         namesToModules = YangModelSearchUtils.mapModulesByNames(context
                 .getModules());
         configModule = namesToModules.get(ConfigConstants.CONFIG_MODULE);
@@ -78,6 +74,10 @@ public abstract class AbstractYangTest {
         testFilesModule = namesToModules.get("test-config-files");
         testFiles1Module = namesToModules.get("test-config-files1");
 
+        // close ISs
+        for (InputStream is : yangISs) {
+            is.close();
+        }
     }
 
     public static List<InputStream> getConfigApiYangInputStreams() {

@@ -50,6 +50,11 @@ import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.parser.api.YangContextParser;
 import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
+import org.opendaylight.yangtools.yang.parser.stmt.reactor.CrossSourceStatementReactor;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangInferencePipeline;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangStatementSourceImpl;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.effective.EffectiveSchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -77,22 +82,34 @@ public final class TestUtils {
         return PARSER.parseYangModels(testFiles);
     }
 
-    public static Set<Module> loadModulesFrom(final String yangPath) {
-        try {
-            return TestUtils.loadModules(TestUtils.class.getResource(yangPath).getPath());
-        } catch (final FileNotFoundException e) {
-            LOG.error("Yang files at path: " + yangPath + " weren't loaded.");
+    public static SchemaContext loadSchemaCtxFromDirPath(final String yangPath) throws ReactorException,
+            URISyntaxException {
+
+        final CrossSourceStatementReactor.BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR
+                .newBuild();
+        File[] files = new File(new URI(yangPath)).listFiles();
+
+        for (File file : files) {
+            reactor.addSource(new YangStatementSourceImpl(file.getPath(),
+                    true));
         }
 
-        return null;
+        EffectiveSchemaContext ctx = reactor.buildEffective();
+        return ctx;
+    }
+
+    public static Set<Module> loadModulesFromDirPath(final String yangPath) throws URISyntaxException, ReactorException {
+
+        return loadSchemaCtxFromDirPath(yangPath).getModules();
     }
 
     public static SchemaContext loadSchemaContext(final Set<Module> modules) {
         return PARSER.resolveSchemaContext(modules);
     }
 
-    public static SchemaContext loadSchemaContext(final String resourceDirectory) throws FileNotFoundException {
-        return PARSER.resolveSchemaContext(loadModulesFrom(resourceDirectory));
+    public static SchemaContext loadSchemaContext(final String resourceDirectory) throws URISyntaxException,
+            ReactorException {
+        return loadSchemaCtxFromDirPath(resourceDirectory);
     }
 
     public static Module findModule(final Set<Module> modules, final String moduleName) {
