@@ -63,7 +63,7 @@ final class DataChangeListenerSupport extends LeaderLocalDelegateFactory<Registe
         final ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier,
                                                      NormalizedNode<?, ?>>> registration;
         final AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> event;
-        if (isLeader) {
+        if (message.isRemoteListener() || isLeader) {
             final Entry<ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>>, DOMImmutableDataChangeEvent> res =
                     createDelegate(message);
             registration = res.getKey();
@@ -100,7 +100,9 @@ final class DataChangeListenerSupport extends LeaderLocalDelegateFactory<Registe
 
         // Now store a reference to the data change listener so it can be notified
         // at a later point if notifications should be enabled or disabled
-        dataChangeListeners.add(dataChangeListenerPath);
+        if(!message.isRemoteListener()) {
+            dataChangeListeners.add(dataChangeListenerPath);
+        }
 
         AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> listener =
                 new DataChangeListenerProxy(dataChangeListenerPath);
