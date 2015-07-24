@@ -10,6 +10,7 @@ package org.opendaylight.controller.netconf.cli;
 import static com.google.common.base.Throwables.getStackTraceAsString;
 
 import com.google.common.base.Preconditions;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -27,6 +28,7 @@ import org.opendaylight.controller.netconf.client.conf.NetconfClientConfiguratio
 import org.opendaylight.controller.netconf.client.conf.NetconfClientConfigurationBuilder;
 import org.opendaylight.controller.netconf.nettyutil.handler.ssh.authentication.LoginPassword;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 
 /**
  * Parse arguments, start remote device connection and start CLI after the
@@ -34,7 +36,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
  */
 public class Main {
 
-    public static void main(final String[] args) {
+    public static void main(final String[] args) throws FileNotFoundException, ReactorException {
         final CliArgumentParser cliArgs = new CliArgumentParser();
         try {
             cliArgs.parse(args);

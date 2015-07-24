@@ -34,9 +34,14 @@ import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaNode;
-import org.opendaylight.yangtools.yang.model.parser.api.YangContextParser;
 import org.opendaylight.yangtools.yang.model.parser.api.YangSyntaxErrorException;
-import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
+import org.opendaylight.yangtools.yang.parser.spi.source.SourceException;
+import org.opendaylight.yangtools.yang.parser.spi.source.StatementStreamSource;
+import org.opendaylight.yangtools.yang.parser.stmt.reactor.CrossSourceStatementReactor;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangInferencePipeline;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangStatementSourceImpl;
+import org.opendaylight.yangtools.yang.parser.util.NamedFileInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -55,8 +60,6 @@ import org.w3c.dom.Element;
 public class TestRestconfUtils {
 
     private static final Logger LOG = LoggerFactory.getLogger(TestRestconfUtils.class);
-
-    private static final YangContextParser parser = new YangParserImpl();
 
     private static final DocumentBuilderFactory BUILDERFACTORY;
 
@@ -177,14 +180,30 @@ public class TestRestconfUtils {
         return testFiles;
     }
 
-    private static SchemaContext loadSchemaContext(final String resourceDirectory) throws IOException {
+    public static SchemaContext parseYangSources(Collection<File> files) throws SourceException, ReactorException, FileNotFoundException {
+
+        StatementStreamSource[] sources = new StatementStreamSource[files.size()];
+
+        int iter = 0;
+        for (final File file : files) {
+            sources[iter++] = new YangStatementSourceImpl(new NamedFileInputStream(file,file.getPath()));
+        }
+
+        CrossSourceStatementReactor.BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR
+                .newBuild();
+        reactor.addSources(sources);
+
+        return reactor.buildEffective();
+    }
+
+    private static SchemaContext loadSchemaContext(final String resourceDirectory) throws IOException, ReactorException {
         final Collection<File> testFiles = loadFiles(resourceDirectory);
-        return parser.parseFiles(testFiles);
+        return parseYangSources(testFiles);
     }
 
     private static SchemaContext addSchemaContext(final String resourceDirectory,
-            final SchemaContext schemaContext) throws IOException, YangSyntaxErrorException {
+            final SchemaContext schemaContext) throws IOException, YangSyntaxErrorException, ReactorException {
         final Collection<File> testFiles = loadFiles(resourceDirectory);
-        return parser.parseFiles(testFiles, schemaContext);
+        return parseYangSources(testFiles);
     }
 }

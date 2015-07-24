@@ -11,6 +11,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import javax.ws.rs.Consumes;
@@ -59,6 +60,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContaine
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.ListNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 
 public class CutDataToCorrectDepthTest extends JerseyTest {
 
@@ -118,7 +120,7 @@ public class CutDataToCorrectDepthTest extends JerseyTest {
     }
 
     @BeforeClass
-    public static void initialize() throws FileNotFoundException {
+    public static void initialize() throws FileNotFoundException, URISyntaxException, ReactorException {
         schemaContextModules = TestUtils.loadSchemaContext("/modules");
         Module module = TestUtils.findModule(schemaContextModules.getModules(), "nested-module");
         assertNotNull(module);

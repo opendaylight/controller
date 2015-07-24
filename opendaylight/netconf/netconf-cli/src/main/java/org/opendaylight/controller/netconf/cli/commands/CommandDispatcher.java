@@ -13,7 +13,10 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -32,7 +35,13 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
+import org.opendaylight.yangtools.yang.parser.spi.source.SourceException;
+import org.opendaylight.yangtools.yang.parser.spi.source.StatementStreamSource;
+import org.opendaylight.yangtools.yang.parser.stmt.reactor.CrossSourceStatementReactor;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangInferencePipeline;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangStatementSourceImpl;
+import org.opendaylight.yangtools.yang.parser.util.NamedFileInputStream;
 
 /**
  * The registry of available commands local + remote. Created from schema contexts.
@@ -106,7 +115,7 @@ public class CommandDispatcher {
     public static final Collection<String> BASE_NETCONF_SCHEMA_PATHS = Lists.newArrayList("/schema/remote/ietf-netconf.yang",
             "/schema/common/netconf-cli-ext.yang", "/schema/common/ietf-inet-types.yang");
 
-    public synchronized void addRemoteCommands(final DOMRpcService rpcService, final SchemaContext remoteSchema) {
+    public synchronized void addRemoteCommands(final DOMRpcService rpcService, final SchemaContext remoteSchema) throws FileNotFoundException, ReactorException {
         this.addRemoteCommands(rpcService, remoteSchema, parseSchema(BASE_NETCONF_SCHEMA_PATHS));
     }
 
@@ -161,11 +170,30 @@ public class CommandDispatcher {
         return IOUtil.qNameToKeyString(rpcDefinition.getQName(), module.getName());
     }
 
-    public static SchemaContext parseSchema(final Collection<String> yangPath) {
-        final YangParserImpl yangParserImpl = new YangParserImpl();
-        // TODO change deprecated method
-        final Set<Module> modules = yangParserImpl.parseYangModelsFromStreams(loadYangs(yangPath));
-        return yangParserImpl.resolveSchemaContext(modules);
+    public static SchemaContext parseYangSources(Collection<File> files) throws SourceException, ReactorException, FileNotFoundException {
+
+        StatementStreamSource[] sources = new StatementStreamSource[files.size()];
+
+        int iter = 0;
+        for (final File file : files) {
+            sources[iter++] = new YangStatementSourceImpl(new NamedFileInputStream(file,file.getPath()));
+        }
+
+        CrossSourceStatementReactor.BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR
+                .newBuild();
+        reactor.addSources(sources);
+
+        return reactor.buildEffective();
+    }
+
+    public static SchemaContext parseSchema(final Collection<String> yangPath) throws FileNotFoundException, ReactorException {
+
+        List<File>files = new ArrayList<>();
+        for (final String path : yangPath) {
+            files.add(new File(path));
+        }
+
+        return parseYangSources(files);
     }
 
     private static List<InputStream> loadYangs(final Collection<String> yangPaths) {

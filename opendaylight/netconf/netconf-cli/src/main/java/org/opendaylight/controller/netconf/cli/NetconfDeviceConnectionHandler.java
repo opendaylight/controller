@@ -8,6 +8,7 @@
 package org.opendaylight.controller.netconf.cli;
 
 import com.google.common.base.Optional;
+import java.io.FileNotFoundException;
 import jline.console.completer.Completer;
 import jline.console.completer.NullCompleter;
 import org.opendaylight.controller.md.sal.dom.api.DOMNotification;
@@ -18,6 +19,7 @@ import org.opendaylight.controller.netconf.cli.io.ConsoleIO;
 import org.opendaylight.controller.sal.connect.api.RemoteDeviceHandler;
 import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionPreferences;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 
 /**
  * Implementation of RemoteDeviceHandler. Integrates cli with
@@ -60,7 +62,11 @@ public class NetconfDeviceConnectionHandler implements RemoteDeviceHandler<Netco
         // possible
         // TODO detect netconf base version
         // TODO detect inet types version
-        commandDispatcher.addRemoteCommands(rpcService, context);
+        try {
+            commandDispatcher.addRemoteCommands(rpcService, context);
+        } catch (FileNotFoundException | ReactorException e) {
+            e.printStackTrace();
+        }
         schemaContextRegistry.setRemoteSchemaContext(context);
         up = true;
         this.notify();

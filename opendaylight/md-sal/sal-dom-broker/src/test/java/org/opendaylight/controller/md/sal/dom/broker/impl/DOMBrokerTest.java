@@ -44,6 +44,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 
 public class DOMBrokerTest {
 
@@ -54,7 +55,7 @@ public class DOMBrokerTest {
     private CommitExecutorService commitExecutor;
 
     @Before
-    public void setupStore() {
+    public void setupStore() throws ReactorException {
 
         InMemoryDOMDataStore operStore = new InMemoryDOMDataStore("OPER",
                 MoreExecutors.newDirectExecutorService());
