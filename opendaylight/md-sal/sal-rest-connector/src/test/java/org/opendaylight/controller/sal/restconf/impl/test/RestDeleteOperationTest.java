@@ -46,7 +46,7 @@ public class RestDeleteOperationTest extends JerseyTest {
 
     @BeforeClass
     public static void init() throws FileNotFoundException {
-        final Set<Module> allModules = TestUtils.loadModulesFrom("/test-config-data/yang1");
+        final Set<Module> allModules = TestUtils.loadSchemaContextFromDirPath("/test-config-data/yang1");
         assertNotNull(allModules);
         final SchemaContext schemaContext = TestUtils.loadSchemaContext(allModules);
         controllerContext = ControllerContext.getInstance();

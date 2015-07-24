@@ -79,7 +79,7 @@ public class RestPostOperationTest extends JerseyTest {
         restconfImpl = RestconfImpl.getInstance();
         restconfImpl.setBroker(brokerFacade);
 
-        final Set<Module> modules = TestUtils.loadModulesFrom("/test-config-data/yang1");
+        final Set<Module> modules = TestUtils.loadSchemaContextFromDirPath("/test-config-data/yang1");
         schemaContext = TestUtils.loadSchemaContext(modules);
 
         loadData();

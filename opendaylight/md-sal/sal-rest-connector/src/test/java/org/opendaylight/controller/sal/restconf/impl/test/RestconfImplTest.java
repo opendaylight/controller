@@ -39,7 +39,7 @@ public class RestconfImplTest {
 
     @BeforeClass
     public static void init() throws FileNotFoundException {
-        final Set<Module> allModules = TestUtils.loadModulesFrom("/full-versions/yangs");
+        final Set<Module> allModules = TestUtils.loadSchemaContextFromDirPath("/full-versions/yangs");
         assertNotNull(allModules);
         final SchemaContext schemaContext = TestUtils.loadSchemaContext(allModules);
         controllerContext = spy(ControllerContext.getInstance());

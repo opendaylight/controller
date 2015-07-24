@@ -45,7 +45,7 @@ public class URITest {
 
     @BeforeClass
     public static void init() throws FileNotFoundException {
-        final Set<Module> allModules = TestUtils.loadModulesFrom("/full-versions/yangs");
+        final Set<Module> allModules = TestUtils.loadSchemaContextFromDirPath("/full-versions/yangs");
         assertNotNull(allModules);
         final SchemaContext schemaContext = TestUtils.loadSchemaContext(allModules);
         controllerContext.setSchemas(schemaContext);
@@ -162,7 +162,7 @@ public class URITest {
         restconfImpl.setBroker(brokerFacade);
         restconfImpl.setControllerContext(controllerContext);
 
-        final Set<Module> modules2 = TestUtils.loadModulesFrom("/test-config-data/yang2");
+        final Set<Module> modules2 = TestUtils.loadSchemaContextFromDirPath("/test-config-data/yang2");
         final SchemaContext schemaContext2 = TestUtils.loadSchemaContext(modules2);
         final DOMMountPoint mountInstance = mock(DOMMountPoint.class);
         if (withSchema) {

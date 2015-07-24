@@ -27,7 +27,7 @@ public abstract class YangAndXmlAndDataSchemaLoader {
     }
 
     protected static void dataLoad(String yangPath, int modulesNumber, String moduleName, String dataSchemaName) {
-        modules = TestUtils.loadModulesFrom(yangPath);
+        modules = TestUtils.loadSchemaContextFromDirPath(yangPath);
         assertEquals(modulesNumber, modules.size());
         Module module = TestUtils.resolveModule(moduleName, modules);
         searchedModuleName = module == null ? "" : module.getName();

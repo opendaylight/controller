@@ -78,8 +78,8 @@ public class InvokeRpcMethodTest {
 
     @BeforeClass
     public static void init() throws FileNotFoundException {
-        final Set<Module> allModules = new HashSet<Module>(TestUtils.loadModulesFrom("/full-versions/yangs"));
-        allModules.addAll(TestUtils.loadModulesFrom("/invoke-rpc"));
+        final Set<Module> allModules = new HashSet<Module>(TestUtils.loadSchemaContextFromDirPath("/full-versions/yangs"));
+        allModules.addAll(TestUtils.loadSchemaContextFromDirPath("/invoke-rpc"));
         assertNotNull(allModules);
         final Module module = TestUtils.resolveModule("invoke-rpc-module", allModules);
         assertNotNull(module);
