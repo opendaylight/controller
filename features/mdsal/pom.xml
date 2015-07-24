@@ -115,12 +115,6 @@
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
-      <artifactId>features-netconf</artifactId>
-      <classifier>features</classifier>
-      <type>xml</type>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
       <artifactId>features-config-persister</artifactId>
       <classifier>features</classifier>
       <type>xml</type>
@@ -247,29 +241,26 @@
       <artifactId>sal-distributed-datastore</artifactId>
     </dependency>
 
+    <!-- message-bus -->
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>messagebus-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>messagebus-impl</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>messagebus-config</artifactId>
+      <version>${mdsal.version}</version>
+      <type>xml</type>
+      <classifier>config</classifier>
+    </dependency>
+
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-inmemory-datastore</artifactId>
-    </dependency>
-
-      <dependency>
-          <groupId>org.opendaylight.controller</groupId>
-          <artifactId>mdsal-netconf-connector</artifactId>
-      </dependency>
-      <dependency>
-          <groupId>org.opendaylight.controller</groupId>
-          <artifactId>mdsal-netconf-monitoring</artifactId>
-      </dependency>
-      <dependency>
-          <groupId>org.opendaylight.controller</groupId>
-          <artifactId>netconf-mdsal-config</artifactId>
-          <version>${netconf.version}</version>
-          <type>xml</type>
-          <classifier>config</classifier>
-      </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>sal-netconf-connector</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
@@ -293,22 +284,6 @@
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>sal-rest-docgen</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>netconf-config-dispatcher</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>netconf-connector-config</artifactId>
-      <version>${netconf.version}</version>
-      <type>xml</type>
-      <classifier>config</classifier>
-    </dependency>
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>netconf-ssh</artifactId>
     </dependency>
 
     <dependency>

@@ -57,10 +57,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
             <artifactId>messagebus-spi</artifactId>
             <version>1.3.0-SNAPSHOT</version>
         </dependency>
-        <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>sal-netconf-connector</artifactId>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.opendaylight.controller</groupId>-->
+            <!--<artifactId>sal-netconf-connector</artifactId>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-binding-config</artifactId>

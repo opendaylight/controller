@@ -8,6 +8,10 @@
 
 package org.opendaylight.controller.netconf.api.util;
 
+/**
+ * These constants mark operation service factories that are auto wired with netconf endpoint
+ * for config subsystem
+ */
 public final class NetconfConstants {
     /*
      * TODO define marker interface in mapping-api that the serviceFactories in cofing subsystem

@@ -14,13 +14,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import org.opendaylight.controller.config.util.capability.Capability;
+import org.opendaylight.controller.config.util.capability.YangModuleCapability;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
-import org.opendaylight.controller.netconf.api.Capability;
 import org.opendaylight.controller.netconf.api.monitoring.CapabilityListener;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
-import org.opendaylight.controller.netconf.util.capability.BasicCapability;
-import org.opendaylight.controller.netconf.util.capability.YangModuleCapability;
 import org.opendaylight.controller.sal.core.api.Broker.ConsumerSession;
 import org.opendaylight.controller.sal.core.api.Consumer;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
@@ -60,8 +59,9 @@ public class MdsalNetconfOperationServiceFactory implements NetconfOperationServ
 
     static Set<Capability> transformCapabilities(final SchemaContext currentContext) {
         final Set<Capability> capabilities = new HashSet<>();
-        // [RFC6241] 8.3.  Candidate Configuration Capability
-        capabilities.add(new BasicCapability("urn:ietf:params:netconf:capability:candidate:1.0"));
+
+        // Added by netconf-impl by default
+//        capabilities.add(new BasicCapability("urn:ietf:params:netconf:capability:candidate:1.0"));
 
         final Set<Module> modules = currentContext.getModules();
         for (final Module module : modules) {

@@ -8,10 +8,11 @@
 package org.opendaylight.controller.netconf.util;
 
 import com.google.common.base.Preconditions;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
+import org.opendaylight.controller.config.util.xml.XmlElement;
+import org.opendaylight.controller.config.util.xml.XmlMappingConstants;
+import org.opendaylight.controller.config.util.xml.XmlUtil;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
-import org.opendaylight.controller.netconf.util.xml.XmlElement;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -22,9 +23,9 @@ public final class NetconfUtil {
 
     private NetconfUtil() {}
 
-    public static Document checkIsMessageOk(Document response) throws NetconfDocumentedException {
+    public static Document checkIsMessageOk(Document response) throws DocumentedException {
         XmlElement element = XmlElement.fromDomDocument(response);
-        Preconditions.checkState(element.getName().equals(XmlNetconfConstants.RPC_REPLY_KEY));
+        Preconditions.checkState(element.getName().equals(XmlMappingConstants.RPC_REPLY_KEY));
         element = element.getOnlyChildElement();
         if (element.getName().equals(XmlNetconfConstants.OK)) {
             return response;

@@ -9,15 +9,17 @@ package org.opendaylight.controller.netconf.it;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.opendaylight.controller.config.util.xml.XmlUtil.readXmlToDocument;
 import static org.opendaylight.controller.netconf.util.test.XmlUnitUtil.assertContainsElementWithName;
 import static org.opendaylight.controller.netconf.util.test.XmlUnitUtil.assertElementsCount;
-import static org.opendaylight.controller.netconf.util.xml.XmlUtil.readXmlToDocument;
 
+import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Lists;
 import java.io.IOException;
-import java.lang.management.ManagementFactory;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.List;
@@ -27,16 +29,18 @@ import javax.management.NotificationListener;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.opendaylight.controller.config.api.jmx.notifications.CommitJMXNotification;
+import org.opendaylight.controller.config.api.jmx.notifications.ConfigJMXNotification;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.Persister;
+import org.opendaylight.controller.config.persist.impl.ConfigPersisterNotificationHandler;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
-import org.opendaylight.controller.netconf.api.jmx.CommitJMXNotification;
 import org.opendaylight.controller.netconf.client.TestingNetconfClient;
-import org.opendaylight.controller.netconf.impl.DefaultCommitNotificationProducer;
-import org.opendaylight.controller.netconf.persist.impl.ConfigPersisterNotificationHandler;
 import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.test.types.rev131127.TestIdentity1;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.test.types.rev131127.TestIdentity2;
+import org.opendaylight.yangtools.sal.binding.generator.util.BindingRuntimeContext;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 public class NetconfConfigPersisterITTest extends AbstractNetconfConfigTest {
@@ -44,15 +48,9 @@ public class NetconfConfigPersisterITTest extends AbstractNetconfConfigTest {
     public static final int PORT = 12026;
     private static final InetSocketAddress TCP_ADDRESS = new InetSocketAddress(LOOPBACK_ADDRESS, PORT);
 
-
     @Override
     protected SocketAddress getTcpServerAddress() {
         return TCP_ADDRESS;
-    }
-
-    @Override
-    protected DefaultCommitNotificationProducer getNotificationProducer() {
-        return new DefaultCommitNotificationProducer(ManagementFactory.getPlatformMBeanServer());
     }
 
     @Test
@@ -62,31 +60,39 @@ public class NetconfConfigPersisterITTest extends AbstractNetconfConfigTest {
 
         try (TestingNetconfClient persisterClient = new TestingNetconfClient("persister", getClientDispatcher(), getClientConfiguration(TCP_ADDRESS, 4000))) {
             try (ConfigPersisterNotificationHandler configPersisterNotificationHandler = new ConfigPersisterNotificationHandler(
-                    platformMBeanServer, mockedAggregator)) {
+                    platformMBeanServer, mockedAggregator, configSubsystemFacadeFactory)) {
 
                 try (TestingNetconfClient netconfClient = new TestingNetconfClient("client", getClientDispatcher(), getClientConfiguration(TCP_ADDRESS, 4000))) {
-                    NetconfMessage response = netconfClient.sendMessage(loadGetConfigMessage());
-                    assertContainsElementWithName(response.getDocument(), "modules");
-                    assertContainsElementWithName(response.getDocument(), "services");
+                    NetconfMessage response = netconfClient.sendMessage(loadEditConfigMessage());
+                    assertContainsElementWithName(response.getDocument(), "ok");
                     response = netconfClient.sendMessage(loadCommitMessage());
                     assertContainsElementWithName(response.getDocument(), "ok");
 
-                    response = netconfClient.sendMessage(loadEditConfigMessage());
-                    assertContainsElementWithName(response.getDocument(), "ok");
-                    response = netconfClient.sendMessage(loadCommitMessage());
-                    assertContainsElementWithName(response.getDocument(), "ok");
+                    response = netconfClient.sendMessage(loadGetConfigMessage());
+                    assertContainsElementWithName(response.getDocument(), "modules");
+                    assertContainsElementWithName(response.getDocument(), "services");
                 }
             }
         }
 
-        notificationVerifier.assertNotificationCount(2);
-        notificationVerifier.assertNotificationContent(0, 0, 0, 8);
-        notificationVerifier.assertNotificationContent(1, 4, 3, 8);
+        notificationVerifier.assertNotificationCount(1);
 
-        mockedAggregator.assertSnapshotCount(2);
+        mockedAggregator.assertSnapshotCount(1);
         // Capabilities are stripped for persister
-        mockedAggregator.assertSnapshotContent(0, 0, 0, 1);
-        mockedAggregator.assertSnapshotContent(1, 4, 3, 3);
+        mockedAggregator.assertSnapshotContent(0, 4, 3, 3);
+    }
+
+    @Override
+    protected BindingRuntimeContext getBindingRuntimeContext() {
+        final BindingRuntimeContext ret = super.getBindingRuntimeContext();
+        doReturn(TestIdentity1.class).when(ret).getIdentityClass(TestIdentity1.QNAME);
+        doReturn(TestIdentity2.class).when(ret).getIdentityClass(TestIdentity2.QNAME);
+        final HashBiMap<String, String> toBeReturned = HashBiMap.create();
+        toBeReturned.put("two", "Two");
+        toBeReturned.put("one", "One");
+        toBeReturned.put("version1", "Version1");
+        doReturn(toBeReturned).when(ret).getEnumMapping(anyString());
+        return ret;
     }
 
     private VerifyingPersister mockAggregator() throws IOException {
@@ -95,7 +101,7 @@ public class NetconfConfigPersisterITTest extends AbstractNetconfConfigTest {
 
     private VerifyingNotificationListener createCommitNotificationListener() throws InstanceNotFoundException {
         final VerifyingNotificationListener listener = new VerifyingNotificationListener();
-        platformMBeanServer.addNotificationListener(DefaultCommitNotificationProducer.OBJECT_NAME, listener, null, null);
+        platformMBeanServer.addNotificationListener(ConfigJMXNotification.OBJECT_NAME, listener, null, null);
         return listener;
     }
 
@@ -123,16 +129,9 @@ public class NetconfConfigPersisterITTest extends AbstractNetconfConfigTest {
             assertEquals(size, notifications.size());
         }
 
-        void assertNotificationContent(final int notificationIndex, final int expectedModulesSize, final int expectedServicesSize, final int expectedCapsSize) {
+        void assertNotificationContent(final int notificationIndex) {
             final Notification notification = notifications.get(notificationIndex);
             assertEquals(CommitJMXNotification.class, notification.getClass());
-            final int capsSize = ((CommitJMXNotification) notification).getCapabilities().size();
-            assertEquals("Expected capabilities count", expectedCapsSize, capsSize);
-            final Element configSnapshot = ((CommitJMXNotification) notification).getConfigSnapshot();
-            final int modulesSize = configSnapshot.getElementsByTagName("module").getLength();
-            assertEquals("Expected modules count", expectedModulesSize, modulesSize);
-            final int servicesSize = configSnapshot.getElementsByTagName("instance").getLength();
-            assertEquals("Expected services count", expectedServicesSize, servicesSize);
         }
     }
 
@@ -164,7 +163,7 @@ public class NetconfConfigPersisterITTest extends AbstractNetconfConfigTest {
                 throws SAXException, IOException {
             final ConfigSnapshotHolder snapshot = snapshots.get(notificationIndex);
             final int capsSize = snapshot.getCapabilities().size();
-            assertEquals("Expected capabilities count", expectedCapsSize, capsSize);
+            assertEquals("Expected capabilities count should be " + expectedCapsSize + " but was " + snapshot.getCapabilities(), expectedCapsSize, capsSize);
             final Document configSnapshot = readXmlToDocument(snapshot.getConfigSnapshot());
             assertElementsCount(configSnapshot, "module", expectedModulesSize);
             assertElementsCount(configSnapshot, "instance", expectedServicesSize);
