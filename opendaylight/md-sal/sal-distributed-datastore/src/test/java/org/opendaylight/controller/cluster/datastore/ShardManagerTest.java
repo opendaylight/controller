@@ -58,6 +58,7 @@ import org.opendaylight.controller.cluster.datastore.messages.LocalShardNotFound
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
 import org.opendaylight.controller.cluster.datastore.messages.RemotePrimaryShardFound;
 import org.opendaylight.controller.cluster.datastore.messages.ShardLeaderStateChanged;
+import org.opendaylight.controller.cluster.datastore.messages.SwitchShardBehavior;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
 import org.opendaylight.controller.cluster.datastore.utils.MessageCollectorActor;
 import org.opendaylight.controller.cluster.datastore.utils.MockClusterWrapper;
@@ -68,6 +69,7 @@ import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListe
 import org.opendaylight.controller.cluster.notifications.RoleChangeNotification;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyncUpStatus;
+import org.opendaylight.controller.cluster.raft.base.messages.SwitchBehavior;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
@@ -87,6 +89,8 @@ public class ShardManagerTest extends AbstractActorTest {
 
     private static TestActorRef<MessageCollectorActor> mockShardActor;
 
+    private static String mockShardName;
+
     private final DatastoreContext.Builder datastoreContextBuilder = DatastoreContext.newBuilder().
             dataStoreType(shardMrgIDSuffix).shardInitializationTimeout(600, TimeUnit.MILLISECONDS)
                    .shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(6);
@@ -105,8 +109,8 @@ public class ShardManagerTest extends AbstractActorTest {
         InMemoryJournal.clear();
 
         if(mockShardActor == null) {
-            String name = new ShardIdentifier(Shard.DEFAULT_NAME, "member-1", "config").toString();
-            mockShardActor = TestActorRef.create(getSystem(), Props.create(MessageCollectorActor.class), name);
+            mockShardName = new ShardIdentifier(Shard.DEFAULT_NAME, "member-1", "config").toString();
+            mockShardActor = TestActorRef.create(getSystem(), Props.create(MessageCollectorActor.class), mockShardName);
         }
 
         mockShardActor.underlyingActor().clear();
@@ -906,6 +910,24 @@ public class ShardManagerTest extends AbstractActorTest {
         assertEquals(true, shardManagerActor.getMBean().getSyncStatus());
 
     }
+
+    @Test
+    public void testOnReceiveSwitchShardBehavior() throws Exception {
+        new JavaTestKit(getSystem()) {{
+            final ActorRef shardManager = getSystem().actorOf(newPropsShardMgrWithMockShardActor());
+
+            shardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
+            shardManager.tell(new ActorInitialized(), mockShardActor);
+
+            shardManager.tell(new SwitchShardBehavior(mockShardName, "Leader", 1000), getRef());
+
+            SwitchBehavior switchBehavior = MessageCollectorActor.expectFirstMatching(mockShardActor, SwitchBehavior.class);
+
+            assertEquals(RaftState.Leader, switchBehavior.getNewState());
+            assertEquals(1000, switchBehavior.getNewTerm());
+        }};
+    }
+
 
     private static class TestShardManager extends ShardManager {
         private final CountDownLatch recoveryComplete = new CountDownLatch(1);
