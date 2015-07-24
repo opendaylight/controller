@@ -32,7 +32,7 @@ final class DataTreeChangeListenerSupport extends LeaderLocalDelegateFactory<Reg
     }
 
     @Override
-    void onLeadershipChange(final boolean isLeader) {
+    void onLeadershipChange(final boolean isLeader, boolean hasLeader) {
         if (isLeader) {
             for (DelayedDataTreeListenerRegistration reg : delayedRegistrations) {
                 reg.createDelegate(this);
@@ -48,7 +48,7 @@ final class DataTreeChangeListenerSupport extends LeaderLocalDelegateFactory<Reg
     }
 
     @Override
-    void onMessage(final RegisterDataTreeChangeListener registerTreeChangeListener, final boolean isLeader) {
+    void onMessage(final RegisterDataTreeChangeListener registerTreeChangeListener, final boolean isLeader, boolean hasLeader) {
         LOG.debug("{}: registerTreeChangeListener for {}, leader: {}", persistenceId(), registerTreeChangeListener.getPath(), isLeader);
 
         final ListenerRegistration<DOMDataTreeChangeListener> registration;
