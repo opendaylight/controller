@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.junit.Test;
@@ -64,7 +63,9 @@ import org.opendaylight.yangtools.yang.model.repo.api.SourceIdentifier;
 import org.opendaylight.yangtools.yang.model.repo.spi.PotentialSchemaSource;
 import org.opendaylight.yangtools.yang.model.repo.spi.SchemaSourceRegistration;
 import org.opendaylight.yangtools.yang.model.repo.spi.SchemaSourceRegistry;
-import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
+import org.opendaylight.yangtools.yang.parser.stmt.reactor.CrossSourceStatementReactor;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangInferencePipeline;
 
 public class NetconfDeviceTest {
 
@@ -236,19 +237,19 @@ public class NetconfDeviceTest {
         verify(facade, timeout(5000).times(2)).onDeviceConnected(any(SchemaContext.class), any(NetconfSessionPreferences.class), any(DOMRpcService.class));
     }
 
-    private SchemaContextFactory getSchemaFactory() {
+    private SchemaContextFactory getSchemaFactory() throws ReactorException {
         final SchemaContextFactory schemaFactory = mockClass(SchemaContextFactory.class);
         doReturn(Futures.immediateCheckedFuture(getSchema())).when(schemaFactory).createSchemaContext(any(Collection.class));
         return schemaFactory;
     }
 
-    public static SchemaContext getSchema() {
-        final YangParserImpl parser = new YangParserImpl();
+    public static SchemaContext getSchema() throws ReactorException {
         final List<InputStream> modelsToParse = Lists.newArrayList(
                 NetconfDeviceTest.class.getResourceAsStream("/schemas/test-module.yang")
         );
-        final Set<Module> models = parser.parseYangModelsFromStreams(modelsToParse);
-        return parser.resolveSchemaContext(models);
+
+        CrossSourceStatementReactor.BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR.newBuild();
+        return reactor.buildEffective(modelsToParse);
     }
 
     private RemoteDeviceHandler<NetconfSessionPreferences> getFacade() throws Exception {
