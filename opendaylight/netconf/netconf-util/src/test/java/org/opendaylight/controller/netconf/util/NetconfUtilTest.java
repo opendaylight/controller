@@ -12,7 +12,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 import org.junit.Test;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
+import org.opendaylight.controller.config.util.xml.XmlUtil;
 import org.w3c.dom.Document;
 
 public class NetconfUtilTest {

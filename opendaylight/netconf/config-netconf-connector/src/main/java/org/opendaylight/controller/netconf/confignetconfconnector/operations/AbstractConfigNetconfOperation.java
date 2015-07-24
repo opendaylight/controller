@@ -8,20 +8,20 @@
 
 package org.opendaylight.controller.netconf.confignetconfconnector.operations;
 
-import org.opendaylight.controller.config.util.ConfigRegistryClient;
+import org.opendaylight.controller.config.facade.xml.ConfigSubsystemFacade;
 import org.opendaylight.controller.netconf.util.mapping.AbstractLastNetconfOperation;
 
 public abstract class AbstractConfigNetconfOperation extends AbstractLastNetconfOperation {
 
-    private final ConfigRegistryClient configRegistryClient;
+    private final ConfigSubsystemFacade configSubsystemFacade;
 
-    protected AbstractConfigNetconfOperation(ConfigRegistryClient configRegistryClient,
+    protected AbstractConfigNetconfOperation(ConfigSubsystemFacade configSubsystemFacade,
             String netconfSessionIdForReporting) {
         super(netconfSessionIdForReporting);
-        this.configRegistryClient = configRegistryClient;
+        this.configSubsystemFacade = configSubsystemFacade;
     }
 
-    public ConfigRegistryClient getConfigRegistryClient() {
-        return configRegistryClient;
+    public ConfigSubsystemFacade getConfigSubsystemFacade() {
+        return configSubsystemFacade;
     }
 }

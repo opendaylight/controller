@@ -12,7 +12,7 @@ import com.google.common.collect.Maps;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import java.util.Map;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
 import org.opendaylight.controller.netconf.util.messages.SendErrorExceptionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,9 +41,9 @@ public final class DeserializerExceptionHandler implements ChannelHandler {
 
         Map<String, String> info = Maps.newHashMap();
         info.put("cause", cause.getMessage());
-        NetconfDocumentedException ex = new NetconfDocumentedException(cause.getMessage(),
-                NetconfDocumentedException.ErrorType.rpc, NetconfDocumentedException.ErrorTag.malformed_message,
-                NetconfDocumentedException.ErrorSeverity.error, info);
+        DocumentedException ex = new DocumentedException(cause.getMessage(),
+                DocumentedException.ErrorType.rpc, DocumentedException.ErrorTag.malformed_message,
+                DocumentedException.ErrorSeverity.error, info);
 
         SendErrorExceptionUtil.sendErrorMessage(ctx.channel(), ex);
     }

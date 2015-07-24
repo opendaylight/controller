@@ -1298,7 +1298,7 @@
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>features-netconf-connector</artifactId>
-        <version>${mdsal.version}</version>
+        <version>${netconf.version}</version>
         <classifier>features</classifier>
         <type>xml</type>
         <scope>runtime</scope>
