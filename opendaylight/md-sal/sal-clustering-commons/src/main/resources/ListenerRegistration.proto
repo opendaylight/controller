@@ -27,6 +27,7 @@ message RegisterChangeListener{
 required InstanceIdentifier instanceIdentifierPath=1;
 required string dataChangeListenerActorPath=2;
 required int32 dataChangeScope=3;
+optional bool registerOnAllInstances=4;
 }
 /**
 * This is the reply for the RegisterChangeListener message

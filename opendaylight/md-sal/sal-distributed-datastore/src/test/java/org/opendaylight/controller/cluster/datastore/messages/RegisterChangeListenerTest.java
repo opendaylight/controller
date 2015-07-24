@@ -33,7 +33,7 @@ public class RegisterChangeListenerTest extends AbstractActorTest {
     public void testToSerializable(){
         TestActorRef<Actor> testActor = factory.createTestActor(MessageCollectorActor.props());
         RegisterChangeListener registerChangeListener = new RegisterChangeListener(TestModel.TEST_PATH, testActor
-                , AsyncDataBroker.DataChangeScope.BASE);
+                , AsyncDataBroker.DataChangeScope.BASE, false);
 
         ListenerRegistrationMessages.RegisterChangeListener serialized
                 = registerChangeListener.toSerializable();
@@ -43,6 +43,7 @@ public class RegisterChangeListenerTest extends AbstractActorTest {
         assertEquals("urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom:store:test", path.getCode(0));
         assertEquals(Serialization.serializedActorPath(testActor), serialized.getDataChangeListenerActorPath());
         assertEquals(AsyncDataBroker.DataChangeScope.BASE.ordinal(), serialized.getDataChangeScope());
+        assertEquals(false, serialized.getRegisterOnAllInstances());
 
     }
 
@@ -50,7 +51,7 @@ public class RegisterChangeListenerTest extends AbstractActorTest {
     public void testFromSerializable(){
         TestActorRef<Actor> testActor = factory.createTestActor(MessageCollectorActor.props());
         RegisterChangeListener registerChangeListener = new RegisterChangeListener(TestModel.TEST_PATH, testActor
-                , AsyncDataBroker.DataChangeScope.SUBTREE);
+                , AsyncDataBroker.DataChangeScope.SUBTREE, true);
 
         ListenerRegistrationMessages.RegisterChangeListener serialized
                 = registerChangeListener.toSerializable();
@@ -61,7 +62,7 @@ public class RegisterChangeListenerTest extends AbstractActorTest {
         assertEquals(TestModel.TEST_PATH, registerChangeListener.getPath());
         assertEquals(testActor.path().toString(), fromSerialized.getDataChangeListenerPath().toString());
         assertEquals(AsyncDataBroker.DataChangeScope.SUBTREE, fromSerialized.getScope());
-
+        assertEquals(true, fromSerialized.isRegisterOnAllInstances());
 
     }
 }
