@@ -26,4 +26,13 @@ public class SwitchBehavior {
     public long getNewTerm() {
         return newTerm;
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("SwitchBehavior{");
+        sb.append("newState=").append(newState);
+        sb.append(", newTerm=").append(newTerm);
+        sb.append('}');
+        return sb.toString();
+    }
 }
