@@ -30,6 +30,14 @@
       <artifactId>netconf-mapping-api</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>netconf-notifications-api</artifactId>
+    </dependency>
+    <dependency>
+       <groupId>org.opendaylight.controller</groupId>
+       <artifactId>netconf-notifications-impl</artifactId>
+    </dependency>
+    <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>netconf-netty-util</artifactId>
     </dependency>
@@ -64,10 +72,6 @@
       <artifactId>ietf-inet-types</artifactId>
     </dependency>
 
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.core</artifactId>
-    </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
@@ -124,37 +128,6 @@
         <plugin>
             <groupId>org.opendaylight.yangtools</groupId>
             <artifactId>yang-maven-plugin</artifactId>
-            <executions>
-                <execution>
-                    <id>config</id>
-                    <goals>
-                        <goal>generate-sources</goal>
-                    </goals>
-                    <configuration>
-                        <codeGenerators>
-                            <generator>
-                                <codeGeneratorClass>org.opendaylight.controller.config.yangjmxgenerator.plugin.JMXGenerator</codeGeneratorClass>
-                                <outputBaseDir>${jmxGeneratorPath}</outputBaseDir>
-                                <additionalConfiguration>
-                                    <namespaceToPackage1>urn:opendaylight:params:xml:ns:yang:controller==org.opendaylight.controller.config.yang</namespaceToPackage1>
-                                </additionalConfiguration>
-                            </generator>
-                            <generator>
-                                <codeGeneratorClass>org.opendaylight.yangtools.maven.sal.api.gen.plugin.CodeGeneratorImpl</codeGeneratorClass>
-                                <outputBaseDir>${salGeneratorPath}</outputBaseDir>
-                            </generator>
-                        </codeGenerators>
-                        <inspectDependencies>true</inspectDependencies>
-                    </configuration>
-                </execution>
-            </executions>
-            <dependencies>
-                <dependency>
-                    <groupId>org.opendaylight.controller</groupId>
-                    <artifactId>yang-jmx-generator-plugin</artifactId>
-                    <version>${config.version}</version>
-                </dependency>
-            </dependencies>
         </plugin>
     </plugins>
   </build>

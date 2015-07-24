@@ -29,6 +29,12 @@ public class ConfigRegistryJMXRegistrator implements AutoCloseable {
                 ConfigRegistryMXBean.OBJECT_NAME);
     }
 
+    public AutoCloseable registerToJMXNoNotifications(ConfigRegistryImplMXBean configRegistry)
+            throws InstanceAlreadyExistsException {
+        return internalJMXRegistrator.registerMBean(configRegistry,
+                ConfigRegistryMXBean.OBJECT_NAME_NO_NOTIFICATIONS);
+    }
+
     @Override
     public void close() {
         internalJMXRegistrator.close();

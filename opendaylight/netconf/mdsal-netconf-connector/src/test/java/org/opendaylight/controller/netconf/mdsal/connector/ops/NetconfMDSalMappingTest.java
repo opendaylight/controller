@@ -37,12 +37,14 @@ import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.ConcurrentDOMDataBroker;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
+import org.opendaylight.controller.config.util.xml.DocumentedException.ErrorSeverity;
+import org.opendaylight.controller.config.util.xml.DocumentedException.ErrorTag;
+import org.opendaylight.controller.config.util.xml.DocumentedException.ErrorType;
+import org.opendaylight.controller.config.util.xml.XmlElement;
+import org.opendaylight.controller.config.util.xml.XmlUtil;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreFactory;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorSeverity;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorTag;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorType;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedExecution;
 import org.opendaylight.controller.netconf.mdsal.connector.CurrentSchemaContext;
@@ -51,8 +53,6 @@ import org.opendaylight.controller.netconf.mdsal.connector.ops.get.Get;
 import org.opendaylight.controller.netconf.mdsal.connector.ops.get.GetConfig;
 import org.opendaylight.controller.netconf.util.test.NetconfXmlUnitRecursiveQualifier;
 import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
-import org.opendaylight.controller.netconf.util.xml.XmlElement;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
@@ -152,7 +152,7 @@ public class NetconfMDSalMappingTest {
         try {
             discardChanges();
             fail("Should have failed, need to execute an edit before discard");
-        } catch (NetconfDocumentedException e) {
+        } catch (DocumentedException e) {
             assertTrue(e.getErrorSeverity() == ErrorSeverity.error);
             assertTrue(e.getErrorTag() == ErrorTag.operation_failed);
             assertTrue(e.getErrorType() == ErrorType.application);
@@ -165,7 +165,7 @@ public class NetconfMDSalMappingTest {
         try {
             executeOperation(new GetConfig(sessionIdForReporting, currentSchemaContext, transactionProvider), "messages/mapping/bad_getConfig.xml");
             fail("Should have failed, this is an incorrect request");
-        } catch (NetconfDocumentedException e) {
+        } catch (DocumentedException e) {
             assertTrue(e.getErrorSeverity() == ErrorSeverity.error);
             assertTrue(e.getErrorTag() == ErrorTag.operation_failed);
             assertTrue(e.getErrorType() == ErrorType.application);
@@ -174,7 +174,7 @@ public class NetconfMDSalMappingTest {
         try {
             executeOperation(new GetConfig(sessionIdForReporting, currentSchemaContext, transactionProvider), "messages/mapping/bad_namespace_getConfig.xml");
             fail("Should have failed, this is an incorrect request");
-        } catch (NetconfDocumentedException e) {
+        } catch (DocumentedException e) {
             assertTrue(e.getErrorSeverity() == ErrorSeverity.error);
             assertTrue(e.getErrorTag() == ErrorTag.operation_failed);
             assertTrue(e.getErrorType() == ErrorType.application);
@@ -189,7 +189,7 @@ public class NetconfMDSalMappingTest {
         try {
             edit("messages/mapping/editConfigs/editConfig_running.xml");
             fail("Should have failed - edit config on running datastore is not supported");
-        } catch (NetconfDocumentedException e) {
+        } catch (DocumentedException e) {
             assertTrue(e.getErrorSeverity() == ErrorSeverity.error);
             assertTrue(e.getErrorTag() == ErrorTag.operation_not_supported);
             assertTrue(e.getErrorType() == ErrorType.protocol);
@@ -274,7 +274,7 @@ public class NetconfMDSalMappingTest {
         try {
             lock();
             fail("Should have failed - locking of running datastore is not supported");
-        } catch (NetconfDocumentedException e) {
+        } catch (DocumentedException e) {
             assertTrue(e.getErrorSeverity() == ErrorSeverity.error);
             assertTrue(e.getErrorTag() == ErrorTag.operation_not_supported);
             assertTrue(e.getErrorType() == ErrorType.application);
@@ -284,7 +284,7 @@ public class NetconfMDSalMappingTest {
         try {
             lockWithoutTarget();
             fail("Should have failed, target is missing");
-        } catch (NetconfDocumentedException e) {
+        } catch (DocumentedException e) {
             assertTrue(e.getErrorSeverity() == ErrorSeverity.error);
             assertTrue(e.getErrorTag() == ErrorTag.invalid_value);
             assertTrue(e.getErrorType() == ErrorType.application);
@@ -299,7 +299,7 @@ public class NetconfMDSalMappingTest {
         try {
             unlock();
             fail("Should have failed - unlocking of running datastore is not supported");
-        } catch (NetconfDocumentedException e) {
+        } catch (DocumentedException e) {
             assertTrue(e.getErrorSeverity() == ErrorSeverity.error);
             assertTrue(e.getErrorTag() == ErrorTag.operation_not_supported);
             assertTrue(e.getErrorType() == ErrorType.application);
@@ -308,7 +308,7 @@ public class NetconfMDSalMappingTest {
         try {
             unlockWithoutTarget();
             fail("Should have failed, target is missing");
-        } catch (NetconfDocumentedException e) {
+        } catch (DocumentedException e) {
             assertTrue(e.getErrorSeverity() == ErrorSeverity.error);
             assertTrue(e.getErrorTag() == ErrorTag.invalid_value);
             assertTrue(e.getErrorType() == ErrorType.application);
@@ -325,7 +325,7 @@ public class NetconfMDSalMappingTest {
         try {
             edit("messages/mapping/editConfigs/editConfig_create.xml");
             fail("Create should have failed - data already exists");
-        } catch (NetconfDocumentedException e) {
+        } catch (DocumentedException e) {
             assertTrue(e.getErrorSeverity() == ErrorSeverity.error);
             assertTrue(e.getErrorTag() == ErrorTag.data_exists);
             assertTrue(e.getErrorType() == ErrorType.protocol);
@@ -344,7 +344,7 @@ public class NetconfMDSalMappingTest {
         try {
             edit("messages/mapping/editConfigs/editConfig_delete-top.xml");
             fail("Delete should have failed - data is missing");
-        } catch (NetconfDocumentedException e) {
+        } catch (DocumentedException e) {
             assertTrue(e.getErrorSeverity() == ErrorSeverity.error);
             assertTrue(e.getErrorTag() == ErrorTag.data_missing);
             assertTrue(e.getErrorType() == ErrorType.protocol);
@@ -401,7 +401,7 @@ public class NetconfMDSalMappingTest {
         try {
             edit("messages/mapping/editConfigs/editConfig_merge_multiple_operations_4_create_existing.xml");
             fail();
-        } catch (NetconfDocumentedException e) {
+        } catch (DocumentedException e) {
             assertTrue(e.getErrorSeverity() == ErrorSeverity.error);
             assertTrue(e.getErrorTag() == ErrorTag.data_exists);
             assertTrue(e.getErrorType() == ErrorType.protocol);
@@ -414,7 +414,7 @@ public class NetconfMDSalMappingTest {
         try {
             edit("messages/mapping/editConfigs/editConfig_merge_multiple_operations_4_delete-non-existing.xml");
             fail();
-        } catch (NetconfDocumentedException e) {
+        } catch (DocumentedException e) {
             assertTrue(e.getErrorSeverity() == ErrorSeverity.error);
             assertTrue(e.getErrorTag() == ErrorTag.data_missing);
             assertTrue(e.getErrorType() == ErrorType.protocol);
@@ -510,7 +510,7 @@ public class NetconfMDSalMappingTest {
             super(sessionId, schemaContext, transactionProvider);
         }
 
-        public YangInstanceIdentifier getInstanceIdentifierFromDocument(Document request) throws NetconfDocumentedException {
+        public YangInstanceIdentifier getInstanceIdentifierFromDocument(Document request) throws DocumentedException {
             XmlElement filterElement = XmlElement.fromDomDocument(request).getOnlyChildElement(GET_CONFIG).getOnlyChildElement(FILTER_NODE);
             return getInstanceIdentifierFromFilter(filterElement);
         }
@@ -550,77 +550,77 @@ public class NetconfMDSalMappingTest {
 
     }
 
-    private Document commit() throws NetconfDocumentedException, ParserConfigurationException, SAXException, IOException {
+    private Document commit() throws DocumentedException, ParserConfigurationException, SAXException, IOException {
         Commit commit = new Commit(sessionIdForReporting, transactionProvider);
         return executeOperation(commit, "messages/mapping/commit.xml");
     }
 
-    private Document discardChanges() throws NetconfDocumentedException, ParserConfigurationException, SAXException, IOException {
+    private Document discardChanges() throws DocumentedException, ParserConfigurationException, SAXException, IOException {
         DiscardChanges discardOp = new DiscardChanges(sessionIdForReporting, transactionProvider);
         return executeOperation(discardOp, "messages/mapping/discardChanges.xml");
     }
 
-    private Document edit(String resource) throws NetconfDocumentedException, ParserConfigurationException, SAXException, IOException {
+    private Document edit(String resource) throws DocumentedException, ParserConfigurationException, SAXException, IOException {
         EditConfig editConfig = new EditConfig(sessionIdForReporting, currentSchemaContext, transactionProvider);
         return executeOperation(editConfig, resource);
     }
 
-    private Document get() throws NetconfDocumentedException, ParserConfigurationException, SAXException, IOException {
+    private Document get() throws DocumentedException, ParserConfigurationException, SAXException, IOException {
         Get get = new Get(sessionIdForReporting, currentSchemaContext, transactionProvider);
         return executeOperation(get, "messages/mapping/get.xml");
     }
 
-    private Document getWithFilter(String resource) throws NetconfDocumentedException, ParserConfigurationException, SAXException, IOException {
+    private Document getWithFilter(String resource) throws DocumentedException, ParserConfigurationException, SAXException, IOException {
         Get get = new Get(sessionIdForReporting, currentSchemaContext, transactionProvider);
         return executeOperation(get, resource);
     }
 
-    private Document getConfigRunning() throws NetconfDocumentedException, ParserConfigurationException, SAXException, IOException {
+    private Document getConfigRunning() throws DocumentedException, ParserConfigurationException, SAXException, IOException {
         GetConfig getConfig = new GetConfig(sessionIdForReporting, currentSchemaContext, transactionProvider);
         return executeOperation(getConfig, "messages/mapping/getConfig.xml");
     }
 
-    private Document getConfigCandidate() throws NetconfDocumentedException, ParserConfigurationException, SAXException, IOException {
+    private Document getConfigCandidate() throws DocumentedException, ParserConfigurationException, SAXException, IOException {
         GetConfig getConfig = new GetConfig(sessionIdForReporting, currentSchemaContext, transactionProvider);
         return executeOperation(getConfig, "messages/mapping/getConfig_candidate.xml");
     }
 
-    private Document getConfigWithFilter(String resource) throws NetconfDocumentedException, ParserConfigurationException, SAXException, IOException {
+    private Document getConfigWithFilter(String resource) throws DocumentedException, ParserConfigurationException, SAXException, IOException {
         GetConfig getConfig = new GetConfig(sessionIdForReporting, currentSchemaContext, transactionProvider);
         return executeOperation(getConfig, resource);
     }
 
-    private Document lock() throws NetconfDocumentedException, ParserConfigurationException, SAXException, IOException {
+    private Document lock() throws DocumentedException, ParserConfigurationException, SAXException, IOException {
         Lock lock = new Lock(sessionIdForReporting);
         return executeOperation(lock, "messages/mapping/lock.xml");
     }
 
-    private Document unlock() throws NetconfDocumentedException, ParserConfigurationException, SAXException, IOException {
+    private Document unlock() throws DocumentedException, ParserConfigurationException, SAXException, IOException {
         Unlock unlock = new Unlock(sessionIdForReporting);
         return executeOperation(unlock, "messages/mapping/unlock.xml");
     }
 
-    private Document lockWithoutTarget() throws NetconfDocumentedException, ParserConfigurationException, SAXException, IOException {
+    private Document lockWithoutTarget() throws DocumentedException, ParserConfigurationException, SAXException, IOException {
         Lock lock = new Lock(sessionIdForReporting);
         return executeOperation(lock, "messages/mapping/lock_notarget.xml");
     }
 
-    private Document unlockWithoutTarget() throws NetconfDocumentedException, ParserConfigurationException, SAXException, IOException {
+    private Document unlockWithoutTarget() throws DocumentedException, ParserConfigurationException, SAXException, IOException {
         Unlock unlock = new Unlock(sessionIdForReporting);
         return executeOperation(unlock, "messages/mapping/unlock_notarget.xml");
     }
 
-    private Document lockCandidate() throws NetconfDocumentedException, ParserConfigurationException, SAXException, IOException {
+    private Document lockCandidate() throws DocumentedException, ParserConfigurationException, SAXException, IOException {
         Lock lock = new Lock(sessionIdForReporting);
         return executeOperation(lock, "messages/mapping/lock_candidate.xml");
     }
 
-    private Document unlockCandidate() throws NetconfDocumentedException, ParserConfigurationException, SAXException, IOException {
+    private Document unlockCandidate() throws DocumentedException, ParserConfigurationException, SAXException, IOException {
         Unlock unlock = new Unlock(sessionIdForReporting);
         return executeOperation(unlock, "messages/mapping/unlock_candidate.xml");
     }
 
-    private Document executeOperation(NetconfOperation op, String filename) throws ParserConfigurationException, SAXException, IOException, NetconfDocumentedException {
+    private Document executeOperation(NetconfOperation op, String filename) throws ParserConfigurationException, SAXException, IOException, DocumentedException {
         final Document request = XmlFileLoader.xmlFileToDocument(filename);
         final Document response = op.handle(request, NetconfOperationChainedExecution.EXECUTION_TERMINATION_POINT);
 

@@ -12,15 +12,15 @@ import com.google.common.base.Optional;
 import java.util.HashMap;
 import java.util.Map;
 import org.opendaylight.controller.config.api.ValidationException;
-import org.opendaylight.controller.config.util.ConfigRegistryClient;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorSeverity;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorTag;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorType;
+import org.opendaylight.controller.config.facade.xml.ConfigSubsystemFacade;
+import org.opendaylight.controller.config.facade.xml.Datastore;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
+import org.opendaylight.controller.config.util.xml.DocumentedException.ErrorSeverity;
+import org.opendaylight.controller.config.util.xml.DocumentedException.ErrorTag;
+import org.opendaylight.controller.config.util.xml.DocumentedException.ErrorType;
+import org.opendaylight.controller.config.util.xml.XmlElement;
+import org.opendaylight.controller.config.util.xml.XmlUtil;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
-import org.opendaylight.controller.netconf.confignetconfconnector.transactions.TransactionProvider;
-import org.opendaylight.controller.netconf.util.xml.XmlElement;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -32,15 +32,11 @@ public class Validate extends AbstractConfigNetconfOperation {
 
     private static final Logger LOG = LoggerFactory.getLogger(Validate.class);
 
-    private final TransactionProvider transactionProvider;
-
-    public Validate(final TransactionProvider transactionProvider, ConfigRegistryClient configRegistryClient,
-            String netconfSessionIdForReporting) {
-        super(configRegistryClient, netconfSessionIdForReporting);
-        this.transactionProvider = transactionProvider;
+    public Validate(final ConfigSubsystemFacade configSubsystemFacade, final String netconfSessionIdForReporting) {
+        super(configSubsystemFacade, netconfSessionIdForReporting);
     }
 
-    private void checkXml(XmlElement xml) throws NetconfDocumentedException {
+    private void checkXml(XmlElement xml) throws DocumentedException {
         xml.checkName(VALIDATE);
         xml.checkNamespace(XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
 
@@ -53,8 +49,8 @@ public class Validate extends AbstractConfigNetconfOperation {
         Datastore sourceDatastore = Datastore.valueOf(datastoreValue);
 
         if (sourceDatastore != Datastore.candidate){
-            throw new NetconfDocumentedException( "Only " + Datastore.candidate
-                    + " is supported as source for " + VALIDATE + " but was " + datastoreValue,ErrorType.application,ErrorTag.data_missing,ErrorSeverity.error);
+            throw new DocumentedException( "Only " + Datastore.candidate
+                    + " is supported as source for " + VALIDATE + " but was " + datastoreValue, ErrorType.application, ErrorTag.data_missing, ErrorSeverity.error);
         }
     }
 
@@ -64,20 +60,20 @@ public class Validate extends AbstractConfigNetconfOperation {
     }
 
     @Override
-    protected Element handleWithNoSubsequentOperations(Document document, XmlElement xml) throws NetconfDocumentedException {
+    protected Element handleWithNoSubsequentOperations(Document document, XmlElement xml) throws DocumentedException {
         checkXml(xml);
         try {
-            transactionProvider.validateTransaction();
+            getConfigSubsystemFacade().validateConfiguration();
         } catch (ValidationException e) {
             LOG.warn("Validation failed", e);
-            throw NetconfDocumentedException.wrap(e);
+            throw DocumentedException.wrap(e);
         } catch (IllegalStateException e) {
             LOG.warn("Validation failed", e);
             final Map<String, String> errorInfo = new HashMap<>();
             errorInfo
                     .put(ErrorTag.operation_failed.name(),
                             "Datastore is not present. Use 'get-config' or 'edit-config' before triggering 'operations' operation");
-            throw new NetconfDocumentedException(e.getMessage(), e, ErrorType.application, ErrorTag.operation_failed,
+            throw new DocumentedException(e.getMessage(), e, ErrorType.application, ErrorTag.operation_failed,
                     ErrorSeverity.error, errorInfo);
 
         }

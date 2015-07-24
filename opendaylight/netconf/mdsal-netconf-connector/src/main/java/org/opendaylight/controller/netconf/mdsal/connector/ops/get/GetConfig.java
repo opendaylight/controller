@@ -10,19 +10,19 @@ package org.opendaylight.controller.netconf.mdsal.connector.ops.get;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
+import org.opendaylight.controller.config.util.xml.DocumentedException.ErrorSeverity;
+import org.opendaylight.controller.config.util.xml.DocumentedException.ErrorTag;
+import org.opendaylight.controller.config.util.xml.DocumentedException.ErrorType;
+import org.opendaylight.controller.config.util.xml.XmlElement;
+import org.opendaylight.controller.config.util.xml.XmlUtil;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadWriteTransaction;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorSeverity;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorTag;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException.ErrorType;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.mdsal.connector.CurrentSchemaContext;
 import org.opendaylight.controller.netconf.mdsal.connector.TransactionProvider;
 import org.opendaylight.controller.netconf.mdsal.connector.ops.Datastore;
-import org.opendaylight.controller.netconf.util.xml.XmlElement;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
@@ -43,12 +43,12 @@ public class GetConfig extends AbstractGet {
     }
 
     @Override
-    protected Element handleWithNoSubsequentOperations(Document document, XmlElement operationElement) throws NetconfDocumentedException {
+    protected Element handleWithNoSubsequentOperations(Document document, XmlElement operationElement) throws DocumentedException {
         GetConfigExecution getConfigExecution = null;
         try {
             getConfigExecution = GetConfigExecution.fromXml(operationElement, OPERATION_NAME);
 
-        } catch (final NetconfDocumentedException e) {
+        } catch (final DocumentedException e) {
             LOG.warn("Get request processing failed on session: {}", getNetconfSessionIdForReporting(), e);
             throw e;
         }
@@ -81,13 +81,13 @@ public class GetConfig extends AbstractGet {
         }
     }
 
-    private DOMDataReadWriteTransaction getTransaction(Datastore datastore) throws NetconfDocumentedException{
+    private DOMDataReadWriteTransaction getTransaction(Datastore datastore) throws DocumentedException{
         if (datastore == Datastore.candidate) {
             return transactionProvider.getOrCreateTransaction();
         } else if (datastore == Datastore.running) {
             return transactionProvider.createRunningTransaction();
         }
-        throw new NetconfDocumentedException("Incorrect Datastore: ", ErrorType.protocol, ErrorTag.bad_element, ErrorSeverity.error);
+        throw new DocumentedException("Incorrect Datastore: ", ErrorType.protocol, ErrorTag.bad_element, ErrorSeverity.error);
     }
 
     @Override

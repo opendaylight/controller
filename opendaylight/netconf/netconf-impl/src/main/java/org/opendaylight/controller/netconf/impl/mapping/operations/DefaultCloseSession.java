@@ -11,12 +11,12 @@ package org.opendaylight.controller.netconf.impl.mapping.operations;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import java.util.Collections;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
+import org.opendaylight.controller.config.util.xml.XmlElement;
+import org.opendaylight.controller.config.util.xml.XmlUtil;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.impl.NetconfServerSession;
 import org.opendaylight.controller.netconf.util.mapping.AbstractSingletonNetconfOperation;
-import org.opendaylight.controller.netconf.util.xml.XmlElement;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -47,17 +47,17 @@ public class DefaultCloseSession extends AbstractSingletonNetconfOperation imple
      */
     @Override
     protected Element handleWithNoSubsequentOperations(Document document, XmlElement operationElement)
-            throws NetconfDocumentedException {
+            throws DocumentedException {
         try {
             sessionResources.close();
             Preconditions.checkNotNull(session, "Session was not set").delayedClose();
             LOG.info("Session {} closing", session.getSessionId());
         } catch (Exception e) {
-            throw new NetconfDocumentedException("Unable to properly close session "
-                    + getNetconfSessionIdForReporting(), NetconfDocumentedException.ErrorType.application,
-                    NetconfDocumentedException.ErrorTag.operation_failed,
-                    NetconfDocumentedException.ErrorSeverity.error, Collections.singletonMap(
-                        NetconfDocumentedException.ErrorSeverity.error.toString(), e.getMessage()));
+            throw new DocumentedException("Unable to properly close session "
+                    + getNetconfSessionIdForReporting(), DocumentedException.ErrorType.application,
+                    DocumentedException.ErrorTag.operation_failed,
+                    DocumentedException.ErrorSeverity.error, Collections.singletonMap(
+                    DocumentedException.ErrorSeverity.error.toString(), e.getMessage()));
         }
         return XmlUtil.createElement(document, XmlNetconfConstants.OK, Optional.<String>absent());
     }

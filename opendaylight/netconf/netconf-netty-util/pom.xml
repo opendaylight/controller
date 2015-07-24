@@ -61,10 +61,6 @@
       <artifactId>nagasena-rta</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.core</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
@@ -85,12 +81,7 @@
         <artifactId>maven-bundle-plugin</artifactId>
         <configuration>
           <instructions>
-            <Export-Package>org.opendaylight.controller.netconf.nettyutil,
-              org.opendaylight.controller.netconf.nettyutil.handler,
-              org.opendaylight.controller.netconf.nettyutil.handler.exi,
-              org.opendaylight.controller.netconf.nettyutil.handler.ssh,
-              org.opendaylight.controller.netconf.nettyutil.handler.ssh.authentication,
-              org.opendaylight.controller.netconf.nettyutil.handler.ssh.client</Export-Package>
+            <Export-Package>org.opendaylight.controller.netconf.nettyutil.*</Export-Package>
           </instructions>
         </configuration>
       </plugin>

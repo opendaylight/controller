@@ -12,7 +12,9 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import java.util.List;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
+import org.opendaylight.controller.config.util.xml.XmlElement;
+import org.opendaylight.controller.config.util.xml.XmlUtil;
 import org.opendaylight.controller.netconf.api.NetconfSession;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.mapping.api.SessionAwareNetconfOperation;
@@ -22,8 +24,6 @@ import org.opendaylight.controller.netconf.notifications.NetconfNotificationRegi
 import org.opendaylight.controller.netconf.notifications.NotificationListenerRegistration;
 import org.opendaylight.controller.netconf.notifications.impl.NetconfNotificationManager;
 import org.opendaylight.controller.netconf.util.mapping.AbstractLastNetconfOperation;
-import org.opendaylight.controller.netconf.util.xml.XmlElement;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf.notification._1._0.rev080714.CreateSubscriptionInput;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netconf.notification._1._0.rev080714.StreamNameType;
 import org.slf4j.Logger;
@@ -51,7 +51,7 @@ public class CreateSubscription extends AbstractLastNetconfOperation implements 
     }
 
     @Override
-    protected Element handleWithNoSubsequentOperations(final Document document, final XmlElement operationElement) throws NetconfDocumentedException {
+    protected Element handleWithNoSubsequentOperations(final Document document, final XmlElement operationElement) throws DocumentedException {
         operationElement.checkName(CREATE_SUBSCRIPTION);
         operationElement.checkNamespace(CreateSubscriptionInput.QNAME.getNamespace().toString());
         // FIXME reimplement using CODEC_REGISTRY and parse everything into generated class instance
@@ -84,7 +84,7 @@ public class CreateSubscription extends AbstractLastNetconfOperation implements 
         return XmlUtil.createElement(document, XmlNetconfConstants.OK, Optional.<String>absent());
     }
 
-    private static StreamNameType parseStreamIfPresent(final XmlElement operationElement) throws NetconfDocumentedException {
+    private static StreamNameType parseStreamIfPresent(final XmlElement operationElement) throws DocumentedException {
         final Optional<XmlElement> stream = operationElement.getOnlyChildElementWithSameNamespaceOptionally("stream");
         return stream.isPresent() ? new StreamNameType(stream.get().getTextContent()) : NetconfNotificationManager.BASE_STREAM_NAME;
     }
