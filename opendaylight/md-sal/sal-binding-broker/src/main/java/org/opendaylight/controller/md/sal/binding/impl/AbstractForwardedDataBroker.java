@@ -15,12 +15,15 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
+import org.opendaylight.controller.md.sal.binding.api.ClusteredDataChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataChangeListener;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataChangeListener;
+import org.opendaylight.controller.md.sal.dom.api.ClusteredDOMDataChangeListener;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.yangtools.concepts.AbstractListenerRegistration;
 import org.opendaylight.yangtools.concepts.Delegator;
@@ -63,8 +66,14 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
 
     public ListenerRegistration<DataChangeListener> registerDataChangeListener(final LogicalDatastoreType store,
             final InstanceIdentifier<?> path, final DataChangeListener listener, final DataChangeScope triggeringScope) {
-        final DOMDataChangeListener domDataChangeListener = new TranslatingDataChangeInvoker(store, path, listener,
+        final DOMDataChangeListener domDataChangeListener;
+
+        if(listener instanceof ClusteredDataChangeListener) {
+            domDataChangeListener = new TranslatingClusteredDataChangeInvoker(store, path, listener, triggeringScope);
+        } else {
+            domDataChangeListener = new TranslatingDataChangeInvoker(store, path, listener,
                 triggeringScope);
+        }
         final YangInstanceIdentifier domPath = codec.toYangInstanceIdentifierBlocking(path);
         final ListenerRegistration<DOMDataChangeListener> domRegistration = domDataBroker.registerDataChangeListener(store,
                 domPath, domDataChangeListener, triggeringScope);
@@ -137,6 +146,20 @@ public abstract class AbstractForwardedDataBroker implements Delegator<DOMDataBr
         @Override
         public String toString() {
             return bindingDataChangeListener.getClass().getName();
+        }
+    }
+
+    /**
+     * Translator for ClusteredDataChangeListener
+     */
+
+    private class TranslatingClusteredDataChangeInvoker extends TranslatingDataChangeInvoker implements
+        ClusteredDOMDataChangeListener {
+
+        public TranslatingClusteredDataChangeInvoker(LogicalDatastoreType store, InstanceIdentifier<?> path,
+                                                     DataChangeListener bindingDataChangeListener,
+                                                     DataChangeScope triggeringScope) {
+            super(store, path, bindingDataChangeListener, triggeringScope);
         }
     }
 
