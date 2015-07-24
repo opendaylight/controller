@@ -683,6 +683,16 @@ public final class ListenerRegistrationMessages {
      * <code>required int32 dataChangeScope = 3;</code>
      */
     int getDataChangeScope();
+
+    // required bool remoteListener = 4;
+    /**
+     * <code>required bool remoteListener = 4;</code>
+     */
+    boolean hasRemoteListener();
+    /**
+     * <code>required bool remoteListener = 4;</code>
+     */
+    boolean getRemoteListener();
   }
   /**
    * Protobuf type {@code org.opendaylight.controller.mdsal.RegisterChangeListener}
@@ -756,6 +766,11 @@ public final class ListenerRegistrationMessages {
             case 24: {
               bitField0_ |= 0x00000004;
               dataChangeScope_ = input.readInt32();
+              break;
+            }
+            case 32: {
+              bitField0_ |= 0x00000008;
+              remoteListener_ = input.readBool();
               break;
             }
           }
@@ -879,10 +894,27 @@ public final class ListenerRegistrationMessages {
       return dataChangeScope_;
     }
 
+    // required bool remoteListener = 4;
+    public static final int REMOTELISTENER_FIELD_NUMBER = 4;
+    private boolean remoteListener_;
+    /**
+     * <code>required bool remoteListener = 4;</code>
+     */
+    public boolean hasRemoteListener() {
+      return ((bitField0_ & 0x00000008) == 0x00000008);
+    }
+    /**
+     * <code>required bool remoteListener = 4;</code>
+     */
+    public boolean getRemoteListener() {
+      return remoteListener_;
+    }
+
     private void initFields() {
       instanceIdentifierPath_ = org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.InstanceIdentifier.getDefaultInstance();
       dataChangeListenerActorPath_ = "";
       dataChangeScope_ = 0;
+      remoteListener_ = false;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -898,6 +930,10 @@ public final class ListenerRegistrationMessages {
         return false;
       }
       if (!hasDataChangeScope()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasRemoteListener()) {
         memoizedIsInitialized = 0;
         return false;
       }
@@ -921,6 +957,9 @@ public final class ListenerRegistrationMessages {
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         output.writeInt32(3, dataChangeScope_);
       }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeBool(4, remoteListener_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -941,6 +980,10 @@ public final class ListenerRegistrationMessages {
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(3, dataChangeScope_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(4, remoteListener_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -1069,6 +1112,8 @@ public final class ListenerRegistrationMessages {
         bitField0_ = (bitField0_ & ~0x00000002);
         dataChangeScope_ = 0;
         bitField0_ = (bitField0_ & ~0x00000004);
+        remoteListener_ = false;
+        bitField0_ = (bitField0_ & ~0x00000008);
         return this;
       }
 
@@ -1113,6 +1158,10 @@ public final class ListenerRegistrationMessages {
           to_bitField0_ |= 0x00000004;
         }
         result.dataChangeScope_ = dataChangeScope_;
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000008;
+        }
+        result.remoteListener_ = remoteListener_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -1140,6 +1189,9 @@ public final class ListenerRegistrationMessages {
         if (other.hasDataChangeScope()) {
           setDataChangeScope(other.getDataChangeScope());
         }
+        if (other.hasRemoteListener()) {
+          setRemoteListener(other.getRemoteListener());
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
@@ -1154,6 +1206,10 @@ public final class ListenerRegistrationMessages {
           return false;
         }
         if (!hasDataChangeScope()) {
+
+          return false;
+        }
+        if (!hasRemoteListener()) {
 
           return false;
         }
@@ -1403,6 +1459,39 @@ public final class ListenerRegistrationMessages {
       public Builder clearDataChangeScope() {
         bitField0_ = (bitField0_ & ~0x00000004);
         dataChangeScope_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // required bool remoteListener = 4;
+      private boolean remoteListener_ ;
+      /**
+       * <code>required bool remoteListener = 4;</code>
+       */
+      public boolean hasRemoteListener() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      /**
+       * <code>required bool remoteListener = 4;</code>
+       */
+      public boolean getRemoteListener() {
+        return remoteListener_;
+      }
+      /**
+       * <code>required bool remoteListener = 4;</code>
+       */
+      public Builder setRemoteListener(boolean value) {
+        bitField0_ |= 0x00000008;
+        remoteListener_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required bool remoteListener = 4;</code>
+       */
+      public Builder clearRemoteListener() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        remoteListener_ = false;
         onChanged();
         return this;
       }
@@ -1944,15 +2033,15 @@ public final class ListenerRegistrationMessages {
       "ylight.controller.mdsal\032\014Common.proto\"%\n" +
       "#CloseDataChangeListenerRegistration\"*\n(" +
       "CloseDataChangeListenerRegistrationReply" +
-      "\"\255\001\n\026RegisterChangeListener\022U\n\026instanceI" +
+      "\"\305\001\n\026RegisterChangeListener\022U\n\026instanceI" +
       "dentifierPath\030\001 \002(\01325.org.opendaylight.c" +
       "ontroller.mdsal.InstanceIdentifier\022#\n\033da" +
       "taChangeListenerActorPath\030\002 \002(\t\022\027\n\017dataC" +
-      "hangeScope\030\003 \002(\005\"?\n\033RegisterChangeListen" +
-      "erReply\022 \n\030listenerRegistrationPath\030\001 \002(",
-      "\tB[\n;org.opendaylight.controller.protobu" +
-      "ff.messages.registrationB\034ListenerRegist" +
-      "rationMessages"
+      "hangeScope\030\003 \002(\005\022\026\n\016remoteListener\030\004 \002(\010" +
+      "\"?\n\033RegisterChangeListenerReply\022 \n\030liste",
+      "nerRegistrationPath\030\001 \002(\tB[\n;org.openday" +
+      "light.controller.protobuff.messages.regi" +
+      "strationB\034ListenerRegistrationMessages"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -1976,7 +2065,7 @@ public final class ListenerRegistrationMessages {
           internal_static_org_opendaylight_controller_mdsal_RegisterChangeListener_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_org_opendaylight_controller_mdsal_RegisterChangeListener_descriptor,
-              new java.lang.String[] { "InstanceIdentifierPath", "DataChangeListenerActorPath", "DataChangeScope", });
+              new java.lang.String[] { "InstanceIdentifierPath", "DataChangeListenerActorPath", "DataChangeScope", "RemoteListener", });
           internal_static_org_opendaylight_controller_mdsal_RegisterChangeListenerReply_descriptor =
             getDescriptor().getMessageTypes().get(3);
           internal_static_org_opendaylight_controller_mdsal_RegisterChangeListenerReply_fieldAccessorTable = new
