@@ -11,8 +11,6 @@
                 <capability>
                     urn:opendaylight:params:xml:ns:yang:controller:config?module=config&amp;revision=2013-04-05
                 </capability>
-                <capability>urn:ietf:params:netconf:capability:candidate:1.0</capability>
-                <capability>urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring?module=ietf-netconf-monitoring&amp;revision=2010-10-04</capability>
                 <capability>urn:ietf:params:xml:ns:yang:rpc-context?module=rpc-context&amp;revision=2013-06-17
                 </capability>
                 <capability>

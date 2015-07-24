@@ -15,8 +15,10 @@ import java.util.Arrays;
 import java.util.List;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.MBeanServer;
+import org.opendaylight.controller.config.api.ConfigRegistry;
 import org.opendaylight.controller.config.manager.impl.ConfigRegistryImpl;
 import org.opendaylight.controller.config.manager.impl.jmx.ConfigRegistryJMXRegistrator;
+import org.opendaylight.controller.config.manager.impl.jmx.JMXNotifierConfigRegistry;
 import org.opendaylight.controller.config.manager.impl.osgi.mapping.BindingContextProvider;
 import org.opendaylight.controller.config.manager.impl.osgi.mapping.ModuleInfoBundleTracker;
 import org.opendaylight.controller.config.manager.impl.osgi.mapping.RefreshingSCPModuleInfoRegistry;
@@ -27,62 +29,81 @@ import org.opendaylight.yangtools.sal.binding.generator.impl.ModuleInfoBackedCon
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ConfigManagerActivator implements BundleActivator {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ConfigManagerActivator.class);
+
     private final MBeanServer configMBeanServer = ManagementFactory.getPlatformMBeanServer();
 
     private AutoCloseable autoCloseable;
 
     @Override
     public void start(final BundleContext context) {
-
-        ModuleInfoBackedContext moduleInfoBackedContext = ModuleInfoBackedContext.create();// the inner strategy is backed by thread context cl?
-
-        BindingContextProvider bindingContextProvider = new BindingContextProvider();
-
-        RefreshingSCPModuleInfoRegistry moduleInfoRegistryWrapper = new RefreshingSCPModuleInfoRegistry(
-                moduleInfoBackedContext, moduleInfoBackedContext, moduleInfoBackedContext, bindingContextProvider, context);
-
-        ModuleInfoBundleTracker moduleInfoBundleTracker = new ModuleInfoBundleTracker(moduleInfoRegistryWrapper);
-
-
-        // start config registry
-        BundleContextBackedModuleFactoriesResolver bundleContextBackedModuleFactoriesResolver = new BundleContextBackedModuleFactoriesResolver(
-                context);
-        ConfigRegistryImpl configRegistry = new ConfigRegistryImpl(bundleContextBackedModuleFactoriesResolver, configMBeanServer,
-                bindingContextProvider);
-
-        // track bundles containing factories
-        BlankTransactionServiceTracker blankTransactionServiceTracker = new BlankTransactionServiceTracker(
-                configRegistry);
-        ModuleFactoryBundleTracker primaryModuleFactoryBundleTracker = new ModuleFactoryBundleTracker(
-                blankTransactionServiceTracker);
-
-        // start extensible tracker
-        ExtensibleBundleTracker<?> bundleTracker = new ExtensibleBundleTracker<>(context,
-                primaryModuleFactoryBundleTracker, moduleInfoBundleTracker);
-        bundleTracker.open();
-
-        // register config registry to OSGi
-        AutoCloseable clsReg = registerService(context, moduleInfoBackedContext, GeneratedClassLoadingStrategy.class);
-        AutoCloseable configRegReg = registerService(context, configRegistry, ConfigRegistryImpl.class);
-
-        // register config registry to jmx
-        ConfigRegistryJMXRegistrator configRegistryJMXRegistrator = new ConfigRegistryJMXRegistrator(configMBeanServer);
         try {
-            configRegistryJMXRegistrator.registerToJMX(configRegistry);
-        } catch (InstanceAlreadyExistsException e) {
-            throw new IllegalStateException("Config Registry was already registered to JMX", e);
+            ModuleInfoBackedContext moduleInfoBackedContext = ModuleInfoBackedContext.create();// the inner strategy is backed by thread context cl?
+
+            BindingContextProvider bindingContextProvider = new BindingContextProvider();
+
+            RefreshingSCPModuleInfoRegistry moduleInfoRegistryWrapper = new RefreshingSCPModuleInfoRegistry(
+                    moduleInfoBackedContext, moduleInfoBackedContext, moduleInfoBackedContext, bindingContextProvider, context);
+
+            ModuleInfoBundleTracker moduleInfoBundleTracker = new ModuleInfoBundleTracker(moduleInfoRegistryWrapper);
+
+            // start config registry
+            BundleContextBackedModuleFactoriesResolver bundleContextBackedModuleFactoriesResolver = new BundleContextBackedModuleFactoriesResolver(
+                    context);
+            ConfigRegistryImpl configRegistry = new ConfigRegistryImpl(bundleContextBackedModuleFactoriesResolver, configMBeanServer,
+                    bindingContextProvider);
+
+            // track bundles containing factories
+            BlankTransactionServiceTracker blankTransactionServiceTracker = new BlankTransactionServiceTracker(
+                    configRegistry);
+            ModuleFactoryBundleTracker primaryModuleFactoryBundleTracker = new ModuleFactoryBundleTracker(
+                    blankTransactionServiceTracker);
+
+            // start extensible tracker
+            ExtensibleBundleTracker<?> bundleTracker = new ExtensibleBundleTracker<>(context,
+                    primaryModuleFactoryBundleTracker, moduleInfoBundleTracker);
+            bundleTracker.open();
+
+            // Wrap config registry with JMX notification publishing adapter
+            final JMXNotifierConfigRegistry notifyingConfigRegistry =
+                    new JMXNotifierConfigRegistry(configRegistry, configMBeanServer);
+
+            // register config registry to OSGi
+            AutoCloseable clsReg = registerService(context, moduleInfoBackedContext, GeneratedClassLoadingStrategy.class);
+            AutoCloseable configRegReg = registerService(context, notifyingConfigRegistry, ConfigRegistry.class);
+
+            // register config registry to jmx
+            ConfigRegistryJMXRegistrator configRegistryJMXRegistrator = new ConfigRegistryJMXRegistrator(configMBeanServer);
+            try {
+                configRegistryJMXRegistrator.registerToJMXNoNotifications(configRegistry);
+            } catch (InstanceAlreadyExistsException e) {
+                throw new IllegalStateException("Config Registry was already registered to JMX", e);
+            }
+
+            // register config registry to jmx
+            final ConfigRegistryJMXRegistrator configRegistryJMXRegistratorWithNotifications = new ConfigRegistryJMXRegistrator(configMBeanServer);
+            try {
+                configRegistryJMXRegistrator.registerToJMX(notifyingConfigRegistry);
+            } catch (InstanceAlreadyExistsException e) {
+                throw new IllegalStateException("Config Registry was already registered to JMX", e);
+            }
+
+            // TODO wire directly via moduleInfoBundleTracker
+            ServiceTracker<ModuleFactory, Object> serviceTracker = new ServiceTracker<>(context, ModuleFactory.class,
+                    blankTransactionServiceTracker);
+            serviceTracker.open();
+
+            List<AutoCloseable> list = Arrays.asList(bindingContextProvider, clsReg, configRegistry, wrap(bundleTracker),
+                    configRegReg, configRegistryJMXRegistrator, configRegistryJMXRegistratorWithNotifications, wrap(serviceTracker), moduleInfoRegistryWrapper, notifyingConfigRegistry);
+            autoCloseable = OsgiRegistrationUtil.aggregate(list);
+        } catch(Exception e) {
+            LOG.warn("Error starting config manager", e);
         }
-
-        // TODO wire directly via moduleInfoBundleTracker
-        ServiceTracker<ModuleFactory, Object> serviceTracker = new ServiceTracker<>(context, ModuleFactory.class,
-                blankTransactionServiceTracker);
-        serviceTracker.open();
-
-        List<AutoCloseable> list = Arrays.asList(
-                bindingContextProvider, clsReg,configRegistry, wrap(bundleTracker), configRegReg, configRegistryJMXRegistrator, wrap(serviceTracker));
-        autoCloseable = OsgiRegistrationUtil.aggregate(list);
     }
 
     @Override
