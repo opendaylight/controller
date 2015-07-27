@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a7fa997_b03b5e37",
+        "filename": "opendaylight/config/config-it-base/src/main/java/org/opendaylight/controller/config/it/base/AbstractConfigTestBase.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-07-27T02:15:37Z",
+      "side": 1,
+      "message": "It would help if this timeout was named MODULE_TIMEOUT_IN_MILLIS",
+      "range": {
+        "startLine": 61,
+        "startChar": 29,
+        "endLine": 61,
+        "endChar": 43
+      },
+      "revId": "8526e1bc1af2c0e4fb3a313dbdb8160b9bf8b31f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_504a0ac6",
+        "filename": "opendaylight/config/config-it-base/src/main/java/org/opendaylight/controller/config/it/base/AbstractConfigTestBase.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-07-27T02:15:37Z",
+      "side": 1,
+      "message": "You could use a Guava Stopwatch here instead of Calendar",
+      "revId": "8526e1bc1af2c0e4fb3a313dbdb8160b9bf8b31f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
