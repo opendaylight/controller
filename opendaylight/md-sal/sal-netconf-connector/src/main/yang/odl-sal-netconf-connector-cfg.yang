@@ -10,9 +10,16 @@ module odl-sal-netconf-connector-cfg {
     import opendaylight-md-sal-binding {prefix md-sal-binding; revision-date 2013-10-28;}
     import odl-netconf-cfg { prefix cfg-net; revision-date 2014-04-08; }
     import ietf-inet-types {prefix inet; revision-date "2010-09-24";}
+    import netconf-topology { prefix top; revision-date 2015-07-27; }
 
     description
         "Service definition for Binding Aware MD-SAL.";
+
+    revision "2015-08-03" {
+        description
+            "Add netconf topology from which dependencies are inherited, change
+            existing dependencies to non-mandatory to preserve backwards compatibility";
+    }
 
     revision "2013-10-28" {
         description
@@ -73,10 +80,19 @@ module odl-sal-netconf-connector-cfg {
                              The connector subscribes (right after connect) to base netconf notifications and listens for netconf-capability-change notification";
             }
 
+            container netconf-topology {
+                uses config:service-ref {
+                    refine type {
+                        mandatory false;
+                        config:required-identity top:netconf-topology;
+                    }
+                }
+            }
+
             container dom-registry {
                 uses config:service-ref {
                     refine type {
-                        mandatory true;
+                        mandatory false;
                         config:required-identity dom:dom-broker-osgi-registry;
                     }
                 }
@@ -85,7 +101,7 @@ module odl-sal-netconf-connector-cfg {
             container binding-registry {
                 uses config:service-ref {
                     refine type {
-                        mandatory true;
+                        mandatory false;
                         config:required-identity md-sal-binding:binding-broker-osgi-registry;
                     }
                 }
@@ -94,7 +110,7 @@ module odl-sal-netconf-connector-cfg {
             container event-executor {
                 uses config:service-ref {
                     refine type {
-                        mandatory true;
+                        mandatory false;
                         config:required-identity netty:netty-event-executor;
                     }
                 }
@@ -103,7 +119,7 @@ module odl-sal-netconf-connector-cfg {
             container processing-executor {
                 uses config:service-ref {
                     refine type {
-                        mandatory true;
+                        mandatory false;
                         config:required-identity th:threadpool;
                     }
                 }

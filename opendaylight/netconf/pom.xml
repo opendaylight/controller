@@ -40,6 +40,8 @@
     <module>netconf-testtool</module>
     <module>netconf-notifications-impl</module>
     <module>netconf-notifications-api</module>
+    <module>netconf-topology-config</module>
+    <module>netconf-topology</module>
 
     <module>netconf-artifacts</module>
   </modules>

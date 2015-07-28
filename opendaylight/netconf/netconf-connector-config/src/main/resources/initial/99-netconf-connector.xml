@@ -21,35 +21,16 @@
           <password xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:connector:netconf">admin</password>
           <tcp-only xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:connector:netconf">false</tcp-only>
           <reconnect-on-changed-schema xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:connector:netconf">true</reconnect-on-changed-schema>
-          <event-executor xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:connector:netconf">
-            <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:netty">prefix:netty-event-executor</type>
-            <name>global-event-executor</name>
-          </event-executor>
-          <binding-registry xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:connector:netconf">
-            <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">prefix:binding-broker-osgi-registry</type>
-            <name>binding-osgi-broker</name>
-          </binding-registry>
-          <dom-registry xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:connector:netconf">
-            <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">prefix:dom-broker-osgi-registry</type>
-            <name>dom-broker</name>
-          </dom-registry>
-          <client-dispatcher xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:connector:netconf">
-            <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:config:netconf">prefix:netconf-client-dispatcher</type>
-            <name>global-netconf-dispatcher</name>
-          </client-dispatcher>
-          <processing-executor xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:connector:netconf">
-            <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:threadpool">prefix:threadpool</type>
-            <name>global-netconf-processing-executor</name>
-          </processing-executor>
-          <keepalive-executor xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:connector:netconf">
-            <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:threadpool">prefix:scheduled-threadpool</type>
-            <name>global-netconf-ssh-scheduled-executor</name>
-          </keepalive-executor>
+          <netconf-topology xmlns="urn:opendaylight:params:xml:ns:yang:controller:md:sal:connector:netconf">
+            <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:netconf:topology">prefix:netconf-topology</type>
+            <name>default-netconf-topology</name>
+          </netconf-topology>
         </module>
-        </modules>
+      </modules>
     </data>
   </configuration>
   <required-capabilities>
-      <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:connector:netconf?module=odl-sal-netconf-connector-cfg&amp;revision=2013-10-28</capability>
+    <capability>urn:opendaylight:params:xml:ns:yang:controller:netconf:topology?module=netconf-topology&amp;revision=2015-07-27</capability>
+    <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:connector:netconf?module=odl-sal-netconf-connector-cfg&amp;revision=2015-08-03</capability>
   </required-capabilities>
 </snapshot>
