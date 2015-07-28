@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a7fa997_b3912854",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2015-07-28T09:55:49Z",
+      "side": 1,
+      "message": "typo in advertise, but i would reword this to: Make test-tool advertise candidate capability.",
+      "revId": "8fe902913edef0af91ad46f5ec59daa560320014",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
