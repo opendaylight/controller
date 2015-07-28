@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a7fa997_f3afa092",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2015-07-28T09:53:27Z",
+      "side": 1,
+      "message": "You should use present tense in commit messages(Implement). Look at it in the way of saying what applying the commit will do, instead of saying what you did in this commit.",
+      "revId": "cad652134f8c327c9411e29d10a53898403d03db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_93cf4c7f",
+        "filename": "opendaylight/netconf/netconf-testtool/src/main/java/org/opendaylight/controller/netconf/test/tool/NetconfDeviceSimulator.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 460,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2015-07-28T09:53:27Z",
+      "side": 1,
+      "message": "Add a comment why creating a schema context is necessary.",
+      "revId": "cad652134f8c327c9411e29d10a53898403d03db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_73edd0ee",
+        "filename": "opendaylight/netconf/netconf-testtool/src/main/java/org/opendaylight/controller/netconf/test/tool/NetconfDeviceSimulator.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 548,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2015-07-28T09:53:27Z",
+      "side": 1,
+      "message": "This should be moved out into it\u0027s own package private class.",
+      "revId": "cad652134f8c327c9411e29d10a53898403d03db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_93e8ace3",
+        "filename": "opendaylight/netconf/netconf-testtool/src/main/java/org/opendaylight/controller/netconf/test/tool/NetconfDeviceSimulator.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 599,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2015-07-28T09:53:27Z",
+      "side": 1,
+      "message": "I would extract the datastore creation into it\u0027s own method createDatastore() to make this more readable since this method is getting quite long. It would then return instances of ConcurrentDOMDataBroker.",
+      "revId": "cad652134f8c327c9411e29d10a53898403d03db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_b3e36804",
+        "filename": "opendaylight/netconf/netconf-testtool/src/main/java/org/opendaylight/controller/netconf/test/tool/NetconfDeviceSimulator.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 625,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2015-07-28T09:53:27Z",
+      "side": 1,
+      "message": "Same goes for netconf state creation, extract into separate method f.ex createNetconfState() which would return the root netconf state node and just write it into the datastore here.",
+      "revId": "cad652134f8c327c9411e29d10a53898403d03db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_53f214d3",
+        "filename": "opendaylight/netconf/netconf-testtool/src/main/java/org/opendaylight/controller/netconf/test/tool/NetconfDeviceSimulator.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 712,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2015-07-28T09:53:27Z",
+      "side": 1,
+      "message": "We should also add DiscardChanges, there is no real reason to support it in the simulated datastore, but here it can be usefull.",
+      "revId": "cad652134f8c327c9411e29d10a53898403d03db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a7fa997_13bc9cdb",
+        "filename": "opendaylight/netconf/netconf-testtool/src/main/java/org/opendaylight/controller/netconf/test/tool/NetconfDeviceSimulator.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 778,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2015-07-28T09:53:27Z",
+      "side": 1,
+      "message": "This should be moved out into it\u0027s own package private class.",
+      "revId": "cad652134f8c327c9411e29d10a53898403d03db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
