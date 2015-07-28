@@ -400,6 +400,11 @@ public class DatastoreContext {
             return this;
         }
 
+        public Builder clusterConfigPath(String path) {
+            this.configurationReader(new FileConfigurationReader(path));
+            return this;
+        }
+
         public DatastoreContext build() {
             datastoreContext.dataStoreProperties = InMemoryDOMDataStoreConfigProperties.create(
                     maxShardDataChangeExecutorPoolSize, maxShardDataChangeExecutorQueueSize,

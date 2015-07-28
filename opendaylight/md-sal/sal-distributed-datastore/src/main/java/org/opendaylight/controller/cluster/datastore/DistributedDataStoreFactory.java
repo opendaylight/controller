@@ -39,7 +39,7 @@ public class DistributedDataStoreFactory {
         DatastoreContextConfigAdminOverlay overlay = new DatastoreContextConfigAdminOverlay(
                 introspector, bundleContext);
 
-        ActorSystem actorSystem = getActorSystem(bundleContext, datastoreContext.getConfigurationReader());
+        ActorSystem actorSystem = getActorSystem(bundleContext, introspector.getContext().getConfigurationReader());
         Configuration config = new ConfigurationImpl("module-shards.conf", "modules.conf");
         final DistributedDataStore dataStore = new DistributedDataStore(actorSystem,
                 new ClusterWrapperImpl(actorSystem), config, introspector.getContext());
