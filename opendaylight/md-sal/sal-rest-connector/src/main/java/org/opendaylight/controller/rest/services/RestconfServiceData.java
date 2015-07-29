@@ -21,31 +21,36 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+
 import org.opendaylight.controller.rest.common.NormalizedNodeContext;
 import org.opendaylight.controller.rest.common.RestconfConstants;
 import org.opendaylight.controller.sal.rest.api.Draft02;
 
 /**
- * The URI hierarchy for the RESTCONF resources consists of an entry point container, 4 top-level resources, and 1
- * field.
- * <ul>
- * <li><b>/restconf</b> - {@link #getRoot()}
- * <ul>
+ * <b>Data resources</b>
+ *
+ * This interface represents the datastore resource type which are split to the
+ * configuration and operation datastore.
+ *
+ * @see <a
+ *      href="https://tools.ietf.org/html/draft-ietf-netconf-restconf-07#section-3.4"></a>
+ *      Specification defines URL path as "{+restconf}/data"
+ *
+ *      TODO finish documentation
+ *
+ *      The URI hierarchy for the RESTCONF resources consists of an entry point
+ *      container, 4 top-level resources, and 1 field.
+ *      <ul>
+ *      <li><b>/restconf</b> - {@link #getRoot()}
+ *      <ul>
  *      <li><b>/config</b> - {@link #readConfigurationData(String)}
- *                              {@link #updateConfigurationData(String, NormalizedNodeContext)}
- *                              {@link #createConfigurationData(NormalizedNodeContext)}
- *                              {@link #createConfigurationData(String, NormalizedNodeContext)}
- * {@link #deleteConfigurationData(String)}
- * <li><b>/operational</b> - {@link #readOperationalData(String)}
- * <li>/modules - {@link #getModules()}
- * <ul>
- * <li>/module
- * </ul>
- *      <li><b>/operations</b> - {@link #invokeRpc(String, NormalizedNodeContext)}
- *                               {@link #invokeRpc(String, NormalizedNodeContext)}
- * <li>/version (field)
- * </ul>
- * </ul>
+ *      {@link #updateConfigurationData(String, NormalizedNodeContext)}
+ *      {@link #createConfigurationData(NormalizedNodeContext)}
+ *      {@link #createConfigurationData(String, NormalizedNodeContext)}
+ *      {@link #deleteConfigurationData(String)}
+ *      <li><b>/operational</b> - {@link #readOperationalData(String)}
+ *      </ul>
+ *      </ul>
  */
 @Path("/")
 public interface RestconfServiceData {
@@ -74,6 +79,12 @@ public interface RestconfServiceData {
     public Response updateConfigurationData(@Encoded @PathParam("identifier") String identifier,
             NormalizedNodeContext payload);
 
+    /**
+     * @param identifier
+     * @param payload
+     * @param uriInfo
+     * @return
+     */
     @POST
     @Path("/config/{identifier:.+}")
     @Consumes({ Draft02.MediaTypes.DATA + JSON, Draft02.MediaTypes.DATA + XML, MediaType.APPLICATION_JSON,

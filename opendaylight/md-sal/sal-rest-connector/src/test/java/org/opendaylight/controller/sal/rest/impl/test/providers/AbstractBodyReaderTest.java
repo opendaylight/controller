@@ -11,18 +11,21 @@ package org.opendaylight.controller.sal.rest.impl.test.providers;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
 import java.lang.reflect.Field;
 import java.util.Collections;
+
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.UriInfo;
-import org.opendaylight.controller.md.sal.rest.common.TestRestconfUtils;
+
 import org.opendaylight.controller.rest.common.NormalizedNodeContext;
 import org.opendaylight.controller.rest.common.RestconfConstants;
 import org.opendaylight.controller.rest.connector.impl.RestSchemaControllerImpl;
 import org.opendaylight.controller.rest.providers.AbstractIdentifierAwareJaxRsProvider;
+import org.opendaylight.controller.rest.test.utils.TestRestconfUtils;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 /**
