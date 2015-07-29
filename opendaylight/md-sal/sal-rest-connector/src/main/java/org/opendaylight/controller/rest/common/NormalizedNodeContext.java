@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.rest.common;
 
-import org.opendaylight.controller.rest.common.WriterParameters.WriterParametersBuilder;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaNode;
 
@@ -18,7 +17,7 @@ public class NormalizedNodeContext {
     private final WriterParameters writerParameters;
 
     public NormalizedNodeContext(final InstanceIdentifierContext<? extends SchemaNode> context,
-                                 final NormalizedNode<?, ?> data, WriterParameters writerParameters) {
+                                 final NormalizedNode<?, ?> data, final WriterParameters writerParameters) {
         this.context = context;
         this.data = data;
         this.writerParameters = writerParameters;

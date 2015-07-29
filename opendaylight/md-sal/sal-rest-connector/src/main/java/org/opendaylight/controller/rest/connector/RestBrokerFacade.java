@@ -8,8 +8,9 @@
 
 package org.opendaylight.controller.rest.connector;
 
-import com.google.common.util.concurrent.CheckedFuture;
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
+
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
@@ -22,6 +23,8 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
+
+import com.google.common.util.concurrent.CheckedFuture;
 
 public interface RestBrokerFacade {
 
@@ -45,6 +48,24 @@ public interface RestBrokerFacade {
             YangInstanceIdentifier path, NormalizedNode<?, ?> payload);
 
     CheckedFuture<Void, TransactionCommitFailedException> commitConfigurationDataPost(DOMMountPoint mountPoint,
+            YangInstanceIdentifier path, NormalizedNode<?, ?> payload);
+
+    /**
+     * @param globalSchema
+     * @param path
+     * @param payload
+     * @return
+     */
+    CheckedFuture<Void, TransactionCommitFailedException> commitConfigurationDataPatch(SchemaContext globalSchema,
+            @CheckForNull YangInstanceIdentifier path, NormalizedNode<?, ?> payload);
+
+    /**
+     * @param mountPoint
+     * @param path
+     * @param payload
+     * @return
+     */
+    CheckedFuture<Void, TransactionCommitFailedException> commitConfigurationDataPatch(DOMMountPoint mountPoint,
             YangInstanceIdentifier path, NormalizedNode<?, ?> payload);
 
     CheckedFuture<Void, TransactionCommitFailedException> commitConfigurationDataDelete(YangInstanceIdentifier path);
