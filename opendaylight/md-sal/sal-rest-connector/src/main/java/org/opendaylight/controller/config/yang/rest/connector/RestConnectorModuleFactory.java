@@ -11,7 +11,6 @@ package org.opendaylight.controller.config.yang.rest.connector;
 
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
-import org.opendaylight.controller.config.yang.rest.connector.RestConnectorModule;
 import org.osgi.framework.BundleContext;
 
 /**

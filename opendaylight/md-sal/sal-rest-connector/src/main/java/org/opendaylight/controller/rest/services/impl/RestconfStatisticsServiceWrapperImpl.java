@@ -7,13 +7,14 @@
  */
 package org.opendaylight.controller.rest.services.impl;
 
-import com.google.common.base.Preconditions;
 import java.math.BigInteger;
 import java.util.concurrent.atomic.AtomicLong;
+
 import javax.annotation.CheckForNull;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
+
 import org.opendaylight.controller.rest.common.NormalizedNodeContext;
 import org.opendaylight.controller.rest.connector.RestBrokerFacade;
 import org.opendaylight.controller.rest.connector.RestSchemaController;
@@ -21,6 +22,8 @@ import org.opendaylight.controller.rest.services.RestconfServiceBase;
 import org.opendaylight.controller.rest.services.RestconfServiceData;
 import org.opendaylight.controller.rest.services.RestconfServiceOperations;
 import org.opendaylight.controller.rest.services.RestconfStatisticsServiceWrapper;
+
+import com.google.common.base.Preconditions;
 
 /**
  * RestconfService wrapper class calculate and provided Request/Response statistics
@@ -158,6 +161,12 @@ public class RestconfStatisticsServiceWrapperImpl implements RestconfStatisticsS
             throw e;
         }
         return response;
+    }
+
+    @Override
+    public Response patchConfigurationData(final String identifier, final NormalizedNodeContext payload) {
+        // FIXME : patch means update so add code to increase AtomicUpdateIndex
+        return delegateRestServData.patchConfigurationData(identifier, payload);
     }
 
     @Override
