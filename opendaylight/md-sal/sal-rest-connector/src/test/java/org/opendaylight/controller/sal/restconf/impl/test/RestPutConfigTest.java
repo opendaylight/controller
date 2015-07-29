@@ -10,6 +10,7 @@ package org.opendaylight.controller.sal.restconf.impl.test;
 
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,7 +18,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
-import org.opendaylight.controller.md.sal.rest.common.TestRestconfUtils;
 import org.opendaylight.controller.rest.common.InstanceIdentifierContext;
 import org.opendaylight.controller.rest.common.NormalizedNodeContext;
 import org.opendaylight.controller.rest.connector.impl.RestBrokerFacadeImpl;
@@ -25,6 +25,7 @@ import org.opendaylight.controller.rest.connector.impl.RestSchemaControllerImpl;
 import org.opendaylight.controller.rest.errors.RestconfDocumentedException;
 import org.opendaylight.controller.rest.services.RestconfServiceData;
 import org.opendaylight.controller.rest.services.impl.RestconfServiceDataImpl;
+import org.opendaylight.controller.rest.test.utils.TestRestconfUtils;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;

@@ -9,15 +9,14 @@ package org.opendaylight.controller.rest.connector.impl;
 
 import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.CONFIGURATION;
 import static org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType.OPERATIONAL;
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.CheckedFuture;
-import com.google.common.util.concurrent.ListenableFuture;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+
 import javax.ws.rs.core.Response.Status;
+
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
@@ -47,6 +46,13 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.ListenableFuture;
+
 public class RestBrokerFacadeImpl implements RestBrokerFacade {
     private final static Logger LOG = LoggerFactory.getLogger(RestBrokerFacadeImpl.class);
 
@@ -62,7 +68,12 @@ public class RestBrokerFacadeImpl implements RestBrokerFacade {
         this.rpcService = Preconditions.checkNotNull(rpcService);
     }
 
-    private void checkPreconditions() {
+    @Deprecated
+    /**
+     * @deprecated : checking existance of DataBroker is not need any more, because
+     * DataBroker is final and checkNotNull is a part of constructor code
+     */
+    private void checkDataBrokerPreconditions() {
         if (domDataBroker == null) {
             throw new RestconfDocumentedException(Status.SERVICE_UNAVAILABLE);
         }
@@ -71,7 +82,7 @@ public class RestBrokerFacadeImpl implements RestBrokerFacade {
     // READ configuration
     @Override
     public NormalizedNode<?, ?> readConfigurationData(final YangInstanceIdentifier path) {
-        checkPreconditions();
+        checkDataBrokerPreconditions();
         return readDataViaTransaction(domDataBroker.newReadOnlyTransaction(), CONFIGURATION, path);
     }
 
@@ -89,7 +100,7 @@ public class RestBrokerFacadeImpl implements RestBrokerFacade {
     // READ operational
     @Override
     public NormalizedNode<?, ?> readOperationalData(final YangInstanceIdentifier path) {
-        checkPreconditions();
+        checkDataBrokerPreconditions();
         return readDataViaTransaction(domDataBroker.newReadOnlyTransaction(), OPERATIONAL, path);
     }
 
@@ -108,7 +119,7 @@ public class RestBrokerFacadeImpl implements RestBrokerFacade {
     @Override
     public CheckedFuture<Void, TransactionCommitFailedException> commitConfigurationDataPut(
             final SchemaContext globalSchema, final YangInstanceIdentifier path, final NormalizedNode<?, ?> payload) {
-        checkPreconditions();
+        checkDataBrokerPreconditions();
         return putDataViaTransaction(domDataBroker.newReadWriteTransaction(), CONFIGURATION, path, payload, globalSchema);
     }
 
@@ -125,11 +136,36 @@ public class RestBrokerFacadeImpl implements RestBrokerFacade {
         throw new RestconfDocumentedException(errMsg);
     }
 
+    /* PATCH configuration */
+
+    @Override
+    public CheckedFuture<Void, TransactionCommitFailedException> commitConfigurationDataPatch(
+            final SchemaContext schemaContext, final YangInstanceIdentifier path, final NormalizedNode<?, ?> payload) {
+
+        Preconditions.checkArgument(path != null);
+        final DOMDataWriteTransaction tx = domDataBroker.newWriteOnlyTransaction();
+        tx.merge(LogicalDatastoreType.CONFIGURATION, path, payload);
+
+        // TODO: when are we return code 200 and when 204 ?
+
+        throw new NotImplementedException();
+    }
+
+    @Override
+    public CheckedFuture<Void, TransactionCommitFailedException> commitConfigurationDataPatch(
+final DOMMountPoint l,
+            final SchemaContext globalSchema, final YangInstanceIdentifier path,
+            final NormalizedNode<?, ?> payload) {
+        checkDataBrokerPreconditions();
+
+        throw new NotImplementedException();
+    }
+
     // POST configuration
     @Override
     public CheckedFuture<Void, TransactionCommitFailedException> commitConfigurationDataPost(
             final SchemaContext globalSchema, final YangInstanceIdentifier path, final NormalizedNode<?, ?> payload) {
-        checkPreconditions();
+        checkDataBrokerPreconditions();
         return postDataViaTransaction(domDataBroker.newReadWriteTransaction(), CONFIGURATION, path, payload, globalSchema);
     }
 
@@ -150,7 +186,7 @@ public class RestBrokerFacadeImpl implements RestBrokerFacade {
     @Override
     public CheckedFuture<Void, TransactionCommitFailedException> commitConfigurationDataDelete(
             final YangInstanceIdentifier path) {
-        checkPreconditions();
+        checkDataBrokerPreconditions();
         return deleteDataViaTransaction(domDataBroker.newWriteOnlyTransaction(), CONFIGURATION, path);
     }
 
@@ -169,7 +205,7 @@ public class RestBrokerFacadeImpl implements RestBrokerFacade {
     // RPC
     @Override
     public CheckedFuture<DOMRpcResult, DOMRpcException> invokeRpc(final SchemaPath type, final NormalizedNode<?, ?> input) {
-        checkPreconditions();
+        checkDataBrokerPreconditions();
         if (rpcService == null) {
             throw new RestconfDocumentedException(Status.SERVICE_UNAVAILABLE);
         }
@@ -179,7 +215,7 @@ public class RestBrokerFacadeImpl implements RestBrokerFacade {
     @Override
     public void registerToListenDataChanges(final LogicalDatastoreType datastore, final DataChangeScope scope,
             final ListenerAdapter listener) {
-        checkPreconditions();
+        checkDataBrokerPreconditions();
 
         if (listener.isListening()) {
             return;

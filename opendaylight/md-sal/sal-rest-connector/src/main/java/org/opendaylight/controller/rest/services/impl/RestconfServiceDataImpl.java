@@ -8,20 +8,17 @@
 
 package org.opendaylight.controller.rest.services.impl;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Predicates;
-import com.google.common.base.Throwables;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Maps;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+
+import javax.ws.rs.NotSupportedException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
+
 import org.opendaylight.controller.md.sal.common.api.data.OptimisticLockFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
@@ -46,6 +43,13 @@ import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Predicates;
+import com.google.common.base.Throwables;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
 
 /**
  * Implementation of {@link RestconfServiceData}
@@ -322,5 +326,63 @@ public class RestconfServiceDataImpl extends AbstractRestconfServiceImpl impleme
                 throw new RestconfDocumentedException(errMsg, ErrorType.PROTOCOL, ErrorTag.INVALID_VALUE);
             }
         }
+    }
+
+    @Override
+    public Response patchConfigurationData(final String identifier, final NormalizedNodeContext payload) {
+        throw new NotSupportedException("implement me");
+//        Preconditions.checkNotNull(identifier);
+//        final InstanceIdentifierContext<?> iiWithData = payload.getInstanceIdentifierContext();
+//
+//        validateInput(iiWithData.getSchemaNode(), payload);
+//        validateTopLevelNodeName(payload, iiWithData.getInstanceIdentifier());
+//        validateListKeysEqualityInPayloadAndUri(payload);
+//
+//        final DOMMountPoint mountPoint = iiWithData.getMountPoint();
+//        final YangInstanceIdentifier normalizedII = iiWithData.getInstanceIdentifier();
+//
+//        /*
+//         * There is a small window where another write transaction could be
+//         * updating the same data simultaneously and we get an
+//         * OptimisticLockFailedException. This error is likely transient and The
+//         * WriteTransaction#submit API docs state that a retry will likely
+//         * succeed. So we'll try again if that scenario occurs. If it fails a
+//         * third time then it probably will never succeed so we'll fail in that
+//         * case.
+//         *
+//         * By retrying we're attempting to hide the internal implementation of
+//         * the data store and how it handles concurrent updates from the
+//         * restconf client. The client has instructed us to put the data and we
+//         * should make every effort to do so without pushing optimistic lock
+//         * failures back to the client and forcing them to handle it via retry
+//         * (and having to document the behavior).
+//         */
+//        int tries = 2;
+//        while (true) {
+//            try {
+//                if (mountPoint != null) {
+//                    broker.commitConfigurationDataPut(mountPoint, normalizedII, payload.getData()).checkedGet();
+//                } else {
+//                    broker.commitConfigurationDataPut(schemaController.getGlobalSchema(), normalizedII,
+//                            payload.getData()).checkedGet();
+//                }
+//
+//                break;
+//            } catch (final TransactionCommitFailedException e) {
+//                if (e instanceof OptimisticLockFailedException) {
+//                    if (--tries <= 0) {
+//                        LOG.debug("Got OptimisticLockFailedException on last try - failing " + identifier);
+//                        throw new RestconfDocumentedException(e.getMessage(), e, e.getErrorList());
+//                    }
+//
+//                    LOG.debug("Got OptimisticLockFailedException - trying again " + identifier);
+//                } else {
+//                    LOG.debug("Update ConfigDataStore fail " + identifier, e);
+//                    throw new RestconfDocumentedException(e.getMessage(), e, e.getErrorList());
+//                }
+//            }
+//        }
+//
+//        return Response.status(Status.OK).build();
     }
 }
