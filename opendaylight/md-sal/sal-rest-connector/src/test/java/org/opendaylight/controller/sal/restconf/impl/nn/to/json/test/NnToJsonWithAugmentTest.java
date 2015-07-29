@@ -8,17 +8,21 @@
 package org.opendaylight.controller.sal.restconf.impl.nn.to.json.test;
 
 import static org.junit.Assert.assertTrue;
+
 import com.google.common.base.Preconditions;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.opendaylight.controller.md.sal.rest.common.TestRestconfUtils;
 import org.opendaylight.controller.rest.common.NormalizedNodeContext;
 import org.opendaylight.controller.rest.providers.NormalizedNodeJsonBodyWriter;
+import org.opendaylight.controller.rest.test.utils.TestRestconfUtils;
 import org.opendaylight.controller.sal.rest.impl.test.providers.AbstractBodyReaderTest;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
