@@ -123,7 +123,8 @@
         <bundle>mvn:com.sun.jersey/jersey-server/${jersey.version}</bundle>
         <bundle>mvn:com.sun.jersey/jersey-servlet/${jersey.version}</bundle>
         <bundle>wrap:mvn:org.json/json/${org.json.version}</bundle>
-    </feature>
+		<configfile finalname="${config.configfile.directory}/${config.restconf.configfile}">mvn:org.opendaylight.controller/sal-rest-docgen-config/${mdsal.version}/xml/config</configfile>    
+	</feature>
 
     <feature name='odl-toaster-rest' version='${project.version}'>
         <feature version='${project.version}'>odl-restconf</feature>

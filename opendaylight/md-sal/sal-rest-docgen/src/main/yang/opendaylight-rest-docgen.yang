@@ -1,0 +1,47 @@
+module opendaylight-rest-docgen {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:md:sal:rest:docgen";
+    prefix "md-sal-rest-docgen";
+
+    import config { prefix config; revision-date 2013-04-05; }
+    import opendaylight-md-sal-dom {prefix dom; revision-date 2013-10-28;}
+
+    description
+        "Service definition for Rest Document Generater";
+
+    revision "2015-07-29" {
+        description
+            "Initial revision";
+    }
+
+    identity rest-docgen {
+        base "config:service-type";
+        config:java-class "org.opendaylight.controller.sal.rest.doc.api.RestDocgen";
+    }
+
+    identity rest-docgen-impl {
+        base config:module-type;
+        config:provided-service rest-docgen;
+        config:java-name-prefix RestDocgen;
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+        case rest-docgen-impl {
+            when "/config:modules/config:module/config:type = 'rest-docgen-impl'";
+            container dom-broker {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity dom:dom-broker-osgi-registry;
+                    }
+                }
+            }
+        }
+    }
+
+    augment "/config:modules/config:module/config:state" {
+        case rest-docgen-impl {
+            when "/config:modules/config:module/config:type = 'rest-docgen-impl'";
+        }
+    }
+}
