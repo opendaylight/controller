@@ -35,6 +35,7 @@
     <module>netconf-notifications-impl</module>
     <module>netconf-notifications-api</module>
     <module>sal-netconf-connector</module>
+    <module>messagebus-netconf</module>
     <module>features</module>
     <module>models</module>
     <module>tools</module>
