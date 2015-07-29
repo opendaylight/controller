@@ -8,20 +8,16 @@
 
 package org.opendaylight.controller.rest.services.impl;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Predicates;
-import com.google.common.base.Throwables;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Maps;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
+
 import org.opendaylight.controller.md.sal.common.api.data.OptimisticLockFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
@@ -46,6 +42,13 @@ import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Predicates;
+import com.google.common.base.Throwables;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
 
 /**
  * Implementation of {@link RestconfServiceData}
@@ -201,6 +204,36 @@ public class RestconfServiceDataImpl extends AbstractRestconfServiceImpl impleme
             responseBuilder.location(location);
         }
         return responseBuilder.build();
+    }
+
+    @Override
+    public Response patchConfigurationData(final String identifier, final NormalizedNodeContext payload) {
+
+        final InstanceIdentifierContext<?> iiWithData = payload.getInstanceIdentifierContext();
+        final YangInstanceIdentifier normalizedII = iiWithData.getInstanceIdentifier();
+
+        if (broker.readConfigurationData(normalizedII) == payload.getData()) {
+            throw new RestconfDocumentedException("Conflict.", ErrorType.PROTOCOL, ErrorTag.LOCK_DENIED);
+        }
+
+        validateInput(iiWithData.getSchemaNode(), payload);
+        validateTopLevelNodeName(payload, iiWithData.getInstanceIdentifier());
+        validateListKeysEqualityInPayloadAndUri(payload);
+
+        final DOMMountPoint mountPoint = iiWithData.getMountPoint();
+        try {
+            if (mountPoint == null) {
+                broker.commitConfigurationDataPatch(schemaController.getGlobalSchema(), normalizedII,
+                        payload.getData()).checkedGet();
+            } else {
+                broker.commitConfigurationDataPatch(mountPoint, normalizedII, payload.getData()).checkedGet();
+            }
+        } catch (final TransactionCommitFailedException e) {
+            LOG.debug("Patch ConfigDataStore fail " + identifier, e);
+            throw new RestconfDocumentedException(e.getMessage(), e, e.getErrorList());
+        }
+
+        return Response.status(Status.OK).build();
     }
 
     @Override

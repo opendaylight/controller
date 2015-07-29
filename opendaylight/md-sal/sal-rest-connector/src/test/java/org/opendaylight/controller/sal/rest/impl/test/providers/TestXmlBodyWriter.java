@@ -9,14 +9,17 @@
 package org.opendaylight.controller.sal.rest.impl.test.providers;
 
 import static org.junit.Assert.assertTrue;
+
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
+
 import javax.ws.rs.core.MediaType;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.opendaylight.controller.md.sal.rest.common.TestRestconfUtils;
 import org.opendaylight.controller.rest.common.NormalizedNodeContext;
 import org.opendaylight.controller.rest.providers.NormalizedNodeXmlBodyWriter;
+import org.opendaylight.controller.rest.test.utils.TestRestconfUtils;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 /**

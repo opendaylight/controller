@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
 import org.opendaylight.controller.rest.connector.RestSchemaController;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
@@ -57,7 +58,7 @@ public class Notificator {
 
     /**
      * Creates new {@link ListenerAdapter} listener from {@link YangInstanceIdentifier} path and stream name.
-     * 
+     *
      * @param path
      *            Path to data in data repository.
      * @param streamName
