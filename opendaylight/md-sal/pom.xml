@@ -53,6 +53,7 @@
 
     <!-- Documentation -->
     <module>sal-rest-docgen</module>
+    <module>sal-rest-docgen-config</module>
     <module>sal-rest-docgen-maven</module>
 
     <module>sal-akka-raft</module>

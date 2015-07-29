@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
+
+This program and the accompanying materials are made available under the
+terms of the Eclipse Public License v1.0 which accompanies this distribution,
+and is available at http://www.eclipse.org/legal/epl-v10.html
+-->
+<snapshot>
+    <configuration>
+        <data xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+            <modules xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
+                <!-- default OF-switch-connection-provider (port 6633) -->
+                <module>
+                    <type xmlns:rest="urn:opendaylight:params:xml:ns:yang:controller:md:sal:rest:docgen">rest:rest-docgen-impl</type>
+                    <name>rest-docgen-default-impl</name>
+                    <dom-broker>
+                        <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:dom-broker-osgi-registry</type>
+                        <name>dom-broker</name>
+                    </dom-broker>
+                </module>
+            </modules>
+
+            <services xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
+                <service>
+                    <type xmlns:rest="urn:opendaylight:params:xml:ns:yang:controller:md:sal:rest:docgen">rest:rest-docgen</type>
+                    <instance>
+                        <name>rest-docgen-default</name>
+                        <provider>
+                            /modules/module[type='rest-docgen-impl'][name='rest-docgen-default-impl']
+                        </provider>
+                    </instance>
+                </service>
+            </services>
+        </data>
+    </configuration>
+    <required-capabilities>
+        <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:rest:docgen?module=opendaylight-rest-docgen&amp;revision=2015-07-29</capability>
+    </required-capabilities>
+</snapshot>
