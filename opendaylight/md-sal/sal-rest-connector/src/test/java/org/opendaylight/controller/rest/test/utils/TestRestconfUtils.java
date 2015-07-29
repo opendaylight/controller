@@ -6,7 +6,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.md.sal.rest.common;
+package org.opendaylight.controller.rest.test.utils;
 
 import com.google.common.base.Preconditions;
 import java.io.File;
