@@ -14,21 +14,9 @@
                   <name>messagebus-app-impl</name>
                   <type xmlns:binding-impl="urn:opendaylight:params:xml:ns:yang:controller:messagebus:app:impl">binding-impl:messagebus-app-impl</type>
                   <binding-broker xmlns="urn:opendaylight:params:xml:ns:yang:controller:messagebus:app:impl">
-                      <type xmlns:md-sal-binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">md-sal-binding:binding-broker-osgi-registry</type>
+                      <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">prefix:binding-broker-osgi-registry</type>
                       <name>binding-osgi-broker</name>
                   </binding-broker>
-                  <dom-broker xmlns="urn:opendaylight:params:xml:ns:yang:controller:messagebus:app:impl">
-                      <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:dom-broker-osgi-registry</type>
-                      <name>dom-broker</name>
-                  </dom-broker>
-                  <namespace-to-stream>
-                      <urn-prefix>urn:ietf:params:xml:ns:yang:smiv2</urn-prefix>
-                      <stream-name>SNMP</stream-name>
-                  </namespace-to-stream>
-                  <namespace-to-stream>
-                      <urn-prefix>urn:ietf:params:xml:ns:yang:ietf-syslog-notification</urn-prefix>
-                      <stream-name>SYSLOG</stream-name>
-                  </namespace-to-stream>
               </module>
           </modules>
           <services xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
