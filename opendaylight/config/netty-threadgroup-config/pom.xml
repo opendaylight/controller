@@ -7,7 +7,7 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>config-plugin-parent</artifactId>
-    <version>0.2.9-Helium-SR4</version>
+    <version>0.2.10-SNAPSHOT</version>
     <relativePath>../config-plugin-parent</relativePath>
   </parent>
   <artifactId>netty-threadgroup-config</artifactId>
