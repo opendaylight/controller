@@ -20,8 +20,6 @@
     <module>opendaylight/md-sal</module>
     <!-- config -->
     <module>opendaylight/config</module>
-    <!-- netconf -->
-    <module>opendaylight/netconf</module>
 
     <module>opendaylight/model</module>
 

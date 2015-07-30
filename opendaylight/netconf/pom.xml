@@ -14,7 +14,17 @@
   <packaging>pom</packaging>
   <name>${project.artifactId}</name>
 
+  <properties>
+    <netconf.version>0.4.0-SNAPSHOT</netconf.version>
+    <config.netconf.client.configfile>01-netconf.xml</config.netconf.client.configfile>
+    <config.netconf.mdsal.configfile>08-mdsal-netconf.xml</config.netconf.mdsal.configfile>
+    <config.netconf.connector.configfile>99-netconf-connector.xml</config.netconf.connector.configfile>
+    <sonar.exclusions>**/org/opendaylight/controller/netconf/cli/**, **/org/opendaylight/controller/netconf/test/tool/**</sonar.exclusions>
+  </properties>
+
   <modules>
+    <module>netconf-artifacts</module>
+
     <module>netconf-api</module>
     <module>netconf-config</module>
     <module>netconf-impl</module>
@@ -39,8 +49,6 @@
     <module>features</module>
     <module>models</module>
     <module>tools</module>
-
-    <module>netconf-artifacts</module>
   </modules>
 
   <dependencies>
@@ -59,6 +67,26 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>netconf-artifacts</artifactId>
+        <version>${project.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>features-netconf-connector</artifactId>
+        <version>${project.version}</version>
+        <classifier>features</classifier>
+        <type>xml</type>
+        <scope>runtime</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <build>
     <pluginManagement>
