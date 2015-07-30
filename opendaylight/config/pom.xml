@@ -5,12 +5,12 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>commons.opendaylight</artifactId>
-    <version>1.4.6-Helium-SR4</version>
+    <version>1.4.7-SNAPSHOT</version>
     <relativePath>../commons/opendaylight</relativePath>
   </parent>
   <artifactId>config-subsystem</artifactId>
 
-  <version>0.2.9-Helium-SR4</version>
+  <version>0.2.10-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>${project.artifactId}</name>
   <prerequisites>
