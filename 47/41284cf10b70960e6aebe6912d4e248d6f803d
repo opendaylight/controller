@@ -1,0 +1,7 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+2: Thanh Ha <thanh.ha@linuxfoundation.org>
+Submitted-by: Thanh Ha <thanh.ha@linuxfoundation.org>
+Submitted-at: Thu, 30 Jul 2015 20:40:17 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/24637
+Project: controller
+Branch: refs/heads/stable/helium
