@@ -21,7 +21,7 @@
     <!-- config -->
     <module>opendaylight/config</module>
     <!-- netconf -->
-    <module>opendaylight/netconf</module>
+     <module>opendaylight/netconf</module>
 
     <module>opendaylight/model</module>
 
