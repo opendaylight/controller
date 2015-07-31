@@ -17,15 +17,17 @@ import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContaine
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafSetEntryNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafSetNodeBuilder;
-import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
 
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
+import org.opendaylight.yangtools.yang.parser.stmt.reactor.CrossSourceStatementReactor;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangInferencePipeline;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangStatementSourceImpl;
 
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntry;
 import static org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes.mapEntryBuilder;
@@ -208,15 +210,17 @@ public class CompositeModel {
     return TestModel.class.getResourceAsStream(resourceName);
   }
 
-  public static SchemaContext createTestContext() {
+  public static SchemaContext createTestContext() throws ReactorException {
     List<InputStream> inputStreams = new ArrayList<>();
     inputStreams.add(getDatastoreTestInputStream());
     inputStreams.add(getDatastoreAugInputStream());
     inputStreams.add(getDatastoreTestNotificationInputStream());
 
-    YangParserImpl parser = new YangParserImpl();
-    Set<Module> modules = parser.parseYangModelsFromStreams(inputStreams);
-    return parser.resolveSchemaContext(modules);
+      CrossSourceStatementReactor.BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR.newBuild();
+      for (InputStream is : inputStreams) {
+          reactor.addSource(new YangStatementSourceImpl(is));
+      }
+      return reactor.buildEffective();
   }
 
   /**

@@ -984,7 +984,7 @@ public class RestconfImpl implements RestconfService {
     /**
      * Load parameter for subscribing to stream from input composite node
      *
-     * @param compNode
+     * @param value
      *            contains value
      * @return enum object if its string value is equal to {@code paramName}. In other cases null.
      */

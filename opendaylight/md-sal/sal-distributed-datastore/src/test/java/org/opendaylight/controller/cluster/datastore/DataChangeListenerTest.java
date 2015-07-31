@@ -14,6 +14,7 @@ import org.opendaylight.controller.md.cluster.datastore.model.CompositeModel;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 
 public class DataChangeListenerTest extends AbstractActorTest {
 
@@ -95,7 +96,7 @@ public class DataChangeListenerTest extends AbstractActorTest {
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test
-    public void testDataChangedWithListenerRuntimeEx(){
+    public void testDataChangedWithListenerRuntimeEx() throws ReactorException {
         new JavaTestKit(getSystem()) {{
             AsyncDataChangeEvent mockChangeEvent1 = Mockito.mock(AsyncDataChangeEvent.class);
             AsyncDataChangeEvent mockChangeEvent2 = Mockito.mock(AsyncDataChangeEvent.class);
