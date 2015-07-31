@@ -34,7 +34,7 @@ public interface ApiDocService {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getRootDoc(@Context javax.ws.rs.core.UriInfo uriInfo);
+    Response getRootDoc(@Context javax.ws.rs.core.UriInfo uriInfo);
 
     /**
      * Generates Swagger compliant document listing APIs for module.
@@ -47,7 +47,7 @@ public interface ApiDocService {
     @GET
     @Path("/{module}({revision})")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getDocByModule(@PathParam("module") String module,
+    Response getDocByModule(@PathParam("module") String module,
             @PathParam("revision") String revision, @Context javax.ws.rs.core.UriInfo uriInfo);
 
     /**
@@ -59,7 +59,7 @@ public interface ApiDocService {
     @GET
     @Path("/ui")
     @Produces(MediaType.TEXT_HTML)
-    public Response getApiExplorer(@Context javax.ws.rs.core.UriInfo uriInfo);
+    Response getApiExplorer(@Context javax.ws.rs.core.UriInfo uriInfo);
 
     /**
      * Generates index document for Swagger UI. This document lists out all
@@ -72,12 +72,12 @@ public interface ApiDocService {
     @GET
     @Path("/mounts")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getListOfMounts(@Context javax.ws.rs.core.UriInfo uriInfo);
+    Response getListOfMounts(@Context javax.ws.rs.core.UriInfo uriInfo);
 
     @GET
     @Path("/mounts/{instance}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getMountRootDoc(@PathParam("instance") String instanceNum,
+    Response getMountRootDoc(@PathParam("instance") String instanceNum,
             @Context javax.ws.rs.core.UriInfo uriInfo);
 
     /**
@@ -91,7 +91,7 @@ public interface ApiDocService {
     @GET
     @Path("/mounts/{instance}/{module}({revision})")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getMountDocByModule(@PathParam("instance") String instanceNum,
+    Response getMountDocByModule(@PathParam("instance") String instanceNum,
             @PathParam("module") String module, @PathParam("revision") String revision,
             @Context javax.ws.rs.core.UriInfo uriInfo);
 

@@ -105,7 +105,7 @@ public class RestConnectorProvider implements Provider, AutoCloseable, RestConne
 
         final ServiceReference<?> ref = bundleCx.getServiceReference(HttpService.class.getName());
         httpService = (HttpService) bundleCx.getService(ref);
-        LOG.info("REST_CONNECTOR_BUNDLE: HTTP SERVICE = " + httpService.toString());
+        LOG.debug("REST_CONNECTOR_BUNDLE: HTTP SERVICE = " + httpService.toString());
 
         try {
             httpService.registerServlet(REST_CONNECTOR_BASE_PATH, restconfServletInit(broker, rsCr), null, null);

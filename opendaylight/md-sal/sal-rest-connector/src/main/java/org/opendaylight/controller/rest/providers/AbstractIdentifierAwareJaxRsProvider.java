@@ -10,6 +10,7 @@ package org.opendaylight.controller.rest.providers;
 
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
+import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 import org.opendaylight.controller.rest.common.InstanceIdentifierContext;
 import org.opendaylight.controller.rest.common.RestconfConstants;
@@ -29,6 +30,9 @@ public class AbstractIdentifierAwareJaxRsProvider {
 
     @Context
     private Request request;
+
+    @Context
+    private SecurityContext securityCx;
 
     protected final String getIdentifier() {
         return uriInfo.getPathParameters(false).getFirst(RestconfConstants.IDENTIFIER);

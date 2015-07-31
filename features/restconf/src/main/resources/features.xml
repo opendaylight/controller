@@ -99,6 +99,11 @@
         <bundle>mvn:javax.servlet/javax.servlet-api/${javax.servlet.api.version}</bundle>
         <bundle>mvn:org.glassfish.jersey.containers/jersey-container-servlet/${jersey2.version}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-remote/${project.version}</bundle>
+        <bundle>mvn:org.glassfish.jersey.bundles.repackaged/jersey-guava/${jersey2.version}</bundle>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.javax-inject/1_2</bundle>
+        <bundle>mvn:com.eclipsesource.jaxrs/jersey-all/${jersey2.version}</bundle>
+        <bundle>mvn:org.glassfish.jersey.containers/jersey-container-servlet-core/${jersey2.version}</bundle>
+        <bundle>mvn:org.glassfish.jersey.containers/jersey-container-servlet/${jersey2.version}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-rest-connector/${project.version}</bundle>
         <bundle>mvn:com.google.code.gson/gson/${gson.version}</bundle>
         <bundle>mvn:org.opendaylight.yangtools/yang-data-codec-gson/${yangtools.version}</bundle>
@@ -113,18 +118,15 @@
     </feature>
     <feature name ='odl-mdsal-apidocs' version='${project.version}' description="OpenDaylight :: MDSAL :: APIDOCS">
         <feature version='${project.version}'>odl-restconf</feature>
-        <bundle>mvn:org.opendaylight.controller/sal-rest-docgen/${project.version}</bundle>
+        <bundle>mvn:org.apache.geronimo.bundles/json/${apache.geronimo.version}</bundle>
+        <bundle>mvn:com.fasterxml.jackson.datatype/jackson-datatype-json-org/${jackson.version}</bundle>
+        <bundle>mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-json-provider/${jackson.version}</bundle>
         <bundle>mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.version}</bundle>
         <bundle>mvn:com.fasterxml.jackson.core/jackson-core/${jackson.version}</bundle>
         <bundle>mvn:com.fasterxml.jackson.core/jackson-databind/${jackson.version}</bundle>
-        <bundle>mvn:com.fasterxml.jackson.datatype/jackson-datatype-json-org/${jackson.version}</bundle>
         <bundle>mvn:com.fasterxml.jackson.module/jackson-module-jaxb-annotations/${jackson.version}</bundle>
         <bundle>mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-base/${jackson.version}</bundle>
-        <bundle>mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-json-provider/${jackson.version}</bundle>
-        <bundle>mvn:com.sun.jersey/jersey-core/${jersey.version}</bundle>
-        <bundle>mvn:com.sun.jersey/jersey-server/${jersey.version}</bundle>
-        <bundle>mvn:com.sun.jersey/jersey-servlet/${jersey.version}</bundle>
-        <bundle>wrap:mvn:org.json/json/${org.json.version}</bundle>
+        <bundle>mvn:org.opendaylight.controller/sal-rest-docgen/${project.version}</bundle>
     </feature>
 
     <feature name='odl-toaster-rest' version='${project.version}'>
