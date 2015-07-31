@@ -104,5 +104,19 @@
          <include>pom.xml</include>
        </includes>
      </fileSet>
+
+     <!-- it -->
+     <fileSet filtered="true" encoding="UTF-8">
+        <directory>it</directory>
+        <includes>
+            <include>pom.xml</include>
+        </includes>
+    </fileSet>
+    <fileSet filtered="true" encoding="UTF-8">
+        <directory>it/src/test/java</directory>
+        <includes>
+            <include>**/*.java</include>
+         </includes>
+    </fileSet>
   </fileSets>
 </archetype-descriptor>

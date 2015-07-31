@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+${copyright} and others.  All rights reserved.
+
+This program and the accompanying materials are made available under the
+terms of the Eclipse Public License v1.0 which accompanies this distribution,
+and is available at http://www.eclipse.org/legal/epl-v10.html
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <parent>
+    <groupId>org.opendaylight.controller</groupId>
+    <artifactId>mdsal-it-parent</artifactId>
+    <version>1.3.0-SNAPSHOT</version>
+    <relativePath/>
+  </parent>
+
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>${groupId}</groupId>
+  <artifactId>${artifactId}-it</artifactId>
+  <version>${version}</version>
+  <packaging>bundle</packaging>
+
+  <properties>
+    <skipITs>false</skipITs>
+    <karaf.distro.groupId>org.opendaylight.${artifactId}</karaf.distro.groupId>
+    <karaf.distro.artifactId>${artifactId}-karaf</karaf.distro.artifactId>
+    <karaf.distro.version>${version}</karaf.distro.version>
+    <karaf.distro.type>zip</karaf.distro.type>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>${artifactId}-features</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
+
+</project>

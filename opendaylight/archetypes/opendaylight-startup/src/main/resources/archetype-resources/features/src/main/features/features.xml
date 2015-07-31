@@ -16,6 +16,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <repository>mvn:org.opendaylight.yangtools/features-yangtools/${symbol_dollar}{yangtools.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.controller/features-mdsal/${symbol_dollar}{mdsal.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.controller/features-restconf/${symbol_dollar}{mdsal.version}/xml/features</repository>
+  <repository>mvn:org.opendaylight.dlux/features-dlux/${symbol_dollar}{dlux.version}/xml/features</repository>
   <feature name='odl-${artifactId}-api' version='${symbol_dollar}{project.version}' description='OpenDaylight :: ${artifactId} :: api'>
     <feature version='${symbol_dollar}{yangtools.version}'>odl-yangtools-models</feature>
     <bundle>mvn:${groupId}/${artifactId}-api/${symbol_dollar}{project.version}</bundle>
@@ -34,6 +35,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <feature version="${symbol_dollar}{project.version}">odl-${artifactId}-rest</feature>
     <feature version="${symbol_dollar}{mdsal.version}">odl-mdsal-apidocs</feature>
     <feature version="${symbol_dollar}{mdsal.version}">odl-mdsal-xsql</feature>
+    <feature version="${symbol_dollar}{dlux.version}">odl-dlux-yangui</feature>
   </feature>
 
 </features>
