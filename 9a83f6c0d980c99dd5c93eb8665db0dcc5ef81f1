@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a7ca5a3_6404947e",
+        "filename": "opendaylight/archetypes/opendaylight-startup/src/main/resources/archetype-resources/it/src/test/java/__packageInPathFormat__/it/__classPrefix__IT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-08-02T15:10:00Z",
+      "side": 1,
+      "message": "Please remove trailing whitespace",
+      "revId": "9a83f6c0d980c99dd5c93eb8665db0dcc5ef81f1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_8409b097",
+        "filename": "opendaylight/archetypes/opendaylight-startup/src/main/resources/archetype-resources/it/src/test/java/__packageInPathFormat__/it/__classPrefix__IT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-08-02T15:10:00Z",
+      "side": 1,
+      "message": "Please remove trailing whitespace",
+      "revId": "9a83f6c0d980c99dd5c93eb8665db0dcc5ef81f1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_24fe9c6c",
+        "filename": "opendaylight/archetypes/opendaylight-startup/src/main/resources/archetype-resources/it/src/test/java/__packageInPathFormat__/it/__classPrefix__IT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-08-02T15:10:00Z",
+      "side": 1,
+      "message": "Please remove trailing whitespace",
+      "revId": "9a83f6c0d980c99dd5c93eb8665db0dcc5ef81f1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
