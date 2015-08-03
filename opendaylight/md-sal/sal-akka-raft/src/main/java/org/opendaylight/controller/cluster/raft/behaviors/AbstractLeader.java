@@ -333,7 +333,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
                 context.getTermInformation().updateAndPersist(rpc.getTerm(), null);
 
-                return switchBehavior(new Follower(context));
+                return internalSwitchBehavior(RaftState.Follower);
             }
         }
 
