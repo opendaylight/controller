@@ -95,7 +95,7 @@ public class Candidate extends AbstractRaftActorBehavior {
         }
 
         if (voteCount >= votesRequired) {
-            return switchBehavior(new Leader(context));
+            return internalSwitchBehavior(RaftState.Leader);
         }
 
         return this;
@@ -121,7 +121,7 @@ public class Candidate extends AbstractRaftActorBehavior {
             if (rpc.getTerm() > context.getTermInformation().getCurrentTerm()) {
                 context.getTermInformation().updateAndPersist(rpc.getTerm(), null);
 
-                return switchBehavior(new Follower(context));
+                return internalSwitchBehavior(RaftState.Follower);
             }
         }
 
@@ -135,7 +135,7 @@ public class Candidate extends AbstractRaftActorBehavior {
                 // who we do not know about (as a peer)
                 // to send a message to the candidate
 
-                return switchBehavior(new Leader(context));
+                return internalSwitchBehavior(RaftState.Leader);
             }
             startNewTerm();
             scheduleElection(electionDuration());

@@ -314,7 +314,7 @@ public class Follower extends AbstractRaftActorBehavior {
 
         if (message instanceof ElectionTimeout) {
             LOG.debug("{}: Received ElectionTimeout - switching to Candidate", logName());
-            return switchBehavior(new Candidate(context));
+            return internalSwitchBehavior(RaftState.Candidate);
 
         } else if (message instanceof InstallSnapshot) {
             InstallSnapshot installSnapshot = (InstallSnapshot) message;
