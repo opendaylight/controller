@@ -43,6 +43,8 @@ import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshotReply;
 import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
+import org.opendaylight.controller.cluster.raft.policy.DefaultRaftPolicy;
+import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.utils.ForwardMessageToBehaviorActor;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import scala.concurrent.duration.FiniteDuration;
@@ -1417,6 +1419,53 @@ public class LeaderTest extends AbstractLeaderTest {
     }
 
     @Test
+    public void testHandleAppendEntriesReplyWithNewerTerm(){
+        logStart("testHandleAppendEntriesReplyWithNewerTerm");
+
+        MockRaftActorContext leaderActorContext = createActorContext();
+        ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setHeartBeatInterval(
+                new FiniteDuration(10000, TimeUnit.SECONDS));
+
+        leaderActorContext.setReplicatedLog(
+                new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 2, 2).build());
+
+        leader = new Leader(leaderActorContext);
+        leaderActor.underlyingActor().setBehavior(leader);
+        leaderActor.tell(new AppendEntriesReply("foo", 20, false, 1000, 10, (short) 1), ActorRef.noSender());
+
+        AppendEntriesReply appendEntriesReply = MessageCollectorActor.expectFirstMatching(leaderActor, AppendEntriesReply.class);
+
+        assertEquals(false, appendEntriesReply.isSuccess());
+        assertEquals(RaftState.Follower, leaderActor.underlyingActor().getFirstBehaviorChange().state());
+
+        MessageCollectorActor.clearMessages(leaderActor);
+    }
+
+    @Test
+    public void testHandleAppendEntriesReplyWithNewerTermWhenElectionsAreDisabled(){
+        logStart("testHandleAppendEntriesReplyWithNewerTermWhenElectionsAreDisabled");
+
+        MockRaftActorContext leaderActorContext = createActorContext();
+        ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setHeartBeatInterval(
+                new FiniteDuration(10000, TimeUnit.SECONDS));
+
+        leaderActorContext.setReplicatedLog(
+                new MockRaftActorContext.MockReplicatedLogBuilder().createEntries(0, 2, 2).build());
+        leaderActorContext.setRaftPolicy(createRaftPolicy(false, false));
+
+        leader = new Leader(leaderActorContext);
+        leaderActor.underlyingActor().setBehavior(leader);
+        leaderActor.tell(new AppendEntriesReply("foo", 20, false, 1000, 10, (short) 1), ActorRef.noSender());
+
+        AppendEntriesReply appendEntriesReply = MessageCollectorActor.expectFirstMatching(leaderActor, AppendEntriesReply.class);
+
+        assertEquals(false, appendEntriesReply.isSuccess());
+        assertEquals(RaftState.Leader, leaderActor.underlyingActor().getFirstBehaviorChange().state());
+
+        MessageCollectorActor.clearMessages(leaderActor);
+    }
+
+    @Test
     public void testHandleAppendEntriesReplySuccess() throws Exception {
         logStart("testHandleAppendEntriesReplySuccess");
 
@@ -1589,56 +1638,69 @@ public class LeaderTest extends AbstractLeaderTest {
         Assert.assertTrue(behavior instanceof Leader);
     }
 
+    private RaftActorBehavior setupIsolatedLeaderCheckTestWithTwoFollowers(RaftPolicy raftPolicy){
+        ActorRef followerActor1 = getSystem().actorOf(MessageCollectorActor.props(), "follower-1");
+        ActorRef followerActor2 = getSystem().actorOf(MessageCollectorActor.props(), "follower-2");
+
+        MockRaftActorContext leaderActorContext = createActorContext();
+
+        Map<String, String> peerAddresses = new HashMap<>();
+        peerAddresses.put("follower-1", followerActor1.path().toString());
+        peerAddresses.put("follower-2", followerActor2.path().toString());
+
+        leaderActorContext.setPeerAddresses(peerAddresses);
+        leaderActorContext.setRaftPolicy(raftPolicy);
+
+        leader = new Leader(leaderActorContext);
+
+        leader.markFollowerActive("follower-1");
+        leader.markFollowerActive("follower-2");
+        RaftActorBehavior behavior = leader.handleMessage(leaderActor, new IsolatedLeaderCheck());
+        Assert.assertTrue("Behavior not instance of Leader when all followers are active",
+                behavior instanceof Leader);
+
+        // kill 1 follower and verify if that got killed
+        final JavaTestKit probe = new JavaTestKit(getSystem());
+        probe.watch(followerActor1);
+        followerActor1.tell(PoisonPill.getInstance(), ActorRef.noSender());
+        final Terminated termMsg1 = probe.expectMsgClass(Terminated.class);
+        assertEquals(termMsg1.getActor(), followerActor1);
+
+        leader.markFollowerInActive("follower-1");
+        leader.markFollowerActive("follower-2");
+        behavior = leader.handleMessage(leaderActor, new IsolatedLeaderCheck());
+        Assert.assertTrue("Behavior not instance of Leader when majority of followers are active",
+                behavior instanceof Leader);
+
+        // kill 2nd follower and leader should change to Isolated leader
+        followerActor2.tell(PoisonPill.getInstance(), null);
+        probe.watch(followerActor2);
+        followerActor2.tell(PoisonPill.getInstance(), ActorRef.noSender());
+        final Terminated termMsg2 = probe.expectMsgClass(Terminated.class);
+        assertEquals(termMsg2.getActor(), followerActor2);
+
+        leader.markFollowerInActive("follower-2");
+        return leader.handleMessage(leaderActor, new IsolatedLeaderCheck());
+    }
+
     @Test
     public void testIsolatedLeaderCheckTwoFollowers() throws Exception {
         logStart("testIsolatedLeaderCheckTwoFollowers");
 
-        new JavaTestKit(getSystem()) {{
+        RaftActorBehavior behavior = setupIsolatedLeaderCheckTestWithTwoFollowers(DefaultRaftPolicy.INSTANCE);
 
-            ActorRef followerActor1 = getTestActor();
-            ActorRef followerActor2 = getTestActor();
+        Assert.assertTrue("Behavior not instance of IsolatedLeader when majority followers are inactive",
+            behavior instanceof IsolatedLeader);
+    }
 
-            MockRaftActorContext leaderActorContext = createActorContext();
+    @Test
+    public void testIsolatedLeaderCheckTwoFollowersWhenElectionsAreDisabled() throws Exception {
+        logStart("testIsolatedLeaderCheckTwoFollowersWhenElectionsAreDisabled");
 
-            Map<String, String> peerAddresses = new HashMap<>();
-            peerAddresses.put("follower-1", followerActor1.path().toString());
-            peerAddresses.put("follower-2", followerActor2.path().toString());
+        RaftActorBehavior behavior = setupIsolatedLeaderCheckTestWithTwoFollowers(createRaftPolicy(false, true));
 
-            leaderActorContext.setPeerAddresses(peerAddresses);
-
-            leader = new Leader(leaderActorContext);
-
-            leader.markFollowerActive("follower-1");
-            leader.markFollowerActive("follower-2");
-            RaftActorBehavior behavior = leader.handleMessage(leaderActor, new IsolatedLeaderCheck());
-            Assert.assertTrue("Behavior not instance of Leader when all followers are active",
+        Assert.assertTrue("Behavior should not switch to IsolatedLeader because elections are disabled",
                 behavior instanceof Leader);
-
-            // kill 1 follower and verify if that got killed
-            final JavaTestKit probe = new JavaTestKit(getSystem());
-            probe.watch(followerActor1);
-            followerActor1.tell(PoisonPill.getInstance(), ActorRef.noSender());
-            final Terminated termMsg1 = probe.expectMsgClass(Terminated.class);
-            assertEquals(termMsg1.getActor(), followerActor1);
-
-            leader.markFollowerInActive("follower-1");
-            leader.markFollowerActive("follower-2");
-            behavior = leader.handleMessage(leaderActor, new IsolatedLeaderCheck());
-            Assert.assertTrue("Behavior not instance of Leader when majority of followers are active",
-                behavior instanceof Leader);
-
-            // kill 2nd follower and leader should change to Isolated leader
-            followerActor2.tell(PoisonPill.getInstance(), null);
-            probe.watch(followerActor2);
-            followerActor2.tell(PoisonPill.getInstance(), ActorRef.noSender());
-            final Terminated termMsg2 = probe.expectMsgClass(Terminated.class);
-            assertEquals(termMsg2.getActor(), followerActor2);
-
-            leader.markFollowerInActive("follower-2");
-            behavior = leader.handleMessage(leaderActor, new IsolatedLeaderCheck());
-            Assert.assertTrue("Behavior not instance of IsolatedLeader when majority followers are inactive",
-                behavior instanceof IsolatedLeader);
-        }};
     }
 
     @Test
