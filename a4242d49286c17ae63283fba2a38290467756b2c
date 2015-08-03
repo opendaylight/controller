@@ -1,0 +1,124 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a7ca5a3_cfc0212d",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/ClusteredDataChangeListener.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-08-03T21:26:33Z",
+      "side": 1,
+      "message": "extra quote",
+      "range": {
+        "startLine": 14,
+        "startChar": 37,
+        "endLine": 14,
+        "endChar": 38
+      },
+      "revId": "a4242d49286c17ae63283fba2a38290467756b2c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_6fdd4d14",
+        "filename": "opendaylight/md-sal/sal-binding-api/src/main/java/org/opendaylight/controller/md/sal/binding/api/ClusteredDataChangeListener.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-08-03T21:26:33Z",
+      "side": 1,
+      "message": "I think we need to add more documentation for this class. It\u0027s very important for developers to understand the difference between simply implementing DataChangeListener and ClusteredDataChangeListener. The differences should be highlighted in the docs.",
+      "revId": "a4242d49286c17ae63283fba2a38290467756b2c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_8fe229d4",
+        "filename": "opendaylight/md-sal/sal-binding-broker/src/main/java/org/opendaylight/controller/md/sal/binding/impl/AbstractForwardedDataBroker.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-08-03T21:26:33Z",
+      "side": 1,
+      "message": "else should be on previous line",
+      "range": {
+        "startLine": 74,
+        "startChar": 7,
+        "endLine": 74,
+        "endChar": 13
+      },
+      "revId": "a4242d49286c17ae63283fba2a38290467756b2c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_0fce195b",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/resources/ListenerRegistration.proto",
+        "patchSetId": 4
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-08-03T21:26:33Z",
+      "side": 1,
+      "message": "In this case it does not matter because RegisterChangeListener is a local message but when you add new fields to a protobuf message in general the new fields should not be required.",
+      "range": {
+        "startLine": 30,
+        "startChar": 0,
+        "endLine": 30,
+        "endChar": 8
+      },
+      "revId": "a4242d49286c17ae63283fba2a38290467756b2c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_6f046d7e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-08-03T21:26:33Z",
+      "side": 1,
+      "message": "Import order broken, static imports go first then alphabetical.",
+      "revId": "a4242d49286c17ae63283fba2a38290467756b2c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_8f09c997",
+        "filename": "opendaylight/md-sal/sal-dom-api/src/main/java/org/opendaylight/controller/md/sal/dom/api/ClusteredDOMDataChangeListener.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-08-03T21:26:33Z",
+      "side": 1,
+      "message": "More docs here would be good.",
+      "revId": "a4242d49286c17ae63283fba2a38290467756b2c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
