@@ -13,6 +13,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
+import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.base.messages.IsolatedLeaderCheck;
 
 /**
@@ -54,7 +55,7 @@ public class Leader extends AbstractLeader {
                 LOG.warn("{}: At least {} followers need to be active, Switching {} from Leader to IsolatedLeader",
                         context.getId(), minIsolatedLeaderPeerCount, leaderId);
 
-                return switchBehavior(new IsolatedLeader(context));
+                return internalSwitchBehavior(RaftState.IsolatedLeader);
             }
         }
 
