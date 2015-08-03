@@ -420,15 +420,24 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
 
     @Override
     public RaftActorBehavior switchBehavior(RaftActorBehavior behavior) {
-        LOG.info("{} :- Switching from behavior {} to {}", logName(), this.state(), behavior.state());
-        try {
-            close();
-        } catch (Exception e) {
-            LOG.error("{}: Failed to close behavior : {}", logName(), this.state(), e);
+        return internalSwitchBehavior(behavior, true);
+    }
+
+    protected RaftActorBehavior internalSwitchBehavior(RaftActorBehavior behavior, boolean forceBehaviorChange) {
+        if(context.getRaftPolicy().automaticElectionsEnabled() || forceBehaviorChange) {
+            LOG.info("{} :- Switching from behavior {} to {}", logName(), this.state(), behavior.state());
+            try {
+                close();
+            } catch (Exception e) {
+                LOG.error("{}: Failed to close behavior : {}", logName(), this.state(), e);
+            }
+
+            return behavior;
         }
 
-        return behavior;
+        return this;
     }
+
 
     protected int getMajorityVoteCount(int numPeers) {
         // Votes are required from a majority of the peers including self.

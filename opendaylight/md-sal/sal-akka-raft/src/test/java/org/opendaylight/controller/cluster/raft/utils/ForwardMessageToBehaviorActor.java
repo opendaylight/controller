@@ -9,17 +9,19 @@
 package org.opendaylight.controller.cluster.raft.utils;
 
 import akka.actor.Props;
+import java.util.ArrayList;
+import java.util.List;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 
 public class ForwardMessageToBehaviorActor extends MessageCollectorActor {
     private RaftActorBehavior behavior;
+    private List<RaftActorBehavior> behaviorChanges = new ArrayList<>();
 
     @Override
     public void onReceive(Object message) throws Exception {
         if(behavior != null) {
-            behavior.handleMessage(sender(), message);
+            behaviorChanges.add(behavior.handleMessage(sender(), message));
         }
-
         super.onReceive(message);
     }
 
@@ -29,6 +31,30 @@ public class ForwardMessageToBehaviorActor extends MessageCollectorActor {
 
     public void setBehavior(RaftActorBehavior behavior){
         this.behavior = behavior;
+    }
+
+    public RaftActorBehavior getFirstBehaviorChange() {
+        if(behaviorChanges.size() == 0){
+            throw new IllegalStateException("no behavior changes present");
+        }
+        return behaviorChanges.get(0);
+    }
+
+    public RaftActorBehavior getLastBehaviorChange() {
+        if(behaviorChanges.size() == 0){
+            throw new IllegalStateException("no behavior changes present");
+        }
+        return behaviorChanges.get(behaviorChanges.size() - 1);
+    }
+
+    public List<RaftActorBehavior> getBehaviorChanges(){
+        return behaviorChanges;
+    }
+
+    @Override
+    public void clear() {
+        super.clear();
+        behaviorChanges.clear();
     }
 }
 

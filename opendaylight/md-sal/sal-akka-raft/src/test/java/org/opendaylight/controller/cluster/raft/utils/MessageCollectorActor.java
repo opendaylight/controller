@@ -45,7 +45,7 @@ public class MessageCollectorActor extends UntypedActor {
         if(GET_ALL_MESSAGES.equals(message)) {
             getSender().tell(new ArrayList<>(messages), getSelf());
         } else if(CLEAR_MESSAGES.equals(message)) {
-            messages.clear();
+            clear();
         } else if(message != null) {
             messages.add(SerializationUtils.fromSerializable(message));
         }
