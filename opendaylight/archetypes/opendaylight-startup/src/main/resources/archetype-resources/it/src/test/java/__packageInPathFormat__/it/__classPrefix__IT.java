@@ -18,7 +18,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.opendaylight.controller.mdsal.it.base.AbstractMdsalTestBase;
-import org.opendaylight.hello.HelloIT;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.karaf.options.LogLevelOption.LogLevel;
@@ -32,7 +31,7 @@ import org.slf4j.LoggerFactory;
 @ExamReactorStrategy(PerClass.class)
 public class ${classPrefix}IT extends AbstractMdsalTestBase {
     private static final Logger LOG = LoggerFactory.getLogger(${classPrefix}IT.class);
-    
+
     @Override
     public String getModuleName() {
         return "${artifactId}";
@@ -57,7 +56,7 @@ public class ${classPrefix}IT extends AbstractMdsalTestBase {
     public String getFeatureName() {
         return "odl-${artifactId}-ui";
     }
-    
+
     @Override
     public Option getLoggingOption() {
         Option option = editConfigurationFilePut(ORG_OPS4J_PAX_LOGGING_CFG,
@@ -66,7 +65,7 @@ public class ${classPrefix}IT extends AbstractMdsalTestBase {
         option = composite(option, super.getLoggingOption());
         return option;
     }
-    
+
     @Test
     public void test${artifactId}FeatureLoad() {
         Assert.assertTrue(true);
