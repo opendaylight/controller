@@ -31,8 +31,15 @@ public class AppendEntriesReply extends AbstractRaftRPC {
 
     private final short payloadVersion;
 
+    private final boolean forceInstallSnapshot;
+
     public AppendEntriesReply(String followerId, long term, boolean success, long logLastIndex, long logLastTerm,
             short payloadVersion) {
+        this(followerId, term, success, logLastIndex, logLastTerm, payloadVersion, false);
+    }
+
+    public AppendEntriesReply(String followerId, long term, boolean success, long logLastIndex, long logLastTerm,
+                              short payloadVersion, boolean forceInstallSnapshot) {
         super(term);
 
         this.followerId = followerId;
@@ -40,7 +47,9 @@ public class AppendEntriesReply extends AbstractRaftRPC {
         this.logLastIndex = logLastIndex;
         this.logLastTerm = logLastTerm;
         this.payloadVersion = payloadVersion;
+        this.forceInstallSnapshot = forceInstallSnapshot;
     }
+
 
     @Override
     public long getTerm() {
@@ -72,7 +81,12 @@ public class AppendEntriesReply extends AbstractRaftRPC {
         StringBuilder builder = new StringBuilder();
         builder.append("AppendEntriesReply [success=").append(success).append(", logLastIndex=").append(logLastIndex)
                 .append(", logLastTerm=").append(logLastTerm).append(", followerId=").append(followerId)
-                .append(", payloadVersion=").append(payloadVersion).append("]");
+                .append(", payloadVersion=").append(", forceInstallSnapshot=").append(forceInstallSnapshot)
+                .append(payloadVersion).append("]");
         return builder.toString();
+    }
+
+    public boolean isForceInstallSnapshot() {
+        return forceInstallSnapshot;
     }
 }
