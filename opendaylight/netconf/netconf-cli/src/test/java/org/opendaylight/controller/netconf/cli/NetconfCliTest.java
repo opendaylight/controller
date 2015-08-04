@@ -18,6 +18,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
@@ -29,20 +30,39 @@ import org.opendaylight.controller.netconf.cli.writer.WriteException;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.model.parser.api.YangContextParser;
-import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
+import org.opendaylight.yangtools.yang.parser.spi.source.SourceException;
+import org.opendaylight.yangtools.yang.parser.spi.source.StatementStreamSource;
+import org.opendaylight.yangtools.yang.parser.stmt.reactor.CrossSourceStatementReactor;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangInferencePipeline;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangStatementSourceImpl;
+import org.opendaylight.yangtools.yang.parser.util.NamedFileInputStream;
 
 @Ignore
 public class NetconfCliTest {
 
-    private final static YangContextParser parser = new YangParserImpl();
+    public static SchemaContext parseYangSources(Collection<File> files) throws SourceException, ReactorException, FileNotFoundException {
+
+        StatementStreamSource[] sources = new StatementStreamSource[files.size()];
+
+        int iter = 0;
+        for (final File file : files) {
+            sources[iter++] = new YangStatementSourceImpl(new NamedFileInputStream(file,file.getPath()));
+        }
+
+        CrossSourceStatementReactor.BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR
+                .newBuild();
+        reactor.addSources(sources);
+
+        return reactor.buildEffective();
+    }
 
     private static SchemaContext loadSchemaContext(final String resourceDirectory) throws IOException,
-            URISyntaxException {
+            URISyntaxException, ReactorException {
         final URI uri = NetconfCliTest.class.getResource(resourceDirectory).toURI();
         final File testDir = new File(uri);
         final String[] fileList = testDir.list();
-        final List<File> testFiles = new ArrayList<File>();
+        final List<File> testFiles = new ArrayList<>();
         if (fileList == null) {
             throw new FileNotFoundException(resourceDirectory);
         }
@@ -51,11 +71,11 @@ public class NetconfCliTest {
                 testFiles.add(new File(testDir, fileName));
             }
         }
-        return parser.parseFiles(testFiles);
+        return parseYangSources(testFiles);
     }
 
     @Test
-    public void cliTest() throws ReadingException, IOException, WriteException, URISyntaxException {
+    public void cliTest() throws ReadingException, IOException, WriteException, URISyntaxException, ReactorException {
 
         final SchemaContext schemaContext = loadSchemaContext("/schema-context");
         assertNotNull(schemaContext);

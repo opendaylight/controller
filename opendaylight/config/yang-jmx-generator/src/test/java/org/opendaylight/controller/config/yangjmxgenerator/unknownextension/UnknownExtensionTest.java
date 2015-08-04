@@ -13,13 +13,11 @@ import static org.junit.Assert.fail;
 import com.google.common.collect.Lists;
 import java.io.InputStream;
 import java.util.List;
-import java.util.Set;
 import org.junit.Test;
-import org.opendaylight.controller.config.yangjmxgenerator.ConfigConstants;
 import org.opendaylight.controller.config.yangjmxgenerator.ServiceInterfaceEntryTest;
-import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.YangModelSearchUtils;
-import org.opendaylight.yangtools.yang.model.api.Module;
-import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
+import org.opendaylight.yangtools.yang.parser.stmt.reactor.CrossSourceStatementReactor;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangInferencePipeline;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangStatementSourceImpl;
 
 public class UnknownExtensionTest extends ServiceInterfaceEntryTest {
 
@@ -29,24 +27,15 @@ public class UnknownExtensionTest extends ServiceInterfaceEntryTest {
                 .getResourceAsStream("test-ifcWithUnknownExtension.yang"));
         yangISs.addAll(getConfigApiYangInputStreams());
         try {
-            YangParserImpl parser = new YangParserImpl();
-            Set<Module> modulesToBuild = parser
-                    .parseYangModelsFromStreams(yangISs);
-            context = parser.resolveSchemaContext(modulesToBuild);
-            namesToModules = YangModelSearchUtils.mapModulesByNames(context
-                    .getModules());
-            configModule = namesToModules.get(ConfigConstants.CONFIG_MODULE);
-            threadsModule = namesToModules
-                    .get(ConfigConstants.CONFIG_THREADS_MODULE);
-            try {
-                super.testCreateFromIdentities();
-                fail();
-            } catch (IllegalStateException e) {
-                assertTrue(
-                        e.getMessage(),
-                        e.getMessage().startsWith(
-                                "Unexpected unknown schema node."));
+            CrossSourceStatementReactor.BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR.newBuild();
+            for (InputStream yangIS : yangISs) {
+                reactor.addSource(new YangStatementSourceImpl(yangIS));
             }
+            context = reactor.buildEffective();
+
+            fail("Should throw IllegalArgumentException due to not found extension type definition");
+        } catch (IllegalArgumentException e) {
+            assertTrue(e.getMessage().startsWith("Not found unknown statement"));
         } finally {
             for (InputStream is : yangISs) {
                 is.close();

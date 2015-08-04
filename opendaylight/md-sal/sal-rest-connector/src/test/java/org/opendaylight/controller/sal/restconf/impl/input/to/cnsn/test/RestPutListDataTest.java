@@ -18,6 +18,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.CheckedFuture;
 import java.io.FileNotFoundException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -47,6 +48,7 @@ import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 
 public class RestPutListDataTest {
 
@@ -63,7 +65,7 @@ public class RestPutListDataTest {
     }
 
     @Before
-    public void initialize() throws FileNotFoundException {
+    public void initialize() throws FileNotFoundException, URISyntaxException, ReactorException {
         final ControllerContext controllerContext = ControllerContext.getInstance();
         schemaContextTestModule = TestUtils.loadSchemaContext("/full-versions/test-module");
         controllerContext.setSchemas(schemaContextTestModule);
