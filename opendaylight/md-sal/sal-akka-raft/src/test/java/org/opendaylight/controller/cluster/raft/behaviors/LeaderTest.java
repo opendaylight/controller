@@ -593,11 +593,6 @@ public class LeaderTest extends AbstractLeaderTest {
 
         MockRaftActorContext actorContext = createActorContextWithFollower();
 
-        Map<String, String> leadersSnapshot = new HashMap<>();
-        leadersSnapshot.put("1", "A");
-        leadersSnapshot.put("2", "B");
-        leadersSnapshot.put("3", "C");
-
         //clears leaders log
         actorContext.getReplicatedLog().removeFrom(0);
 
@@ -649,6 +644,69 @@ public class LeaderTest extends AbstractLeaderTest {
     }
 
     @Test
+    public void testInitiateForceInstallSnapshot() throws Exception {
+        logStart("testInitiateForceInstallSnapshot");
+
+        MockRaftActorContext actorContext = createActorContextWithFollower();
+
+        final int followersLastIndex = 2;
+        final int snapshotIndex = -1;
+        final int newEntryIndex = 4;
+        final int snapshotTerm = -1;
+        final int currentTerm = 2;
+
+        // set the snapshot variables in replicatedlog
+        actorContext.getReplicatedLog().setSnapshotIndex(snapshotIndex);
+        actorContext.getReplicatedLog().setSnapshotTerm(snapshotTerm);
+        actorContext.setLastApplied(3);
+        actorContext.setCommitIndex(followersLastIndex);
+
+        actorContext.getReplicatedLog().removeFrom(0);
+
+        leader = new Leader(actorContext);
+
+        // Leader will send an immediate heartbeat - ignore it.
+        MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
+
+        // set the snapshot as absent and check if capture-snapshot is invoked.
+        leader.setSnapshot(null);
+
+        for(int i=0;i<4;i++) {
+            actorContext.getReplicatedLog().append(new ReplicatedLogImplEntry(i, 1,
+                    new MockRaftActorContext.MockPayload("X" + i)));
+        }
+
+        // new entry
+        ReplicatedLogImplEntry entry = new ReplicatedLogImplEntry(newEntryIndex, currentTerm,
+                new MockRaftActorContext.MockPayload("D"));
+
+        actorContext.getReplicatedLog().append(entry);
+
+        //update follower timestamp
+        leader.markFollowerActive(FOLLOWER_ID);
+
+        // Sending this AppendEntriesReply forces the Leader to capture a snapshot, which subsequently gets
+        // installed with a SendInstallSnapshot
+        leader.handleMessage(leaderActor, new AppendEntriesReply(FOLLOWER_ID, 1, false, 100, 1, (short) 1, true));
+
+        assertEquals("isCapturing", true, actorContext.getSnapshotManager().isCapturing());
+
+        CaptureSnapshot cs = actorContext.getSnapshotManager().getCaptureSnapshot();
+
+        assertTrue(cs.isInstallSnapshotInitiated());
+        assertEquals(3, cs.getLastAppliedIndex());
+        assertEquals(1, cs.getLastAppliedTerm());
+        assertEquals(4, cs.getLastIndex());
+        assertEquals(2, cs.getLastTerm());
+
+        // if an initiate is started again when first is in progress, it shouldnt initiate Capture
+        leader.handleMessage(leaderActor, new Replicate(null, "state-id", entry));
+
+        Assert.assertSame("CaptureSnapshot instance", cs, actorContext.getSnapshotManager().getCaptureSnapshot());
+    }
+
+
+    @Test
     public void testInstallSnapshot() throws Exception {
         logStart("testInstallSnapshot");
 
@@ -681,6 +739,56 @@ public class LeaderTest extends AbstractLeaderTest {
 
         leader.getFollower(FOLLOWER_ID).setMatchIndex(-1);
         leader.getFollower(FOLLOWER_ID).setNextIndex(0);
+
+        Snapshot snapshot = Snapshot.create(toByteString(leadersSnapshot).toByteArray(),
+                Collections.<ReplicatedLogEntry>emptyList(),
+                lastAppliedIndex, snapshotTerm, lastAppliedIndex, snapshotTerm);
+
+        RaftActorBehavior raftBehavior = leader.handleMessage(leaderActor, new SendInstallSnapshot(snapshot));
+
+        assertTrue(raftBehavior instanceof Leader);
+
+        // check if installsnapshot gets called with the correct values.
+
+        InstallSnapshot installSnapshot = MessageCollectorActor.expectFirstMatching(followerActor, InstallSnapshot.class);
+
+        assertNotNull(installSnapshot.getData());
+        assertEquals(lastAppliedIndex, installSnapshot.getLastIncludedIndex());
+        assertEquals(snapshotTerm, installSnapshot.getLastIncludedTerm());
+
+        assertEquals(currentTerm, installSnapshot.getTerm());
+    }
+
+    @Test
+    public void testForceInstallSnapshot() throws Exception {
+        logStart("testForceInstallSnapshot");
+
+        MockRaftActorContext actorContext = createActorContextWithFollower();
+
+        Map<String, String> leadersSnapshot = new HashMap<>();
+        leadersSnapshot.put("1", "A");
+        leadersSnapshot.put("2", "B");
+        leadersSnapshot.put("3", "C");
+
+        final int lastAppliedIndex = 3;
+        final int snapshotIndex = -1;
+        final int snapshotTerm = -1;
+        final int currentTerm = 2;
+
+        // set the snapshot variables in replicatedlog
+        actorContext.getReplicatedLog().setSnapshotIndex(snapshotIndex);
+        actorContext.getReplicatedLog().setSnapshotTerm(snapshotTerm);
+        actorContext.getTermInformation().update(currentTerm, leaderActor.path().toString());
+        actorContext.setCommitIndex(lastAppliedIndex);
+        actorContext.setLastApplied(lastAppliedIndex);
+
+        leader = new Leader(actorContext);
+
+        // Initial heartbeat.
+        MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
+
+        leader.getFollower(FOLLOWER_ID).setMatchIndex(-1);
+        leader.getFollower(FOLLOWER_ID).setNextIndex(-1);
 
         Snapshot snapshot = Snapshot.create(toByteString(leadersSnapshot).toByteArray(),
                 Collections.<ReplicatedLogEntry>emptyList(),
