@@ -30,11 +30,12 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdent
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithValue;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 
 public class CnSnToXmlAndJsonInstanceIdentifierTest extends YangAndXmlAndDataSchemaLoader {
 
     @BeforeClass
-    public static void initialize() {
+    public static void initialize() throws URISyntaxException, ReactorException {
         dataLoad("/instanceidentifier/yang", 4, "instance-identifier-module", "cont");
     }
 

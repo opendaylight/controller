@@ -10,9 +10,11 @@ package org.opendaylight.controller.sal.restconf.impl.test;
 import static org.junit.Assert.assertNotNull;
 
 import com.google.common.base.Preconditions;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -23,12 +25,14 @@ import java.net.URISyntaxException;
 import java.sql.Date;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -38,6 +42,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
@@ -48,8 +53,13 @@ import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableMa
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.model.parser.api.YangContextParser;
-import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
+import org.opendaylight.yangtools.yang.parser.spi.source.SourceException;
+import org.opendaylight.yangtools.yang.parser.spi.source.StatementStreamSource;
+import org.opendaylight.yangtools.yang.parser.stmt.reactor.CrossSourceStatementReactor;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangInferencePipeline;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangStatementSourceImpl;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.effective.EffectiveSchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -59,7 +69,7 @@ public final class TestUtils {
 
     private static final Logger LOG = LoggerFactory.getLogger(TestUtils.class);
 
-    private final static YangContextParser PARSER = new YangParserImpl();
+    //private final static YangContextParser PARSER = new YangParserImpl();
 
     private static Set<Module> loadModules(final String resourceDirectory) throws FileNotFoundException {
         final File testDir = new File(resourceDirectory);
@@ -74,25 +84,75 @@ public final class TestUtils {
                 testFiles.add(new File(testDir, fileName));
             }
         }
-        return PARSER.parseYangModels(testFiles);
-    }
 
-    public static Set<Module> loadModulesFrom(final String yangPath) {
+        SchemaContext schema = null;
         try {
-            return TestUtils.loadModules(TestUtils.class.getResource(yangPath).getPath());
-        } catch (final FileNotFoundException e) {
-            LOG.error("Yang files at path: " + yangPath + " weren't loaded.");
+            schema = parseYangSources(testFiles);
+        } catch (SourceException | ReactorException e) {
+            throw new IllegalStateException(e.getMessage(), e);
         }
 
-        return null;
+        Preconditions.checkNotNull(schema, "Schema context must not be null.");
+        return schema.getModules();
+    }
+
+    public static SchemaContext parseYangSources(Collection<File> files)
+            throws SourceException, ReactorException, FileNotFoundException {
+        return parseYangSources(files.toArray(new File[files.size()]));
+    }
+
+    public static SchemaContext parseYangSources(File... files)
+            throws SourceException, ReactorException, FileNotFoundException {
+
+        StatementStreamSource[] sources = new StatementStreamSource[files.length];
+
+        for (int i = 0; i < files.length; i++) {
+            sources[i] = new YangStatementSourceImpl(new FileInputStream(
+                    files[i]));
+        }
+
+        return parseYangSources(sources);
+    }
+
+    public static SchemaContext parseYangSources(
+            StatementStreamSource... sources) throws SourceException,
+            ReactorException {
+
+        CrossSourceStatementReactor.BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR
+                .newBuild();
+        reactor.addSources(sources);
+
+        return reactor.buildEffective();
+    }
+
+    public static SchemaContext loadSchemaCtxFromDirPath(final String yangPath) throws ReactorException,
+            URISyntaxException {
+
+        final CrossSourceStatementReactor.BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR
+                .newBuild();
+        File[] files = new File(new URI(yangPath)).listFiles();
+
+        for (File file : files) {
+            reactor.addSource(new YangStatementSourceImpl(file.getPath(),
+                    true));
+        }
+
+        EffectiveSchemaContext ctx = reactor.buildEffective();
+        return ctx;
+    }
+
+    public static Set<Module> loadModulesFromDirPath(final String yangPath) throws URISyntaxException, ReactorException {
+
+        return loadSchemaCtxFromDirPath(yangPath).getModules();
     }
 
     public static SchemaContext loadSchemaContext(final Set<Module> modules) {
-        return PARSER.resolveSchemaContext(modules);
+        return EffectiveSchemaContext.resolveSchemaContext(modules);
     }
 
-    public static SchemaContext loadSchemaContext(final String resourceDirectory) throws FileNotFoundException {
-        return PARSER.resolveSchemaContext(loadModulesFrom(resourceDirectory));
+    public static SchemaContext loadSchemaContext(final String resourceDirectory) throws URISyntaxException,
+            ReactorException {
+        return loadSchemaCtxFromDirPath(resourceDirectory);
     }
 
     public static Module findModule(final Set<Module> modules, final String moduleName) {

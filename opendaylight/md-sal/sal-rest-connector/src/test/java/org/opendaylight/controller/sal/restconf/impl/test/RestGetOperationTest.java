@@ -70,6 +70,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableMa
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -99,7 +100,7 @@ public class RestGetOperationTest extends JerseyTest {
     private static final String RESTCONF_NS = "urn:ietf:params:xml:ns:yang:ietf-restconf";
 
     @BeforeClass
-    public static void init() throws FileNotFoundException, ParseException {
+    public static void init() throws FileNotFoundException, ParseException, URISyntaxException, ReactorException {
         schemaContextYangsIetf = TestUtils.loadSchemaContext("/full-versions/yangs");
         schemaContextTestModule = TestUtils.loadSchemaContext("/full-versions/test-module");
         brokerFacade = mock(BrokerFacade.class);

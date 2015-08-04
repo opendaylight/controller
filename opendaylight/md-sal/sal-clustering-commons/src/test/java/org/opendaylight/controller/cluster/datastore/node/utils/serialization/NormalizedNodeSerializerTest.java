@@ -11,6 +11,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -22,7 +23,7 @@ public class NormalizedNodeSerializerTest {
     public ExpectedException expectedException = ExpectedException.none();
 
     @Test
-    public void testSerializeDeSerialize(){
+    public void testSerializeDeSerialize() throws ReactorException {
 
         // This test basically serializes and deSerializes a largish document
         // which contains most of the types of nodes that go into a normalized

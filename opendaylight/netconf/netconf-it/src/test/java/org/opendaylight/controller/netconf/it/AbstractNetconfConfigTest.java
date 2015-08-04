@@ -14,7 +14,10 @@ import static org.mockito.Matchers.anySetOf;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+
+import com.google.common.base.Preconditions;
 import com.google.common.io.ByteStreams;
+
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
@@ -22,6 +25,7 @@ import io.netty.channel.local.LocalAddress;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.concurrent.GlobalEventExecutor;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,9 +35,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
 import org.junit.After;
 import org.junit.Before;
 import org.opendaylight.controller.config.manager.impl.AbstractConfigTest;
@@ -69,7 +73,10 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.not
 import org.opendaylight.yangtools.yang.binding.BindingMapping;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
-import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
+import org.opendaylight.yangtools.yang.parser.spi.source.SourceException;
+import org.opendaylight.yangtools.yang.parser.stmt.reactor.CrossSourceStatementReactor;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangInferencePipeline;
 import org.w3c.dom.Element;
 
 public abstract class AbstractNetconfConfigTest extends AbstractConfigTest {
@@ -279,8 +286,25 @@ public abstract class AbstractNetconfConfigTest extends AbstractConfigTest {
                 }
             }
 
-            final YangParserImpl yangParser = new YangParserImpl();
-            return yangParser.resolveSchemaContext(new HashSet<>(yangParser.parseYangModelsFromStreamsMapped(byteArrayInputStreams).values()));
+//            final YangParserImpl yangParser = new YangParserImpl();
+//            return yangParser.resolveSchemaContext(new HashSet<>(yangParser.parseYangModelsFromStreamsMapped(byteArrayInputStreams).values()));
+            return createSchemaContext(byteArrayInputStreams);
+        }
+
+        private static SchemaContext createSchemaContext(
+                final ArrayList<InputStream> byteArrayInputStreams) {
+            CrossSourceStatementReactor.BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR
+                    .newBuild();
+
+            SchemaContext schema = null;
+            try {
+                schema = reactor.buildEffective(byteArrayInputStreams);
+            } catch (SourceException | ReactorException e) {
+                throw new IllegalStateException(e.getMessage(), e);
+            }
+
+            Preconditions.checkNotNull(schema, "Schema context must not be null.");
+            return schema;
         }
 
         @Override

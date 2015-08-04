@@ -20,6 +20,8 @@ import org.opendaylight.controller.md.cluster.datastore.model.CompositeModel;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
+
 public class DataChangeListenerProxyTest extends AbstractActorTest {
 
   private static class MockDataChangedEvent implements AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> {
@@ -31,8 +33,12 @@ public class DataChangeListenerProxyTest extends AbstractActorTest {
 
     @Override
     public Map<YangInstanceIdentifier, NormalizedNode<?, ?>> getCreatedData() {
-      createdData.put(YangInstanceIdentifier.builder().build(), CompositeModel.createDocumentOne(CompositeModel.createTestContext()));
-      return createdData;
+        try {
+            createdData.put(YangInstanceIdentifier.builder().build(), CompositeModel.createDocumentOne(CompositeModel.createTestContext()));
+        } catch (ReactorException e) {
+            throw new RuntimeException(e);
+        }
+        return createdData;
     }
 
     @Override

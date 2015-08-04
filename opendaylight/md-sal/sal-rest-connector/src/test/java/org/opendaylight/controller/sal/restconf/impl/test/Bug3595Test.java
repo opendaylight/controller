@@ -3,6 +3,7 @@ package org.opendaylight.controller.sal.restconf.impl.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import java.io.FileNotFoundException;
+import java.net.URISyntaxException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
@@ -11,6 +12,7 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 
 public class Bug3595Test {
 
@@ -22,7 +24,7 @@ public class Bug3595Test {
     private static ControllerContext controllerContext = ControllerContext.getInstance();
 
     @BeforeClass
-    public static void initialize() throws FileNotFoundException {
+    public static void initialize() throws FileNotFoundException, URISyntaxException, ReactorException {
         SchemaContext schemaContext = TestUtils.loadSchemaContext("/leafref/yang");
         Module module = TestUtils.findModule(schemaContext.getModules(), "leafref-module");
         assertNotNull(module);
