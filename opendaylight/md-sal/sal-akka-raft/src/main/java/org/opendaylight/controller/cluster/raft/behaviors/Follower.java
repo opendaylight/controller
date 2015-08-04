@@ -147,7 +147,7 @@ public class Follower extends AbstractRaftActorBehavior {
             int addEntriesFrom = 0;
             if (context.getReplicatedLog().size() > 0) {
 
-                // Find the entry up until which the one that is not in the follower's log
+                // Find the entry up until the one that is not in the follower's log
                 for (int i = 0;i < appendEntries.getEntries().size(); i++, addEntriesFrom++) {
                     ReplicatedLogEntry matchEntry = appendEntries.getEntries().get(i);
                     ReplicatedLogEntry newEntry = context.getReplicatedLog().get(matchEntry.getIndex());
@@ -161,12 +161,19 @@ public class Follower extends AbstractRaftActorBehavior {
                         continue;
                     }
 
-                    LOG.debug("{}: Removing entries from log starting at {}", logName(),
+                    if(!context.getRaftPolicy().applyModificationToStateBeforeConsensus()) {
+
+                        LOG.debug("{}: Removing entries from log starting at {}", logName(),
                                 matchEntry.getIndex());
 
-                    // Entries do not match so remove all subsequent entries
-                    context.getReplicatedLog().removeFromAndPersist(matchEntry.getIndex());
-                    break;
+                        // Entries do not match so remove all subsequent entries
+                        context.getReplicatedLog().removeFromAndPersist(matchEntry.getIndex());
+                        break;
+                    } else {
+                        sender.tell(new AppendEntriesReply(context.getId(), currentTerm(), false, lastIndex,
+                                lastTerm(), context.getPayloadVersion(), true), actor());
+                        return this;
+                    }
                 }
             }
 
