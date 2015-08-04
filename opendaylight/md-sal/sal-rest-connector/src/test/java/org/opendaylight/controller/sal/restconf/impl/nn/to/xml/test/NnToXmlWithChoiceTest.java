@@ -8,11 +8,16 @@
 package org.opendaylight.controller.sal.restconf.impl.nn.to.xml.test;
 
 import static org.junit.Assert.assertTrue;
+
 import com.google.common.collect.Iterables;
+
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
+
 import javax.ws.rs.core.MediaType;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.NormalizedNodeXmlBodyWriter;
@@ -33,6 +38,7 @@ import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 
 public class NnToXmlWithChoiceTest extends AbstractBodyReaderTest {
 
@@ -46,7 +52,7 @@ public class NnToXmlWithChoiceTest extends AbstractBodyReaderTest {
     }
 
     @BeforeClass
-    public static void initialization() {
+    public static void initialization() throws IOException, ReactorException {
         schemaContext = schemaContextLoader("/nn-to-xml/choice", schemaContext);
         controllerContext.setSchemas(schemaContext);
     }

@@ -11,10 +11,11 @@ package org.opendaylight.controller.md.cluster.datastore.model;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
+import org.opendaylight.yangtools.yang.parser.stmt.reactor.CrossSourceStatementReactor;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangInferencePipeline;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangStatementSourceImpl;
 
 public class SchemaContextHelper {
 
@@ -26,20 +27,22 @@ public class SchemaContextHelper {
         return TestModel.class.getResourceAsStream(yangFileName);
     }
 
-    public static SchemaContext full(){
+    public static SchemaContext full() throws ReactorException {
         return select(ODL_DATASTORE_TEST_YANG, PEOPLE_YANG, CARS_YANG);
     }
 
-    public static SchemaContext select(String... schemaFiles){
-        YangParserImpl parser = new YangParserImpl();
+    public static SchemaContext select(String... schemaFiles) throws ReactorException {
         List<InputStream> streams = new ArrayList<>();
 
         for(String schemaFile : schemaFiles){
             streams.add(getInputStream(schemaFile));
         }
 
-        Set<Module> modules = parser.parseYangModelsFromStreams(streams);
-        return parser.resolveSchemaContext(modules);
+        CrossSourceStatementReactor.BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR.newBuild();
+        for (InputStream is : streams) {
+            reactor.addSource(new YangStatementSourceImpl(is));
+        }
+        return reactor.buildEffective();
     }
 
 }

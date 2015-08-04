@@ -52,6 +52,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 
 public class RestPostOperationTest extends JerseyTest {
 
@@ -72,14 +73,14 @@ public class RestPostOperationTest extends JerseyTest {
     private static DOMMountPointService mountService;
 
     @BeforeClass
-    public static void init() throws URISyntaxException, IOException {
+    public static void init() throws URISyntaxException, IOException, ReactorException {
         schemaContextYangsIetf = TestUtils.loadSchemaContext("/full-versions/yangs");
         schemaContextTestModule = TestUtils.loadSchemaContext("/full-versions/test-module");
         brokerFacade = mock(BrokerFacade.class);
         restconfImpl = RestconfImpl.getInstance();
         restconfImpl.setBroker(brokerFacade);
 
-        final Set<Module> modules = TestUtils.loadModulesFrom("/test-config-data/yang1");
+        final Set<Module> modules = TestUtils.loadModulesFromDirPath("/test-config-data/yang1");
         schemaContext = TestUtils.loadSchemaContext(modules);
 
         loadData();

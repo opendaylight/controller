@@ -17,6 +17,7 @@ import static org.mockito.Mockito.when;
 import com.google.common.util.concurrent.CheckedFuture;
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
+import java.net.URISyntaxException;
 import java.util.Set;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
@@ -37,6 +38,7 @@ import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 
 public class RestDeleteOperationTest extends JerseyTest {
 
@@ -45,8 +47,8 @@ public class RestDeleteOperationTest extends JerseyTest {
     private static RestconfImpl restconfImpl;
 
     @BeforeClass
-    public static void init() throws FileNotFoundException {
-        final Set<Module> allModules = TestUtils.loadModulesFrom("/test-config-data/yang1");
+    public static void init() throws FileNotFoundException, URISyntaxException, ReactorException {
+        final Set<Module> allModules = TestUtils.loadModulesFromDirPath("/test-config-data/yang1");
         assertNotNull(allModules);
         final SchemaContext schemaContext = TestUtils.loadSchemaContext(allModules);
         controllerContext = ControllerContext.getInstance();

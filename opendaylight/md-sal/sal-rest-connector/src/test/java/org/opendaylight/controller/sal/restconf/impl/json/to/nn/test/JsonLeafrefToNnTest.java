@@ -23,6 +23,7 @@ import org.opendaylight.controller.sal.rest.impl.test.providers.AbstractBodyRead
 import org.opendaylight.controller.sal.restconf.impl.NormalizedNodeContext;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 
 public class JsonLeafrefToNnTest extends AbstractBodyReaderTest {
 
@@ -35,7 +36,7 @@ public class JsonLeafrefToNnTest extends AbstractBodyReaderTest {
     }
 
     @BeforeClass
-    public static void initialize() {
+    public static void initialize() throws IOException, ReactorException {
         schemaContext = schemaContextLoader("/json-to-nn/leafref",
                 schemaContext);
         controllerContext.setSchemas(schemaContext);

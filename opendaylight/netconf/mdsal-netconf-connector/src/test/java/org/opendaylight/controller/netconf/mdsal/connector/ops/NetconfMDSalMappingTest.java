@@ -13,7 +13,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import com.google.common.io.ByteSource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -63,9 +62,10 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.Augmentat
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextListener;
-import org.opendaylight.yangtools.yang.model.parser.api.YangSyntaxErrorException;
-import org.opendaylight.yangtools.yang.parser.builder.impl.BuilderUtils;
-import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
+import org.opendaylight.yangtools.yang.parser.stmt.reactor.CrossSourceStatementReactor;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangInferencePipeline;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangStatementSourceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -640,10 +640,13 @@ public class NetconfMDSalMappingTest {
         return schemas;
     }
 
-    private SchemaContext parseSchemas(Collection<InputStream> schemas) throws IOException, YangSyntaxErrorException {
-        final YangParserImpl parser = new YangParserImpl();
-        Collection<ByteSource> sources = BuilderUtils.streamsToByteSources(schemas);
-        return parser.parseSources(sources);
+    private SchemaContext parseSchemas(Collection<InputStream> schemas) throws ReactorException {
+        CrossSourceStatementReactor.BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR
+                .newBuild();
+        for (InputStream schema : schemas) {
+            reactor.addSource(new YangStatementSourceImpl(schema));
+        }
+        return reactor.buildEffective();
     }
 
     private SchemaService createSchemaService() {

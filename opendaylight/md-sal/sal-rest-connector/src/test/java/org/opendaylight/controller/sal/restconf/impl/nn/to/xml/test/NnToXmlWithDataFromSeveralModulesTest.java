@@ -8,15 +8,19 @@
 package org.opendaylight.controller.sal.restconf.impl.nn.to.xml.test;
 
 import static org.junit.Assert.assertTrue;
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.util.List;
+
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.NormalizedNodeXmlBodyWriter;
@@ -34,6 +38,7 @@ import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 
 public class NnToXmlWithDataFromSeveralModulesTest extends
         AbstractBodyReaderTest {
@@ -48,7 +53,7 @@ public class NnToXmlWithDataFromSeveralModulesTest extends
     }
 
     @BeforeClass
-    public static void initialize() {
+    public static void initialize() throws IOException, ReactorException {
         schemaContext = schemaContextLoader(
                 "/nn-to-xml/data-of-several-modules/yang", schemaContext);
         controllerContext.setSchemas(schemaContext);

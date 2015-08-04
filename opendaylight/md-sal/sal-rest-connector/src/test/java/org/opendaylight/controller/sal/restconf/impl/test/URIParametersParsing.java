@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 import static org.opendaylight.yangtools.yang.common.SimpleDateFormatUtil.getRevisionFormat;
 
 import java.io.FileNotFoundException;
+import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.Set;
@@ -48,6 +49,7 @@ import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.util.SchemaNodeUtils;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 
 public class URIParametersParsing {
 
@@ -56,7 +58,7 @@ public class URIParametersParsing {
     private ControllerContext controllerContext;
 
     @Before
-    public void init() throws FileNotFoundException {
+    public void init() throws FileNotFoundException, URISyntaxException, ReactorException {
         restconf = RestconfImpl.getInstance();
         mockedBrokerFacade = mock(BrokerFacade.class);
         controllerContext = ControllerContext.getInstance();

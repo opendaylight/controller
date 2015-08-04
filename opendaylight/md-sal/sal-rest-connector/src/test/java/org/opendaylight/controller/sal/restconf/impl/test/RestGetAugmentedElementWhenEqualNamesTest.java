@@ -12,6 +12,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.FileNotFoundException;
+import java.net.URISyntaxException;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
@@ -20,6 +21,7 @@ import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.InstanceIdentifierContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfDocumentedException;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 
 public class RestGetAugmentedElementWhenEqualNamesTest {
 
@@ -29,7 +31,7 @@ public class RestGetAugmentedElementWhenEqualNamesTest {
     public ExpectedException exception = ExpectedException.none();
 
     @BeforeClass
-    public static void init() throws FileNotFoundException {
+    public static void init() throws FileNotFoundException, URISyntaxException, ReactorException {
         final SchemaContext schemaContextTestModule = TestUtils.loadSchemaContext("/common/augment/yang");
         controllerContext.setSchemas(schemaContextTestModule);
     }

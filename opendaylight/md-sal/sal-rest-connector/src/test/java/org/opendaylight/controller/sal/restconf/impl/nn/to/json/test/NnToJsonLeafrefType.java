@@ -9,12 +9,17 @@ package org.opendaylight.controller.sal.restconf.impl.nn.to.json.test;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+
 import com.google.common.util.concurrent.UncheckedExecutionException;
+
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.ws.rs.core.MediaType;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.rest.common.TestRestconfUtils;
@@ -22,6 +27,7 @@ import org.opendaylight.controller.sal.rest.impl.NormalizedNodeJsonBodyWriter;
 import org.opendaylight.controller.sal.rest.impl.test.providers.AbstractBodyReaderTest;
 import org.opendaylight.controller.sal.restconf.impl.NormalizedNodeContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 
 public class NnToJsonLeafrefType extends AbstractBodyReaderTest {
 
@@ -34,7 +40,7 @@ public class NnToJsonLeafrefType extends AbstractBodyReaderTest {
     }
 
     @BeforeClass
-    public static void initialization() {
+    public static void initialization() throws IOException, ReactorException {
         schemaContext = schemaContextLoader("/nn-to-json/leafref",
                 schemaContext);
         controllerContext.setSchemas(schemaContext);

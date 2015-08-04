@@ -8,16 +8,16 @@
 
 package org.opendaylight.controller.xml.codec;
 
-import com.google.common.collect.Lists;
-import com.google.common.io.ByteSource;
-import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.junit.Before;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
+import org.opendaylight.yangtools.yang.parser.stmt.reactor.CrossSourceStatementReactor;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangInferencePipeline;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangStatementSourceImpl;
 
 // FIXME : CompositeNode is not avaliable anymore so fix the test to use NormalizedNodeContainer ASAP
 public class XmlUtilsTest {
@@ -43,13 +43,12 @@ public class XmlUtilsTest {
 
   @Before
   public void setUp() throws Exception {
-    final ByteSource byteSource = new ByteSource() {
-      @Override
-      public InputStream openStream() throws IOException {
-        return XmlUtilsTest.this.getClass().getResourceAsStream("rpcTest.yang");
-      }
-    };
-    schema = new YangParserImpl().parseSources(Lists.newArrayList(byteSource));
+    CrossSourceStatementReactor.BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR.newBuild();
+
+    for (InputStream is : Collections.singletonList(XmlUtilsTest.class.getResourceAsStream("rpcTest.yang"))) {
+        reactor.addSource(new YangStatementSourceImpl(is));
+    }
+    schema = reactor.buildEffective();
     final Module rpcTestModule = schema.getModules().iterator().next();
     testRpc = rpcTestModule.getRpcs().iterator().next();
   }

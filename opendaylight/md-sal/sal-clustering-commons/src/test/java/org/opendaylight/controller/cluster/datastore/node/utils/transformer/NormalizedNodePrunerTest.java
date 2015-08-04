@@ -36,6 +36,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.ListNodeBuil
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.NormalizedNodeContainerBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafSetEntryNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafSetNodeBuilder;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 
 public class NormalizedNodePrunerTest {
 
@@ -53,7 +54,7 @@ public class NormalizedNodePrunerTest {
     private NormalizedNode<?,?> normalizedNode;
 
     @Before
-    public void setUp(){
+    public void setUp() throws ReactorException {
         MockitoAnnotations.initMocks(this);
         prunerFullSchema = new NormalizedNodePruner(TestModel.createTestContext());
         prunerNoAugSchema = new NormalizedNodePruner(TestModel.createTestContextWithoutAugmentationSchema());
@@ -120,7 +121,7 @@ public class NormalizedNodePrunerTest {
     }
 
     @Test
-    public void testNodesPrunedWhenTestSchemaNotPresent() throws IOException {
+    public void testNodesPrunedWhenTestSchemaNotPresent() throws IOException, ReactorException {
         NormalizedNodePruner pruner = new NormalizedNodePruner(TestModel.createTestContextWithoutTestSchema());
 
         NormalizedNodeWriter normalizedNodeWriter = NormalizedNodeWriter.forStreamWriter(pruner);

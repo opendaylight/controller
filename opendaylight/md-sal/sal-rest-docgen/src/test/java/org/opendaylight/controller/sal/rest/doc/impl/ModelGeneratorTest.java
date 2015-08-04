@@ -1,13 +1,14 @@
 package org.opendaylight.controller.sal.rest.doc.impl;
 
 import com.google.common.base.Preconditions;
+
 import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.effective.EffectiveSchemaContext;
 
 import java.io.File;
 import java.util.HashSet;
@@ -23,7 +24,8 @@ public class ModelGeneratorTest {
     public void setUp() throws Exception {
         helper = new DocGenTestHelper();
         helper.setUp();
-        schemaContext = new YangParserImpl().resolveSchemaContext(new HashSet<Module>(helper.getModules().values()));
+        schemaContext = EffectiveSchemaContext.resolveSchemaContext(new HashSet<Module>(helper.getModules().values()));
+        //schemaContext = new YangParserImpl().resolveSchemaContext(new HashSet<Module>(helper.getModules().values()));
     }
 
     @Test

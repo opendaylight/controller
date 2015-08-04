@@ -25,6 +25,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 import java.util.List;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -37,7 +38,7 @@ public class NormalizedNodeToNodeCodecTest {
   private SchemaContext schemaContext;
 
   @Before
-  public void setUp() {
+  public void setUp() throws ReactorException {
     schemaContext = TestModel.createTestContext();
     assertNotNull("Schema context must not be null.", schemaContext);
   }

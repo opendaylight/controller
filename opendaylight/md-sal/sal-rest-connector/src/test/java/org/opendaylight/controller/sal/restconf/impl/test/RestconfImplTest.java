@@ -15,6 +15,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.io.FileNotFoundException;
+import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.util.Set;
 import org.junit.Before;
@@ -27,6 +28,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 
 /**
  * @See {@link InvokeRpcMethodTest}
@@ -38,8 +40,8 @@ public class RestconfImplTest {
     private static ControllerContext controllerContext = null;
 
     @BeforeClass
-    public static void init() throws FileNotFoundException {
-        final Set<Module> allModules = TestUtils.loadModulesFrom("/full-versions/yangs");
+    public static void init() throws FileNotFoundException, URISyntaxException, ReactorException {
+        final Set<Module> allModules = TestUtils.loadModulesFromDirPath("/full-versions/yangs");
         assertNotNull(allModules);
         final SchemaContext schemaContext = TestUtils.loadSchemaContext(allModules);
         controllerContext = spy(ControllerContext.getInstance());

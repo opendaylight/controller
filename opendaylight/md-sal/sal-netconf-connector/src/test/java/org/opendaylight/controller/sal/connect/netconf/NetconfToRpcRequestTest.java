@@ -2,15 +2,10 @@ package org.opendaylight.controller.sal.connect.netconf;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.toId;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.toPath;
 
-import com.google.common.collect.Sets;
-import java.io.InputStream;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.io.File;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
@@ -22,10 +17,11 @@ import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeAttrBuilder;
-import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.model.parser.api.YangContextParser;
-import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
+import org.opendaylight.yangtools.yang.parser.stmt.reactor.CrossSourceStatementReactor;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangInferencePipeline;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangStatementSourceImpl;
+import org.opendaylight.yangtools.yang.parser.util.NamedFileInputStream;
 import org.w3c.dom.Document;
 
 
@@ -56,17 +52,18 @@ public class NetconfToRpcRequestTest {
     @SuppressWarnings("deprecation")
     @BeforeClass
     public static void setup() throws Exception {
-        List<InputStream> modelsToParse = Collections
-            .singletonList(NetconfToRpcRequestTest.class.getResourceAsStream("/schemas/rpc-notification-subscription.yang"));
-        YangContextParser parser = new YangParserImpl();
-        final Set<Module> notifModules = parser.parseYangModelsFromStreams(modelsToParse);
-        assertTrue(!notifModules.isEmpty());
+        CrossSourceStatementReactor.BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR.newBuild();
 
-        modelsToParse = Collections
-            .singletonList(NetconfToRpcRequestTest.class.getResourceAsStream("/schemas/config-test-rpc.yang"));
-        parser = new YangParserImpl();
-        final Set<Module> configModules = parser.parseYangModelsFromStreams(modelsToParse);
-        cfgCtx = parser.resolveSchemaContext(Sets.union(configModules, notifModules));
+        File rpcYang = new File(NetconfToRpcRequestTest.class.getResource("/schemas/rpc-notification-subscription.yang").toURI());
+        File configYang = new File(NetconfToRpcRequestTest.class.getResource("/schemas/config-test-rpc.yang").toURI());
+
+        YangStatementSourceImpl rpcSource = new YangStatementSourceImpl(new NamedFileInputStream(rpcYang, rpcYang.getPath()));
+        YangStatementSourceImpl configSource = new YangStatementSourceImpl(new NamedFileInputStream(configYang, configYang.getPath()));
+
+        reactor.addSource(rpcSource);
+        reactor.addSource(configSource);
+
+        cfgCtx = reactor.buildEffective();
         assertNotNull(cfgCtx);
 
         messageTransformer = new NetconfMessageTransformer(cfgCtx, true);

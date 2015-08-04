@@ -46,9 +46,11 @@ import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableCo
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafSetEntryNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableLeafSetNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableMapEntryNodeBuilder;
-import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
+import org.opendaylight.yangtools.yang.parser.stmt.reactor.CrossSourceStatementReactor;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangInferencePipeline;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangStatementSourceImpl;
 
 public class TestModel {
 
@@ -186,35 +188,44 @@ public class TestModel {
         return TestModel.class.getResourceAsStream(resourceName);
     }
 
-    public static SchemaContext createTestContext() {
+    public static SchemaContext createTestContext() throws ReactorException {
         List<InputStream> inputStreams = new ArrayList<>();
         inputStreams.add(getDatastoreTestInputStream());
         inputStreams.add(getDatastoreAugInputStream());
         inputStreams.add(getDatastoreTestNotificationInputStream());
 
-        YangParserImpl parser = new YangParserImpl();
-        Set<Module> modules = parser.parseYangModelsFromStreams(inputStreams);
-        return parser.resolveSchemaContext(modules);
+        CrossSourceStatementReactor.BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR
+                .newBuild();
+        for (InputStream is : inputStreams) {
+            reactor.addSource(new YangStatementSourceImpl(is));
+        }
+        return reactor.buildEffective();
     }
 
-    public static SchemaContext createTestContextWithoutTestSchema() {
+    public static SchemaContext createTestContextWithoutTestSchema() throws ReactorException {
         List<InputStream> inputStreams = new ArrayList<>();
         inputStreams.add(getDatastoreTestNotificationInputStream());
 
-        YangParserImpl parser = new YangParserImpl();
-        Set<Module> modules = parser.parseYangModelsFromStreams(inputStreams);
-        return parser.resolveSchemaContext(modules);
+        CrossSourceStatementReactor.BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR
+                .newBuild();
+        for (InputStream is : inputStreams) {
+            reactor.addSource(new YangStatementSourceImpl(is));
+        }
+        return reactor.buildEffective();
     }
 
 
-    public static SchemaContext createTestContextWithoutAugmentationSchema() {
+    public static SchemaContext createTestContextWithoutAugmentationSchema() throws ReactorException {
         List<InputStream> inputStreams = new ArrayList<>();
         inputStreams.add(getDatastoreTestInputStream());
         inputStreams.add(getDatastoreTestNotificationInputStream());
 
-        YangParserImpl parser = new YangParserImpl();
-        Set<Module> modules = parser.parseYangModelsFromStreams(inputStreams);
-        return parser.resolveSchemaContext(modules);
+        CrossSourceStatementReactor.BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR
+                .newBuild();
+        for (InputStream is : inputStreams) {
+            reactor.addSource(new YangStatementSourceImpl(is));
+        }
+        return reactor.buildEffective();
     }
 
 

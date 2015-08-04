@@ -68,6 +68,7 @@ import org.opendaylight.yangtools.yang.model.api.RpcDefinition;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.opendaylight.yangtools.yang.model.util.SchemaNodeUtils;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 
 public class InvokeRpcMethodTest {
 
@@ -77,9 +78,9 @@ public class InvokeRpcMethodTest {
 
 
     @BeforeClass
-    public static void init() throws FileNotFoundException {
-        final Set<Module> allModules = new HashSet<Module>(TestUtils.loadModulesFrom("/full-versions/yangs"));
-        allModules.addAll(TestUtils.loadModulesFrom("/invoke-rpc"));
+    public static void init() throws FileNotFoundException, URISyntaxException, ReactorException {
+        final Set<Module> allModules = new HashSet<>(TestUtils.loadModulesFromDirPath("/full-versions/yangs"));
+        allModules.addAll(TestUtils.loadModulesFromDirPath("/invoke-rpc"));
         assertNotNull(allModules);
         final Module module = TestUtils.resolveModule("invoke-rpc-module", allModules);
         assertNotNull(module);

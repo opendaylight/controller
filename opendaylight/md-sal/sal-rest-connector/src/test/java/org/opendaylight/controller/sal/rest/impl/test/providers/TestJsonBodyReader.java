@@ -11,11 +11,16 @@ package org.opendaylight.controller.sal.rest.impl.test.providers;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
+
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+
 import javax.ws.rs.core.MediaType;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.JsonNormalizedNodeBodyReader;
@@ -30,6 +35,7 @@ import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 
 /**
  * sal-rest-connector
@@ -57,7 +63,7 @@ public class TestJsonBodyReader extends AbstractBodyReaderTest {
     }
 
     @BeforeClass
-    public static void initialization() throws NoSuchFieldException, SecurityException {
+    public static void initialization() throws NoSuchFieldException, SecurityException, IOException, ReactorException {
         schemaContext = schemaContextLoader("/instanceidentifier/yang", schemaContext);
         schemaContext = schemaContextLoader("/modules", schemaContext);
         schemaContext = schemaContextLoader("/invoke-rpc", schemaContext);

@@ -33,6 +33,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.TipProducingDataTree
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.SchemaValidationFailedException;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 import org.slf4j.LoggerFactory;
 
 public class ShardRecoveryCoordinatorTest {
@@ -42,7 +43,7 @@ public class ShardRecoveryCoordinatorTest {
     private SchemaContext carsSchemaContext;
 
     @Before
-    public void setUp(){
+    public void setUp() throws ReactorException {
         peopleSchemaContext = SchemaContextHelper.select(SchemaContextHelper.PEOPLE_YANG);
         carsSchemaContext = SchemaContextHelper.select(SchemaContextHelper.CARS_YANG);
 
@@ -104,7 +105,7 @@ public class ShardRecoveryCoordinatorTest {
     }
 
     @Test
-    public void testApplyRecoverySnapshot(){
+    public void testApplyRecoverySnapshot() throws ReactorException {
         final ShardRecoveryCoordinator coordinator = new ShardRecoveryCoordinator(peopleDataTree , peopleSchemaContext, "foobar", LoggerFactory.getLogger("foo"));
         coordinator.startLogRecoveryBatch(10);
 
@@ -164,7 +165,7 @@ public class ShardRecoveryCoordinatorTest {
 
 
 
-    private byte[] createSnapshot(){
+    private byte[] createSnapshot() throws ReactorException {
         final TipProducingDataTree dataTree = InMemoryDataTreeFactory.getInstance().create();
         dataTree.setSchemaContext(SchemaContextHelper.select(SchemaContextHelper.CARS_YANG, SchemaContextHelper.PEOPLE_YANG));
 

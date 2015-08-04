@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.common.base.Preconditions;
+
 import java.io.File;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -13,7 +14,9 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
+
 import javax.ws.rs.core.UriInfo;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.After;
@@ -28,7 +31,7 @@ import org.opendaylight.controller.sal.rest.doc.swagger.Resource;
 import org.opendaylight.controller.sal.rest.doc.swagger.ResourceList;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.effective.EffectiveSchemaContext;
 
 /**
  *
@@ -45,7 +48,9 @@ public class ApiDocGeneratorTest {
         generator = new ApiDocGenerator();
         helper = new DocGenTestHelper();
         helper.setUp();
-        schemaContext = new YangParserImpl().resolveSchemaContext(new HashSet<Module>(helper.getModules().values()));
+
+        schemaContext = EffectiveSchemaContext.resolveSchemaContext(new HashSet<Module>(helper.getModules().values()));
+        //schemaContext = new YangParserImpl().resolveSchemaContext(new HashSet<Module>(helper.getModules().values()));
     }
 
     @After
@@ -208,7 +213,7 @@ public class ApiDocGeneratorTest {
 
                 // testing bugs.opendaylight.org bug 1290. UnionType model type.
                 String jsonString = doc.getModels().toString();
-                assertTrue(jsonString.contains("testUnion\":{\"type\":\"integer or string\",\"required\":false}"));
+                assertTrue(jsonString.contains("testUnion\":{\"minItems\":0,\"type\":\"integer or string\",\"required\":false"));
             }
         }
     }

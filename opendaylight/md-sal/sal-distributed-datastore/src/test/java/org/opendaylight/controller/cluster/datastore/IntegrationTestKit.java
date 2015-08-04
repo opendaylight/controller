@@ -29,6 +29,7 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 
 class IntegrationTestKit extends ShardTestKit {
 
@@ -39,17 +40,17 @@ class IntegrationTestKit extends ShardTestKit {
         this.datastoreContextBuilder = datastoreContextBuilder;
     }
 
-    DistributedDataStore setupDistributedDataStore(String typeName, String... shardNames) {
+    DistributedDataStore setupDistributedDataStore(String typeName, String... shardNames) throws ReactorException {
         return setupDistributedDataStore(typeName, true, shardNames);
     }
 
     DistributedDataStore setupDistributedDataStore(String typeName, boolean waitUntilLeader,
-            String... shardNames) {
+            String... shardNames) throws ReactorException {
         return setupDistributedDataStore(typeName, "module-shards.conf", waitUntilLeader, shardNames);
     }
 
     DistributedDataStore setupDistributedDataStore(String typeName, String moduleShardsConfig, boolean waitUntilLeader,
-            String... shardNames) {
+            String... shardNames) throws ReactorException {
         ClusterWrapper cluster = new ClusterWrapperImpl(getSystem());
         Configuration config = new ConfigurationImpl(moduleShardsConfig, "modules.conf");
         ShardStrategyFactory.setConfiguration(config);

@@ -33,6 +33,7 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 
 public class DOMTransactionChainTest {
 
@@ -40,7 +41,7 @@ public class DOMTransactionChainTest {
     private AbstractDOMDataBroker domBroker;
 
     @Before
-    public void setupStore() {
+    public void setupStore() throws ReactorException {
         InMemoryDOMDataStore operStore = new InMemoryDOMDataStore("OPER", MoreExecutors.newDirectExecutorService());
         InMemoryDOMDataStore configStore = new InMemoryDOMDataStore("CFG", MoreExecutors.newDirectExecutorService());
         schemaContext = TestModel.createTestContext();

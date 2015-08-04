@@ -17,6 +17,7 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.testkit.JavaTestKit;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
@@ -40,7 +41,13 @@ import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
-import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
+import org.opendaylight.yangtools.yang.parser.spi.source.SourceException;
+import org.opendaylight.yangtools.yang.parser.spi.source.StatementStreamSource;
+import org.opendaylight.yangtools.yang.parser.stmt.reactor.CrossSourceStatementReactor;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangInferencePipeline;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangStatementSourceImpl;
+import org.opendaylight.yangtools.yang.parser.util.NamedFileInputStream;
 
 /**
  * Base class for RPC tests.
@@ -94,9 +101,25 @@ public class AbstractRpcTest {
         node2 = null;
     }
 
+    public static SchemaContext parseYangSources(Collection<File> files) throws SourceException, ReactorException, FileNotFoundException {
+
+        StatementStreamSource[] sources = new StatementStreamSource[files.size()];
+
+        int iter = 0;
+        for (final File file : files) {
+            sources[iter++] = new YangStatementSourceImpl(new NamedFileInputStream(file,file.getPath()));
+        }
+
+        CrossSourceStatementReactor.BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR
+                .newBuild();
+        reactor.addSources(sources);
+
+        return reactor.buildEffective();
+    }
+
     @Before
-    public void setUp() {
-        schemaContext = new YangParserImpl().parseFiles(Arrays.asList(
+    public void setUp() throws FileNotFoundException, ReactorException {
+        schemaContext = parseYangSources(Arrays.asList(
                 new File(RpcBrokerTest.class.getResource("/test-rpc.yang").getPath())));
 
         domRpcService1 = Mockito.mock(DOMRpcService.class);

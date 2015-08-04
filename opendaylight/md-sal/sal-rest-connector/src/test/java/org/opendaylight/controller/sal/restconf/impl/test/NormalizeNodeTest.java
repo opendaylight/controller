@@ -7,12 +7,16 @@
  */
 package org.opendaylight.controller.sal.restconf.impl.test;
 
+import java.io.FileNotFoundException;
+import java.net.URISyntaxException;
+
 import org.junit.BeforeClass;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 
 public class NormalizeNodeTest extends YangAndXmlAndDataSchemaLoader {
 
     @BeforeClass
-    public static void initialization() {
+    public static void initialization() throws URISyntaxException, ReactorException, FileNotFoundException {
         dataLoad("/normalize-node/yang/");
     }
 

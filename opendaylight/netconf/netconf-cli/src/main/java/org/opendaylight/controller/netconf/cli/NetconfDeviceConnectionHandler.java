@@ -8,6 +8,7 @@
 package org.opendaylight.controller.netconf.cli;
 
 import com.google.common.base.Optional;
+
 import jline.console.completer.Completer;
 import jline.console.completer.NullCompleter;
 import org.opendaylight.controller.md.sal.dom.api.DOMNotification;
@@ -61,6 +62,7 @@ public class NetconfDeviceConnectionHandler implements RemoteDeviceHandler<Netco
         // TODO detect netconf base version
         // TODO detect inet types version
         commandDispatcher.addRemoteCommands(rpcService, context);
+
         schemaContextRegistry.setRemoteSchemaContext(context);
         up = true;
         this.notify();

@@ -14,6 +14,7 @@ import static org.mockito.Mockito.mock;
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
@@ -33,6 +34,7 @@ import org.opendaylight.controller.sal.restconf.impl.ControllerContext;
 import org.opendaylight.controller.sal.restconf.impl.RestconfImpl;
 import org.opendaylight.controller.sal.restconf.impl.test.TestUtils;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -44,7 +46,7 @@ public class RestStream extends JerseyTest {
     private static SchemaContext schemaContextYangsIetf;
 
     @BeforeClass
-    public static void init() throws FileNotFoundException {
+    public static void init() throws FileNotFoundException, URISyntaxException, ReactorException {
         schemaContextYangsIetf = TestUtils.loadSchemaContext("/full-versions/yangs");
         final ControllerContext controllerContext = ControllerContext.getInstance();
         controllerContext.setSchemas(schemaContextYangsIetf);

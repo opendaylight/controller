@@ -8,8 +8,11 @@
 
 package org.opendaylight.controller.sal.restconf.impl.test;
 
+import java.io.IOException;
+
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,6 +33,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdent
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 
 /**
  * sal-rest-connector
@@ -52,7 +56,7 @@ public class RestPutConfigTest {
     private BrokerFacade brokerFacade;
 
     @Before
-    public void init() {
+    public void init() throws IOException, ReactorException {
         restconfService = RestconfImpl.getInstance();
         controllerCx = ControllerContext.getInstance();
         schemaCx = TestRestconfUtils.loadSchemaContext("/test-config-data/yang1/", null);

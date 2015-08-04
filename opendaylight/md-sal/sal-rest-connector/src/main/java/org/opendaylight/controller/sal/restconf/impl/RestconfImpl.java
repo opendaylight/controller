@@ -21,6 +21,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
+
 import java.math.BigInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -35,11 +36,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
+
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
+
 import org.apache.commons.lang3.StringUtils;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -97,7 +100,7 @@ import org.opendaylight.yangtools.yang.parser.builder.api.GroupingBuilder;
 import org.opendaylight.yangtools.yang.parser.builder.impl.ContainerSchemaNodeBuilder;
 import org.opendaylight.yangtools.yang.parser.builder.impl.LeafSchemaNodeBuilder;
 import org.opendaylight.yangtools.yang.parser.builder.impl.ModuleBuilder;
-import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.effective.EffectiveSchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -373,8 +376,9 @@ public class RestconfImpl implements RestconfService {
 
         final Set<Module> fakeRpcModules = Collections.singleton(restConfModuleBuilder.build());
 
-        final YangParserImpl yangParser = new YangParserImpl();
-        final SchemaContext fakeSchemaCx = yangParser.resolveSchemaContext(fakeRpcModules);
+        final SchemaContext fakeSchemaCx = EffectiveSchemaContext.resolveSchemaContext(fakeRpcModules);
+//        final YangParserImpl yangParser = new YangParserImpl();
+//        final SchemaContext fakeSchemaCx = yangParser.resolveSchemaContext(fakeRpcModules);
 
         final InstanceIdentifierContext<?> fakeIICx = new InstanceIdentifierContext<>(null, operContainerSchemaNode, mountPoint, fakeSchemaCx);
 
@@ -984,7 +988,7 @@ public class RestconfImpl implements RestconfService {
     /**
      * Load parameter for subscribing to stream from input composite node
      *
-     * @param compNode
+     * @param value
      *            contains value
      * @return enum object if its string value is equal to {@code paramName}. In other cases null.
      */
