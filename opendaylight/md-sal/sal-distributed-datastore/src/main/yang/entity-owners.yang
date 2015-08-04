@@ -1,0 +1,65 @@
+module entity-owners {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:md:sal:clustering:entity-owners";
+    prefix "entity-owners";
+
+    description
+        "This module contains the base YANG definitions for
+        an implementation of the EntityOwnershipService which stores
+        entity ownership information in the data store";
+
+    revision "2015-08-04" {
+        description "Initial revision.";
+    }
+
+    container entity-owners {
+
+        // The entity-owner list contains a list of all entities which have been assigned an owner
+        // Since an owner will be a cluster member it gives us a quick way to figure out all the entities
+        // that will need to have new owners assigned on the failure of a given cluster member
+        list entity-owner {
+            key name;
+            leaf name {
+                type string;
+            }
+
+            // Group all entities of a given type together
+            list entity-type {
+                key type;
+                leaf type {
+                    type string;
+                }
+
+                list entity {
+                    key id;
+                    leaf id {
+                        type string;
+                    }
+                }
+            }
+        }
+
+        // A list of all entities grouped by type
+        list entity-type {
+            key type;
+            leaf type {
+                type string;
+            }
+
+            list entity {
+                key id;
+                leaf id {
+                    type string;
+                }
+
+                // A list of all the candidates that would like to own the entity
+                list candidate {
+                    key id;
+                    leaf id {
+                        type string;
+                    }
+                }
+            }
+        }
+    }
+}
