@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a7ca5a3_c10235b4",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 612,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2015-08-04T20:09:34Z",
+      "side": 1,
+      "message": "Can we rename this method to say \"canInstallSnapshot\" or \"allowSnapshotInstall\"?",
+      "range": {
+        "startLine": 612,
+        "startChar": 20,
+        "endLine": 612,
+        "endChar": 39
+      },
+      "revId": "fb5c585c07b8634dca86f88f60b54fd8402b2463",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
