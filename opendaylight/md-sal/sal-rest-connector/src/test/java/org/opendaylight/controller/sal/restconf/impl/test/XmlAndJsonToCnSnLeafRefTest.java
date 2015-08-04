@@ -7,8 +7,12 @@
  */
 package org.opendaylight.controller.sal.restconf.impl.test;
 
+import java.io.FileNotFoundException;
+import java.net.URISyntaxException;
+
 import org.junit.BeforeClass;
 import org.opendaylight.yangtools.yang.common.QName;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 
 public class XmlAndJsonToCnSnLeafRefTest extends YangAndXmlAndDataSchemaLoader {
 
@@ -20,7 +24,7 @@ public class XmlAndJsonToCnSnLeafRefTest extends YangAndXmlAndDataSchemaLoader {
     final QName lf3QName = QName.create(contQName, "lf3");
 
     @BeforeClass
-    public static void initialize() {
+    public static void initialize() throws URISyntaxException, ReactorException, FileNotFoundException {
         dataLoad("/leafref/yang", 2, "leafref-module", "cont");
     }
 

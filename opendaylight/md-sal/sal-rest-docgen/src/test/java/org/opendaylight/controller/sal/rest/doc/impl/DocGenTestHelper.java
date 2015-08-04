@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.URI;
@@ -22,16 +23,20 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
+
 import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.model.parser.api.YangContextParser;
-import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
+import org.opendaylight.yangtools.yang.parser.spi.source.SourceException;
+import org.opendaylight.yangtools.yang.parser.stmt.reactor.CrossSourceStatementReactor.BuildAction;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangInferencePipeline;
 
 public class DocGenTestHelper {
 
@@ -39,10 +44,10 @@ public class DocGenTestHelper {
     private ObjectMapper mapper;
 
     public Map<File, Module> loadModules(String resourceDirectory) throws FileNotFoundException,
-            URISyntaxException {
+            URISyntaxException, SourceException, ReactorException {
 
         URI resourceDirUri = getClass().getResource(resourceDirectory).toURI();
-        final YangContextParser parser = new YangParserImpl();
+        //final YangContextParser parser = new YangParserImpl();
         final File testDir = new File(resourceDirUri);
         final String[] fileList = testDir.list();
         final List<File> testFiles = new ArrayList<>();
@@ -53,7 +58,10 @@ public class DocGenTestHelper {
 
             testFiles.add(new File(testDir, fileName));
         }
-        return parser.parseYangModelsMapped(testFiles);
+
+        BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR.newBuild();
+
+        return reactor.buildEffectiveMappedToSource(testFiles);
     }
 
     public Map<File, Module> getModules() {

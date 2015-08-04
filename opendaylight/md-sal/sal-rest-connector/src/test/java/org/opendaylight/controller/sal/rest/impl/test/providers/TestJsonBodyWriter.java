@@ -11,6 +11,7 @@ package org.opendaylight.controller.sal.rest.impl.test.providers;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -22,6 +23,7 @@ import org.opendaylight.controller.sal.rest.impl.JsonNormalizedNodeBodyReader;
 import org.opendaylight.controller.sal.rest.impl.NormalizedNodeJsonBodyWriter;
 import org.opendaylight.controller.sal.restconf.impl.NormalizedNodeContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 
 /**
  * sal-rest-connector org.opendaylight.controller.sal.rest.impl.test.providers
@@ -51,7 +53,7 @@ public class TestJsonBodyWriter extends AbstractBodyReaderTest {
 
     @BeforeClass
     public static void initialization() throws NoSuchFieldException,
-            SecurityException {
+            SecurityException, IOException, ReactorException {
         schemaContext = schemaContextLoader("/instanceidentifier/yang",
                 schemaContext);
         schemaContext = schemaContextLoader("/modules", schemaContext);
