@@ -14,6 +14,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 import javax.ws.rs.core.MediaType;
@@ -34,6 +35,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNodes;
 import org.opendaylight.yangtools.yang.model.api.DataNodeContainer;
 import org.opendaylight.yangtools.yang.model.api.DataSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 
 import com.google.common.base.Optional;
 
@@ -64,7 +66,7 @@ public class TestXmlBodyReaderMountPoint extends AbstractBodyReaderTest {
 
     @BeforeClass
     public static void initialization() throws NoSuchFieldException,
-            SecurityException {
+            SecurityException, IOException, ReactorException {
         schemaContext = schemaContextLoader("/instanceidentifier/yang",
                 schemaContext);
         schemaContext = schemaContextLoader("/modules", schemaContext);

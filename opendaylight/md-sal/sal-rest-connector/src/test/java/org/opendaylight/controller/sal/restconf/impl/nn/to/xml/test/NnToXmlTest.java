@@ -12,10 +12,14 @@ import static org.junit.Assert.assertTrue;
 import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
+
 import javax.ws.rs.core.MediaType;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -55,6 +59,7 @@ import org.opendaylight.yangtools.yang.model.util.Uint32;
 import org.opendaylight.yangtools.yang.model.util.Uint64;
 import org.opendaylight.yangtools.yang.model.util.Uint8;
 import org.opendaylight.yangtools.yang.model.util.UnionType;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 
 public class NnToXmlTest extends AbstractBodyReaderTest {
 
@@ -67,7 +72,7 @@ public class NnToXmlTest extends AbstractBodyReaderTest {
     }
 
     @BeforeClass
-    public static void initialization() {
+    public static void initialization() throws IOException, ReactorException {
         schemaContext = schemaContextLoader("/nn-to-xml/yang", schemaContext);
         controllerContext.setSchemas(schemaContext);
     }

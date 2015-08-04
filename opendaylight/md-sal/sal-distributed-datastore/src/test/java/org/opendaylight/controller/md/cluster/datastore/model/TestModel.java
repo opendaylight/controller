@@ -7,15 +7,15 @@
  */
 package org.opendaylight.controller.md.cluster.datastore.model;
 
-import com.google.common.io.Resources;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.model.parser.api.YangSyntaxErrorException;
-import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
+import org.opendaylight.yangtools.yang.parser.stmt.reactor.CrossSourceStatementReactor;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangInferencePipeline;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangStatementSourceImpl;
 
 public class TestModel {
 
@@ -53,10 +53,13 @@ public class TestModel {
     }
 
     public static SchemaContext createTestContext() {
-        YangParserImpl parser = new YangParserImpl();
         try {
-            return parser.parseSources(Collections.singleton(Resources.asByteSource(TestModel.class.getResource(DATASTORE_TEST_YANG))));
-        } catch (IOException | YangSyntaxErrorException e) {
+            CrossSourceStatementReactor.BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR.newBuild();
+            for (InputStream is : Collections.singletonList(getDatastoreTestInputStream())) {
+                reactor.addSource(new YangStatementSourceImpl(is));
+            }
+            return reactor.buildEffective();
+        } catch (ReactorException e) {
             throw new ExceptionInInitializerError(e);
         }
     }

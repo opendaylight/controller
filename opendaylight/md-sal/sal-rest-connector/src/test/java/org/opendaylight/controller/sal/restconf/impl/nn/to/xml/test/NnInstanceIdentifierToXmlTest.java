@@ -9,12 +9,17 @@ package org.opendaylight.controller.sal.restconf.impl.nn.to.xml.test;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+
 import com.google.common.collect.Iterables;
+
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.util.List;
+
 import javax.ws.rs.core.MediaType;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opendaylight.controller.sal.rest.impl.NormalizedNodeXmlBodyWriter;
@@ -41,6 +46,7 @@ import org.opendaylight.yangtools.yang.model.api.LeafListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.ListSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 
 public class NnInstanceIdentifierToXmlTest extends AbstractBodyReaderTest {
 
@@ -54,7 +60,7 @@ public class NnInstanceIdentifierToXmlTest extends AbstractBodyReaderTest {
     }
 
     @BeforeClass
-    public static void initialization() throws URISyntaxException {
+    public static void initialization() throws URISyntaxException, IOException, ReactorException {
         schemaContext = schemaContextLoader("/instanceidentifier/yang",
                 schemaContext);
         controllerContext.setSchemas(schemaContext);

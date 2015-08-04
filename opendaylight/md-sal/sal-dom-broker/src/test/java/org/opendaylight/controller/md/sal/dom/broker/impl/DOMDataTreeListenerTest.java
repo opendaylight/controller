@@ -53,6 +53,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.ModificationType;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
 
 public class DOMDataTreeListenerTest {
 
@@ -87,7 +88,7 @@ public class DOMDataTreeListenerTest {
             LogicalDatastoreType.CONFIGURATION, TestModel.OUTER_LIST_PATH);
 
     @Before
-    public void setupStore() {
+    public void setupStore() throws ReactorException {
         InMemoryDOMDataStore operStore = new InMemoryDOMDataStore("OPER",
                 MoreExecutors.newDirectExecutorService());
         InMemoryDOMDataStore configStore = new InMemoryDOMDataStore("CFG",

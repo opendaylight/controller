@@ -13,12 +13,12 @@ import static org.junit.Assert.fail;
 import com.google.common.base.Preconditions;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.NameConflictException;
@@ -26,7 +26,10 @@ import org.opendaylight.controller.config.yangjmxgenerator.plugin.util.YangModel
 import org.opendaylight.yangtools.sal.binding.yang.types.TypeProviderImpl;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.Module;
-import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
+import org.opendaylight.yangtools.yang.parser.spi.meta.ReactorException;
+import org.opendaylight.yangtools.yang.parser.stmt.reactor.CrossSourceStatementReactor;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangInferencePipeline;
+import org.opendaylight.yangtools.yang.parser.stmt.rfc6020.YangStatementSourceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,28 +114,30 @@ public class ModuleMXBeanEntryNameConflictTest extends AbstractYangTest {
         return name.substring(startIndex, endIndex);
     }
 
-    private Module loadYangs(File testedModule, String moduleName)
-            throws Exception {
+    private Module loadYangs(File testedModule, String moduleName) throws ReactorException, IOException {
         List<InputStream> yangISs = new ArrayList<>();
         yangISs.addAll(getStreams("/ietf-inet-types.yang"));
 
         yangISs.add(new FileInputStream(testedModule));
-
         yangISs.addAll(getConfigApiYangInputStreams());
 
-        YangParserImpl parser = new YangParserImpl();
-        Set<Module> modulesToBuild = parser.parseYangModelsFromStreams(yangISs);
-        // close ISs
-        for (InputStream is : yangISs) {
-            is.close();
+        CrossSourceStatementReactor.BuildAction reactor = YangInferencePipeline.RFC6020_REACTOR.newBuild();
+        for (InputStream yangIS : yangISs) {
+            reactor.addSource(new YangStatementSourceImpl(yangIS));
         }
-        context = parser.resolveSchemaContext(modulesToBuild);
+        context = reactor.buildEffective();
         namesToModules = YangModelSearchUtils.mapModulesByNames(context
                 .getModules());
         configModule = namesToModules.get(ConfigConstants.CONFIG_MODULE);
         final Module module = namesToModules.get(moduleName);
         Preconditions.checkNotNull(module, "Cannot get module %s from %s",
                 moduleName, namesToModules.keySet());
+
+        // close ISs
+        for (InputStream is : yangISs) {
+            is.close();
+        }
+
         return module;
     }
 
