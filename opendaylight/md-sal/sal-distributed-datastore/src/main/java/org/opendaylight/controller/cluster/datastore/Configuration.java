@@ -9,11 +9,11 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import com.google.common.base.Optional;
-import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategy;
-
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategy;
 
 public interface Configuration {
 
@@ -59,4 +59,9 @@ public interface Configuration {
      * @return
      */
     Set<String> getAllShardNames();
+
+    /**
+     * Returns a unique set of all member names configured for all shards.
+     */
+    Collection<String> getUniqueMemberNamesForAllShards();
 }

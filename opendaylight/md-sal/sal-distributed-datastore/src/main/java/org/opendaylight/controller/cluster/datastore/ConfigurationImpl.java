@@ -21,8 +21,10 @@ import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigObject;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -196,6 +198,16 @@ public class ConfigurationImpl implements Configuration {
     @Override
     public Set<String> getAllShardNames() {
         return allShardNames;
+    }
+
+    @Override
+    public Collection<String> getUniqueMemberNamesForAllShards() {
+        Set<String> allNames = new HashSet<>();
+        for(String shardName: allShardNames) {
+            allNames.addAll(getMembersFromShardName(shardName));
+        }
+
+        return allNames;
     }
 
     private List<Module> readModules(final Config modulesConfig) {
