@@ -207,12 +207,18 @@ module distributed-datastore-provider {
                          should begin applying back pressure. This number is only used as an initial guidance,
                          subsequently the datastore measures the latency for a commit and auto-adjusts the rate limit";
          }
-         
+
          leaf transaction-debug-context-enabled {
              default false;
              type boolean;
              description "Enable or disable transaction context debug. This will log the call site trace for
                           transactions that fail";
+         }
+         leaf cluster-config-path {
+             default "./configuration/initial/";
+             type string;
+             description "The configuration path for the akka configuration file. The
+                          configured path will be used when the controller node restarts.";
          }
     }
 

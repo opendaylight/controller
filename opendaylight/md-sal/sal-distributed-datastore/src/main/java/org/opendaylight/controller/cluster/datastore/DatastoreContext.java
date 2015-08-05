@@ -13,8 +13,8 @@ import com.google.common.collect.Sets;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.text.WordUtils;
-import org.opendaylight.controller.cluster.datastore.config.ConfigurationReader;
-import org.opendaylight.controller.cluster.datastore.config.FileConfigurationReader;
+import org.opendaylight.controller.cluster.common.actor.AkkaConfigurationReader;
+import org.opendaylight.controller.cluster.common.actor.FileAkkaConfigurationReader;
 import org.opendaylight.controller.cluster.raft.ConfigParams;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreConfigProperties;
@@ -40,7 +40,7 @@ public class DatastoreContext {
     public static final Timeout DEFAULT_SHARD_INITIALIZATION_TIMEOUT = new Timeout(5, TimeUnit.MINUTES);
     public static final Timeout DEFAULT_SHARD_LEADER_ELECTION_TIMEOUT = new Timeout(30, TimeUnit.SECONDS);
     public static final boolean DEFAULT_PERSISTENT = true;
-    public static final FileConfigurationReader DEFAULT_CONFIGURATION_READER = new FileConfigurationReader();
+    public static final FileAkkaConfigurationReader DEFAULT_CONFIGURATION_READER = new FileAkkaConfigurationReader();
     public static final int DEFAULT_SHARD_SNAPSHOT_DATA_THRESHOLD_PERCENTAGE = 12;
     public static final int DEFAULT_SHARD_ELECTION_TIMEOUT_FACTOR = 2;
     public static final int DEFAULT_TX_CREATION_INITIAL_RATE_LIMIT = 100;
@@ -59,7 +59,7 @@ public class DatastoreContext {
     private Timeout shardInitializationTimeout = DEFAULT_SHARD_INITIALIZATION_TIMEOUT;
     private Timeout shardLeaderElectionTimeout = DEFAULT_SHARD_LEADER_ELECTION_TIMEOUT;
     private boolean persistent = DEFAULT_PERSISTENT;
-    private ConfigurationReader configurationReader = DEFAULT_CONFIGURATION_READER;
+    private AkkaConfigurationReader configurationReader = DEFAULT_CONFIGURATION_READER;
     private long transactionCreationInitialRateLimit = DEFAULT_TX_CREATION_INITIAL_RATE_LIMIT;
     private final DefaultConfigParamsImpl raftConfig = new DefaultConfigParamsImpl();
     private String dataStoreType = UNKNOWN_DATA_STORE_TYPE;
@@ -155,7 +155,7 @@ public class DatastoreContext {
         return persistent;
     }
 
-    public ConfigurationReader getConfigurationReader() {
+    public AkkaConfigurationReader getConfigurationReader() {
         return configurationReader;
     }
 
@@ -323,7 +323,7 @@ public class DatastoreContext {
             return shardLeaderElectionTimeout(timeout, TimeUnit.SECONDS);
         }
 
-        public Builder configurationReader(ConfigurationReader configurationReader){
+        public Builder configurationReader(AkkaConfigurationReader configurationReader){
             datastoreContext.configurationReader = configurationReader;
             return this;
         }
@@ -397,6 +397,11 @@ public class DatastoreContext {
 
         public Builder maxShardDataStoreExecutorQueueSize(int maxShardDataStoreExecutorQueueSize) {
             this.maxShardDataStoreExecutorQueueSize = maxShardDataStoreExecutorQueueSize;
+            return this;
+        }
+
+        public Builder clusterConfigPath(String path) {
+            this.configurationReader(new FileAkkaConfigurationReader(path));
             return this;
         }
 
