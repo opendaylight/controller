@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a7ca5a3_b23c2995",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/yang/distributed-datastore-provider.yang",
+        "patchSetId": 6
+      },
+      "lineNbr": 210,
+      "author": {
+        "id": 3594
+      },
+      "writtenOn": "2015-08-05T16:12:55Z",
+      "side": 1,
+      "message": "There are some stray spaces here that you might want to remove.",
+      "range": {
+        "startLine": 210,
+        "startChar": 0,
+        "endLine": 210,
+        "endChar": 9
+      },
+      "revId": "1ef2f7321202ef77b5cfd0ca430e6a58cb07331e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
