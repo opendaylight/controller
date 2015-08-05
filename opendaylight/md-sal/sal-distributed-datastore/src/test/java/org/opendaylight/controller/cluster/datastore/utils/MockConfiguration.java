@@ -12,7 +12,9 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -64,5 +66,15 @@ public class MockConfiguration implements Configuration{
 
     @Override public Set<String> getAllShardNames() {
         return Collections.emptySet();
+    }
+
+    @Override
+    public Collection<String> getUniqueMemberNamesForAllShards() {
+        Set<String> allNames = new HashSet<>();
+        for(List<String> l: shardMembers.values()) {
+            allNames.addAll(l);
+        }
+
+        return allNames;
     }
 }
