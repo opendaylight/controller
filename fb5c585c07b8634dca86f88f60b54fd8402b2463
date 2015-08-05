@@ -22,6 +22,23 @@
       "revId": "fb5c585c07b8634dca86f88f60b54fd8402b2463",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_94879d61",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/AppendEntriesReply.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-08-05T02:33:28Z",
+      "side": 1,
+      "message": "Minor thing - we could call this isForceInstallSnapshot since it returns a boolean but I\u0027m OK either way.",
+      "revId": "fb5c585c07b8634dca86f88f60b54fd8402b2463",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
