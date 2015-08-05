@@ -1,0 +1,163 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a7ca5a3_74e9a119",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/DefaultAkkaConfigurationReader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-08-05T03:31:17Z",
+      "side": 1,
+      "message": "Minor thing but please keep the same coding style and omit the space before \u0027(\u0027.",
+      "revId": "d470313ed22ccd596d425194bf025a09aa2031b0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_d4e3d531",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/DefaultAkkaConfigurationReader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-08-05T03:31:17Z",
+      "side": 1,
+      "message": "Please make this a constant. In fact you can change AKKA_CONF_PATH to just \"./configuration/initial\". Also rename to DEFAULT_AKKA_CONF_PATH (since that\u0027s what it means now) and make it private (no need for it to be public).",
+      "revId": "d470313ed22ccd596d425194bf025a09aa2031b0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_54f825e5",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/DefaultAkkaConfigurationReader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-08-05T03:31:17Z",
+      "side": 1,
+      "message": "Declare this on the next line where it\u0027s set. Also rename to just \u0027configFile\u0027.",
+      "revId": "d470313ed22ccd596d425194bf025a09aa2031b0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_34f3290c",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/DefaultAkkaConfigurationReader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-08-05T03:31:17Z",
+      "side": 1,
+      "message": "It would be better to use the File(parent, child) ctor here instead of concatenating in case configPath doesn\u0027t end with \u0027/\u0027, i.e.:\n\n  new File(configPath, \"akka.conf\")",
+      "revId": "d470313ed22ccd596d425194bf025a09aa2031b0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_74d0c153",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/DefaultAkkaConfigurationReader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-08-05T03:31:17Z",
+      "side": 1,
+      "message": "Based on the comment in the ctor above, this would become:\n\n   new File(DEFAULT_AKKA_CONF_PATH, \"akka.conf\");",
+      "revId": "d470313ed22ccd596d425194bf025a09aa2031b0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_14daad78",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/DefaultAkkaConfigurationReader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-08-05T03:31:17Z",
+      "side": 1,
+      "message": "It would be good to print the File path in the message, i.e.\n\n  checkState(..., \"%s is missing\", defaultConfigFile);",
+      "revId": "d470313ed22ccd596d425194bf025a09aa2031b0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_54cfc5b0",
+        "filename": "opendaylight/md-sal/sal-clustering-config/src/main/resources/initial/datastore.cfg",
+        "patchSetId": 3
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-08-05T03:31:17Z",
+      "side": 1,
+      "message": "Please comment this out by default since we default it in the yang model. We list settings here commented out so users can see what can be changed.",
+      "range": {
+        "startLine": 77,
+        "startChar": 27,
+        "endLine": 77,
+        "endChar": 49
+      },
+      "revId": "d470313ed22ccd596d425194bf025a09aa2031b0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_d4baf509",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/config/yang/config/remote_rpc_connector/RemoteRPCBrokerModule.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-08-05T03:31:17Z",
+      "side": 1,
+      "message": "Need to check null from \u0027get\u0027 otherwise NPE.",
+      "revId": "d470313ed22ccd596d425194bf025a09aa2031b0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_743761b1",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/config/yang/config/remote_rpc_connector/RemoteRPCBrokerModule.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-08-05T03:31:17Z",
+      "side": 1,
+      "message": "We should not blindly ignore exceptions. At least log to debug.",
+      "revId": "d470313ed22ccd596d425194bf025a09aa2031b0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
