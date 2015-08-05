@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "5a7ca5a3_54b585cb",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 250,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-08-05T05:49:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a7ca5a3_547345b1",
+      "revId": "27828b95f5358e4b2899500364ac6281ea71c7b5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a7ca5a3_1465cde0",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/policy/DisableElectionsRaftPolicy.java",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2015-08-05T02:07:23Z",
       "side": 1,
       "message": "What is this class for? Can you add javadocs?",
+      "revId": "27828b95f5358e4b2899500364ac6281ea71c7b5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_34b009dd",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/policy/DisableElectionsRaftPolicy.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-08-05T05:49:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a7ca5a3_1465cde0",
       "revId": "27828b95f5358e4b2899500364ac6281ea71c7b5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
