@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "5a7ca5a3_f494d145",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContext.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-08-05T05:35:07Z",
+      "side": 1,
+      "message": "I decided not to put a getter on raftConfig for the policy class name - so this is needed here for the copy constructor.",
+      "parentUuid": "5a7ca5a3_b44ad953",
+      "revId": "98554d24598b1390c6e1ae09a3d9adbb0e4ccf87",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a7ca5a3_d447554a",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContext.java",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2015-08-05T01:56:08Z",
       "side": 1,
       "message": "Is this getter needed since we store it in the raftConfig?",
+      "revId": "98554d24598b1390c6e1ae09a3d9adbb0e4ccf87",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a7ca5a3_d49bd570",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContext.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-08-05T05:35:07Z",
+      "side": 1,
+      "message": "I\u0027ve removed this as this is not used at moment. I had this because there is no getter for the raft policy implementation class name in raftConfig.",
+      "parentUuid": "5a7ca5a3_d447554a",
       "revId": "98554d24598b1390c6e1ae09a3d9adbb0e4ccf87",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
