@@ -11,6 +11,7 @@ package org.opendaylight.controller.cluster.datastore;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import com.google.common.collect.Sets;
 import com.typesafe.config.ConfigFactory;
 import java.io.File;
 import java.util.List;
@@ -100,5 +101,11 @@ public class ConfigurationImplTest {
         assertTrue(allShardNames.contains("people-1"));
         assertTrue(allShardNames.contains("cars-1"));
         assertTrue(allShardNames.contains("test-1"));
+    }
+
+    @Test
+    public void testGetUniqueMemberNamesForAllShards() {
+        assertEquals("getUniqueMemberNamesForAllShards", Sets.newHashSet("member-1", "member-2", "member-3"),
+                configuration.getUniqueMemberNamesForAllShards());
     }
 }
