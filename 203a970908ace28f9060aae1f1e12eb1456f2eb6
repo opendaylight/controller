@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a7ca5a3_b79e5b62",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/config/yang/config/remote_rpc_connector/RemoteRPCBrokerModule.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-08-05T11:48:28Z",
+      "side": 1,
+      "message": "Remove the 2nd \"{}\" as that will substitute \u0027e\u0027 in the message and the stack trace won\u0027t be printed.",
+      "revId": "203a970908ace28f9060aae1f1e12eb1456f2eb6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
