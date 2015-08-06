@@ -16,11 +16,6 @@
   <packaging>jar</packaging>
   <name>${project.artifactId}</name>
 
-  <!--
-  <properties>
-    <checkstyle.skip>true</checkstyle.skip>
-  </properties> -->
-
   <dependencies>
     <dependency>
       <groupId>ch.qos.logback</groupId>
