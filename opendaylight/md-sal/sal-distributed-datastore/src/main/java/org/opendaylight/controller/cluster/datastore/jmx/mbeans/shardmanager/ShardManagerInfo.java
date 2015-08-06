@@ -9,7 +9,6 @@
 package org.opendaylight.controller.cluster.datastore.jmx.mbeans.shardmanager;
 
 import java.util.List;
-
 import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
 
 public class ShardManagerInfo extends AbstractMXBean implements ShardManagerInfoMBean {
@@ -32,6 +31,10 @@ public class ShardManagerInfo extends AbstractMXBean implements ShardManagerInfo
         shardManagerInfo.registerMBean();
 
         return shardManagerInfo;
+    }
+
+    public void addLocalShard(String shardName) {
+        localShards.add(shardName);
     }
 
     @Override

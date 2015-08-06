@@ -27,6 +27,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.typesafe.config.ConfigFactory;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -42,6 +43,8 @@ import org.opendaylight.controller.cluster.datastore.exceptions.PrimaryNotFoundE
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardManagerIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.ActorInitialized;
+import org.opendaylight.controller.cluster.datastore.messages.CreateShard;
+import org.opendaylight.controller.cluster.datastore.messages.CreateShardReply;
 import org.opendaylight.controller.cluster.datastore.messages.FindLocalShard;
 import org.opendaylight.controller.cluster.datastore.messages.FindPrimary;
 import org.opendaylight.controller.cluster.datastore.messages.LocalPrimaryShardFound;
@@ -897,6 +900,101 @@ public class ShardManagerTest extends AbstractActorTest {
         // Sync status is now true
         assertEquals(true, shardManagerActor.getMBean().getSyncStatus());
 
+    }
+
+    @Test
+    public void testOnReceiveCreateShard() {
+        new JavaTestKit(getSystem()) {{
+            datastoreContextBuilder.shardInitializationTimeout(1, TimeUnit.MINUTES).persistent(true);
+
+            ActorRef shardManager = getSystem().actorOf(newShardMgrProps(false));
+
+            SchemaContext schemaContext = TestModel.createTestContext();
+            shardManager.tell(new UpdateSchemaContext(schemaContext), ActorRef.noSender());
+
+            DatastoreContext datastoreContext = DatastoreContext.newBuilder().shardElectionTimeoutFactor(100).
+                    persistent(false).build();
+            Map<String, String> peerAddresses = ImmutableMap.<String, String>builder().put("node1", "").
+                    put("node2", "").build();
+            TestShardCreator shardCreator = (TestShardCreator) new TestShardCreator().datastoreContext(datastoreContext).
+                    peerAddresses(peerAddresses);
+
+            shardManager.tell(new CreateShard("foo", shardCreator), getRef());
+
+            expectMsgClass(duration("5 seconds"), CreateShardReply.class);
+
+            shardManager.tell(new FindLocalShard("foo", true), getRef());
+
+            expectMsgClass(duration("5 seconds"), LocalShardFound.class);
+
+            assertEquals("isRecoveryApplicable", false, shardCreator.shard.persistence().isRecoveryApplicable());
+            assertEquals("peerAddresses", peerAddresses, shardCreator.shard.peerAddresses);
+            assertEquals("ShardIdentifier", new ShardIdentifier("foo", "member-1", shardMrgIDSuffix).toString(),
+                    shardCreator.shard.persistenceId());
+            assertSame("schemaContext", schemaContext, shardCreator.shard.schemaContext);
+
+            // Send CreateShard with same name - should fail.
+
+            shardManager.tell(new CreateShard("foo", new DefaultShardCreator()), getRef());
+
+            expectMsgClass(duration("5 seconds"), akka.actor.Status.Failure.class);
+
+
+            // Send CreateShard with no peerAddresses - should fail.
+
+            shardManager.tell(new CreateShard("foo1", new DefaultShardCreator()), getRef());
+
+            expectMsgClass(duration("5 seconds"), akka.actor.Status.Failure.class);
+        }};
+    }
+
+    @Test
+    public void testOnReceiveCreateShardWithNoInitialSchemaContext() {
+        new JavaTestKit(getSystem()) {{
+            datastoreContextBuilder.shardInitializationTimeout(1, TimeUnit.MINUTES).persistent(true);
+
+            ActorRef shardManager = getSystem().actorOf(newShardMgrProps(false));
+
+            TestShardCreator shardCreator = (TestShardCreator) new TestShardCreator().
+                    peerAddresses(Collections.<String, String>emptyMap());
+
+            shardManager.tell(new CreateShard("foo", shardCreator), getRef());
+
+            expectMsgClass(duration("5 seconds"), CreateShardReply.class);
+
+            SchemaContext schemaContext = TestModel.createTestContext();
+            shardManager.tell(new UpdateSchemaContext(schemaContext), ActorRef.noSender());
+
+            shardManager.tell(new FindLocalShard("foo", true), getRef());
+
+            expectMsgClass(duration("5 seconds"), LocalShardFound.class);
+
+            assertSame("schemaContext", schemaContext, shardCreator.shard.schemaContext);
+        }};
+    }
+
+    @SuppressWarnings({ "serial" })
+    private static class TestShardCreator extends DefaultShardCreator {
+        TestShard shard;
+
+        @Override
+        public Shard create() {
+            shard = new TestShard(getShardId(), getPeerAddresses(), getDatastoreContext(), getSchemaContext());
+            return shard;
+        }
+
+    }
+
+    private static class TestShard extends Shard {
+        Map<String, String> peerAddresses;
+        SchemaContext schemaContext;
+
+        TestShard(ShardIdentifier name, Map<String, String> peerAddresses, DatastoreContext datastoreContext,
+                SchemaContext schemaContext) {
+            super(name, peerAddresses, datastoreContext, schemaContext);
+            this.peerAddresses = peerAddresses;
+            this.schemaContext = schemaContext;
+        }
     }
 
     private static class TestShardManager extends ShardManager {
