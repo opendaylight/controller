@@ -12,12 +12,10 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Cancellable;
 import akka.actor.Props;
-import akka.japi.Creator;
 import akka.persistence.RecoveryFailure;
 import akka.serialization.Serialization;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -162,15 +160,10 @@ public class Shard extends RaftActor {
                 datastoreContext.getShardTransactionCommitTimeoutInSeconds(), TimeUnit.SECONDS) / 2;
     }
 
-    public static Props props(final ShardIdentifier name,
-        final Map<String, String> peerAddresses,
-        final DatastoreContext datastoreContext, final SchemaContext schemaContext) {
-        Preconditions.checkNotNull(name, "name should not be null");
-        Preconditions.checkNotNull(peerAddresses, "peerAddresses should not be null");
-        Preconditions.checkNotNull(datastoreContext, "dataStoreContext should not be null");
-        Preconditions.checkNotNull(schemaContext, "schemaContext should not be null");
-
-        return Props.create(new ShardCreator(name, peerAddresses, datastoreContext, schemaContext));
+    public static Props props(final ShardIdentifier name, final Map<String, String> peerAddresses,
+            final DatastoreContext datastoreContext, final SchemaContext schemaContext) {
+        return new DefaultShardCreator().shardId(name).peerAddresses(peerAddresses).datastoreContext(datastoreContext)
+                .schemaContext(schemaContext).props();
     }
 
     private Optional<ActorRef> createRoleChangeNotifier(String shardId) {
@@ -683,30 +676,6 @@ public class Shard extends RaftActor {
     @VisibleForTesting
     ShardCommitCoordinator getCommitCoordinator() {
         return commitCoordinator;
-    }
-
-
-    private static class ShardCreator implements Creator<Shard> {
-
-        private static final long serialVersionUID = 1L;
-
-        final ShardIdentifier name;
-        final Map<String, String> peerAddresses;
-        final DatastoreContext datastoreContext;
-        final SchemaContext schemaContext;
-
-        ShardCreator(final ShardIdentifier name, final Map<String, String> peerAddresses,
-                final DatastoreContext datastoreContext, final SchemaContext schemaContext) {
-            this.name = name;
-            this.peerAddresses = peerAddresses;
-            this.datastoreContext = datastoreContext;
-            this.schemaContext = schemaContext;
-        }
-
-        @Override
-        public Shard create() throws Exception {
-            return new Shard(name, peerAddresses, datastoreContext, schemaContext);
-        }
     }
 
     @VisibleForTesting
