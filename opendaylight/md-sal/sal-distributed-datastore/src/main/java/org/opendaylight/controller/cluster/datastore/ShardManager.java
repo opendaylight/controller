@@ -29,6 +29,7 @@ import com.google.common.base.Supplier;
 import com.google.common.collect.Sets;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -45,6 +46,8 @@ import org.opendaylight.controller.cluster.datastore.identifiers.ShardManagerIde
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shardmanager.ShardManagerInfo;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shardmanager.ShardManagerInfoMBean;
 import org.opendaylight.controller.cluster.datastore.messages.ActorInitialized;
+import org.opendaylight.controller.cluster.datastore.messages.CreateShard;
+import org.opendaylight.controller.cluster.datastore.messages.CreateShardReply;
 import org.opendaylight.controller.cluster.datastore.messages.FindLocalShard;
 import org.opendaylight.controller.cluster.datastore.messages.FindPrimary;
 import org.opendaylight.controller.cluster.datastore.messages.LocalPrimaryShardFound;
@@ -112,6 +115,8 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     private final CountDownLatch waitTillReadyCountdownLatch;
 
     private final PrimaryShardInfoFutureCache primaryShardInfoCache;
+
+    private SchemaContext schemaContext;
 
     /**
      */
@@ -188,10 +193,51 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             onLeaderStateChanged((ShardLeaderStateChanged) message);
         } else if(message instanceof SwitchShardBehavior){
             onSwitchShardBehavior((SwitchShardBehavior) message);
+        } else if(message instanceof CreateShard) {
+            onCreateShard((CreateShard)message);
         } else {
             unknownMessage(message);
         }
 
+    }
+
+    private void onCreateShard(CreateShard createShard) {
+        Object reply;
+        try {
+            if(localShards.containsKey(createShard.getShardName())) {
+                throw new IllegalStateException(String.format("Shard with name %s already exists",
+                        createShard.getShardName()));
+            }
+
+            ShardIdentifier shardId = getShardIdentifier(cluster.getCurrentMemberName(), createShard.getShardName());
+            Map<String, String> peerAddresses = getPeerAddresses(createShard.getShardName(), createShard.getMemberNames());
+
+            LOG.debug("onCreateShard: shardId: {}, peerAddresses: {}", shardId, peerAddresses);
+
+            DatastoreContext shardDatastoreContext = createShard.getDatastoreContext();
+            if(shardDatastoreContext == null) {
+                shardDatastoreContext = datastoreContext;
+            }
+
+            ShardInformation info = new ShardInformation(createShard.getShardName(), shardId, peerAddresses,
+                    shardDatastoreContext, createShard.getShardPropsCreator());
+            localShards.put(createShard.getShardName(), info);
+
+            mBean.addLocalShard(shardId.toString());
+
+            if(schemaContext != null) {
+                info.setActor(newShardActor(schemaContext, info));
+            }
+
+            reply = new CreateShardReply();
+        } catch (Exception e) {
+            LOG.error("onCreateShard failed", e);
+            reply = new akka.actor.Status.Failure(e);
+        }
+
+        if(getSender() != null && !getContext().system().deadLetters().equals(getSender())) {
+            getSender().tell(reply, getSelf());
+        }
     }
 
     private void checkReady(){
@@ -502,7 +548,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
      * @param message
      */
     private void updateSchemaContext(final Object message) {
-        final SchemaContext schemaContext = ((UpdateSchemaContext) message).getSchemaContext();
+        schemaContext = ((UpdateSchemaContext) message).getSchemaContext();
 
         LOG.debug("Got updated SchemaContext: # of modules {}", schemaContext.getAllModuleIdentifiers().size());
 
@@ -523,8 +569,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
     @VisibleForTesting
     protected ActorRef newShardActor(final SchemaContext schemaContext, ShardInformation info) {
-        return getContext().actorOf(Shard.props(info.getShardId(),
-                info.getPeerAddresses(), datastoreContext, schemaContext)
+        return getContext().actorOf(info.newProps(schemaContext)
                         .withDispatcher(shardDispatcherPath), info.getShardId().toString());
     }
 
@@ -614,12 +659,14 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         List<String> memberShardNames =
             this.configuration.getMemberShardNames(memberName);
 
+        ShardPropsCreator shardPropsCreator = new DefaultShardPropsCreator();
         List<String> localShardActorNames = new ArrayList<>();
         for(String shardName : memberShardNames){
             ShardIdentifier shardId = getShardIdentifier(memberName, shardName);
             Map<String, String> peerAddresses = getPeerAddresses(shardName);
             localShardActorNames.add(shardId.toString());
-            localShards.put(shardName, new ShardInformation(shardName, shardId, peerAddresses));
+            localShards.put(shardName, new ShardInformation(shardName, shardId, peerAddresses, datastoreContext,
+                    shardPropsCreator));
         }
 
         mBean = ShardManagerInfo.createShardManagerMBean(memberName, "shard-manager-" + this.type,
@@ -634,16 +681,18 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
      * @param shardName
      * @return
      */
-    private Map<String, String> getPeerAddresses(String shardName){
+    private Map<String, String> getPeerAddresses(String shardName) {
+        return getPeerAddresses(shardName, configuration.getMembersFromShardName(shardName));
+    }
+
+    private Map<String, String> getPeerAddresses(String shardName, Collection<String> members) {
 
         Map<String, String> peerAddresses = new HashMap<>();
 
-        List<String> members = this.configuration.getMembersFromShardName(shardName);
-
         String currentMemberName = this.cluster.getCurrentMemberName();
 
-        for(String memberName : members){
-            if(!currentMemberName.equals(memberName)){
+        for(String memberName : members) {
+            if(!currentMemberName.equals(memberName)) {
                 ShardIdentifier shardId = getShardIdentifier(memberName, shardName);
                 String path = getShardActorPath(shardName, currentMemberName);
                 peerAddresses.put(shardId.toString(), path);
@@ -697,11 +746,21 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         private String leaderId;
         private short leaderVersion;
 
+        private final DatastoreContext datastoreContext;
+        private final ShardPropsCreator shardPropsCreator;
+
         private ShardInformation(String shardName, ShardIdentifier shardId,
-                Map<String, String> peerAddresses) {
+                Map<String, String> peerAddresses, DatastoreContext datastoreContext,
+                ShardPropsCreator shardPropsCreator) {
             this.shardName = shardName;
             this.shardId = shardId;
             this.peerAddresses = peerAddresses;
+            this.datastoreContext = datastoreContext;
+            this.shardPropsCreator = shardPropsCreator;
+        }
+
+        Props newProps(SchemaContext schemaContext) {
+            return shardPropsCreator.newProps(shardId, peerAddresses, datastoreContext, schemaContext);
         }
 
         String getShardName() {
