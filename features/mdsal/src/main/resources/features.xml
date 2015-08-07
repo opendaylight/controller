@@ -16,6 +16,7 @@
     </feature>
     <feature name='odl-mdsal-common' version='${mdsal.version}' description="OpenDaylight :: Config :: All">
       <feature version='${yangtools.version}'>odl-yangtools-data-binding</feature>
+      <feature version='${config.version}'>odl-config-api</feature>
       <bundle>mvn:org.opendaylight.controller/sal-common-api/${mdsal.version}</bundle>
       <bundle>mvn:org.opendaylight.controller/sal-common-impl/${mdsal.version}</bundle>
       <bundle>mvn:org.opendaylight.controller/sal-common-util/${mdsal.version}</bundle>
@@ -82,6 +83,7 @@
         <feature version='${project.version}'>odl-mdsal-remoterpc-connector</feature>
         <feature version='${project.version}'>odl-mdsal-distributed-datastore</feature>
         <configfile finalname="${config.configfile.directory}/${config.clustering.configfile}">mvn:org.opendaylight.controller/sal-clustering-config/${project.version}/xml/config</configfile>
+        <configfile finalname="${config.configfile.directory}/${config.clustered-entity-ownership.configfile}">mvn:org.opendaylight.controller/sal-clustering-config/${project.version}/xml/entityownershipconfig</configfile>
         <configfile finalname="configuration/initial/akka.conf">mvn:org.opendaylight.controller/sal-clustering-config/${project.version}/xml/akkaconf</configfile>
         <configfile finalname="configuration/initial/module-shards.conf">mvn:org.opendaylight.controller/sal-clustering-config/${project.version}/xml/moduleshardconf</configfile>
         <configfile finalname="configuration/initial/modules.conf">mvn:org.opendaylight.controller/sal-clustering-config/${project.version}/xml/moduleconf</configfile>

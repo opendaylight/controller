@@ -1,0 +1,38 @@
+module distributed-entity-ownership-service {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:config:distributed-entity-ownership-service";
+    prefix "distributed-entity-ownership-service";
+
+    import config { prefix config; revision-date 2013-04-05; }
+    import opendaylight-operational-dom-datastore {prefix operational-dom-store-spi;}
+    import opendaylight-entity-ownership-service { prefix entity-ownership-service-spi; }
+
+    description
+        "This module contains the base YANG definitions for the DistributedEntityOwnershipService implementation";
+
+    revision "2015-08-10" {
+        description "Initial revision.";
+    }
+
+    // This is the definition of the service implementation as a module identity.
+    identity distributed-entity-ownership-service-provider {
+        base config:module-type;
+        config:provided-service entity-ownership-service-spi:entity-ownership-service;
+        config:java-name-prefix DistributedEntityOwnershipServiceProvider;
+    }
+
+    //  Augments the 'configuration' choice node under modules/module.
+    augment "/config:modules/config:module/config:configuration" {
+        case distributed-entity-ownership-service-provider {
+            when "/config:modules/config:module/config:type = 'distributed-entity-ownership-service-provider'";
+                container data-store {
+                    uses config:service-ref {
+                        refine type {
+                            mandatory false;
+                            config:required-identity operational-dom-store-spi:operational-dom-datastore;
+                        }
+                    }
+                }
+        }
+    }
+}
