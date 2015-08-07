@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a7ca5a3_8cb9c9eb",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/yang/entity-owners.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2015-08-07T20:54:00Z",
+      "side": 1,
+      "message": "you can probably define lead id and leaf type outside and point here using uses",
+      "range": {
+        "startLine": 35,
+        "startChar": 25,
+        "endLine": 35,
+        "endChar": 27
+      },
+      "revId": "08e891ea588c4f5093f10cfe49bdbcf020522ebc",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
