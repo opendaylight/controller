@@ -195,6 +195,13 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
                 leafSetBuilder = addLeafSetChildren(identifier.getNodeType(), leafSetBuilder);
                 return leafSetBuilder.build();
 
+            case NodeTypes.ORDERED_LEAF_SET:
+                LOG.debug("Read leaf set node");
+                ListNodeBuilder<Object, LeafSetEntryNode<Object>> orderedLeafSetBuilder =
+                        Builders.orderedLeafSetBuilder().withNodeIdentifier(identifier);
+                orderedLeafSetBuilder = addLeafSetChildren(identifier.getNodeType(), orderedLeafSetBuilder);
+                return orderedLeafSetBuilder.build();
+
             default :
                 return null;
         }
