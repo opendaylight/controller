@@ -202,8 +202,7 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
         DistributedDataStoreFactory.destroyInstance(this);
     }
 
-    @VisibleForTesting
-    ActorContext getActorContext() {
+    public ActorContext getActorContext() {
         return actorContext;
     }
 

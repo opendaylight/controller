@@ -162,14 +162,8 @@ public class Shard extends RaftActor {
                 datastoreContext.getShardTransactionCommitTimeoutInSeconds(), TimeUnit.SECONDS) / 2;
     }
 
-    public static Props props(final ShardIdentifier name,
-        final Map<String, String> peerAddresses,
-        final DatastoreContext datastoreContext, final SchemaContext schemaContext) {
-        Preconditions.checkNotNull(name, "name should not be null");
-        Preconditions.checkNotNull(peerAddresses, "peerAddresses should not be null");
-        Preconditions.checkNotNull(datastoreContext, "dataStoreContext should not be null");
-        Preconditions.checkNotNull(schemaContext, "schemaContext should not be null");
-
+    public static Props props(final ShardIdentifier name, final Map<String, String> peerAddresses,
+            final DatastoreContext datastoreContext, final SchemaContext schemaContext) {
         return Props.create(new ShardCreator(name, peerAddresses, datastoreContext, schemaContext));
     }
 
@@ -291,7 +285,7 @@ public class Shard extends RaftActor {
                 leaderPayloadVersion);
     }
 
-    private void onDatastoreContext(DatastoreContext context) {
+    protected void onDatastoreContext(DatastoreContext context) {
         datastoreContext = context;
 
         commitCoordinator.setQueueCapacity(datastoreContext.getShardTransactionCommitQueueCapacity());
@@ -690,22 +684,29 @@ public class Shard extends RaftActor {
         return commitCoordinator;
     }
 
-
-    private static class ShardCreator implements Creator<Shard> {
-
+    protected abstract static class AbstractShardCreator implements Creator<Shard> {
         private static final long serialVersionUID = 1L;
 
-        final ShardIdentifier name;
-        final Map<String, String> peerAddresses;
-        final DatastoreContext datastoreContext;
-        final SchemaContext schemaContext;
+        protected final ShardIdentifier name;
+        protected final Map<String, String> peerAddresses;
+        protected final DatastoreContext datastoreContext;
+        protected final SchemaContext schemaContext;
+
+        protected AbstractShardCreator(final ShardIdentifier name, final Map<String, String> peerAddresses,
+                final DatastoreContext datastoreContext, final SchemaContext schemaContext) {
+            this.name = Preconditions.checkNotNull(name, "name should not be null");
+            this.peerAddresses = Preconditions.checkNotNull(peerAddresses, "peerAddresses should not be null");
+            this.datastoreContext = Preconditions.checkNotNull(datastoreContext, "dataStoreContext should not be null");
+            this.schemaContext = Preconditions.checkNotNull(schemaContext, "schemaContext should not be null");
+        }
+    }
+
+    private static class ShardCreator extends AbstractShardCreator {
+        private static final long serialVersionUID = 1L;
 
         ShardCreator(final ShardIdentifier name, final Map<String, String> peerAddresses,
                 final DatastoreContext datastoreContext, final SchemaContext schemaContext) {
-            this.name = name;
-            this.peerAddresses = peerAddresses;
-            this.datastoreContext = datastoreContext;
-            this.schemaContext = schemaContext;
+            super(name, peerAddresses, datastoreContext, schemaContext);
         }
 
         @Override
