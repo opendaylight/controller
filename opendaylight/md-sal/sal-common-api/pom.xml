@@ -16,6 +16,10 @@
       <artifactId>guava</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>config-api</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>concepts</artifactId>
     </dependency>
@@ -32,6 +36,42 @@
       <artifactId>yang-data-api</artifactId>
     </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.opendaylight.yangtools</groupId>
+        <artifactId>yang-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>generate-sources</goal>
+            </goals>
+            <configuration>
+              <codeGenerators>
+                <generator>
+                  <codeGeneratorClass>org.opendaylight.yangtools.maven.sal.api.gen.plugin.CodeGeneratorImpl</codeGeneratorClass>
+                  <outputBaseDir>${salGeneratorPath}</outputBaseDir>
+                </generator>
+                <generator>
+                  <codeGeneratorClass>org.opendaylight.controller.config.yangjmxgenerator.plugin.JMXGenerator</codeGeneratorClass>
+                  <outputBaseDir>${jmxGeneratorPath}</outputBaseDir>
+                  <additionalConfiguration>
+                    <namespaceToPackage1>urn:opendaylight:params:xml:ns:yang:controller==org.opendaylight.controller.config.yang</namespaceToPackage1>
+                  </additionalConfiguration>
+                </generator>
+                <generator>
+                  <codeGeneratorClass>org.opendaylight.yangtools.yang.unified.doc.generator.maven.DocumentationGeneratorImpl</codeGeneratorClass>
+                  <outputBaseDir>target/site/models</outputBaseDir>
+                </generator>
+              </codeGenerators>
+              <inspectDependencies>true</inspectDependencies>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 
   <scm>
     <connection>scm:git:http://git.opendaylight.org/gerrit/controller.git</connection>

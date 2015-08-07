@@ -37,6 +37,11 @@
                   <classifier>config</classifier>
                 </artifact>
                 <artifact>
+                  <file>${project.build.directory}/classes/initial/06-clustered-entity-ownership.xml.conf</file>
+                  <type>xml</type>
+                  <classifier>entityownershipconfig</classifier>
+                </artifact>
+                <artifact>
                   <file>${project.build.directory}/classes/initial/akka.conf</file>
                   <type>xml</type>
                   <classifier>akkaconf</classifier>

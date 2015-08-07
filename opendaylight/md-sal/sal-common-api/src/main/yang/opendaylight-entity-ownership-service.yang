@@ -1,0 +1,18 @@
+module opendaylight-entity-ownership-service {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:md:sal:core:spi:entity-ownership-service";
+    prefix "entity-ownership-service";
+
+    import config { prefix config; revision-date 2013-04-05; }
+
+    description "EntityOwnershipService interface definition";
+
+    revision "2015-08-10" {
+        description "Initial revision";
+    }
+
+    identity entity-ownership-service {
+        base "config:service-type";
+        config:java-class  "org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService";
+    }
+}
