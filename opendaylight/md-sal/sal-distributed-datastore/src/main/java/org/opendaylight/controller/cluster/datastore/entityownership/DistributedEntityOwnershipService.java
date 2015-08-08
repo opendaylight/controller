@@ -15,6 +15,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.RegisterCandidateLocal;
+import org.opendaylight.controller.cluster.datastore.entityownership.messages.UnregisterCandidateLocal;
 import org.opendaylight.controller.cluster.datastore.messages.CreateShard;
 import org.opendaylight.controller.md.sal.common.api.clustering.CandidateAlreadyRegisteredException;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
@@ -106,17 +107,24 @@ public class DistributedEntityOwnershipService implements EntityOwnershipService
     public EntityOwnershipCandidateRegistration registerCandidate(Entity entity, EntityOwnershipCandidate candidate)
             throws CandidateAlreadyRegisteredException {
 
-        EntityOwnershipCandidate currentCandidate = registeredEntities.putIfAbsent(entity,candidate);
+        EntityOwnershipCandidate currentCandidate = registeredEntities.putIfAbsent(entity, candidate);
         if(currentCandidate != null) {
             throw new CandidateAlreadyRegisteredException(entity, currentCandidate);
         }
 
         RegisterCandidateLocal registerCandidate = new RegisterCandidateLocal(candidate, entity);
 
-        LOG.debug("Registering candidate with message: " + registerCandidate);
+        LOG.debug("Registering candidate with message: {}", registerCandidate);
 
         executeLocalEntityOwnershipShardOperation(registerCandidate);
-        return new DistributedEntityOwnershipCandidateRegistration(candidate, entity);
+        return new DistributedEntityOwnershipCandidateRegistration(candidate, entity, this);
+    }
+
+    void unregisterCandidate(Entity entity) {
+        LOG.debug("Unregistering candidate for {}", entity);
+
+        executeLocalEntityOwnershipShardOperation(new UnregisterCandidateLocal(entity));
+        registeredEntities.remove(entity);
     }
 
     @Override
