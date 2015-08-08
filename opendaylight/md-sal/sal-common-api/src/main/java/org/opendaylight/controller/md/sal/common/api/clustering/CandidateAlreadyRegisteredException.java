@@ -16,25 +16,18 @@ import javax.annotation.Nonnull;
  * duplicate registration or two different components within the same process trying to register a Candidate.
  */
 public class CandidateAlreadyRegisteredException extends Exception {
+    private static final long serialVersionUID = 1L;
+
     private final Entity entity;
     private final EntityOwnershipCandidate registeredCandidate;
 
     public CandidateAlreadyRegisteredException(@Nonnull Entity entity,
-                                               @Nonnull EntityOwnershipCandidate registeredCandidate,
-                                               String message) {
-        super(message);
-        this.entity = Preconditions.checkNotNull(entity, "entity should not be null");
-        this.registeredCandidate = Preconditions.checkNotNull(registeredCandidate,
-                "registeredCandidate should not be null");
-    }
-
-    public CandidateAlreadyRegisteredException(@Nonnull Entity entity,
-                                               @Nonnull EntityOwnershipCandidate registeredCandidate,
-                                               String message, Throwable throwable) {
-        super(message, throwable);
-        this.entity = Preconditions.checkNotNull(entity, "entity should not be null");
-        this.registeredCandidate = Preconditions.checkNotNull(registeredCandidate,
-                "registeredCandidate should not be null");
+                                               @Nonnull EntityOwnershipCandidate registeredCandidate) {
+        super(String.format("Candidate %s has already been registered for %s",
+                Preconditions.checkNotNull(registeredCandidate, "registeredCandidate should not be null"),
+                Preconditions.checkNotNull(entity, "entity should not be null")));
+        this.entity = entity;
+        this.registeredCandidate = registeredCandidate;
     }
 
     /**

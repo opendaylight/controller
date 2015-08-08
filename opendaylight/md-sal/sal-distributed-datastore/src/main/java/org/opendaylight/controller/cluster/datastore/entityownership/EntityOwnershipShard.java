@@ -11,7 +11,9 @@ import akka.actor.Props;
 import java.util.Map;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.Shard;
+import org.opendaylight.controller.cluster.datastore.entityownership.messages.RegisterCandidateLocal;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
+import org.opendaylight.controller.cluster.datastore.messages.SuccessReply;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 /**
@@ -33,6 +35,19 @@ public class EntityOwnershipShard extends Shard {
     @Override
     protected void onDatastoreContext(DatastoreContext context) {
         super.onDatastoreContext(noPersistenceDatastoreContext(context));
+    }
+
+    @Override
+    public void onReceiveCommand(final Object message) throws Exception {
+        if(message instanceof RegisterCandidateLocal) {
+            onRegisterCandidateLocal((RegisterCandidateLocal)message);
+        } else {
+            super.onReceiveCommand(message);
+        }
+    }
+
+    private void onRegisterCandidateLocal(RegisterCandidateLocal registerCandidate) {
+        getSender().tell(SuccessReply.INSTANCE, getSelf());
     }
 
     public static Props props(final ShardIdentifier name, final Map<String, String> peerAddresses,
