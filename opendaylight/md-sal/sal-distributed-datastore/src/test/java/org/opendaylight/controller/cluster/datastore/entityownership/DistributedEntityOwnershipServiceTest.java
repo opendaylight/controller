@@ -10,9 +10,11 @@ package org.opendaylight.controller.cluster.datastore.entityownership;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import akka.actor.ActorRef;
+import akka.actor.PoisonPill;
 import akka.actor.Props;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.Collections;
@@ -21,12 +23,14 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.AbstractActorTest;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.RegisterCandidateLocal;
+import org.opendaylight.controller.cluster.datastore.entityownership.messages.UnregisterCandidateLocal;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.utils.MockClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.utils.MockConfiguration;
@@ -57,13 +61,18 @@ public class DistributedEntityOwnershipServiceTest extends AbstractActorTest {
     private DistributedDataStore dataStore;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         DatastoreContext datastoreContext = DatastoreContext.newBuilder().dataStoreType(dataStoreType).
                 shardInitializationTimeout(10, TimeUnit.SECONDS).build();
         dataStore = new DistributedDataStore(getSystem(), new MockClusterWrapper(),
                 new MockConfiguration(Collections.<String, List<String>>emptyMap()), datastoreContext );
 
         dataStore.onGlobalContextUpdated(TestModel.createTestContext());
+    }
+
+    @After
+    public void tearDown() {
+        dataStore.getActorContext().getShardManager().tell(PoisonPill.getInstance(), ActorRef.noSender());
     }
 
     @Test
@@ -101,7 +110,7 @@ public class DistributedEntityOwnershipServiceTest extends AbstractActorTest {
         verifyEntityOwnershipCandidateRegistration(entity, reg);
         verifyRegisterCandidateLocal(shardPropsCreator, entity, candidate);
 
-        // Test same entity - should throw exception
+        // Register the same entity - should throw exception
 
         EntityOwnershipCandidate candidate2 = mock(EntityOwnershipCandidate.class);
         try {
@@ -113,7 +122,7 @@ public class DistributedEntityOwnershipServiceTest extends AbstractActorTest {
             assertEquals("getEntity", entity, e.getEntity());
         }
 
-        // Test different entity
+        // Register a different entity - should succeed
 
         Entity entity2 = new Entity(ENTITY_TYPE2, YangInstanceIdentifier.of(QNAME));
         shardPropsCreator.expectShardMessage(RegisterCandidateLocal.class);
@@ -122,6 +131,46 @@ public class DistributedEntityOwnershipServiceTest extends AbstractActorTest {
 
         verifyEntityOwnershipCandidateRegistration(entity2, reg2);
         verifyRegisterCandidateLocal(shardPropsCreator, entity2, candidate);
+
+        service.close();
+    }
+
+    @Test
+    public void testCloseCandidateRegistration() throws Exception {
+        final TestShardPropsCreator shardPropsCreator = new TestShardPropsCreator();
+        DistributedEntityOwnershipService service = new DistributedEntityOwnershipService(dataStore) {
+            @Override
+            protected EntityOwnershipShardPropsCreator newShardPropsCreator() {
+                return shardPropsCreator;
+            }
+        };
+
+        service.start();
+
+        shardPropsCreator.expectShardMessage(RegisterCandidateLocal.class);
+
+        Entity entity = new Entity(ENTITY_TYPE, YangInstanceIdentifier.of(QNAME));
+        EntityOwnershipCandidate candidate = mock(EntityOwnershipCandidate.class);
+
+        EntityOwnershipCandidateRegistration reg = service.registerCandidate(entity, candidate);
+
+        verifyEntityOwnershipCandidateRegistration(entity, reg);
+        verifyRegisterCandidateLocal(shardPropsCreator, entity, candidate);
+
+        shardPropsCreator.expectShardMessage(UnregisterCandidateLocal.class);
+
+        reg.close();
+
+        UnregisterCandidateLocal unregCandidate = shardPropsCreator.waitForShardMessage();
+        assertEquals("getEntity", entity, unregCandidate.getEntity());
+
+        // Re-register - should succeed.
+
+        shardPropsCreator.expectShardMessage(RegisterCandidateLocal.class);
+
+        service.registerCandidate(entity, candidate);
+
+        verifyRegisterCandidateLocal(shardPropsCreator, entity, candidate);
 
         service.close();
     }
@@ -156,8 +205,8 @@ public class DistributedEntityOwnershipServiceTest extends AbstractActorTest {
 
         @SuppressWarnings("unchecked")
         <T> T waitForShardMessage() {
-            assertEquals("Message received", true, Uninterruptibles.awaitUninterruptibly(
-                    messageReceived.get(), 5, TimeUnit.SECONDS));
+            assertTrue("Message " + messageClass.get().getSimpleName() + " was not received",
+                    Uninterruptibles.awaitUninterruptibly(messageReceived.get(), 5, TimeUnit.SECONDS));
             assertEquals("Message type", messageClass.get(), receivedMessage.get().getClass());
             return (T) receivedMessage.get();
         }
