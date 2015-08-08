@@ -19,7 +19,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
  *
  * @author Thomas Pantelis
  */
-public class EntityOwnershipShardPropsCreator implements ShardPropsCreator {
+class EntityOwnershipShardPropsCreator implements ShardPropsCreator {
 
     @Override
     public Props newProps(ShardIdentifier shardId, Map<String, String> peerAddresses,
