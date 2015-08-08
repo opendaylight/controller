@@ -17,13 +17,16 @@ import org.opendaylight.controller.md.sal.common.impl.clustering.AbstractEntityO
  * @author Thomas Pantelis
  */
 class DistributedEntityOwnershipCandidateRegistration extends AbstractEntityOwnershipCandidateRegistration {
+    private final DistributedEntityOwnershipService service;
 
-    DistributedEntityOwnershipCandidateRegistration(EntityOwnershipCandidate candidate, Entity entity) {
+    DistributedEntityOwnershipCandidateRegistration(EntityOwnershipCandidate candidate, Entity entity,
+            DistributedEntityOwnershipService service) {
         super(candidate, entity);
+        this.service = service;
     }
 
     @Override
     public void close() {
-        // TODO - need to send unregister message.
+        service.unregisterCandidate(getEntity());
     }
 }

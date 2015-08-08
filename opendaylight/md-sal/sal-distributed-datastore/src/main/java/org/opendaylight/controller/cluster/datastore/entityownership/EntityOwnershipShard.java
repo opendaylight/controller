@@ -12,6 +12,7 @@ import java.util.Map;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.Shard;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.RegisterCandidateLocal;
+import org.opendaylight.controller.cluster.datastore.entityownership.messages.UnregisterCandidateLocal;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.SuccessReply;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -41,12 +42,20 @@ public class EntityOwnershipShard extends Shard {
     public void onReceiveCommand(final Object message) throws Exception {
         if(message instanceof RegisterCandidateLocal) {
             onRegisterCandidateLocal((RegisterCandidateLocal)message);
+        } else if(message instanceof UnregisterCandidateLocal) {
+            onUnregisterCandidateLocal((UnregisterCandidateLocal)message);
         } else {
             super.onReceiveCommand(message);
         }
     }
 
     private void onRegisterCandidateLocal(RegisterCandidateLocal registerCandidate) {
+        // TODO - implement
+        getSender().tell(SuccessReply.INSTANCE, getSelf());
+    }
+
+    private void onUnregisterCandidateLocal(UnregisterCandidateLocal unregisterCandidate) {
+        // TODO - implement
         getSender().tell(SuccessReply.INSTANCE, getSelf());
     }
 
