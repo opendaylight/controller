@@ -408,6 +408,16 @@ public class Shard extends RaftActor {
         getSender().tell(new akka.actor.Status.Failure(new NoShardLeaderException(errMessage, persistenceId())), getSelf());
     }
 
+    protected void handleBatchedModificationsLocal(BatchedModifications batched, ActorRef sender) {
+        try {
+            commitCoordinator.handleBatchedModifications(batched, sender, this);
+        } catch (Exception e) {
+            LOG.error("{}: Error handling BatchedModifications for Tx {}", persistenceId(),
+                    batched.getTransactionID(), e);
+            sender.tell(new akka.actor.Status.Failure(e), getSelf());
+        }
+    }
+
     private void handleBatchedModifications(BatchedModifications batched) {
         // This message is sent to prepare the modifications transaction directly on the Shard as an
         // optimization to avoid the extra overhead of a separate ShardTransaction actor. On the last
@@ -424,13 +434,7 @@ public class Shard extends RaftActor {
         if(isLeader()) {
             failIfIsolatedLeader(getSender());
 
-            try {
-                commitCoordinator.handleBatchedModifications(batched, getSender(), this);
-            } catch (Exception e) {
-                LOG.error("{}: Error handling BatchedModifications for Tx {}", persistenceId(),
-                        batched.getTransactionID(), e);
-                getSender().tell(new akka.actor.Status.Failure(e), getSelf());
-            }
+            handleBatchedModificationsLocal(batched, getSender());
         } else {
             ActorSelection leader = getLeader();
             if(leader != null) {
@@ -446,7 +450,7 @@ public class Shard extends RaftActor {
     }
 
     private boolean failIfIsolatedLeader(ActorRef sender) {
-        if(getRaftState() == RaftState.IsolatedLeader) {
+        if(isIsolatedLeader()) {
             sender.tell(new akka.actor.Status.Failure(new NoShardLeaderException(String.format(
                     "Shard %s was the leader but has lost contact with all of its followers. Either all" +
                     " other follower nodes are down or this node is isolated by a network partition.",
@@ -455,6 +459,10 @@ public class Shard extends RaftActor {
         }
 
         return false;
+    }
+
+    protected boolean isIsolatedLeader() {
+        return getRaftState() == RaftState.IsolatedLeader;
     }
 
     private void handleReadyLocalTransaction(final ReadyLocalTransaction message) {
@@ -682,6 +690,10 @@ public class Shard extends RaftActor {
     @VisibleForTesting
     ShardCommitCoordinator getCommitCoordinator() {
         return commitCoordinator;
+    }
+
+    protected DatastoreContext getDatastoreContext() {
+        return datastoreContext;
     }
 
     protected abstract static class AbstractShardCreator implements Creator<Shard> {

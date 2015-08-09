@@ -9,6 +9,7 @@
 package org.opendaylight.controller.md.sal.common.api.clustering;
 
 import com.google.common.base.Preconditions;
+import java.io.Serializable;
 import javax.annotation.Nonnull;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
@@ -31,7 +32,8 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
  * referenced by the YangInstanceIdentifier if the inventory node stored in the data store.
  * </p>
  */
-public final class Entity {
+public final class Entity implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     private final String type;
     private final YangInstanceIdentifier id;
@@ -90,9 +92,7 @@ public final class Entity {
 
     @Override
     public int hashCode() {
-        int result = type != null ? type.hashCode() : 0;
-        result = 31 * result + (id != null ? id.hashCode() : 0);
-        return result;
+        return 31 * type.hashCode() + id.hashCode();
     }
 
     @Override

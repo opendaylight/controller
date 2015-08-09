@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore.entityownership;
 import akka.actor.ActorRef;
 import akka.dispatch.OnComplete;
 import akka.util.Timeout;
+import com.google.common.annotations.VisibleForTesting;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
@@ -138,6 +139,11 @@ public class DistributedEntityOwnershipService implements EntityOwnershipService
     }
 
     protected EntityOwnershipShardPropsCreator newShardPropsCreator() {
-        return new EntityOwnershipShardPropsCreator();
+        return new EntityOwnershipShardPropsCreator(datastore.getActorContext().getCurrentMemberName());
+    }
+
+    @VisibleForTesting
+    ActorRef getLocalEntityOwnershipShard() {
+        return localEntityOwnershipShard;
     }
 }
