@@ -25,11 +25,11 @@ import scala.concurrent.duration.FiniteDuration;
 
 public class ShardTestKit extends JavaTestKit {
 
-    protected ShardTestKit(ActorSystem actorSystem) {
+    public ShardTestKit(ActorSystem actorSystem) {
         super(actorSystem);
     }
 
-    protected void waitForLogMessage(final Class<?> logLevel, ActorRef subject, String logMessage){
+    public void waitForLogMessage(final Class<?> logLevel, ActorRef subject, String logMessage){
         // Wait for a specific log message to show up
         final boolean result =
             new JavaTestKit.EventFilter<Boolean>(logLevel
@@ -46,7 +46,7 @@ public class ShardTestKit extends JavaTestKit {
 
     }
 
-    protected void waitUntilLeader(ActorRef shard) {
+    public void waitUntilLeader(ActorRef shard) {
         FiniteDuration duration = Duration.create(100, TimeUnit.MILLISECONDS);
         for(int i = 0; i < 20 * 5; i++) {
             Future<Object> future = Patterns.ask(shard, new FindLeader(), new Timeout(duration));
@@ -68,7 +68,7 @@ public class ShardTestKit extends JavaTestKit {
         Assert.fail("Leader not found for shard " + shard.path());
     }
 
-    protected void waitUntilNoLeader(ActorRef shard) {
+    public void waitUntilNoLeader(ActorRef shard) {
         FiniteDuration duration = Duration.create(100, TimeUnit.MILLISECONDS);
         for(int i = 0; i < 20 * 5; i++) {
             Future<Object> future = Patterns.ask(shard, new FindLeader(), new Timeout(duration));
