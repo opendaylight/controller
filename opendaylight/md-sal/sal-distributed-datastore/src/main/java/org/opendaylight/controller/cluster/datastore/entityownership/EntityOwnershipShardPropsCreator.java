@@ -20,10 +20,15 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
  * @author Thomas Pantelis
  */
 class EntityOwnershipShardPropsCreator implements ShardPropsCreator {
+    private final String localMemberName;
+
+    EntityOwnershipShardPropsCreator(String localMemberName) {
+        this.localMemberName = localMemberName;
+    }
 
     @Override
     public Props newProps(ShardIdentifier shardId, Map<String, String> peerAddresses,
             DatastoreContext datastoreContext, SchemaContext schemaContext) {
-        return EntityOwnershipShard.props(shardId, peerAddresses, datastoreContext, schemaContext);
+        return EntityOwnershipShard.props(shardId, peerAddresses, datastoreContext, schemaContext, localMemberName);
     }
 }

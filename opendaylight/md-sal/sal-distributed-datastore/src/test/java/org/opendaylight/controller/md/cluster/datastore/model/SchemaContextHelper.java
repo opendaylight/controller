@@ -8,12 +8,17 @@
 
 package org.opendaylight.controller.md.cluster.datastore.model;
 
+import com.google.common.io.Resources;
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import org.opendaylight.yangtools.yang.model.parser.api.YangSyntaxErrorException;
 import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
 
 public class SchemaContextHelper {
@@ -42,4 +47,13 @@ public class SchemaContextHelper {
         return parser.resolveSchemaContext(modules);
     }
 
+    public static SchemaContext entityOwners() {
+        YangParserImpl parser = new YangParserImpl();
+        try {
+            File file = new File("src/main/yang/entity-owners.yang");
+            return parser.parseSources(Arrays.asList(Resources.asByteSource(file.toURI().toURL())));
+        } catch (IOException | YangSyntaxErrorException e) {
+            throw new ExceptionInInitializerError(e);
+        }
+    }
 }
