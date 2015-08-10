@@ -22,6 +22,30 @@
       "revId": "8c3cdb04a32a4a8b34f06816102f571d3999620c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_e8539b6a",
+        "filename": "features/restconf/src/main/resources/features.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1723
+      },
+      "writtenOn": "2015-08-10T14:04:34Z",
+      "side": 1,
+      "message": "\u003e Whoa, was this communicated somewhere?\n\nNot mentioned in commit message and buried in a large version bump commit. /me is confused",
+      "parentUuid": "3a79b1b5_c88c9f82",
+      "range": {
+        "startLine": 88,
+        "startChar": 8,
+        "endLine": 88,
+        "endChar": 12
+      },
+      "revId": "8c3cdb04a32a4a8b34f06816102f571d3999620c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
