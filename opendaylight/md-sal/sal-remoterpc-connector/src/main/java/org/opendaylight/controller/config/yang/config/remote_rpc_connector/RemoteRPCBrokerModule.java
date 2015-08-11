@@ -1,6 +1,6 @@
 package org.opendaylight.controller.config.yang.config.remote_rpc_connector;
 
-import org.opendaylight.controller.cluster.common.actor.DefaultAkkaConfigurationReader;
+import org.opendaylight.controller.cluster.common.actor.FileAkkaConfigurationReader;
 import org.opendaylight.controller.remote.rpc.RemoteRpcProviderConfig;
 import org.opendaylight.controller.remote.rpc.RemoteRpcProviderFactory;
 import org.opendaylight.controller.sal.core.api.Broker;
@@ -33,7 +33,7 @@ public class RemoteRPCBrokerModule extends org.opendaylight.controller.config.ya
     RemoteRpcProviderConfig config = new RemoteRpcProviderConfig.Builder(getActorSystemName())
                               .metricCaptureEnabled(getEnableMetricCapture())
                               .mailboxCapacity(getBoundedMailboxCapacity())
-                              .withConfigReader(new DefaultAkkaConfigurationReader())
+                              .withConfigReader(new FileAkkaConfigurationReader())
                               .build();
 
     return RemoteRpcProviderFactory.createInstance(broker, bundleContext, config);
