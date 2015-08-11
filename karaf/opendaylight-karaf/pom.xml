@@ -49,14 +49,6 @@
           down with testing... ie, no broken feature repos
     -->
 
-    <!-- AD-SAL Related Features -->
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>features-base</artifactId>
-      <classifier>features</classifier>
-      <type>xml</type>
-      <scope>runtime</scope>
-    </dependency>
     <!-- MD-SAL Related Features -->
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
