@@ -8,8 +8,8 @@
 
 package org.opendaylight.controller.cluster.datastore.utils;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -34,26 +34,22 @@ public class MockConfiguration implements Configuration{
     }
 
     @Override
-    public List<String> getMemberShardNames(final String memberName) {
+    public Collection<String> getMemberShardNames(final String memberName) {
         return new ArrayList<>(shardMembers.keySet());
     }
-    @Override
-    public Optional<String> getModuleNameFromNameSpace(
-        final String nameSpace) {
-        return Optional.absent();
-    }
 
     @Override
-    public Map<String, ShardStrategy> getModuleNameToShardStrategyMap() {
-        return Collections.emptyMap();
+    public String getModuleNameFromNameSpace(final String nameSpace) {
+        return null;
     }
 
-    @Override public List<String> getShardNamesFromModuleName(
-        final String moduleName) {
-        return Collections.emptyList();
+    @Override
+    public String getShardNameForModule(final String moduleName) {
+        return null;
     }
 
-    @Override public List<String> getMembersFromShardName(final String shardName) {
+    @Override
+    public Collection<String> getMembersFromShardName(final String shardName) {
         if("default".equals(shardName)) {
             return Arrays.asList("member-1", "member-2");
         } else if("astronauts".equals(shardName)){
@@ -76,5 +72,15 @@ public class MockConfiguration implements Configuration{
         }
 
         return allNames;
+    }
+
+    @Override
+    public ShardStrategy getStrategyForModule(String moduleName) {
+        return null;
+    }
+
+    @Override
+    public void addModuleShardConfiguration(URI namespace, String moduleName, String shardName,
+            String shardStrategyName, Collection<String> shardMemberNames) {
     }
 }

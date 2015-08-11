@@ -8,33 +8,25 @@
 
 package org.opendaylight.controller.cluster.datastore.shardstrategy;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 public class ShardStrategyFactory {
-    private static Map<String, ShardStrategy> moduleNameToStrategyMap =
-        new ConcurrentHashMap<>();
-
     private static final String UNKNOWN_MODULE_NAME = "unknown";
-    private static Configuration configuration;
 
+    private final Configuration configuration;
 
-    public static void setConfiguration(final Configuration configuration){
-        ShardStrategyFactory.configuration = configuration;
-        moduleNameToStrategyMap = configuration.getModuleNameToShardStrategyMap();
+    public ShardStrategyFactory(final Configuration configuration) {
+        Preconditions.checkState(configuration != null, "configuration should not be missing");
+        this.configuration = configuration;
     }
 
-    public static ShardStrategy getStrategy(final YangInstanceIdentifier path) {
-        Preconditions.checkState(configuration != null, "configuration should not be missing");
+    public ShardStrategy getStrategy(final YangInstanceIdentifier path) {
         Preconditions.checkNotNull(path, "path should not be null");
 
-
         String moduleName = getModuleName(path);
-        ShardStrategy shardStrategy = moduleNameToStrategyMap.get(moduleName);
+        ShardStrategy shardStrategy = configuration.getStrategyForModule(moduleName);
         if (shardStrategy == null) {
             return DefaultShardStrategy.getInstance();
         }
@@ -42,17 +34,18 @@ public class ShardStrategyFactory {
         return shardStrategy;
     }
 
-
-    private static String getModuleName(final YangInstanceIdentifier path) {
-        String namespace = path.getPathArguments().iterator().next().getNodeType().getNamespace().toASCIIString();
-
-        Optional<String> optional =
-            configuration.getModuleNameFromNameSpace(namespace);
-
-        if(!optional.isPresent()){
-            return UNKNOWN_MODULE_NAME;
+    public static ShardStrategy newShardStrategyInstance(String moduleName, String strategyName,
+            Configuration configuration) {
+        if(ModuleShardStrategy.NAME.equals(strategyName)){
+            return new ModuleShardStrategy(moduleName, configuration);
         }
 
-        return optional.get();
+        return DefaultShardStrategy.getInstance();
+    }
+
+    private String getModuleName(final YangInstanceIdentifier path) {
+        String namespace = path.getPathArguments().iterator().next().getNodeType().getNamespace().toASCIIString();
+        String moduleName = configuration.getModuleNameFromNameSpace(namespace);
+        return moduleName != null ? moduleName : UNKNOWN_MODULE_NAME;
     }
 }

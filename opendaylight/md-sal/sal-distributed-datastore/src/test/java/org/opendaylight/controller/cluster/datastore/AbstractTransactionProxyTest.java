@@ -93,31 +93,33 @@ public abstract class AbstractTransactionProxyTest {
     private static ActorSystem system;
 
     private final Configuration configuration = new MockConfiguration() {
+        Map<String, ShardStrategy> strategyMap = ImmutableMap.<String, ShardStrategy>builder().put(
+                "junk", new ShardStrategy() {
+                    @Override
+                    public String findShard(YangInstanceIdentifier path) {
+                        return "junk";
+                    }
+                }).put(
+                "cars", new ShardStrategy() {
+                    @Override
+                    public String findShard(YangInstanceIdentifier path) {
+                        return "cars";
+                    }
+                }).build();
+
         @Override
-        public Map<String, ShardStrategy> getModuleNameToShardStrategyMap() {
-            return ImmutableMap.<String, ShardStrategy>builder().put(
-                    "junk", new ShardStrategy() {
-                        @Override
-                        public String findShard(YangInstanceIdentifier path) {
-                            return "junk";
-                        }
-                    }).put(
-                    "cars", new ShardStrategy() {
-                        @Override
-                        public String findShard(YangInstanceIdentifier path) {
-                            return "cars";
-                        }
-                    }).build();
+        public ShardStrategy getStrategyForModule(String moduleName) {
+            return strategyMap.get(moduleName);
         }
 
         @Override
-        public Optional<String> getModuleNameFromNameSpace(String nameSpace) {
+        public String getModuleNameFromNameSpace(String nameSpace) {
             if(TestModel.JUNK_QNAME.getNamespace().toASCIIString().equals(nameSpace)) {
-                return Optional.of("junk");
+                return "junk";
             } else if(CarsModel.BASE_QNAME.getNamespace().toASCIIString().equals(nameSpace)){
-                return Optional.of("cars");
+                return "cars";
             }
-            return Optional.<String>absent();
+            return null;
         }
     };
 
@@ -162,6 +164,7 @@ public abstract class AbstractTransactionProxyTest {
         doReturn(getSystem()).when(mockActorContext).getActorSystem();
         doReturn(getSystem().dispatchers().defaultGlobalDispatcher()).when(mockActorContext).getClientDispatcher();
         doReturn(memberName).when(mockActorContext).getCurrentMemberName();
+        doReturn(new ShardStrategyFactory(configuration)).when(mockActorContext).getShardStrategyFactory();
         doReturn(schemaContext).when(mockActorContext).getSchemaContext();
         doReturn(new Timeout(operationTimeoutInSeconds, TimeUnit.SECONDS)).when(mockActorContext).getOperationTimeout();
         doReturn(mockClusterWrapper).when(mockActorContext).getClusterWrapper();
@@ -172,8 +175,6 @@ public abstract class AbstractTransactionProxyTest {
 
         Timer timer = new MetricRegistry().timer("test");
         doReturn(timer).when(mockActorContext).getOperationTimer(any(String.class));
-
-        ShardStrategyFactory.setConfiguration(configuration);
     }
 
     protected ActorSystem getSystem() {
