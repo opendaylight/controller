@@ -21,7 +21,6 @@ import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
-import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
@@ -54,7 +53,6 @@ class IntegrationTestKit extends ShardTestKit {
             String... shardNames) {
         ClusterWrapper cluster = new ClusterWrapperImpl(getSystem());
         Configuration config = new ConfigurationImpl(moduleShardsConfig, "modules.conf");
-        ShardStrategyFactory.setConfiguration(config);
 
         datastoreContextBuilder.dataStoreType(typeName);
 
