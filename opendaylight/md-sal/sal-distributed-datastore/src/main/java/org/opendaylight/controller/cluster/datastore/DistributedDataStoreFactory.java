@@ -15,7 +15,7 @@ import com.typesafe.config.ConfigFactory;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import org.opendaylight.controller.cluster.datastore.config.ConfigurationReader;
+import org.opendaylight.controller.cluster.common.actor.AkkaConfigurationReader;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.osgi.framework.BundleContext;
@@ -57,7 +57,7 @@ public class DistributedDataStoreFactory {
     }
 
     private static synchronized final ActorSystem getActorSystem(final BundleContext bundleContext,
-                                                                 ConfigurationReader configurationReader) {
+                                                                 AkkaConfigurationReader configurationReader) {
         if (actorSystem == null) {
             // Create an OSGi bundle classloader for actor system
             BundleDelegatingClassLoader classLoader = new BundleDelegatingClassLoader(bundleContext.getBundle(),

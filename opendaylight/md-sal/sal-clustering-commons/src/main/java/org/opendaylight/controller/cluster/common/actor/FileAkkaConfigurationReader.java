@@ -11,16 +11,15 @@ package org.opendaylight.controller.cluster.common.actor;
 import com.google.common.base.Preconditions;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-
 import java.io.File;
 
-public class DefaultAkkaConfigurationReader implements AkkaConfigurationReader {
-    public static final String AKKA_CONF_PATH = "./configuration/initial/akka.conf";
+public class FileAkkaConfigurationReader implements AkkaConfigurationReader {
+    private static final String DEFAULT_AKKA_CONF_PATH = "./configuration/initial/akka.conf";
 
     @Override public Config read() {
-        File defaultConfigFile = new File(AKKA_CONF_PATH);
-        Preconditions.checkState(defaultConfigFile.exists(), "akka.conf is missing");
-        return ConfigFactory.parseFile(defaultConfigFile);
+        File configFile = new File(DEFAULT_AKKA_CONF_PATH);
+        Preconditions.checkState(configFile.exists(), "%s is missing", configFile);
+        return ConfigFactory.parseFile(configFile);
 
     }
 }
