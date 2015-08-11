@@ -8,57 +8,57 @@
 
 package org.opendaylight.controller.cluster.datastore;
 
-import com.google.common.base.Optional;
+import java.net.URI;
 import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategy;
 
 public interface Configuration {
 
     /**
-     * Given a memberName find all the shards that belong on that member and
-     * return the names of those shards
-     *
-     * @param memberName
-     * @return
+     * Returns all the shard names that belong on the member by the given name.
      */
-    List<String> getMemberShardNames(String memberName);
+    @Nonnull Collection<String> getMemberShardNames(@Nonnull String memberName);
 
     /**
-     * Given a module namespace return the name of a module
-     * @param nameSpace
-     * @return
+     * Returns the namespace for the given module name or null if not found.
      */
-    Optional<String> getModuleNameFromNameSpace(String nameSpace);
+    @Nullable String getModuleNameFromNameSpace(@Nonnull String nameSpace);
 
     /**
-     * Get a mapping of the module names to it's corresponding ShardStrategy
-     * @return
+     * Returns the first shard name corresponding to the given module name or null if none is configured.
      */
-    Map<String, ShardStrategy> getModuleNameToShardStrategyMap();
+    @Nullable String getShardNameForModule(@Nonnull String moduleName);
 
     /**
-     * Given a module name find all the shardNames corresponding to it
-     * @param moduleName
-     * @return
+     * Returns the member replicas for the given shard name.
      */
-    List<String> getShardNamesFromModuleName(String moduleName);
+    @Nonnull Collection<String> getMembersFromShardName(@Nonnull String shardName);
 
     /**
-     * Given a shardName find all the members on which it belongs
-     *
-     * @param shardName
-     * @return
+     * Returns the ShardStrategy for the given module name or null if the module is not found.
      */
-    List<String> getMembersFromShardName(String shardName);
+    @Nullable ShardStrategy getStrategyForModule(@Nonnull String moduleName);
 
     /**
-     *
-     * @return
+     * Returns all the configured shard names.
      */
     Set<String> getAllShardNames();
+
+    /**
+     * Adds a new configuration for a module ansd shard.
+     *
+     * @param namespace the name space of the module.
+     * @param moduleName the name of the module.
+     * @param shardName the name of the shard.
+     * @param shardStrategyName the name of the sharding strategy (eg "module"). If null the default strategy
+     *                          is used.
+     * @param shardMemberNames the names of the shard's member replicas.
+     */
+    void addModuleShardConfiguration(@Nonnull URI namespace, @Nonnull String moduleName, @Nonnull String shardName,
+            @Nullable String shardStrategyName, @Nonnull Collection<String> shardMemberNames);
 
     /**
      * Returns a unique set of all member names configured for all shards.
