@@ -639,8 +639,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
      */
     private void createLocalShards() {
         String memberName = this.cluster.getCurrentMemberName();
-        List<String> memberShardNames =
-            this.configuration.getMemberShardNames(memberName);
+        Collection<String> memberShardNames = this.configuration.getMemberShardNames(memberName);
 
         ShardPropsCreator shardPropsCreator = new DefaultShardPropsCreator();
         List<String> localShardActorNames = new ArrayList<>();

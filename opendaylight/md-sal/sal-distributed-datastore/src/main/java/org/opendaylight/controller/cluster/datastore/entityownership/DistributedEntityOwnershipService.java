@@ -11,13 +11,17 @@ import akka.actor.ActorRef;
 import akka.dispatch.OnComplete;
 import akka.util.Timeout;
 import com.google.common.annotations.VisibleForTesting;
+import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
+import org.opendaylight.controller.cluster.datastore.config.Configuration;
+import org.opendaylight.controller.cluster.datastore.config.ModuleShardConfiguration;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.RegisterCandidateLocal;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.UnregisterCandidateLocal;
 import org.opendaylight.controller.cluster.datastore.messages.CreateShard;
+import org.opendaylight.controller.cluster.datastore.shardstrategy.ModuleShardStrategy;
 import org.opendaylight.controller.md.sal.common.api.clustering.CandidateAlreadyRegisteredException;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipCandidate;
@@ -25,6 +29,7 @@ import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipC
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListener;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListenerRegistration;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.entity.owners.rev150804.entity.owners.EntityOwner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
@@ -50,9 +55,13 @@ public class DistributedEntityOwnershipService implements EntityOwnershipService
     public void start() {
         ActorRef shardManagerActor = datastore.getActorContext().getShardManager();
 
+        Configuration configuration = datastore.getActorContext().getConfiguration();
+        Collection<String> entityOwnersMemberNames = configuration.getUniqueMemberNamesForAllShards();
+        configuration.addModuleShardConfiguration(new ModuleShardConfiguration(EntityOwner.QNAME.getNamespace(),
+                "entity-owners", ENTITY_OWNERSHIP_SHARD_NAME, ModuleShardStrategy.NAME, entityOwnersMemberNames));
+
         CreateShard createShard = new CreateShard(ENTITY_OWNERSHIP_SHARD_NAME,
-                datastore.getActorContext().getConfiguration().getUniqueMemberNamesForAllShards(),
-                newShardPropsCreator(), null);
+                entityOwnersMemberNames, newShardPropsCreator(), null);
 
         Future<Object> createFuture = datastore.getActorContext().executeOperationAsync(shardManagerActor,
                 createShard, MESSAGE_TIMEOUT);

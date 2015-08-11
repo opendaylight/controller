@@ -8,191 +8,110 @@
 
 package org.opendaylight.controller.cluster.datastore.config;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableList.Builder;
-import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ListMultimap;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
-import com.typesafe.config.ConfigObject;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
-import org.opendaylight.controller.cluster.datastore.shardstrategy.DefaultShardStrategy;
-import org.opendaylight.controller.cluster.datastore.shardstrategy.ModuleShardStrategy;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
 
 public class ConfigurationImpl implements Configuration {
-
-    private final List<ModuleShard> moduleShards;
-
-    private final List<Module> modules;
-
-    private static final Logger
-        LOG = LoggerFactory.getLogger(DistributedDataStore.class);
+    private volatile Map<String, ModuleConfig> moduleConfigMap;
 
     // Look up maps to speed things up
 
-    // key = memberName, value = list of shardNames
-    private final Map<String, List<String>> memberShardNames = new HashMap<>();
+    private volatile Map<String, String> namespaceToModuleName;
+    private volatile Set<String> allShardNames;
 
-    // key = shardName, value = list of replicaNames (replicaNames are the same as memberNames)
-    private final Map<String, List<String>> shardReplicaNames = new HashMap<>();
-
-    private final ListMultimap<String, String> moduleNameToShardName;
-    private final Map<String, ShardStrategy> moduleNameToStrategy;
-    private final Map<String, String> namespaceToModuleName;
-    private final Set<String> allShardNames;
-
-    public ConfigurationImpl(final String moduleShardsConfigPath,
-
-        final String modulesConfigPath){
-
-        Preconditions.checkNotNull(moduleShardsConfigPath, "moduleShardsConfigPath should not be null");
-        Preconditions.checkNotNull(modulesConfigPath, "modulesConfigPath should not be null");
-
-
-        File moduleShardsFile = new File("./configuration/initial/" + moduleShardsConfigPath);
-        File modulesFile = new File("./configuration/initial/" + modulesConfigPath);
-
-        Config moduleShardsConfig = null;
-        if(moduleShardsFile.exists()) {
-            LOG.info("module shards config file exists - reading config from it");
-            moduleShardsConfig = ConfigFactory.parseFile(moduleShardsFile);
-        } else {
-            LOG.warn("module shards configuration read from resource");
-            moduleShardsConfig = ConfigFactory.load(moduleShardsConfigPath);
-        }
-
-        Config modulesConfig = null;
-        if(modulesFile.exists()) {
-            LOG.info("modules config file exists - reading config from it");
-            modulesConfig = ConfigFactory.parseFile(modulesFile);
-        } else {
-            LOG.warn("modules configuration read from resource");
-            modulesConfig = ConfigFactory.load(modulesConfigPath);
-        }
-
-        this.moduleShards = readModuleShards(moduleShardsConfig);
-        this.modules = readModules(modulesConfig);
-
-        this.allShardNames = createAllShardNames(moduleShards);
-        this.moduleNameToShardName = createModuleNameToShardName(moduleShards);
-        this.moduleNameToStrategy = createModuleNameToStrategy(modules);
-        this.namespaceToModuleName = createNamespaceToModuleName(modules);
+    public ConfigurationImpl(final String moduleShardsConfigPath, final String modulesConfigPath) {
+        this(new FileModuleShardConfigProvider(moduleShardsConfigPath, modulesConfigPath));
     }
 
-    private static Set<String> createAllShardNames(Iterable<ModuleShard> moduleShards) {
-        final com.google.common.collect.ImmutableSet.Builder<String> b = ImmutableSet.builder();
-        for(ModuleShard ms : moduleShards){
-            for(Shard s : ms.getShards()) {
-                b.add(s.getName());
-            }
-        }
-        return b.build();
+    public ConfigurationImpl(final ModuleShardConfigProvider provider) {
+        this.moduleConfigMap = ImmutableMap.copyOf(provider.retrieveModuleConfigs(this));
+
+        this.allShardNames = createAllShardNames(moduleConfigMap.values());
+        this.namespaceToModuleName = createNamespaceToModuleName(moduleConfigMap.values());
     }
 
-    private static Map<String, ShardStrategy> createModuleNameToStrategy(Iterable<Module> modules) {
-        final com.google.common.collect.ImmutableMap.Builder<String, ShardStrategy> b = ImmutableMap.builder();
-        for (Module m : modules) {
-            b.put(m.getName(), m.getShardStrategy());
+    private static Set<String> createAllShardNames(Iterable<ModuleConfig> moduleConfigs) {
+        final ImmutableSet.Builder<String> builder = ImmutableSet.builder();
+        for(ModuleConfig moduleConfig : moduleConfigs) {
+            builder.addAll(moduleConfig.getShardNames());
         }
-        return b.build();
+
+        return builder.build();
     }
 
-    private static Map<String, String> createNamespaceToModuleName(Iterable<Module> modules) {
-        final com.google.common.collect.ImmutableMap.Builder<String, String> b = ImmutableMap.builder();
-        for (Module m : modules) {
-            b.put(m.getNameSpace(), m.getName());
-        }
-        return b.build();
-    }
-
-    private static ListMultimap<String, String> createModuleNameToShardName(Iterable<ModuleShard> moduleShards) {
-        final com.google.common.collect.ImmutableListMultimap.Builder<String, String> b = ImmutableListMultimap.builder();
-
-        for (ModuleShard m : moduleShards) {
-            for (Shard s : m.getShards()) {
-                b.put(m.getModuleName(), s.getName());
+    private static Map<String, String> createNamespaceToModuleName(Iterable<ModuleConfig> moduleConfigs) {
+        final ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
+        for(ModuleConfig moduleConfig : moduleConfigs) {
+            if(moduleConfig.getNameSpace() != null) {
+                builder.put(moduleConfig.getNameSpace(), moduleConfig.getName());
             }
         }
 
-        return b.build();
+        return builder.build();
     }
 
-    @Override public List<String> getMemberShardNames(final String memberName){
-
+    @Override
+    public Collection<String> getMemberShardNames(final String memberName){
         Preconditions.checkNotNull(memberName, "memberName should not be null");
 
-        if(memberShardNames.containsKey(memberName)){
-            return memberShardNames.get(memberName);
-        }
-
         List<String> shards = new ArrayList<>();
-        for(ModuleShard ms : moduleShards){
-            for(Shard s : ms.getShards()){
-                for(String m : s.getReplicas()){
-                    if(memberName.equals(m)){
-                        shards.add(s.getName());
-                    }
+        for(ModuleConfig moduleConfig: moduleConfigMap.values()) {
+            for(ShardConfig shardConfig: moduleConfig.getShardConfigs()) {
+                if(shardConfig.getReplicas().contains(memberName)) {
+                    shards.add(shardConfig.getName());
                 }
             }
         }
-
-        memberShardNames.put(memberName, shards);
 
         return shards;
-
     }
 
     @Override
-    public Optional<String> getModuleNameFromNameSpace(final String nameSpace) {
+    public String getModuleNameFromNameSpace(final String nameSpace) {
         Preconditions.checkNotNull(nameSpace, "nameSpace should not be null");
-        return Optional.fromNullable(namespaceToModuleName.get(nameSpace));
+
+        return namespaceToModuleName.get(nameSpace);
     }
 
     @Override
-    public Map<String, ShardStrategy> getModuleNameToShardStrategyMap() {
-        return moduleNameToStrategy;
-    }
-
-    @Override
-    public List<String> getShardNamesFromModuleName(final String moduleName) {
+    public ShardStrategy getStrategyForModule(String moduleName) {
         Preconditions.checkNotNull(moduleName, "moduleName should not be null");
-        return moduleNameToShardName.get(moduleName);
+
+        ModuleConfig moduleConfig = moduleConfigMap.get(moduleName);
+        return moduleConfig != null ? moduleConfig.getShardStrategy(): null;
     }
 
-    @Override public List<String> getMembersFromShardName(final String shardName) {
+    @Override
+    public String getShardNameForModule(final String moduleName) {
+        Preconditions.checkNotNull(moduleName, "moduleName should not be null");
 
+        ModuleConfig moduleConfig = moduleConfigMap.get(moduleName);
+        Collection<ShardConfig> shardConfigs = moduleConfig != null ? moduleConfig.getShardConfigs() :
+            Collections.<ShardConfig>emptySet();
+        return !shardConfigs.isEmpty() ? shardConfigs.iterator().next().getName(): null;
+    }
+
+    @Override
+    public Collection<String> getMembersFromShardName(final String shardName) {
         Preconditions.checkNotNull(shardName, "shardName should not be null");
 
-        if(shardReplicaNames.containsKey(shardName)){
-            return shardReplicaNames.get(shardName);
-        }
-
-        for(ModuleShard ms : moduleShards){
-            for(Shard s : ms.getShards()) {
-                if(s.getName().equals(shardName)){
-                    List<String> replicas = s.getReplicas();
-                    shardReplicaNames.put(shardName, replicas);
-                    return replicas;
-                }
+        for(ModuleConfig moduleConfig: moduleConfigMap.values()) {
+            ShardConfig shardConfig = moduleConfig.getShardConfig(shardName);
+            if(shardConfig != null) {
+                return shardConfig.getReplicas();
             }
         }
-        shardReplicaNames.put(shardName, Collections.<String>emptyList());
+
         return Collections.emptyList();
     }
 
@@ -204,129 +123,32 @@ public class ConfigurationImpl implements Configuration {
     @Override
     public Collection<String> getUniqueMemberNamesForAllShards() {
         Set<String> allNames = new HashSet<>();
-        for(String shardName: allShardNames) {
+        for(String shardName: getAllShardNames()) {
             allNames.addAll(getMembersFromShardName(shardName));
         }
 
         return allNames;
     }
 
-    private List<Module> readModules(final Config modulesConfig) {
-        List<? extends ConfigObject> modulesConfigObjectList =
-            modulesConfig.getObjectList("modules");
+    @Override
+    public synchronized void addModuleShardConfiguration(ModuleShardConfiguration config) {
+        Preconditions.checkNotNull(config, "ModuleShardConfiguration should not be null");
 
-        final Builder<Module> b = ImmutableList.builder();
-        for(ConfigObject o : modulesConfigObjectList){
-            ConfigObjectWrapper w = new ConfigObjectWrapper(o);
-            b.add(new Module(w.stringValue("name"), w.stringValue(
-                "namespace"), w.stringValue("shard-strategy")));
-        }
+        ModuleConfig moduleConfig = new ModuleConfig(config.getModuleName());
+        moduleConfig.setNameSpace(config.getNamespace().toASCIIString());
+        moduleConfig.setShardStrategy(createShardStrategy(config.getModuleName(), config.getShardStrategyName()));
 
-        return b.build();
+        moduleConfig.addShardConfig(config.getShardName(), ImmutableSet.copyOf(config.getShardMemberNames()));
+
+        moduleConfigMap = ImmutableMap.<String, ModuleConfig>builder().putAll(moduleConfigMap).
+                put(config.getModuleName(), moduleConfig).build();
+
+        namespaceToModuleName = ImmutableMap.<String, String>builder().putAll(namespaceToModuleName).
+                put(moduleConfig.getNameSpace(), moduleConfig.getName()).build();
+        allShardNames = ImmutableSet.<String>builder().addAll(allShardNames).add(config.getShardName()).build();
     }
 
-    private static List<ModuleShard> readModuleShards(final Config moduleShardsConfig) {
-        List<? extends ConfigObject> moduleShardsConfigObjectList =
-            moduleShardsConfig.getObjectList("module-shards");
-
-        final Builder<ModuleShard> b = ImmutableList.builder();
-        for(ConfigObject moduleShardConfigObject : moduleShardsConfigObjectList){
-
-            String moduleName = moduleShardConfigObject.get("name").unwrapped().toString();
-
-            List<? extends ConfigObject> shardsConfigObjectList =
-                moduleShardConfigObject.toConfig().getObjectList("shards");
-
-            List<Shard> shards = new ArrayList<>();
-
-            for(ConfigObject shard : shardsConfigObjectList){
-                String shardName = shard.get("name").unwrapped().toString();
-                List<String> replicas = shard.toConfig().getStringList("replicas");
-                shards.add(new Shard(shardName, replicas));
-            }
-
-            b.add(new ModuleShard(moduleName, shards));
-        }
-
-        return b.build();
-    }
-
-    private static class ModuleShard {
-        private final String moduleName;
-        private final List<Shard> shards;
-
-        public ModuleShard(final String moduleName, final List<Shard> shards) {
-            this.moduleName = moduleName;
-            this.shards = shards;
-        }
-
-        public String getModuleName() {
-            return moduleName;
-        }
-
-        public List<Shard> getShards() {
-            return shards;
-        }
-    }
-
-    private static class Shard {
-        private final String name;
-        private final List<String> replicas;
-
-        Shard(final String name, final List<String> replicas) {
-            this.name = name;
-            this.replicas = replicas;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public List<String> getReplicas() {
-            return replicas;
-        }
-    }
-
-    private class Module {
-
-        private final String name;
-        private final String nameSpace;
-        private final ShardStrategy shardStrategy;
-
-        Module(final String name, final String nameSpace, final String shardStrategy) {
-            this.name = name;
-            this.nameSpace = nameSpace;
-            if(ModuleShardStrategy.NAME.equals(shardStrategy)){
-                this.shardStrategy = new ModuleShardStrategy(name, ConfigurationImpl.this);
-            } else {
-                this.shardStrategy = DefaultShardStrategy.getInstance();
-            }
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public String getNameSpace() {
-            return nameSpace;
-        }
-
-        public ShardStrategy getShardStrategy() {
-            return shardStrategy;
-        }
-    }
-
-
-    private static class ConfigObjectWrapper{
-
-        private final ConfigObject configObject;
-
-        ConfigObjectWrapper(final ConfigObject configObject){
-            this.configObject = configObject;
-        }
-
-        public String stringValue(final String name){
-            return configObject.get(name).unwrapped().toString();
-        }
+    private ShardStrategy createShardStrategy(String moduleName, String shardStrategyName) {
+        return ShardStrategyFactory.newShardStrategyInstance(moduleName, shardStrategyName, this);
     }
 }
