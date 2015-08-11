@@ -19,7 +19,6 @@ import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardManagerIdentifier;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.DatastoreConfigurationMXBeanImpl;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.DatastoreInfoMXBeanImpl;
-import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.cluster.datastore.utils.Dispatchers;
 import org.opendaylight.controller.cluster.datastore.utils.PrimaryShardInfoFutureCache;
@@ -126,7 +125,7 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
 
         LOG.debug("Registering listener: {} for path: {} scope: {}", listener, path, scope);
 
-        String shardName = ShardStrategyFactory.getStrategy(path).findShard(path);
+        String shardName = actorContext.getShardStrategyFactory().getStrategy(path).findShard(path);
 
         final DataChangeListenerRegistrationProxy listenerRegistrationProxy =
                 new DataChangeListenerRegistrationProxy(shardName, actorContext, listener);
@@ -140,7 +139,7 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
         Preconditions.checkNotNull(treeId, "treeId should not be null");
         Preconditions.checkNotNull(listener, "listener should not be null");
 
-        final String shardName = ShardStrategyFactory.getStrategy(treeId).findShard(treeId);
+        final String shardName = actorContext.getShardStrategyFactory().getStrategy(treeId).findShard(treeId);
         LOG.debug("Registering tree listener: {} for tree: {} shard: {}", listener, treeId, shardName);
 
         final DataTreeChangeListenerProxy<L> listenerRegistrationProxy =
