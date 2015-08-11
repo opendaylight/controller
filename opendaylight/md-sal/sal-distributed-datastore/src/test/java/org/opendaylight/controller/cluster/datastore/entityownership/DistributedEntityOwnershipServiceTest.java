@@ -19,10 +19,8 @@ import akka.actor.PoisonPill;
 import akka.actor.Props;
 import com.google.common.base.Optional;
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -32,13 +30,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
+import org.opendaylight.controller.cluster.datastore.config.Configuration;
+import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
+import org.opendaylight.controller.cluster.datastore.config.ModuleConfig;
+import org.opendaylight.controller.cluster.datastore.config.ModuleShardConfigProvider;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.RegisterCandidateLocal;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.UnregisterCandidateLocal;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
-import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategy;
-import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
 import org.opendaylight.controller.cluster.datastore.utils.MockClusterWrapper;
-import org.opendaylight.controller.cluster.datastore.utils.MockConfiguration;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.controller.md.sal.common.api.clustering.CandidateAlreadyRegisteredException;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
@@ -72,30 +71,16 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
         DatastoreContext datastoreContext = DatastoreContext.newBuilder().dataStoreType(dataStoreType).
                 shardInitializationTimeout(10, TimeUnit.SECONDS).build();
 
-        // FIXME - remove this MockConfiguration and use the production ConfigurationImpl class when the
-        // DistributedEntityOwnershipService is changed to setup the ShardStrategy for the entity-owners module.
-        MockConfiguration configuration = new MockConfiguration(Collections.<String, List<String>>emptyMap()) {
+        Configuration configuration = new ConfigurationImpl(new ModuleShardConfigProvider() {
             @Override
-            public Optional<String> getModuleNameFromNameSpace(String nameSpace) {
-                return Optional.of("entity-owners");
+            public Map<String, ModuleConfig> retrieveModuleConfigs(Configuration configuration) {
+                return Collections.emptyMap();
             }
-
-            @Override
-            public Map<String, ShardStrategy> getModuleNameToShardStrategyMap() {
-                return ImmutableMap.<String, ShardStrategy>builder().put("entity-owners", new ShardStrategy() {
-                    @Override
-                    public String findShard(YangInstanceIdentifier path) {
-                        return DistributedEntityOwnershipService.ENTITY_OWNERSHIP_SHARD_NAME;
-                    }
-                }).build();
-            }
-        };
+        });
 
         dataStore = new DistributedDataStore(getSystem(), new MockClusterWrapper(), configuration, datastoreContext );
 
         dataStore.onGlobalContextUpdated(SchemaContextHelper.entityOwners());
-
-        ShardStrategyFactory.setConfiguration(configuration);
     }
 
     @After

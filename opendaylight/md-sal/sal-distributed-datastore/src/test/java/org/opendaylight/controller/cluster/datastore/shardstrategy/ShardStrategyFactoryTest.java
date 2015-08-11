@@ -10,7 +10,7 @@ package org.opendaylight.controller.cluster.datastore.shardstrategy;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -21,26 +21,25 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 public class ShardStrategyFactoryTest {
 
+    ShardStrategyFactory factory;
+
     @Rule
     public ExpectedException expectedEx = ExpectedException.none();
 
-    @BeforeClass
-    public static void setUpClass(){
-        ShardStrategyFactory.setConfiguration(new ConfigurationImpl("module-shards.conf", "modules.conf"));
+    @Before
+    public void setUp() {
+        factory = new ShardStrategyFactory(new ConfigurationImpl("module-shards.conf", "modules.conf"));
     }
 
     @Test
     public void testGetStrategy() {
-        ShardStrategy strategy =
-            ShardStrategyFactory.getStrategy(TestModel.TEST_PATH);
+        ShardStrategy strategy = factory.getStrategy(TestModel.TEST_PATH);
         assertNotNull(strategy);
     }
 
     @Test
     public void testGetStrategyForKnownModuleName() {
-        ShardStrategy strategy =
-            ShardStrategyFactory.getStrategy(
-                YangInstanceIdentifier.of(CarsModel.BASE_QNAME));
+        ShardStrategy strategy = factory.getStrategy(YangInstanceIdentifier.of(CarsModel.BASE_QNAME));
         assertTrue(strategy instanceof ModuleShardStrategy);
     }
 
@@ -50,7 +49,7 @@ public class ShardStrategyFactoryTest {
         expectedEx.expect(NullPointerException.class);
         expectedEx.expectMessage("path should not be null");
 
-        ShardStrategyFactory.getStrategy(null);
+        factory.getStrategy(null);
     }
 
 }
