@@ -10,6 +10,10 @@ package org.opendaylight.controller.cluster.datastore.entityownership;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.CANDIDATE_NAME_QNAME;
+import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_ID_QNAME;
+import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_QNAME;
+import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_TYPE_QNAME;
 import com.google.common.base.Optional;
 import org.opendaylight.controller.cluster.datastore.AbstractActorTest;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.entity.owners.rev150804.EntityOwners;
@@ -42,12 +46,11 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
             ContainerNode entityOwnersNode = (ContainerNode) node;
 
             MapEntryNode entityTypeEntry = getMapEntryNodeChild(entityOwnersNode, EntityType.QNAME,
-                    EntityOwnershipShard.ENTITY_TYPE, entityType);
+                    ENTITY_TYPE_QNAME, entityType);
 
-            MapEntryNode entityEntry = getMapEntryNodeChild(entityTypeEntry, EntityOwnershipShard.ENTITY_QNAME,
-                    EntityOwnershipShard.ENTITY_ID, entityId);
+            MapEntryNode entityEntry = getMapEntryNodeChild(entityTypeEntry, ENTITY_QNAME, ENTITY_ID_QNAME, entityId);
 
-            getMapEntryNodeChild(entityEntry, Candidate.QNAME, EntityOwnershipShard.CANDIDATE_NAME, candidateName);
+            getMapEntryNodeChild(entityEntry, Candidate.QNAME, CANDIDATE_NAME_QNAME, candidateName);
         } catch(AssertionError e) {
             throw new AssertionError("Verification of enitity candidate failed - returned data was: " + node, e);
         }
