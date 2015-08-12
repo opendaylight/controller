@@ -11,6 +11,8 @@ package org.opendaylight.controller.md.sal.common.api.clustering;
 import com.google.common.base.Preconditions;
 import java.io.Serializable;
 import javax.annotation.Nonnull;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.core.general.entity.rev150820.Entities;
+import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 /**
@@ -29,17 +31,22 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
  * <p>
  * The identifier is a YangInstanceIdentifier. The reason for the choice of YangInstanceIdentifier is because it
  * can easily be used to represent a data node. For example an inventory node represents a shared entity and it is best
- * referenced by the YangInstanceIdentifier if the inventory node stored in the data store.
+ * referenced by the YangInstanceIdentifier if the inventory node is stored in the data store.
+ * </p>
+ * Note that an entity identifier must conform to a valid yang schema. If there is no existing yang schema to
+ * represent an entity, the general-entity yang model can be used.
+ * <p>
  * </p>
  */
 public final class Entity implements Serializable {
     private static final long serialVersionUID = 1L;
+    private static final QName ENTITIES_NAME = QName.create(Entities.QNAME, "name");
 
     private final String type;
     private final YangInstanceIdentifier id;
 
     /**
-     * Construct a new Entity
+     * Construct an Entity with a YangInstanceIdentifier.
      *
      * @param type the type of the entity
      * @param id the identifier of the entity
@@ -47,6 +54,19 @@ public final class Entity implements Serializable {
     public Entity(@Nonnull String type, @Nonnull YangInstanceIdentifier id) {
         this.type = Preconditions.checkNotNull(type, "type should not be null");
         this.id = Preconditions.checkNotNull(id, "id should not be null");
+    }
+
+    /**
+     * Construct an Entity with an with a name. The general-entity schema is used to construct the
+     * YangInstanceIdentifier.
+     *
+     * @param type the type of the entity
+     * @param entityName the name of the entity used to construct a general-entity YangInstanceIdentifier
+     */
+    public Entity(@Nonnull String type, @Nonnull String entityName) {
+        this.type = Preconditions.checkNotNull(type, "type should not be null");
+        this.id = YangInstanceIdentifier.builder().node(Entities.QNAME).nodeWithKey(Entities.QNAME, ENTITIES_NAME,
+                        Preconditions.checkNotNull(entityName, "entityName should not be null")).build();
     }
 
     /**
