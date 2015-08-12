@@ -51,13 +51,13 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     private final TipProducingDataTree dataTree;
     private SchemaContext schemaContext;
 
-    ShardDataTree(final SchemaContext schemaContext) {
+    public ShardDataTree(final SchemaContext schemaContext) {
         dataTree = InMemoryDataTreeFactory.getInstance().create();
         updateSchemaContext(schemaContext);
 
     }
 
-    TipProducingDataTree getDataTree() {
+    public TipProducingDataTree getDataTree() {
         return dataTree;
     }
 
@@ -98,7 +98,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         return ensureTransactionChain(chainId).newReadWriteTransaction(txId);
     }
 
-    void notifyListeners(final DataTreeCandidate candidate) {
+    public void notifyListeners(final DataTreeCandidate candidate) {
         LOG.debug("Notifying listeners on candidate {}", candidate);
 
         // DataTreeChanges first, as they are more light-weight
@@ -143,7 +143,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         return new SimpleEntry<>(reg, event);
     }
 
-    Entry<ListenerRegistration<DOMDataTreeChangeListener>, DataTreeCandidate> registerTreeChangeListener(final YangInstanceIdentifier path,
+    public Entry<ListenerRegistration<DOMDataTreeChangeListener>, DataTreeCandidate> registerTreeChangeListener(final YangInstanceIdentifier path,
             final DOMDataTreeChangeListener listener) {
         final ListenerRegistration<DOMDataTreeChangeListener> reg = treeChangePublisher.registerTreeChangeListener(path, listener);
 
