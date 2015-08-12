@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore.entityownership;
 
+import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_OWNERS_PATH;
+import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.entityOwnersWithCandidate;
 import akka.actor.ActorSelection;
 import akka.actor.Props;
 import akka.dispatch.OnComplete;
@@ -26,18 +28,7 @@ import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIden
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
 import org.opendaylight.controller.cluster.datastore.messages.SuccessReply;
 import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
-import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.entity.owners.rev150804.EntityOwners;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.entity.owners.rev150804.entity.owners.EntityType;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.entity.owners.rev150804.entity.owners.entity.type.entity.Candidate;
-import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
-import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
-import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
-import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.Future;
 
@@ -47,13 +38,6 @@ import scala.concurrent.Future;
  * @author Thomas Pantelis
  */
 class EntityOwnershipShard extends Shard {
-    static final YangInstanceIdentifier ENTITY_OWNERS_PATH = YangInstanceIdentifier.of(EntityOwners.QNAME);
-    static final  QName ENTITY_QNAME = org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.
-            md.sal.clustering.entity.owners.rev150804.entity.owners.entity.type.Entity.QNAME;
-    static final QName CANDIDATE_NAME = QName.create(Candidate.QNAME, "name");
-    static final QName ENTITY_ID = QName.create(ENTITY_QNAME, "id");
-    static final QName ENTITY_TYPE = QName.create(EntityType.QNAME, "type");
-
     private int transactionIDCounter = 0;
     private final String localMemberName;
     private final List<BatchedModifications> retryModifications = new ArrayList<>();
@@ -96,26 +80,13 @@ class EntityOwnershipShard extends Shard {
         modifications.setReady(true);
         modifications.setTotalMessagesSent(1);
 
-        NormalizedNode<?, ?> entityOwners = createEntityOwnersWithCandidate(registerCandidate.getEntity(), localMemberName);
+        NormalizedNode<?, ?> entityOwners = entityOwnersWithCandidate(registerCandidate.getEntity().getType(),
+                registerCandidate.getEntity().getId(), localMemberName);
         modifications.addModification(new MergeModification(ENTITY_OWNERS_PATH, entityOwners));
 
         tryCommitModifications(modifications);
 
         getSender().tell(SuccessReply.INSTANCE, getSelf());
-    }
-
-    private NormalizedNode<?, ?> createEntityOwnersWithCandidate(Entity entity, String memberName) {
-        MapNode candidateNode = ImmutableNodes.mapNodeBuilder(Candidate.QNAME).addChild(
-                        ImmutableNodes.mapEntry(Candidate.QNAME, CANDIDATE_NAME, memberName)).build();
-
-        MapEntryNode entityNode = ImmutableNodes.mapEntryBuilder(ENTITY_QNAME, ENTITY_ID, entity.getId()).
-                addChild(candidateNode).build();
-
-        MapEntryNode entityTypeNode = ImmutableNodes.mapEntryBuilder(EntityType.QNAME, ENTITY_TYPE, entity.getType()).
-                addChild(ImmutableNodes.mapNodeBuilder(ENTITY_QNAME).addChild(entityNode).build()).build();
-
-        return ImmutableContainerNodeBuilder.create().withNodeIdentifier(new NodeIdentifier(EntityOwners.QNAME)).
-                addChild(ImmutableNodes.mapNodeBuilder(EntityType.QNAME).addChild(entityTypeNode).build()).build();
     }
 
     private void tryCommitModifications(final BatchedModifications modifications) {
