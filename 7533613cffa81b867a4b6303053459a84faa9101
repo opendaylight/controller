@@ -16,6 +16,24 @@
       "revId": "7533613cffa81b867a4b6303053459a84faa9101",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_0596f594",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/DistributedEntityOwnershipService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-08-12T19:35:51Z",
+      "side": 1,
+      "message": "I initially thought of that but the shard may not be created right away, i.e. SchemaContext may not be set yet in which case it\u0027s created later.",
+      "parentUuid": "3a79b1b5_e5b5f931",
+      "revId": "7533613cffa81b867a4b6303053459a84faa9101",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
