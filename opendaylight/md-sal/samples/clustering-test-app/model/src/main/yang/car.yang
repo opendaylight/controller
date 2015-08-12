@@ -60,5 +60,19 @@ module car {
       }
     }
 
+    rpc register-ownership {
+        input {
+            leaf car-id {
+                type string;
+              }
+        }
+    }
     
+    rpc unregister-ownership {
+        input {
+            leaf car-id {
+                type string;
+              }
+        }
+    }
 }
