@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a79b1b5_2aad0032",
+        "filename": "features/config-persister/src/main/resources/features.xml",
+        "patchSetId": 24
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-08-12T17:50:25Z",
+      "side": 1,
+      "message": "Question.. why are you depending on old-config-all ?\n-all features are generally a *bad* idea to depend on as they lead to overinclusion",
+      "revId": "86b5727374bace453c48114dadf58e1767a44ba1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}

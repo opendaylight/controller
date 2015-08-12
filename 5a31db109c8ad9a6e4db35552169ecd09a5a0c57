@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a79b1b5_eaa62853",
+        "filename": "features/mdsal/src/main/resources/features.xml",
+        "patchSetId": 24
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-08-12T17:50:25Z",
+      "side": 0,
+      "message": "How does this transition work for things that are getting odl-netconf-mdsal *from* the mdsal repo?",
+      "revId": "5a31db109c8ad9a6e4db35552169ecd09a5a0c57",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
