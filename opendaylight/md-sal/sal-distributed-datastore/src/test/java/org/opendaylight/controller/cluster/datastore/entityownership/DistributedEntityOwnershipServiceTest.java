@@ -13,6 +13,7 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
+import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_OWNERS_PATH;
 import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
@@ -215,7 +216,7 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
         Stopwatch sw = Stopwatch.createStarted();
         while(sw.elapsed(TimeUnit.MILLISECONDS) <= 5000) {
             DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
-            Optional<NormalizedNode<?, ?>> optional = readTx.read(EntityOwnershipShard.ENTITY_OWNERS_PATH).
+            Optional<NormalizedNode<?, ?>> optional = readTx.read(ENTITY_OWNERS_PATH).
                     checkedGet(5, TimeUnit.SECONDS);
             if(optional.isPresent()) {
                 return optional.get();
