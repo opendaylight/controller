@@ -51,13 +51,13 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     private final TipProducingDataTree dataTree;
     private SchemaContext schemaContext;
 
-    ShardDataTree(final SchemaContext schemaContext) {
+    public ShardDataTree(final SchemaContext schemaContext) {
         dataTree = InMemoryDataTreeFactory.getInstance().create();
         updateSchemaContext(schemaContext);
 
     }
 
-    TipProducingDataTree getDataTree() {
+    public TipProducingDataTree getDataTree() {
         return dataTree;
     }
 
@@ -98,7 +98,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         return ensureTransactionChain(chainId).newReadWriteTransaction(txId);
     }
 
-    void notifyListeners(final DataTreeCandidate candidate) {
+    public void notifyListeners(final DataTreeCandidate candidate) {
         LOG.debug("Notifying listeners on candidate {}", candidate);
 
         // DataTreeChanges first, as they are more light-weight
@@ -125,11 +125,10 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         }
     }
 
-    Entry<ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>>, DOMImmutableDataChangeEvent> registerChangeListener(
+    public <L extends AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>> Entry<ListenerRegistration<L>, DOMImmutableDataChangeEvent> registerChangeListener(
             final YangInstanceIdentifier path,
-            final AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> listener, final DataChangeScope scope) {
-        final ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>> reg =
-                listenerTree.registerDataChangeListener(path, listener, scope);
+            final L listener, final DataChangeScope scope) {
+        final ListenerRegistration<L> reg = listenerTree.registerDataChangeListener(path, listener, scope);
 
         final Optional<NormalizedNode<?, ?>> currentState = dataTree.takeSnapshot().readNode(path);
         final DOMImmutableDataChangeEvent event;
