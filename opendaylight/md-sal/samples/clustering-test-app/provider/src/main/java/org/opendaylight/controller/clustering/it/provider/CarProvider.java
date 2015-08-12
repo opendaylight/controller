@@ -9,21 +9,25 @@ package org.opendaylight.controller.clustering.it.provider;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.Futures;
-
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
-
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
+import org.opendaylight.controller.md.sal.common.api.clustering.CandidateAlreadyRegisteredException;
+import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
+import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipCandidate;
+import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.CarId;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.CarService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.Cars;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.CarsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.RegisterOwnershipInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.StressTestInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.UnregisterOwnershipInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.cars.CarEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.cars.CarEntryBuilder;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -40,12 +44,21 @@ public class CarProvider implements CarService {
     private static final Logger log = LoggerFactory.getLogger(PurchaseCarProvider.class);
 
     private final DataBroker dataProvider;
+    private final EntityOwnershipService ownershipService;
+    private static final Logger LOG = LoggerFactory.getLogger(CarProvider.class);
+
+    private static final String ENTITY_TYPE = "cars";
+
+
+    private final CarEntityOwnershipCandidate ownershipCandidate = new CarEntityOwnershipCandidate();
+
 
     private volatile Thread testThread;
     private volatile boolean stopThread;
 
-    public CarProvider(DataBroker dataProvider) {
+    public CarProvider(DataBroker dataProvider, EntityOwnershipService ownershipService) {
         this.dataProvider = dataProvider;
+        this.ownershipService = ownershipService;
     }
 
     private void stopThread() {
@@ -139,4 +152,29 @@ public class CarProvider implements CarService {
         return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
     }
 
+
+    @Override
+    public Future<RpcResult<Void>> registerOwnership(RegisterOwnershipInput input) {
+        Entity entity = new Entity(ENTITY_TYPE, input.getCarId());
+        try {
+            ownershipService.registerCandidate(entity, ownershipCandidate);
+        } catch (CandidateAlreadyRegisteredException e) {
+            return RpcResultBuilder.<Void>failed().withError(ErrorType.APPLICATION,
+                    "Could not register for car " + input.getCarId(), e).buildFuture();
+        }
+
+        return RpcResultBuilder.<Void>success().buildFuture();
+    }
+
+    @Override
+    public Future<RpcResult<Void>> unregisterOwnership(UnregisterOwnershipInput input) {
+        return RpcResultBuilder.<Void>success().buildFuture();
+    }
+
+    private static class CarEntityOwnershipCandidate implements EntityOwnershipCandidate {
+        @Override
+        public void ownershipChanged(Entity entity, boolean wasOwner, boolean isOwner) {
+            LOG.info("ownershipChanged: entity: {}, wasOwner: {}, isOwner: ()", entity, wasOwner, isOwner);
+        }
+    }
 }
