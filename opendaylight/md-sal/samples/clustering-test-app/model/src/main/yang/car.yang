@@ -76,5 +76,22 @@ module car {
     }
     
     rpc stop-stress-test {
+
+    }
+
+    rpc register-ownership {
+        input {
+            leaf car-id {
+                type string;
+              }
+        }
+    }
+    
+    rpc unregister-ownership {
+        input {
+            leaf car-id {
+                type string;
+              }
+        }
     }
 }

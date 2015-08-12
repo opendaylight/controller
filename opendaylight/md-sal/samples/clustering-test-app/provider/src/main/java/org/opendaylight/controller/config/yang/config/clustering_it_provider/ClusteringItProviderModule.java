@@ -54,7 +54,7 @@ public class ClusteringItProviderModule extends org.opendaylight.controller.conf
 
       people.setRpcRegistration(purchaseCarRpc);
 
-      CarProvider carProvider = new CarProvider(dataBrokerService);
+      CarProvider carProvider = new CarProvider(dataBrokerService, getOwnershipServiceDependency());
       getRpcRegistryDependency().addRpcImplementation(CarService.class, carProvider);
 
       final BindingAwareBroker.RpcRegistration<PeopleService> peopleRpcReg = getRpcRegistryDependency()
