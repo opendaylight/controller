@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.netconf.mapping.api;
 
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
 import org.w3c.dom.Document;
 
 /**
@@ -26,7 +26,7 @@ public interface NetconfOperationChainedExecution {
     /**
      * Do not execute if this is termination point
      */
-    Document execute(Document requestMessage) throws NetconfDocumentedException;
+    Document execute(Document requestMessage) throws DocumentedException;
 
     public static final NetconfOperationChainedExecution EXECUTION_TERMINATION_POINT = new NetconfOperationChainedExecution() {
         @Override
@@ -35,7 +35,7 @@ public interface NetconfOperationChainedExecution {
         }
 
         @Override
-        public Document execute(Document requestMessage) throws NetconfDocumentedException {
+        public Document execute(Document requestMessage) throws DocumentedException {
             throw new IllegalStateException("This execution represents the termination point in operation execution and cannot be executed itself");
         }
     };

@@ -32,18 +32,18 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
+import org.opendaylight.controller.config.util.xml.XmlElement;
+import org.opendaylight.controller.config.util.xml.XmlUtil;
 import org.opendaylight.controller.config.yang.test.impl.DepTestImplModuleFactory;
 import org.opendaylight.controller.config.yang.test.impl.MultipleDependenciesModuleFactory;
 import org.opendaylight.controller.config.yang.test.impl.MultipleDependenciesModuleMXBean;
 import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplModuleFactory;
 import org.opendaylight.controller.config.yang.test.impl.NetconfTestImplModuleMXBean;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
 import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
 import org.opendaylight.controller.netconf.client.TestingNetconfClient;
 import org.opendaylight.controller.netconf.util.test.XmlFileLoader;
-import org.opendaylight.controller.netconf.util.xml.XmlElement;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.test.types.rev131127.TestIdentity1;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.test.types.rev131127.TestIdentity2;
 import org.opendaylight.yangtools.sal.binding.generator.util.BindingRuntimeContext;
@@ -214,17 +214,17 @@ public class NetconfITTest extends AbstractNetconfConfigTest {
         }
     }
 
-    private void assertIsOK(final Document rpcReply) throws NetconfDocumentedException {
+    private void assertIsOK(final Document rpcReply) throws DocumentedException {
         assertEquals("rpc-reply", rpcReply.getDocumentElement().getLocalName());
         assertEquals("ok", XmlElement.fromDomDocument(rpcReply).getOnlyChildElement().getName());
     }
 
-    private Document assertGetConfigWorks(final TestingNetconfClient netconfClient) throws InterruptedException, ExecutionException, TimeoutException, NetconfDocumentedException {
+    private Document assertGetConfigWorks(final TestingNetconfClient netconfClient) throws InterruptedException, ExecutionException, TimeoutException, DocumentedException {
         return assertGetConfigWorks(netconfClient, getGetConfig());
     }
 
     private Document assertGetConfigWorks(final TestingNetconfClient netconfClient, final NetconfMessage getConfigMessage)
-            throws InterruptedException, ExecutionException, TimeoutException, NetconfDocumentedException {
+            throws InterruptedException, ExecutionException, TimeoutException, DocumentedException {
         final NetconfMessage rpcReply = netconfClient.sendMessage(getConfigMessage);
         assertNotNull(rpcReply);
         assertEquals("data", XmlElement.fromDomDocument(rpcReply.getDocument()).getOnlyChildElement().getName());

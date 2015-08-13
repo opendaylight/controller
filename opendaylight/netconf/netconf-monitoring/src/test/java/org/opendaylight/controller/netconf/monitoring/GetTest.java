@@ -14,17 +14,18 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+
 import java.util.Collections;
 import org.hamcrest.CoreMatchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
+import org.opendaylight.controller.config.util.xml.XmlUtil;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedExecution;
-import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state.SchemasBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state.SessionsBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.netconf.monitoring.rev101004.netconf.state.schemas.Schema;
@@ -62,8 +63,8 @@ public class GetTest {
     public void testHandleNoSubsequent() throws Exception {
         try {
             get.handle(null, NetconfOperationChainedExecution.EXECUTION_TERMINATION_POINT);
-        } catch (final NetconfDocumentedException e) {
-            assertNetconfDocumentedEx(e, NetconfDocumentedException.ErrorSeverity.error, NetconfDocumentedException.ErrorTag.operation_failed, NetconfDocumentedException.ErrorType.application);
+        } catch (final DocumentedException e) {
+            assertNetconfDocumentedEx(e, DocumentedException.ErrorSeverity.error, DocumentedException.ErrorTag.operation_failed, DocumentedException.ErrorType.application);
             return;
         }
 
@@ -75,8 +76,8 @@ public class GetTest {
         doReturn(incorrectSubsequentResult).when(subsequentOperation).execute(request);
         try {
             get.handle(request, subsequentOperation);
-        } catch (final NetconfDocumentedException e) {
-            assertNetconfDocumentedEx(e, NetconfDocumentedException.ErrorSeverity.error, NetconfDocumentedException.ErrorTag.invalid_value, NetconfDocumentedException.ErrorType.application);
+        } catch (final DocumentedException e) {
+            assertNetconfDocumentedEx(e, DocumentedException.ErrorSeverity.error, DocumentedException.ErrorTag.invalid_value, DocumentedException.ErrorType.application);
             return;
         }
 
@@ -88,8 +89,8 @@ public class GetTest {
         doThrow(RuntimeException.class).when(subsequentOperation).execute(request);
         try {
             get.handle(request, subsequentOperation);
-        } catch (final NetconfDocumentedException e) {
-            assertNetconfDocumentedEx(e, NetconfDocumentedException.ErrorSeverity.error, NetconfDocumentedException.ErrorTag.operation_failed, NetconfDocumentedException.ErrorType.application);
+        } catch (final DocumentedException e) {
+            assertNetconfDocumentedEx(e, DocumentedException.ErrorSeverity.error, DocumentedException.ErrorTag.operation_failed, DocumentedException.ErrorType.application);
             assertEquals(1, e.getErrorInfo().size());
             return;
         }
@@ -113,7 +114,7 @@ public class GetTest {
 
     }
 
-    private void assertNetconfDocumentedEx(final NetconfDocumentedException e, final NetconfDocumentedException.ErrorSeverity severity, final NetconfDocumentedException.ErrorTag errorTag, final NetconfDocumentedException.ErrorType type) {
+    private void assertNetconfDocumentedEx(final DocumentedException e, final DocumentedException.ErrorSeverity severity, final DocumentedException.ErrorTag errorTag, final DocumentedException.ErrorType type) {
         assertEquals(severity, e.getErrorSeverity());
         assertEquals(errorTag, e.getErrorTag());
         assertEquals(type, e.getErrorType());

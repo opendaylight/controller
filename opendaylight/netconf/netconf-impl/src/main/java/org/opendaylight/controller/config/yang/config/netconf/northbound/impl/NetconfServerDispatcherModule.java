@@ -2,7 +2,6 @@ package org.opendaylight.controller.config.yang.config.netconf.northbound.impl;
 
 import org.opendaylight.controller.config.api.JmxAttributeValidationException;
 import org.opendaylight.controller.netconf.api.monitoring.NetconfMonitoringService;
-import org.opendaylight.controller.netconf.impl.CommitNotifier;
 import org.opendaylight.controller.netconf.impl.NetconfServerDispatcherImpl;
 import org.opendaylight.controller.netconf.impl.NetconfServerSessionNegotiatorFactory;
 import org.opendaylight.controller.netconf.impl.SessionIdProvider;
@@ -29,7 +28,7 @@ public class NetconfServerDispatcherModule extends org.opendaylight.controller.c
         final AggregatedNetconfOperationServiceFactory aggregatedOpProvider = getAggregatedOpProvider();
         final NetconfMonitoringService monitoringService = getServerMonitorDependency();
         final NetconfServerSessionNegotiatorFactory serverNegotiatorFactory = new NetconfServerSessionNegotiatorFactory(
-                getTimerDependency(), aggregatedOpProvider, new SessionIdProvider(), getConnectionTimeoutMillis(), CommitNotifier.NoopCommitNotifier.getInstance(), monitoringService);
+                getTimerDependency(), aggregatedOpProvider, new SessionIdProvider(), getConnectionTimeoutMillis(), monitoringService);
         final NetconfServerDispatcherImpl.ServerChannelInitializer serverChannelInitializer = new NetconfServerDispatcherImpl.ServerChannelInitializer(
                 serverNegotiatorFactory);
 

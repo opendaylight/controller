@@ -8,7 +8,7 @@
 
 package org.opendaylight.controller.netconf.mapping.api;
 
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
 import org.w3c.dom.Document;
 
 /**
@@ -33,7 +33,7 @@ public interface NetconfOperation {
      * @param requestMessage
      * @return
      */
-    HandlingPriority canHandle(Document message) throws NetconfDocumentedException;
+    HandlingPriority canHandle(Document message) throws DocumentedException;
 
     /**
      * Execute current netconf operation and trigger execution of subsequent
@@ -46,8 +46,8 @@ public interface NetconfOperation {
      * @param subsequentOperation
      *            execution of subsequent netconf operation
      * @return
-     * @throws NetconfDocumentedException
+     * @throws DocumentedException
      */
     Document handle(Document requestMessage, NetconfOperationChainedExecution subsequentOperation)
-            throws NetconfDocumentedException;
+            throws DocumentedException;
 }

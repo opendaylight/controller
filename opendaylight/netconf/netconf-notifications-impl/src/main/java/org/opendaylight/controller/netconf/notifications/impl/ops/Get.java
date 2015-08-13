@@ -12,13 +12,14 @@ import com.google.common.base.Preconditions;
 import java.io.IOException;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.dom.DOMResult;
-import org.opendaylight.controller.netconf.api.NetconfDocumentedException;
+import org.opendaylight.controller.config.util.xml.DocumentedException;
+import org.opendaylight.controller.config.util.xml.XmlElement;
+import org.opendaylight.controller.config.util.xml.XmlMappingConstants;
 import org.opendaylight.controller.netconf.api.xml.XmlNetconfConstants;
 import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedExecution;
 import org.opendaylight.controller.netconf.notifications.NetconfNotificationRegistry;
 import org.opendaylight.controller.netconf.util.mapping.AbstractNetconfOperation;
-import org.opendaylight.controller.netconf.util.xml.XmlElement;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netmod.notification.rev080714.Netconf;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netmod.notification.rev080714.NetconfBuilder;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netmod.notification.rev080714.netconf.Streams;
@@ -51,7 +52,7 @@ public class Get extends AbstractNetconfOperation implements AutoCloseable {
     }
 
     @Override
-    public Document handle(final Document requestMessage, final NetconfOperationChainedExecution subsequentOperation) throws NetconfDocumentedException {
+    public Document handle(final Document requestMessage, final NetconfOperationChainedExecution subsequentOperation) throws DocumentedException {
         final Document partialResponse = subsequentOperation.execute(requestMessage);
         final Streams availableStreams = notificationRegistry.getNotificationPublishers();
         if(availableStreams.getStream().isEmpty() == false) {
@@ -60,7 +61,7 @@ public class Get extends AbstractNetconfOperation implements AutoCloseable {
         return partialResponse;
     }
 
-    static void serializeStreamsSubtree(final Document partialResponse, final Streams availableStreams) throws NetconfDocumentedException {
+    static void serializeStreamsSubtree(final Document partialResponse, final Streams availableStreams) throws DocumentedException {
         final Netconf netconfSubtree = new NetconfBuilder().setStreams(availableStreams).build();
         final NormalizedNode<?, ?> normalized = toNormalized(netconfSubtree);
 
@@ -74,9 +75,9 @@ public class Get extends AbstractNetconfOperation implements AutoCloseable {
     }
 
     private static Element getPlaceholder(final Document innerResult)
-            throws NetconfDocumentedException {
+            throws DocumentedException {
         final XmlElement rootElement = XmlElement.fromDomElementWithExpected(
-                innerResult.getDocumentElement(), XmlNetconfConstants.RPC_REPLY_KEY, XmlNetconfConstants.RFC4741_TARGET_NAMESPACE);
+                innerResult.getDocumentElement(), XmlMappingConstants.RPC_REPLY_KEY, XmlNetconfConstants.URN_IETF_PARAMS_XML_NS_NETCONF_BASE_1_0);
         return rootElement.getOnlyChildElement(XmlNetconfConstants.DATA_KEY).getDomElement();
     }
 
@@ -86,7 +87,7 @@ public class Get extends AbstractNetconfOperation implements AutoCloseable {
 
     @Override
     protected Element handle(final Document document, final XmlElement message, final NetconfOperationChainedExecution subsequentOperation)
-            throws NetconfDocumentedException {
+            throws DocumentedException {
         throw new UnsupportedOperationException("Never gets called");
     }
 

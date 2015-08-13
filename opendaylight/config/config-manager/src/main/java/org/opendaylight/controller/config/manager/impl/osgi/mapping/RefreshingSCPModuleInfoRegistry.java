@@ -60,7 +60,6 @@ public class RefreshingSCPModuleInfoRegistry implements ModuleInfoRegistry, Auto
         osgiReg.unregister();
     }
 
-
     private class ObjectRegistrationWrapper implements ObjectRegistration<YangModuleInfo> {
         private final ObjectRegistration<YangModuleInfo> inner;
 
@@ -78,7 +77,6 @@ public class RefreshingSCPModuleInfoRegistry implements ModuleInfoRegistry, Auto
             inner.close();
             updateService();// send modify event when a bundle disappears
         }
-
 
         @Override
         public String toString() {
