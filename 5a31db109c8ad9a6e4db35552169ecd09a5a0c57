@@ -16,6 +16,24 @@
       "revId": "5a31db109c8ad9a6e4db35552169ecd09a5a0c57",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_a0f36f72",
+        "filename": "features/mdsal/src/main/resources/features.xml",
+        "patchSetId": 24
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2015-08-13T09:10:24Z",
+      "side": 0,
+      "message": "Projects will need to migrate to the new feature in netconf, but i see you have already sent a weather report about that so that should help.",
+      "parentUuid": "3a79b1b5_eaa62853",
+      "revId": "5a31db109c8ad9a6e4db35552169ecd09a5a0c57",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }

@@ -16,6 +16,24 @@
       "revId": "86b5727374bace453c48114dadf58e1767a44ba1",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_80ee738a",
+        "filename": "features/config-persister/src/main/resources/features.xml",
+        "patchSetId": 24
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 3127
+      },
+      "writtenOn": "2015-08-13T09:10:24Z",
+      "side": 1,
+      "message": "I\u0027ve changed this to use specific config features.",
+      "parentUuid": "3a79b1b5_2aad0032",
+      "revId": "86b5727374bace453c48114dadf58e1767a44ba1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
