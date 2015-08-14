@@ -11,6 +11,7 @@ import java.util.Set;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
 
 public class ConfigurationImplTest {
 

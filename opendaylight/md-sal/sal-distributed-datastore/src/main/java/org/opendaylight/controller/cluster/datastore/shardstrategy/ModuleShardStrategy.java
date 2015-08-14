@@ -9,7 +9,7 @@
 package org.opendaylight.controller.cluster.datastore.shardstrategy;
 
 import java.util.List;
-import org.opendaylight.controller.cluster.datastore.Configuration;
+import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 public class ModuleShardStrategy implements ShardStrategy {
