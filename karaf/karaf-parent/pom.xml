@@ -23,7 +23,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <properties>
     <branding.version>1.1.1-SNAPSHOT</branding.version>
     <karaf.resources.version>1.5.1-SNAPSHOT</karaf.resources.version>
-    <odlparent.karaf.plugin.version>1.5.1-SNAPSHOT</odlparent.karaf.plugin.version>
     <karaf.localFeature>standard</karaf.localFeature>
     <!--  Karaf Maven plugin 3.023 reinstalls already installed
           boot features to container, which could be observed
@@ -303,6 +302,23 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
                 <overWriteSnapshots>true</overWriteSnapshots>
               </configuration>
             </execution>
+            <execution>
+              <id>copy-dependencies</id>
+              <phase>prepare-package</phase>
+              <goals>
+                <goal>copy-dependencies</goal>
+              </goals>
+              <configuration>
+                <outputDirectory>${project.build.directory}/assembly/system</outputDirectory>
+                <excludeArtifactIds>distribution.vtn-coordinator</excludeArtifactIds>
+                <overWriteReleases>false</overWriteReleases>
+                <overWriteSnapshots>true</overWriteSnapshots>
+                <overWriteIfNewer>true</overWriteIfNewer>
+                <useRepositoryLayout>true</useRepositoryLayout>
+                <addParentPoms>true</addParentPoms>
+                <copyPom>true</copyPom>
+              </configuration>
+            </execution>
           </executions>
         </plugin>
         <plugin>
@@ -328,22 +344,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
                     </fileset>
                   </chmod>
                 </tasks>
-              </configuration>
-            </execution>
-          </executions>
-        </plugin>
-        <plugin>
-          <groupId>org.opendaylight.odlparent</groupId>
-          <artifactId>karaf-plugin</artifactId>
-          <version>${odlparent.karaf.plugin.version}</version>
-          <executions>
-            <execution>
-              <id>populate-local-repo</id>
-              <goals>
-                <goal>populate-local-repo</goal>
-              </goals>
-              <configuration>
-                <localRepo>${project.build.directory}/assembly/system</localRepo>
               </configuration>
             </execution>
           </executions>
@@ -389,11 +389,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-antrun-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.opendaylight.odlparent</groupId>
-        <artifactId>karaf-plugin</artifactId>
-        <version>${odlparent.karaf.plugin.version}</version>
       </plugin>
     </plugins>
   </build>
