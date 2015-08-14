@@ -27,6 +27,6 @@ class DistributedEntityOwnershipCandidateRegistration extends AbstractEntityOwne
 
     @Override
     public void close() {
-        service.unregisterCandidate(getEntity());
+        service.unregisterCandidate(getEntity(), getInstance());
     }
 }

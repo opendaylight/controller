@@ -10,12 +10,14 @@ package org.opendaylight.controller.cluster.datastore.entityownership;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_OWNERS_PATH;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_OWNER_NODE_ID;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_OWNER_QNAME;
+import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.candidatePath;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.entityOwnersWithCandidate;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Props;
 import akka.pattern.Patterns;
 import com.google.common.base.Optional;
+import com.google.common.base.Strings;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -28,8 +30,10 @@ import org.opendaylight.controller.cluster.datastore.entityownership.messages.Un
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
 import org.opendaylight.controller.cluster.datastore.messages.SuccessReply;
+import org.opendaylight.controller.cluster.datastore.modification.DeleteModification;
 import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
+import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
@@ -99,6 +103,18 @@ class EntityOwnershipShard extends Shard {
         getSender().tell(SuccessReply.INSTANCE, getSelf());
     }
 
+    private void onUnregisterCandidateLocal(UnregisterCandidateLocal unregisterCandidate) {
+        LOG.debug("onUnregisterCandidateLocal: {}", unregisterCandidate);
+
+        Entity entity = unregisterCandidate.getEntity();
+        listenerSupport.removeEntityOwnershipListener(entity, unregisterCandidate.getCandidate());
+
+        YangInstanceIdentifier candidatePath = candidatePath(entity.getType(), entity.getId(), localMemberName);
+        commitCoordinator.commitModification(new DeleteModification(candidatePath), this);
+
+        getSender().tell(SuccessReply.INSTANCE, getSelf());
+    }
+
     void tryCommitModifications(final BatchedModifications modifications) {
         if(isLeader()) {
             LOG.debug("Committing BatchedModifications {} locally", modifications.getTransactionID());
@@ -132,11 +148,6 @@ class EntityOwnershipShard extends Shard {
         commitCoordinator.onStateChanged(this, isLeader());
     }
 
-    private void onUnregisterCandidateLocal(UnregisterCandidateLocal unregisterCandidate) {
-        // TODO - implement
-        getSender().tell(SuccessReply.INSTANCE, getSelf());
-    }
-
     private void onCandidateRemoved(CandidateRemoved message) {
         if(!isLeader()){
             return;
@@ -158,7 +169,7 @@ class EntityOwnershipShard extends Shard {
         LOG.debug("onCandidateAdded: {}", message);
 
         String currentOwner = getCurrentOwner(message.getEntityPath());
-        if(currentOwner == null){
+        if(Strings.isNullOrEmpty(currentOwner)){
             writeNewOwner(message.getEntityPath(), newOwner(message.getAllCandidates()));
         }
     }

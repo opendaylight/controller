@@ -55,39 +55,35 @@ public class EntityOwnerChangeListenerTest {
     }
 
     @Test
-    public void testOnDataChanged() throws Exception {
+    public void testOnDataTreeChanged() throws Exception {
         writeNode(ENTITY_OWNERS_PATH, entityOwnersWithCandidate(ENTITY_TYPE, ENTITY_ID1, LOCAL_MEMBER_NAME));
         writeNode(ENTITY_OWNERS_PATH, entityOwnersWithCandidate(ENTITY_TYPE, ENTITY_ID2, LOCAL_MEMBER_NAME));
-        writeNode(ENTITY_OWNERS_PATH, entityOwnersWithCandidate(ENTITY_TYPE, ENTITY_ID1, REMOTE_MEMBER_NAME1));
-
         verify(mockListenerSupport, never()).notifyEntityOwnershipListeners(any(Entity.class), anyBoolean(), anyBoolean());
 
         writeNode(entityPath(ENTITY_TYPE, ENTITY_ID1), entityEntryWithOwner(ENTITY_ID1, LOCAL_MEMBER_NAME));
-
         verify(mockListenerSupport).notifyEntityOwnershipListeners(ENTITY1, false, true);
 
         reset(mockListenerSupport);
-        writeNode(entityPath(ENTITY_TYPE, ENTITY_ID1), entityEntryWithOwner(ENTITY_ID1, REMOTE_MEMBER_NAME1));
+        writeNode(ENTITY_OWNERS_PATH, entityOwnersWithCandidate(ENTITY_TYPE, ENTITY_ID1, REMOTE_MEMBER_NAME1));
+        verify(mockListenerSupport, never()).notifyEntityOwnershipListeners(any(Entity.class), anyBoolean(), anyBoolean());
 
+        reset(mockListenerSupport);
+        writeNode(entityPath(ENTITY_TYPE, ENTITY_ID1), entityEntryWithOwner(ENTITY_ID1, REMOTE_MEMBER_NAME1));
         verify(mockListenerSupport).notifyEntityOwnershipListeners(ENTITY1, true, false);
 
         reset(mockListenerSupport);
         writeNode(entityPath(ENTITY_TYPE, ENTITY_ID1), entityEntryWithOwner(ENTITY_ID1, REMOTE_MEMBER_NAME2));
-
         verify(mockListenerSupport, never()).notifyEntityOwnershipListeners(any(Entity.class), anyBoolean(), anyBoolean());
 
         writeNode(entityPath(ENTITY_TYPE, ENTITY_ID1), entityEntryWithOwner(ENTITY_ID1, LOCAL_MEMBER_NAME));
-
         verify(mockListenerSupport).notifyEntityOwnershipListeners(ENTITY1, false, true);
 
         reset(mockListenerSupport);
         writeNode(entityPath(ENTITY_TYPE, ENTITY_ID2), entityEntryWithOwner(ENTITY_ID2, REMOTE_MEMBER_NAME1));
-
         verify(mockListenerSupport, never()).notifyEntityOwnershipListeners(any(Entity.class), anyBoolean(), anyBoolean());
 
         reset(mockListenerSupport);
         writeNode(entityPath(ENTITY_TYPE, ENTITY_ID2), entityEntryWithOwner(ENTITY_ID2, LOCAL_MEMBER_NAME));
-
         verify(mockListenerSupport).notifyEntityOwnershipListeners(ENTITY2, false, true);
     }
 

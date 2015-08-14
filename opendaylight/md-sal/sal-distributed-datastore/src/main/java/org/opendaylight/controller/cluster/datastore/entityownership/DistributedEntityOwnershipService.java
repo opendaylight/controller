@@ -76,7 +76,6 @@ public class DistributedEntityOwnershipService implements EntityOwnershipService
             public void onComplete(Throwable failure, Object response) {
                 if(failure != null) {
                     LOG.debug("Error sending message {} to {}", message, shardActor, failure);
-                    // TODO - queue for retry
                 } else {
                     LOG.debug("{} message to {} succeeded", message, shardActor, failure);
                 }
@@ -121,10 +120,10 @@ public class DistributedEntityOwnershipService implements EntityOwnershipService
         return new DistributedEntityOwnershipCandidateRegistration(candidate, entity, this);
     }
 
-    void unregisterCandidate(Entity entity) {
+    void unregisterCandidate(Entity entity, EntityOwnershipCandidate entityOwnershipCandidate) {
         LOG.debug("Unregistering candidate for {}", entity);
 
-        executeLocalEntityOwnershipShardOperation(new UnregisterCandidateLocal(entity));
+        executeLocalEntityOwnershipShardOperation(new UnregisterCandidateLocal(entityOwnershipCandidate, entity));
         registeredEntities.remove(entity);
     }
 
