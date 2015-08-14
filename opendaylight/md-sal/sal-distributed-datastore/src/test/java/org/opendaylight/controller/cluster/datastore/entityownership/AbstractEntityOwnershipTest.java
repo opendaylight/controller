@@ -13,6 +13,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.CANDIDATE_NAME_QNAME;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_ID_QNAME;
+import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_OWNERS_PATH;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_OWNER_QNAME;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_QNAME;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_TYPE_QNAME;
@@ -68,6 +69,24 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
         }
     }
 
+    protected void verifyEntityCandidate(String entityType, YangInstanceIdentifier entityId, String candidateName,
+            Function<YangInstanceIdentifier,NormalizedNode<?,?>> reader) {
+        AssertionError lastError = null;
+        Stopwatch sw = Stopwatch.createStarted();
+        while(sw.elapsed(TimeUnit.MILLISECONDS) <= 5000) {
+            NormalizedNode<?, ?> node = reader.apply(ENTITY_OWNERS_PATH);
+            try {
+                verifyEntityCandidate(node, entityType, entityId, candidateName);
+                return;
+            } catch (AssertionError e) {
+                lastError = e;
+                Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
+            }
+        }
+
+        throw lastError;
+    }
+
     protected MapEntryNode getMapEntryNodeChild(DataContainerNode<? extends PathArgument> parent, QName childMap,
             QName child, Object key) {
         Optional<DataContainerChild<? extends PathArgument, ?>> childNode =
@@ -85,19 +104,40 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
 
     protected void verifyOwner(String expected, String entityType, YangInstanceIdentifier entityId,
             Function<YangInstanceIdentifier,NormalizedNode<?,?>> reader) {
+        AssertionError lastError = null;
         YangInstanceIdentifier entityPath = entityPath(entityType, entityId).node(ENTITY_OWNER_QNAME);
         Stopwatch sw = Stopwatch.createStarted();
         while(sw.elapsed(TimeUnit.MILLISECONDS) <= 5000) {
-            NormalizedNode<?, ?> node = reader.apply(entityPath);
-            if(node != null) {
+            try {
+                NormalizedNode<?, ?> node = reader.apply(entityPath);
+                Assert.assertNotNull("Owner was not set for entityId: " + entityId, node);
                 Assert.assertEquals("Entity owner", expected, node.getValue().toString());
                 return;
-            } else {
+            } catch(AssertionError e) {
+                lastError = e;
                 Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
             }
         }
 
-        fail("Owner was not set for entityId: " + entityId);
+        throw lastError;
+    }
+
+    protected void verifyNodeRemoved(YangInstanceIdentifier path,
+            Function<YangInstanceIdentifier,NormalizedNode<?,?>> reader) {
+        AssertionError lastError = null;
+        Stopwatch sw = Stopwatch.createStarted();
+        while(sw.elapsed(TimeUnit.MILLISECONDS) <= 5000) {
+            try {
+                NormalizedNode<?, ?> node = reader.apply(path);
+                Assert.assertNull("Node was not removed at path: " + path, node);
+                return;
+            } catch(AssertionError e) {
+                lastError = e;
+                Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
+            }
+        }
+
+        throw lastError;
     }
 
     static void writeNode(YangInstanceIdentifier path, NormalizedNode<?, ?> node, ShardDataTree shardDataTree)
