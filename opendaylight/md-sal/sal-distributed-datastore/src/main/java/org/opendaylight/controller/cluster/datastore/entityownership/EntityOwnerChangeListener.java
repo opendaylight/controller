@@ -28,6 +28,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,30 +56,33 @@ class EntityOwnerChangeListener implements DOMDataTreeChangeListener {
     @Override
     public void onDataTreeChanged(Collection<DataTreeCandidate> changes) {
         for(DataTreeCandidate change: changes) {
-            MapEntryNode entityNode = (MapEntryNode) change.getRootNode().getDataAfter().get();
+            DataTreeCandidateNode changeRoot = change.getRootNode();
+            MapEntryNode entityNode = (MapEntryNode) changeRoot.getDataAfter().get();
 
-            LOG.debug("Entity node updated: {}", change.getRootPath());
+            LOG.debug("Entity node changed: {}, {}", changeRoot.getModificationType(), change.getRootPath());
 
             String newOwner = extractOwner(entityNode);
 
             String origOwner = null;
-            Optional<NormalizedNode<?, ?>> dataBefore = change.getRootNode().getDataBefore();
+            Optional<NormalizedNode<?, ?>> dataBefore = changeRoot.getDataBefore();
             if(dataBefore.isPresent()) {
-                MapEntryNode origEntityNode = (MapEntryNode) change.getRootNode().getDataBefore().get();
+                MapEntryNode origEntityNode = (MapEntryNode) changeRoot.getDataBefore().get();
                 origOwner = extractOwner(origEntityNode);
             }
 
             LOG.debug("New owner: {}, Original owner: {}", newOwner, origOwner);
 
-            boolean isOwner = Objects.equal(localMemberName, newOwner);
-            boolean wasOwner = Objects.equal(localMemberName, origOwner);
-            if(isOwner || wasOwner) {
-                Entity entity = createEntity(change.getRootPath());
+            if(!Objects.equal(origOwner, newOwner)) {
+                boolean isOwner = Objects.equal(localMemberName, newOwner);
+                boolean wasOwner = Objects.equal(localMemberName, origOwner);
+                if(isOwner || wasOwner) {
+                    Entity entity = createEntity(change.getRootPath());
 
-                LOG.debug("Calling notifyEntityOwnershipListeners: entity: {}, wasOwner: {}, isOwner: {}",
-                        entity, wasOwner, isOwner);
+                    LOG.debug("Calling notifyEntityOwnershipListeners: entity: {}, wasOwner: {}, isOwner: {}",
+                            entity, wasOwner, isOwner);
 
-                listenerSupport.notifyEntityOwnershipListeners(entity, wasOwner, isOwner);
+                    listenerSupport.notifyEntityOwnershipListeners(entity, wasOwner, isOwner);
+                }
             }
         }
     }
