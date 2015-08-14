@@ -305,6 +305,10 @@ public class Shard extends RaftActor {
                         persistenceId(), cohortEntry.getTransactionID(), transactionCommitTimeout);
 
                 doAbortTransaction(cohortEntry.getTransactionID(), null);
+
+//                cohortEntry.getReplySender().tell(new akka.actor.Status.Failure(new RuntimeException(String.format(
+//                        "Transaction %s timed out after {} ms and was aborted", cohortEntry.getTransactionID(),
+//                                transactionCommitTimeout))), getSelf());
             }
         }
 
@@ -687,7 +691,7 @@ public class Shard extends RaftActor {
         return commitCoordinator;
     }
 
-    protected DatastoreContext getDatastoreContext() {
+    public DatastoreContext getDatastoreContext() {
         return datastoreContext;
     }
 

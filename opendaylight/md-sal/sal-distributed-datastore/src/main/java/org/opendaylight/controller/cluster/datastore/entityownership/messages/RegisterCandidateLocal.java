@@ -35,8 +35,8 @@ public class RegisterCandidateLocal {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("RegisterCandidateLocal [candidate=").append(candidate.getClass()).append(", entity=")
-                .append(entity).append("]");
+        builder.append("RegisterCandidateLocal [entity=").append(entity).append(", candidate=").append(candidate)
+                .append("]");
         return builder.toString();
     }
 }
