@@ -9,6 +9,8 @@ package org.opendaylight.controller.cluster.datastore.entityownership;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_OWNERS_PATH;
 import akka.actor.ActorRef;
 import akka.actor.Props;
@@ -98,6 +100,8 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         verifyCommittedEntityCandidate(shard, ENTITY_TYPE, entityId, LOCAL_MEMBER_NAME);
 
         verifyOwner(shard, ENTITY_TYPE, entityId, LOCAL_MEMBER_NAME);
+
+        verify(candidate, timeout(5000)).ownershipChanged(entity, false, true);
     }
 
     @Test
@@ -127,6 +131,8 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         verifyCommittedEntityCandidate(shard, ENTITY_TYPE, entityId, LOCAL_MEMBER_NAME);
 
         verifyOwner(shard, ENTITY_TYPE, entityId, LOCAL_MEMBER_NAME);
+
+        verify(candidate, timeout(5000)).ownershipChanged(entity, false, true);
     }
 
     @Test
@@ -169,6 +175,8 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         verifyCommittedEntityCandidate(shard, ENTITY_TYPE, entityId, LOCAL_MEMBER_NAME);
 
         verifyOwner(shard, ENTITY_TYPE, entityId, LOCAL_MEMBER_NAME);
+
+        verify(candidate, timeout(5000)).ownershipChanged(entity, false, true);
     }
 
     @Test
@@ -207,6 +215,8 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         verifyCommittedEntityCandidate(shard, ENTITY_TYPE, entityId, LOCAL_MEMBER_NAME);
 
         verifyOwner(shard, ENTITY_TYPE, entityId, LOCAL_MEMBER_NAME);
+
+        verify(candidate, timeout(5000)).ownershipChanged(entity, false, true);
     }
 
     @Test
