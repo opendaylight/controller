@@ -44,15 +44,17 @@ import org.slf4j.LoggerFactory;
  * @author Moiz Raja
  * @author Thomas Pantelis
  */
-public class CandidateListChangeListener implements DOMDataTreeChangeListener {
+class CandidateListChangeListener implements DOMDataTreeChangeListener {
     private static final Logger LOG = LoggerFactory.getLogger(CandidateListChangeListener.class);
 
     private final ActorRef shard;
     private final Map<YangInstanceIdentifier, Collection<String>> currentCandidates = new HashMap<>();
 
-    public CandidateListChangeListener(ActorRef shard, ShardDataTree shardDataTree) {
+    CandidateListChangeListener(ActorRef shard) {
         this.shard = Preconditions.checkNotNull(shard, "shard should not be null");
+    }
 
+    void init(ShardDataTree shardDataTree) {
         shardDataTree.registerTreeChangeListener(YangInstanceIdentifier.builder(ENTITY_OWNERS_PATH).
                 node(EntityType.QNAME).node(EntityType.QNAME).node(ENTITY_QNAME).node(ENTITY_QNAME).
                         node(Candidate.QNAME).node(Candidate.QNAME).build(), this);
