@@ -1,4 +1,4 @@
-package org.opendaylight.controller.cluster.datastore;
+package org.opendaylight.controller.cluster.datastore.config;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
