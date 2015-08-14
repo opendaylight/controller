@@ -1,4 +1,4 @@
-package org.opendaylight.controller.cluster.datastore;
+package org.opendaylight.controller.cluster.datastore.config;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -11,6 +11,7 @@ import java.util.Set;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
 
 public class ConfigurationImplTest {
 
