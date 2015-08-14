@@ -687,7 +687,7 @@ public class Shard extends RaftActor {
         return commitCoordinator;
     }
 
-    protected DatastoreContext getDatastoreContext() {
+    public DatastoreContext getDatastoreContext() {
         return datastoreContext;
     }
 
