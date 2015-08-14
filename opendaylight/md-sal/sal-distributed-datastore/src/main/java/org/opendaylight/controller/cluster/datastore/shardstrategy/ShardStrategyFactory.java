@@ -12,7 +12,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import org.opendaylight.controller.cluster.datastore.Configuration;
+import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 public class ShardStrategyFactory {
