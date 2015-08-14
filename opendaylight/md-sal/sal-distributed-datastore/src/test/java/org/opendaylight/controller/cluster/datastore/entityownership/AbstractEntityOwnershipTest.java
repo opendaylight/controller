@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore.entityownership;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.CANDIDATE_NAME_QNAME;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_ID_QNAME;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_QNAME;
@@ -65,7 +66,9 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
         MapNode entityTypeMapNode = (MapNode) childNode.get();
         Optional<MapEntryNode> entityTypeEntry = entityTypeMapNode.getChild(new NodeIdentifierWithPredicates(
                 childMap, child, key));
-        assertEquals("Missing " + childMap.toString() + " entry for " + key, true, entityTypeEntry.isPresent());
+        if(!entityTypeEntry.isPresent()) {
+            fail("Missing " + childMap.toString() + " entry for " + key + ". Actual: " + entityTypeMapNode.getValue());
+        }
         return entityTypeEntry.get();
     }
 }
