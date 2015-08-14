@@ -196,6 +196,7 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
 
         UnregisterCandidateLocal unregCandidate = shardPropsCreator.waitForShardMessage();
         assertEquals("getEntity", entity, unregCandidate.getEntity());
+        assertSame("getCandidate", candidate, unregCandidate.getCandidate());
 
         // Re-register - should succeed.
 
