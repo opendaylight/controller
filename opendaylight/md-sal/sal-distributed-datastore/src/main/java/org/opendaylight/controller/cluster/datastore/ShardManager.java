@@ -473,7 +473,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
         for(ShardInformation info : localShards.values()){
             String shardName = info.getShardName();
-            info.updatePeerAddress(getShardIdentifier(memberName, shardName).toString(),
+            info.updatePeerAddress(memberName, getShardIdentifier(memberName, shardName).toString(),
                 getShardActorPath(shardName, memberName), getSelf());
         }
 
@@ -777,7 +777,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             return peerAddresses;
         }
 
-        void updatePeerAddress(String peerId, String peerAddress, ActorRef sender){
+        void updatePeerAddress(String memberName, String peerId, String peerAddress, ActorRef sender){
             LOG.info("updatePeerAddress for peer {} with address {}", peerId,
                 peerAddress);
             if(peerAddresses.containsKey(peerId)){
@@ -789,7 +789,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                                 peerId, peerAddress, actor.path());
                     }
 
-                    actor.tell(new PeerAddressResolved(peerId.toString(), peerAddress), sender);
+                    actor.tell(new PeerAddressResolved(memberName, peerId.toString(), peerAddress), sender);
                 }
 
                 notifyOnShardInitializedCallbacks();

@@ -1,42 +1,37 @@
 /*
- * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015 Brocade Communications Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.controller.cluster.datastore.messages;
 
 /**
- * Message sent to a shard actor indicating one of its peers is up and it's address has been resolved.
+ * Message sent to a shard actor indicating one of its peers is down.
+ *
+ * @author Thomas Pantelis
  */
-public class PeerAddressResolved {
+public class PeerDown {
     private final String memberName;
     private final String peerId;
-    private final String peerAddress;
 
-    public PeerAddressResolved(String memberName, String peerId, String peerAddress) {
+    public PeerDown(String memberName, String peerId) {
         this.memberName = memberName;
         this.peerId = peerId;
-        this.peerAddress = peerAddress;
     }
 
     public String getMemberName() {
         return memberName;
     }
 
+
     public String getPeerId() {
         return peerId;
     }
 
-    public String getPeerAddress() {
-        return peerAddress;
-    }
-
     @Override
     public String toString() {
-        return "PeerAddressResolved [memberName=" + memberName + ", peerId=" + peerId + ", peerAddress=" + peerAddress
-                + "]";
+        return "PeerDown [memberName=" + memberName + ", peerId=" + peerId + "]";
     }
 }
