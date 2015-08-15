@@ -320,19 +320,19 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             onStateChanged();
         }
 
-        String oldBehaviorLeaderId = oldBehavior == null ? null : oldBehaviorState.getLeaderId();
+        String lastValidLeaderId = oldBehavior == null ? null : oldBehaviorState.getLastValidLeaderId();
         String oldBehaviorStateName = oldBehavior == null ? null : oldBehavior.state().name();
 
         // it can happen that the state has not changed but the leader has changed.
         Optional<ActorRef> roleChangeNotifier = getRoleChangeNotifier();
-        if(!Objects.equal(oldBehaviorLeaderId, currentBehavior.getLeaderId()) ||
+        if(!Objects.equal(lastValidLeaderId, currentBehavior.getLeaderId()) ||
            oldBehaviorState.getLeaderPayloadVersion() != currentBehavior.getLeaderPayloadVersion()) {
             if(roleChangeNotifier.isPresent()) {
                 roleChangeNotifier.get().tell(newLeaderStateChanged(getId(), currentBehavior.getLeaderId(),
                         currentBehavior.getLeaderPayloadVersion()), getSelf());
             }
 
-            onLeaderChanged(oldBehaviorLeaderId, currentBehavior.getLeaderId());
+            onLeaderChanged(lastValidLeaderId, currentBehavior.getLeaderId());
         }
 
         if (roleChangeNotifier.isPresent() &&
@@ -656,21 +656,25 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     private static class BehaviorStateHolder {
         private RaftActorBehavior behavior;
-        private String leaderId;
+        private String lastValidLeaderId;
         private short leaderPayloadVersion;
 
         void init(RaftActorBehavior behavior) {
             this.behavior = behavior;
-            this.leaderId = behavior != null ? behavior.getLeaderId() : null;
             this.leaderPayloadVersion = behavior != null ? behavior.getLeaderPayloadVersion() : -1;
+
+            String behaviorLeaderId = behavior != null ? behavior.getLeaderId() : null;
+            if(behaviorLeaderId != null) {
+                this.lastValidLeaderId = behaviorLeaderId;
+            }
         }
 
         RaftActorBehavior getBehavior() {
             return behavior;
         }
 
-        String getLeaderId() {
-            return leaderId;
+        String getLastValidLeaderId() {
+            return lastValidLeaderId;
         }
 
         short getLeaderPayloadVersion() {

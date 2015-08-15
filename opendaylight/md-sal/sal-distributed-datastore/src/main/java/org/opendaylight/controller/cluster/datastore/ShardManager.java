@@ -55,6 +55,8 @@ import org.opendaylight.controller.cluster.datastore.messages.LocalPrimaryShardF
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardFound;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardNotFound;
 import org.opendaylight.controller.cluster.datastore.messages.PeerAddressResolved;
+import org.opendaylight.controller.cluster.datastore.messages.PeerDown;
+import org.opendaylight.controller.cluster.datastore.messages.PeerUp;
 import org.opendaylight.controller.cluster.datastore.messages.RemoteFindPrimary;
 import org.opendaylight.controller.cluster.datastore.messages.RemotePrimaryShardFound;
 import org.opendaylight.controller.cluster.datastore.messages.ShardLeaderStateChanged;
@@ -176,6 +178,8 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             onActorInitialized(message);
         } else if (message instanceof ClusterEvent.MemberUp){
             memberUp((ClusterEvent.MemberUp) message);
+        } else if (message instanceof ClusterEvent.MemberExited){
+            memberExited((ClusterEvent.MemberExited) message);
         } else if(message instanceof ClusterEvent.MemberRemoved) {
             memberRemoved((ClusterEvent.MemberRemoved) message);
         } else if(message instanceof ClusterEvent.UnreachableMember) {
@@ -213,7 +217,8 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             ShardIdentifier shardId = getShardIdentifier(cluster.getCurrentMemberName(), createShard.getShardName());
             Map<String, String> peerAddresses = getPeerAddresses(createShard.getShardName(), createShard.getMemberNames());
 
-            LOG.debug("onCreateShard: shardId: {}, peerAddresses: {}", shardId, peerAddresses);
+            LOG.debug("onCreateShard: shardId: {}, memberNames: {}. peerAddresses: {}", shardId,
+                    createShard.getMemberNames(), peerAddresses);
 
             DatastoreContext shardDatastoreContext = createShard.getDatastoreContext();
             if(shardDatastoreContext == null) {
@@ -464,7 +469,24 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         LOG.debug("{}: Received MemberRemoved: memberName: {}, address: {}", persistenceId(), memberName,
                 message.member().address());
 
-        memberNameToAddress.remove(message.member().roles().head());
+        memberNameToAddress.remove(memberName);
+
+        for(ShardInformation info : localShards.values()){
+            info.peerDown(memberName, getShardIdentifier(memberName, info.getShardName()).toString(), getSelf());
+        }
+    }
+
+    private void memberExited(ClusterEvent.MemberExited message) {
+        String memberName = message.member().roles().head();
+
+        LOG.debug("{}: Received MemberExited: memberName: {}, address: {}", persistenceId(), memberName,
+                message.member().address());
+
+        memberNameToAddress.remove(memberName);
+
+        for(ShardInformation info : localShards.values()){
+            info.peerDown(memberName, getShardIdentifier(memberName, info.getShardName()).toString(), getSelf());
+        }
     }
 
     private void memberUp(ClusterEvent.MemberUp message) {
@@ -477,8 +499,10 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
         for(ShardInformation info : localShards.values()){
             String shardName = info.getShardName();
-            info.updatePeerAddress(getShardIdentifier(memberName, shardName).toString(),
-                getShardActorPath(shardName, memberName), getSelf());
+            String peerId = getShardIdentifier(memberName, shardName).toString();
+            info.updatePeerAddress(peerId, getShardActorPath(shardName, memberName), getSelf());
+
+            info.peerUp(memberName, peerId, getSelf());
         }
 
         checkReady();
@@ -507,6 +531,8 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
                 primaryShardInfoCache.remove(info.getShardName());
             }
+
+            info.peerDown(memberName, getShardIdentifier(memberName, info.getShardName()).toString(), getSelf());
         }
     }
 
@@ -517,6 +543,8 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                 LOG.debug("Marking Leader {} as available.", leaderId);
                 info.setLeaderAvailable(true);
             }
+
+            info.peerUp(memberName, getShardIdentifier(memberName, info.getShardName()).toString(), getSelf());
         }
     }
 
@@ -694,7 +722,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         for(String memberName : members) {
             if(!currentMemberName.equals(memberName)) {
                 ShardIdentifier shardId = getShardIdentifier(memberName, shardName);
-                String path = getShardActorPath(shardName, currentMemberName);
+                String path = getShardActorPath(shardName, memberName);
                 peerAddresses.put(shardId.toString(), path);
             }
         }
@@ -808,10 +836,22 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                                 peerId, peerAddress, actor.path());
                     }
 
-                    actor.tell(new PeerAddressResolved(peerId.toString(), peerAddress), sender);
+                    actor.tell(new PeerAddressResolved(peerId, peerAddress), sender);
                 }
 
                 notifyOnShardInitializedCallbacks();
+            }
+        }
+
+        void peerDown(String memberName, String peerId, ActorRef sender) {
+            if(peerAddresses.containsKey(peerId) && actor != null) {
+                actor.tell(new PeerDown(memberName, peerId), sender);
+            }
+        }
+
+        void peerUp(String memberName, String peerId, ActorRef sender) {
+            if(peerAddresses.containsKey(peerId) && actor != null) {
+                actor.tell(new PeerUp(memberName, peerId), sender);
             }
         }
 
