@@ -19,9 +19,12 @@ import static org.opendaylight.controller.cluster.datastore.entityownership.Enti
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.candidatePath;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.entityOwnersWithCandidate;
 import akka.actor.ActorRef;
+import akka.actor.PoisonPill;
 import akka.actor.Props;
+import akka.actor.Terminated;
 import akka.actor.UntypedActor;
 import akka.dispatch.Dispatchers;
+import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
@@ -46,6 +49,8 @@ import org.opendaylight.controller.cluster.datastore.entityownership.messages.Un
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
+import org.opendaylight.controller.cluster.datastore.messages.PeerDown;
+import org.opendaylight.controller.cluster.datastore.messages.PeerUp;
 import org.opendaylight.controller.cluster.datastore.messages.SuccessReply;
 import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
@@ -74,12 +79,13 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
             YangInstanceIdentifier.of(QName.create("test", "2015-08-14", "entity1"));
     private static final YangInstanceIdentifier ENTITY_ID2 =
             YangInstanceIdentifier.of(QName.create("test", "2015-08-14", "entity2"));
+    private static final YangInstanceIdentifier ENTITY_ID3 =
+            YangInstanceIdentifier.of(QName.create("test", "2015-08-14", "entity3"));
+    private static final YangInstanceIdentifier ENTITY_ID4 =
+            YangInstanceIdentifier.of(QName.create("test", "2015-08-14", "entity4"));
     private static final SchemaContext SCHEMA_CONTEXT = SchemaContextHelper.entityOwners();
     private static final AtomicInteger NEXT_SHARD_NUM = new AtomicInteger();
     private static final String LOCAL_MEMBER_NAME = "member-1";
-
-    private final ShardIdentifier shardID = ShardIdentifier.builder().memberName(LOCAL_MEMBER_NAME)
-            .shardName("entity-ownership").type("operational" + NEXT_SHARD_NUM.getAndIncrement()).build();
 
     private final Builder dataStoreContextBuilder = DatastoreContext.newBuilder();
     private final TestActorFactory actorFactory = new TestActorFactory(getSystem());
@@ -116,7 +122,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         dataStoreContextBuilder.shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(2);
 
         String peerId = actorFactory.generateActorId("follower");
-        TestActorRef<MockFollower> peer = actorFactory.createTestActor(Props.create(MockFollower.class, peerId).
+        TestActorRef<MockFollower> peer = actorFactory.createTestActor(Props.create(MockFollower.class, peerId, false).
                 withDispatcher(Dispatchers.DefaultDispatcherId()), peerId);
 
         TestActorRef<EntityOwnershipShard> shard = actorFactory.createTestActor(newShardProps(
@@ -152,7 +158,6 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
                 withDispatcher(Dispatchers.DefaultDispatcherId()), peerId);
 
         MockFollower follower = peer.underlyingActor();
-        follower.grantVote = true;
 
         // Drop AppendEntries so consensus isn't reached.
         follower.dropAppendEntries = true;
@@ -196,7 +201,6 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
                 withDispatcher(Dispatchers.DefaultDispatcherId()), peerId);
 
         MockFollower follower = peer.underlyingActor();
-        follower.grantVote = true;
 
         TestActorRef<EntityOwnershipShard> shard = actorFactory.createTestActor(newShardProps(
                 ImmutableMap.<String, String>builder().put(peerId, peer.path().toString()).build()).
@@ -411,6 +415,134 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         verifyOwner(shard, ENTITY_TYPE, ENTITY_ID1, remoteMemberName2);
     }
 
+    @Test
+    public void testOnPeerDown() throws Exception {
+        ShardTestKit kit = new ShardTestKit(getSystem());
+
+        dataStoreContextBuilder.shardHeartbeatIntervalInMillis(500).shardElectionTimeoutFactor(10000);
+
+        String remoteMemberName1 = "remoteMember1";
+        String remoteMemberName2 = "remoteMember2";
+
+        ShardIdentifier leaderId = newShardId(LOCAL_MEMBER_NAME);
+        ShardIdentifier peerId1 = newShardId(remoteMemberName1);
+        ShardIdentifier peerId2 = newShardId(remoteMemberName2);
+
+        TestActorRef<EntityOwnershipShard> peer1 = actorFactory.createTestActor(newShardProps(peerId1,
+                ImmutableMap.<String, String>builder().put(leaderId.toString(), ""). put(peerId2.toString(), "").build(),
+                        remoteMemberName1).withDispatcher(Dispatchers.DefaultDispatcherId()), peerId1.toString());
+
+        TestActorRef<EntityOwnershipShard> peer2 = actorFactory.createTestActor(newShardProps(peerId2,
+                ImmutableMap.<String, String>builder().put(leaderId.toString(), ""). put(peerId1.toString(), "").build(),
+                        remoteMemberName2). withDispatcher(Dispatchers.DefaultDispatcherId()), peerId2.toString());
+
+        dataStoreContextBuilder.shardElectionTimeoutFactor(1);
+        TestActorRef<EntityOwnershipShard> shard = actorFactory.createTestActor(newShardProps(leaderId,
+                ImmutableMap.<String, String>builder().put(peerId1.toString(), peer1.path().toString()).
+                        put(peerId2.toString(), peer2.path().toString()).build(), LOCAL_MEMBER_NAME).
+                withDispatcher(Dispatchers.DefaultDispatcherId()), leaderId.toString());
+
+        kit.waitUntilLeader(shard);
+
+        EntityOwnershipCandidate candidate = mock(EntityOwnershipCandidate.class);
+
+        // Add candidates for entity1 with local as the owner
+
+        shard.tell(new RegisterCandidateLocal(candidate, new Entity(ENTITY_TYPE, ENTITY_ID1)), kit.getRef());
+        kit.expectMsgClass(SuccessReply.class);
+        verifyCommittedEntityCandidate(shard, ENTITY_TYPE, ENTITY_ID1, LOCAL_MEMBER_NAME);
+
+        commitModification(shard, entityOwnersWithCandidate(ENTITY_TYPE, ENTITY_ID1, remoteMemberName2), kit);
+        verifyCommittedEntityCandidate(shard, ENTITY_TYPE, ENTITY_ID1, remoteMemberName2);
+
+        commitModification(shard, entityOwnersWithCandidate(ENTITY_TYPE, ENTITY_ID1, remoteMemberName1), kit);
+        verifyCommittedEntityCandidate(shard, ENTITY_TYPE, ENTITY_ID1, remoteMemberName1);
+        verifyOwner(shard, ENTITY_TYPE, ENTITY_ID1, LOCAL_MEMBER_NAME);
+
+        // Add candidates for entity2 with remoteMember2 as the owner
+
+        commitModification(shard, entityOwnersWithCandidate(ENTITY_TYPE, ENTITY_ID2, remoteMemberName2), kit);
+        verifyCommittedEntityCandidate(shard, ENTITY_TYPE, ENTITY_ID2, remoteMemberName2);
+
+        commitModification(shard, entityOwnersWithCandidate(ENTITY_TYPE, ENTITY_ID2, remoteMemberName1), kit);
+        verifyCommittedEntityCandidate(shard, ENTITY_TYPE, ENTITY_ID2, remoteMemberName1);
+
+        shard.tell(new RegisterCandidateLocal(candidate, new Entity(ENTITY_TYPE, ENTITY_ID2)), kit.getRef());
+        kit.expectMsgClass(SuccessReply.class);
+        verifyCommittedEntityCandidate(shard, ENTITY_TYPE, ENTITY_ID2, LOCAL_MEMBER_NAME);
+        verifyOwner(shard, ENTITY_TYPE, ENTITY_ID2, remoteMemberName2);
+
+        // Add candidates for entity3 with remoteMember2 as the owner.
+
+        commitModification(shard, entityOwnersWithCandidate(ENTITY_TYPE, ENTITY_ID3, remoteMemberName2), kit);
+        verifyCommittedEntityCandidate(shard, ENTITY_TYPE, ENTITY_ID3, remoteMemberName2);
+
+        shard.tell(new RegisterCandidateLocal(candidate, new Entity(ENTITY_TYPE, ENTITY_ID3)), kit.getRef());
+        kit.expectMsgClass(SuccessReply.class);
+        verifyCommittedEntityCandidate(shard, ENTITY_TYPE, ENTITY_ID3, LOCAL_MEMBER_NAME);
+
+        commitModification(shard, entityOwnersWithCandidate(ENTITY_TYPE, ENTITY_ID3, remoteMemberName1), kit);
+        verifyCommittedEntityCandidate(shard, ENTITY_TYPE, ENTITY_ID3, remoteMemberName1);
+        verifyOwner(shard, ENTITY_TYPE, ENTITY_ID3, remoteMemberName2);
+
+        // Add only candidate remoteMember2 for entity4.
+
+        commitModification(shard, entityOwnersWithCandidate(ENTITY_TYPE, ENTITY_ID4, remoteMemberName2), kit);
+        verifyCommittedEntityCandidate(shard, ENTITY_TYPE, ENTITY_ID4, remoteMemberName2);
+        verifyOwner(shard, ENTITY_TYPE, ENTITY_ID4, remoteMemberName2);
+
+        // Kill remoteMember2 and send PeerDown
+
+        kit.watch(peer2);
+        peer2.tell(PoisonPill.getInstance(), ActorRef.noSender());
+        kit.expectMsgClass(JavaTestKit.duration("5 seconds"), Terminated.class);
+        kit.unwatch(peer2);
+
+        shard.tell(new PeerDown(remoteMemberName2, peerId2.toString()), ActorRef.noSender());
+
+        verifyOwner(shard, ENTITY_TYPE, ENTITY_ID4, ""); // no other candidates so should clear
+        verifyOwner(shard, ENTITY_TYPE, ENTITY_ID3, LOCAL_MEMBER_NAME);
+        verifyOwner(shard, ENTITY_TYPE, ENTITY_ID2, remoteMemberName1);
+        verifyOwner(shard, ENTITY_TYPE, ENTITY_ID1, LOCAL_MEMBER_NAME);
+
+        verifyCommittedEntityCandidate(shard, ENTITY_TYPE, ENTITY_ID1, remoteMemberName2);
+        verifyCommittedEntityCandidate(shard, ENTITY_TYPE, ENTITY_ID2, remoteMemberName2);
+        verifyCommittedEntityCandidate(shard, ENTITY_TYPE, ENTITY_ID3, remoteMemberName2);
+        verifyCommittedEntityCandidate(shard, ENTITY_TYPE, ENTITY_ID4, remoteMemberName2);
+
+        // Reinstate remoteMember2 - should become owner for entity 4 again
+
+        dataStoreContextBuilder.shardElectionTimeoutFactor(10000);
+        peer2 = actorFactory.createTestActor(newShardProps(peerId2,
+                ImmutableMap.<String, String>builder().put(leaderId.toString(), ""). put(peerId1.toString(), "").build(),
+                        remoteMemberName2). withDispatcher(Dispatchers.DefaultDispatcherId()), peerId2.toString());
+        shard.tell(new PeerUp(remoteMemberName2, peerId2.toString()), ActorRef.noSender());
+
+        verifyOwner(shard, ENTITY_TYPE, ENTITY_ID4, remoteMemberName2);
+        verifyOwner(shard, ENTITY_TYPE, ENTITY_ID3, LOCAL_MEMBER_NAME);
+        verifyOwner(shard, ENTITY_TYPE, ENTITY_ID2, remoteMemberName1);
+        verifyOwner(shard, ENTITY_TYPE, ENTITY_ID1, LOCAL_MEMBER_NAME);
+
+        // Kill remoteMember1 and send PeerDown
+
+        peer1.tell(PoisonPill.getInstance(), ActorRef.noSender());
+        shard.tell(new PeerDown(remoteMemberName1, peerId1.toString()), ActorRef.noSender());
+
+        verifyOwner(shard, ENTITY_TYPE, ENTITY_ID2, remoteMemberName2);
+    }
+
+    private void commitModification(TestActorRef<EntityOwnershipShard> shard, NormalizedNode<?, ?> node,
+            JavaTestKit sender) {
+        BatchedModifications modifications = new BatchedModifications("tnx", DataStoreVersions.CURRENT_VERSION, "");
+        modifications.setDoCommitOnReady(true);
+        modifications.setReady(true);
+        modifications.setTotalMessagesSent(1);
+        modifications.addModification(new MergeModification(ENTITY_OWNERS_PATH, node));
+
+        shard.tell(modifications, sender.getRef());
+        sender.expectMsgClass(CommitTransactionReply.SERIALIZABLE_CLASS);
+    }
+
     private void verifyEntityCandidateRemoved(final TestActorRef<EntityOwnershipShard> shard, String entityType,
             YangInstanceIdentifier entityId, String candidateName) {
         verifyNodeRemoved(candidatePath(entityType, entityId, candidateName),
@@ -472,8 +604,17 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
     }
 
     private Props newShardProps(Map<String,String> peers) {
-        return EntityOwnershipShard.props(shardID, peers, dataStoreContextBuilder.build(), SCHEMA_CONTEXT,
-                LOCAL_MEMBER_NAME);
+        return newShardProps(newShardId(LOCAL_MEMBER_NAME), peers, LOCAL_MEMBER_NAME);
+    }
+
+    private Props newShardProps(ShardIdentifier shardId, Map<String,String> peers, String memberName) {
+        return EntityOwnershipShard.props(shardId, peers, dataStoreContextBuilder.build(),
+                SCHEMA_CONTEXT, memberName);
+    }
+
+    private ShardIdentifier newShardId(String memberName) {
+        return ShardIdentifier.builder().memberName(memberName).shardName("entity-ownership").
+                type("operational" + NEXT_SHARD_NUM.getAndIncrement()).build();
     }
 
     public static class MockFollower extends UntypedActor {
@@ -482,7 +623,12 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         private final String myId;
 
         public MockFollower(String myId) {
+            this(myId, true);
+        }
+
+        public MockFollower(String myId, boolean grantVote) {
             this.myId = myId;
+            this.grantVote = grantVote;
         }
 
         @Override
