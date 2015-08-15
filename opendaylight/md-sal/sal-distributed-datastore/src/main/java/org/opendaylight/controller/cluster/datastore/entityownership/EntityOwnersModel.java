@@ -19,6 +19,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableOrderedMapNodeBuilder;
 
 /**
  * Utility methods for entity-owners yang model.
@@ -35,7 +36,12 @@ final class EntityOwnersModel {
 
     static final NodeIdentifier ENTITY_OWNERS_NODE_ID = new NodeIdentifier(EntityOwners.QNAME);
     static final NodeIdentifier ENTITY_OWNER_NODE_ID = new NodeIdentifier(ENTITY_OWNER_QNAME);
+    static final NodeIdentifier ENTITY_NODE_ID = new NodeIdentifier(ENTITY_QNAME);
+    static final NodeIdentifier CANDIDATE_NODE_ID = new NodeIdentifier(Candidate.QNAME);
+    static final NodeIdentifier CANDIDATE_NAME_NODE_ID = new NodeIdentifier(CANDIDATE_NAME_QNAME);
     static final YangInstanceIdentifier ENTITY_OWNERS_PATH = YangInstanceIdentifier.of(EntityOwners.QNAME);
+    static final YangInstanceIdentifier ENTITY_TYPES_PATH =
+            YangInstanceIdentifier.of(EntityOwners.QNAME).node(EntityType.QNAME);
 
     static YangInstanceIdentifier entityPath(String entityType, YangInstanceIdentifier entityId) {
         return YangInstanceIdentifier.builder(ENTITY_OWNERS_PATH).node(EntityType.QNAME).
@@ -77,8 +83,8 @@ final class EntityOwnersModel {
     }
 
     static MapNode candidateEntry(String candidateName) {
-        return ImmutableNodes.mapNodeBuilder(Candidate.QNAME).addChild(ImmutableNodes.mapEntry(
-                Candidate.QNAME, CANDIDATE_NAME_QNAME, candidateName)).build();
+        return ImmutableOrderedMapNodeBuilder.create().withNodeIdentifier(new NodeIdentifier(Candidate.QNAME)).
+                addChild(ImmutableNodes.mapEntry(Candidate.QNAME, CANDIDATE_NAME_QNAME, candidateName)).build();
     }
 
     static NormalizedNode<?, ?> entityEntryWithOwner(YangInstanceIdentifier entityId, String owner) {
