@@ -8,7 +8,6 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
-
 public class PeerAddressResolved {
     private final String peerId;
     private final String peerAddress;

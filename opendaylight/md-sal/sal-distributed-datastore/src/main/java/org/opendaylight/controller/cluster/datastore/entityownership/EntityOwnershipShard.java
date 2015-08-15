@@ -7,9 +7,13 @@
  */
 package org.opendaylight.controller.cluster.datastore.entityownership;
 
+import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.CANDIDATE_NAME_NODE_ID;
+import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.CANDIDATE_NODE_ID;
+import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_NODE_ID;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_OWNERS_PATH;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_OWNER_NODE_ID;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_OWNER_QNAME;
+import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_TYPES_PATH;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.candidatePath;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.entityOwnersWithCandidate;
 import akka.actor.ActorRef;
@@ -18,8 +22,11 @@ import akka.actor.Props;
 import akka.pattern.Patterns;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.Shard;
@@ -29,12 +36,18 @@ import org.opendaylight.controller.cluster.datastore.entityownership.messages.Re
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.UnregisterCandidateLocal;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
+import org.opendaylight.controller.cluster.datastore.messages.PeerDown;
+import org.opendaylight.controller.cluster.datastore.messages.PeerUp;
 import org.opendaylight.controller.cluster.datastore.messages.SuccessReply;
 import org.opendaylight.controller.cluster.datastore.modification.DeleteModification;
 import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
+import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
+import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
@@ -50,6 +63,7 @@ class EntityOwnershipShard extends Shard {
     private final String localMemberName;
     private final EntityOwnershipShardCommitCoordinator commitCoordinator;
     private final EntityOwnershipListenerSupport listenerSupport;
+    private final Set<String> downPeerMemberNames = new HashSet<>();
 
     private static DatastoreContext noPersistenceDatastoreContext(DatastoreContext datastoreContext) {
         return DatastoreContext.newBuilderFrom(datastoreContext).persistent(false).build();
@@ -86,6 +100,10 @@ class EntityOwnershipShard extends Shard {
             onCandidateAdded((CandidateAdded) message);
         } else if(message instanceof CandidateRemoved){
             onCandidateRemoved((CandidateRemoved) message);
+        } else if(message instanceof PeerDown) {
+                onPeerDown((PeerDown) message);
+        } else if(message instanceof PeerUp) {
+            onPeerUp((PeerUp) message);
         } else if(!commitCoordinator.handleMessage(message, this)) {
             super.onReceiveCommand(message);
         }
@@ -174,6 +192,74 @@ class EntityOwnershipShard extends Shard {
         }
     }
 
+    private void onPeerDown(PeerDown peerDown) {
+        LOG.debug("onPeerDown: {}", peerDown);
+
+        String downMemberName = peerDown.getMemberName();
+        if(downPeerMemberNames.add(downMemberName)) {
+            selectNewOwnerForEntitiesOwnedBy(downMemberName);
+        }
+    }
+
+    private void onPeerUp(PeerUp message) {
+        LOG.debug("onPeerUp: {}", message);
+
+        if(downPeerMemberNames.remove(message.getMemberName())) {
+            // If this peer went down previously, for its previously owned entities, if there were no other
+            // candidates, the owner would have been cleared so handle that here by trying to re-assign
+            // ownership for entities whose owner is clear.
+
+            selectNewOwnerForEntitiesOwnedBy("");
+        }
+    }
+
+    private void selectNewOwnerForEntitiesOwnedBy(String owner) {
+        DataTreeSnapshot snapshot = getDataStore().getDataTree().takeSnapshot();
+        Optional<NormalizedNode<?, ?>> possibleEntityTypes = snapshot.readNode(ENTITY_TYPES_PATH);
+        if(!possibleEntityTypes.isPresent()) {
+            return;
+        }
+
+        LOG.debug("Searching for entities owned by {}", owner);
+
+        BatchedModifications modifications = commitCoordinator.newBatchedModifications();
+        for(MapEntryNode entityType:  ((MapNode) possibleEntityTypes.get()).getValue()) {
+            Optional<DataContainerChild<? extends PathArgument, ?>> possibleEntities =
+                    entityType.getChild(ENTITY_NODE_ID);
+            if(!possibleEntities.isPresent()) {
+                continue;
+            }
+
+            for(MapEntryNode entity:  ((MapNode) possibleEntities.get()).getValue()) {
+                Optional<DataContainerChild<? extends PathArgument, ?>> possibleOwner =
+                        entity.getChild(ENTITY_OWNER_NODE_ID);
+                if(possibleOwner.isPresent() && owner.equals(possibleOwner.get().getValue().toString())) {
+                    Object newOwner = newOwner(getCandidateNames(entity));
+                    YangInstanceIdentifier entityPath = YangInstanceIdentifier.builder(ENTITY_TYPES_PATH).
+                            node(entityType.getIdentifier()).node(ENTITY_NODE_ID).node(entity.getIdentifier()).
+                                    node(ENTITY_OWNER_NODE_ID).build();
+
+                    LOG.debug("Found entity {}, writing new owner {}", entityPath, newOwner);
+
+                    modifications.addModification(new WriteModification(entityPath,
+                            ImmutableNodes.leafNode(ENTITY_OWNER_NODE_ID, newOwner)));
+                }
+            }
+        }
+
+        commitCoordinator.commitModifications(modifications, this);
+    }
+
+    private Collection<String> getCandidateNames(MapEntryNode entity) {
+        Collection<MapEntryNode> candidates = ((MapNode)entity.getChild(CANDIDATE_NODE_ID).get()).getValue();
+        Collection<String> candidateNames = new ArrayList<>(candidates.size());
+        for(MapEntryNode candidate: candidates) {
+            candidateNames.add(candidate.getChild(CANDIDATE_NAME_NODE_ID).get().getValue().toString());
+        }
+
+        return candidateNames;
+    }
+
     private void writeNewOwner(YangInstanceIdentifier entityPath, String newOwner) {
         LOG.debug("Writing new owner {} for entity {}", newOwner, entityPath);
 
@@ -182,8 +268,10 @@ class EntityOwnershipShard extends Shard {
     }
 
     private String newOwner(Collection<String> candidates) {
-        if(candidates.size() > 0){
-            return candidates.iterator().next();
+        for(String candidate: candidates) {
+            if(!downPeerMemberNames.contains(candidate)) {
+                return candidate;
+            }
         }
 
         return "";
