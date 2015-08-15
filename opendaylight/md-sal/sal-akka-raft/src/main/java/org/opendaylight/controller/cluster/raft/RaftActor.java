@@ -310,7 +310,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                         currentBehavior.getLeaderPayloadVersion()), getSelf());
             }
 
-            onLeaderChanged(oldBehaviorLeaderId, currentBehavior.getLeaderId());
+            onLeaderChanged(oldBehaviorState.getLastValidLeaderId(), currentBehavior.getLeaderId());
         }
 
         if (roleChangeNotifier.isPresent() &&
@@ -634,6 +634,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     private static class BehaviorStateHolder {
         private RaftActorBehavior behavior;
+        private String lastValidLeaderId;
         private String leaderId;
         private short leaderPayloadVersion;
 
@@ -641,6 +642,10 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             this.behavior = behavior;
             this.leaderId = behavior != null ? behavior.getLeaderId() : null;
             this.leaderPayloadVersion = behavior != null ? behavior.getLeaderPayloadVersion() : -1;
+
+            if(this.leaderId != null) {
+                lastValidLeaderId = this.leaderId;
+            }
         }
 
         RaftActorBehavior getBehavior() {
@@ -649,6 +654,10 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
         String getLeaderId() {
             return leaderId;
+        }
+
+        String getLastValidLeaderId() {
+            return lastValidLeaderId;
         }
 
         short getLeaderPayloadVersion() {

@@ -57,7 +57,7 @@ public class MockClusterWrapper implements ClusterWrapper{
         to.tell(createMemberRemoved(memberName, address), null);
     }
 
-    private static ClusterEvent.MemberRemoved createMemberRemoved(String memberName, String address) {
+    public static ClusterEvent.MemberRemoved createMemberRemoved(String memberName, String address) {
         akka.cluster.UniqueAddress uniqueAddress = new UniqueAddress(
             AddressFromURIString.parse(address), 55);
 
