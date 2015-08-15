@@ -140,18 +140,26 @@ class EntityOwnershipShardCommitCoordinator {
     }
 
     void commitModification(Modification modification, EntityOwnershipShard shard) {
+        BatchedModifications modifications = newBatchedModifications();
+        modifications.addModification(modification);
+        commitModifications(modifications, shard);
+    }
+
+    void commitModifications(BatchedModifications modifications, EntityOwnershipShard shard) {
+        if(modifications.getModifications().isEmpty()) {
+            return;
+        }
+
         boolean hasLeader = shard.hasLeader();
         if(inflightCommit != null || !hasLeader) {
             if(log.isDebugEnabled()) {
-                log.debug("{} - adding modification to pending",
+                log.debug("{} - adding modifications to pending",
                         (inflightCommit != null ? "A commit is inflight" : "No shard leader"));
             }
 
-            pendingModifications.add(modification);
+            pendingModifications.addAll(modifications.getModifications());
         } else {
-            inflightCommit = newBatchedModifications();
-            inflightCommit.addModification(modification);
-
+            inflightCommit = modifications;
             shard.tryCommitModifications(inflightCommit);
         }
     }
@@ -179,7 +187,7 @@ class EntityOwnershipShardCommitCoordinator {
         inflightCommit = newBatchedModifications;
     }
 
-    private BatchedModifications newBatchedModifications() {
+    BatchedModifications newBatchedModifications() {
         BatchedModifications modifications = new BatchedModifications(
                 TransactionIdentifier.create(localMemberName, ++transactionIDCounter).toString(),
                 DataStoreVersions.CURRENT_VERSION, "");
