@@ -29,7 +29,7 @@ import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipC
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListener;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListenerRegistration;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.entity.owners.rev150804.entity.owners.EntityOwner;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.entity.owners.rev150804.EntityOwners;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
@@ -57,7 +57,7 @@ public class DistributedEntityOwnershipService implements EntityOwnershipService
 
         Configuration configuration = datastore.getActorContext().getConfiguration();
         Collection<String> entityOwnersMemberNames = configuration.getUniqueMemberNamesForAllShards();
-        configuration.addModuleShardConfiguration(new ModuleShardConfiguration(EntityOwner.QNAME.getNamespace(),
+        configuration.addModuleShardConfiguration(new ModuleShardConfiguration(EntityOwners.QNAME.getNamespace(),
                 "entity-owners", ENTITY_OWNERSHIP_SHARD_NAME, ModuleShardStrategy.NAME, entityOwnersMemberNames));
 
         CreateShard createShard = new CreateShard(ENTITY_OWNERSHIP_SHARD_NAME,
