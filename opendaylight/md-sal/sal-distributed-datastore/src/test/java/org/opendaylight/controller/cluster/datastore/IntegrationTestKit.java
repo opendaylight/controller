@@ -31,26 +31,33 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
-class IntegrationTestKit extends ShardTestKit {
+public class IntegrationTestKit extends ShardTestKit {
 
     DatastoreContext.Builder datastoreContextBuilder;
 
-    IntegrationTestKit(ActorSystem actorSystem, Builder datastoreContextBuilder) {
+    public IntegrationTestKit(ActorSystem actorSystem, Builder datastoreContextBuilder) {
         super(actorSystem);
         this.datastoreContextBuilder = datastoreContextBuilder;
     }
 
-    DistributedDataStore setupDistributedDataStore(String typeName, String... shardNames) {
-        return setupDistributedDataStore(typeName, true, shardNames);
+    public DistributedDataStore setupDistributedDataStore(String typeName, String... shardNames) {
+        return setupDistributedDataStore(typeName, "module-shards.conf", true, SchemaContextHelper.full(), shardNames);
     }
 
-    DistributedDataStore setupDistributedDataStore(String typeName, boolean waitUntilLeader,
+    public DistributedDataStore setupDistributedDataStore(String typeName, boolean waitUntilLeader,
             String... shardNames) {
-        return setupDistributedDataStore(typeName, "module-shards.conf", waitUntilLeader, shardNames);
+        return setupDistributedDataStore(typeName, "module-shards.conf", waitUntilLeader,
+                SchemaContextHelper.full(), shardNames);
     }
 
-    DistributedDataStore setupDistributedDataStore(String typeName, String moduleShardsConfig, boolean waitUntilLeader,
-            String... shardNames) {
+    public DistributedDataStore setupDistributedDataStore(String typeName, String moduleShardsConfig,
+            boolean waitUntilLeader, String... shardNames) {
+        return setupDistributedDataStore(typeName, moduleShardsConfig, waitUntilLeader,
+                SchemaContextHelper.full(), shardNames);
+    }
+
+    public DistributedDataStore setupDistributedDataStore(String typeName, String moduleShardsConfig,
+            boolean waitUntilLeader, SchemaContext schemaContext, String... shardNames) {
         ClusterWrapper cluster = new ClusterWrapperImpl(getSystem());
         Configuration config = new ConfigurationImpl(moduleShardsConfig, "modules.conf");
 
@@ -60,7 +67,6 @@ class IntegrationTestKit extends ShardTestKit {
 
         DistributedDataStore dataStore = new DistributedDataStore(getSystem(), cluster, config, datastoreContext);
 
-        SchemaContext schemaContext = SchemaContextHelper.full();
         dataStore.onGlobalContextUpdated(schemaContext);
 
         if(waitUntilLeader) {
@@ -70,7 +76,7 @@ class IntegrationTestKit extends ShardTestKit {
         return dataStore;
     }
 
-    void waitUntilLeader(ActorContext actorContext, String... shardNames) {
+    public void waitUntilLeader(ActorContext actorContext, String... shardNames) {
         for(String shardName: shardNames) {
             ActorRef shard = findLocalShard(actorContext, shardName);
 
@@ -80,7 +86,7 @@ class IntegrationTestKit extends ShardTestKit {
         }
     }
 
-    void waitUntilNoLeader(ActorContext actorContext, String... shardNames) {
+    public void waitUntilNoLeader(ActorContext actorContext, String... shardNames) {
         for(String shardName: shardNames) {
             ActorRef shard = findLocalShard(actorContext, shardName);
             assertNotNull("No local shard found", shard);
