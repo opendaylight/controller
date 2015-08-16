@@ -102,7 +102,7 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
         return entityTypeEntry.get();
     }
 
-    protected void verifyOwner(String expected, String entityType, YangInstanceIdentifier entityId,
+    static void verifyOwner(String expected, String entityType, YangInstanceIdentifier entityId,
             Function<YangInstanceIdentifier,NormalizedNode<?,?>> reader) {
         AssertionError lastError = null;
         YangInstanceIdentifier entityPath = entityPath(entityType, entityId).node(ENTITY_OWNER_QNAME);
