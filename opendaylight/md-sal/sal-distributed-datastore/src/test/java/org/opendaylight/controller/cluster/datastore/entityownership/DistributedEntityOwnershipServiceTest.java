@@ -13,12 +13,10 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
-import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_OWNERS_PATH;
 import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
-import com.google.common.base.Optional;
-import com.google.common.base.Stopwatch;
+import com.google.common.base.Function;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.Collections;
 import java.util.Map;
@@ -43,7 +41,6 @@ import org.opendaylight.controller.md.sal.common.api.clustering.CandidateAlready
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipCandidate;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipCandidateRegistration;
-import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -123,7 +120,7 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
 
         verifyEntityOwnershipCandidateRegistration(entity, reg);
         verifyRegisterCandidateLocal(shardPropsCreator, entity, candidate);
-        verifyEntityCandidate(readEntityOwners(service.getLocalEntityOwnershipShard()), ENTITY_TYPE, entityId,
+        verifyEntityCandidate(service.getLocalEntityOwnershipShard(), ENTITY_TYPE, entityId,
                 dataStore.getActorContext().getCurrentMemberName());
 
         // Register the same entity - should throw exception
@@ -147,7 +144,7 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
 
         verifyEntityOwnershipCandidateRegistration(entity2, reg2);
         verifyRegisterCandidateLocal(shardPropsCreator, entity2, candidate);
-        verifyEntityCandidate(readEntityOwners(service.getLocalEntityOwnershipShard()), ENTITY_TYPE2, entityId,
+        verifyEntityCandidate(service.getLocalEntityOwnershipShard(), ENTITY_TYPE2, entityId,
                 dataStore.getActorContext().getCurrentMemberName());
 
         service.close();
@@ -196,22 +193,22 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
 
     @Test
     public void testRegisterListener() {
+        // TODO
     }
 
-    private NormalizedNode<?, ?> readEntityOwners(ActorRef shard) throws Exception {
-        Stopwatch sw = Stopwatch.createStarted();
-        while(sw.elapsed(TimeUnit.MILLISECONDS) <= 5000) {
-            DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
-            Optional<NormalizedNode<?, ?>> optional = readTx.read(ENTITY_OWNERS_PATH).
-                    checkedGet(5, TimeUnit.SECONDS);
-            if(optional.isPresent()) {
-                return optional.get();
-            }
-
-            Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
-        }
-
-        return null;
+    private void verifyEntityCandidate(ActorRef entityOwnershipShard, String entityType,
+            YangInstanceIdentifier entityId, String candidateName) {
+        verifyEntityCandidate(entityType, entityId, candidateName,
+                new Function<YangInstanceIdentifier, NormalizedNode<?,?>>() {
+                    @Override
+                    public NormalizedNode<?, ?> apply(YangInstanceIdentifier path) {
+                        try {
+                            return dataStore.newReadOnlyTransaction().read(path).get(5, TimeUnit.SECONDS).get();
+                        } catch (Exception e) {
+                            return null;
+                        }
+                    }
+                });
     }
 
     private void verifyRegisterCandidateLocal(final TestShardPropsCreator shardPropsCreator, Entity entity,

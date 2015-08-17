@@ -63,4 +63,11 @@ public class ModuleShardConfiguration {
     public Collection<String> getShardMemberNames() {
         return shardMemberNames;
     }
+
+    @Override
+    public String toString() {
+        return "ModuleShardConfiguration [namespace=" + namespace + ", moduleName=" + moduleName + ", shardName="
+                + shardName + ", shardMemberNames=" + shardMemberNames + ", shardStrategyName=" + shardStrategyName
+                + "]";
+    }
 }

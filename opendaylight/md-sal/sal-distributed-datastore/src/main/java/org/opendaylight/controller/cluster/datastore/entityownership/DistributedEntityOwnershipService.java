@@ -57,11 +57,9 @@ public class DistributedEntityOwnershipService implements EntityOwnershipService
 
         Configuration configuration = datastore.getActorContext().getConfiguration();
         Collection<String> entityOwnersMemberNames = configuration.getUniqueMemberNamesForAllShards();
-        configuration.addModuleShardConfiguration(new ModuleShardConfiguration(EntityOwners.QNAME.getNamespace(),
-                "entity-owners", ENTITY_OWNERSHIP_SHARD_NAME, ModuleShardStrategy.NAME, entityOwnersMemberNames));
-
-        CreateShard createShard = new CreateShard(ENTITY_OWNERSHIP_SHARD_NAME,
-                entityOwnersMemberNames, newShardPropsCreator(), null);
+        CreateShard createShard = new CreateShard(new ModuleShardConfiguration(EntityOwners.QNAME.getNamespace(),
+                "entity-owners", ENTITY_OWNERSHIP_SHARD_NAME, ModuleShardStrategy.NAME, entityOwnersMemberNames),
+                        newShardPropsCreator(), null);
 
         Future<Object> createFuture = datastore.getActorContext().executeOperationAsync(shardManagerActor,
                 createShard, MESSAGE_TIMEOUT);
