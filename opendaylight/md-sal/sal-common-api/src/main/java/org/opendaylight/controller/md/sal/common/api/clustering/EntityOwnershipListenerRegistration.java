@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.md.sal.common.api.clustering;
 
+import javax.annotation.Nonnull;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
 
 /**
@@ -18,13 +19,13 @@ import org.opendaylight.yangtools.concepts.ObjectRegistration;
 public interface EntityOwnershipListenerRegistration extends ObjectRegistration<EntityOwnershipListener> {
 
     /**
-     *
-     * @return the entity that the listener was registered for
+     * Return the entity type that the listener was registered for
      */
-    Entity getEntity();
+    @Nonnull String getEntityType();
 
     /**
      * Unregister the listener
      */
+    @Override
     void close();
 }
