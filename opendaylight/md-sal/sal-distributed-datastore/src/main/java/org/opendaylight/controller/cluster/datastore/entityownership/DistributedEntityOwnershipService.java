@@ -19,7 +19,9 @@ import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ModuleShardConfiguration;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.RegisterCandidateLocal;
+import org.opendaylight.controller.cluster.datastore.entityownership.messages.RegisterListenerLocal;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.UnregisterCandidateLocal;
+import org.opendaylight.controller.cluster.datastore.entityownership.messages.UnregisterListenerLocal;
 import org.opendaylight.controller.cluster.datastore.messages.CreateShard;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ModuleShardStrategy;
 import org.opendaylight.controller.md.sal.common.api.clustering.CandidateAlreadyRegisteredException;
@@ -128,16 +130,26 @@ public class DistributedEntityOwnershipService implements EntityOwnershipService
     }
 
     void unregisterCandidate(Entity entity, EntityOwnershipCandidate entityOwnershipCandidate) {
-        LOG.debug("Unregistering candidate for {}", entity);
+        LOG.debug("Unregistering candidate {} for {}", entityOwnershipCandidate, entity);
 
         executeLocalEntityOwnershipShardOperation(new UnregisterCandidateLocal(entityOwnershipCandidate, entity));
         registeredEntities.remove(entity);
     }
 
     @Override
-    public EntityOwnershipListenerRegistration registerListener(Entity entity, EntityOwnershipListener listener) {
-        // TODO Auto-generated method stub
-        return null;
+    public EntityOwnershipListenerRegistration registerListener(String entityType, EntityOwnershipListener listener) {
+        RegisterListenerLocal registerListener = new RegisterListenerLocal(listener, entityType);
+
+        LOG.debug("Registering listener with message: {}", registerListener);
+
+        executeLocalEntityOwnershipShardOperation(registerListener);
+        return new DistributedEntityOwnershipListenerRegistration(listener, entityType, this);
+    }
+
+    void unregisterListener(String entityType, EntityOwnershipListener listener) {
+        LOG.debug("Unregistering listener {} for entity type {}", listener, entityType);
+
+        executeLocalEntityOwnershipShardOperation(new UnregisterListenerLocal(listener, entityType));
     }
 
     @Override

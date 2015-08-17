@@ -33,7 +33,9 @@ import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
 import org.opendaylight.controller.cluster.datastore.config.ModuleConfig;
 import org.opendaylight.controller.cluster.datastore.config.ModuleShardConfigProvider;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.RegisterCandidateLocal;
+import org.opendaylight.controller.cluster.datastore.entityownership.messages.RegisterListenerLocal;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.UnregisterCandidateLocal;
+import org.opendaylight.controller.cluster.datastore.entityownership.messages.UnregisterListenerLocal;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.utils.MockClusterWrapper;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
@@ -41,6 +43,8 @@ import org.opendaylight.controller.md.sal.common.api.clustering.CandidateAlready
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipCandidate;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipCandidateRegistration;
+import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListener;
+import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListenerRegistration;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -192,8 +196,42 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
     }
 
     @Test
-    public void testRegisterListener() {
-        // TODO
+    public void testListenerRegistration() {
+        final TestShardPropsCreator shardPropsCreator = new TestShardPropsCreator();
+        DistributedEntityOwnershipService service = new DistributedEntityOwnershipService(dataStore) {
+            @Override
+            protected EntityOwnershipShardPropsCreator newShardPropsCreator() {
+                return shardPropsCreator;
+            }
+        };
+
+        service.start();
+
+        shardPropsCreator.expectShardMessage(RegisterListenerLocal.class);
+
+        YangInstanceIdentifier entityId = YangInstanceIdentifier.of(QNAME);
+        Entity entity = new Entity(ENTITY_TYPE, entityId);
+        EntityOwnershipListener listener = mock(EntityOwnershipListener.class);
+
+        EntityOwnershipListenerRegistration reg = service.registerListener(entity.getType(), listener);
+
+        assertNotNull("EntityOwnershipListenerRegistration null", reg);
+        assertEquals("getEntityType", entity.getType(), reg.getEntityType());
+        assertEquals("getInstance", listener, reg.getInstance());
+
+        RegisterListenerLocal regListener = shardPropsCreator.waitForShardMessage();
+        assertSame("getListener", listener, regListener.getListener());
+        assertEquals("getEntityType", entity.getType(), regListener.getEntityType());
+
+        shardPropsCreator.expectShardMessage(UnregisterListenerLocal.class);
+
+        reg.close();
+
+        UnregisterListenerLocal unregListener = shardPropsCreator.waitForShardMessage();
+        assertEquals("getEntityType", entity.getType(), unregListener.getEntityType());
+        assertSame("getListener", listener, unregListener.getListener());
+
+        service.close();
     }
 
     private void verifyEntityCandidate(ActorRef entityOwnershipShard, String entityType,

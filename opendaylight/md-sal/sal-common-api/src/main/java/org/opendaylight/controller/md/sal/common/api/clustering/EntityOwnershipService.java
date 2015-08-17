@@ -22,9 +22,14 @@ package org.opendaylight.controller.md.sal.common.api.clustering;
 public interface EntityOwnershipService {
 
     /**
-     * Registers as a Candidate that wants to own the given Entity. Only one such request can be made per process.
-     * If multiple requests for registering a Candidate for a given Entity are received in the current process a
-     * CandidateAlreadyRegisteredException will be thrown
+     * Registers a candidate for ownership of the given entity. Only one such request can be made per entity
+     * per process. If multiple requests for registering a candidate for a given entity are received in the
+     * current process a CandidateAlreadyRegisteredException will be thrown.
+     * <p>
+     * The registration is performed asynchronously and the {@link EntityOwnershipCandidate} instance is
+     * notified whenever its process instance is granted ownership of the entity and also whenever it loses
+     * ownership. Note that the {@link EntityOwnershipCandidate} is not notified when another process instance
+     * is granted ownership.
      *
      * @param entity the entity which the Candidate wants to own
      * @param candidate the Candidate that wants to own the entity
@@ -35,13 +40,15 @@ public interface EntityOwnershipService {
             throws CandidateAlreadyRegisteredException;
 
     /**
-     * Registers a Listener that is interested in the ownership status of the given Entity. On registration the Listener
-     * will be notified of the ownership status of the given Entity at the time of registration.
+     * Registers a listener that is interested in ownership changes for entities of the given entity type. The
+     * listener is notified whenever its process instance is granted ownership of the entity and also whenever
+     * it loses ownership. On registration the listener will be notified of all entities its process instance
+     * currently owns at the time of registration.
      *
-     * @param entity the Entity whose ownership status the Listener is interested in
-     * @param listener the Listener that is interested in the entity
+     * @param entityType the type of entities whose ownership status the Listener is interested in
+     * @param listener the listener that is interested in the entities
      * @return a registration object that can be used to unregister the Listener
      */
-    EntityOwnershipListenerRegistration registerListener(Entity entity, EntityOwnershipListener listener);
+    EntityOwnershipListenerRegistration registerListener(String entityType, EntityOwnershipListener listener);
 
 }

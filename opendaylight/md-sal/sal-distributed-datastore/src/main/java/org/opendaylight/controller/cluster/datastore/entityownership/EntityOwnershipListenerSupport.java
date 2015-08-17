@@ -12,6 +12,7 @@ import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -32,6 +33,7 @@ class EntityOwnershipListenerSupport {
     private final ActorContext actorContext;
     private final Map<EntityOwnershipListener, ListenerActorRefEntry> listenerActorMap = new IdentityHashMap<>();
     private final Multimap<Entity, EntityOwnershipListener> entityListenerMap = HashMultimap.create();
+    private final Multimap<String, EntityOwnershipListener> entityTypeListenerMap = HashMultimap.create();
 
     EntityOwnershipListenerSupport(ActorContext actorContext) {
         this.actorContext = actorContext;
@@ -40,7 +42,60 @@ class EntityOwnershipListenerSupport {
     void addEntityOwnershipListener(Entity entity, EntityOwnershipListener listener) {
         LOG.debug("Adding EntityOwnershipListener {} for {}", listener, entity);
 
-        if(entityListenerMap.put(entity, listener)) {
+        addListener(listener, entity, entityListenerMap);
+    }
+
+    void addEntityOwnershipListener(String entityType, EntityOwnershipListener listener) {
+        LOG.debug("Adding EntityOwnershipListener {} for entity type {}", listener, entityType);
+
+        addListener(listener, entityType, entityTypeListenerMap);
+    }
+
+    void removeEntityOwnershipListener(Entity entity, EntityOwnershipListener listener) {
+        LOG.debug("Removing EntityOwnershipListener {} for {}", listener, entity);
+
+        removeListener(listener, entity, entityListenerMap);
+    }
+
+    void removeEntityOwnershipListener(String entityType, EntityOwnershipListener listener) {
+        LOG.debug("Removing EntityOwnershipListener {} for entity type {}", listener, entityType);
+
+        removeListener(listener, entityType, entityTypeListenerMap);
+    }
+
+    void notifyEntityOwnershipListeners(Entity entity, boolean wasOwner, boolean isOwner) {
+        notifyListeners(entity, entity, wasOwner, isOwner, entityListenerMap);
+        notifyListeners(entity, entity.getType(), wasOwner, isOwner, entityTypeListenerMap);
+    }
+
+    void notifyEntityOwnershipListener(Entity entity, boolean wasOwner, boolean isOwner,
+            EntityOwnershipListener listener) {
+        notifyListeners(entity, wasOwner, isOwner, Arrays.asList(listener));
+    }
+
+    private <T> void notifyListeners(Entity entity, T mapKey, boolean wasOwner, boolean isOwner,
+            Multimap<T, EntityOwnershipListener> listenerMap) {
+        Collection<EntityOwnershipListener> listeners = listenerMap.get(mapKey);
+        if(!listeners.isEmpty()) {
+            notifyListeners(entity, wasOwner, isOwner, listeners);
+        }
+    }
+
+    private void notifyListeners(Entity entity, boolean wasOwner, boolean isOwner,
+            Collection<EntityOwnershipListener> listeners) {
+        EntityOwnershipChanged changed = new EntityOwnershipChanged(entity, wasOwner, isOwner);
+        for(EntityOwnershipListener listener: listeners) {
+            ActorRef listenerActor = listenerActorFor(listener);
+
+            LOG.debug("Notifying EntityOwnershipListenerActor {} with {}", listenerActor, changed);
+
+            listenerActor.tell(changed, ActorRef.noSender());
+        }
+    }
+
+    private <T> void addListener(EntityOwnershipListener listener, T mapKey,
+            Multimap<T, EntityOwnershipListener> toListenerMap) {
+        if(toListenerMap.put(mapKey, listener)) {
             ListenerActorRefEntry listenerEntry = listenerActorMap.get(listener);
             if(listenerEntry == null) {
                 listenerActorMap.put(listener, new ListenerActorRefEntry());
@@ -50,10 +105,9 @@ class EntityOwnershipListenerSupport {
         }
     }
 
-    void removeEntityOwnershipListener(Entity entity, EntityOwnershipListener listener) {
-        LOG.debug("Removing EntityOwnershipListener {} for {}", listener, entity);
-
-        if(entityListenerMap.remove(entity, listener)) {
+    private <T> void removeListener(EntityOwnershipListener listener, T mapKey,
+            Multimap<T, EntityOwnershipListener> fromListenerMap) {
+        if(fromListenerMap.remove(mapKey, listener)) {
             ListenerActorRefEntry listenerEntry = listenerActorMap.get(listener);
 
             LOG.debug("Found {}", listenerEntry);
@@ -67,22 +121,6 @@ class EntityOwnershipListenerSupport {
                     listenerEntry.actorRef.tell(PoisonPill.getInstance(), ActorRef.noSender());
                 }
             }
-        }
-    }
-
-    void notifyEntityOwnershipListeners(Entity entity, boolean wasOwner, boolean isOwner) {
-        Collection<EntityOwnershipListener> listeners = entityListenerMap.get(entity);
-        if(listeners.isEmpty()) {
-            return;
-        }
-
-        EntityOwnershipChanged changed = new EntityOwnershipChanged(entity, wasOwner, isOwner);
-        for(EntityOwnershipListener listener: listeners) {
-            ActorRef listenerActor = listenerActorFor(listener);
-
-            LOG.debug("Notifying EntityOwnershipListenerActor {} with {}", listenerActor,changed);
-
-            listenerActor.tell(changed, ActorRef.noSender());
         }
     }
 
