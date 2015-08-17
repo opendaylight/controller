@@ -36,8 +36,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.typesafe.config.ConfigFactory;
+import java.net.URI;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -48,6 +48,9 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
+import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
+import org.opendaylight.controller.cluster.datastore.config.EmptyModuleShardConfigProvider;
+import org.opendaylight.controller.cluster.datastore.config.ModuleShardConfiguration;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.exceptions.NotInitializedException;
 import org.opendaylight.controller.cluster.datastore.exceptions.PrimaryNotFoundException;
@@ -129,9 +132,13 @@ public class ShardManagerTest extends AbstractActorTest {
         InMemoryJournal.clear();
     }
 
-    private Props newShardMgrProps(boolean persistent) {
-        return ShardManager.props(new MockClusterWrapper(), new MockConfiguration(),
-                datastoreContextBuilder.persistent(persistent).build(), ready, primaryShardInfoCache);
+    private Props newShardMgrProps() {
+        return newShardMgrProps(new MockConfiguration());
+    }
+
+    private Props newShardMgrProps(Configuration config) {
+        return ShardManager.props(new MockClusterWrapper(), config, datastoreContextBuilder.build(), ready,
+                primaryShardInfoCache);
     }
 
     private Props newPropsShardMgrWithMockShardActor() {
@@ -739,7 +746,7 @@ public class ShardManagerTest extends AbstractActorTest {
     public void testRoleChangeNotificationAndShardLeaderStateChangedReleaseReady() throws Exception {
         new JavaTestKit(getSystem()) {
             {
-                TestActorRef<ShardManager> shardManager = TestActorRef.create(getSystem(), newShardMgrProps(true));
+                TestActorRef<ShardManager> shardManager = TestActorRef.create(getSystem(), newShardMgrProps());
 
                 String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
                 shardManager.underlyingActor().onReceiveCommand(new RoleChangeNotification(
@@ -759,7 +766,7 @@ public class ShardManagerTest extends AbstractActorTest {
     public void testRoleChangeNotificationToFollowerWithShardLeaderStateChangedReleaseReady() throws Exception {
         new JavaTestKit(getSystem()) {
             {
-                TestActorRef<ShardManager> shardManager = TestActorRef.create(getSystem(), newShardMgrProps(true));
+                TestActorRef<ShardManager> shardManager = TestActorRef.create(getSystem(), newShardMgrProps());
 
                 String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
                 shardManager.underlyingActor().onReceiveCommand(new RoleChangeNotification(
@@ -782,7 +789,7 @@ public class ShardManagerTest extends AbstractActorTest {
     public void testReadyCountDownForMemberUpAfterLeaderStateChanged() throws Exception {
         new JavaTestKit(getSystem()) {
             {
-                TestActorRef<ShardManager> shardManager = TestActorRef.create(getSystem(), newShardMgrProps(true));
+                TestActorRef<ShardManager> shardManager = TestActorRef.create(getSystem(), newShardMgrProps());
 
                 String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
                 shardManager.underlyingActor().onReceiveCommand(new RoleChangeNotification(
@@ -805,7 +812,7 @@ public class ShardManagerTest extends AbstractActorTest {
     public void testRoleChangeNotificationDoNothingForUnknownShard() throws Exception {
         new JavaTestKit(getSystem()) {
             {
-                TestActorRef<ShardManager> shardManager = TestActorRef.create(getSystem(), newShardMgrProps(true));
+                TestActorRef<ShardManager> shardManager = TestActorRef.create(getSystem(), newShardMgrProps());
 
                 shardManager.underlyingActor().onReceiveCommand(new RoleChangeNotification(
                         "unknown", RaftState.Candidate.name(), RaftState.Leader.name()));
@@ -818,7 +825,7 @@ public class ShardManagerTest extends AbstractActorTest {
 
     @Test
     public void testByDefaultSyncStatusIsFalse() throws Exception{
-        final Props persistentProps = newShardMgrProps(true);
+        final Props persistentProps = newShardMgrProps();
         final TestActorRef<ShardManager> shardManager =
                 TestActorRef.create(getSystem(), persistentProps);
 
@@ -845,7 +852,7 @@ public class ShardManagerTest extends AbstractActorTest {
 
     @Test
     public void testWhenShardIsCandidateSyncStatusIsFalse() throws Exception{
-        final Props persistentProps = newShardMgrProps(true);
+        final Props persistentProps = newShardMgrProps();
         final TestActorRef<ShardManager> shardManager =
                 TestActorRef.create(getSystem(), persistentProps);
 
@@ -958,7 +965,8 @@ public class ShardManagerTest extends AbstractActorTest {
         new JavaTestKit(getSystem()) {{
             datastoreContextBuilder.shardInitializationTimeout(1, TimeUnit.MINUTES).persistent(true);
 
-            ActorRef shardManager = getSystem().actorOf(newShardMgrProps(false));
+            ActorRef shardManager = getSystem().actorOf(newShardMgrProps(
+                    new ConfigurationImpl(new EmptyModuleShardConfigProvider())));
 
             SchemaContext schemaContext = TestModel.createTestContext();
             shardManager.tell(new UpdateSchemaContext(schemaContext), ActorRef.noSender());
@@ -967,8 +975,9 @@ public class ShardManagerTest extends AbstractActorTest {
                     persistent(false).build();
             TestShardPropsCreator shardPropsCreator = new TestShardPropsCreator();
 
-            shardManager.tell(new CreateShard("foo", Arrays.asList("member-1", "member-5", "member-6"), shardPropsCreator,
-                    datastoreContext), getRef());
+            ModuleShardConfiguration config = new ModuleShardConfiguration(URI.create("foo-ns"), "foo-module",
+                    "foo", null, Arrays.asList("member-1", "member-5", "member-6"));
+            shardManager.tell(new CreateShard(config, shardPropsCreator, datastoreContext), getRef());
 
             expectMsgClass(duration("5 seconds"), CreateShardReply.class);
 
@@ -986,7 +995,7 @@ public class ShardManagerTest extends AbstractActorTest {
 
             // Send CreateShard with same name - should fail.
 
-            shardManager.tell(new CreateShard("foo", Collections.<String>emptyList(), shardPropsCreator, null), getRef());
+            shardManager.tell(new CreateShard(config, shardPropsCreator, null), getRef());
 
             expectMsgClass(duration("5 seconds"), akka.actor.Status.Failure.class);
         }};
@@ -995,11 +1004,14 @@ public class ShardManagerTest extends AbstractActorTest {
     @Test
     public void testOnReceiveCreateShardWithNoInitialSchemaContext() {
         new JavaTestKit(getSystem()) {{
-            ActorRef shardManager = getSystem().actorOf(newShardMgrProps(false));
+            ActorRef shardManager = getSystem().actorOf(newShardMgrProps(
+                    new ConfigurationImpl(new EmptyModuleShardConfigProvider())));
 
             TestShardPropsCreator shardPropsCreator = new TestShardPropsCreator();
 
-            shardManager.tell(new CreateShard("foo", Arrays.asList("member-1"), shardPropsCreator, null), getRef());
+            ModuleShardConfiguration config = new ModuleShardConfiguration(URI.create("foo-ns"), "foo-module",
+                    "foo", null, Arrays.asList("member-1"));
+            shardManager.tell(new CreateShard(config, shardPropsCreator, null), getRef());
 
             expectMsgClass(duration("5 seconds"), CreateShardReply.class);
 

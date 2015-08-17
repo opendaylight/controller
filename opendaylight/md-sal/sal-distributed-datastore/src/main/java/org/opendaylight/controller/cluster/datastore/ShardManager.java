@@ -39,6 +39,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActorWithMetering;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
+import org.opendaylight.controller.cluster.datastore.config.ModuleShardConfiguration;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.exceptions.NotInitializedException;
 import org.opendaylight.controller.cluster.datastore.exceptions.PrimaryNotFoundException;
@@ -209,25 +210,29 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     private void onCreateShard(CreateShard createShard) {
         Object reply;
         try {
-            if(localShards.containsKey(createShard.getShardName())) {
+            ModuleShardConfiguration moduleShardConfig = createShard.getModuleShardConfig();
+            if(localShards.containsKey(moduleShardConfig.getShardName())) {
                 throw new IllegalStateException(String.format("Shard with name %s already exists",
-                        createShard.getShardName()));
+                        moduleShardConfig.getShardName()));
             }
 
-            ShardIdentifier shardId = getShardIdentifier(cluster.getCurrentMemberName(), createShard.getShardName());
-            Map<String, String> peerAddresses = getPeerAddresses(createShard.getShardName(), createShard.getMemberNames());
+            configuration.addModuleShardConfiguration(moduleShardConfig);
+
+            ShardIdentifier shardId = getShardIdentifier(cluster.getCurrentMemberName(), moduleShardConfig.getShardName());
+            Map<String, String> peerAddresses = getPeerAddresses(moduleShardConfig.getShardName()/*,
+                    moduleShardConfig.getShardMemberNames()*/);
 
             LOG.debug("onCreateShard: shardId: {}, memberNames: {}. peerAddresses: {}", shardId,
-                    createShard.getMemberNames(), peerAddresses);
+                    moduleShardConfig.getShardMemberNames(), peerAddresses);
 
             DatastoreContext shardDatastoreContext = createShard.getDatastoreContext();
             if(shardDatastoreContext == null) {
                 shardDatastoreContext = datastoreContext;
             }
 
-            ShardInformation info = new ShardInformation(createShard.getShardName(), shardId, peerAddresses,
+            ShardInformation info = new ShardInformation(moduleShardConfig.getShardName(), shardId, peerAddresses,
                     shardDatastoreContext, createShard.getShardPropsCreator());
-            localShards.put(createShard.getShardName(), info);
+            localShards.put(info.getShardName(), info);
 
             mBean.addLocalShard(shardId.toString());
 
@@ -707,14 +712,9 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
      * Given the name of the shard find the addresses of all it's peers
      *
      * @param shardName
-     * @return
      */
     private Map<String, String> getPeerAddresses(String shardName) {
-        return getPeerAddresses(shardName, configuration.getMembersFromShardName(shardName));
-    }
-
-    private Map<String, String> getPeerAddresses(String shardName, Collection<String> members) {
-
+        Collection<String> members = configuration.getMembersFromShardName(shardName);
         Map<String, String> peerAddresses = new HashMap<>();
 
         String currentMemberName = this.cluster.getCurrentMemberName();
