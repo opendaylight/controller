@@ -45,7 +45,9 @@ import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.controller.cluster.datastore.ShardDataTree;
 import org.opendaylight.controller.cluster.datastore.ShardTestKit;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.RegisterCandidateLocal;
+import org.opendaylight.controller.cluster.datastore.entityownership.messages.RegisterListenerLocal;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.UnregisterCandidateLocal;
+import org.opendaylight.controller.cluster.datastore.entityownership.messages.UnregisterListenerLocal;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
@@ -65,6 +67,7 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipCandidate;
+import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListener;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -586,6 +589,58 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         verifyOwner(peer2, ENTITY_TYPE, ENTITY_ID3, peerMemberName2);
         verifyOwner(peer2, ENTITY_TYPE, ENTITY_ID2, peerMemberName2);
         verifyOwner(peer2, ENTITY_TYPE, ENTITY_ID1, peerMemberName2);
+    }
+
+    @Test
+    public void testListenerRegistration() throws Exception {
+        ShardTestKit kit = new ShardTestKit(getSystem());
+        TestActorRef<EntityOwnershipShard> shard = actorFactory.createTestActor(newShardProps());
+        kit.waitUntilLeader(shard);
+        ShardDataTree shardDataTree = shard.underlyingActor().getDataStore();
+
+        Entity entity1 = new Entity(ENTITY_TYPE, ENTITY_ID1);
+        Entity entity2 = new Entity(ENTITY_TYPE, ENTITY_ID2);
+        Entity entity3 = new Entity(ENTITY_TYPE, ENTITY_ID3);
+        EntityOwnershipListener listener = mock(EntityOwnershipListener.class);
+        EntityOwnershipCandidate candidate = mock(EntityOwnershipCandidate.class);
+
+        shard.tell(new RegisterListenerLocal(listener, entity1), kit.getRef());
+        kit.expectMsgClass(SuccessReply.class);
+
+        shard.tell(new RegisterListenerLocal(listener, entity2), kit.getRef());
+        kit.expectMsgClass(SuccessReply.class);
+
+        shard.tell(new RegisterCandidateLocal(candidate, entity1), kit.getRef());
+        kit.expectMsgClass(SuccessReply.class);
+
+        verify(listener, timeout(5000)).ownershipChanged(entity1, false, true);
+
+        shard.tell(new RegisterCandidateLocal(candidate, entity2), kit.getRef());
+        kit.expectMsgClass(SuccessReply.class);
+
+        verify(listener, timeout(5000)).ownershipChanged(entity2, false, true);
+        reset(listener);
+
+        String remoteMemberName = "remoteMember";
+        writeNode(ENTITY_OWNERS_PATH, entityOwnersWithCandidate(ENTITY_TYPE, entity1.getId(), remoteMemberName),
+                shardDataTree);
+        verifyCommittedEntityCandidate(shard, ENTITY_TYPE, entity1.getId(), remoteMemberName);
+
+        shard.tell(new UnregisterCandidateLocal(candidate, entity1), kit.getRef());
+        kit.expectMsgClass(SuccessReply.class);
+
+        verify(listener, timeout(5000)).ownershipChanged(entity1, true, false);
+        reset(listener);
+
+        shard.tell(new UnregisterListenerLocal(listener, entity2), kit.getRef());
+        kit.expectMsgClass(SuccessReply.class);
+
+        shard.tell(new RegisterCandidateLocal(candidate, entity3), kit.getRef());
+        kit.expectMsgClass(SuccessReply.class);
+
+        verifyOwner(shard, ENTITY_TYPE, entity3.getId(), LOCAL_MEMBER_NAME);
+        Uninterruptibles.sleepUninterruptibly(500, TimeUnit.MILLISECONDS);
+        verify(listener, never()).ownershipChanged(any(Entity.class), anyBoolean(), anyBoolean());
     }
 
     private void commitModification(TestActorRef<EntityOwnershipShard> shard, NormalizedNode<?, ?> node,

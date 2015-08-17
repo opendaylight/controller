@@ -34,7 +34,9 @@ import org.opendaylight.controller.cluster.datastore.Shard;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.CandidateAdded;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.CandidateRemoved;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.RegisterCandidateLocal;
+import org.opendaylight.controller.cluster.datastore.entityownership.messages.RegisterListenerLocal;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.UnregisterCandidateLocal;
+import org.opendaylight.controller.cluster.datastore.entityownership.messages.UnregisterListenerLocal;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
 import org.opendaylight.controller.cluster.datastore.messages.PeerDown;
@@ -111,6 +113,10 @@ class EntityOwnershipShard extends Shard {
             onPeerDown((PeerDown) message);
         } else if(message instanceof PeerUp) {
             onPeerUp((PeerUp) message);
+        } if(message instanceof RegisterListenerLocal) {
+            onRegisterListenerLocal((RegisterListenerLocal)message);
+        } if(message instanceof UnregisterListenerLocal) {
+            onUnregisterListenerLocal((UnregisterListenerLocal)message);
         } else if(!commitCoordinator.handleMessage(message, this)) {
             super.onReceiveCommand(message);
         }
@@ -136,6 +142,22 @@ class EntityOwnershipShard extends Shard {
 
         YangInstanceIdentifier candidatePath = candidatePath(entity.getType(), entity.getId(), localMemberName);
         commitCoordinator.commitModification(new DeleteModification(candidatePath), this);
+
+        getSender().tell(SuccessReply.INSTANCE, getSelf());
+    }
+
+    private void onRegisterListenerLocal(RegisterListenerLocal registerListener) {
+        LOG.debug("{}: onRegisterListenerLocal: {}", persistenceId(), registerListener);
+
+        listenerSupport.addEntityOwnershipListener(registerListener.getEntity(), registerListener.getListener());
+
+        getSender().tell(SuccessReply.INSTANCE, getSelf());
+    }
+
+    private void onUnregisterListenerLocal(UnregisterListenerLocal unregisterListener) {
+        LOG.debug("{}: onUnregisterListenerLocal: {}", persistenceId(), unregisterListener);
+
+        listenerSupport.removeEntityOwnershipListener(unregisterListener.getEntity(), unregisterListener.getListener());
 
         getSender().tell(SuccessReply.INSTANCE, getSelf());
     }
