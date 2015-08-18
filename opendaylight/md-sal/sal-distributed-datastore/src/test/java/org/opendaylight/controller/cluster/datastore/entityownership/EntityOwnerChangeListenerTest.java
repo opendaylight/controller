@@ -26,6 +26,7 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
+;
 
 /**
  * Unit tests for EntityOwnerChangeListener.
@@ -85,9 +86,21 @@ public class EntityOwnerChangeListenerTest {
         reset(mockListenerSupport);
         writeNode(entityPath(ENTITY_TYPE, ENTITY_ID2), entityEntryWithOwner(ENTITY_ID2, LOCAL_MEMBER_NAME));
         verify(mockListenerSupport).notifyEntityOwnershipListeners(ENTITY2, false, true);
+
+        reset(mockListenerSupport);
+        writeNode(entityPath(ENTITY_TYPE, ENTITY_ID2), entityEntryWithOwner(ENTITY_ID2, LOCAL_MEMBER_NAME));
+        verify(mockListenerSupport, never()).notifyEntityOwnershipListeners(any(Entity.class), anyBoolean(), anyBoolean());
+
+        reset(mockListenerSupport);
+        writeNode(entityPath(ENTITY_TYPE, ENTITY_ID2), entityEntryWithOwner(ENTITY_ID2, null));
+        verify(mockListenerSupport).notifyEntityOwnershipListeners(ENTITY2, true, false);
     }
 
     private void writeNode(YangInstanceIdentifier path, NormalizedNode<?, ?> node) throws DataValidationFailedException {
         AbstractEntityOwnershipTest.writeNode(path, node, shardDataTree);
+    }
+
+    private void deleteNode(YangInstanceIdentifier path) throws DataValidationFailedException {
+        AbstractEntityOwnershipTest.deleteNode(path, shardDataTree);
     }
 }

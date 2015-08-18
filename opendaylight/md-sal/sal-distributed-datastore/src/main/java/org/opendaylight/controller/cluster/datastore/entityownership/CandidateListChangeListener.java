@@ -47,11 +47,13 @@ import org.slf4j.LoggerFactory;
 class CandidateListChangeListener implements DOMDataTreeChangeListener {
     private static final Logger LOG = LoggerFactory.getLogger(CandidateListChangeListener.class);
 
+    private final String logId;
     private final ActorRef shard;
     private final Map<YangInstanceIdentifier, Collection<String>> currentCandidates = new HashMap<>();
 
-    CandidateListChangeListener(ActorRef shard) {
+    CandidateListChangeListener(ActorRef shard, String logId) {
         this.shard = Preconditions.checkNotNull(shard, "shard should not be null");
+        this.logId = logId;
     }
 
     void init(ShardDataTree shardDataTree) {
@@ -65,7 +67,7 @@ class CandidateListChangeListener implements DOMDataTreeChangeListener {
         for(DataTreeCandidate change: changes) {
             DataTreeCandidateNode changeRoot = change.getRootNode();
 
-            LOG.debug("Candidate node changed: {}, {}", changeRoot.getModificationType(), change.getRootPath());
+            LOG.debug("{}: Candidate node changed: {}, {}", logId, changeRoot.getModificationType(), change.getRootPath());
 
             NodeIdentifierWithPredicates candidateKey =
                     (NodeIdentifierWithPredicates) change.getRootPath().getLastPathArgument();
@@ -74,12 +76,12 @@ class CandidateListChangeListener implements DOMDataTreeChangeListener {
             YangInstanceIdentifier entityId = extractEntityPath(change.getRootPath());
 
             if(changeRoot.getModificationType() == ModificationType.WRITE) {
-                LOG.debug("Candidate {} was added for entity {}", candidate, entityId);
+                LOG.debug("{}: Candidate {} was added for entity {}", logId, candidate, entityId);
 
                 Collection<String> currentCandidates = addToCurrentCandidates(entityId, candidate);
                 shard.tell(new CandidateAdded(entityId, candidate, new ArrayList<>(currentCandidates)), shard);
             } else if(changeRoot.getModificationType() == ModificationType.DELETE) {
-                LOG.debug("Candidate {} was removed for entity {}", candidate, entityId);
+                LOG.debug("{}: Candidate {} was removed for entity {}", logId, candidate, entityId);
 
                 Collection<String> currentCandidates = removeFromCurrentCandidates(entityId, candidate);
                 shard.tell(new CandidateRemoved(entityId, candidate, new ArrayList<>(currentCandidates)), shard);
