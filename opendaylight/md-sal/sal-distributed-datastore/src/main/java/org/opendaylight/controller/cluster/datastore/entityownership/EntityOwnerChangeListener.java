@@ -7,25 +7,18 @@
  */
 package org.opendaylight.controller.cluster.datastore.entityownership;
 
-import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_ID_QNAME;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_OWNERS_PATH;
-import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_OWNER_NODE_ID;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_QNAME;
-import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_TYPE_QNAME;
+import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.createEntity;
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import java.util.Collection;
-import java.util.Map.Entry;
 import org.opendaylight.controller.cluster.datastore.ShardDataTree;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.entity.owners.rev150804.entity.owners.EntityType;
-import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
-import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
-import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
+import org.opendaylight.yangtools.yang.data.api.schema.LeafNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateNode;
@@ -50,27 +43,26 @@ class EntityOwnerChangeListener implements DOMDataTreeChangeListener {
 
     void init(ShardDataTree shardDataTree) {
         shardDataTree.registerTreeChangeListener(YangInstanceIdentifier.builder(ENTITY_OWNERS_PATH).
-                node(EntityType.QNAME).node(EntityType.QNAME).node(ENTITY_QNAME).node(ENTITY_QNAME).build(), this);
+                node(EntityType.QNAME).node(EntityType.QNAME).node(ENTITY_QNAME).node(ENTITY_QNAME).node(EntityOwnersModel.ENTITY_OWNER_QNAME).build(), this);
     }
 
     @Override
     public void onDataTreeChanged(Collection<DataTreeCandidate> changes) {
         for(DataTreeCandidate change: changes) {
             DataTreeCandidateNode changeRoot = change.getRootNode();
-            MapEntryNode entityNode = (MapEntryNode) changeRoot.getDataAfter().get();
+            LeafNode<?> ownerLeaf = (LeafNode<?>) changeRoot.getDataAfter().get();
 
-            LOG.debug("Entity node changed: {}, {}", changeRoot.getModificationType(), change.getRootPath());
+            LOG.debug("{}: Entity node changed: {}, {}", logId(), changeRoot.getModificationType(), change.getRootPath());
 
-            String newOwner = extractOwner(entityNode);
+            String newOwner = extractOwner(ownerLeaf);
 
             String origOwner = null;
             Optional<NormalizedNode<?, ?>> dataBefore = changeRoot.getDataBefore();
             if(dataBefore.isPresent()) {
-                MapEntryNode origEntityNode = (MapEntryNode) changeRoot.getDataBefore().get();
-                origOwner = extractOwner(origEntityNode);
+                origOwner = extractOwner((LeafNode<?>) changeRoot.getDataBefore().get());
             }
 
-            LOG.debug("New owner: {}, Original owner: {}", newOwner, origOwner);
+            LOG.debug("{}: New owner: {}, Original owner: {}", logId(), newOwner, origOwner);
 
             if(!Objects.equal(origOwner, newOwner)) {
                 boolean isOwner = Objects.equal(localMemberName, newOwner);
@@ -78,8 +70,8 @@ class EntityOwnerChangeListener implements DOMDataTreeChangeListener {
                 if(isOwner || wasOwner) {
                     Entity entity = createEntity(change.getRootPath());
 
-                    LOG.debug("Calling notifyEntityOwnershipListeners: entity: {}, wasOwner: {}, isOwner: {}",
-                            entity, wasOwner, isOwner);
+                    LOG.debug("{}: Calling notifyEntityOwnershipListeners: entity: {}, wasOwner: {}, isOwner: {}",
+                            logId(), entity, wasOwner, isOwner);
 
                     listenerSupport.notifyEntityOwnershipListeners(entity, wasOwner, isOwner);
                 }
@@ -87,26 +79,12 @@ class EntityOwnerChangeListener implements DOMDataTreeChangeListener {
         }
     }
 
-    private Entity createEntity(YangInstanceIdentifier entityPath) {
-        String entityType = null;
-        YangInstanceIdentifier entityId = null;
-        for(PathArgument pathArg: entityPath.getPathArguments()) {
-            if(pathArg instanceof NodeIdentifierWithPredicates) {
-                NodeIdentifierWithPredicates nodeKey = (NodeIdentifierWithPredicates) pathArg;
-                Entry<QName, Object> key = nodeKey.getKeyValues().entrySet().iterator().next();
-                if(ENTITY_TYPE_QNAME.equals(key.getKey())) {
-                    entityType = key.getValue().toString();
-                } else if(ENTITY_ID_QNAME.equals(key.getKey())) {
-                    entityId = (YangInstanceIdentifier) key.getValue();
-                }
-            }
-        }
-
-        return new Entity(entityType, entityId);
+    private String extractOwner(LeafNode<?> ownerLeaf) {
+        Object value = ownerLeaf.getValue();
+        return value != null ? value.toString() : null;
     }
 
-    private String extractOwner(MapEntryNode entityNode) {
-        Optional<DataContainerChild<? extends PathArgument, ?>> ownerNode = entityNode.getChild(ENTITY_OWNER_NODE_ID);
-        return ownerNode.isPresent() ? (String) ownerNode.get().getValue() : null;
+    private String logId() {
+        return listenerSupport.getLogId();
     }
 }

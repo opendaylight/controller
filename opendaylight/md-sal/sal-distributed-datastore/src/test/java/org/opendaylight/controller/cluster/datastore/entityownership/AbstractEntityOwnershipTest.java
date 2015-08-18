@@ -51,7 +51,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailed
  */
 public class AbstractEntityOwnershipTest extends AbstractActorTest {
     protected void verifyEntityCandidate(NormalizedNode<?, ?> node, String entityType,
-            YangInstanceIdentifier entityId, String candidateName) {
+            YangInstanceIdentifier entityId, String candidateName, boolean expectPresent) {
         try {
             assertNotNull("Missing " + EntityOwners.QNAME.toString(), node);
             assertTrue(node instanceof ContainerNode);
@@ -59,24 +59,25 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
             ContainerNode entityOwnersNode = (ContainerNode) node;
 
             MapEntryNode entityTypeEntry = getMapEntryNodeChild(entityOwnersNode, EntityType.QNAME,
-                    ENTITY_TYPE_QNAME, entityType);
+                    ENTITY_TYPE_QNAME, entityType, true);
 
-            MapEntryNode entityEntry = getMapEntryNodeChild(entityTypeEntry, ENTITY_QNAME, ENTITY_ID_QNAME, entityId);
+            MapEntryNode entityEntry = getMapEntryNodeChild(entityTypeEntry, ENTITY_QNAME, ENTITY_ID_QNAME,
+                    entityId, true);
 
-            getMapEntryNodeChild(entityEntry, Candidate.QNAME, CANDIDATE_NAME_QNAME, candidateName);
+            getMapEntryNodeChild(entityEntry, Candidate.QNAME, CANDIDATE_NAME_QNAME, candidateName, expectPresent);
         } catch(AssertionError e) {
             throw new AssertionError("Verification of entity candidate failed - returned data was: " + node, e);
         }
     }
 
     protected void verifyEntityCandidate(String entityType, YangInstanceIdentifier entityId, String candidateName,
-            Function<YangInstanceIdentifier,NormalizedNode<?,?>> reader) {
+            Function<YangInstanceIdentifier,NormalizedNode<?,?>> reader, boolean expectPresent) {
         AssertionError lastError = null;
         Stopwatch sw = Stopwatch.createStarted();
         while(sw.elapsed(TimeUnit.MILLISECONDS) <= 5000) {
             NormalizedNode<?, ?> node = reader.apply(ENTITY_OWNERS_PATH);
             try {
-                verifyEntityCandidate(node, entityType, entityId, candidateName);
+                verifyEntityCandidate(node, entityType, entityId, candidateName, expectPresent);
                 return;
             } catch (AssertionError e) {
                 lastError = e;
@@ -87,8 +88,13 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
         throw lastError;
     }
 
+    protected void verifyEntityCandidate(String entityType, YangInstanceIdentifier entityId, String candidateName,
+            Function<YangInstanceIdentifier,NormalizedNode<?,?>> reader) {
+        verifyEntityCandidate(entityType, entityId, candidateName, reader, true);
+    }
+
     protected MapEntryNode getMapEntryNodeChild(DataContainerNode<? extends PathArgument> parent, QName childMap,
-            QName child, Object key) {
+            QName child, Object key, boolean expectPresent) {
         Optional<DataContainerChild<? extends PathArgument, ?>> childNode =
                 parent.getChild(new NodeIdentifier(childMap));
         assertEquals("Missing " + childMap.toString(), true, childNode.isPresent());
@@ -96,10 +102,13 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
         MapNode entityTypeMapNode = (MapNode) childNode.get();
         Optional<MapEntryNode> entityTypeEntry = entityTypeMapNode.getChild(new NodeIdentifierWithPredicates(
                 childMap, child, key));
-        if(!entityTypeEntry.isPresent()) {
+        if(expectPresent && !entityTypeEntry.isPresent()) {
             fail("Missing " + childMap.toString() + " entry for " + key + ". Actual: " + entityTypeMapNode.getValue());
+        } else if(!expectPresent && entityTypeEntry.isPresent()) {
+            fail("Found unexpected " + childMap.toString() + " entry for " + key);
         }
-        return entityTypeEntry.get();
+
+        return entityTypeEntry.isPresent() ? entityTypeEntry.get() : null;
     }
 
     static void verifyOwner(String expected, String entityType, YangInstanceIdentifier entityId,
