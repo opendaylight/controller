@@ -7,12 +7,16 @@
  */
 package org.opendaylight.controller.cluster.datastore.entityownership;
 
+import java.util.Map.Entry;
+import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.entity.owners.rev150804.EntityOwners;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.entity.owners.rev150804.entity.owners.EntityType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.entity.owners.rev150804.entity.owners.entity.type.entity.Candidate;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
 import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
@@ -61,6 +65,15 @@ final class EntityOwnersModel {
 
     }
 
+    static YangInstanceIdentifier candidatePath(YangInstanceIdentifier entityPath, String candidateName) {
+        return YangInstanceIdentifier.builder(entityPath).node(Candidate.QNAME).nodeWithKey(
+                Candidate.QNAME, CANDIDATE_NAME_QNAME, candidateName).build();
+    }
+
+    static NodeIdentifierWithPredicates candidateNodeKey(String candidateName) {
+        return new NodeIdentifierWithPredicates(Candidate.QNAME, CANDIDATE_NAME_QNAME, candidateName);
+    }
+
     static NormalizedNode<?, ?> entityOwnersWithCandidate(String entityType, YangInstanceIdentifier entityId,
             String candidateName) {
         return entityOwnersWithEntityTypeEntry(entityTypeEntryWithEntityEntry(entityType,
@@ -86,11 +99,33 @@ final class EntityOwnersModel {
 
     static MapNode candidateEntry(String candidateName) {
         return ImmutableOrderedMapNodeBuilder.create().withNodeIdentifier(new NodeIdentifier(Candidate.QNAME)).
-                addChild(ImmutableNodes.mapEntry(Candidate.QNAME, CANDIDATE_NAME_QNAME, candidateName)).build();
+                addChild(candidateMapEntry(candidateName)).build();
+    }
+
+    static MapEntryNode candidateMapEntry(String candidateName) {
+        return ImmutableNodes.mapEntry(Candidate.QNAME, CANDIDATE_NAME_QNAME, candidateName);
     }
 
     static NormalizedNode<?, ?> entityEntryWithOwner(YangInstanceIdentifier entityId, String owner) {
         return ImmutableNodes.mapEntryBuilder(ENTITY_QNAME, ENTITY_ID_QNAME, entityId).addChild(
                 ImmutableNodes.leafNode(ENTITY_OWNER_QNAME, owner)).build();
+    }
+
+    static Entity createEntity(YangInstanceIdentifier entityPath) {
+        String entityType = null;
+        YangInstanceIdentifier entityId = null;
+        for(PathArgument pathArg: entityPath.getPathArguments()) {
+            if(pathArg instanceof NodeIdentifierWithPredicates) {
+                NodeIdentifierWithPredicates nodeKey = (NodeIdentifierWithPredicates) pathArg;
+                Entry<QName, Object> key = nodeKey.getKeyValues().entrySet().iterator().next();
+                if(ENTITY_TYPE_QNAME.equals(key.getKey())) {
+                    entityType = key.getValue().toString();
+                } else if(ENTITY_ID_QNAME.equals(key.getKey())) {
+                    entityId = (YangInstanceIdentifier) key.getValue();
+                }
+            }
+        }
+
+        return new Entity(entityType, entityId);
     }
 }

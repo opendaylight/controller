@@ -18,6 +18,7 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.EntityOwnershipChanged;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
+import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipCandidate;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,35 +31,51 @@ import org.slf4j.LoggerFactory;
 class EntityOwnershipListenerSupport {
     private static final Logger LOG = LoggerFactory.getLogger(EntityOwnershipListenerSupport.class);
 
+    private final String logId;
     private final ActorContext actorContext;
     private final Map<EntityOwnershipListener, ListenerActorRefEntry> listenerActorMap = new IdentityHashMap<>();
     private final Multimap<Entity, EntityOwnershipListener> entityListenerMap = HashMultimap.create();
     private final Multimap<String, EntityOwnershipListener> entityTypeListenerMap = HashMultimap.create();
 
-    EntityOwnershipListenerSupport(ActorContext actorContext) {
+    EntityOwnershipListenerSupport(ActorContext actorContext, String logId) {
         this.actorContext = actorContext;
+        this.logId = logId;
+    }
+
+    String getLogId() {
+        return logId;
+    }
+
+    boolean hasCandidateForEntity(Entity entity) {
+        for(EntityOwnershipListener listener: entityListenerMap.get(entity)) {
+            if(listener instanceof EntityOwnershipCandidate) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     void addEntityOwnershipListener(Entity entity, EntityOwnershipListener listener) {
-        LOG.debug("Adding EntityOwnershipListener {} for {}", listener, entity);
+        LOG.debug("{}: Adding EntityOwnershipListener {} for {}", logId, listener, entity);
 
         addListener(listener, entity, entityListenerMap);
     }
 
     void addEntityOwnershipListener(String entityType, EntityOwnershipListener listener) {
-        LOG.debug("Adding EntityOwnershipListener {} for entity type {}", listener, entityType);
+        LOG.debug("{}: Adding EntityOwnershipListener {} for entity type {}", logId, listener, entityType);
 
         addListener(listener, entityType, entityTypeListenerMap);
     }
 
     void removeEntityOwnershipListener(Entity entity, EntityOwnershipListener listener) {
-        LOG.debug("Removing EntityOwnershipListener {} for {}", listener, entity);
+        LOG.debug("{}: Removing EntityOwnershipListener {} for {}", logId, listener, entity);
 
         removeListener(listener, entity, entityListenerMap);
     }
 
     void removeEntityOwnershipListener(String entityType, EntityOwnershipListener listener) {
-        LOG.debug("Removing EntityOwnershipListener {} for entity type {}", listener, entityType);
+        LOG.debug("{}: Removing EntityOwnershipListener {} for entity type {}", logId, listener, entityType);
 
         removeListener(listener, entityType, entityTypeListenerMap);
     }
@@ -87,7 +104,7 @@ class EntityOwnershipListenerSupport {
         for(EntityOwnershipListener listener: listeners) {
             ActorRef listenerActor = listenerActorFor(listener);
 
-            LOG.debug("Notifying EntityOwnershipListenerActor {} with {}", listenerActor, changed);
+            LOG.debug("{}: Notifying EntityOwnershipListenerActor {} with {}", logId, listenerActor, changed);
 
             listenerActor.tell(changed, ActorRef.noSender());
         }
@@ -110,7 +127,7 @@ class EntityOwnershipListenerSupport {
         if(fromListenerMap.remove(mapKey, listener)) {
             ListenerActorRefEntry listenerEntry = listenerActorMap.get(listener);
 
-            LOG.debug("Found {}", listenerEntry);
+            LOG.debug("{}: Found {}", logId, listenerEntry);
 
             listenerEntry.referenceCount--;
             if(listenerEntry.referenceCount <= 0) {
@@ -136,7 +153,7 @@ class EntityOwnershipListenerSupport {
             if(actorRef == null) {
                 actorRef = actorContext.actorOf(EntityOwnershipListenerActor.props(listener));
 
-                LOG.debug("Created EntityOwnershipListenerActor {} for listener {}", actorRef, listener);
+                LOG.debug("{}: Created EntityOwnershipListenerActor {} for listener {}", logId, actorRef, listener);
             }
 
             return actorRef;

@@ -15,9 +15,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
+import akka.actor.ActorContext;
 import akka.actor.ActorRef;
 import akka.actor.Props;
-import akka.actor.UntypedActorContext;
 import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
 import com.google.common.util.concurrent.Uninterruptibles;
@@ -25,11 +25,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.AbstractActorTest;
 import org.opendaylight.controller.cluster.raft.TestActorFactory;
 import org.opendaylight.controller.cluster.raft.utils.DoNothingActor;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
+import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipCandidate;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListener;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -43,6 +45,15 @@ import scala.collection.immutable.Iterable;
  */
 public class EntityOwnershipListenerSupportTest extends AbstractActorTest {
     private final TestActorFactory actorFactory = new TestActorFactory(getSystem());
+    private ActorContext actorContext;
+
+    @Before
+    public void setup() {
+        TestActorRef<DoNothingActor> actor = actorFactory.createTestActor(
+                Props.create(DoNothingActor.class), actorFactory.generateActorId("test"));
+
+        actorContext = actor.underlyingActor().getContext();
+    }
 
     @After
     public void tearDown() {
@@ -51,11 +62,7 @@ public class EntityOwnershipListenerSupportTest extends AbstractActorTest {
 
     @Test
     public void testNotifyEntityOwnershipListeners() {
-        TestActorRef<DoNothingActor> actor = actorFactory.createTestActor(
-                Props.create(DoNothingActor.class), actorFactory.generateActorId("test"));
-
-        UntypedActorContext actorContext = actor.underlyingActor().getContext();
-        EntityOwnershipListenerSupport support = new EntityOwnershipListenerSupport(actorContext);
+        EntityOwnershipListenerSupport support = new EntityOwnershipListenerSupport(actorContext, "test");
 
         EntityOwnershipListener mockListener1 = mock(EntityOwnershipListener.class, "EntityOwnershipListener1");
         EntityOwnershipListener mockListener2 = mock(EntityOwnershipListener.class, "EntityOwnershipListener2");
@@ -183,5 +190,23 @@ public class EntityOwnershipListenerSupportTest extends AbstractActorTest {
 
         support.addEntityOwnershipListener(entity1, mockListener2);
         support.removeEntityOwnershipListener(entity1, mockListener2);
+    }
+
+    @Test
+    public void testHasCandidateForEntity() {
+        EntityOwnershipListenerSupport support = new EntityOwnershipListenerSupport(actorContext, "test");
+        Entity entity = new Entity("type", YangInstanceIdentifier.of(QName.create("test", "id")));
+
+        assertEquals("hasCandidateForEntity", false, support.hasCandidateForEntity(entity));
+
+        support.addEntityOwnershipListener(entity, mock(EntityOwnershipListener.class));
+        assertEquals("hasCandidateForEntity", false, support.hasCandidateForEntity(entity));
+
+        EntityOwnershipCandidate candidate = mock(EntityOwnershipCandidate.class);
+        support.addEntityOwnershipListener(entity, candidate);
+        assertEquals("hasCandidateForEntity", true, support.hasCandidateForEntity(entity));
+
+        support.removeEntityOwnershipListener(entity, candidate);
+        assertEquals("hasCandidateForEntity", false, support.hasCandidateForEntity(entity));
     }
 }

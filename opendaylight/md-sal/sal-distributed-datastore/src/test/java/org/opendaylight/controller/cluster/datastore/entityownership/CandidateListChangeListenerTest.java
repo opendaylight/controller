@@ -45,7 +45,7 @@ public class CandidateListChangeListenerTest extends AbstractActorTest {
     public void testOnDataTreeChanged() throws Exception {
         JavaTestKit kit = new JavaTestKit(getSystem());
 
-        new CandidateListChangeListener(kit.getRef()).init(shardDataTree);
+        new CandidateListChangeListener(kit.getRef(), "test").init(shardDataTree);
 
         String memberName1 = "member-1";
         writeNode(ENTITY_OWNERS_PATH, entityOwnersWithCandidate(ENTITY_TYPE, ENTITY_ID1, memberName1));
