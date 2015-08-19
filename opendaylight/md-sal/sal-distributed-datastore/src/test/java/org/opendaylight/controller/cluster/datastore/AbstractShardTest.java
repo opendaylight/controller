@@ -271,6 +271,17 @@ public abstract class AbstractShardTest extends AbstractActorTest{
         cohort.commit();
     }
 
+    public static void mergeToStore(final ShardDataTree store, final YangInstanceIdentifier id,
+            final NormalizedNode<?,?> node) throws InterruptedException, ExecutionException {
+        final ReadWriteShardDataTreeTransaction transaction = store.newReadWriteTransaction("writeToStore", null);
+
+        transaction.getSnapshot().merge(id, node);
+        final ShardDataTreeCohort cohort = transaction.ready();
+        cohort.canCommit().get();
+        cohort.preCommit().get();
+        cohort.commit();
+    }
+
     public static void writeToStore(final DataTree store, final YangInstanceIdentifier id,
             final NormalizedNode<?,?> node) throws DataValidationFailedException {
         final DataTreeModification transaction = store.takeSnapshot().newModification();

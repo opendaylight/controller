@@ -35,7 +35,7 @@ public class DataChangeListenerRegistrationTest extends AbstractActorTest {
   @Test
   public void testOnReceiveCloseListenerRegistration() throws Exception {
     new JavaTestKit(getSystem()) {{
-      final Props props = DataChangeListenerRegistration.props(store
+      final Props props = DataChangeListenerRegistrationActor.props(store
           .registerChangeListener(TestModel.TEST_PATH, noOpDataChangeListener(),
               AsyncDataBroker.DataChangeScope.BASE));
       final ActorRef subject = getSystem().actorOf(props, "testCloseListenerRegistration");
