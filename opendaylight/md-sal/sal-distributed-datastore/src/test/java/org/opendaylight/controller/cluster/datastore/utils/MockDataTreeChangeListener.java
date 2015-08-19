@@ -7,20 +7,23 @@
  */
 package org.opendaylight.controller.cluster.datastore.utils;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Uninterruptibles;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
-
-import javax.annotation.Nonnull;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import javax.annotation.Nonnull;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 
 public class MockDataTreeChangeListener implements DOMDataTreeChangeListener {
 
@@ -54,8 +57,31 @@ public class MockDataTreeChangeListener implements DOMDataTreeChangeListener {
         }
     }
 
+    public void verifyNotifiedData(YangInstanceIdentifier... paths) {
+        Set<YangInstanceIdentifier> pathSet = new HashSet<>(Arrays.asList(paths));
+        for(Collection<DataTreeCandidate> list: changeList) {
+            for(DataTreeCandidate c: list) {
+                pathSet.remove(c.getRootPath());
+            }
+        }
+
+        if(!pathSet.isEmpty()) {
+            fail(pathSet + " not present in " + changeList);
+        }
+    }
+
     public void expectNoMoreChanges(String assertMsg) {
-        Uninterruptibles.sleepUninterruptibly(1, TimeUnit.SECONDS);
+        Uninterruptibles.sleepUninterruptibly(500, TimeUnit.MILLISECONDS);
         assertEquals(assertMsg, expChangeEventCount, changeList.size());
+    }
+
+    public void verifyNoNotifiedData(YangInstanceIdentifier... paths) {
+        Set<YangInstanceIdentifier> pathSet = new HashSet<>(Arrays.asList(paths));
+        for(Collection<DataTreeCandidate> list: changeList) {
+            for(DataTreeCandidate c: list) {
+                assertFalse("Unexpected " + c.getRootPath() + " present in DataTreeCandidate",
+                        pathSet.contains(c.getRootPath()));
+            }
+        }
     }
 }

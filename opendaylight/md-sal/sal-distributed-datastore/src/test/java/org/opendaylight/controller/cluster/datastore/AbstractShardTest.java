@@ -13,7 +13,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
-
 import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
@@ -266,6 +265,17 @@ public abstract class AbstractShardTest extends AbstractActorTest{
         final ReadWriteShardDataTreeTransaction transaction = store.newReadWriteTransaction("writeToStore", null);
 
         transaction.getSnapshot().write(id, node);
+        final ShardDataTreeCohort cohort = transaction.ready();
+        cohort.canCommit().get();
+        cohort.preCommit().get();
+        cohort.commit();
+    }
+
+    public static void mergeToStore(final ShardDataTree store, final YangInstanceIdentifier id,
+            final NormalizedNode<?,?> node) throws InterruptedException, ExecutionException {
+        final ReadWriteShardDataTreeTransaction transaction = store.newReadWriteTransaction("writeToStore", null);
+
+        transaction.getSnapshot().merge(id, node);
         final ShardDataTreeCohort cohort = transaction.ready();
         cohort.canCommit().get();
         cohort.preCommit().get();
