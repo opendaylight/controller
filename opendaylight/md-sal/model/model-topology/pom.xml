@@ -15,6 +15,7 @@
     <dependency>
       <groupId>org.opendaylight.controller.model</groupId>
       <artifactId>model-inventory</artifactId>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.yangtools.model</groupId>
