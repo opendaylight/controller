@@ -23,6 +23,8 @@
     <!-- netconf -->
     <module>opendaylight/netconf</module>
 
+    <module>opendaylight/model</module>
+
     <!-- Parents -->
     <module>opendaylight/commons/concepts</module>
     <module>opendaylight/commons/protocol-framework</module>
