@@ -213,6 +213,7 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
     }
 
     private NormalizedNode<?, ?> readEntityOwners(ActorRef shard) throws Exception {
+        Uninterruptibles.sleepUninterruptibly(500, TimeUnit.MILLISECONDS);
         Stopwatch sw = Stopwatch.createStarted();
         while(sw.elapsed(TimeUnit.MILLISECONDS) <= 5000) {
             DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
