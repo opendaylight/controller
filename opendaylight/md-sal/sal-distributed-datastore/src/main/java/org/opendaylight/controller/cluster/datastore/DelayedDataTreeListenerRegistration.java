@@ -7,8 +7,8 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import java.util.Collections;
 import java.util.Map.Entry;
 import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeChangeListener;
@@ -31,13 +31,13 @@ final class DelayedDataTreeListenerRegistration implements ListenerRegistration<
         this.registerTreeChangeListener = Preconditions.checkNotNull(registerTreeChangeListener);
     }
 
-    synchronized void createDelegate(final DelegateFactory<RegisterDataTreeChangeListener, ListenerRegistration<DOMDataTreeChangeListener>, DataTreeCandidate> factory) {
+    synchronized void createDelegate(final LeaderLocalDelegateFactory<RegisterDataTreeChangeListener, ListenerRegistration<DOMDataTreeChangeListener>, Optional<DataTreeCandidate>> factory) {
         if (!closed) {
-            final Entry<ListenerRegistration<DOMDataTreeChangeListener>, DataTreeCandidate> res = factory.createDelegate(registerTreeChangeListener);
+            final Entry<ListenerRegistration<DOMDataTreeChangeListener>, Optional<DataTreeCandidate>> res =
+                    factory.createDelegate(registerTreeChangeListener);
             this.delegate = res.getKey();
-            if (res.getValue() != null) {
-                delegate.getInstance().onDataTreeChanged(Collections.singletonList(res.getValue()));
-            }
+            factory.getShard().getDataStore().notifyOfInitialData(registerTreeChangeListener.getPath(),
+                    this.delegate.getInstance(), res.getValue());
         }
     }
 
