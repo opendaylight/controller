@@ -25,8 +25,6 @@ import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateTip;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
 
 /**
@@ -94,13 +92,6 @@ public class EntityOwnerChangeListenerTest {
     }
 
     private void writeNode(YangInstanceIdentifier path, NormalizedNode<?, ?> node) throws DataValidationFailedException {
-        DataTreeModification modification = shardDataTree.getDataTree().takeSnapshot().newModification();
-        modification.merge(path, node);
-        modification.ready();
-
-        shardDataTree.getDataTree().validate(modification);
-        DataTreeCandidateTip candidate = shardDataTree.getDataTree().prepare(modification);
-        shardDataTree.getDataTree().commit(candidate);
-        shardDataTree.notifyListeners(candidate);
+        AbstractEntityOwnershipTest.writeNode(path, node, shardDataTree);
     }
 }
