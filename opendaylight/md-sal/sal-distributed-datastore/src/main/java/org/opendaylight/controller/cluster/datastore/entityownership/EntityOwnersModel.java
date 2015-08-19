@@ -44,6 +44,15 @@ final class EntityOwnersModel {
 
     }
 
+    static YangInstanceIdentifier candidatePath(String entityType, YangInstanceIdentifier entityId,
+            String candidateName) {
+        return YangInstanceIdentifier.builder(ENTITY_OWNERS_PATH).node(EntityType.QNAME).
+                nodeWithKey(EntityType.QNAME, ENTITY_TYPE_QNAME, entityType).node(ENTITY_QNAME).
+                        nodeWithKey(ENTITY_QNAME, ENTITY_ID_QNAME, entityId).node(Candidate.QNAME).
+                                nodeWithKey(Candidate.QNAME, CANDIDATE_NAME_QNAME, candidateName).build();
+
+    }
+
     static NormalizedNode<?, ?> entityOwnersWithCandidate(String entityType, YangInstanceIdentifier entityId,
             String candidateName) {
         return entityOwnersWithEntityTypeEntry(entityTypeEntryWithEntityEntry(entityType,
