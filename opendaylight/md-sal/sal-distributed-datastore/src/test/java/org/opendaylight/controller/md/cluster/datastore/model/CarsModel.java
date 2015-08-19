@@ -63,6 +63,21 @@ public class CarsModel {
 
     }
 
+    public static NormalizedNode<?, ?> createEmptyCarsList(){
+
+        // Create a list builder
+        CollectionNodeBuilder<MapEntryNode, MapNode> cars =
+                ImmutableMapNodeBuilder.create().withNodeIdentifier(
+                        new YangInstanceIdentifier.NodeIdentifier(
+                                CAR_QNAME));
+
+        return ImmutableContainerNodeBuilder.create()
+                .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(BASE_QNAME))
+                .withChild(cars.build())
+                .build();
+
+    }
+
     public static NormalizedNode<?, ?> emptyContainer(){
         return ImmutableContainerNodeBuilder.create()
             .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(BASE_QNAME))
