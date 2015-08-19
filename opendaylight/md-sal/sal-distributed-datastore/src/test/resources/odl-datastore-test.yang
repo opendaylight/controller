@@ -46,6 +46,9 @@ module odl-datastore-test {
                 }
             }
         }
+        
+        container outer-container {
+        }
     }
     
     container test2 {

@@ -7,20 +7,20 @@
  */
 package org.opendaylight.controller.cluster.datastore.utils;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Uninterruptibles;
-import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
-
-import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import javax.annotation.Nonnull;
+import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.ModificationType;
 
 public class MockDataTreeChangeListener implements DOMDataTreeChangeListener {
 
@@ -52,6 +52,16 @@ public class MockDataTreeChangeListener implements DOMDataTreeChangeListener {
             fail(String.format("Missing change notifications. Expected: %d. Actual: %d",
                     expChangeEventCount, (expChangeEventCount - changeLatch.getCount())));
         }
+    }
+
+    public void verifyNotifiedData(int i, YangInstanceIdentifier path) {
+        for(DataTreeCandidate c: changeList.get(i)) {
+            if(c.getRootPath().equals(path) && c.getRootNode().getModificationType() == ModificationType.WRITE) {
+                return;
+            }
+        }
+
+        fail(path + " not present in " + changeList.get(i));
     }
 
     public void expectNoMoreChanges(String assertMsg) {

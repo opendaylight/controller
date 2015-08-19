@@ -9,22 +9,25 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
+import com.google.common.base.Optional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 import org.opendaylight.controller.cluster.datastore.messages.EnableNotification;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListener;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListenerReply;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeEvent;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
-import org.opendaylight.controller.md.sal.dom.store.impl.DOMImmutableDataChangeEvent;
+import org.opendaylight.controller.md.sal.dom.store.impl.DataChangeListenerRegistration;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class DataChangeListenerSupport extends LeaderLocalDelegateFactory<RegisterChangeListener, ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>>, DOMImmutableDataChangeEvent> {
+final class DataChangeListenerSupport extends LeaderLocalDelegateFactory<RegisterChangeListener,
+        DataChangeListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>>,
+        Optional<DataTreeCandidate>> {
     private static final Logger LOG = LoggerFactory.getLogger(DataChangeListenerSupport.class);
     private final List<DelayedListenerRegistration> delayedListenerRegistrations = new ArrayList<>();
     private final List<ActorSelection> dataChangeListeners =  new ArrayList<>();
@@ -60,12 +63,10 @@ final class DataChangeListenerSupport extends LeaderLocalDelegateFactory<Registe
 
     private void registerDelayedListeners(DelayedListenerRegistration reg) {
         if(!reg.isClosed()) {
-            final Entry<ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>>, DOMImmutableDataChangeEvent> res =
-                createDelegate(reg.getRegisterChangeListener());
+            final Entry<DataChangeListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>>,
+                            Optional<DataTreeCandidate>> res = createDelegate(reg.getRegisterChangeListener());
             reg.setDelegate(res.getKey());
-            if (res.getValue() != null) {
-                reg.getInstance().onDataChanged(res.getValue());
-            }
+            getShard().getDataStore().notifyOfInitialData(res.getKey(), res.getValue());
         }
     }
 
@@ -77,12 +78,12 @@ final class DataChangeListenerSupport extends LeaderLocalDelegateFactory<Registe
 
         final ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier,
                                                      NormalizedNode<?, ?>>> registration;
-        final AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> event;
         if ((hasLeader && message.isRegisterOnAllInstances()) || isLeader) {
-            final Entry<ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>>, DOMImmutableDataChangeEvent> res =
-                    createDelegate(message);
+            final Entry<DataChangeListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>>,
+                    Optional<DataTreeCandidate>> res = createDelegate(message);
             registration = res.getKey();
-            event = res.getValue();
+
+            getShard().getDataStore().notifyOfInitialData(res.getKey(), res.getValue());
         } else {
             LOG.debug("{}: Shard is not the leader - delaying registration", persistenceId());
 
@@ -93,23 +94,19 @@ final class DataChangeListenerSupport extends LeaderLocalDelegateFactory<Registe
                 delayedListenerRegistrations.add(delayedReg);
             }
             registration = delayedReg;
-            event = null;
         }
 
-        ActorRef listenerRegistration = createActor(DataChangeListenerRegistration.props(registration));
+        ActorRef listenerRegistration = createActor(DataChangeListenerRegistrationActor.props(registration));
 
         LOG.debug("{}: registerDataChangeListener sending reply, listenerRegistrationPath = {} ",
                 persistenceId(), listenerRegistration.path());
 
         tellSender(new RegisterChangeListenerReply(listenerRegistration));
-        if (event != null) {
-            registration.getInstance().onDataChanged(event);
-        }
     }
 
     @Override
-    Entry<ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>>, DOMImmutableDataChangeEvent> createDelegate(
-            final RegisterChangeListener message) {
+    Entry<DataChangeListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>>,
+            Optional<DataTreeCandidate>> createDelegate(final RegisterChangeListener message) {
         ActorSelection dataChangeListenerPath = selectActor(message.getDataChangeListenerPath());
 
         // Notify the listener if notifications should be enabled or not

@@ -13,6 +13,14 @@ import java.io.InputStream;
 import java.util.Collections;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
+import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
+import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
+import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.CollectionNodeBuilder;
+import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.parser.api.YangSyntaxErrorException;
 import org.opendaylight.yangtools.yang.parser.impl.YangParserImpl;
@@ -30,6 +38,7 @@ public class TestModel {
 
 
     public static final QName OUTER_LIST_QNAME = QName.create(TEST_QNAME, "outer-list");
+    public static final QName OUTER_CONTAINER_QNAME = QName.create(TEST_QNAME, "outer-container");
     public static final QName INNER_LIST_QNAME = QName.create(TEST_QNAME, "inner-list");
     public static final QName OUTER_CHOICE_QNAME = QName.create(TEST_QNAME, "outer-choice");
     public static final QName ID_QNAME = QName.create(TEST_QNAME, "id");
@@ -44,6 +53,7 @@ public class TestModel {
             node(OUTER_LIST_QNAME).build();
     public static final YangInstanceIdentifier INNER_LIST_PATH = YangInstanceIdentifier.builder(TEST_PATH).
             node(OUTER_LIST_QNAME).node(INNER_LIST_QNAME).build();
+    public static final YangInstanceIdentifier OUTER_CONTAINER_PATH = TEST_PATH.node(OUTER_CONTAINER_QNAME);
     public static final QName TWO_QNAME = QName.create(TEST_QNAME,"two");
     public static final QName THREE_QNAME = QName.create(TEST_QNAME,"three");
 
@@ -59,5 +69,61 @@ public class TestModel {
         } catch (IOException | YangSyntaxErrorException e) {
             throw new ExceptionInInitializerError(e);
         }
+    }
+
+    public static DataContainerChild<?, ?> outerNode(int... ids) {
+        CollectionNodeBuilder<MapEntryNode, MapNode> outer = ImmutableNodes.mapNodeBuilder(OUTER_LIST_QNAME);
+        for(int id: ids) {
+            outer.addChild(ImmutableNodes.mapEntry(OUTER_LIST_QNAME, ID_QNAME, id));
+        }
+
+        return outer.build();
+    }
+
+    public static DataContainerChild<?, ?> outerNode(MapEntryNode... entries) {
+        CollectionNodeBuilder<MapEntryNode, MapNode> outer = ImmutableNodes.mapNodeBuilder(OUTER_LIST_QNAME);
+        for(MapEntryNode e: entries) {
+            outer.addChild(e);
+        }
+
+        return outer.build();
+    }
+
+    public static DataContainerChild<?, ?> innerNode(String... names) {
+        CollectionNodeBuilder<MapEntryNode, MapNode> outer = ImmutableNodes.mapNodeBuilder(INNER_LIST_QNAME);
+        for(String name: names) {
+            outer.addChild(ImmutableNodes.mapEntry(INNER_LIST_QNAME, NAME_QNAME, name));
+        }
+
+        return outer.build();
+    }
+
+    public static MapEntryNode outerNodeEntry(int id, DataContainerChild<?, ?> inner) {
+        return ImmutableNodes.mapEntryBuilder(OUTER_LIST_QNAME, ID_QNAME, id).addChild(inner).build();
+    }
+
+    public static NormalizedNode<?, ?> testNodeWithOuter(int... ids) {
+        return testNodeWithOuter(outerNode(ids));
+    }
+
+    public static NormalizedNode<?, ?> testNodeWithOuter(DataContainerChild<?, ?> outer) {
+        return ImmutableContainerNodeBuilder.create().withNodeIdentifier(
+                new YangInstanceIdentifier.NodeIdentifier(TEST_QNAME)).withChild(outer).build();
+    }
+
+    public static NodeIdentifierWithPredicates outerEntryKey(int id) {
+        return new NodeIdentifierWithPredicates(OUTER_LIST_QNAME, ID_QNAME, id);
+    }
+
+    public static YangInstanceIdentifier outerEntryPath(int id) {
+        return OUTER_LIST_PATH.node(outerEntryKey(id));
+    }
+
+    public static NodeIdentifierWithPredicates innerEntryKey(String name) {
+        return new NodeIdentifierWithPredicates(INNER_LIST_QNAME, NAME_QNAME, name);
+    }
+
+    public static YangInstanceIdentifier innerEntryPath(int id, String name) {
+        return OUTER_LIST_PATH.node(outerEntryKey(id)).node(INNER_LIST_QNAME).node(innerEntryKey(name));
     }
 }
