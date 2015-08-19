@@ -71,5 +71,4 @@ public class ShardDataTreeTest {
         assertEquals(expectedPeoplePresent, optional1.isPresent());
 
     }
-
 }

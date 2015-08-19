@@ -36,11 +36,21 @@ final class EntityOwnersModel {
     static final NodeIdentifier ENTITY_OWNERS_NODE_ID = new NodeIdentifier(EntityOwners.QNAME);
     static final NodeIdentifier ENTITY_OWNER_NODE_ID = new NodeIdentifier(ENTITY_OWNER_QNAME);
     static final YangInstanceIdentifier ENTITY_OWNERS_PATH = YangInstanceIdentifier.of(EntityOwners.QNAME);
+    static final YangInstanceIdentifier ENTITY_TYPE_PATH = ENTITY_OWNERS_PATH.node(EntityType.QNAME);
 
     static YangInstanceIdentifier entityPath(String entityType, YangInstanceIdentifier entityId) {
         return YangInstanceIdentifier.builder(ENTITY_OWNERS_PATH).node(EntityType.QNAME).
                 nodeWithKey(EntityType.QNAME, ENTITY_TYPE_QNAME, entityType).node(ENTITY_QNAME).
                         nodeWithKey(ENTITY_QNAME, ENTITY_ID_QNAME, entityId).build();
+
+    }
+
+    static YangInstanceIdentifier candidatePath(String entityType, YangInstanceIdentifier entityId,
+            String candidateName) {
+        return YangInstanceIdentifier.builder(ENTITY_OWNERS_PATH).node(EntityType.QNAME).
+                nodeWithKey(EntityType.QNAME, ENTITY_TYPE_QNAME, entityType).node(ENTITY_QNAME).
+                        nodeWithKey(ENTITY_QNAME, ENTITY_ID_QNAME, entityId).node(Candidate.QNAME).
+                                nodeWithKey(Candidate.QNAME, CANDIDATE_NAME_QNAME, candidateName).build();
 
     }
 
