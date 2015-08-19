@@ -20,12 +20,12 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
-public class DataChangeListenerRegistration extends AbstractUntypedActor {
+public class DataChangeListenerRegistrationActor extends AbstractUntypedActor {
 
     private final ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>>
         registration;
 
-    public DataChangeListenerRegistration(
+    public DataChangeListenerRegistrationActor(
         ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>> registration) {
         this.registration = registration;
     }
@@ -52,7 +52,7 @@ public class DataChangeListenerRegistration extends AbstractUntypedActor {
     }
 
     private static class DataChangeListenerRegistrationCreator
-                                            implements Creator<DataChangeListenerRegistration> {
+                                            implements Creator<DataChangeListenerRegistrationActor> {
         private static final long serialVersionUID = 1L;
         final ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier,
                                                            NormalizedNode<?, ?>>> registration;
@@ -64,8 +64,8 @@ public class DataChangeListenerRegistration extends AbstractUntypedActor {
         }
 
         @Override
-        public DataChangeListenerRegistration create() throws Exception {
-            return new DataChangeListenerRegistration(registration);
+        public DataChangeListenerRegistrationActor create() throws Exception {
+            return new DataChangeListenerRegistrationActor(registration);
         }
     }
 }
