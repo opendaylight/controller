@@ -10,6 +10,7 @@ module netconf-node-inventory {
     }
     
     grouping netconf-node-fields {
+    	status deprecated;
         leaf connected {
             type boolean; 
         }
@@ -33,7 +34,7 @@ module netconf-node-inventory {
     
     augment /inv:nodes/inv:node {
         ext:augment-identifier "netconf-node";
-        
+        status deprecated;
         uses netconf-node-fields;
     }
 }
