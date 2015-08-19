@@ -8,22 +8,32 @@
 package org.opendaylight.controller.cluster.datastore.entityownership;
 
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_OWNERS_PATH;
+import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_OWNER_NODE_ID;
+import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_OWNER_QNAME;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.entityOwnersWithCandidate;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Props;
 import akka.pattern.Patterns;
+import com.google.common.base.Optional;
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.Shard;
+import org.opendaylight.controller.cluster.datastore.entityownership.messages.CandidateAdded;
+import org.opendaylight.controller.cluster.datastore.entityownership.messages.CandidateRemoved;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.RegisterCandidateLocal;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.UnregisterCandidateLocal;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
 import org.opendaylight.controller.cluster.datastore.messages.SuccessReply;
 import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
+import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
+import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.Future;
 
@@ -53,11 +63,22 @@ class EntityOwnershipShard extends Shard {
     }
 
     @Override
+    protected void onRecoveryComplete() {
+        super.onRecoveryComplete();
+
+        new CandidateListChangeListener(getSelf(), getDataStore());
+    }
+
+    @Override
     public void onReceiveCommand(final Object message) throws Exception {
         if(message instanceof RegisterCandidateLocal) {
             onRegisterCandidateLocal((RegisterCandidateLocal)message);
         } else if(message instanceof UnregisterCandidateLocal) {
             onUnregisterCandidateLocal((UnregisterCandidateLocal)message);
+        } else if(message instanceof CandidateAdded){
+            onCandidateAdded((CandidateAdded) message);
+        } else if(message instanceof CandidateRemoved){
+            onCandidateRemoved((CandidateRemoved) message);
         } else if(!commitCoordinator.handleMessage(message, this)) {
             super.onReceiveCommand(message);
         }
@@ -111,6 +132,56 @@ class EntityOwnershipShard extends Shard {
     private void onUnregisterCandidateLocal(UnregisterCandidateLocal unregisterCandidate) {
         // TODO - implement
         getSender().tell(SuccessReply.INSTANCE, getSelf());
+    }
+
+    private void onCandidateRemoved(CandidateRemoved message) {
+        if(!isLeader()){
+            return;
+        }
+
+        LOG.debug("onCandidateRemoved: {}", message);
+
+        String currentOwner = getCurrentOwner(message.getEntityPath());
+        if(message.getRemovedCandidate().equals(currentOwner)){
+            writeNewOwner(message.getEntityPath(), newOwner(message.getRemainingCandidates()));
+        }
+    }
+
+    private void onCandidateAdded(CandidateAdded message) {
+        if(!isLeader()){
+            return;
+        }
+
+        LOG.debug("onCandidateAdded: {}", message);
+
+        String currentOwner = getCurrentOwner(message.getEntityPath());
+        if(currentOwner == null){
+            writeNewOwner(message.getEntityPath(), newOwner(message.getAllCandidates()));
+        }
+    }
+
+    private void writeNewOwner(YangInstanceIdentifier entityPath, String newOwner) {
+        LOG.debug("Writing new owner {} for entity {}", newOwner, entityPath);
+
+        commitCoordinator.commitModification(new WriteModification(entityPath.node(ENTITY_OWNER_QNAME),
+                ImmutableNodes.leafNode(ENTITY_OWNER_NODE_ID, newOwner)), this);
+    }
+
+    private String newOwner(Collection<String> candidates) {
+        if(candidates.size() > 0){
+            return candidates.iterator().next();
+        }
+
+        return "";
+    }
+
+    private String getCurrentOwner(YangInstanceIdentifier entityId) {
+        DataTreeSnapshot snapshot = getDataStore().getDataTree().takeSnapshot();
+        Optional<NormalizedNode<?, ?>> optionalEntityOwner = snapshot.readNode(entityId.node(ENTITY_OWNER_QNAME));
+        if(optionalEntityOwner.isPresent()){
+            return optionalEntityOwner.get().getValue().toString();
+        }
+        return null;
     }
 
     public static Props props(final ShardIdentifier name, final Map<String, String> peerAddresses,

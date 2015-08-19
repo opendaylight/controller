@@ -32,8 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A DataChangeListener that listeners for entity owner changes and notifies the EntityOwnershipListenerSupport
- * appropriately.
+ * Listens for entity owner changes and notifies the EntityOwnershipListenerSupport appropriately.
  *
  * @author Thomas Pantelis
  */
