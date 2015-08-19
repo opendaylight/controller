@@ -85,6 +85,18 @@
       <type>xml</type>
       <classifier>config</classifier>
     </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>messagebus-netconf</artifactId>
+      <version>${netconf.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.controller</groupId>
+      <artifactId>messagebus-netconf</artifactId>
+      <version>${netconf.version}</version>
+      <type>xml</type>
+      <classifier>config</classifier>
+    </dependency>
 
     <!--
       Optional TODO: Remove TODO comments.
