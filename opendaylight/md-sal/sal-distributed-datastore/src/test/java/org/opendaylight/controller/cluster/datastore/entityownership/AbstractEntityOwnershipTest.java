@@ -11,6 +11,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import com.google.common.base.Optional;
+import com.google.common.util.concurrent.Uninterruptibles;
+import java.util.Collection;
+import java.util.concurrent.TimeUnit;
+import org.junit.Assert;
 import org.opendaylight.controller.cluster.datastore.AbstractActorTest;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.entity.owners.rev150804.EntityOwners;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.entity.owners.rev150804.entity.owners.EntityType;
@@ -49,7 +53,7 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
 
             getMapEntryNodeChild(entityEntry, Candidate.QNAME, EntityOwnershipShard.CANDIDATE_NAME, candidateName);
         } catch(AssertionError e) {
-            throw new AssertionError("Verification of enitity candidate failed - returned data was: " + node, e);
+            throw new AssertionError("Verification of entity candidate failed - returned data was: " + node, e);
         }
     }
 
@@ -65,4 +69,44 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
         assertEquals("Missing " + childMap.toString() + " entry for " + key, true, entityTypeEntry.isPresent());
         return entityTypeEntry.get();
     }
+
+    protected String getEntityOwner(NormalizedNode<?,?> node,
+                                    String entityType,
+                                    YangInstanceIdentifier entityId){
+
+        ContainerNode entityOwnersNode = (ContainerNode) node;
+
+        MapEntryNode entityTypeEntry = getMapEntryNodeChild(entityOwnersNode, EntityType.QNAME,
+                EntityOwnershipShard.ENTITY_TYPE, entityType);
+
+        MapEntryNode entityEntry = getMapEntryNodeChild(entityTypeEntry, EntityOwnershipShard.ENTITY_QNAME,
+                EntityOwnershipShard.ENTITY_ID, entityId);
+
+
+        Collection<DataContainerChild<? extends PathArgument, ?>> children = entityEntry.getValue();
+
+        for(DataContainerChild<? extends PathArgument, ?> child : children){
+            if(child.getIdentifier().getNodeType().equals(EntityOwnershipShard.ENTITY_OWNER)){
+                return child.getValue().toString();
+            }
+        }
+
+        return null;
+    }
+
+    protected void verifyOwner(String expected, NormalizedNode<?,?> node,
+                               String entityType,
+                               YangInstanceIdentifier entityId){
+
+        for(int i = 0;i<100;i++) {
+            try {
+                Assert.assertEquals(expected, getEntityOwner(node, entityType, entityId));
+                return;
+            } catch(AssertionError error){
+                Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
+            }
+        }
+        throw new AssertionError("Verification of entity owner failed");
+    }
+
 }

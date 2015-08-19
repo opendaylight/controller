@@ -3,12 +3,20 @@ package org.opendaylight.controller.cluster.datastore;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import com.google.common.base.Optional;
+import java.math.BigInteger;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicLong;
 import org.junit.Before;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.datastore.utils.YangListChangeListener;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.PeopleModel;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
@@ -69,6 +77,76 @@ public class ShardDataTreeTest {
         Optional<NormalizedNode<?, ?>> optional1 = snapshot1.readNode(PeopleModel.BASE_PATH);
 
         assertEquals(expectedPeoplePresent, optional1.isPresent());
+
+    }
+
+    @Test
+    public void testDataChangeListener() throws ExecutionException, InterruptedException {
+        final ShardDataTree shardDataTree = new ShardDataTree(fullSchema);
+
+        final List<Map.Entry<YangInstanceIdentifier, NormalizedNode<?,?>>> createdEntries = new ArrayList();
+        final List<YangInstanceIdentifier> deletedEntries = new ArrayList<>();
+        final AtomicLong listSize = new AtomicLong();
+
+
+        YangListChangeListener.registerYangListChangeListener(shardDataTree, CarsModel.CAR_LIST_PATH, new YangListChangeListener(CarsModel.CAR_LIST_PATH) {
+            @Override
+            protected void entryAdded(YangInstanceIdentifier key, NormalizedNode<?, ?> value) {
+                createdEntries.add(new AbstractMap.SimpleEntry<YangInstanceIdentifier, NormalizedNode<?, ?>>(key, value));
+                listSize.set(listSize());
+            }
+
+            @Override
+            protected void entryRemoved(YangInstanceIdentifier key) {
+                deletedEntries.add(key);
+                listSize.set(listSize());
+            }
+        });
+
+        addCar(shardDataTree, "tesla model s", 100000);
+        addCar(shardDataTree, "porsche 911", 100000);
+        addCar(shardDataTree, "honda accord", 100000);
+
+        assertEquals(3, createdEntries.size());
+        assertEquals(3, listSize.get());
+
+        assertEquals(CarsModel.newCarPath("tesla model s"), createdEntries.get(0).getKey());
+        assertEquals(CarsModel.newCarPath("porsche 911"), createdEntries.get(1).getKey());
+        assertEquals(CarsModel.newCarPath("honda accord"), createdEntries.get(2).getKey());
+
+        removeCar(shardDataTree, "tesla model s");
+
+        assertEquals(1, deletedEntries.size());
+        assertEquals(2, listSize.get());
+
+        assertEquals(CarsModel.newCarPath("tesla model s"), deletedEntries.get(0));
+    }
+
+    private void removeCar(ShardDataTree shardDataTree, String carName) throws ExecutionException, InterruptedException {
+        ReadWriteShardDataTreeTransaction transaction = shardDataTree.newReadWriteTransaction("txn-1", null);
+        DataTreeModification snapshot = transaction.getSnapshot();
+
+        snapshot.delete(CarsModel.newCarPath(carName));
+
+        ShardDataTreeCohort cohort = shardDataTree.finishTransaction(transaction);
+
+        cohort.preCommit().get();
+        cohort.commit().get();
+
+    }
+
+
+    private void addCar(ShardDataTree shardDataTree, String carName, long price) throws ExecutionException, InterruptedException {
+        ReadWriteShardDataTreeTransaction transaction = shardDataTree.newReadWriteTransaction("txn-1", null);
+
+        DataTreeModification snapshot = transaction.getSnapshot();
+        snapshot.merge(CarsModel.BASE_PATH, CarsModel.createEmptyCarsList());
+        snapshot.merge(CarsModel.newCarPath(carName), CarsModel.newCarEntry(carName, BigInteger.valueOf(price)));
+
+        ShardDataTreeCohort cohort = shardDataTree.finishTransaction(transaction);
+
+        cohort.preCommit().get();
+        cohort.commit().get();
 
     }
 

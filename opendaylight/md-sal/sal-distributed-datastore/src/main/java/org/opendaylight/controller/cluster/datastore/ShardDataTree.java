@@ -81,7 +81,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         return chain;
     }
 
-    ReadOnlyShardDataTreeTransaction newReadOnlyTransaction(final String txId, final String chainId) {
+    public ReadOnlyShardDataTreeTransaction newReadOnlyTransaction(final String txId, final String chainId) {
         if (Strings.isNullOrEmpty(chainId)) {
             return new ReadOnlyShardDataTreeTransaction(txId, dataTree.takeSnapshot());
         }
@@ -89,7 +89,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         return ensureTransactionChain(chainId).newReadOnlyTransaction(txId);
     }
 
-    ReadWriteShardDataTreeTransaction newReadWriteTransaction(final String txId, final String chainId) {
+    public ReadWriteShardDataTreeTransaction newReadWriteTransaction(final String txId, final String chainId) {
         if (Strings.isNullOrEmpty(chainId)) {
             return new ReadWriteShardDataTreeTransaction(ShardDataTree.this, txId, dataTree.takeSnapshot()
                     .newModification());
@@ -125,7 +125,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         }
     }
 
-    Entry<ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>>, DOMImmutableDataChangeEvent> registerChangeListener(
+    public Entry<ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>>, DOMImmutableDataChangeEvent> registerChangeListener(
             final YangInstanceIdentifier path,
             final AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> listener, final DataChangeScope scope) {
         final ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>> reg =
@@ -143,7 +143,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         return new SimpleEntry<>(reg, event);
     }
 
-    Entry<ListenerRegistration<DOMDataTreeChangeListener>, DataTreeCandidate> registerTreeChangeListener(final YangInstanceIdentifier path,
+    public Entry<ListenerRegistration<DOMDataTreeChangeListener>, DataTreeCandidate> registerTreeChangeListener(final YangInstanceIdentifier path,
             final DOMDataTreeChangeListener listener) {
         final ListenerRegistration<DOMDataTreeChangeListener> reg = treeChangePublisher.registerTreeChangeListener(path, listener);
 
@@ -177,7 +177,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     }
 
     @Override
-    ShardDataTreeCohort finishTransaction(final ReadWriteShardDataTreeTransaction transaction) {
+    public ShardDataTreeCohort finishTransaction(final ReadWriteShardDataTreeTransaction transaction) {
         final DataTreeModification snapshot = transaction.getSnapshot();
         snapshot.ready();
         return new SimpleShardDataTreeCohort(this, snapshot, transaction.getId());

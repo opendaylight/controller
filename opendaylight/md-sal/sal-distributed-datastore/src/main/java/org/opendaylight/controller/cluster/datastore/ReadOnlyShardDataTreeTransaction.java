@@ -9,7 +9,7 @@ package org.opendaylight.controller.cluster.datastore;
 
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
 
-final class ReadOnlyShardDataTreeTransaction extends AbstractShardDataTreeTransaction<DataTreeSnapshot> {
+public final class ReadOnlyShardDataTreeTransaction extends AbstractShardDataTreeTransaction<DataTreeSnapshot> {
     ReadOnlyShardDataTreeTransaction(final String id, final DataTreeSnapshot snapshot) {
         super(id, snapshot);
     }

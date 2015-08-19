@@ -12,30 +12,44 @@ import akka.actor.Props;
 import akka.dispatch.OnComplete;
 import akka.pattern.AskTimeoutException;
 import akka.pattern.Patterns;
+import com.google.common.base.Optional;
+import com.google.common.base.Supplier;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
+import org.opendaylight.controller.cluster.datastore.ReadOnlyShardDataTreeTransaction;
 import org.opendaylight.controller.cluster.datastore.Shard;
+import org.opendaylight.controller.cluster.datastore.entityownership.messages.CandidateAdded;
+import org.opendaylight.controller.cluster.datastore.entityownership.messages.CandidateRemoved;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.RegisterCandidateLocal;
+import org.opendaylight.controller.cluster.datastore.entityownership.messages.RegisterListListener;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.UnregisterCandidateLocal;
+import org.opendaylight.controller.cluster.datastore.entityownership.messages.UnregisterListListener;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
 import org.opendaylight.controller.cluster.datastore.messages.SuccessReply;
 import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
+import org.opendaylight.controller.cluster.datastore.utils.YangListChangeListener;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
+import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.entity.owners.rev150804.EntityOwners;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.entity.owners.rev150804.entity.owners.EntityType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.entity.owners.rev150804.entity.owners.entity.type.entity.Candidate;
+import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -53,10 +67,14 @@ class EntityOwnershipShard extends Shard {
     static final QName CANDIDATE_NAME = QName.create(Candidate.QNAME, "name");
     static final QName ENTITY_ID = QName.create(ENTITY_QNAME, "id");
     static final QName ENTITY_TYPE = QName.create(EntityType.QNAME, "type");
+    static final QName ENTITY_OWNER = QName.create(ENTITY_QNAME, "owner");
+    static final YangInstanceIdentifier ENTITY_TYPE_PATH = ENTITY_OWNERS_PATH.node(EntityType.QNAME);
 
     private int transactionIDCounter = 0;
     private final String localMemberName;
     private final List<BatchedModifications> retryModifications = new ArrayList<>();
+    private final Map<YangInstanceIdentifier, ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>>> listenerRegistrations
+            = new HashMap<>();
 
     private static DatastoreContext noPersistenceDatastoreContext(DatastoreContext datastoreContext) {
         return DatastoreContext.newBuilderFrom(datastoreContext).persistent(false).build();
@@ -66,6 +84,10 @@ class EntityOwnershipShard extends Shard {
             DatastoreContext datastoreContext, SchemaContext schemaContext, String localMemberName) {
         super(name, peerAddresses, noPersistenceDatastoreContext(datastoreContext), schemaContext);
         this.localMemberName = localMemberName;
+
+        YangListChangeListener.registerYangListChangeListener(getDataStore(),
+                ENTITY_TYPE_PATH,
+                new EntityTypeListChangeListener());
     }
 
     @Override
@@ -78,7 +100,15 @@ class EntityOwnershipShard extends Shard {
         if(message instanceof RegisterCandidateLocal) {
             onRegisterCandidateLocal((RegisterCandidateLocal)message);
         } else if(message instanceof UnregisterCandidateLocal) {
-            onUnregisterCandidateLocal((UnregisterCandidateLocal)message);
+            onUnregisterCandidateLocal((UnregisterCandidateLocal) message);
+        } else if(message instanceof RegisterListListener){
+            onRegisterListListener((RegisterListListener) message);
+        } else if(message instanceof UnregisterListListener){
+            onUnRegisterListListener((UnregisterListListener) message);
+        } else if(message instanceof CandidateAdded){
+            onCandidateAdded((CandidateAdded) message);
+        } else if(message instanceof CandidateRemoved){
+            onCandidateRemoved((CandidateRemoved) message);
         } else {
             super.onReceiveCommand(message);
         }
@@ -208,4 +238,132 @@ class EntityOwnershipShard extends Shard {
             return new EntityOwnershipShard(name, peerAddresses, datastoreContext, schemaContext, localMemberName);
         }
     }
+
+    private void onRegisterListListener(RegisterListListener message){
+        YangInstanceIdentifier entityListPath
+                = message.getListPath();
+        ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>> registration
+                = YangListChangeListener.registerYangListChangeListener(getDataStore(),
+                entityListPath, message.getListChangeListenerFactory().get());
+
+        listenerRegistrations.put(message.getListPath(), registration);
+
+    }
+
+    private void onUnRegisterListListener(UnregisterListListener message){
+        ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>> registration
+                = listenerRegistrations.remove(message.getListPath());
+
+        if(registration != null){
+            registration.close();
+        }
+    }
+
+    private void onCandidateRemoved(CandidateRemoved message) {
+        if(!isLeader()){
+            return;
+        }
+        String currentOwner = getCurrentOwner(message.getEntityId());
+        if(message.getRemovedCandidateName().equals(currentOwner) && message.getCandidates().size() > 0){
+            writeNewOwner(message.getEntityId(), newOwner(message.getCandidates()));
+        } else if(message.getCandidates().size() == 0){
+            writeNewOwner(message.getEntityId(), "");
+        }
+    }
+
+    private void onCandidateAdded(CandidateAdded message) {
+        if(!isLeader()){
+            return;
+        }
+        String currentOwner = getCurrentOwner(message.getEntityId());
+        if(currentOwner == null){
+            writeNewOwner(message.getEntityId(), newOwner(message.getCandidates()));
+        }
+    }
+
+    private void writeNewOwner(YangInstanceIdentifier entityId, String newOwner) {
+        LOG.debug("Writing new owner {} for entity {}", newOwner, entityId);
+
+        BatchedModifications modifications = new BatchedModifications(
+                TransactionIdentifier.create(localMemberName, ++transactionIDCounter).toString(),
+                DataStoreVersions.CURRENT_VERSION, "");
+        modifications.setDoCommitOnReady(true);
+        modifications.setReady(true);
+        modifications.setTotalMessagesSent(1);
+
+        modifications.addModification(new MergeModification(entityId.node(ENTITY_OWNER), ImmutableNodes.leafNode(new YangInstanceIdentifier.NodeIdentifier(ENTITY_OWNER), newOwner)));
+
+        tryCommitModifications(modifications);
+    }
+
+    private String newOwner(Collection<MapEntryNode> entries) {
+        if(entries.size() > 0){
+            MapEntryNode entry = entries.iterator().next();
+            Collection<DataContainerChild<? extends YangInstanceIdentifier.PathArgument, ?>> children
+                    = entry.getValue();
+
+            return children.iterator().next().getValue().toString();
+        }
+        return null;
+    }
+
+    private String getCurrentOwner(YangInstanceIdentifier entityId) {
+        ReadOnlyShardDataTreeTransaction transaction = getDataStore().newReadOnlyTransaction("get-current-owner", null);
+        DataTreeSnapshot snapshot = transaction.getSnapshot();
+        Optional<NormalizedNode<?, ?>> optionalEntityOwner = snapshot.readNode(entityId.node(ENTITY_OWNER));
+        if(optionalEntityOwner.isPresent()){
+            return optionalEntityOwner.get().getValue().toString();
+        }
+        return null;
+    }
+
+    private class EntityTypeListChangeListener extends YangListChangeListener {
+
+        protected EntityTypeListChangeListener() {
+            super(ENTITY_TYPE_PATH);
+        }
+
+        @Override
+        protected void entryAdded(final YangInstanceIdentifier key, final NormalizedNode<?, ?> value) {
+            self().tell(new RegisterListListener(key.node(ENTITY_QNAME), new Supplier<YangListChangeListener>() {
+                @Override
+                public YangListChangeListener get() {
+                    return new EntityListChangeListener(key.node(ENTITY_QNAME));
+                }
+            }), self());
+        }
+
+        @Override
+        protected void entryRemoved(YangInstanceIdentifier key) {
+            self().tell(new UnregisterListListener(key.node(ENTITY_QNAME)), self());
+        }
+    }
+
+    private class EntityListChangeListener extends YangListChangeListener {
+        private final Map<YangInstanceIdentifier, ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>>> registrations
+                = new HashMap<>();
+
+        protected EntityListChangeListener(YangInstanceIdentifier listPath) {
+            super(listPath);
+        }
+
+        @Override
+        protected void entryAdded(YangInstanceIdentifier key, NormalizedNode<?, ?> value) {
+            final YangInstanceIdentifier candidateListPath = key.node(Candidate.QNAME);
+            self().tell(new RegisterListListener(candidateListPath, new Supplier<YangListChangeListener>() {
+                @Override
+                public YangListChangeListener get() {
+                    return new CandidateListChangeListener(candidateListPath, self());
+                }
+            }), self());
+        }
+
+        @Override
+        protected void entryRemoved(YangInstanceIdentifier key) {
+            YangInstanceIdentifier candidateListPath = key.node(Candidate.QNAME);
+            self().tell(new UnregisterListListener(candidateListPath), self());
+        }
+    }
+
+
 }

@@ -91,6 +91,8 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         kit.expectMsgClass(SuccessReply.class);
 
         verifyCommittedEntityCandidate(shard, ENTITY_TYPE, entityId, LOCAL_MEMBER_NAME);
+
+        verifyOwner(LOCAL_MEMBER_NAME, readEntityOwners(shard), ENTITY_TYPE, entityId);
     }
 
     @Test
@@ -118,6 +120,8 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         peer.underlyingActor().grantVote = true;
 
         verifyCommittedEntityCandidate(shard, ENTITY_TYPE, entityId, LOCAL_MEMBER_NAME);
+
+        verifyOwner(LOCAL_MEMBER_NAME, readEntityOwners(shard), ENTITY_TYPE, entityId);
     }
 
     @Test
@@ -156,7 +160,10 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         // Resume AppendEntries - the follower should ack the commit which should then result in the candidate
         // write being applied to the state.
         follower.dropAppendEntries = false;
+
         verifyCommittedEntityCandidate(shard, ENTITY_TYPE, entityId, LOCAL_MEMBER_NAME);
+
+        verifyOwner(LOCAL_MEMBER_NAME, readEntityOwners(shard), ENTITY_TYPE, entityId);
     }
 
     @Test
@@ -193,6 +200,8 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         // Resume AppendEntries - the candidate write should now be committed.
         follower.dropAppendEntries = false;
         verifyCommittedEntityCandidate(shard, ENTITY_TYPE, entityId, LOCAL_MEMBER_NAME);
+
+        verifyOwner(LOCAL_MEMBER_NAME, readEntityOwners(shard), ENTITY_TYPE, entityId);
     }
 
     @Test

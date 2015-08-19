@@ -32,7 +32,7 @@ abstract class AbstractShardDataTreeTransaction<T extends DataTreeSnapshot> {
         return id;
     }
 
-    final T getSnapshot() {
+    public final T getSnapshot() {
         return snapshot;
     }
 
