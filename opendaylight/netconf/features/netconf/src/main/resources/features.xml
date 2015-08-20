@@ -133,6 +133,7 @@
 
   <feature name='odl-netconf-mdsal' version='${mdsal.version}' description="OpenDaylight :: Netconf :: Mdsal">
     <feature version='${config.version}'>odl-config-all</feature>
+    <feature version='${config.version}'>odl-config-netty</feature>
     <feature version='${project.version}'>odl-netconf-all</feature>
     <feature version='${project.version}'>odl-netconf-tcp</feature>
     <feature version='${project.version}'>odl-netconf-ssh</feature>
