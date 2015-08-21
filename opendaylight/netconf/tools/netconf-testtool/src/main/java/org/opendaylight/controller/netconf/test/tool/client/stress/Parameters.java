@@ -34,6 +34,9 @@ public class Parameters {
     @Arg(dest = "edit-batch-size")
     public int editBatchSize;
 
+    @Arg(dest = "candidate-datastore")
+    public boolean candidateDatastore;
+
     @Arg(dest = "debug")
     public boolean debug;
 
@@ -100,8 +103,14 @@ public class Parameters {
                 .type(Integer.class)
                 .required(false)
                 .setDefault(-1)
-                .type(Integer.class)
                 .dest("edit-batch-size");
+
+        parser.addArgument("--candidate-datastore")
+                .type(Boolean.class)
+                .required(false)
+                .setDefault(true)
+                .help("Edit candidate or running datastore. Defaults to candidate.")
+                .dest("candidate-datastore");
 
         parser.addArgument("--debug")
                 .type(Boolean.class)

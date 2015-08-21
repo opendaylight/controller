@@ -77,7 +77,9 @@ class AsyncExecutionStrategy implements ExecutionStrategy {
             }
             batchI++;
             LOG.info("Batch {} with size {} sent. Committing", batchI, editBatch);
-            futures.add(sessionListener.sendRequest(StressClient.COMMIT_MSG, StressClient.COMMIT_QNAME));
+            if (params.candidateDatastore) {
+                futures.add(sessionListener.sendRequest(StressClient.COMMIT_MSG, StressClient.COMMIT_QNAME));
+            }
         }
 
         LOG.info("All batches sent. Waiting for responses");
@@ -98,6 +100,7 @@ class AsyncExecutionStrategy implements ExecutionStrategy {
             }
         }
 
-        Preconditions.checkState(responseCounter.get() == editAmount + editBatches.size(), "Not all responses were received, only %s from %s", responseCounter.get(), params.editCount + editBatches.size());
+        Preconditions.checkState(responseCounter.get() == editAmount + (params.candidateDatastore ? editBatches.size() : 0),
+                "Not all responses were received, only %s from %s", responseCounter.get(), params.editCount + editBatches.size());
     }
 }

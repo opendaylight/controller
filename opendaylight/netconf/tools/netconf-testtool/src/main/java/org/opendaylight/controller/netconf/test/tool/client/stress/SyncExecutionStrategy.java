@@ -80,11 +80,14 @@ class SyncExecutionStrategy implements ExecutionStrategy {
             LOG.info("Batch {} with size {} sent. Committing", batchI, editBatch);
 
             // Commit batch sync
-            waitForResponse(responseCounter,
-                    sessionListener.sendRequest(StressClient.COMMIT_MSG, StressClient.COMMIT_QNAME));
+            if (params.candidateDatastore) {
+                waitForResponse(responseCounter,
+                        sessionListener.sendRequest(StressClient.COMMIT_MSG, StressClient.COMMIT_QNAME));
+            }
         }
 
-        Preconditions.checkState(responseCounter.get() == editAmount + editBatches.size(), "Not all responses were received, only %s from %s", responseCounter.get(), params.editCount + editBatches.size());
+        Preconditions.checkState(responseCounter.get() == editAmount + (params.candidateDatastore ? editBatches.size() : 0),
+                "Not all responses were received, only %s from %s", responseCounter.get(), params.editCount + editBatches.size());
     }
 
     private void waitForResponse(AtomicInteger responseCounter, final ListenableFuture<RpcResult<NetconfMessage>> netconfMessageFuture) {
