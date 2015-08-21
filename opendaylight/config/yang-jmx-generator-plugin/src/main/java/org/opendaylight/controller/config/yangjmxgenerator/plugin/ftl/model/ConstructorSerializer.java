@@ -16,7 +16,7 @@ public class ConstructorSerializer {
         if (constr.isPublic()) {
             build.append("public ");
         }
-        build.append(constr.getTypeName() + " ");
+        build.append(constr.getTypeName());
         build.append("() {");
         build.append("\n");
         build.append("    ");

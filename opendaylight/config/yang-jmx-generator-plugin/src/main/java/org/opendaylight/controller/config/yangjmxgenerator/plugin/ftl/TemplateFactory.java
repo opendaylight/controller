@@ -11,7 +11,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -64,7 +63,7 @@ public class TemplateFactory {
         { // create GeneralInterfaceFtlFile for runtime MXBean. Attributes will
           // be transformed to getter methods
             String mxBeanTypeName = entry.getJavaNameOfRuntimeMXBean();
-            List<String> extendedInterfaces = Arrays.asList(RuntimeBean.class
+            List<String> extendedInterfaces = Collections.singletonList(RuntimeBean.class
                     .getCanonicalName());
             List<MethodDeclaration> methods = new ArrayList<>();
 
@@ -179,8 +178,7 @@ public class TemplateFactory {
     public static AbstractFactoryTemplate abstractFactoryTemplateFromMbe(
             final ModuleMXBeanEntry mbe) {
         AbstractFactoryAttributesProcessor attrProcessor = new AbstractFactoryAttributesProcessor();
-        attrProcessor.processAttributes(mbe.getAttributes(),
-                mbe.getPackageName());
+        attrProcessor.processAttributes(mbe.getAttributes());
 
 
 
@@ -205,7 +203,7 @@ public class TemplateFactory {
         boolean generateRuntime = false;
         String registratorFullyQualifiedName = null;
         if (mbe.getRuntimeBeans() != null
-                && mbe.getRuntimeBeans().isEmpty() == false) {
+                && !mbe.getRuntimeBeans().isEmpty()) {
             generateRuntime = true;
             RuntimeBeanEntry rootEntry = RuntimeRegistratorFtlTemplate
                     .findRoot(mbe.getRuntimeBeans());
@@ -294,7 +292,7 @@ public class TemplateFactory {
                 continue;
             }
 
-            Preconditions.checkState(yangPropertiesToTypesMap.containsKey(returnType.getAttributeYangName()) == false,
+            Preconditions.checkState(!yangPropertiesToTypesMap.containsKey(returnType.getAttributeYangName()),
                     "Duplicate TO %s for %s", returnType.getAttributeYangName(), rbe);
             yangPropertiesToTypesMap.put(returnType.getAttributeYangName(), returnType);
         }
@@ -435,8 +433,8 @@ public class TemplateFactory {
 
             private MethodDefinition getEquals(final Map<String, AttributeIfc> attrs) {
                 final StringBuilder equalsBodyBuilder = new StringBuilder(
-                        "        if (this == o) return true;\n" +
-                        "        if (o == null || getClass() != o.getClass()) return false;\n");
+                        "        if (this == o) { return true; }\n" +
+                        "        if (o == null || getClass() != o.getClass()) { return false; }\n");
                 equalsBodyBuilder.append(String.format(
                         "        final %s that = (%s) o;\n", name, name));
                 for (AttributeIfc s : attrs.values()) {
@@ -554,24 +552,19 @@ public class TemplateFactory {
 
         private final List<Field> fields = Lists.newArrayList();
 
-        void processAttributes(final Map<String, AttributeIfc> attributes,
-                final String packageName) {
-            for (Entry<String, AttributeIfc> attrEntry : attributes.entrySet()) {
-                String type;
-                String nullableDefaultWrapped = null;
-                AttributeIfc attributeIfc = attrEntry.getValue();
-
+        void processAttributes(final Map<String, AttributeIfc> attributes) {
+            for (AttributeIfc attributeIfc : attributes.values()) {
                 if (attributeIfc instanceof TypedAttribute) {
                     TypedAttribute typedAttribute = (TypedAttribute) attributeIfc;
-                    type = serializeType(typedAttribute.getType());
+                    String type = serializeType(typedAttribute.getType());
+
+                    fields.add(new Field(type, attributeIfc
+                            .getUpperCaseCammelCase(), null));
                 } else {
                     throw new UnsupportedOperationException(
                             "Attribute not supported: "
                                     + attributeIfc.getClass());
                 }
-
-                fields.add(new Field(type, attributeIfc
-                        .getUpperCaseCammelCase(), nullableDefaultWrapped));
             }
         }
 

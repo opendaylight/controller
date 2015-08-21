@@ -24,42 +24,40 @@ class MethodSerializer {
 
         build.append("    " + "public ");
         for (String mod : method.getModifiers()) {
-            build.append(mod + " ");
+            build.append(mod).append(" ");
         }
-        build.append(method.getReturnType() + " ");
+        build.append(method.getReturnType()).append(" ");
 
-        build.append(method.getName() + "(");
+        build.append(method.getName()).append("(");
+        boolean firstParam = true;
         for (Field param : method.getParameters()) {
-            for (String mod : param.getModifiers()) {
-                build.append(mod + " ");
+            if (!firstParam) {
+                build.append(", ");
             }
-            build.append(param.getType() + " ");
-            build.append(param.getName() + ", ");
+            for (String mod : param.getModifiers()) {
+                build.append(mod).append(" ");
+            }
+            build.append(param.getType()).append(" ");
+            build.append(param.getName());
+            firstParam = false;
         }
-        if (method.getParameters().isEmpty()) {
-            build.append(")");
-        } else {
-            build.deleteCharAt(build.length() - 1);
-            build.deleteCharAt(build.length() - 1);
-            build.append(')');
-        }
+        build.append(")");
 
         if (method instanceof MethodDeclaration) {
             build.append(";");
             build.append("\n");
         } else if (method instanceof MethodDefinition) {
-            if (!((MethodDefinition) method).getThrowsExceptions()
-                    .isEmpty()) {
+            MethodDefinition definition = (MethodDefinition) method;
+            if (!definition.getThrowsExceptions().isEmpty()) {
                 build.append(" throws ");
             }
-            for (String ex : ((MethodDefinition) method)
-                    .getThrowsExceptions()) {
-                build.append(ex + " ");
+            for (String ex : definition.getThrowsExceptions()) {
+                build.append(ex).append(" ");
             }
             build.append(" {");
             build.append("\n");
             build.append("        ");
-            build.append(((MethodDefinition) method).getBody());
+            build.append(definition.getBody());
             build.append("\n");
             build.append("    ");
             build.append("}");
