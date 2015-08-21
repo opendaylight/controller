@@ -85,14 +85,14 @@ public class StringUtil {
 
         int basicIndent = 4;
         StringBuilder sb = new StringBuilder();
-        int intends = 0, empty = 0;
+        int indents = 0, empty = 0;
         for (String line : split) {
-            intends -= StringUtils.countMatches(line, "}");
-            if (intends < 0) {
-                intends = 0;
+            indents -= StringUtils.countMatches(line, "}");
+            if (indents < 0) {
+                indents = 0;
             }
-            if (line.isEmpty() == false) {
-                sb.append(Strings.repeat(" ", basicIndent * intends));
+            if (!line.isEmpty()) {
+                sb.append(Strings.repeat(" ", basicIndent * indents));
                 sb.append(line);
                 sb.append("\n");
                 empty = 0;
@@ -102,7 +102,7 @@ public class StringUtil {
                     sb.append("\n");
                 }
             }
-            intends += StringUtils.countMatches(line, "{");
+            indents += StringUtils.countMatches(line, "{");
         }
         return ensureEndsWithSingleNewLine(sb.toString());
     }

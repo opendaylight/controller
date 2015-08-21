@@ -25,13 +25,13 @@ public interface FtlTemplate {
 
     Optional<String> getMaybeJavadoc();
 
-    public List<Annotation> getAnnotations();
+    List<Annotation> getAnnotations();
 
     TypeDeclaration getTypeDeclaration();
 
-    public String getFullyQualifiedName();
+    String getFullyQualifiedName();
 
-    public List<Field> getFields();
+    List<Field> getFields();
 
     List<? extends Method> getMethods();
 

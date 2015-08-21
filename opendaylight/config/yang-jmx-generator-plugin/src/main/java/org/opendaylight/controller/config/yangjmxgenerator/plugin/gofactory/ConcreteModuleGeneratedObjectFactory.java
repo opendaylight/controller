@@ -67,7 +67,7 @@ public class ConcreteModuleGeneratedObjectFactory {
         // parameters
         stringBuilder.append(Joiner.on(", ").withKeyValueSeparator(" ").join(parameters));
         stringBuilder.append(") {\n");
-        if (parameters.isEmpty() == false) {
+        if (!parameters.isEmpty()) {
             stringBuilder.append("super(");
             stringBuilder.append(Joiner.on(", ").join(parameters.values()));
             stringBuilder.append(");\n");

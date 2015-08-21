@@ -14,7 +14,7 @@ class TypeHelper {
      * "List<String>" for input parameters List.class, String.class
      */
     static String getGenericType(Class<?> type, Class<?>... parameters) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append(type.getCanonicalName());
         if (parameters.length > 0) {
             sb.append("<");
