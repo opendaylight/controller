@@ -114,11 +114,12 @@ public class AbsFactoryGeneratedObjectFactory {
                 "throw new UnsupportedOperationException(\"Class reloading is not supported\");\n"+
             "}\n", moduleFQN, DynamicMBeanWithInstance.class.getCanonicalName()));
 
+        // TODO The generic specifier in HashSet<> isn't necessary, but the Eclipse AST parser used in the unit tests doesn't support this
         b.addToBody(format("\n"+
             "@Override\n"+
             "public java.util.Set<%s> getDefaultModules(org.opendaylight.controller.config.api.DependencyResolverFactory dependencyResolverFactory, %s bundleContext) {\n"+
-                "return new java.util.HashSet<%s>();\n"+
-            "}\n", moduleFQN, BUNDLE_CONTEXT, moduleFQN));
+                "return new java.util.HashSet<%1$s>();\n"+
+            "}\n", moduleFQN, BUNDLE_CONTEXT));
 
         return new GeneratedObjectBuilder(b.build()).toGeneratedObject();
     }
@@ -129,7 +130,7 @@ public class AbsFactoryGeneratedObjectFactory {
             format("public %s createModule(String instanceName, %s dependencyResolver, %s old, %s bundleContext) throws Exception {\n",
                                 Module.class.getCanonicalName(), DependencyResolver.class.getCanonicalName(),
                                 DynamicMBeanWithInstance.class.getCanonicalName(), BUNDLE_CONTEXT)+
-                format("%s oldModule = null;\n",moduleFQN)+
+                format("%s oldModule;\n",moduleFQN)+
                 "try {\n"+
                     format("oldModule = (%s) old.getModule();\n",moduleFQN)+
                 "} catch(Exception e) {\n"+
@@ -150,14 +151,20 @@ public class AbsFactoryGeneratedObjectFactory {
     private static String getServiceIfcsInitialization(List<FullyQualifiedName> providedServices) {
         String generic = format("Class<? extends %s>", AbstractServiceInterface.class.getCanonicalName());
 
-        String result = format("static {\n"+
-            "java.util.Set<%1$s> serviceIfcs2 = new java.util.HashSet<%1$s>();\n", generic);
+        String result = "static {\n";
+        if (!providedServices.isEmpty()) {
+            // TODO The generic specifier in HashSet<> isn't necessary, but the Eclipse AST parser used in the unit tests doesn't support this
+            result += format("java.util.Set<%1$s> serviceIfcs2 = new java.util.HashSet<%1$s>();\n", generic);
 
-        for(FullyQualifiedName fqn: providedServices) {
-            result += format("serviceIfcs2.add(%s.class);\n", fqn);
+            for(FullyQualifiedName fqn: providedServices) {
+                result += format("serviceIfcs2.add(%s.class);\n", fqn);
+            }
+
+            result += "serviceIfcs = java.util.Collections.unmodifiableSet(serviceIfcs2);\n";
+        } else {
+            result += "serviceIfcs = java.util.Collections.emptySet();\n";
         }
-        result += "serviceIfcs = java.util.Collections.unmodifiableSet(serviceIfcs2);\n"+
-            "}\n";
+        result += "}\n";
 
         // add isModuleImplementingServiceInterface and getImplementedServiceIntefaces methods
 

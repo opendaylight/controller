@@ -149,8 +149,8 @@ public class AbsModuleGeneratedObjectFactory {
         return "\n"+
             "@Override\n"+
             "public boolean equals(Object o) {\n"+
-                "if (this == o) return true;\n"+
-                "if (o == null || getClass() != o.getClass()) return false;\n"+
+                "if (this == o) { return true; }\n"+
+                "if (o == null || getClass() != o.getClass()) { return false; }\n"+
                 format("%s that = (%1$s) o;\n", abstractFQN.getTypeName())+
                 "return identifier.equals(that.identifier);\n"+
             "}\n"+
@@ -182,7 +182,7 @@ public class AbsModuleGeneratedObjectFactory {
 
         for (ModuleField moduleField : moduleFields) {
             result += format(
-                "if (java.util.Objects.deepEquals(%s, other.%1$s) == false) {\n"+
+                "if (!java.util.Objects.deepEquals(%s, other.%1$s)) {\n"+
                     "return false;\n"+
                 "}\n", moduleField.getName());
 

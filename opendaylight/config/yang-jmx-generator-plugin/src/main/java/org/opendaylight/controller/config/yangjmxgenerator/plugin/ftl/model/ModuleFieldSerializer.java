@@ -16,28 +16,32 @@ public class ModuleFieldSerializer {
     public static String toString(ModuleField moduleField) {
         StringBuilder builder = new StringBuilder();
         builder.append("    ");
-        builder.append("public static final "
-                + JmxAttribute.class.getCanonicalName() + " "
-                + moduleField.getName() + "JmxAttribute = new "
-                + JmxAttribute.class.getCanonicalName() + "(\""
-                + moduleField.getAttributeName() + "\");");
+        builder.append("public static final ");
+        builder.append(JmxAttribute.class.getCanonicalName());
+        builder.append(" ");
+        builder.append(moduleField.getName());
+        builder.append("JmxAttribute = new ");
+        builder.append(JmxAttribute.class.getCanonicalName());
+        builder.append("(\"");
+        builder.append(moduleField.getAttributeName());
+        builder.append("\");");
         builder.append("\n");
 
         builder.append("     private ");
         for (String mod : moduleField.getModifiers()) {
-            builder.append(mod + " ");
+            builder.append(mod).append(" ");
         }
-        builder.append(moduleField.getType() + " ");
+        builder.append(moduleField.getType()).append(" ");
         builder.append(moduleField.getName());
         if (moduleField.getNullableDefault() != null) {
-            builder.append(" = " + moduleField.getNullableDefault());
+            builder.append(" = ").append(moduleField.getNullableDefault());
         }
         builder.append(";");
 
         if (moduleField.isDependent()) {
             String comment = moduleField.getDependency().isMandatory() ? "mandatory"
                     : "optional";
-            builder.append(" // " + comment);
+            builder.append(" // ").append(comment);
         }
         builder.append("\n");
 
