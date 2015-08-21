@@ -29,7 +29,7 @@ public class GeneratedObjectBuilder {
         content.append(maybeAddComment(input.getCopyright()));
         content.append(maybeAddComment(input.getHeader()));
 
-        if (input.getFQN().getPackageName().isEmpty() == false) {
+        if (!input.getFQN().getPackageName().isEmpty()) {
             content.append("package ");
             content.append(input.getFQN().getPackageName());
             content.append(";\n");

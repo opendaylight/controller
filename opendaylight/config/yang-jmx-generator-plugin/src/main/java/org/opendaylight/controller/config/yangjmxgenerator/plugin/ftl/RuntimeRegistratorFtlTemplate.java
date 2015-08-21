@@ -15,7 +15,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import java.io.Closeable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -41,8 +40,8 @@ public class RuntimeRegistratorFtlTemplate extends GeneralClassTemplate {
             String name, List<Field> fields, List<MethodDefinition> methods) {
         // TODO header
         super(null, runtimeBeanEntry.getPackageName(), name, Collections
-                .<String> emptyList(), Arrays.asList(Closeable.class
-                    .getCanonicalName()), fields, methods);
+                .<String> emptyList(), Collections.singletonList(Closeable.class
+                .getCanonicalName()), fields, methods);
     }
 
     public static RuntimeBeanEntry findRoot(
@@ -65,7 +64,7 @@ public class RuntimeRegistratorFtlTemplate extends GeneralClassTemplate {
 
     private static String constructConstructorBody(
             List<Field> constructorParameters) {
-        StringBuffer constructorBody = new StringBuffer();
+        StringBuilder constructorBody = new StringBuilder();
         for (Field field : constructorParameters) {
             constructorBody.append("this.");
             constructorBody.append(field.getName());
@@ -109,16 +108,16 @@ public class RuntimeRegistratorFtlTemplate extends GeneralClassTemplate {
             StringBuilder registerBody = new StringBuilder();
             registerBody.append(format("%s %s = this.%s.registerRoot(%s);\n",
                     HierarchicalRuntimeBeanRegistration.class
-                            .getCanonicalName(), hierachchicalRegistration
+                            .getCanonicalName(), hierachicalRegistration
                             .getName(), rootRuntimeBeanRegistratorField
                             .getName(), rbParameter.getName()));
             registerBody.append(format("return new %s(%s);\n",
                     rootFtlFile.getFullyQualifiedName(),
-                    hierachchicalRegistration.getName()));
+                    hierachicalRegistration.getName()));
 
             MethodDefinition registerMethod = new MethodDefinition(
                     childRegistratorFQN, "register",
-                    Arrays.asList(rbParameter), registerBody.toString());
+                    Collections.singletonList(rbParameter), registerBody.toString());
             methods.add(registerMethod);
         }
 
@@ -128,11 +127,11 @@ public class RuntimeRegistratorFtlTemplate extends GeneralClassTemplate {
         // TODO add header
         GeneralClassTemplate registrator = new GeneralClassTemplate(null,
                 rootRB.getPackageName(), registratorName,
-                Collections.<String> emptyList(), Arrays.asList(Closeable.class
-                        .getCanonicalName()), constructorParameters, methods);
+                Collections.<String> emptyList(), Collections.singletonList(Closeable.class
+                .getCanonicalName()), constructorParameters, methods);
 
-        checkState(RuntimeRegistratorFtlTemplates.containsKey(registrator
-                .getTypeDeclaration().getName()) == false, "Name conflict: "
+        checkState(!RuntimeRegistratorFtlTemplates.containsKey(registrator
+                .getTypeDeclaration().getName()), "Name conflict: "
                 + registrator.getTypeDeclaration().getName());
         Map<String, FtlTemplate> result = new HashMap<>();
         result.putAll(RuntimeRegistratorFtlTemplates);
@@ -140,7 +139,7 @@ public class RuntimeRegistratorFtlTemplate extends GeneralClassTemplate {
         return result;
     }
 
-    private static Field hierachchicalRegistration = new Field(
+    private static Field hierachicalRegistration = new Field(
             Lists.newArrayList("final"),
             HierarchicalRuntimeBeanRegistration.class.getCanonicalName(),
             "registration");
@@ -173,7 +172,7 @@ public class RuntimeRegistratorFtlTemplate extends GeneralClassTemplate {
         Set<String> currentOccupiedKeys = new HashSet<>(occupiedKeys);
         currentOccupiedKeys.add(parent.getJavaNamePrefix());
 
-        Field registratorsMapField = new Field(Arrays.asList("final"),
+        Field registratorsMapField = new Field(Collections.singletonList("final"),
                 TypeHelper.getGenericType(Map.class, String.class,
                         AtomicInteger.class), "unkeyedMap", "new "
                         + TypeHelper.getGenericType(HashMap.class,
@@ -223,7 +222,7 @@ public class RuntimeRegistratorFtlTemplate extends GeneralClassTemplate {
                 body.append(format("String value = %s;\n", value));
                 body.append(format("%s r = %s.register(key, value, bean);\n",
                         HierarchicalRuntimeBeanRegistration.class
-                                .getCanonicalName(), hierachchicalRegistration
+                                .getCanonicalName(), hierachicalRegistration
                                 .getName()));
                 body.append(format("return new %s(r);",
                         childRegistrator.getFullyQualifiedName()));
@@ -231,9 +230,9 @@ public class RuntimeRegistratorFtlTemplate extends GeneralClassTemplate {
                 Field param = new Field(Lists.newArrayList("final"),
                         child.getJavaNameOfRuntimeMXBean(), "bean");
                 MethodDefinition register = new MethodDefinition(
-                        Arrays.asList("synchronized"),
+                        Collections.singletonList("synchronized"),
                         childRegistrator.getFullyQualifiedName(), "register",
-                        Arrays.asList(param), Collections.<String> emptyList(),
+                        Collections.singletonList(param), Collections.<String> emptyList(),
                         Collections.<Annotation> emptyList(), body.toString());
                 methods.add(register);
 
@@ -243,14 +242,13 @@ public class RuntimeRegistratorFtlTemplate extends GeneralClassTemplate {
         // create parent registration
         String createdName = getJavaNameOfRuntimeRegistration(parent.getJavaNamePrefix());
 
-        List<Field> constructorParameters = Arrays
-                .asList(hierachchicalRegistration);
+        List<Field> constructorParameters = Collections.singletonList(hierachicalRegistration);
         String constructorBody = constructConstructorBody(constructorParameters);
 
         MethodDefinition constructor = MethodDefinition.createConstructor(
                 createdName, constructorParameters, constructorBody);
 
-        MethodDefinition closeRegistrator = createCloseMethodToCloseField(hierachchicalRegistration);
+        MethodDefinition closeRegistrator = createCloseMethodToCloseField(hierachicalRegistration);
         methods.add(closeRegistrator);
         methods.add(constructor);
         List<Field> privateFields = Lists.newArrayList(registratorsMapField);
@@ -261,8 +259,8 @@ public class RuntimeRegistratorFtlTemplate extends GeneralClassTemplate {
 
         LinkedHashMap<String, RuntimeRegistratorFtlTemplate> result = new LinkedHashMap<>();
         result.put(created.getTypeDeclaration().getName(), created);
-        checkState(unorderedResult.containsKey(created.getTypeDeclaration()
-                .getName()) == false, "Naming conflict: "
+        checkState(!unorderedResult.containsKey(created.getTypeDeclaration()
+                .getName()), "Naming conflict: "
                 + created.getTypeDeclaration().getName());
         result.putAll(unorderedResult);
         return result;
