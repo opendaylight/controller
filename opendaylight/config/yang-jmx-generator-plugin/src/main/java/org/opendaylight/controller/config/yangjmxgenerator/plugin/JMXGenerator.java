@@ -65,7 +65,6 @@ public class JMXGenerator implements BasicCodeGenerator, MavenProjectAware {
     private static final Logger LOG = LoggerFactory.getLogger(JMXGenerator.class);
     private static final Pattern NAMESPACE_MAPPING_PATTERN = Pattern.compile("(.+)" + NAMESPACE_TO_PACKAGE_DIVIDER + "(.+)");
 
-    private PackageTranslator packageTranslator;
     private final CodeWriter codeWriter;
     private Map<String, String> namespaceToPackageMapping;
     private File resourceBaseDir;
@@ -92,7 +91,7 @@ public class JMXGenerator implements BasicCodeGenerator, MavenProjectAware {
                 .checkArgument(namespaceToPackageMapping != null && !namespaceToPackageMapping.isEmpty(),
                         "No namespace to package mapping provided in additionalConfiguration");
 
-        packageTranslator = new PackageTranslator(namespaceToPackageMapping);
+        PackageTranslator packageTranslator = new PackageTranslator(namespaceToPackageMapping);
 
         if (!outputBaseDir.exists()) {
             outputBaseDir.mkdirs();
@@ -112,11 +111,9 @@ public class JMXGenerator implements BasicCodeGenerator, MavenProjectAware {
             for (Entry<QName, ServiceInterfaceEntry> sieEntry : namesToSIEntries
                     .entrySet()) {
                 // merge value into qNamesToSIEs
-                if (qNamesToSIEs.containsKey(sieEntry.getKey()) == false) {
-                    qNamesToSIEs.put(sieEntry.getKey(), sieEntry.getValue());
-                } else {
+                if (qNamesToSIEs.put(sieEntry.getKey(), sieEntry.getValue()) != null) {
                     throw new IllegalStateException(
-                        "Cannot add two SIE  with same qname "
+                        "Cannot add two SIE with same qname "
                                 + sieEntry.getValue());
                 }
             }
@@ -177,7 +174,7 @@ public class JMXGenerator implements BasicCodeGenerator, MavenProjectAware {
                 Files.write(fullyQualifiedNamesOfFactories.toString(), serviceLoaderFile, StandardCharsets.UTF_8);
             } catch (IOException e) {
                 String message = "Cannot write to " + serviceLoaderFile;
-                LOG.error(message);
+                LOG.error(message, e);
                 throw new RuntimeException(message, e);
             }
         }
@@ -186,12 +183,11 @@ public class JMXGenerator implements BasicCodeGenerator, MavenProjectAware {
 
     @VisibleForTesting
     static File concatFolders(final File projectBaseDir, final String... folderNames) {
-        StringBuilder b = new StringBuilder();
-        for (String folder : folderNames) {
-            b.append(folder);
-            b.append(File.separator);
+        File result = projectBaseDir;
+        for (String folder: folderNames) {
+            result = new File(result, folder);
         }
-        return new File(projectBaseDir, b.toString());
+        return result;
     }
 
     @Override
@@ -204,13 +200,7 @@ public class JMXGenerator implements BasicCodeGenerator, MavenProjectAware {
     private boolean extractModuleFactoryBoolean(
             final Map<String, String> additionalCfg) {
         String bool = additionalCfg.get(MODULE_FACTORY_FILE_BOOLEAN);
-        if (bool == null) {
-            return true;
-        }
-        if ("false".equals(bool)) {
-            return false;
-        }
-        return true;
+        return !"false".equals(bool);
     }
 
     private static Map<String, String> extractNamespaceMapping(
@@ -254,11 +244,11 @@ public class JMXGenerator implements BasicCodeGenerator, MavenProjectAware {
             if (files.contains(file)) {
                 List<File> undeletedFiles = Lists.newArrayList();
                 for (File presentFile : files) {
-                    if (presentFile.delete() == false) {
+                    if (!presentFile.delete()) {
                         undeletedFiles.add(presentFile);
                     }
                 }
-                if (undeletedFiles.isEmpty() == false) {
+                if (!undeletedFiles.isEmpty()) {
                     LOG.error(
                             "Illegal state occurred: Unable to delete already generated files, undeleted files: {}",
                             undeletedFiles);
