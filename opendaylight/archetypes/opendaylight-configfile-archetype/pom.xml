@@ -5,12 +5,12 @@
   <parent>
      <groupId>org.opendaylight.controller.archetypes</groupId>
      <artifactId>archetypes-parent</artifactId>
-     <version>0.2.1-Lithium-SR1</version>
+     <version>0.2.2-SNAPSHOT</version>
   </parent>
 
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>opendaylight-configfile-archetype</artifactId>
-  <version>1.2.1-Lithium-SR1</version>
+  <version>1.2.2-SNAPSHOT</version>
   <packaging>maven-archetype</packaging>
 
   <description>Configuration files for md-sal</description>
