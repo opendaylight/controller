@@ -29,20 +29,22 @@ public class ShardManagerInfo extends AbstractMXBean implements ShardManagerInfo
 
     private static final Logger LOG = LoggerFactory.getLogger(ShardManagerInfo.class);
 
+    private final String memberName;
     private final List<String> localShards;
 
     private boolean syncStatus = false;
 
     private ShardManager shardManager;
 
-    public ShardManagerInfo(String name, String mxBeanType, List<String> localShards) {
+    public ShardManagerInfo(String memberName, String name, String mxBeanType, List<String> localShards) {
         super(name, mxBeanType, JMX_CATEGORY_SHARD_MANAGER);
+        this.memberName = memberName;
         this.localShards = localShards;
     }
 
-    public static ShardManagerInfo createShardManagerMBean(String name, String mxBeanType,
+    public static ShardManagerInfo createShardManagerMBean(String memberName, String name, String mxBeanType,
             List<String> localShards){
-        ShardManagerInfo shardManagerInfo = new ShardManagerInfo(name, mxBeanType, localShards);
+        ShardManagerInfo shardManagerInfo = new ShardManagerInfo(memberName, name, mxBeanType, localShards);
 
         shardManagerInfo.registerMBean();
 
@@ -57,6 +59,11 @@ public class ShardManagerInfo extends AbstractMXBean implements ShardManagerInfo
     @Override
     public boolean getSyncStatus() {
         return this.syncStatus;
+    }
+
+    @Override
+    public String getMemberName() {
+        return memberName;
     }
 
     @Override
