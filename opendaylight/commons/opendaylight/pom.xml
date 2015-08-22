@@ -109,7 +109,7 @@
     <karaf.branding.version>1.2.0-SNAPSHOT</karaf.branding.version>
     <karaf.shell.version>${karaf.version}</karaf.shell.version>
     <leveldb.version>0.7</leveldb.version>
-    <leveldbjni.version>1.8</leveldbjni.version>
+    <leveldbjni.version>1.8-odl</leveldbjni.version>
     <lifecycle.mapping.version>1.0.0</lifecycle.mapping.version>
     <logging.bridge.version>0.6.0-SNAPSHOT</logging.bridge.version>
     <maven.plugin.api.version>3.0.5</maven.plugin.api.version>
