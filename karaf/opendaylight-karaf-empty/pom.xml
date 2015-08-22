@@ -3,13 +3,13 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>karaf-parent</artifactId>
-    <version>1.5.1-SNAPSHOT</version>
+    <version>1.5.1-Lithium-SR1</version>
     <relativePath>../karaf-parent</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>opendaylight-karaf-empty</artifactId>
-  <version>1.5.1-SNAPSHOT</version>
+  <version>1.5.1-Lithium-SR1</version>
   <name>${project.artifactId}</name>
   <prerequisites>
     <maven>3.1.1</maven>
