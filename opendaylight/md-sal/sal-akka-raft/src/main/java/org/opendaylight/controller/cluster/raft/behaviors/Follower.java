@@ -17,7 +17,6 @@ import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.Snapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
-import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyncUpStatus;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
@@ -41,12 +40,14 @@ public class Follower extends AbstractRaftActorBehavior {
 
     private SnapshotTracker snapshotTracker = null;
 
-    private final InitialSyncStatusTracker initialSyncStatusTracker;
+    private final SyncStatusTracker initialSyncStatusTracker;
+
+    private static final int SYNC_THRESHOLD = 10;
 
     public Follower(RaftActorContext context) {
         super(context, RaftState.Follower);
 
-        initialSyncStatusTracker = new InitialSyncStatusTracker(context.getActor());
+        initialSyncStatusTracker = new SyncStatusTracker(context.getActor(), getId(), SYNC_THRESHOLD);
 
         if(context.getRaftPolicy().automaticElectionsEnabled()) {
             if (context.getPeerAddresses().isEmpty()) {
@@ -393,37 +394,5 @@ public class Follower extends AbstractRaftActorBehavior {
     @VisibleForTesting
     SnapshotTracker getSnapshotTracker(){
         return snapshotTracker;
-    }
-
-    private class InitialSyncStatusTracker {
-
-        private static final long INVALID_LOG_INDEX = -2L;
-        private long initialLeaderCommit = INVALID_LOG_INDEX;
-        private boolean initialSyncUpDone = false;
-        private String syncedLeaderId = null;
-        private final ActorRef actor;
-
-        public InitialSyncStatusTracker(ActorRef actor) {
-            this.actor = actor;
-        }
-
-        public void update(String leaderId, long leaderCommit, long commitIndex){
-
-            if(!leaderId.equals(syncedLeaderId)){
-                initialSyncUpDone = false;
-                initialLeaderCommit = INVALID_LOG_INDEX;
-                syncedLeaderId = leaderId;
-            }
-
-            if(!initialSyncUpDone){
-                if(initialLeaderCommit == INVALID_LOG_INDEX){
-                    actor.tell(new FollowerInitialSyncUpStatus(false, getId()), ActorRef.noSender());
-                    initialLeaderCommit = leaderCommit;
-                } else if(commitIndex >= initialLeaderCommit){
-                    actor.tell(new FollowerInitialSyncUpStatus(true, getId()), ActorRef.noSender());
-                    initialSyncUpDone = true;
-                }
-            }
-        }
     }
 }
