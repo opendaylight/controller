@@ -5,12 +5,12 @@
   <parent>
      <groupId>org.opendaylight.controller.archetypes</groupId>
      <artifactId>archetypes-parent</artifactId>
-     <version>0.2.1-Lithium-SR1</version>
+     <version>0.2.2-SNAPSHOT</version>
   </parent>
 
   <groupId>org.opendaylight.controller.archetypes</groupId>
   <artifactId>odl-model-project</artifactId>
-  <version>1.2.1-Lithium-SR1</version>
+  <version>1.2.2-SNAPSHOT</version>
   <packaging>maven-archetype</packaging>
 
   <properties>
