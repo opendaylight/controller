@@ -24,6 +24,13 @@ public interface ShardManagerInfoMBean {
     boolean getSyncStatus();
 
     /**
+     * Get the name of of the current member
+     *
+     * @return
+     */
+    String getMemberName();
+
+    /**
      * Switch the Raft Behavior of all the local shards to the newBehavior
      *
      * @param newBehavior should be either Leader/Follower only
