@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a79b1b5_70ef421f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipShard.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-08-24T19:24:14Z",
+      "side": 1,
+      "message": "Why did you register a top-level listener for entity-type entries? I think you can just register 1 listener at the candidate list level. For entity owner changes I registered 1 DataTreeListener at entity list level.",
+      "revId": "fb10092c8faebc0bd37db5b9b0811f5447a95d67",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_f0da7277",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipShard.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 270,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-08-24T19:24:14Z",
+      "side": 1,
+      "message": "I assume this is to clear the owner. Should we write null here since we check for null in onCandidateAdded or does the tree code not allow that? If it doesn\u0027t then we need to check for null or empty in onCandidateAdded.",
+      "revId": "fb10092c8faebc0bd37db5b9b0811f5447a95d67",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_10f4cef0",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipShard.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 313,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-08-24T19:24:14Z",
+      "side": 1,
+      "message": "You can actually get a snapshot directly from the getDataTree. I did this in my patch so as not to have to make ReadOnlyShardDataTreeTransaction et al public.",
+      "revId": "fb10092c8faebc0bd37db5b9b0811f5447a95d67",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
