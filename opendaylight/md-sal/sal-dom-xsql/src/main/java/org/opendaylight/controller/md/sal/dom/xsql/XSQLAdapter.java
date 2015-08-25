@@ -15,7 +15,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -112,7 +112,7 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
                     }
                 }
             }
-            l.print(Calendar.getInstance().getTime());
+            l.print(new Date());
             l.print(" - ");
             l.println(str);
         } catch (Exception err) {
@@ -130,7 +130,7 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
                     }
                 }
             }
-            l.print(Calendar.getInstance().getTime());
+            l.print(new Date());
             l.print(" - ");
             e.printStackTrace(l);
         } catch (Exception err) {
