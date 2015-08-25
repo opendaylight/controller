@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a79b1b5_8420a0f8",
+        "filename": "opendaylight/model/i2rs-yang-network-topo/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2015-08-25T19:00:57Z",
+      "side": 1,
+      "message": "It seems like this should be model-i2rs-topology or something to fit with our current naming.",
+      "revId": "3ef800dada5a8f606fc91ecf4228a385f606ac2e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_e4239403",
+        "filename": "opendaylight/model/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 48
+      },
+      "writtenOn": "2015-08-25T19:00:57Z",
+      "side": 1,
+      "message": "is there a reason to have a vastly different name here? not start with model and use topo instead of topology?",
+      "revId": "3ef800dada5a8f606fc91ecf4228a385f606ac2e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
