@@ -1,74 +1,63 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  ~ Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
-  ~
-  ~ This program and the accompanying materials are made available under the
-  ~ terms of the Eclipse Public License v1.0 which accompanies this distribution,
-  ~ and is available at http://www.eclipse.org/legal/epl-v10.html
-  -->
-
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>netconf-subsystem</artifactId>
         <groupId>org.opendaylight.controller</groupId>
+        <artifactId>netconf-subsystem</artifactId>
         <version>0.4.0-SNAPSHOT</version>
     </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>mdsal-netconf-notification</artifactId>
     <packaging>bundle</packaging>
-    <artifactId>netconf-notifications-impl</artifactId>
+    <name>${project.artifactId}</name>
+
 
     <dependencies>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
-            <artifactId>netconf-notifications-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>netconf-util</artifactId>
+            <artifactId>netconf-mapping-api</artifactId>
+            <version>0.4.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
-            <artifactId>config-util</artifactId>
+            <artifactId>netconf-notifications-impl</artifactId>
+            <version>0.4.0-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>org.opendaylight.yangtools</groupId>
-            <artifactId>binding-generator-impl</artifactId>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>config-api</artifactId>
+            <version>${config.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.opendaylight.yangtools</groupId>
-            <artifactId>binding-data-codec</artifactId>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>netconf-notifications-api</artifactId>
+            <version>0.4.0-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.core</artifactId>
+            <groupId>org.opendaylight.controller</groupId>
+            <artifactId>sal-binding-config</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>netconf-mapping-api</artifactId>
+            <version>0.4.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>config-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>xmlunit</groupId>
-            <artifactId>xmlunit</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.opendaylight.yangtools</groupId>
-            <artifactId>mockito-configuration</artifactId>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
-            <artifactId>ietf-netconf-notifications</artifactId>
+            <artifactId>netconf-cli</artifactId>
+            <version>0.4.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
+
 
     <build>
         <plugins>
@@ -77,8 +66,7 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Bundle-Activator>org.opendaylight.controller.netconf.notifications.impl.osgi.Activator</Bundle-Activator>
-                        <Export-Package>org.opendaylight.controller.netconf.notifications.impl.*</Export-Package>
+                        <Import-Package>*</Import-Package>
                     </instructions>
                 </configuration>
             </plugin>
@@ -94,14 +82,20 @@
                         <configuration>
                             <codeGenerators>
                                 <generator>
-                                    <codeGeneratorClass>org.opendaylight.controller.config.yangjmxgenerator.plugin.JMXGenerator</codeGeneratorClass>
+                                    <codeGeneratorClass>
+                                        org.opendaylight.controller.config.yangjmxgenerator.plugin.JMXGenerator
+                                    </codeGeneratorClass>
                                     <outputBaseDir>${jmxGeneratorPath}</outputBaseDir>
                                     <additionalConfiguration>
-                                        <namespaceToPackage1>urn:opendaylight:params:xml:ns:yang:controller==org.opendaylight.controller.config.yang</namespaceToPackage1>
+                                        <namespaceToPackage1>
+                                            urn:opendaylight:params:xml:ns:yang:controller==org.opendaylight.controller.config.yang
+                                        </namespaceToPackage1>
                                     </additionalConfiguration>
                                 </generator>
                                 <generator>
-                                    <codeGeneratorClass>org.opendaylight.yangtools.maven.sal.api.gen.plugin.CodeGeneratorImpl</codeGeneratorClass>
+                                    <codeGeneratorClass>
+                                        org.opendaylight.yangtools.maven.sal.api.gen.plugin.CodeGeneratorImpl
+                                    </codeGeneratorClass>
                                     <outputBaseDir>${salGeneratorPath}</outputBaseDir>
                                 </generator>
                             </codeGenerators>
@@ -111,17 +105,14 @@
                 </executions>
                 <dependencies>
                     <dependency>
-                        <groupId>org.opendaylight.yangtools</groupId>
-                        <artifactId>maven-sal-api-gen-plugin</artifactId>
-                        <version>${yangtools.version}</version>
-                    </dependency>
-                    <dependency>
                         <groupId>org.opendaylight.controller</groupId>
                         <artifactId>yang-jmx-generator-plugin</artifactId>
                         <version>${config.version}</version>
                     </dependency>
                 </dependencies>
+
             </plugin>
         </plugins>
     </build>
+
 </project>

@@ -1,0 +1,79 @@
+module netconf-mdsal-notification {
+     yang-version 1;
+     namespace "urn:opendaylight:params:xml:ns:yang:controller:netconf:mdsal:notification";
+     prefix "nnotification";
+
+     import netconf-northbound-mapper { prefix nnm; revision-date 2015-01-14; }
+     import opendaylight-md-sal-dom { prefix md-sal-dom; revision-date 2013-10-28; }
+     import opendaylight-md-sal-binding {prefix md-sal-binding; revision-date 2013-10-28;}
+     import netconf-northbound-notification {prefix nnn; revision-date 2015-08-06;}
+     import config { prefix config; revision-date 2013-04-05; }
+
+
+     organization "Cisco Systems, Inc.";
+
+     description
+         "This module contains the base YANG definitions for
+         an SAL notification mapper implementation";
+
+     revision "2015-08-03" {
+         description
+         "Initial revision.";
+     }
+
+     identity netconf-mdsal-notification-mapper {
+         base config:module-type;
+         config:provided-service nnm:netconf-northbound-mapper;
+     }
+
+     augment "/config:modules/config:module/config:configuration" {
+         case netconf-mdsal-notification-mapper {
+             when "/config:modules/config:module/config:type = 'netconf-mdsal-notification-mapper'";
+
+             container aggregator {
+                 uses config:service-ref {
+                     refine type {
+                         mandatory true;
+                             config:required-identity nnm:netconf-mapper-registry;
+                         }
+                 }
+             }
+
+             container binding-aware-broker {
+                 uses config:service-ref {
+                     refine type {
+                         mandatory true;
+                         config:required-identity md-sal-binding:binding-broker-osgi-registry;
+                     }
+                 }
+             }
+
+             container data-broker {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity md-sal-binding:binding-async-data-broker;
+                    }
+                }
+             }
+
+             container notification-collector {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity nnn:netconf-notification-collector;
+                    }
+                }
+             }
+
+            container notification-registry {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity nnn:netconf-notification-registry;
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,23 @@
+module netconf-northbound-notification {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:netconf:northbound:notification";
+    prefix "nnn";
+
+    import config { prefix config; revision-date 2013-04-05; }
+
+    description "TODO";
+
+    revision "2015-08-06" {
+            description "Initial revision.";
+    }
+
+    identity netconf-notification-collector {
+            base "config:service-type";
+            config:java-class "org.opendaylight.controller.netconf.notifications.NetconfNotificationCollector";
+        }
+
+    identity netconf-notification-registry {
+           base "config:service-type";
+           config:java-class "org.opendaylight.controller.netconf.notifications.NetconfNotificationRegistry";
+    }
+}

@@ -1,0 +1,27 @@
+module netconf-northbound-notification-impl {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:netconf:northbound:notification:impl";
+    prefix "nnnimpl";
+
+    import config { prefix config; revision-date 2013-04-05; }
+    import netconf-northbound-notification { prefix nnn; revision-date 2015-08-06; }
+
+    description "TODO";
+
+    revision "2015-08-07"{
+        description "Initial revision.";
+    }
+
+    identity netconf-notification-manager {
+        base config:module-type;
+        config:provided-service nnn:netconf-notification-collector;
+        config:provided-service nnn:netconf-notification-registry;
+        config:java-name-prefix NetconfNotificationManager;
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+        case netconf-notification-manager {
+            when "/config:modules/config:module/config:type = 'netconf-notification-manager'";
+        }
+    }
+}
