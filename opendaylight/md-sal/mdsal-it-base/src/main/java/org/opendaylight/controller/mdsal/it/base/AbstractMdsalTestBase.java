@@ -11,8 +11,6 @@ package org.opendaylight.controller.mdsal.it.base;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 import static org.ops4j.pax.exam.CoreOptions.composite;
 
-import java.util.Calendar;
-
 import javax.inject.Inject;
 
 import org.junit.Before;
@@ -50,7 +48,7 @@ public abstract class AbstractMdsalTestBase extends AbstractConfigTestBase imple
     @Before
     public void setup() throws Exception {
         super.setup();
-        Calendar start = Calendar.getInstance();
+        long start = System.nanoTime();
         ServiceReference<BindingAwareBroker> serviceReference = context.getServiceReference(BindingAwareBroker.class);
         if(serviceReference == null) {
             throw new RuntimeException("BindingAwareBroker not found");
@@ -59,10 +57,10 @@ public abstract class AbstractMdsalTestBase extends AbstractConfigTestBase imple
         broker.registerProvider(this);
         for(int i=0;i<REGISTRATION_TIMEOUT;i++) {
             if(session !=null) {
-                Calendar stop = Calendar.getInstance();
-                LOG.info("Registered session {} with the MD-SAL after {} ms",
+                long stop = System.nanoTime();
+                LOG.info("Registered session {} with the MD-SAL after {} ns",
                         session,
-                        stop.getTimeInMillis() - start.getTimeInMillis());
+                        stop - start);
                 return;
             } else {
                 Thread.sleep(1);
