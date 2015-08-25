@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a79b1b5_a446fcbd",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/yang/general-entity.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-08-25T18:46:37Z",
+      "side": 1,
+      "message": "check the generated java code. Each entry in the list will have the class name Entities",
+      "revId": "d58c9d85bab92f447505291ffb3d66b976bff09d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
