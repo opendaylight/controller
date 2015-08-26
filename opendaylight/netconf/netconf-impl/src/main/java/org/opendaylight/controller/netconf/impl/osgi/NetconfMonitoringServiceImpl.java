@@ -259,7 +259,7 @@ public class NetconfMonitoringServiceImpl implements NetconfMonitoringService, A
         }
     }
 
-    static NetconfCapabilityChange computeDiff(final Set<Capability> removed, final Set<Capability> added) {
+    static NetconfCapabilityChange computeDiff(final Set<Capability> added, final Set<Capability> removed) {
         final NetconfCapabilityChangeBuilder netconfCapabilityChangeBuilder = new NetconfCapabilityChangeBuilder();
         netconfCapabilityChangeBuilder.setChangedBy(new ChangedByBuilder().setServerOrUser(new ServerBuilder().setServer(true).build()).build());
         netconfCapabilityChangeBuilder.setDeletedCapability(Lists.newArrayList(Collections2.transform(removed, CAPABILITY_TO_URI)));
