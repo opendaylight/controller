@@ -24,7 +24,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 
   <properties>
     <skipITs>false</skipITs>
-    <karaf.distro.groupId>org.opendaylight.${artifactId}</karaf.distro.groupId>
+    <karaf.distro.groupId>${groupId}</karaf.distro.groupId>
     <karaf.distro.artifactId>${artifactId}-karaf</karaf.distro.artifactId>
     <karaf.distro.version>${version}</karaf.distro.version>
     <karaf.distro.type>zip</karaf.distro.type>
