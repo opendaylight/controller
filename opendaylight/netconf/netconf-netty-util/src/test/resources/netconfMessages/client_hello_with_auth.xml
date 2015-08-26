@@ -1,6 +1,0 @@
-[tomas;10.0.0.0/10000;tcp;1000;1000;;/home/tomas;;]
-<hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
-    <capabilities>
-        <capability>urn:ietf:params:netconf:base:1.0</capability>
-    </capabilities>
-</hello>
