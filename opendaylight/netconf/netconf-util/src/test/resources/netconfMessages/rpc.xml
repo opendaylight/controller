@@ -1,8 +1,0 @@
-<rpc message-id="a" a="64" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
-    <no-arg xmlns="urn:opendaylight:params:xml:ns:yang:controller:test:impl">
-        <context-instance>/modules/module[type='impl-netconf' and name='instance-from-code']</context-instance>
-        <arg1>
-            testarg1
-        </arg1>
-    </no-arg>
-</rpc>
