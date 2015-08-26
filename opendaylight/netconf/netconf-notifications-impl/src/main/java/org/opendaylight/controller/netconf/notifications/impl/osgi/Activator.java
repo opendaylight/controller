@@ -42,7 +42,10 @@ public class Activator implements BundleActivator {
     @Override
     public void start(final BundleContext context) throws Exception {
         netconfNotificationManager = new NetconfNotificationManager();
-        netconfNotificationCollectorServiceRegistration = context.registerService(NetconfNotificationCollector.class, netconfNotificationManager, new Hashtable<String, Object>());
+        // Add properties to autowire with netconf-impl instance for cfg subsystem
+        final Dictionary<String, String> props = new Hashtable<>();
+        props.put(NetconfConstants.SERVICE_NAME, NetconfConstants.NETCONF_NOTIFICATION);
+        netconfNotificationCollectorServiceRegistration = context.registerService(NetconfNotificationCollector.class, netconfNotificationManager, props);
 
         final NetconfOperationServiceFactory netconfOperationServiceFactory = new NetconfOperationServiceFactory() {
 

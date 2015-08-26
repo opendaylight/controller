@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.netconf.impl.osgi;
 
+import com.google.common.base.Preconditions;
 import io.netty.channel.local.LocalAddress;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.util.HashedWheelTimer;
@@ -70,6 +71,7 @@ public class NetconfImplActivator implements BundleActivator {
                     new ServiceTracker<>(context, NetconfNotificationCollector.class, new ServiceTrackerCustomizer<NetconfNotificationCollector, NetconfNotificationCollector>() {
                         @Override
                         public NetconfNotificationCollector addingService(ServiceReference<NetconfNotificationCollector> reference) {
+                            Preconditions.checkState(listenerReg != null, "Notification collector service was already added");
                             listenerReg = context.getService(reference).registerBaseNotificationPublisher();
                             monitoringService.setNotificationPublisher(listenerReg);
                             return null;

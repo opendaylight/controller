@@ -20,4 +20,5 @@ public final class NetconfConstants {
     public static final String SERVICE_NAME = "name";
     public static final String CONFIG_NETCONF_CONNECTOR = "config-netconf-connector";
     public static final String NETCONF_MONITORING = "ietf-netconf-monitoring";
+    public static final String NETCONF_NOTIFICATION = "ietf-netconf-notifications";
 }

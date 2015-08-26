@@ -16,6 +16,8 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.netmod.notification.r
  */
 public interface NetconfNotificationCollector {
 
+
+
     /**
      * Add notification publisher for a particular stream
      *

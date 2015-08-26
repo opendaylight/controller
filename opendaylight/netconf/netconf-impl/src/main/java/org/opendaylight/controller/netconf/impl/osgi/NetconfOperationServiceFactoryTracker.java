@@ -29,7 +29,7 @@ class NetconfOperationServiceFactoryTracker extends
         Object property = reference.getProperty(NetconfConstants.SERVICE_NAME);
         if (property != null
                 && (property.equals(NetconfConstants.CONFIG_NETCONF_CONNECTOR)
-                || property.equals(NetconfConstants.NETCONF_MONITORING))) {
+                || property.equals(NetconfConstants.NETCONF_MONITORING) || property.equals(NetconfConstants.NETCONF_NOTIFICATION))) {
             NetconfOperationServiceFactory netconfOperationServiceFactory = super.addingService(reference);
             factoriesListener.onAddNetconfOperationServiceFactory(netconfOperationServiceFactory);
             return netconfOperationServiceFactory;
