@@ -20,6 +20,6 @@
     </feature>
     <feature name="odl-jolokia" version="${project.version}" description="Jolokia JMX/HTTP bridge">
         <feature>http</feature>
-        <bundle>mvn:org.jolokia/jolokia-osgi/${jolokia.version}</bundle>
+        <bundle>mvn:org.jolokia/jolokia-osgi/{{VERSION}}</bundle>
     </feature>
 </features>
