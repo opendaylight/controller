@@ -59,7 +59,7 @@
     </dependency>
 
     <dependency>
-      <groupId>org.opendaylight.yangtools</groupId>
+      <groupId>org.opendaylight.mdsal</groupId>
       <artifactId>yang-binding</artifactId>
     </dependency>
 
@@ -108,8 +108,8 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.yangtools</groupId>
-      <artifactId>binding-generator-impl</artifactId>
+      <groupId>org.opendaylight.mdsal</groupId>
+      <artifactId>mdsal-binding-generator-impl</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>

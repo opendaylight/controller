@@ -129,7 +129,7 @@
       <version>${mdsal.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.yangtools.model</groupId>
+      <groupId>org.opendaylight.mdsal.model</groupId>
       <artifactId>opendaylight-l2-types</artifactId>
     </dependency>
   </dependencies>
