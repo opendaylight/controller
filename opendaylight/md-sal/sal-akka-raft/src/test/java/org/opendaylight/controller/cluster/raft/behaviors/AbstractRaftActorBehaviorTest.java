@@ -1,6 +1,7 @@
 package org.opendaylight.controller.cluster.raft.behaviors;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.testkit.TestActorRef;
@@ -15,7 +16,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.AbstractActorTest;
-import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
@@ -27,6 +27,7 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
+import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.slf4j.LoggerFactory;
@@ -127,14 +128,7 @@ public abstract class AbstractRaftActorBehaviorTest extends AbstractActorTest {
 
         behavior = createBehavior(context);
 
-        if (behavior instanceof Candidate) {
-            // Resetting the Candidates term to make sure it will match
-            // the term sent by AppendEntries. If this was not done then
-            // the test will fail because the Candidate will assume that
-            // the message was sent to it from a lower term peer and will
-            // thus respond with a failure
-            context.getTermInformation().update(2, "test");
-        }
+        assertFalse("This test should be overridden when testing Candidate", behavior instanceof Candidate);
 
         // Send an unknown message so that the state of the RaftActor remains unchanged
         RaftActorBehavior expected = behavior.handleMessage(behaviorActor, "unknown");

@@ -6,8 +6,10 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.testkit.TestActorRef;
 import com.google.common.base.Stopwatch;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.junit.After;
@@ -126,14 +128,41 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest {
         candidate = new Candidate(createActorContext());
 
         setupPeers(1);
-        candidate.handleMessage(peerActors[0], new AppendEntries(1, "test", 0, 0,
-                Collections.<ReplicatedLogEntry>emptyList(), 0, -1, (short)0));
+        RaftActorBehavior newBehavior = candidate.handleMessage(peerActors[0], new AppendEntries(1, "test", 0, 0,
+                Collections.<ReplicatedLogEntry>emptyList(), 0, -1, (short) 0));
 
         AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(
                 peerActors[0], AppendEntriesReply.class);
         assertEquals("isSuccess", false, reply.isSuccess());
         assertEquals("getTerm", 2, reply.getTerm());
+        assertTrue("New Behavior : " + newBehavior, newBehavior instanceof Candidate);
     }
+
+    @Test
+    public void testResponseToHandleAppendEntriesWithHigherTerm() {
+        candidate = new Candidate(createActorContext());
+
+        setupPeers(1);
+        RaftActorBehavior newBehavior = candidate.handleMessage(peerActors[0], new AppendEntries(5, "test", 0, 0,
+                Collections.<ReplicatedLogEntry>emptyList(), 0, -1, (short) 0));
+
+        assertTrue("New Behavior : " + newBehavior, newBehavior instanceof Follower);
+    }
+
+    @Test
+    public void testResponseToHandleAppendEntriesWithEqualTerm() {
+        MockRaftActorContext actorContext = createActorContext();
+
+        candidate = new Candidate(actorContext);
+
+        setupPeers(1);
+        RaftActorBehavior newBehavior = candidate.handleMessage(peerActors[0], new AppendEntries(2, "test", 0, 0,
+                Collections.<ReplicatedLogEntry>emptyList(), 0, -1, (short) 0));
+
+        assertTrue("New Behavior : " + newBehavior + " term = " + actorContext.getTermInformation().getCurrentTerm(),
+                newBehavior instanceof Follower);
+    }
+
 
     @Test
     public void testResponseToRequestVoteWithLowerTerm() {
@@ -202,6 +231,42 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest {
         assertTrue(elapsed < context.getConfigParams().getElectionTimeOutInterval().toMillis());
     }
 
+    @Test
+    @Override
+    public void testHandleAppendEntriesAddSameEntryToLog() throws Exception {
+        MockRaftActorContext context = createActorContext();
+
+        context.getTermInformation().update(2, "test");
+
+        // Prepare the receivers log
+        MockRaftActorContext.MockPayload payload = new MockRaftActorContext.MockPayload("zero");
+        setLastLogEntry(context, 2, 0, payload);
+
+        List<ReplicatedLogEntry> entries = new ArrayList<>();
+        entries.add(new MockRaftActorContext.MockReplicatedLogEntry(2, 0, payload));
+
+        AppendEntries appendEntries = new AppendEntries(2, "leader-1", -1, -1, entries, 2, -1, (short)0);
+
+        behavior = createBehavior(context);
+
+        // Resetting the Candidates term to make sure it will match
+        // the term sent by AppendEntries. If this was not done then
+        // the test will fail because the Candidate will assume that
+        // the message was sent to it from a lower term peer and will
+        // thus respond with a failure
+        context.getTermInformation().update(2, "test");
+
+        // Send an unknown message so that the state of the RaftActor remains unchanged
+        RaftActorBehavior expected = behavior.handleMessage(candidateActor, "unknown");
+
+        RaftActorBehavior raftBehavior = behavior.handleMessage(candidateActor, appendEntries);
+
+        assertEquals("Raft state", RaftState.Follower, raftBehavior.state());
+
+        assertEquals("ReplicatedLog size", 1, context.getReplicatedLog().size());
+
+        handleAppendEntriesAddSameEntryToLogReply(candidateActor);
+    }
 
     @Override
     protected RaftActorBehavior createBehavior(RaftActorContext actorContext) {

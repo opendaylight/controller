@@ -75,6 +75,14 @@ public class Candidate extends AbstractRaftActorBehavior {
             LOG.debug("{}: handleAppendEntries: {}", logName(), appendEntries);
         }
 
+        // Some other candidate for the same term became a leader and sent us an append entry
+        if(currentTerm() == appendEntries.getTerm()){
+            LOG.debug("{}: New Leader sent an append entry to Candidate for term {} will switch to Follower",
+                    logName(), currentTerm());
+
+            return switchBehavior(new Follower(context));
+        }
+
         return this;
     }
 
