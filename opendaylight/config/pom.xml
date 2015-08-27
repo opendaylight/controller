@@ -44,6 +44,7 @@
     <module>config-parent</module>
     <module>config-persister-impl</module>
     <module>config-it-base</module>
+    <module>yang-jmx-generator-it</module>
   </modules>
 
   <dependencies>
@@ -222,15 +223,4 @@
     </plugins>
   </build>
 
-  <profiles>
-    <profile>
-      <id>integrationtests</id>
-      <activation>
-        <activeByDefault>false</activeByDefault>
-      </activation>
-      <modules>
-        <module>yang-jmx-generator-it</module>
-      </modules>
-    </profile>
-  </profiles>
 </project>

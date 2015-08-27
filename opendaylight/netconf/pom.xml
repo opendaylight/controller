@@ -41,6 +41,7 @@
     <module>tools</module>
 
     <module>netconf-artifacts</module>
+    <module>netconf-it</module>
   </modules>
 
   <dependencies>
@@ -146,16 +147,4 @@
       </plugin>
     </plugins>
   </build>
-
-  <profiles>
-    <profile>
-      <id>integrationtests</id>
-      <activation>
-        <activeByDefault>false</activeByDefault>
-      </activation>
-      <modules>
-        <module>netconf-it</module>
-      </modules>
-    </profile>
-  </profiles>
 </project>
