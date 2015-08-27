@@ -15,6 +15,7 @@
         <feature version='${project.version}'>odl-toaster</feature>
     </feature>
     <feature name='odl-mdsal-common' version='${mdsal.version}' description="OpenDaylight :: Config :: All">
+      <!-- FIXME: Bug 4202: Switch to YANGTools provided odl-yangtools-yang-data -->
       <feature version='${yangtools.version}'>odl-yangtools-data-binding</feature>
       <bundle>mvn:org.opendaylight.controller/sal-common-api/${mdsal.version}</bundle>
       <bundle>mvn:org.opendaylight.controller/sal-common-impl/${mdsal.version}</bundle>
@@ -23,11 +24,15 @@
 
     <feature name='odl-mdsal-broker-local' version='${project.version}' description="OpenDaylight :: MDSAL :: Broker">
         <feature version='${yangtools.version}'>odl-yangtools-common</feature>
+        <!-- FIXME: Bug 4202: Switch to MD-SAL provided odl-mdsal-binding-base -->
         <feature version='${yangtools.version}'>odl-yangtools-binding</feature>
+        <!-- FIXME: Bug 4202: Add to MD-SAL provided odl-mdsal-binding-runtime -->
         <feature version='${yangtools.version}'>odl-yangtools-models</feature>
         <feature version='${mdsal.version}'>odl-mdsal-common</feature>
         <feature version='${config.version}'>odl-config-startup</feature>
         <feature version='${config.version}'>odl-config-netty</feature>
+        <!-- FIXME: Bug 4202: Add MD-SAL provided odl-mdsal-binding-adapter -->
+        <!-- FIXME: Bug 4202: Add MD-SAL provided odl-mdsal-dom-broker -->
         <bundle>mvn:com.lmax/disruptor/${lmax.version}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-core-api/${project.version}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-core-spi/${project.version}</bundle>
@@ -44,7 +49,7 @@
     </feature>
     <feature name='odl-toaster' version='${project.version}' description="OpenDaylight :: Toaster">
         <feature version='${yangtools.version}'>odl-yangtools-common</feature>
-        <feature version='${yangtools.version}'>odl-yangtools-binding</feature>
+        <!-- FIXME: Bug 4202: Switch to MD-SAL provided odl-mdsal-binding-base -->
         <feature version='${project.version}'>odl-mdsal-broker</feature>
         <bundle>mvn:org.opendaylight.controller.samples/sample-toaster/${project.version}</bundle>
         <bundle>mvn:org.opendaylight.controller.samples/sample-toaster-consumer/${project.version}</bundle>
@@ -91,6 +96,7 @@
       <feature version='${project.version}'>odl-mdsal-broker</feature>
     </feature>
     <feature name='odl-clustering-test-app' version='${project.version}'>
+    	<!-- FIXME: Bug 4202: Switch to MD-SAL provided odl-mdsal-models -->
         <feature version='${yangtools.version}'>odl-yangtools-models</feature>
         <feature version='${project.version}'>odl-mdsal-broker-local</feature>
         <bundle>mvn:org.opendaylight.controller.samples/clustering-it-model/${project.version}</bundle>
@@ -99,6 +105,7 @@
     </feature>
 
     <feature name='odl-message-bus-collector' version='${project.version}'>
+    	<!-- FIXME: Bug 4202: Switch to MD-SAL provided odl-mdsal-binding-base -->
         <bundle>mvn:org.opendaylight.controller.model/model-inventory/${mdsal.version}</bundle>
         <feature version='${project.version}'>odl-mdsal-broker</feature>
         <bundle>mvn:org.opendaylight.controller/messagebus-api/${project.version}</bundle>
