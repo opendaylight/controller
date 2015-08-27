@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "3a79b1b5_2005f179",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractRaftActorBehavior.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-08-27T18:17:28Z",
+      "side": 1,
+      "message": "This should say canGrantVote or just remove it - I don\u0027t think we need it here.",
+      "revId": "547407c916034583403883e94afd83b2f4af5d06",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a79b1b5_009f9553",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
         "patchSetId": 1
@@ -13,6 +30,58 @@
       "writtenOn": "2015-08-27T17:41:53Z",
       "side": 1,
       "message": "I could have been more specific here checking if message was instance of AppendEntries,InstallSnapshot and RequestVote but I did not see any harm with covering the rest of the RaftRPCs as well",
+      "revId": "547407c916034583403883e94afd83b2f4af5d06",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_003b153b",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 323,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-08-27T18:17:28Z",
+      "side": 1,
+      "message": "Those are the only ones a follower can get (currently). Basically we want to schedule if the RPC is from an authoritative leader or potential one. This covers it right now.",
+      "parentUuid": "3a79b1b5_009f9553",
+      "revId": "547407c916034583403883e94afd83b2f4af5d06",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_6049a9cf",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 325,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-08-27T18:17:28Z",
+      "side": 1,
+      "message": "I don\u0027t think we need the \"message instance of RequestVote\" here since the ! infers it.",
+      "revId": "547407c916034583403883e94afd83b2f4af5d06",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_e08379ca",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/FollowerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 916,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-08-27T18:17:28Z",
+      "side": 1,
+      "message": "Does it matter whether or not higher term is received? Or is it just testElectionScheduledWhenAnyRaftRPCReceived?",
       "revId": "547407c916034583403883e94afd83b2f4af5d06",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
