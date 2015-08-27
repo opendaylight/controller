@@ -194,6 +194,36 @@
   <dependencyManagement>
     <dependencies>
 
+
+
+      <!-- yangtools artifacts -->
+      <dependency>
+        <groupId>org.opendaylight.yangtools</groupId>
+        <artifactId>yangtools-artifacts</artifactId>
+        <version>${yangtools.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+
+      <!-- mdsal artifacts -->
+      <dependency>
+        <groupId>org.opendaylight.mdsal</groupId>
+        <artifactId>mdsal-artifacts</artifactId>
+        <version>2.0.0-SNAPSHOT</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>config-artifacts</artifactId>
+        <version>${config.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
        <!-- project specific dependencies -->
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
@@ -1207,14 +1237,6 @@
         <version>1.0.2</version>
       </dependency>
 
-      <!-- yangtools artifacts -->
-      <dependency>
-        <groupId>org.opendaylight.yangtools</groupId>
-        <artifactId>yangtools-artifacts</artifactId>
-        <version>${yangtools.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
 
       <dependency>
         <groupId>openexi</groupId>
