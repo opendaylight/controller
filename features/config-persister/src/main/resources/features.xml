@@ -13,6 +13,7 @@
     <feature version='${project.version}'>odl-config-api</feature>
     <feature version='${project.version}'>odl-config-core</feature>
     <feature version='${project.version}'>odl-config-manager</feature>
+    <!-- FIX: Bug 4202: Switch to MD-SAL odl-mdsal-binding-runtime -->
     <feature version='${yangtools.version}'>odl-yangtools-binding-generator</feature>
     <bundle>mvn:org.opendaylight.controller/yang-jmx-generator/${project.version}</bundle>
     <bundle>mvn:org.opendaylight.controller/config-persister-api/${project.version}</bundle>
