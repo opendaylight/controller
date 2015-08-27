@@ -139,6 +139,24 @@
       "revId": "547407c916034583403883e94afd83b2f4af5d06",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_0041d559",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/FollowerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 916,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-08-27T19:41:44Z",
+      "side": 1,
+      "message": "But the code you added doesn\u0027t check the term - it schedules if \"message instance of RaftRPC\". Maybe it should check the term?",
+      "parentUuid": "3a79b1b5_a077c1d3",
+      "revId": "547407c916034583403883e94afd83b2f4af5d06",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
