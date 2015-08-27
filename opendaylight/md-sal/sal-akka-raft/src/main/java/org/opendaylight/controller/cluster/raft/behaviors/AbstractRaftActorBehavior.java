@@ -168,6 +168,24 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
 
         LOG.debug("{}: In requestVote:  {}", logName(), requestVote);
 
+        boolean grantVote = canGrantVote(requestVote);
+
+        if(grantVote) {
+            context.getTermInformation().updateAndPersist(requestVote.getTerm(), requestVote.getCandidateId());
+        }
+
+        RequestVoteReply reply = new RequestVoteReply(currentTerm(), grantVote);
+
+        LOG.debug("{}: requestVote returning: {}", logName(), reply);
+
+        sender.tell(reply, actor());
+
+        return this;
+    }
+
+    protected boolean canGrantVote(RequestVote requestVote){
+        LOG.debug("{}: In requestVote:  {}", logName(), requestVote);
+
         boolean grantVote = false;
 
         //  Reply false if term < currentTerm (§5.1)
@@ -177,7 +195,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
             // If votedFor is null or candidateId, and candidate’s log is at
             // least as up-to-date as receiver’s log, grant vote (§5.2, §5.4)
         } else if (votedFor() == null || votedFor()
-            .equals(requestVote.getCandidateId())) {
+                .equals(requestVote.getCandidateId())) {
 
             boolean candidateLatest = false;
 
@@ -191,24 +209,15 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
             if (requestVote.getLastLogTerm() > lastTerm()) {
                 candidateLatest = true;
             } else if ((requestVote.getLastLogTerm() == lastTerm())
-                && requestVote.getLastLogIndex() >= lastIndex()) {
+                    && requestVote.getLastLogIndex() >= lastIndex()) {
                 candidateLatest = true;
             }
 
             if (candidateLatest) {
                 grantVote = true;
-                context.getTermInformation().updateAndPersist(requestVote.getTerm(),
-                    requestVote.getCandidateId());
             }
         }
-
-        RequestVoteReply reply = new RequestVoteReply(currentTerm(), grantVote);
-
-        LOG.debug("{}: requestVote returning: {}", logName(), reply);
-
-        sender.tell(reply, actor());
-
-        return this;
+        return grantVote;
     }
 
     /**

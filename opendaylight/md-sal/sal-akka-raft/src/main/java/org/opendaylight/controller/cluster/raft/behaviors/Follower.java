@@ -23,6 +23,7 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshotReply;
 import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
+import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 
 /**
@@ -36,8 +37,6 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
  * </ul>
  */
 public class Follower extends AbstractRaftActorBehavior {
-
-
 
     private SnapshotTracker snapshotTracker = null;
 
@@ -321,7 +320,11 @@ public class Follower extends AbstractRaftActorBehavior {
             handleInstallSnapshot(sender, installSnapshot);
         }
 
-        scheduleElection(electionDuration());
+        if(message instanceof RaftRPC &&
+                (!(message instanceof RequestVote) ||
+                        (message instanceof RequestVote && (canGrantVote((RequestVote) message))))){
+            scheduleElection(electionDuration());
+        }
 
         return super.handleMessage(sender, message);
     }
