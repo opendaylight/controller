@@ -102,6 +102,24 @@
     },
     {
       "key": {
+        "uuid": "3a79b1b5_bbc7f244",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipListenerSupport.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-08-27T23:40:23Z",
+      "side": 1,
+      "message": "I added actorFor and made this class non-static. I\u0027ll see what I can do about static factory methods.",
+      "parentUuid": "3a79b1b5_7b171aee",
+      "revId": "82222da0f462a0569ca6d2c1b201a4328e807a67",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a79b1b5_1b006600",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/messages/EntityOwnershipChanged.java",
         "patchSetId": 2
