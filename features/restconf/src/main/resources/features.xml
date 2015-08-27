@@ -14,14 +14,6 @@
         Necessary TODO: Please read the features guidelines:
         https://wiki.opendaylight.org/view/Runtime:Karaf_Features_Guidelines#Feature_Best_Practices
     -->
-    <!--
-    Necessary TODO: Add repo entries for the repositories of features you refer to
-        in this feature file but do not define here.
-        Examples:
-            <repository>mvn:org.opendaylight.yangtools/features-yangtools/0.8.0-SNAPSHOT/xml/features</repository>
-            <repository>mvn:org.opendaylight.controller/features-mdsal/1.3.0-SNAPSHOT/xml/features</repository>
-            <repository>mvn:org.opendaylight.openflowplugin/features-openflowplugin/0.2.0-SNAPSHOT/xml/features</repository>
-    -->
     <repository>mvn:org.opendaylight.controller/features-mdsal/${mdsal.version}/xml/features</repository>
     <repository>mvn:org.opendaylight.yangtools/features-yangtools/${yangtools.version}/xml/features</repository>
     <!-- repository>mvn:org.opendaylight.aaa/features-aaa/${aaa.version}/xml/features</repository -->
@@ -48,42 +40,7 @@
             b) Descriptions: https://wiki.opendaylight.org/view/Runtime:Karaf_Features_Guidelines#Description
             c) Avoid start-levels: https://wiki.opendaylight.org/view/Runtime:Karaf_Features_Guidelines#Avoid_start-levels
 
-        It's also nice to list inside a feature, first the features it needs, then the bundles it needs, then the configfiles.
-        Examples:
-
-        * Basic MD-SAL Provider
-        <feature name='odl-controller-provider' version='${project.version}' description='OpenDaylight :: controller :: Provider '>
-            <feature version='1.3.0-SNAPSHOT'>odl-mdsal-broker</feature>
-            <feature version='${project.version}'>odl-controller-model</feature>
-            <bundle>mvn:org.opendaylight.controller/controller-provider/${project.version}</bundle>
-            ... whatever other bundles you need
-        </feature>
-
-        * Basic MD-SAL Model feature
-        <feature name='odl-controller-model' version='${project.version}' description='OpenDaylight :: controller :: Model'>
-            <feature version='0.8.0-SNAPSHOT'>odl-yangtools-binding</feature>
-            <feature version='0.8.0-SNAPSHOT'>odl-yangtools-models</feature>
-            <bundle>mvn:org.opendaylight.controller/controller-model/${project.version}</bundle>
-            ... whatever other bundles you need
-        </feature>
-
-        * Config Subsystem example - the config file is your config subsystem configuration
-        <feature name='odl-controller-provider' version='${project.version}' description='OpenDaylight :: controller :: Provider'>
-            <feature version='1.3.0-SNAPSHOT'>odl-mdsal-broker</feature>
-            <bundle>mvn:org.opendaylight.controller/controller-provider/${project.version}</bundle>
-            <configfile finalname="etc/opendaylight/karaf/80-controller.xml">mvn:org.opendaylight.controller/controller-config/${project.version}/xml/config</configfile>
-            ... whatever other bundles you need
-        </feature>
-
-        * Basic MD-SAL Provider that uses openflowplugin-flow-services (which brings along odl-mdsal-broker)
-        <feature name='odl-controller-provider' version='${project.version}' description='OpenDaylight :: controller :: Provider'>
-            <feature version='0.2.0-SNAPSHOT'>odl-openflowplugin-flow-services</feature>
-            <bundle>mvn:org.opendaylight.controller/controller-provider/${project.version}</bundle>
-            ... whatever other bundles you need
-        </feature>
-
     -->
-
     <feature name='odl-restconf' version='${project.version}' description="OpenDaylight :: Restconf">
         <!-- feature version='${aaa.version}'>odl-aaa-authn</feature -->
         <feature version='${mdsal.version}'>odl-restconf-noauth</feature>
