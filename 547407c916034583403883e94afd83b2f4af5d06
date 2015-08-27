@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a79b1b5_009f9553",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Follower.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 323,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-08-27T17:41:53Z",
+      "side": 1,
+      "message": "I could have been more specific here checking if message was instance of AppendEntries,InstallSnapshot and RequestVote but I did not see any harm with covering the rest of the RaftRPCs as well",
+      "revId": "547407c916034583403883e94afd83b2f4af5d06",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
