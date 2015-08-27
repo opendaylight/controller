@@ -84,6 +84,24 @@
     },
     {
       "key": {
+        "uuid": "3a79b1b5_7b171aee",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipListenerSupport.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-08-27T22:11:30Z",
+      "side": 1,
+      "message": "Ok. So I was looking at all the field ListenerActorRefEntry fields in the containing class and it seems like if we had static factory methods like createListenerActorRefEntry it would create the ActorRefEntry or increment the count as we do outside similarly destroyActorRefEntry would either decrement the count or remove a reference and kill the actor. That way all this logic would be encapsulated in the ActorRefEntry class. That way we could move the class out as well if necessary.",
+      "parentUuid": "3a79b1b5_fb0eca33",
+      "revId": "82222da0f462a0569ca6d2c1b201a4328e807a67",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a79b1b5_1b006600",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/messages/EntityOwnershipChanged.java",
         "patchSetId": 2
