@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a79b1b5_c022fdb8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipListenerActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-08-27T20:01:40Z",
+      "side": 1,
+      "message": "I know this is generated but looks funny when you read it.",
+      "range": {
+        "startLine": 44,
+        "startChar": 65,
+        "endLine": 44,
+        "endChar": 75
+      },
+      "revId": "82222da0f462a0569ca6d2c1b201a4328e807a67",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_c0099d32",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipListenerSupport.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-08-27T20:01:40Z",
+      "side": 1,
+      "message": "Why not add listenerActorFor in ListenerActorRefEntry? Also adding static factory methods for creating and removing ListenerActorRefEntry might give better encapsulation. What do you think?",
+      "revId": "82222da0f462a0569ca6d2c1b201a4328e807a67",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_1b006600",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/messages/EntityOwnershipChanged.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-08-27T20:01:40Z",
+      "side": 1,
+      "message": "entity not null",
+      "revId": "82222da0f462a0569ca6d2c1b201a4328e807a67",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
