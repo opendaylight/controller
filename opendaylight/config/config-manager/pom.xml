@@ -28,8 +28,8 @@
 
     <!--Dependencies regardign RuntimeGeneratedMappingService-->
     <dependency>
-      <groupId>org.opendaylight.yangtools</groupId>
-      <artifactId>binding-generator-impl</artifactId>
+      <groupId>org.opendaylight.mdsal</groupId>
+      <artifactId>mdsal-binding-generator-impl</artifactId>
     </dependency>
     <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
