@@ -64,7 +64,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
 
     @Override
     protected RaftActorBehavior createBehavior(RaftActorContext actorContext) {
-        return new Follower(actorContext);
+        return new TestFollower(actorContext);
     }
 
     @Override
@@ -77,6 +77,13 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
         MockRaftActorContext context = new MockRaftActorContext("follower", getSystem(), actorRef);
         context.setPayloadVersion(payloadVersion );
         return context;
+    }
+
+    private int getElectionTimeoutCount(RaftActorBehavior follower){
+        if(follower instanceof TestFollower){
+            return ((TestFollower) follower).getElectionTimeoutCount();
+        }
+        return -1;
     }
 
     @Test
@@ -115,6 +122,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
 
         assertEquals("isVoteGranted", true, reply.isVoteGranted());
         assertEquals("getTerm", term, reply.getTerm());
+        assertEquals("schedule election", 1, getElectionTimeoutCount(follower));
     }
 
     @Test
@@ -132,6 +140,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
         RequestVoteReply reply = MessageCollectorActor.expectFirstMatching(leaderActor, RequestVoteReply.class);
 
         assertEquals("isVoteGranted", false, reply.isVoteGranted());
+        assertEquals("schedule election", 0, getElectionTimeoutCount(follower));
     }
 
 
@@ -190,7 +199,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
 
         MockRaftActorContext context = createActorContext();
         context.getReplicatedLog().clear(0,2);
-        context.getReplicatedLog().append(newReplicatedLogEntry(1,100, "bar"));
+        context.getReplicatedLog().append(newReplicatedLogEntry(1, 100, "bar"));
         context.getReplicatedLog().setSnapshotIndex(99);
 
         List<ReplicatedLogEntry> entries = Arrays.asList(
@@ -903,6 +912,26 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
         MessageCollectorActor.assertNoneMatching(followerActor, ElectionTimeout.class, 500);
     }
 
+    @Test
+    public void testElectionScheduledWhenAnyRaftRPCWithHigherTermReceived(){
+        MockRaftActorContext context = createActorContext();
+        follower = createBehavior(context);
+        follower.handleMessage(leaderActor, new RaftRPC() {
+            @Override
+            public long getTerm() {
+                return 100;
+            }
+        });
+        assertEquals("schedule election", 1, getElectionTimeoutCount(follower));
+    }
+
+    @Test
+    public void testElectionNotScheduledWhenNonRaftRPCMessageReceived(){
+        MockRaftActorContext context = createActorContext();
+        follower = createBehavior(context);
+        follower.handleMessage(leaderActor, "non-raft-rpc");
+        assertEquals("schedule election", 0, getElectionTimeoutCount(follower));
+    }
 
     public ByteString getNextChunk (ByteString bs, int offset, int chunkSize){
         int snapshotLength = bs.size();
@@ -960,5 +989,24 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
             throws Exception {
         AppendEntriesReply reply = MessageCollectorActor.expectFirstMatching(replyActor, AppendEntriesReply.class);
         assertEquals("isSuccess", true, reply.isSuccess());
+    }
+
+    private static class TestFollower extends Follower {
+
+        int electionTimeoutCount = 0;
+
+        public TestFollower(RaftActorContext context) {
+            super(context);
+        }
+
+        @Override
+        protected void scheduleElection(FiniteDuration interval) {
+            electionTimeoutCount++;
+            super.scheduleElection(interval);
+        }
+
+        public int getElectionTimeoutCount() {
+            return electionTimeoutCount;
+        }
     }
 }
