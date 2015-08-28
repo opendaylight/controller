@@ -84,6 +84,24 @@
     },
     {
       "key": {
+        "uuid": "3a79b1b5_3b668252",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipListenerSupport.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-08-28T01:53:33Z",
+      "side": 1,
+      "message": "Yeah - but the only way I can see to do what you wanted was to make it non-static or pass in the listener, listenerActorMap, ActorContext etc to the various methods. I think the latter would have been ugly. I was merely treating ListenerActorRefEntry as a simple internal \"struct\" private to this class to hold the actorRef and ref count.",
+      "parentUuid": "3a79b1b5_1b2ce601",
+      "revId": "82222da0f462a0569ca6d2c1b201a4328e807a67",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a79b1b5_c0099d32",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipListenerSupport.java",
         "patchSetId": 2
