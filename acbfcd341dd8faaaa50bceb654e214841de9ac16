@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a79b1b5_1c037d43",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnerChangeListener.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-08-28T18:51:31Z",
+      "side": 1,
+      "message": "this means that if I am not the new owner or was not the old owner I do not get to know if the ownership changed. Is that right? If I register a listener shouldn\u0027t I always be informed when ownership changes regardless of whether I am owner or not?",
+      "revId": "acbfcd341dd8faaaa50bceb654e214841de9ac16",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
