@@ -34,6 +34,24 @@
       "revId": "acbfcd341dd8faaaa50bceb654e214841de9ac16",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_1cb13d8f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnerChangeListener.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-08-28T19:15:20Z",
+      "side": 1,
+      "message": "That is right. I agree there is nothing meaningful we can do today if we knew that the ownership has changed because we don\u0027t tell the listener which member \"owns\" the entity.",
+      "parentUuid": "3a79b1b5_bcc049e1",
+      "revId": "acbfcd341dd8faaaa50bceb654e214841de9ac16",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
