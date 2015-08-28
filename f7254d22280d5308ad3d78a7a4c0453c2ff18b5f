@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a79b1b5_3c50b95d",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/CarProvider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-08-28T18:38:43Z",
+      "side": 1,
+      "message": "do we need this commented code now?",
+      "revId": "f7254d22280d5308ad3d78a7a4c0453c2ff18b5f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_dc4e65c1",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/CarProvider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-08-28T18:38:43Z",
+      "side": 1,
+      "message": "How about adding a log statement here?",
+      "revId": "f7254d22280d5308ad3d78a7a4c0453c2ff18b5f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
