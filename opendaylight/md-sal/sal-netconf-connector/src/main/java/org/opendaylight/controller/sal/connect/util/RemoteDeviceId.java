@@ -77,7 +77,7 @@ public final class RemoteDeviceId {
     private static org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier createBIPath(final String name) {
         final org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.InstanceIdentifierBuilder builder =
                 org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.builder();
-        builder.node(Nodes.QNAME).node(Node.QNAME).nodeWithKey(Node.QNAME, QName.create(Node.QNAME.getNamespace(), Node.QNAME.getRevision(), "id"), name);
+        builder.node(Nodes.QNAME).nodeWithKey(Node.QNAME, QName.create(Node.QNAME.getNamespace(), Node.QNAME.getRevision(), "id"), name);
 
         return builder.build();
     }
@@ -96,9 +96,7 @@ public final class RemoteDeviceId {
                 org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.builder();
         builder
                 .node(NetworkTopology.QNAME)
-                .node(Topology.QNAME)
                 .nodeWithKey(Topology.QNAME, QName.create(Topology.QNAME, "topology-id"), TopologyNetconf.QNAME.getLocalName())
-                .node(org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node.QNAME)
                 .nodeWithKey(org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node.QNAME,
                         QName.create(org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.network.topology.topology.Node.QNAME, "node-id"), name);
         return builder.build();
