@@ -34,6 +34,7 @@ import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.RoleChanged;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
+import org.opendaylight.controller.cluster.raft.base.messages.InitiateCaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.Replicate;
 import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader;
 import org.opendaylight.controller.cluster.raft.behaviors.DelegatingRaftActorBehavior;
@@ -234,6 +235,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             );
         } else if(message instanceof GetOnDemandRaftState) {
             onGetOnDemandRaftStats();
+        } else if(message instanceof InitiateCaptureSnapshot) {
+            captureSnapshot();
         } else if(!snapshotSupport.handleSnapshotMessage(message)) {
             reusableBehaviorStateHolder.init(getCurrentBehavior());
 
@@ -585,6 +588,17 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     protected boolean hasFollowers(){
         return getRaftActorContext().hasFollowers();
+    }
+
+    private void captureSnapshot() {
+        SnapshotManager snapshotManager = context.getSnapshotManager();
+
+        if(!snapshotManager.isCapturing()) {
+            LOG.debug("Take a snapshot of current state. lastReplicatedLog is {} and replicatedToAllIndex is {}",
+                replicatedLog().last(), currentBehavior.getReplicatedToAllIndex());
+
+            snapshotManager.capture(replicatedLog().last(), currentBehavior.getReplicatedToAllIndex());
+        }
     }
 
     /**

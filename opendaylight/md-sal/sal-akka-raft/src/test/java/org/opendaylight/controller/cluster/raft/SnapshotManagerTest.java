@@ -161,6 +161,35 @@ public class SnapshotManagerTest extends AbstractActorTest {
     }
 
     @Test
+    public void testCaptureWithNullLastLogEntry() throws Exception {
+        boolean capture = snapshotManager.capture(null, 1);
+
+        assertTrue(capture);
+
+        assertEquals(true, snapshotManager.isCapturing());
+
+        verify(mockProcedure).apply(null);
+
+        CaptureSnapshot captureSnapshot = snapshotManager.getCaptureSnapshot();
+
+        System.out.println(captureSnapshot);
+
+        // LastIndex and LastTerm are picked up from the lastLogEntry
+        assertEquals(-1L, captureSnapshot.getLastIndex());
+        assertEquals(-1L, captureSnapshot.getLastTerm());
+
+        // Since the actor does not have any followers (no peer addresses) lastApplied will be from lastLogEntry
+        assertEquals(-1L, captureSnapshot.getLastAppliedIndex());
+        assertEquals(-1L, captureSnapshot.getLastAppliedTerm());
+
+        //
+        assertEquals(-1L, captureSnapshot.getReplicatedToAllIndex());
+        assertEquals(-1L, captureSnapshot.getReplicatedToAllTerm());
+        actorRef.underlyingActor().clear();
+
+    }
+
+    @Test
     public void testCaptureWithCreateProcedureError () throws Exception {
         doThrow(new Exception("mock")).when(mockProcedure).apply(null);
 
