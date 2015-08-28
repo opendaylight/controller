@@ -66,6 +66,24 @@
     },
     {
       "key": {
+        "uuid": "3a79b1b5_1b2ce601",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipListenerSupport.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-08-28T00:35:39Z",
+      "side": 1,
+      "message": "Now that you made it non-static it\u0027s kind of a moot point. I was looking for ways to refactor the code so that direct field access would not be necessary.",
+      "parentUuid": "3a79b1b5_9bf8f67d",
+      "revId": "82222da0f462a0569ca6d2c1b201a4328e807a67",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a79b1b5_c0099d32",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipListenerSupport.java",
         "patchSetId": 2
