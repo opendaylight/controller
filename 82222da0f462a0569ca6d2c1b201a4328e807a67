@@ -49,6 +49,23 @@
     },
     {
       "key": {
+        "uuid": "3a79b1b5_9bf8f67d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipListenerSupport.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-08-28T00:01:21Z",
+      "side": 1,
+      "message": "I guess I\u0027m not following what you said below. This code (and the remove method) needs access to the listenerActorMap which is global to the contained ListenerActorRefEntry instances. I could add a static method to ListenerActorRefEntry that does this but I\u0027m not sure what we\u0027d gain. This is the only place the code is needed. We couldn\u0027t move out ListenerActorRefEntry b/c it\u0027s now non-static since it needs access to the containing fields.",
+      "revId": "82222da0f462a0569ca6d2c1b201a4328e807a67",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a79b1b5_c0099d32",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipListenerSupport.java",
         "patchSetId": 2
