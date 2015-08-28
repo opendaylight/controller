@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<features name="odl-mdsal-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0">
+    <feature name="odl-mdsal-xsql" version="${project.version}">
+        <configfile finalname="${config.configfile.directory}/${config.xsql.configfile}">mvn:org.opendaylight.controller/sal-dom-xsql-config/${project.version}/xml/config</configfile>
+    </feature>
+</features>
