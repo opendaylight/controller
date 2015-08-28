@@ -181,14 +181,14 @@
           <execution>
             <id>process-resources</id>
             <goals>
-              <goal>install-kars</goal>
+              <goal>assembly</goal>
             </goals>
             <phase>process-resources</phase>
           </execution>
           <execution>
             <id>package</id>
             <goals>
-              <goal>instance-create-archive</goal>
+              <goal>archive</goal>
             </goals>
           </execution>
         </executions>

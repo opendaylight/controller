@@ -29,7 +29,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
           in huge logs and seems like loop in build, even if it
           is not.
      -->
-    <karaf.maven.version>3.0.1</karaf.maven.version>
+    <karaf.maven.version>4.0.1</karaf.maven.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -208,7 +208,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
                   <descriptor>mvn:org.apache.karaf.features/standard/${karaf.version}/xml/features</descriptor>
                 </descriptors>
                 <features>
-                  <feature>standard</feature>
                   <feature>config</feature>
                   <feature>package</feature>
                   <feature>kar</feature>
@@ -222,14 +221,14 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
             <execution>
               <id>process-resources</id>
               <goals>
-                <goal>install-kars</goal>
+                <goal>assembly</goal>
               </goals>
               <phase>process-resources</phase>
             </execution>
             <execution>
               <id>package</id>
               <goals>
-                <goal>instance-create-archive</goal>
+                <goal>archive</goal>
               </goals>
             </execution>
           </executions>
