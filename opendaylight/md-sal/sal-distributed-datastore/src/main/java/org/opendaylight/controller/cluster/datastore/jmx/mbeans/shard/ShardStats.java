@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard;
 
+import akka.actor.ActorRef;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.google.common.base.Stopwatch;
@@ -20,6 +21,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import org.opendaylight.controller.cluster.datastore.Shard;
+import org.opendaylight.controller.cluster.raft.base.messages.InitiateCaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.client.messages.FollowerInfo;
 import org.opendaylight.controller.cluster.raft.client.messages.GetOnDemandRaftState;
 import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
@@ -344,4 +346,12 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
     public int getPendingTxCommitQueueSize() {
         return shard.getPendingTxCommitQueueSize();
     }
+
+    @Override
+    public void captureSnapshot() {
+        if(shard != null) {
+            shard.getSelf().tell(new InitiateCaptureSnapshot(), ActorRef.noSender());
+        }
+    }
+
 }

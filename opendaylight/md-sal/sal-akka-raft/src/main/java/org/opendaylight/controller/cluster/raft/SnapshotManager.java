@@ -211,8 +211,18 @@ public class SnapshotManager implements SnapshotState {
 
             List<ReplicatedLogEntry> unAppliedEntries = context.getReplicatedLog().getFrom(lastAppliedIndex + 1);
 
-            captureSnapshot = new CaptureSnapshot(lastLogEntry.getIndex(),
-                    lastLogEntry.getTerm(), lastAppliedIndex, lastAppliedTerm,
+            long lastLogEntryIndex = lastAppliedIndex;
+            long lastLogEntryTerm = lastAppliedTerm;
+            if(lastLogEntry != null) {
+                lastLogEntryIndex = lastLogEntry.getIndex();
+                lastLogEntryTerm = lastLogEntry.getTerm();
+            } else {
+                LOG.warn("Capturing Snapshot : lastLogEntry is null. Using lastAppliedIndex {} and lastAppliedTerm {} instead.",
+                    lastAppliedIndex, lastAppliedTerm);
+            }
+
+            captureSnapshot = new CaptureSnapshot(lastLogEntryIndex,
+                lastLogEntryTerm, lastAppliedIndex, lastAppliedTerm,
                     newReplicatedToAllIndex, newReplicatedToAllTerm, unAppliedEntries, targetFollower != null);
 
             if(captureSnapshot.isInstallSnapshotInitiated()) {
