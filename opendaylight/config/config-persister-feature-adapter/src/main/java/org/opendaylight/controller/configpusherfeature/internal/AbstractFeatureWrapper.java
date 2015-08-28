@@ -19,11 +19,15 @@ import javax.xml.bind.JAXBException;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.XMLStreamException;
 import org.apache.karaf.features.BundleInfo;
+import org.apache.karaf.features.Capability;
 import org.apache.karaf.features.Conditional;
 import org.apache.karaf.features.ConfigFileInfo;
 import org.apache.karaf.features.ConfigInfo;
 import org.apache.karaf.features.Dependency;
 import org.apache.karaf.features.Feature;
+import org.apache.karaf.features.Library;
+import org.apache.karaf.features.Requirement;
+import org.apache.karaf.features.Scoping;
 import org.opendaylight.controller.config.persist.storage.file.xml.model.ConfigSnapshot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -151,139 +155,114 @@ public class AbstractFeatureWrapper implements Feature {
         return feature.getName();
     }
 
-    /**
-     * @return
-     * @see org.apache.karaf.features.Feature#getId()
-     */
     @Override
     public String getId() {
         return feature.getId();
     }
 
-    /**
-     * @return
-     * @see org.apache.karaf.features.Feature#getName()
-     */
     @Override
     public String getName() {
         return feature.getName();
     }
 
-    /**
-     * @return
-     * @see org.apache.karaf.features.Feature#getDescription()
-     */
     @Override
     public String getDescription() {
         return feature.getDescription();
     }
 
-    /**
-     * @return
-     * @see org.apache.karaf.features.Feature#getDetails()
-     */
     @Override
     public String getDetails() {
         return feature.getDetails();
     }
 
-    /**
-     * @return
-     * @see org.apache.karaf.features.Feature#getVersion()
-     */
     @Override
     public String getVersion() {
         return feature.getVersion();
     }
 
-    /**
-     * @return
-     * @see org.apache.karaf.features.Feature#hasVersion()
-     */
     @Override
     public boolean hasVersion() {
         return feature.hasVersion();
     }
 
-    /**
-     * @return
-     * @see org.apache.karaf.features.Feature#getResolver()
-     */
     @Override
     public String getResolver() {
         return feature.getResolver();
     }
 
-    /**
-     * @return
-     * @see org.apache.karaf.features.Feature#getInstall()
-     */
     @Override
     public String getInstall() {
         return feature.getInstall();
     }
 
-    /**
-     * @return
-     * @see org.apache.karaf.features.Feature#getDependencies()
-     */
     @Override
     public List<Dependency> getDependencies() {
         return feature.getDependencies();
     }
 
-    /**
-     * @return
-     * @see org.apache.karaf.features.Feature#getBundles()
-     */
     @Override
     public List<BundleInfo> getBundles() {
         return feature.getBundles();
     }
 
-    /**
-     * @return
-     * @see org.apache.karaf.features.Feature#getConfigurations()
-     */
     @Override
     public List<ConfigInfo> getConfigurations() {
         return feature.getConfigurations();
     }
 
-    /**
-     * @return
-     * @see org.apache.karaf.features.Feature#getConfigurationFiles()
-     */
     @Override
     public List<ConfigFileInfo> getConfigurationFiles() {
         return feature.getConfigurationFiles();
     }
 
-    /**
-     * @return
-     * @see org.apache.karaf.features.Feature#getConditional()
-     */
     @Override
     public List<? extends Conditional> getConditional() {
         return feature.getConditional();
     }
 
-    /**
-     * @return
-     * @see org.apache.karaf.features.Feature#getStartLevel()
-     */
     @Override
     public int getStartLevel() {
         return feature.getStartLevel();
     }
 
-    /**
-     * @return
-     * @see org.apache.karaf.features.Feature#getRegion()
-     */
     @Override
-    public String getRegion() {
-        return feature.getRegion();
+    public List<? extends Capability> getCapabilities() {
+        return feature.getCapabilities();
+    }
+
+    @Override
+    public List<? extends Library> getLibraries() {
+        return feature.getLibraries();
+    }
+
+    @Override
+    public String getNamespace() {
+        return feature.getNamespace();
+    }
+
+    @Override
+    public String getRepositoryUrl() {
+        return feature.getRepositoryUrl();
+    }
+
+    @Override
+    public List<? extends Requirement> getRequirements() {
+        return feature.getRequirements();
+    }
+
+    @Override
+    public List<String> getResourceRepositories() {
+        return feature.getResourceRepositories();
+    }
+
+    @Override
+    public Scoping getScoping() {
+        return feature.getScoping();
+    }
+
+    @Override
+    public boolean isHidden() {
+        return feature.isHidden();
     }
 
 }

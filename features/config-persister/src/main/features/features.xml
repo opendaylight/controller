@@ -27,6 +27,7 @@
     <bundle>wrap:mvn:javax.validation/validation-api/{{VERSION}}</bundle>
     <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.core/{{VERSION}}</bundle>
     <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.moxy/{{VERSION}}</bundle>
+    <bundle>wrap:mvn:org.apache.karaf/org.apache.karaf.util/{{VERSION}}</bundle>
   </feature>
   <feature name='odl-config-startup' version='${project.version}' description="OpenDaylight :: Config Persister:: Config Startup">
     <feature version='${project.version}'>odl-config-persister</feature>

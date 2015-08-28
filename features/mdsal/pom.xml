@@ -84,6 +84,12 @@
       <artifactId>blueprint</artifactId>
       <version>${blueprint.version}</version>
     </dependency>
+    <!-- TODO Determine where this really should go -->
+    <dependency>
+      <groupId>org.apache.aries.quiesce</groupId>
+      <artifactId>org.apache.aries.quiesce.api</artifactId>
+      <version>1.0.0</version>
+    </dependency>
 
     <!-- Required features repositories -->
     <dependency>

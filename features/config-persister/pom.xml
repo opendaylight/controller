@@ -96,6 +96,11 @@
       <groupId>org.eclipse.persistence</groupId>
       <artifactId>org.eclipse.persistence.moxy</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.apache.karaf</groupId>
+      <artifactId>org.apache.karaf.util</artifactId>
+      <version>${karaf.version}</version>
+    </dependency>
 
   </dependencies>
 
