@@ -52,6 +52,24 @@
       "revId": "acbfcd341dd8faaaa50bceb654e214841de9ac16",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_3c5af950",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnerChangeListener.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-08-28T19:33:09Z",
+      "side": 1,
+      "message": "right - that\u0027s why I did it this way.",
+      "parentUuid": "3a79b1b5_1cb13d8f",
+      "revId": "acbfcd341dd8faaaa50bceb654e214841de9ac16",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
