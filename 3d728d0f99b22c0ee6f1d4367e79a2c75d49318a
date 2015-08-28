@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a79b1b5_3c22f901",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/config/Configuration.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-08-28T18:35:34Z",
+      "side": 1,
+      "message": "Should we instead take a single constructed ModuleShardConfiguration object as parameter? I would expect we would add more configuration options in the future - so taking one built parameter will keep this interface stable.",
+      "range": {
+        "startLine": 60,
+        "startChar": 9,
+        "endLine": 60,
+        "endChar": 36
+      },
+      "revId": "3d728d0f99b22c0ee6f1d4367e79a2c75d49318a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
