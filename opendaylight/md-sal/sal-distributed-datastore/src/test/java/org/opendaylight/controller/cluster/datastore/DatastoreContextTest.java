@@ -17,6 +17,7 @@ import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEF
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SHARD_TX_COMMIT_TIMEOUT_IN_SECONDS;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SNAPSHOT_BATCH_COUNT;
 import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_TX_CREATION_INITIAL_RATE_LIMIT;
+import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEFAULT_SHARD_SNAPSHOT_CHUNK_SIZE;
 import java.util.concurrent.TimeUnit;
 import org.junit.Assert;
 import org.junit.Test;
@@ -54,6 +55,7 @@ public class DatastoreContextTest {
                 context.getDataStoreProperties().getMaxDataChangeListenerQueueSize());
         assertEquals(InMemoryDOMDataStoreConfigProperties.DEFAULT_MAX_DATA_STORE_EXECUTOR_QUEUE_SIZE,
                 context.getDataStoreProperties().getMaxDataStoreExecutorQueueSize());
+        assertEquals(DEFAULT_SHARD_SNAPSHOT_CHUNK_SIZE, context.getShardSnapshotChunkSize());
     }
 
     @Test
@@ -88,6 +90,7 @@ public class DatastoreContextTest {
                 InMemoryDOMDataStoreConfigProperties.DEFAULT_MAX_DATA_CHANGE_LISTENER_QUEUE_SIZE + 1);
         builder.maxShardDataStoreExecutorQueueSize(
                 InMemoryDOMDataStoreConfigProperties.DEFAULT_MAX_DATA_STORE_EXECUTOR_QUEUE_SIZE + 1);
+        builder.shardSnapshotChunkSize(DEFAULT_SHARD_SNAPSHOT_CHUNK_SIZE+1);
 
         DatastoreContext context = builder.build();
 
@@ -137,5 +140,6 @@ public class DatastoreContextTest {
                 context.getDataStoreProperties().getMaxDataChangeListenerQueueSize());
         assertEquals(InMemoryDOMDataStoreConfigProperties.DEFAULT_MAX_DATA_STORE_EXECUTOR_QUEUE_SIZE + 1,
                 context.getDataStoreProperties().getMaxDataStoreExecutorQueueSize());
+        assertEquals(DEFAULT_SHARD_SNAPSHOT_CHUNK_SIZE + 1, context.getShardSnapshotChunkSize());
     }
 }
