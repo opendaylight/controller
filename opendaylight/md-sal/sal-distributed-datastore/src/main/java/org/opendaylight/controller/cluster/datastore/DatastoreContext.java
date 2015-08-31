@@ -47,6 +47,7 @@ public class DatastoreContext {
     public static final String UNKNOWN_DATA_STORE_TYPE = "unknown";
     public static final int DEFAULT_SHARD_BATCHED_MODIFICATION_COUNT = 1000;
     public static final long DEFAULT_SHARD_COMMIT_QUEUE_EXPIRY_TIMEOUT_IN_MS = TimeUnit.MILLISECONDS.convert(2, TimeUnit.MINUTES);
+    public static final int DEFAULT_SHARD_SNAPSHOT_CHUNK_SIZE = 2048000;
 
     private static Set<String> globalDatastoreTypes = Sets.newConcurrentHashSet();
 
@@ -68,6 +69,7 @@ public class DatastoreContext {
     private long shardCommitQueueExpiryTimeoutInMillis = DEFAULT_SHARD_COMMIT_QUEUE_EXPIRY_TIMEOUT_IN_MS;
     private boolean transactionDebugContextEnabled = false;
     private String customRaftPolicyImplementation = "";
+    private int shardSnapshotChunkSize = DEFAULT_SHARD_SNAPSHOT_CHUNK_SIZE;
 
     public static Set<String> getGlobalDatastoreTypes() {
         return globalDatastoreTypes;
@@ -100,6 +102,7 @@ public class DatastoreContext {
         this.shardCommitQueueExpiryTimeoutInMillis = other.shardCommitQueueExpiryTimeoutInMillis;
         this.transactionDebugContextEnabled = other.transactionDebugContextEnabled;
         this.customRaftPolicyImplementation = other.customRaftPolicyImplementation;
+        this.shardSnapshotChunkSize = other.shardSnapshotChunkSize;
 
         setShardJournalRecoveryLogBatchSize(other.raftConfig.getJournalRecoveryLogBatchSize());
         setSnapshotBatchCount(other.raftConfig.getSnapshotBatchCount());
@@ -221,6 +224,15 @@ public class DatastoreContext {
 
     public boolean isTransactionDebugContextEnabled() {
         return transactionDebugContextEnabled;
+    }
+
+    public int getShardSnapshotChunkSize() {
+        return shardSnapshotChunkSize;
+    }
+
+    public void setShardSnapshotChunkSize(int shardSnapshotChunkSize) {
+        // TODO: Should there be a minimum size? If so, add a check.
+        this.shardSnapshotChunkSize = shardSnapshotChunkSize;
     }
 
     public static class Builder {
@@ -423,6 +435,11 @@ public class DatastoreContext {
 
         public Builder customRaftPolicyImplementation(String customRaftPolicyImplementation) {
             datastoreContext.setCustomRaftPolicyImplementation(customRaftPolicyImplementation);
+            return this;
+        }
+
+        public Builder shardSnapshotChunkSize(int shardSnapshotChunkSize) {
+            datastoreContext.shardSnapshotChunkSize = shardSnapshotChunkSize;
             return this;
         }
     }

@@ -225,6 +225,12 @@ module distributed-datastore-provider {
                          present in the distributed data store module itself. If this property is set to a class which
                          cannot be found then the default raft behavior will be applied";
          }
+
+         leaf shard-snapshot-chunk-size {
+            default 2048000;
+            type int32;
+            description "An integer value for snapshot chunk size in bytes.";
+         }
     }
 
     // Augments the 'configuration' choice node under modules/module.
