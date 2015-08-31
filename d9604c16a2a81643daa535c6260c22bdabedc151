@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a79b1b5_e22ffa9f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContext.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 234,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-08-31T12:12:23Z",
+      "side": 1,
+      "message": "If we\u0027re going to enforce a minimum size then we would do that in the yang.",
+      "revId": "d9604c16a2a81643daa535c6260c22bdabedc151",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_42210eb3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContext.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-08-31T12:12:23Z",
+      "side": 1,
+      "message": "This needs to be set in the raftConfig. You can follow what was done for snapsotBatchCount.",
+      "revId": "d9604c16a2a81643daa535c6260c22bdabedc151",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_c2f2fe6e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/yang/distributed-datastore-provider.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-08-31T12:12:23Z",
+      "side": 1,
+      "message": "Please non-zero-uint32-type",
+      "revId": "d9604c16a2a81643daa535c6260c22bdabedc151",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_222652cf",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/yang/distributed-datastore-provider.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-08-31T12:12:23Z",
+      "side": 1,
+      "message": "How about \"When sending a snapshot to a follower, the maximum size for a chunk of data.\" ?",
+      "revId": "d9604c16a2a81643daa535c6260c22bdabedc151",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
