@@ -58,7 +58,7 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     // in-memory journal can use before it needs to snapshot
     private int snapshotDataThresholdPercentage = 12;
 
-    private int snaphotChunkSize = SNAPSHOT_CHUNK_SIZE;
+    private int snapshotChunkSize = SNAPSHOT_CHUNK_SIZE;
 
     private long electionTimeoutFactor = 2;
     private String customRaftPolicyImplementationClass;
@@ -78,8 +78,8 @@ public class DefaultConfigParamsImpl implements ConfigParams {
         this.snapshotDataThresholdPercentage = snapshotDataThresholdPercentage;
     }
 
-    public void setSnaphotChunkSize(int snaphotChunkSize) {
-        this.snaphotChunkSize = snaphotChunkSize;
+    public void setSnapshotChunkSize(int snapshotChunkSize) {
+        this.snapshotChunkSize = snapshotChunkSize;
     }
 
     public void setJournalRecoveryLogBatchSize(int journalRecoveryLogBatchSize) {
@@ -131,7 +131,7 @@ public class DefaultConfigParamsImpl implements ConfigParams {
 
     @Override
     public int getSnapshotChunkSize() {
-        return snaphotChunkSize;
+        return snapshotChunkSize;
     }
 
     @Override

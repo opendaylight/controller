@@ -128,4 +128,10 @@ public class DatastoreConfigurationMXBeanImpl extends AbstractMXBean implements 
     public int getMaxShardDataStoreExecutorQueueSize() {
         return context.getDataStoreProperties().getMaxDataStoreExecutorQueueSize();
     }
+
+    @Override
+    public int getShardSnapshotChunkSize() {
+        return context.getShardSnapshotChunkSize();
+    }
+
 }
