@@ -16,6 +16,24 @@
       "revId": "9ec7d744c578a2cc6f7057c1038d63aea9137d0f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_abb79dd7",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/DefaultConfigParamsImplTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-09-01T17:02:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3a79b1b5_d064044b",
+      "revId": "9ec7d744c578a2cc6f7057c1038d63aea9137d0f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
