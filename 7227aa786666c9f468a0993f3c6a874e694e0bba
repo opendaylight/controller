@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "3a79b1b5_8b02e16d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-09-01T17:38:42Z",
+      "side": 1,
+      "message": "no before. DistributedEntityOwnershipService added to the Configuration before the ShardManager actor was instantiated. Then then ShardManager creates the shard as Shard. Later when it receives the CreateShard message it detects the shard is already present and throw an ex.",
+      "parentUuid": "3a79b1b5_ebc4b541",
+      "range": {
+        "startLine": 12,
+        "startChar": 6,
+        "endLine": 12,
+        "endChar": 12
+      },
+      "revId": "7227aa786666c9f468a0993f3c6a874e694e0bba",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a79b1b5_4bc6094b",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/CreateShard.java",
         "patchSetId": 1
@@ -36,6 +60,24 @@
       "writtenOn": "2015-09-01T17:15:57Z",
       "side": 1,
       "message": "the new toString :) I need to switch to this.",
+      "revId": "7227aa786666c9f468a0993f3c6a874e694e0bba",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_2bf94d80",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/CreateShard.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-09-01T17:38:42Z",
+      "side": 1,
+      "message": "Yeah - I changed my eclipse default to use concatenation.",
+      "parentUuid": "3a79b1b5_4bc6094b",
       "revId": "7227aa786666c9f468a0993f3c6a874e694e0bba",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
