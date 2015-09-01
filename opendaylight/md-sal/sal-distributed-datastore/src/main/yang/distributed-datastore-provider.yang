@@ -214,6 +214,13 @@ module distributed-datastore-provider {
              description "Enable or disable transaction context debug. This will log the call site trace for
                           transactions that fail";
          }
+
+         leaf shard-snapshot-chunk-size {
+            default 2048000;
+            type non-zero-uint32-type;
+            description "When sending a snapshot to a follower, this is the maximum size in bytes for 
+                         a chunk of data.";
+         }
     }
 
     // Augments the 'configuration' choice node under modules/module.

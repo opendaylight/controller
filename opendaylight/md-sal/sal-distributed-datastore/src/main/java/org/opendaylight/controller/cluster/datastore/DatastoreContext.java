@@ -47,6 +47,7 @@ public class DatastoreContext {
     public static final String UNKNOWN_DATA_STORE_TYPE = "unknown";
     public static final int DEFAULT_SHARD_BATCHED_MODIFICATION_COUNT = 1000;
     public static final long DEFAULT_SHARD_COMMIT_QUEUE_EXPIRY_TIMEOUT_IN_MS = TimeUnit.MILLISECONDS.convert(2, TimeUnit.MINUTES);
+    public static final int DEFAULT_SHARD_SNAPSHOT_CHUNK_SIZE = 2048000;
 
     private static Set<String> globalDatastoreTypes = Sets.newConcurrentHashSet();
 
@@ -79,6 +80,7 @@ public class DatastoreContext {
         setIsolatedLeaderCheckInterval(DEFAULT_ISOLATED_LEADER_CHECK_INTERVAL_IN_MILLIS);
         setSnapshotDataThresholdPercentage(DEFAULT_SHARD_SNAPSHOT_DATA_THRESHOLD_PERCENTAGE);
         setElectionTimeoutFactor(DEFAULT_SHARD_ELECTION_TIMEOUT_FACTOR);
+        setShardSnapshotChunkSize(DEFAULT_SHARD_SNAPSHOT_CHUNK_SIZE);
     }
 
     private DatastoreContext(DatastoreContext other) {
@@ -105,6 +107,7 @@ public class DatastoreContext {
         setIsolatedLeaderCheckInterval(other.raftConfig.getIsolatedCheckIntervalInMillis());
         setSnapshotDataThresholdPercentage(other.raftConfig.getSnapshotDataThresholdPercentage());
         setElectionTimeoutFactor(other.raftConfig.getElectionTimeoutFactor());
+        setShardSnapshotChunkSize(other.raftConfig.getSnapshotChunkSize());
     }
 
     public static Builder newBuilder() {
@@ -212,6 +215,14 @@ public class DatastoreContext {
 
     public boolean isTransactionDebugContextEnabled() {
         return transactionDebugContextEnabled;
+    }
+
+    public int getShardSnapshotChunkSize() {
+        return raftConfig.getSnapshotChunkSize();
+    }
+
+    public void setShardSnapshotChunkSize(int shardSnapshotChunkSize) {
+        raftConfig.setSnapshotChunkSize(shardSnapshotChunkSize);
     }
 
     public static class Builder {
@@ -410,6 +421,11 @@ public class DatastoreContext {
             }
 
             return datastoreContext;
+        }
+
+        public Builder shardSnapshotChunkSize(int shardSnapshotChunkSize) {
+            datastoreContext.setShardSnapshotChunkSize(shardSnapshotChunkSize);
+            return this;
         }
     }
 }
