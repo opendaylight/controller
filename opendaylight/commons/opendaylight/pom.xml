@@ -145,7 +145,6 @@
     <karaf.security.version>0.6.0-SNAPSHOT</karaf.security.version>
     <shapeless.version>1.2.4</shapeless.version>
     <sitedeploy>dav:http://nexus.opendaylight.org/content/sites/site</sitedeploy>
-    <sonar.branch>${user.name}-private-view</sonar.branch>
     <sonar.host.url>https://sonar.opendaylight.org/</sonar.host.url>
     <!-- Sonar properties using jacoco to retrieve integration test results -->
     <sonar-jacoco-listeners.version>2.4</sonar-jacoco-listeners.version>
