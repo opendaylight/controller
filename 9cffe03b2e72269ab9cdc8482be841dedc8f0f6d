@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a79b1b5_0656c3d2",
+        "filename": "opendaylight/md-sal/samples/clustering-test-app/provider/src/main/java/org/opendaylight/controller/clustering/it/provider/CarProvider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-09-02T18:07:38Z",
+      "side": 1,
+      "message": "Not a big deal but can you return a failed RpcResult, e.g. RpcResultBuilder.failed().withError(\"Invalid rate\", ...)?",
+      "revId": "9cffe03b2e72269ab9cdc8482be841dedc8f0f6d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
