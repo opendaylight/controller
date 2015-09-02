@@ -58,7 +58,23 @@ public class CarProvider implements CarService {
 
     @Override
     public Future<RpcResult<Void>> stressTest(StressTestInput input) {
-        log.info("stressTest starting : rate: {}", input.getRate());
+        final int inputRate, inputCount;
+
+        // If rate is not provided, or given as zero, then just return.
+        if ((input.getRate() == null) || (input.getRate() == 0)) {
+            log.info("Exiting stress test as no rate is given.");
+            return Futures.immediateFuture(RpcResultBuilder.<Void>success().build());
+        } else {
+            inputRate = input.getRate();
+        }
+
+        if (input.getCount() != null) {
+            inputCount = input.getCount();
+        } else {
+            inputCount = 0;
+        }
+
+        log.info("Stress test starting : rate: {} count: {}", inputRate, inputCount);
 
         stopThread();
 
@@ -73,7 +89,7 @@ public class CarProvider implements CarService {
         }
 
         stopThread = false;
-        final long sleep = TimeUnit.NANOSECONDS.convert(1000,TimeUnit.MILLISECONDS) / input.getRate();
+        final long sleep = TimeUnit.NANOSECONDS.convert(1000,TimeUnit.MILLISECONDS) / inputRate;
         final Stopwatch sw = Stopwatch.createUnstarted();
         testThread = new Thread() {
             @Override
@@ -97,9 +113,14 @@ public class CarProvider implements CarService {
                     if((count.get() % 1000) == 0) {
                         log.info("Cars created {}, time: {}",count.get(),sw.elapsed(TimeUnit.SECONDS));
                     }
+
+                    // Check if a count is specified in input and we have created that many cars.
+                    if ((inputCount != 0) && (count.get() >= inputCount)) {
+                        stopThread = true;
+                    }
                 }
 
-                log.info("Stress test thread stopping");
+                log.info("Stress test thread stopping after creating {} cars.", count.get());
             }
         };
         testThread.start();
