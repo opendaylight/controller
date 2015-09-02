@@ -9,10 +9,12 @@ package org.opendaylight.controller.clustering.it.provider;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.Futures;
+
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
+
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -25,6 +27,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.cars.CarEntry;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.config.sal.clustering.it.car.rev140818.cars.CarEntryBuilder;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
+import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.slf4j.Logger;
@@ -58,7 +61,25 @@ public class CarProvider implements CarService {
 
     @Override
     public Future<RpcResult<Void>> stressTest(StressTestInput input) {
-        log.info("stressTest starting : rate: {}", input.getRate());
+        final int inputRate, inputCount;
+
+        // If rate is not provided, or given as zero, then just return.
+        if ((input.getRate() == null) || (input.getRate() == 0)) {
+            log.info("Exiting stress test as no rate is given.");
+            return Futures.immediateFuture(RpcResultBuilder.<Void>failed()
+                                           .withError(ErrorType.PROTOCOL, "invalid rate")
+                                           .build());
+        } else {
+            inputRate = input.getRate();
+        }
+
+        if (input.getCount() != null) {
+            inputCount = input.getCount();
+        } else {
+            inputCount = 0;
+        }
+
+        log.info("Stress test starting : rate: {} count: {}", inputRate, inputCount);
 
         stopThread();
 
@@ -73,7 +94,7 @@ public class CarProvider implements CarService {
         }
 
         stopThread = false;
-        final long sleep = TimeUnit.NANOSECONDS.convert(1000,TimeUnit.MILLISECONDS) / input.getRate();
+        final long sleep = TimeUnit.NANOSECONDS.convert(1000,TimeUnit.MILLISECONDS) / inputRate;
         final Stopwatch sw = Stopwatch.createUnstarted();
         testThread = new Thread() {
             @Override
@@ -97,9 +118,14 @@ public class CarProvider implements CarService {
                     if((count.get() % 1000) == 0) {
                         log.info("Cars created {}, time: {}",count.get(),sw.elapsed(TimeUnit.SECONDS));
                     }
+
+                    // Check if a count is specified in input and we have created that many cars.
+                    if ((inputCount != 0) && (count.get() >= inputCount)) {
+                        stopThread = true;
+                    }
                 }
 
-                log.info("Stress test thread stopping");
+                log.info("Stress test thread stopping after creating {} cars.", count.get());
             }
         };
         testThread.start();
