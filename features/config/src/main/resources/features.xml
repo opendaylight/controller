@@ -15,7 +15,7 @@
   <feature name='odl-config-api' version='${project.version}' description="OpenDaylight :: Config :: API">
     <bundle>mvn:org.opendaylight.controller/config-api/${project.version}</bundle>
     <feature version='${yangtools.version}'>odl-yangtools-common</feature>
-    <feature version='${yangtools.version}'>odl-yangtools-binding</feature>
+    <feature version='${yangtools.version}'>odl-mdsal-binding-base</feature>
   </feature>
 
   <feature name='odl-config-netty-config-api' version='${project.version}' description="OpenDaylight :: Config :: Netty Config API">
@@ -30,8 +30,8 @@
 
   <feature name='odl-config-core' version='${project.version}' description="OpenDaylight :: Config :: Core">
     <feature version='${yangtools.version}'>odl-yangtools-common</feature>
-    <feature version='${yangtools.version}'>odl-yangtools-binding</feature>
-    <feature version='${yangtools.version}'>odl-yangtools-binding-generator</feature>
+    <feature version='${yangtools.version}'>odl-mdsal-binding-base</feature>
+    <feature version='${yangtools.version}'>odl-mdsal-binding-base-generator</feature>
     <feature version='${project.version}'>odl-config-api</feature>
     <bundle>mvn:org.opendaylight.yangtools/yang-model-api/${yangtools.version}</bundle>
     <bundle>mvn:org.opendaylight.controller/config-util/${project.version}</bundle>

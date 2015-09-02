@@ -72,8 +72,8 @@
 
         * Basic MD-SAL Model feature
         <feature name='odl-${repoName}-model' version='${symbol_dollar}{project.version}' description='OpenDaylight :: ${repoName} :: Model'>
-            <feature version='0.8.0-SNAPSHOT'>odl-yangtools-binding</feature>
-            <feature version='0.8.0-SNAPSHOT'>odl-yangtools-models</feature>
+            <feature version='0.8.0-SNAPSHOT'>odl-mdsal-binding-base</feature>
+            <feature version='0.8.0-SNAPSHOT'>odl-mdsal-models</feature>
             <bundle>mvn:${groupId}/${repoName}-model/${symbol_dollar}{project.version}</bundle>
             ... whatever other bundles you need
         </feature>

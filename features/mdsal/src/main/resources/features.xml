@@ -23,8 +23,8 @@
 
     <feature name='odl-mdsal-broker-local' version='${project.version}' description="OpenDaylight :: MDSAL :: Broker">
         <feature version='${yangtools.version}'>odl-yangtools-common</feature>
-        <feature version='${yangtools.version}'>odl-yangtools-binding</feature>
-        <feature version='${yangtools.version}'>odl-yangtools-models</feature>
+        <feature version='${yangtools.version}'>odl-mdsal-binding-base</feature>
+        <feature version='${yangtools.version}'>odl-mdsal-models</feature>
         <feature version='${mdsal.version}'>odl-mdsal-common</feature>
         <feature version='${config.version}'>odl-config-startup</feature>
         <feature version='${config.version}'>odl-config-netty</feature>
@@ -44,7 +44,7 @@
     </feature>
     <feature name='odl-toaster' version='${project.version}' description="OpenDaylight :: Toaster">
         <feature version='${yangtools.version}'>odl-yangtools-common</feature>
-        <feature version='${yangtools.version}'>odl-yangtools-binding</feature>
+        <feature version='${yangtools.version}'>odl-mdsal-binding-base</feature>
         <feature version='${project.version}'>odl-mdsal-broker</feature>
         <bundle>mvn:org.opendaylight.controller.samples/sample-toaster/${project.version}</bundle>
         <bundle>mvn:org.opendaylight.controller.samples/sample-toaster-consumer/${project.version}</bundle>
@@ -91,7 +91,7 @@
       <feature version='${project.version}'>odl-mdsal-broker</feature>
     </feature>
     <feature name='odl-clustering-test-app' version='${project.version}'>
-        <feature version='${yangtools.version}'>odl-yangtools-models</feature>
+        <feature version='${yangtools.version}'>odl-mdsal-models</feature>
         <feature version='${project.version}'>odl-mdsal-broker-local</feature>
         <bundle>mvn:org.opendaylight.controller.samples/clustering-it-model/${project.version}</bundle>
         <bundle>mvn:org.opendaylight.controller.samples/clustering-it-provider/${project.version}</bundle>

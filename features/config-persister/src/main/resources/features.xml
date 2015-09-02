@@ -13,7 +13,7 @@
     <feature version='${project.version}'>odl-config-api</feature>
     <feature version='${project.version}'>odl-config-core</feature>
     <feature version='${project.version}'>odl-config-manager</feature>
-    <feature version='${yangtools.version}'>odl-yangtools-binding-generator</feature>
+    <feature version='${yangtools.version}'>odl-mdsal-binding-base-generator</feature>
     <bundle>mvn:org.opendaylight.controller/yang-jmx-generator/${project.version}</bundle>
     <bundle>mvn:org.opendaylight.controller/config-persister-api/${project.version}</bundle>
     <bundle>mvn:org.opendaylight.controller/config-util/${project.version}</bundle>
