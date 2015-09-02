@@ -33,6 +33,24 @@
       "revId": "3ef800dada5a8f606fc91ecf4228a385f606ac2e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_36dc50e4",
+        "filename": "opendaylight/model/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-09-02T06:51:29Z",
+      "side": 1,
+      "message": "I used model naming scheme from YANGTools instead the one in controller. But yes, it seems confusing.",
+      "parentUuid": "3a79b1b5_e4239403",
+      "revId": "3ef800dada5a8f606fc91ecf4228a385f606ac2e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
