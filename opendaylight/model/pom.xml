@@ -20,7 +20,6 @@
   </modules>
 
   <properties>
-    <bundle.plugin.version>2.4.0</bundle.plugin.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
