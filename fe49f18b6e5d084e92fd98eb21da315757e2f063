@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "3a79b1b5_8d598e00",
+        "filename": "opendaylight/md-sal/sal-common-impl/src/main/java/org/opendaylight/controller/md/sal/common/impl/clustering/AbstractEntityOwnershipCandidateRegistration.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-09-04T01:20:09Z",
+      "side": 1,
+      "message": "done",
+      "parentUuid": "3a79b1b5_b2ece590",
+      "range": {
+        "startLine": 26,
+        "startChar": 22,
+        "endLine": 26,
+        "endChar": 28
+      },
+      "revId": "fe49f18b6e5d084e92fd98eb21da315757e2f063",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a79b1b5_72fe4d3a",
         "filename": "opendaylight/md-sal/sal-common-impl/src/main/java/org/opendaylight/controller/md/sal/common/impl/clustering/AbstractEntityOwnershipListenerRegistration.java",
         "patchSetId": 3
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "3a79b1b5_ad5c8aee",
+        "filename": "opendaylight/md-sal/sal-common-impl/src/main/java/org/opendaylight/controller/md/sal/common/impl/clustering/AbstractEntityOwnershipListenerRegistration.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-09-04T01:20:09Z",
+      "side": 1,
+      "message": "done",
+      "parentUuid": "3a79b1b5_72fe4d3a",
+      "range": {
+        "startLine": 25,
+        "startChar": 26,
+        "endLine": 25,
+        "endChar": 36
+      },
+      "revId": "fe49f18b6e5d084e92fd98eb21da315757e2f063",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a79b1b5_92a0c944",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/DistributedEntityOwnershipService.java",
         "patchSetId": 3
@@ -59,6 +107,30 @@
       "writtenOn": "2015-09-03T21:13:47Z",
       "side": 1,
       "message": "more preconditions",
+      "range": {
+        "startLine": 140,
+        "startChar": 47,
+        "endLine": 140,
+        "endChar": 63
+      },
+      "revId": "fe49f18b6e5d084e92fd98eb21da315757e2f063",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_4d737680",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/DistributedEntityOwnershipService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-09-04T01:20:09Z",
+      "side": 1,
+      "message": "done",
+      "parentUuid": "3a79b1b5_92a0c944",
       "range": {
         "startLine": 140,
         "startChar": 47,
