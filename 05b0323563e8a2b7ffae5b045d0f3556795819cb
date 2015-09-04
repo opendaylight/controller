@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a79b1b5_9151a410",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipShard.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 257,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-09-04T22:29:38Z",
+      "side": 1,
+      "message": "I\u0027m just wondering that instead of re-registering a candidate it may be better to unregister a candidate if we the leader makes you the leader and you find that you do not have a local registration.\n\nThis will also another race condition which is possible today where a follower unregisters a candidate and then attempts to write that to the store but before it can do that the leader changes the owner to that follower because some other node which had leadership on that entity went down.",
+      "range": {
+        "startLine": 257,
+        "startChar": 38,
+        "endLine": 257,
+        "endChar": 45
+      },
+      "revId": "05b0323563e8a2b7ffae5b045d0f3556795819cb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
