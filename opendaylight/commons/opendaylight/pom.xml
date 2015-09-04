@@ -1334,7 +1334,6 @@
         <plugin>
           <groupId>org.apache.felix</groupId>
           <artifactId>maven-bundle-plugin</artifactId>
-          <version>${bundle.plugin.version}</version>
           <extensions>true</extensions>
         </plugin>
         <plugin>
@@ -1359,7 +1358,6 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>${maven.compile.plugin.version}</version>
           <configuration>
             <source>${java.version.source}</source>
             <target>${java.version.target}</target>
@@ -1369,13 +1367,7 @@
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-jar-plugin</artifactId>
-          <version>${jar.plugin.version}</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-javadoc-plugin</artifactId>
-          <version>2.8.1</version>
           <configuration>
             <doclet>org.jboss.apiviz.APIviz</doclet>
             <docletArtifact>
@@ -1407,23 +1399,12 @@
           </configuration>
         </plugin>
         <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-release-plugin</artifactId>
-          <version>${releaseplugin.version}</version>
-        </plugin>
-        <plugin>
           <groupId>org.codehaus.enunciate</groupId>
           <artifactId>maven-enunciate-plugin</artifactId>
-          <version>${enunciate.version}</version>
           <configuration>
             <configFile>enunciate.xml</configFile>
           </configuration>
           <dependencies>
-            <dependency>
-              <groupId>org.codehaus.enunciate</groupId>
-              <artifactId>enunciate-swagger</artifactId>
-              <version>${enunciate.version}</version>
-            </dependency>
             <dependency>
               <groupId>org.opendaylight.controller</groupId>
               <artifactId>commons.logback_settings</artifactId>
@@ -1441,7 +1422,6 @@
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>build-helper-maven-plugin</artifactId>
-          <version>1.8</version>
           <executions>
             <execution>
               <id>add-source</id>
@@ -1567,7 +1547,6 @@
                   <pluginExecutionFilter>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
-                    <versionRange>${enforcer.version}</versionRange>
                     <goals>
                       <goal>enforce</goal>
                     </goals>
@@ -1598,7 +1577,6 @@
         <plugin>
           <groupId>org.jacoco</groupId>
           <artifactId>jacoco-maven-plugin</artifactId>
-          <version>${jacoco.version}</version>
           <executions>
             <execution>
               <id>prepare-ut-agent</id>
@@ -1676,7 +1654,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
-        <version>${enforcer.version}</version>
         <executions>
           <execution>
             <id>enforce-requirements</id>
@@ -1699,7 +1676,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
-        <version>${failsafe.version}</version>
         <configuration>
           <argLine>${testvm.argLine} ${jacoco.agent.it.arg}</argLine>
           <systemProperties>
@@ -1771,7 +1747,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>${checkstyle.version}</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
