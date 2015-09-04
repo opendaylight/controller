@@ -237,7 +237,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-checkstyle-plugin</artifactId>
-          <version>${checkstyle.version}</version>
           <configuration>
             <excludes>**\/target\/,**\/bin\/,**\/target-ide\/,**\/configuration\/initial\/</excludes>
           </configuration>
@@ -354,7 +353,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
-        <version>${enforcer.version}</version>
         <executions>
           <execution>
             <id>enforce-maven</id>
