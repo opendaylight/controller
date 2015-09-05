@@ -22,6 +22,30 @@
       "revId": "05b0323563e8a2b7ffae5b045d0f3556795819cb",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_31de9040",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipShard.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 257,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-09-05T03:27:25Z",
+      "side": 1,
+      "message": "But wouldn\u0027t that race condition correct itself once the leader committed the unregistration (i.e. candidate removal)?\n\nUnregistering the candidate as you mention above would work too. Doing it that way, the leader behavior would remain as it was before, i.e. leave a down peer as a candidate but select a new owner. But I\u0027m leaning towards the way I did it in this patch b/c it seems logical to me to remove its candidate when a node is declared down. The most common case will be stopping the process in which case it will re-register on restart. This also cleanly handles a node retired from the cluster although, granted, will be uncommon. The code here to re-register on network partition will be uncommon. What do you think?",
+      "parentUuid": "3a79b1b5_9151a410",
+      "range": {
+        "startLine": 257,
+        "startChar": 38,
+        "endLine": 257,
+        "endChar": 45
+      },
+      "revId": "05b0323563e8a2b7ffae5b045d0f3556795819cb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
