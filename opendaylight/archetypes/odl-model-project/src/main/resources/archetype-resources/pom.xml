@@ -142,61 +142,6 @@
       </plugins>
     </pluginManagement>
   </build>
-  <pluginRepositories>
-    <!-- OpenDayLight Repo Mirror -->
-    <pluginRepository>
-      <id>opendaylight-mirror</id>
-      <name>opendaylight-mirror</name>
-      <url>${nexusproxy}/groups/public/</url>
-      <snapshots>
-          <enabled>false</enabled>
-      </snapshots>
-      <releases>
-          <enabled>true</enabled>
-          <updatePolicy>never</updatePolicy>
-      </releases>
-    </pluginRepository>
-    <!-- OpenDayLight Snapshot artifact -->
-    <pluginRepository>
-      <id>opendaylight-snapshot</id>
-      <name>opendaylight-snapshot</name>
-      <url>${nexusproxy}/repositories/${nexus.repository.snapshot}/</url>
-      <snapshots>
-          <enabled>true</enabled>
-      </snapshots>
-      <releases>
-          <enabled>false</enabled>
-      </releases>
-    </pluginRepository>
-  </pluginRepositories>
-
-  <repositories>
-    <!-- OpenDayLight Repo Mirror -->
-    <repository>
-      <id>opendaylight-mirror</id>
-      <name>opendaylight-mirror</name>
-      <url>${nexusproxy}/groups/public/</url>
-      <snapshots>
-          <enabled>false</enabled>
-      </snapshots>
-      <releases>
-          <enabled>true</enabled>
-          <updatePolicy>never</updatePolicy>
-      </releases>
-    </repository>
-    <!-- OpenDayLight Snapshot artifact -->
-    <repository>
-      <id>opendaylight-snapshot</id>
-      <name>opendaylight-snapshot</name>
-      <url>${nexusproxy}/repositories/${nexus.repository.snapshot}/</url>
-      <snapshots>
-          <enabled>true</enabled>
-      </snapshots>
-      <releases>
-          <enabled>false</enabled>
-      </releases>
-    </repository>
-  </repositories>
 
   <distributionManagement>
     <!-- OpenDayLight Released artifact -->

@@ -1337,67 +1337,6 @@
     <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
   </scm>
 
-  <repositories>
-
-    <!-- OpenDayLight Repo Mirror -->
-    <!-- NOTE: URLs need to be hardcoded in the repository section because we have
-         parent poms that do NOT exist in this project and thus need to be pulled
-         down from the repository. To override these URLs you should use the
-         mirror section in your local settings.xml file. -->
-    <repository>
-      <releases>
-        <enabled>true</enabled>
-        <updatePolicy>never</updatePolicy>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-      <id>opendaylight-mirror</id>
-      <name>opendaylight-mirror</name>
-      <url>http://nexus.opendaylight.org/content/groups/public/</url>
-    </repository>
-    <!-- OpenDayLight Snapshot artifact -->
-    <repository>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-      <id>opendaylight-snapshot</id>
-      <name>opendaylight-snapshot</name>
-      <url>http://nexus.opendaylight.org/content/repositories/opendaylight.snapshot/</url>
-    </repository>
-  </repositories>
-
-  <pluginRepositories>
-    <!-- OpenDayLight Repo Mirror -->
-    <pluginRepository>
-      <releases>
-        <enabled>true</enabled>
-        <updatePolicy>never</updatePolicy>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-      <id>opendaylight-mirror</id>
-      <name>opendaylight-mirror</name>
-      <url>http://nexus.opendaylight.org/content/groups/public/</url>
-    </pluginRepository>
-    <!-- OpenDayLight Snapshot artifact -->
-    <pluginRepository>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-      <id>opendaylight-snapshot</id>
-      <name>opendaylight-snapshot</name>
-      <url>http://nexus.opendaylight.org/content/repositories/opendaylight.snapshot/</url>
-    </pluginRepository>
-  </pluginRepositories>
-
   <!-- distribution management only runs when you run mvn deploy
        which is if you are deploying compiled artifacts to a
        maven repository. In that case logic dictacts that you already
