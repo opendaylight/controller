@@ -25,6 +25,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   </prerequisites>
   <properties>
     <mdsal.version>1.3.0-SNAPSHOT</mdsal.version>
+    <restconf.version>1.3.0-SNAPSHOT</restconf.version>
     <yangtools.version>0.8.0-SNAPSHOT</yangtools.version>
     <dlux.version>0.3.0-SNAPSHOT</dlux.version>
     <configfile.directory>etc/opendaylight/karaf</configfile.directory>
@@ -36,6 +37,13 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>mdsal-artifacts</artifactId>
         <version>${mdsal.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.opendaylight.netconf</groupId>
+        <artifactId>restconf-artifacts</artifactId>
+        <version>${restconf.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -59,10 +67,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.controller</groupId>
+      <groupId>org.opendaylight.netconf</groupId>
       <artifactId>features-restconf</artifactId>
       <classifier>features</classifier>
-      <version>${mdsal.version}</version>
+      <version>${restconf.version}</version>
       <type>xml</type>
       <scope>runtime</scope>
     </dependency>

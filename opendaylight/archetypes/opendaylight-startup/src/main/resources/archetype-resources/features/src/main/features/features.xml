@@ -15,7 +15,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
   <repository>mvn:org.opendaylight.yangtools/features-yangtools/${symbol_dollar}{yangtools.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.controller/features-mdsal/${symbol_dollar}{mdsal.version}/xml/features</repository>
-  <repository>mvn:org.opendaylight.controller/features-restconf/${symbol_dollar}{mdsal.version}/xml/features</repository>
+  <repository>mvn:org.opendaylight.netconf/features-restconf/${symbol_dollar}{restconf.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.dlux/features-dlux/${symbol_dollar}{dlux.version}/xml/features</repository>
   <feature name='odl-${artifactId}-api' version='${symbol_dollar}{project.version}' description='OpenDaylight :: ${artifactId} :: api'>
     <feature version='${symbol_dollar}{yangtools.version}'>odl-yangtools-models</feature>
@@ -29,11 +29,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   </feature>
   <feature name='odl-${artifactId}-rest' version='${symbol_dollar}{project.version}' description='OpenDaylight :: ${artifactId} :: REST'>
     <feature version="${symbol_dollar}{project.version}">odl-${artifactId}</feature>
-    <feature version="${symbol_dollar}{mdsal.version}">odl-restconf</feature>
+    <feature version="${symbol_dollar}{restconf.version}">odl-restconf</feature>
   </feature>
   <feature name='odl-${artifactId}-ui' version='${symbol_dollar}{project.version}' description='OpenDaylight :: ${artifactId} :: UI'>
     <feature version="${symbol_dollar}{project.version}">odl-${artifactId}-rest</feature>
-    <feature version="${symbol_dollar}{mdsal.version}">odl-mdsal-apidocs</feature>
+    <feature version="${symbol_dollar}{restconf.version}">odl-mdsal-apidocs</feature>
     <feature version="${symbol_dollar}{mdsal.version}">odl-mdsal-xsql</feature>
     <feature version="${symbol_dollar}{dlux.version}">odl-dlux-yangui</feature>
   </feature>
