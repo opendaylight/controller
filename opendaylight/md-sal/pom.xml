@@ -45,16 +45,9 @@
 
     <!-- Base Models -->
     <module>sal-remote</module>
-    <module>sal-restconf-broker</module>
 
     <!-- Connectors -->
     <module>sal-connector-api</module>
-    <module>sal-rest-connector</module>
-    <module>sal-rest-connector-config</module>
-
-    <!-- Documentation -->
-    <module>sal-rest-docgen</module>
-    <module>sal-rest-docgen-maven</module>
 
     <module>sal-akka-raft</module>
     <module>sal-akka-raft-example</module>

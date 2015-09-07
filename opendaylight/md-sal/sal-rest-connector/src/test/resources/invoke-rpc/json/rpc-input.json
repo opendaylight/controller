@@ -1,7 +1,0 @@
-{
-    "invoke-rpc-module:input" : {
-	    "cont" : {
-	        "lf" : "lf-test"
-	    }
-    }
-}

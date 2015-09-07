@@ -1,8 +1,0 @@
-<cont>
-    <lf1>121</lf1>
-    <lf2>121</lf2>
-    <lf-ident xmlns:a="leafref:module">a:base</lf-ident>
-    <lf-ident-ref xmlns:a="leafref:module">a:base</lf-ident-ref>
-    <lf-ident-ref-relative xmlns:a="leafref:module">a:base</lf-ident-ref-relative>
-    <lf-ident-ref-relative-cnd xmlns:a="leafref:module">a:base</lf-ident-ref-relative-cnd>
-</cont>

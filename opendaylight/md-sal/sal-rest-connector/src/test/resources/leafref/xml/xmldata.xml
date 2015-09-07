@@ -1,6 +1,0 @@
-<cont xmlnsa="leafref:module">
-    <lf4 xmlns:nsa="referenced:module">/nsa:cont/nsa:lf1</lf4>
-    <lf2 xmlns:nsa="leafref:module">/nsa:cont/nsa:lf1</lf2>
-    <lf3 xmlns:ns="leafref:module">/ns:cont/ns:lf2</lf3>
-    <lf5 xmlns:nsa="leafref:module">/nsa:cont/nsa:lf3</lf5>
-</cont>

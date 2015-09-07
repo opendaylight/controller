@@ -17,7 +17,6 @@
     <module>mdsal</module>
     <module>protocol-framework</module>
     <module>akka</module>
-    <module>restconf</module>
     <module>extras</module>
   </modules>
 </project>

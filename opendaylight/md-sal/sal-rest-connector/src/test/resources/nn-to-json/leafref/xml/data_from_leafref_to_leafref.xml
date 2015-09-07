@@ -1,4 +1,0 @@
-<cont xmlns="main:module"
-      xmlns:cont-augment-module="cont:augment:module">
-    <cont-augment-module:lf7>200</cont-augment-module:lf7>
-</cont>

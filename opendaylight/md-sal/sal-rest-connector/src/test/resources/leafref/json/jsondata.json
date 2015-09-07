@@ -1,8 +1,0 @@
-{
-    "leafref-module:cont" : {
-        "lf4" : "/referenced-module:cont/referenced-module:lf1",
-        "lf2" : "/leafref-module:cont/leafref-module:lf1",
-        "lf3" : "/leafref-module:cont/leafref-module:lf2",
-        "lf5" : "/leafref-module:cont/leafref-module:lf3"
-    }
-}
