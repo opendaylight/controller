@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<features name="odl-config-persister-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
+  <repository>mvn:org.opendaylight.mdsal/features-mdsal/{{VERSION}}/xml/features</repository>
+  <repository>mvn:org.opendaylight.controller/features-config/{{VERSION}}/xml/features</repository>
+  <feature name='odl-config-persister-all' version='${project.version}' description="OpenDaylight :: Config Persister:: All">
+    <feature version='${project.version}'>odl-config-persister</feature>
+    <feature version='${project.version}'>odl-config-startup</feature>
+  </feature>
+  <feature name='odl-config-persister' version='${project.version}' description="OpenDaylight :: Config Persister ">
+    <feature version='${project.version}'>odl-config-api</feature>
+    <feature version='${project.version}'>odl-config-core</feature>
+    <feature version='${project.version}'>odl-config-manager</feature>
+    <feature version='${mdsal.version}'>odl-mdsal-binding-runtime</feature>
+    <bundle>mvn:org.opendaylight.controller/yang-jmx-generator/{{VERSION}}</bundle>
+    <bundle>mvn:org.opendaylight.controller/config-persister-api/{{VERSION}}</bundle>
+    <bundle>mvn:org.opendaylight.controller/config-util/{{VERSION}}</bundle>
+    <bundle>mvn:org.opendaylight.controller/config-manager-facade-xml/{{VERSION}}</bundle>
+    <bundle>mvn:org.opendaylight.controller/config-persister-file-xml-adapter/{{VERSION}}</bundle>
+    <bundle>mvn:org.opendaylight.controller/config-persister-impl/{{VERSION}}</bundle>
+    <bundle>mvn:org.opendaylight.controller/config-persister-feature-adapter/{{VERSION}}</bundle>
+
+    <bundle>mvn:com.google.guava/guava/{{VERSION}}</bundle>
+    <bundle>mvn:commons-io/commons-io/{{VERSION}}</bundle>
+    <bundle>mvn:org.apache.commons/commons-lang3/{{VERSION}}</bundle>
+    <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.core/{{VERSION}}</bundle>
+    <bundle>mvn:org.eclipse.persistence/org.eclipse.persistence.moxy/{{VERSION}}</bundle>
+  </feature>
+  <feature name='odl-config-startup' version='${project.version}' description="OpenDaylight :: Config Persister:: Config Startup">
+    <feature version='${project.version}'>odl-config-persister</feature>
+  </feature>
+  <feature name='odl-config-manager-facade-xml' version='${project.version}' description="Opendaylight :: Config Persister:: Mapping for Config Subsystem">
+    <feature version='${project.version}'>odl-config-core</feature>
+    <bundle>mvn:org.opendaylight.controller/config-manager-facade-xml/{{VERSION}}</bundle>
+  </feature>
+</features>

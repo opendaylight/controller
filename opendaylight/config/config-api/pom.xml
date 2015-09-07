@@ -7,7 +7,7 @@
     <artifactId>config-subsystem</artifactId>
     <version>0.4.0-SNAPSHOT</version>
   </parent>
-
+  <!-- FIXME Use org.opendaylight.mdsal:binding-parent -->
   <artifactId>config-api</artifactId>
   <packaging>bundle</packaging>
   <name>${project.artifactId}</name>
@@ -18,7 +18,7 @@
       <artifactId>jsr305</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.yangtools</groupId>
+      <groupId>org.opendaylight.mdsal</groupId>
       <artifactId>yang-binding</artifactId>
     </dependency>
     <dependency>

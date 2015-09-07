@@ -27,8 +27,12 @@
       <artifactId>sal-binding-broker-impl</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.yangtools</groupId>
-      <artifactId>binding-data-codec</artifactId>
+      <groupId>org.opendaylight.mdsal</groupId>
+      <artifactId>mdsal-binding-dom-codec</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.opendaylight.mdsal.model</groupId>
+      <artifactId>ietf-yang-types</artifactId>
     </dependency>
   </dependencies>
 

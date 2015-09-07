@@ -19,16 +19,17 @@ import org.ops4j.pax.exam.util.PathUtils;
 public class TestHelper {
 
     public static final String CONTROLLER = "org.opendaylight.controller";
+    public static final String MDSAL = "org.opendaylight.mdsal";
     public static final String YANGTOOLS = "org.opendaylight.yangtools";
 
     public static final String CONTROLLER_MODELS = "org.opendaylight.controller.model";
-    public static final String YANGTOOLS_MODELS = "org.opendaylight.yangtools.model";
+    public static final String MDSAL_MODELS = "org.opendaylight.mdsal.model";
 
     public static Option mdSalCoreBundles() {
         return new DefaultCompositeOption( //
                 mavenBundle(YANGTOOLS, "concepts").versionAsInProject(), // //
                 mavenBundle(YANGTOOLS, "util").versionAsInProject(), // //
-                mavenBundle(YANGTOOLS, "yang-binding").versionAsInProject(), // //
+                mavenBundle(MDSAL, "yang-binding").versionAsInProject(), // //
                 mavenBundle(YANGTOOLS, "yang-common").versionAsInProject(), // //
                 mavenBundle(YANGTOOLS, "object-cache-api").versionAsInProject(), // //
                 mavenBundle(YANGTOOLS, "object-cache-guava").versionAsInProject(), // //
@@ -80,16 +81,11 @@ public class TestHelper {
                 mavenBundle(YANGTOOLS, "yang-model-api").versionAsInProject(), // //
                 mavenBundle(YANGTOOLS, "yang-model-util").versionAsInProject(), // //
                 mavenBundle(YANGTOOLS, "yang-parser-api").versionAsInProject(), //
-                mavenBundle(YANGTOOLS, "yang-parser-impl").versionAsInProject(),
-                mavenBundle(YANGTOOLS, "binding-generator-spi").versionAsInProject(), // //
-                mavenBundle(YANGTOOLS, "binding-model-api").versionAsInProject(), // //
-                mavenBundle(YANGTOOLS, "binding-generator-util").versionAsInProject(), //
                 mavenBundle(YANGTOOLS, "yang-parser-impl").versionAsInProject(), //
-                mavenBundle(YANGTOOLS, "binding-type-provider").versionAsInProject(), //
-                mavenBundle(YANGTOOLS, "binding-generator-api").versionAsInProject(), mavenBundle(YANGTOOLS,
-                        "binding-generator-spi").versionAsInProject(), //
-                mavenBundle(YANGTOOLS, "binding-generator-impl").versionAsInProject(),
-                mavenBundle(YANGTOOLS, "binding-data-codec").versionAsInProject(),
+                mavenBundle(MDSAL, "mdsal-binding-generator-api").versionAsInProject(), //
+                mavenBundle(MDSAL, "mdsal-binding-generator-util").versionAsInProject(), //
+                mavenBundle(MDSAL, "mdsal-binding-generator-impl").versionAsInProject(),
+                mavenBundle(MDSAL, "mdsal-binding-dom-codec").versionAsInProject(),
                 mavenBundle(YANGTOOLS + ".thirdparty", "antlr4-runtime-osgi-nohead").versionAsInProject(), // //
 
                 mavenBundle(CONTROLLER, "sal-binding-util").versionAsInProject(), //
@@ -161,10 +157,10 @@ public class TestHelper {
 
     public static Option baseModelBundles() {
         return new DefaultCompositeOption( //
-                mavenBundle(YANGTOOLS_MODELS, "yang-ext").versionAsInProject(), // //
-                mavenBundle(YANGTOOLS_MODELS, "ietf-inet-types").versionAsInProject(), // //
-                mavenBundle(YANGTOOLS_MODELS, "ietf-yang-types").versionAsInProject(), // //
-                mavenBundle(YANGTOOLS_MODELS, "opendaylight-l2-types").versionAsInProject() // //
+                mavenBundle(MDSAL+".model", "yang-ext").versionAsInProject(), // //
+                mavenBundle(MDSAL_MODELS, "ietf-inet-types").versionAsInProject(), // //
+                mavenBundle(MDSAL_MODELS, "ietf-yang-types").versionAsInProject(), // //
+                mavenBundle(MDSAL_MODELS, "opendaylight-l2-types").versionAsInProject() // //
                 );
     }
 
