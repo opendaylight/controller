@@ -14,7 +14,8 @@
   <packaging>pom</packaging>
 
   <properties>
-
+    <mdsal.version>2.0.0-SNAPSHOT</mdsal.version>
+    <mdsal.model.version>0.8.0-SNAPSHOT</mdsal.model.version>
     <akka.version>2.3.10</akka.version>
     <appauth.version>0.6.0-SNAPSHOT</appauth.version>
     <archetype-app-northbound>0.2.0-SNAPSHOT</archetype-app-northbound>
@@ -189,6 +190,44 @@
 
   <dependencyManagement>
     <dependencies>
+
+
+
+      <!-- yangtools artifacts -->
+      <dependency>
+        <groupId>org.opendaylight.yangtools</groupId>
+        <artifactId>yangtools-artifacts</artifactId>
+        <version>${yangtools.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+
+      <!-- mdsal artifacts -->
+      <dependency>
+        <groupId>org.opendaylight.mdsal</groupId>
+        <artifactId>mdsal-artifacts</artifactId>
+        <version>2.0.0-SNAPSHOT</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+        <!-- mdsal artifacts -->
+        <dependency>
+          <groupId>org.opendaylight.mdsal.model</groupId>
+          <artifactId>mdsal-model-artifacts</artifactId>
+          <version>${mdsal.model.version}</version>
+          <type>pom</type>
+          <scope>import</scope>
+        </dependency>
+
+      <dependency>
+        <groupId>org.opendaylight.controller</groupId>
+        <artifactId>config-artifacts</artifactId>
+        <version>${config.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
 
        <!-- project specific dependencies -->
       <dependency>
@@ -1196,14 +1235,6 @@
         <version>1.0.2</version>
       </dependency>
 
-      <!-- yangtools artifacts -->
-      <dependency>
-        <groupId>org.opendaylight.yangtools</groupId>
-        <artifactId>yangtools-artifacts</artifactId>
-        <version>${yangtools.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
 
       <dependency>
         <groupId>openexi</groupId>
@@ -1611,9 +1642,9 @@
           <version>${yangtools.version}</version>
           <dependencies>
             <dependency>
-              <groupId>org.opendaylight.yangtools</groupId>
+              <groupId>org.opendaylight.mdsal</groupId>
               <artifactId>maven-sal-api-gen-plugin</artifactId>
-              <version>${yangtools.version}</version>
+              <version>0.8.0-SNAPSHOT</version>
               <type>jar</type>
             </dependency>
             <dependency>
