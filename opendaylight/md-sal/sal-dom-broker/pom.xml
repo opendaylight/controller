@@ -52,11 +52,6 @@
     </dependency>
 
     <dependency>
-        <groupId>org.opendaylight.yangtools.model</groupId>
-        <artifactId>ietf-yang-types</artifactId>
-    </dependency>
-
-    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
     </dependency>
