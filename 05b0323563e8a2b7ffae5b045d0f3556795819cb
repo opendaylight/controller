@@ -46,6 +46,30 @@
       "revId": "05b0323563e8a2b7ffae5b045d0f3556795819cb",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_f51b1dc8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipShard.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 257,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-09-08T16:58:55Z",
+      "side": 1,
+      "message": "In general I think partitioning will be more common than process down. I am fine with your change but I think it does not cover the scenario where even when we unregister we do get assigned as the owner which can happen in the scenario I described earlier. How about we merge and push this and then we can address this in a subsequent commit?",
+      "parentUuid": "3a79b1b5_31de9040",
+      "range": {
+        "startLine": 257,
+        "startChar": 38,
+        "endLine": 257,
+        "endChar": 45
+      },
+      "revId": "05b0323563e8a2b7ffae5b045d0f3556795819cb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
