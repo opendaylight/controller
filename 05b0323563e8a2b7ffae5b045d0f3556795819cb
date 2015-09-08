@@ -70,6 +70,30 @@
       "revId": "05b0323563e8a2b7ffae5b045d0f3556795819cb",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_b567e524",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipShard.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 257,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-09-08T21:02:01Z",
+      "side": 1,
+      "message": "Sure. I want to get this merged into stable/lithium. This will be the last patch on the topic branch.",
+      "parentUuid": "3a79b1b5_f51b1dc8",
+      "range": {
+        "startLine": 257,
+        "startChar": 38,
+        "endLine": 257,
+        "endChar": 45
+      },
+      "revId": "05b0323563e8a2b7ffae5b045d0f3556795819cb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
