@@ -514,6 +514,7 @@ public class DistributedDataStoreRemotingIntegrationTest {
     @Test
     public void testReadyLocalTransactionForwardedToLeader() throws Exception {
         initDatastores("testReadyLocalTransactionForwardedToLeader");
+        followerTestKit.waitUntilLeader(followerDistributedDataStore.getActorContext(), "cars");
 
         Optional<ActorRef> carsFollowerShard = followerDistributedDataStore.getActorContext().findLocalShard("cars");
         assertEquals("Cars follower shard found", true, carsFollowerShard.isPresent());
@@ -532,7 +533,13 @@ public class DistributedDataStoreRemotingIntegrationTest {
         ReadyLocalTransaction readyLocal = new ReadyLocalTransaction(transactionID , modification, true);
 
         carsFollowerShard.get().tell(readyLocal, followerTestKit.getRef());
-        followerTestKit.expectMsgClass(CommitTransactionReply.SERIALIZABLE_CLASS);
+        Object resp = followerTestKit.expectMsgClass(Object.class);
+        if(resp instanceof akka.actor.Status.Failure) {
+            throw new AssertionError("Unexpected failure response", ((akka.actor.Status.Failure)resp).cause());
+        }
+
+        assertTrue("Expected response of type " + CommitTransactionReply.SERIALIZABLE_CLASS,
+                CommitTransactionReply.SERIALIZABLE_CLASS.equals(resp.getClass()));
 
         verifyCars(leaderDistributedDataStore.newReadOnlyTransaction(), car);
     }
