@@ -16,10 +16,20 @@ public interface EntityOwnershipListener {
     /**
      * A notification that is generated when the ownership status for a given entity changes in the current process.
      *
-     * @param entity the entity whose ownership status has changed
-     * @param wasOwner true if this process was the owner of the given entity right before this notification
-     *                 was generated
-     * @param isOwner true if this process now owns the given entity
+     * The following outlines valid combinations of the ownership status flags in the EntityOwnershipChange
+     * parameter and their meanings:
+     * <ul>
+     * <li><b>wasOwner = false, isOwner = true, hasOwner = true</b> - this process has been granted ownership</li>
+     * <li><b>wasOwner = true, isOwner = false, hasOwner = true</b> - this process was the owner but ownership
+     *     transitioned to another process</li>
+     * <li><b>wasOwner = false, isOwner = false, hasOwner = true</b> - ownership transitioned to another process
+     *     and this process was not the previous owner</li>
+     * <li><b>wasOwner = false, isOwner = false, hasOwner = false</b> - the entity no longer has any candidates and
+     *     thus no owner and this process was not the previous owner</li>
+     * <li><b>wasOwner = true, isOwner = false, hasOwner = false</b> - the entity no longer has any candidates and
+     *     thus no owner and this process was the previous owner</li>
+     * </ul>
+     * @param ownershipChange describes the entity whose ownership status has changed
      */
-    void ownershipChanged(Entity entity, boolean wasOwner, boolean isOwner);
+    void ownershipChanged(EntityOwnershipChange ownershipChange);
 }

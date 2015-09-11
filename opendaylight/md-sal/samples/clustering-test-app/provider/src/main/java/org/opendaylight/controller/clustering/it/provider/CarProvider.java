@@ -173,8 +173,9 @@ public class CarProvider implements CarService {
 
     private static class CarEntityOwnershipCandidate implements EntityOwnershipCandidate {
         @Override
-        public void ownershipChanged(Entity entity, boolean wasOwner, boolean isOwner) {
-            LOG.info("ownershipChanged: entity: {}, wasOwner: {}, isOwner: ()", entity, wasOwner, isOwner);
+        public void ownershipChanged(Entity entity, boolean wasOwner, boolean isOwner, boolean hasOwner) {
+            LOG.info("ownershipChanged: entity: {}, wasOwner: {}, isOwner: {}, hasOwner: {}", entity,
+                    wasOwner, isOwner, hasOwner);
         }
     }
 }

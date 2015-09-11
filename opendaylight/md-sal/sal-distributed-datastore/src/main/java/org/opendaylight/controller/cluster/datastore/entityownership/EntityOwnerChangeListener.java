@@ -67,14 +67,14 @@ class EntityOwnerChangeListener implements DOMDataTreeChangeListener {
             if(!Objects.equal(origOwner, newOwner)) {
                 boolean isOwner = Objects.equal(localMemberName, newOwner);
                 boolean wasOwner = Objects.equal(localMemberName, origOwner);
-                if(isOwner || wasOwner) {
-                    Entity entity = createEntity(change.getRootPath());
+                boolean hasOwner = newOwner != null && !newOwner.toString().isEmpty();
 
-                    LOG.debug("{}: Calling notifyEntityOwnershipListeners: entity: {}, wasOwner: {}, isOwner: {}",
-                            logId(), entity, wasOwner, isOwner);
+                Entity entity = createEntity(change.getRootPath());
 
-                    listenerSupport.notifyEntityOwnershipListeners(entity, wasOwner, isOwner);
-                }
+                LOG.debug("{}: Calling notifyEntityOwnershipListeners: entity: {}, wasOwner: {}, isOwner: {}, hasOwner: {}",
+                        logId(), entity, wasOwner, isOwner, hasOwner);
+
+                listenerSupport.notifyEntityOwnershipListeners(entity, wasOwner, isOwner, hasOwner);
             }
         }
     }
