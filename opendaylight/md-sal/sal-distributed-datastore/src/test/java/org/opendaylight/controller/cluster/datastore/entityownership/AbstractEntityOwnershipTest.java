@@ -23,9 +23,14 @@ import com.google.common.base.Optional;
 import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.concurrent.TimeUnit;
+import org.hamcrest.Description;
 import org.junit.Assert;
+import org.mockito.ArgumentMatcher;
+import org.mockito.Matchers;
 import org.opendaylight.controller.cluster.datastore.AbstractActorTest;
 import org.opendaylight.controller.cluster.datastore.ShardDataTree;
+import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
+import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipChange;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.entity.owners.rev150804.EntityOwners;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.entity.owners.rev150804.entity.owners.EntityType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.entity.owners.rev150804.entity.owners.entity.type.entity.Candidate;
@@ -171,5 +176,37 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
         DataTreeCandidateTip candidate = shardDataTree.getDataTree().prepare(modification);
         shardDataTree.getDataTree().commit(candidate);
         shardDataTree.notifyListeners(candidate);
+    }
+
+    static EntityOwnershipChange ownershipChange(final Entity expEntity, final boolean expWasOwner,
+            final boolean expIsOwner, final boolean expHasOwner) {
+        return Matchers.argThat(new ArgumentMatcher<EntityOwnershipChange>() {
+            @Override
+            public boolean matches(Object argument) {
+                EntityOwnershipChange change = (EntityOwnershipChange) argument;
+                return expEntity.equals(change.getEntity()) && expWasOwner == change.wasOwner() &&
+                        expIsOwner == change.isOwner() && expHasOwner == change.hasOwner();
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendValue(new EntityOwnershipChange(expEntity, expWasOwner, expIsOwner, expHasOwner));
+            }
+        });
+    }
+
+    static EntityOwnershipChange ownershipChange(final Entity expEntity) {
+        return Matchers.argThat(new ArgumentMatcher<EntityOwnershipChange>() {
+            @Override
+            public boolean matches(Object argument) {
+                EntityOwnershipChange change = (EntityOwnershipChange) argument;
+                return expEntity.equals(change.getEntity());
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendValue(new EntityOwnershipChange(expEntity, false, false, false));
+            }
+        });
     }
 }

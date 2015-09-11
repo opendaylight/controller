@@ -8,8 +8,6 @@
 package org.opendaylight.controller.cluster.datastore.entityownership;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -27,7 +25,6 @@ import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.datastore.AbstractActorTest;
 import org.opendaylight.controller.cluster.raft.TestActorFactory;
 import org.opendaylight.controller.cluster.raft.utils.DoNothingActor;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
@@ -43,7 +40,7 @@ import scala.collection.immutable.Iterable;
  *
  * @author Thomas Pantelis
  */
-public class EntityOwnershipListenerSupportTest extends AbstractActorTest {
+public class EntityOwnershipListenerSupportTest extends AbstractEntityOwnershipTest {
     private final TestActorFactory actorFactory = new TestActorFactory(getSystem());
     private ActorContext actorContext;
 
@@ -83,73 +80,73 @@ public class EntityOwnershipListenerSupportTest extends AbstractActorTest {
 
         // Notify entity1 changed and verify listeners are notified.
 
-        support.notifyEntityOwnershipListeners(entity1, false, true);
+        support.notifyEntityOwnershipListeners(entity1, false, true, true);
 
-        verify(mockListener1, timeout(5000)).ownershipChanged(entity1, false, true);
-        verify(mockListener2, timeout(5000)).ownershipChanged(entity1, false, true);
-        verify(mockListener3, timeout(5000)).ownershipChanged(entity1, false, true);
+        verify(mockListener1, timeout(5000)).ownershipChanged(ownershipChange(entity1, false, true, true));
+        verify(mockListener2, timeout(5000)).ownershipChanged(ownershipChange(entity1, false, true, true));
+        verify(mockListener3, timeout(5000)).ownershipChanged(ownershipChange(entity1, false, true, true));
         assertEquals("# of listener actors", 3, actorContext.children().size());
 
         // Notify entity2 changed and verify only mockListener1 and mockListener3 are notified.
 
-        support.notifyEntityOwnershipListeners(entity2, false, true);
+        support.notifyEntityOwnershipListeners(entity2, false, false, false);
 
-        verify(mockListener1, timeout(5000)).ownershipChanged(entity2, false, true);
-        verify(mockListener3, timeout(5000)).ownershipChanged(entity2, false, true);
+        verify(mockListener1, timeout(5000)).ownershipChanged(ownershipChange(entity2, false, false, false));
+        verify(mockListener3, timeout(5000)).ownershipChanged(ownershipChange(entity2, false, false, false));
         Uninterruptibles.sleepUninterruptibly(300, TimeUnit.MILLISECONDS);
-        verify(mockListener2, never()).ownershipChanged(eq(entity2), anyBoolean(), anyBoolean());
+        verify(mockListener2, never()).ownershipChanged(ownershipChange(entity2));
         assertEquals("# of listener actors", 3, actorContext.children().size());
 
         // Notify entity3 changed and verify only mockListener3 is notified.
 
-        support.notifyEntityOwnershipListeners(entity3, false, true);
+        support.notifyEntityOwnershipListeners(entity3, false, true, true);
 
-        verify(mockListener3, timeout(5000)).ownershipChanged(entity3, false, true);
+        verify(mockListener3, timeout(5000)).ownershipChanged(ownershipChange(entity3, false, true, true));
         Uninterruptibles.sleepUninterruptibly(300, TimeUnit.MILLISECONDS);
-        verify(mockListener1, never()).ownershipChanged(eq(entity3), anyBoolean(), anyBoolean());
-        verify(mockListener2, never()).ownershipChanged(eq(entity3), anyBoolean(), anyBoolean());
+        verify(mockListener1, never()).ownershipChanged(ownershipChange(entity3));
+        verify(mockListener2, never()).ownershipChanged(ownershipChange(entity3));
 
         // Notify entity4 changed and verify no listeners are notified.
 
-        support.notifyEntityOwnershipListeners(entity4, false, true);
+        support.notifyEntityOwnershipListeners(entity4, true, false, true);
 
         Uninterruptibles.sleepUninterruptibly(300, TimeUnit.MILLISECONDS);
-        verify(mockListener1, never()).ownershipChanged(eq(entity4), anyBoolean(), anyBoolean());
-        verify(mockListener2, never()).ownershipChanged(eq(entity4), anyBoolean(), anyBoolean());
-        verify(mockListener3, never()).ownershipChanged(eq(entity4), anyBoolean(), anyBoolean());
+        verify(mockListener1, never()).ownershipChanged(ownershipChange(entity4));
+        verify(mockListener2, never()).ownershipChanged(ownershipChange(entity4));
+        verify(mockListener3, never()).ownershipChanged(ownershipChange(entity4));
 
         // Notify entity5 changed and verify no listener is notified.
 
-        support.notifyEntityOwnershipListeners(entity5, false, true);
+        support.notifyEntityOwnershipListeners(entity5, true, false, true);
 
         Uninterruptibles.sleepUninterruptibly(300, TimeUnit.MILLISECONDS);
-        verify(mockListener1, never()).ownershipChanged(eq(entity4), anyBoolean(), anyBoolean());
-        verify(mockListener2, never()).ownershipChanged(eq(entity4), anyBoolean(), anyBoolean());
-        verify(mockListener3, never()).ownershipChanged(eq(entity4), anyBoolean(), anyBoolean());
+        verify(mockListener1, never()).ownershipChanged(ownershipChange(entity4));
+        verify(mockListener2, never()).ownershipChanged(ownershipChange(entity4));
+        verify(mockListener3, never()).ownershipChanged(ownershipChange(entity4));
 
         reset(mockListener1, mockListener2, mockListener3);
 
         // Unregister mockListener1 for entity1, issue a change and verify only mockListeners 2 & 3 are notified.
 
         support.removeEntityOwnershipListener(entity1, mockListener1);
-        support.notifyEntityOwnershipListeners(entity1, false, true);
+        support.notifyEntityOwnershipListeners(entity1, true, false, true);
 
-        verify(mockListener2, timeout(5000)).ownershipChanged(entity1, false, true);
-        verify(mockListener3, timeout(5000)).ownershipChanged(entity1, false, true);
+        verify(mockListener2, timeout(5000)).ownershipChanged(ownershipChange(entity1, true, false, true));
+        verify(mockListener3, timeout(5000)).ownershipChanged(ownershipChange(entity1, true, false, true));
         Uninterruptibles.sleepUninterruptibly(300, TimeUnit.MILLISECONDS);
-        verify(mockListener1, never()).ownershipChanged(eq(entity1), anyBoolean(), anyBoolean());
+        verify(mockListener1, never()).ownershipChanged(ownershipChange(entity1));
 
         // Unregister mockListener3, issue a change for entity1 and verify only mockListeners2 is notified.
 
         reset(mockListener1, mockListener2, mockListener3);
 
         support.removeEntityOwnershipListener(entity1.getType(), mockListener3);
-        support.notifyEntityOwnershipListeners(entity1, false, true);
+        support.notifyEntityOwnershipListeners(entity1, false, false, false);
 
-        verify(mockListener2, timeout(5000)).ownershipChanged(entity1, false, true);
+        verify(mockListener2, timeout(5000)).ownershipChanged(ownershipChange(entity1, false, false, false));
         Uninterruptibles.sleepUninterruptibly(300, TimeUnit.MILLISECONDS);
-        verify(mockListener1, never()).ownershipChanged(eq(entity1), anyBoolean(), anyBoolean());
-        verify(mockListener3, never()).ownershipChanged(eq(entity1), anyBoolean(), anyBoolean());
+        verify(mockListener1, never()).ownershipChanged(ownershipChange(entity1));
+        verify(mockListener3, never()).ownershipChanged(ownershipChange(entity1));
 
         // Completely unregister all listeners and verify their listener actors are destroyed.
 
@@ -180,11 +177,11 @@ public class EntityOwnershipListenerSupportTest extends AbstractActorTest {
 
         support.addEntityOwnershipListener(entity1, mockListener1);
 
-        support.notifyEntityOwnershipListeners(entity1, false, true);
+        support.notifyEntityOwnershipListeners(entity1, false, false, true);
 
-        verify(mockListener1, timeout(5000)).ownershipChanged(entity1, false, true);
-        verify(mockListener2, never()).ownershipChanged(eq(entity1), anyBoolean(), anyBoolean());
-        verify(mockListener3, never()).ownershipChanged(eq(entity1), anyBoolean(), anyBoolean());
+        verify(mockListener1, timeout(5000)).ownershipChanged(ownershipChange(entity1, false, false, true));
+        verify(mockListener2, never()).ownershipChanged(ownershipChange(entity1));
+        verify(mockListener3, never()).ownershipChanged(ownershipChange(entity1));
 
         // Quickly register and unregister mockListener2 - expecting no exceptions.
 
