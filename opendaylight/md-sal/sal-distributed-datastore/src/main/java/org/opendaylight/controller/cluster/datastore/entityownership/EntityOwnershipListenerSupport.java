@@ -80,27 +80,27 @@ class EntityOwnershipListenerSupport {
         removeListener(listener, entityType, entityTypeListenerMap);
     }
 
-    void notifyEntityOwnershipListeners(Entity entity, boolean wasOwner, boolean isOwner) {
-        notifyListeners(entity, entity, wasOwner, isOwner, entityListenerMap);
-        notifyListeners(entity, entity.getType(), wasOwner, isOwner, entityTypeListenerMap);
+    void notifyEntityOwnershipListeners(Entity entity, boolean wasOwner, boolean isOwner, boolean hasOwner) {
+        notifyListeners(entity, entity, wasOwner, isOwner, hasOwner, entityListenerMap);
+        notifyListeners(entity, entity.getType(), wasOwner, isOwner, hasOwner, entityTypeListenerMap);
     }
 
-    void notifyEntityOwnershipListener(Entity entity, boolean wasOwner, boolean isOwner,
+    void notifyEntityOwnershipListener(Entity entity, boolean wasOwner, boolean isOwner, boolean hasOwner,
             EntityOwnershipListener listener) {
-        notifyListeners(entity, wasOwner, isOwner, Arrays.asList(listener));
+        notifyListeners(entity, wasOwner, isOwner, hasOwner, Arrays.asList(listener));
     }
 
-    private <T> void notifyListeners(Entity entity, T mapKey, boolean wasOwner, boolean isOwner,
+    private <T> void notifyListeners(Entity entity, T mapKey, boolean wasOwner, boolean isOwner, boolean hasOwner,
             Multimap<T, EntityOwnershipListener> listenerMap) {
         Collection<EntityOwnershipListener> listeners = listenerMap.get(mapKey);
         if(!listeners.isEmpty()) {
-            notifyListeners(entity, wasOwner, isOwner, listeners);
+            notifyListeners(entity, wasOwner, isOwner, hasOwner, listeners);
         }
     }
 
-    private void notifyListeners(Entity entity, boolean wasOwner, boolean isOwner,
+    private void notifyListeners(Entity entity, boolean wasOwner, boolean isOwner, boolean hasOwner,
             Collection<EntityOwnershipListener> listeners) {
-        EntityOwnershipChanged changed = new EntityOwnershipChanged(entity, wasOwner, isOwner);
+        EntityOwnershipChanged changed = new EntityOwnershipChanged(entity, wasOwner, isOwner, hasOwner);
         for(EntityOwnershipListener listener: listeners) {
             ActorRef listenerActor = listenerActorFor(listener);
 

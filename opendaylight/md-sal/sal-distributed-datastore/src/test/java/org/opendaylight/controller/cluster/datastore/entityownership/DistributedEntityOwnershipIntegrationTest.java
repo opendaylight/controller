@@ -8,9 +8,6 @@
 package org.opendaylight.controller.cluster.datastore.entityownership;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
@@ -152,26 +149,24 @@ public class DistributedEntityOwnershipIntegrationTest {
         // Register leader candidate for entity1 and verify it becomes owner
 
         leaderEntityOwnershipService.registerCandidate(ENTITY1, leaderMockCandidate);
-        verify(leaderMockCandidate, timeout(5000)).ownershipChanged(ENTITY1, false, true);
+        verify(leaderMockCandidate, timeout(5000)).ownershipChanged(ENTITY1, false, true, true);
         reset(leaderMockCandidate);
 
         // Register leader candidate for entity1_2 (same id, different type) and verify it becomes owner
 
         leaderEntityOwnershipService.registerCandidate(ENTITY1_2, leaderMockCandidate);
-        verify(leaderMockCandidate, timeout(5000)).ownershipChanged(ENTITY1_2, false, true);
+        verify(leaderMockCandidate, timeout(5000)).ownershipChanged(ENTITY1_2, false, true, true);
         reset(leaderMockCandidate);
 
         // Register follower1 candidate for entity1 and verify it gets added but doesn't become owner
-
         follower1EntityOwnershipService.registerCandidate(ENTITY1, follower1MockCandidate);
         verifyCandidates(leaderDistributedDataStore, ENTITY1, "member-1", "member-2");
         verifyOwner(leaderDistributedDataStore, ENTITY1, "member-1");
-        verify(follower1MockCandidate, never()).ownershipChanged(any(Entity.class), anyBoolean(), anyBoolean());
 
         // Register follower1 candidate for entity2 and verify it becomes owner
 
         follower1EntityOwnershipService.registerCandidate(ENTITY2, follower1MockCandidate);
-        verify(follower1MockCandidate, timeout(5000)).ownershipChanged(ENTITY2, false, true);
+        verify(follower1MockCandidate, timeout(5000)).ownershipChanged(ENTITY2, false, true, true);
         reset(follower1MockCandidate);
 
         // Register follower2 candidate for entity2 and verify it gets added but doesn't become owner
@@ -179,23 +174,22 @@ public class DistributedEntityOwnershipIntegrationTest {
         follower2EntityOwnershipService.registerCandidate(ENTITY2, follower2MockCandidate);
         verifyCandidates(leaderDistributedDataStore, ENTITY2, "member-2", "member-3");
         verifyOwner(leaderDistributedDataStore, ENTITY2, "member-2");
-        verify(follower2MockCandidate, never()).ownershipChanged(any(Entity.class), anyBoolean(), anyBoolean());
 
         // Unregister follower1 candidate for entity2 and verify follower2 becomes owner
 
         follower1EntityOwnershipService.unregisterCandidate(ENTITY2, follower1MockCandidate);
-        verify(follower2MockCandidate, timeout(5000)).ownershipChanged(ENTITY2, false, true);
+        verify(follower2MockCandidate, timeout(5000)).ownershipChanged(ENTITY2, false, true, true);
 
         // Register follower1 candidate for entity3 and verify it becomes owner
 
         follower1EntityOwnershipService.registerCandidate(ENTITY3, follower1MockCandidate);
-        verify(follower1MockCandidate, timeout(5000)).ownershipChanged(ENTITY3, false, true);
+        verify(follower1MockCandidate, timeout(5000)).ownershipChanged(ENTITY3, false, true, true);
         verifyOwner(leaderDistributedDataStore, ENTITY3, "member-2");
 
         // Register follower2 candidate for entity4 and verify it becomes owner
 
         follower2EntityOwnershipService.registerCandidate(ENTITY4, follower2MockCandidate);
-        verify(follower2MockCandidate, timeout(5000)).ownershipChanged(ENTITY4, false, true);
+        verify(follower2MockCandidate, timeout(5000)).ownershipChanged(ENTITY4, false, true, true);
         reset(follower2MockCandidate);
 
         // Register follower1 candidate for entity4 and verify it gets added but doesn't become owner
@@ -204,20 +198,19 @@ public class DistributedEntityOwnershipIntegrationTest {
         follower1EntityOwnershipService.registerCandidate(ENTITY4, follower1MockCandidate);
         verifyCandidates(leaderDistributedDataStore, ENTITY4, "member-3", "member-2");
         verifyOwner(leaderDistributedDataStore, ENTITY4, "member-3");
-        verify(follower1MockCandidate, never()).ownershipChanged(any(Entity.class), anyBoolean(), anyBoolean());
 
         // Shutdown follower2 and verify it's owned entities (entity 2 & 4) get re-assigned
 
         reset(follower1MockCandidate);
         JavaTestKit.shutdownActorSystem(follower2System);
 
-        verify(follower1MockCandidate, timeout(15000)).ownershipChanged(ENTITY4, false, true);
+        verify(follower1MockCandidate, timeout(15000)).ownershipChanged(ENTITY4, false, true, true);
         verifyOwner(leaderDistributedDataStore, ENTITY2, ""); // no other candidate
 
         // Register leader candidate for entity2 and verify it becomes owner
 
         leaderEntityOwnershipService.registerCandidate(ENTITY2, leaderMockCandidate);
-        verify(leaderMockCandidate, timeout(5000)).ownershipChanged(ENTITY2, false, true);
+        verify(leaderMockCandidate, timeout(5000)).ownershipChanged(ENTITY2, false, true, true);
         verifyOwner(leaderDistributedDataStore, ENTITY2, "member-1");
 
         // Unregister leader candidate for entity2 and verify the owner is cleared

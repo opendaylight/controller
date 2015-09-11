@@ -47,9 +47,10 @@ public class EntityOwnershipListenerActorTest extends AbstractActorTest {
         Entity entity = new Entity("test", YangInstanceIdentifier.of(QName.create("test", "id1")));
         boolean wasOwner = false;
         boolean isOwner = true;
-        listenerActor.tell(new EntityOwnershipChanged(entity, wasOwner, isOwner), ActorRef.noSender());
+        boolean hasOwner = true;
+        listenerActor.tell(new EntityOwnershipChanged(entity, wasOwner, isOwner, hasOwner), ActorRef.noSender());
 
-        verify(mockListener, timeout(5000)).ownershipChanged(entity, wasOwner, isOwner);
+        verify(mockListener, timeout(5000)).ownershipChanged(entity, wasOwner, isOwner, hasOwner);
     }
 
     @Test
@@ -57,16 +58,16 @@ public class EntityOwnershipListenerActorTest extends AbstractActorTest {
         EntityOwnershipListener mockListener = mock(EntityOwnershipListener.class);
 
         Entity entity1 = new Entity("test", YangInstanceIdentifier.of(QName.create("test", "id1")));
-        doThrow(new RuntimeException("mock")).when(mockListener).ownershipChanged(entity1, false, true);
+        doThrow(new RuntimeException("mock")).when(mockListener).ownershipChanged(entity1, false, true, true);
         Entity entity2 = new Entity("test", YangInstanceIdentifier.of(QName.create("test", "id2")));
-        doNothing().when(mockListener).ownershipChanged(entity2, true, false);
+        doNothing().when(mockListener).ownershipChanged(entity2, true, false, false);
 
         TestActorRef<EntityOwnershipListenerActor> listenerActor = actorFactory.createTestActor(
                 EntityOwnershipListenerActor.props(mockListener), actorFactory.generateActorId("listener"));
 
-        listenerActor.tell(new EntityOwnershipChanged(entity1, false, true), ActorRef.noSender());
-        listenerActor.tell(new EntityOwnershipChanged(entity2, true, false), ActorRef.noSender());
+        listenerActor.tell(new EntityOwnershipChanged(entity1, false, true, true), ActorRef.noSender());
+        listenerActor.tell(new EntityOwnershipChanged(entity2, true, false, false), ActorRef.noSender());
 
-        verify(mockListener, timeout(5000)).ownershipChanged(entity2, true, false);
+        verify(mockListener, timeout(5000)).ownershipChanged(entity2, true, false, false);
     }
 }
