@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.datastore.entityownership;
 
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
-import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipCandidate;
 import org.opendaylight.controller.md.sal.common.impl.clustering.AbstractEntityOwnershipCandidateRegistration;
 
 /**
@@ -19,21 +18,19 @@ import org.opendaylight.controller.md.sal.common.impl.clustering.AbstractEntityO
 class DistributedEntityOwnershipCandidateRegistration extends AbstractEntityOwnershipCandidateRegistration {
     private final DistributedEntityOwnershipService service;
 
-    DistributedEntityOwnershipCandidateRegistration(EntityOwnershipCandidate candidate, Entity entity,
-            DistributedEntityOwnershipService service) {
-        super(candidate, entity);
+    DistributedEntityOwnershipCandidateRegistration(Entity entity, DistributedEntityOwnershipService service) {
+        super(entity);
         this.service = service;
     }
 
     @Override
     protected void removeRegistration() {
-        service.unregisterCandidate(getEntity(), getInstance());
+        service.unregisterCandidate(getInstance());
     }
 
     @Override
     public String toString() {
-        return "DistributedEntityOwnershipCandidateRegistration [entity=" + getEntity() + ", candidate="
-                + getInstance() + "]";
+        return "DistributedEntityOwnershipCandidateRegistration [entity=" + getInstance() + "]";
     }
 
 

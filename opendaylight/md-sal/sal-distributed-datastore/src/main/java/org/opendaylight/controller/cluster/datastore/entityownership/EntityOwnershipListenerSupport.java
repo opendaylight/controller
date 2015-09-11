@@ -14,10 +14,11 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.Set;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
-import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipCandidate;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipChange;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListener;
 import org.slf4j.Logger;
@@ -34,7 +35,7 @@ class EntityOwnershipListenerSupport {
     private final String logId;
     private final ActorContext actorContext;
     private final Map<EntityOwnershipListener, ListenerActorRefEntry> listenerActorMap = new IdentityHashMap<>();
-    private final Multimap<Entity, EntityOwnershipListener> entityListenerMap = HashMultimap.create();
+    private final Set<Entity> entitiesWithCandidateSet = new HashSet<>();
     private final Multimap<String, EntityOwnershipListener> entityTypeListenerMap = HashMultimap.create();
 
     EntityOwnershipListenerSupport(ActorContext actorContext, String logId) {
@@ -47,31 +48,21 @@ class EntityOwnershipListenerSupport {
     }
 
     boolean hasCandidateForEntity(Entity entity) {
-        for(EntityOwnershipListener listener: entityListenerMap.get(entity)) {
-            if(listener instanceof EntityOwnershipCandidate) {
-                return true;
-            }
-        }
-
-        return false;
+        return entitiesWithCandidateSet.contains(entity);
     }
 
-    void addEntityOwnershipListener(Entity entity, EntityOwnershipListener listener) {
-        LOG.debug("{}: Adding EntityOwnershipListener {} for {}", logId, listener, entity);
+    void setHasCandidateForEntity(Entity entity) {
+        entitiesWithCandidateSet.add(entity);
+    }
 
-        addListener(listener, entity, entityListenerMap);
+    void unsetHasCandidateForEntity(Entity entity) {
+        entitiesWithCandidateSet.remove(entity);
     }
 
     void addEntityOwnershipListener(String entityType, EntityOwnershipListener listener) {
         LOG.debug("{}: Adding EntityOwnershipListener {} for entity type {}", logId, listener, entityType);
 
         addListener(listener, entityType, entityTypeListenerMap);
-    }
-
-    void removeEntityOwnershipListener(Entity entity, EntityOwnershipListener listener) {
-        LOG.debug("{}: Removing EntityOwnershipListener {} for {}", logId, listener, entity);
-
-        removeListener(listener, entity, entityListenerMap);
     }
 
     void removeEntityOwnershipListener(String entityType, EntityOwnershipListener listener) {
@@ -81,7 +72,6 @@ class EntityOwnershipListenerSupport {
     }
 
     void notifyEntityOwnershipListeners(Entity entity, boolean wasOwner, boolean isOwner, boolean hasOwner) {
-        notifyListeners(entity, entity, wasOwner, isOwner, hasOwner, entityListenerMap);
         notifyListeners(entity, entity.getType(), wasOwner, isOwner, hasOwner, entityTypeListenerMap);
     }
 

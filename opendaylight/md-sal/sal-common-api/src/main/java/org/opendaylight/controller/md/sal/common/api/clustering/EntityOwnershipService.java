@@ -28,17 +28,14 @@ public interface EntityOwnershipService {
      * per process. If multiple requests for registering a candidate for a given entity are received in the
      * current process a CandidateAlreadyRegisteredException will be thrown.
      * <p>
-     * The registration is performed asynchronously and the {@link EntityOwnershipCandidate} instance is
-     * notified whenever its process instance is granted ownership of the entity and also whenever it loses
-     * ownership. Note that the {@link EntityOwnershipCandidate} is not notified when another process instance
-     * is granted ownership.
+     * The registration is performed asynchronously and any registered {@link EntityOwnershipListener} is
+     * notified of ownership status changes for the entity.
      *
      * @param entity the entity which the Candidate wants to own
-     * @param candidate the Candidate that wants to own the entity
      * @return a registration object that can be used to unregister the Candidate
      * @throws org.opendaylight.controller.md.sal.common.api.clustering.CandidateAlreadyRegisteredException
      */
-    EntityOwnershipCandidateRegistration registerCandidate(@Nonnull Entity entity, @Nonnull EntityOwnershipCandidate candidate)
+    EntityOwnershipCandidateRegistration registerCandidate(@Nonnull Entity entity)
             throws CandidateAlreadyRegisteredException;
 
     /**

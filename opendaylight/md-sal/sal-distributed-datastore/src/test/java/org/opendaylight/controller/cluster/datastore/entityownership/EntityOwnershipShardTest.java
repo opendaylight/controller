@@ -66,7 +66,6 @@ import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
-import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipCandidate;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipChange;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListener;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -113,14 +112,12 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
 
         YangInstanceIdentifier entityId = ENTITY_ID1;
         Entity entity = new Entity(ENTITY_TYPE, entityId);
-        EntityOwnershipCandidate candidate = mock(EntityOwnershipCandidate.class);
 
-        shard.tell(new RegisterCandidateLocal(candidate, entity), kit.getRef());
+        shard.tell(new RegisterCandidateLocal(entity), kit.getRef());
         kit.expectMsgClass(SuccessReply.class);
 
         verifyCommittedEntityCandidate(shard, ENTITY_TYPE, entityId, LOCAL_MEMBER_NAME);
         verifyOwner(shard, ENTITY_TYPE, entityId, LOCAL_MEMBER_NAME);
-        verify(candidate, timeout(5000)).ownershipChanged(ownershipChange(entity, false, true, true));
     }
 
     @Test
@@ -139,19 +136,15 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
 
         YangInstanceIdentifier entityId = ENTITY_ID1;
         Entity entity = new Entity(ENTITY_TYPE, entityId);
-        EntityOwnershipCandidate candidate = mock(EntityOwnershipCandidate.class);
 
-        shard.tell(new RegisterCandidateLocal(candidate, entity), kit.getRef());
+        shard.tell(new RegisterCandidateLocal(entity), kit.getRef());
         kit.expectMsgClass(SuccessReply.class);
 
         // Now grant the vote so the shard becomes the leader. This should retry the commit.
         peer.underlyingActor().grantVote = true;
 
         verifyCommittedEntityCandidate(shard, ENTITY_TYPE, entityId, LOCAL_MEMBER_NAME);
-
         verifyOwner(shard, ENTITY_TYPE, entityId, LOCAL_MEMBER_NAME);
-
-        verify(candidate, timeout(5000)).ownershipChanged(ownershipChange(entity, false, true, true));
     }
 
     @Test
@@ -178,9 +171,8 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
 
         YangInstanceIdentifier entityId = ENTITY_ID1;
         Entity entity = new Entity(ENTITY_TYPE, entityId);
-        EntityOwnershipCandidate candidate = mock(EntityOwnershipCandidate.class);
 
-        shard.tell(new RegisterCandidateLocal(candidate, entity), kit.getRef());
+        shard.tell(new RegisterCandidateLocal(entity), kit.getRef());
         kit.expectMsgClass(SuccessReply.class);
 
         // Wait enough time for the commit to timeout.
@@ -191,10 +183,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         follower.dropAppendEntries = false;
 
         verifyCommittedEntityCandidate(shard, ENTITY_TYPE, entityId, LOCAL_MEMBER_NAME);
-
         verifyOwner(shard, ENTITY_TYPE, entityId, LOCAL_MEMBER_NAME);
-
-        verify(candidate, timeout(5000)).ownershipChanged(ownershipChange(entity, false, true, true));
     }
 
     @Test
@@ -222,18 +211,14 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
 
         YangInstanceIdentifier entityId = ENTITY_ID1;
         Entity entity = new Entity(ENTITY_TYPE, entityId);
-        EntityOwnershipCandidate candidate = mock(EntityOwnershipCandidate.class);
 
-        shard.tell(new RegisterCandidateLocal(candidate, entity), kit.getRef());
+        shard.tell(new RegisterCandidateLocal(entity), kit.getRef());
         kit.expectMsgClass(SuccessReply.class);
 
         // Resume AppendEntries - the candidate write should now be committed.
         follower.dropAppendEntries = false;
         verifyCommittedEntityCandidate(shard, ENTITY_TYPE, entityId, LOCAL_MEMBER_NAME);
-
         verifyOwner(shard, ENTITY_TYPE, entityId, LOCAL_MEMBER_NAME);
-
-        verify(candidate, timeout(5000)).ownershipChanged(ownershipChange(entity, false, true, true));
     }
 
     @Test
@@ -255,9 +240,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         shard.tell(new AppendEntries(1L, peerId, -1L, -1L, Collections.<ReplicatedLogEntry>emptyList(), -1L, -1L,
                 DataStoreVersions.CURRENT_VERSION), peer);
 
-        EntityOwnershipCandidate candidate = mock(EntityOwnershipCandidate.class);
-
-        shard.tell(new RegisterCandidateLocal(candidate, new Entity(ENTITY_TYPE, ENTITY_ID1)), kit.getRef());
+        shard.tell(new RegisterCandidateLocal(new Entity(ENTITY_TYPE, ENTITY_ID1)), kit.getRef());
         kit.expectMsgClass(SuccessReply.class);
 
         MockLeader leader = peer.underlyingActor();
@@ -273,7 +256,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
 
         shard.tell(dataStoreContextBuilder.shardTransactionCommitTimeoutInSeconds(1).build(), ActorRef.noSender());
 
-        shard.tell(new RegisterCandidateLocal(candidate, new Entity(ENTITY_TYPE, ENTITY_ID2)), kit.getRef());
+        shard.tell(new RegisterCandidateLocal(new Entity(ENTITY_TYPE, ENTITY_ID2)), kit.getRef());
         kit.expectMsgClass(SuccessReply.class);
 
         assertEquals("Leader received BatchedModifications", true, Uninterruptibles.awaitUninterruptibly(
@@ -290,7 +273,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         for(int i = 1; i <= max; i++) {
             YangInstanceIdentifier id = YangInstanceIdentifier.of(QName.create("test", "2015-08-14", "test" + i));
             entityIds.add(id);
-            shard.tell(new RegisterCandidateLocal(candidate, new Entity(ENTITY_TYPE, id)), kit.getRef());
+            shard.tell(new RegisterCandidateLocal(new Entity(ENTITY_TYPE, id)), kit.getRef());
         }
 
         assertEquals("Leader received BatchedModifications", true, Uninterruptibles.awaitUninterruptibly(
@@ -315,35 +298,29 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         kit.waitUntilLeader(shard);
 
         Entity entity = new Entity(ENTITY_TYPE, ENTITY_ID1);
-        EntityOwnershipCandidate candidate = mock(EntityOwnershipCandidate.class);
 
         // Register
 
-        shard.tell(new RegisterCandidateLocal(candidate, entity), kit.getRef());
+        shard.tell(new RegisterCandidateLocal(entity), kit.getRef());
         kit.expectMsgClass(SuccessReply.class);
 
         verifyCommittedEntityCandidate(shard, ENTITY_TYPE, ENTITY_ID1, LOCAL_MEMBER_NAME);
         verifyOwner(shard, ENTITY_TYPE, ENTITY_ID1, LOCAL_MEMBER_NAME);
-        verify(candidate, timeout(5000)).ownershipChanged(ownershipChange(entity, false, true, true));
 
         // Unregister
 
-        reset(candidate);
-
-        shard.tell(new UnregisterCandidateLocal(candidate, entity), kit.getRef());
+        shard.tell(new UnregisterCandidateLocal(entity), kit.getRef());
         kit.expectMsgClass(SuccessReply.class);
 
         verifyOwner(shard, ENTITY_TYPE, ENTITY_ID1, "");
-        //verify(candidate).ownershipChanged(entity, true, false, false);
 
         // Register again
 
-        shard.tell(new RegisterCandidateLocal(candidate, entity), kit.getRef());
+        shard.tell(new RegisterCandidateLocal(entity), kit.getRef());
         kit.expectMsgClass(SuccessReply.class);
 
         verifyCommittedEntityCandidate(shard, ENTITY_TYPE, ENTITY_ID1, LOCAL_MEMBER_NAME);
         verifyOwner(shard, ENTITY_TYPE, ENTITY_ID1, LOCAL_MEMBER_NAME);
-        verify(candidate, timeout(5000)).ownershipChanged(ownershipChange(entity, false, true, true));
     }
 
     @Test
@@ -353,7 +330,6 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         kit.waitUntilLeader(shard);
 
         Entity entity = new Entity(ENTITY_TYPE, ENTITY_ID1);
-        EntityOwnershipCandidate candidate = mock(EntityOwnershipCandidate.class);
         ShardDataTree shardDataTree = shard.underlyingActor().getDataStore();
 
         // Add a remote candidate
@@ -363,7 +339,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
 
         // Register local
 
-        shard.tell(new RegisterCandidateLocal(candidate, entity), kit.getRef());
+        shard.tell(new RegisterCandidateLocal(entity), kit.getRef());
         kit.expectMsgClass(SuccessReply.class);
 
         // Verify the remote candidate becomes owner
@@ -371,51 +347,42 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         verifyCommittedEntityCandidate(shard, ENTITY_TYPE, ENTITY_ID1, remoteMemberName1);
         verifyCommittedEntityCandidate(shard, ENTITY_TYPE, ENTITY_ID1, LOCAL_MEMBER_NAME);
         verifyOwner(shard, ENTITY_TYPE, ENTITY_ID1, remoteMemberName1);
-        verify(candidate, never()).ownershipChanged(any(EntityOwnershipChange.class));
 
         // Add another remote candidate and verify ownership doesn't change
 
-        reset(candidate);
         String remoteMemberName2 = "remoteMember2";
         writeNode(ENTITY_OWNERS_PATH, entityOwnersWithCandidate(ENTITY_TYPE, ENTITY_ID1, remoteMemberName2), shardDataTree);
 
         verifyCommittedEntityCandidate(shard, ENTITY_TYPE, ENTITY_ID1, remoteMemberName2);
         Uninterruptibles.sleepUninterruptibly(500, TimeUnit.MILLISECONDS);
         verifyOwner(shard, ENTITY_TYPE, ENTITY_ID1, remoteMemberName1);
-        verify(candidate, never()).ownershipChanged(any(EntityOwnershipChange.class));
 
         // Remove the second remote candidate and verify ownership doesn't change
 
-        reset(candidate);
         deleteNode(candidatePath(ENTITY_TYPE, ENTITY_ID1, remoteMemberName2), shardDataTree);
 
         verifyEntityCandidateRemoved(shard, ENTITY_TYPE, ENTITY_ID1, remoteMemberName2);
         Uninterruptibles.sleepUninterruptibly(500, TimeUnit.MILLISECONDS);
         verifyOwner(shard, ENTITY_TYPE, ENTITY_ID1, remoteMemberName1);
-        verify(candidate, never()).ownershipChanged(any(EntityOwnershipChange.class));
 
         // Remove the first remote candidate and verify the local candidate becomes owner
 
-        reset(candidate);
         deleteNode(candidatePath(ENTITY_TYPE, ENTITY_ID1, remoteMemberName1), shardDataTree);
 
         verifyEntityCandidateRemoved(shard, ENTITY_TYPE, ENTITY_ID1, remoteMemberName1);
         verifyOwner(shard, ENTITY_TYPE, ENTITY_ID1, LOCAL_MEMBER_NAME);
-        verify(candidate, timeout(5000)).ownershipChanged(ownershipChange(entity, false, true, true));
 
         // Add the second remote candidate back and verify ownership doesn't change
 
-        reset(candidate);
         writeNode(ENTITY_OWNERS_PATH, entityOwnersWithCandidate(ENTITY_TYPE, ENTITY_ID1, remoteMemberName2), shardDataTree);
 
         verifyCommittedEntityCandidate(shard, ENTITY_TYPE, ENTITY_ID1, remoteMemberName2);
         Uninterruptibles.sleepUninterruptibly(500, TimeUnit.MILLISECONDS);
         verifyOwner(shard, ENTITY_TYPE, ENTITY_ID1, LOCAL_MEMBER_NAME);
-        verify(candidate, never()).ownershipChanged(any(EntityOwnershipChange.class));
 
         // Unregister the local candidate and verify the second remote candidate becomes owner
 
-        shard.tell(new UnregisterCandidateLocal(candidate, entity), kit.getRef());
+        shard.tell(new UnregisterCandidateLocal(entity), kit.getRef());
         kit.expectMsgClass(SuccessReply.class);
 
         verifyEntityCandidateRemoved(shard, ENTITY_TYPE, ENTITY_ID1, LOCAL_MEMBER_NAME);
@@ -451,8 +418,6 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
 
         kit.waitUntilLeader(leader);
 
-        EntityOwnershipCandidate candidate = mock(EntityOwnershipCandidate.class);
-
         // Send PeerDown and PeerUp with no entities
 
         leader.tell(new PeerDown(peerMemberName2, peerId2.toString()), ActorRef.noSender());
@@ -460,7 +425,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
 
         // Add candidates for entity1 with the local leader as the owner
 
-        leader.tell(new RegisterCandidateLocal(candidate, new Entity(ENTITY_TYPE, ENTITY_ID1)), kit.getRef());
+        leader.tell(new RegisterCandidateLocal(new Entity(ENTITY_TYPE, ENTITY_ID1)), kit.getRef());
         kit.expectMsgClass(SuccessReply.class);
         verifyCommittedEntityCandidate(leader, ENTITY_TYPE, ENTITY_ID1, LOCAL_MEMBER_NAME);
 
@@ -485,7 +450,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         commitModification(leader, entityOwnersWithCandidate(ENTITY_TYPE, ENTITY_ID3, peerMemberName2), kit);
         verifyCommittedEntityCandidate(leader, ENTITY_TYPE, ENTITY_ID3, peerMemberName2);
 
-        leader.tell(new RegisterCandidateLocal(candidate, new Entity(ENTITY_TYPE, ENTITY_ID3)), kit.getRef());
+        leader.tell(new RegisterCandidateLocal(new Entity(ENTITY_TYPE, ENTITY_ID3)), kit.getRef());
         kit.expectMsgClass(SuccessReply.class);
         verifyCommittedEntityCandidate(leader, ENTITY_TYPE, ENTITY_ID3, LOCAL_MEMBER_NAME);
 
@@ -630,31 +595,34 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         shard.tell(new PeerAddressResolved(leaderId.toString(), leader.path().toString()), ActorRef.noSender());
 
         Entity entity = new Entity(ENTITY_TYPE, ENTITY_ID1);
-        EntityOwnershipCandidate candidate = mock(EntityOwnershipCandidate.class);
+        EntityOwnershipListener listener = mock(EntityOwnershipListener.class);
+
+        shard.tell(new RegisterListenerLocal(listener, ENTITY_TYPE), kit.getRef());
+        kit.expectMsgClass(SuccessReply.class);
 
         // Register local candidate
 
-        shard.tell(new RegisterCandidateLocal(candidate, entity), kit.getRef());
+        shard.tell(new RegisterCandidateLocal(entity), kit.getRef());
         kit.expectMsgClass(SuccessReply.class);
         verifyCommittedEntityCandidate(shard, entity.getType(), entity.getId(), LOCAL_MEMBER_NAME);
-        verify(candidate, timeout(5000)).ownershipChanged(ownershipChange(entity, false, true, true));
-        reset(candidate);
+        verify(listener, timeout(5000)).ownershipChanged(ownershipChange(entity, false, true, true));
+        reset(listener);
 
         // Simulate a replicated commit from the leader to remove the local candidate that would occur after a
         // network partition is healed.
 
         leader.tell(new PeerDown(LOCAL_MEMBER_NAME, localId.toString()), ActorRef.noSender());
 
-        verify(candidate, timeout(5000)).ownershipChanged(ownershipChange(entity, true, false, false));
+        verify(listener, timeout(5000)).ownershipChanged(ownershipChange(entity, true, false, false));
 
         // Since the the shard has a local candidate registered, it should re-add its candidate to the entity.
 
         verifyCommittedEntityCandidate(shard, entity.getType(), entity.getId(), LOCAL_MEMBER_NAME);
-        verify(candidate, timeout(5000)).ownershipChanged(ownershipChange(entity, false, true, true));
+        verify(listener, timeout(5000)).ownershipChanged(ownershipChange(entity, false, true, true));
 
         // Unregister the local candidate and verify it's removed and no re-added.
 
-        shard.tell(new UnregisterCandidateLocal(candidate, entity), kit.getRef());
+        shard.tell(new UnregisterCandidateLocal(entity), kit.getRef());
         kit.expectMsgClass(SuccessReply.class);
 
         verifyNoEntityCandidate(shard, entity.getType(), entity.getId(), LOCAL_MEMBER_NAME);
@@ -675,7 +643,6 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         Entity entity3 = new Entity(ENTITY_TYPE, ENTITY_ID3);
         Entity entity4 = new Entity(otherEntityType, ENTITY_ID3);
         EntityOwnershipListener listener = mock(EntityOwnershipListener.class);
-        EntityOwnershipCandidate candidate = mock(EntityOwnershipCandidate.class);
 
         // Register listener
 
@@ -684,12 +651,12 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
 
         // Register a couple candidates for the desired entity type and verify listener is notified.
 
-        shard.tell(new RegisterCandidateLocal(candidate, entity1), kit.getRef());
+        shard.tell(new RegisterCandidateLocal(entity1), kit.getRef());
         kit.expectMsgClass(SuccessReply.class);
 
         verify(listener, timeout(5000)).ownershipChanged(ownershipChange(entity1, false, true, true));
 
-        shard.tell(new RegisterCandidateLocal(candidate, entity2), kit.getRef());
+        shard.tell(new RegisterCandidateLocal(entity2), kit.getRef());
         kit.expectMsgClass(SuccessReply.class);
 
         verify(listener, timeout(5000)).ownershipChanged(ownershipChange(entity2, false, true, true));
@@ -697,7 +664,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
 
         // Register another candidate for another entity type and verify listener is not notified.
 
-        shard.tell(new RegisterCandidateLocal(candidate, entity4), kit.getRef());
+        shard.tell(new RegisterCandidateLocal(entity4), kit.getRef());
         kit.expectMsgClass(SuccessReply.class);
 
         Uninterruptibles.sleepUninterruptibly(500, TimeUnit.MILLISECONDS);
@@ -712,7 +679,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
 
         // Unregister the local candidate for entity1 and verify listener is notified
 
-        shard.tell(new UnregisterCandidateLocal(candidate, entity1), kit.getRef());
+        shard.tell(new UnregisterCandidateLocal(entity1), kit.getRef());
         kit.expectMsgClass(SuccessReply.class);
 
         verify(listener, timeout(5000)).ownershipChanged(ownershipChange(entity1, true, false, true));
@@ -723,7 +690,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         shard.tell(new UnregisterListenerLocal(listener, ENTITY_TYPE), kit.getRef());
         kit.expectMsgClass(SuccessReply.class);
 
-        shard.tell(new RegisterCandidateLocal(candidate, entity3), kit.getRef());
+        shard.tell(new RegisterCandidateLocal(entity3), kit.getRef());
         kit.expectMsgClass(SuccessReply.class);
 
         verifyOwner(shard, ENTITY_TYPE, entity3.getId(), LOCAL_MEMBER_NAME);
@@ -732,7 +699,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
 
         // Re-register the listener and verify it gets notified of currently owned entities
 
-        reset(listener, candidate);
+        reset(listener);
 
         shard.tell(new RegisterListenerLocal(listener, ENTITY_TYPE), kit.getRef());
         kit.expectMsgClass(SuccessReply.class);
@@ -742,8 +709,6 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         Uninterruptibles.sleepUninterruptibly(300, TimeUnit.MILLISECONDS);
         verify(listener, never()).ownershipChanged(ownershipChange(entity4));
         verify(listener, never()).ownershipChanged(ownershipChange(entity1));
-        verify(candidate, never()).ownershipChanged(ownershipChange(entity2));
-        verify(candidate, never()).ownershipChanged(ownershipChange(entity3));
     }
 
     private void commitModification(TestActorRef<EntityOwnershipShard> shard, NormalizedNode<?, ?> node,
