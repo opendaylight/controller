@@ -16,6 +16,24 @@
       "revId": "04b725d6a5a4b5b1819075fd6eb0c2c1394c07da",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_faca1d6d",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/clustering/EntityOwnershipListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-09-11T20:29:56Z",
+      "side": 1,
+      "message": "Good idea. I\u0027ll have to change all the unit tests but that\u0027s fine.",
+      "parentUuid": "3a79b1b5_5a2eb144",
+      "revId": "04b725d6a5a4b5b1819075fd6eb0c2c1394c07da",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
