@@ -19,15 +19,11 @@ public class CandidateAlreadyRegisteredException extends Exception {
     private static final long serialVersionUID = 1L;
 
     private final Entity entity;
-    private final EntityOwnershipCandidate registeredCandidate;
 
-    public CandidateAlreadyRegisteredException(@Nonnull Entity entity,
-                                               @Nonnull EntityOwnershipCandidate registeredCandidate) {
-        super(String.format("Candidate %s has already been registered for %s",
-                Preconditions.checkNotNull(registeredCandidate, "registeredCandidate should not be null"),
+    public CandidateAlreadyRegisteredException(@Nonnull Entity entity) {
+        super(String.format("Candidate has already been registered for %s",
                 Preconditions.checkNotNull(entity, "entity should not be null")));
         this.entity = entity;
-        this.registeredCandidate = registeredCandidate;
     }
 
     /**
@@ -37,14 +33,5 @@ public class CandidateAlreadyRegisteredException extends Exception {
     @Nonnull
     public Entity getEntity() {
         return entity;
-    }
-
-    /**
-     *
-     * @return the currently registered candidate
-     */
-    @Nonnull
-    public EntityOwnershipCandidate getRegisteredCandidate() {
-        return registeredCandidate;
     }
 }
