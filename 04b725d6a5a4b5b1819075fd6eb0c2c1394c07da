@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a79b1b5_5a2eb144",
+        "filename": "opendaylight/md-sal/sal-common-api/src/main/java/org/opendaylight/controller/md/sal/common/api/clustering/EntityOwnershipListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-09-11T20:12:20Z",
+      "side": 1,
+      "message": "What are your thoughts on changing this interface as follows,\n\nvoid ownershipChanged(OwnershipChange change);\n\nwhere the entity, was, is and has owner are attributes of the OwnershipChange. This way we can add more attributes over time.",
+      "revId": "04b725d6a5a4b5b1819075fd6eb0c2c1394c07da",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
