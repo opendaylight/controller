@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.datastore.entityownership.messages;
 
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
-import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipCandidate;
 
 /**
  * Message sent to the local EntityOwnershipShard to register a candidate.
@@ -16,16 +15,10 @@ import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipC
  * @author Thomas Pantelis
  */
 public class RegisterCandidateLocal {
-    private final EntityOwnershipCandidate candidate;
     private final Entity entity;
 
-    public RegisterCandidateLocal(EntityOwnershipCandidate candidate, Entity entity) {
-        this.candidate = candidate;
+    public RegisterCandidateLocal(Entity entity) {
         this.entity = entity;
-    }
-
-    public EntityOwnershipCandidate getCandidate() {
-        return candidate;
     }
 
     public Entity getEntity() {
@@ -34,9 +27,6 @@ public class RegisterCandidateLocal {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("RegisterCandidateLocal [entity=").append(entity).append(", candidate=").append(candidate)
-                .append("]");
-        return builder.toString();
+        return "RegisterCandidateLocal [entity=" + entity + "]";
     }
 }

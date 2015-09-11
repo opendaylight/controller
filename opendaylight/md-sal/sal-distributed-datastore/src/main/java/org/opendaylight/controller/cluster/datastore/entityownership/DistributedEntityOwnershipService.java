@@ -27,7 +27,6 @@ import org.opendaylight.controller.cluster.datastore.messages.CreateShard;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ModuleShardStrategy;
 import org.opendaylight.controller.md.sal.common.api.clustering.CandidateAlreadyRegisteredException;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
-import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipCandidate;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipCandidateRegistration;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListener;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListenerRegistration;
@@ -48,7 +47,7 @@ public class DistributedEntityOwnershipService implements EntityOwnershipService
     private static final Timeout MESSAGE_TIMEOUT = new Timeout(1, TimeUnit.MINUTES);
 
     private final DistributedDataStore datastore;
-    private final ConcurrentMap<Entity, EntityOwnershipCandidate> registeredEntities = new ConcurrentHashMap<>();
+    private final ConcurrentMap<Entity, Entity> registeredEntities = new ConcurrentHashMap<>();
     private volatile ActorRef localEntityOwnershipShard;
 
     public DistributedEntityOwnershipService(DistributedDataStore datastore) {
@@ -114,28 +113,26 @@ public class DistributedEntityOwnershipService implements EntityOwnershipService
     }
 
     @Override
-    public EntityOwnershipCandidateRegistration registerCandidate(Entity entity, EntityOwnershipCandidate candidate)
+    public EntityOwnershipCandidateRegistration registerCandidate(Entity entity)
             throws CandidateAlreadyRegisteredException {
         Preconditions.checkNotNull(entity, "entity cannot be null");
-        Preconditions.checkNotNull(candidate, "candidate cannot be null");
 
-        EntityOwnershipCandidate currentCandidate = registeredEntities.putIfAbsent(entity, candidate);
-        if(currentCandidate != null) {
-            throw new CandidateAlreadyRegisteredException(entity, currentCandidate);
+        if(registeredEntities.putIfAbsent(entity, entity) != null) {
+            throw new CandidateAlreadyRegisteredException(entity);
         }
 
-        RegisterCandidateLocal registerCandidate = new RegisterCandidateLocal(candidate, entity);
+        RegisterCandidateLocal registerCandidate = new RegisterCandidateLocal(entity);
 
         LOG.debug("Registering candidate with message: {}", registerCandidate);
 
         executeLocalEntityOwnershipShardOperation(registerCandidate);
-        return new DistributedEntityOwnershipCandidateRegistration(candidate, entity, this);
+        return new DistributedEntityOwnershipCandidateRegistration(entity, this);
     }
 
-    void unregisterCandidate(Entity entity, EntityOwnershipCandidate entityOwnershipCandidate) {
-        LOG.debug("Unregistering candidate {} for {}", entityOwnershipCandidate, entity);
+    void unregisterCandidate(Entity entity) {
+        LOG.debug("Unregistering candidate for {}", entity);
 
-        executeLocalEntityOwnershipShardOperation(new UnregisterCandidateLocal(entityOwnershipCandidate, entity));
+        executeLocalEntityOwnershipShardOperation(new UnregisterCandidateLocal(entity));
         registeredEntities.remove(entity);
     }
 

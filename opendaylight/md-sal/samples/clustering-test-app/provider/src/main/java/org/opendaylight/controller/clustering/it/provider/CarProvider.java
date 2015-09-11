@@ -12,13 +12,14 @@ import com.google.common.util.concurrent.Futures;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.clustering.CandidateAlreadyRegisteredException;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
-import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipCandidate;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipChange;
+import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListener;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
@@ -50,9 +51,8 @@ public class CarProvider implements CarService {
 
     private static final String ENTITY_TYPE = "cars";
 
-
-    private final CarEntityOwnershipCandidate ownershipCandidate = new CarEntityOwnershipCandidate();
-
+    private final CarEntityOwnershipListener ownershipListener = new CarEntityOwnershipListener();
+    private final AtomicBoolean registeredListener = new AtomicBoolean();
 
     private volatile Thread testThread;
     private volatile boolean stopThread;
@@ -156,9 +156,13 @@ public class CarProvider implements CarService {
 
     @Override
     public Future<RpcResult<Void>> registerOwnership(RegisterOwnershipInput input) {
+        if(registeredListener.compareAndSet(false, true)) {
+            ownershipService.registerListener(ENTITY_TYPE, ownershipListener);
+        }
+
         Entity entity = new Entity(ENTITY_TYPE, input.getCarId());
         try {
-            ownershipService.registerCandidate(entity, ownershipCandidate);
+            ownershipService.registerCandidate(entity);
         } catch (CandidateAlreadyRegisteredException e) {
             return RpcResultBuilder.<Void>failed().withError(ErrorType.APPLICATION,
                     "Could not register for car " + input.getCarId(), e).buildFuture();
@@ -172,7 +176,7 @@ public class CarProvider implements CarService {
         return RpcResultBuilder.<Void>success().buildFuture();
     }
 
-    private static class CarEntityOwnershipCandidate implements EntityOwnershipCandidate {
+    private static class CarEntityOwnershipListener implements EntityOwnershipListener {
         @Override
         public void ownershipChanged(EntityOwnershipChange ownershipChange) {
             LOG.info("ownershipChanged: {}", ownershipChange);
