@@ -110,7 +110,7 @@
     </feature>
     <feature name='odl-clustering-test-app' version='${project.version}'>
         <feature version='${yangtools.version}'>odl-yangtools-models</feature>
-        <feature version='${project.version}'>odl-mdsal-broker-local</feature>
+        <feature version='${project.version}'>odl-mdsal-broker</feature>
         <bundle>mvn:org.opendaylight.controller.samples/clustering-it-model/${project.version}</bundle>
         <bundle>mvn:org.opendaylight.controller.samples/clustering-it-provider/${project.version}</bundle>
         <configfile finalname="${config.configfile.directory}/20-clustering-test-app.xml">mvn:org.opendaylight.controller.samples/clustering-it-config/${project.version}/xml/config</configfile>
