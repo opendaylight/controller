@@ -8,12 +8,10 @@
 package org.opendaylight.controller.cluster.datastore.entityownership;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
+import static org.opendaylight.controller.cluster.datastore.entityownership.AbstractEntityOwnershipTest.ownershipChange;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.CANDIDATE_NAME_NODE_ID;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.entityPath;
 import akka.actor.ActorSystem;
@@ -94,6 +92,18 @@ public class DistributedEntityOwnershipIntegrationTest {
     @Mock
     private EntityOwnershipCandidate follower2MockCandidate;
 
+    @Mock
+    private EntityOwnershipCandidate leaderMockListener;
+
+    @Mock
+    private EntityOwnershipCandidate leaderMockListener2;
+
+    @Mock
+    private EntityOwnershipCandidate follower1MockListener;
+
+    @Mock
+    private EntityOwnershipCandidate follower2MockListener;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -149,54 +159,71 @@ public class DistributedEntityOwnershipIntegrationTest {
     public void test() throws Exception {
         initDatastores("test");
 
+        leaderEntityOwnershipService.registerListener(ENTITY_TYPE1, leaderMockListener);
+        leaderEntityOwnershipService.registerListener(ENTITY_TYPE2, leaderMockListener2);
+        follower1EntityOwnershipService.registerListener(ENTITY_TYPE1, follower1MockListener);
+
         // Register leader candidate for entity1 and verify it becomes owner
 
         leaderEntityOwnershipService.registerCandidate(ENTITY1, leaderMockCandidate);
-        verify(leaderMockCandidate, timeout(5000)).ownershipChanged(ENTITY1, false, true);
-        reset(leaderMockCandidate);
+        verify(leaderMockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY1, false, true, true));
+        verify(follower1MockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY1, false, false, true));
+        reset(leaderMockListener, follower1MockListener);
 
         // Register leader candidate for entity1_2 (same id, different type) and verify it becomes owner
 
         leaderEntityOwnershipService.registerCandidate(ENTITY1_2, leaderMockCandidate);
-        verify(leaderMockCandidate, timeout(5000)).ownershipChanged(ENTITY1_2, false, true);
-        reset(leaderMockCandidate);
+        verify(leaderMockListener2, timeout(5000)).ownershipChanged(ownershipChange(ENTITY1_2, false, true, true));
+        verify(leaderMockListener, timeout(300).never()).ownershipChanged(ownershipChange(ENTITY1_2));
+        reset(leaderMockListener2);
 
         // Register follower1 candidate for entity1 and verify it gets added but doesn't become owner
 
         follower1EntityOwnershipService.registerCandidate(ENTITY1, follower1MockCandidate);
         verifyCandidates(leaderDistributedDataStore, ENTITY1, "member-1", "member-2");
         verifyOwner(leaderDistributedDataStore, ENTITY1, "member-1");
-        verify(follower1MockCandidate, never()).ownershipChanged(any(Entity.class), anyBoolean(), anyBoolean());
+        verify(leaderMockListener, timeout(300).never()).ownershipChanged(ownershipChange(ENTITY1));
+        verify(follower1MockListener, timeout(300).never()).ownershipChanged(ownershipChange(ENTITY1));
 
         // Register follower1 candidate for entity2 and verify it becomes owner
 
         follower1EntityOwnershipService.registerCandidate(ENTITY2, follower1MockCandidate);
-        verify(follower1MockCandidate, timeout(5000)).ownershipChanged(ENTITY2, false, true);
-        reset(follower1MockCandidate);
+        verify(follower1MockCandidate, timeout(5000)).ownershipChanged(ownershipChange(ENTITY2, false, true, true));
+        verify(leaderMockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY2, false, false, true));
+        reset(leaderMockListener, follower1MockListener);
 
         // Register follower2 candidate for entity2 and verify it gets added but doesn't become owner
 
+        follower2EntityOwnershipService.registerListener(ENTITY_TYPE1, follower2MockListener);
         follower2EntityOwnershipService.registerCandidate(ENTITY2, follower2MockCandidate);
         verifyCandidates(leaderDistributedDataStore, ENTITY2, "member-2", "member-3");
         verifyOwner(leaderDistributedDataStore, ENTITY2, "member-2");
-        verify(follower2MockCandidate, never()).ownershipChanged(any(Entity.class), anyBoolean(), anyBoolean());
 
         // Unregister follower1 candidate for entity2 and verify follower2 becomes owner
 
         follower1EntityOwnershipService.unregisterCandidate(ENTITY2, follower1MockCandidate);
-        verify(follower2MockCandidate, timeout(5000)).ownershipChanged(ENTITY2, false, true);
+        verifyOwner(leaderDistributedDataStore, ENTITY2, "member-3");
+        verify(follower2MockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY2, false, true, true));
+        verify(follower1MockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY2, true, false, true));
+        verify(leaderMockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY2, false, false, true));
+        verifyCandidates(leaderDistributedDataStore, ENTITY2, "member-3");
 
         // Register follower1 candidate for entity3 and verify it becomes owner
 
         follower1EntityOwnershipService.registerCandidate(ENTITY3, follower1MockCandidate);
-        verify(follower1MockCandidate, timeout(5000)).ownershipChanged(ENTITY3, false, true);
         verifyOwner(leaderDistributedDataStore, ENTITY3, "member-2");
+        verify(follower1MockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY3, false, true, true));
+        verify(follower2MockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY3, false, false, true));
+        verify(leaderMockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY3, false, false, true));
 
         // Register follower2 candidate for entity4 and verify it becomes owner
 
         follower2EntityOwnershipService.registerCandidate(ENTITY4, follower2MockCandidate);
-        verify(follower2MockCandidate, timeout(5000)).ownershipChanged(ENTITY4, false, true);
-        reset(follower2MockCandidate);
+        verifyOwner(leaderDistributedDataStore, ENTITY4, "member-3");
+        verify(follower2MockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY4, false, true, true));
+        verify(follower1MockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY4, false, false, true));
+        verify(leaderMockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY4, false, false, true));
+        reset(follower2MockListener);
 
         // Register follower1 candidate for entity4 and verify it gets added but doesn't become owner
 
@@ -204,26 +231,29 @@ public class DistributedEntityOwnershipIntegrationTest {
         follower1EntityOwnershipService.registerCandidate(ENTITY4, follower1MockCandidate);
         verifyCandidates(leaderDistributedDataStore, ENTITY4, "member-3", "member-2");
         verifyOwner(leaderDistributedDataStore, ENTITY4, "member-3");
-        verify(follower1MockCandidate, never()).ownershipChanged(any(Entity.class), anyBoolean(), anyBoolean());
 
         // Shutdown follower2 and verify it's owned entities (entity 2 & 4) get re-assigned
 
-        reset(follower1MockCandidate);
+        reset(leaderMockListener, follower1MockListener);
         JavaTestKit.shutdownActorSystem(follower2System);
 
-        verify(follower1MockCandidate, timeout(15000)).ownershipChanged(ENTITY4, false, true);
+        verify(follower1MockListener, timeout(15000)).ownershipChanged(ownershipChange(ENTITY4, false, true, true));
+        verify(leaderMockListener, timeout(15000)).ownershipChanged(ownershipChange(ENTITY4, false, false, true));
+        verify(leaderMockListener, timeout(15000)).ownershipChanged(ownershipChange(ENTITY2, false, false, false));
         verifyOwner(leaderDistributedDataStore, ENTITY2, ""); // no other candidate
 
         // Register leader candidate for entity2 and verify it becomes owner
 
         leaderEntityOwnershipService.registerCandidate(ENTITY2, leaderMockCandidate);
-        verify(leaderMockCandidate, timeout(5000)).ownershipChanged(ENTITY2, false, true);
+        verify(leaderMockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY2, false, true, true));
         verifyOwner(leaderDistributedDataStore, ENTITY2, "member-1");
 
         // Unregister leader candidate for entity2 and verify the owner is cleared
 
         leaderEntityOwnershipService.unregisterCandidate(ENTITY2, leaderMockCandidate);
         verifyOwner(leaderDistributedDataStore, ENTITY2, "");
+        verify(leaderMockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY2, true, false, false));
+        verify(follower1MockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY2, false, false, false));
     }
 
     private void verifyCandidates(DistributedDataStore dataStore, Entity entity, String... expCandidates) throws Exception {
