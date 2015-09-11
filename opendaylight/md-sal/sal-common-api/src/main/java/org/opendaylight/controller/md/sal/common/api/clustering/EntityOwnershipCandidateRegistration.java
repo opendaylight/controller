@@ -8,22 +8,16 @@
 
 package org.opendaylight.controller.md.sal.common.api.clustering;
 
-import javax.annotation.Nonnull;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
 
 /**
  * An EntityOwnershipCandidateRegistration records a request to register a Candidate for a given Entity. Calling
  * close on the EntityOwnershipCandidateRegistration will remove the Candidate from any future ownership considerations
- * for that Entity and will also remove it as a Listener for ownership status changes.
+ * for that Entity.
  */
-public interface EntityOwnershipCandidateRegistration extends ObjectRegistration<EntityOwnershipCandidate> {
+public interface EntityOwnershipCandidateRegistration extends ObjectRegistration<Entity> {
    /**
-    * Returns the entity that the listener was registered for
-    */
-    @Nonnull Entity getEntity();
-
-   /**
-    * Unregister the listener
+    * Unregister the candidate
     */
    @Override
    void close();

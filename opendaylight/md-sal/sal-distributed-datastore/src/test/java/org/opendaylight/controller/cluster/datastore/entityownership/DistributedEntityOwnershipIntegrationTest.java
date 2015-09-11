@@ -38,7 +38,7 @@ import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
 import org.opendaylight.controller.cluster.datastore.IntegrationTestKit;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
-import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipCandidate;
+import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListener;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.entity.owners.rev150804.entity.owners.entity.type.entity.Candidate;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
@@ -84,25 +84,16 @@ public class DistributedEntityOwnershipIntegrationTest {
     private IntegrationTestKit follower2TestKit;
 
     @Mock
-    private EntityOwnershipCandidate leaderMockCandidate;
+    private EntityOwnershipListener leaderMockListener;
 
     @Mock
-    private EntityOwnershipCandidate follower1MockCandidate;
+    private EntityOwnershipListener leaderMockListener2;
 
     @Mock
-    private EntityOwnershipCandidate follower2MockCandidate;
+    private EntityOwnershipListener follower1MockListener;
 
     @Mock
-    private EntityOwnershipCandidate leaderMockListener;
-
-    @Mock
-    private EntityOwnershipCandidate leaderMockListener2;
-
-    @Mock
-    private EntityOwnershipCandidate follower1MockListener;
-
-    @Mock
-    private EntityOwnershipCandidate follower2MockListener;
+    private EntityOwnershipListener follower2MockListener;
 
     @Before
     public void setUp() {
@@ -165,21 +156,21 @@ public class DistributedEntityOwnershipIntegrationTest {
 
         // Register leader candidate for entity1 and verify it becomes owner
 
-        leaderEntityOwnershipService.registerCandidate(ENTITY1, leaderMockCandidate);
+        leaderEntityOwnershipService.registerCandidate(ENTITY1);
         verify(leaderMockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY1, false, true, true));
         verify(follower1MockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY1, false, false, true));
         reset(leaderMockListener, follower1MockListener);
 
         // Register leader candidate for entity1_2 (same id, different type) and verify it becomes owner
 
-        leaderEntityOwnershipService.registerCandidate(ENTITY1_2, leaderMockCandidate);
+        leaderEntityOwnershipService.registerCandidate(ENTITY1_2);
         verify(leaderMockListener2, timeout(5000)).ownershipChanged(ownershipChange(ENTITY1_2, false, true, true));
         verify(leaderMockListener, timeout(300).never()).ownershipChanged(ownershipChange(ENTITY1_2));
         reset(leaderMockListener2);
 
         // Register follower1 candidate for entity1 and verify it gets added but doesn't become owner
 
-        follower1EntityOwnershipService.registerCandidate(ENTITY1, follower1MockCandidate);
+        follower1EntityOwnershipService.registerCandidate(ENTITY1);
         verifyCandidates(leaderDistributedDataStore, ENTITY1, "member-1", "member-2");
         verifyOwner(leaderDistributedDataStore, ENTITY1, "member-1");
         verify(leaderMockListener, timeout(300).never()).ownershipChanged(ownershipChange(ENTITY1));
@@ -187,21 +178,21 @@ public class DistributedEntityOwnershipIntegrationTest {
 
         // Register follower1 candidate for entity2 and verify it becomes owner
 
-        follower1EntityOwnershipService.registerCandidate(ENTITY2, follower1MockCandidate);
-        verify(follower1MockCandidate, timeout(5000)).ownershipChanged(ownershipChange(ENTITY2, false, true, true));
+        follower1EntityOwnershipService.registerCandidate(ENTITY2);
+        verify(follower1MockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY2, false, true, true));
         verify(leaderMockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY2, false, false, true));
         reset(leaderMockListener, follower1MockListener);
 
         // Register follower2 candidate for entity2 and verify it gets added but doesn't become owner
 
         follower2EntityOwnershipService.registerListener(ENTITY_TYPE1, follower2MockListener);
-        follower2EntityOwnershipService.registerCandidate(ENTITY2, follower2MockCandidate);
+        follower2EntityOwnershipService.registerCandidate(ENTITY2);
         verifyCandidates(leaderDistributedDataStore, ENTITY2, "member-2", "member-3");
         verifyOwner(leaderDistributedDataStore, ENTITY2, "member-2");
 
         // Unregister follower1 candidate for entity2 and verify follower2 becomes owner
 
-        follower1EntityOwnershipService.unregisterCandidate(ENTITY2, follower1MockCandidate);
+        follower1EntityOwnershipService.unregisterCandidate(ENTITY2);
         verifyOwner(leaderDistributedDataStore, ENTITY2, "member-3");
         verify(follower2MockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY2, false, true, true));
         verify(follower1MockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY2, true, false, true));
@@ -210,7 +201,7 @@ public class DistributedEntityOwnershipIntegrationTest {
 
         // Register follower1 candidate for entity3 and verify it becomes owner
 
-        follower1EntityOwnershipService.registerCandidate(ENTITY3, follower1MockCandidate);
+        follower1EntityOwnershipService.registerCandidate(ENTITY3);
         verifyOwner(leaderDistributedDataStore, ENTITY3, "member-2");
         verify(follower1MockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY3, false, true, true));
         verify(follower2MockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY3, false, false, true));
@@ -218,17 +209,16 @@ public class DistributedEntityOwnershipIntegrationTest {
 
         // Register follower2 candidate for entity4 and verify it becomes owner
 
-        follower2EntityOwnershipService.registerCandidate(ENTITY4, follower2MockCandidate);
+        follower2EntityOwnershipService.registerCandidate(ENTITY4);
         verifyOwner(leaderDistributedDataStore, ENTITY4, "member-3");
         verify(follower2MockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY4, false, true, true));
         verify(follower1MockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY4, false, false, true));
         verify(leaderMockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY4, false, false, true));
-        reset(follower2MockListener);
+        reset(follower1MockListener, follower2MockListener);
 
         // Register follower1 candidate for entity4 and verify it gets added but doesn't become owner
 
-        reset(follower1MockCandidate);
-        follower1EntityOwnershipService.registerCandidate(ENTITY4, follower1MockCandidate);
+        follower1EntityOwnershipService.registerCandidate(ENTITY4);
         verifyCandidates(leaderDistributedDataStore, ENTITY4, "member-3", "member-2");
         verifyOwner(leaderDistributedDataStore, ENTITY4, "member-3");
 
@@ -244,13 +234,13 @@ public class DistributedEntityOwnershipIntegrationTest {
 
         // Register leader candidate for entity2 and verify it becomes owner
 
-        leaderEntityOwnershipService.registerCandidate(ENTITY2, leaderMockCandidate);
+        leaderEntityOwnershipService.registerCandidate(ENTITY2);
         verify(leaderMockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY2, false, true, true));
         verifyOwner(leaderDistributedDataStore, ENTITY2, "member-1");
 
         // Unregister leader candidate for entity2 and verify the owner is cleared
 
-        leaderEntityOwnershipService.unregisterCandidate(ENTITY2, leaderMockCandidate);
+        leaderEntityOwnershipService.unregisterCandidate(ENTITY2);
         verifyOwner(leaderDistributedDataStore, ENTITY2, "");
         verify(leaderMockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY2, true, false, false));
         verify(follower1MockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY2, false, false, false));

@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.datastore.entityownership.messages;
 
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
-import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipCandidate;
 
 /**
  * Message sent to the local EntityOwnershipShard to unregister a candidate.
@@ -16,16 +15,10 @@ import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipC
  * @author Thomas Pantelis
  */
 public class UnregisterCandidateLocal {
-    private final EntityOwnershipCandidate candidate;
     private final Entity entity;
 
-    public UnregisterCandidateLocal(EntityOwnershipCandidate candidate, Entity entity) {
-        this.candidate = candidate;
+    public UnregisterCandidateLocal(Entity entity) {
         this.entity = entity;
-    }
-
-    public EntityOwnershipCandidate getCandidate() {
-        return candidate;
     }
 
     public Entity getEntity() {
@@ -34,6 +27,6 @@ public class UnregisterCandidateLocal {
 
     @Override
     public String toString() {
-        return "UnregisterCandidateLocal [entity=" + entity + ", candidate=" + candidate + "]";
+        return "UnregisterCandidateLocal [entity=" + entity + "]";
     }
 }

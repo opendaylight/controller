@@ -41,7 +41,6 @@ import org.opendaylight.controller.cluster.datastore.utils.MockClusterWrapper;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.controller.md.sal.common.api.clustering.CandidateAlreadyRegisteredException;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
-import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipCandidate;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipCandidateRegistration;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListener;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListenerRegistration;
@@ -118,24 +117,21 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
 
         YangInstanceIdentifier entityId = YangInstanceIdentifier.of(QNAME);
         Entity entity = new Entity(ENTITY_TYPE, entityId);
-        EntityOwnershipCandidate candidate = mock(EntityOwnershipCandidate.class);
 
-        EntityOwnershipCandidateRegistration reg = service.registerCandidate(entity, candidate);
+        EntityOwnershipCandidateRegistration reg = service.registerCandidate(entity);
 
         verifyEntityOwnershipCandidateRegistration(entity, reg);
-        verifyRegisterCandidateLocal(shardPropsCreator, entity, candidate);
+        verifyRegisterCandidateLocal(shardPropsCreator, entity);
         verifyEntityCandidate(service.getLocalEntityOwnershipShard(), ENTITY_TYPE, entityId,
                 dataStore.getActorContext().getCurrentMemberName());
 
         // Register the same entity - should throw exception
 
-        EntityOwnershipCandidate candidate2 = mock(EntityOwnershipCandidate.class);
         try {
-            service.registerCandidate(entity, candidate2);
+            service.registerCandidate(entity);
             fail("Expected CandidateAlreadyRegisteredException");
         } catch(CandidateAlreadyRegisteredException e) {
             // expected
-            assertSame("getCandidate", candidate, e.getRegisteredCandidate());
             assertEquals("getEntity", entity, e.getEntity());
         }
 
@@ -144,10 +140,10 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
         Entity entity2 = new Entity(ENTITY_TYPE2, entityId);
         shardPropsCreator.expectShardMessage(RegisterCandidateLocal.class);
 
-        EntityOwnershipCandidateRegistration reg2 = service.registerCandidate(entity2, candidate);
+        EntityOwnershipCandidateRegistration reg2 = service.registerCandidate(entity2);
 
         verifyEntityOwnershipCandidateRegistration(entity2, reg2);
-        verifyRegisterCandidateLocal(shardPropsCreator, entity2, candidate);
+        verifyRegisterCandidateLocal(shardPropsCreator, entity2);
         verifyEntityCandidate(service.getLocalEntityOwnershipShard(), ENTITY_TYPE2, entityId,
                 dataStore.getActorContext().getCurrentMemberName());
 
@@ -169,12 +165,11 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
         shardPropsCreator.expectShardMessage(RegisterCandidateLocal.class);
 
         Entity entity = new Entity(ENTITY_TYPE, YangInstanceIdentifier.of(QNAME));
-        EntityOwnershipCandidate candidate = mock(EntityOwnershipCandidate.class);
 
-        EntityOwnershipCandidateRegistration reg = service.registerCandidate(entity, candidate);
+        EntityOwnershipCandidateRegistration reg = service.registerCandidate(entity);
 
         verifyEntityOwnershipCandidateRegistration(entity, reg);
-        verifyRegisterCandidateLocal(shardPropsCreator, entity, candidate);
+        verifyRegisterCandidateLocal(shardPropsCreator, entity);
 
         shardPropsCreator.expectShardMessage(UnregisterCandidateLocal.class);
 
@@ -182,15 +177,14 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
 
         UnregisterCandidateLocal unregCandidate = shardPropsCreator.waitForShardMessage();
         assertEquals("getEntity", entity, unregCandidate.getEntity());
-        assertSame("getCandidate", candidate, unregCandidate.getCandidate());
 
         // Re-register - should succeed.
 
         shardPropsCreator.expectShardMessage(RegisterCandidateLocal.class);
 
-        service.registerCandidate(entity, candidate);
+        service.registerCandidate(entity);
 
-        verifyRegisterCandidateLocal(shardPropsCreator, entity, candidate);
+        verifyRegisterCandidateLocal(shardPropsCreator, entity);
 
         service.close();
     }
@@ -249,16 +243,14 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
                 });
     }
 
-    private void verifyRegisterCandidateLocal(final TestShardPropsCreator shardPropsCreator, Entity entity,
-            EntityOwnershipCandidate candidate) {
+    private void verifyRegisterCandidateLocal(final TestShardPropsCreator shardPropsCreator, Entity entity) {
         RegisterCandidateLocal regCandidate = shardPropsCreator.waitForShardMessage();
-        assertSame("getCandidate", candidate, regCandidate.getCandidate());
         assertEquals("getEntity", entity, regCandidate.getEntity());
     }
 
     private void verifyEntityOwnershipCandidateRegistration(Entity entity, EntityOwnershipCandidateRegistration reg) {
         assertNotNull("EntityOwnershipCandidateRegistration null", reg);
-        assertEquals("getEntity", entity, reg.getEntity());
+        assertEquals("getInstance", entity, reg.getInstance());
     }
 
     static class TestShardPropsCreator extends EntityOwnershipShardPropsCreator {
