@@ -41,7 +41,7 @@ class EntityOwnershipListenerActor extends AbstractUntypedActor {
         LOG.debug("Notifying EntityOwnershipListener {}: {}", listener, change);
 
         try {
-            listener.ownershipChanged(change.getEntity(), change.wasOwner(), change.isOwner());
+            listener.ownershipChanged(change.getEntity(), change.wasOwner(), change.isOwner(), change.hasOwner());
         } catch (Exception e) {
             LOG.error("Error notifying listener {}", listener, e);
         }

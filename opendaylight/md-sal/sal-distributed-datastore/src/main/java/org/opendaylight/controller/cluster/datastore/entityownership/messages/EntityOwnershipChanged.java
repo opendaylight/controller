@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.datastore.entityownership.messages;
 
 import com.google.common.base.Preconditions;
+import javax.annotation.Nonnull;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
 
 /**
@@ -19,11 +20,13 @@ public class EntityOwnershipChanged {
     private final Entity entity;
     private final boolean wasOwner;
     private final boolean isOwner;
+    private final boolean hasOwner;
 
-    public EntityOwnershipChanged(Entity entity, boolean wasOwner, boolean isOwner) {
+    public EntityOwnershipChanged(@Nonnull Entity entity, boolean wasOwner, boolean isOwner, boolean hasOwner) {
         this.entity = Preconditions.checkNotNull(entity, "entity can't be null");
         this.wasOwner = wasOwner;
         this.isOwner = isOwner;
+        this.hasOwner = hasOwner;
     }
 
     public Entity getEntity() {
@@ -38,8 +41,14 @@ public class EntityOwnershipChanged {
         return isOwner;
     }
 
+
+    public boolean hasOwner() {
+        return hasOwner;
+    }
+
     @Override
     public String toString() {
-        return "EntityOwnershipChanged [entity=" + entity + ", wasOwner=" + wasOwner + ", isOwner=" + isOwner + "]";
+        return "EntityOwnershipChanged [entity=" + entity + ", wasOwner=" + wasOwner + ", isOwner=" + isOwner
+                + ", hasOwner=" + hasOwner + "]";
     }
 }
