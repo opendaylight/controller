@@ -11,7 +11,7 @@ import akka.actor.Props;
 import akka.japi.Creator;
 import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedActor;
-import org.opendaylight.controller.cluster.datastore.entityownership.messages.EntityOwnershipChanged;
+import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipChange;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,16 +32,16 @@ class EntityOwnershipListenerActor extends AbstractUntypedActor {
 
     @Override
     protected void handleReceive(Object message) {
-        if(message instanceof EntityOwnershipChanged) {
-            onEntityOwnershipChanged((EntityOwnershipChanged)message);
+        if(message instanceof EntityOwnershipChange) {
+            onEntityOwnershipChanged((EntityOwnershipChange)message);
         }
     }
 
-    private void onEntityOwnershipChanged(EntityOwnershipChanged change) {
+    private void onEntityOwnershipChanged(EntityOwnershipChange change) {
         LOG.debug("Notifying EntityOwnershipListener {}: {}", listener, change);
 
         try {
-            listener.ownershipChanged(change.getEntity(), change.wasOwner(), change.isOwner());
+            listener.ownershipChanged(change);
         } catch (Exception e) {
             LOG.error("Error notifying listener {}", listener, e);
         }
