@@ -271,19 +271,21 @@
       <artifactId>sal-remoterpc-connector</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.controller</groupId>
+      <groupId>org.opendaylight.netconf</groupId>
       <artifactId>sal-rest-connector</artifactId>
+      <version>${mdsal.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.controller</groupId>
+      <groupId>org.opendaylight.netconf</groupId>
       <artifactId>sal-rest-connector-config</artifactId>
       <version>${mdsal.version}</version>
       <type>xml</type>
       <classifier>config</classifier>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.controller</groupId>
+      <groupId>org.opendaylight.netconf</groupId>
       <artifactId>sal-rest-docgen</artifactId>
+      <version>${mdsal.version}</version>
     </dependency>
 
     <dependency>
