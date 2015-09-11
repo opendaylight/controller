@@ -16,10 +16,9 @@ import akka.actor.ActorRef;
 import akka.testkit.TestActorRef;
 import org.junit.After;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.datastore.AbstractActorTest;
-import org.opendaylight.controller.cluster.datastore.entityownership.messages.EntityOwnershipChanged;
 import org.opendaylight.controller.cluster.raft.TestActorFactory;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
+import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipChange;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListener;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -29,7 +28,7 @@ import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
  *
  * @author Thomas Pantelis
  */
-public class EntityOwnershipListenerActorTest extends AbstractActorTest {
+public class EntityOwnershipListenerActorTest extends AbstractEntityOwnershipTest {
     private final TestActorFactory actorFactory = new TestActorFactory(getSystem());
 
     @After
@@ -47,9 +46,10 @@ public class EntityOwnershipListenerActorTest extends AbstractActorTest {
         Entity entity = new Entity("test", YangInstanceIdentifier.of(QName.create("test", "id1")));
         boolean wasOwner = false;
         boolean isOwner = true;
-        listenerActor.tell(new EntityOwnershipChanged(entity, wasOwner, isOwner), ActorRef.noSender());
+        boolean hasOwner = true;
+        listenerActor.tell(new EntityOwnershipChange(entity, wasOwner, isOwner, hasOwner), ActorRef.noSender());
 
-        verify(mockListener, timeout(5000)).ownershipChanged(entity, wasOwner, isOwner);
+        verify(mockListener, timeout(5000)).ownershipChanged(ownershipChange(entity, wasOwner, isOwner, hasOwner));
     }
 
     @Test
@@ -57,16 +57,16 @@ public class EntityOwnershipListenerActorTest extends AbstractActorTest {
         EntityOwnershipListener mockListener = mock(EntityOwnershipListener.class);
 
         Entity entity1 = new Entity("test", YangInstanceIdentifier.of(QName.create("test", "id1")));
-        doThrow(new RuntimeException("mock")).when(mockListener).ownershipChanged(entity1, false, true);
+        doThrow(new RuntimeException("mock")).when(mockListener).ownershipChanged(ownershipChange(entity1, false, true, true));
         Entity entity2 = new Entity("test", YangInstanceIdentifier.of(QName.create("test", "id2")));
-        doNothing().when(mockListener).ownershipChanged(entity2, true, false);
+        doNothing().when(mockListener).ownershipChanged(ownershipChange(entity2, true, false, false));
 
         TestActorRef<EntityOwnershipListenerActor> listenerActor = actorFactory.createTestActor(
                 EntityOwnershipListenerActor.props(mockListener), actorFactory.generateActorId("listener"));
 
-        listenerActor.tell(new EntityOwnershipChanged(entity1, false, true), ActorRef.noSender());
-        listenerActor.tell(new EntityOwnershipChanged(entity2, true, false), ActorRef.noSender());
+        listenerActor.tell(new EntityOwnershipChange(entity1, false, true, true), ActorRef.noSender());
+        listenerActor.tell(new EntityOwnershipChange(entity2, true, false, false), ActorRef.noSender());
 
-        verify(mockListener, timeout(5000)).ownershipChanged(entity2, true, false);
+        verify(mockListener, timeout(5000)).ownershipChanged(ownershipChange(entity2, true, false, false));
     }
 }

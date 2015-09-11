@@ -18,6 +18,7 @@ import org.opendaylight.controller.md.sal.binding.api.WriteTransaction;
 import org.opendaylight.controller.md.sal.common.api.clustering.CandidateAlreadyRegisteredException;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipCandidate;
+import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipChange;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
@@ -173,8 +174,8 @@ public class CarProvider implements CarService {
 
     private static class CarEntityOwnershipCandidate implements EntityOwnershipCandidate {
         @Override
-        public void ownershipChanged(Entity entity, boolean wasOwner, boolean isOwner) {
-            LOG.info("ownershipChanged: entity: {}, wasOwner: {}, isOwner: ()", entity, wasOwner, isOwner);
+        public void ownershipChanged(EntityOwnershipChange ownershipChange) {
+            LOG.info("ownershipChanged: {}", ownershipChange);
         }
     }
 }
