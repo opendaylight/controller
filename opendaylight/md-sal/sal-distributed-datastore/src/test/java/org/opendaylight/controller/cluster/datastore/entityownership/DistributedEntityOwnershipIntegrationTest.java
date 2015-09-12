@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.datastore.entityownership;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.AdditionalMatchers.or;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
@@ -231,9 +232,10 @@ public class DistributedEntityOwnershipIntegrationTest {
         reset(leaderMockListener, follower1MockListener);
         JavaTestKit.shutdownActorSystem(follower2System);
 
-        verify(follower1MockListener, timeout(15000)).ownershipChanged(ownershipChange(ENTITY4, false, true, true));
-        verify(leaderMockListener, timeout(15000)).ownershipChanged(ownershipChange(ENTITY4, false, false, true));
-        verify(leaderMockListener, timeout(15000)).ownershipChanged(ownershipChange(ENTITY2, false, false, false));
+        verify(follower1MockListener, timeout(15000).times(2)).ownershipChanged(or(ownershipChange(ENTITY4, false, true, true),
+                ownershipChange(ENTITY2, false, false, false)));
+        verify(leaderMockListener, timeout(15000).times(2)).ownershipChanged(or(ownershipChange(ENTITY4, false, false, true),
+                ownershipChange(ENTITY2, false, false, false)));
         verifyOwner(leaderDistributedDataStore, ENTITY2, ""); // no other candidate
 
         // Register leader candidate for entity2 and verify it becomes owner
