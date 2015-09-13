@@ -17,10 +17,10 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
-
+import java.util.Collection;
 import java.util.Dictionary;
+import java.util.Map.Entry;
 import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
@@ -58,14 +58,17 @@ public class ModuleFactoryBundleTrackerTest {
             }
         }).when(bundle).loadClass(anyString());
         doReturn("mockBundle").when(bundle).toString();
+        doReturn("mockBundleContext").when(context).toString();
         doReturn(context).when(bundle).getBundleContext();
         doReturn(reg).when(context).registerService(anyString(), anyObject(), any(Dictionary.class));
     }
 
     @Test
     public void testRegisterFactory() throws Exception {
-        ModuleFactoryBundleTracker.registerFactory(TestingFactory.class.getName(), bundle);
-        verify(context).registerService(ModuleFactory.class.getName(), TestingFactory.currentInstance, null);
+        Entry<ModuleFactory, Bundle> entry = ModuleFactoryBundleTracker.registerFactory(
+                TestingFactory.class.getName(), bundle);
+        assertEquals(TestingFactory.currentInstance, entry.getKey());
+        assertEquals(bundle, entry.getValue());
     }
 
     @Test
@@ -130,7 +133,13 @@ public class ModuleFactoryBundleTrackerTest {
         final ModuleFactoryBundleTracker tracker = new ModuleFactoryBundleTracker(blankTxTracker);
         doReturn(getClass().getResource("/module-factories/module-factory-ok")).when(bundle).getEntry(anyString());
         tracker.addingBundle(bundle, mock(BundleEvent.class));
-        verify(context).registerService(ModuleFactory.class.getName(), TestingFactory.currentInstance, null);
+
+        Collection<Entry<ModuleFactory, Bundle>> entries = tracker.getModuleFactoryEntries();
+        assertNotNull(entries);
+        assertEquals(1, entries.size());
+        Entry<ModuleFactory, Bundle> entry = entries.iterator().next();
+        assertEquals(TestingFactory.currentInstance, entry.getKey());
+        assertEquals(bundle, entry.getValue());
     }
 
     @Test

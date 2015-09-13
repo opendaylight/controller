@@ -7,13 +7,11 @@
  */
 package org.opendaylight.controller.config.manager.impl.osgi;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.google.common.util.concurrent.MoreExecutors;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.ThreadFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
@@ -50,9 +48,6 @@ import org.slf4j.LoggerFactory;
  */
 public final class ExtensibleBundleTracker<T> extends BundleTracker<Future<T>> {
 
-    private static final ThreadFactory THREAD_FACTORY = new ThreadFactoryBuilder()
-        .setNameFormat("config-bundle-tracker-%d")
-        .build();
     private final ExecutorService eventExecutor;
     private final BundleTrackerCustomizer<T> primaryTracker;
     private final BundleTrackerCustomizer<?>[] additionalTrackers;
@@ -70,7 +65,7 @@ public final class ExtensibleBundleTracker<T> extends BundleTracker<Future<T>> {
         super(context, bundleState, null);
         this.primaryTracker = primaryBundleTrackerCustomizer;
         this.additionalTrackers = additionalBundleTrackerCustomizers;
-        eventExecutor = Executors.newSingleThreadExecutor(THREAD_FACTORY);
+        eventExecutor = MoreExecutors.newDirectExecutorService();
         LOG.trace("Registered as extender with context {} and bundle state {}", context, bundleState);
     }
 

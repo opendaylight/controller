@@ -7,15 +7,17 @@
  */
 package org.opendaylight.controller.config.manager.impl.osgi;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Stopwatch;
+import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.AbstractMap;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.config.manager.impl.factoriesresolver.ModuleFactoriesResolver;
 import org.opendaylight.controller.config.spi.ModuleFactory;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,42 +28,38 @@ public class BundleContextBackedModuleFactoriesResolver implements
         ModuleFactoriesResolver {
     private static final Logger LOG = LoggerFactory
             .getLogger(BundleContextBackedModuleFactoriesResolver.class);
-    private final BundleContext bundleContext;
+    private ModuleFactoryBundleTracker moduleFactoryBundleTracker;
+    private int bundleContextTimeout = 60000;
 
-    public BundleContextBackedModuleFactoriesResolver(
-            BundleContext bundleContext) {
-        this.bundleContext = bundleContext;
+    public BundleContextBackedModuleFactoriesResolver() {
+    }
+
+    public void setModuleFactoryBundleTracker(ModuleFactoryBundleTracker moduleFactoryBundleTracker) {
+        this.moduleFactoryBundleTracker = moduleFactoryBundleTracker;
+    }
+
+    @VisibleForTesting
+    public void setBundleContextTimeout(int bundleContextTimeout) {
+        this.bundleContextTimeout = bundleContextTimeout;
     }
 
     @Override
     public Map<String, Map.Entry<ModuleFactory, BundleContext>> getAllFactories() {
-        Collection<ServiceReference<ModuleFactory>> serviceReferences;
-        try {
-            serviceReferences = bundleContext.getServiceReferences(
-                    ModuleFactory.class, null);
-        } catch (InvalidSyntaxException e) {
-            throw new IllegalStateException(e);
-        }
-        Map<String, Map.Entry<ModuleFactory, BundleContext>> result = new HashMap<>(serviceReferences.size());
-        for (ServiceReference<ModuleFactory> serviceReference : serviceReferences) {
-            ModuleFactory factory = bundleContext.getService(serviceReference);
-            // null if the service is not registered, the service object
-            // returned by a ServiceFactory does not
-            // implement the classes under which it was registered or the
-            // ServiceFactory threw an exception.
-            if(factory == null) {
-                throw new NullPointerException("ServiceReference of class" + serviceReference.getClass() + "not found.");
+        Map<String, Map.Entry<ModuleFactory, BundleContext>> result = new HashMap<>();
+        for(Map.Entry<ModuleFactory, Bundle> entry: moduleFactoryBundleTracker.getModuleFactoryEntries()) {
+            ModuleFactory factory = entry.getKey();
+            Bundle bundle = entry.getValue();
+            String moduleName = factory .getImplementationName();
+            if (moduleName == null || moduleName.isEmpty()) {
+                throw new IllegalStateException("Invalid implementation name for " + factory);
             }
 
-            String moduleName = factory.getImplementationName();
-            if (moduleName == null || moduleName.isEmpty()) {
-                throw new IllegalStateException(
-                        "Invalid implementation name for " + factory);
+            LOG.debug("Processing factory {} {}", moduleName, factory);
+
+            BundleContext bundleContext = getBundleContext(bundle);
+            if(bundleContext == null) {
+                throw new IllegalStateException("Bundle context for " + factory + " ModuleFactory not found.");
             }
-            if (serviceReference.getBundle() == null || serviceReference.getBundle().getBundleContext() == null) {
-                throw new NullPointerException("Bundle context of " + factory + " ModuleFactory not found.");
-            }
-            LOG.debug("Reading factory {} {}", moduleName, factory);
 
             Map.Entry<ModuleFactory, BundleContext> conflicting = result.get(moduleName);
             if (conflicting != null) {
@@ -71,10 +69,25 @@ public class BundleContextBackedModuleFactoriesResolver implements
                 LOG.error(error);
                 throw new IllegalArgumentException(error);
             } else {
-                result.put(moduleName, new AbstractMap.SimpleImmutableEntry<>(factory,
-                        serviceReference.getBundle().getBundleContext()));
+                result.put(moduleName, new AbstractMap.SimpleImmutableEntry<>(factory, bundleContext));
             }
         }
+
         return result;
+    }
+
+    private BundleContext getBundleContext(Bundle bundle) {
+        // If the bundle isn't activated yet, it may not have a BundleContext yet so busy wait for it.
+        Stopwatch timer = Stopwatch.createStarted();
+        while(timer.elapsed(TimeUnit.MILLISECONDS) <= bundleContextTimeout) {
+            BundleContext bundleContext = bundle.getBundleContext();
+            if(bundleContext != null) {
+                return bundleContext;
+            }
+
+            Uninterruptibles.sleepUninterruptibly(10, TimeUnit.MILLISECONDS);
+        }
+
+        return null;
     }
 }

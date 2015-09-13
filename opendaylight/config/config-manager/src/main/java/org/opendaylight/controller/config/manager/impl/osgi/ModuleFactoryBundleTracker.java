@@ -13,10 +13,15 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import java.io.IOException;
 import java.net.URL;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Map.Entry;
+import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleEvent;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.BundleTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +39,9 @@ public class ModuleFactoryBundleTracker implements BundleTrackerCustomizer<Objec
     private final BlankTransactionServiceTracker blankTransactionServiceTracker;
     private static final Logger LOG = LoggerFactory.getLogger(ModuleFactoryBundleTracker.class);
 
+    @GuardedBy(value = "moduleFactoryEntries")
+    private final Collection<Map.Entry<ModuleFactory, Bundle>> moduleFactoryEntries = new ArrayList<>();
+
     public ModuleFactoryBundleTracker(BlankTransactionServiceTracker blankTransactionServiceTracker) {
         this.blankTransactionServiceTracker = blankTransactionServiceTracker;
     }
@@ -46,7 +54,10 @@ public class ModuleFactoryBundleTracker implements BundleTrackerCustomizer<Objec
         if (resource != null) {
             try {
                 for (String factoryClassName : Resources.readLines(resource, Charsets.UTF_8)) {
-                    registerFactory(factoryClassName, bundle);
+                    Entry<ModuleFactory, Bundle> moduleFactoryEntry = registerFactory(factoryClassName, bundle);
+                    synchronized (moduleFactoryEntries) {
+                        moduleFactoryEntries.add(moduleFactoryEntry);
+                    }
                 }
             } catch (IOException e) {
                 LOG.error("Error while reading {}", resource, e);
@@ -67,19 +78,23 @@ public class ModuleFactoryBundleTracker implements BundleTrackerCustomizer<Objec
         blankTransactionServiceTracker.blankTransaction();
     }
 
+    public Collection<Map.Entry<ModuleFactory, Bundle>> getModuleFactoryEntries() {
+        synchronized (moduleFactoryEntries) {
+            return new ArrayList<>(moduleFactoryEntries);
+        }
+    }
+
     @VisibleForTesting
-    protected static ServiceRegistration<?> registerFactory(String factoryClassName, Bundle bundle) {
+    protected static Map.Entry<ModuleFactory, Bundle> registerFactory(String factoryClassName, Bundle bundle) {
         String errorMessage;
         Exception ex = null;
         try {
             Class<?> clazz = bundle.loadClass(factoryClassName);
             if (ModuleFactory.class.isAssignableFrom(clazz)) {
                 try {
-                    LOG.debug("Registering {} in bundle {}",
-                            clazz.getName(), bundle);
-                    return bundle.getBundleContext().registerService(
-                            ModuleFactory.class.getName(), clazz.newInstance(),
-                            null);
+                    LOG.debug("Registering {} in bundle {}", clazz.getName(), bundle);
+
+                    return new AbstractMap.SimpleImmutableEntry<>((ModuleFactory)clazz.newInstance(), bundle);
                 } catch (InstantiationException e) {
                     errorMessage = logMessage(
                             "Could not instantiate {} in bundle {}, reason {}",
@@ -89,6 +104,11 @@ public class ModuleFactoryBundleTracker implements BundleTrackerCustomizer<Objec
                     errorMessage = logMessage(
                             "Illegal access during instantiation of class {} in bundle {}, reason {}",
                             factoryClassName, bundle, e);
+                    ex = e;
+                } catch (RuntimeException e) {
+                    errorMessage = logMessage(
+                            "Unexpected exception during instantiation of class {} in bundle {}, reason {}",
+                            clazz, bundle.getBundleContext(), e);
                     ex = e;
                 }
             } else {
