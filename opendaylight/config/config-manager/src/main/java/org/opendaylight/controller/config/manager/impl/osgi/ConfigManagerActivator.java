@@ -9,7 +9,6 @@ package org.opendaylight.controller.config.manager.impl.osgi;
 
 import static org.opendaylight.controller.config.manager.impl.util.OsgiRegistrationUtil.registerService;
 import static org.opendaylight.controller.config.manager.impl.util.OsgiRegistrationUtil.wrap;
-
 import java.lang.management.ManagementFactory;
 import java.util.Arrays;
 import java.util.List;
@@ -26,6 +25,7 @@ import org.opendaylight.controller.config.manager.impl.util.OsgiRegistrationUtil
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.opendaylight.yangtools.sal.binding.generator.impl.GeneratedClassLoadingStrategy;
 import org.opendaylight.yangtools.sal.binding.generator.impl.ModuleInfoBackedContext;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
@@ -53,8 +53,7 @@ public class ConfigManagerActivator implements BundleActivator {
             ModuleInfoBundleTracker moduleInfoBundleTracker = new ModuleInfoBundleTracker(moduleInfoRegistryWrapper);
 
             // start config registry
-            BundleContextBackedModuleFactoriesResolver bundleContextBackedModuleFactoriesResolver = new BundleContextBackedModuleFactoriesResolver(
-                    context);
+            BundleContextBackedModuleFactoriesResolver bundleContextBackedModuleFactoriesResolver = new BundleContextBackedModuleFactoriesResolver();
             ConfigRegistryImpl configRegistry = new ConfigRegistryImpl(bundleContextBackedModuleFactoriesResolver, configMBeanServer,
                     bindingContextProvider);
 
@@ -63,10 +62,12 @@ public class ConfigManagerActivator implements BundleActivator {
                     configRegistry);
             ModuleFactoryBundleTracker primaryModuleFactoryBundleTracker = new ModuleFactoryBundleTracker(
                     blankTransactionServiceTracker);
+            bundleContextBackedModuleFactoriesResolver.setModuleFactoryBundleTracker(primaryModuleFactoryBundleTracker);
 
             // start extensible tracker
             ExtensibleBundleTracker<?> bundleTracker = new ExtensibleBundleTracker<>(context,
-                    primaryModuleFactoryBundleTracker, moduleInfoBundleTracker);
+                Bundle.RESOLVED | Bundle.STARTING | Bundle.STOPPING | Bundle.ACTIVE,
+                primaryModuleFactoryBundleTracker, moduleInfoBundleTracker);
             bundleTracker.open();
 
             // Wrap config registry with JMX notification publishing adapter
