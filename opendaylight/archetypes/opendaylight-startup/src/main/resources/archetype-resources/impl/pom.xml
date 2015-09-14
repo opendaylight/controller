@@ -2,8 +2,9 @@
 #set( $symbol_dollar = '$' )
 #set( $symbol_escape = '\' )
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- vi: set et smarttab sw=4 tabstop=4: --><!--
-Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
+<!-- vi: set et smarttab sw=4 tabstop=4: -->
+<!--
+Copyright © ${copyrightYear} ${copyright} and others. All rights reserved.
 
 This program and the accompanying materials are made available under the
 terms of the Eclipse Public License v1.0 which accompanies this distribution,

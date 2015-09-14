@@ -9,6 +9,16 @@
         </defaultValue>
     </requiredProperty>
     <requiredProperty key="copyright" />
+    <requiredProperty key="copyrightYear">
+        <defaultValue>
+            2015
+        </defaultValue>
+    </requiredProperty>
+    <requiredProperty key="version">
+        <defaultValue>
+            1.0.0-SNAPSHOT
+        </defaultValue>
+    </requiredProperty>
   </requiredProperties>
   <fileSets>
 
