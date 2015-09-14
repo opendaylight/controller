@@ -9,6 +9,7 @@
         </defaultValue>
     </requiredProperty>
     <requiredProperty key="copyright" />
+    <requiredProperty key="copyrightYear" />
   </requiredProperties>
   <fileSets>
 
