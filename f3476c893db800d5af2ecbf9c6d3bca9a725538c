@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a79b1b5_4c3118a1",
+        "filename": "opendaylight/archetypes/opendaylight-startup/src/main/resources/META-INF/maven/archetype-metadata.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 9
+      },
+      "writtenOn": "2015-09-15T15:07:52Z",
+      "side": 1,
+      "message": "Could we set a default value here of 2015?",
+      "revId": "f3476c893db800d5af2ecbf9c6d3bca9a725538c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
