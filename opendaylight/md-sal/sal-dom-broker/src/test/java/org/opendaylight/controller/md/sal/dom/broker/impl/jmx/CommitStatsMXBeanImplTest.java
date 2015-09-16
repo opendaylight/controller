@@ -12,7 +12,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
-import org.opendaylight.yangtools.util.DurationStatsTracker;
+import org.opendaylight.yangtools.util.DurationStatisticsTracker;
 
 /**
  * Unit tests for CommitStatsMXBeanImpl.
@@ -24,7 +24,7 @@ public class CommitStatsMXBeanImplTest {
     @Test
     public void test() {
 
-        DurationStatsTracker commitStatsTracker = new DurationStatsTracker();
+        DurationStatisticsTracker commitStatsTracker = DurationStatisticsTracker.createConcurrent();
         CommitStatsMXBeanImpl bean =
                 new CommitStatsMXBeanImpl(commitStatsTracker, "Test");
 
