@@ -32,6 +32,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateNodes;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidates;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.ModificationType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,6 +43,8 @@ final class DataTreeCandidatePayload extends Payload implements Externalizable {
     private static final byte SUBTREE_MODIFIED = 1;
     private static final byte UNMODIFIED = 2;
     private static final byte WRITE = 3;
+    private static final byte APPEARED = 4;
+    private static final byte DISAPPEARED = 5;
 
     private transient byte[] serialized;
 
@@ -64,9 +67,19 @@ final class DataTreeCandidatePayload extends Payload implements Externalizable {
     private static void writeNode(final NormalizedNodeOutputStreamWriter writer, final DataOutput out,
             final DataTreeCandidateNode node) throws IOException {
         switch (node.getModificationType()) {
+        case APPEARED:
+            out.writeByte(APPEARED);
+            writer.writePathArgument(node.getIdentifier());
+            writeChildren(writer, out, node.getChildNodes());
+            break;
         case DELETE:
             out.writeByte(DELETE);
             writer.writePathArgument(node.getIdentifier());
+            break;
+        case DISAPPEARED:
+            out.writeByte(DISAPPEARED);
+            writer.writePathArgument(node.getIdentifier());
+            writeChildren(writer, out, node.getChildNodes());
             break;
         case SUBTREE_MODIFIED:
             out.writeByte(SUBTREE_MODIFIED);
@@ -92,8 +105,16 @@ final class DataTreeCandidatePayload extends Payload implements Externalizable {
 
             final DataTreeCandidateNode node = candidate.getRootNode();
             switch (node.getModificationType()) {
+            case APPEARED:
+                out.writeByte(APPEARED);
+                writeChildren(writer, out, node.getChildNodes());
+                break;
             case DELETE:
                 out.writeByte(DELETE);
+                break;
+            case DISAPPEARED:
+                out.writeByte(DISAPPEARED);
+                writeChildren(writer, out, node.getChildNodes());
                 break;
             case SUBTREE_MODIFIED:
                 out.writeByte(SUBTREE_MODIFIED);
@@ -135,21 +156,31 @@ final class DataTreeCandidatePayload extends Payload implements Externalizable {
         }
     }
 
+    private static DataTreeCandidateNode readModifiedNode(final ModificationType type,
+            final NormalizedNodeInputStreamReader reader, final DataInput in) throws IOException {
+
+        final PathArgument identifier = reader.readPathArgument();
+        final Collection<DataTreeCandidateNode> children = readChildren(reader, in);
+        if (children.isEmpty()) {
+            LOG.debug("Modified node {} does not have any children, not instantiating it", identifier);
+            return null;
+        } else {
+            return ModifiedDataTreeCandidateNode.create(identifier, type, children);
+        }
+    }
+
     private static DataTreeCandidateNode readNode(final NormalizedNodeInputStreamReader reader,
             final DataInput in) throws IOException {
         final byte type = in.readByte();
         switch (type) {
+        case APPEARED:
+            return readModifiedNode(ModificationType.APPEARED, reader, in);
         case DELETE:
             return DeletedDataTreeCandidateNode.create(reader.readPathArgument());
+        case DISAPPEARED:
+            return readModifiedNode(ModificationType.DISAPPEARED, reader, in);
         case SUBTREE_MODIFIED:
-            final PathArgument identifier = reader.readPathArgument();
-            final Collection<DataTreeCandidateNode> children = readChildren(reader, in);
-            if (children.isEmpty()) {
-                LOG.debug("Modified node {} does not have any children, not instantiating it", identifier);
-                return null;
-            } else {
-                return ModifiedDataTreeCandidateNode.create(identifier, children);
-            }
+            return readModifiedNode(ModificationType.SUBTREE_MODIFIED, reader, in);
         case UNMODIFIED:
             return null;
         case WRITE:
