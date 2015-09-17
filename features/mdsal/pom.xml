@@ -24,6 +24,13 @@
     <akka.version>2.3.10</akka.version>
     <features.file>features.xml</features.file>
     <org.json.version>20131018</org.json.version>
+    <config.configfile.directory>etc/opendaylight/karaf</config.configfile.directory>
+    <config.clustering.configfile>05-clustering.xml</config.clustering.configfile>
+    <config.clustered-entity-ownership.configfile>06-clustered-entity-ownership.xml</config.clustered-entity-ownership.configfile>
+    <config.netty.configfile>00-netty.xml</config.netty.configfile>
+    <config.mdsal.configfile>01-md-sal.xml</config.mdsal.configfile>
+    <config.xsql.configfile>04-xsql.xml</config.xsql.configfile>
+    <config.toaster.configfile>03-toaster-sample.xml</config.toaster.configfile>
   </properties>
 
   <dependencyManagement>
