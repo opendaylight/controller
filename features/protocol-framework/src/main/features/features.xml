@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<features name="odl-protocol-framework-${protocol-framework.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0"
+<features name="odl-protocol-framework-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
   <repository>mvn:org.opendaylight.controller/features-config/{{VERSION}}/xml/features</repository>
