@@ -118,7 +118,6 @@ public final class ResolveDataChangeEventsTask {
         switch (type) {
         case SUBTREE_MODIFIED:
             return resolveSubtreeChangeEvent(state, node);
-        case MERGE:
         case WRITE:
             Preconditions.checkArgument(maybeAfter.isPresent(),
                     "Modification at {} has type {} but no after-data", state.getPath(), type);
@@ -279,7 +278,6 @@ public final class ResolveDataChangeEventsTask {
 
             switch (childMod.getModificationType()) {
             case WRITE:
-            case MERGE:
             case DELETE:
                 if (resolveAnyChangeEvent(childState, childMod)) {
                     scope = DataChangeScope.ONE;
