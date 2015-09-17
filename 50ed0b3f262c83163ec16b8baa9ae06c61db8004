@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a79b1b5_07c9b225",
+        "filename": "opendaylight/archetypes/opendaylight-startup/src/main/resources/META-INF/maven/archetype-metadata.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-09-17T10:08:13Z",
+      "side": 1,
+      "message": "Could we add defaultValue property as Ed raised? Then we can merge it.",
+      "range": {
+        "startLine": 12,
+        "startChar": 4,
+        "endLine": 12,
+        "endChar": 44
+      },
+      "revId": "50ed0b3f262c83163ec16b8baa9ae06c61db8004",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
