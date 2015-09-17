@@ -18,6 +18,7 @@
     <mdsal.version>2.0.0-SNAPSHOT</mdsal.version>
     <config.version>0.4.0-SNAPSHOT</config.version>
     <features.file>features.xml</features.file>
+    <config.configfile.directory>etc/opendaylight/karaf</config.configfile.directory>
   </properties>
 
 
