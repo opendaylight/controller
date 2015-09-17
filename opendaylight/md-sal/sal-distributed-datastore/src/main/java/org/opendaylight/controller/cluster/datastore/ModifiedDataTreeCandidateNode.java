@@ -22,13 +22,13 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.ModificationType;
 abstract class ModifiedDataTreeCandidateNode extends AbstractDataTreeCandidateNode {
     private final Collection<DataTreeCandidateNode> children;
 
-    private ModifiedDataTreeCandidateNode(final Collection<DataTreeCandidateNode> children) {
-        super(ModificationType.SUBTREE_MODIFIED);
+    private ModifiedDataTreeCandidateNode(final ModificationType type, final Collection<DataTreeCandidateNode> children) {
+        super(type);
         this.children = Preconditions.checkNotNull(children);
     }
 
     static DataTreeCandidateNode create(final Collection<DataTreeCandidateNode> children) {
-        return new ModifiedDataTreeCandidateNode(children) {
+        return new ModifiedDataTreeCandidateNode(ModificationType.SUBTREE_MODIFIED, children) {
             @Override
             public PathArgument getIdentifier() {
                 throw new UnsupportedOperationException("Root node does not have an identifier");
@@ -36,8 +36,8 @@ abstract class ModifiedDataTreeCandidateNode extends AbstractDataTreeCandidateNo
         };
     }
 
-    static DataTreeCandidateNode create(final PathArgument identifier, final Collection<DataTreeCandidateNode> children) {
-        return new ModifiedDataTreeCandidateNode(children) {
+    static DataTreeCandidateNode create(final PathArgument identifier, final ModificationType type, final Collection<DataTreeCandidateNode> children) {
+        return new ModifiedDataTreeCandidateNode(type, children) {
             @Override
             public final PathArgument getIdentifier() {
                 return identifier;
