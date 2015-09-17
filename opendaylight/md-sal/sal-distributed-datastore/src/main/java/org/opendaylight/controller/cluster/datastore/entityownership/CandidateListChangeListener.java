@@ -66,8 +66,9 @@ class CandidateListChangeListener implements DOMDataTreeChangeListener {
     public void onDataTreeChanged(Collection<DataTreeCandidate> changes) {
         for(DataTreeCandidate change: changes) {
             DataTreeCandidateNode changeRoot = change.getRootNode();
+            ModificationType type = changeRoot.getModificationType();
 
-            LOG.debug("{}: Candidate node changed: {}, {}", logId, changeRoot.getModificationType(), change.getRootPath());
+            LOG.debug("{}: Candidate node changed: {}, {}", logId, type, change.getRootPath());
 
             NodeIdentifierWithPredicates candidateKey =
                     (NodeIdentifierWithPredicates) change.getRootPath().getLastPathArgument();
@@ -75,12 +76,12 @@ class CandidateListChangeListener implements DOMDataTreeChangeListener {
 
             YangInstanceIdentifier entityId = extractEntityPath(change.getRootPath());
 
-            if(changeRoot.getModificationType() == ModificationType.WRITE) {
+            if(type == ModificationType.WRITE || type == ModificationType.APPEARED) {
                 LOG.debug("{}: Candidate {} was added for entity {}", logId, candidate, entityId);
 
                 Collection<String> currentCandidates = addToCurrentCandidates(entityId, candidate);
                 shard.tell(new CandidateAdded(entityId, candidate, new ArrayList<>(currentCandidates)), shard);
-            } else if(changeRoot.getModificationType() == ModificationType.DELETE) {
+            } else if(type == ModificationType.DELETE || type == ModificationType.DISAPPEARED) {
                 LOG.debug("{}: Candidate {} was removed for entity {}", logId, candidate, entityId);
 
                 Collection<String> currentCandidates = removeFromCurrentCandidates(entityId, candidate);
