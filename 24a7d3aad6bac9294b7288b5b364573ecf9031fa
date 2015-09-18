@@ -16,6 +16,24 @@
       "revId": "24a7d3aad6bac9294b7288b5b364573ecf9031fa",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_c8b426d3",
+        "filename": "opendaylight/config/config-manager/src/test/java/org/opendaylight/controller/config/manager/impl/osgi/BundleContextBackedModuleFactoriesResolverTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-09-18T22:12:40Z",
+      "side": 1,
+      "message": "It is but you\u0027ll notice they verify the ex message contents. I\u0027m not saying that\u0027s good practice but this is existing code and not within the scope of this patch to change.",
+      "parentUuid": "3a79b1b5_e8b7a2d6",
+      "revId": "24a7d3aad6bac9294b7288b5b364573ecf9031fa",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
