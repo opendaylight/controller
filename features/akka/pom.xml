@@ -183,6 +183,7 @@
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>opendaylight-karaf-empty</artifactId>
       <version>${karaf.empty.version}</version>
+      <scope>test</scope>
       <type>zip</type>
     </dependency>
     <!-- Uncomment this if you get an error : java.lang.NoSuchMethodError: org.slf4j.helpers.MessageFormatter.format(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)Lorg/slf4j/helpers/FormattingTuple;
