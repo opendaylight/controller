@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a79b1b5_e8b7a2d6",
+        "filename": "opendaylight/config/config-manager/src/test/java/org/opendaylight/controller/config/manager/impl/osgi/BundleContextBackedModuleFactoriesResolverTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 3576
+      },
+      "writtenOn": "2015-09-18T20:55:43Z",
+      "side": 1,
+      "message": "This is usually cleaner by using \"@Test(expected \u003d ExceptionClazz.class)\" and removing the try/catch wrapper.  This will need to specify what exception type you expect to get.",
+      "revId": "24a7d3aad6bac9294b7288b5b364573ecf9031fa",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
