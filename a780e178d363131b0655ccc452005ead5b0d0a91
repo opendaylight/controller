@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_337348b3",
+        "filename": "opendaylight/commons/opendaylight/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-09-20T19:33:37Z",
+      "side": 1,
+      "message": "dependencies should be declared in the corresponding dependencyManagement/pluginManagement sections without using properties -- they are hard to maintain across projects.",
+      "revId": "a780e178d363131b0655ccc452005ead5b0d0a91",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
