@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_f31cf015",
+        "filename": "opendaylight/commons/opendaylight/pom.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 1325,
+      "author": {
+        "id": 3339
+      },
+      "writtenOn": "2015-09-21T06:59:52Z",
+      "side": 1,
+      "message": "Please declare this version instead of specifying it inline.",
+      "range": {
+        "startLine": 1325,
+        "startChar": 8,
+        "endLine": 1325,
+        "endChar": 32
+      },
+      "revId": "029b0623c180a652f524b97c03e0f85b39c88905",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_9319fc24",
+        "filename": "opendaylight/commons/opendaylight/pom.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 2028,
+      "author": {
+        "id": 3339
+      },
+      "writtenOn": "2015-09-21T06:59:52Z",
+      "side": 1,
+      "message": "Please declare this version instead of specifying it inline.",
+      "range": {
+        "startLine": 2028,
+        "startChar": 14,
+        "endLine": 2028,
+        "endChar": 38
+      },
+      "revId": "029b0623c180a652f524b97c03e0f85b39c88905",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
