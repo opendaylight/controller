@@ -15,11 +15,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
   <repository>mvn:org.opendaylight.yangtools/features-yangtools/${symbol_dollar}{yangtools.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.controller/features-mdsal/${symbol_dollar}{mdsal.version}/xml/features</repository>
+  <repository>mvn:org.opendaylight.mdsal.model/features-mdsal-model/${symbol_dollar}{mdsal.model.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.netconf/features-restconf/${symbol_dollar}{restconf.version}/xml/features</repository>
   <repository>mvn:org.opendaylight.dlux/features-dlux/${symbol_dollar}{dlux.version}/xml/features</repository>
   <feature name='odl-${artifactId}-api' version='${symbol_dollar}{project.version}' description='OpenDaylight :: ${artifactId} :: api'>
-    <!-- FIXME: Bug 4202: Switch to MD-SAL provided odl-mdsal-models-base -->
-    <feature version='${symbol_dollar}{yangtools.version}'>odl-yangtools-models</feature>
+    <feature version='${symbol_dollar}{mdsal.model.version}'>odl-mdsal-models</feature>
     <bundle>mvn:${groupId}/${artifactId}-api/${symbol_dollar}{project.version}</bundle>
   </feature>
   <feature name='odl-${artifactId}' version='${symbol_dollar}{project.version}' description='OpenDaylight :: ${artifactId}'>
