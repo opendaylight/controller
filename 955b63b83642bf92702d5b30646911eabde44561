@@ -22,6 +22,30 @@
       "revId": "955b63b83642bf92702d5b30646911eabde44561",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_48e2cb04",
+        "filename": "opendaylight/md-sal/mdsal-it-base/src/main/java/org/opendaylight/controller/mdsal/it/base/AbstractMdsalTestBase.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 4540
+      },
+      "writtenOn": "2015-09-22T14:08:08Z",
+      "side": 1,
+      "message": "Good catch, I\u0027ve updated the patch.",
+      "parentUuid": "1a76adc5_28f3cf0b",
+      "range": {
+        "startLine": 51,
+        "startChar": 8,
+        "endLine": 51,
+        "endChar": 48
+      },
+      "revId": "955b63b83642bf92702d5b30646911eabde44561",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
