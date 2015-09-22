@@ -49,13 +49,15 @@ public final class PingPongDataBroker extends ForwardingDOMDataBroker implements
 
     @Override
     public void close() {
-        // TODO Auto-generated method stub
+        // intentionally NOOP
     }
 
     @Override
     public <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerDataTreeChangeListener(final DOMDataTreeIdentifier treeId, final L listener) {
-        if (delegate instanceof DOMDataTreeChangeService) {
-            return ((DOMDataTreeChangeService)delegate).registerDataTreeChangeListener(treeId, listener);
+        final DOMDataTreeChangeService treeService =
+                (DOMDataTreeChangeService) delegate.getSupportedExtensions().get(DOMDataTreeChangeService.class);
+        if (treeService != null) {
+            return treeService.registerDataTreeChangeListener(treeId, listener);
         }
 
         throw new UnsupportedOperationException("Delegate " + delegate + " does not support required functionality");
