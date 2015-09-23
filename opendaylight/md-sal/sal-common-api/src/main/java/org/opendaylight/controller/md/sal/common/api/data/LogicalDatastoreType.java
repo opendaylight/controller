@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.md.sal.common.api.data;
 
+
 public enum LogicalDatastoreType {
 
     /**
@@ -17,7 +18,7 @@ public enum LogicalDatastoreType {
      * the system and it's operation related data.
      *
      */
-    OPERATIONAL,
+    OPERATIONAL(org.opendaylight.mdsal.common.api.LogicalDatastoreType.OPERATIONAL),
     /**
      * Logical Datastore representing configuration state of the system
      * and it's components.
@@ -26,6 +27,27 @@ public enum LogicalDatastoreType {
      * the system and intended operation mode.
      *
      */
-    CONFIGURATION
+    CONFIGURATION(org.opendaylight.mdsal.common.api.LogicalDatastoreType.CONFIGURATION);
+
+    private final org.opendaylight.mdsal.common.api.LogicalDatastoreType newValue;
+
+    private LogicalDatastoreType(org.opendaylight.mdsal.common.api.LogicalDatastoreType newValue) {
+        this.newValue = newValue;
+    }
+
+    public org.opendaylight.mdsal.common.api.LogicalDatastoreType asNew() {
+        return this.newValue;
+    }
+
+    public LogicalDatastoreType fromNew(org.opendaylight.mdsal.common.api.LogicalDatastoreType newValue) {
+        switch (newValue) {
+            case CONFIGURATION:
+                return CONFIGURATION;
+            case OPERATIONAL:
+                return OPERATIONAL;
+            default:
+                throw new IllegalArgumentException("Not supported datastore type " + newValue);
+        }
+    }
 
 }
