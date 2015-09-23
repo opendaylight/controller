@@ -12,15 +12,12 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
-import org.opendaylight.controller.cluster.datastore.identifiers.ShardManagerIdentifier;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.DatastoreConfigurationMXBeanImpl;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.DatastoreInfoMXBeanImpl;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
-import org.opendaylight.controller.cluster.datastore.utils.Dispatchers;
 import org.opendaylight.controller.cluster.datastore.utils.PrimaryShardInfoFutureCache;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
@@ -75,16 +72,10 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
 
         this.type = datastoreContext.getDataStoreType();
 
-        String shardManagerId = ShardManagerIdentifier.builder().type(type).build().toString();
-
-        LOG.info("Creating ShardManager : {}", shardManagerId);
-
-        String shardDispatcher =
-                new Dispatchers(actorSystem.dispatchers()).getDispatcherPath(Dispatchers.DispatcherType.Shard);
-
         PrimaryShardInfoFutureCache primaryShardInfoCache = new PrimaryShardInfoFutureCache();
-        actorContext = new ActorContext(actorSystem, createShardManager(actorSystem, cluster, configuration,
-                datastoreContext, shardDispatcher, shardManagerId, primaryShardInfoCache), cluster,
+        ActorRef shardManagerActor = ShardManagerActors.getInstance().newInstance(actorSystem, cluster, configuration,
+                datastoreContext, primaryShardInfoCache, waitTillReadyCountDownLatch);
+        actorContext = new ActorContext(actorSystem, shardManagerActor, cluster,
                 configuration, datastoreContext, primaryShardInfoCache);
 
         this.waitTillReadyTimeInMillis =
@@ -198,6 +189,7 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
         }
 
         txContextFactory.close();
+        ShardManagerActors.getInstance().remove(actorContext.getShardManager());
         actorContext.shutdown();
         DistributedDataStoreFactory.destroyInstance(this);
     }
@@ -218,27 +210,6 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
         } catch (InterruptedException e) {
             LOG.error("Interrupted while waiting for shards to settle", e);
         }
-    }
-
-    private ActorRef createShardManager(ActorSystem actorSystem, ClusterWrapper cluster, Configuration configuration,
-                                        DatastoreContext datastoreContext, String shardDispatcher, String shardManagerId,
-                                        PrimaryShardInfoFutureCache primaryShardInfoCache){
-        Exception lastException = null;
-
-        for(int i=0;i<100;i++) {
-            try {
-                return actorSystem.actorOf(
-                        ShardManager.props(cluster, configuration, datastoreContext, waitTillReadyCountDownLatch,
-                                primaryShardInfoCache).withDispatcher(shardDispatcher).withMailbox(
-                                        ActorContext.MAILBOX), shardManagerId);
-            } catch (Exception e){
-                lastException = e;
-                Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
-                LOG.debug(String.format("Could not create actor %s because of %s - waiting for sometime before retrying (retry count = %d)", shardManagerId, e.getMessage(), i));
-            }
-        }
-
-        throw new IllegalStateException("Failed to create Shard Manager", lastException);
     }
 
     @VisibleForTesting
