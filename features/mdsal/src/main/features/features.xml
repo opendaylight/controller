@@ -53,7 +53,7 @@
     </feature>
     <feature name='odl-toaster' version='${project.version}' description="OpenDaylight :: Toaster">
         <feature version='${yangtools.version}'>odl-yangtools-common</feature>
-        <feature version='${yangtools.version}'>odl-yangtools-binding</feature>
+        <feature version='${mdsal.version}'>odl-mdsal-binding-runtime</feature>
         <feature version='${project.version}'>odl-mdsal-broker</feature>
         <bundle>mvn:org.opendaylight.controller.samples/sample-toaster/{{VERSION}}</bundle>
         <bundle>mvn:org.opendaylight.controller.samples/sample-toaster-consumer/{{VERSION}}</bundle>
