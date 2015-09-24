@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_4699576d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-09-24T11:34:52Z",
+      "side": 1,
+      "message": "Could you please provide additional info why is this needed?\n\nE.g. Adding ShardManagerActors which will be used by xx\nto provide canonical mapping between non-actor java instances",
+      "range": {
+        "startLine": 9,
+        "startChar": 0,
+        "endLine": 11,
+        "endChar": 14
+      },
+      "revId": "1d2fb4eb184198cee723a73b24be8192ef571a54",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
