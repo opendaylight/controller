@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.md.sal.common.api.clustering;
 
+import com.google.common.base.Optional;
 import javax.annotation.Nonnull;
 
 /**
@@ -50,4 +51,11 @@ public interface EntityOwnershipService {
      */
     EntityOwnershipListenerRegistration registerListener(@Nonnull String entityType, @Nonnull EntityOwnershipListener listener);
 
+    /**
+     * Gets the current ownership state information for an entity.
+     *
+     * @param forEntity the entity to query.
+     * @return an Optional EntityOwnershipState whose instance is present if the entity is found
+     */
+    Optional<EntityOwnershipState> getOwnershipState(@Nonnull Entity forEntity);
 }
