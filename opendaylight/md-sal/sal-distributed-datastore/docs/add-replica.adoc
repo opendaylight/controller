@@ -1,0 +1,235 @@
+= Adding/Removing a Shard Replica
+
+== Terminology
+Raft :: An algorithm for maintaining consensus in a cluster. Raft clusters are defined by strong leadership where
+every update must be committed by the leader
+shard :: A shard represents a subset of the complete data present in the data store
+replica :: A replica represents a single copy of a piece of data
+shard cluster :: All the replicas for a given shard form a Raft cluster
+akka cluster :: All the controller nodes form an akka cluster. This actually uses the Akka Clustering module to
+form a cluster which then facilitates controller node discovery.
+Shard :: The Shard class in the data store actually represents a replica of a shard
+ShardManager :: The ShardManager class is responsible for creating local replicas of a shard
+
+=== Existing Concepts
+
+==== Replica Creation
+
+The ShardManager creates local shard replicas based on the configuration. When the ShardManager creates a Shard it
+passes the peers to the Shard. It is able to do all of this based on the static configuration as defined in
+module-shards.conf. This concept needs to be supported going forward.
+
+=== New Concepts
+
+* ShardManager must remember which local replicas it needs to create.
+* Shard needs to remember which peers have been accepted into the Shard cluster
+
+=== Flows
+
+==== Startup of member-1
+
+The default configuration that ships with the controller has the controllers role name set to member-1 in akka.conf
+ and all the shards are defined to have only one replica which is on member-1.
+
+Thus when we bring up a default distribution of the controller without any configuration changes it comes up as a
+single node cluster.
+
+The first time ever that this controller instance comes up the ShardManager will read the static configuration and
+will persist it to disk using akka-persistence.
+
+IMPORTANT:
+Note that this writing of configuration to disk should only be done after akka-persistence recovery is complete and
+no configuration was read from persistence. This is to ensure that we do not overwrite modified configuration with
+initial configuration.
+
+==== Startup of member-2
+
+Now let's say we have member-1 up and running and we're now want to add some HA into the mix. To do this we are going
+to start of member-2 and make it join the akka cluster. To make a controller node join a controller cluster we need to
+modify akka.conf and change the role name from member-1 to member-2. __For now I will not talk about seed nodes__
+
+Now startup member-2. When it starts up ShardManager will see that no replicas need to be created locally because
+according to module-shards.conf all replicas are on member-1.
+
+
+==== Add a replica for the default shard on member-2
+
+To add a replica we primarily need to follow the Raft thesis from here https://ramcloud.stanford.edu/~ongaro/thesis.pdf.
+Chapter 4 covers "Cluster membership changes" and that is what we will follow.
+
+The sequence of operation will be roughly as follows. Note that this is only a high level representation and I do not
+imply that any methods or messages exist with such names nor do they need to.
+
+[plantuml]
+....
+actor User
+participant ShardManager as shard.manager
+participant ShardManagerJMXBean as shard.jmx.bean
+participant Shard as default.shard.member.1  <<(A,#ADD1B2)>>
+
+
+User -> shard.jmx.bean : addReplica(default)
+shard.jmx.bean -> shard.manager : tell(CreateReplica)
+activate shard.manager
+participant Shard as default.shard.member.2  <<(B,#FFFF00)>>
+create default.shard.member.2
+shard.manager -> default.shard.member.2 : create(primary)
+shard.manager -> default.shard.member.1 : tell(AddServer(member-2))
+shard.manager -> shard.manager : saveConfiguration(newConfiguration = {localReplicas : []{ name : default, state: adding}]})
+activate default.shard.member.1
+default.shard.member.1 -> default.shard.member.1 : addNonVotingPeer(member-2)
+default.shard.member.1 -> default.shard.member.2 : appendEntries(dataTree)
+default.shard.member.1 <-- default.shard.member.2 : appendEntriesReply(dataTree)
+default.shard.member.1 -> default.shard.member.1 : saveConfiguration(newConfiguration = {replicas : [member-1, member-2]})
+default.shard.member.1 -> default.shard.member.2 : appendEntries(newConfiguration)
+default.shard.member.1 <-- default.shard.member.2 : appendEntriesReply(newConfiguration)
+default.shard.member.1 -> default.shard.member.1 : commitConfiguration()
+default.shard.member.1 -> default.shard.member.2 : appendEntries(heartbeat)
+default.shard.member.2 -> default.shard.member.2 : commitConfiguration()
+default.shard.member.1 <-- default.shard.member.2 : appendEntries(heartbeat)
+default.shard.member.1 -> shard.manager : tell(AddServerReply())
+shard.manager -> shard.manager : saveConfiguration(newConfiguration = {localReplicas : [{ name : default, state: added}]})
+
+....
+
+==== Restart member-2
+
+When member-2 is restarted and ShardManager starts up at the end of recovery it sees that one replica namely the
+default shard replica needs to be created here. So, it creates the replica. The default Shard knows it's configuration
+that is member-1 is it's peer and connects to it. If member-1 happens to be the leader it starts sending AppendEntries
+to member-2.
+
+
+==== Restart member-1
+
+When member-1 is restarted it's akka.conf will need to be altered to add member-2 as a seed node. This is to ensure
+that member-1 joins the akka cluster correctly. Note that this is not how I ultimately envisage this but I am not going
+to demand this for this story because we could build another layer which could provide akka cluster configuration.
+
+==== Remove the default shard replica
+
+Assume member-2 is the Leader of the default shard
+
+[plantuml]
+....
+actor User
+participant ShardManager as shard.manager
+participant ShardManagerJMXBean as shard.jmx.bean
+participant Shard as default.shard.member.1  <<(A,#ADD1B2)>>
+participant Shard as default.shard.member.2  <<(B,#FFFF00)>>
+
+User -> shard.jmx.bean : addReplica(default)
+shard.jmx.bean -> shard.manager : tell(DestroyReplica)
+activate shard.manager
+shard.manager -> shard.manager : saveConfiguration(newConfiguration = {localReplicas : [{ name : default, state: removing}]})
+shard.manager -> default.shard.member.1 : tell(RemoveServer(member-2))
+default.shard.member.1 -> default.shard.member.1 : saveConfiguration(newConfiguration = {replicas : [member-1]})
+default.shard.member.1 -> default.shard.member.1 : commitConfiguration()
+default.shard.member.1 -> shard.manager : tell(RemoveServerReply())
+shard.manager -> shard.manager : saveConfiguration(newConfiguration = {localReplicas : [] })
+shard.manager -> default.shard.member.2 : tell(PoisonPill)
+destroy default.shard.member.2
+....
+
+==== Adding a third default shard replica
+
+[plantuml]
+....
+actor User
+participant ShardManager as shard.manager
+participant ShardManagerJMXBean as shard.jmx.bean
+participant Shard as default.shard.member.1  <<(A,#ADD1B2)>>
+participant Shard as default.shard.member.2  <<(B,#FFFF00)>>
+
+
+User -> shard.jmx.bean : addReplica(default)
+shard.jmx.bean -> shard.manager : tell(CreateReplica)
+activate shard.manager
+participant Shard as default.shard.member.3  <<(C,#00CCCC)>>
+create default.shard.member.3
+shard.manager -> default.shard.member.3 : create(primary)
+shard.manager -> default.shard.member.1 : tell(AddServer(member-2))
+shard.manager -> shard.manager : saveConfiguration(newConfiguration = {localReplicas : [{ name : default, state: adding}]})
+activate default.shard.member.1
+default.shard.member.1 -> default.shard.member.1 : addNonVotingPeer(member-3)
+default.shard.member.1 -> default.shard.member.2 : appendEntries(dataTree)
+default.shard.member.1 <-- default.shard.member.2 : appendEntriesReply(dataTree)
+default.shard.member.1 -> default.shard.member.1 : saveConfiguration(newConfiguration = {replicas : [member-1, member-2, member-3]})
+default.shard.member.1 -> default.shard.member.2 : appendEntries(newConfiguration)
+default.shard.member.1 <-- default.shard.member.2 : appendEntriesReply(newConfiguration)
+default.shard.member.1 -> default.shard.member.1 : commitConfiguration()
+default.shard.member.1 -> default.shard.member.2 : appendEntries(heartbeat)
+default.shard.member.2 -> default.shard.member.2 : commitConfiguration()
+default.shard.member.1 <-- default.shard.member.2 : appendEntries(heartbeat)
+default.shard.member.1 -> shard.manager : tell(AddServerReply())
+shard.manager -> shard.manager : saveConfiguration(newConfiguration = {localReplicas : [{ name : default, state: added}]})
+default.shard.member.1 -> default.shard.member.3 : appendEntries(heartbeat)
+default.shard.member.2 -> default.shard.member.3 : commitConfiguration()
+default.shard.member.1 <-- default.shard.member.3 : appendEntries(heartbeat)
+....
+
+=== APIs
+
+==== ShardManagerJMXBean
+
+. boolean addReplica(String friendlyModuleName);
+
+
+=== Configuration
+
+==== ShardManager Configuration
+
+localReplicas
+
+. inventory
+. topology
+. ...
+
+
+==== Shard Configuration
+
+replicas
+
+. member-1
+. member-2
+. member-3
+. ....
+
+
+==== RAFT Notes
+
+- According to RAFT the new configuration must be adopted by all replicas (servers) as soon as it is added to the
+  replicated log. Why?
+
+The new configuration takes effect on each server as soon as it is added
+to that server’s log: the Cnew entry is replicated to the Cnew servers, and **a majority of the new
+configuration** is used to determine the Cnew entry’s commitment
+
+Also if after replicating a new configuration if the leader fails and a new leader gets elected, the new leader
+must ensure that no other configuration changes can happen before the current configuration is committed. If the new
+configuration was not applied on replication the new leader may assume that it is already in a committed configuration
+and allow a new configuration change to proceed.
+
+- If a replica has already adopted a configuration and later if the log entry containing the new configuration
+  had to be removed for some reason how do we revert to the old configuration?
+
+
+==== Generating this document
+
+- Install asciidoctor : http://asciidoctor.org/docs/install-toolchain/
+[source, bash]
+gem install asciidoctor
+
+- Install asciidoctor pdf : http://asciidoctor.org/docs/convert-asciidoc-to-pdf/
+[source, bash]
+gem install --pre asciidoctor-pdf
+
+- Install asciidoctor diagram : http://asciidoctor.org/docs/asciidoctor-diagram/
+[source, bash]
+gem install --pre asciidoctor-diagram
+
+- Run command
+[source, bash]
+asciidoctor-pdf -r asciidoctor-diagram add-replica.adoc
+
+add-replica.adoc can be found in the controller-repo under sal-distributed-datastore/docs
