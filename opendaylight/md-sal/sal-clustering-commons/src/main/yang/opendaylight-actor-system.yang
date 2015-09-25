@@ -1,0 +1,33 @@
+module opendaylight-actor-system {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:md:sal:core:actor-system";
+    prefix "actor-system";
+
+    import config { prefix config; revision-date 2013-04-05; }
+
+    description "Actor System definition and implementation";
+
+    revision "2015-10-05" {
+        description "Initial revision";
+    }
+
+    identity actor-system {
+        base "config:service-type";
+        config:java-class  "akka.actor.ActorSystem";
+    }
+
+    // This is the definition of the service implementation as a module identity.
+    identity actor-system-provider {
+        base config:module-type;
+        config:provided-service actor-system;
+        config:java-name-prefix ActorSystemProvider;
+    }
+
+    //  Augments the 'configuration' choice node under modules/module.
+    augment "/config:modules/config:module/config:configuration" {
+        case actor-system-provider {
+            when "/config:modules/config:module/config:type = 'actor-system-provider'";
+        }
+    }
+
+}
