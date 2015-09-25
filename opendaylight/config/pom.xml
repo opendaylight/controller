@@ -99,11 +99,6 @@
           </executions>
         </plugin>
         <plugin>
-          <groupId>org.codehaus.groovy.maven</groupId>
-          <artifactId>gmaven-plugin</artifactId>
-          <version>${gmaven.plugin.version}</version>
-        </plugin>
-        <plugin>
           <groupId>org.opendaylight.yangtools</groupId>
           <artifactId>yang-maven-plugin</artifactId>
           <version>${yangtools.version}</version>
