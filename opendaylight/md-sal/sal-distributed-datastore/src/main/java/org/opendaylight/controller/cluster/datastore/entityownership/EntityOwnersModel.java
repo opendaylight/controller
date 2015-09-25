@@ -106,7 +106,7 @@ final class EntityOwnersModel {
         return ImmutableNodes.mapEntry(Candidate.QNAME, CANDIDATE_NAME_QNAME, candidateName);
     }
 
-    static NormalizedNode<?, ?> entityEntryWithOwner(YangInstanceIdentifier entityId, String owner) {
+    static MapEntryNode entityEntryWithOwner(YangInstanceIdentifier entityId, String owner) {
         return ImmutableNodes.mapEntryBuilder(ENTITY_QNAME, ENTITY_ID_QNAME, entityId).addChild(
                 ImmutableNodes.leafNode(ENTITY_OWNER_QNAME, owner)).build();
     }

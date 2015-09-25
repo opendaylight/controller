@@ -40,6 +40,7 @@ import org.opendaylight.controller.cluster.datastore.IntegrationTestKit;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListener;
+import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipState;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.entity.owners.rev150804.entity.owners.entity.type.entity.Candidate;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
@@ -162,6 +163,9 @@ public class DistributedEntityOwnershipIntegrationTest {
         verify(follower1MockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY1, false, false, true));
         reset(leaderMockListener, follower1MockListener);
 
+        verifyGetOwnershipState(leaderEntityOwnershipService, ENTITY1, true, true);
+        verifyGetOwnershipState(follower1EntityOwnershipService, ENTITY1, false, true);
+
         // Register leader candidate for entity1_2 (same id, different type) and verify it becomes owner
 
         leaderEntityOwnershipService.registerCandidate(ENTITY1_2);
@@ -246,6 +250,14 @@ public class DistributedEntityOwnershipIntegrationTest {
         verifyOwner(leaderDistributedDataStore, ENTITY2, "");
         verify(leaderMockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY2, true, false, false));
         verify(follower1MockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY2, false, false, false));
+    }
+
+    private void verifyGetOwnershipState(DistributedEntityOwnershipService service, Entity entity,
+            boolean isOwner, boolean hasOwner) {
+        Optional<EntityOwnershipState> state = service.getOwnershipState(entity);
+        assertEquals("getOwnershipState present", true, state.isPresent());
+        assertEquals("isOwner", isOwner, state.get().isOwner());
+        assertEquals("hasOwner", hasOwner, state.get().hasOwner());
     }
 
     private void verifyCandidates(DistributedDataStore dataStore, Entity entity, String... expCandidates) throws Exception {
