@@ -13,10 +13,18 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
+import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_ID_QNAME;
+import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_OWNERS_PATH;
+import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_QNAME;
+import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.entityEntryWithOwner;
+import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.entityOwnersWithEntityTypeEntry;
+import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.entityPath;
+import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.entityTypeEntryWithEntityEntry;
 import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.Collections;
 import java.util.Map;
@@ -28,6 +36,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
+import org.opendaylight.controller.cluster.datastore.ShardDataTree;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
 import org.opendaylight.controller.cluster.datastore.config.ModuleConfig;
@@ -37,6 +46,7 @@ import org.opendaylight.controller.cluster.datastore.entityownership.messages.Re
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.UnregisterCandidateLocal;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.UnregisterListenerLocal;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
+import org.opendaylight.controller.cluster.datastore.messages.GetShardDataTree;
 import org.opendaylight.controller.cluster.datastore.utils.MockClusterWrapper;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.controller.md.sal.common.api.clustering.CandidateAlreadyRegisteredException;
@@ -44,9 +54,12 @@ import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipCandidateRegistration;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListener;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListenerRegistration;
+import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipState;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
+import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
@@ -228,6 +241,53 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
         service.close();
     }
 
+    @Test
+    public void testGetOwnershipState() throws Exception {
+        final TestShardPropsCreator shardPropsCreator = new TestShardPropsCreator();
+        DistributedEntityOwnershipService service = new DistributedEntityOwnershipService(dataStore) {
+            @Override
+            protected EntityOwnershipShardPropsCreator newShardPropsCreator() {
+                return shardPropsCreator;
+            }
+        };
+
+        service.start();
+
+        ShardDataTree shardDataTree = new ShardDataTree(SchemaContextHelper.entityOwners());
+        shardPropsCreator.setDataTree(shardDataTree.getDataTree());
+
+        Entity entity1 = new Entity(ENTITY_TYPE, "one");
+        writeNode(ENTITY_OWNERS_PATH, entityOwnersWithEntityTypeEntry(entityTypeEntryWithEntityEntry(entity1.getType(),
+                entityEntryWithOwner(entity1.getId(), "member-1"))), shardDataTree);
+        verifyGetOwnershipState(service, entity1, true, true);
+
+        writeNode(entityPath(entity1.getType(), entity1.getId()), entityEntryWithOwner(entity1.getId(), "member-2"),
+                shardDataTree);
+        verifyGetOwnershipState(service, entity1, false, true);
+
+        writeNode(entityPath(entity1.getType(), entity1.getId()), entityEntryWithOwner(entity1.getId(), ""),
+                shardDataTree);
+        verifyGetOwnershipState(service, entity1, false, false);
+
+        Entity entity2 = new Entity(ENTITY_TYPE, "two");
+        Optional<EntityOwnershipState> state = service.getOwnershipState(entity2);
+        assertEquals("getOwnershipState present", false, state.isPresent());
+
+        writeNode(entityPath(entity2.getType(), entity2.getId()), ImmutableNodes.mapEntry(ENTITY_QNAME,
+                ENTITY_ID_QNAME, entity2.getId()), shardDataTree);
+        verifyGetOwnershipState(service, entity2, false, false);
+
+        service.close();
+    }
+
+    private void verifyGetOwnershipState(DistributedEntityOwnershipService service, Entity entity,
+            boolean isOwner, boolean hasOwner) {
+        Optional<EntityOwnershipState> state = service.getOwnershipState(entity);
+        assertEquals("getOwnershipState present", true, state.isPresent());
+        assertEquals("isOwner", isOwner, state.get().isOwner());
+        assertEquals("hasOwner", hasOwner, state.get().hasOwner());
+    }
+
     private void verifyEntityCandidate(ActorRef entityOwnershipShard, String entityType,
             YangInstanceIdentifier entityId, String candidateName) {
         verifyEntityCandidate(entityType, entityId, candidateName,
@@ -261,12 +321,13 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
         private final AtomicReference<CountDownLatch> messageReceived = new AtomicReference<>();
         private final AtomicReference<Object> receivedMessage = new AtomicReference<>();
         private final AtomicReference<Class<?>> messageClass = new AtomicReference<>();
+        private final AtomicReference<DataTree> dataTree = new AtomicReference<>();
 
         @Override
         public Props newProps(ShardIdentifier shardId, Map<String, String> peerAddresses,
                 DatastoreContext datastoreContext, SchemaContext schemaContext) {
             return Props.create(TestEntityOwnershipShard.class, shardId, peerAddresses, datastoreContext,
-                    schemaContext, "member-1", messageClass, messageReceived, receivedMessage);
+                    schemaContext, "member-1", messageClass, messageReceived, receivedMessage, dataTree);
         }
 
         @SuppressWarnings("unchecked")
@@ -282,27 +343,37 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
             receivedMessage.set(null);
             messageClass.set(ofType);
         }
+
+        void setDataTree(DataTree tree) {
+            this.dataTree.set(tree);
+        }
     }
 
     static class TestEntityOwnershipShard extends EntityOwnershipShard {
         private final AtomicReference<CountDownLatch> messageReceived;
         private final AtomicReference<Object> receivedMessage;
         private final AtomicReference<Class<?>> messageClass;
+        private final AtomicReference<DataTree> dataTree;
 
         protected TestEntityOwnershipShard(ShardIdentifier name, Map<String, String> peerAddresses,
                 DatastoreContext datastoreContext, SchemaContext schemaContext, String localMemberName,
                 AtomicReference<Class<?>> messageClass, AtomicReference<CountDownLatch> messageReceived,
-                AtomicReference<Object> receivedMessage) {
+                AtomicReference<Object> receivedMessage, AtomicReference<DataTree> dataTree) {
             super(name, peerAddresses, datastoreContext, schemaContext, localMemberName);
             this.messageClass = messageClass;
             this.messageReceived = messageReceived;
             this.receivedMessage = receivedMessage;
+            this.dataTree = dataTree;
         }
 
         @Override
         public void onReceiveCommand(final Object message) throws Exception {
             try {
-                super.onReceiveCommand(message);
+                if(dataTree.get() != null && message instanceof GetShardDataTree) {
+                    sender().tell(dataTree.get(), self());
+                } else {
+                    super.onReceiveCommand(message);
+                }
             } finally {
                 Class<?> expMsgClass = messageClass.get();
                 if(expMsgClass != null && expMsgClass.equals(message.getClass())) {

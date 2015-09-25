@@ -7,11 +7,16 @@
  */
 package org.opendaylight.controller.cluster.datastore.entityownership;
 
+import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.ENTITY_OWNER_NODE_ID;
+import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.entityPath;
 import akka.actor.ActorRef;
 import akka.dispatch.OnComplete;
+import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -24,6 +29,7 @@ import org.opendaylight.controller.cluster.datastore.entityownership.messages.Re
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.UnregisterCandidateLocal;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.UnregisterListenerLocal;
 import org.opendaylight.controller.cluster.datastore.messages.CreateShard;
+import org.opendaylight.controller.cluster.datastore.messages.GetShardDataTree;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ModuleShardStrategy;
 import org.opendaylight.controller.md.sal.common.api.clustering.CandidateAlreadyRegisteredException;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
@@ -31,10 +37,18 @@ import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipC
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListener;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListenerRegistration;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipService;
+import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipState;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.entity.owners.rev150804.EntityOwners;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
+import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
+import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import scala.concurrent.Await;
 import scala.concurrent.Future;
+import scala.concurrent.duration.Duration;
 
 /**
  * The distributed implementation of the EntityOwnershipService.
@@ -49,6 +63,7 @@ public class DistributedEntityOwnershipService implements EntityOwnershipService
     private final DistributedDataStore datastore;
     private final ConcurrentMap<Entity, Entity> registeredEntities = new ConcurrentHashMap<>();
     private volatile ActorRef localEntityOwnershipShard;
+    private volatile DataTree localEntityOwnershipShardDataTree;
 
     public DistributedEntityOwnershipService(DistributedDataStore datastore) {
         this.datastore = datastore;
@@ -147,6 +162,49 @@ public class DistributedEntityOwnershipService implements EntityOwnershipService
 
         executeLocalEntityOwnershipShardOperation(registerListener);
         return new DistributedEntityOwnershipListenerRegistration(listener, entityType, this);
+    }
+
+    @Override
+    public Optional<EntityOwnershipState> getOwnershipState(Entity forEntity) {
+        Preconditions.checkNotNull(forEntity, "forEntity cannot be null");
+
+        DataTree dataTree = getLocalEntityOwnershipShardDataTree();
+        if(dataTree == null) {
+            return Optional.absent();
+        }
+
+        Optional<NormalizedNode<?, ?>> entityNode = dataTree.takeSnapshot().readNode(
+                entityPath(forEntity.getType(), forEntity.getId()));
+        if(!entityNode.isPresent()) {
+            return Optional.absent();
+        }
+
+        String localMemberName = datastore.getActorContext().getCurrentMemberName();
+        Optional<DataContainerChild<? extends PathArgument, ?>> ownerLeaf = ((MapEntryNode)entityNode.get()).
+                getChild(ENTITY_OWNER_NODE_ID);
+        String owner = ownerLeaf.isPresent() ? ownerLeaf.get().getValue().toString() : null;
+        boolean hasOwner = !Strings.isNullOrEmpty(owner);
+        boolean isOwner = hasOwner && localMemberName.equals(owner);
+
+        return Optional.of(new EntityOwnershipState(isOwner, hasOwner));
+    }
+
+    private DataTree getLocalEntityOwnershipShardDataTree() {
+        if(localEntityOwnershipShardDataTree == null) {
+            try {
+                if(localEntityOwnershipShard == null) {
+                    localEntityOwnershipShard = Await.result(datastore.getActorContext().findLocalShardAsync(
+                            ENTITY_OWNERSHIP_SHARD_NAME), Duration.Inf());
+                }
+
+                localEntityOwnershipShardDataTree = (DataTree) Await.result(Patterns.ask(localEntityOwnershipShard,
+                        GetShardDataTree.INSTANCE, MESSAGE_TIMEOUT), Duration.Inf());
+            } catch (Exception e) {
+                LOG.error("Failed to find local {} shard", ENTITY_OWNERSHIP_SHARD_NAME, e);
+            }
+        }
+
+        return localEntityOwnershipShardDataTree;
     }
 
     void unregisterListener(String entityType, EntityOwnershipListener listener) {
