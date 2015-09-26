@@ -20,24 +20,30 @@ public class Snapshot implements Serializable {
     private final long lastTerm;
     private final long lastAppliedIndex;
     private final long lastAppliedTerm;
+    private final long electionTerm;
+    private final String electionVotedFor;
 
-    private Snapshot(byte[] state,
-        List<ReplicatedLogEntry> unAppliedEntries, long lastIndex,
-        long lastTerm, long lastAppliedIndex, long lastAppliedTerm) {
+    private Snapshot(byte[] state, List<ReplicatedLogEntry> unAppliedEntries, long lastIndex, long lastTerm,
+            long lastAppliedIndex, long lastAppliedTerm, long electionTerm, String electionVotedFor) {
         this.state = state;
         this.unAppliedEntries = unAppliedEntries;
         this.lastIndex = lastIndex;
         this.lastTerm = lastTerm;
         this.lastAppliedIndex = lastAppliedIndex;
         this.lastAppliedTerm = lastAppliedTerm;
+        this.electionTerm = electionTerm;
+        this.electionVotedFor = electionVotedFor;
     }
 
+    public static Snapshot create(byte[] state, List<ReplicatedLogEntry> entries, long lastIndex, long lastTerm,
+            long lastAppliedIndex, long lastAppliedTerm) {
+        return new Snapshot(state, entries, lastIndex, lastTerm, lastAppliedIndex, lastAppliedTerm, -1, null);
+    }
 
-    public static Snapshot create(byte[] state,
-        List<ReplicatedLogEntry> entries, long lastIndex, long lastTerm,
-        long lastAppliedIndex, long lastAppliedTerm) {
-        return new Snapshot(state, entries, lastIndex, lastTerm,
-            lastAppliedIndex, lastAppliedTerm);
+    public static Snapshot create(byte[] state, List<ReplicatedLogEntry> entries, long lastIndex, long lastTerm,
+            long lastAppliedIndex, long lastAppliedTerm, long electionTerm, String electionVotedFor) {
+        return new Snapshot(state, entries, lastIndex, lastTerm, lastAppliedIndex, lastAppliedTerm,
+                electionTerm, electionVotedFor);
     }
 
     public byte[] getState() {
@@ -64,15 +70,20 @@ public class Snapshot implements Serializable {
         return this.lastIndex;
     }
 
-    public String getLogMessage() {
-        StringBuilder sb = new StringBuilder();
-        return sb.append("Snapshot={")
-            .append("lastTerm:" + this.getLastTerm() + ", ")
-            .append("lastIndex:" + this.getLastIndex()  + ", ")
-            .append("LastAppliedIndex:" + this.getLastAppliedIndex()  + ", ")
-            .append("LastAppliedTerm:" + this.getLastAppliedTerm()  + ", ")
-            .append("UnAppliedEntries size:" + this.getUnAppliedEntries().size()  + "}")
-            .toString();
+    public long getElectionTerm() {
+        return electionTerm;
+    }
 
+
+    public String getElectionVotedFor() {
+        return electionVotedFor;
+    }
+
+    @Override
+    public String toString() {
+        return "Snapshot [lastIndex=" + lastIndex + ", lastTerm=" + lastTerm + ", lastAppliedIndex=" + lastAppliedIndex
+                + ", lastAppliedTerm=" + lastAppliedTerm + ", unAppliedEntries size=" + unAppliedEntries.size()
+                + ", state size=" + state.length + ", electionTerm=" + electionTerm + ", electionVotedFor=" + electionVotedFor
+                + "]";
     }
 }
