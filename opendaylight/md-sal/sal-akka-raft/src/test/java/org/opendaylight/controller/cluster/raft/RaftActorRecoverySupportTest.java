@@ -8,22 +8,29 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import akka.japi.Procedure;
 import akka.persistence.RecoveryCompleted;
 import akka.persistence.SnapshotMetadata;
 import akka.persistence.SnapshotOffer;
+import akka.persistence.SnapshotSelectionCriteria;
 import java.util.Arrays;
 import java.util.Collections;
+import org.hamcrest.Description;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentMatcher;
 import org.mockito.InOrder;
+import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
+import org.opendaylight.controller.cluster.PersistentDataProvider;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyLogEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.DeleteEntries;
@@ -50,6 +57,9 @@ public class RaftActorRecoverySupportTest {
     @Mock
     private RaftActorRecoveryCohort mockCohort;
 
+    @Mock
+    PersistentDataProvider mockPersistentProvider;
+
     private RaftActorRecoverySupport support;
 
     private RaftActorContext context;
@@ -59,7 +69,7 @@ public class RaftActorRecoverySupportTest {
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
-        context = new RaftActorContextImpl(null, null, "test", new ElectionTermImpl(mockPersistence, "test", LOG),
+        context = new RaftActorContextImpl(null, null, "test", new ElectionTermImpl(mockPersistentProvider, "test", LOG),
                 -1, -1, Collections.<String,String>emptyMap(), configParams, mockPersistence, LOG);
 
         support = new RaftActorRecoverySupport(context, mockBehavior , mockCohort);
@@ -74,7 +84,7 @@ public class RaftActorRecoverySupportTest {
     }
 
     private void sendMessageToSupport(Object message, boolean expComplete) {
-        boolean complete = support.handleRecoveryMessage(message);
+        boolean complete = support.handleRecoveryMessage(message, mockPersistentProvider);
         assertEquals("complete", expComplete, complete);
     }
 
@@ -281,9 +291,13 @@ public class RaftActorRecoverySupportTest {
         assertEquals("Voted For", "member2", context.getTermInformation().getVotedFor());
     }
 
+    @SuppressWarnings("unchecked")
     @Test
-    public void testRecoveryWithPersistenceDisabled() {
+    public void testDataRecoveredWithPersistenceDisabled() {
         doReturn(false).when(mockPersistence).isRecoveryApplicable();
+        doReturn(10L).when(mockPersistentProvider).getLastSequenceNumber();
+
+        sendMessageToSupport(new UpdateElectionTerm(5, "member2"));
 
         Snapshot snapshot = Snapshot.create(new byte[]{1}, Collections.<ReplicatedLogEntry>emptyList(), 3, 1, 3, 1);
         SnapshotOffer snapshotOffer = new SnapshotOffer(new SnapshotMetadata("test", 6, 12345), snapshot);
@@ -308,13 +322,44 @@ public class RaftActorRecoverySupportTest {
         assertEquals("Snapshot term", -1, context.getReplicatedLog().getSnapshotTerm());
         assertEquals("Snapshot index", -1, context.getReplicatedLog().getSnapshotIndex());
 
-        sendMessageToSupport(new UpdateElectionTerm(5, "member2"));
-
-        assertEquals("Current term", 0, context.getTermInformation().getCurrentTerm());
-        assertEquals("Voted For", null, context.getTermInformation().getVotedFor());
+        assertEquals("Current term", 5, context.getTermInformation().getCurrentTerm());
+        assertEquals("Voted For", "member2", context.getTermInformation().getVotedFor());
 
         sendMessageToSupport(RecoveryCompleted.getInstance(), true);
 
         verifyNoMoreInteractions(mockCohort);
+
+        verify(mockPersistentProvider).deleteMessages(10L);
+        verify(mockPersistentProvider).deleteSnapshots(any(SnapshotSelectionCriteria.class));
+        verify(mockPersistentProvider).persist(updateElectionTerm(5, "member2"), any(Procedure.class));
+    }
+
+    static UpdateElectionTerm updateElectionTerm(final long term, final String votedFor) {
+        return Matchers.argThat(new ArgumentMatcher<UpdateElectionTerm>() {
+            @Override
+            public boolean matches(Object argument) {
+                UpdateElectionTerm other = (UpdateElectionTerm) argument;
+                return term == other.getCurrentTerm() && votedFor.equals(other.getVotedFor());
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendValue(new UpdateElectionTerm(term, votedFor));
+            }
+        });
+    }
+
+    @Test
+    public void testNoDataRecoveredWithPersistenceDisabled() {
+        doReturn(false).when(mockPersistence).isRecoveryApplicable();
+
+        sendMessageToSupport(new UpdateElectionTerm(5, "member2"));
+
+        assertEquals("Current term", 5, context.getTermInformation().getCurrentTerm());
+        assertEquals("Voted For", "member2", context.getTermInformation().getVotedFor());
+
+        sendMessageToSupport(RecoveryCompleted.getInstance(), true);
+
+        verifyNoMoreInteractions(mockCohort, mockPersistentProvider);
     }
 }
