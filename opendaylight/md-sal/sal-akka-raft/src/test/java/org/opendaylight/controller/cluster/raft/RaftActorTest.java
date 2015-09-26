@@ -18,12 +18,12 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.actor.Terminated;
+import akka.dispatch.Dispatchers;
 import akka.japi.Procedure;
 import akka.persistence.RecoveryCompleted;
 import akka.persistence.SaveSnapshotFailure;
@@ -50,6 +50,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.NonPersistentDataProvider;
+import org.opendaylight.controller.cluster.PersistentDataProvider;
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.RoleChanged;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyJournalEntries;
@@ -219,6 +220,47 @@ public class RaftActorTest extends AbstractActorTest {
     }
 
     @Test
+    public void testUpdateElectionTermPersistedWithPersistenceDisabled() throws Exception {
+        new JavaTestKit(getSystem()) {{
+            String persistenceId = factory.generateActorId("follower-");
+            DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+            config.setHeartBeatInterval(new FiniteDuration(100, TimeUnit.MILLISECONDS));
+            config.setElectionTimeoutFactor(1);
+
+            InMemoryJournal.addWriteMessagesCompleteLatch(persistenceId, 1);
+
+            TestActorRef<MockRaftActor> ref = factory.createTestActor(MockRaftActor.props(persistenceId,
+                    ImmutableMap.<String, String>builder().put("member1", "address").build(),
+                    Optional.<ConfigParams>of(config), new NonPersistentDataProvider()).
+                            withDispatcher(Dispatchers.DefaultDispatcherId()), persistenceId);
+
+            InMemoryJournal.waitForWriteMessagesComplete(persistenceId);
+            List<UpdateElectionTerm> entries = InMemoryJournal.get(persistenceId, UpdateElectionTerm.class);
+            assertEquals("UpdateElectionTerm entries", 1, entries.size());
+            UpdateElectionTerm updateEntry = entries.get(0);
+
+            factory.killActor(ref, this);
+
+            config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
+            ref = factory.createTestActor(MockRaftActor.props(persistenceId,
+                    ImmutableMap.<String, String>builder().put("member1", "address").build(),
+                    Optional.<ConfigParams>of(config), new NonPersistentDataProvider()).
+                            withDispatcher(Dispatchers.DefaultDispatcherId()), persistenceId);
+
+            MockRaftActor actor = ref.underlyingActor();
+            actor.waitForRecoveryComplete();
+
+            RaftActorContext newContext = actor.getRaftActorContext();
+            assertEquals("electionTerm", updateEntry.getCurrentTerm(),
+                    newContext.getTermInformation().getCurrentTerm());
+            assertEquals("votedFor", updateEntry.getVotedFor(), newContext.getTermInformation().getVotedFor());
+
+            entries = InMemoryJournal.get(persistenceId, UpdateElectionTerm.class);
+            assertEquals("UpdateElectionTerm entries", 1, entries.size());
+        }};
+    }
+
+    @Test
     public void testRaftActorForwardsToRaftActorRecoverySupport() {
         String persistenceId = factory.generateActorId("leader-");
 
@@ -265,14 +307,14 @@ public class RaftActorTest extends AbstractActorTest {
                 new org.opendaylight.controller.cluster.raft.RaftActor.UpdateElectionTerm(6, "member3");
         mockRaftActor.handleRecover(deprecatedUpdateElectionTerm);
 
-        verify(mockSupport).handleRecoveryMessage(same(snapshotOffer));
-        verify(mockSupport).handleRecoveryMessage(same(logEntry));
-        verify(mockSupport).handleRecoveryMessage(same(applyJournalEntries));
-        verify(mockSupport).handleRecoveryMessage(same(applyLogEntries));
-        verify(mockSupport).handleRecoveryMessage(same(deleteEntries));
-        verify(mockSupport).handleRecoveryMessage(same(deprecatedDeleteEntries));
-        verify(mockSupport).handleRecoveryMessage(same(updateElectionTerm));
-        verify(mockSupport).handleRecoveryMessage(same(deprecatedUpdateElectionTerm));
+        verify(mockSupport).handleRecoveryMessage(same(snapshotOffer), any(PersistentDataProvider.class));
+        verify(mockSupport).handleRecoveryMessage(same(logEntry), any(PersistentDataProvider.class));
+        verify(mockSupport).handleRecoveryMessage(same(applyJournalEntries), any(PersistentDataProvider.class));
+        verify(mockSupport).handleRecoveryMessage(same(applyLogEntries), any(PersistentDataProvider.class));
+        verify(mockSupport).handleRecoveryMessage(same(deleteEntries), any(PersistentDataProvider.class));
+        verify(mockSupport).handleRecoveryMessage(same(deprecatedDeleteEntries), any(PersistentDataProvider.class));
+        verify(mockSupport).handleRecoveryMessage(same(updateElectionTerm), any(PersistentDataProvider.class));
+        verify(mockSupport).handleRecoveryMessage(same(deprecatedUpdateElectionTerm), any(PersistentDataProvider.class));
     }
 
     @Test
@@ -347,7 +389,7 @@ public class RaftActorTest extends AbstractActorTest {
 
                 mockRaftActor.onReceiveCommand(new ApplyJournalEntries(10));
 
-                verify(dataPersistenceProvider, times(2)).persist(anyObject(), any(Procedure.class));
+                verify(dataPersistenceProvider).persist(any(ApplyJournalEntries.class), any(Procedure.class));
 
             }
 
@@ -387,6 +429,8 @@ public class RaftActorTest extends AbstractActorTest {
 
     @Test
     public void testRaftRoleChangeNotifierWhenRaftActorHasNoPeers() throws Exception {
+        System.out.println("!!!!!!!!!!!testRaftRoleChangeNotifierWhenRaftActorHasNoPeers starting");
+        try {
         new JavaTestKit(getSystem()) {{
             TestActorRef<MessageCollectorActor> notifierActor = factory.createTestActor(
                     Props.create(MessageCollectorActor.class));
@@ -401,7 +445,7 @@ public class RaftActorTest extends AbstractActorTest {
 
             TestActorRef<MockRaftActor> raftActorRef = factory.createTestActor(MockRaftActor.props(persistenceId,
                     Collections.<String, String>emptyMap(), Optional.<ConfigParams>of(config), notifierActor,
-                    new NonPersistentDataProvider()), persistenceId);
+                    new NonPersistentDataProvider()).withDispatcher(Dispatchers.DefaultDispatcherId()), persistenceId);
 
             List<RoleChanged> matches =  MessageCollectorActor.expectMatching(notifierActor, RoleChanged.class, 3);
 
@@ -444,7 +488,7 @@ public class RaftActorTest extends AbstractActorTest {
                 }
             };
 
-            raftActor.changeCurrentBehavior(follower);
+            raftActor.newBehavior(follower);
 
             leaderStateChange = MessageCollectorActor.expectFirstMatching(notifierActor, LeaderStateChanged.class);
             assertEquals(persistenceId, leaderStateChange.getMemberId());
@@ -471,6 +515,9 @@ public class RaftActorTest extends AbstractActorTest {
             leaderStateChange = MessageCollectorActor.getFirstMatching(notifierActor, LeaderStateChanged.class);
             assertNull(leaderStateChange);
         }};
+        } finally {
+            System.out.println("!!!!!!!!!!!testRaftRoleChangeNotifierWhenRaftActorHasNoPeers ending");
+        }
     }
 
     @Test
