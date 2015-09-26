@@ -25,11 +25,13 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
+import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 
 public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort, RaftActorSnapshotCohort {
 
     public static final short PAYLOAD_VERSION = 5;
+    static final String CHANGE_BEHAVIOR = "CHANGE_BEHAVIOR";
 
     final RaftActor actorDelegate;
     final RaftActorRecoveryCohort recoveryCohortDelegate;
@@ -241,6 +243,19 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
 
     @Override public String persistenceId() {
         return this.getId();
+    }
+
+    protected void newBehavior(RaftActorBehavior newBehavior) {
+        self().tell(newBehavior, ActorRef.noSender());
+    }
+
+    @Override
+    public void handleCommand(final Object message) {
+        if(message instanceof RaftActorBehavior) {
+            super.changeCurrentBehavior((RaftActorBehavior)message);
+        } else {
+            super.handleCommand(message);
+        }
     }
 
     public static Object toObject(byte[] bs) throws ClassNotFoundException, IOException {
