@@ -173,10 +173,9 @@ public class InMemoryJournal extends AsyncWriteJournal {
     @Override
     public Future<Long> doAsyncReadHighestSequenceNr(String persistenceId, long fromSequenceNr) {
         // Akka calls this during recovery.
-
         Map<Long, Object> journal = journals.get(persistenceId);
         if(journal == null) {
-            return Futures.successful(-1L);
+            return Futures.successful(fromSequenceNr);
         }
 
         synchronized (journal) {
