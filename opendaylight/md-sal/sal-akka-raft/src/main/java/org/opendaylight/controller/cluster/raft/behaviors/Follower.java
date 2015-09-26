@@ -355,7 +355,9 @@ public class Follower extends AbstractRaftActorBehavior {
                         installSnapshot.getLastIncludedIndex(),
                         installSnapshot.getLastIncludedTerm(),
                         installSnapshot.getLastIncludedIndex(),
-                        installSnapshot.getLastIncludedTerm());
+                        installSnapshot.getLastIncludedTerm(),
+                        context.getTermInformation().getCurrentTerm(),
+                        context.getTermInformation().getVotedFor());
 
                 actor().tell(new ApplySnapshot(snapshot), actor());
 

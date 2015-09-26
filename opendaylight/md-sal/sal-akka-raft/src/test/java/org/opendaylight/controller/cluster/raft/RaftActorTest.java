@@ -25,7 +25,6 @@ import akka.actor.Props;
 import akka.actor.Terminated;
 import akka.dispatch.Dispatchers;
 import akka.japi.Procedure;
-import akka.persistence.RecoveryCompleted;
 import akka.persistence.SaveSnapshotFailure;
 import akka.persistence.SaveSnapshotSuccess;
 import akka.persistence.SnapshotMetadata;
@@ -960,7 +959,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         MockRaftActor leaderActor = mockActorRef.underlyingActor();
 
-        leaderActor.handleRecover(RecoveryCompleted.getInstance());
+        leaderActor.waitForRecoveryComplete();
 
         leaderActor.handleCommand(new SwitchBehavior(RaftState.Follower, 100));
 
@@ -981,8 +980,6 @@ public class RaftActorTest extends AbstractActorTest {
 
         assertEquals(110, leaderActor.getRaftActorContext().getTermInformation().getCurrentTerm());
         assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
-
-
     }
 
     public static ByteString fromObject(Object snapshot) throws Exception {

@@ -62,6 +62,9 @@ public class SnapshotManagerTest extends AbstractActorTest {
     @Mock
     private Procedure<Void> mockProcedure;
 
+    @Mock
+    private ElectionTerm mockElectionTerm;
+
     private SnapshotManager snapshotManager;
 
     private TestActorFactory factory;
@@ -81,9 +84,9 @@ public class SnapshotManagerTest extends AbstractActorTest {
         doReturn(mockDataPersistenceProvider).when(mockRaftActorContext).getPersistenceProvider();
         doReturn("123").when(mockRaftActorBehavior).getLeaderId();
 
-        ElectionTerm mockElectionTerm = mock(ElectionTerm.class);
         doReturn(mockElectionTerm).when(mockRaftActorContext).getTermInformation();
         doReturn(5L).when(mockElectionTerm).getCurrentTerm();
+        doReturn("member5").when(mockElectionTerm).getVotedFor();
 
         snapshotManager = new SnapshotManager(mockRaftActorContext, LoggerFactory.getLogger(this.getClass()));
         factory = new TestActorFactory(getSystem());
@@ -258,6 +261,8 @@ public class SnapshotManagerTest extends AbstractActorTest {
         assertEquals("getLastAppliedIndex", 8L, snapshot.getLastAppliedIndex());
         assertArrayEquals("getState", bytes, snapshot.getState());
         assertEquals("getUnAppliedEntries", Arrays.asList(lastLogEntry), snapshot.getUnAppliedEntries());
+        assertEquals("electionTerm", mockElectionTerm.getCurrentTerm(), snapshot.getElectionTerm());
+        assertEquals("electionVotedFor", mockElectionTerm.getVotedFor(), snapshot.getElectionVotedFor());
 
         verify(mockReplicatedLog).snapshotPreCommit(7L, 1L);
     }
