@@ -127,6 +127,7 @@ class RaftActorRecoverySupport {
         context.setReplicatedLog(ReplicatedLogImpl.newInstance(snapshot, context, currentBehavior));
         context.setLastApplied(snapshot.getLastAppliedIndex());
         context.setCommitIndex(snapshot.getLastAppliedIndex());
+        context.getTermInformation().update(snapshot.getElectionTerm(), snapshot.getElectionVotedFor());
 
         Stopwatch timer = Stopwatch.createStarted();
 

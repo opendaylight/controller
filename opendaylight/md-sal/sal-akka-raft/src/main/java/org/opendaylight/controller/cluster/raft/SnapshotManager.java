@@ -293,11 +293,13 @@ public class SnapshotManager implements SnapshotState {
             Snapshot snapshot = Snapshot.create(snapshotBytes,
                     captureSnapshot.getUnAppliedEntries(),
                     captureSnapshot.getLastIndex(), captureSnapshot.getLastTerm(),
-                    captureSnapshot.getLastAppliedIndex(), captureSnapshot.getLastAppliedTerm());
+                    captureSnapshot.getLastAppliedIndex(), captureSnapshot.getLastAppliedTerm(),
+                    context.getTermInformation().getCurrentTerm(),
+                    context.getTermInformation().getVotedFor());
 
             context.getPersistenceProvider().saveSnapshot(snapshot);
 
-            LOG.info("{}: Persisting of snapshot done: {}", persistenceId(), snapshot.getLogMessage());
+            LOG.info("{}: Persisting of snapshot done: {}", persistenceId(), snapshot);
 
             long dataThreshold = totalMemory *
                     context.getConfigParams().getSnapshotDataThresholdPercentage() / 100;
@@ -305,7 +307,7 @@ public class SnapshotManager implements SnapshotState {
 
             boolean logSizeExceededSnapshotBatchCount =
                     context.getReplicatedLog().size() >= context.getConfigParams().getSnapshotBatchCount();
-LOG.debug("Log size: {}, getSnapshotBatchCount: {}",context.getReplicatedLog().size(),context.getConfigParams().getSnapshotBatchCount());
+
             if (dataSizeThresholdExceeded || logSizeExceededSnapshotBatchCount) {
                 if(LOG.isDebugEnabled()) {
                     if(dataSizeThresholdExceeded) {

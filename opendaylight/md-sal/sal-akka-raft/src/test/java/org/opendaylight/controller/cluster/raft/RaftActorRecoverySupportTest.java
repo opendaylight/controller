@@ -185,11 +185,13 @@ public class RaftActorRecoverySupportTest {
         ReplicatedLogEntry unAppliedEntry2 = new MockRaftActorContext.MockReplicatedLogEntry(1,
                 5, new MockRaftActorContext.MockPayload("5", 5));
 
-        int lastAppliedDuringSnapshotCapture = 3;
-        int lastIndexDuringSnapshotCapture = 5;
+        long lastAppliedDuringSnapshotCapture = 3;
+        long lastIndexDuringSnapshotCapture = 5;
+        long electionTerm = 2;
+        String electionVotedFor = "member-2";
 
         Snapshot snapshot = Snapshot.create(snapshotBytes, Arrays.asList(unAppliedEntry1, unAppliedEntry2),
-                lastIndexDuringSnapshotCapture, 1, lastAppliedDuringSnapshotCapture, 1);
+                lastIndexDuringSnapshotCapture, 1, lastAppliedDuringSnapshotCapture, 1, electionTerm, electionVotedFor);
 
         SnapshotMetadata metadata = new SnapshotMetadata("test", 6, 12345);
         SnapshotOffer snapshotOffer = new SnapshotOffer(metadata , snapshot);
@@ -203,6 +205,8 @@ public class RaftActorRecoverySupportTest {
         assertEquals("Commit index", lastAppliedDuringSnapshotCapture, context.getCommitIndex());
         assertEquals("Snapshot term", 1, context.getReplicatedLog().getSnapshotTerm());
         assertEquals("Snapshot index", lastAppliedDuringSnapshotCapture, context.getReplicatedLog().getSnapshotIndex());
+        assertEquals("Election term", electionTerm, context.getTermInformation().getCurrentTerm());
+        assertEquals("Election votedFor", electionVotedFor, context.getTermInformation().getVotedFor());
 
         verify(mockCohort).applyRecoverySnapshot(snapshotBytes);
     }
