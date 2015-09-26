@@ -793,30 +793,6 @@
         <type>xml</type>
         <scope>runtime</scope>
       </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>features-base</artifactId>
-        <version>${commons.opendaylight.version}</version>
-        <classifier>features</classifier>
-        <type>xml</type>
-        <scope>runtime</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>features-adsal</artifactId>
-        <version>${sal.version}</version>
-        <classifier>features</classifier>
-        <type>xml</type>
-        <scope>runtime</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>features-nsf</artifactId>
-        <version>${nsf.version}</version>
-        <classifier>features</classifier>
-        <type>xml</type>
-        <scope>runtime</scope>
-      </dependency>
 
       <!-- JMH Benchmark dependencies -->
       <dependency>
