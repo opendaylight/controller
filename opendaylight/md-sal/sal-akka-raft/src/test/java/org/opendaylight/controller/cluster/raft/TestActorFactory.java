@@ -108,15 +108,26 @@ public class TestActorFactory implements AutoCloseable {
         return prefix + actorCount++;
     }
 
+    public void killActor(ActorRef actor, JavaTestKit kit) {
+        killActor(actor, kit, true);
+    }
+
+    private void killActor(ActorRef actor, JavaTestKit kit, boolean remove) {
+        LOG.info("Killing actor {}", actor);
+        kit.watch(actor);
+        actor.tell(PoisonPill.getInstance(), ActorRef.noSender());
+        kit.expectTerminated(JavaTestKit.duration("5 seconds"), actor);
+
+        if(remove) {
+            createdActors.remove(actor);
+        }
+    }
+
     @Override
     public void close() {
-        new JavaTestKit(system) {{
-            for(ActorRef actor : createdActors) {
-                watch(actor);
-                LOG.info("Killing actor {}", actor);
-                actor.tell(PoisonPill.getInstance(), ActorRef.noSender());
-                expectTerminated(duration("5 seconds"), actor);
-            }
-        }};
+        JavaTestKit kit = new JavaTestKit(system);
+        for(ActorRef actor : createdActors) {
+            killActor(actor, kit, false);
+        }
     }
 }
