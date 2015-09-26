@@ -141,6 +141,7 @@ public class InMemoryJournal extends AsyncWriteJournal {
     @Override
     public Future<Void> doAsyncReplayMessages(final String persistenceId, final long fromSequenceNr,
             final long toSequenceNr, long max, final Procedure<PersistentRepr> replayCallback) {
+        LOG.info("doAsyncReplayMessages: {}, {}, {}",persistenceId, fromSequenceNr, toSequenceNr);
         return Futures.future(new Callable<Void>() {
             @Override
             public Void call() throws Exception {
@@ -156,6 +157,7 @@ public class InMemoryJournal extends AsyncWriteJournal {
 
                 synchronized (journal) {
                     for (Map.Entry<Long,Object> entry : journal.entrySet()) {
+                        LOG.info("doAsyncReplayMessages: entry {}",entry);
                         if (entry.getKey() >= fromSequenceNr && entry.getKey() <= toSequenceNr) {
                             PersistentRepr persistentMessage =
                                     new PersistentImpl(entry.getValue(), entry.getKey(), persistenceId,
@@ -173,10 +175,10 @@ public class InMemoryJournal extends AsyncWriteJournal {
     @Override
     public Future<Long> doAsyncReadHighestSequenceNr(String persistenceId, long fromSequenceNr) {
         // Akka calls this during recovery.
-
+        LOG.info("doAsyncReadHighestSequenceNr: {}, {}",persistenceId,fromSequenceNr);
         Map<Long, Object> journal = journals.get(persistenceId);
         if(journal == null) {
-            return Futures.successful(-1L);
+            return Futures.successful(fromSequenceNr);
         }
 
         synchronized (journal) {
@@ -186,7 +188,7 @@ public class InMemoryJournal extends AsyncWriteJournal {
                     highest = seqNr.longValue();
                 }
             }
-
+LOG.info("doAsyncReadHighestSequenceNr returning {}",highest);
             return Futures.successful(highest);
         }
     }

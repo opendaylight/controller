@@ -12,7 +12,6 @@ package org.opendaylight.controller.cluster.raft;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.japi.Procedure;
-import akka.persistence.SnapshotSelectionCriteria;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
@@ -111,6 +110,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     private final DelegatingPersistentDataProvider delegatingPersistenceProvider = new DelegatingPersistentDataProvider(null);
 
+    private final PersistentDataProvider persistentProvider;
+
     private RaftActorRecoverySupport raftRecovery;
 
     private RaftActorSnapshotMessageSupport snapshotSupport;
@@ -122,8 +123,9 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     public RaftActor(String id, Map<String, String> peerAddresses,
          Optional<ConfigParams> configParams, short payloadVersion) {
 
+        persistentProvider = new PersistentDataProvider(this);
         context = new RaftActorContextImpl(this.getSelf(),
-            this.getContext(), id, new ElectionTermImpl(delegatingPersistenceProvider, id, LOG),
+            this.getContext(), id, new ElectionTermImpl(persistentProvider, id, LOG),
             -1, -1, peerAddresses,
             (configParams.isPresent() ? configParams.get(): new DefaultConfigParamsImpl()),
             delegatingPersistenceProvider, LOG);
@@ -161,17 +163,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             raftRecovery = newRaftActorRecoverySupport();
         }
 
-        boolean recoveryComplete = raftRecovery.handleRecoveryMessage(message);
+        boolean recoveryComplete = raftRecovery.handleRecoveryMessage(message, persistentProvider);
         if(recoveryComplete) {
-            if(!persistence().isRecoveryApplicable()) {
-                // Delete all the messages from the akka journal so that we do not end up with consistency issues
-                // Note I am not using the dataPersistenceProvider and directly using the akka api here
-                deleteMessages(lastSequenceNr());
-
-                // Delete all the akka snapshots as they will not be needed
-                deleteSnapshots(new SnapshotSelectionCriteria(scala.Long.MaxValue(), scala.Long.MaxValue()));
-            }
-
             onRecoveryComplete();
 
             initializeBehavior();
