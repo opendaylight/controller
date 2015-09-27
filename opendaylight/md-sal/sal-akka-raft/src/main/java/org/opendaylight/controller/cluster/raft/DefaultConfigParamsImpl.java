@@ -7,10 +7,12 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import java.util.concurrent.TimeUnit;
+import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.raft.policy.DefaultRaftPolicy;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.slf4j.Logger;
@@ -63,7 +65,9 @@ public class DefaultConfigParamsImpl implements ConfigParams {
     private long electionTimeoutFactor = 2;
     private String customRaftPolicyImplementationClass;
 
-    Supplier<RaftPolicy> policySupplier = Suppliers.memoize(new PolicySupplier());
+    private final Supplier<RaftPolicy> policySupplier = Suppliers.memoize(new PolicySupplier());
+
+    private PeerAddressResolver peerAddressResolver = NoopPeerAddressResolver.INSIANCE;
 
     public void setHeartBeatInterval(FiniteDuration heartBeatInterval) {
         this.heartBeatInterval = heartBeatInterval;
@@ -176,5 +180,14 @@ public class DefaultConfigParamsImpl implements ConfigParams {
             }
             return DefaultRaftPolicy.INSTANCE;
         }
+    }
+
+    @Override
+    public PeerAddressResolver getPeerAddressResolver() {
+        return peerAddressResolver;
+    }
+
+    public void setPeerAddressResolver(@Nonnull PeerAddressResolver peerAddressResolver) {
+        this.peerAddressResolver = Preconditions.checkNotNull(peerAddressResolver);
     }
 }
