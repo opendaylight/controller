@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import scala.concurrent.duration.FiniteDuration;
 
@@ -92,4 +93,9 @@ public interface ConfigParams {
      * DefaultRaftPolicy
      */
     RaftPolicy getRaftPolicy();
+
+    /**
+     * Returns the PeerAddressResolver.
+     */
+    @Nonnull PeerAddressResolver getPeerAddressResolver();
 }
