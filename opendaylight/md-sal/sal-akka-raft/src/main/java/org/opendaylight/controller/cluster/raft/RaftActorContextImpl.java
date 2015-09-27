@@ -16,6 +16,7 @@ import akka.actor.Props;
 import akka.actor.UntypedActorContext;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Supplier;
+import com.google.common.collect.Maps;
 import java.util.Map;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
@@ -63,7 +64,7 @@ public class RaftActorContextImpl implements RaftActorContext {
         this.termInformation = termInformation;
         this.commitIndex = commitIndex;
         this.lastApplied = lastApplied;
-        this.peerAddresses = peerAddresses;
+        this.peerAddresses = Maps.newHashMap(peerAddresses);
         this.configParams = configParams;
         this.persistenceProvider = persistenceProvider;
         this.LOG = logger;

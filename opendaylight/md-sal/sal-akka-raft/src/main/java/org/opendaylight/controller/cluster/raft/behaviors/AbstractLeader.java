@@ -14,8 +14,6 @@ import akka.actor.Cancellable;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMap.Builder;
 import com.google.protobuf.ByteString;
 import java.io.IOException;
 import java.util.Collection;
@@ -79,7 +77,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     // This would be passed as the hash code of the last chunk when sending the first chunk
     public static final int INITIAL_LAST_CHUNK_HASH_CODE = -1;
 
-    private final Map<String, FollowerLogInformation> followerToLog;
+    private final Map<String, FollowerLogInformation> followerToLog = new HashMap<>();
     private final Map<String, FollowerToSnapshot> mapFollowerToSnapshot = new HashMap<>();
 
     private Cancellable heartbeatSchedule = null;
@@ -97,14 +95,12 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
         setLeaderPayloadVersion(context.getPayloadVersion());
 
-        final Builder<String, FollowerLogInformation> ftlBuilder = ImmutableMap.builder();
         for (String followerId : context.getPeerAddresses().keySet()) {
             FollowerLogInformation followerLogInformation =
                 new FollowerLogInformationImpl(followerId, -1, context);
 
-            ftlBuilder.put(followerId, followerLogInformation);
+            followerToLog.put(followerId, followerLogInformation);
         }
-        followerToLog = ftlBuilder.build();
 
         leaderId = context.getId();
 
@@ -139,6 +135,12 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
      */
     public final Collection<String> getFollowerIds() {
         return followerToLog.keySet();
+    }
+
+    public void addUninitializedFollower(String followerId) {
+        FollowerLogInformation followerLogInformation = new FollowerLogInformationImpl(followerId, -1, context);
+        followerLogInformation.setInitialized(false);
+        followerToLog.put(followerId, followerLogInformation);
     }
 
     @VisibleForTesting
@@ -594,7 +596,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
      * then send the existing snapshot in chunks to the follower.
      * @param followerId
      */
-    private void initiateCaptureSnapshot(String followerId) {
+    public void initiateCaptureSnapshot(String followerId) {
         if (snapshot.isPresent()) {
             // if a snapshot is present in the memory, most likely another install is in progress
             // no need to capture snapshot.
@@ -624,10 +626,11 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         LOG.debug("{}: sendInstallSnapshot", logName());
         for (Entry<String, FollowerLogInformation> e : followerToLog.entrySet()) {
             ActorSelection followerActor = context.getPeerActorSelection(e.getKey());
+            FollowerLogInformation followerLogInfo = e.getValue();
 
             if (followerActor != null) {
                 long nextIndex = e.getValue().getNextIndex();
-                if (canInstallSnapshot(nextIndex)) {
+                if (!followerLogInfo.isInitialized() || canInstallSnapshot(nextIndex)) {
                     sendSnapshotChunk(followerActor, e.getKey());
                 }
             }
