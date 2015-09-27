@@ -28,6 +28,8 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
 
     private short payloadVersion = -1;
 
+    private FollowerState state = FollowerState.VOTING;
+
     public FollowerLogInformationImpl(String id, long matchIndex, RaftActorContext context) {
         this.id = id;
         this.nextIndex = context.getCommitIndex();
@@ -87,6 +89,10 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
 
     @Override
     public boolean isFollowerActive() {
+        if(state == FollowerState.VOTING_NOT_INITIALIZED) {
+            return false;
+        }
+
         long elapsed = stopwatch.elapsed(TimeUnit.MILLISECONDS);
         return (stopwatch.isRunning()) &&
                 (elapsed <= context.getConfigParams().getElectionTimeOutInterval().toMillis());
@@ -114,6 +120,10 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
 
     @Override
     public boolean okToReplicate() {
+        if(state == FollowerState.VOTING_NOT_INITIALIZED) {
+            return false;
+        }
+
         // Return false if we are trying to send duplicate data before the heartbeat interval
         if(getNextIndex() == lastReplicatedIndex){
             if(lastReplicatedStopwatch.elapsed(TimeUnit.MILLISECONDS) < context.getConfigParams()
@@ -134,16 +144,16 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
         lastReplicatedStopwatch.start();
     }
 
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("FollowerLogInformationImpl [id=").append(id).append(", nextIndex=").append(nextIndex)
-                .append(", matchIndex=").append(matchIndex).append(", stopwatch=")
-                .append(stopwatch.elapsed(TimeUnit.MILLISECONDS))
-                .append(", followerTimeoutMillis=")
-                .append(context.getConfigParams().getElectionTimeOutInterval().toMillis()).append("]");
-        return builder.toString();
-    }
+    //    @Override
+    //    public String toString() {
+    //        StringBuilder builder = new StringBuilder();
+    //        builder.append("FollowerLogInformationImpl [id=").append(id).append(", nextIndex=").append(nextIndex)
+    //                .append(", matchIndex=").append(matchIndex).append(", stopwatch=")
+    //                .append(stopwatch.elapsed(TimeUnit.MILLISECONDS))
+    //                .append(", followerTimeoutMillis=")
+    //                .append(context.getConfigParams().getElectionTimeOutInterval().toMillis()).append("]");
+    //        return builder.toString();
+    //    }
 
     @Override
     public short getPayloadVersion() {
@@ -153,5 +163,28 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
     @Override
     public void setPayloadVersion(short payloadVersion) {
         this.payloadVersion = payloadVersion;
+    }
+
+    @Override
+    public boolean canParticipateInConsensus() {
+        return state == FollowerState.VOTING;
+    }
+
+    @Override
+    public void setFollowerState(FollowerState state) {
+        this.state = state;
+    }
+
+    @Override
+    public FollowerState getFollowerState() {
+        return state;
+    }
+
+    @Override
+    public String toString() {
+        return "FollowerLogInformationImpl [id=" + id + ", nextIndex=" + nextIndex + ", matchIndex=" + matchIndex
+                + ", lastReplicatedIndex=" + lastReplicatedIndex + ", state=" + state + ", stopwatch="
+                + stopwatch.elapsed(TimeUnit.MILLISECONDS) + ", followerTimeoutMillis="
+                + context.getConfigParams().getElectionTimeOutInterval().toMillis() + "]";
     }
 }

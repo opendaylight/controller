@@ -14,8 +14,6 @@ import akka.actor.Cancellable;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMap.Builder;
 import com.google.protobuf.ByteString;
 import java.io.IOException;
 import java.util.Collection;
@@ -30,6 +28,7 @@ import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.ClientRequestTracker;
 import org.opendaylight.controller.cluster.raft.ClientRequestTrackerImpl;
 import org.opendaylight.controller.cluster.raft.FollowerLogInformation;
+import org.opendaylight.controller.cluster.raft.FollowerLogInformation.FollowerState;
 import org.opendaylight.controller.cluster.raft.FollowerLogInformationImpl;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
@@ -79,7 +78,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     // This would be passed as the hash code of the last chunk when sending the first chunk
     public static final int INITIAL_LAST_CHUNK_HASH_CODE = -1;
 
-    private final Map<String, FollowerLogInformation> followerToLog;
+    private final Map<String, FollowerLogInformation> followerToLog = new HashMap<>();
     private final Map<String, FollowerToSnapshot> mapFollowerToSnapshot = new HashMap<>();
 
     private Cancellable heartbeatSchedule = null;
@@ -97,14 +96,12 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
         setLeaderPayloadVersion(context.getPayloadVersion());
 
-        final Builder<String, FollowerLogInformation> ftlBuilder = ImmutableMap.builder();
         for (String followerId : context.getPeerAddresses().keySet()) {
             FollowerLogInformation followerLogInformation =
-                new FollowerLogInformationImpl(followerId, -1, context);
+                    new FollowerLogInformationImpl(followerId, -1, context);
 
-            ftlBuilder.put(followerId, followerLogInformation);
+            followerToLog.put(followerId, followerLogInformation);
         }
-        followerToLog = ftlBuilder.build();
 
         leaderId = context.getId();
 
@@ -141,6 +138,12 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         return followerToLog.keySet();
     }
 
+    public void addFollower(String followerId, FollowerState followerState) {
+        FollowerLogInformation followerLogInformation = new FollowerLogInformationImpl(followerId, -1, context);
+        followerLogInformation.setFollowerState(followerState);
+        followerToLog.put(followerId, followerLogInformation);
+    }
+
     @VisibleForTesting
     void setSnapshot(@Nullable Snapshot snapshot) {
         if(snapshot != null) {
@@ -152,7 +155,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
     @Override
     protected RaftActorBehavior handleAppendEntries(ActorRef sender,
-        AppendEntries appendEntries) {
+            AppendEntries appendEntries) {
 
         LOG.debug("{}: handleAppendEntries: {}", logName(), appendEntries);
 
@@ -161,7 +164,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
     @Override
     protected RaftActorBehavior handleAppendEntriesReply(ActorRef sender,
-        AppendEntriesReply appendEntriesReply) {
+            AppendEntriesReply appendEntriesReply) {
 
         if(LOG.isTraceEnabled()) {
             LOG.trace("{}: handleAppendEntriesReply: {}", logName(), appendEntriesReply);
@@ -170,7 +173,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         // Update the FollowerLogInformation
         String followerId = appendEntriesReply.getFollowerId();
         FollowerLogInformation followerLogInformation =
-            followerToLog.get(followerId);
+                followerToLog.get(followerId);
 
         if(followerLogInformation == null){
             LOG.error("{}: handleAppendEntriesReply - unknown follower {}", logName(), followerId);
@@ -178,9 +181,9 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         }
 
         if(followerLogInformation.timeSinceLastActivity() >
-                context.getConfigParams().getElectionTimeOutInterval().toMillis()) {
+        context.getConfigParams().getElectionTimeOutInterval().toMillis()) {
             LOG.warn("{} : handleAppendEntriesReply delayed beyond election timeout, " +
-                            "appendEntriesReply : {}, timeSinceLastActivity : {}, lastApplied : {}, commitIndex : {}",
+                    "appendEntriesReply : {}, timeSinceLastActivity : {}, lastApplied : {}, commitIndex : {}",
                     logName(), appendEntriesReply, followerLogInformation.timeSinceLastActivity(),
                     context.getLastApplied(), context.getCommitIndex());
         }
@@ -239,7 +242,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             if (replicatedCount >= minReplicationCount) {
                 ReplicatedLogEntry replicatedLogEntry = context.getReplicatedLog().get(N);
                 if (replicatedLogEntry != null &&
-                    replicatedLogEntry.getTerm() == currentTerm()) {
+                        replicatedLogEntry.getTerm() == currentTerm()) {
                     context.setCommitIndex(N);
                 }
             } else {
@@ -318,7 +321,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
     @Override
     protected RaftActorBehavior handleRequestVoteReply(ActorRef sender,
-        RequestVoteReply requestVoteReply) {
+            RequestVoteReply requestVoteReply) {
         return this;
     }
 
@@ -392,8 +395,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                         LOG.debug("{}: InstallSnapshotReply received, " +
                                 "last chunk received, Chunk: {}. Follower: {} Setting nextIndex: {}",
                                 logName(), reply.getChunkIndex(), followerId,
-                            context.getReplicatedLog().getSnapshotIndex() + 1
-                        );
+                                context.getReplicatedLog().getSnapshotIndex() + 1
+                                );
                     }
 
                     long followerMatchIndex = snapshot.get().getLastIncludedIndex();
@@ -402,8 +405,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                     mapFollowerToSnapshot.remove(followerId);
 
                     LOG.debug("{}: follower: {}, matchIndex set to {}, nextIndex set to {}",
-                                logName(), followerId, followerLogInformation.getMatchIndex(),
-                                followerLogInformation.getNextIndex());
+                            logName(), followerId, followerLogInformation.getMatchIndex(),
+                            followerLogInformation.getNextIndex());
 
                     if (mapFollowerToSnapshot.isEmpty()) {
                         // once there are no pending followers receiving snapshots
@@ -454,10 +457,10 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         // Create a tracker entry we will use this later to notify the
         // client actor
         trackerList.add(
-            new ClientRequestTrackerImpl(replicate.getClientActor(),
-                replicate.getIdentifier(),
-                logIndex)
-        );
+                new ClientRequestTrackerImpl(replicate.getClientActor(),
+                        replicate.getIdentifier(),
+                        logIndex)
+                );
 
         boolean applyModificationToState = followerToLog.isEmpty()
                 || context.getRaftPolicy().applyModificationToStateBeforeConsensus();
@@ -493,7 +496,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
      */
 
     private void sendUpdatesToFollower(String followerId, FollowerLogInformation followerLogInformation,
-                                       boolean sendHeartbeat, boolean isHeartbeat) {
+            boolean sendHeartbeat, boolean isHeartbeat) {
 
         ActorSelection followerActor = context.getPeerActorSelection(followerId);
         if (followerActor != null) {
@@ -533,16 +536,16 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                         sendAppendEntries = true;
                     }
                 } else if (isFollowerActive && followerNextIndex >= 0 &&
-                    leaderLastIndex > followerNextIndex && !context.getSnapshotManager().isCapturing()) {
+                        leaderLastIndex > followerNextIndex && !context.getSnapshotManager().isCapturing()) {
                     // if the followers next index is not present in the leaders log, and
                     // if the follower is just not starting and if leader's index is more than followers index
                     // then snapshot should be sent
 
                     if (LOG.isDebugEnabled()) {
                         LOG.debug(String.format("%s: InitiateInstallSnapshot to follower: %s," +
-                                    "follower-nextIndex: %d, leader-snapshot-index: %d,  " +
-                                    "leader-last-index: %d", logName(), followerId,
-                                    followerNextIndex, leaderSnapShotIndex, leaderLastIndex));
+                                "follower-nextIndex: %d, leader-snapshot-index: %d,  " +
+                                "leader-last-index: %d", logName(), followerId,
+                                followerNextIndex, leaderSnapShotIndex, leaderLastIndex));
                     }
 
                     // Send heartbeat to follower whenever install snapshot is initiated.
@@ -567,11 +570,11 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     }
 
     private void sendAppendEntriesToFollower(ActorSelection followerActor, long followerNextIndex,
-        List<ReplicatedLogEntry> entries, String followerId) {
+            List<ReplicatedLogEntry> entries, String followerId) {
         AppendEntries appendEntries = new AppendEntries(currentTerm(), context.getId(),
-            prevLogIndex(followerNextIndex),
-            prevLogTerm(followerNextIndex), entries,
-            context.getCommitIndex(), super.getReplicatedToAllIndex(), context.getPayloadVersion());
+                prevLogIndex(followerNextIndex),
+                prevLogTerm(followerNextIndex), entries,
+                context.getCommitIndex(), super.getReplicatedToAllIndex(), context.getPayloadVersion());
 
         if(!entries.isEmpty() || LOG.isTraceEnabled()) {
             LOG.debug("{}: Sending AppendEntries to follower {}: {}", logName(), followerId,
@@ -594,7 +597,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
      * then send the existing snapshot in chunks to the follower.
      * @param followerId
      */
-    private void initiateCaptureSnapshot(String followerId) {
+    public void initiateCaptureSnapshot(String followerId) {
         if (snapshot.isPresent()) {
             // if a snapshot is present in the memory, most likely another install is in progress
             // no need to capture snapshot.
@@ -624,10 +627,12 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         LOG.debug("{}: sendInstallSnapshot", logName());
         for (Entry<String, FollowerLogInformation> e : followerToLog.entrySet()) {
             ActorSelection followerActor = context.getPeerActorSelection(e.getKey());
+            FollowerLogInformation followerLogInfo = e.getValue();
 
             if (followerActor != null) {
                 long nextIndex = e.getValue().getNextIndex();
-                if (canInstallSnapshot(nextIndex)) {
+                if (followerLogInfo.getFollowerState() == FollowerState.VOTING_NOT_INITIALIZED ||
+                        canInstallSnapshot(nextIndex)) {
                     sendSnapshotChunk(followerActor, e.getKey());
                 }
             }
@@ -648,16 +653,16 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                 FollowerToSnapshot followerToSnapshot = mapFollowerToSnapshot.get(followerId);
 
                 followerActor.tell(
-                    new InstallSnapshot(currentTerm(), context.getId(),
-                        snapshot.get().getLastIncludedIndex(),
-                        snapshot.get().getLastIncludedTerm(),
-                        nextSnapshotChunk,
-                        followerToSnapshot.incrementChunkIndex(),
-                        followerToSnapshot.getTotalChunks(),
-                        Optional.of(followerToSnapshot.getLastChunkHashCode())
-                    ).toSerializable(),
-                    actor()
-                );
+                        new InstallSnapshot(currentTerm(), context.getId(),
+                                snapshot.get().getLastIncludedIndex(),
+                                snapshot.get().getLastIncludedTerm(),
+                                nextSnapshotChunk,
+                                followerToSnapshot.incrementChunkIndex(),
+                                followerToSnapshot.getTotalChunks(),
+                                Optional.of(followerToSnapshot.getLastChunkHashCode())
+                                ).toSerializable(),
+                                actor()
+                        );
 
                 if(LOG.isDebugEnabled()) {
                     LOG.debug("{}: InstallSnapshot sent to follower {}, Chunk: {}/{}",
@@ -715,8 +720,8 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         // need to be sent if there are other messages being sent to the remote
         // actor.
         heartbeatSchedule = context.getActorSystem().scheduler().scheduleOnce(
-            interval, context.getActor(), new SendHeartBeat(),
-            context.getActorSystem().dispatcher(), context.getActor());
+                interval, context.getActor(), new SendHeartBeat(),
+                context.getActorSystem().dispatcher(), context.getActor());
     }
 
     @Override
@@ -762,7 +767,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
             this.snapshotBytes = snapshotBytes;
             int size = snapshotBytes.size();
             totalChunks = ( size / context.getConfigParams().getSnapshotChunkSize()) +
-                ((size % context.getConfigParams().getSnapshotChunkSize()) > 0 ? 1 : 0);
+                    ((size % context.getConfigParams().getSnapshotChunkSize()) > 0 ? 1 : 0);
             if(LOG.isDebugEnabled()) {
                 LOG.debug("{}: Snapshot {} bytes, total chunks to send:{}",
                         logName(), size, totalChunks);
