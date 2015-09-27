@@ -641,7 +641,8 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         Entity entity1 = new Entity(ENTITY_TYPE, ENTITY_ID1);
         Entity entity2 = new Entity(ENTITY_TYPE, ENTITY_ID2);
         Entity entity3 = new Entity(ENTITY_TYPE, ENTITY_ID3);
-        Entity entity4 = new Entity(otherEntityType, ENTITY_ID3);
+        Entity noOwnerEntity = new Entity(ENTITY_TYPE, ENTITY_ID4);
+        Entity otherTypeEntity = new Entity(otherEntityType, ENTITY_ID3);
         EntityOwnershipListener listener = mock(EntityOwnershipListener.class);
 
         // Register listener
@@ -664,11 +665,11 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
 
         // Register another candidate for another entity type and verify listener is not notified.
 
-        shard.tell(new RegisterCandidateLocal(entity4), kit.getRef());
+        shard.tell(new RegisterCandidateLocal(otherTypeEntity), kit.getRef());
         kit.expectMsgClass(SuccessReply.class);
 
         Uninterruptibles.sleepUninterruptibly(500, TimeUnit.MILLISECONDS);
-        verify(listener, never()).ownershipChanged(ownershipChange(entity4));
+        verify(listener, never()).ownershipChanged(ownershipChange(otherTypeEntity));
 
         // Register remote candidate for entity1
 
@@ -697,6 +698,14 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         Uninterruptibles.sleepUninterruptibly(500, TimeUnit.MILLISECONDS);
         verify(listener, never()).ownershipChanged(any(EntityOwnershipChange.class));
 
+        // Register then unregister a candidate for an entity so it has no owner.
+
+        shard.tell(new RegisterCandidateLocal(noOwnerEntity), kit.getRef());
+        kit.expectMsgClass(SuccessReply.class);
+
+        shard.tell(new UnregisterCandidateLocal(noOwnerEntity), kit.getRef());
+        kit.expectMsgClass(SuccessReply.class);
+
         // Re-register the listener and verify it gets notified of currently owned entities
 
         reset(listener);
@@ -704,11 +713,12 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         shard.tell(new RegisterListenerLocal(listener, ENTITY_TYPE), kit.getRef());
         kit.expectMsgClass(SuccessReply.class);
 
-        verify(listener, timeout(5000).times(2)).ownershipChanged(or(ownershipChange(entity2, false, true, true),
-                ownershipChange(entity3, false, true, true)));
+        verify(listener, timeout(5000).times(3)).ownershipChanged(or(
+                or(ownershipChange(entity2, false, true, true), ownershipChange(entity3, false, true, true)),
+                ownershipChange(entity1, false, false, true)));
         Uninterruptibles.sleepUninterruptibly(300, TimeUnit.MILLISECONDS);
-        verify(listener, never()).ownershipChanged(ownershipChange(entity4));
-        verify(listener, never()).ownershipChanged(ownershipChange(entity1));
+        verify(listener, never()).ownershipChanged(ownershipChange(otherTypeEntity));
+        verify(listener, never()).ownershipChanged(ownershipChange(noOwnerEntity));
     }
 
     private void commitModification(TestActorRef<EntityOwnershipShard> shard, NormalizedNode<?, ?> node,

@@ -187,6 +187,9 @@ public class DistributedEntityOwnershipIntegrationTest {
         // Register follower2 candidate for entity2 and verify it gets added but doesn't become owner
 
         follower2EntityOwnershipService.registerListener(ENTITY_TYPE1, follower2MockListener);
+        verify(follower2MockListener, timeout(5000).times(2)).ownershipChanged(or(
+                ownershipChange(ENTITY1, false, false, true), ownershipChange(ENTITY2, false, false, true)));
+        reset(follower2MockListener);
         follower2EntityOwnershipService.registerCandidate(ENTITY2);
         verifyCandidates(leaderDistributedDataStore, ENTITY2, "member-2", "member-3");
         verifyOwner(leaderDistributedDataStore, ENTITY2, "member-2");

@@ -27,6 +27,7 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Props;
 import akka.pattern.Patterns;
+import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import java.util.ArrayList;
@@ -160,16 +161,21 @@ class EntityOwnershipShard extends Shard {
 
         getSender().tell(SuccessReply.INSTANCE, getSelf());
 
-        searchForEntitiesOwnedBy(localMemberName, new EntityWalker() {
+        searchForEntities(new EntityWalker() {
             @Override
             public void onEntity(MapEntryNode entityTypeNode, MapEntryNode entityNode) {
                 Optional<DataContainerChild<? extends PathArgument, ?>> possibleType =
                         entityTypeNode.getChild(ENTITY_TYPE_NODE_ID);
                 String entityType = possibleType.isPresent() ? possibleType.get().getValue().toString() : null;
-                if(registerListener.getEntityType().equals(entityType)) {
+                Optional<DataContainerChild<? extends PathArgument, ?>> possibleOwner =
+                        entityNode.getChild(ENTITY_OWNER_NODE_ID);
+                String owner = possibleOwner.isPresent() ? possibleOwner.get().getValue().toString() : null;
+                boolean hasOwner = !Strings.isNullOrEmpty(owner);
+                if(registerListener.getEntityType().equals(entityType) && hasOwner) {
                     Entity entity = new Entity(entityType,
                             (YangInstanceIdentifier) entityNode.getChild(ENTITY_ID_NODE_ID).get().getValue());
-                    listenerSupport.notifyEntityOwnershipListener(entity, false, true, true, registerListener.getListener());
+                    boolean isOwner = Objects.equal(localMemberName, owner);
+                    listenerSupport.notifyEntityOwnershipListener(entity, false, isOwner, true, registerListener.getListener());
                 }
             }
         });
@@ -348,12 +354,6 @@ class EntityOwnershipShard extends Shard {
     }
 
     private void searchForEntitiesOwnedBy(final String owner, final EntityWalker walker) {
-        DataTreeSnapshot snapshot = getDataStore().getDataTree().takeSnapshot();
-        Optional<NormalizedNode<?, ?>> possibleEntityTypes = snapshot.readNode(ENTITY_TYPES_PATH);
-        if(!possibleEntityTypes.isPresent()) {
-            return;
-        }
-
         LOG.debug("{}: Searching for entities owned by {}", persistenceId(), owner);
 
         searchForEntities(new EntityWalker() {
