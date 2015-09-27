@@ -146,7 +146,13 @@ public class RaftActorContextImpl implements RaftActorContext {
     }
 
     @Override public String getPeerAddress(String peerId) {
-        return peerAddresses.get(peerId);
+        String peerAddress = peerAddresses.get(peerId);
+        if(peerAddress == null) {
+            peerAddress = configParams.getPeerAddressResolver().resolve(peerId);
+            peerAddresses.put(peerId, peerAddress);
+        }
+
+        return peerAddress;
     }
 
     @Override public ConfigParams getConfigParams() {
