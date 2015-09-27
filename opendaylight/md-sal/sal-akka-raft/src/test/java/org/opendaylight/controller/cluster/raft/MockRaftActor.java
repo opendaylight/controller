@@ -37,7 +37,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     private final CountDownLatch recoveryComplete = new CountDownLatch(1);
     private final List<Object> state;
     private ActorRef roleChangeNotifier;
-    private final CountDownLatch initializeBehaviorComplete = new CountDownLatch(1);
+    protected final CountDownLatch initializeBehaviorComplete = new CountDownLatch(1);
     private RaftActorRecoverySupport raftActorRecoverySupport;
     private RaftActorSnapshotMessageSupport snapshotMessageSupport;
 

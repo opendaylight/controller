@@ -119,6 +119,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     private final SwitchBehaviorSupplier reusableSwitchBehaviorSupplier = new SwitchBehaviorSupplier();
 
+    private RaftActorServerConfigurationSupport serverConfigurationSupport;
+
     public RaftActor(String id, Map<String, String> peerAddresses,
          Optional<ConfigParams> configParams, short payloadVersion) {
 
@@ -140,6 +142,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         super.preStart();
 
         snapshotSupport = newRaftActorSnapshotMessageSupport();
+        serverConfigurationSupport = new RaftActorServerConfigurationSupport(getRaftActorContext());
     }
 
     @Override
@@ -243,7 +246,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             captureSnapshot();
         } else if(message instanceof SwitchBehavior){
             switchBehavior(((SwitchBehavior) message));
-        } else if(!snapshotSupport.handleSnapshotMessage(message)) {
+        } else if(!snapshotSupport.handleSnapshotMessage(message) &&
+                !serverConfigurationSupport.handleMessage(message, this, getSender())) {
             switchBehavior(reusableSwitchBehaviorSupplier.handleMessage(getSender(), message));
         }
     }
