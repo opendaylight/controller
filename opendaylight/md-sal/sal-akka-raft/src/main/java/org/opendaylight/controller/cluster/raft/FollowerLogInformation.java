@@ -108,4 +108,22 @@ public interface FollowerLogInformation {
      * Sets the payload data version of the follower.
      */
     void setPayloadVersion(short payloadVersion);
+
+    /**
+     * Sets whether or not the follower is sufficiently initialized in order to
+     * participate in consensus.
+     */
+    void setInitializedForConsensus(boolean value);
+
+    /**
+     * Returns whether or not the follower is sufficiently initialized in order to
+     * participate in consensus.
+     */
+    boolean isInitializedForConsensus();
+
+    /**
+     * Returns true is the follower is in a state where it can participate in leader elections and commitment
+     * consensus.
+     */
+    boolean canParticipateInConsensus();
 }

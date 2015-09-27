@@ -28,6 +28,8 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
 
     private short payloadVersion = -1;
 
+    private boolean initializedForConsensus = true;
+
     public FollowerLogInformationImpl(String id, long matchIndex, RaftActorContext context) {
         this.id = id;
         this.nextIndex = context.getCommitIndex();
@@ -87,6 +89,10 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
 
     @Override
     public boolean isFollowerActive() {
+        if(!initializedForConsensus) {
+            return false;
+        }
+
         long elapsed = stopwatch.elapsed(TimeUnit.MILLISECONDS);
         return (stopwatch.isRunning()) &&
                 (elapsed <= context.getConfigParams().getElectionTimeOutInterval().toMillis());
@@ -114,6 +120,10 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
 
     @Override
     public boolean okToReplicate() {
+        if(!initializedForConsensus) {
+            return false;
+        }
+
         // Return false if we are trying to send duplicate data before the heartbeat interval
         if(getNextIndex() == lastReplicatedIndex){
             if(lastReplicatedStopwatch.elapsed(TimeUnit.MILLISECONDS) < context.getConfigParams()
@@ -153,5 +163,20 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
     @Override
     public void setPayloadVersion(short payloadVersion) {
         this.payloadVersion = payloadVersion;
+    }
+
+    @Override
+    public void setInitializedForConsensus(boolean value) {
+        this.initializedForConsensus = value;
+    }
+
+    @Override
+    public boolean isInitializedForConsensus() {
+        return initializedForConsensus;
+    }
+
+    @Override
+    public boolean canParticipateInConsensus() {
+        return initializedForConsensus;
     }
 }

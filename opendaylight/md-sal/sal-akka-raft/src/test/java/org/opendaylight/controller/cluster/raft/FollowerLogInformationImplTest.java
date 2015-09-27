@@ -64,7 +64,6 @@ public class FollowerLogInformationImplTest {
     @Test
     public void testOkToReplicate(){
         MockRaftActorContext context = new MockRaftActorContext();
-        context.setCommitIndex(9);
         FollowerLogInformation followerLogInformation =
                 new FollowerLogInformationImpl(
                         "follower1", 10, context);
@@ -79,5 +78,25 @@ public class FollowerLogInformationImplTest {
         //increment next index and try immediately and it should work again
         followerLogInformation.incrNextIndex();
         assertTrue(followerLogInformation.okToReplicate());
+    }
+
+    @Test
+    public void testNotInitialized() {
+        MockRaftActorContext context = new MockRaftActorContext();
+        FollowerLogInformation followerLogInformation = new FollowerLogInformationImpl("follower1", -1, context);
+
+        followerLogInformation.setInitializedForConsensus(false);
+        assertFalse(followerLogInformation.okToReplicate());
+        assertFalse(followerLogInformation.canParticipateInConsensus());
+
+        followerLogInformation.markFollowerActive();
+        assertFalse(followerLogInformation.isFollowerActive());
+
+        followerLogInformation.setInitializedForConsensus(true);
+        assertTrue(followerLogInformation.okToReplicate());
+        assertTrue(followerLogInformation.canParticipateInConsensus());
+
+        followerLogInformation.markFollowerActive();
+        assertTrue(followerLogInformation.isFollowerActive());
     }
 }

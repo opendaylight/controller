@@ -15,8 +15,8 @@ import java.util.List;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 
 public class ForwardMessageToBehaviorActor extends MessageCollectorActor {
-    private RaftActorBehavior behavior;
-    private List<RaftActorBehavior> behaviorChanges = new ArrayList<>();
+    private volatile RaftActorBehavior behavior;
+    private final List<RaftActorBehavior> behaviorChanges = new ArrayList<>();
 
     @Override
     public void onReceive(Object message) throws Exception {
