@@ -13,6 +13,7 @@ import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.concurrent.TimeUnit;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.raft.FollowerLogInformation.FollowerState;
 import scala.concurrent.duration.FiniteDuration;
 
 public class FollowerLogInformationImplTest {
@@ -29,14 +30,14 @@ public class FollowerLogInformationImplTest {
         context.setConfigParams(configParams);
 
         FollowerLogInformation followerLogInformation =
-            new FollowerLogInformationImpl("follower1", 9, context);
+                new FollowerLogInformationImpl("follower1", 9, context);
 
         assertFalse("Follower should be termed inactive before stopwatch starts",
-            followerLogInformation.isFollowerActive());
+                followerLogInformation.isFollowerActive());
 
         followerLogInformation.markFollowerActive();
         if (sleepWithElaspsedTimeReturned(200) > 200) {
-          return;
+            return;
         }
         assertTrue("Follower should be active", followerLogInformation.isFollowerActive());
 
@@ -44,11 +45,11 @@ public class FollowerLogInformationImplTest {
             return;
         }
         assertFalse("Follower should be inactive after time lapsed",
-            followerLogInformation.isFollowerActive());
+                followerLogInformation.isFollowerActive());
 
         followerLogInformation.markFollowerActive();
         assertTrue("Follower should be active from inactive",
-            followerLogInformation.isFollowerActive());
+                followerLogInformation.isFollowerActive());
     }
 
     // we cannot rely comfortably that the sleep will indeed sleep for the desired time
@@ -64,7 +65,6 @@ public class FollowerLogInformationImplTest {
     @Test
     public void testOkToReplicate(){
         MockRaftActorContext context = new MockRaftActorContext();
-        context.setCommitIndex(9);
         FollowerLogInformation followerLogInformation =
                 new FollowerLogInformationImpl(
                         "follower1", 10, context);
@@ -79,5 +79,38 @@ public class FollowerLogInformationImplTest {
         //increment next index and try immediately and it should work again
         followerLogInformation.incrNextIndex();
         assertTrue(followerLogInformation.okToReplicate());
+    }
+
+    @Test
+    public void testVotingNotInitializedState() {
+        MockRaftActorContext context = new MockRaftActorContext();
+        FollowerLogInformation followerLogInformation = new FollowerLogInformationImpl("follower1", -1, context);
+
+        followerLogInformation.setFollowerState(FollowerState.VOTING_NOT_INITIALIZED);
+        assertFalse(followerLogInformation.okToReplicate());
+        assertFalse(followerLogInformation.canParticipateInConsensus());
+
+        followerLogInformation.markFollowerActive();
+        assertFalse(followerLogInformation.isFollowerActive());
+
+        followerLogInformation.setFollowerState(FollowerState.VOTING);
+        assertTrue(followerLogInformation.okToReplicate());
+        assertTrue(followerLogInformation.canParticipateInConsensus());
+
+        followerLogInformation.markFollowerActive();
+        assertTrue(followerLogInformation.isFollowerActive());
+    }
+
+    @Test
+    public void testNonVotingState() {
+        MockRaftActorContext context = new MockRaftActorContext();
+        FollowerLogInformation followerLogInformation = new FollowerLogInformationImpl("follower1", -1, context);
+
+        followerLogInformation.setFollowerState(FollowerState.NON_VOTING);
+        assertTrue(followerLogInformation.okToReplicate());
+        assertFalse(followerLogInformation.canParticipateInConsensus());
+
+        followerLogInformation.markFollowerActive();
+        assertTrue(followerLogInformation.isFollowerActive());
     }
 }
