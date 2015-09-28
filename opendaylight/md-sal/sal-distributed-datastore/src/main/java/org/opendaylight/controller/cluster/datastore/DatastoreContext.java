@@ -17,6 +17,7 @@ import org.opendaylight.controller.cluster.common.actor.AkkaConfigurationReader;
 import org.opendaylight.controller.cluster.common.actor.FileAkkaConfigurationReader;
 import org.opendaylight.controller.cluster.raft.ConfigParams;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
+import org.opendaylight.controller.cluster.raft.PeerAddressResolver;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreConfigProperties;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
@@ -176,6 +177,10 @@ public class DatastoreContext {
 
     public long getTransactionCreationInitialRateLimit() {
         return transactionCreationInitialRateLimit;
+    }
+
+    public void setPeerAddressResolver(PeerAddressResolver resolver) {
+        raftConfig.setPeerAddressResolver(resolver);
     }
 
     private void setHeartbeatInterval(long shardHeartbeatIntervalInMillis){
