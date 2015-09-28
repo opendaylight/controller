@@ -107,7 +107,7 @@ public class DOMRpcServiceTestBugfix560 {
                 .builder().node(Top.QNAME)
                 .node(TopLevelList.QNAME)
                 .nodeWithKey(TopLevelList.QNAME, TLL_NAME_QNAME, mount)
-                .toInstance();
+                .build();
     }
 
     private static InstanceIdentifier<TopLevelList> createBATllIdentifier(
