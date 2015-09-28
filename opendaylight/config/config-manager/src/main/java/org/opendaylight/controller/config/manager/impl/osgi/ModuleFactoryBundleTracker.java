@@ -56,6 +56,15 @@ public class ModuleFactoryBundleTracker implements BundleTrackerCustomizer<Objec
 
     @Override
     public Object addingBundle(Bundle bundle, BundleEvent event) {
+        if(event != null && event.getType() == BundleEvent.STOPPED) {
+            // We're tracking RESOLVED, STARTING, and ACTIVE states but not STOPPING. So when a bundle transitions
+            // to STOPPING, removedBundle gets called and we remove the ModuleFactory entries. However the
+            // bundle will then transition to RESOLVED which will cause the tracker to notify addingBundle.
+            // In this case we don't want to re-add the ModuleFactory entries so we check if the BundleEvent
+            // is STOPPED.
+            return null;
+        }
+
         URL resource = bundle.getEntry("META-INF/services/" + ModuleFactory.class.getName());
         LOG.trace("Got addingBundle event of bundle {}, resource {}, event {}",
                 bundle, resource, event);
@@ -83,7 +92,9 @@ public class ModuleFactoryBundleTracker implements BundleTrackerCustomizer<Objec
 
     @Override
     public void removedBundle(Bundle bundle, BundleEvent event, Object object) {
-        bundleModuleFactoryMap.removeAll(new BundleKey(bundle));
+        synchronized (bundleModuleFactoryMap) {
+            bundleModuleFactoryMap.removeAll(new BundleKey(bundle));
+        }
 
         // workaround for service tracker not getting removed service event
         blankTransactionServiceTracker.blankTransaction();

@@ -66,7 +66,7 @@ public class ConfigManagerActivator implements BundleActivator {
 
             // start extensible tracker
             ExtensibleBundleTracker<?> bundleTracker = new ExtensibleBundleTracker<>(context,
-                Bundle.RESOLVED | Bundle.STARTING | Bundle.STOPPING | Bundle.ACTIVE,
+                Bundle.RESOLVED | Bundle.STARTING | Bundle.ACTIVE,
                 primaryModuleFactoryBundleTracker, moduleInfoBundleTracker);
             bundleTracker.open();
 
