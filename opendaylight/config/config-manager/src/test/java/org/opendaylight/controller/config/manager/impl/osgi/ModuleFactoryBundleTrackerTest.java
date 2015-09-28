@@ -18,6 +18,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import java.util.Collection;
@@ -134,7 +135,7 @@ public class ModuleFactoryBundleTrackerTest {
     public void testBundleAddAndRemove() throws Exception {
         final ModuleFactoryBundleTracker tracker = new ModuleFactoryBundleTracker(blankTxTracker);
         doReturn(getClass().getResource("/module-factories/module-factory-ok")).when(bundle).getEntry(anyString());
-        tracker.addingBundle(bundle, mock(BundleEvent.class));
+        tracker.addingBundle(bundle, null);
 
         Collection<Entry<ModuleFactory, BundleContext>> entries = tracker.getModuleFactoryEntries();
         assertNotNull(entries);
@@ -145,13 +146,23 @@ public class ModuleFactoryBundleTrackerTest {
 
         doNothing().when(blankTxTracker).blankTransaction();;
 
-        tracker.removedBundle(bundle, mock(BundleEvent.class), bundle);
+        BundleEvent mockEvent = mock(BundleEvent.class);
+        doReturn(BundleEvent.STOPPING).when(mockEvent).getType();
+
+        tracker.removedBundle(bundle, mockEvent, bundle);
 
         entries = tracker.getModuleFactoryEntries();
         assertNotNull(entries);
         assertEquals(0, entries.size());
 
-        verify(blankTxTracker).blankTransaction();;
+        verify(blankTxTracker).blankTransaction();
+
+        reset(mockEvent);
+        doReturn(BundleEvent.STOPPED).when(mockEvent).getType();
+
+        tracker.addingBundle(bundle, mockEvent);
+
+        assertEquals(0, tracker.getModuleFactoryEntries().size());
     }
 
     @Test
