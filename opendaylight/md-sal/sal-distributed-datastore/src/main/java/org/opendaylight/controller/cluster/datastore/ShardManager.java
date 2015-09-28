@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorPath;
 import akka.actor.ActorRef;
-import akka.actor.Address;
 import akka.actor.Cancellable;
 import akka.actor.OneForOneStrategy;
 import akka.actor.Props;
@@ -44,7 +43,6 @@ import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderExc
 import org.opendaylight.controller.cluster.datastore.exceptions.NotInitializedException;
 import org.opendaylight.controller.cluster.datastore.exceptions.PrimaryNotFoundException;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
-import org.opendaylight.controller.cluster.datastore.identifiers.ShardManagerIdentifier;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shardmanager.ShardManagerInfo;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shardmanager.ShardManagerInfoMBean;
 import org.opendaylight.controller.cluster.datastore.messages.ActorInitialized;
@@ -90,11 +88,6 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
     private static final Logger LOG = LoggerFactory.getLogger(ShardManager.class);
 
-    // Stores a mapping between a member name and the address of the member
-    // Member names look like "member-1", "member-2" etc and are as specified
-    // in configuration
-    private final Map<String, Address> memberNameToAddress = new HashMap<>();
-
     // Stores a mapping between a shard name and it's corresponding information
     // Shard names look like inventory, topology etc and are as specified in
     // configuration
@@ -103,8 +96,6 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     // The type of a ShardManager reflects the type of the datastore itself
     // A data store could be of type config/operational
     private final String type;
-
-    private final String shardManagerIdentifierString;
 
     private final ClusterWrapper cluster;
 
@@ -120,6 +111,8 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
     private final PrimaryShardInfoFutureCache primaryShardInfoCache;
 
+    private final ShardPeerAddressResolver peerAddressResolver;
+
     private SchemaContext schemaContext;
 
     /**
@@ -132,11 +125,14 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         this.configuration = Preconditions.checkNotNull(configuration, "configuration should not be null");
         this.datastoreContext = datastoreContext;
         this.type = datastoreContext.getDataStoreType();
-        this.shardManagerIdentifierString = ShardManagerIdentifier.builder().type(type).build().toString();
         this.shardDispatcherPath =
                 new Dispatchers(context().system().dispatchers()).getDispatcherPath(Dispatchers.DispatcherType.Shard);
         this.waitTillReadyCountdownLatch = waitTillReadyCountdownLatch;
         this.primaryShardInfoCache = primaryShardInfoCache;
+
+        peerAddressResolver = new ShardPeerAddressResolver(type, cluster.getCurrentMemberName());
+        this.datastoreContext = DatastoreContext.newBuilderFrom(datastoreContext).shardPeerAddressResolver(
+                peerAddressResolver).build();
 
         // Subscribe this actor to cluster member events
         cluster.subscribeToMemberEvents(getSelf());
@@ -145,11 +141,11 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     }
 
     public static Props props(
-        final ClusterWrapper cluster,
-        final Configuration configuration,
-        final DatastoreContext datastoreContext,
-        final CountDownLatch waitTillReadyCountdownLatch,
-        final PrimaryShardInfoFutureCache primaryShardInfoCache) {
+            final ClusterWrapper cluster,
+            final Configuration configuration,
+            final DatastoreContext datastoreContext,
+            final CountDownLatch waitTillReadyCountdownLatch,
+            final PrimaryShardInfoFutureCache primaryShardInfoCache) {
 
         Preconditions.checkNotNull(cluster, "cluster should not be null");
         Preconditions.checkNotNull(configuration, "configuration should not be null");
@@ -228,6 +224,9 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             DatastoreContext shardDatastoreContext = createShard.getDatastoreContext();
             if(shardDatastoreContext == null) {
                 shardDatastoreContext = datastoreContext;
+            } else {
+                shardDatastoreContext = DatastoreContext.newBuilderFrom(shardDatastoreContext).shardPeerAddressResolver(
+                        peerAddressResolver).build();
             }
 
             ShardInformation info = new ShardInformation(moduleShardConfig.getShardName(), shardId, peerAddresses,
@@ -474,7 +473,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         LOG.debug("{}: Received MemberRemoved: memberName: {}, address: {}", persistenceId(), memberName,
                 message.member().address());
 
-        memberNameToAddress.remove(memberName);
+        peerAddressResolver.removePeerAddress(memberName);
 
         for(ShardInformation info : localShards.values()){
             info.peerDown(memberName, getShardIdentifier(memberName, info.getShardName()).toString(), getSelf());
@@ -487,7 +486,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         LOG.debug("{}: Received MemberExited: memberName: {}, address: {}", persistenceId(), memberName,
                 message.member().address());
 
-        memberNameToAddress.remove(memberName);
+        peerAddressResolver.removePeerAddress(memberName);
 
         for(ShardInformation info : localShards.values()){
             info.peerDown(memberName, getShardIdentifier(memberName, info.getShardName()).toString(), getSelf());
@@ -500,12 +499,12 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         LOG.debug("{}: Received MemberUp: memberName: {}, address: {}", persistenceId(), memberName,
                 message.member().address());
 
-        memberNameToAddress.put(memberName, message.member().address());
+        peerAddressResolver.addPeerAddress(memberName, message.member().address());
 
         for(ShardInformation info : localShards.values()){
             String shardName = info.getShardName();
             String peerId = getShardIdentifier(memberName, shardName).toString();
-            info.updatePeerAddress(peerId, getShardActorPath(shardName, memberName), getSelf());
+            info.updatePeerAddress(peerId, peerAddressResolver.getShardActorAddress(shardName, memberName), getSelf());
 
             info.peerUp(memberName, peerId, getSelf());
         }
@@ -554,7 +553,8 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     }
 
     private void onDatastoreContext(DatastoreContext context) {
-        datastoreContext = context;
+        datastoreContext = DatastoreContext.newBuilderFrom(context).shardPeerAddressResolver(
+                peerAddressResolver).build();
         for (ShardInformation info : localShards.values()) {
             if (info.getActor() != null) {
                 info.getActor().tell(datastoreContext, getSelf());
@@ -604,7 +604,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     @VisibleForTesting
     protected ActorRef newShardActor(final SchemaContext schemaContext, ShardInformation info) {
         return getContext().actorOf(info.newProps(schemaContext)
-                        .withDispatcher(shardDispatcherPath), info.getShardId().toString());
+                .withDispatcher(shardDispatcherPath), info.getShardId().toString());
     }
 
     private void findPrimary(FindPrimary message) {
@@ -624,51 +624,30 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                             new LocalPrimaryShardFound(primaryPath, info.getLocalShardDataTree().get()) :
                                 new RemotePrimaryShardFound(primaryPath, info.getLeaderVersion());
 
-                    if(LOG.isDebugEnabled()) {
-                        LOG.debug("{}: Found primary for {}: {}", persistenceId(), shardName, found);
-                    }
+                            if(LOG.isDebugEnabled()) {
+                                LOG.debug("{}: Found primary for {}: {}", persistenceId(), shardName, found);
+                            }
 
-                    return found;
+                            return found;
                 }
             });
 
             return;
         }
 
-        for(Map.Entry<String, Address> entry: memberNameToAddress.entrySet()) {
-            if(!cluster.getCurrentMemberName().equals(entry.getKey())) {
-                String path = getShardManagerActorPathBuilder(entry.getValue()).toString();
+        for(String address: peerAddressResolver.getShardManagerPeerActorAddresses()) {
+            LOG.debug("{}: findPrimary for {} forwarding to remote ShardManager {}", persistenceId(),
+                    shardName, address);
 
-                LOG.debug("{}: findPrimary for {} forwarding to remote ShardManager {}", persistenceId(),
-                        shardName, path);
-
-                getContext().actorSelection(path).forward(new RemoteFindPrimary(shardName,
-                        message.isWaitUntilReady()), getContext());
-                return;
-            }
+            getContext().actorSelection(address).forward(new RemoteFindPrimary(shardName,
+                    message.isWaitUntilReady()), getContext());
+            return;
         }
 
         LOG.debug("{}: No shard found for {}", persistenceId(), shardName);
 
         getSender().tell(new PrimaryNotFoundException(
                 String.format("No primary shard found for %s.", shardName)), getSelf());
-    }
-
-    private StringBuilder getShardManagerActorPathBuilder(Address address) {
-        StringBuilder builder = new StringBuilder();
-        builder.append(address.toString()).append("/user/").append(shardManagerIdentifierString);
-        return builder;
-    }
-
-    private String getShardActorPath(String shardName, String memberName) {
-        Address address = memberNameToAddress.get(memberName);
-        if(address != null) {
-            StringBuilder builder = getShardManagerActorPathBuilder(address);
-            builder.append("/")
-                .append(getShardIdentifier(memberName, shardName));
-            return builder.toString();
-        }
-        return null;
     }
 
     /**
@@ -680,7 +659,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
      * @return
      */
     private ShardIdentifier getShardIdentifier(String memberName, String shardName){
-        return ShardIdentifier.builder().memberName(memberName).shardName(shardName).type(type).build();
+        return peerAddressResolver.getShardIdentifier(memberName, shardName);
     }
 
     /**
@@ -703,7 +682,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         }
 
         mBean = ShardManagerInfo.createShardManagerMBean(memberName, "shard-manager-" + this.type,
-                    datastoreContext.getDataStoreMXBeanType(), localShardActorNames);
+                datastoreContext.getDataStoreMXBeanType(), localShardActorNames);
 
         mBean.setShardManager(this);
     }
@@ -722,8 +701,8 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         for(String memberName : members) {
             if(!currentMemberName.equals(memberName)) {
                 ShardIdentifier shardId = getShardIdentifier(memberName, shardName);
-                String path = getShardActorPath(shardName, memberName);
-                peerAddresses.put(shardId.toString(), path);
+                String address = peerAddressResolver.getShardActorAddress(shardName, memberName);
+                peerAddresses.put(shardId.toString(), address);
             }
         }
         return peerAddresses;
@@ -733,14 +712,14 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     public SupervisorStrategy supervisorStrategy() {
 
         return new OneForOneStrategy(10, Duration.create("1 minute"),
-            new Function<Throwable, SupervisorStrategy.Directive>() {
-                @Override
-                public SupervisorStrategy.Directive apply(Throwable t) {
-                    LOG.warn("Supervisor Strategy caught unexpected exception - resuming", t);
-                    return SupervisorStrategy.resume();
-                }
+                new Function<Throwable, SupervisorStrategy.Directive>() {
+            @Override
+            public SupervisorStrategy.Directive apply(Throwable t) {
+                LOG.warn("Supervisor Strategy caught unexpected exception - resuming", t);
+                return SupervisorStrategy.resume();
             }
-        );
+        }
+                );
 
     }
 
@@ -826,7 +805,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
         void updatePeerAddress(String peerId, String peerAddress, ActorRef sender){
             LOG.info("updatePeerAddress for peer {} with address {}", peerId,
-                peerAddress);
+                    peerAddress);
             if(peerAddresses.containsKey(peerId)){
                 peerAddresses.put(peerId, peerAddress);
 

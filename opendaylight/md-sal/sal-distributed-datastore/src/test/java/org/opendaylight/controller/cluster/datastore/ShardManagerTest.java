@@ -961,6 +961,7 @@ public class ShardManagerTest extends AbstractActorTest {
         }};
     }
 
+    @Test
     public void testOnReceiveCreateShard() {
         new JavaTestKit(getSystem()) {{
             datastoreContextBuilder.shardInitializationTimeout(1, TimeUnit.MINUTES).persistent(true);
@@ -986,6 +987,8 @@ public class ShardManagerTest extends AbstractActorTest {
             expectMsgClass(duration("5 seconds"), LocalShardFound.class);
 
             assertEquals("isRecoveryApplicable", false, shardPropsCreator.datastoreContext.isPersistent());
+            assertTrue("Epxected ShardPeerAddressResolver", shardPropsCreator.datastoreContext.getShardRaftConfig().
+                    getPeerAddressResolver() instanceof ShardPeerAddressResolver);
             assertEquals("peerMembers", Sets.newHashSet(new ShardIdentifier("foo", "member-5", shardMrgIDSuffix).toString(),
                     new ShardIdentifier("foo", "member-6", shardMrgIDSuffix).toString()),
                     shardPropsCreator.peerAddresses.keySet());

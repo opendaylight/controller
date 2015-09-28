@@ -17,6 +17,7 @@ import org.opendaylight.controller.cluster.common.actor.AkkaConfigurationReader;
 import org.opendaylight.controller.cluster.common.actor.FileAkkaConfigurationReader;
 import org.opendaylight.controller.cluster.raft.ConfigParams;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
+import org.opendaylight.controller.cluster.raft.PeerAddressResolver;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreConfigProperties;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
@@ -111,7 +112,7 @@ public class DatastoreContext {
         setElectionTimeoutFactor(other.raftConfig.getElectionTimeoutFactor());
         setCustomRaftPolicyImplementation(other.customRaftPolicyImplementation);
         setShardSnapshotChunkSize(other.raftConfig.getSnapshotChunkSize());
-
+        setPeerAddressResolver(other.raftConfig.getPeerAddressResolver());
     }
 
     public static Builder newBuilder() {
@@ -178,6 +179,10 @@ public class DatastoreContext {
         return transactionCreationInitialRateLimit;
     }
 
+    private void setPeerAddressResolver(PeerAddressResolver resolver) {
+        raftConfig.setPeerAddressResolver(resolver);
+    }
+
     private void setHeartbeatInterval(long shardHeartbeatIntervalInMillis){
         raftConfig.setHeartBeatInterval(new FiniteDuration(shardHeartbeatIntervalInMillis,
                 TimeUnit.MILLISECONDS));
@@ -201,13 +206,16 @@ public class DatastoreContext {
         raftConfig.setCustomRaftPolicyImplementationClass(customRaftPolicyImplementation);
     }
 
-
     private void setSnapshotDataThresholdPercentage(int shardSnapshotDataThresholdPercentage) {
         raftConfig.setSnapshotDataThresholdPercentage(shardSnapshotDataThresholdPercentage);
     }
 
     private void setSnapshotBatchCount(long shardSnapshotBatchCount) {
         raftConfig.setSnapshotBatchCount(shardSnapshotBatchCount);
+    }
+
+    private void setShardSnapshotChunkSize(int shardSnapshotChunkSize) {
+        raftConfig.setSnapshotChunkSize(shardSnapshotChunkSize);
     }
 
     public int getShardBatchedModificationCount() {
@@ -228,10 +236,6 @@ public class DatastoreContext {
 
     public int getShardSnapshotChunkSize() {
         return raftConfig.getSnapshotChunkSize();
-    }
-
-    public void setShardSnapshotChunkSize(int shardSnapshotChunkSize) {
-        raftConfig.setSnapshotChunkSize(shardSnapshotChunkSize);
     }
 
     public static class Builder {
@@ -439,6 +443,11 @@ public class DatastoreContext {
 
         public Builder shardSnapshotChunkSize(int shardSnapshotChunkSize) {
             datastoreContext.setShardSnapshotChunkSize(shardSnapshotChunkSize);
+            return this;
+        }
+
+        public Builder shardPeerAddressResolver(PeerAddressResolver resolver) {
+            datastoreContext.setPeerAddressResolver(resolver);
             return this;
         }
     }
