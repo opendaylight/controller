@@ -5,6 +5,7 @@ module remote-rpc-connector {
 
     import config { prefix config; revision-date 2013-04-05; }
     import opendaylight-md-sal-dom {prefix dom;}
+    import actor-system-provider-service {prefix actor-system;}
 
     description
         "This module contains the base YANG definitions for
@@ -35,16 +36,19 @@ module remote-rpc-connector {
                 }
             }
 
+            container actor-system-provider {
+                uses config:service-ref {
+                    refine type {
+                        mandatory false;
+                        config:required-identity actor-system:actor-system-provider-service;
+                    }
+                }
+            }
+
             leaf enable-metric-capture {
                 default false;
                 type boolean;
                 description "Enable or disable metric capture.";
-            }
-
-            leaf actor-system-name {
-                default odl-cluster-rpc;
-                type string;
-                description "Name by which actor system is identified. Its also used to find relevant configuration";
             }
 
             leaf bounded-mailbox-capacity {

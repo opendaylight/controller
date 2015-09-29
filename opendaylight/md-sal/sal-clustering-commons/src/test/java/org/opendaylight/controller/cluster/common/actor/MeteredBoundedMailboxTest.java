@@ -13,13 +13,14 @@ import akka.actor.DeadLetter;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
 import akka.testkit.JavaTestKit;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import scala.concurrent.duration.FiniteDuration;
-
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class MeteredBoundedMailboxTest {
 
@@ -29,14 +30,20 @@ public class MeteredBoundedMailboxTest {
 
     @Before
     public void setUp() throws Exception {
-        config = new CommonConfig.Builder<>("testsystem").build();
+        config = new CommonConfig.Builder<>("testsystem").withConfigReader(new AkkaConfigurationReader() {
+            @Override
+            public Config read() {
+                return ConfigFactory.load();
+            }
+        }).build();
         actorSystem = ActorSystem.create("testsystem", config.get());
     }
 
     @After
     public void tearDown() throws Exception {
-       if (actorSystem != null)
-           actorSystem.shutdown();
+       if (actorSystem != null) {
+        actorSystem.shutdown();
+    }
     }
 
     @Test
@@ -86,8 +93,9 @@ public class MeteredBoundedMailboxTest {
         public void onReceive(Object message) throws Exception {
             lock.lock();
             try {
-                if ("ping".equals(message))
+                if ("ping".equals(message)) {
                     getSender().tell("pong", getSelf());
+                }
             } finally {
                 lock.unlock();
             }

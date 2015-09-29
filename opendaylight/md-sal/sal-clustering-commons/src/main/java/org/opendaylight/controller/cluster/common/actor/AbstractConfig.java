@@ -11,13 +11,12 @@ package org.opendaylight.controller.cluster.common.actor;
 import com.google.common.base.Preconditions;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-
 import java.util.HashMap;
 import java.util.Map;
 
 public abstract class AbstractConfig implements UnifiedConfig {
 
-    private Config config;
+    private final Config config;
 
     public AbstractConfig(Config config){
         this.config = config;
@@ -45,11 +44,13 @@ public abstract class AbstractConfig implements UnifiedConfig {
             return (T)this;
         }
 
-        protected Config merge(){
-            if (fallback == null)
-                fallback = ConfigFactory.load().getConfig(actorSystemName);
+        protected Config merge() {
+            Config config = ConfigFactory.parseMap(configHolder);
+            if (fallback != null) {
+                config = config.withFallback(fallback);
+            }
 
-            return ConfigFactory.parseMap(configHolder).withFallback(fallback);
+            return config;
         }
     }
 }

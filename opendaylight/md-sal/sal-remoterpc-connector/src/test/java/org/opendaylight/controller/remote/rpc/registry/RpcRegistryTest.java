@@ -15,6 +15,8 @@ import akka.actor.Props;
 import akka.japi.Pair;
 import akka.testkit.JavaTestKit;
 import com.google.common.util.concurrent.Uninterruptibles;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -29,6 +31,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.common.actor.AkkaConfigurationReader;
 import org.opendaylight.controller.remote.rpc.RemoteRpcProviderConfig;
 import org.opendaylight.controller.remote.rpc.RouteIdentifierImpl;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.AddOrUpdateRoutes;
@@ -61,26 +64,37 @@ public class RpcRegistryTest {
 
     @BeforeClass
     public static void staticSetup() throws InterruptedException {
-      RemoteRpcProviderConfig config1 = new RemoteRpcProviderConfig.Builder("memberA").build();
-      RemoteRpcProviderConfig config2 = new RemoteRpcProviderConfig.Builder("memberB").build();
-      RemoteRpcProviderConfig config3 = new RemoteRpcProviderConfig.Builder("memberC").build();
-      node1 = ActorSystem.create("opendaylight-rpc", config1.get());
-      node2 = ActorSystem.create("opendaylight-rpc", config2.get());
-      node3 = ActorSystem.create("opendaylight-rpc", config3.get());
+        AkkaConfigurationReader reader = new AkkaConfigurationReader() {
+            @Override
+            public Config read() {
+                return ConfigFactory.load();
+            }
+        };
+
+        RemoteRpcProviderConfig config1 = new RemoteRpcProviderConfig.Builder("memberA").withConfigReader(reader).build();
+        RemoteRpcProviderConfig config2 = new RemoteRpcProviderConfig.Builder("memberB").withConfigReader(reader).build();
+        RemoteRpcProviderConfig config3 = new RemoteRpcProviderConfig.Builder("memberC").withConfigReader(reader).build();
+        node1 = ActorSystem.create("opendaylight-rpc", config1.get());
+        node2 = ActorSystem.create("opendaylight-rpc", config2.get());
+        node3 = ActorSystem.create("opendaylight-rpc", config3.get());
     }
 
     @AfterClass
     public static void staticTeardown() {
-      JavaTestKit.shutdownActorSystem(node1);
-      JavaTestKit.shutdownActorSystem(node2);
-      JavaTestKit.shutdownActorSystem(node3);
+        JavaTestKit.shutdownActorSystem(node1);
+        JavaTestKit.shutdownActorSystem(node2);
+        JavaTestKit.shutdownActorSystem(node3);
     }
 
     @Before
     public void setup() {
-        registry1 = node1.actorOf(Props.create(RpcRegistry.class));
-        registry2 = node2.actorOf(Props.create(RpcRegistry.class));
-        registry3 = node3.actorOf(Props.create(RpcRegistry.class));
+        registry1 = node1.actorOf(Props.create(RpcRegistry.class, config(node1)));
+        registry2 = node2.actorOf(Props.create(RpcRegistry.class, config(node2)));
+        registry3 = node3.actorOf(Props.create(RpcRegistry.class, config(node3)));
+    }
+
+    private RemoteRpcProviderConfig config(ActorSystem node){
+        return new RemoteRpcProviderConfig(node.settings().config());
     }
 
     @After
