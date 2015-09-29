@@ -73,7 +73,7 @@ public class DistributedOperationalDataStoreProviderModule extends
                 .build();
 
         return DistributedDataStoreFactory.createInstance(getOperationalSchemaServiceDependency(),
-                datastoreContext, bundleContext);
+                datastoreContext, getOperationalActorSystemProviderDependency().getActorSystem(), bundleContext);
     }
 
     public void setBundleContext(BundleContext bundleContext) {

@@ -78,9 +78,13 @@ public class RpcRegistryTest {
 
     @Before
     public void setup() {
-        registry1 = node1.actorOf(Props.create(RpcRegistry.class));
-        registry2 = node2.actorOf(Props.create(RpcRegistry.class));
-        registry3 = node3.actorOf(Props.create(RpcRegistry.class));
+        registry1 = node1.actorOf(Props.create(RpcRegistry.class, config(node1)));
+        registry2 = node2.actorOf(Props.create(RpcRegistry.class, config(node2)));
+        registry3 = node3.actorOf(Props.create(RpcRegistry.class, config(node3)));
+    }
+
+    private RemoteRpcProviderConfig config(ActorSystem node){
+        return new RemoteRpcProviderConfig(node.settings().config());
     }
 
     @After

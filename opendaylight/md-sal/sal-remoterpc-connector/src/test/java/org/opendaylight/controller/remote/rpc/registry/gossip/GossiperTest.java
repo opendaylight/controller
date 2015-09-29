@@ -7,23 +7,6 @@
  */
 package org.opendaylight.controller.remote.rpc.registry.gossip;
 
-import akka.actor.ActorSystem;
-import akka.actor.Address;
-import akka.actor.Props;
-import akka.testkit.TestActorRef;
-import com.typesafe.config.ConfigFactory;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.opendaylight.controller.remote.rpc.TerminationMonitor;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyMap;
 import static org.mockito.Mockito.doNothing;
@@ -34,6 +17,22 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.opendaylight.controller.remote.rpc.registry.gossip.Messages.GossiperMessages.GossipEnvelope;
 import static org.opendaylight.controller.remote.rpc.registry.gossip.Messages.GossiperMessages.GossipStatus;
+import akka.actor.ActorSystem;
+import akka.actor.Address;
+import akka.actor.Props;
+import akka.testkit.TestActorRef;
+import com.typesafe.config.ConfigFactory;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.opendaylight.controller.remote.rpc.RemoteRpcProviderConfig;
+import org.opendaylight.controller.remote.rpc.TerminationMonitor;
 
 
 public class GossiperTest {
@@ -121,7 +120,7 @@ public class GossiperTest {
      */
     private static Gossiper createGossiper(){
 
-        final Props props = Props.create(Gossiper.class, false);
+        final Props props = Props.create(Gossiper.class, false, new RemoteRpcProviderConfig(system.settings().config()));
         final TestActorRef<Gossiper> testRef = TestActorRef.create(system, props, "testGossiper");
 
         return testRef.underlyingActor();

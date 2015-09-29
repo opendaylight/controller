@@ -13,6 +13,7 @@ import akka.actor.ActorRefProvider;
 import akka.actor.Address;
 import akka.actor.Props;
 import akka.cluster.ClusterActorRefProvider;
+import com.google.common.base.Preconditions;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -68,8 +69,8 @@ public class BucketStore<T extends Copier<T>> extends AbstractUntypedActorWithMe
 
     private final RemoteRpcProviderConfig config;
 
-    public BucketStore(){
-        config = new RemoteRpcProviderConfig(getContext().system().settings().config());
+    public BucketStore(RemoteRpcProviderConfig config){
+        this.config = Preconditions.checkNotNull(config);
     }
 
     @Override
@@ -78,7 +79,7 @@ public class BucketStore<T extends Copier<T>> extends AbstractUntypedActorWithMe
         selfAddress = provider.getDefaultAddress();
 
         if ( provider instanceof ClusterActorRefProvider) {
-            getContext().actorOf(Props.create(Gossiper.class).withMailbox(config.getMailBoxName()), "gossiper");
+            getContext().actorOf(Props.create(Gossiper.class, config).withMailbox(config.getMailBoxName()), "gossiper");
         }
     }
 

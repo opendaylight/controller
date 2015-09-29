@@ -72,7 +72,7 @@ public class DistributedConfigDataStoreProviderModule extends
                 .build();
 
         return DistributedDataStoreFactory.createInstance(getConfigSchemaServiceDependency(),
-                datastoreContext, bundleContext);
+                datastoreContext, getConfigActorSystemProviderDependency().getActorSystem(), bundleContext);
     }
 
     public void setBundleContext(BundleContext bundleContext) {
