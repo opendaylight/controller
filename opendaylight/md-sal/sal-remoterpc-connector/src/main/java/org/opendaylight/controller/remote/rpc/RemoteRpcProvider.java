@@ -11,6 +11,7 @@ package org.opendaylight.controller.remote.rpc;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
+import com.google.common.base.Preconditions;
 import java.util.Collection;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
@@ -42,10 +43,12 @@ public class RemoteRpcProvider implements AutoCloseable, Provider, SchemaContext
   private final RemoteRpcProviderConfig config;
 
 
-  public RemoteRpcProvider(final ActorSystem actorSystem, final DOMRpcProviderService rpcProvisionRegistry) {
+  public RemoteRpcProvider(final ActorSystem actorSystem,
+                           final DOMRpcProviderService rpcProvisionRegistry,
+                           final RemoteRpcProviderConfig config) {
     this.actorSystem = actorSystem;
     this.rpcProvisionRegistry = rpcProvisionRegistry;
-    config = new RemoteRpcProviderConfig(actorSystem.settings().config());
+    this.config = Preconditions.checkNotNull(config);
   }
 
   @Override
@@ -78,7 +81,7 @@ public class RemoteRpcProvider implements AutoCloseable, Provider, SchemaContext
     final DOMRpcService rpcService = brokerSession.getService(DOMRpcService.class);
     schemaContext = schemaService.getGlobalContext();
     rpcManager = actorSystem.actorOf(RpcManager.props(schemaContext,
-            rpcProvisionRegistry, rpcService), config.getRpcManagerName());
+            rpcProvisionRegistry, rpcService, config), config.getRpcManagerName());
     schemaListenerRegistration = schemaService.registerSchemaContextListener(this);
     LOG.debug("rpc manager started");
   }

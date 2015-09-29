@@ -55,11 +55,12 @@ public class RpcManager extends AbstractUntypedActor {
 
     private RpcManager(final SchemaContext schemaContext,
                        final DOMRpcProviderService rpcProvisionRegistry,
-                       final DOMRpcService rpcSevices) {
+                       final DOMRpcService rpcSevices,
+                       final RemoteRpcProviderConfig config) {
         this.schemaContext = schemaContext;
         this.rpcProvisionRegistry = rpcProvisionRegistry;
         rpcServices = rpcSevices;
-        config = new RemoteRpcProviderConfig(getContext().system().settings().config());
+        this.config = config;
 
         createRpcActors();
         startListeners();
@@ -67,18 +68,19 @@ public class RpcManager extends AbstractUntypedActor {
 
 
       public static Props props(final SchemaContext schemaContext,
-              final DOMRpcProviderService rpcProvisionRegistry, final DOMRpcService rpcServices) {
+              final DOMRpcProviderService rpcProvisionRegistry, final DOMRpcService rpcServices,
+              final RemoteRpcProviderConfig config) {
           Preconditions.checkNotNull(schemaContext, "SchemaContext can not be null!");
           Preconditions.checkNotNull(rpcProvisionRegistry, "RpcProviderService can not be null!");
           Preconditions.checkNotNull(rpcServices, "RpcService can not be null!");
-          return Props.create(RpcManager.class, schemaContext, rpcProvisionRegistry, rpcServices);
+          return Props.create(RpcManager.class, schemaContext, rpcProvisionRegistry, rpcServices, config);
       }
 
     private void createRpcActors() {
         LOG.debug("Create rpc registry and broker actors");
 
         rpcRegistry =
-                getContext().actorOf(RpcRegistry.props().
+                getContext().actorOf(RpcRegistry.props(config).
                     withMailbox(config.getMailBoxName()), config.getRpcRegistryName());
 
         rpcBroker =

@@ -9,10 +9,9 @@ package org.opendaylight.controller.remote.rpc;
 
 import akka.util.Timeout;
 import com.typesafe.config.Config;
+import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.common.actor.CommonConfig;
 import scala.concurrent.duration.FiniteDuration;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  */

@@ -11,6 +11,7 @@ package org.opendaylight.controller.remote.rpc;
 import akka.actor.ActorSystem;
 import akka.osgi.BundleDelegatingClassLoader;
 import com.typesafe.config.Config;
+import org.opendaylight.controller.cluster.ActorSystemFactory;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcProviderService;
 import org.opendaylight.controller.sal.core.api.Broker;
 import org.osgi.framework.BundleContext;
@@ -24,7 +25,7 @@ public class RemoteRpcProviderFactory {
             final Broker broker, final BundleContext bundleContext, final RemoteRpcProviderConfig config){
 
       final RemoteRpcProvider rpcProvider =
-          new RemoteRpcProvider(createActorSystem(bundleContext, config), (DOMRpcProviderService) broker);
+          new RemoteRpcProvider(createActorSystem(bundleContext, config), (DOMRpcProviderService) broker, config);
 
       broker.registerProvider(rpcProvider);
       return rpcProvider;
@@ -46,6 +47,6 @@ public class RemoteRpcProviderFactory {
                     config.getActorSystemName());
         }
 
-        return ActorSystem.create(config.getActorSystemName(), actorSystemConfig, classLoader);
+        return ActorSystemFactory.createActorSystem(bundleContext);
     }
 }
