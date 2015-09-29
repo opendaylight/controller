@@ -203,7 +203,6 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
 
         txContextFactory.close();
         actorContext.shutdown();
-        DistributedDataStoreFactory.destroyInstance(this);
     }
 
     public ActorContext getActorContext() {
