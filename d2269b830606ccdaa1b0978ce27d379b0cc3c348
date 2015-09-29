@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_27f9ab4d",
+        "filename": "opendaylight/commons/opendaylight/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-09-29T11:27:27Z",
+      "side": 1,
+      "message": "Hi Rao, which maven repository is this artifact coming from and why does it have the special version with the odl suffix?",
+      "revId": "d2269b830606ccdaa1b0978ce27d379b0cc3c348",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
