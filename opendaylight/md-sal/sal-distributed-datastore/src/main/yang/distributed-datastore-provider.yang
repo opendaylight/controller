@@ -10,6 +10,7 @@ module distributed-datastore-provider {
     import opendaylight-config-dom-datastore {prefix config-dom-store-spi;}
     import opendaylight-operational-dom-datastore {prefix operational-dom-store-spi;}
     import opendaylight-md-sal-dom {prefix sal;}
+    import actor-system-provider-service {prefix actor-system;}
 
     description
         "This module contains the base YANG definitions for
@@ -247,6 +248,15 @@ module distributed-datastore-provider {
                     }
                 }
 
+                container config-actor-system-provider {
+                    uses config:service-ref {
+                        refine type {
+                            mandatory false;
+                            config:required-identity actor-system:actor-system-provider-service;
+                        }
+                    }
+                }
+
                 container config-properties {
                     uses data-store-properties;
                 }
@@ -262,6 +272,15 @@ module distributed-datastore-provider {
                         refine type {
                             mandatory false;
                             config:required-identity sal:schema-service;
+                        }
+                    }
+                }
+
+                container operational-actor-system-provider {
+                    uses config:service-ref {
+                        refine type {
+                            mandatory false;
+                            config:required-identity actor-system:actor-system-provider-service;
                         }
                     }
                 }

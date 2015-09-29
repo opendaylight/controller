@@ -1,0 +1,18 @@
+module actor-system-provider-service {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:config:actor-system-provider:service";
+    prefix "actor-system";
+
+    import config { prefix config; revision-date 2013-04-05; }
+
+    description "Akka actor system provider service definition";
+
+    revision "2015-10-05" {
+        description "Initial revision";
+    }
+
+    identity actor-system-provider-service {
+        base "config:service-type";
+        config:java-class  "org.opendaylight.controller.cluster.ActorSystemProvider";
+    }
+}
