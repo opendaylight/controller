@@ -8,14 +8,11 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorSystem;
-import akka.actor.Props;
-import akka.osgi.BundleDelegatingClassLoader;
 import com.google.common.base.Preconditions;
-import com.typesafe.config.ConfigFactory;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import org.opendaylight.controller.cluster.common.actor.AkkaConfigurationReader;
+import org.opendaylight.controller.cluster.ActorSystemFactory;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
@@ -40,7 +37,7 @@ public class DistributedDataStoreFactory {
         DatastoreContextConfigAdminOverlay overlay = new DatastoreContextConfigAdminOverlay(
                 introspector, bundleContext);
 
-        ActorSystem actorSystem = getActorSystem(bundleContext, datastoreContext.getConfigurationReader());
+        ActorSystem actorSystem = getActorSystem(bundleContext);
         Configuration config = new ConfigurationImpl("module-shards.conf", "modules.conf");
         final DistributedDataStore dataStore = new DistributedDataStore(actorSystem,
                 new ClusterWrapperImpl(actorSystem), config, introspector.getContext());
@@ -56,19 +53,8 @@ public class DistributedDataStoreFactory {
         return dataStore;
     }
 
-    private static synchronized final ActorSystem getActorSystem(final BundleContext bundleContext,
-                                                                 AkkaConfigurationReader configurationReader) {
-        if (actorSystem == null) {
-            // Create an OSGi bundle classloader for actor system
-            BundleDelegatingClassLoader classLoader = new BundleDelegatingClassLoader(bundleContext.getBundle(),
-                Thread.currentThread().getContextClassLoader());
-
-            actorSystem = ActorSystem.create(ACTOR_SYSTEM_NAME,
-                ConfigFactory.load(configurationReader.read()).getConfig(CONFIGURATION_NAME), classLoader);
-            actorSystem.actorOf(Props.create(TerminationMonitor.class), "termination-monitor");
-        }
-
-        return actorSystem;
+    private static synchronized final ActorSystem getActorSystem(final BundleContext bundleContext) {
+        return ActorSystemFactory.createActorSystem(bundleContext);
     }
 
     public static synchronized void destroyInstance(DistributedDataStore dataStore){
