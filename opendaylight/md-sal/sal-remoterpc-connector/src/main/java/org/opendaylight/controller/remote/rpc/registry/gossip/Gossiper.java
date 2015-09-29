@@ -18,6 +18,7 @@ import akka.cluster.ClusterEvent;
 import akka.cluster.Member;
 import akka.dispatch.Mapper;
 import akka.pattern.Patterns;
+import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -77,10 +78,10 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
 
     private Boolean autoStartGossipTicks = true;
 
-    private RemoteRpcProviderConfig config;
+    private final RemoteRpcProviderConfig config;
 
-    public Gossiper(){
-        config = new RemoteRpcProviderConfig(getContext().system().settings().config());
+    public Gossiper(RemoteRpcProviderConfig config){
+        this.config = Preconditions.checkNotNull(config);
     }
 
     /**
@@ -88,7 +89,8 @@ public class Gossiper extends AbstractUntypedActorWithMetering {
      * @param autoStartGossipTicks used for turning off gossip ticks during testing.
      *                             Gossip tick can be manually sent.
      */
-    public Gossiper(Boolean autoStartGossipTicks){
+    public Gossiper(Boolean autoStartGossipTicks, RemoteRpcProviderConfig config){
+        this(config);
         this.autoStartGossipTicks = autoStartGossipTicks;
     }
 

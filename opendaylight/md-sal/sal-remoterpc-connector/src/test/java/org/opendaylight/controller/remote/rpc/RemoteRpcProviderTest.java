@@ -51,7 +51,8 @@ public class RemoteRpcProviderTest {
 
   @Test
   public void testRemoteRpcProvider() throws Exception {
-    final RemoteRpcProvider rpcProvider = new RemoteRpcProvider(system, mock(DOMRpcProviderService.class));
+    final RemoteRpcProvider rpcProvider = new RemoteRpcProvider(system, mock(DOMRpcProviderService.class),
+            new RemoteRpcProviderConfig(system.settings().config()));
     final Broker.ProviderSession session = mock(Broker.ProviderSession.class);
     final SchemaService schemaService = mock(SchemaService.class);
     when(schemaService.getGlobalContext()). thenReturn(mock(SchemaContext.class));

@@ -15,6 +15,7 @@ import akka.japi.Pair;
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.List;
+import org.opendaylight.controller.remote.rpc.RemoteRpcProviderConfig;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.AddOrUpdateRoutes;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.FindRouters;
 import org.opendaylight.controller.remote.rpc.registry.RpcRegistry.Messages.RemoveRoutes;
@@ -34,12 +35,13 @@ import org.opendaylight.controller.sal.connector.api.RpcRouter.RouteIdentifier;
  */
 public class RpcRegistry extends BucketStore<RoutingTable> {
 
-    public RpcRegistry() {
+    public RpcRegistry(RemoteRpcProviderConfig config) {
+        super(config);
         getLocalBucket().setData(new RoutingTable());
     }
 
-    public static Props props() {
-        return Props.create(new RpcRegistryCreator());
+    public static Props props(RemoteRpcProviderConfig config) {
+        return Props.create(new RpcRegistryCreator(config));
     }
 
     @Override
@@ -231,10 +233,15 @@ public class RpcRegistry extends BucketStore<RoutingTable> {
 
     private static class RpcRegistryCreator implements Creator<RpcRegistry> {
         private static final long serialVersionUID = 1L;
+        private final RemoteRpcProviderConfig config;
+
+        private RpcRegistryCreator(RemoteRpcProviderConfig config) {
+            this.config = config;
+        }
 
         @Override
         public RpcRegistry create() throws Exception {
-            RpcRegistry registry =  new RpcRegistry();
+            RpcRegistry registry =  new RpcRegistry(config);
             RemoteRpcRegistryMXBean mxBean = new RemoteRpcRegistryMXBeanImpl(registry);
             return registry;
         }
