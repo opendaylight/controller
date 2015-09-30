@@ -20,6 +20,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.opendaylight.controller.cluster.datastore.DataStoreVersions.CURRENT_VERSION;
+
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.PoisonPill;
@@ -551,8 +552,8 @@ public class ShardTest extends AbstractShardTest {
         final NormalizedNode<?, ?> root = readStore(testStore, YangInstanceIdentifier.builder().build());
 
         InMemorySnapshotStore.addSnapshot(shardID.toString(), Snapshot.create(
-            SerializationUtils.serializeNormalizedNode(root),
-            Collections.<ReplicatedLogEntry>emptyList(), 0, 1, -1, -1));
+                SerializationUtils.serializeNormalizedNode(root),
+                Collections.<ReplicatedLogEntry>emptyList(), 0, 1, -1, -1));
         return testStore;
     }
 
@@ -1681,7 +1682,7 @@ public class ShardTest extends AbstractShardTest {
             doReturn(Futures.immediateFuture(Boolean.TRUE)).when(cohort).canCommit();
 
             shard.tell(new ForwardedReadyTransaction(transactionID2, CURRENT_VERSION,
-                cohort, modification, true, false), getRef());
+                    cohort, modification, true, false), getRef());
             expectMsgClass(duration, ReadyTransactionReply.class);
 
             shard.tell(new CanCommitTransaction(transactionID2).toSerializable(), getRef());
@@ -2030,7 +2031,7 @@ public class ShardTest extends AbstractShardTest {
                     TestModel.TEST2_PATH, ImmutableNodes.containerNode(TestModel.TEST2_QNAME), modification3);
 
             shard.tell(new ForwardedReadyTransaction(transactionID3, CURRENT_VERSION,
-                cohort3, modification3, true, false), getRef());
+                    cohort3, modification3, true, false), getRef());
             expectMsgClass(duration, ReadyTransactionReply.class);
 
             // All Tx's are readied. We'll send canCommit for the last one but not the others. The others
@@ -2329,44 +2330,50 @@ public class ShardTest extends AbstractShardTest {
             final TestActorRef<Shard> shard = TestActorRef.create(getSystem(),
                     Props.create(new DelegatingShardCreator(creator)), shardActorName);
 
+            NormalizedNode<?,?> expectedRoot = readStore(shard, YangInstanceIdentifier.builder().build());
+
             waitUntilLeader(shard);
+
+            awaitAndValidateSnapshot(expectedRoot);
 
             writeToStore(shard, TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
 
-            final NormalizedNode<?,?> expectedRoot = readStore(shard, YangInstanceIdentifier.builder().build());
+            expectedRoot = readStore(shard, YangInstanceIdentifier.builder().build());
 
             // Trigger creation of a snapshot by ensuring
             final RaftActorContext raftActorContext = ((TestShard) shard.underlyingActor()).getRaftActorContext();
             raftActorContext.getSnapshotManager().capture(mock(ReplicatedLogEntry.class), -1);
 
-            assertEquals("Snapshot saved", true, latch.get().await(5, TimeUnit.SECONDS));
-
-            assertTrue("Invalid saved snapshot " + savedSnapshot.get(),
-                    savedSnapshot.get() instanceof Snapshot);
-
-            verifySnapshot((Snapshot)savedSnapshot.get(), expectedRoot);
-
-            latch.set(new CountDownLatch(1));
-            savedSnapshot.set(null);
+            awaitAndValidateSnapshot(expectedRoot);
 
             raftActorContext.getSnapshotManager().capture(mock(ReplicatedLogEntry.class), -1);
 
-            assertEquals("Snapshot saved", true, latch.get().await(5, TimeUnit.SECONDS));
-
-            assertTrue("Invalid saved snapshot " + savedSnapshot.get(),
-                    savedSnapshot.get() instanceof Snapshot);
-
-            verifySnapshot((Snapshot)savedSnapshot.get(), expectedRoot);
+            awaitAndValidateSnapshot(expectedRoot);
 
             shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
         }
 
-        private void verifySnapshot(final Snapshot snapshot, final NormalizedNode<?,?> expectedRoot) {
+            private void awaitAndValidateSnapshot(NormalizedNode<?,?> expectedRoot
+                                                  ) throws InterruptedException {
+                assertEquals("Snapshot saved", true, latch.get().await(5, TimeUnit.SECONDS));
 
-            final NormalizedNode<?, ?> actual = SerializationUtils.deserializeNormalizedNode(snapshot.getState());
-            assertEquals("Root node", expectedRoot, actual);
+                assertTrue("Invalid saved snapshot " + savedSnapshot.get(),
+                        savedSnapshot.get() instanceof Snapshot);
 
-        }};
+                verifySnapshot((Snapshot)savedSnapshot.get(), expectedRoot);
+
+                latch.set(new CountDownLatch(1));
+                savedSnapshot.set(null);
+
+            }
+
+            private void verifySnapshot(final Snapshot snapshot, final NormalizedNode<?,?> expectedRoot) {
+
+                final NormalizedNode<?, ?> actual = SerializationUtils.deserializeNormalizedNode(snapshot.getState());
+                assertEquals("Root node", expectedRoot, actual);
+
+            }
+        };
     }
 
     /**

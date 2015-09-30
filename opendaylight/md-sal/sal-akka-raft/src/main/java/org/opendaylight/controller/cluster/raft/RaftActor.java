@@ -170,6 +170,10 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             initializeBehavior();
 
             raftRecovery = null;
+
+            // Once recovery is complete, create a snapshot
+            self().tell(new InitiateCaptureSnapshot(), self());
+               LOG.info("Snapshot capture initiated after recovery");
         }
     }
 

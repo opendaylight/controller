@@ -19,6 +19,7 @@ import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.reset;
 import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
@@ -590,6 +591,8 @@ public class RaftActorTest extends AbstractActorTest {
 
                 leaderActor.waitForInitializeBehaviorComplete();
 
+                waitForEndOfOnRecoveryCaptureSnapshot(leaderActor, leaderActor.getCurrentBehavior());
+
                 // create 8 entries in the log - 0 to 4 are applied and will get picked up as part of the capture snapshot
 
                 Leader leader = new Leader(leaderActor.getRaftActorContext());
@@ -687,6 +690,7 @@ public class RaftActorTest extends AbstractActorTest {
 
                 followerActor.waitForInitializeBehaviorComplete();
 
+                waitForEndOfOnRecoveryCaptureSnapshot(followerActor, followerActor.getCurrentBehavior());
 
                 Follower follower = new Follower(followerActor.getRaftActorContext());
                 followerActor.setCurrentBehavior(follower);
@@ -795,6 +799,8 @@ public class RaftActorTest extends AbstractActorTest {
                 leaderActor.getRaftActorContext().getTermInformation().update(1, persistenceId);
 
                 leaderActor.waitForInitializeBehaviorComplete();
+
+                waitForEndOfOnRecoveryCaptureSnapshot(leaderActor, leaderActor.getCurrentBehavior());
 
                 Leader leader = new Leader(leaderActor.getRaftActorContext());
                 leaderActor.setCurrentBehavior(leader);
@@ -1002,5 +1008,19 @@ public class RaftActorTest extends AbstractActorTest {
             }
         }
     }
-
+   private void waitForEndOfOnRecoveryCaptureSnapshot(MockRaftActor actor, RaftActorBehavior actorbehavior) {
+        for(int i=0;i<100;i++){
+            if(actor.getRaftActorContext().getSnapshotManager().isCapturing()){
+                break;
+            }
+            Uninterruptibles.sleepUninterruptibly(10, TimeUnit.MILLISECONDS);
+        }
+        verify(actor.snapshotCohortDelegate).createSnapshot(any(ActorRef.class));
+        assertTrue(actor.getRaftActorContext().getSnapshotManager().isCapturing());
+        actor.getRaftActorContext().getSnapshotManager().persist(null,
+                actorbehavior, Runtime.getRuntime().totalMemory());
+        actor.getRaftActorContext().getSnapshotManager().commit(-1, actorbehavior);
+        assertTrue(!actor.getRaftActorContext().getSnapshotManager().isCapturing());
+        reset(actor.snapshotCohortDelegate);
+    }
 }
