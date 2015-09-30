@@ -9,9 +9,8 @@
 package org.opendaylight.controller.config.util.capability;
 
 import java.util.Set;
-import org.opendaylight.yangtools.yang.model.api.Module;
 
 public interface ModuleListener {
 
-    void onCapabilitiesChanged(Set<Module> added, Set<Module> removed);
+    void onCapabilitiesChanged(Set<Capability> added, Set<Capability> removed);
 }
