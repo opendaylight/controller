@@ -15,8 +15,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import java.util.Dictionary;
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.config.manager.impl.osgi.mapping.BindingContextProvider;
 import org.opendaylight.controller.config.manager.impl.osgi.mapping.RefreshingSCPModuleInfoRegistry;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
@@ -25,10 +28,20 @@ import org.opendaylight.yangtools.sal.binding.generator.api.ModuleInfoRegistry;
 import org.opendaylight.yangtools.sal.binding.generator.util.BindingRuntimeContext;
 import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
+import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
+import org.opendaylight.yangtools.yang.model.repo.spi.SchemaSourceProvider;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
 public class RefreshingSCPModuleInfoRegistryTest {
+
+    @Mock
+    SchemaSourceProvider<YangTextSchemaSource> sourceProvider;
+
+    @Before public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
+    }
+
     @Test
     public void testConstructor() throws Exception {
         ModuleInfoRegistry reg = mock(ModuleInfoRegistry.class);
@@ -47,7 +60,7 @@ public class RefreshingSCPModuleInfoRegistryTest {
         doReturn("B-runtime-context").when(bindingRuntimeContext).toString();
         doReturn(bindingRuntimeContext).when(codecRegistryProvider).getBindingContext();
 
-        RefreshingSCPModuleInfoRegistry scpreg = new RefreshingSCPModuleInfoRegistry(reg, prov, classLoadingStrat, codecRegistryProvider, ctxt);
+        RefreshingSCPModuleInfoRegistry scpreg = new RefreshingSCPModuleInfoRegistry(reg, prov, classLoadingStrat, sourceProvider, codecRegistryProvider, ctxt);
 
         doNothing().when(servReg).unregister();
 
