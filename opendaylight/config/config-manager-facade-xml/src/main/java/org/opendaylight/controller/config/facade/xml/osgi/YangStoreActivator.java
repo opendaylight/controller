@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.config.facade.xml.osgi;
 
+import com.google.common.base.Preconditions;
 import java.lang.management.ManagementFactory;
 import java.util.Hashtable;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -16,6 +17,8 @@ import org.opendaylight.controller.config.facade.xml.ConfigSubsystemFacadeFactor
 import org.opendaylight.controller.config.util.ConfigRegistryJMXClient;
 import org.opendaylight.yangtools.sal.binding.generator.util.BindingRuntimeContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
+import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
+import org.opendaylight.yangtools.yang.model.repo.spi.SchemaSourceProvider;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -51,6 +54,11 @@ public class YangStoreActivator implements BundleActivator {
             @Override
             public YangStoreService addingService(ServiceReference<SchemaContextProvider> reference) {
                 LOG.debug("Got addingService(SchemaContextProvider) event");
+                if(reference.getProperty(SchemaSourceProvider.class.getName()) == null &&
+                    reference.getProperty(BindingRuntimeContext.class.getName()) == null) {
+                    LOG.debug("SchemaContextProvider not from config-manager. Ignoring");
+                    return null;
+                }
 
                 // Yang store service should not be registered multiple times
                 if(!alreadyStarted.compareAndSet(false, true)) {
@@ -58,7 +66,13 @@ public class YangStoreActivator implements BundleActivator {
                     throw new RuntimeException("Starting yang store service multiple times");
                 }
                 SchemaContextProvider schemaContextProvider = reference.getBundle().getBundleContext().getService(reference);
-                final YangStoreService yangStoreService = new YangStoreService(schemaContextProvider);
+                final Object sourceProvider = Preconditions.checkNotNull(
+                    reference.getProperty(SchemaSourceProvider.class.getName()), "Source provider not found");
+                Preconditions.checkArgument(sourceProvider instanceof SchemaSourceProvider);
+
+                // TODO avoid cast
+                final YangStoreService yangStoreService = new YangStoreService(schemaContextProvider,
+                    ((SchemaSourceProvider<YangTextSchemaSource>) sourceProvider));
                 yangStoreServiceServiceRegistration = context.registerService(YangStoreService.class, yangStoreService, new Hashtable<String, Object>());
                 configRegistryLookup = new ConfigRegistryLookupThread(yangStoreService);
                 configRegistryLookup.start();
@@ -67,14 +81,23 @@ public class YangStoreActivator implements BundleActivator {
 
             @Override
             public void modifiedService(ServiceReference<SchemaContextProvider> reference, YangStoreService service) {
+                if (service == null) {
+                    return;
+                }
+
                 LOG.debug("Got modifiedService(SchemaContextProvider) event");
-                final BindingRuntimeContext runtimeContext = (BindingRuntimeContext) reference.getProperty(BindingRuntimeContext.class.getName());
+                final BindingRuntimeContext runtimeContext = (BindingRuntimeContext) reference
+                    .getProperty(BindingRuntimeContext.class.getName());
                 LOG.debug("BindingRuntimeContext retrieved as {}", runtimeContext);
                 service.refresh(runtimeContext);
             }
 
             @Override
             public void removedService(ServiceReference<SchemaContextProvider> reference, YangStoreService service) {
+                if(service == null) {
+                    return;
+                }
+
                 LOG.debug("Got removedService(SchemaContextProvider) event");
                 alreadyStarted.set(false);
                 configRegistryLookup.interrupt();
