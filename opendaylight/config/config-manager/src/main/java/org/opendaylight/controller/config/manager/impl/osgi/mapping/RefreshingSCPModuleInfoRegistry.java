@@ -15,6 +15,8 @@ import org.opendaylight.yangtools.sal.binding.generator.api.ModuleInfoRegistry;
 import org.opendaylight.yangtools.sal.binding.generator.util.BindingRuntimeContext;
 import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
+import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
+import org.opendaylight.yangtools.yang.model.repo.spi.SchemaSourceProvider;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
@@ -25,24 +27,31 @@ public class RefreshingSCPModuleInfoRegistry implements ModuleInfoRegistry, Auto
 
     private final ModuleInfoRegistry moduleInfoRegistry;
     private final SchemaContextProvider schemaContextProvider;
+    private final SchemaSourceProvider<YangTextSchemaSource> sourceProvider;
     private final BindingContextProvider bindingContextProvider;
     private final ClassLoadingStrategy classLoadingStrat;
 
     private final ServiceRegistration<SchemaContextProvider> osgiReg;
 
     public RefreshingSCPModuleInfoRegistry(final ModuleInfoRegistry moduleInfoRegistry,
-                                           final SchemaContextProvider schemaContextProvider, final ClassLoadingStrategy classLoadingStrat, final BindingContextProvider bindingContextProvider, final BundleContext bundleContext) {
+        final SchemaContextProvider schemaContextProvider, final ClassLoadingStrategy classLoadingStrat,
+        final SchemaSourceProvider<YangTextSchemaSource> sourceProvider, final BindingContextProvider bindingContextProvider,
+        final BundleContext bundleContext) {
+
         this.moduleInfoRegistry = moduleInfoRegistry;
         this.schemaContextProvider = schemaContextProvider;
         this.classLoadingStrat = classLoadingStrat;
+        this.sourceProvider = sourceProvider;
         this.bindingContextProvider = bindingContextProvider;
-        osgiReg = bundleContext.registerService(SchemaContextProvider.class, schemaContextProvider, new Hashtable<String, String>());
+        osgiReg = bundleContext
+            .registerService(SchemaContextProvider.class, schemaContextProvider, new Hashtable<String, String>());
     }
 
     private void updateService() {
         bindingContextProvider.update(classLoadingStrat, schemaContextProvider);
         osgiReg.setProperties(new Hashtable<String, Object>() {{
                 put(BindingRuntimeContext.class.getName(), bindingContextProvider.getBindingContext());
+                put(SchemaSourceProvider.class.getName(), sourceProvider);
             }
         }); // send modifiedService event
     }

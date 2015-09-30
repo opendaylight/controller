@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.config.facade.xml.osgi;
 
+import com.google.common.base.Preconditions;
 import java.lang.management.ManagementFactory;
 import java.util.Hashtable;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -16,6 +17,8 @@ import org.opendaylight.controller.config.facade.xml.ConfigSubsystemFacadeFactor
 import org.opendaylight.controller.config.util.ConfigRegistryJMXClient;
 import org.opendaylight.yangtools.sal.binding.generator.util.BindingRuntimeContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
+import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
+import org.opendaylight.yangtools.yang.model.repo.spi.SchemaSourceProvider;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -58,7 +61,13 @@ public class YangStoreActivator implements BundleActivator {
                     throw new RuntimeException("Starting yang store service multiple times");
                 }
                 SchemaContextProvider schemaContextProvider = reference.getBundle().getBundleContext().getService(reference);
-                final YangStoreService yangStoreService = new YangStoreService(schemaContextProvider);
+                final Object sourceProvider = Preconditions.checkNotNull(
+                    reference.getProperty(SchemaSourceProvider.class.getName()), "Source provider not found");
+                Preconditions.checkArgument(sourceProvider instanceof SchemaSourceProvider);
+
+                // TODO avoid cast
+                final YangStoreService yangStoreService = new YangStoreService(schemaContextProvider,
+                    ((SchemaSourceProvider<YangTextSchemaSource>) sourceProvider));
                 yangStoreServiceServiceRegistration = context.registerService(YangStoreService.class, yangStoreService, new Hashtable<String, Object>());
                 configRegistryLookup = new ConfigRegistryLookupThread(yangStoreService);
                 configRegistryLookup.start();

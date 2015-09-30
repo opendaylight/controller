@@ -8,18 +8,18 @@
 
 package org.opendaylight.controller.config.facade.xml.osgi;
 
-import com.google.common.base.Optional;
+import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
 import com.google.common.collect.BiMap;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.common.io.ByteStreams;
+import com.google.common.util.concurrent.CheckedFuture;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.NoSuchElementException;
 import java.util.Set;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.PackageTranslator;
@@ -31,7 +31,10 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.IdentitySchemaNode;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
-import org.opendaylight.yangtools.yang.parser.builder.impl.ModuleIdentifierImpl;
+import org.opendaylight.yangtools.yang.model.repo.api.SchemaSourceException;
+import org.opendaylight.yangtools.yang.model.repo.api.SourceIdentifier;
+import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
+import org.opendaylight.yangtools.yang.model.repo.spi.SchemaSourceProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,9 +50,13 @@ final class YangStoreSnapshot implements YangStoreContext, EnumResolver {
 
     private final SchemaContext schemaContext;
     private final BindingRuntimeContext bindingContextProvider;
+    private final SchemaSourceProvider<YangTextSchemaSource> sourceProvider;
 
-    public YangStoreSnapshot(final SchemaContext resolveSchemaContext, final BindingRuntimeContext bindingContextProvider) {
+    public YangStoreSnapshot(final SchemaContext resolveSchemaContext,
+        final BindingRuntimeContext bindingContextProvider,
+        final SchemaSourceProvider<YangTextSchemaSource> sourceProvider) {
         this.bindingContextProvider = bindingContextProvider;
+        this.sourceProvider = sourceProvider;
         LOG.trace("Resolved modules:{}", resolveSchemaContext.getModules());
         this.schemaContext = resolveSchemaContext;
         // JMX generator
@@ -119,21 +126,18 @@ final class YangStoreSnapshot implements YangStoreContext, EnumResolver {
 
     @Override
     public String getModuleSource(final org.opendaylight.yangtools.yang.model.api.ModuleIdentifier moduleIdentifier) {
-        final Optional<String> moduleSource = schemaContext.getModuleSource(moduleIdentifier);
-        if(moduleSource.isPresent()) {
-            return moduleSource.get();
-        } else {
-            try {
-                return Iterables.find(getModules(), new Predicate<Module>() {
-                    @Override
-                    public boolean apply(final Module input) {
-                        final ModuleIdentifierImpl id = new ModuleIdentifierImpl(input.getName(), Optional.fromNullable(input.getNamespace()), Optional.fromNullable(input.getRevision()));
-                        return id.equals(moduleIdentifier);
-                    }
-                }).getSource();
-            } catch (final NoSuchElementException e) {
-                throw new IllegalArgumentException("Source for yang module " + moduleIdentifier + " not found", e);
-            }
+        final CheckedFuture<? extends YangTextSchemaSource, SchemaSourceException> source = sourceProvider.getSource(
+            moduleIdentifier.getRevision() == null ?
+                new SourceIdentifier(moduleIdentifier.getName()) :
+                new SourceIdentifier(moduleIdentifier.getName(),
+                    QName.formattedRevision(moduleIdentifier.getRevision())));
+
+        try {
+            final YangTextSchemaSource yangTextSchemaSource = source.checkedGet();
+            return new String(ByteStreams.toByteArray(yangTextSchemaSource.openStream()), Charsets.UTF_8);
+        } catch (SchemaSourceException | IOException e) {
+            LOG.warn("Unable to provide source for {}", moduleIdentifier, e);
+            throw new IllegalArgumentException("Unable to provide source for " + moduleIdentifier, e);
         }
     }
 
