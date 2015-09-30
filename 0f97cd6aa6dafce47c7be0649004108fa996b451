@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_fa26e1b9",
+        "filename": "opendaylight/config/config-manager/src/main/java/org/opendaylight/controller/config/manager/impl/osgi/mapping/ModuleInfoBundleTracker.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 4580
+      },
+      "writtenOn": "2015-09-30T14:29:42Z",
+      "side": 1,
+      "message": "Unnecessary?",
+      "revId": "0f97cd6aa6dafce47c7be0649004108fa996b451",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
