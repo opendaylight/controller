@@ -8,6 +8,8 @@
 
 package org.opendaylight.controller.config.facade.xml.osgi;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.Sets;
 import java.lang.ref.SoftReference;
 import java.util.Collections;
@@ -18,13 +20,18 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.annotation.Nullable;
+import org.opendaylight.controller.config.util.capability.Capability;
 import org.opendaylight.controller.config.util.capability.ModuleListener;
+import org.opendaylight.controller.config.util.capability.YangModuleCapability;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.yangtools.sal.binding.generator.util.BindingRuntimeContext;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.model.api.Module;
 import org.opendaylight.yangtools.yang.model.api.ModuleIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContextProvider;
+import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
+import org.opendaylight.yangtools.yang.model.repo.spi.SchemaSourceProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,6 +66,7 @@ public class YangStoreService implements YangStoreContext {
             new AtomicReference<>(new SoftReference<BindingRuntimeContext>(null));
 
     private final SchemaContextProvider schemaContextProvider;
+    private final SchemaSourceProvider<YangTextSchemaSource> sourceProvider;
 
     private final ExecutorService notificationExecutor = Executors.newSingleThreadExecutor(new ThreadFactory() {
         @Override
@@ -69,8 +77,10 @@ public class YangStoreService implements YangStoreContext {
 
     private final Set<ModuleListener> listeners = Collections.synchronizedSet(new HashSet<ModuleListener>());
 
-    public YangStoreService(final SchemaContextProvider schemaContextProvider) {
+    public YangStoreService(final SchemaContextProvider schemaContextProvider,
+        final SchemaSourceProvider<YangTextSchemaSource> sourceProvider) {
         this.schemaContextProvider = schemaContextProvider;
+        this.sourceProvider = sourceProvider;
     }
 
     private synchronized YangStoreContext getYangStoreSnapshot() {
@@ -79,7 +89,8 @@ public class YangStoreService implements YangStoreContext {
 
         while (ret == null) {
             // We need to be compute a new value
-            ret = new YangStoreSnapshot(schemaContextProvider.getSchemaContext(), refBindingContext.get().get());
+            // TODO sourceProvider is not a snapshot
+            ret = new YangStoreSnapshot(schemaContextProvider.getSchemaContext(), refBindingContext.get().get(), sourceProvider);
 
             if (!ref.compareAndSet(r, new SoftReference<>(ret))) {
                 LOG.debug("Concurrent refresh detected, recomputing snapshot");
@@ -135,7 +146,7 @@ public class YangStoreService implements YangStoreContext {
         }
 
         this.listeners.add(listener);
-        listener.onCapabilitiesChanged(context.getModules(), Collections.<Module>emptySet());
+        listener.onCapabilitiesChanged(toCapabilities(context.getModules(), context), Collections.<Capability>emptySet());
 
         return new AutoCloseable() {
             @Override
@@ -143,6 +154,14 @@ public class YangStoreService implements YangStoreContext {
                 YangStoreService.this.listeners.remove(listener);
             }
         };
+    }
+
+    private Set<Capability> toCapabilities(final Set<Module> modules, final YangStoreContext current) {
+        return Sets.newHashSet(Collections2.transform(modules, new Function<Module, Capability>() {
+            @Nullable @Override public Capability apply(final Module input) {
+                return new YangModuleCapability(input, current.getModuleSource(input));
+            }
+        }));
     }
 
     private final class CapabilityChangeNotifier implements Runnable {
@@ -162,9 +181,10 @@ public class YangStoreService implements YangStoreContext {
                 final Set<Module> added = Sets.difference(current.getModules(), previous.getModules());
 
                 for (final ModuleListener listener : listeners) {
-                    listener.onCapabilitiesChanged(added, removed);
+                    listener.onCapabilitiesChanged(toCapabilities(added, current), toCapabilities(removed, current));
                 }
             }
         }
+
     }
 }

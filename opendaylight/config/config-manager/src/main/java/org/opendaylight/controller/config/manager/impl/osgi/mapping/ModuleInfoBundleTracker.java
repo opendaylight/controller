@@ -61,6 +61,7 @@ public final class ModuleInfoBundleTracker implements BundleTrackerCustomizer<Co
             throw new RuntimeException(e);
         }
 
+
         LOG.trace("Got following registrations {}", registrations);
         return registrations;
     }

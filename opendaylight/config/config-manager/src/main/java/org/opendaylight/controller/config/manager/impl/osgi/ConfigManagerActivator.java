@@ -48,7 +48,7 @@ public class ConfigManagerActivator implements BundleActivator {
             BindingContextProvider bindingContextProvider = new BindingContextProvider();
 
             RefreshingSCPModuleInfoRegistry moduleInfoRegistryWrapper = new RefreshingSCPModuleInfoRegistry(
-                    moduleInfoBackedContext, moduleInfoBackedContext, moduleInfoBackedContext, bindingContextProvider, context);
+                    moduleInfoBackedContext, moduleInfoBackedContext, moduleInfoBackedContext, moduleInfoBackedContext, bindingContextProvider, context);
 
             ModuleInfoBundleTracker moduleInfoBundleTracker = new ModuleInfoBundleTracker(moduleInfoRegistryWrapper);
 
