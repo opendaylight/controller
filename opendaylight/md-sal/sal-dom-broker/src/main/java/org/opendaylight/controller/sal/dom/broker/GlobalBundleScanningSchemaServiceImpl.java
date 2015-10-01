@@ -49,6 +49,7 @@ public class GlobalBundleScanningSchemaServiceImpl implements SchemaContextProvi
     private ServiceTracker<SchemaContextListener, SchemaContextListener> listenerTracker;
     private BundleTracker<Iterable<Registration>> bundleTracker;
     private boolean starting = true;
+    private volatile boolean stopping;
     private static GlobalBundleScanningSchemaServiceImpl instance;
 
     private GlobalBundleScanningSchemaServiceImpl(final BundleContext context) {
@@ -134,6 +135,7 @@ public class GlobalBundleScanningSchemaServiceImpl implements SchemaContextProvi
 
     @Override
     public void close() {
+        stopping = true;
         if (bundleTracker != null) {
             bundleTracker.close();
         }
@@ -243,7 +245,7 @@ public class GlobalBundleScanningSchemaServiceImpl implements SchemaContextProvi
     }
 
     public synchronized void tryToUpdateSchemaContext() {
-        if (starting) {
+        if (starting || stopping) {
             return;
         }
         Optional<SchemaContext> schema = contextResolver.getSchemaContext();
