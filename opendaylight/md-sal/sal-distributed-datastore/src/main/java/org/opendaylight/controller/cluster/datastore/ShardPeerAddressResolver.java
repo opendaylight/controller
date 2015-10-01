@@ -80,6 +80,10 @@ class ShardPeerAddressResolver implements PeerAddressResolver {
 
     @Override
     public String resolve(String peerId) {
+        if(peerId == null) {
+            return null;
+        }
+
         ShardIdentifier shardId = ShardIdentifier.builder().fromShardIdString(peerId).build();
         return getShardActorAddress(shardId.getShardName(), shardId.getMemberName());
     }

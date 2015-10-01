@@ -8,7 +8,6 @@
 
 package org.opendaylight.controller.cluster.raft;
 
-import static com.google.common.base.Preconditions.checkState;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
@@ -176,11 +175,12 @@ public class RaftActorContextImpl implements RaftActorContext {
         return null;
     }
 
-    @Override public void setPeerAddress(String peerId, String peerAddress) {
-        LOG.info("Peer address for peer {} set to {}", peerId, peerAddress);
-        checkState(peerAddresses.containsKey(peerId), peerId + " is unknown");
-
-        peerAddresses.put(peerId, peerAddress);
+    @Override
+    public void setPeerAddress(String peerId, String peerAddress) {
+        if(peerAddresses.containsKey(peerId)) {
+            LOG.info("Peer address for peer {} set to {}", peerId, peerAddress);
+            peerAddresses.put(peerId, peerAddress);
+        }
     }
 
     @Override
