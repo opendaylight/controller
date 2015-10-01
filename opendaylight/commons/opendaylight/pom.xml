@@ -191,8 +191,6 @@
   <dependencyManagement>
     <dependencies>
 
-
-
       <!-- yangtools artifacts -->
       <dependency>
         <groupId>org.opendaylight.yangtools</groupId>
@@ -221,15 +219,7 @@
           <scope>import</scope>
         </dependency>
 
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
-        <artifactId>config-artifacts</artifactId>
-        <version>${config.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-
-       <!-- project specific dependencies -->
+      <!-- project specific dependencies -->
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>config-artifacts</artifactId>
