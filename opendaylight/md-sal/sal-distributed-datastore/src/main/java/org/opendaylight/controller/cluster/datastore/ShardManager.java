@@ -63,6 +63,7 @@ import org.opendaylight.controller.cluster.datastore.messages.RemotePrimaryShard
 import org.opendaylight.controller.cluster.datastore.messages.ShardLeaderStateChanged;
 import org.opendaylight.controller.cluster.datastore.messages.SwitchShardBehavior;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
+import org.opendaylight.controller.cluster.datastore.messages.UpdateShardReplica;
 import org.opendaylight.controller.cluster.datastore.utils.Dispatchers;
 import org.opendaylight.controller.cluster.datastore.utils.PrimaryShardInfoFutureCache;
 import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListener;
@@ -201,6 +202,10 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             onSwitchShardBehavior((SwitchShardBehavior) message);
         } else if(message instanceof CreateShard) {
             onCreateShard((CreateShard)message);
+        } else if(message instanceof UpdateShardReplica){
+            mBean.setShardReplicateInProgress(true);
+            updateShardReplica((UpdateShardReplica)message);
+            mBean.setShardReplicateInProgress(false);
         } else {
             unknownMessage(message);
         }
@@ -753,6 +758,25 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     ShardManagerInfoMBean getMBean(){
         return mBean;
     }
+
+    private void updateShardReplica (UpdateShardReplica shardReplicaMsg){
+        /* Process ShardReplication configuration messages in serialized way so that
+         * the old local shards can be correctly backtracked in cases when the primary
+         * shard fails to add the shard replica in this node.
+         */
+
+        String shardName = shardReplicaMsg.getShardName();
+        if (this.configuration.checkModuleAvailability(shardName) == false) {
+            LOG.debug ("Shard {} not available for replication", shardName);
+            return;
+        }
+        if (shardReplicaMsg.getShardReplicateAction() == UpdateShardReplica.ShardReplicaAction.CREATE) {
+            // call CreateShard for the shardName
+        } else {
+            // call RemoveShard for the shardName
+        }
+    }
+
 
     @VisibleForTesting
     protected static class ShardInformation {

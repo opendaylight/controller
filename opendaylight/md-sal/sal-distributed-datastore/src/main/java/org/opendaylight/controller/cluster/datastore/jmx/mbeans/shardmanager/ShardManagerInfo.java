@@ -18,6 +18,7 @@ import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.opendaylight.controller.cluster.datastore.messages.UpdateShardReplica;
 
 public class ShardManagerInfo extends AbstractMXBean implements ShardManagerInfoMBean {
 
@@ -35,6 +36,8 @@ public class ShardManagerInfo extends AbstractMXBean implements ShardManagerInfo
     private boolean syncStatus = false;
 
     private ShardManager shardManager;
+    // Flag to denote if the shardReplication configuration is currently processed by the shardManager
+    private boolean shardReplicateInProgress = false;
 
     public ShardManagerInfo(String memberName, String name, String mxBeanType, List<String> localShards) {
         super(name, mxBeanType, JMX_CATEGORY_SHARD_MANAGER);
@@ -95,5 +98,42 @@ public class ShardManagerInfo extends AbstractMXBean implements ShardManagerInfo
 
     public void setShardManager(ShardManager shardManager){
         this.shardManager = shardManager;
+    }
+
+    public void setShardReplicateInProgress(boolean replicateStatus){
+        this.shardReplicateInProgress = replicateStatus;
+    }
+
+    @Override
+    public boolean addShardReplica (String shardName){
+        LOG.info ("addShardReplica initiated for shard {}", shardName);
+        if (this.shardReplicateInProgress == true){
+            LOG.info ("Shard Replication process is in progress for a previous configuration.");
+            return false;
+        }
+        for (String shard : localShards){
+            if (shard.contains(shardName)){
+                LOG.info ("Local shard {} already exists, not recreating it", shardName);
+                return false;
+            }
+        }
+        shardManager.getSelf().tell(new UpdateShardReplica(shardName, UpdateShardReplica.ShardReplicaAction.CREATE), ActorRef.noSender());
+        return true;
+    }
+
+    @Override
+    public boolean removeShardReplica (String shardName){
+        LOG.info ("removeShardReplica initiated for shard {}", shardName);
+        if (this.shardReplicateInProgress == true){
+            LOG.info ("Shard Replication process is in progress for a previous configuration.");
+            return false;
+        }
+        for (String shard : localShards){
+            if (shard.contains(shardName)){
+                shardManager.getSelf().tell(new UpdateShardReplica(shardName, UpdateShardReplica.ShardReplicaAction.REMOVE), ActorRef.noSender());
+                return true;
+            }
+        }
+        return false;
     }
 }
