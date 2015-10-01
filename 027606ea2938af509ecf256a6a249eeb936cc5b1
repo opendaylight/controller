@@ -1,0 +1,174 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_cbb6b98a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-01T13:06:55Z",
+      "side": 1,
+      "message": "I don\u0027t think we should feedback to the mbean like this - doesn\u0027t seem clean. As I commented in the mbean class, the raft actor code needs to check if one is in progress anyway. Also updateShardReplica will be async so setting to false here would be incorrect.",
+      "revId": "027606ea2938af509ecf256a6a249eeb936cc5b1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_cb6d5906",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 769,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-01T13:06:55Z",
+      "side": 1,
+      "message": "Is the purpose to check if a local shard already exists? If so, then you can check the localShard map.\n\ncheckstyle: use \u0027!\u0027 instead of \"\u003d\u003d false\" for booleans",
+      "revId": "027606ea2938af509ecf256a6a249eeb936cc5b1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_cb5a3983",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shardmanager/ShardManagerInfo.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-01T13:06:55Z",
+      "side": 1,
+      "message": "This should be volatile",
+      "revId": "027606ea2938af509ecf256a6a249eeb936cc5b1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_6b4be5b0",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shardmanager/ShardManagerInfo.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-01T13:06:55Z",
+      "side": 1,
+      "message": "It would be useful to return the message to the client. I\u0027m not sure how best to do that via JMX, i.e. return a String or throw a runtime ex.\n\nHowever do we need to do this check here? This has to be checked anyway in the raft code so might as well let that handle it.",
+      "revId": "027606ea2938af509ecf256a6a249eeb936cc5b1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_2bcded31",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shardmanager/ShardManagerInfo.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-01T13:06:55Z",
+      "side": 1,
+      "message": "This check should be done in the ShardManager.",
+      "revId": "027606ea2938af509ecf256a6a249eeb936cc5b1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_4be5c9a6",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shardmanager/ShardManagerInfo.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-01T13:06:55Z",
+      "side": 1,
+      "message": "This should use the ask pattern to wait for the response.",
+      "revId": "027606ea2938af509ecf256a6a249eeb936cc5b1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_8b02013d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/UpdateShardReplica.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-01T13:06:55Z",
+      "side": 1,
+      "message": "Please add class javadocs",
+      "revId": "027606ea2938af509ecf256a6a249eeb936cc5b1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_6bf9a54c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/UpdateShardReplica.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-01T13:06:55Z",
+      "side": 1,
+      "message": "I would prefer separate message classes for add and remove to be consistent as we haven\u0027t used this pattern elsewhere.",
+      "revId": "027606ea2938af509ecf256a6a249eeb936cc5b1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_cb9f9902",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/UpdateShardReplica.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-01T13:06:55Z",
+      "side": 1,
+      "message": "Minor thing but Moiz and I have moved to using String concatenation in toString. Please update your IDE (looks like eclipse).",
+      "revId": "027606ea2938af509ecf256a6a249eeb936cc5b1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_0befd188",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/utils/MockConfiguration.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-01T13:06:55Z",
+      "side": 1,
+      "message": "Minor thing but please add blank line.",
+      "revId": "027606ea2938af509ecf256a6a249eeb936cc5b1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
