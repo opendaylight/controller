@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "1a76adc5_8c4bf72a",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RemoteRpcProviderConfig.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2015-10-01T22:36:59Z",
+      "side": 1,
+      "message": "This object can be a singleton, which fetches configuration from some cfg file and can be reused in remote rpc",
+      "range": {
+        "startLine": 18,
+        "startChar": 13,
+        "endLine": 18,
+        "endChar": 36
+      },
+      "revId": "7e19f270f7f200bf973624382f56cb013ac3aa9c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_179b7819",
         "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RemoteRpcProviderFactory.java",
         "patchSetId": 2
@@ -13,6 +36,29 @@
       "writtenOn": "2015-09-30T13:53:44Z",
       "side": 1,
       "message": "This can be removed.",
+      "revId": "7e19f270f7f200bf973624382f56cb013ac3aa9c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_6c8d3b7b",
+        "filename": "opendaylight/md-sal/sal-remoterpc-connector/src/main/java/org/opendaylight/controller/remote/rpc/RemoteRpcProviderFactory.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1903
+      },
+      "writtenOn": "2015-10-01T22:36:59Z",
+      "side": 1,
+      "message": "this Config is not in use either",
+      "range": {
+        "startLine": 41,
+        "startChar": 41,
+        "endLine": 41,
+        "endChar": 47
+      },
       "revId": "7e19f270f7f200bf973624382f56cb013ac3aa9c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
