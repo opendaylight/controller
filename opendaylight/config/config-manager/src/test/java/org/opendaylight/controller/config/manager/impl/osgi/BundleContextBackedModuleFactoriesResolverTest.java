@@ -13,58 +13,40 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import com.google.common.util.concurrent.Uninterruptibles;
-import java.util.AbstractMap;
-import java.util.Arrays;
+import com.google.common.collect.Lists;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
 public class BundleContextBackedModuleFactoriesResolverTest {
 
     @Mock
-    private ModuleFactoryBundleTracker mockBundleTracker;
-
-    @Mock
-    private BundleContext mockBundleContext1;
-
-    @Mock
-    private BundleContext mockBundleContext2;
-
-    @Mock
-    private Bundle mockBundle1;
-
-    @Mock
-    private Bundle mockBundle2;
-
+    private BundleContext bundleContext;
     private BundleContextBackedModuleFactoriesResolver resolver;
+    private ServiceReference<?> s1;
+    private ServiceReference<?> s2;
     private ModuleFactory f1;
     private ModuleFactory f2;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        doReturn(mockBundleContext1).when(mockBundle1).getBundleContext();
-        doReturn(mockBundleContext2).when(mockBundle2).getBundleContext();
-
+        s1 = getServiceRef();
+        s2 = getServiceRef();
+        doReturn(Lists.newArrayList(s1, s2)).when(bundleContext).getServiceReferences(ModuleFactory.class, null);
         f1 = getMockFactory("f1");
+        doReturn(f1).when(bundleContext).getService(s1);
         f2 = getMockFactory("f2");
-
-        resolver = new BundleContextBackedModuleFactoriesResolver();
-        resolver.setModuleFactoryBundleTracker(mockBundleTracker);
+        doReturn(f2).when(bundleContext).getService(s2);
+        resolver = new BundleContextBackedModuleFactoriesResolver(bundleContext);
     }
 
     private ModuleFactory getMockFactory(final String name) {
@@ -74,28 +56,30 @@ public class BundleContextBackedModuleFactoriesResolverTest {
         return mock;
     }
 
+    private ServiceReference<?> getServiceRef() {
+        ServiceReference<?> mock = mock(ServiceReference.class);
+        doReturn("serviceRef").when(mock).toString();
+        final Bundle bundle = mock(Bundle.class);
+        doReturn(bundleContext).when(bundle).getBundleContext();
+        doReturn(bundle).when(mock).getBundle();
+        return mock;
+    }
+
     @Test
     public void testGetAllFactories() throws Exception {
-        doReturn(Arrays.asList(new AbstractMap.SimpleImmutableEntry<>(f1, mockBundleContext1),
-                new AbstractMap.SimpleImmutableEntry<>(f2, mockBundleContext2))).
-                        when(mockBundleTracker).getModuleFactoryEntries();
-
         Map<String, Map.Entry<ModuleFactory, BundleContext>> allFactories = resolver.getAllFactories();
         assertEquals(2, allFactories.size());
         assertTrue(allFactories.containsKey(f1.getImplementationName()));
         assertEquals(f1, allFactories.get(f1.getImplementationName()).getKey());
-        assertEquals(mockBundleContext1, allFactories.get(f1.getImplementationName()).getValue());
+        assertEquals(bundleContext, allFactories.get(f1.getImplementationName()).getValue());
         assertTrue(allFactories.containsKey(f2.getImplementationName()));
         assertEquals(f2, allFactories.get(f2.getImplementationName()).getKey());
-        assertEquals(mockBundleContext2, allFactories.get(f2.getImplementationName()).getValue());
+        assertEquals(bundleContext, allFactories.get(f2.getImplementationName()).getValue());
     }
 
     @Test
     public void testDuplicateFactories() throws Exception {
-        doReturn(Arrays.asList(new AbstractMap.SimpleImmutableEntry<>(f1, mockBundleContext1),
-                new AbstractMap.SimpleImmutableEntry<>(f1, mockBundleContext2))).
-                        when(mockBundleTracker).getModuleFactoryEntries();
-
+        doReturn(f1).when(bundleContext).getService(s2);
         try {
             resolver.getAllFactories();
         } catch (Exception e) {
@@ -107,54 +91,21 @@ public class BundleContextBackedModuleFactoriesResolverTest {
         fail("Should fail with duplicate factory name");
     }
 
+    @Test(expected = NullPointerException.class)
+    public void testNullFactory() throws Exception {
+        doReturn(null).when(bundleContext).getService(s2);
+        resolver.getAllFactories();
+    }
+
     @Test(expected = IllegalStateException.class)
     public void testNullFactoryName() throws Exception {
-        doReturn(Arrays.asList(new AbstractMap.SimpleImmutableEntry<>(f1, mockBundleContext1))).
-                when(mockBundleTracker).getModuleFactoryEntries();
-
         doReturn(null).when(f1).getImplementationName();
         resolver.getAllFactories();
     }
 
-    @Test
-    public void testBundleContextInitiallyNull() throws Exception {
-        final AtomicReference<BundleContext> bundleContext = new AtomicReference<>();
-        Answer<BundleContext> answer = new Answer<BundleContext>() {
-            @Override
-            public BundleContext answer(InvocationOnMock invocation) throws Throwable {
-                return bundleContext.get();
-            }
-        };
-
-        doAnswer(answer).when(mockBundle1).getBundleContext();
-        doReturn(Arrays.asList(new AbstractMap.SimpleImmutableEntry<>(f1, mockBundleContext1))).
-                when(mockBundleTracker).getModuleFactoryEntries();
-
-        final AtomicReference<Map<String, Map.Entry<ModuleFactory, BundleContext>>> allFactories = new AtomicReference<>();
-        final AtomicReference<Exception> caughtEx = new AtomicReference<>();
-        final CountDownLatch doneLatch = new CountDownLatch(1);
-        new Thread() {
-            @Override
-            public void run() {
-                try {
-                    allFactories.set(resolver.getAllFactories());
-                } catch (Exception e) {
-                    caughtEx.set(e);
-                } finally {
-                    doneLatch.countDown();
-                }
-            }
-        }.start();
-
-        Uninterruptibles.sleepUninterruptibly(500, TimeUnit.MILLISECONDS);
-        bundleContext.set(mockBundleContext1);
-
-        assertEquals(true, doneLatch.await(5, TimeUnit.SECONDS));
-        if(caughtEx.get() != null) {
-            throw caughtEx.get();
-        }
-
-        assertEquals(1, allFactories.get().size());
-        assertTrue(allFactories.get().containsKey(f1.getImplementationName()));
+    @Test(expected = NullPointerException.class)
+    public void testNullBundleName() throws Exception {
+        doReturn(null).when(s1).getBundle();
+        resolver.getAllFactories();
     }
 }
