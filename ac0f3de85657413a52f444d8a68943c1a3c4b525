@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_cb8319cb",
+        "filename": "opendaylight/model/model-inventory/src/main/yang/netconf-node-inventory.yang",
+        "patchSetId": 4
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-01T12:37:01Z",
+      "side": 1,
+      "message": "Minor thing but a tab char got added.",
+      "revId": "ac0f3de85657413a52f444d8a68943c1a3c4b525",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_4b770903",
+        "filename": "opendaylight/model/model-inventory/src/main/yang/opendaylight-inventory.yang",
+        "patchSetId": 4
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-01T12:37:01Z",
+      "side": 1,
+      "message": "tab char",
+      "revId": "ac0f3de85657413a52f444d8a68943c1a3c4b525",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_6b7445fd",
+        "filename": "opendaylight/model/model-inventory/src/main/yang/opendaylight-inventory.yang",
+        "patchSetId": 4
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-01T12:37:01Z",
+      "side": 1,
+      "message": "tab char",
+      "revId": "ac0f3de85657413a52f444d8a68943c1a3c4b525",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
