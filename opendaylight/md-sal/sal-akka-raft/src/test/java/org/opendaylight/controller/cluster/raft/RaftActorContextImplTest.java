@@ -65,4 +65,19 @@ public class RaftActorContextImplTest extends AbstractActorTest {
         assertEquals("getPeerAddress", "peerAddress1", context.getPeerAddress("peer1"));
         verify(mockResolver, never()).resolve(anyString());
     }
+
+    @Test
+    public void testSetPeerAddress() {
+        DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
+        RaftActorContextImpl context = new RaftActorContextImpl(actor, actor.underlyingActor().getContext(),
+                "test", new ElectionTermImpl(new NonPersistentDataProvider(), "test", log), -1, -1,
+                Maps.newHashMap(ImmutableMap.<String, String>of("peer1", "peerAddress1")), configParams,
+                new NonPersistentDataProvider(), log);
+
+        context.setPeerAddress("peer1", "peerAddress1_1");
+        assertEquals("getPeerAddress", "peerAddress1_1", context.getPeerAddress("peer1"));
+
+        context.setPeerAddress("peer2", "peerAddress2");
+        assertEquals("getPeerAddress", null, context.getPeerAddress("peer2"));
+    }
 }
