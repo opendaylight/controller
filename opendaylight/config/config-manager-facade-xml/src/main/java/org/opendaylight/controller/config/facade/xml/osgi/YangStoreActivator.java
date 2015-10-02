@@ -51,6 +51,11 @@ public class YangStoreActivator implements BundleActivator {
             @Override
             public YangStoreService addingService(ServiceReference<SchemaContextProvider> reference) {
                 LOG.debug("Got addingService(SchemaContextProvider) event");
+                if(reference.getProperty(SchemaSourceProvider.class.getName()) == null &&
+                    reference.getProperty(BindingRuntimeContext.class.getName()) == null) {
+                    LOG.debug("SchemaContextProvider not from config-manager. Ignoring");
+                    return null;
+                }
 
                 // Yang store service should not be registered multiple times
                 if(!alreadyStarted.compareAndSet(false, true)) {
@@ -67,14 +72,23 @@ public class YangStoreActivator implements BundleActivator {
 
             @Override
             public void modifiedService(ServiceReference<SchemaContextProvider> reference, YangStoreService service) {
+                if (service == null) {
+                    return;
+                }
+
                 LOG.debug("Got modifiedService(SchemaContextProvider) event");
-                final BindingRuntimeContext runtimeContext = (BindingRuntimeContext) reference.getProperty(BindingRuntimeContext.class.getName());
+                final BindingRuntimeContext runtimeContext = (BindingRuntimeContext) reference
+                    .getProperty(BindingRuntimeContext.class.getName());
                 LOG.debug("BindingRuntimeContext retrieved as {}", runtimeContext);
                 service.refresh(runtimeContext);
             }
 
             @Override
             public void removedService(ServiceReference<SchemaContextProvider> reference, YangStoreService service) {
+                if(service == null) {
+                    return;
+                }
+
                 LOG.debug("Got removedService(SchemaContextProvider) event");
                 alreadyStarted.set(false);
                 configRegistryLookup.interrupt();
