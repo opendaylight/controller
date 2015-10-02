@@ -70,6 +70,7 @@
         <feature version='${project.version}'>odl-mdsal-broker-local</feature>
         <feature version='${akka.version}'>odl-akka-system</feature>
         <feature version='${akka.version}'>odl-akka-persistence</feature>
+        <feature version='${akka.version}'>odl-akka-clustering</feature>
         <bundle>mvn:org.opendaylight.controller/sal-clustering-commons/{{VERSION}}</bundle>
         <bundle>mvn:org.opendaylight.controller/sal-akka-raft/{{VERSION}}</bundle>
         <bundle>mvn:com.codahale.metrics/metrics-core/3.0.1</bundle>
@@ -77,13 +78,11 @@
     <feature name ='odl-mdsal-distributed-datastore' version='${project.version}'>
         <feature version='${project.version}'>odl-mdsal-broker-local</feature>
         <feature version='${project.version}'>odl-mdsal-clustering-commons</feature>
-        <feature version='${akka.version}'>odl-akka-clustering</feature>
         <bundle>mvn:org.opendaylight.controller/sal-distributed-datastore/{{VERSION}}</bundle>
     </feature>
     <feature name ='odl-mdsal-remoterpc-connector' version='${project.version}'>
         <feature version='${project.version}'>odl-mdsal-broker-local</feature>
         <feature version='${project.version}'>odl-mdsal-clustering-commons</feature>
-        <feature version='${akka.version}'>odl-akka-clustering</feature>
         <feature version='0.7'>odl-akka-leveldb</feature>
         <bundle>mvn:org.opendaylight.controller/sal-remoterpc-connector/{{VERSION}}</bundle>
     </feature>
