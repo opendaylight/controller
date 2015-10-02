@@ -50,9 +50,8 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
 
     private static final long READY_WAIT_FACTOR = 3;
 
-    private final ActorContext actorContext;
+    private ActorContext actorContext;
     private final long waitTillReadyTimeInMillis;
-
 
     private AutoCloseable closeable;
 
@@ -60,41 +59,56 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
 
     private DatastoreInfoMXBeanImpl datastoreInfoMXBean;
 
-    private final CountDownLatch waitTillReadyCountDownLatch = new CountDownLatch(1);
+    private CountDownLatch waitTillReadyCountDownLatch = new CountDownLatch(1);
 
     private final String type;
 
-    private final TransactionContextFactory txContextFactory;
+    private TransactionContextFactory txContextFactory;
+    private final Configuration configuration;
+    private final DatastoreContext datastoreContext;
 
     public DistributedDataStore(ActorSystem actorSystem, ClusterWrapper cluster,
             Configuration configuration, DatastoreContext datastoreContext) {
-        Preconditions.checkNotNull(actorSystem, "actorSystem should not be null");
-        Preconditions.checkNotNull(cluster, "cluster should not be null");
         Preconditions.checkNotNull(configuration, "configuration should not be null");
         Preconditions.checkNotNull(datastoreContext, "datastoreContext should not be null");
 
+        this.configuration = configuration;
+        this.datastoreContext = datastoreContext;
+        this.waitTillReadyTimeInMillis = datastoreContext.getShardLeaderElectionTimeout().duration().toMillis()
+                * READY_WAIT_FACTOR;
         this.type = datastoreContext.getDataStoreType();
-
-        String shardManagerId = ShardManagerIdentifier.builder().type(type).build().toString();
-
-        LOG.info("Creating ShardManager : {}", shardManagerId);
-
-        String shardDispatcher =
-                new Dispatchers(actorSystem.dispatchers()).getDispatcherPath(Dispatchers.DispatcherType.Shard);
-
-        PrimaryShardInfoFutureCache primaryShardInfoCache = new PrimaryShardInfoFutureCache();
-        actorContext = new ActorContext(actorSystem, createShardManager(actorSystem, cluster, configuration,
-                datastoreContext, shardDispatcher, shardManagerId, primaryShardInfoCache), cluster,
-                configuration, datastoreContext, primaryShardInfoCache);
-
-        this.waitTillReadyTimeInMillis =
-                actorContext.getDatastoreContext().getShardLeaderElectionTimeout().duration().toMillis() * READY_WAIT_FACTOR;
-
-        this.txContextFactory = TransactionContextFactory.create(actorContext);
 
         datastoreConfigMXBean = new DatastoreConfigurationMXBeanImpl(datastoreContext.getDataStoreMXBeanType());
         datastoreConfigMXBean.setContext(datastoreContext);
         datastoreConfigMXBean.registerMBean();
+
+        setActorSystem(actorSystem, cluster);
+    }
+
+    public synchronized void setActorSystem(ActorSystem actorSystem, ClusterWrapper cluster) {
+        Preconditions.checkNotNull(actorSystem, "actorSystem should not be null");
+        Preconditions.checkNotNull(cluster, "cluster should not be null");
+
+        if (datastoreInfoMXBean != null) {
+            datastoreInfoMXBean.unregisterMBean();
+        }
+
+        // store old schema context to restore later
+        final SchemaContext oldSchemaContext = actorContext != null ? actorContext.getSchemaContext() : null;
+
+        this.waitTillReadyCountDownLatch = new CountDownLatch(1);
+        PrimaryShardInfoFutureCache primaryShardInfoCache = new PrimaryShardInfoFutureCache();
+
+        final ActorRef shardManager = createShardManager(actorSystem, cluster, primaryShardInfoCache);
+        actorContext = new ActorContext(actorSystem, shardManager, cluster, configuration, datastoreContext,
+                primaryShardInfoCache);
+
+        this.txContextFactory = TransactionContextFactory.create(actorContext);
+
+        // restore old schema context
+        if (oldSchemaContext != null) {
+            actorContext.setSchemaContext(oldSchemaContext);
+        }
 
         datastoreInfoMXBean = new DatastoreInfoMXBeanImpl(datastoreContext.getDataStoreMXBeanType(), actorContext);
         datastoreInfoMXBean.registerMBean();
@@ -107,6 +121,11 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
         this.type = UNKNOWN_TYPE;
         this.waitTillReadyTimeInMillis =
                 actorContext.getDatastoreContext().getShardLeaderElectionTimeout().duration().toMillis() * READY_WAIT_FACTOR;
+
+        this.configuration = null;
+        this.datastoreConfigMXBean = null;
+        this.datastoreInfoMXBean = null;
+        this.datastoreContext = null;
     }
 
     public void setCloseable(AutoCloseable closeable) {
@@ -220,9 +239,15 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
         }
     }
 
-    private ActorRef createShardManager(ActorSystem actorSystem, ClusterWrapper cluster, Configuration configuration,
-                                        DatastoreContext datastoreContext, String shardDispatcher, String shardManagerId,
-                                        PrimaryShardInfoFutureCache primaryShardInfoCache){
+    private ActorRef createShardManager(ActorSystem actorSystem, ClusterWrapper cluster,
+            PrimaryShardInfoFutureCache primaryShardInfoCache) {
+
+        String shardDispatcher =
+                new Dispatchers(actorSystem.dispatchers()).getDispatcherPath(Dispatchers.DispatcherType.Shard);
+
+        String shardManagerId = ShardManagerIdentifier.builder().type(type).build().toString();
+        LOG.info("Creating ShardManager : {}", shardManagerId);
+
         Exception lastException = null;
 
         for(int i=0;i<100;i++) {
