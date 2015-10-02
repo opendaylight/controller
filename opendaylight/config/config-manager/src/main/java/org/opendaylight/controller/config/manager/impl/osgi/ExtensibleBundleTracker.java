@@ -9,7 +9,6 @@ package org.opendaylight.controller.config.manager.impl.osgi;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -90,7 +89,7 @@ public final class ExtensibleBundleTracker<T> extends BundleTracker<Future<T>> {
                     LOG.trace("AddingBundle for {} and event {} finished successfully",bundle,event);
                     return primaryTrackerRetVal;
                 } catch (Exception e) {
-                    LOG.error("Failed to add bundle ",e);
+                    LOG.error("Failed to add bundle {}", bundle, e);
                     throw e;
                 }
             }
@@ -122,8 +121,8 @@ public final class ExtensibleBundleTracker<T> extends BundleTracker<Future<T>> {
                 }
             });
             LOG.trace("Removed bundle event for {} finished successfully.",bundle);
-        } catch (InterruptedException | ExecutionException e) {
-            LOG.error("Addition of bundle failed, ", e);
+        } catch (Exception e) {
+            LOG.error("Failed to remove bundle {}", bundle, e);
         }
     }
 

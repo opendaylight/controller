@@ -73,6 +73,14 @@ public class YangStoreActivator implements BundleActivator {
                 // TODO avoid cast
                 final YangStoreService yangStoreService = new YangStoreService(schemaContextProvider,
                     ((SchemaSourceProvider<YangTextSchemaSource>) sourceProvider));
+
+                final BindingRuntimeContext runtimeContext = (BindingRuntimeContext) reference
+                        .getProperty(BindingRuntimeContext.class.getName());
+                LOG.debug("BindingRuntimeContext retrieved as {}", runtimeContext);
+                if(runtimeContext != null) {
+                    yangStoreService.refresh(runtimeContext);
+                }
+
                 yangStoreServiceServiceRegistration = context.registerService(YangStoreService.class, yangStoreService, new Hashtable<String, Object>());
                 configRegistryLookup = new ConfigRegistryLookupThread(yangStoreService);
                 configRegistryLookup.start();
