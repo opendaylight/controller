@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 public class TerminationMonitor extends UntypedActor{
     private static final Logger LOG = LoggerFactory.getLogger(TerminationMonitor.class);
+    public static final String ADDRESS = "termination-monitor";
 
     public TerminationMonitor(){
         LOG.debug("Created TerminationMonitor");
