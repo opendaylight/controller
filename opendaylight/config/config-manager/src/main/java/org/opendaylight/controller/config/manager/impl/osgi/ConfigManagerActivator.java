@@ -49,7 +49,7 @@ public class ConfigManagerActivator implements BundleActivator {
             RefreshingSCPModuleInfoRegistry moduleInfoRegistryWrapper = new RefreshingSCPModuleInfoRegistry(
                     moduleInfoBackedContext, moduleInfoBackedContext, moduleInfoBackedContext, moduleInfoBackedContext, bindingContextProvider, context);
 
-            ModuleInfoBundleTracker moduleInfoBundleTracker = new ModuleInfoBundleTracker(moduleInfoRegistryWrapper);
+            ModuleInfoBundleTracker moduleInfoBundleTracker = new ModuleInfoBundleTracker(context, moduleInfoRegistryWrapper);
 
             // start config registry
             BundleContextBackedModuleFactoriesResolver bundleContextBackedModuleFactoriesResolver = new BundleContextBackedModuleFactoriesResolver(
@@ -60,13 +60,15 @@ public class ConfigManagerActivator implements BundleActivator {
             // track bundles containing factories
             BlankTransactionServiceTracker blankTransactionServiceTracker = new BlankTransactionServiceTracker(
                     configRegistry);
-            ModuleFactoryBundleTracker primaryModuleFactoryBundleTracker = new ModuleFactoryBundleTracker(
+            ModuleFactoryBundleTracker moduleFactoryTracker = new ModuleFactoryBundleTracker(
                     blankTransactionServiceTracker);
 
             // start extensible tracker
-            ExtensibleBundleTracker<?> bundleTracker = new ExtensibleBundleTracker<>(context,
-                    primaryModuleFactoryBundleTracker, moduleInfoBundleTracker);
-            bundleTracker.open();
+            ExtensibleBundleTracker<?> moduleFactoryBundleTracker = new ExtensibleBundleTracker<>(context,
+                    moduleFactoryTracker);
+            moduleFactoryBundleTracker.open();
+
+            moduleInfoBundleTracker.open();
 
             // Wrap config registry with JMX notification publishing adapter
             final JMXNotifierConfigRegistry notifyingConfigRegistry =
@@ -97,11 +99,17 @@ public class ConfigManagerActivator implements BundleActivator {
                     blankTransactionServiceTracker);
             serviceTracker.open();
 
-            List<AutoCloseable> list = Arrays.asList(bindingContextProvider, clsReg, configRegistry, wrap(bundleTracker),
+            List<AutoCloseable> list = Arrays.asList(bindingContextProvider, clsReg, configRegistry,
+                    wrap(moduleFactoryBundleTracker), wrap(moduleInfoBundleTracker.getBundleTracker()),
                     configRegReg, configRegistryJMXRegistrator, configRegistryJMXRegistratorWithNotifications, wrap(serviceTracker), moduleInfoRegistryWrapper, notifyingConfigRegistry);
             autoCloseable = OsgiRegistrationUtil.aggregate(list);
         } catch(Exception e) {
             LOG.warn("Error starting config manager", e);
+        } catch(Error e) {
+            // Log JVM Error and re-throw. The exception may silently fail the bundle and not always log the
+            // exception. This has been seen on initial feature install.
+            LOG.error("Error starting config manager", e);
+            throw e;
         }
     }
 

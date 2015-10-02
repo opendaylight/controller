@@ -16,11 +16,12 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
-import org.opendaylight.yangtools.sal.binding.generator.api.ModuleInfoRegistry;
 import org.opendaylight.yangtools.yang.binding.YangModelBindingProvider;
 import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
+import org.osgi.util.tracker.BundleTracker;
 import org.osgi.util.tracker.BundleTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,10 +36,26 @@ public final class ModuleInfoBundleTracker implements BundleTrackerCustomizer<Co
     public static final String MODULE_INFO_PROVIDER_PATH_PREFIX = "META-INF/services/";
 
 
-    private final ModuleInfoRegistry moduleInfoRegistry;
+    private final RefreshingSCPModuleInfoRegistry moduleInfoRegistry;
+    private final BundleTracker<Collection<ObjectRegistration<YangModuleInfo>>> bundleTracker;
+    private boolean starting;
 
-    public ModuleInfoBundleTracker(ModuleInfoRegistry moduleInfoRegistry) {
+    public ModuleInfoBundleTracker(BundleContext context, RefreshingSCPModuleInfoRegistry moduleInfoRegistry) {
         this.moduleInfoRegistry = moduleInfoRegistry;
+        bundleTracker = new BundleTracker<>(context, Bundle.RESOLVED | Bundle.STARTING |
+                Bundle.STOPPING | Bundle.ACTIVE, this);
+    }
+
+    public void open() {
+        starting = true;
+        bundleTracker.open();
+
+        starting = false;
+        moduleInfoRegistry.updateService();
+    }
+
+    public BundleTracker<?> getBundleTracker() {
+        return bundleTracker;
     }
 
     @Override
@@ -56,9 +73,14 @@ public final class ModuleInfoBundleTracker implements BundleTrackerCustomizer<Co
                 YangModuleInfo moduleInfo = retrieveModuleInfo(moduleInfoName, bundle);
                 registrations.add(moduleInfoRegistry.registerModuleInfo(moduleInfo));
             }
+
+            if(!starting) {
+                moduleInfoRegistry.updateService();
+            }
         } catch (IOException e) {
-            LOG.error("Error while reading {}", resource, e);
-            throw new RuntimeException(e);
+            LOG.error("Error while reading {} from bundle {}", resource, bundle, e);
+        } catch (RuntimeException e) {
+            LOG.error("Failed to process {} for bundle {}", resource, bundle, e);
         }
 
         LOG.trace("Got following registrations {}", registrations);
@@ -79,7 +101,7 @@ public final class ModuleInfoBundleTracker implements BundleTrackerCustomizer<Co
             try {
                 reg.close();
             } catch (Exception e) {
-                throw new RuntimeException("Unable to unregister YangModuleInfo " + reg.getInstance(), e);
+                LOG.error("Unable to unregister YangModuleInfo {}", reg.getInstance(), e);
             }
         }
     }
@@ -104,13 +126,11 @@ public final class ModuleInfoBundleTracker implements BundleTrackerCustomizer<Co
                     moduleInfoClass, bundle, e);
             throw new IllegalStateException(errorMessage, e);
         }
+
         try{
             return instance.getModuleInfo();
-        } catch (NoClassDefFoundError e) {
-
-
-            LOG.error("Error while executing getModuleInfo on {}", instance, e);
-            throw e;
+        } catch (NoClassDefFoundError | ExceptionInInitializerError e) {
+            throw new IllegalStateException("Error while executing getModuleInfo on " + instance, e);
         }
     }
 

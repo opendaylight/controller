@@ -19,11 +19,14 @@ import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
 import org.opendaylight.yangtools.yang.model.repo.spi.SchemaSourceProvider;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Update SchemaContext service in Service Registry each time new YangModuleInfo is added or removed.
  */
 public class RefreshingSCPModuleInfoRegistry implements ModuleInfoRegistry, AutoCloseable {
+    private static final Logger LOG = LoggerFactory.getLogger(RefreshingSCPModuleInfoRegistry.class);
 
     private final ModuleInfoRegistry moduleInfoRegistry;
     private final SchemaContextProvider schemaContextProvider;
@@ -31,7 +34,7 @@ public class RefreshingSCPModuleInfoRegistry implements ModuleInfoRegistry, Auto
     private final BindingContextProvider bindingContextProvider;
     private final ClassLoadingStrategy classLoadingStrat;
 
-    private final ServiceRegistration<SchemaContextProvider> osgiReg;
+    private volatile ServiceRegistration<SchemaContextProvider> osgiReg;
 
     public RefreshingSCPModuleInfoRegistry(final ModuleInfoRegistry moduleInfoRegistry,
         final SchemaContextProvider schemaContextProvider, final ClassLoadingStrategy classLoadingStrat,
@@ -47,26 +50,35 @@ public class RefreshingSCPModuleInfoRegistry implements ModuleInfoRegistry, Auto
             .registerService(SchemaContextProvider.class, schemaContextProvider, new Hashtable<String, String>());
     }
 
-    private void updateService() {
-        bindingContextProvider.update(classLoadingStrat, schemaContextProvider);
-        osgiReg.setProperties(new Hashtable<String, Object>() {{
-                put(BindingRuntimeContext.class.getName(), bindingContextProvider.getBindingContext());
-                put(SchemaSourceProvider.class.getName(), sourceProvider);
+    public void updateService() {
+        if(osgiReg != null) {
+            try {
+                bindingContextProvider.update(classLoadingStrat, schemaContextProvider);
+                osgiReg.setProperties(new Hashtable<String, Object>() {{
+                        put(BindingRuntimeContext.class.getName(), bindingContextProvider.getBindingContext());
+                        put(SchemaSourceProvider.class.getName(), sourceProvider);
+                    }}); // send modifiedService event
+            } catch (RuntimeException e) {
+                // The ModuleInfoBackedContext throws a RuntimeException if it can't create the schema context.
+                LOG.warn("Error updating the BindingContextProvider", e);
             }
-        }); // send modifiedService event
+        }
     }
 
     @Override
     public ObjectRegistration<YangModuleInfo> registerModuleInfo(YangModuleInfo yangModuleInfo) {
         ObjectRegistration<YangModuleInfo> yangModuleInfoObjectRegistration = moduleInfoRegistry.registerModuleInfo(yangModuleInfo);
         ObjectRegistrationWrapper wrapper = new ObjectRegistrationWrapper(yangModuleInfoObjectRegistration);
-        updateService();
         return wrapper;
     }
 
     @Override
     public void close() throws Exception {
-        osgiReg.unregister();
+        if(osgiReg != null) {
+            osgiReg.unregister();
+        }
+
+        osgiReg = null;
     }
 
     private class ObjectRegistrationWrapper implements ObjectRegistration<YangModuleInfo> {

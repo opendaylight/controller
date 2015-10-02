@@ -13,7 +13,6 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-
 import java.util.Dictionary;
 import org.junit.Before;
 import org.junit.Test;
@@ -70,6 +69,7 @@ public class RefreshingSCPModuleInfoRegistryTest {
         doReturn(ymi).when(reg).registerModuleInfo(modInfo);
 
         scpreg.registerModuleInfo(modInfo);
+        scpreg.updateService();
 
         verify(codecRegistryProvider).update(classLoadingStrat, prov);
 
