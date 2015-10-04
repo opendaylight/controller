@@ -2,6 +2,40 @@
   "comments": [
     {
       "key": {
+        "uuid": "1a76adc5_0a7fc2e1",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/NodeMonitor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-04T13:11:34Z",
+      "side": 1,
+      "message": "Since the purpose of this class is to detect quarantine and the javadocs outline that, can we call it QuarantinedMonitorActor?",
+      "revId": "91dc0610607c48bf4cffe456dcb63b7236af9926",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_2a4e3ec2",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/NodeMonitor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-04T13:11:34Z",
+      "side": 1,
+      "message": "It\u0027s unfortunate we have to rely on exception message contents. It would be nice if we could devise a unit test for this so, when we upgrade, we can detect if the message changes or we no longer get the event. If unit test isn\u0027t feasible, then integration test. This would be a separate patch.",
+      "revId": "91dc0610607c48bf4cffe456dcb63b7236af9926",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_d4b091f6",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/NodeMonitor.java",
         "patchSetId": 2
