@@ -145,6 +145,30 @@
     },
     {
       "key": {
+        "uuid": "1a76adc5_292c0b47",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/FollowerLogInformation.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-05T14:31:51Z",
+      "side": 1,
+      "message": "If it\u0027s a permanent non voting replica I don\u0027t think we need to have it caught up. The whole idea of having it caught up is to reduce periods on unavailability because consensus could not be reached on a log entry.",
+      "parentUuid": "1a76adc5_295e4be7",
+      "range": {
+        "startLine": 116,
+        "startChar": 9,
+        "endLine": 116,
+        "endChar": 23
+      },
+      "revId": "34d9a6ba5a7f523429182cb1c788083dbd39e456",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_7d264b18",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
         "patchSetId": 3
@@ -322,6 +346,30 @@
       "side": 1,
       "message": "Not sure I follow. Maybe I don\u0027t understand yet how we would roll back but wouldn\u0027t this be done when we remove entries in Follower#handleAppendEnties and maybe on recovery via DeleteEntries? If so, wouldn\u0027t we need to get the old server config from the ServerConfigurationPayload entry that was removed? Or maybe there\u0027s another way we would do it that I\u0027m not seeing...",
       "parentUuid": "1a76adc5_29d08b4f",
+      "range": {
+        "startLine": 36,
+        "startChar": 81,
+        "endLine": 36,
+        "endChar": 96
+      },
+      "revId": "34d9a6ba5a7f523429182cb1c788083dbd39e456",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_c920f74b",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/ServerConfigurationPayload.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-05T14:31:51Z",
+      "side": 1,
+      "message": "Every Replica has the raft cluster configuration. When it receives the new configuration it can therefore backup the old server configuration. So it really does not need the leader to tell it the old server configuration.",
+      "parentUuid": "1a76adc5_c972377c",
       "range": {
         "startLine": 36,
         "startChar": 81,
