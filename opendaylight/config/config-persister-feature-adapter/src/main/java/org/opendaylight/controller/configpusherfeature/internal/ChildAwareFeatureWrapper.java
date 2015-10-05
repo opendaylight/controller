@@ -58,15 +58,20 @@ public class ChildAwareFeatureWrapper extends AbstractFeatureWrapper implements 
         if(dependencies != null) {
             for(Dependency dependency: dependencies) {
                 Feature fi = extractFeatureFromDependency(dependency);
-                if(fi != null){
-                    ChildAwareFeatureWrapper wrappedFeature = new ChildAwareFeatureWrapper(fi,featuresService);
-                    childFeatures.add(wrappedFeature);
+                if(fi != null) {
+                    if(featuresService.getFeature(fi.getName(), fi.getVersion()) == null) {
+                        LOG.warn("Feature: {}, {} is missing from features service. Skipping", fi.getName(), fi.getVersion());
+                    } else {
+                        ChildAwareFeatureWrapper wrappedFeature = new ChildAwareFeatureWrapper(fi,featuresService);
+                        childFeatures.add(wrappedFeature);
+                    }
                 }
             }
         }
         return childFeatures;
     }
 
+    @Override
     public LinkedHashSet<FeatureConfigSnapshotHolder> getFeatureConfigSnapshotHolders() throws Exception {
         LinkedHashSet <FeatureConfigSnapshotHolder> snapShotHolders = new LinkedHashSet<FeatureConfigSnapshotHolder>();
         for(ChildAwareFeatureWrapper c: getChildFeatures()) {
