@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "1a76adc5_a56e01c8",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-05T06:05:49Z",
+      "side": 1,
+      "message": "You should check if the recovered log is empty – no need to snapshot if there’s no log data.",
+      "parentUuid": "1a76adc5_253431dd",
+      "range": {
+        "startLine": 176,
+        "startChar": 15,
+        "endLine": 176,
+        "endChar": 18
+      },
+      "revId": "2617a5b098d6bb7e5a9889ec679fc6fe38c4add0",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_45312deb",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
         "patchSetId": 1
