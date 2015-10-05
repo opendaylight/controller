@@ -18,6 +18,8 @@ import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.opendaylight.controller.cluster.datastore.messages.CreateShardReplica;
+import org.opendaylight.controller.cluster.datastore.messages.RemoveShardReplica;
 
 public class ShardManagerInfo extends AbstractMXBean implements ShardManagerInfoMBean {
 
@@ -95,5 +97,30 @@ public class ShardManagerInfo extends AbstractMXBean implements ShardManagerInfo
 
     public void setShardManager(ShardManager shardManager){
         this.shardManager = shardManager;
+    }
+
+    @Override
+    public boolean addShardReplica (String shardName){
+        LOG.info ("addShardReplica initiated for shard {}", shardName);
+        for (String shard : localShards){
+            if (shard.contains(shardName)){
+                LOG.info ("Local shard {} already exists, not recreating it", shardName);
+                return false;
+            }
+        }
+        shardManager.getSelf().tell(new CreateShardReplica(shardName), ActorRef.noSender());
+        return true;
+    }
+
+    @Override
+    public boolean removeShardReplica (String shardName){
+        LOG.info ("removeShardReplica initiated for shard {}", shardName);
+        for (String shard : localShards){
+            if (shard.contains(shardName)){
+                shardManager.getSelf().tell(new RemoveShardReplica(shardName), ActorRef.noSender());
+                return true;
+            }
+        }
+        return false;
     }
 }
