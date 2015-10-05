@@ -169,6 +169,30 @@
     },
     {
       "key": {
+        "uuid": "1a76adc5_69a763be",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/FollowerLogInformation.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-05T14:52:24Z",
+      "side": 1,
+      "message": "That\u0027s true. So I think we would need 3 FollowerStates - VOTING, NON-VOTING, and VOTING_INITIALIZING. If permanent voting then initialize state to VOTING_INITIALIZING - when caught up, change to VOTING. That should work.",
+      "parentUuid": "1a76adc5_292c0b47",
+      "range": {
+        "startLine": 116,
+        "startChar": 9,
+        "endLine": 116,
+        "endChar": 23
+      },
+      "revId": "34d9a6ba5a7f523429182cb1c788083dbd39e456",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_7d264b18",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
         "patchSetId": 3
@@ -370,6 +394,30 @@
       "side": 1,
       "message": "Every Replica has the raft cluster configuration. When it receives the new configuration it can therefore backup the old server configuration. So it really does not need the leader to tell it the old server configuration.",
       "parentUuid": "1a76adc5_c972377c",
+      "range": {
+        "startLine": 36,
+        "startChar": 81,
+        "endLine": 36,
+        "endChar": 96
+      },
+      "revId": "34d9a6ba5a7f523429182cb1c788083dbd39e456",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_29b16bf8",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/ServerConfigurationPayload.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-05T14:52:24Z",
+      "side": 1,
+      "message": "By backup I assume you mean add another log entry with the old config? We could - we would need to distinguish the 2, e.g. make ServerConfigurationPayload abstract and derive NewServerConfigurationPayload and OldServerConfigurationPayload.",
+      "parentUuid": "1a76adc5_c920f74b",
       "range": {
         "startLine": 36,
         "startChar": 81,
