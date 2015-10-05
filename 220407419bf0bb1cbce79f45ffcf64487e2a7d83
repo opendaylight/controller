@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_cc41e53a",
+        "filename": "opendaylight/commons/protocol-framework/src/main/java/org/opendaylight/protocol/framework/NeverReconnectStrategy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-10-05T17:46:00Z",
+      "side": 1,
+      "message": "new Throwable(\"Reconnect failed\", cause);",
+      "revId": "220407419bf0bb1cbce79f45ffcf64487e2a7d83",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
