@@ -121,6 +121,30 @@
     },
     {
       "key": {
+        "uuid": "1a76adc5_295e4be7",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/FollowerLogInformation.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-05T14:13:26Z",
+      "side": 1,
+      "message": "Don\u0027t we need a flag to indicate if it needs to be caught up regardless if it\u0027s a permanent voting replica or not? After it\u0027s caught up we need to indicate that but we can\u0027t just blindly set it from NonVotingReplica to VotingReplica if it\u0027s configured to be permanent non-voting.",
+      "parentUuid": "1a76adc5_693d238f",
+      "range": {
+        "startLine": 116,
+        "startChar": 9,
+        "endLine": 116,
+        "endChar": 23
+      },
+      "revId": "34d9a6ba5a7f523429182cb1c788083dbd39e456",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_7d264b18",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
         "patchSetId": 3
@@ -274,6 +298,30 @@
       "side": 1,
       "message": "But couldn\u0027t the replicas just save this information from their configuration itself? We can keep this here but I don\u0027t think it\u0027s necessary.",
       "parentUuid": "1a76adc5_29ababd9",
+      "range": {
+        "startLine": 36,
+        "startChar": 81,
+        "endLine": 36,
+        "endChar": 96
+      },
+      "revId": "34d9a6ba5a7f523429182cb1c788083dbd39e456",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_c972377c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/ServerConfigurationPayload.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-05T14:13:26Z",
+      "side": 1,
+      "message": "Not sure I follow. Maybe I don\u0027t understand yet how we would roll back but wouldn\u0027t this be done when we remove entries in Follower#handleAppendEnties and maybe on recovery via DeleteEntries? If so, wouldn\u0027t we need to get the old server config from the ServerConfigurationPayload entry that was removed? Or maybe there\u0027s another way we would do it that I\u0027m not seeing...",
+      "parentUuid": "1a76adc5_29d08b4f",
       "range": {
         "startLine": 36,
         "startChar": 81,
