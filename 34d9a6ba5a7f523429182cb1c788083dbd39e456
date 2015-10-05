@@ -97,6 +97,30 @@
     },
     {
       "key": {
+        "uuid": "1a76adc5_693d238f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/FollowerLogInformation.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-05T13:57:04Z",
+      "side": 1,
+      "message": "Do we really care about initialized (i.e caught up) for a permanent NonVotingReplica?",
+      "parentUuid": "1a76adc5_69a1a3f7",
+      "range": {
+        "startLine": 116,
+        "startChar": 9,
+        "endLine": 116,
+        "endChar": 23
+      },
+      "revId": "34d9a6ba5a7f523429182cb1c788083dbd39e456",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_7d264b18",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
         "patchSetId": 3
@@ -226,6 +250,30 @@
       "side": 1,
       "message": "So we can roll back if the entry is removed.",
       "parentUuid": "1a76adc5_e937f3e1",
+      "range": {
+        "startLine": 36,
+        "startChar": 81,
+        "endLine": 36,
+        "endChar": 96
+      },
+      "revId": "34d9a6ba5a7f523429182cb1c788083dbd39e456",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_29d08b4f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/ServerConfigurationPayload.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-05T13:57:04Z",
+      "side": 1,
+      "message": "But couldn\u0027t the replicas just save this information from their configuration itself? We can keep this here but I don\u0027t think it\u0027s necessary.",
+      "parentUuid": "1a76adc5_29ababd9",
       "range": {
         "startLine": 36,
         "startChar": 81,
