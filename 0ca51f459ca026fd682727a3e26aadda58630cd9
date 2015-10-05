@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_4975c796",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContext.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-05T13:27:16Z",
+      "side": 1,
+      "message": "I don\u0027t like this public setter on DatastoreContext. DatastoreContext is built using a builder and once built I\u0027d prefer that we did not mutate it.",
+      "range": {
+        "startLine": 182,
+        "startChar": 16,
+        "endLine": 182,
+        "endChar": 38
+      },
+      "revId": "0ca51f459ca026fd682727a3e26aadda58630cd9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_29740b98",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-05T13:27:16Z",
+      "side": 1,
+      "message": "we shouldn\u0027t set the peer address resolver here. I think the only reason you\u0027re doing this here is because you get the current member name from the cluster here. The member name can also be retrieved from akka config. How about just getting it from there?",
+      "range": {
+        "startLine": 134,
+        "startChar": 30,
+        "endLine": 134,
+        "endChar": 52
+      },
+      "revId": "0ca51f459ca026fd682727a3e26aadda58630cd9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
