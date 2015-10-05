@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_6cd69151",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/ActorSystemFactory.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-05T18:58:35Z",
+      "side": 1,
+      "message": "We should no longer have a static instance. We really want a new instance each time when the Module createInstance is called. We don\u0027t really need this class - the code below is small and can be in createInstance.",
+      "revId": "3cf8b39234ee15027591b4af02adf836204daa75",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_4c3875a0",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/config/yang/md/sal/core/actor_system/ActorSystemProviderModule.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-05T18:58:35Z",
+      "side": 1,
+      "message": "This should call actorSystem.awaitTermination as well",
+      "revId": "3cf8b39234ee15027591b4af02adf836204daa75",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_ecc14181",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/config/yang/md/sal/core/actor_system/ActorSystemProviderModule.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-05T18:58:35Z",
+      "side": 1,
+      "message": "What we really want to do is return the ActorSystem here so it can be injected into CDS et al. However it isn\u0027t AutoCloseable (this illustrates a shortcoming of the config system). I think what we should do is create a wrapper interface, e.g. ActorSystemWrapper or ActorSystemProvider, which is AutoCloseable and has a method to get the ActorSystem instance. This interface would be the provided service declared in the yang and we would return an instance here.",
+      "revId": "3cf8b39234ee15027591b4af02adf836204daa75",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_8cbe8dfe",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DistributedDataStoreFactory.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-05T18:58:35Z",
+      "side": 1,
+      "message": "The ActorSystem should be injected into the Module classes and passed here.",
+      "revId": "3cf8b39234ee15027591b4af02adf836204daa75",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_acbb490d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DistributedDataStoreFactory.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-05T18:58:35Z",
+      "side": 1,
+      "message": "We don\u0027t need this code anymore as the ActprSystem will be shutdown by the commons Module.",
+      "revId": "3cf8b39234ee15027591b4af02adf836204daa75",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
