@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "1a76adc5_c94b172a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContext.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-05T13:59:45Z",
+      "side": 1,
+      "message": "I could but I wanted to keep the ShardPeerAddressResolver private/owned by the ShardManager as its the ShardManager that adds/removes member addresses and it keeps state for the ShardManager. Also if the cfg file is modified and a new DatastoreContext is created, it would create a new ShardPeerAddressResolver instance which would lose the previous instance and wipe out the ShardManager\u0027s state. To alleviate that the ShardManager would have to still reset the ShardPeerAddressResolver instance in the new DatastoreContext. That doesn\u0027t seem clean to me.",
+      "parentUuid": "1a76adc5_49d14756",
+      "range": {
+        "startLine": 182,
+        "startChar": 16,
+        "endLine": 182,
+        "endChar": 38
+      },
+      "revId": "0ca51f459ca026fd682727a3e26aadda58630cd9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_29740b98",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
         "patchSetId": 2
