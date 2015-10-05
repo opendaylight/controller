@@ -145,6 +145,30 @@
     },
     {
       "key": {
+        "uuid": "1a76adc5_891aff15",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContext.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-05T14:34:45Z",
+      "side": 1,
+      "message": "Yes I could pass it to the Shard and RaftActor directly - I was going to do that originally but that requires a lot of changes. I can do that if you want. I went the DatastoreContext -\u003e ConfigParams route to make it easier. What if we need to add more params in the future to Shard/RaftActor - does that mean we have to keep adding more and more params to the Props and ctors?",
+      "parentUuid": "1a76adc5_693203a9",
+      "range": {
+        "startLine": 182,
+        "startChar": 16,
+        "endLine": 182,
+        "endChar": 38
+      },
+      "revId": "0ca51f459ca026fd682727a3e26aadda58630cd9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_29740b98",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
         "patchSetId": 2
