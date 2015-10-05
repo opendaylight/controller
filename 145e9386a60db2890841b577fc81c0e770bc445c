@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_4c2715b7",
+        "filename": "opendaylight/commons/protocol-framework/src/main/java/org/opendaylight/protocol/framework/NeverReconnectStrategy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-10-05T17:44:03Z",
+      "side": 1,
+      "message": "I think new Trowable(\"Reconnect failed\", cause) will be better, as it preserves the cause chain.",
+      "revId": "145e9386a60db2890841b577fc81c0e770bc445c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
