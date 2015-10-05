@@ -121,6 +121,30 @@
     },
     {
       "key": {
+        "uuid": "1a76adc5_693203a9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContext.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-05T14:26:12Z",
+      "side": 1,
+      "message": "The other option is to pass the ShardPeerAddressResolver directly to the Shard actor. But I didn\u0027t want to change signatures and add yet another param. So I used the ConfigParams via the DatastoreContext as a vehicle to pass it. I don\u0027t think it\u0027s wrong for the ShardManager to set its ShardPeerAddressResolver instance in the DatastoreContext.",
+      "parentUuid": "1a76adc5_c94b172a",
+      "range": {
+        "startLine": 182,
+        "startChar": 16,
+        "endLine": 182,
+        "endChar": 38
+      },
+      "revId": "0ca51f459ca026fd682727a3e26aadda58630cd9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_29740b98",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
         "patchSetId": 2
