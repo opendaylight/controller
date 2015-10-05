@@ -1,0 +1,225 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_a56da106",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 766,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-05T12:21:41Z",
+      "side": 1,
+      "message": "verifing (sic)",
+      "revId": "caa0fdc4f7d21d1c4a733db2cb4c05e90c64f20b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_45a7ed4f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 769,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-05T12:21:41Z",
+      "side": 1,
+      "message": "You should send back akka.status.Failure.",
+      "revId": "caa0fdc4f7d21d1c4a733db2cb4c05e90c64f20b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_c5721de5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 771,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-05T12:21:41Z",
+      "side": 1,
+      "message": "verifing (sic)",
+      "revId": "caa0fdc4f7d21d1c4a733db2cb4c05e90c64f20b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_657789d5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 772,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-05T12:21:41Z",
+      "side": 1,
+      "message": "checkstyle: for booleans, use \"if(a)\" for true and \"if(!a)\" for false.",
+      "revId": "caa0fdc4f7d21d1c4a733db2cb4c05e90c64f20b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_857425d0",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 774,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-05T12:21:41Z",
+      "side": 1,
+      "message": "You should send back akka.status.Failure.",
+      "revId": "caa0fdc4f7d21d1c4a733db2cb4c05e90c64f20b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_0569f5f8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 784,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-05T12:21:41Z",
+      "side": 1,
+      "message": "You should send back akka.status.Failure.",
+      "revId": "caa0fdc4f7d21d1c4a733db2cb4c05e90c64f20b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_c549bd8c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shardmanager/ShardManagerInfo.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-05T12:21:41Z",
+      "side": 1,
+      "message": "This check is done in the ShardManager.",
+      "revId": "caa0fdc4f7d21d1c4a733db2cb4c05e90c64f20b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_652549c1",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shardmanager/ShardManagerInfo.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-05T12:21:41Z",
+      "side": 1,
+      "message": "I think it would be ideal to provide feedback to the caller via the ask pattern. The JConsole UI does not block on operation calls but it does pop up a message dialog when the operation completes, either success or failure. I\u0027m not sure what jolokia does but I would think it would block. To report errors, I\u0027m not sure if one should return status output or throw a runtime ex - you\u0027ll have to play with that.",
+      "revId": "caa0fdc4f7d21d1c4a733db2cb4c05e90c64f20b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_655ea947",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shardmanager/ShardManagerInfo.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-05T12:21:41Z",
+      "side": 1,
+      "message": "This check should be done in the ShardManager.",
+      "revId": "caa0fdc4f7d21d1c4a733db2cb4c05e90c64f20b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_452ccdab",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/CreateShardReplica.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-05T12:21:41Z",
+      "side": 1,
+      "message": "use PreConditon.checkNotNull, especially since you declared it @Nonnull",
+      "revId": "caa0fdc4f7d21d1c4a733db2cb4c05e90c64f20b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_252f51a3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/CreateShardReplica.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-05T12:21:41Z",
+      "side": 1,
+      "message": "you don\u0027t need the str var - just a return.",
+      "revId": "caa0fdc4f7d21d1c4a733db2cb4c05e90c64f20b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_e5187986",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/RemoveShardReplica.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-05T12:21:41Z",
+      "side": 1,
+      "message": "use PreConditon.checkNotNull, especially since you declared it @Nonnull",
+      "revId": "caa0fdc4f7d21d1c4a733db2cb4c05e90c64f20b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_051ed570",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/RemoveShardReplica.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-05T12:21:41Z",
+      "side": 1,
+      "message": "you don\u0027t need the str var - just a return.",
+      "revId": "caa0fdc4f7d21d1c4a733db2cb4c05e90c64f20b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
