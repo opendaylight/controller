@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "1a76adc5_3d0681cf",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipShard.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 448,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-06T17:52:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a76adc5_52324c11",
+      "revId": "52f08b5452cf1cdc17719d0d56aaf451960f16f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_d225fcc2",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipShard.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2015-10-06T14:31:21Z",
       "side": 1,
       "message": "We could check if viableCandidates is empty here so the strategy doesn\u0027t have to handle it. I imagine every strategy would return \"\" if there are no candidates.",
+      "revId": "52f08b5452cf1cdc17719d0d56aaf451960f16f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_fd0fa9df",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipShard.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 452,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-06T17:52:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a76adc5_d225fcc2",
       "revId": "52f08b5452cf1cdc17719d0d56aaf451960f16f5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "1a76adc5_bdf931ca",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/selectionstrategy/EntityOwnerSelectionStrategy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-06T17:52:37Z",
+      "side": 1,
+      "message": "Will get rid of this and use the selectionDelayInMillis\u003d0 as delaySelection false",
+      "parentUuid": "1a76adc5_5219ec86",
+      "revId": "52f08b5452cf1cdc17719d0d56aaf451960f16f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_126e1402",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/selectionstrategy/EntityOwnerSelectionStrategy.java",
         "patchSetId": 1
@@ -64,6 +118,24 @@
       "writtenOn": "2015-10-06T14:31:21Z",
       "side": 1,
       "message": "How about- \"the available candidates from which to choose the new owner\"",
+      "revId": "52f08b5452cf1cdc17719d0d56aaf451960f16f5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_ddf66dd7",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/selectionstrategy/EntityOwnerSelectionStrategy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-06T17:52:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a76adc5_126e1402",
       "revId": "52f08b5452cf1cdc17719d0d56aaf451960f16f5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
