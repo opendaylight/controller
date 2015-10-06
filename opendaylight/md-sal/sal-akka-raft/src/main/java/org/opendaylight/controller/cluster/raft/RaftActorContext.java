@@ -201,4 +201,9 @@ public interface RaftActorContext {
      * @return an implementation of the RaftPolicy so that the Raft code can be adapted
      */
     RaftPolicy getRaftPolicy();
+
+    /**
+     * @return the votingStatus of this RaftActor
+     */
+    boolean getRaftActorVotingStatus();
 }

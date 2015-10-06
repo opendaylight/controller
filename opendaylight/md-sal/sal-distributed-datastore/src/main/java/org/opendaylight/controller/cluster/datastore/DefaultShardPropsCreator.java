@@ -19,9 +19,19 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
  */
 public class DefaultShardPropsCreator implements ShardPropsCreator {
 
+    private boolean shardVotingStatus;
+
+    public DefaultShardPropsCreator(boolean votingStatus) {
+        this.shardVotingStatus = votingStatus;
+    }
+
+    public DefaultShardPropsCreator() {
+        this.shardVotingStatus = true;
+    }
+
     @Override
     public Props newProps(ShardIdentifier shardId, Map<String, String> peerAddresses,
             DatastoreContext datastoreContext, SchemaContext schemaContext) {
-        return Shard.props(shardId, peerAddresses, datastoreContext, schemaContext);
+        return Shard.props(shardId, peerAddresses, datastoreContext, schemaContext, shardVotingStatus);
     }
 }

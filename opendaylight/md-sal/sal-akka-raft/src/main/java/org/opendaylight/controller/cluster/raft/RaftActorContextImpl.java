@@ -54,9 +54,18 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     private short payloadVersion;
 
+    private boolean votingStatus;
+
     public RaftActorContextImpl(ActorRef actor, UntypedActorContext context, String id,
             ElectionTerm termInformation, long commitIndex, long lastApplied, Map<String, String> peerAddresses,
             ConfigParams configParams, DataPersistenceProvider persistenceProvider, Logger logger) {
+        this(actor, context, id, termInformation, commitIndex, lastApplied, peerAddresses, configParams,
+             persistenceProvider, logger, true);
+    }
+
+    public RaftActorContextImpl(ActorRef actor, UntypedActorContext context, String id,
+            ElectionTerm termInformation, long commitIndex, long lastApplied, Map<String, String> peerAddresses,
+            ConfigParams configParams, DataPersistenceProvider persistenceProvider, Logger logger, boolean votingStatus) {
         this.actor = actor;
         this.context = context;
         this.id = id;
@@ -67,6 +76,7 @@ public class RaftActorContextImpl implements RaftActorContext {
         this.configParams = configParams;
         this.persistenceProvider = persistenceProvider;
         this.LOG = logger;
+        this.votingStatus = votingStatus;
     }
 
     void setPayloadVersion(short payloadVersion) {
@@ -208,5 +218,14 @@ public class RaftActorContextImpl implements RaftActorContext {
     @Override
     public RaftPolicy getRaftPolicy() {
         return configParams.getRaftPolicy();
+    }
+
+    @Override
+    public boolean getRaftActorVotingStatus() {
+        return this.votingStatus;
+    }
+
+    public void enableRaftActorVotingStatus() {
+        this.votingStatus = true;
     }
 }

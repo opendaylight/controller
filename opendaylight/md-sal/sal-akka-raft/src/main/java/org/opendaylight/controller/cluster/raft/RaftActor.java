@@ -46,6 +46,7 @@ import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
 import org.opendaylight.controller.cluster.raft.client.messages.FollowerInfo;
 import org.opendaylight.controller.cluster.raft.client.messages.GetOnDemandRaftState;
 import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
+import org.opendaylight.controller.cluster.raft.base.messages.EnableRaftActorVotingStatus;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -121,18 +122,26 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     private final SwitchBehaviorSupplier reusableSwitchBehaviorSupplier = new SwitchBehaviorSupplier();
 
     public RaftActor(String id, Map<String, String> peerAddresses,
-         Optional<ConfigParams> configParams, short payloadVersion) {
+         Optional<ConfigParams> configParams, short payloadVersion,
+         boolean shardVoteStatus) {
 
         persistentProvider = new PersistentDataProvider(this);
         context = new RaftActorContextImpl(this.getSelf(),
             this.getContext(), id, new ElectionTermImpl(persistentProvider, id, LOG),
             -1, -1, peerAddresses,
             (configParams.isPresent() ? configParams.get(): new DefaultConfigParamsImpl()),
-            delegatingPersistenceProvider, LOG);
+            delegatingPersistenceProvider, LOG, shardVoteStatus);
 
         context.setPayloadVersion(payloadVersion);
         context.setReplicatedLog(ReplicatedLogImpl.newInstance(context, currentBehavior));
     }
+
+    public RaftActor(String id, Map<String, String> peerAddresses,
+         Optional<ConfigParams> configParams, short payloadVersion) {
+
+        this (id, peerAddresses, configParams, payloadVersion, true);
+    }
+
 
     @Override
     public void preStart() throws Exception {
@@ -236,6 +245,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             captureSnapshot();
         } else if(message instanceof SwitchBehavior){
             switchBehavior(((SwitchBehavior) message));
+        } else if(message instanceof EnableRaftActorVotingStatus) {
+            context.enableRaftActorVotingStatus();
         } else if(!snapshotSupport.handleSnapshotMessage(message)) {
             switchBehavior(reusableSwitchBehaviorSupplier.handleMessage(getSender(), message));
         }
