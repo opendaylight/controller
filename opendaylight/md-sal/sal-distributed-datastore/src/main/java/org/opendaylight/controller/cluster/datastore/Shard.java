@@ -117,8 +117,13 @@ public class Shard extends RaftActor {
 
     protected Shard(final ShardIdentifier name, final Map<String, String> peerAddresses,
             final DatastoreContext datastoreContext, final SchemaContext schemaContext) {
+        this (name, peerAddresses, datastoreContext, schemaContext, true);
+    }
+
+    protected Shard(final ShardIdentifier name, final Map<String, String> peerAddresses,
+            final DatastoreContext datastoreContext, final SchemaContext schemaContext, final boolean shardVoteStatus) {
         super(name.toString(), new HashMap<>(peerAddresses), Optional.of(datastoreContext.getShardRaftConfig()),
-                DataStoreVersions.CURRENT_VERSION);
+                DataStoreVersions.CURRENT_VERSION, shardVoteStatus);
 
         this.name = name.toString();
         this.datastoreContext = datastoreContext;
@@ -164,9 +169,15 @@ public class Shard extends RaftActor {
     }
 
     public static Props props(final ShardIdentifier name, final Map<String, String> peerAddresses,
-            final DatastoreContext datastoreContext, final SchemaContext schemaContext) {
-        return Props.create(new ShardCreator(name, peerAddresses, datastoreContext, schemaContext));
+            final DatastoreContext datastoreContext, final SchemaContext schemaContext, boolean shardVoteStatus) {
+        return Props.create(new ShardCreator(name, peerAddresses, datastoreContext, schemaContext, shardVoteStatus));
     }
+
+    public static Props props(final ShardIdentifier name, final Map<String, String> peerAddresses,
+            final DatastoreContext datastoreContext, final SchemaContext schemaContext) {
+            return (props(name, peerAddresses, datastoreContext, schemaContext, true));
+    }
+
 
     private Optional<ActorRef> createRoleChangeNotifier(String shardId) {
         ActorRef shardRoleChangeNotifier = this.getContext().actorOf(
@@ -706,13 +717,19 @@ public class Shard extends RaftActor {
         protected final Map<String, String> peerAddresses;
         protected final DatastoreContext datastoreContext;
         protected final SchemaContext schemaContext;
+        protected final boolean shardVoteStatus;
 
         protected AbstractShardCreator(final ShardIdentifier name, final Map<String, String> peerAddresses,
-                final DatastoreContext datastoreContext, final SchemaContext schemaContext) {
+                final DatastoreContext datastoreContext, final SchemaContext schemaContext, boolean shardVoteStatus) {
             this.name = Preconditions.checkNotNull(name, "name should not be null");
             this.peerAddresses = Preconditions.checkNotNull(peerAddresses, "peerAddresses should not be null");
             this.datastoreContext = Preconditions.checkNotNull(datastoreContext, "dataStoreContext should not be null");
             this.schemaContext = Preconditions.checkNotNull(schemaContext, "schemaContext should not be null");
+            this.shardVoteStatus = shardVoteStatus;
+        }
+        protected AbstractShardCreator(final ShardIdentifier name, final Map<String, String> peerAddresses,
+                final DatastoreContext datastoreContext, final SchemaContext schemaContext) {
+            this (name, peerAddresses, datastoreContext, schemaContext, true);
         }
     }
 
@@ -720,13 +737,13 @@ public class Shard extends RaftActor {
         private static final long serialVersionUID = 1L;
 
         ShardCreator(final ShardIdentifier name, final Map<String, String> peerAddresses,
-                final DatastoreContext datastoreContext, final SchemaContext schemaContext) {
-            super(name, peerAddresses, datastoreContext, schemaContext);
+                final DatastoreContext datastoreContext, final SchemaContext schemaContext, boolean shardVoteStatus) {
+            super(name, peerAddresses, datastoreContext, schemaContext, shardVoteStatus);
         }
 
         @Override
         public Shard create() throws Exception {
-            return new Shard(name, peerAddresses, datastoreContext, schemaContext);
+            return new Shard(name, peerAddresses, datastoreContext, schemaContext, shardVoteStatus);
         }
     }
 

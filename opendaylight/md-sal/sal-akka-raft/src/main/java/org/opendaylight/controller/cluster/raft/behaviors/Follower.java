@@ -320,9 +320,11 @@ public class Follower extends AbstractRaftActorBehavior {
         }
 
         if (message instanceof ElectionTimeout) {
-            LOG.debug("{}: Received ElectionTimeout - switching to Candidate", logName());
-            return internalSwitchBehavior(RaftState.Candidate);
-
+            // when the RaftActor is non-voting capabale, do not process ElectionTimeout. Remain in Follower state
+            if (context.getRaftActorVotingStatus()) {
+                LOG.debug("{}: Received ElectionTimeout - switching to Candidate", logName());
+                return internalSwitchBehavior(RaftState.Candidate);
+            }
         } else if (message instanceof InstallSnapshot) {
             InstallSnapshot installSnapshot = (InstallSnapshot) message;
             handleInstallSnapshot(sender, installSnapshot);

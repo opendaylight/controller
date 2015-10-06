@@ -254,6 +254,11 @@ public class MockRaftActorContext implements RaftActorContext {
         this.payloadVersion = payloadVersion;
     }
 
+    @Override
+    public boolean getRaftActorVotingStatus() {
+        return true;
+    }
+
     public static class SimpleReplicatedLog extends AbstractReplicatedLogImpl {
         @Override
         public void appendAndPersist(

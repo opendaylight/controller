@@ -186,6 +186,11 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
     protected boolean canGrantVote(RequestVote requestVote){
         boolean grantVote = false;
 
+        // when the RaftActor is non-voting capabale, do not grant votes
+        if (!(context.getRaftActorVotingStatus())) {
+            return grantVote;
+        }
+
         //  Reply false if term < currentTerm (§5.1)
         if (requestVote.getTerm() < currentTerm()) {
             grantVote = false;
