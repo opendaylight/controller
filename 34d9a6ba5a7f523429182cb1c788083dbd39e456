@@ -427,6 +427,30 @@
       "revId": "34d9a6ba5a7f523429182cb1c788083dbd39e456",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_cf5eb745",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/ServerConfigurationPayload.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-06T10:35:12Z",
+      "side": 1,
+      "message": "What I am proposing is that the RaftActor have three fields. \n\n- committedConfiguration\n- currentConfiguration\n- currentConfigurationLogIndex\n\nLet\u0027s say we had a Follower which was received a new configuration. It would add  the new configuration to the log and after that set the currentConfiguration and currentConfigurationLogIndex. As you can see there is no need for the Leader to pass the old configuration because it does not matter the Follower has been persisting the configuration anyway + it also maintains it in a field.\n\nNow let\u0027s say after replicating the currentConfiguration and before committing the configuration the current Leader dies. Then the follower in question is partitioned and some other node which did not have the \"currentConfiguration\" becomes the leader. When the partition is resolved and the new Leader sends entries to the Follower, the Follower may have to remove uncommitted entries from it\u0027s logs, which is fine except for currentConfiguration which is not a committed configuration. To undo that we simply check if the logindex that we are going back to less than the currentConfigurationLogIndex, if it is then we set currentConfiguration to committedConfiguration and currentConfigurationLogIndex would be set to -1.",
+      "parentUuid": "1a76adc5_29b16bf8",
+      "range": {
+        "startLine": 36,
+        "startChar": 81,
+        "endLine": 36,
+        "endChar": 96
+      },
+      "revId": "34d9a6ba5a7f523429182cb1c788083dbd39e456",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
