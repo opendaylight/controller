@@ -27,6 +27,7 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Props;
 import akka.pattern.Patterns;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import java.util.ArrayList;
@@ -42,9 +43,11 @@ import org.opendaylight.controller.cluster.datastore.entityownership.messages.Ca
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.CandidateRemoved;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.RegisterCandidateLocal;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.RegisterListenerLocal;
+import org.opendaylight.controller.cluster.datastore.entityownership.messages.SelectOwner;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.UnregisterCandidateLocal;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.UnregisterListenerLocal;
 import org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.EntityOwnerSelectionStrategy;
+import org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.EntityOwnerSelectionStrategyWrapper;
 import org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.FirstCandidateSelectionStrategy;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
@@ -71,16 +74,13 @@ import scala.concurrent.Future;
  * @author Thomas Pantelis
  */
 class EntityOwnershipShard extends Shard {
-
-    private static final EntityOwnerSelectionStrategy DEFAULT_ENTITY_OWNER_SELECTION_STRATEGY
-            = FirstCandidateSelectionStrategy.INSTANCE;
-
     private final String localMemberName;
     private final EntityOwnershipShardCommitCoordinator commitCoordinator;
     private final EntityOwnershipListenerSupport listenerSupport;
     private final Set<String> downPeerMemberNames = new HashSet<>();
     private final Map<String, String> peerIdToMemberNames = new HashMap<>();
-    private final Map<String, EntityOwnerSelectionStrategy> ownerSelectionStrategies = new HashMap<>();
+    private final Map<String, EntityOwnerSelectionStrategyWrapper> ownerSelectionStrategies = new HashMap<>();
+    private final EntityOwnerSelectionStrategyWrapper defaultEntityOwnerSelectionStrategy;
 
     private static DatastoreContext noPersistenceDatastoreContext(DatastoreContext datastoreContext) {
         return DatastoreContext.newBuilderFrom(datastoreContext).persistent(false).build();
@@ -92,6 +92,8 @@ class EntityOwnershipShard extends Shard {
         this.localMemberName = localMemberName;
         this.commitCoordinator = new EntityOwnershipShardCommitCoordinator(localMemberName, LOG);
         this.listenerSupport = new EntityOwnershipListenerSupport(getContext(), persistenceId());
+        this.defaultEntityOwnerSelectionStrategy =
+                createEntityOwnerSelectionStrategyWrapper(FirstCandidateSelectionStrategy.INSTANCE);
 
         for(String peerId: peerAddresses.keySet()) {
             ShardIdentifier shardId = ShardIdentifier.builder().fromShardIdString(peerId).build();
@@ -115,7 +117,7 @@ class EntityOwnershipShard extends Shard {
     @Override
     public void onReceiveCommand(final Object message) throws Exception {
         if(message instanceof RegisterCandidateLocal) {
-            onRegisterCandidateLocal((RegisterCandidateLocal)message);
+            onRegisterCandidateLocal((RegisterCandidateLocal) message);
         } else if(message instanceof UnregisterCandidateLocal) {
             onUnregisterCandidateLocal((UnregisterCandidateLocal)message);
         } else if(message instanceof CandidateAdded){
@@ -126,12 +128,22 @@ class EntityOwnershipShard extends Shard {
             onPeerDown((PeerDown) message);
         } else if(message instanceof PeerUp) {
             onPeerUp((PeerUp) message);
-        } if(message instanceof RegisterListenerLocal) {
+        } else if(message instanceof RegisterListenerLocal) {
             onRegisterListenerLocal((RegisterListenerLocal)message);
-        } if(message instanceof UnregisterListenerLocal) {
-            onUnregisterListenerLocal((UnregisterListenerLocal)message);
+        } else if(message instanceof UnregisterListenerLocal) {
+            onUnregisterListenerLocal((UnregisterListenerLocal) message);
+        } else if(message instanceof SelectOwner) {
+            onSelectOwner((SelectOwner) message);
         } else if(!commitCoordinator.handleMessage(message, this)) {
             super.onReceiveCommand(message);
+        }
+    }
+
+    private void onSelectOwner(SelectOwner selectOwner) {
+        String currentOwner = getCurrentOwner(selectOwner.getEntityPath());
+        if(Strings.isNullOrEmpty(currentOwner)) {
+            writeNewOwner(selectOwner.getEntityPath(), newOwner(selectOwner.getAllCandidates(),
+                    selectOwner.getOwnerSelectionStrategy()));
         }
     }
 
@@ -252,8 +264,8 @@ class EntityOwnershipShard extends Shard {
         if(isLeader()) {
             String currentOwner = getCurrentOwner(message.getEntityPath());
             if(message.getRemovedCandidate().equals(currentOwner)){
-                writeNewOwner(message.getEntityPath(), newOwner(message.getRemainingCandidates(),
-                        getEntityOwnerElectionStrategy(message.getEntityPath())));
+                writeNewOwner(message.getEntityPath(),
+                        newOwner(message.getRemainingCandidates(), getEntityOwnerElectionStrategyWrapper(message.getEntityPath())));
             }
         } else {
             // We're not the leader. If the removed candidate is our local member then check if we actually
@@ -273,12 +285,12 @@ class EntityOwnershipShard extends Shard {
         }
     }
 
-    private EntityOwnerSelectionStrategy getEntityOwnerElectionStrategy(YangInstanceIdentifier entityPath) {
+    private EntityOwnerSelectionStrategyWrapper getEntityOwnerElectionStrategyWrapper(YangInstanceIdentifier entityPath) {
         String entityType = EntityOwnersModel.entityTypeFromEntityPath(entityPath);
-        EntityOwnerSelectionStrategy entityOwnerSelectionStrategy = ownerSelectionStrategies.get(entityType);
+        EntityOwnerSelectionStrategyWrapper entityOwnerSelectionStrategy = ownerSelectionStrategies.get(entityType);
 
         if(entityOwnerSelectionStrategy == null){
-            entityOwnerSelectionStrategy = DEFAULT_ENTITY_OWNER_SELECTION_STRATEGY;
+            entityOwnerSelectionStrategy = defaultEntityOwnerSelectionStrategy;
             ownerSelectionStrategies.put(entityType, entityOwnerSelectionStrategy);
         }
 
@@ -298,13 +310,11 @@ class EntityOwnershipShard extends Shard {
 
         String currentOwner = getCurrentOwner(message.getEntityPath());
         if(Strings.isNullOrEmpty(currentOwner)){
-            EntityOwnerSelectionStrategy entityOwnerSelectionStrategy
-                    = getEntityOwnerElectionStrategy(message.getEntityPath());
-            if(entityOwnerSelectionStrategy.selectionDelayInMillis() == 0L) {
-                writeNewOwner(message.getEntityPath(), newOwner(message.getAllCandidates(),
-                        entityOwnerSelectionStrategy));
+            EntityOwnerSelectionStrategyWrapper strategy = getEntityOwnerElectionStrategyWrapper(message.getEntityPath());
+            if(strategy.selectionDelayInMillis() == 0L) {
+                writeNewOwner(message.getEntityPath(), newOwner(message.getAllCandidates(), strategy));
             } else {
-                throw new UnsupportedOperationException("Delayed selection not implemented yet");
+                strategy.scheduleOwnerSelection(message.getEntityPath(), message.getAllCandidates());
             }
         }
     }
@@ -336,7 +346,7 @@ class EntityOwnershipShard extends Shard {
                         node(entityTypeNode.getIdentifier()).node(ENTITY_NODE_ID).node(entityNode.getIdentifier()).
                         node(ENTITY_OWNER_NODE_ID).build();
 
-                Object newOwner = newOwner(getCandidateNames(entityNode), getEntityOwnerElectionStrategy(entityPath));
+                Object newOwner = newOwner(getCandidateNames(entityNode), getEntityOwnerElectionStrategyWrapper(entityPath));
 
                 LOG.debug("{}: Found entity {}, writing new owner {}", persistenceId(), entityPath, newOwner);
 
@@ -353,9 +363,9 @@ class EntityOwnershipShard extends Shard {
         searchForEntities(new EntityWalker() {
             @Override
             public void onEntity(MapEntryNode entityTypeNode, MapEntryNode entityNode) {
-                if(hasCandidate(entityNode, owner)) {
+                if (hasCandidate(entityNode, owner)) {
                     YangInstanceIdentifier entityId =
-                            (YangInstanceIdentifier)entityNode.getIdentifier().getKeyValues().get(ENTITY_ID_QNAME);
+                            (YangInstanceIdentifier) entityNode.getIdentifier().getKeyValues().get(ENTITY_ID_QNAME);
                     YangInstanceIdentifier candidatePath = candidatePath(
                             entityTypeNode.getIdentifier().getKeyValues().get(ENTITY_TYPE_QNAME).toString(),
                             entityId, owner);
@@ -458,6 +468,22 @@ class EntityOwnershipShard extends Shard {
         return null;
     }
 
+    private EntityOwnerSelectionStrategyWrapper createEntityOwnerSelectionStrategyWrapper(EntityOwnerSelectionStrategy entityOwnerSelectionStrategy){
+        return new EntityOwnerSelectionStrategyWrapper(context().system().scheduler(), self(),
+                context().system().dispatcher(), entityOwnerSelectionStrategy);
+    }
+
+    @VisibleForTesting
+    void addEntityOwnerSelectionStrategy(String entityType, Class<? extends EntityOwnerSelectionStrategy> ownerSelectionStrategyClass){
+        try {
+            EntityOwnerSelectionStrategyWrapper strategy =
+                    createEntityOwnerSelectionStrategyWrapper(ownerSelectionStrategyClass.newInstance());
+            ownerSelectionStrategies.put(entityType, strategy);
+        } catch (InstantiationException | IllegalAccessException e) {
+            LOG.error("Exception occurred when adding election strategy", e);
+        }
+    }
+
     public static Props props(final ShardIdentifier name, final Map<String, String> peerAddresses,
             final DatastoreContext datastoreContext, final SchemaContext schemaContext, final String localMemberName) {
         return Props.create(new Creator(name, peerAddresses, datastoreContext, schemaContext, localMemberName));
@@ -484,4 +510,5 @@ class EntityOwnershipShard extends Shard {
     private static interface EntityWalker {
         void onEntity(MapEntryNode entityTypeNode, MapEntryNode entityNode);
     }
+
 }
