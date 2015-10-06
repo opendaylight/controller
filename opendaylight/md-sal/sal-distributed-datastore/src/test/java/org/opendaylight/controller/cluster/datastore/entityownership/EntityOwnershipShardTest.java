@@ -48,6 +48,7 @@ import org.opendaylight.controller.cluster.datastore.entityownership.messages.Re
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.RegisterListenerLocal;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.UnregisterCandidateLocal;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.UnregisterListenerLocal;
+import org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.LastCandidateSelectionStrategy;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
@@ -868,6 +869,35 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
                 }
             }
         }
+    }
+
+
+    @Test
+    public void testDelayedEntityOwnerSelection() throws Exception {
+        ShardTestKit kit = new ShardTestKit(getSystem());
+        TestActorRef<EntityOwnershipShard> shard = actorFactory.createTestActor(newShardProps());
+        shard.underlyingActor().addEntityOwnerSelectionStrategy(ENTITY_TYPE, LastCandidateSelectionStrategy.class);
+        kit.waitUntilLeader(shard);
+
+        Entity entity = new Entity(ENTITY_TYPE, ENTITY_ID1);
+        ShardDataTree shardDataTree = shard.underlyingActor().getDataStore();
+
+        // Add a remote candidate
+
+        String remoteMemberName1 = "remoteMember1";
+        writeNode(ENTITY_OWNERS_PATH, entityOwnersWithCandidate(ENTITY_TYPE, ENTITY_ID1, remoteMemberName1), shardDataTree);
+
+
+        // Register local
+
+        shard.tell(new RegisterCandidateLocal(entity), kit.getRef());
+        kit.expectMsgClass(SuccessReply.class);
+
+        // Verify the local candidate becomes owner
+
+        verifyCommittedEntityCandidate(shard, ENTITY_TYPE, ENTITY_ID1, remoteMemberName1);
+        verifyCommittedEntityCandidate(shard, ENTITY_TYPE, ENTITY_ID1, LOCAL_MEMBER_NAME);
+        verifyOwner(shard, ENTITY_TYPE, ENTITY_ID1, LOCAL_MEMBER_NAME);
     }
 
     public static class MockLeader extends UntypedActor {

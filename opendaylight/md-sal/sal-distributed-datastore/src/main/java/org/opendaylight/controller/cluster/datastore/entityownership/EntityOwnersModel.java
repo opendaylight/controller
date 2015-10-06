@@ -114,7 +114,7 @@ final class EntityOwnersModel {
     static String entityTypeFromEntityPath(YangInstanceIdentifier entityPath){
         YangInstanceIdentifier parent = entityPath;
         while(!parent.isEmpty()) {
-            if (ENTITY_TYPE_QNAME.equals(parent.getLastPathArgument().getNodeType())) {
+            if (EntityType.QNAME.equals(parent.getLastPathArgument().getNodeType())) {
                 YangInstanceIdentifier.NodeIdentifierWithPredicates entityTypeLastPathArgument = (YangInstanceIdentifier.NodeIdentifierWithPredicates) parent.getLastPathArgument();
                 return (String) entityTypeLastPathArgument.getKeyValues().get(ENTITY_TYPE_QNAME);
             }
