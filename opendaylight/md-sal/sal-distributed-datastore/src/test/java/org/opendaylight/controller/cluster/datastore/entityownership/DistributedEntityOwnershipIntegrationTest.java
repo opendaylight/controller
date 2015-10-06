@@ -9,6 +9,7 @@ package org.opendaylight.controller.cluster.datastore.entityownership;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.AdditionalMatchers.or;
+import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
@@ -198,11 +199,17 @@ public class DistributedEntityOwnershipIntegrationTest {
         // Unregister follower1 candidate for entity2 and verify follower2 becomes owner
 
         follower1EntityOwnershipService.unregisterCandidate(ENTITY2);
+        verifyCandidates(leaderDistributedDataStore, ENTITY2, "member-3");
         verifyOwner(leaderDistributedDataStore, ENTITY2, "member-3");
-        verify(follower2MockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY2, false, true, true));
         verify(follower1MockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY2, true, false, true));
         verify(leaderMockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY2, false, false, true));
-        verifyCandidates(leaderDistributedDataStore, ENTITY2, "member-3");
+
+        // Depending on timing, follower2MockListener could get ownershipChanged with "false, false, true" if
+        // if the original ownership change with "member-2 is replicated to follower2 after the listener is
+        // registered.
+        Uninterruptibles.sleepUninterruptibly(500, TimeUnit.MILLISECONDS);
+        verify(follower2MockListener, atMost(1)).ownershipChanged(ownershipChange(ENTITY2, false, false, true));
+        verify(follower2MockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY2, false, true, true));
 
         // Register follower1 candidate for entity3 and verify it becomes owner
 
