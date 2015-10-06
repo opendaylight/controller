@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_d2417c3a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DistributedDataStoreFactory.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-06T11:22:49Z",
+      "side": 1,
+      "message": "wouldn\u0027t it be more appropriate to have the code which subscribe to the Cluster and RemoteLifecycle events in QuarantinedMonitorActor?",
+      "range": {
+        "startLine": 94,
+        "startChar": 8,
+        "endLine": 94,
+        "endChar": 19
+      },
+      "revId": "90ed375e5b59b6e929b5ba7fa046c5955a230f34",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_120a9421",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DistributedDataStoreFactory.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-06T11:22:49Z",
+      "side": 1,
+      "message": "Why should the self be removed from default seed nodes? Are you trying to prevent the current node from forming it\u0027s own cluster? If so could you add a few comments so that we can remember in future?",
+      "range": {
+        "startLine": 138,
+        "startChar": 52,
+        "endLine": 138,
+        "endChar": 62
+      },
+      "revId": "90ed375e5b59b6e929b5ba7fa046c5955a230f34",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_d2689cbc",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/QuarantinedMonitorActor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-06T11:22:49Z",
+      "side": 1,
+      "message": "I think this can be moved to clustering commons. Just pass in a callback interface when creating the QuarantinedMonitorActor, let\u0027s call it QuarantineAction. When a quarantine is detected we can invoke a method on that QuarantineAction (execute). The implementation of QuarantineAction passed by the DistributedDataStoreFactory could restart the actor system when the callback method is invoked- and you can remove the call to DistributedDataStoreFactory.restartSystem from this class.",
+      "range": {
+        "startLine": 27,
+        "startChar": 13,
+        "endLine": 27,
+        "endChar": 36
+      },
+      "revId": "90ed375e5b59b6e929b5ba7fa046c5955a230f34",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_b25f200e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/QuarantinedMonitorActor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-06T11:22:49Z",
+      "side": 1,
+      "message": "QuarantinedMonitorActor?",
+      "range": {
+        "startLine": 34,
+        "startChar": 27,
+        "endLine": 34,
+        "endChar": 38
+      },
+      "revId": "90ed375e5b59b6e929b5ba7fa046c5955a230f34",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_92b9c430",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/QuarantinedMonitorActor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-06T11:22:49Z",
+      "side": 1,
+      "message": "Do we really need to process these cluster messages? We\u0027re simply logging this info. I think the ShardManager already does something similar.",
+      "range": {
+        "startLine": 46,
+        "startChar": 44,
+        "endLine": 46,
+        "endChar": 52
+      },
+      "revId": "90ed375e5b59b6e929b5ba7fa046c5955a230f34",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
