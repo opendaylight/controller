@@ -169,6 +169,30 @@
     },
     {
       "key": {
+        "uuid": "1a76adc5_72d66851",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContext.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-06T11:31:18Z",
+      "side": 1,
+      "message": "I agree that it would be a lot of changes if we had to pass this to the Shard ctor. Maybe we should consider having a single ctor param which has methods to receive the arguments. That way we avoid changes in the future. With more people contributing to the code I am afraid that these types of setters will proliferate and then we may not be able to undo what we started. I can refactor in a separate patch to a single argument if you agree with the general philosophy on this.",
+      "parentUuid": "1a76adc5_891aff15",
+      "range": {
+        "startLine": 182,
+        "startChar": 16,
+        "endLine": 182,
+        "endChar": 38
+      },
+      "revId": "0ca51f459ca026fd682727a3e26aadda58630cd9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_29740b98",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
         "patchSetId": 2
