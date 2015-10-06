@@ -111,6 +111,18 @@ final class EntityOwnersModel {
                 ImmutableNodes.leafNode(ENTITY_OWNER_QNAME, owner)).build();
     }
 
+    static String entityTypeFromEntityPath(YangInstanceIdentifier entityPath){
+        YangInstanceIdentifier parent = entityPath;
+        while(!parent.isEmpty()) {
+            if (ENTITY_TYPE_QNAME.equals(parent.getLastPathArgument().getNodeType())) {
+                YangInstanceIdentifier.NodeIdentifierWithPredicates entityTypeLastPathArgument = (YangInstanceIdentifier.NodeIdentifierWithPredicates) parent.getLastPathArgument();
+                return (String) entityTypeLastPathArgument.getKeyValues().get(ENTITY_TYPE_QNAME);
+            }
+            parent = parent.getParent();
+        }
+        return null;
+    }
+
     static Entity createEntity(YangInstanceIdentifier entityPath) {
         String entityType = null;
         YangInstanceIdentifier entityId = null;
