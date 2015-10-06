@@ -18,6 +18,12 @@ import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.opendaylight.controller.cluster.datastore.messages.CreateShardReplica;
+import org.opendaylight.controller.cluster.datastore.messages.RemoveShardReplica;
+import akka.pattern.Patterns;
+import akka.util.Timeout;
+import java.util.concurrent.TimeUnit;
+import scala.concurrent.Await;
 
 public class ShardManagerInfo extends AbstractMXBean implements ShardManagerInfoMBean {
 
@@ -95,5 +101,35 @@ public class ShardManagerInfo extends AbstractMXBean implements ShardManagerInfo
 
     public void setShardManager(ShardManager shardManager){
         this.shardManager = shardManager;
+    }
+
+    @Override
+    public boolean addShardReplica (String shardName){
+        boolean result = false;
+        LOG.info ("addShardReplica initiated for shard {}", shardName);
+        Timeout addTimeOut = new Timeout(1, TimeUnit.MINUTES);
+        try {
+            result = (boolean)Await.result(Patterns.ask(shardManager.getSelf(),
+                                      new CreateShardReplica(shardName), addTimeOut),
+                                      addTimeOut.duration());
+        } catch (Exception ex) {
+            LOG.debug ("Obtained an exception during addShardReplica", ex);
+        }
+        return result;
+    }
+
+    @Override
+    public boolean removeShardReplica (String shardName){
+        boolean result = false;
+        LOG.info ("removeShardReplica initiated for shard {}", shardName);
+        Timeout remTimeOut = new Timeout(30, TimeUnit.SECONDS);
+        try {
+            result = (boolean)Await.result(Patterns.ask(shardManager.getSelf(),
+                                      new RemoveShardReplica(shardName), remTimeOut),
+                                      remTimeOut.duration());
+        } catch (Exception ex) {
+            LOG.debug ("Obtained an exception during removeShardReplica", ex);
+        }
+        return result;
     }
 }

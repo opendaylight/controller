@@ -52,4 +52,19 @@ public interface ShardManagerInfoMBean {
      *             the term provided when switching to a new Leader should always be higher than the previous term.
      */
     void switchShardState(String shardName, String newBehavior, long term);
+
+    /**  Add a new Shard replica for an existing Shard in this controller node
+     *
+     * @param shardName the shard that is to be replicated in this node
+     * @return true if the ShardReplica creation is successfully initiated.
+     */
+    boolean addShardReplica (String shardName);
+
+    /**  Remove a Shard replica available in this controller node
+     *
+     * @param shardName the shard that is to be replicated in this node
+     * @return true if the ShardReplica deletion is successfully initiated.
+     */
+    boolean removeShardReplica (String shardName);
+
 }
