@@ -9,6 +9,7 @@ package org.opendaylight.controller.config.manager.testingservices.parallelapsp.
 
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.ObjectName;
+import org.opendaylight.controller.config.api.ModuleFactoryNotFoundException;
 import org.opendaylight.controller.config.manager.impl.AbstractConfigTest;
 import org.opendaylight.controller.config.manager.testingservices.parallelapsp.TestingParallelAPSPConfigMXBean;
 import org.opendaylight.controller.config.manager.testingservices.parallelapsp.TestingParallelAPSPModuleFactory;
@@ -23,7 +24,7 @@ public abstract class AbstractParallelAPSPTest extends AbstractConfigTest {
 
     protected ObjectName createParallelAPSP(
             ConfigTransactionJMXClient transaction, ObjectName threadPoolON)
-            throws InstanceAlreadyExistsException {
+            throws InstanceAlreadyExistsException, ModuleFactoryNotFoundException {
         ObjectName apspName = transaction.createModule(
                 TestingParallelAPSPModuleFactory.NAME, apsp1);
         TestingParallelAPSPConfigMXBean parallelAPSPConfigProxy = transaction
@@ -34,7 +35,7 @@ public abstract class AbstractParallelAPSPTest extends AbstractConfigTest {
     }
 
     protected ObjectName createFixed1(ConfigTransactionJMXClient transaction,
-            int numberOfThreads) throws InstanceAlreadyExistsException {
+            int numberOfThreads) throws InstanceAlreadyExistsException, ModuleFactoryNotFoundException {
 
         ObjectName name = transaction.createModule(
                 getThreadPoolImplementationName(), fixed1);

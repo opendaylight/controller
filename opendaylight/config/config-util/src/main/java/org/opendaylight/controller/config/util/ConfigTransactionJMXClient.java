@@ -18,6 +18,7 @@ import javax.management.MBeanException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import org.opendaylight.controller.config.api.ConflictingVersionException;
+import org.opendaylight.controller.config.api.ModuleFactoryNotFoundException;
 import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.api.jmx.CommitStatus;
 import org.opendaylight.controller.config.api.jmx.ConfigRegistryMXBean;
@@ -84,7 +85,7 @@ public class ConfigTransactionJMXClient implements ConfigTransactionClient {
     // proxy around ConfigManagerMXBean
     @Override
     public ObjectName createModule(String moduleName, String instanceName)
-            throws InstanceAlreadyExistsException {
+            throws InstanceAlreadyExistsException, ModuleFactoryNotFoundException {
         return configTransactionControllerMXBeanProxy.createModule(moduleName, instanceName);
     }
 

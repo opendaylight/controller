@@ -68,10 +68,11 @@ public class ConfigManagerActivator implements BundleActivator {
             ModuleFactoryBundleTracker moduleFactoryTracker = new ModuleFactoryBundleTracker(
                     blankTransactionServiceTracker);
 
-            boolean scanResolvedBundlesForModuleInfo = false;
+            boolean scanResolvedBundlesForModuleInfo = true;
             BundleTracker<Collection<ObjectRegistration<YangModuleInfo>>> moduleInfoResolvedBundleTracker = null;
             ExtensibleBundleTracker<?> moduleFactoryBundleTracker;
             if(scanResolvedBundlesForModuleInfo) {
+                LOG.info("scanResolvedBundlesForModuleInfo");
                 moduleInfoResolvedBundleTracker = new BundleTracker<>(context, Bundle.RESOLVED | Bundle.STARTING |
                             Bundle.STOPPING | Bundle.ACTIVE, moduleInfoBundleTracker);
                 moduleFactoryBundleTracker = new ExtensibleBundleTracker<>(context, moduleFactoryTracker);

@@ -19,6 +19,7 @@ import java.util.Set;
 import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
 import org.opendaylight.controller.config.api.ConflictingVersionException;
+import org.opendaylight.controller.config.api.ModuleFactoryNotFoundException;
 import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.api.jmx.CommitStatus;
 import org.opendaylight.controller.config.facade.xml.mapping.IdentityMapping;
@@ -118,7 +119,8 @@ public class ConfigSubsystemFacade implements Closeable {
         }
     }
 
-    public void executeConfigExecution(ConfigExecution configExecution) throws DocumentedException, ValidationException {
+    public void executeConfigExecution(ConfigExecution configExecution)
+            throws DocumentedException, ValidationException, ModuleFactoryNotFoundException {
         if (configExecution.shouldTest()) {
             executeTests(configExecution);
         }
@@ -140,17 +142,19 @@ public class ConfigSubsystemFacade implements Closeable {
         return status;
     }
 
-    private void executeSet(ConfigExecution configExecution) throws DocumentedException {
+    private void executeSet(ConfigExecution configExecution) throws DocumentedException, ModuleFactoryNotFoundException {
         set(configExecution);
         LOG.debug("Set phase for {} operation successful, element: ", configExecution.getDefaultStrategy(), configExecution.getConfigElement());
     }
 
-    private void executeTests(ConfigExecution configExecution) throws DocumentedException, ValidationException {
+    private void executeTests(ConfigExecution configExecution)
+            throws DocumentedException, ValidationException, ModuleFactoryNotFoundException {
         test(configExecution, configExecution.getDefaultStrategy());
         LOG.debug("Test phase for {} operation successful, element: ", configExecution.getDefaultStrategy(), configExecution.getConfigElement());
     }
 
-    private void test(ConfigExecution execution, EditStrategyType editStrategyType) throws ValidationException, DocumentedException {
+    private void test(ConfigExecution execution, EditStrategyType editStrategyType)
+            throws ValidationException, DocumentedException, ModuleFactoryNotFoundException {
         ObjectName taON = transactionProvider.getTestTransaction();
         try {
             // default strategy = replace wipes config
@@ -169,7 +173,7 @@ public class ConfigSubsystemFacade implements Closeable {
         }
     }
 
-    private void set(ConfigExecution ConfigExecution) throws DocumentedException {
+    private void set(ConfigExecution ConfigExecution) throws DocumentedException, ModuleFactoryNotFoundException {
         ObjectName taON = transactionProvider.getOrCreateTransaction();
 
         // default strategy = replace wipes config
@@ -223,7 +227,8 @@ public class ConfigSubsystemFacade implements Closeable {
         return ta.getServiceInterfaceName(namespace, serviceName);
     }
 
-    private void setOnTransaction(ConfigTransactionClient ta, ConfigExecution execution) throws DocumentedException {
+    private void setOnTransaction(ConfigTransactionClient ta, ConfigExecution execution)
+            throws DocumentedException, ModuleFactoryNotFoundException {
 
         for (Multimap<String, ModuleElementResolved> modulesToResolved : execution.getResolvedXmlElements(ta).values()) {
 
@@ -240,8 +245,8 @@ public class ConfigSubsystemFacade implements Closeable {
         }
     }
 
-    private void handleMisssingInstancesOnTransaction(ConfigTransactionClient ta,
-                                                      ConfigExecution execution) throws DocumentedException {
+    private void handleMisssingInstancesOnTransaction(ConfigTransactionClient ta, ConfigExecution execution)
+            throws DocumentedException, ModuleFactoryNotFoundException {
 
         for (Multimap<String, ModuleElementDefinition> modulesToResolved : execution.getModulesDefinition(ta).values()) {
             for (Map.Entry<String, ModuleElementDefinition> moduleToResolved : modulesToResolved.entries()) {

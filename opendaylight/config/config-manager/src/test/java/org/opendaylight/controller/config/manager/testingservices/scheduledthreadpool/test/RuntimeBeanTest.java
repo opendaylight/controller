@@ -9,7 +9,6 @@ package org.opendaylight.controller.config.manager.testingservices.scheduledthre
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -21,6 +20,7 @@ import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
 import org.junit.Test;
 import org.opendaylight.controller.config.api.ConflictingVersionException;
+import org.opendaylight.controller.config.api.ModuleFactoryNotFoundException;
 import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.api.jmx.CommitStatus;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
@@ -52,7 +52,7 @@ public class RuntimeBeanTest extends AbstractScheduledTest {
             ifc1runtimeON2);
 
     private ObjectName createScheduled() throws InstanceAlreadyExistsException,
-            ConflictingVersionException, ValidationException {
+            ConflictingVersionException, ValidationException, ModuleFactoryNotFoundException {
         ConfigTransactionJMXClient transaction = configRegistryClient
                 .createTransaction();
 
@@ -72,8 +72,9 @@ public class RuntimeBeanTest extends AbstractScheduledTest {
 
     private void checkRuntimeBeans() throws Exception {
         // check runtime bean - on 2 places
-        for (ObjectName on : allObjectNames)
+        for (ObjectName on : allObjectNames) {
             checkRuntimeBean(on);
+        }
     }
 
     private void checkRuntimeBean(ObjectName on) throws Exception {
@@ -149,8 +150,9 @@ public class RuntimeBeanTest extends AbstractScheduledTest {
         configTransaction.destroyModule(ObjectNameUtil
                 .createTransactionModuleON(configTransaction.getTransactionName(), createdConfigBean));
         configTransaction.commit();
-        for (ObjectName on : allObjectNames)
+        for (ObjectName on : allObjectNames) {
             checkRuntimeBeanDoesNotExist(on);
+        }
     }
 
 }

@@ -9,7 +9,6 @@
 package org.opendaylight.controller.config.persist.impl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.google.common.base.Function;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Collections2;
@@ -29,6 +28,7 @@ import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import javax.management.MBeanServerConnection;
 import org.opendaylight.controller.config.api.ConflictingVersionException;
+import org.opendaylight.controller.config.api.ModuleFactoryNotFoundException;
 import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.facade.xml.ConfigExecution;
 import org.opendaylight.controller.config.facade.xml.ConfigSubsystemFacade;
@@ -57,9 +57,9 @@ public class ConfigPusherImpl implements ConfigPusher {
 
     private final long maxWaitForCapabilitiesMillis;
     private final long conflictingVersionTimeoutMillis;
-    private BlockingQueue<List<? extends ConfigSnapshotHolder>> queue = new LinkedBlockingQueue<>(QUEUE_SIZE);
+    private final BlockingQueue<List<? extends ConfigSnapshotHolder>> queue = new LinkedBlockingQueue<>(QUEUE_SIZE);
 
-    private ConfigSubsystemFacadeFactory facade;
+    private final ConfigSubsystemFacadeFactory facade;
     private ConfigPersisterNotificationHandler jmxNotificationHandler;
 
     public ConfigPusherImpl(ConfigSubsystemFacadeFactory facade, long maxWaitForCapabilitiesMillis,
@@ -96,6 +96,7 @@ public class ConfigPusherImpl implements ConfigPusher {
         }
     }
 
+    @Override
     public void pushConfigs(List<? extends ConfigSnapshotHolder> configs) throws InterruptedException {
         LOG.debug("Requested to push configs {}", configs);
         this.queue.put(configs);
@@ -217,7 +218,7 @@ public class ConfigPusherImpl implements ConfigPusher {
 
     static class NotEnoughCapabilitiesException extends ConfigPusherException {
         private static final long serialVersionUID = 1L;
-        private Set<String> missingCaps;
+        private final Set<String> missingCaps;
 
         NotEnoughCapabilitiesException(String message, Set<String> missingCaps) {
             super(message);
@@ -281,8 +282,8 @@ public class ConfigPusherImpl implements ConfigPusher {
         final ConfigSubsystemFacade currentFacade = this.facade.createFacade("config-push");
         try {
             ConfigExecution configExecution = createConfigExecution(xmlToBePersisted, currentFacade);
-            currentFacade.executeConfigExecution(configExecution);
-        } catch (ValidationException | DocumentedException e) {
+            executeWithMissingModuleFactoryRetries(currentFacade, configExecution);
+        } catch (ValidationException | DocumentedException | ModuleFactoryNotFoundException e) {
             LOG.trace("Validation for config: {} failed", configSnapshotHolder, e);
             throw new ConfigSnapshotFailureException(configSnapshotHolder.toString(), "edit", e);
         }
@@ -297,6 +298,24 @@ public class ConfigPusherImpl implements ConfigPusher {
         LOG.trace("Total time spent {} ms", stopwatch.elapsed(TimeUnit.MILLISECONDS));
 
         return true;
+    }
+
+    private void executeWithMissingModuleFactoryRetries(ConfigSubsystemFacade facade, ConfigExecution configExecution)
+            throws DocumentedException, ValidationException, ModuleFactoryNotFoundException {
+        Stopwatch stopwatch = Stopwatch.createStarted();
+        ModuleFactoryNotFoundException lastException = null;
+        do {
+            try {
+                facade.executeConfigExecution(configExecution);
+                return;
+            } catch (ModuleFactoryNotFoundException e) {
+                LOG.info("{} - will retry after timeout", e.toString());
+                lastException = e;
+                sleep();
+            }
+        } while (stopwatch.elapsed(TimeUnit.MILLISECONDS) < maxWaitForCapabilitiesMillis);
+
+        throw lastException;
     }
 
     private ConfigExecution createConfigExecution(Element xmlToBePersisted, final ConfigSubsystemFacade currentFacade) throws DocumentedException {
