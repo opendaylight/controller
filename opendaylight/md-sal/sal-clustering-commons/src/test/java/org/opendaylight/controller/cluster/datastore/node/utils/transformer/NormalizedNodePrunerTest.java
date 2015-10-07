@@ -81,7 +81,7 @@ public class NormalizedNodePrunerTest {
 
         normalizedNodeWriter.write(expected);
 
-        NormalizedNode actual = pruner.normalizedNode();
+        NormalizedNode<?, ?> actual = pruner.normalizedNode();
 
         assertEquals(expected, actual);
 
@@ -97,7 +97,7 @@ public class NormalizedNodePrunerTest {
 
         normalizedNodeWriter.write(expected);
 
-        NormalizedNode actual = pruner.normalizedNode();
+        NormalizedNode<?, ?> actual = pruner.normalizedNode();
 
         assertEquals(expected, actual);
 
@@ -116,7 +116,7 @@ public class NormalizedNodePrunerTest {
 
         normalizedNodeWriter.write(expected);
 
-        NormalizedNode actual = pruner.normalizedNode();
+        NormalizedNode<?, ?> actual = pruner.normalizedNode();
 
         Assert.assertNotEquals(expected, actual);
 
@@ -137,7 +137,7 @@ public class NormalizedNodePrunerTest {
 
         normalizedNodeWriter.write(expected);
 
-        NormalizedNode actual = pruner.normalizedNode();
+        NormalizedNode<?, ?> actual = pruner.normalizedNode();
 
         // Since top level schema is missing null is returned
         assertNull(actual);
@@ -183,7 +183,7 @@ public class NormalizedNodePrunerTest {
 
         verify(normalizedNodeContainerBuilder).addChild(captor.capture());
 
-        NormalizedNode value = captor.getValue();
+        NormalizedNode<?, ?> value = captor.getValue();
         assertEquals(normalizedNodeBuilderWrapper.identifier().getNodeType(), value.getNodeType());
         assertEquals(normalizedNodeBuilderWrapper.identifier(), value.getIdentifier());
         assertEquals(o, value.getValue());
@@ -214,7 +214,7 @@ public class NormalizedNodePrunerTest {
 
         verify(normalizedNodeContainerBuilder).addChild(captor.capture());
 
-        NormalizedNode value = captor.getValue();
+        NormalizedNode<?, ?> value = captor.getValue();
         assertEquals(nodeIdentifier.getNodeType(), value.getNodeType());
         assertEquals(nodeIdentifier, value.getIdentifier());
         assertEquals(o, value.getValue());
@@ -247,7 +247,7 @@ public class NormalizedNodePrunerTest {
 
         verify(normalizedNodeContainerBuilder).addChild(captor.capture());
 
-        NormalizedNode value = captor.getValue();
+        NormalizedNode<?, ?> value = captor.getValue();
         assertEquals(nodeIdentifier.getNodeType(), value.getNodeType());
         assertEquals(nodeIdentifier, value.getIdentifier());
         assertEquals(o, value.getValue());
