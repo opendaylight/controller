@@ -50,32 +50,34 @@ public class DistributedDataStoreTest extends AbstractActorTest {
 
     @Test
     public void testRateLimitingUsedInReadWriteTxCreation(){
-        DistributedDataStore distributedDataStore = new DistributedDataStore(actorContext);
+        try (DistributedDataStore distributedDataStore = new DistributedDataStore(actorContext)) {
 
-        distributedDataStore.newReadWriteTransaction();
+            distributedDataStore.newReadWriteTransaction();
 
-        verify(actorContext, times(1)).acquireTxCreationPermit();
+            verify(actorContext, times(1)).acquireTxCreationPermit();
+        }
     }
 
     @Test
     public void testRateLimitingUsedInWriteOnlyTxCreation(){
-        DistributedDataStore distributedDataStore = new DistributedDataStore(actorContext);
+        try (DistributedDataStore distributedDataStore = new DistributedDataStore(actorContext)) {
 
-        distributedDataStore.newWriteOnlyTransaction();
+            distributedDataStore.newWriteOnlyTransaction();
 
-        verify(actorContext, times(1)).acquireTxCreationPermit();
+            verify(actorContext, times(1)).acquireTxCreationPermit();
+        }
     }
-
 
     @Test
     public void testRateLimitingNotUsedInReadOnlyTxCreation(){
-        DistributedDataStore distributedDataStore = new DistributedDataStore(actorContext);
+        try (DistributedDataStore distributedDataStore = new DistributedDataStore(actorContext)) {
 
-        distributedDataStore.newReadOnlyTransaction();
-        distributedDataStore.newReadOnlyTransaction();
-        distributedDataStore.newReadOnlyTransaction();
+            distributedDataStore.newReadOnlyTransaction();
+            distributedDataStore.newReadOnlyTransaction();
+            distributedDataStore.newReadOnlyTransaction();
 
-        verify(actorContext, times(0)).acquireTxCreationPermit();
+            verify(actorContext, times(0)).acquireTxCreationPermit();
+        }
     }
 
     @Test
@@ -83,40 +85,41 @@ public class DistributedDataStoreTest extends AbstractActorTest {
         doReturn(datastoreContext).when(actorContext).getDatastoreContext();
         doReturn(shardElectionTimeout).when(datastoreContext).getShardLeaderElectionTimeout();
         doReturn(FiniteDuration.apply(50, TimeUnit.MILLISECONDS)).when(shardElectionTimeout).duration();
-        DistributedDataStore distributedDataStore = new DistributedDataStore(actorContext);
+        try (DistributedDataStore distributedDataStore = new DistributedDataStore(actorContext)) {
 
-        long start = System.currentTimeMillis();
+            long start = System.currentTimeMillis();
 
-        distributedDataStore.waitTillReady();
+            distributedDataStore.waitTillReady();
 
-        long end = System.currentTimeMillis();
+            long end = System.currentTimeMillis();
 
-        assertTrue("Expected to be blocked for 50 millis", (end-start) >= 50);
+            assertTrue("Expected to be blocked for 50 millis", (end - start) >= 50);
+        }
     }
 
     @Test
     public void testWaitTillReadyCountDown(){
-        final DistributedDataStore distributedDataStore = new DistributedDataStore(actorContext);
-        doReturn(datastoreContext).when(actorContext).getDatastoreContext();
-        doReturn(shardElectionTimeout).when(datastoreContext).getShardLeaderElectionTimeout();
-        doReturn(FiniteDuration.apply(5000, TimeUnit.MILLISECONDS)).when(shardElectionTimeout).duration();
+        try (final DistributedDataStore distributedDataStore = new DistributedDataStore(actorContext)) {
+            doReturn(datastoreContext).when(actorContext).getDatastoreContext();
+            doReturn(shardElectionTimeout).when(datastoreContext).getShardLeaderElectionTimeout();
+            doReturn(FiniteDuration.apply(5000, TimeUnit.MILLISECONDS)).when(shardElectionTimeout).duration();
 
-        Executors.newSingleThreadExecutor().submit(new Runnable() {
-            @Override
-            public void run() {
-                Uninterruptibles.sleepUninterruptibly(500, TimeUnit.MILLISECONDS);
-                distributedDataStore.getWaitTillReadyCountDownLatch().countDown();
-            }
-        });
+            Executors.newSingleThreadExecutor().submit(new Runnable() {
+                @Override
+                public void run() {
+                    Uninterruptibles.sleepUninterruptibly(500, TimeUnit.MILLISECONDS);
+                    distributedDataStore.getWaitTillReadyCountDownLatch().countDown();
+                }
+            });
 
-        long start = System.currentTimeMillis();
+            long start = System.currentTimeMillis();
 
-        distributedDataStore.waitTillReady();
+            distributedDataStore.waitTillReady();
 
-        long end = System.currentTimeMillis();
+            long end = System.currentTimeMillis();
 
-        assertTrue("Expected to be released in 500 millis", (end-start) < 5000);
-
+            assertTrue("Expected to be released in 500 millis", (end - start) < 5000);
+        }
     }
 
 }
