@@ -41,6 +41,7 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshotReply;
+import org.opendaylight.controller.cluster.raft.messages.UnInitializedFollowerSnapshotReply;
 import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import scala.concurrent.duration.FiniteDuration;
@@ -85,9 +86,9 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
     private final Collection<ClientRequestTracker> trackerList = new LinkedList<>();
 
-    protected final int minReplicationCount;
+    protected int minReplicationCount;
 
-    protected final int minIsolatedLeaderPeerCount;
+    protected int minIsolatedLeaderPeerCount;
 
     private Optional<SnapshotHolder> snapshot;
 
@@ -143,6 +144,16 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         followerLogInformation.setFollowerState(followerState);
         followerToLog.put(followerId, followerLogInformation);
     }
+
+    public void removeUninitializedFollower(String followerId) {
+        followerToLog.remove(followerId);
+    }
+
+    public void reCalculateMinReplicaCntAndMinIsolatedLeaderPeerCnt(){
+        minReplicationCount = getMajorityVoteCount(getFollowerIds().size());
+        minIsolatedLeaderPeerCount = minReplicationCount > 0 ? (minReplicationCount - 1) : 0;
+    }
+
 
     @VisibleForTesting
     void setSnapshot(@Nullable Snapshot snapshot) {
@@ -417,6 +428,12 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
                 } else {
                     followerToSnapshot.markSendStatus(true);
+                    if(!followerLogInformation.canParticipateInConsensus()){
+                        UnInitializedFollowerSnapshotReply unInitFollSnapshotSuccess =
+                                             new UnInitializedFollowerSnapshotReply(followerId);
+                        actor().tell(unInitFollSnapshotSuccess, actor());
+                    }
+
                 }
             } else {
                 LOG.info("{}: InstallSnapshotReply received sending snapshot chunk failed, Will retry, Chunk: {}",
