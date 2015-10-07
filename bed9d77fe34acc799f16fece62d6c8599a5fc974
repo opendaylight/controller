@@ -1,0 +1,412 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_1e737bea",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-07T17:52:09Z",
+      "side": 1,
+      "message": "if serverConfigurationSupport returns true we don\u0027t want to call applyState below.",
+      "revId": "bed9d77fe34acc799f16fece62d6c8599a5fc974",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_3e619739",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-07T17:52:09Z",
+      "side": 1,
+      "message": "This technically shouldn\u0027t be static since it\u0027s initialized in ctor.",
+      "revId": "bed9d77fe34acc799f16fece62d6c8599a5fc974",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_5e66d352",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-07T17:52:09Z",
+      "side": 1,
+      "message": "I believe this should pass timeInterval instead of 3000.",
+      "revId": "bed9d77fe34acc799f16fece62d6c8599a5fc974",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_1e605b31",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-07T17:52:09Z",
+      "side": 1,
+      "message": "Can you move this to the bottom of the file? That\u0027s where we\u0027ve been putting inner classes.",
+      "revId": "bed9d77fe34acc799f16fece62d6c8599a5fc974",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_de518363",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-07T17:52:09Z",
+      "side": 1,
+      "message": "These can be declared final (it\u0027s useful to configure your IDE to do this automatically).",
+      "revId": "bed9d77fe34acc799f16fece62d6c8599a5fc974",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_9e4b0bb0",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-07T17:52:09Z",
+      "side": 1,
+      "message": "spaces after commas",
+      "revId": "bed9d77fe34acc799f16fece62d6c8599a5fc974",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_ded8a3f1",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-07T17:52:09Z",
+      "side": 1,
+      "message": "Can we follow the pattern of prefixing message handler methods with \"on\" to be consistent? Ie, onFollowerCatchUpTimeout, onUnInitializedFollowerSnapshotReply etc",
+      "revId": "bed9d77fe34acc799f16fece62d6c8599a5fc974",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_fe5a3f82",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-07T17:52:09Z",
+      "side": 1,
+      "message": "space after comma",
+      "revId": "bed9d77fe34acc799f16fece62d6c8599a5fc974",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_fee8ff7d",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-07T17:52:09Z",
+      "side": 1,
+      "message": "We don\u0027t actually need to catch up a non-voting follower.",
+      "revId": "bed9d77fe34acc799f16fece62d6c8599a5fc974",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_7ee5cfa6",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-07T17:52:09Z",
+      "side": 1,
+      "message": "space after commas",
+      "revId": "bed9d77fe34acc799f16fece62d6c8599a5fc974",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_1eee1b89",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-07T17:52:09Z",
+      "side": 1,
+      "message": "We don\u0027t need this if we don\u0027t initiate snapshot for non-voting.",
+      "revId": "bed9d77fe34acc799f16fece62d6c8599a5fc974",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_9ee22b9e",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-07T17:52:09Z",
+      "side": 1,
+      "message": "space after commas",
+      "revId": "bed9d77fe34acc799f16fece62d6c8599a5fc974",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_5e9b3318",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-07T17:52:09Z",
+      "side": 1,
+      "message": "I find it generally makes code more readable to insert blank lines in between code sections.",
+      "revId": "bed9d77fe34acc799f16fece62d6c8599a5fc974",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_fe9f9f01",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 215,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-07T17:52:09Z",
+      "side": 1,
+      "message": "space after commas",
+      "revId": "bed9d77fe34acc799f16fece62d6c8599a5fc974",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_1ea5bb52",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-07T17:52:09Z",
+      "side": 1,
+      "message": "space after commas",
+      "revId": "bed9d77fe34acc799f16fece62d6c8599a5fc974",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_beb0478c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-07T17:52:09Z",
+      "side": 1,
+      "message": "spacing around else",
+      "revId": "bed9d77fe34acc799f16fece62d6c8599a5fc974",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_dead0333",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-07T17:52:09Z",
+      "side": 1,
+      "message": "This should pass \u0027result\u0027 to AddServerReply",
+      "revId": "bed9d77fe34acc799f16fece62d6c8599a5fc974",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_7eaaaf1a",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 243,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-07T17:52:09Z",
+      "side": 1,
+      "message": "You can just call processAddServer directly instead of sending a message - that\u0027s what we do for queue txns in Shard.",
+      "revId": "bed9d77fe34acc799f16fece62d6c8599a5fc974",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_be5e0744",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-07T17:52:09Z",
+      "side": 1,
+      "message": "We should call the new calculate method below.",
+      "revId": "bed9d77fe34acc799f16fece62d6c8599a5fc974",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_7e814f8e",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-07T17:52:09Z",
+      "side": 1,
+      "message": "Since this method removes the follower regardless of initialized state, can we rename to removeFollower?",
+      "revId": "bed9d77fe34acc799f16fece62d6c8599a5fc974",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_de7423d1",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-07T17:52:09Z",
+      "side": 1,
+      "message": "I usually prefer to spell out words rather than abbreviate like \"Cnt\". How about renaming to calculateMajorityVoteCount?",
+      "revId": "bed9d77fe34acc799f16fece62d6c8599a5fc974",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_3e4bd788",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 431,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-07T17:52:09Z",
+      "side": 1,
+      "message": "I think we want to check FollowerState \u003d\u003d VOTING_NOT_INITIALIZED here",
+      "revId": "bed9d77fe34acc799f16fece62d6c8599a5fc974",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_de5bc352",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/FollowerCatchUpTimeout.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-07T17:52:09Z",
+      "side": 1,
+      "message": "Please add class javadoc, e.g. \"Local message sent when catch-up of a new follower doesn\u0027t complete in a timely manner\"",
+      "revId": "bed9d77fe34acc799f16fece62d6c8599a5fc974",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_9e554b1f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/UnInitializedFollowerSnapshotReply.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-07T17:52:09Z",
+      "side": 1,
+      "message": "Please add javadoc",
+      "revId": "bed9d77fe34acc799f16fece62d6c8599a5fc974",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
