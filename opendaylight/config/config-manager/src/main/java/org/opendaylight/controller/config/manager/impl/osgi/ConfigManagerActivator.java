@@ -68,7 +68,7 @@ public class ConfigManagerActivator implements BundleActivator {
             ModuleFactoryBundleTracker moduleFactoryTracker = new ModuleFactoryBundleTracker(
                     blankTransactionServiceTracker);
 
-            boolean scanResolvedBundlesForModuleInfo = false;
+            boolean scanResolvedBundlesForModuleInfo = true;
             BundleTracker<Collection<ObjectRegistration<YangModuleInfo>>> moduleInfoResolvedBundleTracker = null;
             ExtensibleBundleTracker<?> moduleFactoryBundleTracker;
             if(scanResolvedBundlesForModuleInfo) {

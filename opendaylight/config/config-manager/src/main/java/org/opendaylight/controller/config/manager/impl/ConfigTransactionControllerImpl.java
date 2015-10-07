@@ -9,7 +9,6 @@ package org.opendaylight.controller.config.manager.impl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
-
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -27,6 +26,7 @@ import javax.management.InstanceNotFoundException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import org.opendaylight.controller.config.api.DependencyResolver;
+import org.opendaylight.controller.config.api.ModuleFactoryNotFoundException;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.api.annotations.ServiceInterfaceAnnotation;
@@ -188,7 +188,8 @@ class ConfigTransactionControllerImpl implements
     }
 
 
-    private synchronized void copyExistingModule(ModuleInternalInfo oldConfigBeanInfo) throws InstanceAlreadyExistsException {
+    private synchronized void copyExistingModule(ModuleInternalInfo oldConfigBeanInfo)
+            throws InstanceAlreadyExistsException {
 
         transactionStatus.checkNotCommitStarted();
         transactionStatus.checkNotAborted();
@@ -200,7 +201,7 @@ class ConfigTransactionControllerImpl implements
         try {
             moduleFactory = factoriesHolder.findByModuleName(moduleIdentifier.getFactoryName());
             bc = getModuleFactoryBundleContext(moduleFactory.getImplementationName());
-        } catch (InstanceNotFoundException e) {
+        } catch (ModuleFactoryNotFoundException e) {
             throw new IllegalStateException(e);
         }
 
@@ -221,8 +222,8 @@ class ConfigTransactionControllerImpl implements
     }
 
     @Override
-    public synchronized ObjectName createModule(String factoryName,
-                                                String instanceName) throws InstanceAlreadyExistsException {
+    public synchronized ObjectName createModule(String factoryName, String instanceName)
+            throws InstanceAlreadyExistsException {
 
         transactionStatus.checkNotCommitStarted();
         transactionStatus.checkNotAborted();
@@ -230,12 +231,8 @@ class ConfigTransactionControllerImpl implements
         dependencyResolverManager.assertNotExists(moduleIdentifier);
 
         // find factory
-        ModuleFactory moduleFactory;
-        try {
-            moduleFactory = factoriesHolder.findByModuleName(factoryName);
-        } catch (InstanceNotFoundException e) {
-            throw new IllegalArgumentException(e);
-        }
+        ModuleFactory moduleFactory = factoriesHolder.findByModuleName(factoryName);
+
         DependencyResolver dependencyResolver = dependencyResolverManager.getOrCreate(moduleIdentifier);
         BundleContext bundleContext = getModuleFactoryBundleContext(moduleFactory.getImplementationName());
         Module module = moduleFactory.createModule(instanceName, dependencyResolver,
@@ -452,6 +449,7 @@ class ConfigTransactionControllerImpl implements
         close();
     }
 
+    @Override
     public void close() {
         dependencyResolverManager.close();
         txLookupRegistry.close();
