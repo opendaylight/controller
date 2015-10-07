@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import javax.management.InstanceNotFoundException;
+import org.opendaylight.controller.config.api.ModuleFactoryNotFoundException;
 import org.opendaylight.controller.config.spi.ModuleFactory;
 import org.osgi.framework.BundleContext;
 
@@ -55,11 +55,10 @@ public class HierarchicalConfigMBeanFactoriesHolder {
      * @throws IllegalArgumentException
      *             if factory is not found
      */
-    public ModuleFactory findByModuleName(String moduleName) throws InstanceNotFoundException {
+    public ModuleFactory findByModuleName(String moduleName) throws ModuleFactoryNotFoundException {
         Map.Entry<ModuleFactory, BundleContext> result = moduleNamesToConfigBeanFactories.get(moduleName);
         if (result == null) {
-            throw new InstanceNotFoundException(
-                    "ModuleFactory not found with module name: " + moduleName);
+            throw new ModuleFactoryNotFoundException(moduleName);
         }
         return result.getKey();
     }

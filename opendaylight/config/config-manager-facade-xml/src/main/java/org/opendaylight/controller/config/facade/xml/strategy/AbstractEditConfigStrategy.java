@@ -11,6 +11,7 @@ package org.opendaylight.controller.config.facade.xml.strategy;
 import java.util.Map;
 import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
+import org.opendaylight.controller.config.api.ModuleFactoryNotFoundException;
 import org.opendaylight.controller.config.facade.xml.exception.ConfigHandlingException;
 import org.opendaylight.controller.config.facade.xml.mapping.attributes.fromxml.AttributeConfigElement;
 import org.opendaylight.controller.config.facade.xml.mapping.config.ServiceRegistryWrapper;
@@ -25,7 +26,7 @@ public abstract class AbstractEditConfigStrategy implements EditConfigStrategy {
     @Override
     public void executeConfiguration(String module, String instance, Map<String, AttributeConfigElement> configuration,
                                      ConfigTransactionClient ta, ServiceRegistryWrapper services) throws
-        ConfigHandlingException {
+        ConfigHandlingException, ModuleFactoryNotFoundException {
 
         try {
             ObjectName on = ta.lookupConfigBean(module, instance);
@@ -42,7 +43,7 @@ public abstract class AbstractEditConfigStrategy implements EditConfigStrategy {
 
     abstract void handleMissingInstance(Map<String, AttributeConfigElement> configuration, ConfigTransactionClient ta,
                                         String module, String instance, ServiceRegistryWrapper services) throws
-        ConfigHandlingException;
+        ConfigHandlingException, ModuleFactoryNotFoundException;
 
     abstract void executeStrategy(Map<String, AttributeConfigElement> configuration, ConfigTransactionClient ta,
                                   ObjectName objectName, ServiceRegistryWrapper services) throws

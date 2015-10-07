@@ -10,6 +10,7 @@ package org.opendaylight.controller.config.facade.xml.strategy;
 
 import java.util.Collections;
 import java.util.Map;
+import org.opendaylight.controller.config.api.ModuleFactoryNotFoundException;
 import org.opendaylight.controller.config.facade.xml.exception.ConfigHandlingException;
 import org.opendaylight.controller.config.facade.xml.mapping.attributes.fromxml.AttributeConfigElement;
 import org.opendaylight.controller.config.facade.xml.mapping.config.ServiceRegistryWrapper;
@@ -24,7 +25,7 @@ public class NoneEditConfigStrategy implements EditConfigStrategy {
     @Override
     public void executeConfiguration(String module, String instance, Map<String, AttributeConfigElement> configuration,
                                      ConfigTransactionClient ta, ServiceRegistryWrapper services) throws
-        ConfigHandlingException {
+        ConfigHandlingException, ModuleFactoryNotFoundException {
         if(configuration != null && !configuration.isEmpty()) {
             for (Map.Entry<String, AttributeConfigElement> attrEntry : configuration.entrySet()) {
                 if(attrEntry.getValue().getEditStrategy().isPresent()) {

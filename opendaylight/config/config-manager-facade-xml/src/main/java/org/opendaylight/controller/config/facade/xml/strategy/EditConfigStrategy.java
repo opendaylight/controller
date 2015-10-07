@@ -9,6 +9,7 @@
 package org.opendaylight.controller.config.facade.xml.strategy;
 
 import java.util.Map;
+import org.opendaylight.controller.config.api.ModuleFactoryNotFoundException;
 import org.opendaylight.controller.config.facade.xml.exception.ConfigHandlingException;
 import org.opendaylight.controller.config.facade.xml.mapping.attributes.fromxml.AttributeConfigElement;
 import org.opendaylight.controller.config.facade.xml.mapping.config.ServiceRegistryWrapper;
@@ -18,6 +19,6 @@ public interface EditConfigStrategy {
 
     void executeConfiguration(String module, String instance, Map<String, AttributeConfigElement> configuration,
                               ConfigTransactionClient ta, ServiceRegistryWrapper services) throws
-        ConfigHandlingException;
+        ConfigHandlingException, ModuleFactoryNotFoundException;
 
 }
