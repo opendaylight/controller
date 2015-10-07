@@ -18,6 +18,13 @@ import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.opendaylight.controller.cluster.datastore.messages.CreateShardReplica;
+import org.opendaylight.controller.cluster.datastore.messages.RemoveShardReplica;
+import akka.pattern.Patterns;
+import akka.util.Timeout;
+import java.util.concurrent.TimeUnit;
+import scala.concurrent.Await;
+import akka.actor.Status;
 
 public class ShardManagerInfo extends AbstractMXBean implements ShardManagerInfoMBean {
 
@@ -95,5 +102,50 @@ public class ShardManagerInfo extends AbstractMXBean implements ShardManagerInfo
 
     public void setShardManager(ShardManager shardManager){
         this.shardManager = shardManager;
+    }
+
+    @Override
+    public boolean addShardReplica (String shardName) throws IllegalArgumentException {
+        LOG.info ("addShardReplica initiated for shard {}", shardName);
+        Object resp = null;
+        Timeout addTimeOut = new Timeout(1, TimeUnit.MINUTES);
+        try {
+            resp = Await.result(Patterns.ask(shardManager.getSelf(),
+                                new CreateShardReplica(shardName), addTimeOut),
+                                addTimeOut.duration());
+        } catch (Exception ex) {
+            LOG.debug ("Obtained an exception during addShardReplica", ex);
+        }
+        if (resp != null) {
+            if (resp instanceof Status.Success) {
+                return true;
+            }
+            else if (resp instanceof Status.Failure) {
+                throw new IllegalArgumentException(((Status.Failure)resp).cause());
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean removeShardReplica (String shardName) throws IllegalArgumentException {
+        LOG.info ("removeShardReplica initiated for shard {}", shardName);
+        Object resp = null;
+        Timeout remTimeOut = new Timeout(30, TimeUnit.SECONDS);
+        try {
+            resp = Await.result(Patterns.ask(shardManager.getSelf(),
+                                new RemoveShardReplica(shardName), remTimeOut),
+                                remTimeOut.duration());
+        } catch (Exception ex) {
+            LOG.debug ("Obtained an exception during removeShardReplica", ex);
+        }
+        if (resp != null) {
+            if (resp instanceof Status.Success) {
+                return true;
+            } else if (resp instanceof Status.Failure) {
+                throw new IllegalArgumentException(((Status.Failure)resp).cause());
+            }
+        }
+        return false;
     }
 }

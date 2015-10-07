@@ -22,7 +22,7 @@ public interface Configuration {
     @Nonnull Collection<String> getMemberShardNames(@Nonnull String memberName);
 
     /**
-     * Returns the namespace for the given module name or null if not found.
+     * Returns the module name for the given namespace name or null if not found.
      */
     @Nullable String getModuleNameFromNameSpace(@Nonnull String nameSpace);
 
@@ -55,4 +55,9 @@ public interface Configuration {
      * Returns a unique set of all member names configured for all shards.
      */
     Collection<String> getUniqueMemberNamesForAllShards();
+
+    /*
+     * Verifies if the given module shard in available in the cluster
+     */
+    boolean checkModuleAvailability(String moduleName);
 }

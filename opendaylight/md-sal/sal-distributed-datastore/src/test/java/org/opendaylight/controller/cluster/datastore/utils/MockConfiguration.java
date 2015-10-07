@@ -82,4 +82,9 @@ public class MockConfiguration implements Configuration{
     @Override
     public void addModuleShardConfiguration(ModuleShardConfiguration config) {
     }
+
+    @Override
+    public boolean checkModuleAvailability(String moduleName) {
+        return false;
+    }
 }
