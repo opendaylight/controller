@@ -38,30 +38,35 @@ public final class ModuleInfoBundleTracker implements AutoCloseable,
 
 
     private final RefreshingSCPModuleInfoRegistry moduleInfoRegistry;
-    private final BundleTracker<Collection<ObjectRegistration<YangModuleInfo>>> bundleTracker;
+    private BundleTracker<Collection<ObjectRegistration<YangModuleInfo>>> bundleTracker;
     private boolean starting;
 
     public ModuleInfoBundleTracker(BundleContext context, RefreshingSCPModuleInfoRegistry moduleInfoRegistry) {
         this.moduleInfoRegistry = moduleInfoRegistry;
-        bundleTracker = new BundleTracker<>(context, Bundle.RESOLVED | Bundle.STARTING |
-                Bundle.STOPPING | Bundle.ACTIVE, this);
     }
 
-    public void open() {
-        LOG.debug("ModuleInfoBundleTracker open starting");
+    public void open(BundleTracker<Collection<ObjectRegistration<YangModuleInfo>>> bundleTracker) {
+        LOG.debug("ModuleInfoBundleTracker open starting with bundleTracker {}", bundleTracker);
 
-        starting = true;
-        bundleTracker.open();
+        if(bundleTracker != null) {
+            this.bundleTracker = bundleTracker;
+            starting = true;
+            bundleTracker.open();
 
-        starting = false;
-        moduleInfoRegistry.updateService();
+            starting = false;
+            moduleInfoRegistry.updateService();
+        } else {
+            starting = false;
+        }
 
         LOG.debug("ModuleInfoBundleTracker open complete");
     }
 
     @Override
     public void close() {
-        bundleTracker.close();
+        if(bundleTracker != null) {
+            bundleTracker.close();
+        }
     }
 
     @Override

@@ -11,6 +11,7 @@ import static org.opendaylight.controller.config.manager.impl.util.OsgiRegistrat
 import static org.opendaylight.controller.config.manager.impl.util.OsgiRegistrationUtil.wrap;
 import java.lang.management.ManagementFactory;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.MBeanServer;
@@ -23,10 +24,14 @@ import org.opendaylight.controller.config.manager.impl.osgi.mapping.ModuleInfoBu
 import org.opendaylight.controller.config.manager.impl.osgi.mapping.RefreshingSCPModuleInfoRegistry;
 import org.opendaylight.controller.config.manager.impl.util.OsgiRegistrationUtil;
 import org.opendaylight.controller.config.spi.ModuleFactory;
+import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.sal.binding.generator.impl.GeneratedClassLoadingStrategy;
 import org.opendaylight.yangtools.sal.binding.generator.impl.ModuleInfoBackedContext;
+import org.opendaylight.yangtools.yang.binding.YangModuleInfo;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.BundleTracker;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,12 +68,22 @@ public class ConfigManagerActivator implements BundleActivator {
             ModuleFactoryBundleTracker moduleFactoryTracker = new ModuleFactoryBundleTracker(
                     blankTransactionServiceTracker);
 
-            // start extensible tracker
-            ExtensibleBundleTracker<?> moduleFactoryBundleTracker = new ExtensibleBundleTracker<>(context,
-                    moduleFactoryTracker);
-            moduleFactoryBundleTracker.open();
+            boolean scanResolvedBundlesForModuleInfo = false;
+            BundleTracker<Collection<ObjectRegistration<YangModuleInfo>>> moduleInfoResolvedBundleTracker = null;
+            ExtensibleBundleTracker<?> moduleFactoryBundleTracker;
+            if(scanResolvedBundlesForModuleInfo) {
+                moduleInfoResolvedBundleTracker = new BundleTracker<>(context, Bundle.RESOLVED | Bundle.STARTING |
+                            Bundle.STOPPING | Bundle.ACTIVE, moduleInfoBundleTracker);
+                moduleFactoryBundleTracker = new ExtensibleBundleTracker<>(context, moduleFactoryTracker);
+            } else {
+                moduleFactoryBundleTracker = new ExtensibleBundleTracker<>(context,
+                        moduleFactoryTracker, moduleInfoBundleTracker);
+            }
 
-            moduleInfoBundleTracker.open();
+            moduleInfoBundleTracker.open(moduleInfoResolvedBundleTracker);
+
+            // start extensible tracker
+            moduleFactoryBundleTracker.open();
 
             // Wrap config registry with JMX notification publishing adapter
             final JMXNotifierConfigRegistry notifyingConfigRegistry =
