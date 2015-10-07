@@ -22,6 +22,30 @@
       "revId": "81ebf4f4090dc24b4d10e9f987b0fc995f782a25",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_1e15bbf0",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/yang/distributed-datastore-provider.yang",
+        "patchSetId": 7
+      },
+      "lineNbr": 258,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-07T14:26:21Z",
+      "side": 1,
+      "message": "mandatory \u003d\u003d false was an oversight - I copied the section from another one :)  In fact config-schema-service isn\u0027t mandatory - it should be. I can fix the others too.\n\nI don\u0027t think it\u0027s worth the effort to handle legacy configs. Also this wouldn\u0027t work correctly with Gary\u0027s patch to restart the ActorSystem when quarantined.",
+      "parentUuid": "1a76adc5_de6503e2",
+      "range": {
+        "startLine": 251,
+        "startChar": 16,
+        "endLine": 258,
+        "endChar": 17
+      },
+      "revId": "81ebf4f4090dc24b4d10e9f987b0fc995f782a25",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
