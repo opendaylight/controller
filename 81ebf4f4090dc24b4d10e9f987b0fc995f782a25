@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_de6503e2",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/yang/distributed-datastore-provider.yang",
+        "patchSetId": 7
+      },
+      "lineNbr": 258,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-10-07T13:33:46Z",
+      "side": 1,
+      "message": "you modeled actor-system reference as non-mandatory, which means config subsystem will accept initial config without actor system reference (e.g. initial config for lithium)\nbut in createInstance that would result in NPE.\n\nHAving this non-mandatory gives possibility to support legacy config and new config in such whay, if config-actor-system-provider is not specified - the modules will default to previous behaviour (create own actor system).\n\nJust an idea.",
+      "range": {
+        "startLine": 251,
+        "startChar": 16,
+        "endLine": 258,
+        "endChar": 17
+      },
+      "revId": "81ebf4f4090dc24b4d10e9f987b0fc995f782a25",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
