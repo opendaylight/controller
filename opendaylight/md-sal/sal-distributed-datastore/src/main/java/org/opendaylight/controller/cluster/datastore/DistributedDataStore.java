@@ -186,8 +186,12 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
 
     @Override
     public void close() {
-        datastoreConfigMXBean.unregisterMBean();
-        datastoreInfoMXBean.unregisterMBean();
+        if (datastoreConfigMXBean != null) {
+            datastoreConfigMXBean.unregisterMBean();
+        }
+        if (datastoreInfoMXBean != null) {
+            datastoreInfoMXBean.unregisterMBean();
+        }
 
         if (closeable != null) {
             try {
