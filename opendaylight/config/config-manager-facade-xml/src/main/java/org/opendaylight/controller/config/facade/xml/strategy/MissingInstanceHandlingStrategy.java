@@ -11,6 +11,7 @@ package org.opendaylight.controller.config.facade.xml.strategy;
 import java.util.Map;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.ObjectName;
+import org.opendaylight.controller.config.api.ModuleFactoryNotFoundException;
 import org.opendaylight.controller.config.facade.xml.exception.ConfigHandlingException;
 import org.opendaylight.controller.config.facade.xml.mapping.attributes.fromxml.AttributeConfigElement;
 import org.opendaylight.controller.config.facade.xml.mapping.config.ServiceRegistryWrapper;
@@ -25,7 +26,8 @@ public class MissingInstanceHandlingStrategy extends AbstractEditConfigStrategy 
 
     @Override
     void handleMissingInstance(Map<String, AttributeConfigElement> configuration, ConfigTransactionClient ta,
-            String module, String instance, ServiceRegistryWrapper services) throws ConfigHandlingException {
+            String module, String instance, ServiceRegistryWrapper services)
+                    throws ConfigHandlingException, ModuleFactoryNotFoundException {
         try {
             ObjectName on = ta.createModule(module, instance);
             LOG.trace("New instance for {} {} created under name {}", module, instance, on);

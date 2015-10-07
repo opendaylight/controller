@@ -13,7 +13,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
 import javax.annotation.Nullable;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
@@ -21,6 +20,7 @@ import javax.management.IntrospectionException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 import org.junit.Test;
+import org.opendaylight.controller.config.api.ModuleFactoryNotFoundException;
 import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
 import org.opendaylight.controller.config.manager.testingservices.parallelapsp.TestingParallelAPSPConfigMXBean;
@@ -129,7 +129,7 @@ public class TwoInterfacesExportTest extends AbstractScheduledTest {
 
     @Test
     public void tryToRegisterThreadPoolWithSameName()
-            throws InstanceAlreadyExistsException {
+            throws InstanceAlreadyExistsException, ModuleFactoryNotFoundException {
         ConfigTransactionJMXClient transaction = configRegistryClient
                 .createTransaction();
 
@@ -163,7 +163,7 @@ public class TwoInterfacesExportTest extends AbstractScheduledTest {
 
     @Test
     public void testWithAPSP_useScheduledNames()
-            throws InstanceAlreadyExistsException, ValidationException {
+            throws InstanceAlreadyExistsException, ValidationException, ModuleFactoryNotFoundException {
         ConfigTransactionJMXClient transaction = configRegistryClient
                 .createTransaction();
         ObjectName scheduledName = transaction.createModule(

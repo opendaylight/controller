@@ -12,7 +12,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
 import com.google.common.collect.Sets;
 import java.util.Arrays;
 import java.util.Collections;
@@ -29,6 +28,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.config.api.ConflictingVersionException;
+import org.opendaylight.controller.config.api.ModuleFactoryNotFoundException;
 import org.opendaylight.controller.config.api.ValidationException;
 import org.opendaylight.controller.config.api.ValidationException.ExceptionMessageWithStackTrace;
 import org.opendaylight.controller.config.api.jmx.CommitStatus;
@@ -50,7 +50,7 @@ import org.opendaylight.controller.config.util.ConfigTransactionJMXClient;
  * <li>Reconfiguration that triggers new object creation</li>
  * <li>Replacement of running instance with different one with same name</li>
  * </ol>
- * Only one bean is being configured - {@link TestingThreadPoolIfc} which has no
+ * Only one bean is being configured - TestingThreadPoolIfc which has no
  * dependencies.
  */
 public class SimpleConfigurationTest extends AbstractConfigTest {
@@ -96,7 +96,7 @@ public class SimpleConfigurationTest extends AbstractConfigTest {
 
     static ObjectName createFixedThreadPool(
             ConfigTransactionJMXClient transaction)
-            throws InstanceAlreadyExistsException, InstanceNotFoundException {
+            throws InstanceAlreadyExistsException, InstanceNotFoundException, ModuleFactoryNotFoundException {
         transaction.assertVersion(0, 1);
 
         ObjectName fixed1names = transaction.createModule(
@@ -132,7 +132,7 @@ public class SimpleConfigurationTest extends AbstractConfigTest {
 
     private void testValidation(ConfigTransactionClient transaction)
             throws InstanceAlreadyExistsException, ReflectionException,
-            InstanceNotFoundException, MBeanException, ConflictingVersionException {
+            InstanceNotFoundException, MBeanException, ConflictingVersionException, ModuleFactoryNotFoundException {
         ObjectName fixed1names = transaction.createModule(
                 TestingFixedThreadPoolModuleFactory.NAME, fixed1);
         // call validate on config bean

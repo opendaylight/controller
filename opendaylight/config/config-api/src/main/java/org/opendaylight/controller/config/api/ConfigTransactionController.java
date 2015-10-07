@@ -25,9 +25,10 @@ public interface ConfigTransactionController extends LookupRegistry, ServiceRefe
      * @return ObjectName of newly created module
      * @throws InstanceAlreadyExistsException
      *             if given ifcName and instanceName is already registered
+     * @throws ModuleFactoryNotFoundException
      */
     ObjectName createModule(String moduleName, String instanceName)
-            throws InstanceAlreadyExistsException;
+            throws InstanceAlreadyExistsException, ModuleFactoryNotFoundException;
 
     /**
      * Destroy existing module.
