@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "1a76adc5_184ab380",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 770,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-10-07T06:07:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a76adc5_12d294d2",
+      "revId": "3b19b7d74852783267ea2d1b128a56ddd646da99",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_f2511863",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shardmanager/ShardManagerInfo.java",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2015-10-06T13:35:04Z",
       "side": 1,
       "message": "Returning a boolean does not provide any feedback as to why it failed. Don\u0027t you think it\u0027s more user-friendly to provide a reason for a failure to the user? From the ShardManager you can return akka.status.Success or akka.status.Failure. From here, return \"Success\" or the Failure cause message.",
+      "revId": "3b19b7d74852783267ea2d1b128a56ddd646da99",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_b85e1f44",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shardmanager/ShardManagerInfo.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-10-07T06:07:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a76adc5_f2511863",
       "revId": "3b19b7d74852783267ea2d1b128a56ddd646da99",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
