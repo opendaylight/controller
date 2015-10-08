@@ -16,6 +16,24 @@
       "revId": "7d792bb026f8aaad19f858ddb29e9adead60cd73",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_37f4555a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/databroker/AbstractDOMBrokerTransaction.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 3172
+      },
+      "writtenOn": "2015-10-08T23:09:24Z",
+      "side": 1,
+      "message": "We currently don\u0027t need K at all.  I didn\u0027t remove it because I thought that someone must have put it there for a reason, like maybe anticipating future changes that will use it.  If there\u0027s no such plan, I\u0027ll remove it all together.",
+      "parentUuid": "1a76adc5_a126e714",
+      "revId": "7d792bb026f8aaad19f858ddb29e9adead60cd73",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
