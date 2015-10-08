@@ -1,0 +1,188 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_e66e35c9",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-08T18:10:09Z",
+      "side": 1,
+      "message": "remove the commented code. Put in a TODO comment if you want a reminder.",
+      "range": {
+        "startLine": 199,
+        "startChar": 12,
+        "endLine": 199,
+        "endChar": 14
+      },
+      "revId": "40fb48c41a6620e5f9a8e6389b4ba91d47aee42d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_66ad4588",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-08T18:10:09Z",
+      "side": 1,
+      "message": "I think we should get rid of this class and move the code to the Leader/Follower classes. Common code between Leader/Follower fits better in AbstractRaftActorBehavior. The behavior classes are almost support classes and this seems to be a support class for other support classes.",
+      "range": {
+        "startLine": 37,
+        "startChar": 6,
+        "endLine": 37,
+        "endChar": 41
+      },
+      "revId": "40fb48c41a6620e5f9a8e6389b4ba91d47aee42d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_c66539e2",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-08T18:10:09Z",
+      "side": 1,
+      "message": "Should this be final?",
+      "range": {
+        "startLine": 41,
+        "startChar": 12,
+        "endLine": 41,
+        "endChar": 17
+      },
+      "revId": "40fb48c41a6620e5f9a8e6389b4ba91d47aee42d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_06749197",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-08T18:10:09Z",
+      "side": 1,
+      "message": "If this is not a constant do not use all caps for it. Also this should probably be final as well.",
+      "range": {
+        "startLine": 45,
+        "startChar": 27,
+        "endLine": 45,
+        "endChar": 52
+      },
+      "revId": "40fb48c41a6620e5f9a8e6389b4ba91d47aee42d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_269c2dc0",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-08T18:10:09Z",
+      "side": 1,
+      "message": "I believe Tom mentioned this as well. Shouldn\u0027t this be timeInterval instead of 3000?",
+      "range": {
+        "startLine": 52,
+        "startChar": 55,
+        "endLine": 52,
+        "endChar": 59
+      },
+      "revId": "40fb48c41a6620e5f9a8e6389b4ba91d47aee42d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_a6afdde2",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-08T18:10:09Z",
+      "side": 1,
+      "message": "has been replicated to a",
+      "range": {
+        "startLine": 72,
+        "startChar": 53,
+        "endLine": 72,
+        "endChar": 69
+      },
+      "revId": "40fb48c41a6620e5f9a8e6389b4ba91d47aee42d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_865f410e",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 229,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-08T18:10:09Z",
+      "side": 1,
+      "message": "Should this be private static?",
+      "range": {
+        "startLine": 229,
+        "startChar": 4,
+        "endLine": 229,
+        "endChar": 17
+      },
+      "revId": "40fb48c41a6620e5f9a8e6389b4ba91d47aee42d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_26eaed0f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-08T18:10:09Z",
+      "side": 1,
+      "message": "updateMinReplicationCount? It\u0027s not just calculating but it\u0027s also updating the counts.",
+      "range": {
+        "startLine": 144,
+        "startChar": 16,
+        "endLine": 144,
+        "endChar": 69
+      },
+      "revId": "40fb48c41a6620e5f9a8e6389b4ba91d47aee42d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
