@@ -1,0 +1,314 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_4b1852d3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 766,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-08T17:17:02Z",
+      "side": 1,
+      "message": "replica",
+      "range": {
+        "startLine": 766,
+        "startChar": 37,
+        "endLine": 766,
+        "endChar": 48
+      },
+      "revId": "7fb2856b7b960d001fd2e0ba2d066b83808c0884",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_0b125ab1",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 769,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-08T17:17:02Z",
+      "side": 1,
+      "message": "should we use a more specific exception for this? IllegalArgumentException is more to protect against developer errors.",
+      "range": {
+        "startLine": 769,
+        "startChar": 63,
+        "endLine": 769,
+        "endChar": 87
+      },
+      "revId": "7fb2856b7b960d001fd2e0ba2d066b83808c0884",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_6b20aef7",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 772,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-08T17:17:02Z",
+      "side": 1,
+      "message": "verify that a shard with the specified name is present in the cluster configuration",
+      "range": {
+        "startLine": 772,
+        "startChar": 11,
+        "endLine": 772,
+        "endChar": 91
+      },
+      "revId": "7fb2856b7b960d001fd2e0ba2d066b83808c0884",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_8b1d0ac0",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 779,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-08T17:17:02Z",
+      "side": 1,
+      "message": "How about sending a CreateShardReplicaReply or if not a Failure with UnsupportedOperationException - otherwise everytime we will have to wait for the timeout to get a response.",
+      "range": {
+        "startLine": 779,
+        "startChar": 11,
+        "endLine": 779,
+        "endChar": 15
+      },
+      "revId": "7fb2856b7b960d001fd2e0ba2d066b83808c0884",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_2b615639",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shardmanager/ShardManagerInfo.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-08T17:17:02Z",
+      "side": 1,
+      "message": "You don\u0027t need to define Object here and set it to null. Just define it later and initialize it to Await.result",
+      "revId": "7fb2856b7b960d001fd2e0ba2d066b83808c0884",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_ab89e6cb",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shardmanager/ShardManagerInfo.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-08T17:17:02Z",
+      "side": 1,
+      "message": "These timeouts should be configurable. Could you atleast put a TODO for this.",
+      "range": {
+        "startLine": 112,
+        "startChar": 33,
+        "endLine": 112,
+        "endChar": 40
+      },
+      "revId": "7fb2856b7b960d001fd2e0ba2d066b83808c0884",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_0bd7bac2",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shardmanager/ShardManagerInfo.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-08T17:17:02Z",
+      "side": 1,
+      "message": "I don\u0027t think this is correct. Await.result will return the response message when it returns and will throw the exception returned as a Failure response. You do not need to check it like this. A unit test should confirm this.",
+      "revId": "7fb2856b7b960d001fd2e0ba2d066b83808c0884",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_8b90aaed",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shardmanager/ShardManagerInfoMBean.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-08T17:17:02Z",
+      "side": 1,
+      "message": "Could you put this on the next line?",
+      "range": {
+        "startLine": 56,
+        "startChar": 9,
+        "endLine": 56,
+        "endChar": 78
+      },
+      "revId": "7fb2856b7b960d001fd2e0ba2d066b83808c0884",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_cb86a2b9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shardmanager/ShardManagerInfoMBean.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-08T17:17:02Z",
+      "side": 1,
+      "message": "the shard for which a replica needs to be created on this controller instance?",
+      "range": {
+        "startLine": 58,
+        "startChar": 24,
+        "endLine": 58,
+        "endChar": 71
+      },
+      "revId": "7fb2856b7b960d001fd2e0ba2d066b83808c0884",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_6baaee1a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/CreateShardReplica.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-08T17:17:02Z",
+      "side": 1,
+      "message": "Should this have been named AddShardReplica? corresponding to the name of the addReplica/removeReplica methods?",
+      "range": {
+        "startLine": 20,
+        "startChar": 13,
+        "endLine": 20,
+        "endChar": 31
+      },
+      "revId": "7fb2856b7b960d001fd2e0ba2d066b83808c0884",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_0b733aea",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/CreateShardReplica.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-08T17:17:02Z",
+      "side": 1,
+      "message": "private final String shardName",
+      "range": {
+        "startLine": 22,
+        "startChar": 4,
+        "endLine": 22,
+        "endChar": 28
+      },
+      "revId": "7fb2856b7b960d001fd2e0ba2d066b83808c0884",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_ab77a6d3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/CreateShardReplica.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-08T17:17:02Z",
+      "side": 1,
+      "message": "drop this",
+      "range": {
+        "startLine": 31,
+        "startChar": 75,
+        "endLine": 31,
+        "endChar": 97
+      },
+      "revId": "7fb2856b7b960d001fd2e0ba2d066b83808c0884",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_cb7462d1",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/CreateShardReplica.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-08T17:17:02Z",
+      "side": 1,
+      "message": "this.shardName \u003d Preconditions.checkNotNull(shardName, \"ShardName should not be null\");",
+      "range": {
+        "startLine": 32,
+        "startChar": 8,
+        "endLine": 32,
+        "endChar": 34
+      },
+      "revId": "7fb2856b7b960d001fd2e0ba2d066b83808c0884",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_8b7e6aad",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/RemoveShardReplica.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-08T17:17:02Z",
+      "side": 1,
+      "message": "Apply the comments from CreateShardReplica to this class as well",
+      "range": {
+        "startLine": 19,
+        "startChar": 13,
+        "endLine": 19,
+        "endChar": 31
+      },
+      "revId": "7fb2856b7b960d001fd2e0ba2d066b83808c0884",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
