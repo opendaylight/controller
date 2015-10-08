@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "1a76adc5_8152cbdb",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-08T18:29:26Z",
+      "side": 1,
+      "message": "I had commented earlier - we need to elide the the call to applyState below.",
+      "parentUuid": "1a76adc5_e66e35c9",
+      "range": {
+        "startLine": 199,
+        "startChar": 12,
+        "endLine": 199,
+        "endChar": 14
+      },
+      "revId": "40fb48c41a6620e5f9a8e6389b4ba91d47aee42d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_66ad4588",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
         "patchSetId": 4
@@ -36,6 +60,30 @@
       "writtenOn": "2015-10-08T18:10:09Z",
       "side": 1,
       "message": "I think we should get rid of this class and move the code to the Leader/Follower classes. Common code between Leader/Follower fits better in AbstractRaftActorBehavior. The behavior classes are almost support classes and this seems to be a support class for other support classes.",
+      "range": {
+        "startLine": 37,
+        "startChar": 6,
+        "endLine": 37,
+        "endChar": 41
+      },
+      "revId": "40fb48c41a6620e5f9a8e6389b4ba91d47aee42d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_a14b472a",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-08T18:29:26Z",
+      "side": 1,
+      "message": "We could do that - one thing though is the persistData logic in the RaftActor. We could add a PersistData message.",
+      "parentUuid": "1a76adc5_66ad4588",
       "range": {
         "startLine": 37,
         "startChar": 6,
@@ -117,6 +165,23 @@
     },
     {
       "key": {
+        "uuid": "1a76adc5_060fb131",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-08T18:29:26Z",
+      "side": 1,
+      "message": "Also It\u0027s better not to cache the timeout/duration b/c config params can be change dynamically.",
+      "revId": "40fb48c41a6620e5f9a8e6389b4ba91d47aee42d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_a6afdde2",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
         "patchSetId": 4
@@ -134,6 +199,40 @@
         "endLine": 72,
         "endChar": 69
       },
+      "revId": "40fb48c41a6620e5f9a8e6389b4ba91d47aee42d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_462cc999",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-08T18:29:26Z",
+      "side": 1,
+      "message": "This should be warn.",
+      "revId": "40fb48c41a6620e5f9a8e6389b4ba91d47aee42d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_46536917",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 220,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-08T18:29:26Z",
+      "side": 1,
+      "message": "I think log level should be debug. Also you don\u0027t need an if block, just do:\n\nLOG.debug(\"respondToClient returned {} for server : {} \",  result, fInfo.getAddServer().getNewServerId());",
       "revId": "40fb48c41a6620e5f9a8e6389b4ba91d47aee42d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
