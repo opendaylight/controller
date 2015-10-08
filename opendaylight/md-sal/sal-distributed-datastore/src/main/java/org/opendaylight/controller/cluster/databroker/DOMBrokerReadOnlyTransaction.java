@@ -8,6 +8,8 @@
 
 package org.opendaylight.controller.cluster.databroker;
 
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionFactory;
+
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
 import java.util.Map;
@@ -18,15 +20,15 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
-public class DOMBrokerReadOnlyTransaction<T extends DOMStoreReadTransaction>
-    extends AbstractDOMBrokerTransaction<LogicalDatastoreType, T>
+public class DOMBrokerReadOnlyTransaction
+    extends AbstractDOMBrokerTransaction<LogicalDatastoreType, DOMStoreReadTransaction>
         implements DOMDataReadOnlyTransaction {
     /**
      * Creates new composite Transactions.
      *
      * @param identifier Identifier of transaction.
      */
-    protected DOMBrokerReadOnlyTransaction(Object identifier, Map storeTxFactories) {
+    protected DOMBrokerReadOnlyTransaction(Object identifier, Map<LogicalDatastoreType, ? extends DOMStoreTransactionFactory> storeTxFactories) {
         super(identifier, storeTxFactories);
     }
 
@@ -49,8 +51,8 @@ public class DOMBrokerReadOnlyTransaction<T extends DOMStoreReadTransaction>
     }
 
     @Override
-    protected T createTransaction(LogicalDatastoreType key) {
-        return (T) getTxFactory(key).newReadOnlyTransaction();
+    protected DOMStoreReadTransaction createTransaction(LogicalDatastoreType key) {
+        return getTxFactory(key).newReadOnlyTransaction();
     }
 
 

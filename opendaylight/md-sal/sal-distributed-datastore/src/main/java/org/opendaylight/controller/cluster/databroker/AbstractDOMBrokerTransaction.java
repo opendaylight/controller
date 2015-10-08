@@ -19,10 +19,10 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionFactory;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
-public abstract class AbstractDOMBrokerTransaction<K, T extends DOMStoreTransaction> implements
+public abstract class AbstractDOMBrokerTransaction<K extends LogicalDatastoreType, T extends DOMStoreTransaction> implements
         AsyncTransaction<YangInstanceIdentifier, NormalizedNode<?, ?>> {
 
-    private Map<K, T> backingTxs;
+    private Map<LogicalDatastoreType, T> backingTxs;
     private final Object identifier;
     private final Map<LogicalDatastoreType, ? extends DOMStoreTransactionFactory> storeTxFactories;
 
@@ -36,7 +36,7 @@ public abstract class AbstractDOMBrokerTransaction<K, T extends DOMStoreTransact
     protected AbstractDOMBrokerTransaction(final Object identifier, Map<LogicalDatastoreType, ? extends DOMStoreTransactionFactory> storeTxFactories) {
         this.identifier = Preconditions.checkNotNull(identifier, "Identifier should not be null");
         this.storeTxFactories = Preconditions.checkNotNull(storeTxFactories, "Store Transaction Factories should not be null");
-        this.backingTxs = new EnumMap(LogicalDatastoreType.class);
+        this.backingTxs = new EnumMap<>(LogicalDatastoreType.class);
     }
 
     /**
