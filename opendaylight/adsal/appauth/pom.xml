@@ -4,11 +4,11 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>commons.opendaylight</artifactId>
-    <version>1.5.2-SNAPSHOT</version>
+    <version>1.5.2-Lithium-SR2</version>
     <relativePath>../../commons/opendaylight</relativePath>
   </parent>
   <artifactId>appauth</artifactId>
-  <version>0.5.2-SNAPSHOT</version>
+  <version>0.5.2-Lithium-SR2</version>
   <packaging>bundle</packaging>
 
   <dependencies>
