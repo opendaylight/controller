@@ -15,18 +15,19 @@ import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionFactory;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
-public class DOMBrokerReadOnlyTransaction<T extends DOMStoreReadTransaction>
-    extends AbstractDOMBrokerTransaction<LogicalDatastoreType, T>
+public class DOMBrokerReadOnlyTransaction
+    extends AbstractDOMBrokerTransaction<DOMStoreReadTransaction>
         implements DOMDataReadOnlyTransaction {
     /**
      * Creates new composite Transactions.
      *
      * @param identifier Identifier of transaction.
      */
-    protected DOMBrokerReadOnlyTransaction(Object identifier, Map storeTxFactories) {
+    protected DOMBrokerReadOnlyTransaction(Object identifier, Map<LogicalDatastoreType, ? extends DOMStoreTransactionFactory> storeTxFactories) {
         super(identifier, storeTxFactories);
     }
 
@@ -49,8 +50,8 @@ public class DOMBrokerReadOnlyTransaction<T extends DOMStoreReadTransaction>
     }
 
     @Override
-    protected T createTransaction(LogicalDatastoreType key) {
-        return (T) getTxFactory(key).newReadOnlyTransaction();
+    protected DOMStoreReadTransaction createTransaction(LogicalDatastoreType key) {
+        return getTxFactory(key).newReadOnlyTransaction();
     }
 
 
