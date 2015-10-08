@@ -96,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "1a76adc5_210657cf",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-08T18:34:16Z",
+      "side": 1,
+      "message": "Also we have to consider not overloading the behavior classes with too much logic and state tracking. They already do plenty of that. AbstractLeader has become a bit monolithic.",
+      "parentUuid": "1a76adc5_a14b472a",
+      "range": {
+        "startLine": 37,
+        "startChar": 6,
+        "endLine": 37,
+        "endChar": 41
+      },
+      "revId": "40fb48c41a6620e5f9a8e6389b4ba91d47aee42d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_c66539e2",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
         "patchSetId": 4
