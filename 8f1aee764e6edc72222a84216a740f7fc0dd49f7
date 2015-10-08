@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "1a76adc5_35d4551f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 769,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-10-08T12:33:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a76adc5_32c8eb21",
+      "revId": "8f1aee764e6edc72222a84216a740f7fc0dd49f7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_924bffaf",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2015-10-08T00:51:10Z",
       "side": 1,
       "message": "Minor thing but what this really means is that there\u0027s no module configuration for the shard so I think we should reflect this in the message, e.g. \"No module configuration exists for shard %s\"",
+      "revId": "8f1aee764e6edc72222a84216a740f7fc0dd49f7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_f599fd6e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 775,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-10-08T12:33:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a76adc5_924bffaf",
       "revId": "8f1aee764e6edc72222a84216a740f7fc0dd49f7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "1a76adc5_e8ab6487",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/config/ConfigurationImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-10-08T12:33:13Z",
+      "side": 1,
+      "message": "Modified to isShardConfigured from moduleConfigMap, the shardNames are obtained in allShardNames. verifying if the shard is available in it.",
+      "parentUuid": "1a76adc5_72e503a7",
+      "revId": "8f1aee764e6edc72222a84216a740f7fc0dd49f7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_f2b6f389",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shardmanager/ShardManagerInfo.java",
         "patchSetId": 4
@@ -64,6 +118,24 @@
       "writtenOn": "2015-10-08T00:51:10Z",
       "side": 1,
       "message": "Not every exception will be an IllegalArgumentException. Since we\u0027re only throwing unchecked exceptions then no need to declare an throws.",
+      "revId": "8f1aee764e6edc72222a84216a740f7fc0dd49f7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_28139cb9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shardmanager/ShardManagerInfo.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-10-08T12:33:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a76adc5_f2b6f389",
       "revId": "8f1aee764e6edc72222a84216a740f7fc0dd49f7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "1a76adc5_481858d3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shardmanager/ShardManagerInfo.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-10-08T12:33:13Z",
+      "side": 1,
+      "message": "Propagating the received throwable exception.",
+      "parentUuid": "1a76adc5_d28657b9",
+      "revId": "8f1aee764e6edc72222a84216a740f7fc0dd49f7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_12ee0f89",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shardmanager/ShardManagerInfo.java",
         "patchSetId": 4
@@ -98,6 +188,24 @@
       "writtenOn": "2015-10-08T00:51:10Z",
       "side": 1,
       "message": "It would be better to use Throwables.propagate here.",
+      "revId": "8f1aee764e6edc72222a84216a740f7fc0dd49f7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_081260b1",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shardmanager/ShardManagerInfo.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-10-08T12:33:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a76adc5_12ee0f89",
       "revId": "8f1aee764e6edc72222a84216a740f7fc0dd49f7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "1a76adc5_a826cc14",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shardmanager/ShardManagerInfo.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-10-08T12:33:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a76adc5_32ef8b89",
+      "revId": "8f1aee764e6edc72222a84216a740f7fc0dd49f7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_92f9bf4f",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shardmanager/ShardManagerInfo.java",
         "patchSetId": 4
@@ -138,6 +264,24 @@
     },
     {
       "key": {
+        "uuid": "1a76adc5_c8230804",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shardmanager/ShardManagerInfo.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-10-08T12:33:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a76adc5_92f9bf4f",
+      "revId": "8f1aee764e6edc72222a84216a740f7fc0dd49f7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_7293c3fa",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shardmanager/ShardManagerInfo.java",
         "patchSetId": 4
@@ -149,6 +293,24 @@
       "writtenOn": "2015-10-08T00:51:10Z",
       "side": 1,
       "message": "Same as above",
+      "revId": "8f1aee764e6edc72222a84216a740f7fc0dd49f7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_6820b4f7",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shardmanager/ShardManagerInfo.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-10-08T12:33:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a76adc5_7293c3fa",
       "revId": "8f1aee764e6edc72222a84216a740f7fc0dd49f7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
