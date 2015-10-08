@@ -78,7 +78,7 @@ public abstract class AbstractDOMTransactionFactory<T extends DOMStoreTransactio
     public final DOMDataReadWriteTransaction newReadWriteTransaction() {
         checkNotClosed();
 
-        return new DOMBrokerReadWriteTransaction<>(newTransactionIdentifier(), storeTxFactories, this);
+        return new DOMBrokerReadWriteTransaction(newTransactionIdentifier(), storeTxFactories, this);
     }
 
     /**

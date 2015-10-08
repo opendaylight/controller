@@ -19,8 +19,8 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransactionFactory;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
-public class DOMBrokerReadWriteTransaction<T extends DOMStoreReadWriteTransaction>
-        extends DOMBrokerWriteOnlyTransaction<DOMStoreReadWriteTransaction> implements DOMDataReadWriteTransaction {
+public class DOMBrokerReadWriteTransaction
+        extends AbstractDOMBrokerWriteTransaction<DOMStoreReadWriteTransaction> implements DOMDataReadWriteTransaction {
     /**
      * Creates new composite Transactions.
      *
