@@ -94,6 +94,30 @@
     },
     {
       "key": {
+        "uuid": "1a76adc5_2b195688",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 779,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-08T17:25:46Z",
+      "side": 1,
+      "message": "For success case, I was thinking to return akka.status.Success (I just recently discovered this) instead of specific empty reply type although that\u0027s the pattern we\u0027ve been using.",
+      "parentUuid": "1a76adc5_8b1d0ac0",
+      "range": {
+        "startLine": 779,
+        "startChar": 11,
+        "endLine": 779,
+        "endChar": 15
+      },
+      "revId": "7fb2856b7b960d001fd2e0ba2d066b83808c0884",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_2b615639",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shardmanager/ShardManagerInfo.java",
         "patchSetId": 7
