@@ -63,6 +63,8 @@ import org.opendaylight.controller.cluster.datastore.messages.RemotePrimaryShard
 import org.opendaylight.controller.cluster.datastore.messages.ShardLeaderStateChanged;
 import org.opendaylight.controller.cluster.datastore.messages.SwitchShardBehavior;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
+import org.opendaylight.controller.cluster.datastore.messages.CreateShardReplica;
+import org.opendaylight.controller.cluster.datastore.messages.RemoveShardReplica;
 import org.opendaylight.controller.cluster.datastore.utils.Dispatchers;
 import org.opendaylight.controller.cluster.datastore.utils.PrimaryShardInfoFutureCache;
 import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListener;
@@ -76,6 +78,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
+import org.opendaylight.controller.cluster.raft.base.messages.EnableRaftActorVotingStatus;
+import org.opendaylight.controller.cluster.datastore.policy.ShardInitRaftPolicy;
+import org.opendaylight.controller.cluster.PersistentDataProvider;
 
 /**
  * The ShardManager has the following jobs,
@@ -122,6 +127,9 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
     private SchemaContext schemaContext;
 
+    private final PersistentDataProvider persistentProvider;
+
+
     /**
      */
     protected ShardManager(ClusterWrapper cluster, Configuration configuration,
@@ -137,6 +145,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                 new Dispatchers(context().system().dispatchers()).getDispatcherPath(Dispatchers.DispatcherType.Shard);
         this.waitTillReadyCountdownLatch = waitTillReadyCountdownLatch;
         this.primaryShardInfoCache = primaryShardInfoCache;
+        this.persistentProvider = new PersistentDataProvider(this);
 
         // Subscribe this actor to cluster member events
         cluster.subscribeToMemberEvents(getSelf());
@@ -201,6 +210,10 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             onSwitchShardBehavior((SwitchShardBehavior) message);
         } else if(message instanceof CreateShard) {
             onCreateShard((CreateShard)message);
+        } else if(message instanceof CreateShardReplica){
+            onCreateShardReplica((CreateShardReplica)message);
+        } else if(message instanceof RemoveShardReplica){
+            onRemoveShardReplica((RemoveShardReplica)message);
         } else {
             unknownMessage(message);
         }
@@ -754,6 +767,60 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         return mBean;
     }
 
+    private DatastoreContext getInitShardDataStoreContext() {
+        return (DatastoreContext.newBuilderFrom(datastoreContext)
+                 .customRaftPolicyImplementation(ShardInitRaftPolicy.class.getName()).build());
+    }
+
+    private void onCreateShardReplica (CreateShardReplica shardReplicaMsg) {
+        String shardName = shardReplicaMsg.getShardName();
+
+        // verifying the local shard replication is already available in the controller node
+        if (localShards.containsKey(shardName)) {
+            LOG.debug ("Local shard replica {} already available in the controller node", shardName);
+            getSender().tell(new akka.actor.Status.Failure(new IllegalArgumentException(String.format("Local shard %s already exists", shardName))), getSelf());
+            return;
+        }
+        // verifying if the shard is available in the cluster for replication on this node.
+        if (!(this.configuration.isShardConfigured(shardName))) {
+            LOG.debug ("Shard {} not available for replication", shardName);
+            getSender().tell(new akka.actor.Status.Failure(new IllegalArgumentException(String.format("Module Configuration not avaialble for shard %s in the cluster group", shardName))), getSelf());
+            return;
+        }
+
+        // call CreateShard for the shardName
+        ShardIdentifier shardId = getShardIdentifier(this.cluster.getCurrentMemberName(), shardName);
+        Map<String, String> peerAddresses = getPeerAddresses(shardName);
+        ShardInformation shardInfo = new ShardInformation(shardName, shardId, peerAddresses, getInitShardDataStoreContext(),
+                new DefaultShardPropsCreator());
+        localShards.put(shardName, shardInfo);
+        mBean.addLocalShard(shardId.toString());
+        if(schemaContext != null) {
+            shardInfo.setActor(newShardActor(schemaContext, shardInfo));
+        }
+    }
+
+    private void onRemoveShardReplica (RemoveShardReplica shardReplicaMsg) {
+        String shardName = shardReplicaMsg.getShardName();
+        boolean deleteStatus = false;
+
+        // verifying the local shard replication is available in the controller node
+        if (!localShards.containsKey(shardName)) {
+            LOG.debug ("Local shard replica {} is not available in the controller node", shardName);
+            getSender().tell(new akka.actor.Status.Failure(new IllegalArgumentException(String.format("Local shard %s not available", shardName))), getSelf());
+            return;
+        }
+        // call RemoveShard for the shardName
+    }
+
+    private void makeShardVotingCapable (String shardName) {
+        // get the shardInfo, send shard actor mesg to make it voting capable.
+        ShardInformation shardInfo = localShards.get(shardName);
+        shardInfo.setDatastoreContext(datastoreContext);
+        shardInfo.enableShardVotingStatus(getSelf());
+    }
+
+
     @VisibleForTesting
     protected static class ShardInformation {
         private final ShardIdentifier shardId;
@@ -774,7 +841,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         private String leaderId;
         private short leaderVersion;
 
-        private final DatastoreContext datastoreContext;
+        private DatastoreContext datastoreContext;
         private final ShardPropsCreator shardPropsCreator;
 
         private ShardInformation(String shardName, ShardIdentifier shardId,
@@ -964,6 +1031,18 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
         void setLeaderVersion(short leaderVersion) {
             this.leaderVersion = leaderVersion;
+        }
+
+        void setDatastoreContext(DatastoreContext datastoreContext) {
+            this.datastoreContext = datastoreContext;
+        }
+
+        void enableShardVotingStatus(ActorRef sender) {
+            LOG.debug ("Enabling shard voting status for {}", this.shardName);
+            if (actor != null) {
+                actor.tell(this.datastoreContext, sender);
+                actor.tell(new EnableRaftActorVotingStatus(), sender);
+            }
         }
     }
 

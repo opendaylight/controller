@@ -18,6 +18,14 @@ import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.opendaylight.controller.cluster.datastore.messages.CreateShardReplica;
+import org.opendaylight.controller.cluster.datastore.messages.RemoveShardReplica;
+import akka.pattern.Patterns;
+import akka.util.Timeout;
+import java.util.concurrent.TimeUnit;
+import scala.concurrent.Await;
+import akka.actor.Status;
+import com.google.common.base.Throwables;
 
 public class ShardManagerInfo extends AbstractMXBean implements ShardManagerInfoMBean {
 
@@ -95,5 +103,44 @@ public class ShardManagerInfo extends AbstractMXBean implements ShardManagerInfo
 
     public void setShardManager(ShardManager shardManager){
         this.shardManager = shardManager;
+    }
+
+    @Override
+    public void addShardReplica (String shardName) {
+        LOG.info ("addShardReplica initiated for shard {}", shardName);
+        Object resp = null;
+        Timeout addTimeOut = new Timeout(1, TimeUnit.MINUTES);
+        try {
+            resp = Await.result(Patterns.ask(shardManager.getSelf(),
+                                new CreateShardReplica(shardName), addTimeOut),
+                                addTimeOut.duration());
+            if (resp instanceof Status.Failure) {
+                Throwables.propagate(((Status.Failure)resp).cause());
+            }
+        } catch (Throwable th) {
+            LOG.debug ("Obtained an exception during addShardReplica", th);
+            Throwables.propagate(th);
+        }
+        return;
+    }
+
+    @Override
+    public void removeShardReplica (String shardName) {
+        LOG.info ("removeShardReplica initiated for shard {}", shardName);
+        Object resp = null;
+        Timeout remTimeOut = new Timeout(30, TimeUnit.SECONDS);
+        try {
+            resp = Await.result(Patterns.ask(shardManager.getSelf(),
+                                new RemoveShardReplica(shardName), remTimeOut),
+                                remTimeOut.duration());
+            if (resp instanceof Status.Failure) {
+                Throwables.propagate(((Status.Failure)resp).cause());
+            }
+
+        } catch (Throwable th) {
+            LOG.debug ("Obtained an exception during removeShardReplica", th);
+            Throwables.propagate(th);
+        }
+        return;
     }
 }
