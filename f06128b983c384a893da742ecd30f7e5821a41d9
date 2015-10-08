@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_08eee088",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 775,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-08T13:33:26Z",
+      "side": 1,
+      "message": "\"avaialble\" (sic).  What is \"cluster group\"? That is a term/concept we haven\u0027t used.  I think \"No module configuration exists for shard %s\" is clearer.",
+      "revId": "f06128b983c384a893da742ecd30f7e5821a41d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_c8ff8833",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/config/ConfigurationImpl.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-08T13:33:26Z",
+      "side": 1,
+      "message": "Forgot about allShardNames - that\u0027s the better way to check it.",
+      "revId": "f06128b983c384a893da742ecd30f7e5821a41d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_489b7818",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shardmanager/ShardManagerInfo.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-08T13:33:26Z",
+      "side": 1,
+      "message": "Minor thing but it\u0027s not usually good practice to catch Throwable as that includes JVM errors although in this case it\u0027s OK since it will get propagated. But it will trigger a checkstyle/PMD violation - catch Exception will avoid that.",
+      "revId": "f06128b983c384a893da742ecd30f7e5821a41d9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
