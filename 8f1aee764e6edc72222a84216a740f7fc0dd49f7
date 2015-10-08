@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_32c8eb21",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 769,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-08T00:51:10Z",
+      "side": 1,
+      "message": "\"alreay\"  (sic)",
+      "revId": "8f1aee764e6edc72222a84216a740f7fc0dd49f7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_924bffaf",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 775,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-08T00:51:10Z",
+      "side": 1,
+      "message": "Minor thing but what this really means is that there\u0027s no module configuration for the shard so I think we should reflect this in the message, e.g. \"No module configuration exists for shard %s\"",
+      "revId": "8f1aee764e6edc72222a84216a740f7fc0dd49f7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_72e503a7",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/config/ConfigurationImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-08T00:51:10Z",
+      "side": 1,
+      "message": "This method takes a moduleName and checks for an entry in the moduleConfigMap. However the ShardManager passes in a shardName to check if a shard configuration is defined. So we really want this method called, e.g. \"isShardConfigured\". The code needs to traverse the ModuleConfig config entries and return true if one satisfies moduleConfig.getShardConfig(shardName) !\u003d null.",
+      "revId": "8f1aee764e6edc72222a84216a740f7fc0dd49f7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_f2b6f389",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shardmanager/ShardManagerInfo.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-08T00:51:10Z",
+      "side": 1,
+      "message": "Not every exception will be an IllegalArgumentException. Since we\u0027re only throwing unchecked exceptions then no need to declare an throws.",
+      "revId": "8f1aee764e6edc72222a84216a740f7fc0dd49f7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_d28657b9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shardmanager/ShardManagerInfo.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-08T00:51:10Z",
+      "side": 1,
+      "message": "We should propagate the exception here. Await will most likely throw a TimeoutException so I would suggest to catch that explicitly and throw \nnew RuntimeException(ex.getMessage()). Also catch Exception and use Throwables.propagate ((from google guava lib)).",
+      "revId": "8f1aee764e6edc72222a84216a740f7fc0dd49f7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_12ee0f89",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shardmanager/ShardManagerInfo.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-08T00:51:10Z",
+      "side": 1,
+      "message": "It would be better to use Throwables.propagate here.",
+      "revId": "8f1aee764e6edc72222a84216a740f7fc0dd49f7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_32ef8b89",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shardmanager/ShardManagerInfo.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-08T00:51:10Z",
+      "side": 1,
+      "message": "If resp is null then it timed out but we should handle that above as I commented. The code block above should be moved after the Await call above (don\u0027t need to check resp !\u003d null b/c it either returns a valid reps or throws an exception).",
+      "revId": "8f1aee764e6edc72222a84216a740f7fc0dd49f7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_92f9bf4f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shardmanager/ShardManagerInfo.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-08T00:51:10Z",
+      "side": 1,
+      "message": "I don\u0027t see the purpose in returning a boolean since, on error, we throw an exception and thus never return false. So successful completion without an exception means success.",
+      "revId": "8f1aee764e6edc72222a84216a740f7fc0dd49f7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_7293c3fa",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shardmanager/ShardManagerInfo.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-08T00:51:10Z",
+      "side": 1,
+      "message": "Same as above",
+      "revId": "8f1aee764e6edc72222a84216a740f7fc0dd49f7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
