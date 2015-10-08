@@ -193,6 +193,30 @@
     },
     {
       "key": {
+        "uuid": "1a76adc5_3289d0eb",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContext.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-08T13:43:13Z",
+      "side": 1,
+      "message": "That sounds good.",
+      "parentUuid": "1a76adc5_72d66851",
+      "range": {
+        "startLine": 182,
+        "startChar": 16,
+        "endLine": 182,
+        "endChar": 38
+      },
+      "revId": "0ca51f459ca026fd682727a3e26aadda58630cd9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_29740b98",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
         "patchSetId": 2
