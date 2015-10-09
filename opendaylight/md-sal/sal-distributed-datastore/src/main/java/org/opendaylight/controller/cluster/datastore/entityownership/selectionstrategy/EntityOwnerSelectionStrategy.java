@@ -19,7 +19,7 @@ public interface EntityOwnerSelectionStrategy {
      *
      * @return the time in millis owner selection should be delayed
      */
-    long selectionDelayInMillis();
+    long getSelectionDelayInMillis();
 
 
     /**
