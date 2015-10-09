@@ -878,7 +878,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
     public void testDelayedEntityOwnerSelection() throws Exception {
         ShardTestKit kit = new ShardTestKit(getSystem());
         TestActorRef<EntityOwnershipShard> shard = actorFactory.createTestActor(newShardProps());
-        shard.underlyingActor().addEntityOwnerSelectionStrategy(ENTITY_TYPE, LastCandidateSelectionStrategy.class);
+        shard.underlyingActor().addEntityOwnerSelectionStrategy(ENTITY_TYPE, LastCandidateSelectionStrategy.class, 500);
         kit.waitUntilLeader(shard);
 
         Entity entity = new Entity(ENTITY_TYPE, ENTITY_ID1);
