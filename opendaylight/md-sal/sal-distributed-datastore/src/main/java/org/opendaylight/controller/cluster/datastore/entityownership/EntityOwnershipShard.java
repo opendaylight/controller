@@ -30,6 +30,7 @@ import akka.pattern.Patterns;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -314,12 +315,12 @@ class EntityOwnershipShard extends Shard {
         if(Strings.isNullOrEmpty(currentOwner)){
             EntityOwnerSelectionStrategy entityOwnerSelectionStrategy
                     = getEntityOwnerElectionStrategy(message.getEntityPath());
-            if(entityOwnerSelectionStrategy.selectionDelayInMillis() == 0L) {
+            if(entityOwnerSelectionStrategy.getSelectionDelayInMillis() == 0L) {
                 writeNewOwner(message.getEntityPath(), newOwner(message.getAllCandidates(),
                         entityOwnerSelectionStrategy));
             } else {
                 context().system().scheduler().scheduleOnce(
-                        FiniteDuration.apply(entityOwnerSelectionStrategy.selectionDelayInMillis(), TimeUnit.MILLISECONDS)
+                        FiniteDuration.apply(entityOwnerSelectionStrategy.getSelectionDelayInMillis(), TimeUnit.MILLISECONDS)
                         , self() , new SelectOwner(message.getEntityPath(), message.getAllCandidates(), entityOwnerSelectionStrategy)
                         , context().system().dispatcher(), self());
             }
@@ -506,10 +507,12 @@ class EntityOwnershipShard extends Shard {
     }
 
     @VisibleForTesting
-    void addEntityOwnerSelectionStrategy(String entityType, Class<? extends EntityOwnerSelectionStrategy> ownerSelectionStrategyClass){
+    void addEntityOwnerSelectionStrategy(String entityType, Class<? extends EntityOwnerSelectionStrategy> ownerSelectionStrategyClass, long delay){
         try {
-            ownerSelectionStrategies.put(entityType, ownerSelectionStrategyClass.newInstance());
-        } catch (InstantiationException | IllegalAccessException e) {
+            EntityOwnerSelectionStrategy entityOwnerSelectionStrategy
+                    = ownerSelectionStrategyClass.getDeclaredConstructor(Long.class).newInstance(delay);
+            ownerSelectionStrategies.put(entityType, entityOwnerSelectionStrategy);
+        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
             LOG.error("Exception occurred when adding election strategy", e);
         }
     }
