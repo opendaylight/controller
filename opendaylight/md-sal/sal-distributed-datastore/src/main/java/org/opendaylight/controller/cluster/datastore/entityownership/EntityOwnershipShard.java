@@ -30,6 +30,7 @@ import akka.pattern.Patterns;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -312,7 +313,7 @@ class EntityOwnershipShard extends Shard {
         String currentOwner = getCurrentOwner(message.getEntityPath());
         if(Strings.isNullOrEmpty(currentOwner)){
             EntityOwnerSelectionStrategyWrapper strategy = getEntityOwnerElectionStrategyWrapper(message.getEntityPath());
-            if(strategy.selectionDelayInMillis() == 0L) {
+            if(strategy.getSelectionDelayInMillis() == 0L) {
                 writeNewOwner(message.getEntityPath(), newOwner(message.getAllCandidates(), strategy));
             } else {
                 strategy.scheduleOwnerSelection(message.getEntityPath(), message.getAllCandidates());
@@ -478,12 +479,16 @@ class EntityOwnershipShard extends Shard {
     }
 
     @VisibleForTesting
-    void addEntityOwnerSelectionStrategy(String entityType, Class<? extends EntityOwnerSelectionStrategy> ownerSelectionStrategyClass){
+    void addEntityOwnerSelectionStrategy(String entityType,
+                                         Class<? extends EntityOwnerSelectionStrategy> ownerSelectionStrategyClass,
+                                         long delay){
         try {
+            EntityOwnerSelectionStrategy entityOwnerSelectionStrategy
+                    = ownerSelectionStrategyClass.getDeclaredConstructor(long.class).newInstance(delay);
             EntityOwnerSelectionStrategyWrapper strategy =
-                    createEntityOwnerSelectionStrategyWrapper(ownerSelectionStrategyClass.newInstance());
+                    createEntityOwnerSelectionStrategyWrapper(entityOwnerSelectionStrategy);
             ownerSelectionStrategies.put(entityType, strategy);
-        } catch (InstantiationException | IllegalAccessException e) {
+        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
             LOG.error("Exception occurred when adding election strategy", e);
         }
     }
@@ -514,5 +519,4 @@ class EntityOwnershipShard extends Shard {
     private static interface EntityWalker {
         void onEntity(MapEntryNode entityTypeNode, MapEntryNode entityNode);
     }
-
 }
