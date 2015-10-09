@@ -30,7 +30,7 @@ import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableOr
  *
  * @author Thomas Pantelis
  */
-final class EntityOwnersModel {
+public final class EntityOwnersModel {
     static final  QName ENTITY_QNAME = org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.
             md.sal.clustering.entity.owners.rev150804.entity.owners.entity.type.Entity.QNAME;
     static final QName CANDIDATE_NAME_QNAME = QName.create(Candidate.QNAME, "name");
@@ -111,7 +111,7 @@ final class EntityOwnersModel {
                 ImmutableNodes.leafNode(ENTITY_OWNER_QNAME, owner)).build();
     }
 
-    static String entityTypeFromEntityPath(YangInstanceIdentifier entityPath){
+    public static String entityTypeFromEntityPath(YangInstanceIdentifier entityPath){
         YangInstanceIdentifier parent = entityPath;
         while(!parent.isEmpty()) {
             if (EntityType.QNAME.equals(parent.getLastPathArgument().getNodeType())) {

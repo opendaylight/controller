@@ -52,18 +52,19 @@ public class EntityOwnerSelectionStrategyWrapper implements EntityOwnerSelection
             lastScheduledTask.cancel();
         }
         lastScheduledTask = scheduler.scheduleOnce(
-                FiniteDuration.apply(strategy.selectionDelayInMillis(), TimeUnit.MILLISECONDS)
+                FiniteDuration.apply(strategy.getSelectionDelayInMillis(), TimeUnit.MILLISECONDS)
                 , shard, new SelectOwner(entityPath, allCandidates, strategy)
                 , dispatcher, shard);
     }
 
     @Override
-    public long selectionDelayInMillis(){
-        return strategy.selectionDelayInMillis();
+    public long getSelectionDelayInMillis(){
+        return strategy.getSelectionDelayInMillis();
     }
 
     @Override
     public String newOwner(Collection<String> viableCandidates){
         return strategy.newOwner(viableCandidates);
     }
+
 }

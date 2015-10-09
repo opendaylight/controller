@@ -12,10 +12,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class LastCandidateSelectionStrategy implements EntityOwnerSelectionStrategy {
-    @Override
-    public long selectionDelayInMillis() {
-        return 500;
+public class LastCandidateSelectionStrategy extends AbstractEntityOwnerSelectionStrategy {
+    public LastCandidateSelectionStrategy(long selectionDelayInMillis) {
+        super(selectionDelayInMillis);
     }
 
     @Override

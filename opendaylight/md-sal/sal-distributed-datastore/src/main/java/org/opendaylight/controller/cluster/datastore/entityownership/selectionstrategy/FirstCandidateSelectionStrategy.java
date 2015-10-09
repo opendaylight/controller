@@ -14,13 +14,12 @@ import java.util.Collection;
 /**
  * The FirstCandidateSelectionStrategy always selects the first viable candidate from the list of candidates
  */
-public class FirstCandidateSelectionStrategy implements EntityOwnerSelectionStrategy {
+public class FirstCandidateSelectionStrategy extends AbstractEntityOwnerSelectionStrategy {
 
-    public static final FirstCandidateSelectionStrategy INSTANCE = new FirstCandidateSelectionStrategy();
+    public static final FirstCandidateSelectionStrategy INSTANCE = new FirstCandidateSelectionStrategy(0L);
 
-    @Override
-    public long selectionDelayInMillis() {
-        return 0;
+    public FirstCandidateSelectionStrategy(long selectionDelayInMillis) {
+        super(selectionDelayInMillis);
     }
 
     @Override

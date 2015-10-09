@@ -47,8 +47,9 @@ import org.opendaylight.controller.cluster.datastore.entityownership.messages.Se
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.UnregisterCandidateLocal;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.UnregisterListenerLocal;
 import org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.EntityOwnerSelectionStrategy;
+import org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.EntityOwnerSelectionStrategyConfig;
 import org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.EntityOwnerSelectionStrategyWrapper;
-import org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.FirstCandidateSelectionStrategy;
+import org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.EntityOwnerSelectionStrategyWrapperFactory;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
 import org.opendaylight.controller.cluster.datastore.messages.PeerDown;
@@ -80,8 +81,7 @@ class EntityOwnershipShard extends Shard {
     private final EntityOwnershipListenerSupport listenerSupport;
     private final Set<String> downPeerMemberNames = new HashSet<>();
     private final Map<String, String> peerIdToMemberNames = new HashMap<>();
-    private final Map<String, EntityOwnerSelectionStrategyWrapper> ownerSelectionStrategies = new HashMap<>();
-    private final EntityOwnerSelectionStrategyWrapper defaultEntityOwnerSelectionStrategy;
+    private EntityOwnerSelectionStrategyWrapperFactory strategyFactory;
 
     private static DatastoreContext noPersistenceDatastoreContext(DatastoreContext datastoreContext) {
         return DatastoreContext.newBuilderFrom(datastoreContext).persistent(false).build();
@@ -93,8 +93,8 @@ class EntityOwnershipShard extends Shard {
         this.localMemberName = localMemberName;
         this.commitCoordinator = new EntityOwnershipShardCommitCoordinator(localMemberName, LOG);
         this.listenerSupport = new EntityOwnershipListenerSupport(getContext(), persistenceId());
-        this.defaultEntityOwnerSelectionStrategy =
-                createEntityOwnerSelectionStrategyWrapper(FirstCandidateSelectionStrategy.INSTANCE);
+        this.strategyFactory = new EntityOwnerSelectionStrategyWrapperFactory(context().system().scheduler(),
+                context().system().dispatcher(), self(), EntityOwnerSelectionStrategyConfig.newBuilder().build());
 
         for(String peerId: peerAddresses.keySet()) {
             ShardIdentifier shardId = ShardIdentifier.builder().fromShardIdString(peerId).build();
@@ -287,15 +287,7 @@ class EntityOwnershipShard extends Shard {
     }
 
     private EntityOwnerSelectionStrategyWrapper getEntityOwnerElectionStrategyWrapper(YangInstanceIdentifier entityPath) {
-        String entityType = EntityOwnersModel.entityTypeFromEntityPath(entityPath);
-        EntityOwnerSelectionStrategyWrapper entityOwnerSelectionStrategy = ownerSelectionStrategies.get(entityType);
-
-        if(entityOwnerSelectionStrategy == null){
-            entityOwnerSelectionStrategy = defaultEntityOwnerSelectionStrategy;
-            ownerSelectionStrategies.put(entityType, entityOwnerSelectionStrategy);
-        }
-
-        return entityOwnerSelectionStrategy;
+        return strategyFactory.getEntityOwnerSelectionStrategyWrapper(entityPath);
     }
 
     private void onCandidateAdded(CandidateAdded message) {
@@ -312,7 +304,7 @@ class EntityOwnershipShard extends Shard {
         String currentOwner = getCurrentOwner(message.getEntityPath());
         if(Strings.isNullOrEmpty(currentOwner)){
             EntityOwnerSelectionStrategyWrapper strategy = getEntityOwnerElectionStrategyWrapper(message.getEntityPath());
-            if(strategy.selectionDelayInMillis() == 0L) {
+            if(strategy.getSelectionDelayInMillis() == 0L) {
                 writeNewOwner(message.getEntityPath(), newOwner(message.getAllCandidates(), strategy));
             } else {
                 strategy.scheduleOwnerSelection(message.getEntityPath(), message.getAllCandidates());
@@ -472,20 +464,14 @@ class EntityOwnershipShard extends Shard {
         return null;
     }
 
-    private EntityOwnerSelectionStrategyWrapper createEntityOwnerSelectionStrategyWrapper(EntityOwnerSelectionStrategy entityOwnerSelectionStrategy){
-        return new EntityOwnerSelectionStrategyWrapper(context().system().scheduler(), self(),
-                context().system().dispatcher(), entityOwnerSelectionStrategy);
-    }
-
     @VisibleForTesting
-    void addEntityOwnerSelectionStrategy(String entityType, Class<? extends EntityOwnerSelectionStrategy> ownerSelectionStrategyClass){
-        try {
-            EntityOwnerSelectionStrategyWrapper strategy =
-                    createEntityOwnerSelectionStrategyWrapper(ownerSelectionStrategyClass.newInstance());
-            ownerSelectionStrategies.put(entityType, strategy);
-        } catch (InstantiationException | IllegalAccessException e) {
-            LOG.error("Exception occurred when adding election strategy", e);
-        }
+    void addEntityOwnerSelectionStrategy(String entityType,
+                                         Class<? extends EntityOwnerSelectionStrategy> clazz,
+                                         long delay){
+        EntityOwnerSelectionStrategyConfig config = EntityOwnerSelectionStrategyConfig.newBuilder()
+                .addStrategy(entityType, clazz, delay).build();
+        this.strategyFactory = new EntityOwnerSelectionStrategyWrapperFactory(context().system().scheduler(),
+                context().system().dispatcher(), self(), config);
     }
 
     public static Props props(final ShardIdentifier name, final Map<String, String> peerAddresses,
@@ -514,5 +500,4 @@ class EntityOwnershipShard extends Shard {
     private static interface EntityWalker {
         void onEntity(MapEntryNode entityTypeNode, MapEntryNode entityNode);
     }
-
 }
