@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_6445386f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipShard.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 513,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-09T17:43:02Z",
+      "side": 1,
+      "message": "We probably should we look for long.class as it\u0027s more natural to use primitives.",
+      "revId": "634f802eb5e95fca5dfcdb1616691c41c1ff921a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
