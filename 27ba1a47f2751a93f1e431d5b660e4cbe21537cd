@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "1a76adc5_8f866d12",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipShard.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 324,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-09T21:43:50Z",
+      "side": 1,
+      "message": "yeah that sounds good.",
+      "parentUuid": "1a76adc5_6fcbd1a5",
+      "revId": "27ba1a47f2751a93f1e431d5b660e4cbe21537cd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_e4aaa818",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipShard.java",
         "patchSetId": 2
