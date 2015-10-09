@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_84a3b44e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipShard.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 324,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-09T17:33:48Z",
+      "side": 1,
+      "message": "Is this OK to pass  the cached candidates to SelectOwner, i.e. shouldn\u0027t it re-read the candidates when processed in case new ones came in during the wait period?",
+      "revId": "27ba1a47f2751a93f1e431d5b660e4cbe21537cd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_e4aaa818",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipShard.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 508,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-09T17:33:48Z",
+      "side": 1,
+      "message": "Can you move this above the static classes?",
+      "revId": "27ba1a47f2751a93f1e431d5b660e4cbe21537cd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_048fa4cd",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/messages/SelectOwner.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-09T17:33:48Z",
+      "side": 1,
+      "message": "Please add toString()",
+      "revId": "27ba1a47f2751a93f1e431d5b660e4cbe21537cd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_44acbc35",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipShardTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 896,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-09T17:33:48Z",
+      "side": 1,
+      "message": "Do we need this hardcoded sleep? The verify methods below already busy wait.",
+      "revId": "27ba1a47f2751a93f1e431d5b660e4cbe21537cd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
