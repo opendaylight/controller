@@ -18,6 +18,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
@@ -277,7 +278,7 @@ public class RaftActorTest extends AbstractActorTest {
         mockRaftActor.waitForRecoveryComplete();
 
         RaftActorRecoverySupport mockSupport = mock(RaftActorRecoverySupport.class);
-        mockRaftActor.setRaftActorRecoverySupport(mockSupport );
+        mockRaftActor.setRaftActorRecoverySupport(mockSupport);
 
         Snapshot snapshot = Snapshot.create(new byte[]{1}, Collections.<ReplicatedLogEntry>emptyList(), 3, 1, 3, 1);
         SnapshotOffer snapshotOffer = new SnapshotOffer(new SnapshotMetadata("test", 6, 12345), snapshot);
@@ -588,17 +589,19 @@ public class RaftActorTest extends AbstractActorTest {
                 leaderActor.getRaftActorContext().setLastApplied(4);
                 leaderActor.getRaftActorContext().getTermInformation().update(1, persistenceId);
 
+                // create couple of entries in the log so that capture snapshot will get triggered on recovery
+                MockRaftActorContext.MockReplicatedLogBuilder logBuilder = new MockRaftActorContext.MockReplicatedLogBuilder();
+                leaderActor.getRaftActorContext().setReplicatedLog(logBuilder.createEntries(0, 2, 1).build());
                 leaderActor.waitForInitializeBehaviorComplete();
-
-                // create 8 entries in the log - 0 to 4 are applied and will get picked up as part of the capture snapshot
+                waitForEndOfOnRecoveryCaptureSnapshot(leaderActor, leaderActor.getCurrentBehavior());
 
                 Leader leader = new Leader(leaderActor.getRaftActorContext());
                 leaderActor.setCurrentBehavior(leader);
                 assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
 
-                MockRaftActorContext.MockReplicatedLogBuilder logBuilder = new MockRaftActorContext.MockReplicatedLogBuilder();
+                // create 8 entries in the log - 0 to 4 are applied and will get picked up as part of the capture snapshot
+                logBuilder = new MockRaftActorContext.MockReplicatedLogBuilder();
                 leaderActor.getRaftActorContext().setReplicatedLog(logBuilder.createEntries(0, 8, 1).build());
-
                 assertEquals(8, leaderActor.getReplicatedLog().size());
 
                 leaderActor.getRaftActorContext().getSnapshotManager()
@@ -685,15 +688,18 @@ public class RaftActorTest extends AbstractActorTest {
                 followerActor.getRaftActorContext().setLastApplied(4);
                 followerActor.getRaftActorContext().getTermInformation().update(1, persistenceId);
 
+                // create an entry in the log so that capture snapshot will get triggered on recovery
+                MockRaftActorContext.MockReplicatedLogBuilder logBuilder = new MockRaftActorContext.MockReplicatedLogBuilder();
+                followerActor.getRaftActorContext().setReplicatedLog(logBuilder.createEntries(0, 1, 1).build());
                 followerActor.waitForInitializeBehaviorComplete();
-
+                waitForEndOfOnRecoveryCaptureSnapshot(followerActor, followerActor.getCurrentBehavior());
 
                 Follower follower = new Follower(followerActor.getRaftActorContext());
                 followerActor.setCurrentBehavior(follower);
                 assertEquals(RaftState.Follower, followerActor.getCurrentBehavior().state());
 
                 // create 6 entries in the log - 0 to 4 are applied and will get picked up as part of the capture snapshot
-                MockRaftActorContext.MockReplicatedLogBuilder logBuilder = new MockRaftActorContext.MockReplicatedLogBuilder();
+                logBuilder = new MockRaftActorContext.MockReplicatedLogBuilder();
                 followerActor.getRaftActorContext().setReplicatedLog(logBuilder.createEntries(0, 6, 1).build());
 
                 // log has indices 0-5
@@ -794,14 +800,19 @@ public class RaftActorTest extends AbstractActorTest {
                 leaderActor.getRaftActorContext().setLastApplied(9);
                 leaderActor.getRaftActorContext().getTermInformation().update(1, persistenceId);
 
+
+                // create an entry in the log so that capture snapshot will get triggered on recovery
+                MockRaftActorContext.MockReplicatedLogBuilder logBuilder = new MockRaftActorContext.MockReplicatedLogBuilder();
+                leaderActor.getRaftActorContext().setReplicatedLog(logBuilder.createEntries(0, 1, 1).build());
                 leaderActor.waitForInitializeBehaviorComplete();
+                waitForEndOfOnRecoveryCaptureSnapshot(leaderActor, leaderActor.getCurrentBehavior());
 
                 Leader leader = new Leader(leaderActor.getRaftActorContext());
                 leaderActor.setCurrentBehavior(leader);
                 assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
 
                 // create 5 entries in the log
-                MockRaftActorContext.MockReplicatedLogBuilder logBuilder = new MockRaftActorContext.MockReplicatedLogBuilder();
+                logBuilder = new MockRaftActorContext.MockReplicatedLogBuilder();
                 leaderActor.getRaftActorContext().setReplicatedLog(logBuilder.createEntries(5, 10, 1).build());
 
                 //set the snapshot index to 4 , 0 to 4 are snapshotted
@@ -1003,4 +1014,25 @@ public class RaftActorTest extends AbstractActorTest {
         }
     }
 
+    private void waitForEndOfOnRecoveryCaptureSnapshot(MockRaftActor actor, RaftActorBehavior actorbehavior) throws Exception {
+        for(int i=0;i<100;i++){
+           if(actor.getRaftActorContext().getSnapshotManager().isCapturing()){
+            break;
+           }
+            Uninterruptibles.sleepUninterruptibly(10, TimeUnit.MILLISECONDS);
+        }
+        ByteString snapshotBytes = fromObject(Arrays.asList(
+                new MockRaftActorContext.MockPayload("PL1"),
+                new MockRaftActorContext.MockPayload("PL2"),
+                new MockRaftActorContext.MockPayload("PL3"),
+                new MockRaftActorContext.MockPayload("PL4"),
+                new MockRaftActorContext.MockPayload("PL5")));
+
+        verify(actor.snapshotCohortDelegate).createSnapshot(any(ActorRef.class));
+        assertTrue(actor.getRaftActorContext().getSnapshotManager().isCapturing());
+        actor.getRaftActorContext().getSnapshotManager().persist(snapshotBytes.toByteArray(), actorbehavior, Runtime.getRuntime().totalMemory());
+        actor.getRaftActorContext().getSnapshotManager().commit(-1, actorbehavior);
+        assertTrue(!actor.getRaftActorContext().getSnapshotManager().isCapturing());
+        reset(actor.snapshotCohortDelegate);
+    }
 }
