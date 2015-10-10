@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_0f457db2",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipShard.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 493,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-10T00:14:25Z",
+      "side": 1,
+      "message": "How about we put this code and the map in an EntityOwnerSelectionStrategyConfig class that is passed to the shard on construction. The EntityOwnerSelectionStrategyConfig can be created and built in the Module class and passed to the DistributedEOService.",
+      "revId": "ac6b4e29df1a8f7d4f838a7f2eff7fa1636762da",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
