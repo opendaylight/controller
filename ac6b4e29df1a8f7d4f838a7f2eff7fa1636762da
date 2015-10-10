@@ -16,6 +16,24 @@
       "revId": "ac6b4e29df1a8f7d4f838a7f2eff7fa1636762da",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_cf4ea596",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipShard.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 493,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-10T03:21:31Z",
+      "side": 1,
+      "message": "I amended the commit by adding the EntityOwnerSelectionStrategyConfig and moving out the code from EntityOwnershipShard. I\u0027ll make the constructor change in a separate commit so that it\u0027s clear what I\u0027m doing.",
+      "parentUuid": "1a76adc5_0f457db2",
+      "revId": "ac6b4e29df1a8f7d4f838a7f2eff7fa1636762da",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
