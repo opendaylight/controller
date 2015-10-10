@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_0a16cbf1",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/selectionstrategy/EntityOwnerSelectionStrategyConfig.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-10T11:39:18Z",
+      "side": 1,
+      "message": "We need to remove from this Map when the owner is selected.",
+      "revId": "6e30d9bbe14c86424861f10aa88d43bfa2dca388",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_ea1a6f16",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/selectionstrategy/EntityOwnerSelectionStrategyConfig.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-10T11:39:18Z",
+      "side": 1,
+      "message": "Since instances will be passed to the EOShard and EOShard won\u0027t be the creator, is it proper to have EOShard to add its own state like this? Perhaps this class should only contain the immutable entityTypeToStrategyInfo and not the EntityOwnerSelectionStrategyWrapper concept. What do you think?",
+      "revId": "6e30d9bbe14c86424861f10aa88d43bfa2dca388",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
