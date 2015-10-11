@@ -81,6 +81,7 @@ class EntityOwnershipShard extends Shard {
     private final Set<String> downPeerMemberNames = new HashSet<>();
     private final Map<String, String> peerIdToMemberNames = new HashMap<>();
     private final EntityOwnerSelectionStrategyWrapperFactory strategyFactory;
+    private final EntityOwnershipStatistics entityOwnershipStatistics;
 
     private static DatastoreContext noPersistenceDatastoreContext(DatastoreContext datastoreContext) {
         return DatastoreContext.newBuilderFrom(datastoreContext).persistent(false).build();
@@ -95,6 +96,8 @@ class EntityOwnershipShard extends Shard {
         this.listenerSupport = new EntityOwnershipListenerSupport(getContext(), persistenceId());
         this.strategyFactory = new EntityOwnerSelectionStrategyWrapperFactory(context().system().scheduler(),
                 context().system().dispatcher(), self(), strategyConfig);
+        this.entityOwnershipStatistics = new EntityOwnershipStatistics();
+        this.entityOwnershipStatistics.init(getDataStore());
 
         for(String peerId: peerAddresses.keySet()) {
             ShardIdentifier shardId = ShardIdentifier.builder().fromShardIdString(peerId).build();
