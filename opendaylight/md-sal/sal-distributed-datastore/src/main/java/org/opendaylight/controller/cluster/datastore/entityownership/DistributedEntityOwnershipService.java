@@ -62,12 +62,14 @@ public class DistributedEntityOwnershipService implements EntityOwnershipService
     private static final Timeout MESSAGE_TIMEOUT = new Timeout(1, TimeUnit.MINUTES);
 
     private final DistributedDataStore datastore;
+    private final EntityOwnerSelectionStrategyConfig strategyConfig;
     private final ConcurrentMap<Entity, Entity> registeredEntities = new ConcurrentHashMap<>();
     private volatile ActorRef localEntityOwnershipShard;
     private volatile DataTree localEntityOwnershipShardDataTree;
 
-    public DistributedEntityOwnershipService(DistributedDataStore datastore) {
-        this.datastore = datastore;
+    public DistributedEntityOwnershipService(DistributedDataStore datastore, EntityOwnerSelectionStrategyConfig strategyConfig) {
+        this.datastore = Preconditions.checkNotNull(datastore);
+        this.strategyConfig = Preconditions.checkNotNull(strategyConfig);
     }
 
     public void start() {
@@ -219,7 +221,7 @@ public class DistributedEntityOwnershipService implements EntityOwnershipService
     }
 
     protected EntityOwnershipShardPropsCreator newShardPropsCreator() {
-        return new EntityOwnershipShardPropsCreator(datastore.getActorContext().getCurrentMemberName(), EntityOwnerSelectionStrategyConfig.newBuilder().build());
+        return new EntityOwnershipShardPropsCreator(datastore.getActorContext().getCurrentMemberName(), this.strategyConfig);
     }
 
     @VisibleForTesting
