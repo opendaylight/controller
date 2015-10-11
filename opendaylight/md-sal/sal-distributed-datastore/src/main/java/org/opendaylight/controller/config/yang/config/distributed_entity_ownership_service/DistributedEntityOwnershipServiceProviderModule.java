@@ -3,6 +3,7 @@ package org.opendaylight.controller.config.yang.config.distributed_entity_owners
 import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
 import org.opendaylight.controller.cluster.datastore.entityownership.DistributedEntityOwnershipService;
+import org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.EntityOwnerSelectionStrategyConfig;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 
 
@@ -30,7 +31,7 @@ public class DistributedEntityOwnershipServiceProviderModule extends org.openday
         DOMStore dataStore = getDataStoreDependency();
         Preconditions.checkArgument(dataStore instanceof DistributedDataStore,
                 "Injected DOMStore must be an instance of DistributedDataStore");
-        DistributedEntityOwnershipService service = new DistributedEntityOwnershipService((DistributedDataStore)dataStore);
+        DistributedEntityOwnershipService service = new DistributedEntityOwnershipService((DistributedDataStore)dataStore, EntityOwnerSelectionStrategyConfig.newBuilder().build());
         service.start();
         return service;
     }
