@@ -27,7 +27,6 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Cancellable;
 import akka.pattern.Patterns;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
@@ -79,8 +78,8 @@ class EntityOwnershipShard extends Shard {
     private final EntityOwnershipListenerSupport listenerSupport;
     private final Set<String> downPeerMemberNames = new HashSet<>();
     private final Map<String, String> peerIdToMemberNames = new HashMap<>();
-    private EntityOwnerSelectionStrategyConfig strategyConfig;
-    private Map<YangInstanceIdentifier, Cancellable> entityToScheduledOwnershipTask = new HashMap<>();
+    private final EntityOwnerSelectionStrategyConfig strategyConfig;
+    private final Map<YangInstanceIdentifier, Cancellable> entityToScheduledOwnershipTask = new HashMap<>();
 
     private static DatastoreContext noPersistenceDatastoreContext(DatastoreContext datastoreContext) {
         return DatastoreContext.newBuilderFrom(datastoreContext).persistent(false).build();
@@ -91,7 +90,7 @@ class EntityOwnershipShard extends Shard {
         this.localMemberName = builder.localMemberName;
         this.commitCoordinator = new EntityOwnershipShardCommitCoordinator(builder.localMemberName, LOG);
         this.listenerSupport = new EntityOwnershipListenerSupport(getContext(), persistenceId());
-        this.strategyConfig = EntityOwnerSelectionStrategyConfig.newBuilder().build();
+        this.strategyConfig = builder.ownerSelectionStrategyConfig;
 
         for(String peerId: getRaftActorContext().getPeerIds()) {
             ShardIdentifier shardId = ShardIdentifier.builder().fromShardIdString(peerId).build();
@@ -397,7 +396,7 @@ class EntityOwnershipShard extends Shard {
             public void onEntity(MapEntryNode entityTypeNode, MapEntryNode entityNode) {
                 Optional<DataContainerChild<? extends PathArgument, ?>> possibleOwner =
                         entityNode.getChild(ENTITY_OWNER_NODE_ID);
-                if(possibleOwner.isPresent() && owner.equals(possibleOwner.get().getValue().toString())) {
+                if (possibleOwner.isPresent() && owner.equals(possibleOwner.get().getValue().toString())) {
                     walker.onEntity(entityTypeNode, entityNode);
                 }
             }
@@ -491,21 +490,13 @@ class EntityOwnershipShard extends Shard {
         void onEntity(MapEntryNode entityTypeNode, MapEntryNode entityNode);
     }
 
-    @VisibleForTesting
-    void addEntityOwnerSelectionStrategy(String entityType,
-                                         Class<? extends EntityOwnerSelectionStrategy> clazz,
-                                         long delay){
-        EntityOwnerSelectionStrategyConfig config = EntityOwnerSelectionStrategyConfig.newBuilder()
-                .addStrategy(entityType, clazz, delay).build();
-        this.strategyConfig = config;
-    }
-
     public static Builder newBuilder() {
         return new Builder();
     }
 
     static class Builder extends Shard.AbstractBuilder<Builder, EntityOwnershipShard> {
         private String localMemberName;
+        private EntityOwnerSelectionStrategyConfig ownerSelectionStrategyConfig;
 
         protected Builder() {
             super(EntityOwnershipShard.class);
@@ -517,10 +508,17 @@ class EntityOwnershipShard extends Shard {
             return this;
         }
 
+        Builder ownerSelectionStrategyConfig(EntityOwnerSelectionStrategyConfig ownerSelectionStrategyConfig){
+            checkSealed();
+            this.ownerSelectionStrategyConfig = ownerSelectionStrategyConfig;
+            return this;
+        }
+
         @Override
         protected void verify() {
             super.verify();
             Preconditions.checkNotNull(localMemberName, "localMemberName should not be null");
+            Preconditions.checkNotNull(ownerSelectionStrategyConfig, "ownerSelectionStrategyConfig should not be null");
         }
     }
 }

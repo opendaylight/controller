@@ -47,6 +47,7 @@ import org.opendaylight.controller.cluster.datastore.entityownership.messages.Re
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.RegisterListenerLocal;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.UnregisterCandidateLocal;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.UnregisterListenerLocal;
+import org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.EntityOwnerSelectionStrategyConfig;
 import org.opendaylight.controller.cluster.datastore.messages.GetShardDataTree;
 import org.opendaylight.controller.cluster.datastore.utils.MockClusterWrapper;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
@@ -319,7 +320,8 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
 
     static class TestShardBuilder extends EntityOwnershipShard.Builder {
         TestShardBuilder() {
-            localMemberName("member-1");
+            localMemberName("member-1").ownerSelectionStrategyConfig(
+                    EntityOwnerSelectionStrategyConfig.newBuilder().build());
         }
 
         private final AtomicReference<CountDownLatch> messageReceived = new AtomicReference<>();
@@ -329,6 +331,7 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
 
         @Override
         public Props props() {
+            verify();
             return Props.create(TestEntityOwnershipShard.class,this, messageClass, messageReceived,
                     receivedMessage, dataTree);
         }
