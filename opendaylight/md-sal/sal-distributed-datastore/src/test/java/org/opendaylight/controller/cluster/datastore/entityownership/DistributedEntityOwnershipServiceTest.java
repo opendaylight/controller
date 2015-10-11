@@ -108,7 +108,8 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
 
     @Test
     public void testEntityOwnershipShardCreated() throws Exception {
-        DistributedEntityOwnershipService service = new DistributedEntityOwnershipService(dataStore);
+        DistributedEntityOwnershipService service = new DistributedEntityOwnershipService(dataStore,
+                EntityOwnerSelectionStrategyConfig.newBuilder().build());
         service.start();
 
         Future<ActorRef> future = dataStore.getActorContext().findLocalShardAsync(
@@ -122,7 +123,8 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
     @Test
     public void testRegisterCandidate() throws Exception {
         final TestShardBuilder shardBuilder = new TestShardBuilder();
-        DistributedEntityOwnershipService service = new DistributedEntityOwnershipService(dataStore) {
+        DistributedEntityOwnershipService service = new DistributedEntityOwnershipService(dataStore,
+                EntityOwnerSelectionStrategyConfig.newBuilder().build()) {
             @Override
             protected EntityOwnershipShard.Builder newShardBuilder() {
                 return shardBuilder;
@@ -171,7 +173,8 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
     @Test
     public void testCloseCandidateRegistration() throws Exception {
         final TestShardBuilder shardBuilder = new TestShardBuilder();
-        DistributedEntityOwnershipService service = new DistributedEntityOwnershipService(dataStore) {
+        DistributedEntityOwnershipService service = new DistributedEntityOwnershipService(dataStore,
+                EntityOwnerSelectionStrategyConfig.newBuilder().build()) {
             @Override
             protected EntityOwnershipShard.Builder newShardBuilder() {
                 return shardBuilder;
@@ -210,7 +213,8 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
     @Test
     public void testListenerRegistration() {
         final TestShardBuilder shardBuilder = new TestShardBuilder();
-        DistributedEntityOwnershipService service = new DistributedEntityOwnershipService(dataStore) {
+        DistributedEntityOwnershipService service = new DistributedEntityOwnershipService(dataStore,
+                EntityOwnerSelectionStrategyConfig.newBuilder().build()) {
             @Override
             protected EntityOwnershipShard.Builder newShardBuilder() {
                 return shardBuilder;
@@ -249,7 +253,8 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
     @Test
     public void testGetOwnershipState() throws Exception {
         final TestShardBuilder shardBuilder = new TestShardBuilder();
-        DistributedEntityOwnershipService service = new DistributedEntityOwnershipService(dataStore) {
+        DistributedEntityOwnershipService service = new DistributedEntityOwnershipService(dataStore,
+                EntityOwnerSelectionStrategyConfig.newBuilder().build()) {
             @Override
             protected EntityOwnershipShard.Builder newShardBuilder() {
                 return shardBuilder;
