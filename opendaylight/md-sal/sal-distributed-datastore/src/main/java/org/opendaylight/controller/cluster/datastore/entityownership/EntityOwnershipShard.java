@@ -84,6 +84,7 @@ class EntityOwnershipShard extends Shard {
     private EntityOwnerSelectionStrategyConfig strategyConfig;
     private Map<String, EntityOwnerSelectionStrategy> entityTypeToOwnerSelectionStrategy = new HashMap<>();
     private Map<YangInstanceIdentifier, Cancellable> entityToScheduledOwnershipTask = new HashMap<>();
+    private final EntityOwnershipStatistics entityOwnershipStatistics;
 
     private static DatastoreContext noPersistenceDatastoreContext(DatastoreContext datastoreContext) {
         return DatastoreContext.newBuilderFrom(datastoreContext).persistent(false).build();
@@ -97,6 +98,8 @@ class EntityOwnershipShard extends Shard {
         this.commitCoordinator = new EntityOwnershipShardCommitCoordinator(localMemberName, LOG);
         this.listenerSupport = new EntityOwnershipListenerSupport(getContext(), persistenceId());
         this.strategyConfig = strategyConfig;
+        this.entityOwnershipStatistics = new EntityOwnershipStatistics();
+        this.entityOwnershipStatistics.init(getDataStore());
 
         for(String peerId: peerAddresses.keySet()) {
             ShardIdentifier shardId = ShardIdentifier.builder().fromShardIdString(peerId).build();
