@@ -47,6 +47,7 @@ import org.opendaylight.controller.cluster.datastore.entityownership.messages.Re
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.RegisterListenerLocal;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.UnregisterCandidateLocal;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.UnregisterListenerLocal;
+import org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.EntityOwnerSelectionStrategyConfig;
 import org.opendaylight.controller.cluster.datastore.messages.GetShardDataTree;
 import org.opendaylight.controller.cluster.datastore.utils.MockClusterWrapper;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
@@ -107,7 +108,7 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
 
     @Test
     public void testEntityOwnershipShardCreated() throws Exception {
-        DistributedEntityOwnershipService service = new DistributedEntityOwnershipService(dataStore);
+        DistributedEntityOwnershipService service = new DistributedEntityOwnershipService(dataStore, EntityOwnerSelectionStrategyConfig.newBuilder().build());
         service.start();
 
         Future<ActorRef> future = dataStore.getActorContext().findLocalShardAsync(
@@ -121,7 +122,7 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
     @Test
     public void testRegisterCandidate() throws Exception {
         final TestShardBuilder shardBuilder = new TestShardBuilder();
-        DistributedEntityOwnershipService service = new DistributedEntityOwnershipService(dataStore) {
+        DistributedEntityOwnershipService service = new DistributedEntityOwnershipService(dataStore, EntityOwnerSelectionStrategyConfig.newBuilder().build()) {
             @Override
             protected EntityOwnershipShard.Builder newShardBuilder() {
                 return shardBuilder;
@@ -170,7 +171,7 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
     @Test
     public void testCloseCandidateRegistration() throws Exception {
         final TestShardBuilder shardBuilder = new TestShardBuilder();
-        DistributedEntityOwnershipService service = new DistributedEntityOwnershipService(dataStore) {
+        DistributedEntityOwnershipService service = new DistributedEntityOwnershipService(dataStore, EntityOwnerSelectionStrategyConfig.newBuilder().build()) {
             @Override
             protected EntityOwnershipShard.Builder newShardBuilder() {
                 return shardBuilder;
@@ -209,7 +210,7 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
     @Test
     public void testListenerRegistration() {
         final TestShardBuilder shardBuilder = new TestShardBuilder();
-        DistributedEntityOwnershipService service = new DistributedEntityOwnershipService(dataStore) {
+        DistributedEntityOwnershipService service = new DistributedEntityOwnershipService(dataStore, EntityOwnerSelectionStrategyConfig.newBuilder().build()) {
             @Override
             protected EntityOwnershipShard.Builder newShardBuilder() {
                 return shardBuilder;
@@ -248,7 +249,7 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
     @Test
     public void testGetOwnershipState() throws Exception {
         final TestShardBuilder shardBuilder = new TestShardBuilder();
-        DistributedEntityOwnershipService service = new DistributedEntityOwnershipService(dataStore) {
+        DistributedEntityOwnershipService service = new DistributedEntityOwnershipService(dataStore, EntityOwnerSelectionStrategyConfig.newBuilder().build()) {
             @Override
             protected EntityOwnershipShard.Builder newShardBuilder() {
                 return shardBuilder;
@@ -320,6 +321,7 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
     static class TestShardBuilder extends EntityOwnershipShard.Builder {
         TestShardBuilder() {
             localMemberName("member-1");
+            ownerSelectionStrategyConfig(EntityOwnerSelectionStrategyConfig.newBuilder().build());
         }
 
         private final AtomicReference<CountDownLatch> messageReceived = new AtomicReference<>();
