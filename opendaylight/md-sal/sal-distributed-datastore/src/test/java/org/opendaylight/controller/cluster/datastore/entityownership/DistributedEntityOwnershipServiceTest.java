@@ -47,6 +47,7 @@ import org.opendaylight.controller.cluster.datastore.entityownership.messages.Re
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.RegisterListenerLocal;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.UnregisterCandidateLocal;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.UnregisterListenerLocal;
+import org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.EntityOwnerSelectionStrategyConfig;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.GetShardDataTree;
 import org.opendaylight.controller.cluster.datastore.utils.MockClusterWrapper;
@@ -321,7 +322,7 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
 
     static class TestShardPropsCreator extends EntityOwnershipShardPropsCreator {
         TestShardPropsCreator() {
-            super("member-1");
+            super("member-1", EntityOwnerSelectionStrategyConfig.newBuilder().build());
         }
 
         private final AtomicReference<CountDownLatch> messageReceived = new AtomicReference<>();
@@ -365,7 +366,7 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
                 DatastoreContext datastoreContext, SchemaContext schemaContext, String localMemberName,
                 AtomicReference<Class<?>> messageClass, AtomicReference<CountDownLatch> messageReceived,
                 AtomicReference<Object> receivedMessage, AtomicReference<DataTree> dataTree) {
-            super(name, peerAddresses, datastoreContext, schemaContext, localMemberName);
+            super(name, peerAddresses, datastoreContext, schemaContext, localMemberName, EntityOwnerSelectionStrategyConfig.newBuilder().build());
             this.messageClass = messageClass;
             this.messageReceived = messageReceived;
             this.receivedMessage = receivedMessage;
