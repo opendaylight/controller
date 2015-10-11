@@ -27,7 +27,6 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Props;
 import akka.pattern.Patterns;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import java.util.ArrayList;
@@ -81,20 +80,21 @@ class EntityOwnershipShard extends Shard {
     private final EntityOwnershipListenerSupport listenerSupport;
     private final Set<String> downPeerMemberNames = new HashSet<>();
     private final Map<String, String> peerIdToMemberNames = new HashMap<>();
-    private EntityOwnerSelectionStrategyWrapperFactory strategyFactory;
+    private final EntityOwnerSelectionStrategyWrapperFactory strategyFactory;
 
     private static DatastoreContext noPersistenceDatastoreContext(DatastoreContext datastoreContext) {
         return DatastoreContext.newBuilderFrom(datastoreContext).persistent(false).build();
     }
 
     protected EntityOwnershipShard(ShardIdentifier name, Map<String, String> peerAddresses,
-            DatastoreContext datastoreContext, SchemaContext schemaContext, String localMemberName) {
+                                   DatastoreContext datastoreContext, SchemaContext schemaContext, String localMemberName,
+                                   EntityOwnerSelectionStrategyConfig strategyConfig) {
         super(name, peerAddresses, noPersistenceDatastoreContext(datastoreContext), schemaContext);
         this.localMemberName = localMemberName;
         this.commitCoordinator = new EntityOwnershipShardCommitCoordinator(localMemberName, LOG);
         this.listenerSupport = new EntityOwnershipListenerSupport(getContext(), persistenceId());
         this.strategyFactory = new EntityOwnerSelectionStrategyWrapperFactory(context().system().scheduler(),
-                context().system().dispatcher(), self(), EntityOwnerSelectionStrategyConfig.newBuilder().build());
+                context().system().dispatcher(), self(), strategyConfig);
 
         for(String peerId: peerAddresses.keySet()) {
             ShardIdentifier shardId = ShardIdentifier.builder().fromShardIdString(peerId).build();
@@ -464,36 +464,29 @@ class EntityOwnershipShard extends Shard {
         return null;
     }
 
-    @VisibleForTesting
-    void addEntityOwnerSelectionStrategy(String entityType,
-                                         Class<? extends EntityOwnerSelectionStrategy> clazz,
-                                         long delay){
-        EntityOwnerSelectionStrategyConfig config = EntityOwnerSelectionStrategyConfig.newBuilder()
-                .addStrategy(entityType, clazz, delay).build();
-        this.strategyFactory = new EntityOwnerSelectionStrategyWrapperFactory(context().system().scheduler(),
-                context().system().dispatcher(), self(), config);
-    }
-
     public static Props props(final ShardIdentifier name, final Map<String, String> peerAddresses,
-            final DatastoreContext datastoreContext, final SchemaContext schemaContext, final String localMemberName) {
-        return Props.create(new Creator(name, peerAddresses, datastoreContext, schemaContext, localMemberName));
+                              final DatastoreContext datastoreContext, final SchemaContext schemaContext,
+                              final String localMemberName, final EntityOwnerSelectionStrategyConfig strategyConfig) {
+        return Props.create(new Creator(name, peerAddresses, datastoreContext, schemaContext, localMemberName, strategyConfig));
     }
 
     private static class Creator extends AbstractShardCreator {
         private static final long serialVersionUID = 1L;
 
         private final String localMemberName;
+        private final EntityOwnerSelectionStrategyConfig strategyConfig;
 
         Creator(final ShardIdentifier name, final Map<String, String> peerAddresses,
                 final DatastoreContext datastoreContext, final SchemaContext schemaContext,
-                final String localMemberName) {
+                final String localMemberName, EntityOwnerSelectionStrategyConfig strategyConfig) {
             super(name, peerAddresses, datastoreContext, schemaContext);
             this.localMemberName = localMemberName;
+            this.strategyConfig = strategyConfig;
         }
 
         @Override
         public Shard create() throws Exception {
-            return new EntityOwnershipShard(name, peerAddresses, datastoreContext, schemaContext, localMemberName);
+            return new EntityOwnershipShard(name, peerAddresses, datastoreContext, schemaContext, localMemberName, strategyConfig);
         }
     }
 
