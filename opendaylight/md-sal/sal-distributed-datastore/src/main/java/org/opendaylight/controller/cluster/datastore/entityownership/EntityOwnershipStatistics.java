@@ -78,7 +78,10 @@ class EntityOwnershipStatistics implements DOMDataTreeChangeListener {
     }
 
     Map<String, Long> byEntityType(String entityType){
-        return statistics.get(entityType).readOnlySnapshot();
+        if(statistics.get(entityType) != null) {
+            return statistics.get(entityType).readOnlySnapshot();
+        }
+        return new HashMap<>();
     }
 
     private String extractOwner(LeafNode<?> ownerLeaf) {
