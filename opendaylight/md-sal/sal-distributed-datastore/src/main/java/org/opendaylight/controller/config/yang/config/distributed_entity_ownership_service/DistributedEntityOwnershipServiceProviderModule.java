@@ -4,10 +4,14 @@ import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
 import org.opendaylight.controller.cluster.datastore.entityownership.DistributedEntityOwnershipService;
 import org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.EntityOwnerSelectionStrategyConfig;
+import org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.EntityOwnerSelectionStrategyConfigReader;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
+import org.osgi.framework.BundleContext;
 
 
 public class DistributedEntityOwnershipServiceProviderModule extends org.opendaylight.controller.config.yang.config.distributed_entity_ownership_service.AbstractDistributedEntityOwnershipServiceProviderModule {
+    private BundleContext bundleContext;
+
     public DistributedEntityOwnershipServiceProviderModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
     }
@@ -31,8 +35,13 @@ public class DistributedEntityOwnershipServiceProviderModule extends org.openday
         DOMStore dataStore = getDataStoreDependency();
         Preconditions.checkArgument(dataStore instanceof DistributedDataStore,
                 "Injected DOMStore must be an instance of DistributedDataStore");
-        DistributedEntityOwnershipService service = new DistributedEntityOwnershipService((DistributedDataStore)dataStore, EntityOwnerSelectionStrategyConfig.newBuilder().build());
+        EntityOwnerSelectionStrategyConfig strategyConfig = new EntityOwnerSelectionStrategyConfigReader(bundleContext).getConfig();
+        DistributedEntityOwnershipService service = new DistributedEntityOwnershipService((DistributedDataStore)dataStore, strategyConfig);
         service.start();
         return service;
+    }
+
+    public void setBundleContext(BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
     }
 }
