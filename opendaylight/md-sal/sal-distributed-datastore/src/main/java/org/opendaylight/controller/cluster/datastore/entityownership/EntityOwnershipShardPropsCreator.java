@@ -11,6 +11,7 @@ import akka.actor.Props;
 import java.util.Map;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.ShardPropsCreator;
+import org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.EntityOwnerSelectionStrategyConfig;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
@@ -21,14 +22,18 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
  */
 class EntityOwnershipShardPropsCreator implements ShardPropsCreator {
     private final String localMemberName;
+    private final EntityOwnerSelectionStrategyConfig strategyConfig;
 
-    EntityOwnershipShardPropsCreator(String localMemberName) {
+    EntityOwnershipShardPropsCreator(String localMemberName, EntityOwnerSelectionStrategyConfig strategyConfig) {
         this.localMemberName = localMemberName;
+        this.strategyConfig = strategyConfig;
     }
 
     @Override
     public Props newProps(ShardIdentifier shardId, Map<String, String> peerAddresses,
             DatastoreContext datastoreContext, SchemaContext schemaContext) {
-        return EntityOwnershipShard.props(shardId, peerAddresses, datastoreContext, schemaContext, localMemberName);
+        return EntityOwnershipShard.props(shardId, peerAddresses, datastoreContext, schemaContext, localMemberName,
+                strategyConfig);
     }
+
 }
