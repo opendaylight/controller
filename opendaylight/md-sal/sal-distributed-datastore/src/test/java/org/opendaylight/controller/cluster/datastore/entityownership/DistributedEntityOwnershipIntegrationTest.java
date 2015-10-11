@@ -38,6 +38,7 @@ import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
 import org.opendaylight.controller.cluster.datastore.IntegrationTestKit;
+import org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.EntityOwnerSelectionStrategyConfig;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListener;
@@ -136,13 +137,13 @@ public class DistributedEntityOwnershipIntegrationTest {
         follower1DistributedDataStore.waitTillReady();
         follower2DistributedDataStore.waitTillReady();
 
-        leaderEntityOwnershipService = new DistributedEntityOwnershipService(leaderDistributedDataStore);
+        leaderEntityOwnershipService = new DistributedEntityOwnershipService(leaderDistributedDataStore, EntityOwnerSelectionStrategyConfig.newBuilder().build());
         leaderEntityOwnershipService.start();
 
-        follower1EntityOwnershipService = new DistributedEntityOwnershipService(follower1DistributedDataStore);
+        follower1EntityOwnershipService = new DistributedEntityOwnershipService(follower1DistributedDataStore, EntityOwnerSelectionStrategyConfig.newBuilder().build());
         follower1EntityOwnershipService.start();
 
-        follower2EntityOwnershipService = new DistributedEntityOwnershipService(follower2DistributedDataStore);
+        follower2EntityOwnershipService = new DistributedEntityOwnershipService(follower2DistributedDataStore, EntityOwnerSelectionStrategyConfig.newBuilder().build());
         follower2EntityOwnershipService.start();
 
         leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(),
