@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "1a76adc5_354c4842",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 2981
+      },
+      "writtenOn": "2015-10-11T17:20:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a76adc5_af05697b",
+      "revId": "2fd0e41297098a95d3680a30b2da84426c4f732f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_6fff5168",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2015-10-09T23:30:47Z",
       "side": 1,
       "message": "There\u0027s a simpler way to verify that snapshot capture was initiated. Mockito.verify also takes a timeout() param that waits for the method to be called. I think it\u0027s sufficient to only verify that snapshot capture was initiated so you just need to do:\n\n    verify(actor.snapshotCohortDelegate, timeout(5000))\n            .createSnapshot(any(ActorRef.class));\n\nWe have other tests for full snapshot verification.",
+      "revId": "2fd0e41297098a95d3680a30b2da84426c4f732f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_d562b4ac",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1036,
+      "author": {
+        "id": 2981
+      },
+      "writtenOn": "2015-10-11T17:20:36Z",
+      "side": 1,
+      "message": "Tom, In this function refactored from base code, intent is to handle the additional snapshot triggered on recovery (with this 3381 fix) other than the snapshot triggered by the existing testFake.* functions. Hence retaining this change to avoid test failures in this new scenario",
+      "parentUuid": "1a76adc5_6fff5168",
       "revId": "2fd0e41297098a95d3680a30b2da84426c4f732f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "1a76adc5_5547841d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 2347,
+      "author": {
+        "id": 2981
+      },
+      "writtenOn": "2015-10-11T17:20:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a76adc5_2ff95980",
+      "revId": "2fd0e41297098a95d3680a30b2da84426c4f732f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_4ff4d586",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
         "patchSetId": 2
@@ -64,6 +118,24 @@
       "writtenOn": "2015-10-09T23:30:47Z",
       "side": 1,
       "message": "Don\u0027t need System.out.",
+      "revId": "2fd0e41297098a95d3680a30b2da84426c4f732f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_f55570c6",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 2350,
+      "author": {
+        "id": 2981
+      },
+      "writtenOn": "2015-10-11T17:20:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a76adc5_4ff4d586",
       "revId": "2fd0e41297098a95d3680a30b2da84426c4f732f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "1a76adc5_15510cd8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 2367,
+      "author": {
+        "id": 2981
+      },
+      "writtenOn": "2015-10-11T17:20:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a76adc5_8f02ed6d",
+      "revId": "2fd0e41297098a95d3680a30b2da84426c4f732f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_eff28199",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
         "patchSetId": 2
@@ -98,6 +188,24 @@
       "writtenOn": "2015-10-09T23:30:47Z",
       "side": 1,
       "message": "It doesn\u0027t seem like these changes were needed but it\u0027s fine (unless I\u0027m missing something).",
+      "revId": "2fd0e41297098a95d3680a30b2da84426c4f732f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_b55ff8e4",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 2368,
+      "author": {
+        "id": 2981
+      },
+      "writtenOn": "2015-10-11T17:20:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a76adc5_eff28199",
       "revId": "2fd0e41297098a95d3680a30b2da84426c4f732f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
