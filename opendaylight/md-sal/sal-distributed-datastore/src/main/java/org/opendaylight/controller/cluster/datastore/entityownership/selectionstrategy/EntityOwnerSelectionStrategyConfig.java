@@ -23,6 +23,10 @@ public class EntityOwnerSelectionStrategyConfig {
 
     }
 
+    public boolean isStrategyConfigured(String entityType){
+        return entityTypeToStrategyInfo.get(entityType) != null;
+    }
+
     public EntityOwnerSelectionStrategy createStrategy(String entityType){
         final EntityOwnerSelectionStrategy strategy;
         final EntityOwnerSelectionStrategy existingStrategy = entityTypeToOwnerSelectionStrategy.get(entityType);
