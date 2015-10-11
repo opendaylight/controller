@@ -13,6 +13,8 @@ import akka.actor.Cancellable;
 import akka.actor.Scheduler;
 import com.google.common.base.Preconditions;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.SelectOwner;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -63,8 +65,8 @@ public class EntityOwnerSelectionStrategyWrapper implements EntityOwnerSelection
     }
 
     @Override
-    public String newOwner(Collection<String> viableCandidates){
-        return strategy.newOwner(viableCandidates);
+    public String newOwner(Collection<String> viableCandidates, Map<String, Long> statistics){
+        return strategy.newOwner(viableCandidates, new HashMap<String, Long>());
     }
 
 }
