@@ -48,6 +48,7 @@ import org.opendaylight.controller.cluster.datastore.entityownership.messages.Re
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.RegisterListenerLocal;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.UnregisterCandidateLocal;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.UnregisterListenerLocal;
+import org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.EntityOwnerSelectionStrategyConfig;
 import org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.LastCandidateSelectionStrategy;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
@@ -405,15 +406,15 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
 
         TestActorRef<EntityOwnershipShard> peer1 = actorFactory.createTestActor(newShardProps(peerId1,
                 ImmutableMap.<String, String>builder().put(leaderId.toString(), ""). put(peerId2.toString(), "").build(),
-                        peerMemberName1).withDispatcher(Dispatchers.DefaultDispatcherId()), peerId1.toString());
+                        peerMemberName1, EntityOwnerSelectionStrategyConfig.newBuilder().build()).withDispatcher(Dispatchers.DefaultDispatcherId()), peerId1.toString());
 
         TestActorRef<EntityOwnershipShard> peer2 = actorFactory.createTestActor(newShardProps(peerId2,
                 ImmutableMap.<String, String>builder().put(leaderId.toString(), ""). put(peerId1.toString(), "").build(),
-                        peerMemberName2). withDispatcher(Dispatchers.DefaultDispatcherId()), peerId2.toString());
+                        peerMemberName2, EntityOwnerSelectionStrategyConfig.newBuilder().build()). withDispatcher(Dispatchers.DefaultDispatcherId()), peerId2.toString());
 
         TestActorRef<EntityOwnershipShard> leader = actorFactory.createTestActor(newShardProps(leaderId,
                 ImmutableMap.<String, String>builder().put(peerId1.toString(), peer1.path().toString()).
-                        put(peerId2.toString(), peer2.path().toString()).build(), LOCAL_MEMBER_NAME).
+                        put(peerId2.toString(), peer2.path().toString()).build(), LOCAL_MEMBER_NAME, EntityOwnerSelectionStrategyConfig.newBuilder().build()).
                 withDispatcher(Dispatchers.DefaultDispatcherId()), leaderId.toString());
         leader.tell(new ElectionTimeout(), leader);
 
@@ -498,7 +499,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
 
         peer2 = actorFactory.createTestActor(newShardProps(peerId2,
                 ImmutableMap.<String, String>builder().put(leaderId.toString(), ""). put(peerId1.toString(), "").build(),
-                        peerMemberName2). withDispatcher(Dispatchers.DefaultDispatcherId()), peerId2.toString());
+                        peerMemberName2, EntityOwnerSelectionStrategyConfig.newBuilder().build()). withDispatcher(Dispatchers.DefaultDispatcherId()), peerId2.toString());
         leader.tell(new PeerUp(peerMemberName2, peerId2.toString()), ActorRef.noSender());
         // Send PeerUp again - should be noop
         leader.tell(new PeerUp(peerMemberName2, peerId2.toString()), ActorRef.noSender());
@@ -539,7 +540,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
 
         peer1 = actorFactory.createTestActor(newShardProps(peerId1,
                 ImmutableMap.<String, String>builder().put(leaderId.toString(), ""). put(peerId2.toString(), "").build(),
-                        peerMemberName1).withDispatcher(Dispatchers.DefaultDispatcherId()), peerId1.toString());
+                        peerMemberName1, EntityOwnerSelectionStrategyConfig.newBuilder().build()).withDispatcher(Dispatchers.DefaultDispatcherId()), peerId1.toString());
         leader.tell(new PeerUp(peerMemberName1, peerId1.toString()), ActorRef.noSender());
 
         verifyOwner(leader, ENTITY_TYPE, ENTITY_ID4, "");
@@ -588,7 +589,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
 
         TestActorRef<EntityOwnershipShard> leader = actorFactory.createTestActor(newShardProps(leaderId,
                 ImmutableMap.<String, String>builder().put(localId.toString(), shard.path().toString()).build(),
-                    LOCAL_MEMBER_NAME).withDispatcher(Dispatchers.DefaultDispatcherId()), leaderId.toString());
+                    LOCAL_MEMBER_NAME, EntityOwnerSelectionStrategyConfig.newBuilder().build()).withDispatcher(Dispatchers.DefaultDispatcherId()), leaderId.toString());
         leader.tell(new ElectionTimeout(), leader);
 
         kit.waitUntilLeader(leader);
@@ -803,13 +804,19 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         return newShardProps(Collections.<String,String>emptyMap());
     }
 
-    private Props newShardProps(Map<String,String> peers) {
-        return newShardProps(newShardId(LOCAL_MEMBER_NAME), peers, LOCAL_MEMBER_NAME);
+    private Props newShardProps(EntityOwnerSelectionStrategyConfig strategyConfig) {
+        return newShardProps(newShardId(LOCAL_MEMBER_NAME), Collections.<String,String>emptyMap(),
+                LOCAL_MEMBER_NAME, strategyConfig);
     }
 
-    private Props newShardProps(ShardIdentifier shardId, Map<String,String> peers, String memberName) {
+    private Props newShardProps(Map<String,String> peers) {
+        return newShardProps(newShardId(LOCAL_MEMBER_NAME), peers, LOCAL_MEMBER_NAME, EntityOwnerSelectionStrategyConfig.newBuilder().build());
+    }
+
+    private Props newShardProps(ShardIdentifier shardId, Map<String, String> peers, String memberName,
+                                EntityOwnerSelectionStrategyConfig strategyConfig) {
         return EntityOwnershipShard.props(shardId, peers, dataStoreContextBuilder.build(),
-                SCHEMA_CONTEXT, memberName);
+                SCHEMA_CONTEXT, memberName, strategyConfig);
     }
 
     private ShardIdentifier newShardId(String memberName) {
@@ -821,7 +828,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
 
         TestEntityOwnershipShard(ShardIdentifier name, Map<String, String> peerAddresses,
                 DatastoreContext datastoreContext) {
-            super(name, peerAddresses, datastoreContext, SCHEMA_CONTEXT, LOCAL_MEMBER_NAME);
+            super(name, peerAddresses, datastoreContext, SCHEMA_CONTEXT, LOCAL_MEMBER_NAME, EntityOwnerSelectionStrategyConfig.newBuilder().build());
         }
 
         @Override
@@ -875,8 +882,9 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
     @Test
     public void testDelayedEntityOwnerSelection() throws Exception {
         ShardTestKit kit = new ShardTestKit(getSystem());
-        TestActorRef<EntityOwnershipShard> shard = actorFactory.createTestActor(newShardProps());
-        shard.underlyingActor().addEntityOwnerSelectionStrategy(ENTITY_TYPE, LastCandidateSelectionStrategy.class, 500);
+        EntityOwnerSelectionStrategyConfig.Builder builder
+                = EntityOwnerSelectionStrategyConfig.newBuilder().addStrategy(ENTITY_TYPE, LastCandidateSelectionStrategy.class, 500);
+        TestActorRef<EntityOwnershipShard> shard = actorFactory.createTestActor(newShardProps(builder.build()));
         kit.waitUntilLeader(shard);
 
         Entity entity = new Entity(ENTITY_TYPE, ENTITY_ID1);
