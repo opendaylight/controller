@@ -17,7 +17,6 @@ import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.actor.Terminated;
 import akka.japi.Procedure;
-import akka.persistence.RecoveryCompleted;
 import akka.persistence.SaveSnapshotFailure;
 import akka.persistence.SaveSnapshotSuccess;
 import akka.persistence.SnapshotMetadata;
@@ -910,7 +909,7 @@ public class RaftActorTest extends AbstractActorTest {
 
         MockRaftActor leaderActor = mockActorRef.underlyingActor();
 
-        leaderActor.handleRecover(RecoveryCompleted.getInstance());
+        leaderActor.waitForRecoveryComplete();
 
         leaderActor.handleCommand(new SwitchBehavior(RaftState.Follower, 100));
 
