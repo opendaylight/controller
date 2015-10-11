@@ -146,7 +146,9 @@ class EntityOwnershipShard extends Shard {
     private void onSelectOwner(SelectOwner selectOwner) {
         String currentOwner = getCurrentOwner(selectOwner.getEntityPath());
         if(Strings.isNullOrEmpty(currentOwner)) {
+            String entityType = EntityOwnersModel.entityTypeFromEntityPath(selectOwner.getEntityPath());
             writeNewOwner(selectOwner.getEntityPath(), newOwner(selectOwner.getAllCandidates(),
+                    entityOwnershipStatistics.byEntityType(entityType),
                     selectOwner.getOwnerSelectionStrategy()));
         }
     }
@@ -268,8 +270,11 @@ class EntityOwnershipShard extends Shard {
         if(isLeader()) {
             String currentOwner = getCurrentOwner(message.getEntityPath());
             if(message.getRemovedCandidate().equals(currentOwner)){
+                String entityType = EntityOwnersModel.entityTypeFromEntityPath(message.getEntityPath());
                 writeNewOwner(message.getEntityPath(),
-                        newOwner(message.getRemainingCandidates(), getEntityOwnerElectionStrategyWrapper(message.getEntityPath())));
+                        newOwner(message.getRemainingCandidates(),
+                                entityOwnershipStatistics.byEntityType(entityType),
+                                getEntityOwnerElectionStrategyWrapper(message.getEntityPath())));
             }
         } else {
             // We're not the leader. If the removed candidate is our local member then check if we actually
@@ -308,7 +313,9 @@ class EntityOwnershipShard extends Shard {
         if(Strings.isNullOrEmpty(currentOwner)){
             EntityOwnerSelectionStrategyWrapper strategy = getEntityOwnerElectionStrategyWrapper(message.getEntityPath());
             if(strategy.getSelectionDelayInMillis() == 0L) {
-                writeNewOwner(message.getEntityPath(), newOwner(message.getAllCandidates(), strategy));
+                String entityType = EntityOwnersModel.entityTypeFromEntityPath(message.getEntityPath());
+                writeNewOwner(message.getEntityPath(), newOwner(message.getAllCandidates(),
+                        entityOwnershipStatistics.byEntityType(entityType), strategy));
             } else {
                 strategy.scheduleOwnerSelection(message.getEntityPath(), message.getAllCandidates());
             }
@@ -342,7 +349,11 @@ class EntityOwnershipShard extends Shard {
                         node(entityTypeNode.getIdentifier()).node(ENTITY_NODE_ID).node(entityNode.getIdentifier()).
                         node(ENTITY_OWNER_NODE_ID).build();
 
-                Object newOwner = newOwner(getCandidateNames(entityNode), getEntityOwnerElectionStrategyWrapper(entityPath));
+                String entityType = EntityOwnersModel.entityTypeFromEntityPath(entityPath);
+
+                Object newOwner = newOwner(getCandidateNames(entityNode),
+                        entityOwnershipStatistics.byEntityType(entityType),
+                        getEntityOwnerElectionStrategyWrapper(entityPath));
 
                 LOG.debug("{}: Found entity {}, writing new owner {}", persistenceId(), entityPath, newOwner);
 
@@ -439,12 +450,12 @@ class EntityOwnershipShard extends Shard {
                 ImmutableNodes.leafNode(ENTITY_OWNER_NODE_ID, newOwner)), this);
     }
 
-    private String newOwner(Collection<String> candidates, EntityOwnerSelectionStrategy ownerSelectionStrategy) {
+    private String newOwner(Collection<String> candidates, Map<String, Long> statistics, EntityOwnerSelectionStrategy ownerSelectionStrategy) {
         Collection<String> viableCandidates = getViableCandidates(candidates);
         if(viableCandidates.size() == 0){
             return "";
         }
-        return ownerSelectionStrategy.newOwner(viableCandidates);
+        return ownerSelectionStrategy.newOwner(viableCandidates, statistics);
     }
 
     private Collection<String> getViableCandidates(Collection<String> candidates) {
