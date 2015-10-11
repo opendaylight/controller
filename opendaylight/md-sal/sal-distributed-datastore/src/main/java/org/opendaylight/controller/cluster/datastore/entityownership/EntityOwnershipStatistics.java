@@ -65,7 +65,10 @@ class EntityOwnershipStatistics extends AbstractEntityOwnerChangeListener {
     }
 
     Map<String, Long> byEntityType(String entityType){
-        return statistics.get(entityType).readOnlySnapshot();
+        if(statistics.get(entityType) != null) {
+            return statistics.get(entityType).readOnlySnapshot();
+        }
+        return new HashMap<>();
     }
 
     private void updateStatistics(String entityType, String candidateName, long count){
