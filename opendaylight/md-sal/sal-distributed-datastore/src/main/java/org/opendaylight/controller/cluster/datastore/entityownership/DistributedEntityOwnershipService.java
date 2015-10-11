@@ -28,6 +28,7 @@ import org.opendaylight.controller.cluster.datastore.entityownership.messages.Re
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.RegisterListenerLocal;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.UnregisterCandidateLocal;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.UnregisterListenerLocal;
+import org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.EntityOwnerSelectionStrategyConfig;
 import org.opendaylight.controller.cluster.datastore.messages.CreateShard;
 import org.opendaylight.controller.cluster.datastore.messages.GetShardDataTree;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ModuleShardStrategy;
@@ -218,7 +219,8 @@ public class DistributedEntityOwnershipService implements EntityOwnershipService
     }
 
     protected EntityOwnershipShard.Builder newShardBuilder() {
-        return EntityOwnershipShard.newBuilder().localMemberName(datastore.getActorContext().getCurrentMemberName());
+        return EntityOwnershipShard.newBuilder().localMemberName(datastore.getActorContext().getCurrentMemberName())
+                .ownerSelectionStrategyConfig(EntityOwnerSelectionStrategyConfig.newBuilder().build());
     }
 
     @VisibleForTesting
