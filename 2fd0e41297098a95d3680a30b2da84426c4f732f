@@ -54,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "1a76adc5_444037a5",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 596,
+      "author": {
+        "id": 2981
+      },
+      "writtenOn": "2015-10-12T17:33:32Z",
+      "side": 1,
+      "message": "So far in multiple UT runs have not run into intermittent test failures. Anyways see a point here; so will try what you said \u0026 comeback - esp the InMemoryJournal entry addition \u0026 test.",
+      "parentUuid": "1a76adc5_f0201ef9",
+      "revId": "2fd0e41297098a95d3680a30b2da84426c4f732f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_6fff5168",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
         "patchSetId": 2
@@ -101,6 +119,24 @@
       "side": 1,
       "message": "Th reason you had test failures was b/c you were always triggering snapshot, even with an empty journal. Now that you\u0027ve changed that, those testFake.* methods should work w/o change as they start with an empty journal.\n\nWhat I was referring to above is the code in this method. It looks like the purpose is to verify that a snapshot was initiated. What I meant was, instead of the busy wait above and the other code, you could simply verify createSnapshot was called with a timeout as I outlined in my previous comment. So that 1 line of code would be sufficient to verify.",
       "parentUuid": "1a76adc5_d562b4ac",
+      "revId": "2fd0e41297098a95d3680a30b2da84426c4f732f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_a4390b43",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1036,
+      "author": {
+        "id": 2981
+      },
+      "writtenOn": "2015-10-12T17:33:32Z",
+      "side": 1,
+      "message": "Let me try this \u0026 comeback Tom",
+      "parentUuid": "1a76adc5_90ec4a91",
       "revId": "2fd0e41297098a95d3680a30b2da84426c4f732f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
