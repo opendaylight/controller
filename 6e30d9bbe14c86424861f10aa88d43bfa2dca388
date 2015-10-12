@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "1a76adc5_24e17b9a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/selectionstrategy/EntityOwnerSelectionStrategyConfig.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-12T18:40:10Z",
+      "side": 1,
+      "message": "You\u0027re absolutely right. Will fix.",
+      "parentUuid": "1a76adc5_70b72e87",
+      "revId": "6e30d9bbe14c86424861f10aa88d43bfa2dca388",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_ea1a6f16",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/selectionstrategy/EntityOwnerSelectionStrategyConfig.java",
         "patchSetId": 3
