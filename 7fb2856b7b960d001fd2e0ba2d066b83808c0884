@@ -118,6 +118,30 @@
     },
     {
       "key": {
+        "uuid": "1a76adc5_d0cba21c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 779,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-12T12:05:58Z",
+      "side": 1,
+      "message": "That is good too.",
+      "parentUuid": "1a76adc5_2b195688",
+      "range": {
+        "startLine": 779,
+        "startChar": 11,
+        "endLine": 779,
+        "endChar": 15
+      },
+      "revId": "7fb2856b7b960d001fd2e0ba2d066b83808c0884",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_2b615639",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shardmanager/ShardManagerInfo.java",
         "patchSetId": 7
