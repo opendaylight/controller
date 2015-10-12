@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "1a76adc5_70b72e87",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/selectionstrategy/EntityOwnerSelectionStrategyConfig.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-12T12:42:31Z",
+      "side": 1,
+      "message": "The Wrapper is a little more than just a strategy - it also has state info like the timer task Cancellable. So the EntityOwnerSelectionStrategyWrapper would be permanently cached - we wouldn\u0027t be able to dynamically change EntityOwnerSelectionStrategy the config.\n\nBut beyond that, you\u0027re caching EntityOwnerSelectionStrategyWrapper instances by entity type. They should be cached per entity path. Then we would clean them up when owner is selected,",
+      "parentUuid": "1a76adc5_9580bc47",
+      "revId": "6e30d9bbe14c86424861f10aa88d43bfa2dca388",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_ea1a6f16",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/selectionstrategy/EntityOwnerSelectionStrategyConfig.java",
         "patchSetId": 3
