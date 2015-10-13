@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "1a76adc5_d838a4a2",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipShard.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 324,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-13T22:18:48Z",
+      "side": 1,
+      "message": "Tom, I added the change for this in the next commit. Hope that\u0027s ok.",
+      "parentUuid": "1a76adc5_8f866d12",
+      "revId": "27ba1a47f2751a93f1e431d5b660e4cbe21537cd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_e4aaa818",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipShard.java",
         "patchSetId": 2
