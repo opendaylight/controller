@@ -11,7 +11,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
-import com.google.inject.Inject;
+import javax.inject.Inject;
 import java.util.concurrent.Future;
 import org.junit.Test;
 import org.opendaylight.controller.md.sal.common.api.TransactionStatus;
