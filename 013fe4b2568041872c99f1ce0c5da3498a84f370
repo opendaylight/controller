@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_696424e5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipStatistics.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-14T15:37:27Z",
+      "side": 1,
+      "message": "Could we merge this with the existing EntityOwnershipListener to get some code reuse? The EntityOwnershipStatistics could be passed to the listener and updated.",
+      "revId": "013fe4b2568041872c99f1ce0c5da3498a84f370",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
