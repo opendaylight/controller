@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a76adc5_a95b1c2d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipShard.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-14T15:26:39Z",
+      "side": 1,
+      "message": "Would it make sense move this map and associated code into EntityOwnerSelectionStrategyConfig?  Then StrategyInfo wouldn\u0027t need to be public.",
+      "revId": "7e5c2fa4d639c0edbdbb630811fd84037ace8a18",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_e951140f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipShard.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 303,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-14T15:26:39Z",
+      "side": 1,
+      "message": "You can call get on line 301 instead of getting twice.",
+      "revId": "7e5c2fa4d639c0edbdbb630811fd84037ace8a18",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
