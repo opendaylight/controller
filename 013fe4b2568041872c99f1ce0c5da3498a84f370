@@ -16,6 +16,24 @@
       "revId": "013fe4b2568041872c99f1ce0c5da3498a84f370",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a76adc5_494cc842",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipStatistics.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-14T16:59:31Z",
+      "side": 1,
+      "message": "Actually I don\u0027t want to merge this with the existing ownership listener. The objection I have is that these listener classes sometimes end up doing multiple unrelated things and violate the single responsibility principle. I was thinking this is a new pattern we should follow :) I do want code reuse to also be done so how about I introduce an Abstract Base class where the common methods (like init, extractOwner) remain?",
+      "parentUuid": "1a76adc5_696424e5",
+      "revId": "013fe4b2568041872c99f1ce0c5da3498a84f370",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
