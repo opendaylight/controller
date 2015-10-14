@@ -616,15 +616,18 @@ public class DistributedDataStoreIntegrationTest {
         }};
     }
 
-    private void testTransactionCommitFailureWithNoShardLeader(final boolean writeOnly) throws Throwable {
+    private void testTransactionCommitFailureWithNoShardLeader(final boolean writeOnly, final String testName) throws Throwable {
         new IntegrationTestKit(getSystem(), datastoreContextBuilder) {{
-            String testName = "testTransactionCommitFailureWithNoShardLeader";
             String shardName = "default";
 
-            // We don't want the shard to become the leader so prevent shard election from completing
-            // by setting the election timeout, which is based on the heartbeat interval, really high.
+            // We don't want the shard to become the leader so prevent shard elections.
+            datastoreContextBuilder.customRaftPolicyImplementation(
+                    "org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy");
 
-            datastoreContextBuilder.shardHeartbeatIntervalInMillis(30000);
+            // The ShardManager uses the election timeout for FindPrimary so reset it low so it will timeout quickly.
+            datastoreContextBuilder.shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(1).
+                    shardInitializationTimeout(200, TimeUnit.MILLISECONDS);
+            //datastoreContextBuilder.shardHeartbeatIntervalInMillis(30000);
 
             DistributedDataStore dataStore = setupDistributedDataStore(testName, false, shardName);
 
@@ -634,8 +637,8 @@ public class DistributedDataStoreIntegrationTest {
 
             // The ShardManager uses the election timeout for FindPrimary so reset it low so it will timeout quickly.
 
-            datastoreContextBuilder.shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(1);
-            dataStore.onDatastoreContextUpdated(datastoreContextBuilder.build());
+//            datastoreContextBuilder.shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(1);
+//            dataStore.onDatastoreContextUpdated(datastoreContextBuilder.build());
 
             // Create the write Tx.
 
@@ -691,13 +694,18 @@ public class DistributedDataStoreIntegrationTest {
 
     @Test(expected=NoShardLeaderException.class)
     public void testWriteOnlyTransactionCommitFailureWithNoShardLeader() throws Throwable {
+        System.out.println("!!!!!!!!!testWriteOnlyTransactionCommitFailureWithNoShardLeader starting");
         datastoreContextBuilder.writeOnlyTransactionOptimizationsEnabled(true);
-        testTransactionCommitFailureWithNoShardLeader(true);
+        try {
+            testTransactionCommitFailureWithNoShardLeader(true, "testWriteOnlyTransactionCommitFailureWithNoShardLeader");
+        } finally {
+            System.out.println("!!!!!!!!!testWriteOnlyTransactionCommitFailureWithNoShardLeader ending");
+        }
     }
 
     @Test(expected=NoShardLeaderException.class)
     public void testReadWriteTransactionCommitFailureWithNoShardLeader() throws Throwable {
-        testTransactionCommitFailureWithNoShardLeader(false);
+        testTransactionCommitFailureWithNoShardLeader(false, "testReadWriteTransactionCommitFailureWithNoShardLeader");
     }
 
     @Test
