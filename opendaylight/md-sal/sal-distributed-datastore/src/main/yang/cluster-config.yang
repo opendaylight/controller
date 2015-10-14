@@ -1,0 +1,76 @@
+module cluster-config {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:md:sal:cluster:config";
+    prefix "clustering-config";
+
+    description
+        "This module contains YANG RPC definitions for configuring a cluster.";
+
+    revision "2015-10-13" {
+        description "Initial revision.";
+    }
+
+    rpc add-shard-replica {
+        input {
+            leaf shard-name {
+              type string;
+              description "The name of the shard for which to create a replica.";
+            }
+        }
+
+        description "Adds a replica of a shard to this node and joins it to an existing cluster. The shard must
+            already have a module configuration defined for it and there must already be a shard existing on
+            another node with a leader. This RPC first contacts peer member seed nodes searching for a shard.
+            When found, an AddServer message is sent to the shard leader and applied as described in the Raft
+            paper.";
+    }
+
+    rpc remove-shard-replica {
+        input {
+            leaf shard-name {
+              type string;
+              description "The name of the shard for which to remove the replica.";
+            }
+        }
+
+        description "Removes an existing replica of a shard from this node via the RemoveServer mechanism as
+            described in the Raft paper.";
+    }
+
+    rpc add-replicas-for-all-shards {
+        description "Adds replicas on this node for all currently defined shards. This is equivalent to issuing
+            an add-shard-replica RPC for all shards.";
+    }
+
+    rpc remove-all-shard-replicas {
+        description "Removes replicas for all shards on this node. This is equivalent to issuing
+            a remove-shard-replica for all shards and essentially removes this node from a cluster.";
+    }
+
+    rpc convert-members-to-nonvoting-for-all-shards {
+        input {
+            leaf-list member-names {
+                type string;
+                description "The names of the cluster members to convert.";
+            }
+        }
+        
+        description "Converts the given cluster members to non-voting for all shards. The members will no 
+            longer participate in leader elections and consensus but will be replicated. This is useful for
+            having a set of members serve as a backup cluster in case the primary voting cluster suffers
+            catastrophic failure. This RPC can be issued to any cluster member and will be forwarded
+            to the leader.";
+    }
+
+    rpc convert-members-to-voting-for-all-shards {
+        input {
+            leaf-list member-names {
+                type string;
+                description "The names of the cluster members to convert.";
+            }
+        }
+        
+        description "Converts the given cluster members to voting for all shards. The members will 
+            participate in leader elections and consensus.";
+    }
+}
