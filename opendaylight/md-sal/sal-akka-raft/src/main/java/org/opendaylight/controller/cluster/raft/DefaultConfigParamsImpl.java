@@ -103,6 +103,10 @@ public class DefaultConfigParamsImpl implements ConfigParams {
         this.customRaftPolicyImplementationClass = customRaftPolicyImplementationClass;
     }
 
+    public String getCustomRaftPolicyImplementationClass() {
+        return customRaftPolicyImplementationClass;
+    }
+
     @Override
     public long getSnapshotBatchCount() {
         return snapshotBatchCount;
