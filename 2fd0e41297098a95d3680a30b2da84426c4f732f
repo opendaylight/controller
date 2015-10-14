@@ -72,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "fad0f9df_12ddec42",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 596,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-14T20:41:01Z",
+      "side": 1,
+      "message": "I have a script that loops over a unit test over and over and quits if it fails. Unit tests with akka and actors are often tricky due to the async nature. I\u0027ve seen unit tests succeed dozens of times even over 100 times before failing. Sometimes a unit test runs fine in jenkins for weeks or months before failing (in fact I just had one today). I haven\u0027t run this test with the script but it looks like it will be prone to intermittent timing failures.",
+      "parentUuid": "1a76adc5_444037a5",
+      "revId": "2fd0e41297098a95d3680a30b2da84426c4f732f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_6fff5168",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
         "patchSetId": 2
