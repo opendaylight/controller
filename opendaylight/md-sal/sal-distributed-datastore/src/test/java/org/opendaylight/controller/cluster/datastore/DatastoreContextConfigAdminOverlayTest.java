@@ -96,6 +96,8 @@ public class DatastoreContextConfigAdminOverlayTest {
 
         DatastoreContext context = DatastoreContext.newBuilder().build();
         doReturn(context).when(mockIntrospector).getContext();
+        DatastoreContextFactory contextFactory = new DatastoreContextFactory(mockIntrospector);
+        doReturn(contextFactory).when(mockIntrospector).newContextFactory();
 
         DatastoreContextConfigAdminOverlay.Listener mockListener =
                 mock(DatastoreContextConfigAdminOverlay.Listener.class);
@@ -122,7 +124,7 @@ public class DatastoreContextConfigAdminOverlayTest {
 
         verify(mockIntrospector).update(properties);
 
-        verify(mockListener).onDatastoreContextUpdated(context);
+        verify(mockListener).onDatastoreContextUpdated(contextFactory);
 
         verify(mockBundleContext, times(2)).ungetService(mockConfigAdminServiceRef);
 

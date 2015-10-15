@@ -34,6 +34,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.exceptions.ShardLeaderNotRespondingException;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
@@ -482,7 +485,7 @@ public class DistributedDataStoreRemotingIntegrationTest {
         // Switch the leader to the follower
 
         followerDatastoreContextBuilder.shardElectionTimeoutFactor(1);
-        followerDistributedDataStore.onDatastoreContextUpdated(followerDatastoreContextBuilder.build());
+        sendDatastoreContextUpdate(followerDistributedDataStore, followerDatastoreContextBuilder);
 
         JavaTestKit.shutdownActorSystem(leaderSystem, null, true);
 
@@ -580,7 +583,7 @@ public class DistributedDataStoreRemotingIntegrationTest {
         JavaTestKit.shutdownActorSystem(leaderSystem, null, true);
 
         followerDatastoreContextBuilder.operationTimeoutInMillis(50).shardElectionTimeoutFactor(1);
-        followerDistributedDataStore.onDatastoreContextUpdated(followerDatastoreContextBuilder.build());
+        sendDatastoreContextUpdate(followerDistributedDataStore, followerDatastoreContextBuilder);
 
         DOMStoreReadWriteTransaction rwTx = followerDistributedDataStore.newReadWriteTransaction();
 
@@ -612,7 +615,7 @@ public class DistributedDataStoreRemotingIntegrationTest {
         Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
 
         followerDatastoreContextBuilder.operationTimeoutInMillis(10).shardElectionTimeoutFactor(1);
-        followerDistributedDataStore.onDatastoreContextUpdated(followerDatastoreContextBuilder.build());
+        sendDatastoreContextUpdate(followerDistributedDataStore, followerDatastoreContextBuilder);
 
         DOMStoreReadWriteTransaction rwTx = followerDistributedDataStore.newReadWriteTransaction();
 
@@ -646,12 +649,25 @@ public class DistributedDataStoreRemotingIntegrationTest {
         JavaTestKit.shutdownActorSystem(leaderSystem, null, true);
 
         followerDatastoreContextBuilder.operationTimeoutInMillis(500);
-        followerDistributedDataStore.onDatastoreContextUpdated(followerDatastoreContextBuilder.build());
+        sendDatastoreContextUpdate(followerDistributedDataStore, followerDatastoreContextBuilder);
 
         DOMStoreReadWriteTransaction rwTx = followerDistributedDataStore.newReadWriteTransaction();
 
         rwTx.write(CarsModel.BASE_PATH, CarsModel.emptyContainer());
 
         followerTestKit.doCommit(rwTx.ready());
+    }
+
+    private void sendDatastoreContextUpdate(DistributedDataStore dataStore, final Builder builder) {
+        DatastoreContextFactory mockContextFactory = Mockito.mock(DatastoreContextFactory.class);
+        Answer<DatastoreContext> answer = new Answer<DatastoreContext>() {
+            @Override
+            public DatastoreContext answer(InvocationOnMock invocation) {
+                return builder.build();
+            }
+        };
+        Mockito.doAnswer(answer).when(mockContextFactory).getBaseDatastoreContext();
+        Mockito.doAnswer(answer).when(mockContextFactory).getShardDatastoreContext(Mockito.anyString());
+        dataStore.onDatastoreContextUpdated(mockContextFactory);
     }
 }
