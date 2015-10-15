@@ -52,6 +52,24 @@
       "revId": "013fe4b2568041872c99f1ce0c5da3498a84f370",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_266eaeca",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipStatistics.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-15T21:42:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a76adc5_29514cd8",
+      "revId": "013fe4b2568041872c99f1ce0c5da3498a84f370",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
