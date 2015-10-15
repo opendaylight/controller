@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.primitives.Primitives;
 import java.beans.BeanInfo;
@@ -19,10 +20,12 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
@@ -180,6 +183,7 @@ public class DatastoreContextIntrospector {
     }
 
     private DatastoreContext context;
+    private Map<String, Object> currentProperties;
 
     public DatastoreContextIntrospector(DatastoreContext context) {
         this.context = context;
@@ -187,6 +191,36 @@ public class DatastoreContextIntrospector {
 
     public DatastoreContext getContext() {
         return context;
+    }
+
+    public DatastoreContextFactory newContextFactory() {
+        return new DatastoreContextFactory(this);
+    }
+
+    public synchronized DatastoreContext getShardDatastoreContext(String forShardName) {
+        if(currentProperties == null) {
+            return context;
+        }
+
+        Builder builder = DatastoreContext.newBuilderFrom(context);
+        String dataStoreTypePrefix = context.getDataStoreType() + '.';
+        final String shardNamePrefix = forShardName + '.';
+
+        List<String> keys = getSortedKeysByDatastoreType(currentProperties.keySet(), dataStoreTypePrefix);
+
+        for(String key: keys) {
+            Object value = currentProperties.get(key);
+            if(key.startsWith(dataStoreTypePrefix)) {
+                key = key.replaceFirst(dataStoreTypePrefix, "");
+            }
+
+            if(key.startsWith(shardNamePrefix)) {
+                key = key.replaceFirst(shardNamePrefix, "");
+                convertValueAndInvokeSetter(key, value, builder);
+            }
+        }
+
+        return builder.build();
     }
 
     /**
@@ -197,19 +231,50 @@ public class DatastoreContextIntrospector {
      * @return true if the cached DatastoreContext was updated, false otherwise.
      */
     public synchronized boolean update(Dictionary<String, Object> properties) {
+        currentProperties = null;
         if(properties == null || properties.isEmpty()) {
             return false;
         }
 
         LOG.debug("In update: properties: {}", properties);
 
+        ImmutableMap.Builder<String, Object> mapBuilder = ImmutableMap.<String, Object>builder();
+
         Builder builder = DatastoreContext.newBuilderFrom(context);
 
         final String dataStoreTypePrefix = context.getDataStoreType() + '.';
 
+        List<String> keys = getSortedKeysByDatastoreType(Collections.list(properties.keys()), dataStoreTypePrefix);
+
+        boolean updated = false;
+        for(String key: keys) {
+            Object value = properties.get(key);
+            mapBuilder.put(key, value);
+
+            // If the key is prefixed with the data store type, strip it off.
+            if(key.startsWith(dataStoreTypePrefix)) {
+                key = key.replaceFirst(dataStoreTypePrefix, "");
+            }
+
+            if(convertValueAndInvokeSetter(key, value, builder)) {
+                updated = true;
+            }
+        }
+
+        currentProperties = mapBuilder.build();
+
+        if(updated) {
+            context = builder.build();
+        }
+
+        return updated;
+    }
+
+    private ArrayList<String> getSortedKeysByDatastoreType(Collection<String> inKeys,
+            final String dataStoreTypePrefix) {
         // Sort the property keys by putting the names prefixed with the data store type last. This
         // is done so data store specific settings are applied after global settings.
-        ArrayList<String> keys = Collections.list(properties.keys());
+        ArrayList<String> keys = new ArrayList<>(inKeys);
         Collections.sort(keys, new Comparator<String>() {
             @Override
             public int compare(String key1, String key2) {
@@ -217,44 +282,33 @@ public class DatastoreContextIntrospector {
                            key2.startsWith(dataStoreTypePrefix) ? -1 : key1.compareTo(key2);
             }
         });
+        return keys;
+    }
 
-        boolean updated = false;
-        for(String key: keys) {
-            Object value = properties.get(key);
-            try {
-                // If the key is prefixed with the data store type, strip it off.
-                if(key.startsWith(dataStoreTypePrefix)) {
-                    key = key.replaceFirst(dataStoreTypePrefix, "");
-                }
+    private boolean convertValueAndInvokeSetter(String inKey, Object inValue, Builder builder) {
+        String key = convertToCamelCase(inKey);
 
-                key = convertToCamelCase(key);
-
-                // Convert the value to the right type.
-                value = convertValue(key, value);
-                if(value == null) {
-                    continue;
-                }
-
-                LOG.debug("Converted value for property {}: {} ({})",
-                        key, value, value.getClass().getSimpleName());
-
-                // Call the setter method on the Builder instance.
-                Method setter = builderSetters.get(key);
-                setter.invoke(builder, constructorValueRecursively(
-                        Primitives.wrap(setter.getParameterTypes()[0]), value.toString()));
-
-                updated = true;
-
-            } catch (Exception e) {
-                LOG.error("Error converting value ({}) for property {}", value, key, e);
+        try {
+            // Convert the value to the right type.
+            Object value = convertValue(key, inValue);
+            if(value == null) {
+                return false;
             }
+
+            LOG.debug("Converted value for property {}: {} ({})",
+                    key, value, value.getClass().getSimpleName());
+
+            // Call the setter method on the Builder instance.
+            Method setter = builderSetters.get(key);
+            setter.invoke(builder, constructorValueRecursively(
+                    Primitives.wrap(setter.getParameterTypes()[0]), value.toString()));
+
+            return true;
+        } catch (Exception e) {
+            LOG.error("Error converting value ({}) for property {}", inValue, key, e);
         }
 
-        if(updated) {
-            context = builder.build();
-        }
-
-        return updated;
+        return false;
     }
 
     private static String convertToCamelCase(String inString) {
