@@ -18,6 +18,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
+import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
@@ -64,8 +65,11 @@ public class IntegrationTestKit extends ShardTestKit {
         datastoreContextBuilder.dataStoreType(typeName);
 
         DatastoreContext datastoreContext = datastoreContextBuilder.build();
+        DatastoreContextFactory mockContextFactory = Mockito.mock(DatastoreContextFactory.class);
+        Mockito.doReturn(datastoreContext).when(mockContextFactory).getBaseDatastoreContext();
+        Mockito.doReturn(datastoreContext).when(mockContextFactory).getShardDatastoreContext(Mockito.anyString());
 
-        DistributedDataStore dataStore = new DistributedDataStore(getSystem(), cluster, config, datastoreContext);
+        DistributedDataStore dataStore = new DistributedDataStore(getSystem(), cluster, config, mockContextFactory);
 
         dataStore.onGlobalContextUpdated(schemaContext);
 

@@ -29,7 +29,7 @@ public class DistributedDataStoreFactory {
 
         Configuration config = new ConfigurationImpl("module-shards.conf", "modules.conf");
         final DistributedDataStore dataStore = new DistributedDataStore(actorSystem,
-                new ClusterWrapperImpl(actorSystem), config, introspector.getContext());
+                new ClusterWrapperImpl(actorSystem), config, introspector.newContextFactory());
 
         overlay.setListener(dataStore);
 

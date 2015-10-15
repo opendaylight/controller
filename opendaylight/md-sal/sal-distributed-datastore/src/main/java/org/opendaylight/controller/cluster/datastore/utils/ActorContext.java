@@ -28,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
+import org.opendaylight.controller.cluster.datastore.DatastoreContextFactory;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.exceptions.LocalShardNotFoundException;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
@@ -172,8 +173,8 @@ public class ActorContext {
         }
     }
 
-    public void setDatastoreContext(DatastoreContext context) {
-        this.datastoreContext = context;
+    public void setDatastoreContext(DatastoreContextFactory contextFactory) {
+        this.datastoreContext = contextFactory.getBaseDatastoreContext();
         setCachedProperties();
 
         // We write the 'updated' volatile to trigger a write memory barrier so that the writes above
@@ -186,7 +187,7 @@ public class ActorContext {
         updated = true;
 
         if(shardManager != null) {
-            shardManager.tell(context, ActorRef.noSender());
+            shardManager.tell(contextFactory, ActorRef.noSender());
         }
     }
 

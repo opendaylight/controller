@@ -29,7 +29,7 @@ public class DatastoreContextConfigAdminOverlay implements AutoCloseable {
     public static final String CONFIG_ID = "org.opendaylight.controller.cluster.datastore";
 
     public static interface Listener {
-        void onDatastoreContextUpdated(DatastoreContext context);
+        void onDatastoreContextUpdated(DatastoreContextFactory contextFactory);
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(DatastoreContextConfigAdminOverlay.class);
@@ -72,7 +72,7 @@ public class DatastoreContextConfigAdminOverlay implements AutoCloseable {
 
                 if(introspector.update(properties)) {
                     if(listener != null) {
-                        listener.onDatastoreContextUpdated(introspector.getContext());
+                        listener.onDatastoreContextUpdated(introspector.newContextFactory());
                     }
                 }
             } else {
