@@ -20,6 +20,7 @@ import static org.mockito.Mockito.verify;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.AddressFromURIString;
+import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.actor.Status;
 import akka.cluster.Cluster;
@@ -38,15 +39,21 @@ import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.typesafe.config.ConfigFactory;
 import java.net.URI;
+import java.util.AbstractMap;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
@@ -142,9 +149,16 @@ public class ShardManagerTest extends AbstractActorTest {
         return newShardMgrProps(new MockConfiguration());
     }
 
+    private static DatastoreContextFactory newDatastoreContextFactory(DatastoreContext datastoreContext) {
+        DatastoreContextFactory mockFactory = mock(DatastoreContextFactory.class);
+        Mockito.doReturn(datastoreContext).when(mockFactory).getBaseDatastoreContext();
+        Mockito.doReturn(datastoreContext).when(mockFactory).getShardDatastoreContext(Mockito.anyString());
+        return mockFactory;
+    }
+
     private Props newShardMgrProps(Configuration config) {
-        return ShardManager.props(new MockClusterWrapper(), config, datastoreContextBuilder.build(), ready,
-                primaryShardInfoCache);
+        return ShardManager.props(new MockClusterWrapper(), config,
+                newDatastoreContextFactory(datastoreContextBuilder.build()), ready, primaryShardInfoCache);
     }
 
     private Props newPropsShardMgrWithMockShardActor() {
@@ -158,12 +172,100 @@ public class ShardManagerTest extends AbstractActorTest {
             private static final long serialVersionUID = 1L;
             @Override
             public ShardManager create() throws Exception {
-                return new ForwardingShardManager(clusterWrapper, config, datastoreContextBuilder.build(),
-                        ready, name, shardActor, primaryShardInfoCache);
+                return new ForwardingShardManager(clusterWrapper, config, newDatastoreContextFactory(
+                        datastoreContextBuilder.build()), ready, name, shardActor, primaryShardInfoCache);
             }
         };
 
         return Props.create(new DelegatingShardManagerCreator(creator)).withDispatcher(Dispatchers.DefaultDispatcherId());
+    }
+
+    @Test
+    public void testPerShardDatastoreContext() throws Exception {
+        final DatastoreContextFactory mockFactory = newDatastoreContextFactory(
+                datastoreContextBuilder.shardElectionTimeoutFactor(5).build());
+
+        Mockito.doReturn(DatastoreContext.newBuilderFrom(datastoreContextBuilder.build()).
+                shardElectionTimeoutFactor(6).build()).when(mockFactory).getShardDatastoreContext("default");
+
+        Mockito.doReturn(DatastoreContext.newBuilderFrom(datastoreContextBuilder.build()).
+                shardElectionTimeoutFactor(7).build()).when(mockFactory).getShardDatastoreContext("topology");
+
+        final MockConfiguration mockConfig = new MockConfiguration() {
+            @Override
+            public Collection<String> getMemberShardNames(String memberName) {
+                return Arrays.asList("default", "topology");
+            }
+
+            @Override
+            public Collection<String> getMembersFromShardName(String shardName) {
+                return Arrays.asList("member-1");
+            }
+        };
+
+        final TestActorRef<MessageCollectorActor> defaultShardActor = TestActorRef.create(getSystem(),
+                Props.create(MessageCollectorActor.class), "default");
+        final TestActorRef<MessageCollectorActor> topologyShardActor = TestActorRef.create(getSystem(),
+                Props.create(MessageCollectorActor.class), "topology");
+
+        final Map<String, Entry<ActorRef, DatastoreContext>> shardInfoMap = Collections.synchronizedMap(
+                new HashMap<String, Entry<ActorRef, DatastoreContext>>());
+        shardInfoMap.put("default", new AbstractMap.SimpleEntry<ActorRef, DatastoreContext>(defaultShardActor, null));
+        shardInfoMap.put("topology", new AbstractMap.SimpleEntry<ActorRef, DatastoreContext>(topologyShardActor, null));
+
+        final CountDownLatch newShardActorLatch = new CountDownLatch(2);
+        final Creator<ShardManager> creator = new Creator<ShardManager>() {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public ShardManager create() throws Exception {
+                return new ShardManager(new MockClusterWrapper(), mockConfig, mockFactory, ready, primaryShardInfoCache) {
+                    @Override
+                    protected ActorRef newShardActor(SchemaContext schemaContext, ShardInformation info) {
+                        Entry<ActorRef, DatastoreContext> entry = shardInfoMap.get(info.getShardName());
+                        ActorRef ref = null;
+                        if(entry != null) {
+                            ref = entry.getKey();
+                            entry.setValue(info.getDatastoreContext());
+                        }
+
+                        newShardActorLatch.countDown();
+                        return ref;
+                    }
+                };
+            }
+        };
+
+        JavaTestKit kit = new JavaTestKit(getSystem());
+
+        final ActorRef shardManager = getSystem().actorOf(Props.create(new DelegatingShardManagerCreator(creator)).
+                    withDispatcher(Dispatchers.DefaultDispatcherId()));
+
+        shardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), kit.getRef());
+
+        assertEquals("Shard actors created", true, newShardActorLatch.await(5, TimeUnit.SECONDS));
+        assertEquals("getShardElectionTimeoutFactor", 6, shardInfoMap.get("default").getValue().
+                getShardElectionTimeoutFactor());
+        assertEquals("getShardElectionTimeoutFactor", 7, shardInfoMap.get("topology").getValue().
+                getShardElectionTimeoutFactor());
+
+        DatastoreContextFactory newMockFactory = newDatastoreContextFactory(
+                datastoreContextBuilder.shardElectionTimeoutFactor(5).build());
+        Mockito.doReturn(DatastoreContext.newBuilderFrom(datastoreContextBuilder.build()).
+                shardElectionTimeoutFactor(66).build()).when(newMockFactory).getShardDatastoreContext("default");
+
+        Mockito.doReturn(DatastoreContext.newBuilderFrom(datastoreContextBuilder.build()).
+                shardElectionTimeoutFactor(77).build()).when(newMockFactory).getShardDatastoreContext("topology");
+
+        shardManager.tell(newMockFactory, kit.getRef());
+
+        DatastoreContext newContext = MessageCollectorActor.expectFirstMatching(defaultShardActor, DatastoreContext.class);
+        assertEquals("getShardElectionTimeoutFactor", 66, newContext.getShardElectionTimeoutFactor());
+
+        newContext = MessageCollectorActor.expectFirstMatching(topologyShardActor, DatastoreContext.class);
+        assertEquals("getShardElectionTimeoutFactor", 77, newContext.getShardElectionTimeoutFactor());
+
+        defaultShardActor.tell(PoisonPill.getInstance(), ActorRef.noSender());
+        topologyShardActor.tell(PoisonPill.getInstance(), ActorRef.noSender());
     }
 
     @Test
@@ -842,10 +944,9 @@ public class ShardManagerTest extends AbstractActorTest {
 
     @Test
     public void testWhenShardIsLeaderSyncStatusIsTrue() throws Exception{
-        final Props persistentProps = ShardManager.props(
-                new MockClusterWrapper(),
-                new MockConfiguration(),
-                DatastoreContext.newBuilder().persistent(true).build(), ready, primaryShardInfoCache);
+        final Props persistentProps = ShardManager.props(new MockClusterWrapper(), new MockConfiguration(),
+                newDatastoreContextFactory(DatastoreContext.newBuilder().persistent(true).build()), ready,
+                primaryShardInfoCache);
         final TestActorRef<ShardManager> shardManager =
                 TestActorRef.create(getSystem(), persistentProps);
 
@@ -876,10 +977,9 @@ public class ShardManagerTest extends AbstractActorTest {
 
     @Test
     public void testWhenShardIsFollowerSyncStatusDependsOnFollowerInitialSyncStatus() throws Exception{
-        final Props persistentProps = ShardManager.props(
-                new MockClusterWrapper(),
-                new MockConfiguration(),
-                DatastoreContext.newBuilder().persistent(true).build(), ready, primaryShardInfoCache);
+        final Props persistentProps = ShardManager.props(new MockClusterWrapper(), new MockConfiguration(),
+                newDatastoreContextFactory(DatastoreContext.newBuilder().persistent(true).build()), ready,
+                primaryShardInfoCache);
         final TestActorRef<ShardManager> shardManager =
                 TestActorRef.create(getSystem(), persistentProps);
 
@@ -904,15 +1004,15 @@ public class ShardManagerTest extends AbstractActorTest {
 
     @Test
     public void testWhenMultipleShardsPresentSyncStatusMustBeTrueForAllShards() throws Exception{
-        final Props persistentProps = ShardManager.props(
-                new MockClusterWrapper(),
+        final Props persistentProps = ShardManager.props(new MockClusterWrapper(),
                 new MockConfiguration() {
                     @Override
                     public List<String> getMemberShardNames(String memberName) {
                         return Arrays.asList("default", "astronauts");
                     }
                 },
-                DatastoreContext.newBuilder().persistent(true).build(), ready, primaryShardInfoCache);
+                newDatastoreContextFactory(DatastoreContext.newBuilder().persistent(true).build()), ready,
+                primaryShardInfoCache);
         final TestActorRef<ShardManager> shardManager =
                 TestActorRef.create(getSystem(), persistentProps);
 
@@ -1192,8 +1292,8 @@ public class ShardManagerTest extends AbstractActorTest {
 
         TestShardManager(String shardMrgIDSuffix) {
             super(new MockClusterWrapper(), new MockConfiguration(),
-                    DatastoreContext.newBuilder().dataStoreType(shardMrgIDSuffix).build(), ready,
-                    new PrimaryShardInfoFutureCache());
+                    newDatastoreContextFactory(DatastoreContext.newBuilder().dataStoreType(shardMrgIDSuffix).build()),
+                    ready, new PrimaryShardInfoFutureCache());
         }
 
         @Override
@@ -1252,9 +1352,9 @@ public class ShardManagerTest extends AbstractActorTest {
         private final String name;
 
         protected ForwardingShardManager(ClusterWrapper cluster, Configuration configuration,
-                DatastoreContext datastoreContext, CountDownLatch waitTillReadyCountdownLatch, String name,
+                DatastoreContextFactory factory, CountDownLatch waitTillReadyCountdownLatch, String name,
                 ActorRef shardActor, PrimaryShardInfoFutureCache primaryShardInfoCache) {
-            super(cluster, configuration, datastoreContext, waitTillReadyCountdownLatch, primaryShardInfoCache);
+            super(cluster, configuration, factory, waitTillReadyCountdownLatch, primaryShardInfoCache);
             this.shardActor = shardActor;
             this.name = name;
         }

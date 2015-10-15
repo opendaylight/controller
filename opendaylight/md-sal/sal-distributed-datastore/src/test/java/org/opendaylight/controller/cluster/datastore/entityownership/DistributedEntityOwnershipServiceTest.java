@@ -34,7 +34,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
+import org.opendaylight.controller.cluster.datastore.DatastoreContextFactory;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
 import org.opendaylight.controller.cluster.datastore.ShardDataTree;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
@@ -91,7 +93,11 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
             }
         });
 
-        dataStore = new DistributedDataStore(getSystem(), new MockClusterWrapper(), configuration, datastoreContext );
+        DatastoreContextFactory mockContextFactory = Mockito.mock(DatastoreContextFactory.class);
+        Mockito.doReturn(datastoreContext).when(mockContextFactory).getBaseDatastoreContext();
+        Mockito.doReturn(datastoreContext).when(mockContextFactory).getShardDatastoreContext(Mockito.anyString());
+
+        dataStore = new DistributedDataStore(getSystem(), new MockClusterWrapper(), configuration, mockContextFactory);
 
         dataStore.onGlobalContextUpdated(SchemaContextHelper.entityOwners());
     }

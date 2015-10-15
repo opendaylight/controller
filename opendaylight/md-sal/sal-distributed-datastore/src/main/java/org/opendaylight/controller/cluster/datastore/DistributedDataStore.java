@@ -67,13 +67,13 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
     private final TransactionContextFactory txContextFactory;
 
     public DistributedDataStore(ActorSystem actorSystem, ClusterWrapper cluster,
-            Configuration configuration, DatastoreContext datastoreContext) {
+            Configuration configuration, DatastoreContextFactory datastoreContextFactory) {
         Preconditions.checkNotNull(actorSystem, "actorSystem should not be null");
         Preconditions.checkNotNull(cluster, "cluster should not be null");
         Preconditions.checkNotNull(configuration, "configuration should not be null");
-        Preconditions.checkNotNull(datastoreContext, "datastoreContext should not be null");
+        Preconditions.checkNotNull(datastoreContextFactory, "datastoreContextFactory should not be null");
 
-        this.type = datastoreContext.getDataStoreType();
+        this.type = datastoreContextFactory.getBaseDatastoreContext().getDataStoreType();
 
         String shardManagerId = ShardManagerIdentifier.builder().type(type).build().toString();
 
@@ -84,19 +84,21 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
 
         PrimaryShardInfoFutureCache primaryShardInfoCache = new PrimaryShardInfoFutureCache();
         actorContext = new ActorContext(actorSystem, createShardManager(actorSystem, cluster, configuration,
-                datastoreContext, shardDispatcher, shardManagerId, primaryShardInfoCache), cluster,
-                configuration, datastoreContext, primaryShardInfoCache);
+                datastoreContextFactory, shardDispatcher, shardManagerId, primaryShardInfoCache), cluster,
+                configuration, datastoreContextFactory.getBaseDatastoreContext(), primaryShardInfoCache);
 
         this.waitTillReadyTimeInMillis =
                 actorContext.getDatastoreContext().getShardLeaderElectionTimeout().duration().toMillis() * READY_WAIT_FACTOR;
 
         this.txContextFactory = TransactionContextFactory.create(actorContext);
 
-        datastoreConfigMXBean = new DatastoreConfigurationMXBeanImpl(datastoreContext.getDataStoreMXBeanType());
-        datastoreConfigMXBean.setContext(datastoreContext);
+        datastoreConfigMXBean = new DatastoreConfigurationMXBeanImpl(
+                datastoreContextFactory.getBaseDatastoreContext().getDataStoreMXBeanType());
+        datastoreConfigMXBean.setContext(datastoreContextFactory.getBaseDatastoreContext());
         datastoreConfigMXBean.registerMBean();
 
-        datastoreInfoMXBean = new DatastoreInfoMXBeanImpl(datastoreContext.getDataStoreMXBeanType(), actorContext);
+        datastoreInfoMXBean = new DatastoreInfoMXBeanImpl(datastoreContextFactory.getBaseDatastoreContext().
+                getDataStoreMXBeanType(), actorContext);
         datastoreInfoMXBean.registerMBean();
     }
 
@@ -177,11 +179,11 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
     }
 
     @Override
-    public void onDatastoreContextUpdated(DatastoreContext context) {
+    public void onDatastoreContextUpdated(DatastoreContextFactory contextFactory) {
         LOG.info("DatastoreContext updated for data store {}", actorContext.getDataStoreType());
 
-        actorContext.setDatastoreContext(context);
-        datastoreConfigMXBean.setContext(context);
+        actorContext.setDatastoreContext(contextFactory);
+        datastoreConfigMXBean.setContext(contextFactory.getBaseDatastoreContext());
     }
 
     @Override
@@ -224,14 +226,14 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
     }
 
     private ActorRef createShardManager(ActorSystem actorSystem, ClusterWrapper cluster, Configuration configuration,
-                                        DatastoreContext datastoreContext, String shardDispatcher, String shardManagerId,
-                                        PrimaryShardInfoFutureCache primaryShardInfoCache){
+                                        DatastoreContextFactory datastoreContextFactory, String shardDispatcher,
+                                        String shardManagerId, PrimaryShardInfoFutureCache primaryShardInfoCache){
         Exception lastException = null;
 
         for(int i=0;i<100;i++) {
             try {
                 return actorSystem.actorOf(
-                        ShardManager.props(cluster, configuration, datastoreContext, waitTillReadyCountDownLatch,
+                        ShardManager.props(cluster, configuration, datastoreContextFactory, waitTillReadyCountDownLatch,
                                 primaryShardInfoCache).withDispatcher(shardDispatcher).withMailbox(
                                         ActorContext.MAILBOX), shardManagerId);
             } catch (Exception e){

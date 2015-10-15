@@ -185,4 +185,49 @@ public class DatastoreContextIntrospectorTest {
         assertEquals(false, configContext.isPersistent());
         assertEquals(444, configContext.getDataStoreProperties().getMaxDataChangeExecutorPoolSize());
     }
+
+    @Test
+    public void testGetDatastoreContextForShard() {
+        Dictionary<String, Object> properties = new Hashtable<>();
+        properties.put("shard-transaction-idle-timeout-in-minutes", "22"); // global setting
+        properties.put("operational.shard-transaction-idle-timeout-in-minutes", "33"); // operational override
+        properties.put("config.shard-transaction-idle-timeout-in-minutes", "44"); // config override
+        properties.put("topology.shard-transaction-idle-timeout-in-minutes", "55"); // global shard override
+
+        DatastoreContext operContext = DatastoreContext.newBuilder().dataStoreType("operational").build();
+        DatastoreContextIntrospector operIntrospector = new DatastoreContextIntrospector(operContext);
+
+        DatastoreContext shardContext = operIntrospector.newContextFactory().getShardDatastoreContext("topology");
+        assertEquals(10, shardContext.getShardTransactionIdleTimeout().toMinutes());
+
+        operIntrospector.update(properties);
+        operContext = operIntrospector.getContext();
+        assertEquals(33, operContext.getShardTransactionIdleTimeout().toMinutes());
+
+        shardContext = operIntrospector.newContextFactory().getShardDatastoreContext("topology");
+        assertEquals(55, shardContext.getShardTransactionIdleTimeout().toMinutes());
+
+        DatastoreContext configContext = DatastoreContext.newBuilder().dataStoreType("config").build();
+        DatastoreContextIntrospector configIntrospector = new DatastoreContextIntrospector(configContext);
+        configIntrospector.update(properties);
+        configContext = configIntrospector.getContext();
+        assertEquals(44, configContext.getShardTransactionIdleTimeout().toMinutes());
+
+        shardContext = configIntrospector.newContextFactory().getShardDatastoreContext("topology");
+        assertEquals(55, shardContext.getShardTransactionIdleTimeout().toMinutes());
+
+        properties.put("operational.topology.shard-transaction-idle-timeout-in-minutes", "66"); // operational shard override
+        properties.put("config.topology.shard-transaction-idle-timeout-in-minutes", "77"); // config shard override
+
+        operIntrospector.update(properties);
+        shardContext = operIntrospector.newContextFactory().getShardDatastoreContext("topology");
+        assertEquals(66, shardContext.getShardTransactionIdleTimeout().toMinutes());
+
+        configIntrospector.update(properties);
+        shardContext = configIntrospector.newContextFactory().getShardDatastoreContext("topology");
+        assertEquals(77, shardContext.getShardTransactionIdleTimeout().toMinutes());
+
+        shardContext = configIntrospector.newContextFactory().getShardDatastoreContext("default");
+        assertEquals(44, shardContext.getShardTransactionIdleTimeout().toMinutes());
+    }
 }
