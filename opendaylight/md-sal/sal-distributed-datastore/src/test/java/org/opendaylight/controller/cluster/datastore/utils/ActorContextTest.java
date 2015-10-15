@@ -43,6 +43,7 @@ import org.opendaylight.controller.cluster.datastore.AbstractActorTest;
 import org.opendaylight.controller.cluster.datastore.ClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
+import org.opendaylight.controller.cluster.datastore.DatastoreContextFactory;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.exceptions.NotInitializedException;
@@ -374,9 +375,12 @@ public class ActorContextTest extends AbstractActorTest{
             DatastoreContext newContext = DatastoreContext.newBuilder().operationTimeoutInSeconds(6).
                     shardTransactionCommitTimeoutInSeconds(8).build();
 
-            actorContext.setDatastoreContext(newContext);
+            DatastoreContextFactory mockContextFactory = mock(DatastoreContextFactory.class);
+            Mockito.doReturn(newContext).when(mockContextFactory).getBaseDatastoreContext();
 
-            expectMsgClass(duration("5 seconds"), DatastoreContext.class);
+            actorContext.setDatastoreContext(mockContextFactory);
+
+            expectMsgClass(duration("5 seconds"), DatastoreContextFactory.class);
 
             Assert.assertSame("getDatastoreContext", newContext, actorContext.getDatastoreContext());
 

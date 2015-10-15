@@ -106,7 +106,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
     private ShardManagerInfo mBean;
 
-    private DatastoreContext datastoreContext;
+    private DatastoreContextFactory datastoreContextFactory;
 
     private final CountDownLatch waitTillReadyCountdownLatch;
 
@@ -119,21 +119,19 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     /**
      */
     protected ShardManager(ClusterWrapper cluster, Configuration configuration,
-            DatastoreContext datastoreContext, CountDownLatch waitTillReadyCountdownLatch,
+            DatastoreContextFactory datastoreContextFactory, CountDownLatch waitTillReadyCountdownLatch,
             PrimaryShardInfoFutureCache primaryShardInfoCache) {
 
         this.cluster = Preconditions.checkNotNull(cluster, "cluster should not be null");
         this.configuration = Preconditions.checkNotNull(configuration, "configuration should not be null");
-        this.datastoreContext = datastoreContext;
-        this.type = datastoreContext.getDataStoreType();
+        this.datastoreContextFactory = datastoreContextFactory;
+        this.type = datastoreContextFactory.getBaseDatastoreContext().getDataStoreType();
         this.shardDispatcherPath =
                 new Dispatchers(context().system().dispatchers()).getDispatcherPath(Dispatchers.DispatcherType.Shard);
         this.waitTillReadyCountdownLatch = waitTillReadyCountdownLatch;
         this.primaryShardInfoCache = primaryShardInfoCache;
 
         peerAddressResolver = new ShardPeerAddressResolver(type, cluster.getCurrentMemberName());
-        this.datastoreContext = DatastoreContext.newBuilderFrom(datastoreContext).shardPeerAddressResolver(
-                peerAddressResolver).build();
 
         // Subscribe this actor to cluster member events
         cluster.subscribeToMemberEvents(getSelf());
@@ -144,7 +142,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     public static Props props(
             final ClusterWrapper cluster,
             final Configuration configuration,
-            final DatastoreContext datastoreContext,
+            final DatastoreContextFactory datastoreContextFactory,
             final CountDownLatch waitTillReadyCountdownLatch,
             final PrimaryShardInfoFutureCache primaryShardInfoCache) {
 
@@ -153,7 +151,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         Preconditions.checkNotNull(waitTillReadyCountdownLatch, "waitTillReadyCountdownLatch should not be null");
         Preconditions.checkNotNull(primaryShardInfoCache, "primaryShardInfoCache should not be null");
 
-        return Props.create(new ShardManagerCreator(cluster, configuration, datastoreContext,
+        return Props.create(new ShardManagerCreator(cluster, configuration, datastoreContextFactory,
                 waitTillReadyCountdownLatch, primaryShardInfoCache));
     }
 
@@ -184,8 +182,8 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             memberUnreachable((ClusterEvent.UnreachableMember)message);
         } else if(message instanceof ClusterEvent.ReachableMember) {
             memberReachable((ClusterEvent.ReachableMember) message);
-        } else if(message instanceof DatastoreContext) {
-            onDatastoreContext((DatastoreContext)message);
+        } else if(message instanceof DatastoreContextFactory) {
+            onDatastoreContextFactory((DatastoreContextFactory)message);
         } else if(message instanceof RoleChangeNotification) {
             onRoleChangeNotification((RoleChangeNotification) message);
         } else if(message instanceof FollowerInitialSyncUpStatus){
@@ -224,7 +222,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
             DatastoreContext shardDatastoreContext = createShard.getDatastoreContext();
             if(shardDatastoreContext == null) {
-                shardDatastoreContext = datastoreContext;
+                shardDatastoreContext = newShardDatastoreContext(moduleShardConfig.getShardName());
             } else {
                 shardDatastoreContext = DatastoreContext.newBuilderFrom(shardDatastoreContext).shardPeerAddressResolver(
                         peerAddressResolver).build();
@@ -249,6 +247,11 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         if(getSender() != null && !getContext().system().deadLetters().equals(getSender())) {
             getSender().tell(reply, getSelf());
         }
+    }
+
+    private DatastoreContext newShardDatastoreContext(String shardName) {
+        return DatastoreContext.newBuilderFrom(datastoreContextFactory.getShardDatastoreContext(shardName)).
+                shardPeerAddressResolver(peerAddressResolver).build();
     }
 
     private void checkReady(){
@@ -428,11 +431,11 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
                 LOG.debug("{}: Scheduling timer to wait for shard {}", persistenceId(), shardInformation.getShardName());
 
-                FiniteDuration timeout = datastoreContext.getShardInitializationTimeout().duration();
+                FiniteDuration timeout = shardInformation.getDatastoreContext().getShardInitializationTimeout().duration();
                 if(shardInformation.isShardInitialized()) {
                     // If the shard is already initialized then we'll wait enough time for the shard to
                     // elect a leader, ie 2 times the election timeout.
-                    timeout = FiniteDuration.create(datastoreContext.getShardRaftConfig()
+                    timeout = FiniteDuration.create(shardInformation.getDatastoreContext().getShardRaftConfig()
                             .getElectionTimeOutInterval().toMillis() * 2, TimeUnit.MILLISECONDS);
                 }
 
@@ -559,13 +562,10 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         }
     }
 
-    private void onDatastoreContext(DatastoreContext context) {
-        datastoreContext = DatastoreContext.newBuilderFrom(context).shardPeerAddressResolver(
-                peerAddressResolver).build();
+    private void onDatastoreContextFactory(DatastoreContextFactory factory) {
+        datastoreContextFactory = factory;
         for (ShardInformation info : localShards.values()) {
-            if (info.getActor() != null) {
-                info.getActor().tell(datastoreContext, getSelf());
-            }
+            info.setDatastoreContext(newShardDatastoreContext(info.getShardName()), getSelf());
         }
     }
 
@@ -684,12 +684,12 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             ShardIdentifier shardId = getShardIdentifier(memberName, shardName);
             Map<String, String> peerAddresses = getPeerAddresses(shardName);
             localShardActorNames.add(shardId.toString());
-            localShards.put(shardName, new ShardInformation(shardName, shardId, peerAddresses, datastoreContext,
-                    shardPropsCreator, peerAddressResolver));
+            localShards.put(shardName, new ShardInformation(shardName, shardId, peerAddresses,
+                    newShardDatastoreContext(shardName), shardPropsCreator, peerAddressResolver));
         }
 
         mBean = ShardManagerInfo.createShardManagerMBean(memberName, "shard-manager-" + this.type,
-                datastoreContext.getDataStoreMXBeanType(), localShardActorNames);
+                datastoreContextFactory.getBaseDatastoreContext().getDataStoreMXBeanType(), localShardActorNames);
 
         mBean.setShardManager(this);
     }
@@ -760,7 +760,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         private String leaderId;
         private short leaderVersion;
 
-        private final DatastoreContext datastoreContext;
+        private DatastoreContext datastoreContext;
         private final ShardPropsCreator shardPropsCreator;
         private final ShardPeerAddressResolver addressResolver;
 
@@ -806,6 +806,17 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
         Optional<DataTree> getLocalShardDataTree() {
             return localShardDataTree;
+        }
+
+        DatastoreContext getDatastoreContext() {
+            return datastoreContext;
+        }
+
+        void setDatastoreContext(DatastoreContext datastoreContext, ActorRef sender) {
+            this.datastoreContext = datastoreContext;
+            if(getActor() != null) {
+                getActor().tell(datastoreContext, sender);
+            }
         }
 
         void updatePeerAddress(String peerId, String peerAddress, ActorRef sender){
@@ -952,22 +963,23 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
         final ClusterWrapper cluster;
         final Configuration configuration;
-        final DatastoreContext datastoreContext;
+        final DatastoreContextFactory datastoreContextFactory;
         private final CountDownLatch waitTillReadyCountdownLatch;
         private final PrimaryShardInfoFutureCache primaryShardInfoCache;
 
-        ShardManagerCreator(ClusterWrapper cluster, Configuration configuration, DatastoreContext datastoreContext,
-                CountDownLatch waitTillReadyCountdownLatch, PrimaryShardInfoFutureCache primaryShardInfoCache) {
+        ShardManagerCreator(ClusterWrapper cluster, Configuration configuration,
+                DatastoreContextFactory datastoreContextFactory, CountDownLatch waitTillReadyCountdownLatch,
+                PrimaryShardInfoFutureCache primaryShardInfoCache) {
             this.cluster = cluster;
             this.configuration = configuration;
-            this.datastoreContext = datastoreContext;
+            this.datastoreContextFactory = datastoreContextFactory;
             this.waitTillReadyCountdownLatch = waitTillReadyCountdownLatch;
             this.primaryShardInfoCache = primaryShardInfoCache;
         }
 
         @Override
         public ShardManager create() throws Exception {
-            return new ShardManager(cluster, configuration, datastoreContext, waitTillReadyCountdownLatch,
+            return new ShardManager(cluster, configuration, datastoreContextFactory, waitTillReadyCountdownLatch,
                     primaryShardInfoCache);
         }
     }
