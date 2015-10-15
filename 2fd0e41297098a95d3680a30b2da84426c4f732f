@@ -90,6 +90,24 @@
     },
     {
       "key": {
+        "uuid": "fad0f9df_9548e6cd",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 596,
+      "author": {
+        "id": 2981
+      },
+      "writtenOn": "2015-10-15T11:38:06Z",
+      "side": 1,
+      "message": "Sure Tom. I have started working on this \u0026 getting the OnRecoveryCaptureSnapshot JUnit test script passed consistently. If you can share your looping script will try with that too.",
+      "parentUuid": "fad0f9df_12ddec42",
+      "revId": "2fd0e41297098a95d3680a30b2da84426c4f732f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_6fff5168",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
         "patchSetId": 2
