@@ -1,0 +1,33 @@
+<snapshot>
+    <configuration>
+        <data xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+            <modules xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
+                <module>
+                    <type xmlns:prefix="http://netconfcentral.org/ns/odl-sql">
+                        prefix:odl-sql
+                    </type>
+                    <name>odl-sql</name>
+                    <data-broker>
+                        <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">binding:binding-async-data-broker</type>
+                        <name>binding-data-broker</name>
+                    </data-broker>
+                    <async-data-broker>
+                        <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:dom-async-data-broker</type>
+                        <name>inmemory-data-broker</name>
+                    </async-data-broker>
+                    <schema-service>
+                        <type xmlns:dom="urn:opendaylight:params:xml:ns:yang:controller:md:sal:dom">dom:schema-service</type>
+                        <name>yang-schema-service</name>
+                    </schema-service>
+                    <rpc-registry>
+                        <type xmlns:binding="urn:opendaylight:params:xml:ns:yang:controller:md:sal:binding">binding:binding-rpc-registry</type>
+                        <name>binding-rpc-broker</name>
+                    </rpc-registry>
+                </module>
+            </modules>
+        </data>
+    </configuration>
+    <required-capabilities>
+        <capability>http://netconfcentral.org/ns/odl-sql?module=odl-sql&amp;revision=2015-10-16</capability>
+    </required-capabilities>
+</snapshot>
