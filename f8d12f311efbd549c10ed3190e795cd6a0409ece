@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fad0f9df_c7b55c32",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 763,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-10-16T12:33:09Z",
+      "side": 1,
+      "message": "This was made protected to provide mock behaviour in the derived mockShardManager for testing the jmx APIs added.\nAs the JMX test cases are getting removed, reverting the access specifier back to private.",
+      "parentUuid": "fad0f9df_a71cd86b",
+      "revId": "f8d12f311efbd549c10ed3190e795cd6a0409ece",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fad0f9df_c719dc7a",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
         "patchSetId": 9
@@ -30,6 +48,24 @@
       "writtenOn": "2015-10-16T12:00:25Z",
       "side": 1,
       "message": "Why do we need a static ShardManager instance?",
+      "revId": "f8d12f311efbd549c10ed3190e795cd6a0409ece",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_c78c7c82",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-10-16T12:33:09Z",
+      "side": 1,
+      "message": "The MockShardManager was created to used by the JMX test cases added for Add/Remove replica.\nThe instance was made static so as to create the mockShardManager object without instantiating the ShardManagerTest class.\nAs the jmx test cases not required. Removing the MockShardManager related changes.",
+      "parentUuid": "fad0f9df_c719dc7a",
       "revId": "f8d12f311efbd549c10ed3190e795cd6a0409ece",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "fad0f9df_e7c3c088",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 1085,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-10-16T12:33:09Z",
+      "side": 1,
+      "message": "Wanted to check AddReplica for a new shard that is already created in the node. Should this be modified.",
+      "parentUuid": "fad0f9df_a73378f5",
+      "revId": "f8d12f311efbd549c10ed3190e795cd6a0409ece",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fad0f9df_6726f0bc",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
         "patchSetId": 9
@@ -64,6 +118,24 @@
       "writtenOn": "2015-10-16T12:00:25Z",
       "side": 1,
       "message": "What is this class for?",
+      "revId": "f8d12f311efbd549c10ed3190e795cd6a0409ece",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_a7bdb804",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 1279,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-10-16T12:33:09Z",
+      "side": 1,
+      "message": "This was added to mock the add/remove shard replica on invocation from the jmx test cases.\nAs the jmx test changes are not required, MockShardManager class related changes are also removed.",
+      "parentUuid": "fad0f9df_6726f0bc",
       "revId": "f8d12f311efbd549c10ed3190e795cd6a0409ece",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "fad0f9df_c7ba3c0a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shardmanager/ShardManagerInfoTest.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-10-16T12:33:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fad0f9df_6774b09c",
+      "revId": "f8d12f311efbd549c10ed3190e795cd6a0409ece",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fad0f9df_c7479c4a",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/utils/MockConfiguration.java",
         "patchSetId": 9
@@ -98,6 +188,24 @@
       "writtenOn": "2015-10-16T12:00:25Z",
       "side": 1,
       "message": "This really should check shardMembers.contains(shardName)",
+      "revId": "f8d12f311efbd549c10ed3190e795cd6a0409ece",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_c7ff9ca9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/utils/MockConfiguration.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-10-16T12:33:09Z",
+      "side": 1,
+      "message": "to verify for a new non-existent shard available in the module.conf configuration, made the check so.\nThe shardMembers list contains only default, so with this check, i could mock for a shard that is not yet created.\n(default get created with the MockConfiguration)",
+      "parentUuid": "fad0f9df_c7479c4a",
       "revId": "f8d12f311efbd549c10ed3190e795cd6a0409ece",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
