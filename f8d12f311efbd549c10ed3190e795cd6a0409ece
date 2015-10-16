@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fad0f9df_a71cd86b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 763,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-16T12:00:25Z",
+      "side": 1,
+      "message": "Why was this made protected?",
+      "revId": "f8d12f311efbd549c10ed3190e795cd6a0409ece",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_c719dc7a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-16T12:00:25Z",
+      "side": 1,
+      "message": "Why do we need a static ShardManager instance?",
+      "revId": "f8d12f311efbd549c10ed3190e795cd6a0409ece",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_a73378f5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 1085,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-16T12:00:25Z",
+      "side": 1,
+      "message": "I\u0027m curious why you\u0027re dynamically creating a shard here instead of using the MockConfiguration which sets up the default shard? It\u0027s OK except you\u0027re also testing CreateShard which is orthogonal to this test.",
+      "revId": "f8d12f311efbd549c10ed3190e795cd6a0409ece",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_6726f0bc",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 1279,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-16T12:00:25Z",
+      "side": 1,
+      "message": "What is this class for?",
+      "revId": "f8d12f311efbd549c10ed3190e795cd6a0409ece",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_6774b09c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shardmanager/ShardManagerInfoTest.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-16T12:00:25Z",
+      "side": 1,
+      "message": "We don\u0027t actually need this test class since we decided to use yang RPCs instead of JMX. We can leave the JMX operations in for now and convert them later.",
+      "revId": "f8d12f311efbd549c10ed3190e795cd6a0409ece",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_c7479c4a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/utils/MockConfiguration.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-16T12:00:25Z",
+      "side": 1,
+      "message": "This really should check shardMembers.contains(shardName)",
+      "revId": "f8d12f311efbd549c10ed3190e795cd6a0409ece",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
