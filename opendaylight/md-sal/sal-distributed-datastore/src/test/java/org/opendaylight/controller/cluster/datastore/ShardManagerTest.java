@@ -88,6 +88,8 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
+import org.opendaylight.controller.cluster.datastore.messages.AddShardReplica;
+import org.opendaylight.controller.cluster.datastore.messages.RemoveShardReplica;
 
 public class ShardManagerTest extends AbstractActorTest {
     private static int ID_COUNTER = 1;
@@ -101,6 +103,8 @@ public class ShardManagerTest extends AbstractActorTest {
     private static TestActorRef<MessageCollectorActor> mockShardActor;
 
     private static String mockShardName;
+
+    private static ShardManager mockShardManager;
 
     private final DatastoreContext.Builder datastoreContextBuilder = DatastoreContext.newBuilder().
             dataStoreType(shardMrgIDSuffix).shardInitializationTimeout(600, TimeUnit.MILLISECONDS)
@@ -154,6 +158,31 @@ public class ShardManagerTest extends AbstractActorTest {
             public ShardManager create() throws Exception {
                 return new ForwardingShardManager(clusterWrapper, config, datastoreContextBuilder.build(),
                         ready, name, shardActor, primaryShardInfoCache);
+            }
+        };
+
+        return Props.create(new DelegatingShardManagerCreator(creator)).withDispatcher(Dispatchers.DefaultDispatcherId());
+    }
+
+    public static ShardManager getMockShardManager() {
+        if (mockShardManager == null) {
+            String shardManagerId = ShardManagerIdentifier.builder().type("config").build().toString();
+            TestActorRef<MockShardManager> shardManager = TestActorRef.create(ActorSystem.create("test"),
+                                                    newPropsMockShardManager(), shardManagerId);
+
+            mockShardManager = shardManager.underlyingActor();
+        }
+        return mockShardManager;
+    }
+
+    private static Props newPropsMockShardManager() {
+        Creator<ShardManager> creator = new Creator<ShardManager>() {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public ShardManager create() throws Exception {
+                return new MockShardManager(new MockClusterWrapper(), new MockConfiguration(),
+                                            DatastoreContext.newBuilder().dataStoreType("config").build(),
+                                            ready, new PrimaryShardInfoFutureCache());
             }
         };
 
@@ -1027,6 +1056,83 @@ public class ShardManagerTest extends AbstractActorTest {
         }};
     }
 
+    @Test
+    public void testAddShardReplicaForNonExistentShard() throws Exception {
+        new JavaTestKit(getSystem()) {{
+            ActorRef shardManager = getSystem().actorOf(newShardMgrProps(
+                    new ConfigurationImpl(new EmptyModuleShardConfigProvider())));
+
+            shardManager.tell(new AddShardReplica("model-inventory"), getRef());
+            expectMsgClass(duration("2 seconds"), akka.actor.Status.Failure.class);
+        }};
+    }
+    @Test
+    public void testAddShardReplicaForAlreadyCreatedShard() throws Exception {
+        new JavaTestKit(getSystem()) {{
+            datastoreContextBuilder.shardInitializationTimeout(1, TimeUnit.MINUTES).persistent(true);
+
+            ActorRef shardManager = getSystem().actorOf(newShardMgrProps(
+                    new ConfigurationImpl(new EmptyModuleShardConfigProvider())));
+
+            SchemaContext schemaContext = TestModel.createTestContext();
+            shardManager.tell(new UpdateSchemaContext(schemaContext), ActorRef.noSender());
+
+            DatastoreContext datastoreContext = DatastoreContext.newBuilder().shardElectionTimeoutFactor(100).
+                    persistent(false).build();
+            TestShardPropsCreator shardPropsCreator = new TestShardPropsCreator();
+            ModuleShardConfiguration config = new ModuleShardConfiguration(URI.create("model-inventory"), "modelInventory",
+                    "model-inventory", null, Arrays.asList("member-1"));
+            shardManager.tell(new CreateShard(config, shardPropsCreator, datastoreContext), getRef());
+
+            expectMsgClass(duration("5 seconds"), CreateShardReply.class);
+            shardManager.tell(new AddShardReplica("model-inventory"), getRef());
+            expectMsgClass(duration("2 seconds"), akka.actor.Status.Failure.class);
+        }};
+    }
+    @Test
+    public void testAddShardReplica() throws Exception {
+        new JavaTestKit(getSystem()) {{
+            datastoreContextBuilder.shardInitializationTimeout(1, TimeUnit.MINUTES).persistent(true);
+
+            ActorRef shardManager = getSystem().actorOf(newShardMgrProps());
+
+           /* SchemaContext schemaContext = TestModel.createTestContext();
+            shardManager.tell(new UpdateSchemaContext(schemaContext), ActorRef.noSender());
+
+            DatastoreContext datastoreContext = DatastoreContext.newBuilder().shardElectionTimeoutFactor(100).
+                    persistent(false).build();
+            TestShardPropsCreator shardPropsCreator = new TestShardPropsCreator();
+            ModuleShardConfiguration config = new ModuleShardConfiguration(URI.create("model-inventory"), "modelInventory",
+                    "model-inventory", null, Arrays.asList("member-2"));
+            shardManager.tell(new CreateShard(config, shardPropsCreator, datastoreContext), getRef());
+
+            expectMsgClass(duration("5 seconds"), CreateShardReply.class);
+            */
+            shardManager.tell(new AddShardReplica("astronauts"), getRef());
+            expectMsgClass(duration("2 seconds"), akka.actor.Status.Success.class);
+/*
+            datastoreContextBuilder.shardInitializationTimeout(1, TimeUnit.MINUTES).persistent(true);
+
+            ActorRef shardManager = getSystem().actorOf(newPropsShardMgrWithMockShardActor());
+
+            shardManager.tell(new AddShardReplica("inventory"), getRef());
+            expectMsgClass(duration("2 seconds"), akka.actor.Status.Success.class);
+            */
+         }};
+    }
+
+    @Test
+    public void testRemoveShardReplicaForNonExistentShard() throws Exception {
+        new JavaTestKit(getSystem()) {{
+            ActorRef shardManager = getSystem().actorOf(newShardMgrProps(
+                    new ConfigurationImpl(new EmptyModuleShardConfigProvider())));
+
+            shardManager.tell(new RemoveShardReplica("model-inventory"), getRef());
+            expectMsgClass(duration("2 seconds"), akka.actor.Status.Failure.class);
+        }};
+
+    }
+
     private static class TestShardPropsCreator implements ShardPropsCreator {
         ShardIdentifier shardId;
         Map<String, String> peerAddresses;
@@ -1187,6 +1293,36 @@ public class ShardManagerTest extends AbstractActorTest {
             assertEquals("FindPrimary received", true,
                     Uninterruptibles.awaitUninterruptibly(findPrimaryMessageReceived, 5, TimeUnit.SECONDS));
             findPrimaryMessageReceived = new CountDownLatch(1);
+        }
+    }
+
+    private static class MockShardManager extends ShardManager {
+
+        public MockShardManager(ClusterWrapper cluster, Configuration configuration,
+                                DatastoreContext datastoreContext, CountDownLatch latch,
+                                PrimaryShardInfoFutureCache primaryShardInfoCache) {
+            super (cluster, configuration, datastoreContext, latch, primaryShardInfoCache);
+        }
+
+        @Override
+        protected void onAddShardReplica (AddShardReplica shardReplicaMsg) {
+            if (shardReplicaMsg.getShardName().equals("astronauts")) {
+                getSender().tell(new akka.actor.Status.Success(true), getSelf());
+            } else if (shardReplicaMsg.getShardName().equals("model-inventory")) {
+                getSender().tell(new akka.actor.Status.Failure(new IllegalStateException(String.format("Timeout on replicating local shard %s", shardReplicaMsg.getShardName()))), getSelf());
+            } else {
+            //don't send any message back to the sender
+            }
+
+        }
+
+        @Override
+        protected void onRemoveShardReplica (RemoveShardReplica shardReplicaMsg) {
+            if (shardReplicaMsg.getShardName().equals("astronauts")) {
+                getSender().tell(new akka.actor.Status.Success(true), getSelf());
+            } else {
+                getSender().tell(new akka.actor.Status.Failure(new IllegalStateException(String.format("Leader failed to remove %s", shardReplicaMsg.getShardName()))), getSelf());
+            }
         }
     }
 }
