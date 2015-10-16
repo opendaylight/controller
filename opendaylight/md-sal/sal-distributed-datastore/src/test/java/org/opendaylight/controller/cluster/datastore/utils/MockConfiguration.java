@@ -35,7 +35,13 @@ public class MockConfiguration implements Configuration{
 
     @Override
     public Collection<String> getMemberShardNames(final String memberName) {
-        return new ArrayList<>(shardMembers.keySet());
+        ArrayList<String> shardNames = new ArrayList<String>();
+        for(Map.Entry<String, List<String>> shard : shardMembers.entrySet()) {
+            if (shard.getValue().contains(memberName)) {
+                shardNames.add(shard.getKey());
+            }
+        }
+        return shardNames;
     }
 
     @Override
@@ -81,5 +87,10 @@ public class MockConfiguration implements Configuration{
 
     @Override
     public void addModuleShardConfiguration(ModuleShardConfiguration config) {
+    }
+
+    @Override
+    public boolean isShardConfigured(String shardName) {
+        return (shardMembers.containsKey(shardName));
     }
 }

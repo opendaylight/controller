@@ -62,6 +62,8 @@ import org.opendaylight.controller.cluster.datastore.messages.RemotePrimaryShard
 import org.opendaylight.controller.cluster.datastore.messages.ShardLeaderStateChanged;
 import org.opendaylight.controller.cluster.datastore.messages.SwitchShardBehavior;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
+import org.opendaylight.controller.cluster.datastore.messages.AddShardReplica;
+import org.opendaylight.controller.cluster.datastore.messages.RemoveShardReplica;
 import org.opendaylight.controller.cluster.datastore.utils.Dispatchers;
 import org.opendaylight.controller.cluster.datastore.utils.PrimaryShardInfoFutureCache;
 import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListener;
@@ -198,6 +200,10 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             onSwitchShardBehavior((SwitchShardBehavior) message);
         } else if(message instanceof CreateShard) {
             onCreateShard((CreateShard)message);
+        } else if(message instanceof AddShardReplica){
+            onAddShardReplica((AddShardReplica)message);
+        } else if(message instanceof RemoveShardReplica){
+            onRemoveShardReplica((RemoveShardReplica)message);
         } else {
             unknownMessage(message);
         }
@@ -739,6 +745,43 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     ShardManagerInfoMBean getMBean(){
         return mBean;
     }
+
+    private void onAddShardReplica (AddShardReplica shardReplicaMsg) {
+        String shardName = shardReplicaMsg.getShardName();
+
+        // verify the local shard replica is already available in the controller node
+        if (localShards.containsKey(shardName)) {
+            LOG.debug ("Local shard replica {} already available in the controller node", shardName);
+            getSender().tell(new akka.actor.Status.Failure(new IllegalArgumentException(String.format("Local shard %s already exists", shardName))), getSelf());
+            return;
+        }
+        // verify the shard with the specified name is present in the cluster configuration
+        if (!(this.configuration.isShardConfigured(shardName))) {
+            LOG.debug ("Shard {} not available for replication", shardName);
+            getSender().tell(new akka.actor.Status.Failure(new IllegalArgumentException(String.format("No module configuration exists for shard %s", shardName))), getSelf());
+            return;
+        }
+
+        // call CreateShard for the shardName
+        getSender().tell(new akka.actor.Status.Success(true), getSelf());
+        return;
+    }
+
+    private void onRemoveShardReplica (RemoveShardReplica shardReplicaMsg) {
+        String shardName = shardReplicaMsg.getShardName();
+        boolean deleteStatus = false;
+
+        // verify the local shard replica is available in the controller node
+        if (!localShards.containsKey(shardName)) {
+            LOG.debug ("Local shard replica {} is not available in the controller node", shardName);
+            getSender().tell(new akka.actor.Status.Failure(new IllegalArgumentException(String.format("Local shard %s not available", shardName))), getSelf());
+            return;
+        }
+        // call RemoveShard for the shardName
+        getSender().tell(new akka.actor.Status.Success(true), getSelf());
+        return;
+    }
+
 
     @VisibleForTesting
     protected static class ShardInformation {

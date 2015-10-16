@@ -88,6 +88,8 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
+import org.opendaylight.controller.cluster.datastore.messages.AddShardReplica;
+import org.opendaylight.controller.cluster.datastore.messages.RemoveShardReplica;
 
 public class ShardManagerTest extends AbstractActorTest {
     private static int ID_COUNTER = 1;
@@ -1028,6 +1030,51 @@ public class ShardManagerTest extends AbstractActorTest {
             assertSame("schemaContext", schemaContext, shardPropsCreator.schemaContext);
             assertNotNull("schemaContext is null", shardPropsCreator.datastoreContext);
         }};
+    }
+
+    @Test
+    public void testAddShardReplicaForNonExistentShard() throws Exception {
+        new JavaTestKit(getSystem()) {{
+            ActorRef shardManager = getSystem().actorOf(newShardMgrProps(
+                    new ConfigurationImpl(new EmptyModuleShardConfigProvider())));
+
+            shardManager.tell(new AddShardReplica("model-inventory"), getRef());
+            expectMsgClass(duration("2 seconds"), akka.actor.Status.Failure.class);
+        }};
+    }
+    @Test
+    public void testAddShardReplicaForAlreadyCreatedShard() throws Exception {
+        new JavaTestKit(getSystem()) {{
+            ActorRef shardManager = getSystem().actorOf(newShardMgrProps());
+            shardManager.tell(new AddShardReplica("default"), getRef());
+            expectMsgClass(duration("2 seconds"), akka.actor.Status.Failure.class);
+        }};
+    }
+    @Test
+    public void testAddShardReplica() throws Exception {
+        new JavaTestKit(getSystem()) {{
+
+            MockConfiguration mockConfig = new MockConfiguration(ImmutableMap.<String, List<String>>builder().
+                put("default", Arrays.asList("member-1", "member-2")).
+                put("astronauts", Arrays.asList("member-2")).build());
+
+            ActorRef shardManager = getSystem().actorOf(newShardMgrProps(mockConfig));
+
+            shardManager.tell(new AddShardReplica("astronauts"), getRef());
+            expectMsgClass(duration("2 seconds"), akka.actor.Status.Success.class);
+         }};
+    }
+
+    @Test
+    public void testRemoveShardReplicaForNonExistentShard() throws Exception {
+        new JavaTestKit(getSystem()) {{
+            ActorRef shardManager = getSystem().actorOf(newShardMgrProps(
+                    new ConfigurationImpl(new EmptyModuleShardConfigProvider())));
+
+            shardManager.tell(new RemoveShardReplica("model-inventory"), getRef());
+            expectMsgClass(duration("2 seconds"), akka.actor.Status.Failure.class);
+        }};
+
     }
 
     private static class TestShardPropsCreator implements ShardPropsCreator {
