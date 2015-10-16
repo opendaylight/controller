@@ -11,6 +11,9 @@ package org.opendaylight.controller.md.sal.binding.impl.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
 import static org.opendaylight.controller.md.sal.test.model.util.ListsBindingUtils.TOP_BAR_KEY;
 import static org.opendaylight.controller.md.sal.test.model.util.ListsBindingUtils.TOP_FOO_KEY;
 import static org.opendaylight.controller.md.sal.test.model.util.ListsBindingUtils.USES_ONE_KEY;
@@ -22,10 +25,13 @@ import static org.opendaylight.controller.md.sal.test.model.util.ListsBindingUti
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.SettableFuture;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Matchers;
+import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification;
 import org.opendaylight.controller.md.sal.binding.api.DataObjectModification.ModificationType;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeListener;
@@ -37,8 +43,10 @@ import org.opendaylight.controller.md.sal.binding.test.AbstractConcurrentDataBro
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.augment.rev140709.TreeComplexUsesAugment;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.Top;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.TopBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.TwoLevelList;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelList;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.test.list.rev140701.two.level.list.TopLevelListBuilder;
 import org.opendaylight.yangtools.yang.binding.DataObject;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier.PathArgument;
@@ -137,7 +145,28 @@ public class DataTreeChangeListenerTest extends AbstractConcurrentDataBrokerTest
         verifyModification(barDeleteEvent.getRootNode(), BAR_ARGUMENT, ModificationType.DELETE);
     }
 
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testWildcardNotificationOfPreexistingData() throws Exception {
+        InstanceIdentifier<Top> id = InstanceIdentifier.builder(Top.class).build();
+        ArrayList<TopLevelList> list = new ArrayList<>();
+        list.add(new TopLevelListBuilder().setName("name").build());
+        TopBuilder builder = new TopBuilder().setTopLevelList(list);
 
+        DataBroker dataBroker = getDataBroker();
+
+        WriteTransaction writeTransaction = dataBroker.newWriteOnlyTransaction();
+        writeTransaction.put(LogicalDatastoreType.OPERATIONAL, id, builder.build());
+        assertCommit(writeTransaction.submit());
+
+        DataTreeChangeListener<TopLevelList> listener = mock(DataTreeChangeListener.class);
+        InstanceIdentifier<TopLevelList> wildcard = InstanceIdentifier.builder(Top.class).child(TopLevelList.class)
+                .build();
+        dataBroker.registerDataTreeChangeListener(new DataTreeIdentifier<>(LogicalDatastoreType.OPERATIONAL, wildcard),
+                listener);
+
+        verify(listener, timeout(1000)).onDataTreeChanged(Matchers.anyObject());
+    }
 
     private void createAndVerifyTop(final EventCapturingListener<Top> listener) throws Exception {
         putTx(TOP_PATH,TOP_INITIAL_DATA).submit().checkedGet();

@@ -43,6 +43,11 @@ final class InMemoryDOMStoreTreeChangePublisher extends AbstractDOMStoreTreeChan
         notificationManager = new QueuedNotificationManager<>(listenerExecutor, MANAGER_INVOKER, maxQueueSize, "DataTreeChangeListenerQueueMgr");
     }
 
+    private InMemoryDOMStoreTreeChangePublisher(QueuedNotificationManager<
+            AbstractDOMDataTreeChangeListenerRegistration<?>, DataTreeCandidate> notificationManager) {
+        this.notificationManager = notificationManager;
+    }
+
     @Override
     protected void notifyListeners(final Collection<AbstractDOMDataTreeChangeListenerRegistration<?>> registrations, final YangInstanceIdentifier path, final DataTreeCandidateNode node) {
         final DataTreeCandidate candidate = DataTreeCandidates.newDataTreeCandidate(path, node);
@@ -63,10 +68,15 @@ final class InMemoryDOMStoreTreeChangePublisher extends AbstractDOMStoreTreeChan
     <L extends DOMDataTreeChangeListener> ListenerRegistration<L> registerTreeChangeListener(final YangInstanceIdentifier treeId, final L listener, final DataTreeSnapshot snapshot) {
         final AbstractDOMDataTreeChangeListenerRegistration<L> reg = registerTreeChangeListener(treeId, listener);
 
-        final Optional<NormalizedNode<?, ?>> node = snapshot.readNode(treeId);
+        final Optional<NormalizedNode<?, ?>> node = snapshot.readNode(YangInstanceIdentifier.EMPTY);
         if (node.isPresent()) {
-            final DataTreeCandidate candidate = DataTreeCandidates.fromNormalizedNode(treeId, node.get());
-            notificationManager.submitNotification(reg, candidate);
+            final DataTreeCandidate candidate = DataTreeCandidates.fromNormalizedNode(
+                    YangInstanceIdentifier.EMPTY, node.get());
+
+            InMemoryDOMStoreTreeChangePublisher publisher =
+                    new InMemoryDOMStoreTreeChangePublisher(notificationManager);
+            publisher.registerTreeChangeListener(treeId, listener);
+            publisher.publishChange(candidate);
         }
 
         return reg;
