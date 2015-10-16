@@ -107,6 +107,24 @@
     },
     {
       "key": {
+        "uuid": "fad0f9df_e7cd0088",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 1085,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-16T13:00:34Z",
+      "side": 1,
+      "message": "If you use MockConfiguration then only \"default\" would be defined and created. So you can send AddReplica with \"default\" shard - no need to use CreateShard and introduce a dependency on it.",
+      "parentUuid": "fad0f9df_e7c3c088",
+      "revId": "f8d12f311efbd549c10ed3190e795cd6a0409ece",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fad0f9df_6726f0bc",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
         "patchSetId": 9
@@ -206,6 +224,24 @@
       "side": 1,
       "message": "to verify for a new non-existent shard available in the module.conf configuration, made the check so.\nThe shardMembers list contains only default, so with this check, i could mock for a shard that is not yet created.\n(default get created with the MockConfiguration)",
       "parentUuid": "fad0f9df_c7479c4a",
+      "revId": "f8d12f311efbd549c10ed3190e795cd6a0409ece",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_27b468f1",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/utils/MockConfiguration.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-16T13:00:34Z",
+      "side": 1,
+      "message": "I\u0027m not sure I follow. The way you have this coded is isShardConfigured(\"astronauts\") returns true and isShardConfigured(\"default\") returns false. However getMemberShardNames returns \"default\" (by default) so there\u0027s a disconnect. if getMemberShardNames returns \"default\" then isShardConfigured(\"default\") should return true, otherwise false.",
+      "parentUuid": "fad0f9df_c7ff9ca9",
       "revId": "f8d12f311efbd549c10ed3190e795cd6a0409ece",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
