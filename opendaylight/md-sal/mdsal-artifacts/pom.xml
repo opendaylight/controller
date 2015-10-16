@@ -246,20 +246,15 @@
                 <scope>runtime</scope>
             </dependency>
 
-            <!-- XSQL support -->
+            <!-- odl-sql support -->
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>sal-dom-xsql</artifactId>
+                <artifactId>sal-dom-odl-sql</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>sal-karaf-xsql</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>sal-dom-xsql-config</artifactId>
+                <artifactId>sal-dom-odl-sql</artifactId>
                 <version>${project.version}</version>
                 <classifier>config</classifier>
                 <type>xml</type>

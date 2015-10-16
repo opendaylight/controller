@@ -49,7 +49,6 @@
     <config.clustered-entity-ownership.configfile>06-clustered-entity-ownership.xml</config.clustered-entity-ownership.configfile>
     <config.netty.configfile>00-netty.xml</config.netty.configfile>
     <config.mdsal.configfile>01-md-sal.xml</config.mdsal.configfile>
-    <config.xsql.configfile>04-xsql.xml</config.xsql.configfile>
     <config.toaster.configfile>03-toaster-sample.xml</config.toaster.configfile>
     <config.restconf.configfile>10-rest-connector.xml</config.restconf.configfile>
 

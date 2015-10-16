@@ -1,0 +1,84 @@
+module odl-sql{
+    yang-version 1;
+    namespace "http://netconfcentral.org/ns/odl-sql";
+    prefix odl-sql;
+
+    import config { prefix config; revision-date 2013-04-05; }
+    import opendaylight-md-sal-binding { prefix mdsal; revision-date 2013-10-28; }
+    import rpc-context { prefix rpcx; revision-date 2013-06-17; }
+    import opendaylight-md-sal-dom {prefix sal;}
+    import opendaylight-md-sal-common {prefix common;}
+
+    organization "OpenDayLight";
+    contact "Sharon Aicler <saichler@cisco.com>";
+    description "YANG version of the odl-sql module";
+
+    revision "2015-10-16" {
+          description "odl-sql module v1";
+    }
+
+    identity odl-sql {
+        base config:module-type;
+        config:java-name-prefix ODLSQL;
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+        case odl-sql {
+            when "/config:modules/config:module/config:type = 'odl-sql'";
+
+            container data-broker {
+                uses config:service-ref {
+                    refine type {
+                        mandatory false;
+                        config:required-identity mdsal:binding-async-data-broker;
+                    }
+                }
+            }
+
+            container async-data-broker {
+                uses config:service-ref {
+                    refine type {
+                        mandatory false;
+                        config:required-identity sal:dom-async-data-broker;
+                    }
+                }
+
+            }
+
+            container schema-service {
+                uses config:service-ref {
+                    refine type {
+                        mandatory false;
+                        config:required-identity sal:schema-service;
+                    }
+                }
+
+            }
+
+            container rpc-registry {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity mdsal:binding-rpc-registry;
+                    }
+                }
+            }            
+        }
+    }
+
+    rpc execute-query  {
+        description
+          "Rest call to execute a odl-sql query ";          
+        input {
+            leaf odlsql {
+              type string;
+              description "query to execute";
+            }
+        }
+        output {
+            leaf result{
+            	type string;
+            }
+        }
+    }
+}
