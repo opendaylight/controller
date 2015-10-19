@@ -7,13 +7,14 @@
  */
 package org.opendaylight.controller.messagebus.eventsources.netconf;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import java.util.List;
-
 import org.opendaylight.controller.md.sal.binding.api.MountPoint;
 import org.opendaylight.controller.md.sal.dom.api.DOMMountPoint;
 import org.opendaylight.controller.messagebus.spi.EventSourceRegistration;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.topology.rev150114.NetconfNode;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.topology.rev150114.NetconfNodeFields.ConnectionStatus;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.topology.rev150114.NetconfNodeConnectionStatus.ConnectionStatus;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.topology.rev150114.network.topology.topology.topology.types.TopologyNetconf;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NodeId;
@@ -24,9 +25,6 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 
 /**
  * Helper class to keep connection status of netconf node  and event source registration object
@@ -58,7 +56,7 @@ public class NetconfEventSourceRegistration implements AutoCloseable{
         if(isEventSource(node) == false){
             return null;
         }
-        NetconfEventSourceRegistration nesr = new NetconfEventSourceRegistration(instanceIdent, node, netconfEventSourceManager);
+        final NetconfEventSourceRegistration nesr = new NetconfEventSourceRegistration(instanceIdent, node, netconfEventSourceManager);
         nesr.updateStatus();
         LOG.debug("NetconfEventSourceRegistration for node {} has been initialized...",node.getNodeId().getValue());
         return nesr;
@@ -105,7 +103,7 @@ public class NetconfEventSourceRegistration implements AutoCloseable{
     }
 
     void updateStatus(){
-        ConnectionStatus netconfConnStatus = getNetconfNode().getConnectionStatus();
+        final ConnectionStatus netconfConnStatus = getNetconfNode().getConnectionStatus();
         LOG.info("Change status on node {}, new status is {}",this.node.getNodeId().getValue(),netconfConnStatus);
         if(netconfConnStatus.equals(currentNetconfConnStatus)){
             return;
@@ -113,7 +111,7 @@ public class NetconfEventSourceRegistration implements AutoCloseable{
         changeStatus(netconfConnStatus);
     }
 
-    private boolean checkConnectionStatusType(ConnectionStatus status){
+    private boolean checkConnectionStatusType(final ConnectionStatus status){
         if(    status == ConnectionStatus.Connected
             || status == ConnectionStatus.Connecting
             || status == ConnectionStatus.UnableToConnect){
@@ -122,7 +120,7 @@ public class NetconfEventSourceRegistration implements AutoCloseable{
         return false;
     }
 
-    private void changeStatus(ConnectionStatus newStatus){
+    private void changeStatus(final ConnectionStatus newStatus){
         Preconditions.checkNotNull(newStatus);
         if(checkConnectionStatusType(newStatus) == false){
             throw new IllegalStateException("Unknown new Netconf Connection Status");
