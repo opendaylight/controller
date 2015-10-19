@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.topology.rev150114.netconf.node.fields.unavailable.capabilities.UnavailableCapability.FailureReason;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.topology.rev150114.netconf.node.connection.status.unavailable.capabilities.UnavailableCapability.FailureReason;
 import org.opendaylight.yangtools.yang.common.QName;
 
 public final class NetconfDeviceCapabilities {
@@ -28,21 +28,21 @@ public final class NetconfDeviceCapabilities {
         this.nonModuleBasedCapabilities = new HashSet<>();
     }
 
-    public void addUnresolvedCapability(QName source, FailureReason reason) {
+    public void addUnresolvedCapability(final QName source, final FailureReason reason) {
         unresolvedCapabilites.put(source, reason);
     }
 
-    public void addUnresolvedCapabilities(Collection<QName> capabilities, FailureReason reason) {
-        for (QName s : capabilities) {
+    public void addUnresolvedCapabilities(final Collection<QName> capabilities, final FailureReason reason) {
+        for (final QName s : capabilities) {
             unresolvedCapabilites.put(s, reason);
         }
     }
 
-    public void addCapabilities(Collection<QName> availableSchemas) {
+    public void addCapabilities(final Collection<QName> availableSchemas) {
         resolvedCapabilities.addAll(availableSchemas);
     }
 
-    public void addNonModuleBasedCapabilities(Collection<String> nonModuleCapabilities) {
+    public void addNonModuleBasedCapabilities(final Collection<String> nonModuleCapabilities) {
         this.nonModuleBasedCapabilities.addAll(nonModuleCapabilities);
     }
 

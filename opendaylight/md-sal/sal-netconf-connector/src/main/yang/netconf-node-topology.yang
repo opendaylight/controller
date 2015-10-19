@@ -15,15 +15,21 @@ module netconf-node-topology {
         }
     }
 
-    grouping netconf-node-fields {
-        leaf connection-status {
-            type enumeration {
-                enum connecting;
-                enum connected;
-                enum unable-to-connect;
+    grouping netconf-node-credentials {
+        choice creditals {
+            config true;
+            case login-password {
+                leaf username {
+                    type string;
+                }
+                leaf password {
+                    type string;
+                }
             }
         }
-
+    }
+    
+    grouping netconf-node-connection-parameters {
         leaf host {
             type inet:host;
         }
@@ -32,17 +38,99 @@ module netconf-node-topology {
             type inet:port-number;
         }
 
+        leaf tcp-only {
+            config true;
+            type boolean;
+        }
+
+        container yang-module-capabilities {
+            config true;
+            leaf-list capability {
+                type string;
+                description "Set a list of capabilities to override capabilities provided in device's hello message.
+                             Can be used for devices that do not report any yang modules in their hello message";
+            }
+        }
+
+        leaf reconnect-on-changed-schema {
+            config true;
+            type boolean;
+            default false;
+            description "If true, the connector would auto disconnect/reconnect when schemas are changed in the remote device.
+                         The connector subscribes (right after connect) to base netconf notifications and listens for netconf-capability-change notification";
+        }
+
+        leaf connection-timeout-millis {
+            config true;
+            type uint32;
+            default 20000;
+            description "Specifies timeout in milliseconds after which connection must be established.";
+        }
+
+        leaf default-request-timeout-millis {
+            config true;
+            type uint32;
+            default 60000;
+            description "Timeout for blocking operations within transactions.";
+        }
+
+        leaf max-connection-attempts {
+            config true;
+            type uint32;
+            default 0; // retry forever
+            description "Maximum number of connection retries. Non positive value or null is interpreted as infinity.";
+        }
+
+        leaf between-attempts-timeout-millis {
+            config true;
+            type uint16;
+            default 2000;
+            description "Initial timeout in milliseconds to wait between connection attempts. Will be multiplied by sleep-factor with every additional attempt";
+        }
+
+        leaf sleep-factor {
+            config true;
+            type decimal64 {
+                fraction-digits 1;
+            }
+            default 1.5;
+        }
+
+        // Keepalive configuration
+        leaf keepalive-delay {
+            config true;
+            type uint32;
+            default 120;
+            description "Netconf connector sends keepalive RPCs while the session is idle, this delay specifies the delay between keepalive RPC in seconds
+                         If a value <1 is provided, no keepalives will be sent";
+        }
+    }
+
+    grouping netconf-node-connection-status {
+
+        leaf connection-status {
+            config false;
+            type enumeration {
+                enum connecting;
+                enum connected;
+                enum unable-to-connect;
+            }
+        }
+
         leaf connected-message {
+            config false;
             type string;
         }
 
         container available-capabilities {
+            config false;
             leaf-list available-capability {
                 type string;
             }
         }
 
         container unavailable-capabilities {
+            config false;
             list unavailable-capability {
                 leaf capability {
                     type string;
@@ -64,6 +152,16 @@ module netconf-node-topology {
                 is available verbatim under this container through the
                 mount extension.";
         }
+    }
+
+    grouping netconf-node-fields {
+
+        uses netconf-node-credentials;
+
+        uses netconf-node-connection-parameters;
+
+        uses netconf-node-connection-status;
+
     }
 
     augment "/nt:network-topology/nt:topology/nt:node" {

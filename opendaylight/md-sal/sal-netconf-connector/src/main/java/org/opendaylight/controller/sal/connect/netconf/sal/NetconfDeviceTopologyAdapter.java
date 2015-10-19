@@ -30,13 +30,13 @@ import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.topology.rev150114.NetconfNode;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.topology.rev150114.NetconfNodeBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.topology.rev150114.NetconfNodeFields.ConnectionStatus;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.topology.rev150114.netconf.node.fields.AvailableCapabilitiesBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.topology.rev150114.netconf.node.fields.UnavailableCapabilities;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.topology.rev150114.netconf.node.fields.UnavailableCapabilitiesBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.topology.rev150114.netconf.node.fields.unavailable.capabilities.UnavailableCapability;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.topology.rev150114.netconf.node.fields.unavailable.capabilities.UnavailableCapability.FailureReason;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.topology.rev150114.netconf.node.fields.unavailable.capabilities.UnavailableCapabilityBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.topology.rev150114.NetconfNodeConnectionStatus.ConnectionStatus;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.topology.rev150114.netconf.node.connection.status.AvailableCapabilitiesBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.topology.rev150114.netconf.node.connection.status.UnavailableCapabilities;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.topology.rev150114.netconf.node.connection.status.UnavailableCapabilitiesBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.topology.rev150114.netconf.node.connection.status.unavailable.capabilities.UnavailableCapability;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.topology.rev150114.netconf.node.connection.status.unavailable.capabilities.UnavailableCapability.FailureReason;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.topology.rev150114.netconf.node.connection.status.unavailable.capabilities.UnavailableCapabilityBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.netconf.node.topology.rev150114.network.topology.topology.topology.types.TopologyNetconf;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopology;
 import org.opendaylight.yang.gen.v1.urn.tbd.params.xml.ns.yang.network.topology.rev131021.NetworkTopologyBuilder;
@@ -67,7 +67,7 @@ final class NetconfDeviceTopologyAdapter implements AutoCloseable {
     };
     public static final Function<QName, String> AVAILABLE_CAPABILITY_TRANSFORMER = new Function<QName, String>() {
         @Override
-        public String apply(QName qName) {
+        public String apply(final QName qName) {
             // intern string representation of a capability to avoid duplicates
             return qName.toString().intern();
         }
@@ -84,13 +84,13 @@ final class NetconfDeviceTopologyAdapter implements AutoCloseable {
         this.id = id;
         this.txChain = Preconditions.checkNotNull(dataService).createTransactionChain(new TransactionChainListener() {
             @Override
-            public void onTransactionChainFailed(TransactionChain<?, ?> chain, AsyncTransaction<?, ?> transaction, Throwable cause) {
+            public void onTransactionChainFailed(final TransactionChain<?, ?> chain, final AsyncTransaction<?, ?> transaction, final Throwable cause) {
                 logger.error("{}: TransactionChain({}) {} FAILED!", id, chain, transaction.getIdentifier(), cause);
                 throw new IllegalStateException(id + "  TransactionChain(" + chain + ") not committed correctly", cause);
             }
 
             @Override
-            public void onTransactionChainSuccessful(TransactionChain<?, ?> chain) {
+            public void onTransactionChainSuccessful(final TransactionChain<?, ?> chain) {
                 logger.trace("{}: TransactionChain({}) {} SUCCESSFUL", id, chain);
             }
         });
@@ -107,13 +107,13 @@ final class NetconfDeviceTopologyAdapter implements AutoCloseable {
         createNetworkTopologyIfNotPresent(writeTx);
 
         final InstanceIdentifier<Node> path = id.getTopologyBindingPath();
-        NodeBuilder nodeBuilder = getNodeIdBuilder(id);
-        NetconfNodeBuilder netconfNodeBuilder = new NetconfNodeBuilder();
+        final NodeBuilder nodeBuilder = getNodeIdBuilder(id);
+        final NetconfNodeBuilder netconfNodeBuilder = new NetconfNodeBuilder();
         netconfNodeBuilder.setConnectionStatus(ConnectionStatus.Connecting);
         netconfNodeBuilder.setHost(id.getHost());
         netconfNodeBuilder.setPort(new PortNumber(id.getAddress().getPort()));
         nodeBuilder.addAugmentation(NetconfNode.class, netconfNodeBuilder.build());
-        Node node = nodeBuilder.build();
+        final Node node = nodeBuilder.build();
 
         logger.trace("{}: Init device state transaction {} putting if absent operational data started.", id, writeTx.getIdentifier());
         writeTx.put(LogicalDatastoreType.OPERATIONAL, path, node);
@@ -126,7 +126,7 @@ final class NetconfDeviceTopologyAdapter implements AutoCloseable {
         commitTransaction(writeTx, "init");
     }
 
-    public void updateDeviceData(boolean up, NetconfDeviceCapabilities capabilities) {
+    public void updateDeviceData(final boolean up, final NetconfDeviceCapabilities capabilities) {
         final Node data = buildDataForNetconfNode(up, capabilities);
 
         final WriteTransaction writeTx = txChain.newWriteOnlyTransaction();
@@ -137,8 +137,8 @@ final class NetconfDeviceTopologyAdapter implements AutoCloseable {
         commitTransaction(writeTx, "update");
     }
 
-    public void setDeviceAsFailed(Throwable throwable) {
-        String reason = (throwable != null && throwable.getMessage() != null) ? throwable.getMessage() : UNKNOWN_REASON;
+    public void setDeviceAsFailed(final Throwable throwable) {
+        final String reason = (throwable != null && throwable.getMessage() != null) ? throwable.getMessage() : UNKNOWN_REASON;
 
         final NetconfNode netconfNode = new NetconfNodeBuilder().setConnectionStatus(ConnectionStatus.UnableToConnect).setConnectedMessage(reason).build();
         final Node data = getNodeIdBuilder(id).addAugmentation(NetconfNode.class, netconfNode).build();
@@ -151,8 +151,8 @@ final class NetconfDeviceTopologyAdapter implements AutoCloseable {
         commitTransaction(writeTx, "update-failed-device");
     }
 
-    private Node buildDataForNetconfNode(boolean up, NetconfDeviceCapabilities capabilities) {
-        List<String> capabilityList = new ArrayList<>();
+    private Node buildDataForNetconfNode(final boolean up, final NetconfDeviceCapabilities capabilities) {
+        final List<String> capabilityList = new ArrayList<>();
         capabilityList.addAll(capabilities.getNonModuleBasedCapabilities());
         capabilityList.addAll(FluentIterable.from(capabilities.getResolvedCapabilities()).transform(AVAILABLE_CAPABILITY_TRANSFORMER).toList());
         final AvailableCapabilitiesBuilder avCapabalitiesBuilder = new AvailableCapabilitiesBuilder();
