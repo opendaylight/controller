@@ -117,6 +117,21 @@ module netconf-node-topology {
             }
         }
 
+        container clustered-connection-status {
+            config false;
+            list node-status {
+                leaf node {
+                    type string;
+                }
+                leaf status {
+                    type enumeration {
+                        enum successful;
+                        enum failed;
+                    }
+                }
+            }
+        }
+
         leaf connected-message {
             config false;
             type string;
