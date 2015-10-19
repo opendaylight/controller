@@ -44,6 +44,8 @@
     <module>netconf-notifications-impl</module>
     <module>netconf-notifications-api</module>
 
+    <module>abstract-topology</module>
+
     <module>netconf-artifacts</module>
   </modules>
 
