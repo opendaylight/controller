@@ -97,6 +97,30 @@
     },
     {
       "key": {
+        "uuid": "fad0f9df_1e65eae0",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-20T13:01:08Z",
+      "side": 1,
+      "message": "Applying it to state in this case entails adding to the peers/followers which has already been done. The applyState call below is overridden by derived classes to apply to their state so we shouldn\u0027t call applyState for server config changes.",
+      "parentUuid": "fad0f9df_c89248f6",
+      "range": {
+        "startLine": 199,
+        "startChar": 12,
+        "endLine": 199,
+        "endChar": 14
+      },
+      "revId": "40fb48c41a6620e5f9a8e6389b4ba91d47aee42d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fad0f9df_435879fa",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
         "patchSetId": 4
