@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fad0f9df_20dd2871",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-20T17:53:10Z",
+      "side": 1,
+      "message": "You should not cache this timeout at all as config params can dynamically change. Just create a new instance where it\u0027s needed.",
+      "revId": "69d35bb2fa8fc1ddf5512807b332e5959cfdfbc8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_a0827850",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-20T17:53:10Z",
+      "side": 1,
+      "message": "return true here",
+      "revId": "69d35bb2fa8fc1ddf5512807b332e5959cfdfbc8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_8081744c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-20T17:53:10Z",
+      "side": 1,
+      "message": "return false here",
+      "revId": "69d35bb2fa8fc1ddf5512807b332e5959cfdfbc8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_008d847b",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-20T17:53:10Z",
+      "side": 1,
+      "message": "You could eliminate isServerConfigurationInProgress if you instead check if the queue is empty. If not empty, then add it and call processAddServer. This avoids one less state variable to maintain.",
+      "revId": "69d35bb2fa8fc1ddf5512807b332e5959cfdfbc8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_e0e64044",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-20T17:53:10Z",
+      "side": 1,
+      "message": "You really don\u0027t have to pass any sender or ID since you\u0027re not using it for tracking.",
+      "revId": "69d35bb2fa8fc1ddf5512807b332e5959cfdfbc8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
