@@ -214,6 +214,24 @@
     },
     {
       "key": {
+        "uuid": "fad0f9df_20dbe8ee",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-20T20:27:57Z",
+      "side": 1,
+      "message": "You wouldn\u0027t want to add it to the queue before you check isEmpty. You could do this:\n\n  CatchupFollowerInfo followerInfo \u003d new ...\n  boolean process \u003d !followerInfoQueue.isEmpty();\n  followerInfoQueue.add(followerInfo);\n  if(process) {\n      processAddServer(raftActor);\n  }",
+      "parentUuid": "fad0f9df_20268817",
+      "revId": "69d35bb2fa8fc1ddf5512807b332e5959cfdfbc8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fad0f9df_e0e64044",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
         "patchSetId": 7
@@ -261,6 +279,24 @@
       "side": 1,
       "message": "Not clear. Can you please elaborate?",
       "parentUuid": "fad0f9df_60fed06d",
+      "revId": "69d35bb2fa8fc1ddf5512807b332e5959cfdfbc8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_a0eef889",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-20T20:27:57Z",
+      "side": 1,
+      "message": "The reason persistData takes an ActorRef and ID is to track context for the Shard (i.e. reply-to sender and transaction ID) that is passed back to the Shard via ApplyState. But you\u0027re already storing the context in CatchupFollowerInfo so you don\u0027t really need to pass the sender and an ID b/c you don\u0027t use it.",
+      "parentUuid": "fad0f9df_e01f20b6",
       "revId": "69d35bb2fa8fc1ddf5512807b332e5959cfdfbc8",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
