@@ -21,6 +21,7 @@
     <properties>
         <jolokia-bridge.version>0.2.0-SNAPSHOT</jolokia-bridge.version>
         <jolokia.version>1.1.4</jolokia.version>
+        <aaa.version>0.3.0-SNAPSHOT</aaa.version>
     </properties>
 
     <dependencies>
@@ -28,6 +29,13 @@
             <groupId>org.jolokia</groupId>
             <artifactId>jolokia-osgi</artifactId>
             <version>${jolokia.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opendaylight.aaa</groupId>
+            <artifactId>features-aaa</artifactId>
+            <version>${aaa.version}</version>
+            <classifier>features</classifier>
+            <type>xml</type>
         </dependency>
     </dependencies>
 

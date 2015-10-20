@@ -15,10 +15,14 @@
 <features name="odl-extras-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
+
+    <repository>mvn:org.opendaylight.aaa/features-aaa/${aaa.version}/xml/features</repository>
+
     <feature name='odl-extras-all' version='${project.version}' description='OpenDaylight :: Extras :: All'>
         <feature version="${project.version}">odl-jolokia</feature>
     </feature>
     <feature name="odl-jolokia" version="${project.version}" description="Jolokia JMX/HTTP bridge">
+        <feature>odl-aaa-authn</feature>
         <feature>http</feature>
         <bundle>mvn:org.jolokia/jolokia-osgi/{{VERSION}}</bundle>
     </feature>
