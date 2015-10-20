@@ -43,6 +43,7 @@ import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshotReply;
 import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
+import org.opendaylight.controller.cluster.raft.messages.UnInitializedFollowerSnapshotReply;
 import scala.concurrent.duration.FiniteDuration;
 
 /**
@@ -85,9 +86,9 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
     private final Collection<ClientRequestTracker> trackerList = new LinkedList<>();
 
-    protected final int minReplicationCount;
+    private int minReplicationCount;
 
-    protected final int minIsolatedLeaderPeerCount;
+    private int minIsolatedLeaderPeerCount;
 
     private Optional<SnapshotHolder> snapshot;
 
@@ -107,15 +108,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
         LOG.debug("{}: Election: Leader has following peers: {}", logName(), getFollowerIds());
 
-        minReplicationCount = getMajorityVoteCount(getFollowerIds().size());
-
-        // the isolated Leader peer count will be 1 less than the majority vote count.
-        // this is because the vote count has the self vote counted in it
-        // for e.g
-        // 0 peers = 1 votesRequired , minIsolatedLeaderPeerCount = 0
-        // 2 peers = 2 votesRequired , minIsolatedLeaderPeerCount = 1
-        // 4 peers = 3 votesRequired, minIsolatedLeaderPeerCount = 2
-        minIsolatedLeaderPeerCount = minReplicationCount > 0 ? (minReplicationCount - 1) : 0;
+        updateMinReplicaCountAndMinIsolatedLeaderPeerCount();
 
         snapshot = Optional.absent();
 
@@ -142,6 +135,26 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         FollowerLogInformation followerLogInformation = new FollowerLogInformationImpl(followerId, -1, context);
         followerLogInformation.setFollowerState(followerState);
         followerToLog.put(followerId, followerLogInformation);
+    }
+
+    public void removeFollower(String followerId) {
+        followerToLog.remove(followerId);
+    }
+
+    public void updateMinReplicaCountAndMinIsolatedLeaderPeerCount(){
+        minReplicationCount = getMajorityVoteCount(getFollowerIds().size());
+
+        //the isolated Leader peer count will be 1 less than the majority vote count.
+        //this is because the vote count has the self vote counted in it
+        //for e.g
+        //0 peers = 1 votesRequired , minIsolatedLeaderPeerCount = 0
+        //2 peers = 2 votesRequired , minIsolatedLeaderPeerCount = 1
+        //4 peers = 3 votesRequired, minIsolatedLeaderPeerCount = 2
+        minIsolatedLeaderPeerCount = minReplicationCount > 0 ? (minReplicationCount - 1) : 0;
+    }
+
+    public int getMinIsolatedLeaderPeerCount(){
+        return minIsolatedLeaderPeerCount;
     }
 
     @VisibleForTesting
@@ -414,7 +427,13 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                         setSnapshot(null);
                     }
                     wasLastChunk = true;
-
+                    FollowerState followerState = followerLogInformation.getFollowerState();
+                    if(followerState ==  FollowerState.VOTING_NOT_INITIALIZED){
+                        UnInitializedFollowerSnapshotReply unInitFollowerSnapshotSuccess =
+                                             new UnInitializedFollowerSnapshotReply(followerId);
+                        context.getActor().tell(unInitFollowerSnapshotSuccess, context.getActor());
+                        LOG.debug("Sent message UnInitializedFollowerSnapshotReply to self");
+                    }
                 } else {
                     followerToSnapshot.markSendStatus(true);
                 }

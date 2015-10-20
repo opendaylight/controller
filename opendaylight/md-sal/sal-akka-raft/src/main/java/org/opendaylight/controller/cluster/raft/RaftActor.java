@@ -195,6 +195,11 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         if (message instanceof ApplyState){
             ApplyState applyState = (ApplyState) message;
 
+            boolean result = serverConfigurationSupport.handleMessage(message, this, getSender());
+            if(result){
+                return;
+            }
+
             long elapsedTime = (System.nanoTime() - applyState.getStartTime());
             if(elapsedTime >= APPLY_STATE_DELAY_THRESHOLD_IN_NANOS){
                 LOG.warn("ApplyState took more time than expected. Elapsed Time = {} ms ApplyState = {}",
