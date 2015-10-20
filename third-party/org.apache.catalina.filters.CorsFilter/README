@@ -1,0 +1,12 @@
+See: http://tomcat.apache.org/tomcat-7.0-doc/config/filter.html#CORS_Filter
+And: http://en.wikipedia.org/wiki/Cross-origin_resource_sharing
+This is done to allow a web page using javascript to be able to make calls
+to our REST APIs even though it does not originate in our domain.
+
+This bundle just rolls up org.apache.catalina.filters.CorsFilter and adds it as a 
+fragment to the org.apache.catalina bundle.
+
+The reason this is necessary is because the CorsFilter class was originally added
+at Tomcat 7.0.42, and we are using 7.0.32.  As the CorsFilter class is a simple one,
+with very few dependencies, this seemed the best way to bring it in.
+
