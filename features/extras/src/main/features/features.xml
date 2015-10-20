@@ -19,6 +19,7 @@
         <feature version="${project.version}">odl-jolokia</feature>
     </feature>
     <feature name="odl-jolokia" version="${project.version}" description="Jolokia JMX/HTTP bridge">
+        <feature>odl-aaa-authn</feature>
         <feature>http</feature>
         <bundle>mvn:org.jolokia/jolokia-osgi/{{VERSION}}</bundle>
     </feature>
