@@ -49,6 +49,54 @@
     },
     {
       "key": {
+        "uuid": "fad0f9df_c89248f6",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 3366
+      },
+      "writtenOn": "2015-10-20T06:09:03Z",
+      "side": 1,
+      "message": "added todo",
+      "parentUuid": "1a76adc5_e66e35c9",
+      "range": {
+        "startLine": 199,
+        "startChar": 12,
+        "endLine": 199,
+        "endChar": 14
+      },
+      "revId": "40fb48c41a6620e5f9a8e6389b4ba91d47aee42d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_68a47c57",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 3366
+      },
+      "writtenOn": "2015-10-20T06:09:03Z",
+      "side": 1,
+      "message": "Tom - I am not fully clear on this comment, i thought this configuration change also needs to be applied to the state, please correct me.",
+      "parentUuid": "1a76adc5_8152cbdb",
+      "range": {
+        "startLine": 199,
+        "startChar": 12,
+        "endLine": 199,
+        "endChar": 14
+      },
+      "revId": "40fb48c41a6620e5f9a8e6389b4ba91d47aee42d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_66ad4588",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
         "patchSetId": 4
@@ -144,6 +192,30 @@
     },
     {
       "key": {
+        "uuid": "fad0f9df_e88f0ccb",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 3366
+      },
+      "writtenOn": "2015-10-20T06:09:03Z",
+      "side": 1,
+      "message": "From the discussion, I am infering that RaftActorServerConfigurationSupport would continue to exist as a seperate class.",
+      "parentUuid": "1a76adc5_8f874dd7",
+      "range": {
+        "startLine": 37,
+        "startChar": 6,
+        "endLine": 37,
+        "endChar": 41
+      },
+      "revId": "40fb48c41a6620e5f9a8e6389b4ba91d47aee42d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_c66539e2",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
         "patchSetId": 4
@@ -167,6 +239,30 @@
     },
     {
       "key": {
+        "uuid": "fad0f9df_88bc406e",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 3366
+      },
+      "writtenOn": "2015-10-20T06:09:03Z",
+      "side": 1,
+      "message": "Changed to final.",
+      "parentUuid": "1a76adc5_c66539e2",
+      "range": {
+        "startLine": 41,
+        "startChar": 12,
+        "endLine": 41,
+        "endChar": 17
+      },
+      "revId": "40fb48c41a6620e5f9a8e6389b4ba91d47aee42d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_06749197",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
         "patchSetId": 4
@@ -178,6 +274,30 @@
       "writtenOn": "2015-10-08T18:10:09Z",
       "side": 1,
       "message": "If this is not a constant do not use all caps for it. Also this should probably be final as well.",
+      "range": {
+        "startLine": 45,
+        "startChar": 27,
+        "endLine": 45,
+        "endChar": 52
+      },
+      "revId": "40fb48c41a6620e5f9a8e6389b4ba91d47aee42d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_a8c104e6",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 3366
+      },
+      "writtenOn": "2015-10-20T06:09:03Z",
+      "side": 1,
+      "message": "Changed to final.",
+      "parentUuid": "1a76adc5_06749197",
       "range": {
         "startLine": 45,
         "startChar": 27,
@@ -230,6 +350,24 @@
     },
     {
       "key": {
+        "uuid": "fad0f9df_48b6588c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 3366
+      },
+      "writtenOn": "2015-10-20T06:09:03Z",
+      "side": 1,
+      "message": "Yes, I will change it once Junit code is also tested. Currently, it gives me Junit error on changing to timeInterval.",
+      "parentUuid": "1a76adc5_060fb131",
+      "revId": "40fb48c41a6620e5f9a8e6389b4ba91d47aee42d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_a6afdde2",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
         "patchSetId": 4
@@ -241,6 +379,30 @@
       "writtenOn": "2015-10-08T18:10:09Z",
       "side": 1,
       "message": "has been replicated to a",
+      "range": {
+        "startLine": 72,
+        "startChar": 53,
+        "endLine": 72,
+        "endChar": 69
+      },
+      "revId": "40fb48c41a6620e5f9a8e6389b4ba91d47aee42d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_68bb1c73",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 3366
+      },
+      "writtenOn": "2015-10-20T06:09:03Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "1a76adc5_a6afdde2",
       "range": {
         "startLine": 72,
         "startChar": 53,
@@ -270,6 +432,24 @@
     },
     {
       "key": {
+        "uuid": "fad0f9df_08b0508a",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 3366
+      },
+      "writtenOn": "2015-10-20T06:09:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1a76adc5_462cc999",
+      "revId": "40fb48c41a6620e5f9a8e6389b4ba91d47aee42d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_46536917",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
         "patchSetId": 4
@@ -281,6 +461,24 @@
       "writtenOn": "2015-10-08T18:29:26Z",
       "side": 1,
       "message": "I think log level should be debug. Also you don\u0027t need an if block, just do:\n\nLOG.debug(\"respondToClient returned {} for server : {} \",  result, fInfo.getAddServer().getNewServerId());",
+      "revId": "40fb48c41a6620e5f9a8e6389b4ba91d47aee42d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_28ad1432",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 220,
+      "author": {
+        "id": 3366
+      },
+      "writtenOn": "2015-10-20T06:09:03Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "1a76adc5_46536917",
       "revId": "40fb48c41a6620e5f9a8e6389b4ba91d47aee42d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -310,6 +508,30 @@
     },
     {
       "key": {
+        "uuid": "fad0f9df_c8a9e825",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 229,
+      "author": {
+        "id": 3366
+      },
+      "writtenOn": "2015-10-20T06:09:03Z",
+      "side": 1,
+      "message": "Changed to private.",
+      "parentUuid": "1a76adc5_865f410e",
+      "range": {
+        "startLine": 229,
+        "startChar": 4,
+        "endLine": 229,
+        "endChar": 17
+      },
+      "revId": "40fb48c41a6620e5f9a8e6389b4ba91d47aee42d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_26eaed0f",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
         "patchSetId": 4
@@ -321,6 +543,30 @@
       "writtenOn": "2015-10-08T18:10:09Z",
       "side": 1,
       "message": "updateMinReplicationCount? It\u0027s not just calculating but it\u0027s also updating the counts.",
+      "range": {
+        "startLine": 144,
+        "startChar": 16,
+        "endLine": 144,
+        "endChar": 69
+      },
+      "revId": "40fb48c41a6620e5f9a8e6389b4ba91d47aee42d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_e8a62c53",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 3366
+      },
+      "writtenOn": "2015-10-20T06:09:03Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "1a76adc5_26eaed0f",
       "range": {
         "startLine": 144,
         "startChar": 16,
