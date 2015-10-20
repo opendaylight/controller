@@ -97,6 +97,23 @@
     },
     {
       "key": {
+        "uuid": "fad0f9df_435879fa",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-10-20T08:53:55Z",
+      "side": 1,
+      "message": "imports should be ordered alphabetically",
+      "revId": "40fb48c41a6620e5f9a8e6389b4ba91d47aee42d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_66ad4588",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
         "patchSetId": 4
@@ -532,6 +549,23 @@
     },
     {
       "key": {
+        "uuid": "fad0f9df_635d7de9",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-10-20T08:53:55Z",
+      "side": 1,
+      "message": "please do not leak mutable fields: make them private and add getter/setter methods.",
+      "revId": "40fb48c41a6620e5f9a8e6389b4ba91d47aee42d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_26eaed0f",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
         "patchSetId": 4
@@ -573,6 +607,23 @@
         "endLine": 144,
         "endChar": 69
       },
+      "revId": "40fb48c41a6620e5f9a8e6389b4ba91d47aee42d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_236f7594",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/FollowerCatchUpTimeout.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-10-20T08:53:55Z",
+      "side": 1,
+      "message": "Can serverId be null? If not, please guard it with Preconditions.checkNotNull(). If so, document the fact via @Nullable (especially in the getter, so its users understand that nulls may be coming their way).",
       "revId": "40fb48c41a6620e5f9a8e6389b4ba91d47aee42d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
