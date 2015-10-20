@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "fad0f9df_40f5cc81",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 3366
+      },
+      "writtenOn": "2015-10-20T19:49:38Z",
+      "side": 1,
+      "message": "OK. Done.",
+      "parentUuid": "fad0f9df_20dd2871",
+      "revId": "69d35bb2fa8fc1ddf5512807b332e5959cfdfbc8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fad0f9df_a0827850",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
         "patchSetId": 7
@@ -30,6 +48,24 @@
       "writtenOn": "2015-10-20T17:53:10Z",
       "side": 1,
       "message": "return true here",
+      "revId": "69d35bb2fa8fc1ddf5512807b332e5959cfdfbc8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_e0c3a036",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 3366
+      },
+      "writtenOn": "2015-10-20T19:49:38Z",
+      "side": 1,
+      "message": "Agreed. Done.",
+      "parentUuid": "fad0f9df_a0827850",
       "revId": "69d35bb2fa8fc1ddf5512807b332e5959cfdfbc8",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "fad0f9df_00c1042e",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 3366
+      },
+      "writtenOn": "2015-10-20T19:49:38Z",
+      "side": 1,
+      "message": "Agreed. Done.",
+      "parentUuid": "fad0f9df_8081744c",
+      "revId": "69d35bb2fa8fc1ddf5512807b332e5959cfdfbc8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fad0f9df_008d847b",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
         "patchSetId": 7
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "fad0f9df_40c70c46",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 3366
+      },
+      "writtenOn": "2015-10-20T19:49:38Z",
+      "side": 1,
+      "message": "I assume you mean as below, add it to queue, if not empty, then call processAddServer.\n\n  // cache AddServer request to be processed\n     CatchupFollowerInfo followerInfo \u003d new     CatchupFollowerInfo(addServer,sender);\n        followerInfoQueue.add(followerInfo);\n        // process the request, if no server config in-progress\n        if(!followerInfoQueue.isEmpty()){\n            processAddServer(raftActor);\n        }",
+      "parentUuid": "fad0f9df_008d847b",
+      "revId": "69d35bb2fa8fc1ddf5512807b332e5959cfdfbc8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fad0f9df_e0e64044",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
         "patchSetId": 7
@@ -81,6 +153,24 @@
       "writtenOn": "2015-10-20T17:53:10Z",
       "side": 1,
       "message": "You really don\u0027t have to pass any sender or ID since you\u0027re not using it for tracking.",
+      "revId": "69d35bb2fa8fc1ddf5512807b332e5959cfdfbc8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_60fed06d",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 3366
+      },
+      "writtenOn": "2015-10-20T19:49:38Z",
+      "side": 1,
+      "message": "Not clear. Can you please elaborate?",
+      "parentUuid": "fad0f9df_e0e64044",
       "revId": "69d35bb2fa8fc1ddf5512807b332e5959cfdfbc8",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
