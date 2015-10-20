@@ -29,6 +29,13 @@
             <artifactId>jolokia-osgi</artifactId>
             <version>${jolokia.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.opendaylight.aaa</groupId>
+            <artifactId>features-aaa</artifactId>
+            <version>${aaa.version}</version>
+            <classifier>features</classifier>
+            <type>xml</type>
+        </dependency>
     </dependencies>
 
     <scm>
