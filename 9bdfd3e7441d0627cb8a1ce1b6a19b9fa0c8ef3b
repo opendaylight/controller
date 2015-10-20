@@ -1,0 +1,191 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fad0f9df_009ca468",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 243,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-20T19:07:50Z",
+      "side": 1,
+      "message": "This is really a message to set the behavior to follower. It would be nice to reuse the SwitchBehavior message but that has a specific purpose and wouldn\u0027t work in this case (w/o changes to overload it). In lieu of that, how about we generalize this message and call it SwitchToFollower?",
+      "revId": "9bdfd3e7441d0627cb8a1ce1b6a19b9fa0c8ef3b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_60dd7042",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 787,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-20T19:07:50Z",
+      "side": 1,
+      "message": "avaialble (sic).  How about \"Cannot add replica for shard %s because no peer is available\"?",
+      "revId": "9bdfd3e7441d0627cb8a1ce1b6a19b9fa0c8ef3b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_c00a1cd2",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 803,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-20T19:07:50Z",
+      "side": 1,
+      "message": "I think what you should do here is to send a FindPrimary message to self using the ask pattern. This will discover the primary/leader for the shard, if one exists, and return the actor path, which you would use to send the AddServer message.",
+      "revId": "9bdfd3e7441d0627cb8a1ce1b6a19b9fa0c8ef3b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_a02cb84b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 812,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-20T19:07:50Z",
+      "side": 1,
+      "message": "We should wait until it succeeds before updating the mbean.",
+      "revId": "9bdfd3e7441d0627cb8a1ce1b6a19b9fa0c8ef3b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_80e2d401",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 816,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-20T19:07:50Z",
+      "side": 1,
+      "message": "We don\u0027t need 2 debug logs here.",
+      "revId": "9bdfd3e7441d0627cb8a1ce1b6a19b9fa0c8ef3b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_2020c848",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 824,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-20T19:07:50Z",
+      "side": 1,
+      "message": "\"Could not ...\".",
+      "revId": "9bdfd3e7441d0627cb8a1ce1b6a19b9fa0c8ef3b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_a0d35837",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 831,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-20T19:07:50Z",
+      "side": 1,
+      "message": "\"Could not ...\".",
+      "revId": "9bdfd3e7441d0627cb8a1ce1b6a19b9fa0c8ef3b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_00c5845a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 836,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-20T19:07:50Z",
+      "side": 1,
+      "message": "Maybe we should call this getReplyActor and should null out to release the memory. However, is it good to use the ShardInformation to store the reply-to sender? Since it\u0027s temporary, would it be better to keep this state in a separate map?",
+      "revId": "9bdfd3e7441d0627cb8a1ce1b6a19b9fa0c8ef3b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_a0a118ab",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 848,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-20T19:07:50Z",
+      "side": 1,
+      "message": "You should remove the ShardInformation from the map since it failed.",
+      "revId": "9bdfd3e7441d0627cb8a1ce1b6a19b9fa0c8ef3b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_20952840",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/policy/ShardInitRaftPolicy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-20T19:07:50Z",
+      "side": 1,
+      "message": "This is a policy to disable raft elections which might be generally useful so I think we should put it in sal-akka-raft. In fact there already is a DisableElectionsRaftPolicy under sal-akka-raft/src/test/java so you could just move it.",
+      "revId": "9bdfd3e7441d0627cb8a1ce1b6a19b9fa0c8ef3b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_805df4eb",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1077,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-20T19:07:50Z",
+      "side": 1,
+      "message": "\u0027with\u0027 should be \u0027With\u0027",
+      "revId": "9bdfd3e7441d0627cb8a1ce1b6a19b9fa0c8ef3b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
