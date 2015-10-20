@@ -57,6 +57,7 @@ import org.opendaylight.controller.cluster.datastore.exceptions.PrimaryNotFoundE
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardManagerIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.ActorInitialized;
+import org.opendaylight.controller.cluster.datastore.messages.AddShardReplica;
 import org.opendaylight.controller.cluster.datastore.messages.CreateShard;
 import org.opendaylight.controller.cluster.datastore.messages.CreateShardReply;
 import org.opendaylight.controller.cluster.datastore.messages.FindLocalShard;
@@ -68,6 +69,7 @@ import org.opendaylight.controller.cluster.datastore.messages.PeerDown;
 import org.opendaylight.controller.cluster.datastore.messages.PeerUp;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
 import org.opendaylight.controller.cluster.datastore.messages.RemotePrimaryShardFound;
+import org.opendaylight.controller.cluster.datastore.messages.RemoveShardReplica;
 import org.opendaylight.controller.cluster.datastore.messages.ShardLeaderStateChanged;
 import org.opendaylight.controller.cluster.datastore.messages.SwitchShardBehavior;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
@@ -80,6 +82,8 @@ import org.opendaylight.controller.cluster.notifications.RoleChangeNotification;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyncUpStatus;
 import org.opendaylight.controller.cluster.raft.base.messages.SwitchBehavior;
+import org.opendaylight.controller.cluster.raft.messages.AddServerReply;
+import org.opendaylight.controller.cluster.raft.messages.ServerChangeStatus;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
@@ -88,8 +92,6 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
-import org.opendaylight.controller.cluster.datastore.messages.AddShardReplica;
-import org.opendaylight.controller.cluster.datastore.messages.RemoveShardReplica;
 
 public class ShardManagerTest extends AbstractActorTest {
     private static int ID_COUNTER = 1;
@@ -1042,6 +1044,7 @@ public class ShardManagerTest extends AbstractActorTest {
             expectMsgClass(duration("2 seconds"), akka.actor.Status.Failure.class);
         }};
     }
+
     @Test
     public void testAddShardReplicaForAlreadyCreatedShard() throws Exception {
         new JavaTestKit(getSystem()) {{
@@ -1050,18 +1053,41 @@ public class ShardManagerTest extends AbstractActorTest {
             expectMsgClass(duration("2 seconds"), akka.actor.Status.Failure.class);
         }};
     }
+
     @Test
     public void testAddShardReplica() throws Exception {
         new JavaTestKit(getSystem()) {{
-
             MockConfiguration mockConfig = new MockConfiguration(ImmutableMap.<String, List<String>>builder().
                 put("default", Arrays.asList("member-1", "member-2")).
                 put("astronauts", Arrays.asList("member-2")).build());
 
             ActorRef shardManager = getSystem().actorOf(newShardMgrProps(mockConfig));
+            MockClusterWrapper.sendMemberUp(shardManager, "member-2", getRef().path().toString());
+            shardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
 
             shardManager.tell(new AddShardReplica("astronauts"), getRef());
+            //send a mock AddServer reply with OK status
+            shardManager.tell(new AddServerReply("member-1-shard-astronauts-config", ServerChangeStatus.OK, "member-2-shard-astronauts-config"), getRef());
+
             expectMsgClass(duration("2 seconds"), akka.actor.Status.Success.class);
+         }};
+    }
+
+    @Test
+    public void testAddShardReplicawithTimeout() throws Exception {
+        new JavaTestKit(getSystem()) {{
+            MockConfiguration mockConfig = new MockConfiguration(ImmutableMap.<String, List<String>>builder().
+                put("default", Arrays.asList("member-1", "member-2")).
+                put("astronauts", Arrays.asList("member-2")).build());
+
+            ActorRef shardManager = getSystem().actorOf(newShardMgrProps(mockConfig));
+            MockClusterWrapper.sendMemberUp(shardManager, "member-2", getRef().path().toString());
+            shardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
+
+            shardManager.tell(new AddShardReplica("astronauts"), getRef());
+            //send a mock AddServer reply with timeout status
+            shardManager.tell(new AddServerReply("member-1-shard-astronauts-config", ServerChangeStatus.TIMEOUT, "member-2-shard-astronauts-config"), getRef());
+            expectMsgClass(duration("5 seconds"), akka.actor.Status.Failure.class);
          }};
     }
 

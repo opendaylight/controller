@@ -13,6 +13,7 @@ import akka.actor.ActorRef;
 import akka.actor.Address;
 import akka.actor.Cancellable;
 import akka.actor.OneForOneStrategy;
+import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.actor.SupervisorStrategy;
 import akka.cluster.ClusterEvent;
@@ -64,13 +65,18 @@ import org.opendaylight.controller.cluster.datastore.messages.SwitchShardBehavio
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
 import org.opendaylight.controller.cluster.datastore.messages.AddShardReplica;
 import org.opendaylight.controller.cluster.datastore.messages.RemoveShardReplica;
+import org.opendaylight.controller.cluster.datastore.policy.ShardInitRaftPolicy;
 import org.opendaylight.controller.cluster.datastore.utils.Dispatchers;
 import org.opendaylight.controller.cluster.datastore.utils.PrimaryShardInfoFutureCache;
 import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListener;
 import org.opendaylight.controller.cluster.notifications.RoleChangeNotification;
 import org.opendaylight.controller.cluster.raft.RaftState;
+import org.opendaylight.controller.cluster.raft.base.messages.EnableRaftActorVotingStatus;
 import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyncUpStatus;
 import org.opendaylight.controller.cluster.raft.base.messages.SwitchBehavior;
+import org.opendaylight.controller.cluster.raft.messages.AddServer;
+import org.opendaylight.controller.cluster.raft.messages.AddServerReply;
+import org.opendaylight.controller.cluster.raft.messages.ServerChangeStatus;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
@@ -204,6 +210,8 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             onAddShardReplica((AddShardReplica)message);
         } else if(message instanceof RemoveShardReplica){
             onRemoveShardReplica((RemoveShardReplica)message);
+        } else if(message instanceof AddServerReply){
+            onAddServerReply((AddServerReply)message);
         } else {
             unknownMessage(message);
         }
@@ -745,6 +753,10 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     ShardManagerInfoMBean getMBean(){
         return mBean;
     }
+    private DatastoreContext getInitShardDataStoreContext() {
+        return (DatastoreContext.newBuilderFrom(datastoreContext)
+                 .customRaftPolicyImplementation(ShardInitRaftPolicy.class.getName()).build());
+    }
 
     private void onAddShardReplica (AddShardReplica shardReplicaMsg) {
         String shardName = shardReplicaMsg.getShardName();
@@ -762,9 +774,79 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             return;
         }
 
-        // call CreateShard for the shardName
-        getSender().tell(new akka.actor.Status.Success(true), getSelf());
+        // Create the localShard
+        if (schemaContext == null) {
+            LOG.debug ("schemaContext is not updated to create localShardActor");
+            getSender().tell(new akka.actor.Status.Failure(new IllegalStateException(String.format("schemaContext not available to create localShardActor for %s", shardName))), getSelf());
+            return;
+        }
+
+        Map<String, String> peerAddresses = getPeerAddresses(shardName);
+        if (peerAddresses.isEmpty()) {
+            LOG.debug ("Shard members not available for replicating shard data from leader");
+            getSender().tell(new akka.actor.Status.Failure(new IllegalStateException(String.format("Shard peers not avaialble for shard %s ", shardName))), getSelf());
+            return;
+        }
+        String peerAddress = null;
+        for(Map.Entry<String, String> peer: peerAddresses.entrySet()) {
+            if (peer.getValue()!= null) {
+                LOG.debug ("valid peerAddress {} found", peer);
+                peerAddress = peer.getValue();
+                break;
+            }
+        }
+        if (peerAddress == null) {
+            LOG.debug ("Valid Shard peer not available for informing AddServer({}) to shard leader", shardName);
+            getSender().tell(new akka.actor.Status.Failure(new IllegalStateException(String.format("Shard peers not resolved for shard %s replication", shardName))), getSelf());
+            return;
+        }
+
+        ShardIdentifier shardId = getShardIdentifier(this.cluster.getCurrentMemberName(), shardName);
+        String localShardAddress = peerAddressResolver.getShardManagerActorPathBuilder(cluster.getSelfAddress())
+                                    .append("/").append(shardId).toString();
+        ShardInformation shardInfo = new ShardInformation(shardName, shardId, peerAddresses,
+                          getInitShardDataStoreContext(), new DefaultShardPropsCreator(), peerAddressResolver);
+        localShards.put(shardName, shardInfo);
+        shardInfo.setCreatorActor(getSender());
+        shardInfo.setActor(newShardActor(schemaContext, shardInfo));
+        mBean.addLocalShard(shardId.toString());
+
+        LOG.debug ("sending AddServer for shard {} with address {}", shardId, localShardAddress);
+        //inform ShardLeader to add this shard as a replica by sending an AddServer message
+        LOG.debug ("sending AddServer message to peer {}", peerAddress);
+        getContext().actorSelection(peerAddress).tell (new AddServer(shardId.toString(), localShardAddress, true), getSelf());
         return;
+    }
+    private void onAddServerReply (AddServerReply replyMsg) {
+        ShardIdentifier shardId = ShardIdentifier.builder().fromShardIdString(replyMsg.getServerId()).build();
+        String shardName = shardId.getShardName();
+        if (shardName == null) {
+            LOG.error ("Could retrieve shard name from AddServerReply msg for {}" , replyMsg.getServerId());
+            return;
+        }
+
+        LOG.debug ("received onAddServerReply for shard {}", shardName);
+        ShardInformation shardInfo = localShards.get(shardName);
+        if (shardInfo == null) {
+            LOG.error ("Could retrieve shard infomation for shard {}" , replyMsg.getServerId());
+            return;
+        }
+        if (replyMsg.getStatus() == ServerChangeStatus.OK) {
+            LOG.debug ("Leader shard successfully added the replica shard {}", shardName);
+            if (shardInfo.getCreatorActor() != null) {
+                shardInfo.getCreatorActor().tell(new akka.actor.Status.Success(true), getSelf());
+            }
+        } else {
+            LOG.warn ("Cannot add shard replica {} status {}", shardName, replyMsg.getStatus());
+            LOG.debug ("removing the local shard replica for shard {}", shardName);
+            //remove the local replica created
+            if (shardInfo.getActor() != null) {
+                shardInfo.getActor().tell(PoisonPill.getInstance(), getSelf());
+            }
+            if (shardInfo.getCreatorActor() != null) {
+                shardInfo.getCreatorActor().tell(new akka.actor.Status.Failure(new IllegalStateException(String.format("Shard %s replication failed with status %d", shardName, replyMsg.getStatus().ordinal()))), getSelf());
+            }
+        }
     }
 
     private void onRemoveShardReplica (RemoveShardReplica shardReplicaMsg) {
@@ -782,6 +864,14 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         return;
     }
 
+    private void makeShardVotingCapable (String shardName) {
+        // get the shardInfo, send shard actor mesg to make it voting capable.
+        ShardInformation shardInfo = localShards.get(shardName);
+        shardInfo.setDatastoreContext(datastoreContext);
+        shardInfo.enableShardVotingStatus(getSelf());
+    }
+
+
 
     @VisibleForTesting
     protected static class ShardInformation {
@@ -792,6 +882,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         private final Map<String, String> initialPeerAddresses;
         private Optional<DataTree> localShardDataTree;
         private boolean leaderAvailable = false;
+        private ActorRef creatorActor;
 
         // flag that determines if the actor is ready for business
         private boolean actorInitialized = false;
@@ -803,7 +894,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         private String leaderId;
         private short leaderVersion;
 
-        private final DatastoreContext datastoreContext;
+        private DatastoreContext datastoreContext;
         private final ShardPropsCreator shardPropsCreator;
         private final ShardPeerAddressResolver addressResolver;
 
@@ -987,6 +1078,26 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
         void setLeaderVersion(short leaderVersion) {
             this.leaderVersion = leaderVersion;
+        }
+
+        void setDatastoreContext(DatastoreContext datastoreContext) {
+            this.datastoreContext = datastoreContext;
+        }
+
+        void enableShardVotingStatus(ActorRef sender) {
+            LOG.debug ("Enabling shard voting status for {}", this.shardName);
+            if (actor != null) {
+                actor.tell(this.datastoreContext, sender);
+                actor.tell(new EnableRaftActorVotingStatus(), sender);
+            }
+        }
+
+        void setCreatorActor(ActorRef actor) {
+            this.creatorActor = actor;
+        }
+
+        ActorRef getCreatorActor() {
+            return this.creatorActor;
         }
     }
 

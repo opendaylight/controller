@@ -130,6 +130,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         // Also verify ServerConfigurationPayload entry in both followers
 
         AddServerReply addServerReply = testKit.expectMsgClass(JavaTestKit.duration("5 seconds"), AddServerReply.class);
+        assertEquals("getServer", NEW_SERVER_ID, addServerReply.getServerId());
         assertEquals("getStatus", ServerChangeStatus.OK, addServerReply.getStatus());
         assertEquals("getLeaderHint", LEADER_ID, addServerReply.getLeaderHint());
     }
@@ -147,6 +148,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         noLeaderActor.tell(new AddServer(NEW_SERVER_ID, newServerActor.path().toString(), true), testKit.getRef());
         AddServerReply addServerReply = testKit.expectMsgClass(JavaTestKit.duration("5 seconds"), AddServerReply.class);
+        assertEquals("getServer", NEW_SERVER_ID, addServerReply.getServerId());
         assertEquals("getStatus", ServerChangeStatus.NO_LEADER, addServerReply.getStatus());
     }
 

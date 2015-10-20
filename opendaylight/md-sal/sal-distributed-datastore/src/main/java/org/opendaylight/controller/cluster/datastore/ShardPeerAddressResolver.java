@@ -70,11 +70,10 @@ class ShardPeerAddressResolver implements PeerAddressResolver {
             return getShardManagerActorPathBuilder(memberAddress).append("/").append(
                     getShardIdentifier(memberName, shardName)).toString();
         }
-
         return null;
     }
 
-    private StringBuilder getShardManagerActorPathBuilder(Address address) {
+    public StringBuilder getShardManagerActorPathBuilder(Address address) {
         return new StringBuilder().append(address.toString()).append("/user/").append(shardManagerIdentifier);
     }
 
