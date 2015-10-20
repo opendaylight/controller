@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fad0f9df_40ff0c35",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-20T20:32:09Z",
+      "side": 1,
+      "message": "Please address this TODO, i.e.:\n\nboolean handled \u003d serverConfigurationSupport.handleMessage(message, this, getSender());\n...\nif(!handled) {\n    applyState(...);\n}",
+      "revId": "28e383a5650c818e73fc846a7eeb5f45bb21c482",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_80edf48d",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-20T20:32:09Z",
+      "side": 1,
+      "message": "You want to capture isEmpty before you add to the queue.",
+      "revId": "28e383a5650c818e73fc846a7eeb5f45bb21c482",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
