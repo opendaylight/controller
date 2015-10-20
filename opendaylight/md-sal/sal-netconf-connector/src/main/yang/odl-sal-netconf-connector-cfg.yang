@@ -18,6 +18,12 @@ module odl-sal-netconf-connector-cfg {
         description
             "Initial revision";
     }
+    
+    revision "2015-08-03" {
+        description
+            "Add netconf topology from which dependencies are inherited, change
+            existing dependencies to non-mandatory to preserve backwards compatibility";
+    }
 
     identity sal-netconf-connector {
         base config:module-type;
@@ -76,7 +82,7 @@ module odl-sal-netconf-connector-cfg {
             container dom-registry {
                 uses config:service-ref {
                     refine type {
-                        mandatory true;
+                        mandatory false;
                         config:required-identity dom:dom-broker-osgi-registry;
                     }
                 }
@@ -85,7 +91,7 @@ module odl-sal-netconf-connector-cfg {
             container binding-registry {
                 uses config:service-ref {
                     refine type {
-                        mandatory true;
+                        mandatory false;
                         config:required-identity md-sal-binding:binding-broker-osgi-registry;
                     }
                 }
@@ -94,7 +100,7 @@ module odl-sal-netconf-connector-cfg {
             container event-executor {
                 uses config:service-ref {
                     refine type {
-                        mandatory true;
+                        mandatory false;
                         config:required-identity netty:netty-event-executor;
                     }
                 }
@@ -103,7 +109,7 @@ module odl-sal-netconf-connector-cfg {
             container processing-executor {
                 uses config:service-ref {
                     refine type {
-                        mandatory true;
+                        mandatory false;
                         config:required-identity th:threadpool;
                     }
                 }
