@@ -19,7 +19,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMNotificationService;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 
-class NetconfDeviceNotificationService implements DOMNotificationService {
+public class NetconfDeviceNotificationService implements DOMNotificationService {
 
     private final Multimap<SchemaPath, DOMNotificationListener> listeners = HashMultimap.create();
 

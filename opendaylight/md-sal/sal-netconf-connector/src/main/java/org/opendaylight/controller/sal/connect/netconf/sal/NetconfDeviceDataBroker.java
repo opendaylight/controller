@@ -32,16 +32,16 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
-final class NetconfDeviceDataBroker implements DOMDataBroker {
+public class NetconfDeviceDataBroker implements DOMDataBroker {
     private final RemoteDeviceId id;
     private final NetconfBaseOps netconfOps;
     private final long requestTimeoutMillis;
 
     private final boolean rollbackSupport;
-    private boolean candidateSupported;
-    private boolean runningWritable;
+    private final boolean candidateSupported;
+    private final boolean runningWritable;
 
-    public NetconfDeviceDataBroker(final RemoteDeviceId id, final SchemaContext schemaContext, final DOMRpcService rpc, final NetconfSessionPreferences netconfSessionPreferences, long requestTimeoutMillis) {
+    public NetconfDeviceDataBroker(final RemoteDeviceId id, final SchemaContext schemaContext, final DOMRpcService rpc, final NetconfSessionPreferences netconfSessionPreferences, final long requestTimeoutMillis) {
         this.id = id;
         this.netconfOps = new NetconfBaseOps(rpc, schemaContext);
         this.requestTimeoutMillis = requestTimeoutMillis;
