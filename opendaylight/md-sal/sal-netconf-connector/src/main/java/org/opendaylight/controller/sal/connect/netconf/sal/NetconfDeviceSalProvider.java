@@ -27,9 +27,9 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class NetconfDeviceSalProvider implements AutoCloseable, Provider, BindingAwareProvider {
+public final class NetconfDeviceSalProvider implements AutoCloseable, Provider, BindingAwareProvider {
 
-    private static final Logger logger = LoggerFactory.getLogger(NetconfDeviceSalProvider.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NetconfDeviceSalProvider.class);
 
     private final RemoteDeviceId id;
     private volatile NetconfDeviceDatastoreAdapter datastoreAdapter;
@@ -61,7 +61,7 @@ final class NetconfDeviceSalProvider implements AutoCloseable, Provider, Binding
 
     @Override
     public void onSessionInitiated(final Broker.ProviderSession session) {
-        logger.debug("{}: (BI)Session with sal established {}", id, session);
+        LOG.debug("{}: (BI)Session with sal established {}", id, session);
 
         final DOMMountPointService mountService = session.getService(DOMMountPointService.class);
         if (mountService != null) {
@@ -76,7 +76,7 @@ final class NetconfDeviceSalProvider implements AutoCloseable, Provider, Binding
 
     @Override
     public void onSessionInitiated(final BindingAwareBroker.ProviderContext session) {
-        logger.debug("{}: Session with sal established {}", id, session);
+        LOG.debug("{}: Session with sal established {}", id, session);
 
         final DataBroker dataBroker = session.getSALService(DataBroker.class);
         datastoreAdapter = new NetconfDeviceDatastoreAdapter(id, dataBroker);
@@ -84,6 +84,7 @@ final class NetconfDeviceSalProvider implements AutoCloseable, Provider, Binding
         topologyDatastoreAdapter = new NetconfDeviceTopologyAdapter(id, dataBroker);
     }
 
+    @Override
     public void close() throws Exception {
         mountInstance.close();
         datastoreAdapter.close();
@@ -92,7 +93,7 @@ final class NetconfDeviceSalProvider implements AutoCloseable, Provider, Binding
         topologyDatastoreAdapter = null;
     }
 
-    static final class MountInstance implements AutoCloseable {
+    public static final class MountInstance implements AutoCloseable {
 
         private DOMMountPointService mountService;
         private final RemoteDeviceId id;
@@ -123,13 +124,13 @@ final class NetconfDeviceSalProvider implements AutoCloseable, Provider, Binding
             this.notificationService = notificationService;
 
             registration = mountBuilder.register();
-            logger.debug("{}: Mountpoint exposed into MD-SAL {}", id, registration);
+            LOG.debug("{}: Mountpoint exposed into MD-SAL {}", id, registration);
         }
 
         @Deprecated
         synchronized void onDeviceDisconnected() {
             if(registration == null) {
-                logger.trace("{}: Not removing mountpoint from MD-SAL, mountpoint was not registered yet", id);
+                LOG.trace("{}: Not removing mountpoint from MD-SAL, mountpoint was not registered yet", id);
                 return;
             }
 
@@ -137,14 +138,14 @@ final class NetconfDeviceSalProvider implements AutoCloseable, Provider, Binding
                 registration.close();
             } catch (final Exception e) {
                 // Only log and ignore
-                logger.warn("Unable to unregister mount instance for {}. Ignoring exception", id.getPath(), e);
+                LOG.warn("Unable to unregister mount instance for {}. Ignoring exception", id.getPath(), e);
             } finally {
-                logger.debug("{}: Mountpoint removed from MD-SAL {}", id, registration);
+                LOG.debug("{}: Mountpoint removed from MD-SAL {}", id, registration);
                 registration = null;
             }
         }
 
-        synchronized void onTopologyDeviceConnected(final SchemaContext initialCtx,
+        public synchronized void onTopologyDeviceConnected(final SchemaContext initialCtx,
                                                     final DOMDataBroker broker, final DOMRpcService rpc,
                                                     final NetconfDeviceNotificationService notificationService) {
 
@@ -159,13 +160,13 @@ final class NetconfDeviceSalProvider implements AutoCloseable, Provider, Binding
             mountBuilder.addService(DOMNotificationService.class, notificationService);
 
             topologyRegistration = mountBuilder.register();
-            logger.debug("{}: TOPOLOGY Mountpoint exposed into MD-SAL {}", id, registration);
+            LOG.debug("{}: TOPOLOGY Mountpoint exposed into MD-SAL {}", id, registration);
 
         }
 
-        synchronized void onTopologyDeviceDisconnected() {
+        public synchronized void onTopologyDeviceDisconnected() {
             if(topologyRegistration == null) {
-                logger.trace("{}: Not removing TOPOLOGY mountpoint from MD-SAL, mountpoint was not registered yet", id);
+                LOG.trace("{}: Not removing TOPOLOGY mountpoint from MD-SAL, mountpoint was not registered yet", id);
                 return;
             }
 
@@ -173,15 +174,15 @@ final class NetconfDeviceSalProvider implements AutoCloseable, Provider, Binding
                 topologyRegistration.close();
             } catch (final Exception e) {
                 // Only log and ignore
-                logger.warn("Unable to unregister mount instance for {}. Ignoring exception", id.getTopologyPath(), e);
+                LOG.warn("Unable to unregister mount instance for {}. Ignoring exception", id.getTopologyPath(), e);
             } finally {
-                logger.debug("{}: TOPOLOGY Mountpoint removed from MD-SAL {}", id, registration);
+                LOG.debug("{}: TOPOLOGY Mountpoint removed from MD-SAL {}", id, registration);
                 topologyRegistration = null;
             }
         }
 
         @Override
-        synchronized public void close() throws Exception {
+        public synchronized void close() throws Exception {
             onDeviceDisconnected();
             onTopologyDeviceDisconnected();
             mountService = null;
