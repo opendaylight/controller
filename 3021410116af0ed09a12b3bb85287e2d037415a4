@@ -1,0 +1,136 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fad0f9df_a6185085",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 755,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-21T12:57:53Z",
+      "side": 1,
+      "message": "shard replica?",
+      "range": {
+        "startLine": 755,
+        "startChar": 114,
+        "endLine": 755,
+        "endChar": 115
+      },
+      "revId": "3021410116af0ed09a12b3bb85287e2d037415a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_4622c4ba",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 755,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-21T12:57:53Z",
+      "side": 1,
+      "message": "Line too long. For the future please try to fit the line within 100 characters. It\u0027s easier when reviewing code side by side.",
+      "revId": "3021410116af0ed09a12b3bb85287e2d037415a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_66126864",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 760,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-21T12:57:53Z",
+      "side": 1,
+      "message": "\"has not been configured\". This has nothing to do with replication yet.",
+      "range": {
+        "startLine": 760,
+        "startChar": 33,
+        "endLine": 760,
+        "endChar": 62
+      },
+      "revId": "3021410116af0ed09a12b3bb85287e2d037415a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_46096430",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shardmanager/ShardManagerInfo.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-21T12:57:53Z",
+      "side": 1,
+      "message": "why the strange naming? I mean the \"set\" before the addShardReplica?",
+      "range": {
+        "startLine": 107,
+        "startChar": 16,
+        "endLine": 107,
+        "endChar": 34
+      },
+      "revId": "3021410116af0ed09a12b3bb85287e2d037415a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_06035c10",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/jmx/mbeans/shardmanager/ShardManagerInfo.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-21T12:57:53Z",
+      "side": 1,
+      "message": "You should catch IllegalArgumentException and AskTimeOutException I think these are the only expected Exceptions here.",
+      "range": {
+        "startLine": 116,
+        "startChar": 17,
+        "endLine": 116,
+        "endChar": 26
+      },
+      "revId": "3021410116af0ed09a12b3bb85287e2d037415a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_c9048717",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 1042,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-21T12:57:53Z",
+      "side": 1,
+      "message": "Ideally you should get the Failure message and verify which exception it contains",
+      "range": {
+        "startLine": 1042,
+        "startChar": 12,
+        "endLine": 1042,
+        "endChar": 26
+      },
+      "revId": "3021410116af0ed09a12b3bb85287e2d037415a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
