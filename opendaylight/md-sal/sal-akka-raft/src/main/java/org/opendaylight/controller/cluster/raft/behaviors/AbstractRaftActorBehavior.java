@@ -10,6 +10,8 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 
 import akka.actor.ActorRef;
 import akka.actor.Cancellable;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.raft.ClientRequestTracker;
@@ -492,14 +494,19 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
     }
 
     public void applyServerConfiguration(ServerConfigurationPayload serverConfig) {
-        for(String peerId: context.getPeerAddresses().keySet()) {
-            context.removePeer(peerId);
-        }
-
+        Map<String, String> currentPeers = new HashMap<>(context.getPeerAddresses());
         for(String peerId: serverConfig.getNewServerConfig()) {
             if(!getId().equals(peerId)) {
-                context.addToPeers(peerId, null);
+                if(!currentPeers.containsKey(peerId)) {
+                    context.addToPeers(peerId, null);
+                } else {
+                    currentPeers.remove(peerId);
+                }
             }
+        }
+
+        for(String peerIdToRemove: currentPeers.keySet()) {
+            context.removePeer(peerIdToRemove);
         }
     }
 }
