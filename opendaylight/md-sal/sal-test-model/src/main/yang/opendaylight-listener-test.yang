@@ -1,0 +1,22 @@
+module listener-container {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:md:sal:test:listener";
+    prefix "test";
+
+    revision "2015-08-25" {
+        description
+            "Initial revision.";
+    }
+
+    container listener-test {
+        list list-item {
+            key "sip op";
+            leaf sip {
+                type string;
+            }
+            leaf op {
+                type uint32;
+            }
+        }
+    }
+}
