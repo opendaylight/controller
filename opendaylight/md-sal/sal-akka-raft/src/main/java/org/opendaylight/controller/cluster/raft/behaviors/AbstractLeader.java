@@ -157,7 +157,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         minIsolatedLeaderPeerCount = minReplicationCount > 0 ? (minReplicationCount - 1) : 0;
     }
 
-    public int getMinIsolatedLeaderPeerCount(){
+    protected int getMinIsolatedLeaderPeerCount(){
         return minIsolatedLeaderPeerCount;
     }
 
@@ -433,7 +433,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                     }
                     wasLastChunk = true;
                     FollowerState followerState = followerLogInformation.getFollowerState();
-                    if(followerState ==  FollowerState.VOTING_NOT_INITIALIZED){
+                    if(followerState == FollowerState.VOTING_NOT_INITIALIZED){
                         UnInitializedFollowerSnapshotReply unInitFollowerSnapshotSuccess =
                                              new UnInitializedFollowerSnapshotReply(followerId);
                         context.getActor().tell(unInitFollowerSnapshotSuccess, context.getActor());
