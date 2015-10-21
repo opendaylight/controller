@@ -1,0 +1,42 @@
+module shared-schema-repository {
+
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:netconf:topology:shared:schema:repository";
+    prefix "ssr";
+
+    import config { prefix config; revision-date 2013-04-05; }
+
+    description
+            "Module definition for Shared schema repository.";
+
+    revision "2015-07-27" {
+        description
+            "Initial revision";
+    }
+
+    identity shared-schema-repository {
+        base "config:service-type";
+        config:java-class "org.opendaylight.controller.netconf.topology.SchemaRepositoryProvider";
+    }
+
+    identity shared-schema-repository-impl {
+        base "config:module-type";
+        config:provided-service shared-schema-repository;
+        config:java-name-prefix SchemaRepositoryImpl;
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+        case shared-schema-repository-impl {
+            when "/config:modules/config:module/config:type = 'shared-schema-repository-impl'";
+
+            container schema-repository-fallbacks {
+                list schema-repository-fallback {
+                    leaf repository-url {
+                        type string;
+                    }
+                }
+            }
+        }
+    }
+}
+
