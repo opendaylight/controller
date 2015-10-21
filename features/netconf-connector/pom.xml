@@ -120,6 +120,16 @@
       <artifactId>netconf-config-dispatcher</artifactId>
     </dependency>
     <dependency>
+       <groupId>org.opendaylight.controller</groupId>
+       <artifactId>netconf-topology</artifactId>
+    </dependency>
+    <dependency>
+       <groupId>org.opendaylight.controller</groupId>
+       <artifactId>netconf-topology-config</artifactId>
+       <classifier>config</classifier>
+       <type>xml</type>
+    </dependency>
+    <dependency>
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>netconf-tcp</artifactId>
     </dependency>

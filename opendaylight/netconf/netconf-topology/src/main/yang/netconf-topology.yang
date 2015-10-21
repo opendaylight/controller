@@ -1,0 +1,111 @@
+module netconf-topology {
+
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:netconf:topology";
+    prefix "nt";
+
+    import config { prefix config; revision-date 2013-04-05; }
+    import threadpool {prefix th;}
+    import netty {prefix netty;}
+    import opendaylight-md-sal-dom {prefix dom;}
+    import opendaylight-md-sal-binding {prefix md-sal-binding; revision-date 2013-10-28;}
+    import odl-netconf-cfg { prefix cfg-net; revision-date 2014-04-08; }
+    import shared-schema-repository { prefix sh; revision-date 2015-07-27; }
+
+    description
+            "Module definition for Netconf topolgy. Netconf topology provides a set of common configuration ";
+
+    revision "2015-07-27" {
+        description
+            "Initial revision";
+    }
+
+    identity netconf-topology {
+        base config:service-type;
+        config:java-class "org.opendaylight.controller.netconf.topology.NetconfTopology";
+    }
+
+    identity netconf-topology-impl {
+        base config:module-type;
+        config:java-name-prefix NetconfTopology;
+        config:provided-service netconf-topology;
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+        case netconf-topology-impl {
+            when "/config:modules/config:module/config:type = 'netconf-topology-impl'";
+
+            leaf topology-id {
+                mandatory true;
+                type string;
+            }
+
+            container dom-registry {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity dom:dom-broker-osgi-registry;
+                    }
+                }
+            }
+
+            container binding-registry {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity md-sal-binding:binding-broker-osgi-registry;
+                    }
+                }
+            }
+
+            container event-executor {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity netty:netty-event-executor;
+                    }
+                }
+            }
+
+            container processing-executor {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity th:threadpool;
+                    }
+                }
+
+                description "Makes up for flaws in netty threading design";
+            }
+
+            container client-dispatcher {
+                uses config:service-ref {
+                    refine type {
+                        mandatory false;
+                        config:required-identity cfg-net:netconf-client-dispatcher;
+                    }
+                }
+            }
+
+            container keepalive-executor {
+                uses config:service-ref {
+                    refine type {
+                        mandatory false;
+                        config:required-identity th:scheduled-threadpool;
+                    }
+                }
+
+                description "Dedicated solely to keepalive execution";
+            }
+
+            container shared-schema-repository {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity sh:shared-schema-repository;
+                    }
+                }
+            }
+        }
+    }
+}
