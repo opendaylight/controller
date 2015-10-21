@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.raft;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Cancellable;
+import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -37,28 +38,29 @@ import scala.concurrent.duration.FiniteDuration;
  */
 class RaftActorServerConfigurationSupport {
     private static final Logger LOG = LoggerFactory.getLogger(RaftActorServerConfigurationSupport.class);
-    private final RaftActorContext context;
-    // client follower queue
-    private final Queue<CatchupFollowerInfo> followerInfoQueue = new LinkedList<CatchupFollowerInfo>();
-    // timeout handle
-    private Cancellable followerTimeout = null;
+
+    private final OperationState IDLE = new Idle();
+
+    private final RaftActorContext raftContext;
+
+    private final Queue<InitialOperationState> pendingOperationsQueue = new LinkedList<>();
+
+    private OperationState currentOperationState = IDLE;
 
     RaftActorServerConfigurationSupport(RaftActorContext context) {
-        this.context = context;
+        this.raftContext = context;
     }
 
     boolean handleMessage(Object message, RaftActor raftActor, ActorRef sender) {
         if(message instanceof AddServer) {
             onAddServer((AddServer)message, raftActor, sender);
             return true;
-        } else if (message instanceof FollowerCatchUpTimeout){
-            FollowerCatchUpTimeout followerTimeout  = (FollowerCatchUpTimeout)message;
-            // abort follower catchup on timeout
-            onFollowerCatchupTimeout(raftActor, sender, followerTimeout.getNewServerId());
+        } else if (message instanceof FollowerCatchUpTimeout) {
+            currentOperationState.onFollowerCatchupTimeout(raftActor, (FollowerCatchUpTimeout)message);
             return true;
-        } else if (message instanceof UnInitializedFollowerSnapshotReply){
-            // snapshot installation is successful
-            onUnInitializedFollowerSnapshotReply((UnInitializedFollowerSnapshotReply)message, raftActor,sender);
+        } else if (message instanceof UnInitializedFollowerSnapshotReply) {
+            currentOperationState.onUnInitializedFollowerSnapshotReply(raftActor,
+                    (UnInitializedFollowerSnapshotReply)message);
             return true;
         } else if(message instanceof ApplyState) {
             return onApplyState((ApplyState) message, raftActor);
@@ -70,32 +72,11 @@ class RaftActorServerConfigurationSupport {
     private boolean onApplyState(ApplyState applyState, RaftActor raftActor) {
         Payload data = applyState.getReplicatedLogEntry().getData();
         if(data instanceof ServerConfigurationPayload) {
-            CatchupFollowerInfo followerInfo = followerInfoQueue.peek();
-            if(followerInfo != null && followerInfo.getContextId().equals(applyState.getIdentifier())) {
-                LOG.info("{} has been successfully replicated to a majority of followers", data);
-
-                // respond ok to follower
-                respondToClient(raftActor, ServerChangeStatus.OK);
-            }
-
+            currentOperationState.onApplyState(raftActor, applyState);
             return true;
         }
 
         return false;
-    }
-
-    private void onAddServer(AddServer addServer, RaftActor raftActor, ActorRef sender) {
-        LOG.debug("{}: onAddServer: {}", context.getId(), addServer);
-        if(noLeaderOrForwardedToLeader(addServer, raftActor, sender)) {
-            return;
-        }
-
-        CatchupFollowerInfo followerInfo = new CatchupFollowerInfo(addServer,sender);
-        boolean process = followerInfoQueue.isEmpty();
-        followerInfoQueue.add(followerInfo);
-        if(process) {
-            processAddServer(raftActor);
-        }
     }
 
     /**
@@ -119,32 +100,14 @@ class RaftActorServerConfigurationSupport {
      *     <li>Respond to caller with TIMEOUT.</li>
      * </ul>
      */
-    private void processAddServer(RaftActor raftActor){
-        LOG.debug("{}: In processAddServer", context.getId());
+    private void onAddServer(AddServer addServer, RaftActor raftActor, ActorRef sender) {
+        LOG.debug("{}: onAddServer: {}", raftContext.getId(), addServer);
 
-        AbstractLeader leader = (AbstractLeader) raftActor.getCurrentBehavior();
-        CatchupFollowerInfo followerInfo = followerInfoQueue.peek();
-        AddServer addSrv = followerInfo.getAddServer();
-        context.addToPeers(addSrv.getNewServerId(), addSrv.getNewServerAddress());
-
-        // if voting member - initialize to VOTING_NOT_INITIALIZED
-        FollowerState initialState = addSrv.isVotingMember() ? FollowerState.VOTING_NOT_INITIALIZED :
-            FollowerState.NON_VOTING;
-        leader.addFollower(addSrv.getNewServerId(), initialState);
-
-        if(initialState == FollowerState.VOTING_NOT_INITIALIZED){
-            LOG.debug("Leader sending initiate capture snapshot to follower : {}", addSrv.getNewServerId());
-            leader.initiateCaptureSnapshot(addSrv.getNewServerId());
-            // schedule the catchup timeout timer
-            followerTimeout = context.getActorSystem().scheduler()
-               .scheduleOnce(new FiniteDuration(((context.getConfigParams().getElectionTimeOutInterval().toMillis()) * 2),
-                TimeUnit.MILLISECONDS),
-                context.getActor(), new FollowerCatchUpTimeout(addSrv.getNewServerId()),
-                context.getActorSystem().dispatcher(), context.getActor());
-        } else {
-            LOG.debug("Directly persisting  the new server configuration : {}", addSrv.getNewServerId());
-            persistNewServerConfiguration(raftActor, followerInfo);
+        if(noLeaderOrForwardedToLeader(addServer, raftActor, sender)) {
+            return;
         }
+
+        currentOperationState.onAddServer(raftActor, addServer, sender);
     }
 
     private boolean noLeaderOrForwardedToLeader(Object message, RaftActor raftActor, ActorRef sender) {
@@ -164,74 +127,215 @@ class RaftActorServerConfigurationSupport {
         return true;
     }
 
-    private void onUnInitializedFollowerSnapshotReply(UnInitializedFollowerSnapshotReply reply,
-                                                 RaftActor raftActor, ActorRef sender){
-        CatchupFollowerInfo followerInfo = followerInfoQueue.peek();
-        // Sanity check - it's possible we get a reply after it timed out.
-        if(followerInfo == null) {
-            return;
-        }
+    private interface OperationState {
+        void onAddServer(RaftActor raftActor, AddServer addServer, ActorRef sender);
 
-        String followerId = reply.getFollowerId();
-        AbstractLeader leader = (AbstractLeader) raftActor.getCurrentBehavior();
-        FollowerLogInformation followerLogInformation = leader.getFollower(followerId);
-        stopFollowerTimer();
-        followerLogInformation.setFollowerState(FollowerState.VOTING);
-        leader.updateMinReplicaCountAndMinIsolatedLeaderPeerCount();
+        void onFollowerCatchupTimeout(RaftActor raftActor, FollowerCatchUpTimeout followerTimeout);
 
-        persistNewServerConfiguration(raftActor, followerInfo);
+        void onUnInitializedFollowerSnapshotReply(RaftActor raftActor, UnInitializedFollowerSnapshotReply reply);
+
+        void onApplyState(RaftActor raftActor, ApplyState applyState);
     }
 
-    private void persistNewServerConfiguration(RaftActor raftActor, CatchupFollowerInfo followerInfo){
-        List <String> cNew = new ArrayList<String>(context.getPeerAddresses().keySet());
-        cNew.add(context.getId());
+    private interface InitialOperationState {
+        void initiate(RaftActor raftActor);
+    }
 
-        LOG.debug("New server configuration : {}",  cNew.toString());
+    private abstract class AbstractOperationState implements OperationState {
+        @Override
+        public void onAddServer(RaftActor raftActor, AddServer addServer, ActorRef sender) {
+            // We're not in the idle state so queue it.
 
-        ServerConfigurationPayload servPayload = new ServerConfigurationPayload(cNew, Collections.<String>emptyList());
+            LOG.debug("{}: Server operaiton already in progress - queueing {}", raftContext.getId(), addServer);
 
-        raftActor.persistData(followerInfo.getClientRequestor(), followerInfo.getContextId(), servPayload);
-   }
-
-   private void stopFollowerTimer() {
-        if (followerTimeout != null && !followerTimeout.isCancelled()) {
-            followerTimeout.cancel();
+            pendingOperationsQueue.add(new InitialAddServerState(new AddServerContext(addServer, sender)));
         }
-   }
 
-   private void onFollowerCatchupTimeout(RaftActor raftActor, ActorRef sender, String serverId){
-        LOG.debug("onFollowerCatchupTimeout: {}",  serverId);
-        AbstractLeader leader = (AbstractLeader) raftActor.getCurrentBehavior();
-        // cleanup
-        context.removePeer(serverId);
-        leader.removeFollower(serverId);
-        LOG.warn("Timeout occured for new server {} while installing snapshot", serverId);
-        respondToClient(raftActor,ServerChangeStatus.TIMEOUT);
-   }
-
-   private void respondToClient(RaftActor raftActor, ServerChangeStatus result){
-        // remove the entry from the queue
-        CatchupFollowerInfo fInfo = followerInfoQueue.remove();
-
-        // get the sender
-        ActorRef toClient = fInfo.getClientRequestor();
-
-        toClient.tell(new AddServerReply(result, raftActor.getLeaderId()), raftActor.self());
-        LOG.debug("Response returned is {} for server {} ",  result, fInfo.getAddServer().getNewServerId());
-        if(!followerInfoQueue.isEmpty()){
-            processAddServer(raftActor);
+        @Override
+        public void onFollowerCatchupTimeout(RaftActor raftActor, FollowerCatchUpTimeout followerTimeout) {
+            LOG.debug("onFollowerCatchupTimeout should not be called in state {}", this);
         }
-   }
+
+        @Override
+        public void onUnInitializedFollowerSnapshotReply(RaftActor raftActor, UnInitializedFollowerSnapshotReply reply) {
+            LOG.debug("onUnInitializedFollowerSnapshotReply should not be called in state {}", this);
+        }
+
+        @Override
+        public void onApplyState(RaftActor raftActor, ApplyState applyState) {
+        }
+
+        protected void persistNewServerConfiguration(RaftActor raftActor, ServerOperationContext<?> operationContext){
+            List <String> newConfig = new ArrayList<String>(raftContext.getPeerAddresses().keySet());
+            newConfig.add(raftContext.getId());
+
+            LOG.debug("{}: New server configuration : {}", raftContext.getId(), newConfig);
+
+            ServerConfigurationPayload servPayload = new ServerConfigurationPayload(newConfig, Collections.<String>emptyList());
+
+            raftActor.persistData(operationContext.getClientRequestor(), operationContext.getContextId(), servPayload);
+
+            currentOperationState = new Persisting(operationContext);
+        }
+
+        protected void operationComplete(RaftActor raftActor, ServerOperationContext<?> operationContext,
+                ServerChangeStatus status) {
+
+            LOG.debug("{}: Returning {} for operation {}", raftContext.getId(), status, operationContext.getOperation());
+
+            operationContext.getClientRequestor().tell(operationContext.newReply(status, raftActor.getLeaderId()),
+                    raftActor.self());
+
+            InitialOperationState nextOperation = pendingOperationsQueue.poll();
+            if(nextOperation != null) {
+                nextOperation.initiate(raftActor);
+            } else {
+                currentOperationState = IDLE;
+            }
+        }
+
+        @Override
+        public String toString() {
+            return getClass().getSimpleName();
+        }
+    }
+
+    private class Idle extends AbstractOperationState {
+        @Override
+        public void onAddServer(RaftActor raftActor, AddServer addServer, ActorRef sender) {
+            new InitialAddServerState(new AddServerContext(addServer, sender)).initiate(raftActor);
+        }
+    }
+
+    private class Persisting extends AbstractOperationState {
+        private final ServerOperationContext<?> operationContext;
+
+        Persisting(ServerOperationContext<?> operationContext) {
+            this.operationContext = operationContext;
+        }
+
+        @Override
+        public void onApplyState(RaftActor raftActor, ApplyState applyState) {
+            if(operationContext.getContextId().equals(applyState.getIdentifier())) {
+                LOG.info("{}: {} has been successfully replicated to a majority of followers",
+                        applyState.getReplicatedLogEntry().getData());
+
+                operationComplete(raftActor, operationContext, ServerChangeStatus.OK);
+            }
+        }
+    }
+
+    private abstract class AddServerState extends AbstractOperationState {
+        private final AddServerContext addServerContext;
+
+        AddServerState(AddServerContext addServerContext) {
+            this.addServerContext = addServerContext;
+        }
+
+        AddServerContext getAddServerContext() {
+            return addServerContext;
+        }
+    }
+
+    private class InitialAddServerState extends AddServerState implements InitialOperationState {
+        InitialAddServerState(AddServerContext addServerContext) {
+            super(addServerContext);
+        }
+
+        @Override
+        public void initiate(RaftActor raftActor) {
+            AbstractLeader leader = (AbstractLeader) raftActor.getCurrentBehavior();
+
+            AddServer addServer = getAddServerContext().getOperation();
+
+            LOG.debug("{}: Initiate {}", raftContext.getId(), addServer);
+
+            raftContext.addToPeers(addServer.getNewServerId(), addServer.getNewServerAddress());
+
+            // if voting member - initialize to VOTING_NOT_INITIALIZED
+            FollowerState initialState = addServer.isVotingMember() ? FollowerState.VOTING_NOT_INITIALIZED :
+                FollowerState.NON_VOTING;
+            leader.addFollower(addServer.getNewServerId(), initialState);
+
+            if(initialState == FollowerState.VOTING_NOT_INITIALIZED){
+                LOG.debug("{}: Leader sending initiate capture snapshot to new follower {}", raftContext.getId(),
+                        addServer.getNewServerId());
+
+                leader.initiateCaptureSnapshot(addServer.getNewServerId());
+
+                // schedule the install snapshot timeout timer
+                Cancellable installSnapshotTimer = raftContext.getActorSystem().scheduler().scheduleOnce(
+                        new FiniteDuration(((raftContext.getConfigParams().getElectionTimeOutInterval().toMillis()) * 2),
+                                TimeUnit.MILLISECONDS), raftContext.getActor(),
+                                new FollowerCatchUpTimeout(addServer.getNewServerId()),
+                                raftContext.getActorSystem().dispatcher(), raftContext.getActor());
+
+                currentOperationState = new InstallingSnapshot(getAddServerContext(), installSnapshotTimer);
+            } else {
+                LOG.debug("{}: New follower is non-voting - directly persisting new server configuration",
+                        raftContext.getId());
+
+                persistNewServerConfiguration(raftActor, getAddServerContext());
+            }
+        }
+    }
+
+    private class InstallingSnapshot extends AddServerState {
+        private final Cancellable installSnapshotTimer;
+
+        InstallingSnapshot(AddServerContext addServerContext, Cancellable installSnapshotTimer) {
+            super(addServerContext);
+            this.installSnapshotTimer = Preconditions.checkNotNull(installSnapshotTimer);
+        }
+
+        @Override
+        public void onFollowerCatchupTimeout(RaftActor raftActor, FollowerCatchUpTimeout followerTimeout) {
+            String serverId = followerTimeout.getNewServerId();
+
+            LOG.debug("{}: onFollowerCatchupTimeout: {}", raftContext.getId(), serverId);
+
+            AbstractLeader leader = (AbstractLeader) raftActor.getCurrentBehavior();
+
+            // cleanup
+            raftContext.removePeer(serverId);
+            leader.removeFollower(serverId);
+
+            LOG.warn("{}: Timeout occured for new server {} while installing snapshot", raftContext.getId(), serverId);
+
+            operationComplete(raftActor, getAddServerContext(), ServerChangeStatus.TIMEOUT);
+        }
+
+        @Override
+        public void onUnInitializedFollowerSnapshotReply(RaftActor raftActor, UnInitializedFollowerSnapshotReply reply) {
+            LOG.debug("{}: onUnInitializedFollowerSnapshotReply: {}", raftContext.getId(), reply);
+
+            String followerId = reply.getFollowerId();
+
+            // Sanity check to guard against receiving an UnInitializedFollowerSnapshotReply from a prior
+            // add server operation that timed out.
+            if(getAddServerContext().getOperation().getNewServerId().equals(followerId)) {
+                AbstractLeader leader = (AbstractLeader) raftActor.getCurrentBehavior();
+                FollowerLogInformation followerLogInformation = leader.getFollower(followerId);
+
+                installSnapshotTimer.cancel();
+
+                followerLogInformation.setFollowerState(FollowerState.VOTING);
+                leader.updateMinReplicaCountAndMinIsolatedLeaderPeerCount();
+
+                persistNewServerConfiguration(raftActor, getAddServerContext());
+            }
+        }
+    }
 
     // maintain sender actorRef
-    private static class CatchupFollowerInfo {
-        private final AddServer addServer;
+    private static abstract class ServerOperationContext<T> {
+        private final T operation;
         private final ActorRef clientRequestor;
         private final String contextId;
 
-        CatchupFollowerInfo(AddServer addSrv, ActorRef cliReq){
-            addServer = addSrv;
-            clientRequestor = cliReq;
+        ServerOperationContext(T operation, ActorRef clientRequestor){
+            this.operation = operation;
+            this.clientRequestor = clientRequestor;
             contextId = UUID.randomUUID().toString();
         }
 
@@ -239,12 +343,25 @@ class RaftActorServerConfigurationSupport {
             return contextId;
         }
 
-        AddServer getAddServer(){
-            return addServer;
+        T getOperation(){
+            return operation;
         }
 
         ActorRef getClientRequestor(){
             return clientRequestor;
+        }
+
+        abstract Object newReply(ServerChangeStatus status, String leaderId);
+    }
+
+    private static class AddServerContext extends ServerOperationContext<AddServer> {
+        AddServerContext(AddServer addServer, ActorRef clientRequestor) {
+            super(addServer, clientRequestor);
+        }
+
+        @Override
+        Object newReply(ServerChangeStatus status, String leaderId) {
+            return new AddServerReply(status, leaderId);
         }
     }
 }
