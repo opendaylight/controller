@@ -12,6 +12,7 @@ import akka.japi.Procedure;
 import akka.persistence.SnapshotSelectionCriteria;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.List;
+import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.SendInstallSnapshot;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
@@ -37,12 +38,16 @@ public class SnapshotManager implements SnapshotState {
 
     private Procedure<Void> createSnapshotProcedure;
 
-    private Snapshot applySnapshot;
+    private ApplySnapshot applySnapshot;
     private Procedure<byte[]> applySnapshotProcedure;
 
     public SnapshotManager(RaftActorContext context, Logger logger) {
         this.context = context;
         this.LOG = logger;
+    }
+
+    public boolean isApplying() {
+        return applySnapshot != null;
     }
 
     @Override
@@ -61,7 +66,7 @@ public class SnapshotManager implements SnapshotState {
     }
 
     @Override
-    public void apply(Snapshot snapshot) {
+    public void apply(ApplySnapshot snapshot) {
         currentState.apply(snapshot);
     }
 
@@ -130,7 +135,7 @@ public class SnapshotManager implements SnapshotState {
         }
 
         @Override
-        public void apply(Snapshot snapshot) {
+        public void apply(ApplySnapshot snapshot) {
             LOG.debug("apply should not be called in state {}", this);
         }
 
@@ -260,14 +265,14 @@ public class SnapshotManager implements SnapshotState {
         }
 
         @Override
-        public void apply(Snapshot snapshot) {
-            applySnapshot = snapshot;
+        public void apply(ApplySnapshot applySnapshot) {
+            SnapshotManager.this.applySnapshot = applySnapshot;
 
             lastSequenceNumber = context.getPersistenceProvider().getLastSequenceNumber();
 
             LOG.debug("lastSequenceNumber prior to persisting applied snapshot: {}", lastSequenceNumber);
 
-            context.getPersistenceProvider().saveSnapshot(snapshot);
+            context.getPersistenceProvider().saveSnapshot(applySnapshot.getSnapshot());
 
             SnapshotManager.this.currentState = PERSISTING;
         }
@@ -374,16 +379,19 @@ public class SnapshotManager implements SnapshotState {
 
         @Override
         public void commit(long sequenceNumber, RaftActorBehavior currentBehavior) {
-            LOG.debug("Snapshot success sequence number:", sequenceNumber);
+            LOG.debug("Snapshot success sequence number: {}", sequenceNumber);
 
             if(applySnapshot != null) {
                 try {
-                    applySnapshotProcedure.apply(applySnapshot.getState());
+                    Snapshot snapshot = applySnapshot.getSnapshot();
+                    applySnapshotProcedure.apply(snapshot.getState());
 
                     //clears the followers log, sets the snapshot index to ensure adjusted-index works
-                    context.setReplicatedLog(ReplicatedLogImpl.newInstance(applySnapshot, context, currentBehavior));
-                    context.setLastApplied(applySnapshot.getLastAppliedIndex());
-                    context.setCommitIndex(applySnapshot.getLastAppliedIndex());
+                    context.setReplicatedLog(ReplicatedLogImpl.newInstance(snapshot, context, currentBehavior));
+                    context.setLastApplied(snapshot.getLastAppliedIndex());
+                    context.setCommitIndex(snapshot.getLastAppliedIndex());
+
+                    applySnapshot.getCallback().onSuccess();
                 } catch (Exception e) {
                     LOG.error("Error applying snapshot", e);
                 }
@@ -412,6 +420,8 @@ public class SnapshotManager implements SnapshotState {
                         context.getReplicatedLog().getSnapshotIndex(),
                         context.getReplicatedLog().getSnapshotTerm(),
                         context.getReplicatedLog().size());
+            } else {
+                applySnapshot.getCallback().onFailure();
             }
 
             lastSequenceNumber = -1;

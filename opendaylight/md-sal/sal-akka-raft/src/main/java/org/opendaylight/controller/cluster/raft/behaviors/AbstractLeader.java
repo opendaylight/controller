@@ -135,6 +135,10 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         FollowerLogInformation followerLogInformation = new FollowerLogInformationImpl(followerId, -1, context);
         followerLogInformation.setFollowerState(followerState);
         followerToLog.put(followerId, followerLogInformation);
+
+        if(heartbeatSchedule == null) {
+            scheduleHeartBeat(context.getConfigParams().getHeartBeatInterval());
+        }
     }
 
     public void removeFollower(String followerId) {
@@ -254,9 +258,10 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
             if (replicatedCount >= minReplicationCount) {
                 ReplicatedLogEntry replicatedLogEntry = context.getReplicatedLog().get(N);
-                if (replicatedLogEntry != null &&
-                    replicatedLogEntry.getTerm() == currentTerm()) {
+                if (replicatedLogEntry != null && replicatedLogEntry.getTerm() == currentTerm()) {
                     context.setCommitIndex(N);
+                } else {
+                    break;
                 }
             } else {
                 break;

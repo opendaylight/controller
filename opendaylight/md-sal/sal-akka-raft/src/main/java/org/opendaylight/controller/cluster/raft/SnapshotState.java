@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.cluster.raft;
 
+import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 
 public interface SnapshotState {
@@ -42,7 +43,7 @@ public interface SnapshotState {
      *
      * @param snapshot the Snapshot to apply.
      */
-    void apply(Snapshot snapshot);
+    void apply(ApplySnapshot snapshot);
 
     /**
      * Persist the snapshot
