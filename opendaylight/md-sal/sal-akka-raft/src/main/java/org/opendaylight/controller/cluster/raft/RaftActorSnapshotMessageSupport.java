@@ -55,7 +55,7 @@ class RaftActorSnapshotMessageSupport {
 
     boolean handleSnapshotMessage(Object message) {
         if(message instanceof ApplySnapshot ) {
-            onApplySnapshot(((ApplySnapshot) message).getSnapshot());
+            onApplySnapshot((ApplySnapshot) message);
             return true;
         } else if (message instanceof SaveSnapshotSuccess) {
             onSaveSnapshotSuccess((SaveSnapshotSuccess) message);
@@ -95,10 +95,10 @@ class RaftActorSnapshotMessageSupport {
         context.getSnapshotManager().commit(sequenceNumber, currentBehavior);
     }
 
-    private void onApplySnapshot(Snapshot snapshot) {
+    private void onApplySnapshot(ApplySnapshot message) {
         log.info("{}: Applying snapshot on follower with snapshotIndex: {}, snapshotTerm: {}", context.getId(),
-                snapshot.getLastAppliedIndex(), snapshot.getLastAppliedTerm());
+                message.getSnapshot().getLastAppliedIndex(), message.getSnapshot().getLastAppliedTerm());
 
-        context.getSnapshotManager().apply(snapshot);
+        context.getSnapshotManager().apply(message);
     }
 }

@@ -192,13 +192,10 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     @Override
     public void handleCommand(final Object message) {
-        if (message instanceof ApplyState){
+        if(serverConfigurationSupport.handleMessage(message, this, getSender())) {
+            return;
+        } else if (message instanceof ApplyState){
             ApplyState applyState = (ApplyState) message;
-
-            boolean result = serverConfigurationSupport.handleMessage(message, this, getSender());
-            if(result){
-                return;
-            }
 
             long elapsedTime = (System.nanoTime() - applyState.getStartTime());
             if(elapsedTime >= APPLY_STATE_DELAY_THRESHOLD_IN_NANOS){
@@ -244,8 +241,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             captureSnapshot();
         } else if(message instanceof SwitchBehavior){
             switchBehavior(((SwitchBehavior) message));
-        } else if(!snapshotSupport.handleSnapshotMessage(message) &&
-                !serverConfigurationSupport.handleMessage(message, this, getSender())) {
+        } else if(!snapshotSupport.handleSnapshotMessage(message)) {
             switchBehavior(reusableSwitchBehaviorSupplier.handleMessage(getSender(), message));
         }
     }

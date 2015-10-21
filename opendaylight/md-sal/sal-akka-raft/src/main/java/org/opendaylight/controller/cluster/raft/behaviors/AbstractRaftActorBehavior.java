@@ -17,6 +17,7 @@ import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.SerializationUtils;
+import org.opendaylight.controller.cluster.raft.ServerConfigurationPayload;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
@@ -490,4 +491,15 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
         return context.getId();
     }
 
+    public void applyServerConfiguration(ServerConfigurationPayload serverConfig) {
+        for(String peerId: context.getPeerAddresses().keySet()) {
+            context.removePeer(peerId);
+        }
+
+        for(String peerId: serverConfig.getNewServerConfig()) {
+            if(!getId().equals(peerId)) {
+                context.addToPeers(peerId, null);
+            }
+        }
+    }
 }

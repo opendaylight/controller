@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.ServerConfigurationPayload;
 import org.opendaylight.controller.cluster.raft.Snapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
@@ -103,7 +104,7 @@ public class Follower extends AbstractRaftActorBehavior {
         // to make it easier to read. Before refactoring ensure tests
         // cover the code properly
 
-        if (snapshotTracker != null) {
+        if (snapshotTracker != null || context.getSnapshotManager().isApplying()) {
             // if snapshot install is in progress, follower should just acknowledge append entries with a reply.
             AppendEntriesReply reply = new AppendEntriesReply(context.getId(), currentTerm(), true,
                     lastIndex(), lastTerm(), context.getPayloadVersion());
@@ -189,6 +190,10 @@ public class Follower extends AbstractRaftActorBehavior {
                 LOG.debug("{}: Append entry to log {}", logName(), entry.getData());
 
                 context.getReplicatedLog().appendAndPersist(entry);
+
+                if(entry.getData() instanceof ServerConfigurationPayload) {
+                    applyServerConfiguration((ServerConfigurationPayload)entry.getData());
+                }
             }
 
             LOG.debug("{}: Log size is now {}", logName(), context.getReplicatedLog().size());
@@ -335,7 +340,7 @@ public class Follower extends AbstractRaftActorBehavior {
         return super.handleMessage(sender, message);
     }
 
-    private void handleInstallSnapshot(ActorRef sender, InstallSnapshot installSnapshot) {
+    private void handleInstallSnapshot(final ActorRef sender, InstallSnapshot installSnapshot) {
 
         LOG.debug("{}: InstallSnapshot received from leader {}, datasize: {} , Chunk: {}/{}",
                     logName(), installSnapshot.getLeaderId(), installSnapshot.getData().size(),
@@ -348,6 +353,9 @@ public class Follower extends AbstractRaftActorBehavior {
         updateInitialSyncStatus(installSnapshot.getLastIncludedIndex(), installSnapshot.getLeaderId());
 
         try {
+            final InstallSnapshotReply reply = new InstallSnapshotReply(
+                    currentTerm(), context.getId(), installSnapshot.getChunkIndex(), true);
+
             if(snapshotTracker.addChunk(installSnapshot.getChunkIndex(), installSnapshot.getData(),
                     installSnapshot.getLastChunkHashCode())){
                 Snapshot snapshot = Snapshot.create(snapshotTracker.getSnapshot(),
@@ -359,19 +367,28 @@ public class Follower extends AbstractRaftActorBehavior {
                         context.getTermInformation().getCurrentTerm(),
                         context.getTermInformation().getVotedFor());
 
-                actor().tell(new ApplySnapshot(snapshot), actor());
+                ApplySnapshot.Callback applySnapshotCallback = new ApplySnapshot.Callback() {
+                    @Override
+                    public void onSuccess() {
+                        LOG.debug("{}: handleInstallSnapshot returning: {}", logName(), reply);
+
+                        sender.tell(reply, actor());
+                    }
+
+                    @Override
+                    public void onFailure() {
+                        sender.tell(new InstallSnapshotReply(currentTerm(), context.getId(), -1, false), actor());
+                    }
+                };
+
+                actor().tell(new ApplySnapshot(snapshot, applySnapshotCallback), actor());
 
                 snapshotTracker = null;
+            } else {
+                LOG.debug("{}: handleInstallSnapshot returning: {}", logName(), reply);
 
+                sender.tell(reply, actor());
             }
-
-            InstallSnapshotReply reply = new InstallSnapshotReply(
-                    currentTerm(), context.getId(), installSnapshot.getChunkIndex(), true);
-
-            LOG.debug("{}: handleInstallSnapshot returning: {}", logName(), reply);
-
-            sender.tell(reply, actor());
-
         } catch (SnapshotTracker.InvalidChunkException e) {
             LOG.debug("{}: Exception in InstallSnapshot of follower", logName(), e);
 

@@ -97,9 +97,10 @@ public class RaftActorSnapshotMessageSupportTest {
         Snapshot snapshot = Snapshot.create(snapshotBytes, Collections.<ReplicatedLogEntry>emptyList(),
                 lastIndexDuringSnapshotCapture, 1, lastAppliedDuringSnapshotCapture, 1);
 
-        sendMessageToSupport(new ApplySnapshot(snapshot));
+        ApplySnapshot applySnapshot = new ApplySnapshot(snapshot);
+        sendMessageToSupport(applySnapshot);
 
-        verify(mockSnapshotManager).apply(snapshot);
+        verify(mockSnapshotManager).apply(applySnapshot);
     }
 
     @Test
