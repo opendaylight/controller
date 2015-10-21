@@ -50,6 +50,6 @@
     </data>
   </configuration>
   <required-capabilities>
-      <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:connector:netconf?module=odl-sal-netconf-connector-cfg&amp;revision=2013-10-28</capability>
+      <capability>urn:opendaylight:params:xml:ns:yang:controller:md:sal:connector:netconf?module=odl-sal-netconf-connector-cfg&amp;revision=2015-08-03</capability>
   </required-capabilities>
 </snapshot>

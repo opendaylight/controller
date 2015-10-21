@@ -24,6 +24,18 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
+                <artifactId>netconf-topology</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>netconf-topology-config</artifactId>
+                <version>${project.version}</version>
+                <classifier>config</classifier>
+                <type>xml</type>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>config-netconf-connector</artifactId>
                 <version>${project.version}</version>
             </dependency>
