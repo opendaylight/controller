@@ -42,6 +42,30 @@
     },
     {
       "key": {
+        "uuid": "fad0f9df_d46bbe83",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-21T21:07:07Z",
+      "side": 1,
+      "message": "We can look into refactoring this later. One thing is that ApplyState isn\u0027t passed to the behavior.",
+      "parentUuid": "fad0f9df_c92b2781",
+      "range": {
+        "startLine": 37,
+        "startChar": 6,
+        "endLine": 37,
+        "endChar": 41
+      },
+      "revId": "4e186d6e4a9c84482dc74aee353e12a12f6728a7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fad0f9df_e91ceb6c",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
         "patchSetId": 9
@@ -53,6 +77,30 @@
       "writtenOn": "2015-10-21T13:47:17Z",
       "side": 1,
       "message": "This is no longer a TODO right?",
+      "range": {
+        "startLine": 103,
+        "startChar": 11,
+        "endLine": 103,
+        "endChar": 15
+      },
+      "revId": "4e186d6e4a9c84482dc74aee353e12a12f6728a7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_f4e36231",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-21T21:07:07Z",
+      "side": 1,
+      "message": "Addressed with https://git.opendaylight.org/gerrit/#/c/28663/",
+      "parentUuid": "fad0f9df_e91ceb6c",
       "range": {
         "startLine": 103,
         "startChar": 11,
@@ -88,6 +136,30 @@
     },
     {
       "key": {
+        "uuid": "fad0f9df_b4d5da44",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-21T21:07:07Z",
+      "side": 1,
+      "message": "Addressed with https://git.opendaylight.org/gerrit/#/c/28663/",
+      "parentUuid": "fad0f9df_c9a007f7",
+      "range": {
+        "startLine": 159,
+        "startChar": 63,
+        "endLine": 159,
+        "endChar": 74
+      },
+      "revId": "4e186d6e4a9c84482dc74aee353e12a12f6728a7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fad0f9df_69579b03",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
         "patchSetId": 9
@@ -99,6 +171,30 @@
       "writtenOn": "2015-10-21T13:47:17Z",
       "side": 1,
       "message": "Could you please rename this to oldConfiguration? cOld and cNew are a little hard to read.",
+      "range": {
+        "startLine": 169,
+        "startChar": 21,
+        "endLine": 169,
+        "endChar": 25
+      },
+      "revId": "4e186d6e4a9c84482dc74aee353e12a12f6728a7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_54ca6ea2",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-21T21:07:07Z",
+      "side": 1,
+      "message": "Addressed with https://git.opendaylight.org/gerrit/#/c/28663/",
+      "parentUuid": "fad0f9df_69579b03",
       "range": {
         "startLine": 169,
         "startChar": 21,
@@ -134,6 +230,30 @@
     },
     {
       "key": {
+        "uuid": "fad0f9df_74cf72b1",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-21T21:07:07Z",
+      "side": 1,
+      "message": "Addressed with https://git.opendaylight.org/gerrit/#/c/28663/",
+      "parentUuid": "fad0f9df_e9614bd4",
+      "range": {
+        "startLine": 175,
+        "startChar": 19,
+        "endLine": 175,
+        "endChar": 23
+      },
+      "revId": "4e186d6e4a9c84482dc74aee353e12a12f6728a7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fad0f9df_e94aab54",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
         "patchSetId": 9
@@ -145,6 +265,30 @@
       "writtenOn": "2015-10-21T13:47:17Z",
       "side": 1,
       "message": "Does ServerConfigurationPayload only take two List\u003cString\u003e?  Aren\u0027t we losing information about voting/non-voting replicas?",
+      "range": {
+        "startLine": 181,
+        "startChar": 53,
+        "endLine": 181,
+        "endChar": 79
+      },
+      "revId": "4e186d6e4a9c84482dc74aee353e12a12f6728a7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_d4bdfe03",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-21T21:07:07Z",
+      "side": 1,
+      "message": "Yes we need to include the voting status. I figured we can do that in a later patch. We also won\u0027t need to store \"cOld\" here based on your idea for handling rollback.",
+      "parentUuid": "fad0f9df_e94aab54",
       "range": {
         "startLine": 181,
         "startChar": 53,
@@ -180,6 +324,30 @@
     },
     {
       "key": {
+        "uuid": "fad0f9df_14c4e690",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-21T21:07:07Z",
+      "side": 1,
+      "message": "Addressed with https://git.opendaylight.org/gerrit/#/c/28663/",
+      "parentUuid": "fad0f9df_09484f5a",
+      "range": {
+        "startLine": 182,
+        "startChar": 11,
+        "endLine": 182,
+        "endChar": 16
+      },
+      "revId": "4e186d6e4a9c84482dc74aee353e12a12f6728a7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fad0f9df_a99b43c8",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
         "patchSetId": 9
@@ -191,6 +359,30 @@
       "writtenOn": "2015-10-21T13:47:17Z",
       "side": 1,
       "message": "This should be moved to onFollowerCatchUpTimeout after respondToClient is called. No one would guess that the method respondToClient will start processing the next AddServer message.",
+      "range": {
+        "startLine": 214,
+        "startChar": 0,
+        "endLine": 216,
+        "endChar": 9
+      },
+      "revId": "4e186d6e4a9c84482dc74aee353e12a12f6728a7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_f4ba8209",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 216,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-21T21:07:07Z",
+      "side": 1,
+      "message": "Will address in another patch.",
+      "parentUuid": "fad0f9df_a99b43c8",
       "range": {
         "startLine": 214,
         "startChar": 0,
@@ -226,6 +418,30 @@
     },
     {
       "key": {
+        "uuid": "fad0f9df_943776b0",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 220,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-21T21:07:07Z",
+      "side": 1,
+      "message": "Addressed with https://git.opendaylight.org/gerrit/#/c/28663/",
+      "parentUuid": "fad0f9df_49ac17ee",
+      "range": {
+        "startLine": 220,
+        "startChar": 4,
+        "endLine": 220,
+        "endChar": 17
+      },
+      "revId": "4e186d6e4a9c84482dc74aee353e12a12f6728a7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fad0f9df_09b60f3e",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
         "patchSetId": 9
@@ -237,6 +453,24 @@
       "writtenOn": "2015-10-21T13:47:17Z",
       "side": 1,
       "message": "I\u0027m thinking it makes more sense to invoke updateMinReplicaCount.. from this method and make the updateMinReplicaCount private.",
+      "revId": "4e186d6e4a9c84482dc74aee353e12a12f6728a7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_54582efa",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-21T21:07:07Z",
+      "side": 1,
+      "message": "Actually for AddServer we call this method if install snapshot times out which is prior to updateMinReplicaCount. So we don\u0027t need to call updateMinReplicaCount from here in that case although may be needed for RemoveServer.\n\nupdateMinReplicaCount is public b/c it\u0027s called after install snapshot succeeds. It also sets the FollowerState to VOTING so we could make updateMinReplicaCount private if we add a specific method to set the FollowerState to VOTING. Six and 1/2 dozen of the other I guess.",
+      "parentUuid": "fad0f9df_09b60f3e",
       "revId": "4e186d6e4a9c84482dc74aee353e12a12f6728a7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -289,6 +523,30 @@
     },
     {
       "key": {
+        "uuid": "fad0f9df_745d32e9",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeader.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 431,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-21T21:07:07Z",
+      "side": 1,
+      "message": "Will address in another patch.",
+      "parentUuid": "fad0f9df_a9826350",
+      "range": {
+        "startLine": 431,
+        "startChar": 40,
+        "endLine": 431,
+        "endChar": 41
+      },
+      "revId": "4e186d6e4a9c84482dc74aee353e12a12f6728a7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fad0f9df_29967395",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/FollowerCatchUpTimeout.java",
         "patchSetId": 9
@@ -312,6 +570,30 @@
     },
     {
       "key": {
+        "uuid": "fad0f9df_1472a67c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/FollowerCatchUpTimeout.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-21T21:07:07Z",
+      "side": 1,
+      "message": "Will address in another patch.",
+      "parentUuid": "fad0f9df_29967395",
+      "range": {
+        "startLine": 2,
+        "startChar": 17,
+        "endLine": 2,
+        "endChar": 22
+      },
+      "revId": "4e186d6e4a9c84482dc74aee353e12a12f6728a7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fad0f9df_89f8bfe6",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/UnInitializedFollowerSnapshotReply.java",
         "patchSetId": 9
@@ -323,6 +605,30 @@
       "writtenOn": "2015-10-21T13:47:17Z",
       "side": 1,
       "message": "How about followerId? shortened names are not very readable.",
+      "range": {
+        "startLine": 17,
+        "startChar": 53,
+        "endLine": 17,
+        "endChar": 59
+      },
+      "revId": "4e186d6e4a9c84482dc74aee353e12a12f6728a7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_346faa94",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/UnInitializedFollowerSnapshotReply.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-21T21:07:07Z",
+      "side": 1,
+      "message": "Will address in another patch.",
+      "parentUuid": "fad0f9df_89f8bfe6",
       "range": {
         "startLine": 17,
         "startChar": 53,
