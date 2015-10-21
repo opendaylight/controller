@@ -785,6 +785,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
         Assert.assertArrayEquals("getState", bsSnapshot.toByteArray(), snapshot.getState());
         assertEquals("getElectionTerm", 1, snapshot.getElectionTerm());
         assertEquals("getElectionVotedFor", "leader", snapshot.getElectionVotedFor());
+        applySnapshot.getCallback().onSuccess();
 
         List<InstallSnapshotReply> replies = MessageCollectorActor.getAllMatching(
                 leaderActor, InstallSnapshotReply.class);

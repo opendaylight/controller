@@ -79,4 +79,10 @@ public class ServerConfigurationPayload extends Payload implements Serializable 
     public Payload decode(AppendEntriesMessages.AppendEntries.ReplicatedLogEntry.Payload payload) {
         return null;
     }
+
+    @Override
+    public String toString() {
+        return "ServerConfigurationPayload [newServerConfig=" + newServerConfig + ", oldServerConfig="
+                + oldServerConfig + "]";
+    }
 }
