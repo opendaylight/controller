@@ -492,9 +492,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
     }
 
     public void applyServerConfiguration(ServerConfigurationPayload serverConfig) {
-        for(String peerId: context.getPeerAddresses().keySet()) {
-            context.removePeer(peerId);
-        }
+        context.getPeerAddresses().clear();
 
         for(String peerId: serverConfig.getNewServerConfig()) {
             if(!getId().equals(peerId)) {
