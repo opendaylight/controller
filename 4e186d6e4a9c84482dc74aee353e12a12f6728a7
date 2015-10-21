@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fad0f9df_835dfeeb",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-21T00:00:50Z",
+      "side": 1,
+      "message": "Not trying to nitpick but there\u0027s no point in handling it here for the serverConfigurationSupport if we\u0027re just going to return. If that\u0027s the case then I think it\u0027s cleaner to move the if(serverConfigurationSupport.handleMessage(...)) clause to the top of this method (and remove it from the bottom of the method), i.e.:\n\nif(snapshotSupport.handleSnapshotMessage(message)) {\n    return;\n} else if(message instanceof ApplyState) {\n}\n...\n\nThis is what I had suggested initially. The reason to handle it here would be to execute the rest of the code in this block while eliding the applyState call. However I don\u0027t think we need to do this.",
+      "revId": "4e186d6e4a9c84482dc74aee353e12a12f6728a7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
