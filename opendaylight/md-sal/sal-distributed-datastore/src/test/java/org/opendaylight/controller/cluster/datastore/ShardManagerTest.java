@@ -21,6 +21,7 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.AddressFromURIString;
 import akka.actor.Props;
+import akka.actor.Status;
 import akka.cluster.Cluster;
 import akka.cluster.ClusterEvent;
 import akka.dispatch.Dispatchers;
@@ -57,6 +58,7 @@ import org.opendaylight.controller.cluster.datastore.exceptions.PrimaryNotFoundE
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardManagerIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.ActorInitialized;
+import org.opendaylight.controller.cluster.datastore.messages.AddShardReplica;
 import org.opendaylight.controller.cluster.datastore.messages.CreateShard;
 import org.opendaylight.controller.cluster.datastore.messages.CreateShardReply;
 import org.opendaylight.controller.cluster.datastore.messages.FindLocalShard;
@@ -68,6 +70,7 @@ import org.opendaylight.controller.cluster.datastore.messages.PeerDown;
 import org.opendaylight.controller.cluster.datastore.messages.PeerUp;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
 import org.opendaylight.controller.cluster.datastore.messages.RemotePrimaryShardFound;
+import org.opendaylight.controller.cluster.datastore.messages.RemoveShardReplica;
 import org.opendaylight.controller.cluster.datastore.messages.ShardLeaderStateChanged;
 import org.opendaylight.controller.cluster.datastore.messages.SwitchShardBehavior;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
@@ -1028,6 +1031,59 @@ public class ShardManagerTest extends AbstractActorTest {
             assertSame("schemaContext", schemaContext, shardPropsCreator.schemaContext);
             assertNotNull("schemaContext is null", shardPropsCreator.datastoreContext);
         }};
+    }
+
+    @Test
+    public void testAddShardReplicaForNonExistentShard() throws Exception {
+        new JavaTestKit(getSystem()) {{
+            ActorRef shardManager = getSystem().actorOf(newShardMgrProps(
+                    new ConfigurationImpl(new EmptyModuleShardConfigProvider())));
+
+            shardManager.tell(new AddShardReplica("model-inventory"), getRef());
+            Status.Failure resp = expectMsgClass(duration("2 seconds"), Status.Failure.class);
+
+            assertEquals("Failure obtained", true,
+                          (resp.cause() instanceof IllegalArgumentException));
+        }};
+    }
+
+    @Test
+    public void testAddShardReplicaForAlreadyCreatedShard() throws Exception {
+        new JavaTestKit(getSystem()) {{
+            ActorRef shardManager = getSystem().actorOf(newShardMgrProps());
+            shardManager.tell(new AddShardReplica("default"), getRef());
+            Status.Failure resp = expectMsgClass(duration("2 seconds"), Status.Failure.class);
+            assertEquals("Failure obtained", true,
+                          (resp.cause() instanceof IllegalArgumentException));
+        }};
+    }
+
+    @Test
+    public void testAddShardReplica() throws Exception {
+        new JavaTestKit(getSystem()) {{
+            MockConfiguration mockConfig = new MockConfiguration(ImmutableMap.<String, List<String>>builder().
+                put("default", Arrays.asList("member-1", "member-2")).
+                put("astronauts", Arrays.asList("member-2")).build());
+
+            ActorRef shardManager = getSystem().actorOf(newShardMgrProps(mockConfig));
+
+            shardManager.tell(new AddShardReplica("astronauts"), getRef());
+            expectMsgClass(duration("2 seconds"), Status.Success.class);
+         }};
+    }
+
+    @Test
+    public void testRemoveShardReplicaForNonExistentShard() throws Exception {
+        new JavaTestKit(getSystem()) {{
+            ActorRef shardManager = getSystem().actorOf(newShardMgrProps(
+                    new ConfigurationImpl(new EmptyModuleShardConfigProvider())));
+
+            shardManager.tell(new RemoveShardReplica("model-inventory"), getRef());
+            Status.Failure resp = expectMsgClass(duration("2 seconds"), Status.Failure.class);
+            assertEquals("Failure obtained", true,
+                         (resp.cause() instanceof IllegalArgumentException));
+        }};
+
     }
 
     private static class TestShardPropsCreator implements ShardPropsCreator {

@@ -151,4 +151,10 @@ public class ConfigurationImpl implements Configuration {
     private ShardStrategy createShardStrategy(String moduleName, String shardStrategyName) {
         return ShardStrategyFactory.newShardStrategyInstance(moduleName, shardStrategyName, this);
     }
+
+    @Override
+    public boolean isShardConfigured(String shardName) {
+        Preconditions.checkNotNull(shardName, "shardName should not be null");
+        return allShardNames.contains(shardName);
+    }
 }
