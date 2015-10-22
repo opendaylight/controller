@@ -98,6 +98,7 @@ public class ConfigManagerActivator implements BundleActivator {
             try {
                 configRegistryJMXRegistrator.registerToJMXNoNotifications(configRegistry);
             } catch (InstanceAlreadyExistsException e) {
+                configRegistryJMXRegistrator.close();
                 throw new IllegalStateException("Config Registry was already registered to JMX", e);
             }
 
@@ -106,6 +107,8 @@ public class ConfigManagerActivator implements BundleActivator {
             try {
                 configRegistryJMXRegistrator.registerToJMX(notifyingConfigRegistry);
             } catch (InstanceAlreadyExistsException e) {
+                configRegistryJMXRegistrator.close();
+                configRegistryJMXRegistratorWithNotifications.close();
                 throw new IllegalStateException("Config Registry was already registered to JMX", e);
             }
 
