@@ -8,6 +8,7 @@ module odl-datastore-test {
     }
 
     container test {
+        presence true;
         list outer-list {
             key id;
             leaf id {
