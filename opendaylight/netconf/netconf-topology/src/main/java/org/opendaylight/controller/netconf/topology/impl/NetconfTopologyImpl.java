@@ -63,6 +63,8 @@ public class NetconfTopologyImpl implements NetconfTopology, BindingAwareProvide
 
     private static final Logger LOG = LoggerFactory.getLogger(NetconfTopologyImpl.class);
 
+    private ProviderSession domProviderRegistration;
+
     private final String topologyId;
     private final NetconfClientDispatcher clientDispatcher;
     private final BindingAwareBroker bindingAwareBroker;
@@ -83,20 +85,20 @@ public class NetconfTopologyImpl implements NetconfTopology, BindingAwareProvide
             final BindingAwareBroker bindingAwareBroker, final Broker domBroker, final EventExecutor eventExecutor,
             final ScheduledThreadPool keepaliveExecutor, final ThreadPool processingExecutor,
             final SchemaRepositoryProvider sharedSchemaRepository) {
-        this.topologyId = topologyId;
-        this.clientDispatcher = clientDispatcher;
-        this.bindingAwareBroker = bindingAwareBroker;
-        this.domBroker = domBroker;
-        this.eventExecutor = eventExecutor;
+        this.topologyId = Preconditions.checkNotNull(topologyId);
+        this.clientDispatcher = Preconditions.checkNotNull(clientDispatcher);
+        this.bindingAwareBroker = Preconditions.checkNotNull(bindingAwareBroker);
+        this.domBroker = Preconditions.checkNotNull(domBroker);
+        this.eventExecutor = Preconditions.checkNotNull(eventExecutor);
         this.keepaliveExecutor = keepaliveExecutor;
-        this.processingExecutor = processingExecutor;
-        this.sharedSchemaRepository = sharedSchemaRepository;
+        this.processingExecutor = Preconditions.checkNotNull(processingExecutor);
+        this.sharedSchemaRepository = Preconditions.checkNotNull(sharedSchemaRepository);
 
         registerToSal(this, this);
     }
 
     private void registerToSal(final BindingAwareProvider baProvider, final Provider provider) {
-        domBroker.registerProvider(provider);
+        domProviderRegistration = domBroker.registerProvider(provider);
         bindingAwareBroker.registerProvider(baProvider);
     }
 
@@ -107,6 +109,10 @@ public class NetconfTopologyImpl implements NetconfTopology, BindingAwareProvide
             connectorDTO.getCommunicator().disconnect();
         }
         activeConnectors.clear();
+        if (domProviderRegistration != null) {
+            domProviderRegistration.close();
+            domProviderRegistration = null;
+        }
     }
 
     @Override
@@ -121,6 +127,8 @@ public class NetconfTopologyImpl implements NetconfTopology, BindingAwareProvide
 
     @Override
     public ListenableFuture<NetconfDeviceCapabilities> connectNode(final NodeId nodeId, final Node configNode) {
+        Preconditions.checkArgument(configNode != null, "Node can not be null!");
+        Preconditions.checkArgument(nodeId != null, "NodeId can not be null!");
         return setupConnection(nodeId, configNode);
     }
 
@@ -303,15 +311,14 @@ public class NetconfTopologyImpl implements NetconfTopology, BindingAwareProvide
         }
     }
 
-    private InetSocketAddress getSocketAddress(final Host host, final int port) {
+    private static InetSocketAddress getSocketAddress(final Host host, final int port) {
         if (host.getDomainName() != null) {
             return new InetSocketAddress(host.getDomainName().getValue(), port);
-        } else {
-            final IpAddress ipAddress = host.getIpAddress();
-            final String ip = ipAddress.getIpv4Address() != null ? ipAddress.getIpv4Address().getValue() : ipAddress
-                    .getIpv6Address().getValue();
-            return new InetSocketAddress(ip, port);
         }
+        final IpAddress ipAddress = host.getIpAddress();
+        final String ip = ipAddress.getIpv4Address() != null ? ipAddress.getIpv4Address().getValue() : ipAddress
+                .getIpv6Address().getValue();
+        return new InetSocketAddress(ip, port);
     }
 }
 
