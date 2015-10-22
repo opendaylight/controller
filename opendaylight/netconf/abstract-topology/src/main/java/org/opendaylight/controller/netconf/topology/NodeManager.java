@@ -6,7 +6,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.netconf.topology;
+package org.opendaylight.controller.netconf.topology;
 
 import akka.actor.TypedActor.Receiver;
 import com.google.common.annotations.Beta;
