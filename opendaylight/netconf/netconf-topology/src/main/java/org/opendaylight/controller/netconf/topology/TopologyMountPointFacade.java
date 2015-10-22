@@ -21,6 +21,7 @@ import org.opendaylight.controller.sal.connect.netconf.sal.NetconfDeviceNotifica
 import org.opendaylight.controller.sal.connect.netconf.sal.NetconfDeviceSalProvider;
 import org.opendaylight.controller.sal.connect.util.RemoteDeviceId;
 import org.opendaylight.controller.sal.core.api.Broker;
+import org.opendaylight.controller.sal.core.api.Broker.ProviderSession;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +34,8 @@ public class TopologyMountPointFacade implements AutoCloseable, RemoteDeviceHand
     private final Broker domBroker;
     private final BindingAwareBroker bindingBroker;
     private final long defaultRequestTimeoutMillis;
+
+    private ProviderSession domProviderRegistration;
 
     private SchemaContext remoteSchemaContext = null;
     private NetconfSessionPreferences netconfSessionPreferences = null;
@@ -53,7 +56,7 @@ public class TopologyMountPointFacade implements AutoCloseable, RemoteDeviceHand
     }
 
     public void registerToSal(final Broker domRegistryDependency, final BindingAwareBroker bindingBroker) {
-        domRegistryDependency.registerProvider(salProvider);
+        domProviderRegistration = domRegistryDependency.registerProvider(salProvider);
         bindingBroker.registerProvider(salProvider);
     }
 
@@ -113,6 +116,10 @@ public class TopologyMountPointFacade implements AutoCloseable, RemoteDeviceHand
 
     @Override
     public void close() {
+        if (domProviderRegistration != null) {
+            domProviderRegistration.close();
+            domProviderRegistration = null;
+        }
         closeGracefully(salProvider);
     }
 
