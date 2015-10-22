@@ -8,6 +8,7 @@ module people {
     }
 
     container people {
+        presence "expected to exist when empty";
         list person {
             key name;
             leaf name {

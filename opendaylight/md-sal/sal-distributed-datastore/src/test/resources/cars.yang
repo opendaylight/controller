@@ -8,6 +8,7 @@ module cars {
     }
 
     container cars {
+        presence "expected to exist when empty";
         list car {
             key name;
             leaf name {
