@@ -113,7 +113,7 @@ public class DatastoreContextTest {
         Assert.assertNotSame(context, newContext);
     }
 
-    private void verifyCustomSettings(DatastoreContext context) {
+    private static void verifyCustomSettings(DatastoreContext context) {
         assertEquals(DEFAULT_SHARD_TRANSACTION_IDLE_TIMEOUT.toMillis() + 1,
                 context.getShardTransactionIdleTimeout().toMillis());
         assertEquals(TimeUnit.MILLISECONDS.toSeconds(DEFAULT_OPERATION_TIMEOUT_IN_MS) + 1,

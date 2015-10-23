@@ -64,7 +64,7 @@ public class NormalizedNodeStreamReaderWriterTest {
         writer.close();
     }
 
-    private NormalizedNode<?, ?> createTestContainer() {
+    private static NormalizedNode<?, ?> createTestContainer() {
         byte[] bytes1 = {1,2,3};
         LeafSetEntryNode<Object> entry1 = ImmutableLeafSetEntryNodeBuilder.create().withNodeIdentifier(
                 new YangInstanceIdentifier.NodeWithValue(TestModel.BINARY_LEAF_LIST_QNAME, bytes1)).

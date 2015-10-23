@@ -75,7 +75,7 @@ public class MeteredBoundedMailbox implements MailboxType, ProducesMessageQueue<
         }
     }
 
-    private Gauge<Integer> getQueueSizeGuage(final MeteredMessageQueue monitoredQueue ){
+    private static Gauge<Integer> getQueueSizeGuage(final MeteredMessageQueue monitoredQueue ){
         return new Gauge<Integer>() {
             @Override
             public Integer getValue() {

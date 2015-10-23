@@ -64,7 +64,7 @@ public class FileModuleShardConfigProvider implements ModuleShardConfigProvider 
         return moduleConfigMap;
     }
 
-    private void readModulesConfig(final Config modulesConfig, Map<String, ModuleConfig> moduleConfigMap,
+    private static void readModulesConfig(final Config modulesConfig, Map<String, ModuleConfig> moduleConfigMap,
             Configuration configuration) {
         List<? extends ConfigObject> modulesConfigObjectList = modulesConfig.getObjectList("modules");
 

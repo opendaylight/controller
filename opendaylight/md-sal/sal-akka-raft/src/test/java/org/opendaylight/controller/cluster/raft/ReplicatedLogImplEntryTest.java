@@ -46,7 +46,7 @@ public class ReplicatedLogImplEntryTest {
      * Use this method to generate a file with a serialized ReplicatedLogImplEntry instance to be
      * used in tests that verify backwards compatible de-serialization.
      */
-    private void generateSerializedFile() throws IOException {
+    private static void generateSerializedFile() throws IOException {
         String expPayloadData = "This is a test";
         int expIndex = 1;
         int expTerm = 2;

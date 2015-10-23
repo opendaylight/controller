@@ -46,7 +46,7 @@ public class SnapshotTest {
         }
     }
 
-    private Snapshot newLithiumSnapshot() {
+    private static Snapshot newLithiumSnapshot() {
         byte[] state = {1, 2, 3, 4, 5};
         List<ReplicatedLogEntry> entries = new ArrayList<>();
         entries.add(new ReplicatedLogImplEntry(6, 2, new MockPayload("payload")));
@@ -62,7 +62,7 @@ public class SnapshotTest {
      * Use this method to generate a file with a serialized Snapshot instance to be
      * used in tests that verify backwards compatible de-serialization.
      */
-    private void generateSerializedFile(Snapshot snapshot, String fileName) throws IOException {
+    private static void generateSerializedFile(Snapshot snapshot, String fileName) throws IOException {
         FileOutputStream fos = new FileOutputStream("src/test/resources/" + fileName);
         ObjectOutputStream oos = new ObjectOutputStream(fos);
         oos.writeObject(snapshot);

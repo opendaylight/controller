@@ -96,7 +96,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         }
     }
 
-    private DefaultConfigParamsImpl newFollowerConfigParams() {
+    private static DefaultConfigParamsImpl newFollowerConfigParams() {
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         configParams.setHeartBeatInterval(new FiniteDuration(100, TimeUnit.MILLISECONDS));
         configParams.setElectionTimeoutFactor(100000);
@@ -401,14 +401,14 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         expectFirstMatching(leaderActor, AddServer.class);
     }
 
-    private void verifyServerConfigurationPayloadEntry(ReplicatedLog log, String... cNew) {
+    private static void verifyServerConfigurationPayloadEntry(ReplicatedLog log, String... cNew) {
         ReplicatedLogEntry logEntry = log.get(log.lastIndex());
         assertEquals("Last log entry payload class", ServerConfigurationPayload.class, logEntry.getData().getClass());
         ServerConfigurationPayload payload = (ServerConfigurationPayload)logEntry.getData();
         assertEquals("getNewServerConfig", Sets.newHashSet(cNew), Sets.newHashSet(payload.getNewServerConfig()));
     }
 
-    private RaftActorContext newFollowerContext(String id, TestActorRef<? extends UntypedActor> actor) {
+    private static RaftActorContext newFollowerContext(String id, TestActorRef<? extends UntypedActor> actor) {
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         configParams.setHeartBeatInterval(new FiniteDuration(100, TimeUnit.MILLISECONDS));
         configParams.setElectionTimeoutFactor(100000);

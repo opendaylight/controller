@@ -68,7 +68,7 @@ public class DataChangeListenerRegistrationTest extends AbstractActorTest {
     }};
   }
 
-  private  AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> noOpDataChangeListener(){
+  private static AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> noOpDataChangeListener(){
     return new AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>() {
       @Override
       public void onDataChanged(final AsyncDataChangeEvent<YangInstanceIdentifier, NormalizedNode<?, ?>> change) {

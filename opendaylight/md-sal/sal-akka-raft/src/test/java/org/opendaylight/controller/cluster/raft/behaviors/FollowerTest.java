@@ -87,7 +87,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
         return context;
     }
 
-    private int getElectionTimeoutCount(RaftActorBehavior follower){
+    private static int getElectionTimeoutCount(RaftActorBehavior follower){
         if(follower instanceof TestFollower){
             return ((TestFollower) follower).getElectionTimeoutCount();
         }
@@ -1019,7 +1019,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
     }
 
 
-    private ReplicatedLogEntry newReplicatedLogEntry(long term, long index, String data) {
+    private static ReplicatedLogEntry newReplicatedLogEntry(long term, long index, String data) {
         return new MockRaftActorContext.MockReplicatedLogEntry(term, index,
                 new MockRaftActorContext.MockPayload(data));
     }

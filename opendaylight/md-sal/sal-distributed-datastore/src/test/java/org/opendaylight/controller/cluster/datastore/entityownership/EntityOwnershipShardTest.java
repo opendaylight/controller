@@ -711,7 +711,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         verify(listener, never()).ownershipChanged(ownershipChange(entity1));
     }
 
-    private void commitModification(TestActorRef<EntityOwnershipShard> shard, NormalizedNode<?, ?> node,
+    private static void commitModification(TestActorRef<EntityOwnershipShard> shard, NormalizedNode<?, ?> node,
             JavaTestKit sender) {
         BatchedModifications modifications = newBatchedModifications();
         modifications.addModification(new MergeModification(ENTITY_OWNERS_PATH, node));
@@ -720,7 +720,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
         sender.expectMsgClass(CommitTransactionReply.SERIALIZABLE_CLASS);
     }
 
-    private BatchedModifications newBatchedModifications() {
+    private static BatchedModifications newBatchedModifications() {
         BatchedModifications modifications = new BatchedModifications("tnx", DataStoreVersions.CURRENT_VERSION, "");
         modifications.setDoCommitOnReady(true);
         modifications.setReady(true);
@@ -784,8 +784,8 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
                 entityId, candidateName, true);
     }
 
-    private void verifyOwner(final TestActorRef<EntityOwnershipShard> shard, String entityType, YangInstanceIdentifier entityId,
-            String localMemberName) {
+    private static void verifyOwner(final TestActorRef<EntityOwnershipShard> shard, String entityType,
+            YangInstanceIdentifier entityId, String localMemberName) {
         verifyOwner(localMemberName, entityType, entityId, new Function<YangInstanceIdentifier, NormalizedNode<?,?>>() {
             @Override
             public NormalizedNode<?, ?> apply(YangInstanceIdentifier path) {
@@ -811,7 +811,7 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
                 SCHEMA_CONTEXT, memberName);
     }
 
-    private ShardIdentifier newShardId(String memberName) {
+    private static ShardIdentifier newShardId(String memberName) {
         return ShardIdentifier.builder().memberName(memberName).shardName("entity-ownership").
                 type("operational" + NEXT_SHARD_NUM.getAndIncrement()).build();
     }

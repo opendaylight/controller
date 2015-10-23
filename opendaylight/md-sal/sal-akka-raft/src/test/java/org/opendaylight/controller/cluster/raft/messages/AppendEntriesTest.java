@@ -67,7 +67,7 @@ public class AppendEntriesTest {
         verifyAppendEntries(entries, entries2);
     }
 
-    private void verifyAppendEntries(AppendEntries expected, AppendEntries actual) {
+    private static void verifyAppendEntries(AppendEntries expected, AppendEntries actual) {
         assertEquals("getLeaderId", expected.getLeaderId(), actual.getLeaderId());
         assertEquals("getTerm", expected.getTerm(), actual.getTerm());
         assertEquals("getLeaderCommit", expected.getLeaderCommit(), actual.getLeaderCommit());
@@ -83,7 +83,7 @@ public class AppendEntriesTest {
         }
     }
 
-    private void verifyReplicatedLogEntry(ReplicatedLogEntry expected, ReplicatedLogEntry actual) {
+    private static void verifyReplicatedLogEntry(ReplicatedLogEntry expected, ReplicatedLogEntry actual) {
         assertEquals("getIndex", expected.getIndex(), actual.getIndex());
         assertEquals("getTerm", expected.getTerm(), actual.getTerm());
         assertEquals("getData", expected.getData().toString(), actual.getData().toString());

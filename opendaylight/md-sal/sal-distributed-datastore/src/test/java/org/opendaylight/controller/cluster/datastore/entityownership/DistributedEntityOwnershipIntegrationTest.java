@@ -259,7 +259,7 @@ public class DistributedEntityOwnershipIntegrationTest {
         verify(follower1MockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY2, false, false, false));
     }
 
-    private void verifyGetOwnershipState(DistributedEntityOwnershipService service, Entity entity,
+    private static void verifyGetOwnershipState(DistributedEntityOwnershipService service, Entity entity,
             boolean isOwner, boolean hasOwner) {
         Optional<EntityOwnershipState> state = service.getOwnershipState(entity);
         assertEquals("getOwnershipState present", true, state.isPresent());
@@ -267,7 +267,7 @@ public class DistributedEntityOwnershipIntegrationTest {
         assertEquals("hasOwner", hasOwner, state.get().hasOwner());
     }
 
-    private void verifyCandidates(DistributedDataStore dataStore, Entity entity, String... expCandidates) throws Exception {
+    private static void verifyCandidates(DistributedDataStore dataStore, Entity entity, String... expCandidates) throws Exception {
         AssertionError lastError = null;
         Stopwatch sw = Stopwatch.createStarted();
         while(sw.elapsed(TimeUnit.MILLISECONDS) <= 5000) {
@@ -291,7 +291,7 @@ public class DistributedEntityOwnershipIntegrationTest {
         throw lastError;
     }
 
-    private void verifyOwner(final DistributedDataStore dataStore, Entity entity, String expOwner) throws Exception {
+    private static void verifyOwner(final DistributedDataStore dataStore, Entity entity, String expOwner) {
         AbstractEntityOwnershipTest.verifyOwner(expOwner, entity.getType(), entity.getId(),
                 new Function<YangInstanceIdentifier, NormalizedNode<?,?>>() {
                     @Override

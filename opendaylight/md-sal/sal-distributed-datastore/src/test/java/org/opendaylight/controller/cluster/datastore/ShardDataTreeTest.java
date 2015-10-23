@@ -121,7 +121,7 @@ public class ShardDataTreeTest {
         assertEquals(expected, actual);
     }
 
-    private NormalizedNode<?, ?> getCars(ShardDataTree shardDataTree) {
+    private static NormalizedNode<?, ?> getCars(ShardDataTree shardDataTree) {
         ReadOnlyShardDataTreeTransaction readOnlyShardDataTreeTransaction = shardDataTree.newReadOnlyTransaction("txn-2", null);
         DataTreeSnapshot snapshot1 = readOnlyShardDataTreeTransaction.getSnapshot();
 
@@ -134,7 +134,7 @@ public class ShardDataTreeTest {
         return optional.get();
     }
 
-    private DataTreeCandidateTip addCar(ShardDataTree shardDataTree) throws ExecutionException, InterruptedException {
+    private static DataTreeCandidateTip addCar(ShardDataTree shardDataTree) throws ExecutionException, InterruptedException {
         return doTransaction(shardDataTree, new DataTreeOperation() {
             @Override
             public void execute(DataTreeModification snapshot) {
@@ -145,7 +145,7 @@ public class ShardDataTreeTest {
         });
     }
 
-    private DataTreeCandidateTip removeCar(ShardDataTree shardDataTree) throws ExecutionException, InterruptedException {
+    private static DataTreeCandidateTip removeCar(ShardDataTree shardDataTree) throws ExecutionException, InterruptedException {
         return doTransaction(shardDataTree, new DataTreeOperation() {
             @Override
             public void execute(DataTreeModification snapshot) {
@@ -158,7 +158,7 @@ public class ShardDataTreeTest {
         public abstract void execute(DataTreeModification snapshot);
     }
 
-    private DataTreeCandidateTip doTransaction(ShardDataTree shardDataTree, DataTreeOperation operation)
+    private static DataTreeCandidateTip doTransaction(ShardDataTree shardDataTree, DataTreeOperation operation)
             throws ExecutionException, InterruptedException {
         ReadWriteShardDataTreeTransaction transaction = shardDataTree.newReadWriteTransaction("txn-1", null);
         DataTreeModification snapshot = transaction.getSnapshot();
@@ -173,7 +173,7 @@ public class ShardDataTreeTest {
         return candidate;
     }
 
-    private DataTreeCandidateTip applyCandidates(ShardDataTree shardDataTree, List<DataTreeCandidateTip> candidates)
+    private static DataTreeCandidateTip applyCandidates(ShardDataTree shardDataTree, List<DataTreeCandidateTip> candidates)
             throws ExecutionException, InterruptedException {
         ReadWriteShardDataTreeTransaction transaction = shardDataTree.newReadWriteTransaction("txn-1", null);
         DataTreeModification snapshot = transaction.getSnapshot();

@@ -188,7 +188,7 @@ public class ConcurrentDOMDataBrokerTest {
         assertFailure(future, null, mockCohort1, mockCohort2, mockCohort3);
     }
 
-    private void assertFailure(final CheckedFuture<Void, TransactionCommitFailedException> future,
+    private static void assertFailure(final CheckedFuture<Void, TransactionCommitFailedException> future,
             final Exception expCause, final DOMStoreThreePhaseCommitCohort... mockCohorts)
                     throws Exception {
         try {
