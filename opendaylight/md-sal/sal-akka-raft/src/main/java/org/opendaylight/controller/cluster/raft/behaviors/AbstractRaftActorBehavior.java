@@ -10,8 +10,9 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 
 import akka.actor.ActorRef;
 import akka.actor.Cancellable;
-import java.util.Map;
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.raft.ClientRequestTracker;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
@@ -19,6 +20,7 @@ import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.SerializationUtils;
 import org.opendaylight.controller.cluster.raft.ServerConfigurationPayload;
+import org.opendaylight.controller.cluster.raft.VotingState;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
@@ -493,18 +495,18 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
     }
 
     public void applyServerConfiguration(ServerConfigurationPayload serverConfig) {
-        Map<String, String> currentPeers = context.getPeerAddresses();
+        Set<String> currentPeers = new HashSet<>(context.getPeerIds());
         for(String peerId: serverConfig.getNewServerConfig()) {
             if(!getId().equals(peerId)) {
-                if(!currentPeers.containsKey(peerId)) {
-                    context.addToPeers(peerId, null);
+                if(!currentPeers.contains(peerId)) {
+                    context.addToPeers(peerId, null, VotingState.VOTING);
                 } else {
                     currentPeers.remove(peerId);
                 }
             }
         }
 
-        for(String peerIdToRemove: currentPeers.keySet()) {
+        for(String peerIdToRemove: currentPeers) {
             context.removePeer(peerIdToRemove);
         }
     }

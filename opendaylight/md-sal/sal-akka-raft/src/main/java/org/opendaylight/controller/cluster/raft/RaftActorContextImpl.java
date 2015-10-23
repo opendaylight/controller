@@ -8,20 +8,17 @@
 
 package org.opendaylight.controller.cluster.raft;
 
+import akka.actor.ActorContext;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
-import akka.actor.UntypedActorContext;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Supplier;
-import com.google.common.collect.Maps;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.slf4j.Logger;
@@ -30,7 +27,7 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     private final ActorRef actor;
 
-    private final UntypedActorContext context;
+    private final ActorContext context;
 
     private final String id;
 
@@ -42,7 +39,7 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     private ReplicatedLog replicatedLog;
 
-    private final Map<String, String> peerAddresses;
+    private final Map<String, PeerInfo> peerInfoMap = new HashMap<>();
 
     private final Logger LOG;
 
@@ -59,7 +56,7 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     private short payloadVersion;
 
-    public RaftActorContextImpl(ActorRef actor, UntypedActorContext context, String id,
+    public RaftActorContextImpl(ActorRef actor, ActorContext context, String id,
             ElectionTerm termInformation, long commitIndex, long lastApplied, Map<String, String> peerAddresses,
             ConfigParams configParams, DataPersistenceProvider persistenceProvider, Logger logger) {
         this.actor = actor;
@@ -68,10 +65,13 @@ public class RaftActorContextImpl implements RaftActorContext {
         this.termInformation = termInformation;
         this.commitIndex = commitIndex;
         this.lastApplied = lastApplied;
-        this.peerAddresses = Maps.newHashMap(peerAddresses);
         this.configParams = configParams;
         this.persistenceProvider = persistenceProvider;
         this.LOG = logger;
+
+        for(Map.Entry<String, String> e: peerAddresses.entrySet()) {
+            peerInfoMap.put(e.getKey(), new PeerInfo(e.getKey(), e.getValue(), VotingState.VOTING));
+        }
     }
 
     void setPayloadVersion(short payloadVersion) {
@@ -150,20 +150,30 @@ public class RaftActorContextImpl implements RaftActorContext {
     }
 
     @Override
-    public Map<String, String> getPeerAddresses() {
-        return new HashMap<String, String>(peerAddresses);
+    public Collection<String> getPeerIds() {
+        return peerInfoMap.keySet();
     }
 
     @Override
-    public Collection<String> getPeerIds() {
-        return peerAddresses.keySet();
+    public Collection<PeerInfo> getPeers() {
+        return peerInfoMap.values();
     }
 
-    @Override public String getPeerAddress(String peerId) {
-        String peerAddress = peerAddresses.get(peerId);
-        if(peerAddress == null) {
-            peerAddress = configParams.getPeerAddressResolver().resolve(peerId);
-            peerAddresses.put(peerId, peerAddress);
+    @Override
+    public PeerInfo getPeerInfo(String peerId) {
+        return peerInfoMap.get(peerId);
+    }
+
+    @Override
+    public String getPeerAddress(String peerId) {
+        String peerAddress = null;
+        PeerInfo peerInfo = peerInfoMap.get(peerId);
+        if(peerInfo != null) {
+            peerAddress = peerInfo.getAddress();
+            if(peerAddress == null) {
+                peerAddress = configParams.getPeerAddressResolver().resolve(peerId);
+                peerInfo.setAddress(peerAddress);
+            }
         }
 
         return peerAddress;
@@ -173,12 +183,13 @@ public class RaftActorContextImpl implements RaftActorContext {
         return configParams;
     }
 
-    @Override public void addToPeers(String name, String address) {
-        peerAddresses.put(name, address);
+    @Override
+    public void addToPeers(String id, String address, VotingState votingState) {
+        peerInfoMap.put(id, new PeerInfo(id, address, votingState));
     }
 
     @Override public void removePeer(String name) {
-        peerAddresses.remove(name);
+        peerInfoMap.remove(name);
     }
 
     @Override public ActorSelection getPeerActorSelection(String peerId) {
@@ -191,9 +202,10 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     @Override
     public void setPeerAddress(String peerId, String peerAddress) {
-        if(peerAddresses.containsKey(peerId)) {
+        PeerInfo peerInfo = peerInfoMap.get(peerId);
+        if(peerInfo != null) {
             LOG.info("Peer address for peer {} set to {}", peerId, peerAddress);
-            peerAddresses.put(peerId, peerAddress);
+            peerInfo.setAddress(peerAddress);
         }
     }
 
