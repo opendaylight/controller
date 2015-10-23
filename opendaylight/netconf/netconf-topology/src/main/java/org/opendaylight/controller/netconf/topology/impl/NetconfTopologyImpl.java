@@ -77,7 +77,7 @@ public class NetconfTopologyImpl implements NetconfTopology, BindingAwareProvide
 
     private DOMMountPointService mountPointService = null;
     private DataBroker dataBroker = null;
-    private final HashMap<NodeId, NetconfConnectorDTO> activeConnectors = new HashMap<>();
+    final HashMap<NodeId, NetconfConnectorDTO> activeConnectors = new HashMap<>();
 
     public NetconfTopologyImpl(final String topologyId, final NetconfClientDispatcher clientDispatcher,
             final BindingAwareBroker bindingAwareBroker, final Broker domBroker, final EventExecutor eventExecutor,
@@ -137,8 +137,21 @@ public class NetconfTopologyImpl implements NetconfTopology, BindingAwareProvide
     }
 
     @Override
+    public void registerMountPoint(final NodeId nodeId) {
+        Preconditions.checkState(activeConnectors.containsKey(nodeId));
+        activeConnectors.get(nodeId).getMountPointFacade().registerMountPoint();
+    }
+
+    @Override
+    public void unregisterMountPoint(final NodeId nodeId) {
+        Preconditions.checkState(activeConnectors.containsKey(nodeId));
+        activeConnectors.get(nodeId).getMountPointFacade().unregisterMountPoint();
+    }
+
+    @Override
     public void registerConnectionStatusListener(final NodeId node,
             final RemoteDeviceHandler<NetconfSessionPreferences> listener) {
+        Preconditions.checkState(activeConnectors.containsKey(node));
         activeConnectors.get(node).getMountPointFacade().registerConnectionStatusListener(listener);
     }
 
@@ -213,16 +226,17 @@ public class NetconfTopologyImpl implements NetconfTopology, BindingAwareProvide
             throw new IllegalStateException("Only login/password authentification is supported");
         }
 
-        return NetconfReconnectingClientConfigurationBuilder
-                .create()
+        return NetconfReconnectingClientConfigurationBuilder.create()
                 .withAddress(socketAddress)
                 .withConnectionTimeoutMillis(clientConnectionTimeoutMillis)
                 .withReconnectStrategy(strategy)
                 .withAuthHandler(authHandler)
-                .withProtocol(
-                        node.isTcpOnly() ? NetconfClientConfiguration.NetconfClientProtocol.TCP
-                                : NetconfClientConfiguration.NetconfClientProtocol.SSH).withConnectStrategyFactory(sf)
-                .withSessionListener(listener).build();
+                .withProtocol(node.isTcpOnly() ?
+                        NetconfClientConfiguration.NetconfClientProtocol.TCP :
+                        NetconfClientConfiguration.NetconfClientProtocol.SSH)
+                .withConnectStrategyFactory(sf)
+                .withSessionListener(listener)
+                .build();
     }
 
     @Override
@@ -245,7 +259,7 @@ public class NetconfTopologyImpl implements NetconfTopology, BindingAwareProvide
         private final NetconfDeviceCommunicator communicator;
         private final TopologyMountPointFacade mountPointFacade;
 
-        private NetconfConnectorDTO(final NetconfDeviceCommunicator communicator,
+        NetconfConnectorDTO(final NetconfDeviceCommunicator communicator,
                 final TopologyMountPointFacade mountPointFacade) {
             this.communicator = communicator;
             this.mountPointFacade = mountPointFacade;
@@ -284,8 +298,8 @@ public class NetconfTopologyImpl implements NetconfTopology, BindingAwareProvide
             final Long maxSleep = null;
             final Long deadline = null;
 
-            return new TimedReconnectStrategy(executor, minSleep, minSleep, sleepFactor, maxSleep, connectionAttempts,
-                    deadline);
+            return new TimedReconnectStrategy(executor, minSleep, minSleep,
+                    sleepFactor, maxSleep, connectionAttempts, deadline);
         }
     }
 

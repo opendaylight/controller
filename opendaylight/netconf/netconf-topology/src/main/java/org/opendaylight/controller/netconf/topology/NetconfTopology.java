@@ -27,5 +27,9 @@ public interface NetconfTopology {
 
     ListenableFuture<Void> disconnectNode(NodeId nodeId);
 
+    void registerMountPoint(NodeId nodeId);
+
+    void unregisterMountPoint(NodeId nodeId);
+
     void registerConnectionStatusListener(NodeId node, RemoteDeviceHandler<NetconfSessionPreferences> listener);
 }
