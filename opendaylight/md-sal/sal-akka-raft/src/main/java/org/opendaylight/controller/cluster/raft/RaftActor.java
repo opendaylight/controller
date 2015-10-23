@@ -379,7 +379,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
         replicatedLog().appendAndPersist(replicatedLogEntry, new Procedure<ReplicatedLogEntry>() {
             @Override
-            public void apply(ReplicatedLogEntry replicatedLogEntry) throws Exception {
+            public void apply(ReplicatedLogEntry replicatedLogEntry) {
                 if (!hasFollowers()){
                     // Increment the Commit Index and the Last Applied values
                     raftContext.setCommitIndex(replicatedLogEntry.getIndex());
