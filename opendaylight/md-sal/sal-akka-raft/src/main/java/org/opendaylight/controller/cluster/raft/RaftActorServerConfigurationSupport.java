@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import org.opendaylight.controller.cluster.raft.FollowerLogInformation.FollowerState;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader;
 import org.opendaylight.controller.cluster.raft.messages.AddServer;
@@ -276,14 +275,13 @@ class RaftActorServerConfigurationSupport {
 
             LOG.debug("{}: Initiating {}", raftContext.getId(), addServer);
 
-            raftContext.addToPeers(addServer.getNewServerId(), addServer.getNewServerAddress());
+            VotingState votingState = addServer.isVotingMember() ? VotingState.VOTING_NOT_INITIALIZED :
+                    VotingState.NON_VOTING;
+            raftContext.addToPeers(addServer.getNewServerId(), addServer.getNewServerAddress(), votingState);
 
-            // if voting member - initialize to VOTING_NOT_INITIALIZED
-            FollowerState initialState = addServer.isVotingMember() ? FollowerState.VOTING_NOT_INITIALIZED :
-                FollowerState.NON_VOTING;
-            leader.addFollower(addServer.getNewServerId(), initialState);
+            leader.addFollower(addServer.getNewServerId());
 
-            if(initialState == FollowerState.VOTING_NOT_INITIALIZED){
+            if(votingState == VotingState.VOTING_NOT_INITIALIZED){
                 LOG.debug("{}: Leader sending initiate capture snapshot to new follower {}", raftContext.getId(),
                         addServer.getNewServerId());
 
@@ -345,14 +343,12 @@ class RaftActorServerConfigurationSupport {
             // add server operation that timed out.
             if(getAddServerContext().getOperation().getNewServerId().equals(followerId)) {
                 AbstractLeader leader = (AbstractLeader) raftActor.getCurrentBehavior();
-                FollowerLogInformation followerLogInformation = leader.getFollower(followerId);
-
-                installSnapshotTimer.cancel();
-
-                followerLogInformation.setFollowerState(FollowerState.VOTING);
-                leader.updateMinReplicaCountAndMinIsolatedLeaderPeerCount();
+                raftContext.getPeerInfo(followerId).setVotingState(VotingState.VOTING);
+                leader.updateMinReplicaCount();
 
                 persistNewServerConfiguration(raftActor, getAddServerContext());
+
+                installSnapshotTimer.cancel();
             }
         }
     }

@@ -28,13 +28,15 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
 
     private short payloadVersion = -1;
 
-    private FollowerState state = FollowerState.VOTING;
+    private final PeerInfo peerInfo;
 
     public FollowerLogInformationImpl(String id, long matchIndex, RaftActorContext context) {
         this.id = id;
         this.nextIndex = context.getCommitIndex();
         this.matchIndex = matchIndex;
         this.context = context;
+
+        peerInfo = context.getPeerInfo(id);
     }
 
     @Override
@@ -89,7 +91,7 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
 
     @Override
     public boolean isFollowerActive() {
-        if(state == FollowerState.VOTING_NOT_INITIALIZED) {
+        if(peerInfo.getVotingState() == VotingState.VOTING_NOT_INITIALIZED) {
             return false;
         }
 
@@ -120,7 +122,7 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
 
     @Override
     public boolean okToReplicate() {
-        if(state == FollowerState.VOTING_NOT_INITIALIZED) {
+        if(peerInfo.getVotingState() == VotingState.VOTING_NOT_INITIALIZED) {
             return false;
         }
 
@@ -155,25 +157,10 @@ public class FollowerLogInformationImpl implements FollowerLogInformation {
     }
 
     @Override
-    public boolean canParticipateInConsensus() {
-        return state == FollowerState.VOTING;
-    }
-
-    @Override
-    public void setFollowerState(FollowerState state) {
-        this.state = state;
-    }
-
-    @Override
-    public FollowerState getFollowerState() {
-        return state;
-    }
-
-    @Override
     public String toString() {
         return "FollowerLogInformationImpl [id=" + id + ", nextIndex=" + nextIndex + ", matchIndex=" + matchIndex
-                + ", lastReplicatedIndex=" + lastReplicatedIndex + ", state=" + state + ", stopwatch="
-                + stopwatch.elapsed(TimeUnit.MILLISECONDS) + ", followerTimeoutMillis="
+                + ", lastReplicatedIndex=" + lastReplicatedIndex + ", votingState=" + peerInfo.getVotingState()
+                + ", stopwatch=" + stopwatch.elapsed(TimeUnit.MILLISECONDS) + ", followerTimeoutMillis="
                 + context.getConfigParams().getElectionTimeOutInterval().toMillis() + "]";
     }
 }
