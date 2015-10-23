@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "fad0f9df_47963b96",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 243,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-23T06:12:40Z",
+      "side": 1,
+      "message": "In fact, since you\u0027re only sending this message b/c the raft policy changed, we could eliminate this message altogether by checking for raft policy change in updateConfigParams and re-initialize the behavior. updateConfigParams is called by the Shard on DatastoreContext change.",
+      "parentUuid": "fad0f9df_e7872f60",
+      "revId": "9bdfd3e7441d0627cb8a1ce1b6a19b9fa0c8ef3b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fad0f9df_60dd7042",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
         "patchSetId": 1
