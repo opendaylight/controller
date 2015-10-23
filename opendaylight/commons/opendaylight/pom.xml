@@ -336,28 +336,6 @@
       </dependency>
 
       <dependency>
-        <groupId>com.sun.jersey</groupId>
-        <artifactId>jersey-client</artifactId>
-        <version>${jersey.version}</version>
-      </dependency>
-      <!-- Jersey for JAXRS -->
-      <dependency>
-        <groupId>com.sun.jersey</groupId>
-        <artifactId>jersey-core</artifactId>
-        <version>${jersey.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.sun.jersey</groupId>
-        <artifactId>jersey-server</artifactId>
-        <version>${jersey.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.sun.jersey</groupId>
-        <artifactId>jersey-servlet</artifactId>
-        <version>${jersey-servlet.version}</version>
-      </dependency>
-
-      <dependency>
         <groupId>com.typesafe.akka</groupId>
         <artifactId>akka-actor_${scala.version}</artifactId>
         <version>${akka.version}</version>
