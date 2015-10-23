@@ -61,7 +61,6 @@ public class FilterValve extends ValveBase {
      * @param fileName path to xml file containing valve configuration
      * @throws Exception
      */
-    @SuppressWarnings("UnusedDeclaration")
     public void setConfigurationFile(String fileName) throws Exception {
         File configurationFile = new File(fileName);
         if (configurationFile.exists() == false || configurationFile.canRead() == false) {
