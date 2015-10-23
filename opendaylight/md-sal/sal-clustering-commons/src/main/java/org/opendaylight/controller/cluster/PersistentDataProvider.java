@@ -30,7 +30,7 @@ public class PersistentDataProvider implements DataPersistenceProvider {
 
     @Override
     public <T> void persist(T o, Procedure<T> procedure) {
-        persistentActor.persist(o, procedure);
+        persistentActor.persistAsync(o, procedure);
     }
 
     @Override
