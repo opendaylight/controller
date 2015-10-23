@@ -24,6 +24,11 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
+                <artifactId>abstract-topology</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>netconf-topology</artifactId>
                 <version>${project.version}</version>
             </dependency>
