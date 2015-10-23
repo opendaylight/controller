@@ -322,7 +322,7 @@ public class Shard extends RaftActor {
         return ModificationType.UNMODIFIED.equals(candidate.getRootNode().getModificationType());
     }
 
-    void continueCommit(final CohortEntry cohortEntry) throws Exception {
+    void continueCommit(final CohortEntry cohortEntry) {
         final DataTreeCandidate candidate = cohortEntry.getCandidate();
 
         // If we do not have any followers and we are not using persistence
