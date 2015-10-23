@@ -15,7 +15,9 @@ import akka.actor.Props;
 import akka.actor.UntypedActorContext;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Supplier;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import java.util.Collection;
 import java.util.Map;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
@@ -121,15 +123,18 @@ public class RaftActorContextImpl implements RaftActorContext {
         return lastApplied;
     }
 
-    @Override public void setLastApplied(long lastApplied) {
+    @Override
+    public void setLastApplied(long lastApplied) {
         this.lastApplied = lastApplied;
     }
 
-    @Override public void setReplicatedLog(ReplicatedLog replicatedLog) {
+    @Override
+    public void setReplicatedLog(ReplicatedLog replicatedLog) {
         this.replicatedLog = replicatedLog;
     }
 
-    @Override public ReplicatedLog getReplicatedLog() {
+    @Override
+    public ReplicatedLog getReplicatedLog() {
         return replicatedLog;
     }
 
@@ -141,8 +146,14 @@ public class RaftActorContextImpl implements RaftActorContext {
         return this.LOG;
     }
 
-    @Override public Map<String, String> getPeerAddresses() {
-        return peerAddresses;
+    @Override
+    public Map<String, String> getPeerAddresses() {
+        return ImmutableMap.copyOf(peerAddresses);
+    }
+
+    @Override
+    public Collection<String> getPeerIds() {
+        return peerAddresses.keySet();
     }
 
     @Override public String getPeerAddress(String peerId) {
@@ -203,7 +214,7 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     @Override
     public boolean hasFollowers() {
-        return getPeerAddresses().keySet().size() > 0;
+        return getPeerIds().size() > 0;
     }
 
     @Override

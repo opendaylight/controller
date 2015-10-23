@@ -19,7 +19,6 @@ import com.google.common.base.Supplier;
 import com.google.common.collect.Lists;
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -289,7 +288,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 .snapshotIndex(replicatedLog().getSnapshotIndex())
                 .snapshotTerm(replicatedLog().getSnapshotTerm())
                 .votedFor(context.getTermInformation().getVotedFor())
-                .peerAddresses(new HashMap<>(context.getPeerAddresses()));
+                .peerAddresses(context.getPeerAddresses());
 
         ReplicatedLogEntry lastLogEntry = getLastLogEntry();
         if (lastLogEntry != null) {
