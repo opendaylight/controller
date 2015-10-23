@@ -79,10 +79,10 @@ public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, 
                 if (getRaftState() == RaftState.Leader || getRaftState() == RaftState.IsolatedLeader) {
                     final String followers = ((Leader)this.getCurrentBehavior()).printFollowerStates();
                     LOG.debug("{} = {}, Peers={}, followers={}", getId(), getRaftState(),
-                        getRaftActorContext().getPeerAddresses().keySet(), followers);
+                        getRaftActorContext().getPeerIds(), followers);
                 } else {
                     LOG.debug("{} = {}, Peers={}", getId(), getRaftState(),
-                        getRaftActorContext().getPeerAddresses().keySet());
+                        getRaftActorContext().getPeerIds());
                 }
 
 

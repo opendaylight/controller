@@ -25,9 +25,7 @@ import akka.actor.ActorRef;
 import akka.japi.Procedure;
 import akka.persistence.SnapshotSelectionCriteria;
 import akka.testkit.TestActorRef;
-import com.google.common.collect.ImmutableMap;
 import java.util.Arrays;
-import java.util.HashMap;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -75,7 +73,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
     public void setUp(){
         MockitoAnnotations.initMocks(this);
 
-        doReturn(new HashMap<>()).when(mockRaftActorContext).getPeerAddresses();
+        doReturn(false).when(mockRaftActorContext).hasFollowers();
         doReturn(mockConfigParams).when(mockRaftActorContext).getConfigParams();
         doReturn(10L).when(mockConfigParams).getSnapshotBatchCount();
         doReturn(70).when(mockConfigParams).getSnapshotDataThresholdPercentage();
@@ -231,7 +229,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
         doReturn(7L).when(mockReplicatedLog).getSnapshotIndex();
         doReturn(1L).when(mockReplicatedLog).getSnapshotTerm();
 
-        doReturn(ImmutableMap.builder().put("follower-1", "").build()).when(mockRaftActorContext).getPeerAddresses();
+        doReturn(true).when(mockRaftActorContext).hasFollowers();
 
         doReturn(8L).when(mockRaftActorContext).getLastApplied();
 

@@ -426,8 +426,12 @@ public class ShardTest extends AbstractShardTest {
                             newDatastoreContext(), SCHEMA_CONTEXT);
                 }
 
-                Map<String, String> getPeerAddresses() {
-                    return getRaftActorContext().getPeerAddresses();
+//                Map<String, String> getPeerAddresses() {
+//                    return getRaftActorContext().getPeerAddresses();
+//                }
+
+                String getPeerAddress(String id) {
+                    return getRaftActorContext().getPeerAddress(id);
                 }
 
                 @Override
@@ -455,8 +459,8 @@ public class ShardTest extends AbstractShardTest {
             final String address = "akka://foobar";
             shard.underlyingActor().onReceiveCommand(new PeerAddressResolved(shardID.toString(), address));
 
-            assertEquals("getPeerAddresses", address,
-                ((TestShard) shard.underlyingActor()).getPeerAddresses().get(shardID.toString()));
+            assertEquals("getPeerAddress", address,
+                ((TestShard) shard.underlyingActor()).getPeerAddress(shardID.toString()));
 
             shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
         }};
