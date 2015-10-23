@@ -145,7 +145,9 @@ class RaftActorServerConfigurationSupport {
             leader.forward(message, raftActor.getContext());
         } else {
             LOG.debug("No leader - returning NO_LEADER AddServerReply");
-            sender.tell(new AddServerReply(ServerChangeStatus.NO_LEADER, null), raftActor.self());
+            AddServer addServer = (AddServer) message;
+            sender.tell(new AddServerReply(addServer.getNewServerId(),
+                       ServerChangeStatus.NO_LEADER, null), raftActor.self());
         }
 
         return true;
@@ -209,7 +211,8 @@ class RaftActorServerConfigurationSupport {
         // get the sender
         ActorRef toClient = fInfo.getClientRequestor();
 
-        toClient.tell(new AddServerReply(result, raftActor.getLeaderId()), raftActor.self());
+        toClient.tell(new AddServerReply(fInfo.getAddServer().getNewServerId(), result,
+                    raftActor.getLeaderId()), raftActor.self());
         LOG.debug("Response returned is {} for server {} ",  result, fInfo.getAddServer().getNewServerId());
         if(!followerInfoQueue.isEmpty()){
             processAddServer(raftActor);
