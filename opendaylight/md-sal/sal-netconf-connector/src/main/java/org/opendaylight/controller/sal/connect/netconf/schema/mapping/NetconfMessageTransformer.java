@@ -145,7 +145,19 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
 
     private static final ThreadLocal<SimpleDateFormat> EVENT_TIME_FORMAT = new ThreadLocal<SimpleDateFormat>() {
         protected SimpleDateFormat initialValue() {
-            return new SimpleDateFormat(NetconfNotification.RFC3339_DATE_FORMAT_BLUEPRINT);
+            final SimpleDateFormat withMillis = new SimpleDateFormat(
+                NetconfNotification.RFC3339_DATE_FORMAT_WITH_MILLIS_BLUEPRINT);
+
+            return new SimpleDateFormat(NetconfNotification.RFC3339_DATE_FORMAT_BLUEPRINT) {
+                @Override public Date parse(final String source) throws ParseException {
+                    try {
+                        return super.parse(source);
+                    } catch (ParseException e) {
+                        // In case of failure, try to parse with milliseconds
+                        return withMillis.parse(source);
+                    }
+                }
+            };
         }
 
         public void set(SimpleDateFormat value) {
@@ -178,7 +190,8 @@ public class NetconfMessageTransformer implements MessageTransformer<NetconfMess
         } catch (NetconfDocumentedException e) {
             throw new IllegalArgumentException("Notification payload does not contain " + EVENT_TIME + " " + message);
         } catch (ParseException e) {
-            throw new IllegalArgumentException("Notification event time in wrong format " + EVENT_TIME + " " + message);
+            LOG.warn("Unable to parse event time from {}. Setting time to {}", eventTimeElement, NetconfNotification.UNKNOWN_EVENT_TIME, e);
+            return new AbstractMap.SimpleEntry<>(NetconfNotification.UNKNOWN_EVENT_TIME, notificationElement);
         }
     }
 

@@ -69,7 +69,7 @@ public class NetconfToNotificationTest {
         assertNotNull(root);
         assertEquals(6, Iterables.size(root.getValue()));
         assertEquals("user-visited-page", root.getNodeType().getLocalName());
-        assertEquals(new SimpleDateFormat(NetconfNotification.RFC3339_DATE_FORMAT_BLUEPRINT).parse("2007-07-08T00:01:00Z"),
+        assertEquals(new SimpleDateFormat(NetconfNotification.RFC3339_DATE_FORMAT_WITH_MILLIS_BLUEPRINT).parse("2015-10-23T09:42:27.67175+00:00"),
                 ((DOMEvent) domNotification).getEventTime());
     }
 }
