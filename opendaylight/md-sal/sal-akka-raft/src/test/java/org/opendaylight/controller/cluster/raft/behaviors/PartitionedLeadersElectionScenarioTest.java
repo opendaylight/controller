@@ -286,8 +286,7 @@ public class PartitionedLeadersElectionScenarioTest extends AbstractLeaderElecti
         DefaultConfigParamsImpl member2ConfigParams = newConfigParams();
         member2Context.setConfigParams(member2ConfigParams);
 
-        Follower member2Behavior = new Follower(member2Context);
-        member2Actor.behavior = member2Behavior;
+        member2Actor.behavior = new Follower(member2Context);
 
         // Create member 3's behavior initially as Follower
 
@@ -299,8 +298,7 @@ public class PartitionedLeadersElectionScenarioTest extends AbstractLeaderElecti
         DefaultConfigParamsImpl member3ConfigParams = newConfigParams();
         member3Context.setConfigParams(member3ConfigParams);
 
-        Follower member3Behavior = new Follower(member3Context);
-        member3Actor.behavior = member3Behavior;
+        member3Actor.behavior = new Follower(member3Context);
 
         // Create member 1's behavior initially as Leader
 
