@@ -37,7 +37,7 @@ final class ShardDataTreeTransactionChain extends ShardDataTreeTransactionParent
         Preconditions.checkState(openTransaction == null, "Transaction %s is open", openTransaction);
 
         if (previousTx == null) {
-            return dataTree.getDataTree().takeSnapshot();
+            return dataTree.takeSnapshot();
         } else {
             return previousTx.getSnapshot();
         }

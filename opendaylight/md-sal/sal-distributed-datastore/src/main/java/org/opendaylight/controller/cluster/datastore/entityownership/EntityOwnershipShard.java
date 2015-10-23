@@ -59,7 +59,6 @@ import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.Future;
@@ -343,13 +342,12 @@ class EntityOwnershipShard extends Shard {
         commitCoordinator.commitModifications(modifications, this);
     }
 
-    private boolean hasCandidate(MapEntryNode entity, String candidateName) {
+    private static boolean hasCandidate(MapEntryNode entity, String candidateName) {
         return ((MapNode)entity.getChild(CANDIDATE_NODE_ID).get()).getChild(candidateNodeKey(candidateName)).isPresent();
     }
 
     private void searchForEntitiesOwnedBy(final String owner, final EntityWalker walker) {
-        DataTreeSnapshot snapshot = getDataStore().getDataTree().takeSnapshot();
-        Optional<NormalizedNode<?, ?>> possibleEntityTypes = snapshot.readNode(ENTITY_TYPES_PATH);
+        Optional<NormalizedNode<?, ?>> possibleEntityTypes = getDataStore().readNode(ENTITY_TYPES_PATH);
         if(!possibleEntityTypes.isPresent()) {
             return;
         }
@@ -369,8 +367,7 @@ class EntityOwnershipShard extends Shard {
     }
 
     private void searchForEntities(EntityWalker walker) {
-        DataTreeSnapshot snapshot = getDataStore().getDataTree().takeSnapshot();
-        Optional<NormalizedNode<?, ?>> possibleEntityTypes = snapshot.readNode(ENTITY_TYPES_PATH);
+        Optional<NormalizedNode<?, ?>> possibleEntityTypes = getDataStore().readNode(ENTITY_TYPES_PATH);
         if(!possibleEntityTypes.isPresent()) {
             return;
         }
@@ -388,7 +385,7 @@ class EntityOwnershipShard extends Shard {
         }
     }
 
-    private Collection<String> getCandidateNames(MapEntryNode entity) {
+    private static Collection<String> getCandidateNames(MapEntryNode entity) {
         Collection<MapEntryNode> candidates = ((MapNode)entity.getChild(CANDIDATE_NODE_ID).get()).getValue();
         Collection<String> candidateNames = new ArrayList<>(candidates.size());
         for(MapEntryNode candidate: candidates) {
@@ -416,8 +413,7 @@ class EntityOwnershipShard extends Shard {
     }
 
     private String getCurrentOwner(YangInstanceIdentifier entityId) {
-        DataTreeSnapshot snapshot = getDataStore().getDataTree().takeSnapshot();
-        Optional<NormalizedNode<?, ?>> optionalEntityOwner = snapshot.readNode(entityId.node(ENTITY_OWNER_QNAME));
+        Optional<NormalizedNode<?, ?>> optionalEntityOwner = getDataStore().readNode(entityId.node(ENTITY_OWNER_QNAME));
         if(optionalEntityOwner.isPresent()){
             return optionalEntityOwner.get().getValue().toString();
         }

@@ -50,7 +50,6 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateTip;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
@@ -243,16 +242,11 @@ public abstract class AbstractShardTest extends AbstractActorTest{
 
     public static NormalizedNode<?,?> readStore(final TestActorRef<? extends Shard> shard, final YangInstanceIdentifier id)
             throws ExecutionException, InterruptedException {
-        return readStore(shard.underlyingActor().getDataStore().getDataTree(), id);
+        return shard.underlyingActor().getDataStore().readNode(id).orNull();
     }
 
     public static NormalizedNode<?,?> readStore(final DataTree store, final YangInstanceIdentifier id) {
-        final DataTreeSnapshot transaction = store.takeSnapshot();
-
-        final Optional<NormalizedNode<?, ?>> optional = transaction.readNode(id);
-        final NormalizedNode<?, ?> node = optional.isPresent()? optional.get() : null;
-
-        return node;
+        return store.takeSnapshot().readNode(id).orNull();
     }
 
     public static void writeToStore(final TestActorRef<Shard> shard, final YangInstanceIdentifier id,
