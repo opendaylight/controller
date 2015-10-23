@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fad0f9df_47207b49",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1063,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-10-23T10:24:58Z",
+      "side": 1,
+      "message": "I am figuring the way to send a RemotePrimaryShardFound message to the mock ShardManager actor created. Will re-enable this positive test case after correcting it.",
+      "revId": "1dfb5cab3b0fe89a7b80b1d5899a48009439ba36",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
