@@ -259,33 +259,36 @@ public class FileStorageAdapterTest {
         if (!file.exists()) {
             return;
         }
-        XmlFileStorageAdapter storage = new XmlFileStorageAdapter();
-        storage.setFileStorage(file);
+        try (XmlFileStorageAdapter storage = new XmlFileStorageAdapter()) {
+            storage.setFileStorage(file);
 
-        List<ConfigSnapshotHolder> elementOptional = storage.loadLastConfigs();
-        assertThat(elementOptional.size(), is(0));
+            List<ConfigSnapshotHolder> elementOptional = storage.loadLastConfigs();
+            assertThat(elementOptional.size(), is(0));
+        }
     }
 
     @Test(expected = NullPointerException.class)
     public void testNoProperties() throws Exception {
-        XmlFileStorageAdapter storage = new XmlFileStorageAdapter();
-        storage.loadLastConfigs();
+        try (XmlFileStorageAdapter storage = new XmlFileStorageAdapter()) {
+            storage.loadLastConfigs();
+        }
     }
 
     @Test(expected = NullPointerException.class)
     public void testNoProperties2() throws Exception {
-        XmlFileStorageAdapter storage = new XmlFileStorageAdapter();
-        storage.persistConfig(new ConfigSnapshotHolder() {
-            @Override
-            public String getConfigSnapshot() {
-                return mock(String.class);
-            }
+        try (XmlFileStorageAdapter storage = new XmlFileStorageAdapter()) {
+            storage.persistConfig(new ConfigSnapshotHolder() {
+                @Override
+                public String getConfigSnapshot() {
+                    return mock(String.class);
+                }
 
-            @Override
-            public SortedSet<String> getCapabilities() {
-                return new TreeSet<>();
-            }
-        } );
+                @Override
+                public SortedSet<String> getCapabilities() {
+                    return new TreeSet<>();
+                }
+            });
+        }
     }
 
     static String createConfig() {

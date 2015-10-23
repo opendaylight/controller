@@ -100,17 +100,16 @@ public class JDBCConnection implements Connection, Runnable {
 
     public JDBCConnection(boolean server) {
         try {
-            ServerSocket s = new ServerSocket(50003);
-            socket = s.accept();
-            try {
-                in = new DataInputStream(new BufferedInputStream(
-                        socket.getInputStream()));
-                out = new DataOutputStream(new BufferedOutputStream(
-                        socket.getOutputStream()));
-                new JDBCObjectReader();
-                new Thread(this).start();
-            } catch (Exception err) {
-                err.printStackTrace();
+            try (ServerSocket s = new ServerSocket(50003)) {
+                socket = s.accept();
+                try {
+                    in = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
+                    out = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
+                    new JDBCObjectReader();
+                    new Thread(this).start();
+                } catch (Exception err) {
+                    err.printStackTrace();
+                }
             }
         } catch (Exception err) {
             err.printStackTrace();

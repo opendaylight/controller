@@ -49,23 +49,23 @@ public class RemoteRpcProviderTest {
     system = null;
   }
 
-  @Test
-  public void testRemoteRpcProvider() throws Exception {
-    final RemoteRpcProvider rpcProvider = new RemoteRpcProvider(system, mock(DOMRpcProviderService.class),
-            new RemoteRpcProviderConfig(system.settings().config()));
-    final Broker.ProviderSession session = mock(Broker.ProviderSession.class);
-    final SchemaService schemaService = mock(SchemaService.class);
-    when(schemaService.getGlobalContext()). thenReturn(mock(SchemaContext.class));
-    when(session.getService(SchemaService.class)).thenReturn(schemaService);
-    when(session.getService(DOMRpcService.class)).thenReturn(mock(DOMRpcService.class));
+    @Test
+    public void testRemoteRpcProvider() throws Exception {
+        try (final RemoteRpcProvider rpcProvider = new RemoteRpcProvider(system, mock(DOMRpcProviderService.class),
+                new RemoteRpcProviderConfig(system.settings().config()))) {
+            final Broker.ProviderSession session = mock(Broker.ProviderSession.class);
+            final SchemaService schemaService = mock(SchemaService.class);
+            when(schemaService.getGlobalContext()).thenReturn(mock(SchemaContext.class));
+            when(session.getService(SchemaService.class)).thenReturn(schemaService);
+            when(session.getService(DOMRpcService.class)).thenReturn(mock(DOMRpcService.class));
 
-    rpcProvider.onSessionInitiated(session);
+            rpcProvider.onSessionInitiated(session);
 
-    final ActorRef actorRef = Await.result(
-            system.actorSelection(
-                    moduleConfig.getRpcManagerPath()).resolveOne(Duration.create(1, TimeUnit.SECONDS)),
-                                                                 Duration.create(2, TimeUnit.SECONDS));
+            final ActorRef actorRef = Await.result(
+                    system.actorSelection(moduleConfig.getRpcManagerPath()).resolveOne(
+                            Duration.create(1, TimeUnit.SECONDS)), Duration.create(2, TimeUnit.SECONDS));
 
-    Assert.assertTrue(actorRef.path().toString().contains(moduleConfig.getRpcManagerPath()));
-  }
+            Assert.assertTrue(actorRef.path().toString().contains(moduleConfig.getRpcManagerPath()));
+        }
+    }
 }

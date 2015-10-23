@@ -57,23 +57,26 @@ public class BindingDOMDataBrokerAdapterTest {
 
         BindingToNormalizedNodeCodec codec = new BindingToNormalizedNodeCodec(classLoadingStrategy, codecRegistry);
 
-        BindingDOMDataBrokerAdapter bindingDOMDataBrokerAdapter = new BindingDOMDataBrokerAdapter(dataBroker, codec);
-        Mockito.when(codecRegistry.toYangInstanceIdentifier(TOP_PATH)).thenReturn(yangInstanceIdentifier);
+        try (BindingDOMDataBrokerAdapter bindingDOMDataBrokerAdapter = new BindingDOMDataBrokerAdapter(dataBroker,
+                codec)) {
+            Mockito.when(codecRegistry.toYangInstanceIdentifier(TOP_PATH)).thenReturn(yangInstanceIdentifier);
 
-        ArgumentCaptor<ClusteredDOMDataChangeListener> clusteredDOMListener = ArgumentCaptor.
-            forClass(ClusteredDOMDataChangeListener.class);
-        ArgumentCaptor<LogicalDatastoreType> logicalDatastoreType = ArgumentCaptor.forClass(LogicalDatastoreType.class);
-        ArgumentCaptor<AsyncDataBroker.DataChangeScope> dataChangeScope = ArgumentCaptor.
-            forClass(AsyncDataBroker.DataChangeScope.class);
-        ArgumentCaptor<YangInstanceIdentifier> yangInstanceIdentifier = ArgumentCaptor.
-            forClass(YangInstanceIdentifier.class);
+            ArgumentCaptor<ClusteredDOMDataChangeListener> clusteredDOMListener = ArgumentCaptor
+                    .forClass(ClusteredDOMDataChangeListener.class);
+            ArgumentCaptor<LogicalDatastoreType> logicalDatastoreType = ArgumentCaptor
+                    .forClass(LogicalDatastoreType.class);
+            ArgumentCaptor<AsyncDataBroker.DataChangeScope> dataChangeScope = ArgumentCaptor
+                    .forClass(AsyncDataBroker.DataChangeScope.class);
+            ArgumentCaptor<YangInstanceIdentifier> yangInstanceIdentifier = ArgumentCaptor
+                    .forClass(YangInstanceIdentifier.class);
 
-        TestListener listener = new TestListener();
+            TestListener listener = new TestListener();
 
-        bindingDOMDataBrokerAdapter.registerDataChangeListener(LogicalDatastoreType.OPERATIONAL, TOP_PATH, listener,
-            AsyncDataBroker.DataChangeScope.BASE);
-        Mockito.verify(dataBroker).registerDataChangeListener(logicalDatastoreType.capture(), yangInstanceIdentifier.capture(),
-            clusteredDOMListener.capture(), dataChangeScope.capture());
+            bindingDOMDataBrokerAdapter.registerDataChangeListener(LogicalDatastoreType.OPERATIONAL, TOP_PATH,
+                    listener, AsyncDataBroker.DataChangeScope.BASE);
+            Mockito.verify(dataBroker).registerDataChangeListener(logicalDatastoreType.capture(),
+                    yangInstanceIdentifier.capture(), clusteredDOMListener.capture(), dataChangeScope.capture());
+        }
 
     }
 
