@@ -12,12 +12,6 @@ package org.opendaylight.controller.cluster.raft;
  */
 public interface FollowerLogInformation {
 
-    enum FollowerState {
-        VOTING,
-        NON_VOTING,
-        VOTING_NOT_INITIALIZED
-    };
-
     /**
      * Increment the value of the nextIndex
      *
@@ -114,20 +108,4 @@ public interface FollowerLogInformation {
      * Sets the payload data version of the follower.
      */
     void setPayloadVersion(short payloadVersion);
-
-    /**
-     * Sets the state of the follower.
-     */
-    void setFollowerState(FollowerState state);
-
-    /**
-     * @return the state of the follower.
-     */
-    FollowerState getFollowerState();
-
-    /**
-     * @return true if the follower is in a state where it can participate in leader elections and
-     *              commitment consensus.
-     */
-    boolean canParticipateInConsensus();
 }

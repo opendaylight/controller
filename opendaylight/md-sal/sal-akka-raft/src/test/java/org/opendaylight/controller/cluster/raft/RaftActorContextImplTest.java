@@ -18,6 +18,8 @@ import akka.actor.Props;
 import akka.testkit.TestActorRef;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.After;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.NonPersistentDataProvider;
@@ -45,11 +47,13 @@ public class RaftActorContextImplTest extends AbstractActorTest {
 
     @Test
     public void testGetPeerAddress() {
+        Map<String, String> peerMap = new HashMap<>();
+        peerMap.put("peer1", "peerAddress1");
+        peerMap.put("peer2", null);
         DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
         RaftActorContextImpl context = new RaftActorContextImpl(actor, actor.underlyingActor().getContext(),
                 "test", new ElectionTermImpl(new NonPersistentDataProvider(), "test", log), -1, -1,
-                Maps.newHashMap(ImmutableMap.<String, String>of("peer1", "peerAddress1")), configParams,
-                new NonPersistentDataProvider(), log);
+                peerMap, configParams, new NonPersistentDataProvider(), log);
 
         assertEquals("getPeerAddress", "peerAddress1", context.getPeerAddress("peer1"));
         assertEquals("getPeerAddress", null, context.getPeerAddress("peer2"));

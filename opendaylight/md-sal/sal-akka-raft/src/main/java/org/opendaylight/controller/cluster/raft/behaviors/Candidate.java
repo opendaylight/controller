@@ -10,7 +10,9 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
+import java.util.ArrayList;
 import java.util.Collection;
+import org.opendaylight.controller.cluster.raft.PeerInfo;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
@@ -44,22 +46,26 @@ public class Candidate extends AbstractRaftActorBehavior {
 
     private final int votesRequired;
 
-    private final Collection<String> peers;
+    private final Collection<String> votingPeers = new ArrayList<>();
 
     public Candidate(RaftActorContext context) {
         super(context, RaftState.Candidate);
 
-        peers = context.getPeerIds();
-
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("{}: Election: Candidate has following peers: {}", logName(), peers);
+        for(PeerInfo peer: context.getPeers()) {
+            if(peer.isVoting()) {
+                votingPeers.add(peer.getId());
+            }
         }
 
-        votesRequired = getMajorityVoteCount(peers.size());
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("{}: Election: Candidate has following voting peers: {}", logName(), votingPeers);
+        }
+
+        votesRequired = getMajorityVoteCount(votingPeers.size());
 
         startNewTerm();
 
-        if(peers.isEmpty()){
+        if(votingPeers.isEmpty()){
             actor().tell(ELECTION_TIMEOUT, actor());
         } else {
             scheduleElection(electionDuration());
@@ -170,7 +176,7 @@ public class Candidate extends AbstractRaftActorBehavior {
         // Request for a vote
         // TODO: Retry request for vote if replies do not arrive in a reasonable
         // amount of time TBD
-        for (String peerId : peers) {
+        for (String peerId : votingPeers) {
             ActorSelection peerActor = context.getPeerActorSelection(peerId);
             if(peerActor != null) {
                 RequestVote requestVote = new RequestVote(
