@@ -46,7 +46,6 @@ import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
 
 public class DataTreeChangeListenerProxyTest extends AbstractActorTest {
-    @SuppressWarnings("unchecked")
     private final DOMDataTreeChangeListener mockListener = mock(DOMDataTreeChangeListener.class);
 
     @Test(timeout=10000)

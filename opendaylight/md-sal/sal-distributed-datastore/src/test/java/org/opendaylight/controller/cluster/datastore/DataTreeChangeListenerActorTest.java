@@ -24,7 +24,6 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 
 public class DataTreeChangeListenerActorTest extends AbstractActorTest {
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test
     public void testDataChangedWhenNotificationsAreEnabled(){
         new JavaTestKit(getSystem()) {{
@@ -46,7 +45,6 @@ public class DataTreeChangeListenerActorTest extends AbstractActorTest {
         }};
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test
     public void testDataChangedWhenNotificationsAreDisabled(){
         new JavaTestKit(getSystem()) {{
@@ -72,7 +70,6 @@ public class DataTreeChangeListenerActorTest extends AbstractActorTest {
         }};
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test
     public void testDataChangedWithNoSender(){
         new JavaTestKit(getSystem()) {{
@@ -103,7 +100,6 @@ public class DataTreeChangeListenerActorTest extends AbstractActorTest {
         }};
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test
     public void testDataChangedWithListenerRuntimeEx(){
         new JavaTestKit(getSystem()) {{
