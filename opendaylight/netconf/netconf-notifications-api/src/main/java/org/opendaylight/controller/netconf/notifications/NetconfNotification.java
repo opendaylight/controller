@@ -23,7 +23,16 @@ public final class NetconfNotification extends NetconfMessage {
     public static final String NOTIFICATION = "notification";
     public static final String NOTIFICATION_NAMESPACE = "urn:ietf:params:netconf:capability:notification:1.0";
     public static final String RFC3339_DATE_FORMAT_BLUEPRINT = "yyyy-MM-dd'T'HH:mm:ssXXX";
+    // The format with milliseconds is a bit fragile, it cannot be used for timestamps without millis (thats why its a separate format)
+    // + it might not work properly with more than 6 digits
+    // TODO try to find a better solution with Java8
+    public static final String RFC3339_DATE_FORMAT_WITH_MILLIS_BLUEPRINT = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXX";
     public static final String EVENT_TIME = "eventTime";
+
+    /**
+     * Used for unknown/un-parse-able event-times
+     */
+    public static final Date UNKNOWN_EVENT_TIME = new Date(0);
 
     /**
      * Create new notification and capture the timestamp in the constructor
