@@ -97,7 +97,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
         setLeaderPayloadVersion(context.getPayloadVersion());
 
-        for (String followerId : context.getPeerAddresses().keySet()) {
+        for (String followerId : context.getPeerIds()) {
             FollowerLogInformation followerLogInformation =
                 new FollowerLogInformationImpl(followerId, -1, context);
 
