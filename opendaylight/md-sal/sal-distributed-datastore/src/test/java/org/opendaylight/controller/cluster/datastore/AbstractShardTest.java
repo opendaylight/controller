@@ -243,7 +243,7 @@ public abstract class AbstractShardTest extends AbstractActorTest{
 
     public static NormalizedNode<?,?> readStore(final TestActorRef<? extends Shard> shard, final YangInstanceIdentifier id)
             throws ExecutionException, InterruptedException {
-        return readStore(shard.underlyingActor().getDataStore().getDataTree(), id);
+        return shard.underlyingActor().getDataStore().readNode(id).orNull();
     }
 
     public static NormalizedNode<?,?> readStore(final DataTree store, final YangInstanceIdentifier id) {
