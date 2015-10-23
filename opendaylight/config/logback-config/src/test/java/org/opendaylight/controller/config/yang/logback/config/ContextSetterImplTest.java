@@ -10,6 +10,7 @@ package org.opendaylight.controller.config.yang.logback.config;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
@@ -19,6 +20,7 @@ import ch.qos.logback.core.Appender;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -42,6 +44,7 @@ public class ContextSetterImplTest {
         MockitoAnnotations.initMocks(this);
         LogbackRuntimeRegistration reg = mock(LogbackRuntimeRegistration.class);
         doReturn(reg).when(runtimeRegistratorMock).register(any(LogbackRuntimeMXBean.class));
+        doNothing().when(reg).close();
     }
 
     @Test
@@ -86,23 +89,24 @@ public class ContextSetterImplTest {
         assertLoggerWithAppenders("l2", "a22");
     }
 
-    private void createContextSetter(Multimap<String, String> loggersToAppenders) {
-        ContextSetterImpl setter = new ContextSetterImpl(runtimeRegistratorMock);
+    private void createContextSetter(Multimap<String, String> loggersToAppenders) throws IOException {
+        try (ContextSetterImpl setter = new ContextSetterImpl(runtimeRegistratorMock)) {
 
-        List<LoggerTO> logger = Lists.newArrayList();
-        List<ConsoleAppenderTO> consoleAppenders = Lists.newArrayList();
+            List<LoggerTO> logger = Lists.newArrayList();
+            List<ConsoleAppenderTO> consoleAppenders = Lists.newArrayList();
 
-        for (String loggerName : loggersToAppenders.keySet()) {
-            LoggerTO l1 = createLogger(loggerName, loggersToAppenders.get(loggerName));
-            logger.add(l1);
-            for (String appenderName : loggersToAppenders.get(loggerName)) {
-                consoleAppenders.add(createConsoleAppender(appenderName));
+            for (String loggerName : loggersToAppenders.keySet()) {
+                LoggerTO l1 = createLogger(loggerName, loggersToAppenders.get(loggerName));
+                logger.add(l1);
+                for (String appenderName : loggersToAppenders.get(loggerName)) {
+                    consoleAppenders.add(createConsoleAppender(appenderName));
+                }
+
             }
 
+            LogbackModule logbackModule = createLogbackModule(logger, consoleAppenders);
+            setter.updateContext(logbackModule);
         }
-
-        LogbackModule logbackModule = createLogbackModule(logger, consoleAppenders);
-        setter.updateContext(logbackModule);
     }
 
     private void assertLoggerWithAppenders(String name, String... appenders) {

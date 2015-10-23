@@ -218,8 +218,7 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
         DefaultConfigParamsImpl member2ConfigParams = newConfigParams();
         member2Context.setConfigParams(member2ConfigParams);
 
-        Follower member2Behavior = new Follower(member2Context);
-        member2Actor.behavior = member2Behavior;
+        member2Actor.behavior = new Follower(member2Context);
 
         // Create member 1's behavior as Leader.
 
@@ -250,5 +249,6 @@ public class PartitionedCandidateOnStartupElectionScenarioTest extends AbstractL
         member2Context.getTermInformation().update(3, member1Context.getId());
 
         testLog.info("setupInitialMember1AndMember2Behaviors ending");
+
     }
 }

@@ -70,27 +70,30 @@ public class NormalizedNodeAggregatorTest {
 
     }
 
-    public static NormalizedNode<?,?> getRootNode(NormalizedNode<?, ?> moduleNode, SchemaContext schemaContext) throws ReadFailedException, ExecutionException, InterruptedException {
-        InMemoryDOMDataStore store = new InMemoryDOMDataStore("test", Executors.newSingleThreadExecutor());
-        store.onGlobalContextUpdated(schemaContext);
+    public static NormalizedNode<?, ?> getRootNode(NormalizedNode<?, ?> moduleNode, SchemaContext schemaContext)
+            throws ReadFailedException, ExecutionException, InterruptedException {
+        try (InMemoryDOMDataStore store = new InMemoryDOMDataStore("test", Executors.newSingleThreadExecutor())) {
+            store.onGlobalContextUpdated(schemaContext);
 
-        DOMStoreWriteTransaction writeTransaction = store.newWriteOnlyTransaction();
+            DOMStoreWriteTransaction writeTransaction = store.newWriteOnlyTransaction();
 
-        writeTransaction.merge(YangInstanceIdentifier.builder().node(moduleNode.getNodeType()).build(), moduleNode);
+            writeTransaction.merge(YangInstanceIdentifier.builder().node(moduleNode.getNodeType()).build(), moduleNode);
 
-        DOMStoreThreePhaseCommitCohort ready = writeTransaction.ready();
+            DOMStoreThreePhaseCommitCohort ready = writeTransaction.ready();
 
-        ready.canCommit().get();
-        ready.preCommit().get();
-        ready.commit().get();
+            ready.canCommit().get();
+            ready.preCommit().get();
+            ready.commit().get();
 
-        DOMStoreReadTransaction readTransaction = store.newReadOnlyTransaction();
+            DOMStoreReadTransaction readTransaction = store.newReadOnlyTransaction();
 
-        CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read = readTransaction.read(YangInstanceIdentifier.builder().build());
+            CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> read = readTransaction
+                    .read(YangInstanceIdentifier.builder().build());
 
-        Optional<NormalizedNode<?, ?>> nodeOptional = read.checkedGet();
+            Optional<NormalizedNode<?, ?>> nodeOptional = read.checkedGet();
 
-        return nodeOptional.get();
+            return nodeOptional.get();
+        }
     }
 
     public static NormalizedNode<?,?> findChildWithQName(Collection<NormalizedNode<?, ?>> collection, QName qName) {
