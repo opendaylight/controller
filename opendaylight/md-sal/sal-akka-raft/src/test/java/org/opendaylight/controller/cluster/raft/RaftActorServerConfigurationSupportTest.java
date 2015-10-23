@@ -161,11 +161,9 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         // Verify new server config was applied in both followers
 
-        assertEquals("Follower peers", Sets.newHashSet(LEADER_ID, NEW_SERVER_ID),
-                followerActorContext.getPeerAddresses().keySet());
+        assertEquals("Follower peers", Sets.newHashSet(LEADER_ID, NEW_SERVER_ID), followerActorContext.getPeerIds());
 
-        assertEquals("New follower peers", Sets.newHashSet(LEADER_ID, FOLLOWER_ID),
-                newFollowerActorContext.getPeerAddresses().keySet());
+        assertEquals("New follower peers", Sets.newHashSet(LEADER_ID, FOLLOWER_ID), newFollowerActorContext.getPeerIds());
 
         expectFirstMatching(newFollowerCollectorActor, ApplyState.class);
         expectFirstMatching(followerActor, ApplyState.class);
@@ -219,8 +217,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         // Verify new server config was applied in the new follower
 
-        assertEquals("New follower peers", Sets.newHashSet(LEADER_ID),
-                newFollowerActorContext.getPeerAddresses().keySet());
+        assertEquals("New follower peers", Sets.newHashSet(LEADER_ID), newFollowerActorContext.getPeerIds());
     }
 
     @Test
@@ -259,8 +256,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         // Verify new server config was applied in the new follower
 
-        assertEquals("New follower peers", Sets.newHashSet(LEADER_ID),
-                newFollowerActorContext.getPeerAddresses().keySet());
+        assertEquals("New follower peers", Sets.newHashSet(LEADER_ID), newFollowerActorContext.getPeerIds());
 
         MessageCollectorActor.assertNoneMatching(newFollowerCollectorActor, InstallSnapshot.class, 500);
 
@@ -336,7 +332,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         MessageCollectorActor.expectMatching(newFollowerCollectorActor, ApplyState.class, 2);
 
         assertEquals("New follower peers", Sets.newHashSet(LEADER_ID, NEW_SERVER_ID2),
-               newFollowerActorContext.getPeerAddresses().keySet());
+               newFollowerActorContext.getPeerIds());
     }
 
     @Test
@@ -362,7 +358,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         AddServerReply addServerReply = testKit.expectMsgClass(JavaTestKit.duration("5 seconds"), AddServerReply.class);
         assertEquals("getStatus", ServerChangeStatus.TIMEOUT, addServerReply.getStatus());
 
-        assertEquals("Leader peers size", 0, leaderActorContext.getPeerAddresses().keySet().size());
+        assertEquals("Leader peers size", 0, leaderActorContext.getPeerIds().size());
         assertEquals("Leader followers size", 0,
                 ((AbstractLeader)leaderRaftActor.getCurrentBehavior()).getFollowerIds().size());
     }

@@ -10,7 +10,7 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
-import java.util.Set;
+import java.util.Collection;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
@@ -44,12 +44,12 @@ public class Candidate extends AbstractRaftActorBehavior {
 
     private final int votesRequired;
 
-    private final Set<String> peers;
+    private final Collection<String> peers;
 
     public Candidate(RaftActorContext context) {
         super(context, RaftState.Candidate);
 
-        peers = context.getPeerAddresses().keySet();
+        peers = context.getPeerIds();
 
         if(LOG.isDebugEnabled()) {
             LOG.debug("{}: Election: Candidate has following peers: {}", logName(), peers);
@@ -59,7 +59,7 @@ public class Candidate extends AbstractRaftActorBehavior {
 
         startNewTerm();
 
-        if(context.getPeerAddresses().isEmpty()){
+        if(peers.isEmpty()){
             actor().tell(ELECTION_TIMEOUT, actor());
         } else {
             scheduleElection(electionDuration());
