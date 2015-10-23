@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "fad0f9df_e7872f60",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 243,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-23T06:05:57Z",
+      "side": 1,
+      "message": "I would omit the Voting part since we\u0027re not doing anything to change its voting state here.",
+      "parentUuid": "fad0f9df_ef1cebc3",
+      "revId": "9bdfd3e7441d0627cb8a1ce1b6a19b9fa0c8ef3b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fad0f9df_60dd7042",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
         "patchSetId": 1
