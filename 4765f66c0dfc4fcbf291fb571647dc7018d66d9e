@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fad0f9df_a7e28701",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 2877
+      },
+      "writtenOn": "2015-10-23T10:33:23Z",
+      "side": 1,
+      "message": "ConfigManagerActivator",
+      "range": {
+        "startLine": 10,
+        "startChar": 19,
+        "endLine": 10,
+        "endChar": 41
+      },
+      "revId": "4765f66c0dfc4fcbf291fb571647dc7018d66d9e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
