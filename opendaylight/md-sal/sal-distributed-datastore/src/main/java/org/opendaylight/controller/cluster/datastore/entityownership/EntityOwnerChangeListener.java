@@ -79,7 +79,7 @@ class EntityOwnerChangeListener implements DOMDataTreeChangeListener {
         }
     }
 
-    private String extractOwner(LeafNode<?> ownerLeaf) {
+    private static String extractOwner(LeafNode<?> ownerLeaf) {
         Object value = ownerLeaf.getValue();
         return value != null ? value.toString() : null;
     }

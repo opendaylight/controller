@@ -939,7 +939,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
                 expected, (end-start)), (end - start) <= expected);
     }
 
-    private Optional<DataTree> createDataTree(){
+    private static Optional<DataTree> createDataTree(){
         DataTree dataTree = mock(DataTree.class);
         Optional<DataTree> dataTreeOptional = Optional.of(dataTree);
         DataTreeSnapshot dataTreeSnapshot = mock(DataTreeSnapshot.class);
@@ -951,7 +951,7 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         return dataTreeOptional;
     }
 
-    private Optional<DataTree> createDataTree(NormalizedNode readResponse){
+    private static Optional<DataTree> createDataTree(NormalizedNode readResponse){
         DataTree dataTree = mock(DataTree.class);
         Optional<DataTree> dataTreeOptional = Optional.of(dataTree);
         DataTreeSnapshot dataTreeSnapshot = mock(DataTreeSnapshot.class);

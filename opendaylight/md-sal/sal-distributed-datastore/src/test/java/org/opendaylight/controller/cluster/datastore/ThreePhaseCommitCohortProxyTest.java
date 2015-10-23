@@ -133,7 +133,7 @@ public class ThreePhaseCommitCohortProxyTest extends AbstractActorTest {
                 any(ActorSelection.class), isA(requestType), any(Timeout.class));
     }
 
-    private void propagateExecutionExceptionCause(ListenableFuture<?> future) throws Throwable {
+    private static void propagateExecutionExceptionCause(ListenableFuture<?> future) throws Throwable {
 
         try {
             future.get(5, TimeUnit.SECONDS);

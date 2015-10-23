@@ -95,7 +95,7 @@ public class IntegrationTestKit extends ShardTestKit {
         }
     }
 
-    private ActorRef findLocalShard(ActorContext actorContext, String shardName) {
+    private static ActorRef findLocalShard(ActorContext actorContext, String shardName) {
         ActorRef shard = null;
         for(int i = 0; i < 20 * 5 && shard == null; i++) {
             Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);

@@ -280,7 +280,7 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
         service.close();
     }
 
-    private void verifyGetOwnershipState(DistributedEntityOwnershipService service, Entity entity,
+    private static void verifyGetOwnershipState(DistributedEntityOwnershipService service, Entity entity,
             boolean isOwner, boolean hasOwner) {
         Optional<EntityOwnershipState> state = service.getOwnershipState(entity);
         assertEquals("getOwnershipState present", true, state.isPresent());
@@ -303,12 +303,12 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
                 });
     }
 
-    private void verifyRegisterCandidateLocal(final TestShardPropsCreator shardPropsCreator, Entity entity) {
+    private static void verifyRegisterCandidateLocal(final TestShardPropsCreator shardPropsCreator, Entity entity) {
         RegisterCandidateLocal regCandidate = shardPropsCreator.waitForShardMessage();
         assertEquals("getEntity", entity, regCandidate.getEntity());
     }
 
-    private void verifyEntityOwnershipCandidateRegistration(Entity entity, EntityOwnershipCandidateRegistration reg) {
+    private static void verifyEntityOwnershipCandidateRegistration(Entity entity, EntityOwnershipCandidateRegistration reg) {
         assertNotNull("EntityOwnershipCandidateRegistration null", reg);
         assertEquals("getInstance", entity, reg.getInstance());
     }

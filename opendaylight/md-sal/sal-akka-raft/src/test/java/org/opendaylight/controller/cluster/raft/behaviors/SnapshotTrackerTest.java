@@ -162,7 +162,7 @@ public class SnapshotTrackerTest {
         return bs.substring(start, start + size);
     }
 
-    private ByteString toByteString(Map<String, String> state) {
+    private static ByteString toByteString(Map<String, String> state) {
         ByteArrayOutputStream b = null;
         ObjectOutputStream o = null;
         try {

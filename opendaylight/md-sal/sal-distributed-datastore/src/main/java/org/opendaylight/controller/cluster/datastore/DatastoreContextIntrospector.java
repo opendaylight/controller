@@ -257,7 +257,7 @@ public class DatastoreContextIntrospector {
         return updated;
     }
 
-    private String convertToCamelCase(String inString) {
+    private static String convertToCamelCase(String inString) {
         String str = inString.trim();
         if(StringUtils.contains(str, '-') || StringUtils.contains(str, ' ')) {
             str = inString.replace('-', ' ');
