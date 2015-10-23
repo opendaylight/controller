@@ -52,5 +52,8 @@ public abstract class AbstractConfig implements UnifiedConfig {
 
             return config;
         }
+
+        protected abstract T self();
+
     }
 }

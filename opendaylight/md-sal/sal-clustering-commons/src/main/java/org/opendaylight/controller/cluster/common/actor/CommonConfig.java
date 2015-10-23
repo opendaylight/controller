@@ -12,7 +12,6 @@ import com.google.common.base.Preconditions;
 import com.typesafe.config.Config;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -89,7 +88,7 @@ public class CommonConfig extends AbstractConfig {
         return cachedMailBoxPushTimeout;
     }
 
-    public static class Builder<T extends Builder<T>> extends AbstractConfig.Builder<T>{
+    public static abstract class Builder<T extends Builder<T>> extends AbstractConfig.Builder<T>{
 
         public Builder(String actorSystemName) {
             super(actorSystemName);
@@ -103,7 +102,7 @@ public class CommonConfig extends AbstractConfig {
 
         public T metricCaptureEnabled(boolean enabled) {
             configHolder.put(TAG_METRIC_CAPTURE_ENABLED, String.valueOf(enabled));
-            return (T)this;
+            return self();
         }
 
         public T mailboxCapacity(int capacity) {
@@ -111,7 +110,7 @@ public class CommonConfig extends AbstractConfig {
 
             Map<String, Object> boundedMailbox = (Map<String, Object>) configHolder.get(TAG_MAILBOX);
             boundedMailbox.put(TAG_MAILBOX_CAPACITY, capacity);
-            return (T)this;
+            return self();
         }
 
         public T mailboxPushTimeout(String timeout){
@@ -120,11 +119,24 @@ public class CommonConfig extends AbstractConfig {
 
             Map<String, Object> boundedMailbox = (Map<String, Object>) configHolder.get(TAG_MAILBOX);
             boundedMailbox.put(TAG_MAILBOX_PUSH_TIMEOUT, timeout);
-            return (T)this;
+            return self();
         }
 
         public CommonConfig build() {
             return new CommonConfig(merge());
+        }
+
+    }
+
+    public static class DefaultBuilder extends Builder<DefaultBuilder>{
+
+        public DefaultBuilder(String actorSystemName) {
+            super(actorSystemName);
+        }
+
+        @Override
+        protected DefaultBuilder self() {
+            return this;
         }
     }
 }

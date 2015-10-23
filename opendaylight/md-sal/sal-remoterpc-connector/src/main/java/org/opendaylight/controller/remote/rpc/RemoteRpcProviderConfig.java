@@ -106,6 +106,11 @@ public class RemoteRpcProviderConfig extends CommonConfig {
         public RemoteRpcProviderConfig build(){
             return new RemoteRpcProviderConfig(merge());
         }
+
+        @Override
+        protected Builder self() {
+            return this;
+        }
     }
 
 

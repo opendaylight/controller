@@ -30,7 +30,7 @@ public class MeteredBoundedMailboxTest {
 
     @Before
     public void setUp() throws Exception {
-        config = new CommonConfig.Builder<>("testsystem").withConfigReader(new AkkaConfigurationReader() {
+        config = new CommonConfig.DefaultBuilder("testsystem").withConfigReader(new AkkaConfigurationReader() {
             @Override
             public Config read() {
                 return ConfigFactory.load();

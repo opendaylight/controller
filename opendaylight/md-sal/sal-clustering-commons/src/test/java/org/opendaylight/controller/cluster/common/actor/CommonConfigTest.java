@@ -21,7 +21,7 @@ public class CommonConfigTest {
 
     @Test
     public void testCommonConfigDefaults(){
-        CommonConfig config = new CommonConfig.Builder<>("testsystem").build();
+        CommonConfig config = new CommonConfig.DefaultBuilder("testsystem").build();
 
         assertNotNull(config.getActorSystemName());
         assertNotNull(config.getMailBoxCapacity());
@@ -35,7 +35,7 @@ public class CommonConfigTest {
 
         int expectedCapacity = 123;
         String timeoutValue = "1000ms";
-        CommonConfig config = new CommonConfig.Builder<>("testsystem")
+        CommonConfig config = new CommonConfig.DefaultBuilder("testsystem")
                 .mailboxCapacity(expectedCapacity)
                 .mailboxPushTimeout(timeoutValue)
                 .metricCaptureEnabled(true)
