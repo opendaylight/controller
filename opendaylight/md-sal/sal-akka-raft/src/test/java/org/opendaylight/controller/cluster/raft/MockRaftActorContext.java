@@ -17,6 +17,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
 import com.google.protobuf.GeneratedMessage;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -163,20 +164,31 @@ public class MockRaftActorContext implements RaftActorContext {
         return LoggerFactory.getLogger(getClass());
     }
 
-    @Override public Map<String, String> getPeerAddresses() {
-        return peerAddresses;
-    }
-
     @Override
     public Collection<String> getPeerIds() {
         return peerAddresses.keySet();
+    }
+
+    @Override
+    public Collection<PeerInfo> getPeers() {
+        Collection<PeerInfo> peers = new ArrayList<>();
+        for(Map.Entry<String, String> p: peerAddresses.entrySet()) {
+            peers.add(new PeerInfo(p.getKey(), p.getValue(), VotingState.VOTING));
+        }
+
+        return peers;
     }
 
     @Override public String getPeerAddress(String peerId) {
         return peerAddresses.get(peerId);
     }
 
-    @Override public void addToPeers(String name, String address) {
+    @Override
+    public PeerInfo getPeerInfo(String peerId) {
+        return new PeerInfo(peerId, peerAddresses.get(peerId), VotingState.VOTING);
+    }
+
+    @Override public void addToPeers(String name, String address, VotingState votingState) {
         peerAddresses.put(name, address);
     }
 
