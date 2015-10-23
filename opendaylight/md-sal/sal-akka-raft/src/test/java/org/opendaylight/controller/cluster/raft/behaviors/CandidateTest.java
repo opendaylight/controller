@@ -23,10 +23,16 @@ import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
+import org.opendaylight.controller.cluster.NonPersistentDataProvider;
+import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
+import org.opendaylight.controller.cluster.raft.ElectionTerm;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
+import org.opendaylight.controller.cluster.raft.RaftActorContextImpl;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.VotingState;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
@@ -34,8 +40,11 @@ import org.opendaylight.controller.cluster.raft.messages.RaftRPC;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.RequestVoteReply;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CandidateTest extends AbstractRaftActorBehaviorTest {
+    static final Logger LOG = LoggerFactory.getLogger(CandidateTest.class);
 
     private final TestActorRef<MessageCollectorActor> candidateActor = actorFactory.createTestActor(
             Props.create(MessageCollectorActor.class), actorFactory.generateActorId("candidate"));
@@ -114,8 +123,21 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest {
     @Test
     public void testBecomeLeaderOnReceivingMajorityVotesInFiveNodeCluster(){
         MockRaftActorContext raftActorContext = createActorContext();
+        raftActorContext.getTermInformation().update(2L, "other");
+        raftActorContext.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().
+                createEntries(0, 5, 1).build());
         raftActorContext.setPeerAddresses(setupPeers(4));
         candidate = new Candidate(raftActorContext);
+
+        RequestVote requestVote = MessageCollectorActor.expectFirstMatching(peerActors[0], RequestVote.class);
+        assertEquals("getTerm", 3L, requestVote.getTerm());
+        assertEquals("getCandidateId", raftActorContext.getId(), requestVote.getCandidateId());
+        assertEquals("getLastLogTerm", 1L, requestVote.getLastLogTerm());
+        assertEquals("getLastLogIndex", 4L, requestVote.getLastLogIndex());
+
+        MessageCollectorActor.expectFirstMatching(peerActors[1], RequestVote.class);
+        MessageCollectorActor.expectFirstMatching(peerActors[2], RequestVote.class);
+        MessageCollectorActor.expectFirstMatching(peerActors[3], RequestVote.class);
 
         // First peers denies the vote.
         candidate = candidate.handleMessage(peerActors[0], new RequestVoteReply(1, false));
@@ -123,6 +145,32 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest {
         assertEquals("Behavior", RaftState.Candidate, candidate.state());
 
         candidate = candidate.handleMessage(peerActors[1], new RequestVoteReply(1, true));
+
+        assertEquals("Behavior", RaftState.Candidate, candidate.state());
+
+        candidate = candidate.handleMessage(peerActors[2], new RequestVoteReply(1, true));
+
+        assertEquals("Behavior", RaftState.Leader, candidate.state());
+    }
+
+    @Test
+    public void testBecomeLeaderOnReceivingMajorityVotesWithNonVotingPeers(){
+        ElectionTerm mockElectionTerm = Mockito.mock(ElectionTerm.class);
+        Mockito.doReturn(1L).when(mockElectionTerm).getCurrentTerm();
+        RaftActorContext raftActorContext = new RaftActorContextImpl(candidateActor, candidateActor.actorContext(),
+                "candidate", mockElectionTerm, -1, -1, setupPeers(4), new DefaultConfigParamsImpl(),
+                new NonPersistentDataProvider(), LOG);
+        raftActorContext.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().build());
+        raftActorContext.getPeerInfo("peer1").setVotingState(VotingState.NON_VOTING);
+        raftActorContext.getPeerInfo("peer4").setVotingState(VotingState.NON_VOTING);
+        candidate = new Candidate(raftActorContext);
+
+        MessageCollectorActor.expectFirstMatching(peerActors[1], RequestVote.class);
+        MessageCollectorActor.expectFirstMatching(peerActors[2], RequestVote.class);
+        MessageCollectorActor.assertNoneMatching(peerActors[0], RequestVote.class, 300);
+        MessageCollectorActor.assertNoneMatching(peerActors[3], RequestVote.class, 100);
+
+        candidate = candidate.handleMessage(peerActors[1], new RequestVoteReply(1, false));
 
         assertEquals("Behavior", RaftState.Candidate, candidate.state());
 
