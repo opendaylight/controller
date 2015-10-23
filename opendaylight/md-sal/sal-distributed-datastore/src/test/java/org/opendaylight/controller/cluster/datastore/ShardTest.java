@@ -1183,7 +1183,7 @@ public class ShardTest extends AbstractShardTest {
 
             final ShardDataTree dataStore = shard.underlyingActor().getDataStore();
 
-            final DataTreeModification modification = dataStore.getDataTree().takeSnapshot().newModification();
+            final DataTreeModification modification = dataStore.newModification();
 
             final ContainerNode writeData = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
             new WriteModification(TestModel.TEST_PATH, writeData).apply(modification);
@@ -1216,7 +1216,7 @@ public class ShardTest extends AbstractShardTest {
 
             final ShardDataTree dataStore = shard.underlyingActor().getDataStore();
 
-            final DataTreeModification modification = dataStore.getDataTree().takeSnapshot().newModification();
+            final DataTreeModification modification = dataStore.newModification();
 
             final ContainerNode writeData = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
             new WriteModification(TestModel.TEST_PATH, writeData).apply(modification);
@@ -2086,7 +2086,7 @@ public class ShardTest extends AbstractShardTest {
             // Ready the third Tx.
 
             final String transactionID3 = "tx3";
-            final DataTreeModification modification3 = dataStore.getDataTree().takeSnapshot().newModification();
+            final DataTreeModification modification3 = dataStore.newModification();
             new WriteModification(TestModel.TEST2_PATH, ImmutableNodes.containerNode(TestModel.TEST2_QNAME))
                     .apply(modification3);
                 modification3.ready();

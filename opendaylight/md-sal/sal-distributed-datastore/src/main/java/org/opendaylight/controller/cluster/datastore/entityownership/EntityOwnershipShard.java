@@ -343,13 +343,12 @@ class EntityOwnershipShard extends Shard {
         commitCoordinator.commitModifications(modifications, this);
     }
 
-    private boolean hasCandidate(MapEntryNode entity, String candidateName) {
+    private static boolean hasCandidate(MapEntryNode entity, String candidateName) {
         return ((MapNode)entity.getChild(CANDIDATE_NODE_ID).get()).getChild(candidateNodeKey(candidateName)).isPresent();
     }
 
     private void searchForEntitiesOwnedBy(final String owner, final EntityWalker walker) {
-        DataTreeSnapshot snapshot = getDataStore().getDataTree().takeSnapshot();
-        Optional<NormalizedNode<?, ?>> possibleEntityTypes = snapshot.readNode(ENTITY_TYPES_PATH);
+        Optional<NormalizedNode<?, ?>> possibleEntityTypes = getDataStore().readNode(ENTITY_TYPES_PATH);
         if(!possibleEntityTypes.isPresent()) {
             return;
         }
@@ -369,8 +368,7 @@ class EntityOwnershipShard extends Shard {
     }
 
     private void searchForEntities(EntityWalker walker) {
-        DataTreeSnapshot snapshot = getDataStore().getDataTree().takeSnapshot();
-        Optional<NormalizedNode<?, ?>> possibleEntityTypes = snapshot.readNode(ENTITY_TYPES_PATH);
+        Optional<NormalizedNode<?, ?>> possibleEntityTypes = getDataStore().readNode(ENTITY_TYPES_PATH);
         if(!possibleEntityTypes.isPresent()) {
             return;
         }
@@ -388,7 +386,7 @@ class EntityOwnershipShard extends Shard {
         }
     }
 
-    private Collection<String> getCandidateNames(MapEntryNode entity) {
+    private static Collection<String> getCandidateNames(MapEntryNode entity) {
         Collection<MapEntryNode> candidates = ((MapNode)entity.getChild(CANDIDATE_NODE_ID).get()).getValue();
         Collection<String> candidateNames = new ArrayList<>(candidates.size());
         for(MapEntryNode candidate: candidates) {
