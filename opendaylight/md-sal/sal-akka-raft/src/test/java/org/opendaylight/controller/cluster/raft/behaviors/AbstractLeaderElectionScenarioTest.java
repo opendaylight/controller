@@ -186,17 +186,16 @@ public class AbstractLeaderElectionScenarioTest {
         assertEquals(name + " behavior state", expState, actor.behavior.state());
     }
 
-    void initializeLeaderBehavior(MemberActor actor, RaftActorContext context,
-            int numActiveFollowers) throws Exception {
+    void initializeLeaderBehavior(MemberActor actor, RaftActorContext context, int numActiveFollowers) throws Exception {
         // Leader sends immediate heartbeats - we don't care about it so ignore it.
 
         actor.expectMessageClass(AppendEntriesReply.class, numActiveFollowers);
-        Leader leader = new Leader(context);
+        actor.behavior = new Leader(context);
         actor.waitForExpectedMessages(AppendEntriesReply.class);
-        actor.behavior = leader;
 
         actor.forwardCapturedMessagesToBehavior(AppendEntriesReply.class, ActorRef.noSender());
         actor.clear();
+
     }
 
     TestActorRef<MemberActor> newMemberActor(String name) throws Exception {

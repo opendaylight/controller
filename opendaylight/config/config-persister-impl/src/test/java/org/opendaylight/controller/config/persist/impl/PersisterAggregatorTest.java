@@ -13,9 +13,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.opendaylight.controller.config.persist.impl.PersisterAggregator.PersisterWithConfiguration;
 
 import com.google.common.collect.Lists;
 import java.io.IOException;
@@ -27,6 +27,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.config.persist.api.ConfigSnapshotHolder;
 import org.opendaylight.controller.config.persist.api.Persister;
+import org.opendaylight.controller.config.persist.impl.PersisterAggregator.PersisterWithConfiguration;
 import org.opendaylight.controller.config.persist.impl.osgi.ConfigPersisterActivator;
 import org.opendaylight.controller.config.persist.impl.osgi.PropertiesProviderBaseImpl;
 import org.opendaylight.controller.config.persist.storage.file.xml.XmlFileStorageAdapter;
@@ -97,17 +98,18 @@ public class PersisterAggregatorTest {
     @Test
     public void testNoopAdapter() throws Exception {
         final NoOpStorageAdapter noOpStorageAdapter = new NoOpStorageAdapter();
-        final PersisterAggregator persisterAggregator =
-                new PersisterAggregator(Lists.newArrayList(new PersisterWithConfiguration(noOpStorageAdapter, false)));
+        try (final PersisterAggregator persisterAggregator = new PersisterAggregator(
+                Lists.newArrayList(new PersisterWithConfiguration(noOpStorageAdapter, false)))) {
 
-        noOpStorageAdapter.instantiate(null);
+            noOpStorageAdapter.instantiate(null);
 
-        persisterAggregator.persistConfig(null);
-        persisterAggregator.loadLastConfigs();
-        persisterAggregator.persistConfig(null);
-        persisterAggregator.loadLastConfigs();
+            persisterAggregator.persistConfig(null);
+            persisterAggregator.loadLastConfigs();
+            persisterAggregator.persistConfig(null);
+            persisterAggregator.loadLastConfigs();
 
-        noOpStorageAdapter.close();
+            noOpStorageAdapter.close();
+        }
     }
 
     @Test
@@ -141,13 +143,14 @@ public class PersisterAggregatorTest {
     private Persister mockPersister(String name){
         Persister result = mock(Persister.class);
         doReturn("mock:" + name).when(result).toString();
+        doNothing().when(result).close();
         return result;
     }
 
     @Test
     public void loadLastConfig() throws Exception {
         List<PersisterWithConfiguration> persisterWithConfigurations = new ArrayList<>();
-        PersisterWithConfiguration first = new PersisterWithConfiguration(mock(Persister.class), false);
+        PersisterWithConfiguration first = new PersisterWithConfiguration(mockPersister("p0"), false);
 
         ConfigSnapshotHolder ignored = mockHolder("ignored");
         doReturn(Arrays.asList(ignored)).when(first.getStorage()).loadLastConfigs(); // should be ignored
@@ -164,9 +167,10 @@ public class PersisterAggregatorTest {
         persisterWithConfigurations.add(second);
         persisterWithConfigurations.add(third);
 
-        PersisterAggregator persisterAggregator = new PersisterAggregator(persisterWithConfigurations);
-        List<ConfigSnapshotHolder> configSnapshotHolderOptional = persisterAggregator.loadLastConfigs();
-        assertEquals(1, configSnapshotHolderOptional.size());
-        assertEquals(used, configSnapshotHolderOptional.get(0));
+        try (PersisterAggregator persisterAggregator = new PersisterAggregator(persisterWithConfigurations)) {
+            List<ConfigSnapshotHolder> configSnapshotHolderOptional = persisterAggregator.loadLastConfigs();
+            assertEquals(1, configSnapshotHolderOptional.size());
+            assertEquals(used, configSnapshotHolderOptional.get(0));
+        }
     }
 }
