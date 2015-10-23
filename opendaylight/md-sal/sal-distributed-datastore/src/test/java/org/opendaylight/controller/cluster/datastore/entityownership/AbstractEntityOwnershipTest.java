@@ -155,26 +155,21 @@ public class AbstractEntityOwnershipTest extends AbstractActorTest {
 
     static void writeNode(YangInstanceIdentifier path, NormalizedNode<?, ?> node, ShardDataTree shardDataTree)
             throws DataValidationFailedException {
-        DataTreeModification modification = shardDataTree.getDataTree().takeSnapshot().newModification();
+        DataTreeModification modification = shardDataTree.newModification();
         modification.merge(path, node);
         commit(shardDataTree, modification);
     }
 
     static void deleteNode(YangInstanceIdentifier path, ShardDataTree shardDataTree)
             throws DataValidationFailedException {
-        DataTreeModification modification = shardDataTree.getDataTree().takeSnapshot().newModification();
+        DataTreeModification modification = shardDataTree.newModification();
         modification.delete(path);
         commit(shardDataTree, modification);
     }
 
     static void commit(ShardDataTree shardDataTree, DataTreeModification modification)
             throws DataValidationFailedException {
-        modification.ready();
-
-        shardDataTree.getDataTree().validate(modification);
-        DataTreeCandidateTip candidate = shardDataTree.getDataTree().prepare(modification);
-        shardDataTree.getDataTree().commit(candidate);
-        shardDataTree.notifyListeners(candidate);
+        shardDataTree.notifyListeners(shardDataTree.commit(modification));
     }
 
     static EntityOwnershipChange ownershipChange(final Entity expEntity, final boolean expWasOwner,

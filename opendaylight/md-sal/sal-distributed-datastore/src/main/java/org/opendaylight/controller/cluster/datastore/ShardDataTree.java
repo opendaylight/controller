@@ -25,8 +25,10 @@ import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateTip;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidates;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.TipProducingDataTree;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
@@ -195,5 +197,25 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         final DataTreeModification snapshot = transaction.getSnapshot();
         snapshot.ready();
         return new SimpleShardDataTreeCohort(this, snapshot, transaction.getId());
+    }
+
+    public Optional<NormalizedNode<?, ?>> readNode(YangInstanceIdentifier path) {
+        return dataTree.takeSnapshot().readNode(path);
+    }
+
+    public DataTreeSnapshot takeSnapshot() {
+        return dataTree.takeSnapshot();
+    }
+
+    public DataTreeModification newModification() {
+        return dataTree.takeSnapshot().newModification();
+    }
+
+    public DataTreeCandidate commit(DataTreeModification modification) throws DataValidationFailedException {
+        modification.ready();
+        dataTree.validate(modification);
+        DataTreeCandidateTip candidate = dataTree.prepare(modification);
+        dataTree.commit(candidate);
+        return candidate;
     }
 }

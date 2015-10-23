@@ -142,29 +142,21 @@ public class ShardRecoveryCoordinatorTest {
 
     private Optional<NormalizedNode<?,?>> readCars(final ShardDataTree shardDataTree){
         final TipProducingDataTree dataTree = shardDataTree.getDataTree();
+        // FIXME: this should not be called here
         dataTree.setSchemaContext(peopleSchemaContext);
 
-        final DataTreeSnapshot snapshot = dataTree.takeSnapshot();
-
-        final DataTreeModification modification = snapshot.newModification();
-
-        return modification.readNode(CarsModel.BASE_PATH);
+        return shardDataTree.readNode(CarsModel.BASE_PATH);
     }
 
     private Optional<NormalizedNode<?,?>> readPeople(final ShardDataTree shardDataTree){
         final TipProducingDataTree dataTree = shardDataTree.getDataTree();
+        // FIXME: this should not be called here
         dataTree.setSchemaContext(peopleSchemaContext);
 
-        final DataTreeSnapshot snapshot = dataTree.takeSnapshot();
-
-        final DataTreeModification modification = snapshot.newModification();
-
-        return modification.readNode(PeopleModel.BASE_PATH);
+        return shardDataTree.readNode(PeopleModel.BASE_PATH);
     }
 
-
-
-    private byte[] createSnapshot(){
+    private static byte[] createSnapshot(){
         final TipProducingDataTree dataTree = InMemoryDataTreeFactory.getInstance().create();
         dataTree.setSchemaContext(SchemaContextHelper.select(SchemaContextHelper.CARS_YANG, SchemaContextHelper.PEOPLE_YANG));
 
