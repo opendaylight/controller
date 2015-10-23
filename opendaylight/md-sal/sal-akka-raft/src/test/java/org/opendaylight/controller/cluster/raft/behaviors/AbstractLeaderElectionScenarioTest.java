@@ -162,7 +162,18 @@ public class AbstractLeaderElectionScenarioTest {
     }
 
     @After
-    public void tearDown() {
+    public void tearDown() throws Exception {
+
+        if (member1Actor.behavior != null) {
+            member1Actor.behavior.close();
+        }
+        if (member2Actor.behavior != null) {
+            member2Actor.behavior.close();
+        }
+        if (member3Actor.behavior != null) {
+            member3Actor.behavior.close();
+        }
+
         JavaTestKit.shutdownActorSystem(system);
     }
 
@@ -186,17 +197,20 @@ public class AbstractLeaderElectionScenarioTest {
         assertEquals(name + " behavior state", expState, actor.behavior.state());
     }
 
-    void initializeLeaderBehavior(MemberActor actor, RaftActorContext context,
-            int numActiveFollowers) throws Exception {
+    void initializeLeaderBehavior(MemberActor actor, RaftActorContext context, int numActiveFollowers) throws Exception {
         // Leader sends immediate heartbeats - we don't care about it so ignore it.
 
         actor.expectMessageClass(AppendEntriesReply.class, numActiveFollowers);
+
+        @SuppressWarnings("resource")
         Leader leader = new Leader(context);
         actor.waitForExpectedMessages(AppendEntriesReply.class);
+        // Delay assignment here so the AppendEntriesReply isn't forwarded to the behavior.
         actor.behavior = leader;
 
         actor.forwardCapturedMessagesToBehavior(AppendEntriesReply.class, ActorRef.noSender());
         actor.clear();
+
     }
 
     TestActorRef<MemberActor> newMemberActor(String name) throws Exception {
