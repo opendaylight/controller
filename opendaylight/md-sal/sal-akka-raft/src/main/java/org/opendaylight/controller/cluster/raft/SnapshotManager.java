@@ -108,7 +108,7 @@ public class SnapshotManager implements SnapshotState {
     }
 
     private boolean hasFollowers(){
-        return context.getPeerAddresses().keySet().size() > 0;
+        return context.hasFollowers();
     }
 
     private String persistenceId(){

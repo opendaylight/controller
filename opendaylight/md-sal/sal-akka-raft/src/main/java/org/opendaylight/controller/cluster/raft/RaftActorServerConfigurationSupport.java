@@ -172,7 +172,7 @@ class RaftActorServerConfigurationSupport {
         }
 
         protected void persistNewServerConfiguration(RaftActor raftActor, ServerOperationContext<?> operationContext){
-            List <String> newConfig = new ArrayList<String>(raftContext.getPeerAddresses().keySet());
+            List <String> newConfig = new ArrayList<String>(raftContext.getPeerIds());
             newConfig.add(raftContext.getId());
 
             LOG.debug("{}: New server configuration : {}", raftContext.getId(), newConfig);
