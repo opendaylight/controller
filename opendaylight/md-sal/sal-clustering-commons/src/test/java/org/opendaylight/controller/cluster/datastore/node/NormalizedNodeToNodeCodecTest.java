@@ -29,9 +29,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 public class NormalizedNodeToNodeCodecTest {
-
-
-
   private SchemaContext schemaContext;
 
   @Before
@@ -40,7 +37,7 @@ public class NormalizedNodeToNodeCodecTest {
     assertNotNull("Schema context must not be null.", schemaContext);
   }
 
-  private YangInstanceIdentifier instanceIdentifierFromString(String s) {
+  private static YangInstanceIdentifier instanceIdentifierFromString(String s) {
       return PathUtils.toYangInstanceIdentifier(s);
   }
 

@@ -80,7 +80,7 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
         }
     }
 
-    private void onFindPrimaryShardFailure(Throwable failure, TransactionProxy parent,
+    private static void onFindPrimaryShardFailure(Throwable failure, TransactionProxy parent,
             String shardName, TransactionContextWrapper transactionContextWrapper) {
         LOG.debug("Tx {}: Find primary for shard {} failed", parent.getIdentifier(), shardName, failure);
 

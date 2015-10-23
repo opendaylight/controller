@@ -148,7 +148,7 @@ public class NormalizedNodePrunerTest {
     }
 
 
-    private int countNodes(NormalizedNode<?,?> normalizedNode, final String namespaceFilter){
+    private static int countNodes(NormalizedNode<?,?> normalizedNode, final String namespaceFilter){
         if(normalizedNode == null){
             return 0;
         }
@@ -380,7 +380,7 @@ public class NormalizedNodePrunerTest {
         verify(normalizedNodeContainerBuilder).addChild(any(NormalizedNode.class));
     }
 
-    private NormalizedNode<?, ?> createTestContainer() {
+    private static NormalizedNode<?, ?> createTestContainer() {
         byte[] bytes1 = {1,2,3};
         LeafSetEntryNode<Object> entry1 = ImmutableLeafSetEntryNodeBuilder.create().withNodeIdentifier(
                 new YangInstanceIdentifier.NodeWithValue(TestModel.BINARY_LEAF_LIST_QNAME, bytes1)).

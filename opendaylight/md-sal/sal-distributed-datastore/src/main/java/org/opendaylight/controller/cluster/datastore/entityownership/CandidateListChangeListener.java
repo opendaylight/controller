@@ -112,7 +112,7 @@ class CandidateListChangeListener implements DOMDataTreeChangeListener {
         return Collections.emptyList();
     }
 
-    private YangInstanceIdentifier extractEntityPath(YangInstanceIdentifier candidatePath) {
+    private static YangInstanceIdentifier extractEntityPath(YangInstanceIdentifier candidatePath) {
         List<PathArgument> newPathArgs = new ArrayList<>();
         for(PathArgument pathArg: candidatePath.getPathArguments()) {
             newPathArgs.add(pathArg);

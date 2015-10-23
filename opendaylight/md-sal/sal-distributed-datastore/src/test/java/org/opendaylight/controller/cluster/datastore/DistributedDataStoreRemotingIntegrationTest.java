@@ -133,7 +133,7 @@ public class DistributedDataStoreRemotingIntegrationTest {
         leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(), SHARD_NAMES);
     }
 
-    private void verifyCars(DOMStoreReadTransaction readTx, MapEntryNode... entries) throws Exception {
+    private static void verifyCars(DOMStoreReadTransaction readTx, MapEntryNode... entries) throws Exception {
         Optional<NormalizedNode<?, ?>> optional = readTx.read(CarsModel.CAR_LIST_PATH).get(5, TimeUnit.SECONDS);
         assertEquals("isPresent", true, optional.isPresent());
 
@@ -145,14 +145,14 @@ public class DistributedDataStoreRemotingIntegrationTest {
         assertEquals("Car list node", listBuilder.build(), optional.get());
     }
 
-    private void verifyNode(DOMStoreReadTransaction readTx, YangInstanceIdentifier path, NormalizedNode<?, ?> expNode)
+    private static void verifyNode(DOMStoreReadTransaction readTx, YangInstanceIdentifier path, NormalizedNode<?, ?> expNode)
             throws Exception {
         Optional<NormalizedNode<?, ?>> optional = readTx.read(path).get(5, TimeUnit.SECONDS);
         assertEquals("isPresent", true, optional.isPresent());
         assertEquals("Data node", expNode, optional.get());
     }
 
-    private void verifyExists(DOMStoreReadTransaction readTx, YangInstanceIdentifier path) throws Exception {
+    private static void verifyExists(DOMStoreReadTransaction readTx, YangInstanceIdentifier path) throws Exception {
         Boolean exists = readTx.exists(path).get(5, TimeUnit.SECONDS);
         assertEquals("exists", true, exists);
     }

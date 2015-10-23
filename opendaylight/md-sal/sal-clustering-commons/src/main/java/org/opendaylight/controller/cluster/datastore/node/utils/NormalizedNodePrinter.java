@@ -14,7 +14,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
 public class NormalizedNodePrinter implements NormalizedNodeVisitor {
 
-    private String spaces(int n){
+    private static String spaces(int n){
         StringBuilder builder = new StringBuilder();
         for(int i=0;i<n;i++){
             builder.append(' ');

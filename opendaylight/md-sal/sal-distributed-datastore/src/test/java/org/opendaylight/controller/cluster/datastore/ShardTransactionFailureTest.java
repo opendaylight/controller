@@ -207,7 +207,7 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
         Await.result(future, Duration.create(3, TimeUnit.SECONDS));
     }
 
-    private NormalizedNodeMessages.Node buildNormalizedNode() {
+    private static NormalizedNodeMessages.Node buildNormalizedNode() {
         return NormalizedNodeSerializer
             .serialize(Builders.containerBuilder().withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME)).build());
     }

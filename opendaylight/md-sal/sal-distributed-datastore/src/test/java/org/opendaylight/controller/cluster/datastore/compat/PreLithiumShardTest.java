@@ -75,7 +75,7 @@ import scala.concurrent.duration.FiniteDuration;
  */
 public class PreLithiumShardTest extends AbstractShardTest {
 
-    private CompositeModificationPayload newLegacyPayload(final Modification... mods) {
+    private static CompositeModificationPayload newLegacyPayload(final Modification... mods) {
         MutableCompositeModification compMod = new MutableCompositeModification();
         for(Modification mod: mods) {
             compMod.addModification(mod);
@@ -84,7 +84,7 @@ public class PreLithiumShardTest extends AbstractShardTest {
         return new CompositeModificationPayload(compMod.toSerializable());
     }
 
-    private CompositeModificationByteStringPayload newLegacyByteStringPayload(final Modification... mods) {
+    private static CompositeModificationByteStringPayload newLegacyByteStringPayload(final Modification... mods) {
         MutableCompositeModification compMod = new MutableCompositeModification();
         for(Modification mod: mods) {
             compMod.addModification(mod);
@@ -93,7 +93,7 @@ public class PreLithiumShardTest extends AbstractShardTest {
         return new CompositeModificationByteStringPayload(compMod.toSerializable());
     }
 
-    private ModificationPayload newModificationPayload(final Modification... mods) throws IOException {
+    private static ModificationPayload newModificationPayload(final Modification... mods) throws IOException {
         MutableCompositeModification compMod = new MutableCompositeModification();
         for(Modification mod: mods) {
             compMod.addModification(mod);

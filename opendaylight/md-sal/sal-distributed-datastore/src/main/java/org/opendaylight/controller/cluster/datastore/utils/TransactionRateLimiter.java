@@ -83,7 +83,7 @@ public class TransactionRateLimiter {
         return -1.0D;
     }
 
-    private double calculateNewRateLimit(Timer commitTimer, long commitTimeoutInSeconds) {
+    private static double calculateNewRateLimit(Timer commitTimer, long commitTimeoutInSeconds) {
         if(commitTimer == null) {
             // This can happen in unit tests.
             return 0;

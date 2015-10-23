@@ -59,7 +59,7 @@ import scala.concurrent.Future;
  */
 public class PreLithiumTransactionProxyTest extends AbstractTransactionProxyTest {
 
-    private WriteData eqLegacyWriteData(final NormalizedNode<?, ?> nodeToWrite) {
+    private static WriteData eqLegacyWriteData(final NormalizedNode<?, ?> nodeToWrite) {
         ArgumentMatcher<WriteData> matcher = new ArgumentMatcher<WriteData>() {
             @Override
             public boolean matches(Object argument) {
@@ -75,7 +75,7 @@ public class PreLithiumTransactionProxyTest extends AbstractTransactionProxyTest
         return argThat(matcher);
     }
 
-    private MergeData eqLegacyMergeData(final NormalizedNode<?, ?> nodeToWrite) {
+    private static MergeData eqLegacyMergeData(final NormalizedNode<?, ?> nodeToWrite) {
         ArgumentMatcher<MergeData> matcher = new ArgumentMatcher<MergeData>() {
             @Override
             public boolean matches(Object argument) {
@@ -91,7 +91,7 @@ public class PreLithiumTransactionProxyTest extends AbstractTransactionProxyTest
         return argThat(matcher);
     }
 
-    private DeleteData eqLegacyDeleteData(final YangInstanceIdentifier expPath) {
+    private static DeleteData eqLegacyDeleteData(final YangInstanceIdentifier expPath) {
         ArgumentMatcher<DeleteData> matcher = new ArgumentMatcher<DeleteData>() {
             @Override
             public boolean matches(Object argument) {
@@ -103,7 +103,7 @@ public class PreLithiumTransactionProxyTest extends AbstractTransactionProxyTest
         return argThat(matcher);
     }
 
-    private CanCommitTransaction eqCanCommitTransaction(final String transactionID) {
+    private static CanCommitTransaction eqCanCommitTransaction(final String transactionID) {
         ArgumentMatcher<CanCommitTransaction> matcher = new ArgumentMatcher<CanCommitTransaction>() {
             @Override
             public boolean matches(Object argument) {
@@ -115,7 +115,7 @@ public class PreLithiumTransactionProxyTest extends AbstractTransactionProxyTest
         return argThat(matcher);
     }
 
-    private CommitTransaction eqCommitTransaction(final String transactionID) {
+    private static CommitTransaction eqCommitTransaction(final String transactionID) {
         ArgumentMatcher<CommitTransaction> matcher = new ArgumentMatcher<CommitTransaction>() {
             @Override
             public boolean matches(Object argument) {
@@ -127,7 +127,7 @@ public class PreLithiumTransactionProxyTest extends AbstractTransactionProxyTest
         return argThat(matcher);
     }
 
-    private Future<Object> readySerializedTxReply(String path, short version) {
+    private static Future<Object> readySerializedTxReply(String path, short version) {
         return Futures.successful(new ReadyTransactionReply(path, version).toSerializable());
     }
 

@@ -60,7 +60,7 @@ public class InstanceIdentifierUtilsTest {
 
     }
 
-    private void withValue(Object value) {
+    private static void withValue(Object value) {
         YangInstanceIdentifier.PathArgument p1 = new YangInstanceIdentifier.NodeIdentifier(TEST_QNAME);
 
         YangInstanceIdentifier.PathArgument p2 =
@@ -91,7 +91,7 @@ public class InstanceIdentifierUtilsTest {
 
     }
 
-    private void withPredicates(Object value) {
+    private static void withPredicates(Object value) {
         YangInstanceIdentifier.PathArgument p1 = new YangInstanceIdentifier.NodeIdentifier(TEST_QNAME);
 
         YangInstanceIdentifier.PathArgument p2 = new YangInstanceIdentifier.NodeIdentifierWithPredicates(

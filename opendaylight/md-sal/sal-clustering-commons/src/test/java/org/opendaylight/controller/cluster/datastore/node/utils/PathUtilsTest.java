@@ -93,21 +93,21 @@ public class PathUtilsTest {
 
     }
 
-    private YangInstanceIdentifier.NodeIdentifier nodeIdentifier(){
+    private static YangInstanceIdentifier.NodeIdentifier nodeIdentifier(){
         return new YangInstanceIdentifier.NodeIdentifier(TestModel.TEST_QNAME);
     }
 
-    private YangInstanceIdentifier.AugmentationIdentifier augmentationIdentifier(){
+    private static YangInstanceIdentifier.AugmentationIdentifier augmentationIdentifier(){
         Set<QName> childNames = ImmutableSet.of(QNameFactory.create("(urn:opendaylight:flow:table:statistics?revision=2013-12-15)flow-table-statistics"));
 
         return new YangInstanceIdentifier.AugmentationIdentifier(childNames);
     }
 
-    private YangInstanceIdentifier.NodeWithValue nodeWithValue(){
+    private static YangInstanceIdentifier.NodeWithValue nodeWithValue(){
         return new YangInstanceIdentifier.NodeWithValue(TestModel.TEST_QNAME, Integer.valueOf(100));
     }
 
-    private YangInstanceIdentifier.NodeIdentifierWithPredicates nodeIdentifierWithPredicates(){
+    private static YangInstanceIdentifier.NodeIdentifierWithPredicates nodeIdentifierWithPredicates(){
         Map<QName, Object> keys = new HashMap<>();
 
         keys.put(TestModel.ID_QNAME, Integer.valueOf(100));
