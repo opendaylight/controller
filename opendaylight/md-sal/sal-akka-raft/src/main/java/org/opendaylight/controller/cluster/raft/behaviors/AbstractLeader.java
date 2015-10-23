@@ -28,12 +28,13 @@ import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.ClientRequestTracker;
 import org.opendaylight.controller.cluster.raft.ClientRequestTrackerImpl;
 import org.opendaylight.controller.cluster.raft.FollowerLogInformation;
-import org.opendaylight.controller.cluster.raft.FollowerLogInformation.FollowerState;
 import org.opendaylight.controller.cluster.raft.FollowerLogInformationImpl;
+import org.opendaylight.controller.cluster.raft.PeerInfo;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.Snapshot;
+import org.opendaylight.controller.cluster.raft.VotingState;
 import org.opendaylight.controller.cluster.raft.base.messages.Replicate;
 import org.opendaylight.controller.cluster.raft.base.messages.SendHeartBeat;
 import org.opendaylight.controller.cluster.raft.base.messages.SendInstallSnapshot;
@@ -88,8 +89,6 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
     private int minReplicationCount;
 
-    private int minIsolatedLeaderPeerCount;
-
     private Optional<SnapshotHolder> snapshot;
 
     public AbstractLeader(RaftActorContext context) {
@@ -97,18 +96,16 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
 
         setLeaderPayloadVersion(context.getPayloadVersion());
 
-        for (String followerId : context.getPeerIds()) {
-            FollowerLogInformation followerLogInformation =
-                new FollowerLogInformationImpl(followerId, -1, context);
-
-            followerToLog.put(followerId, followerLogInformation);
+        for(PeerInfo peerInfo: context.getPeers()) {
+            FollowerLogInformation followerLogInformation = new FollowerLogInformationImpl(peerInfo, -1, context);
+            followerToLog.put(peerInfo.getId(), followerLogInformation);
         }
 
         leaderId = context.getId();
 
         LOG.debug("{}: Election: Leader has following peers: {}", logName(), getFollowerIds());
 
-        updateMinReplicaCountAndMinIsolatedLeaderPeerCount();
+        updateMinReplicaCount();
 
         snapshot = Optional.absent();
 
@@ -131,9 +128,9 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         return followerToLog.keySet();
     }
 
-    public void addFollower(String followerId, FollowerState followerState) {
-        FollowerLogInformation followerLogInformation = new FollowerLogInformationImpl(followerId, -1, context);
-        followerLogInformation.setFollowerState(followerState);
+    public void addFollower(String followerId) {
+        FollowerLogInformation followerLogInformation = new FollowerLogInformationImpl(
+                context.getPeerInfo(followerId), -1, context);
         followerToLog.put(followerId, followerLogInformation);
 
         if(heartbeatSchedule == null) {
@@ -145,20 +142,26 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         followerToLog.remove(followerId);
     }
 
-    public void updateMinReplicaCountAndMinIsolatedLeaderPeerCount(){
-        minReplicationCount = getMajorityVoteCount(getFollowerIds().size());
+    public void updateMinReplicaCount() {
+        int numVoting = 0;
+        for(PeerInfo peer: context.getPeers()) {
+            if(peer.isVoting()) {
+                numVoting++;
+            }
+        }
 
-        //the isolated Leader peer count will be 1 less than the majority vote count.
+        minReplicationCount = getMajorityVoteCount(numVoting);
+    }
+
+    protected int getMinIsolatedLeaderPeerCount(){
+      //the isolated Leader peer count will be 1 less than the majority vote count.
         //this is because the vote count has the self vote counted in it
         //for e.g
         //0 peers = 1 votesRequired , minIsolatedLeaderPeerCount = 0
         //2 peers = 2 votesRequired , minIsolatedLeaderPeerCount = 1
         //4 peers = 3 votesRequired, minIsolatedLeaderPeerCount = 2
-        minIsolatedLeaderPeerCount = minReplicationCount > 0 ? (minReplicationCount - 1) : 0;
-    }
 
-    protected int getMinIsolatedLeaderPeerCount(){
-        return minIsolatedLeaderPeerCount;
+        return minReplicationCount > 0 ? (minReplicationCount - 1) : 0;
     }
 
     @VisibleForTesting
@@ -432,8 +435,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                         setSnapshot(null);
                     }
                     wasLastChunk = true;
-                    FollowerState followerState = followerLogInformation.getFollowerState();
-                    if(followerState == FollowerState.VOTING_NOT_INITIALIZED){
+                    if(context.getPeerInfo(followerId).getVotingState() == VotingState.VOTING_NOT_INITIALIZED){
                         UnInitializedFollowerSnapshotReply unInitFollowerSnapshotSuccess =
                                              new UnInitializedFollowerSnapshotReply(followerId);
                         context.getActor().tell(unInitFollowerSnapshotSuccess, context.getActor());
@@ -650,14 +652,15 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     private void sendInstallSnapshot() {
         LOG.debug("{}: sendInstallSnapshot", logName());
         for (Entry<String, FollowerLogInformation> e : followerToLog.entrySet()) {
-            ActorSelection followerActor = context.getPeerActorSelection(e.getKey());
+            String followerId = e.getKey();
+            ActorSelection followerActor = context.getPeerActorSelection(followerId);
             FollowerLogInformation followerLogInfo = e.getValue();
 
             if (followerActor != null) {
-                long nextIndex = e.getValue().getNextIndex();
-                if (followerLogInfo.getFollowerState() == FollowerState.VOTING_NOT_INITIALIZED ||
+                long nextIndex = followerLogInfo.getNextIndex();
+                if (context.getPeerInfo(followerId).getVotingState() == VotingState.VOTING_NOT_INITIALIZED ||
                         canInstallSnapshot(nextIndex)) {
-                    sendSnapshotChunk(followerActor, e.getKey());
+                    sendSnapshotChunk(followerActor, followerId);
                 }
             }
         }
@@ -759,7 +762,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
     }
 
     protected boolean isLeaderIsolated() {
-        int minPresent = minIsolatedLeaderPeerCount;
+        int minPresent = getMinIsolatedLeaderPeerCount();
         for (FollowerLogInformation followerLogInformation : followerToLog.values()) {
             if (followerLogInformation.isFollowerActive()) {
                 --minPresent;
