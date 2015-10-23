@@ -14,6 +14,7 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Supplier;
+import java.util.Collection;
 import java.util.Map;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
@@ -103,7 +104,7 @@ public interface RaftActorContext {
     Logger getLogger();
 
     /**
-     * @return a mapping of peerId's to their addresses
+     * @return a copy of the mapping of peerId's to their addresses
      *
      */
     Map<String, String> getPeerAddresses();
@@ -117,6 +118,11 @@ public interface RaftActorContext {
      *         resolved
      */
     String getPeerAddress(String peerId);
+
+    /**
+     * @return the list of peer IDs.
+     */
+    Collection<String> getPeerIds();
 
     /**
      * Add to actor peers

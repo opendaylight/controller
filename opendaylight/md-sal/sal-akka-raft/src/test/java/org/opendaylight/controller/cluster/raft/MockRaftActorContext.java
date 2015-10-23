@@ -17,6 +17,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
 import com.google.protobuf.GeneratedMessage;
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
@@ -166,6 +167,11 @@ public class MockRaftActorContext implements RaftActorContext {
         return peerAddresses;
     }
 
+    @Override
+    public Collection<String> getPeerIds() {
+        return peerAddresses.keySet();
+    }
+
     @Override public String getPeerAddress(String peerId) {
         return peerAddresses.get(peerId);
     }
@@ -224,7 +230,7 @@ public class MockRaftActorContext implements RaftActorContext {
 
     @Override
     public boolean hasFollowers() {
-        return getPeerAddresses().keySet().size() > 0;
+        return getPeerIds().size() > 0;
     }
 
     @Override
