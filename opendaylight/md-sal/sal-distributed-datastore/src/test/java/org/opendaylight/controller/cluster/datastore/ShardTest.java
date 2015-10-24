@@ -1792,7 +1792,7 @@ public class ShardTest extends AbstractShardTest {
 
             waitUntilLeader(shard);
 
-            final FiniteDuration duration = duration("5 seconds");
+            final FiniteDuration duration = duration("500 seconds");
             final ShardDataTree dataStore = shard.underlyingActor().getDataStore();
 
             final String transactionID = "tx1";
