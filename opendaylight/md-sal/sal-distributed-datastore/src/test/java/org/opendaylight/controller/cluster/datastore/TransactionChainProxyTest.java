@@ -76,26 +76,26 @@ public class TransactionChainProxyTest extends AbstractTransactionProxyTest {
 
     @Test
     public void testTransactionChainsHaveUniqueId(){
-        TransactionChainProxy one = new TransactionChainProxy(mockComponentFactory);
-        TransactionChainProxy two = new TransactionChainProxy(mockComponentFactory);
-
-        Assert.assertNotEquals(one.getTransactionChainId(), two.getTransactionChainId());
+        try (TransactionChainProxy one = new TransactionChainProxy(mockComponentFactory)) {
+            try (TransactionChainProxy two = new TransactionChainProxy(mockComponentFactory)) {
+                Assert.assertNotEquals(one.getTransactionChainId(), two.getTransactionChainId());
+            }
+        }
     }
 
     @Test
     public void testRateLimitingUsedInReadWriteTxCreation(){
-        TransactionChainProxy txChainProxy = new TransactionChainProxy(mockComponentFactory);
-
-        txChainProxy.newReadWriteTransaction();
-
+        try (TransactionChainProxy txChainProxy = new TransactionChainProxy(mockComponentFactory)) {
+            txChainProxy.newReadWriteTransaction();
+        }
         verify(mockActorContext, times(1)).acquireTxCreationPermit();
     }
 
     @Test
     public void testRateLimitingUsedInWriteOnlyTxCreation(){
-        TransactionChainProxy txChainProxy = new TransactionChainProxy(mockComponentFactory);
-
-        txChainProxy.newWriteOnlyTransaction();
+        try (TransactionChainProxy txChainProxy = new TransactionChainProxy(mockComponentFactory)) {
+            txChainProxy.newWriteOnlyTransaction();
+        }
 
         verify(mockActorContext, times(1)).acquireTxCreationPermit();
     }
@@ -103,9 +103,9 @@ public class TransactionChainProxyTest extends AbstractTransactionProxyTest {
 
     @Test
     public void testRateLimitingNotUsedInReadOnlyTxCreation(){
-        TransactionChainProxy txChainProxy = new TransactionChainProxy(mockComponentFactory);
-
-        txChainProxy.newReadOnlyTransaction();
+        try (TransactionChainProxy txChainProxy = new TransactionChainProxy(mockComponentFactory)) {
+            txChainProxy.newReadOnlyTransaction();
+        }
 
         verify(mockActorContext, times(0)).acquireTxCreationPermit();
     }
