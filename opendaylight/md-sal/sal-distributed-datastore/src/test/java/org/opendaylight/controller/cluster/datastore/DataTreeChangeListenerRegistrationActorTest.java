@@ -20,7 +20,7 @@ import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 
 public class DataTreeChangeListenerRegistrationActorTest extends AbstractActorTest {
-    private static final InMemoryDOMDataStore store = new InMemoryDOMDataStore("OPER", MoreExecutors.sameThreadExecutor());
+    private static final InMemoryDOMDataStore store = new InMemoryDOMDataStore("OPER", MoreExecutors.newDirectExecutorService());
 
     static {
         store.onGlobalContextUpdated(TestModel.createTestContext());
