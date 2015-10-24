@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.datastore.node.utils.transformer;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
@@ -259,8 +260,6 @@ public class NormalizedNodePrunerTest {
         prunerNoAugSchema.anyxmlNode(new YangInstanceIdentifier.NodeIdentifier(TestModel.AUG_CONT_QNAME), mock(DOMSource.class));
 
         verify(normalizedNodeContainerBuilder, never()).addChild(any(NormalizedNode.class));
-
-
     }
 
 
@@ -269,7 +268,7 @@ public class NormalizedNodePrunerTest {
         prunerFullSchema.startLeafSet(new YangInstanceIdentifier.NodeIdentifier(TestModel.BOOLEAN_LEAF_QNAME), 10);
 
         assertEquals(1, prunerFullSchema.stack().size());
-        assertTrue(prunerFullSchema.stack().peek().toString(), prunerFullSchema.stack().peek() instanceof NormalizedNodeBuilderWrapper);
+        assertNotNull(prunerFullSchema.stack().peek());
         assertTrue(prunerFullSchema.stack().peek().builder().toString(), prunerFullSchema.stack().peek().builder() instanceof ListNodeBuilder);
     }
 
@@ -278,7 +277,7 @@ public class NormalizedNodePrunerTest {
         prunerFullSchema.startContainerNode(new YangInstanceIdentifier.NodeIdentifier(TestModel.BOOLEAN_LEAF_QNAME), 10);
 
         assertEquals(1, prunerFullSchema.stack().size());
-        assertTrue(prunerFullSchema.stack().peek().toString(), prunerFullSchema.stack().peek() instanceof NormalizedNodeBuilderWrapper);
+        assertNotNull(prunerFullSchema.stack().peek());
         assertTrue(prunerFullSchema.stack().peek().builder().toString(), prunerFullSchema.stack().peek().builder() instanceof DataContainerNodeAttrBuilder);
     }
 
@@ -287,7 +286,7 @@ public class NormalizedNodePrunerTest {
         prunerFullSchema.startUnkeyedList(new YangInstanceIdentifier.NodeIdentifier(TestModel.BOOLEAN_LEAF_QNAME), 10);
 
         assertEquals(1, prunerFullSchema.stack().size());
-        assertTrue(prunerFullSchema.stack().peek().toString(), prunerFullSchema.stack().peek() instanceof NormalizedNodeBuilderWrapper);
+        assertNotNull(prunerFullSchema.stack().peek());
         assertTrue(prunerFullSchema.stack().peek().builder().toString(), prunerFullSchema.stack().peek().builder() instanceof CollectionNodeBuilder);
     }
 
@@ -296,7 +295,7 @@ public class NormalizedNodePrunerTest {
         prunerFullSchema.startUnkeyedListItem(new YangInstanceIdentifier.NodeIdentifier(TestModel.BOOLEAN_LEAF_QNAME), 10);
 
         assertEquals(1, prunerFullSchema.stack().size());
-        assertTrue(prunerFullSchema.stack().peek().toString(), prunerFullSchema.stack().peek() instanceof NormalizedNodeBuilderWrapper);
+        assertNotNull(prunerFullSchema.stack().peek());
         assertTrue(prunerFullSchema.stack().peek().builder().toString(), prunerFullSchema.stack().peek().builder() instanceof DataContainerNodeAttrBuilder);
     }
 
@@ -305,7 +304,7 @@ public class NormalizedNodePrunerTest {
         prunerFullSchema.startMapNode(new YangInstanceIdentifier.NodeIdentifier(TestModel.BOOLEAN_LEAF_QNAME), 10);
 
         assertEquals(1, prunerFullSchema.stack().size());
-        assertTrue(prunerFullSchema.stack().peek().toString(), prunerFullSchema.stack().peek() instanceof NormalizedNodeBuilderWrapper);
+        assertNotNull(prunerFullSchema.stack().peek());
         assertTrue(prunerFullSchema.stack().peek().builder().toString(), prunerFullSchema.stack().peek().builder() instanceof CollectionNodeBuilder);
     }
 
@@ -316,7 +315,7 @@ public class NormalizedNodePrunerTest {
                         ImmutableMap.<QName, Object>of(TestModel.BOOLEAN_LEAF_QNAME, "value")), 10);
 
         assertEquals(1, prunerFullSchema.stack().size());
-        assertTrue(prunerFullSchema.stack().peek().toString(), prunerFullSchema.stack().peek() instanceof NormalizedNodeBuilderWrapper);
+        assertNotNull(prunerFullSchema.stack().peek());
         assertTrue(prunerFullSchema.stack().peek().builder().toString(), prunerFullSchema.stack().peek().builder() instanceof DataContainerNodeAttrBuilder);
     }
 
@@ -325,7 +324,7 @@ public class NormalizedNodePrunerTest {
         prunerFullSchema.startOrderedMapNode(new YangInstanceIdentifier.NodeIdentifier(TestModel.BOOLEAN_LEAF_QNAME), 10);
 
         assertEquals(1, prunerFullSchema.stack().size());
-        assertTrue(prunerFullSchema.stack().peek().toString(), prunerFullSchema.stack().peek() instanceof NormalizedNodeBuilderWrapper);
+        assertNotNull(prunerFullSchema.stack().peek());
         assertTrue(prunerFullSchema.stack().peek().builder().toString(), prunerFullSchema.stack().peek().builder() instanceof CollectionNodeBuilder);
     }
 
@@ -334,7 +333,7 @@ public class NormalizedNodePrunerTest {
         prunerFullSchema.startChoiceNode(new YangInstanceIdentifier.NodeIdentifier(TestModel.BOOLEAN_LEAF_QNAME), 10);
 
         assertEquals(1, prunerFullSchema.stack().size());
-        assertTrue(prunerFullSchema.stack().peek().toString(), prunerFullSchema.stack().peek() instanceof NormalizedNodeBuilderWrapper);
+        assertNotNull(prunerFullSchema.stack().peek());
         assertTrue(prunerFullSchema.stack().peek().builder().toString(), prunerFullSchema.stack().peek().builder() instanceof DataContainerNodeBuilder);
     }
 
@@ -343,7 +342,7 @@ public class NormalizedNodePrunerTest {
         prunerFullSchema.startAugmentationNode(new YangInstanceIdentifier.AugmentationIdentifier(ImmutableSet.of(TestModel.AUG_CONT_QNAME)));
 
         assertEquals(1, prunerFullSchema.stack().size());
-        assertTrue(prunerFullSchema.stack().peek().toString(), prunerFullSchema.stack().peek() instanceof NormalizedNodeBuilderWrapper);
+        assertNotNull(prunerFullSchema.stack().peek());
         assertTrue(prunerFullSchema.stack().peek().builder().toString(), prunerFullSchema.stack().peek().builder() instanceof DataContainerNodeBuilder);
     }
 
