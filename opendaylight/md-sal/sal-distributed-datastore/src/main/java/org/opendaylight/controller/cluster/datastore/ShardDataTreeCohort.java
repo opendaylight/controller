@@ -9,14 +9,15 @@ package org.opendaylight.controller.cluster.datastore;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.ListenableFuture;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateTip;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 
+@VisibleForTesting
 public abstract class ShardDataTreeCohort {
     ShardDataTreeCohort() {
         // Prevent foreign instantiation
     }
 
-    abstract DataTreeCandidateTip getCandidate();
+    abstract DataTreeCandidate getCandidate();
 
     @VisibleForTesting
     public abstract ListenableFuture<Boolean> canCommit();
