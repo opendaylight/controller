@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.google.common.base.Verify;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,6 +30,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateTip
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidates;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeTip;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.TipProducingDataTree;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
@@ -52,12 +54,13 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     private final ShardDataTreeChangePublisher treeChangePublisher = new ShardDataTreeChangePublisher();
     private final ListenerTree listenerTree = ListenerTree.create();
     private final TipProducingDataTree dataTree;
+    private DataTreeTip tip;
     private SchemaContext schemaContext;
 
     public ShardDataTree(final SchemaContext schemaContext) {
         dataTree = InMemoryDataTreeFactory.getInstance().create();
         updateSchemaContext(schemaContext);
-
+        tip = dataTree;
     }
 
     public TipProducingDataTree getDataTree() {
@@ -111,8 +114,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         ResolveDataChangeEventsTask.create(candidate, listenerTree).resolve(MANAGER);
     }
 
-    void notifyOfInitialData(DataChangeListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier,
-            NormalizedNode<?, ?>>> listenerReg, Optional<DataTreeCandidate> currentState) {
+    void notifyOfInitialData(final DataChangeListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier,
+            NormalizedNode<?, ?>>> listenerReg, final Optional<DataTreeCandidate> currentState) {
 
         if(currentState.isPresent()) {
             ListenerTree localListenerTree = ListenerTree.create();
@@ -199,7 +202,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         return new SimpleShardDataTreeCohort(this, snapshot, transaction.getId());
     }
 
-    public Optional<NormalizedNode<?, ?>> readNode(YangInstanceIdentifier path) {
+    public Optional<NormalizedNode<?, ?>> readNode(final YangInstanceIdentifier path) {
         return dataTree.takeSnapshot().readNode(path);
     }
 
@@ -211,11 +214,36 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         return dataTree.takeSnapshot().newModification();
     }
 
-    public DataTreeCandidate commit(DataTreeModification modification) throws DataValidationFailedException {
+    public DataTreeCandidate commit(final DataTreeModification modification) throws DataValidationFailedException {
         modification.ready();
         dataTree.validate(modification);
         DataTreeCandidateTip candidate = dataTree.prepare(modification);
         dataTree.commit(candidate);
         return candidate;
+    }
+
+    void validate(final DataTreeModification modification) throws DataValidationFailedException {
+        tip.validate(modification);
+    }
+
+    DataTreeCandidate prepare(final DataTreeModification modification) {
+        // This is safe, needs an API update
+        final DataTreeCandidateTip candidate = (DataTreeCandidateTip) tip.prepare(modification);
+        tip = Verify.verifyNotNull(candidate);
+        return candidate;
+    }
+
+    void commit(final DataTreeCandidate candidate) {
+        dataTree.commit(candidate);
+        if (tip.equals(candidate)) {
+            tip = dataTree;
+        }
+    }
+
+    void abort(final DataTreeCandidate candidate) {
+        Preconditions.checkState(tip.equals(candidate), "Cannot abort non-tip candidate %s, tip is %s", candidate, tip);
+        // FIXME: we need to get the previous tip from somewhere, best place would be candidate, but that requires
+        //        an API change in yangtools
+        tip = dataTree;
     }
 }
