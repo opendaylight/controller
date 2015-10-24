@@ -1345,8 +1345,12 @@ public class ShardTest extends AbstractShardTest {
                 final InOrder inOrder = inOrder(dataTree);
                 inOrder.verify(dataTree).validate(any(DataTreeModification.class));
                 inOrder.verify(dataTree).prepare(any(DataTreeModification.class));
+
+                // FIXME: this invocation is done on the result of validate(). To test it, we need to make sure mock
+                //        validate performs wrapping and we capture that mock
+                // inOrder.verify(dataTree).validate(any(DataTreeModification.class));
+
                 inOrder.verify(dataTree).commit(any(DataTreeCandidate.class));
-                inOrder.verify(dataTree).validate(any(DataTreeModification.class));
             }
         };
     }
