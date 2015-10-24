@@ -16,6 +16,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateTip;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 
+@VisibleForTesting
 public abstract class ShardDataTreeCohort implements Identifiable<TransactionIdentifier> {
     public enum State {
         READY,
