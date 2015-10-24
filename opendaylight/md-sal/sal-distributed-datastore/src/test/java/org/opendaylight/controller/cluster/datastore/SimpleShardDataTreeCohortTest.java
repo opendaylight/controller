@@ -62,13 +62,13 @@ public class SimpleShardDataTreeCohortTest {
         ListenableFuture<Boolean> future = cohort.canCommit();
         assertNotNull("Future is null", future);
         assertEquals("Future", true, future.get(3, TimeUnit.SECONDS));
-        verify(mockDataTree).validate(mockModification);
+        verify(mockShardDataTree).validate(mockModification);
     }
 
     @Test(expected=OptimisticLockFailedException.class)
     public void testCanCommitWithConflictingModEx() throws Throwable {
         doThrow(new ConflictingModificationAppliedException(YangInstanceIdentifier.EMPTY, "mock")).
-                when(mockDataTree).validate(mockModification);
+                when(mockShardDataTree).validate(mockModification);
         try {
             cohort.canCommit().get();
         } catch (ExecutionException e) {
@@ -79,7 +79,7 @@ public class SimpleShardDataTreeCohortTest {
     @Test(expected=TransactionCommitFailedException.class)
     public void testCanCommitWithDataValidationEx() throws Throwable {
         doThrow(new DataValidationFailedException(YangInstanceIdentifier.EMPTY, "mock")).
-                when(mockDataTree).validate(mockModification);
+                when(mockShardDataTree).validate(mockModification);
         try {
             cohort.canCommit().get();
         } catch (ExecutionException e) {
@@ -89,7 +89,7 @@ public class SimpleShardDataTreeCohortTest {
 
     @Test(expected=IllegalArgumentException.class)
     public void testCanCommitWithIllegalArgumentEx() throws Throwable {
-        doThrow(new IllegalArgumentException("mock")).when(mockDataTree).validate(mockModification);
+        doThrow(new IllegalArgumentException("mock")).when(mockShardDataTree).validate(mockModification);
         try {
             cohort.canCommit().get();
         } catch (ExecutionException e) {
@@ -100,24 +100,24 @@ public class SimpleShardDataTreeCohortTest {
     @Test
     public void testPreCommitAndCommitSuccess() throws Exception {
         DataTreeCandidateTip mockCandidate = mock(DataTreeCandidateTip.class);
-        doReturn(mockCandidate ).when(mockDataTree).prepare(mockModification);
+        doReturn(mockCandidate).when(mockShardDataTree).prepare(mockModification);
 
         ListenableFuture<Void> future = cohort.preCommit();
         assertNotNull("Future is null", future);
         future.get();
-        verify(mockDataTree).prepare(mockModification);
+        verify(mockShardDataTree).prepare(mockModification);
 
         assertSame("getCandidate", mockCandidate, cohort.getCandidate());
 
         future = cohort.commit();
         assertNotNull("Future is null", future);
         future.get();
-        verify(mockDataTree).commit(mockCandidate);
+        verify(mockShardDataTree).commit(mockCandidate);
     }
 
     @Test(expected=IllegalArgumentException.class)
     public void testPreCommitWithIllegalArgumentEx() throws Throwable {
-        doThrow(new IllegalArgumentException("mock")).when(mockDataTree).prepare(mockModification);
+        doThrow(new IllegalArgumentException("mock")).when(mockShardDataTree).prepare(mockModification);
         try {
             cohort.preCommit().get();
         } catch (ExecutionException e) {
@@ -127,7 +127,7 @@ public class SimpleShardDataTreeCohortTest {
 
     @Test(expected=IllegalArgumentException.class)
     public void testCommitWithIllegalArgumentEx() throws Throwable {
-        doThrow(new IllegalArgumentException("mock")).when(mockDataTree).commit(any(DataTreeCandidateTip.class));
+        doThrow(new IllegalArgumentException("mock")).when(mockShardDataTree).commit(any(DataTreeCandidateTip.class));
         try {
             cohort.commit().get();
         } catch (ExecutionException e) {

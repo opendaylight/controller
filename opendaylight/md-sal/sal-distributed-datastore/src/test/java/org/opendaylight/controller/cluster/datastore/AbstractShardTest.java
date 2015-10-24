@@ -47,7 +47,6 @@ import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateTip;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -231,9 +230,9 @@ public abstract class AbstractShardTest extends AbstractActorTest{
             }
         }).when(cohort).abort();
 
-        doAnswer(new Answer<DataTreeCandidateTip>() {
+        doAnswer(new Answer<DataTreeCandidate>() {
             @Override
-            public DataTreeCandidateTip answer(final InvocationOnMock invocation) {
+            public DataTreeCandidate answer(final InvocationOnMock invocation) {
                 return actual.getCandidate();
             }
         }).when(cohort).getCandidate();
