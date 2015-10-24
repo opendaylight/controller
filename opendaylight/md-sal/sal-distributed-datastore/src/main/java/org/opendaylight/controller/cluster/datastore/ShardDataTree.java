@@ -12,12 +12,14 @@ import akka.util.Timeout;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Predicates;
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Ticker;
 import com.google.common.base.Verify;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
+import com.google.common.collect.Iterators;
 import com.google.common.primitives.UnsignedLong;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.File;
@@ -64,9 +66,11 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateTip
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidates;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeTip;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.ModificationType;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.TipProducingDataTree;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.TipProducingDataTreeTip;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -108,6 +112,17 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     private final Shard shard;
     private Runnable runOnPendingTransactionsComplete;
 
+    /**
+     * Optimistic {@link DataTreeCandidate} preparation. Since our DataTree implementation is a
+     * {@link TipProducingDataTree}, each {@link DataTreeCandidate} is also a {@link DataTreeTip}, e.g. another
+     * candidate can be prepared on top of it. They still need to be committed in sequence. Here we track the current
+     * tip of the data tree, which is the last DataTreeCandidate we have in flight, or the DataTree itself. We need to
+     * track all the candidates we have outstanding to support aborting a candidate somewhere in the middle of the
+     * sequence -- in which case we retain the preceding candidates, but have to prepare all the subsequent ones.
+     */
+    private final Queue<TipProducingDataTreeTip> pendingCandidates = new ArrayDeque<>();
+    private TipProducingDataTreeTip tip;
+
     private SchemaContext schemaContext;
 
     public ShardDataTree(final Shard shard, final SchemaContext schemaContext, final TipProducingDataTree dataTree,
@@ -122,6 +137,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         this.dataChangeListenerPublisher = Preconditions.checkNotNull(dataChangeListenerPublisher);
         this.logContext = Preconditions.checkNotNull(logContext);
         this.metadata = ImmutableList.copyOf(metadata);
+        tip = dataTree;
     }
 
     public ShardDataTree(final Shard shard, final SchemaContext schemaContext, final TreeType treeType,
@@ -505,6 +521,10 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     @VisibleForTesting
     @Deprecated
     public DataTreeCandidate commit(final DataTreeModification modification) throws DataValidationFailedException {
+        // Direct modification commit is a utility, which cannot be used while we have transactions in-flight
+        Preconditions.checkState(pendingCandidates.isEmpty(), "Cannot modify data tree while %s are pending",
+            pendingCandidates);
+
         modification.ready();
         dataTree.validate(modification);
         DataTreeCandidate candidate = dataTree.prepare(modification);
@@ -536,7 +556,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             LOG.debug("{}: Validating transaction {}", logContext, cohort.getIdentifier());
             Exception cause;
             try {
-                dataTree.validate(modification);
+                tip.validate(modification);
                 LOG.debug("{}: Transaction {} validated", logContext, cohort.getIdentifier());
                 cohort.successfulCanCommit();
                 entry.lastAccess = shard.ticker().read();
@@ -591,7 +611,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         Verify.verify(cohort.equals(current), "Attempted to pre-commit %s while %s is pending", cohort, current);
         final DataTreeCandidateTip candidate;
         try {
-            candidate = dataTree.prepare(cohort.getDataTreeModification());
+            candidate = tip.prepare(cohort.getDataTreeModification());
         } catch (Exception e) {
             failPreCommit(e);
             return;
@@ -603,6 +623,10 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             failPreCommit(e);
             return;
         }
+
+        // Enqueue in the pending queue and set the tip of the data tree.
+        pendingCandidates.add(Verify.verifyNotNull(candidate));
+        tip = candidate;
 
         entry.lastAccess = shard.ticker().read();
         cohort.successfulPreCommit(candidate);
@@ -619,6 +643,10 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         final TransactionIdentifier txId = cohort.getIdentifier();
         final DataTreeCandidate candidate = cohort.getCandidate();
 
+        Verify.verify(candidate.equals(pendingCandidates.peek()),
+            "Attempted to commit candidate %s, which is not the head of %s", candidate, pendingCandidates);
+        pendingCandidates.remove();
+
         LOG.debug("{}: Resuming commit of transaction {}", logContext, txId);
 
         try {
@@ -627,6 +655,11 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             LOG.error("{}: Failed to commit transaction {}", logContext, txId, e);
             failCommit(e);
             return;
+        }
+
+        // All pending candidates have been committed, reset the tip to the data tree
+        if (tip.equals(candidate)) {
+            tip = dataTree;
         }
 
         shard.getShardMBean().incrementCommittedTransactionCount();
@@ -749,7 +782,6 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         }
     }
 
-    @SuppressFBWarnings(value = "RV_RETURN_VALUE_IGNORED", justification = "See inline comment below.")
     void startAbort(final SimpleShardDataTreeCohort cohort) {
         final Iterator<CommitEntry> it = pendingTransactions.iterator();
         if (!it.hasNext()) {
@@ -761,13 +793,11 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         final CommitEntry first = it.next();
         if (cohort.equals(first.cohort)) {
             if (cohort.getState() != State.COMMIT_PENDING) {
-                LOG.debug("{}: aborted head of queue {} in state {}", logContext, cohort.getIdentifier(),
+                LOG.debug("{}: aborting head of queue {} in state {}", logContext, cohort.getIdentifier(),
                     cohort.getIdentifier());
 
-                // The suppression of the FindBugs "RV_RETURN_VALUE_IGNORED" warning pertains to this line. In
-                // this case, we've already obtained the head of the queue above via the Iterator and we just want to
-                // remove it here.
-                pendingTransactions.poll();
+                pendingTransactions.remove();
+                abort(cohort.getCandidate());
                 processNextTransaction();
             } else {
                 LOG.warn("{}: transaction {} is committing, skipping abort", logContext, cohort.getIdentifier());
@@ -781,11 +811,37 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
             if (cohort.equals(e.cohort)) {
                 LOG.debug("{}: aborting queued transaction {}", logContext, cohort.getIdentifier());
                 it.remove();
+                abort(cohort.getCandidate());
                 return;
             }
         }
 
         LOG.debug("{}: aborted transaction {} not found in the queue", logContext, cohort.getIdentifier());
+    }
+
+    private void abort(final DataTreeCandidate candidate) {
+        // Track the last non-aborted candidate in the queue, default to the data tree itself
+        TipProducingDataTreeTip newTip = dataTree;
+
+        final Iterator<TipProducingDataTreeTip> it = pendingCandidates.iterator();
+        while (it.hasNext()) {
+            final TipProducingDataTreeTip c = it.next();
+            if (!candidate.equals(c)) {
+                // Not the candidate to be aborted, retain it for possible use as the new tip
+                newTip = c;
+                continue;
+            }
+
+            // Found the requested candidate. Remove it and all subsequent candidates from the queue.
+            it.remove();
+            Iterators.removeIf(it, Predicates.alwaysTrue());
+
+            // Reset the tip to the last candidate in sequence
+            tip = newTip;
+            return;
+        }
+
+        throw new IllegalArgumentException("Candidate " + candidate + " not found in " + pendingCandidates);
     }
 
     void setRunOnPendingTransactionsComplete(final Runnable operation) {

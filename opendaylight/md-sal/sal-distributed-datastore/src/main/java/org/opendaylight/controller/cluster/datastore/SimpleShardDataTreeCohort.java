@@ -13,8 +13,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
 import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -28,14 +26,14 @@ import scala.concurrent.Future;
 
 final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
     private static final Logger LOG = LoggerFactory.getLogger(SimpleShardDataTreeCohort.class);
-    private static final ListenableFuture<Void> VOID_FUTURE = Futures.immediateFuture(null);
+
     private final DataTreeModification transaction;
     private final ShardDataTree dataTree;
     private final TransactionIdentifier transactionId;
     private final CompositeDataTreeCohort userCohorts;
 
     private State state = State.READY;
-    private DataTreeCandidateTip candidate;
+    private DataTreeCandidate candidate;
     private FutureCallback<?> callback;
     private Exception nextFailure;
 
@@ -53,12 +51,11 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
     }
 
     @Override
-    DataTreeCandidateTip getCandidate() {
+    DataTreeCandidate getCandidate() {
         return candidate;
     }
 
     @Override
-
     DataTreeModification getDataTreeModification() {
         return transaction;
     }
@@ -92,10 +89,10 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
         }
     }
 
-
     @Override
     public void abort(final FutureCallback<Void> callback) {
         dataTree.startAbort(this);
+        candidate = null;
         state = State.ABORTED;
 
         final Optional<Future<Iterable<Object>>> maybeAborts = userCohorts.abort();
