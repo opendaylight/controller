@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fad0f9df_20175def",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeaderElectionScenarioTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-24T13:19:13Z",
+      "side": 1,
+      "message": "This really isn\u0027t a resource leak since it\u0027s used after this method returns and we technically don\u0027t want leader closed here even though it doesn\u0027t hurt the test. To be correct we should suppress the warning here and close he behavior when he MemberActor is sopped.",
+      "revId": "a991de5b6be9b30024acb533fb3518c9f4b506cd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
