@@ -10,10 +10,14 @@ package org.opendaylight.controller.cluster.datastore;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.google.common.base.Verify;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayDeque;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Queue;
 import javax.annotation.concurrent.NotThreadSafe;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
@@ -29,6 +33,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateTip
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidates;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeTip;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.TipProducingDataTree;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
@@ -54,10 +59,21 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     private final TipProducingDataTree dataTree;
     private SchemaContext schemaContext;
 
+    /**
+     * Optimistic {@link DataTreeCandidate} preparation. Since our DataTree implementation is a
+     * {@link TipProducingDataTree}, each {@link DataTreeCandidate} is also a {@link DataTreeTip}, e.g. another
+     * candidate can be prepared on top of it. They still need to be committed in sequence. Here we track the current
+     * tip of the data tree, which is the last DataTreeCandidate we have in flight, or the DataTree itself. We need to
+     * track all the candidates we have outstanding to support aborting a candidate somewhere in the middle of the
+     * sequence -- in which case we retain the preceding candidates, but have to prepare all the subsequent ones.
+     */
+    private final Queue<DataTreeTip> pendingCandidates = new ArrayDeque<>();
+    private DataTreeTip tip;
+
     public ShardDataTree(final SchemaContext schemaContext) {
         dataTree = InMemoryDataTreeFactory.getInstance().create();
         updateSchemaContext(schemaContext);
-
+        tip = dataTree;
     }
 
     public TipProducingDataTree getDataTree() {
@@ -111,8 +127,8 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         ResolveDataChangeEventsTask.create(candidate, listenerTree).resolve(MANAGER);
     }
 
-    void notifyOfInitialData(DataChangeListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier,
-            NormalizedNode<?, ?>>> listenerReg, Optional<DataTreeCandidate> currentState) {
+    void notifyOfInitialData(final DataChangeListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier,
+            NormalizedNode<?, ?>>> listenerReg, final Optional<DataTreeCandidate> currentState) {
 
         if(currentState.isPresent()) {
             ListenerTree localListenerTree = ListenerTree.create();
@@ -199,7 +215,7 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         return new SimpleShardDataTreeCohort(this, snapshot, transaction.getId());
     }
 
-    public Optional<NormalizedNode<?, ?>> readNode(YangInstanceIdentifier path) {
+    public Optional<NormalizedNode<?, ?>> readNode(final YangInstanceIdentifier path) {
         return dataTree.takeSnapshot().readNode(path);
     }
 
@@ -211,11 +227,72 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
         return dataTree.takeSnapshot().newModification();
     }
 
-    public DataTreeCandidate commit(DataTreeModification modification) throws DataValidationFailedException {
+    public DataTreeCandidate commit(final DataTreeModification modification) throws DataValidationFailedException {
+        // Direct modification commit is a utility, which cannot be used while we have transactions in-flight
+        Preconditions.checkState(pendingCandidates.isEmpty(), "Cannot modify data tree while %s are pending",
+            pendingCandidates);
+
         modification.ready();
         dataTree.validate(modification);
         DataTreeCandidateTip candidate = dataTree.prepare(modification);
         dataTree.commit(candidate);
         return candidate;
+    }
+
+    void validate(final DataTreeModification modification) throws DataValidationFailedException {
+        tip.validate(modification);
+    }
+
+    DataTreeCandidate prepare(final DataTreeModification modification) {
+        // The cast here is okay, it is just yangtools API gives us a DataTreeCandidate. We know this comes
+        // from InMemoryDataTree and it produces DataTreeCandidateTips.
+        final DataTreeCandidateTip candidate = (DataTreeCandidateTip) tip.prepare(modification);
+
+        // Enqueue in the pending queue and set the tip of the data tree.
+        pendingCandidates.add(Verify.verifyNotNull(candidate));
+        tip = candidate;
+
+        return candidate;
+    }
+
+    void commit(final DataTreeCandidate candidate) {
+        Verify.verify(candidate.equals(pendingCandidates.peek()),
+            "Attempted to commit candidate %s, which is not the head of %s", candidate, pendingCandidates);
+
+        dataTree.commit(candidate);
+        pendingCandidates.poll();
+
+        // All pending candidates have been committed, reset the tip to the data tree
+        if (tip.equals(candidate)) {
+            tip = dataTree;
+        }
+    }
+
+    void abort(final DataTreeCandidate candidate) {
+        // Track the last non-aborted candidate in the queue, default to the data tree itself
+        DataTreeTip newTip = dataTree;
+
+        final Iterator<DataTreeTip> it = pendingCandidates.iterator();
+        while (it.hasNext()) {
+            final DataTreeTip c = it.next();
+            if (!candidate.equals(c)) {
+                // Not the candidate to be aborted, retain it for possible use as the new tip
+                newTip = c;
+                continue;
+            }
+
+            // Found the requested candidate. Remove it and all subsequent candidates from the queue.
+            it.remove();
+            while (it.hasNext()) {
+                it.next();
+                it.remove();
+            }
+
+            // Reset the tip to the last candidate in sequence
+            tip = newTip;
+            return;
+        }
+
+        throw new IllegalArgumentException("Candidate " + candidate + " not found in " + pendingCandidates);
     }
 }
