@@ -171,7 +171,7 @@ public class DataTreeChangeListenerProxyTest extends AbstractActorTest {
                     "testFailedRegistration");
             doReturn(mockActor).when(mockActorSystem).actorOf(any(Props.class));
             ExecutionContextExecutor executor = ExecutionContexts.fromExecutor(
-                    MoreExecutors.sameThreadExecutor());
+                    MoreExecutors.directExecutor());
 
 
             ActorContext actorContext = mock(ActorContext.class);

@@ -26,7 +26,7 @@ public abstract class AbstractModificationTest {
 
   @Before
   public void setUp(){
-    store = new InMemoryDOMDataStore("test", MoreExecutors.sameThreadExecutor());
+    store = new InMemoryDOMDataStore("test", MoreExecutors.newDirectExecutorService());
     store.onGlobalContextUpdated(TestModel.createTestContext());
   }
 

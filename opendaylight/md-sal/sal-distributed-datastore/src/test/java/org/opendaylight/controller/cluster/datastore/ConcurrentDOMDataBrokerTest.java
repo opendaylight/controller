@@ -82,7 +82,7 @@ public class ConcurrentDOMDataBrokerTest {
         doReturn("tx").when(transaction).getIdentifier();
 
         DOMStore store = new InMemoryDOMDataStore("OPER",
-            MoreExecutors.sameThreadExecutor());
+            MoreExecutors.newDirectExecutorService());
 
         coordinator = new ConcurrentDOMDataBroker(ImmutableMap.of(LogicalDatastoreType.OPERATIONAL, store), futureExecutor);
     }
