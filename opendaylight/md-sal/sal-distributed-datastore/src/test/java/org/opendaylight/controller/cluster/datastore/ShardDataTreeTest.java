@@ -21,7 +21,7 @@ import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.PeopleModel;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateTip;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidates;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
@@ -90,7 +90,7 @@ public class ShardDataTreeTest {
     public void bug4359AddRemoveCarOnce() throws ExecutionException, InterruptedException {
         ShardDataTree shardDataTree = new ShardDataTree(fullSchema, TreeType.OPERATIONAL);
 
-        List<DataTreeCandidateTip> candidates = new ArrayList<>();
+        List<DataTreeCandidate> candidates = new ArrayList<>();
         candidates.add(addCar(shardDataTree));
         candidates.add(removeCar(shardDataTree));
 
@@ -107,7 +107,7 @@ public class ShardDataTreeTest {
     public void bug4359AddRemoveCarTwice() throws ExecutionException, InterruptedException {
         ShardDataTree shardDataTree = new ShardDataTree(fullSchema, TreeType.OPERATIONAL);
 
-        List<DataTreeCandidateTip> candidates = new ArrayList<>();
+        List<DataTreeCandidate> candidates = new ArrayList<>();
         candidates.add(addCar(shardDataTree));
         candidates.add(removeCar(shardDataTree));
         candidates.add(addCar(shardDataTree));
@@ -135,7 +135,7 @@ public class ShardDataTreeTest {
         return optional.get();
     }
 
-    private static DataTreeCandidateTip addCar(ShardDataTree shardDataTree) throws ExecutionException, InterruptedException {
+    private static DataTreeCandidate addCar(ShardDataTree shardDataTree) throws ExecutionException, InterruptedException {
         return doTransaction(shardDataTree, new DataTreeOperation() {
             @Override
             public void execute(DataTreeModification snapshot) {
@@ -146,7 +146,7 @@ public class ShardDataTreeTest {
         });
     }
 
-    private static DataTreeCandidateTip removeCar(ShardDataTree shardDataTree) throws ExecutionException, InterruptedException {
+    private static DataTreeCandidate removeCar(ShardDataTree shardDataTree) throws ExecutionException, InterruptedException {
         return doTransaction(shardDataTree, new DataTreeOperation() {
             @Override
             public void execute(DataTreeModification snapshot) {
@@ -159,7 +159,7 @@ public class ShardDataTreeTest {
         public abstract void execute(DataTreeModification snapshot);
     }
 
-    private static DataTreeCandidateTip doTransaction(ShardDataTree shardDataTree, DataTreeOperation operation)
+    private static DataTreeCandidate doTransaction(ShardDataTree shardDataTree, DataTreeOperation operation)
             throws ExecutionException, InterruptedException {
         ReadWriteShardDataTreeTransaction transaction = shardDataTree.newReadWriteTransaction("txn-1", null);
         DataTreeModification snapshot = transaction.getSnapshot();
@@ -168,24 +168,24 @@ public class ShardDataTreeTest {
 
         cohort.canCommit().get();
         cohort.preCommit().get();
-        DataTreeCandidateTip candidate = cohort.getCandidate();
+        DataTreeCandidate candidate = cohort.getCandidate();
         cohort.commit().get();
 
         return candidate;
     }
 
-    private static DataTreeCandidateTip applyCandidates(ShardDataTree shardDataTree, List<DataTreeCandidateTip> candidates)
+    private static DataTreeCandidate applyCandidates(ShardDataTree shardDataTree, List<DataTreeCandidate> candidates)
             throws ExecutionException, InterruptedException {
         ReadWriteShardDataTreeTransaction transaction = shardDataTree.newReadWriteTransaction("txn-1", null);
         DataTreeModification snapshot = transaction.getSnapshot();
-        for(DataTreeCandidateTip candidateTip : candidates){
+        for(DataTreeCandidate candidateTip : candidates){
             DataTreeCandidates.applyToModification(snapshot, candidateTip);
         }
         ShardDataTreeCohort cohort = shardDataTree.finishTransaction(transaction);
 
         cohort.canCommit().get();
         cohort.preCommit().get();
-        DataTreeCandidateTip candidate = cohort.getCandidate();
+        DataTreeCandidate candidate = cohort.getCandidate();
         cohort.commit().get();
 
         return candidate;

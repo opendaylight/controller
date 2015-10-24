@@ -14,7 +14,7 @@ import org.opendaylight.controller.cluster.datastore.utils.PruningDataTreeModifi
 import org.opendaylight.controller.md.sal.common.api.data.OptimisticLockFailedException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.ConflictingModificationAppliedException;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateTip;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
 import org.slf4j.Logger;
@@ -27,7 +27,7 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
     private final DataTreeModification transaction;
     private final ShardDataTree dataTree;
     private final String transactionId;
-    private DataTreeCandidateTip candidate;
+    private DataTreeCandidate candidate;
 
     SimpleShardDataTreeCohort(final ShardDataTree dataTree, final DataTreeModification transaction,
             final String transactionId) {
@@ -37,7 +37,7 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
     }
 
     @Override
-    DataTreeCandidateTip getCandidate() {
+    DataTreeCandidate getCandidate() {
         return candidate;
     }
 
@@ -45,7 +45,7 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
     public ListenableFuture<Boolean> canCommit() {
         DataTreeModification modification = dataTreeModification();
         try {
-            dataTree.getDataTree().validate(modification);
+            dataTree.validate(modification);
             LOG.trace("Transaction {} validated", transaction);
             return TRUE_FUTURE;
         }
@@ -69,7 +69,7 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
     @Override
     public ListenableFuture<Void> preCommit() {
         try {
-            candidate = dataTree.getDataTree().prepare(dataTreeModification());
+            candidate = dataTree.prepare(dataTreeModification());
             /*
              * FIXME: this is the place where we should be interacting with persistence, specifically by invoking
              *        persist on the candidate (which gives us a Future).
@@ -92,14 +92,17 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
 
     @Override
     public ListenableFuture<Void> abort() {
-        // No-op, really
+        if (candidate != null) {
+            dataTree.abort(candidate);
+        }
+
         return VOID_FUTURE;
     }
 
     @Override
     public ListenableFuture<Void> commit() {
         try {
-            dataTree.getDataTree().commit(candidate);
+            dataTree.commit(candidate);
         } catch (Exception e) {
             LOG.error("Transaction {} failed to commit", transaction, e);
             return Futures.immediateFailedFuture(e);
