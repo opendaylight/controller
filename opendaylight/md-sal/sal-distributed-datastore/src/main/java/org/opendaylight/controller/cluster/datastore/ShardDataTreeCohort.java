@@ -13,9 +13,9 @@ import com.google.common.util.concurrent.FutureCallback;
 import org.opendaylight.controller.cluster.access.concepts.TransactionIdentifier;
 import org.opendaylight.yangtools.concepts.Identifiable;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateTip;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 
+@VisibleForTesting
 public abstract class ShardDataTreeCohort implements Identifiable<TransactionIdentifier> {
     public enum State {
         READY,
@@ -36,7 +36,7 @@ public abstract class ShardDataTreeCohort implements Identifiable<TransactionIde
 
     // FIXME: This leaks internal state generated in preCommit,
     // should be result of canCommit
-    abstract DataTreeCandidateTip getCandidate();
+    abstract DataTreeCandidate getCandidate();
 
     abstract DataTreeModification getDataTreeModification();
 
