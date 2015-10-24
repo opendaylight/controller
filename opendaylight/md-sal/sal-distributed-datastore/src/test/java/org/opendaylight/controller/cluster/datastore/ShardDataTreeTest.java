@@ -42,7 +42,6 @@ import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
-import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateTip;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidates;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
@@ -122,7 +121,7 @@ public class ShardDataTreeTest extends AbstractTest {
     public void bug4359AddRemoveCarOnce() throws ExecutionException, InterruptedException {
         final ShardDataTree shardDataTree = new ShardDataTree(mockShard, fullSchema, TreeType.OPERATIONAL);
 
-        final List<DataTreeCandidateTip> candidates = new ArrayList<>();
+        final List<DataTreeCandidate> candidates = new ArrayList<>();
         candidates.add(addCar(shardDataTree));
         candidates.add(removeCar(shardDataTree));
 
@@ -139,7 +138,7 @@ public class ShardDataTreeTest extends AbstractTest {
     public void bug4359AddRemoveCarTwice() throws ExecutionException, InterruptedException {
         final ShardDataTree shardDataTree = new ShardDataTree(mockShard, fullSchema, TreeType.OPERATIONAL);
 
-        final List<DataTreeCandidateTip> candidates = new ArrayList<>();
+        final List<DataTreeCandidate> candidates = new ArrayList<>();
         candidates.add(addCar(shardDataTree));
         candidates.add(removeCar(shardDataTree));
         candidates.add(addCar(shardDataTree));
@@ -197,8 +196,8 @@ public class ShardDataTreeTest extends AbstractTest {
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private static void verifyOnDataTreeChanged(DOMDataTreeChangeListener listener,
-            Consumer<DataTreeCandidate> callback) {
+    private static void verifyOnDataTreeChanged(final DOMDataTreeChangeListener listener,
+            final Consumer<DataTreeCandidate> callback) {
         ArgumentCaptor<Collection> changes = ArgumentCaptor.forClass(Collection.class);
         verify(listener, atLeastOnce()).onDataTreeChanged(changes.capture());
         for (Collection list : changes.getAllValues()) {
@@ -222,12 +221,12 @@ public class ShardDataTreeTest extends AbstractTest {
         return optional.get();
     }
 
-    private static DataTreeCandidateTip addCar(final ShardDataTree shardDataTree)
+    private static DataTreeCandidate addCar(final ShardDataTree shardDataTree)
             throws ExecutionException, InterruptedException {
         return addCar(shardDataTree, "altima");
     }
 
-    private static DataTreeCandidateTip addCar(final ShardDataTree shardDataTree, String name)
+    private static DataTreeCandidate addCar(final ShardDataTree shardDataTree, final String name)
             throws ExecutionException, InterruptedException {
         return doTransaction(shardDataTree, snapshot -> {
             snapshot.merge(CarsModel.BASE_PATH, CarsModel.emptyContainer());
@@ -236,7 +235,7 @@ public class ShardDataTreeTest extends AbstractTest {
         });
     }
 
-    private static DataTreeCandidateTip removeCar(final ShardDataTree shardDataTree)
+    private static DataTreeCandidate removeCar(final ShardDataTree shardDataTree)
             throws ExecutionException, InterruptedException {
         return doTransaction(shardDataTree, snapshot -> snapshot.delete(CarsModel.newCarPath("altima")));
     }
@@ -246,7 +245,7 @@ public class ShardDataTreeTest extends AbstractTest {
         void execute(DataTreeModification snapshot);
     }
 
-    private static DataTreeCandidateTip doTransaction(final ShardDataTree shardDataTree,
+    private static DataTreeCandidate doTransaction(final ShardDataTree shardDataTree,
             final DataTreeOperation operation) throws ExecutionException, InterruptedException {
         final ReadWriteShardDataTreeTransaction transaction =
                 shardDataTree.newReadWriteTransaction(nextTransactionId());
@@ -256,25 +255,25 @@ public class ShardDataTreeTest extends AbstractTest {
 
         immediateCanCommit(cohort);
         immediatePreCommit(cohort);
-        final DataTreeCandidateTip candidate = cohort.getCandidate();
+        final DataTreeCandidate candidate = cohort.getCandidate();
         immediateCommit(cohort);
 
         return candidate;
     }
 
-    private static DataTreeCandidateTip applyCandidates(final ShardDataTree shardDataTree,
-            final List<DataTreeCandidateTip> candidates) throws ExecutionException, InterruptedException {
+    private static DataTreeCandidate applyCandidates(final ShardDataTree shardDataTree,
+            final List<DataTreeCandidate> candidates) throws ExecutionException, InterruptedException {
         final ReadWriteShardDataTreeTransaction transaction =
                 shardDataTree.newReadWriteTransaction(nextTransactionId());
         final DataTreeModification snapshot = transaction.getSnapshot();
-        for (final DataTreeCandidateTip candidateTip : candidates) {
+        for (final DataTreeCandidate candidateTip : candidates) {
             DataTreeCandidates.applyToModification(snapshot, candidateTip);
         }
         final ShardDataTreeCohort cohort = shardDataTree.finishTransaction(transaction);
 
         immediateCanCommit(cohort);
         immediatePreCommit(cohort);
-        final DataTreeCandidateTip candidate = cohort.getCandidate();
+        final DataTreeCandidate candidate = cohort.getCandidate();
         immediateCommit(cohort);
 
         return candidate;
