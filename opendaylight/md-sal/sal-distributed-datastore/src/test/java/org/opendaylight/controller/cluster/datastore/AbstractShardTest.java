@@ -461,7 +461,7 @@ public abstract class AbstractShardTest extends AbstractActorTest {
         }
 
         @Override
-        DataTreeCandidateTip getCandidate() {
+        DataTreeCandidate getCandidate() {
             return delegate.getCandidate();
         }
 
