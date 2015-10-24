@@ -13,8 +13,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Verify;
 import com.google.common.primitives.UnsignedLong;
 import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -28,7 +26,7 @@ import scala.concurrent.Future;
 
 final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
     private static final Logger LOG = LoggerFactory.getLogger(SimpleShardDataTreeCohort.class);
-    private static final ListenableFuture<Void> VOID_FUTURE = Futures.immediateFuture(null);
+
     private final DataTreeModification transaction;
     private final ShardDataTree dataTree;
     private final TransactionIdentifier transactionId;
@@ -58,7 +56,6 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
     }
 
     @Override
-
     DataTreeModification getDataTreeModification() {
         return transaction;
     }
@@ -92,10 +89,14 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
         }
     }
 
-
     @Override
     public void abort(final FutureCallback<Void> callback) {
-        dataTree.startAbort(this);
+        if (!dataTree.startAbort(this)) {
+            callback.onSuccess(null);
+            return;
+        }
+
+        candidate = null;
         state = State.ABORTED;
 
         final Optional<Future<Iterable<Object>>> maybeAborts = userCohorts.abort();
@@ -127,7 +128,12 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
         checkState(State.PRE_COMMIT_COMPLETE);
         this.callback = Preconditions.checkNotNull(newCallback);
         state = State.COMMIT_PENDING;
-        dataTree.startCommit(this, candidate);
+
+        if (nextFailure == null) {
+            dataTree.startCommit(this, candidate);
+        } else {
+            failedCommit(nextFailure);
+        }
     }
 
     private <T> FutureCallback<T> switchState(final State newState) {
@@ -137,6 +143,11 @@ final class SimpleShardDataTreeCohort extends ShardDataTreeCohort {
         LOG.debug("Transaction {} changing state from {} to {}", transactionId, state, newState);
         this.state = newState;
         return ret;
+    }
+
+    void setNewCandidate(DataTreeCandidateTip dataTreeCandidate) {
+        checkState(State.PRE_COMMIT_COMPLETE);
+        this.candidate = Verify.verifyNotNull(dataTreeCandidate);
     }
 
     void successfulCanCommit() {
