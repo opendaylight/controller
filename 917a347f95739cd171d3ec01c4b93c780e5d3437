@@ -1,0 +1,225 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fad0f9df_56d82bef",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 487,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-26T12:57:05Z",
+      "side": 1,
+      "message": "By checking instance equality they will always be different. You should check if getCustomRaftPolicyImplementationClass is different (you can use Objects.equal). Also I think this change is important enough to warrant a unit test in RaftActorTest to verify the behavior isn\u0027t unnecessarily re-created.",
+      "revId": "917a347f95739cd171d3ec01c4b93c780e5d3437",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_76352f45",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 841,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-26T12:57:05Z",
+      "side": 1,
+      "message": "Indentation - should be at least 4 spaces",
+      "revId": "917a347f95739cd171d3ec01c4b93c780e5d3437",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_1673834e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 842,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-26T12:57:05Z",
+      "side": 1,
+      "message": "You should just return the original \u0027failure\u0027.",
+      "revId": "917a347f95739cd171d3ec01c4b93c780e5d3437",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_b68f1723",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 844,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-26T12:57:05Z",
+      "side": 1,
+      "message": "This return isn\u0027t necessary.",
+      "revId": "917a347f95739cd171d3ec01c4b93c780e5d3437",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_56ceeb5b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 849,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-26T12:57:05Z",
+      "side": 1,
+      "message": "Indentation although the log isn\u0027t needed.",
+      "revId": "917a347f95739cd171d3ec01c4b93c780e5d3437",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_d6309b58",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 851,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-26T12:57:05Z",
+      "side": 1,
+      "message": "Indentation - should be at least 4 spaces with related lines below indented appropriately.",
+      "revId": "917a347f95739cd171d3ec01c4b93c780e5d3437",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_16d8631c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 852,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-26T12:57:05Z",
+      "side": 1,
+      "message": "\"Shard leader not available...\" is not correct here - looks like copy/paste from above. The message should be something like \"Invalid response type, %s, received from FindPrimary for shard %s\", response.getClass().getName(), shardName.",
+      "revId": "917a347f95739cd171d3ec01c4b93c780e5d3437",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_16f9434d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 869,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-26T12:57:05Z",
+      "side": 1,
+      "message": "You can call getShardActorAddress here.",
+      "revId": "917a347f95739cd171d3ec01c4b93c780e5d3437",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_56ad8b30",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 884,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-26T12:57:05Z",
+      "side": 1,
+      "message": "You should use the ask pattern here as well. This would make it easier - no need to track in flight request info in the shardReplicaInProgressList. But also you need to handle timeouts.",
+      "revId": "917a347f95739cd171d3ec01c4b93c780e5d3437",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_f6a91f25",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 936,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-26T12:57:05Z",
+      "side": 1,
+      "message": "Why are you outputting the enum ordinal and not the enum name?",
+      "revId": "917a347f95739cd171d3ec01c4b93c780e5d3437",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_f6e4bfad",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardPeerAddressResolver.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-26T12:57:05Z",
+      "side": 1,
+      "message": "I don\u0027t think you need this change any more.",
+      "revId": "917a347f95739cd171d3ec01c4b93c780e5d3437",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_3626c717",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1139,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-26T12:57:05Z",
+      "side": 1,
+      "message": "For this negative test you actually don\u0027t even need to create the second ActorSystem.",
+      "revId": "917a347f95739cd171d3ec01c4b93c780e5d3437",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_7683efcc",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1208,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-26T12:57:05Z",
+      "side": 1,
+      "message": "This test looks like a duplicate of testAddShardReplica except for this part where you send the reply. I don\u0027t think we need the overhead of 2 tests (setting up ActorSystems isn\u0027t cheap) - we can combine this with testAddShardReplica.",
+      "revId": "917a347f95739cd171d3ec01c4b93c780e5d3437",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
