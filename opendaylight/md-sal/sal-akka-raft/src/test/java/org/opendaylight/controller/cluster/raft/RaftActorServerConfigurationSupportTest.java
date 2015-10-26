@@ -428,6 +428,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         public MockLeaderRaftActor(Map<String, String> peerAddresses, ConfigParams config,
                 RaftActorContext fromContext) {
             super(LEADER_ID, peerAddresses, Optional.of(config), NO_PERSISTENCE);
+            setPersistence(false);
 
             RaftActorContext context = getRaftActorContext();
             for(int i = 0; i < fromContext.getReplicatedLog().size(); i++) {

@@ -2329,7 +2329,6 @@ public class ShardTest extends AbstractShardTest {
                     Props.create(new DelegatingShardCreator(creator)), shardActorName);
 
             waitUntilLeader(shard);
-
             writeToStore(shard, TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
 
             final NormalizedNode<?,?> expectedRoot = readStore(shard, YangInstanceIdentifier.builder().build());
@@ -2337,35 +2336,35 @@ public class ShardTest extends AbstractShardTest {
             // Trigger creation of a snapshot by ensuring
             final RaftActorContext raftActorContext = ((TestShard) shard.underlyingActor()).getRaftActorContext();
             raftActorContext.getSnapshotManager().capture(mock(ReplicatedLogEntry.class), -1);
-
-            assertEquals("Snapshot saved", true, latch.get().await(5, TimeUnit.SECONDS));
-
-            assertTrue("Invalid saved snapshot " + savedSnapshot.get(),
-                    savedSnapshot.get() instanceof Snapshot);
-
-            verifySnapshot((Snapshot)savedSnapshot.get(), expectedRoot);
-
-            latch.set(new CountDownLatch(1));
-            savedSnapshot.set(null);
+            awaitAndValidateSnapshot(expectedRoot);
 
             raftActorContext.getSnapshotManager().capture(mock(ReplicatedLogEntry.class), -1);
-
-            assertEquals("Snapshot saved", true, latch.get().await(5, TimeUnit.SECONDS));
-
-            assertTrue("Invalid saved snapshot " + savedSnapshot.get(),
-                    savedSnapshot.get() instanceof Snapshot);
-
-            verifySnapshot((Snapshot)savedSnapshot.get(), expectedRoot);
+            awaitAndValidateSnapshot(expectedRoot);
 
             shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
         }
 
-        private void verifySnapshot(final Snapshot snapshot, final NormalizedNode<?,?> expectedRoot) {
+            private void awaitAndValidateSnapshot(NormalizedNode<?,?> expectedRoot
+                                              ) throws InterruptedException {
+                System.out.println("Inside awaitAndValidateSnapshot {}" + savedSnapshot.get());
+                assertEquals("Snapshot saved", true, latch.get().await(5, TimeUnit.SECONDS));
 
-            final NormalizedNode<?, ?> actual = SerializationUtils.deserializeNormalizedNode(snapshot.getState());
-            assertEquals("Root node", expectedRoot, actual);
+                assertTrue("Invalid saved snapshot " + savedSnapshot.get(),
+                        savedSnapshot.get() instanceof Snapshot);
 
-        }};
+                verifySnapshot((Snapshot)savedSnapshot.get(), expectedRoot);
+
+                latch.set(new CountDownLatch(1));
+                savedSnapshot.set(null);
+            }
+
+            private void verifySnapshot(final Snapshot snapshot, final NormalizedNode<?,?> expectedRoot) {
+
+                final NormalizedNode<?, ?> actual = SerializationUtils.deserializeNormalizedNode(snapshot.getState());
+                assertEquals("Root node", expectedRoot, actual);
+
+           }
+        };
     }
 
     /**
