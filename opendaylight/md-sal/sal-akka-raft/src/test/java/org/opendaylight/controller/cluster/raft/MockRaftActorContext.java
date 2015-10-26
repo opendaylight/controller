@@ -13,17 +13,14 @@ import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.japi.Procedure;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Supplier;
+
 import com.google.protobuf.GeneratedMessage;
+
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import org.opendaylight.controller.cluster.DataPersistenceProvider;
+
 import org.opendaylight.controller.cluster.NonPersistentDataProvider;
-import org.opendaylight.controller.cluster.raft.policy.DefaultRaftPolicy;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages;
@@ -31,25 +28,14 @@ import org.opendaylight.controller.protobuff.messages.cluster.raft.test.MockPayl
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MockRaftActorContext implements RaftActorContext {
+public class MockRaftActorContext extends RaftActorContextImpl {
+    private static final Logger LOG = LoggerFactory.getLogger(MockRaftActorContext.class);
 
-    private String id;
     private ActorSystem system;
-    private ActorRef actor;
-    private long index = 0;
-    private long lastApplied = 0;
-    private final ElectionTerm electionTerm;
-    private ReplicatedLog replicatedLog;
-    private Map<String, String> peerAddresses = new HashMap<>();
-    private ConfigParams configParams;
-    private boolean snapshotCaptureInitiated;
-    private SnapshotManager snapshotManager;
-    private DataPersistenceProvider persistenceProvider = new NonPersistentDataProvider();
-    private short payloadVersion;
-    private RaftPolicy raftPolicy = DefaultRaftPolicy.INSTANCE;
+    private RaftPolicy raftPolicy;
 
-    public MockRaftActorContext(){
-        electionTerm = new ElectionTerm() {
+    private static ElectionTerm newElectionTerm() {
+        return new ElectionTerm() {
             private long currentTerm = 1;
             private String votedFor = "";
 
@@ -76,25 +62,29 @@ public class MockRaftActorContext implements RaftActorContext {
                 update(currentTerm, votedFor);
             }
         };
+    }
 
-        configParams = new DefaultConfigParamsImpl();
+    public MockRaftActorContext(){
+        super(null, null, "test", newElectionTerm(), -1, -1, new HashMap<String, String>(),
+                new DefaultConfigParamsImpl(), new NonPersistentDataProvider(), LOG);
     }
 
     public MockRaftActorContext(String id, ActorSystem system, ActorRef actor){
-        this();
-        this.id = id;
+        super(actor, null, id, newElectionTerm(), -1, -1, new HashMap<String, String>(),
+                new DefaultConfigParamsImpl(), new NonPersistentDataProvider(), LOG);
+
         this.system = system;
-        this.actor = actor;
 
         initReplicatedLog();
     }
 
 
     public void initReplicatedLog(){
-        this.replicatedLog = new SimpleReplicatedLog();
+        SimpleReplicatedLog replicatedLog = new SimpleReplicatedLog();
         long term = getTermInformation().getCurrentTerm();
-        this.replicatedLog.append(new MockReplicatedLogEntry(term, 0, new MockPayload("1")));
-        this.replicatedLog.append(new MockReplicatedLogEntry(term, 1, new MockPayload("2")));
+        replicatedLog.append(new MockReplicatedLogEntry(term, 0, new MockPayload("1")));
+        replicatedLog.append(new MockReplicatedLogEntry(term, 1, new MockPayload("2")));
+        setReplicatedLog(replicatedLog);
     }
 
     @Override public ActorRef actorOf(Props props) {
@@ -105,95 +95,8 @@ public class MockRaftActorContext implements RaftActorContext {
         return system.actorSelection(path);
     }
 
-    @Override public String getId() {
-        return id;
-    }
-
-    @Override public ActorRef getActor() {
-        return actor;
-    }
-
-    @Override public ElectionTerm getTermInformation() {
-        return electionTerm;
-    }
-
-    public void setIndex(long index){
-        this.index = index;
-    }
-
-    @Override public long getCommitIndex() {
-        return index;
-    }
-
-    @Override public void setCommitIndex(long commitIndex) {
-        this.index = commitIndex;
-    }
-
-    @Override public void setLastApplied(long lastApplied){
-        this.lastApplied = lastApplied;
-    }
-
-    @Override public long getLastApplied() {
-        return lastApplied;
-    }
-
-    @Override
-    // FIXME : A lot of tests try to manipulate the replicated log by setting it using this method
-    // This is OK to do if the underlyingActor is not RafActor or a derived class. If not then you should not
-    // used this way to manipulate the log because the RaftActor actually has a field replicatedLog
-    // which it creates internally and sets on the RaftActorContext
-    // The only right way to manipulate the replicated log therefore is to get it from either the RaftActor
-    // or the RaftActorContext and modify the entries in there instead of trying to replace it by using this setter
-    // Simple assertion that will fail if you do so
-    // ReplicatedLog log = new ReplicatedLogImpl();
-    // raftActor.underlyingActor().getRaftActorContext().setReplicatedLog(log);
-    // assertEquals(log, raftActor.underlyingActor().getReplicatedLog())
-    public void setReplicatedLog(ReplicatedLog replicatedLog) {
-        this.replicatedLog = replicatedLog;
-    }
-
-    @Override public ReplicatedLog getReplicatedLog() {
-        return replicatedLog;
-    }
-
     @Override public ActorSystem getActorSystem() {
         return this.system;
-    }
-
-    @Override public Logger getLogger() {
-        return LoggerFactory.getLogger(getClass());
-    }
-
-    @Override
-    public Collection<String> getPeerIds() {
-        return peerAddresses.keySet();
-    }
-
-    @Override
-    public Collection<PeerInfo> getPeers() {
-        Collection<PeerInfo> peers = new ArrayList<>();
-        for(Map.Entry<String, String> p: peerAddresses.entrySet()) {
-            peers.add(new PeerInfo(p.getKey(), p.getValue(), VotingState.VOTING));
-        }
-
-        return peers;
-    }
-
-    @Override public String getPeerAddress(String peerId) {
-        return peerAddresses.get(peerId);
-    }
-
-    @Override
-    public PeerInfo getPeerInfo(String peerId) {
-        return new PeerInfo(peerId, peerAddresses.get(peerId), VotingState.VOTING);
-    }
-
-    @Override public void addToPeers(String name, String address, VotingState votingState) {
-        peerAddresses.put(name, address);
-    }
-
-    @Override public void removePeer(String name) {
-        peerAddresses.remove(name);
     }
 
     @Override public ActorSelection getPeerActorSelection(String peerId) {
@@ -204,72 +107,30 @@ public class MockRaftActorContext implements RaftActorContext {
         return null;
     }
 
-    @Override public void setPeerAddress(String peerId, String peerAddress) {
-        Preconditions.checkState(peerAddresses.containsKey(peerId));
-        peerAddresses.put(peerId, peerAddress);
-    }
-
     public void setPeerAddresses(Map<String, String> peerAddresses) {
-        this.peerAddresses = peerAddresses;
-    }
+        for(String id: getPeerIds()) {
+            removePeer(id);
+        }
 
-    @Override
-    public ConfigParams getConfigParams() {
-        return configParams;
+        for(Map.Entry<String, String> e: peerAddresses.entrySet()) {
+            addToPeers(e.getKey(), e.getValue(), VotingState.VOTING);
+        }
     }
 
     @Override
     public SnapshotManager getSnapshotManager() {
-        if(this.snapshotManager == null){
-            this.snapshotManager = new SnapshotManager(this, getLogger());
-            this.snapshotManager.setCreateSnapshotCallable(NoopProcedure.<Void>instance());
-        }
-        return this.snapshotManager;
-    }
-
-    public void setConfigParams(ConfigParams configParams) {
-        this.configParams = configParams;
-    }
-
-    @Override
-    public long getTotalMemory() {
-        return Runtime.getRuntime().totalMemory();
-    }
-
-    @Override
-    public void setTotalMemoryRetriever(Supplier<Long> retriever) {
-    }
-
-    @Override
-    public boolean hasFollowers() {
-        return getPeerIds().size() > 0;
-    }
-
-    @Override
-    public DataPersistenceProvider getPersistenceProvider() {
-        return persistenceProvider;
-    }
-
-    public void setPersistenceProvider(DataPersistenceProvider persistenceProvider) {
-        this.persistenceProvider = persistenceProvider;
-    }
-
-    @Override
-    public short getPayloadVersion() {
-        return payloadVersion;
+        SnapshotManager snapshotManager = super.getSnapshotManager();
+        snapshotManager.setCreateSnapshotCallable(NoopProcedure.<Void>instance());
+        return snapshotManager;
     }
 
     @Override
     public RaftPolicy getRaftPolicy() {
-        return this.raftPolicy;
+        return raftPolicy != null ? raftPolicy : super.getRaftPolicy();
     }
 
-    public void setRaftPolicy(RaftPolicy raftPolicy){
+    public void setRaftPolicy(RaftPolicy raftPolicy) {
         this.raftPolicy = raftPolicy;
-    }
-
-    public void setPayloadVersion(short payloadVersion) {
-        this.payloadVersion = payloadVersion;
     }
 
     public static class SimpleReplicatedLog extends AbstractReplicatedLogImpl {
