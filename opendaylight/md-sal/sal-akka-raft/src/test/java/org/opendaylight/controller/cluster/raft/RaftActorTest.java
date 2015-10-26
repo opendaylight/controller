@@ -19,6 +19,7 @@ import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.timeout;
 import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
@@ -102,6 +103,7 @@ public class RaftActorTest extends AbstractActorTest {
         RaftActorTestKit kit = new RaftActorTestKit(getSystem(), "testFindLeader");
         kit.waitUntilLeader();
     }
+
 
     @Test
     public void testRaftActorRecoveryWithPersistenceEnabled() throws Exception {
@@ -939,6 +941,40 @@ public class RaftActorTest extends AbstractActorTest {
             assertEquals(3, leader.getReplicatedToAllIndex());
 
         }};
+    }
+
+    @Test
+    public void testRaftActorOnRecoverySnapshot() throws Exception {
+        TEST_LOG.info("testRaftActorOnRecoverySnapshot");
+
+        new JavaTestKit(getSystem()) {{
+                String persistenceId = factory.generateActorId("follower-");
+
+                DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+
+                // Set the heartbeat interval high to essentially disable election otherwise the test
+                // may fail if the actor is switched to Leader
+                config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
+
+                ImmutableMap<String, String> peerAddresses = ImmutableMap.<String, String>builder().put("member1", "address").build();
+
+                // Create mock ReplicatedLogEntry
+                ReplicatedLogEntry replLogEntry = new MockRaftActorContext.MockReplicatedLogEntry(1,1,
+                        new MockRaftActorContext.MockPayload("F", 1));
+
+                InMemoryJournal.addEntry(persistenceId, 1, replLogEntry);
+
+                TestActorRef<MockRaftActor> ref = factory.createTestActor(
+                        MockRaftActor.props(persistenceId, peerAddresses, Optional.<ConfigParams>of(config)));
+
+                MockRaftActor mockRaftActor = ref.underlyingActor();
+
+                mockRaftActor.waitForRecoveryComplete();
+
+                mockRaftActor.waitForInitializeBehaviorComplete();
+
+                verify(mockRaftActor.snapshotCohortDelegate, timeout(5000)).createSnapshot(any(ActorRef.class));
+            }};
     }
 
     @Test
