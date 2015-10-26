@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import com.google.common.base.Preconditions;
 import com.google.protobuf.GeneratedMessage.GeneratedExtension;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -14,6 +15,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages;
 import org.slf4j.Logger;
@@ -29,22 +31,16 @@ public class ServerConfigurationPayload extends Payload implements Serializable 
 
     private static final Logger LOG = LoggerFactory.getLogger(ServerConfigurationPayload.class);
 
-    private final List<String> newServerConfig;
-    private final List<String> oldServerConfig;
+    private final List<ServerInfo> serverConfig;
     private transient int serializedSize = -1;
 
-    public ServerConfigurationPayload(List<String> newServerConfig, List<String> oldServerConfig) {
-        this.newServerConfig = newServerConfig;
-        this.oldServerConfig = oldServerConfig;
+    public ServerConfigurationPayload(@Nonnull List<ServerInfo> serverConfig) {
+        this.serverConfig = Preconditions.checkNotNull(serverConfig);
     }
 
-    public List<String> getNewServerConfig() {
-        return newServerConfig;
-    }
-
-
-    public List<String> getOldServerConfig() {
-        return oldServerConfig;
+    @Nonnull
+    public List<ServerInfo> getServerConfig() {
+        return serverConfig;
     }
 
     @Override
@@ -53,8 +49,7 @@ public class ServerConfigurationPayload extends Payload implements Serializable 
             try {
                 ByteArrayOutputStream bos = new ByteArrayOutputStream();
                 ObjectOutputStream out = new ObjectOutputStream(bos);
-                out.writeObject(newServerConfig);
-                out.writeObject(oldServerConfig);
+                out.writeObject(serverConfig);
                 out.close();
 
                 serializedSize = bos.toByteArray().length;
@@ -82,7 +77,51 @@ public class ServerConfigurationPayload extends Payload implements Serializable 
 
     @Override
     public String toString() {
-        return "ServerConfigurationPayload [newServerConfig=" + newServerConfig + ", oldServerConfig="
-                + oldServerConfig + "]";
+        return "ServerConfigurationPayload [serverConfig=" + serverConfig + "]";
+    }
+
+    public static class ServerInfo implements Serializable {
+        private static final long serialVersionUID = 1L;
+
+        private final String id;
+        private final boolean isVoting;
+
+        public ServerInfo(@Nonnull String id, boolean isVoting) {
+            this.id = Preconditions.checkNotNull(id);
+            this.isVoting = isVoting;
+        }
+
+        @Nonnull
+        public String getId() {
+            return id;
+        }
+
+        public boolean isVoting() {
+            return isVoting;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + (isVoting ? 1231 : 1237);
+            result = prime * result + id.hashCode();
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == null || getClass() != obj.getClass()) {
+                return false;
+            }
+
+            ServerInfo other = (ServerInfo) obj;
+            return isVoting == other.isVoting && id.equals(other.id);
+        }
+
+        @Override
+        public String toString() {
+            return "ServerInfo [id=" + id + ", isVoting=" + isVoting + "]";
+        }
     }
 }

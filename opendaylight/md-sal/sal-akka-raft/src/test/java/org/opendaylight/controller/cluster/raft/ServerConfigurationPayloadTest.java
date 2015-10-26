@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import static org.opendaylight.controller.cluster.raft.ServerConfigurationPayload.ServerInfo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
@@ -22,18 +23,16 @@ public class ServerConfigurationPayloadTest {
 
     @Test
     public void testSerialization() {
-        ServerConfigurationPayload expected = new ServerConfigurationPayload(Arrays.asList("1", "2"),
-                Arrays.asList("3"));
+        ServerConfigurationPayload expected = new ServerConfigurationPayload(Arrays.asList(new ServerInfo("1", true),
+                new ServerInfo("2", false)));
         ServerConfigurationPayload cloned = (ServerConfigurationPayload) SerializationUtils.clone(expected);
 
-        assertEquals("getNewServerConfig", expected.getNewServerConfig(), cloned.getNewServerConfig());
-        assertEquals("getOldServerConfig", expected.getOldServerConfig(), cloned.getOldServerConfig());
+        assertEquals("getServerConfig", expected.getServerConfig(), cloned.getServerConfig());
     }
 
     @Test
     public void testSize() {
-        ServerConfigurationPayload expected = new ServerConfigurationPayload(Arrays.asList("1", "2"),
-                Arrays.asList("3"));
+        ServerConfigurationPayload expected = new ServerConfigurationPayload(Arrays.asList(new ServerInfo("1", true)));
         assertTrue(expected.size() > 0);
     }
 }
