@@ -108,6 +108,42 @@
     },
     {
       "key": {
+        "uuid": "fad0f9df_1155cd1c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 596,
+      "author": {
+        "id": 2981
+      },
+      "writtenOn": "2015-10-26T15:25:37Z",
+      "side": 1,
+      "message": "new JUnit test case added for OnRecoverySnapshot based on InMemoryJournal before creating the actor",
+      "parentUuid": "1a76adc5_f0201ef9",
+      "revId": "2fd0e41297098a95d3680a30b2da84426c4f732f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_b1188185",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 596,
+      "author": {
+        "id": 2981
+      },
+      "writtenOn": "2015-10-26T15:25:37Z",
+      "side": 1,
+      "message": "new JUnit test case added for OnRecoverySnapshot based on InMemoryJournal before creating the actor \u0026 loop test run for 10+ times until now successfully",
+      "parentUuid": "fad0f9df_9548e6cd",
+      "revId": "2fd0e41297098a95d3680a30b2da84426c4f732f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1a76adc5_6fff5168",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
         "patchSetId": 2
@@ -173,6 +209,24 @@
       "side": 1,
       "message": "Let me try this \u0026 comeback Tom",
       "parentUuid": "1a76adc5_90ec4a91",
+      "revId": "2fd0e41297098a95d3680a30b2da84426c4f732f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_71121964",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1036,
+      "author": {
+        "id": 2981
+      },
+      "writtenOn": "2015-10-26T15:25:37Z",
+      "side": 1,
+      "message": "test simplified to just check if captureSnapshot was triggered using verify on timeout API",
+      "parentUuid": "1a76adc5_a4390b43",
       "revId": "2fd0e41297098a95d3680a30b2da84426c4f732f",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
