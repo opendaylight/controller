@@ -23,13 +23,13 @@ import com.google.common.collect.Sets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-//import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.NonPersistentDataProvider;
+import org.opendaylight.controller.cluster.raft.ServerConfigurationPayload.ServerInfo;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
@@ -149,15 +149,18 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         assertEquals("Leader journal last index", 3, leaderActorContext.getReplicatedLog().lastIndex());
         assertEquals("Leader commit index", 3, leaderActorContext.getCommitIndex());
         assertEquals("Leader last applied index", 3, leaderActorContext.getLastApplied());
-        verifyServerConfigurationPayloadEntry(leaderActorContext.getReplicatedLog(), LEADER_ID, FOLLOWER_ID, NEW_SERVER_ID);
+        verifyServerConfigurationPayloadEntry(leaderActorContext.getReplicatedLog(), votingServer(LEADER_ID),
+                votingServer(FOLLOWER_ID), votingServer(NEW_SERVER_ID));
 
         // Verify ServerConfigurationPayload entry in both followers
 
         assertEquals("Follower journal last index", 3, followerActorContext.getReplicatedLog().lastIndex());
-        verifyServerConfigurationPayloadEntry(followerActorContext.getReplicatedLog(), LEADER_ID, FOLLOWER_ID, NEW_SERVER_ID);
+        verifyServerConfigurationPayloadEntry(followerActorContext.getReplicatedLog(), votingServer(LEADER_ID),
+                votingServer(FOLLOWER_ID), votingServer(NEW_SERVER_ID));
 
         assertEquals("New follower journal last index", 3, newFollowerActorContext.getReplicatedLog().lastIndex());
-        verifyServerConfigurationPayloadEntry(newFollowerActorContext.getReplicatedLog(), LEADER_ID, FOLLOWER_ID, NEW_SERVER_ID);
+        verifyServerConfigurationPayloadEntry(newFollowerActorContext.getReplicatedLog(), votingServer(LEADER_ID),
+                votingServer(FOLLOWER_ID), votingServer(NEW_SERVER_ID));
 
         // Verify new server config was applied in both followers
 
@@ -207,13 +210,15 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         assertEquals("Leader journal last index", 2, leaderActorContext.getReplicatedLog().lastIndex());
         assertEquals("Leader commit index", 2, leaderActorContext.getCommitIndex());
         assertEquals("Leader last applied index", 2, leaderActorContext.getLastApplied());
-        verifyServerConfigurationPayloadEntry(leaderActorContext.getReplicatedLog(), LEADER_ID, NEW_SERVER_ID);
+        verifyServerConfigurationPayloadEntry(leaderActorContext.getReplicatedLog(), votingServer(LEADER_ID),
+                votingServer(NEW_SERVER_ID));
 
         // Verify ServerConfigurationPayload entry in the new follower
 
         expectFirstMatching(newFollowerCollectorActor, ApplyState.class);
         assertEquals("New follower journal last index", 2, newFollowerActorContext.getReplicatedLog().lastIndex());
-        verifyServerConfigurationPayloadEntry(newFollowerActorContext.getReplicatedLog(), LEADER_ID, NEW_SERVER_ID);
+        verifyServerConfigurationPayloadEntry(newFollowerActorContext.getReplicatedLog(), votingServer(LEADER_ID),
+                votingServer(NEW_SERVER_ID));
 
         // Verify new server config was applied in the new follower
 
@@ -246,13 +251,15 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         assertEquals("Leader journal last index", 0, leaderActorContext.getReplicatedLog().lastIndex());
         assertEquals("Leader commit index", 0, leaderActorContext.getCommitIndex());
         assertEquals("Leader last applied index", 0, leaderActorContext.getLastApplied());
-        verifyServerConfigurationPayloadEntry(leaderActorContext.getReplicatedLog(), LEADER_ID, NEW_SERVER_ID);
+        verifyServerConfigurationPayloadEntry(leaderActorContext.getReplicatedLog(), votingServer(LEADER_ID),
+                nonVotingServer(NEW_SERVER_ID));
 
         // Verify ServerConfigurationPayload entry in the new follower
 
         expectFirstMatching(newFollowerCollectorActor, ApplyState.class);
         assertEquals("New follower journal last index", 0, newFollowerActorContext.getReplicatedLog().lastIndex());
-        verifyServerConfigurationPayloadEntry(newFollowerActorContext.getReplicatedLog(), LEADER_ID, NEW_SERVER_ID);
+        verifyServerConfigurationPayloadEntry(newFollowerActorContext.getReplicatedLog(), votingServer(LEADER_ID),
+                nonVotingServer(NEW_SERVER_ID));
 
         // Verify new server config was applied in the new follower
 
@@ -276,7 +283,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         assertEquals("Leader commit index", 1, leaderActorContext.getCommitIndex());
         assertEquals("Leader last applied index", 1, leaderActorContext.getLastApplied());
         verifyServerConfigurationPayloadEntry(leaderActorContext.getReplicatedLog(),
-                LEADER_ID, NEW_SERVER_ID, NEW_SERVER_ID2);
+                votingServer(LEADER_ID), nonVotingServer(NEW_SERVER_ID), nonVotingServer(NEW_SERVER_ID2));
     }
 
     @Test
@@ -325,7 +332,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         assertEquals("Leader commit index", 1, leaderActorContext.getCommitIndex());
         assertEquals("Leader last applied index", 1, leaderActorContext.getLastApplied());
         verifyServerConfigurationPayloadEntry(leaderActorContext.getReplicatedLog(),
-                LEADER_ID, NEW_SERVER_ID, NEW_SERVER_ID2);
+                votingServer(LEADER_ID), votingServer(NEW_SERVER_ID), nonVotingServer(NEW_SERVER_ID2));
 
         // Verify ServerConfigurationPayload entry in the new follower
 
@@ -401,11 +408,19 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         expectFirstMatching(leaderActor, AddServer.class);
     }
 
-    private void verifyServerConfigurationPayloadEntry(ReplicatedLog log, String... cNew) {
+    private ServerInfo votingServer(String id) {
+        return new ServerInfo(id, true);
+    }
+
+    private ServerInfo nonVotingServer(String id) {
+        return new ServerInfo(id, false);
+    }
+
+    private void verifyServerConfigurationPayloadEntry(ReplicatedLog log, ServerInfo... expected) {
         ReplicatedLogEntry logEntry = log.get(log.lastIndex());
         assertEquals("Last log entry payload class", ServerConfigurationPayload.class, logEntry.getData().getClass());
         ServerConfigurationPayload payload = (ServerConfigurationPayload)logEntry.getData();
-        assertEquals("getNewServerConfig", Sets.newHashSet(cNew), Sets.newHashSet(payload.getNewServerConfig()));
+        assertEquals("getNewServerConfig", Sets.newHashSet(expected), Sets.newHashSet(payload.getServerConfig()));
     }
 
     private RaftActorContext newFollowerContext(String id, TestActorRef<? extends UntypedActor> actor) {
