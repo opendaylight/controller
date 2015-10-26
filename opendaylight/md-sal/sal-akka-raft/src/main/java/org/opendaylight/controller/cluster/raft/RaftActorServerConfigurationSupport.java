@@ -400,7 +400,7 @@ class RaftActorServerConfigurationSupport {
 
         @Override
         Object newReply(ServerChangeStatus status, String leaderId) {
-            return new AddServerReply(status, leaderId);
+            return new AddServerReply(getOperation().getNewServerId(), status, leaderId);
         }
 
         @Override

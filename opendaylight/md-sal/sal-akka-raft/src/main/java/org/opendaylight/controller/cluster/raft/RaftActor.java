@@ -46,6 +46,7 @@ import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
 import org.opendaylight.controller.cluster.raft.client.messages.FollowerInfo;
 import org.opendaylight.controller.cluster.raft.client.messages.GetOnDemandRaftState;
 import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
+import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -481,7 +482,12 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     protected void updateConfigParams(ConfigParams configParams) {
+        RaftPolicy oldRaftPolicy = context.getRaftPolicy();
         context.setConfigParams(configParams);
+        if (context.getRaftPolicy() != oldRaftPolicy) {
+            //RaftPolicy is modifed for the Actor. Re-initialize its current behaviour
+            initializeBehavior();
+        }
     }
 
     public final DataPersistenceProvider persistence() {

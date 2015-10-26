@@ -19,10 +19,16 @@ public class AbstractServerChangeReply implements Serializable {
 
     private final String leaderHint;
     private final ServerChangeStatus status;
+    private final String serverId;
 
-    public AbstractServerChangeReply(ServerChangeStatus status, String leaderHint) {
+    public AbstractServerChangeReply(String serverId, ServerChangeStatus status, String leaderHint) {
+        this.serverId = serverId;
         this.status = status;
         this.leaderHint = leaderHint;
+    }
+
+    public String getServerId() {
+        return serverId;
     }
 
     public static long getSerialversionuid() {
@@ -39,6 +45,6 @@ public class AbstractServerChangeReply implements Serializable {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + " [status=" + status + ", leaderHint=" + leaderHint + "]";
+        return getClass().getSimpleName() + " [serverId=" + serverId + ", status=" + status + ", leaderHint=" + leaderHint + "]";
     }
 }
