@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fad0f9df_965d33ec",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 429,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-26T11:32:43Z",
+      "side": 1,
+      "message": "commented code",
+      "range": {
+        "startLine": 429,
+        "startChar": 2,
+        "endLine": 429,
+        "endChar": 18
+      },
+      "revId": "d693af4d3d46d72fe2d99242e81f6ac916b8eef6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_3672477d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 455,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-26T11:32:43Z",
+      "side": 1,
+      "message": "here too",
+      "range": {
+        "startLine": 455,
+        "startChar": 14,
+        "endLine": 455,
+        "endChar": 29
+      },
+      "revId": "d693af4d3d46d72fe2d99242e81f6ac916b8eef6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
