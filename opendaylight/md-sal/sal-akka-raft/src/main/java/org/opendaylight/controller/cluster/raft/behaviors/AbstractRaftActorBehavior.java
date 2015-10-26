@@ -20,6 +20,7 @@ import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.SerializationUtils;
 import org.opendaylight.controller.cluster.raft.ServerConfigurationPayload;
+import org.opendaylight.controller.cluster.raft.ServerConfigurationPayload.ServerInfo;
 import org.opendaylight.controller.cluster.raft.VotingState;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
@@ -496,12 +497,14 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
 
     public void applyServerConfiguration(ServerConfigurationPayload serverConfig) {
         Set<String> currentPeers = new HashSet<>(context.getPeerIds());
-        for(String peerId: serverConfig.getNewServerConfig()) {
-            if(!getId().equals(peerId)) {
-                if(!currentPeers.contains(peerId)) {
-                    context.addToPeers(peerId, null, VotingState.VOTING);
+        for(ServerInfo server: serverConfig.getServerConfig()) {
+            if(!getId().equals(server.getId())) {
+                VotingState votingState = server.isVoting() ? VotingState.VOTING: VotingState.NON_VOTING;
+                if(!currentPeers.contains(server.getId())) {
+                    context.addToPeers(server.getId(), null, votingState);
                 } else {
-                    currentPeers.remove(peerId);
+                    context.getPeerInfo(server.getId()).setVotingState(votingState);
+                    currentPeers.remove(server.getId());
                 }
             }
         }
