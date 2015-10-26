@@ -12,12 +12,13 @@ import akka.actor.ActorSelection;
 import akka.actor.Cancellable;
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import org.opendaylight.controller.cluster.raft.ServerConfigurationPayload.ServerInfo;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader;
 import org.opendaylight.controller.cluster.raft.messages.AddServer;
@@ -171,12 +172,17 @@ class RaftActorServerConfigurationSupport {
         }
 
         protected void persistNewServerConfiguration(RaftActor raftActor, ServerOperationContext<?> operationContext){
-            List <String> newConfig = new ArrayList<String>(raftContext.getPeerIds());
-            newConfig.add(raftContext.getId());
+            Collection<PeerInfo> peers = raftContext.getPeers();
+            List<ServerInfo> newConfig = new ArrayList<>(peers.size() + 1);
+            for(PeerInfo peer: peers) {
+                newConfig.add(new ServerInfo(peer.getId(), peer.isVoting()));
+            }
+
+            newConfig.add(new ServerInfo(raftContext.getId(), true));
 
             LOG.debug("{}: New server configuration : {}", raftContext.getId(), newConfig);
 
-            ServerConfigurationPayload payload = new ServerConfigurationPayload(newConfig, Collections.<String>emptyList());
+            ServerConfigurationPayload payload = new ServerConfigurationPayload(newConfig);
 
             raftActor.persistData(operationContext.getClientRequestor(), operationContext.getContextId(), payload);
 
