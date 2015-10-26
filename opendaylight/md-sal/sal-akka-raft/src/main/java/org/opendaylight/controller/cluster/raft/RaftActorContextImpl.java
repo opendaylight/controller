@@ -74,7 +74,7 @@ public class RaftActorContextImpl implements RaftActorContext {
         }
     }
 
-    void setPayloadVersion(short payloadVersion) {
+    public void setPayloadVersion(short payloadVersion) {
         this.payloadVersion = payloadVersion;
     }
 
@@ -83,7 +83,7 @@ public class RaftActorContextImpl implements RaftActorContext {
         return payloadVersion;
     }
 
-    void setConfigParams(ConfigParams configParams) {
+    public void setConfigParams(ConfigParams configParams) {
         this.configParams = configParams;
     }
 
