@@ -33,6 +33,24 @@
       "revId": "6b49dc9655bdb24b47b67f1d54bd8560fb785a03",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fad0f9df_ee82a351",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/common/actor/CommonConfig.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 3172
+      },
+      "writtenOn": "2015-10-26T21:34:33Z",
+      "side": 1,
+      "message": "The issue is that self() needs to return type T (or subclass would have issues), so it would still require an unchecked cast if it\u0027s implemented here.  I\u0027ll see if I can find a way around that.",
+      "parentUuid": "fad0f9df_80b409f3",
+      "revId": "6b49dc9655bdb24b47b67f1d54bd8560fb785a03",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
