@@ -64,6 +64,7 @@ public class FollowerLogInformationImplTest {
     @Test
     public void testOkToReplicate(){
         MockRaftActorContext context = new MockRaftActorContext();
+        context.setCommitIndex(0);
         FollowerLogInformation followerLogInformation =
                 new FollowerLogInformationImpl(new PeerInfo("follower1", null, VotingState.VOTING), 10, context);
 
@@ -83,6 +84,7 @@ public class FollowerLogInformationImplTest {
     public void testVotingNotInitializedState() {
         final PeerInfo peerInfo = new PeerInfo("follower1", null, VotingState.VOTING_NOT_INITIALIZED);
         MockRaftActorContext context = new MockRaftActorContext();
+        context.setCommitIndex(0);
         FollowerLogInformation followerLogInformation = new FollowerLogInformationImpl(peerInfo, -1, context);
 
         assertFalse(followerLogInformation.okToReplicate());
@@ -101,6 +103,7 @@ public class FollowerLogInformationImplTest {
     public void testNonVotingState() {
         final PeerInfo peerInfo = new PeerInfo("follower1", null, VotingState.NON_VOTING);
         MockRaftActorContext context = new MockRaftActorContext();
+        context.setCommitIndex(0);
         FollowerLogInformation followerLogInformation = new FollowerLogInformationImpl(peerInfo, -1, context);
 
         assertTrue(followerLogInformation.okToReplicate());
