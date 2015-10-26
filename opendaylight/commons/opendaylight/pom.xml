@@ -104,8 +104,6 @@
     <jmxGeneratorPath>src/main/yang-gen-config</jmxGeneratorPath>
     <jolokia-bridge.version>0.2.0-SNAPSHOT</jolokia-bridge.version>
     <jolokia.version>1.1.4</jolokia.version>
-    <jsr311.api.version>1.1.1</jsr311.api.version>
-    <jsr311.v2.api.version>2.0</jsr311.v2.api.version>
     <karaf.branding.version>1.2.0-SNAPSHOT</karaf.branding.version>
     <karaf.shell.version>${karaf.version}</karaf.shell.version>
     <leveldb.version>0.7</leveldb.version>
@@ -232,13 +230,6 @@
        <!-- project specific dependencies -->
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
-        <artifactId>config-artifacts</artifactId>
-        <version>${config.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller</groupId>
         <artifactId>mdsal-artifacts</artifactId>
         <version>${mdsal.version}</version>
         <type>pom</type>
@@ -251,16 +242,6 @@
         <version>${sshd-core.version}</version>
       </dependency>
       <dependency>
-        <groupId>ch.qos.logback</groupId>
-        <artifactId>logback-classic</artifactId>
-        <version>${logback.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>ch.qos.logback</groupId>
-        <artifactId>logback-core</artifactId>
-        <version>${logback.version}</version>
-      </dependency>
-      <dependency>
         <groupId>com.codahale.metrics</groupId>
         <artifactId>metrics-core</artifactId>
         <version>${codahale.metrics.version}</version>
@@ -270,57 +251,7 @@
         <artifactId>metrics-graphite</artifactId>
         <version>${codahale.metrics.version}</version>
       </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-annotations</artifactId>
-        <version>${jackson.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-core</artifactId>
-        <version>${jackson.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-databind</artifactId>
-        <version>${jackson.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.datatype</groupId>
-        <artifactId>jackson-datatype-json-org</artifactId>
-        <version>${jackson.version}</version>
-      </dependency>
 
-      <dependency>
-        <groupId>com.fasterxml.jackson.jaxrs</groupId>
-        <artifactId>jackson-jaxrs-base</artifactId>
-        <version>${jackson.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.jaxrs</groupId>
-        <artifactId>jackson-jaxrs-json-provider</artifactId>
-        <version>${jackson.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.module</groupId>
-        <artifactId>jackson-module-jaxb-annotations</artifactId>
-        <version>${jackson.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.github.romix</groupId>
-        <artifactId>java-concurrent-hash-trie-map</artifactId>
-        <version>${ctrie.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.google.code.gson</groupId>
-        <artifactId>gson</artifactId>
-        <version>${gson.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.google.guava</groupId>
-        <artifactId>guava</artifactId>
-        <version>${guava.version}</version>
-      </dependency>
       <dependency>
         <groupId>com.lmax</groupId>
         <artifactId>disruptor</artifactId>
@@ -373,26 +304,6 @@
             <artifactId>akka-slf4j_${scala.version}</artifactId>
             <version>${akka.version}</version>
         </dependency>
-      <dependency>
-        <groupId>commons-codec</groupId>
-        <artifactId>commons-codec</artifactId>
-        <version>${commons.codec.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>commons-fileupload</groupId>
-        <artifactId>commons-fileupload</artifactId>
-        <version>${commons.fileupload.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>commons-io</groupId>
-        <artifactId>commons-io</artifactId>
-        <version>${commons.io.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>commons-lang</groupId>
-        <artifactId>commons-lang</artifactId>
-        <version>${commons.lang.version}</version>
-      </dependency>
       <dependency>
         <groupId>commons-net</groupId>
         <artifactId>commons-net</artifactId>
@@ -468,22 +379,6 @@
         <artifactId>org.eclipse.osgi.services</artifactId>
         <version>3.3.100.v20120522-1822</version>
       </dependency>
-      <!-- Gemini Web -->
-      <dependency>
-        <groupId>geminiweb</groupId>
-        <artifactId>org.eclipse.gemini.web.core</artifactId>
-        <version>${geminiweb.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>geminiweb</groupId>
-        <artifactId>org.eclipse.gemini.web.extender</artifactId>
-        <version>${geminiweb.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>geminiweb</groupId>
-        <artifactId>org.eclipse.gemini.web.tomcat</artifactId>
-        <version>${geminiweb.version}</version>
-      </dependency>
       <dependency>
         <groupId>geminiweb</groupId>
         <artifactId>org.eclipse.virgo.kernel.equinox.extensions</artifactId>
@@ -518,42 +413,6 @@
         <groupId>geminiweb</groupId>
         <artifactId>org.eclipse.virgo.util.parser.manifest</artifactId>
         <version>${virgo.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.netty</groupId>
-        <artifactId>netty-buffer</artifactId>
-        <version>${netty.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.netty</groupId>
-        <artifactId>netty-codec</artifactId>
-        <version>${netty.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.netty</groupId>
-        <artifactId>netty-codec-http</artifactId>
-        <version>${netty.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.netty</groupId>
-        <artifactId>netty-common</artifactId>
-        <version>${netty.version}</version>
-      </dependency>
-      <!-- Netty -->
-      <dependency>
-        <groupId>io.netty</groupId>
-        <artifactId>netty-handler</artifactId>
-        <version>${netty.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.netty</groupId>
-        <artifactId>netty-transport</artifactId>
-        <version>${netty.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>javax.ws.rs</groupId>
-        <artifactId>jsr311-api</artifactId>
-        <version>${jsr311.api.version}</version>
       </dependency>
       <dependency>
         <groupId>net.sourceforge.pmd</groupId>
@@ -646,49 +505,6 @@
         <version>${commons.tomcat.util}</version>
       </dependency>
       <dependency>
-        <groupId>org.aopalliance</groupId>
-        <artifactId>com.springsource.org.aopalliance</artifactId>
-        <version>${aopalliance.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.commons</groupId>
-        <artifactId>commons-lang3</artifactId>
-        <version>${commons.lang3.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>org.apache.felix.dependencymanager</artifactId>
-        <version>${felix.dependencymanager.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>org.apache.felix.dependencymanager.shell</artifactId>
-        <version>${felix.dependencymanager.shell.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>org.apache.felix.fileinstall</artifactId>
-        <version>${felix.fileinstall.version}</version>
-      </dependency>
-      <!-- felix webconsole -->
-      <dependency>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>org.apache.felix.webconsole</artifactId>
-        <version>${felix.webconsole.version}</version>
-        <!-- the all bundle includes all the necessary plugins -->
-        <classifier>all</classifier>
-      </dependency>
-      <dependency>
-        <groupId>org.bouncycastle</groupId>
-        <artifactId>bcpkix-jdk15on</artifactId>
-        <version>${bouncycastle.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.bouncycastle</groupId>
-        <artifactId>bcprov-jdk15on</artifactId>
-        <version>${bouncycastle.version}</version>
-      </dependency>
-      <dependency>
         <groupId>org.codehaus.enunciate</groupId>
         <artifactId>enunciate-core-annotations</artifactId>
         <version>${enunciate.version}</version>
@@ -697,11 +513,6 @@
         <groupId>org.codehaus.gmaven.runtime</groupId>
         <artifactId>gmaven-runtime-2.0</artifactId>
         <version>1.5</version>
-      </dependency>
-      <dependency>
-        <groupId>org.codehaus.jettison</groupId>
-        <artifactId>jettison</artifactId>
-        <version>${jettison.version}</version>
       </dependency>
       <dependency>
         <groupId>org.eclipse</groupId>
@@ -748,11 +559,6 @@
         <version>2.4</version>
       </dependency>
       <dependency>
-        <groupId>org.javassist</groupId>
-        <artifactId>javassist</artifactId>
-        <version>${javassist.version}</version>
-      </dependency>
-      <dependency>
         <groupId>org.jboss.resteasy</groupId>
         <artifactId>jaxrs-api</artifactId>
         <version>3.0.4.Final</version>
@@ -766,11 +572,6 @@
         <groupId>org.jolokia</groupId>
         <artifactId>jolokia-osgi</artifactId>
         <version>${jolokia.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.json</groupId>
-        <artifactId>json</artifactId>
-        <version>${org.json.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
@@ -1190,11 +991,6 @@
         <type>xml</type>
         <scope>runtime</scope>
       </dependency>
-      <dependency>
-        <groupId>org.opendaylight.controller.thirdparty</groupId>
-        <artifactId>com.sun.jersey.jersey-servlet</artifactId>
-        <version>${jersey-servlet.version}</version>
-      </dependency>
 
       <!-- Third parties from opendaylight released -->
       <dependency>
@@ -1205,7 +1001,7 @@
       <dependency>
         <groupId>org.opendaylight.controller.thirdparty</groupId>
         <artifactId>org.apache.catalina.filters.CorsFilter</artifactId>
-        <version>${corsfilter.version}</version>
+        <version>7.0.42</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller.thirdparty</groupId>
