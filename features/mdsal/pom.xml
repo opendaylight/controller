@@ -23,7 +23,6 @@
     <commons.opendaylight.version>1.6.0-SNAPSHOT</commons.opendaylight.version>
     <akka.version>2.3.14</akka.version>
     <features.file>features.xml</features.file>
-    <org.json.version>20131018</org.json.version>
     <config.configfile.directory>etc/opendaylight/karaf</config.configfile.directory>
     <config.clustering.configfile>05-clustering.xml</config.clustering.configfile>
     <config.clustered-entity-ownership.configfile>06-clustered-entity-ownership.xml</config.clustered-entity-ownership.configfile>
