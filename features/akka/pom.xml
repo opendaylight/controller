@@ -126,7 +126,7 @@
     <dependency>
         <groupId>org.uncommons.maths</groupId>
         <artifactId>uncommons-maths</artifactId>
-        <version>${uncommons.maths.version}</version>
+        <version>1.2.2a</version>
         <exclusions>
             <exclusion>
                 <groupId>jfree</groupId>
