@@ -35,7 +35,6 @@
     <commons.checkstyle.version>0.2.0-SNAPSHOT</commons.checkstyle.version>
     <commons.httpclient.version>0.3.0-SNAPSHOT</commons.httpclient.version>
     <commons.logback_settings.version>0.2.0-SNAPSHOT</commons.logback_settings.version>
-    <commons.net.version>3.0.1</commons.net.version>
     <commons.opendaylight.commons.httpclient>0.3.0-SNAPSHOT</commons.opendaylight.commons.httpclient>
     <commons.opendaylight.concepts.version>0.7.0-SNAPSHOT</commons.opendaylight.concepts.version>
     <commons.opendaylight.version>1.6.0-SNAPSHOT</commons.opendaylight.version>
@@ -90,7 +89,6 @@
     <jdepend.maven.plugin.version>2.0-beta-2</jdepend.maven.plugin.version>
     <jmxGeneratorPath>src/main/yang-gen-config</jmxGeneratorPath>
     <jolokia-bridge.version>0.2.0-SNAPSHOT</jolokia-bridge.version>
-    <jolokia.version>1.1.4</jolokia.version>
     <karaf.branding.version>1.2.0-SNAPSHOT</karaf.branding.version>
     <karaf.shell.version>${karaf.version}</karaf.shell.version>
     <leveldb.version>0.7</leveldb.version>
@@ -278,11 +276,6 @@
             <version>${akka.version}</version>
         </dependency>
       <dependency>
-        <groupId>commons-net</groupId>
-        <artifactId>commons-net</artifactId>
-        <version>${commons.net.version}</version>
-      </dependency>
-      <dependency>
         <groupId>net.sourceforge.pmd</groupId>
         <artifactId>pmd</artifactId>
         <version>5.1.0</version>
@@ -315,11 +308,6 @@
         <groupId>org.glassfish.jersey.test-framework.providers</groupId>
         <artifactId>jersey-test-framework-provider-grizzly2</artifactId>
         <version>2.4</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jolokia</groupId>
-        <artifactId>jolokia-osgi</artifactId>
-        <version>${jolokia.version}</version>
       </dependency>
       <dependency>
         <groupId>org.opendaylight.controller</groupId>
