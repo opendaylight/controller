@@ -16,6 +16,24 @@
       "revId": "294f14b2bd763ecadb7288d313f04ee5050888d2",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dad5f5cf_d701943a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/entityownership/selectionstrategy/EntityOwnerSelectionStrategyConfigReaderTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-10-27T21:07:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fad0f9df_fc127657",
+      "revId": "294f14b2bd763ecadb7288d313f04ee5050888d2",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
