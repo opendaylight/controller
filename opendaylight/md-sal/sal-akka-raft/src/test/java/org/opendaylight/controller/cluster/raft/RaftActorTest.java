@@ -10,7 +10,9 @@ package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
@@ -1003,4 +1005,25 @@ public class RaftActorTest extends AbstractActorTest {
         }
     }
 
+    @Test
+    public void testUpdateConfigParam() throws Exception {
+        DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
+        configParams.setCustomRaftPolicyImplementationClass("org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy");
+        String persistenceId = factory.generateActorId("follower-");
+        Map<String, String> peerAddresses = new HashMap<>();
+        DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
+
+        TestActorRef<MockRaftActor> actorRef = factory.createTestActor(
+                MockRaftActor.props(persistenceId, peerAddresses,
+                    Optional.<ConfigParams>of(configParams), dataPersistenceProvider), persistenceId);
+        MockRaftActor mockRaftActor = actorRef.underlyingActor();
+        RaftActorBehavior behavior = mockRaftActor.getCurrentBehavior();
+        mockRaftActor.updateConfigParams(configParams);
+        assertSame("Same Behavior", behavior, mockRaftActor.getCurrentBehavior());
+
+        DefaultConfigParamsImpl configParams2 = new DefaultConfigParamsImpl();
+        configParams2.setCustomRaftPolicyImplementationClass("org.opendaylight.controller.cluster.raft.policy.DefaultRaftPolicy");
+        mockRaftActor.updateConfigParams(configParams2);
+        assertNotSame("Different Behavior", behavior, mockRaftActor.getCurrentBehavior());
+    }
 }
