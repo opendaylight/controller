@@ -21,7 +21,7 @@
     <controller.mdsal.version>1.3.0-SNAPSHOT</controller.mdsal.version>
     <config.version>0.4.0-SNAPSHOT</config.version>
     <commons.opendaylight.version>1.6.0-SNAPSHOT</commons.opendaylight.version>
-    <akka.version>2.3.10</akka.version>
+    <akka.version>2.3.14</akka.version>
     <features.file>features.xml</features.file>
     <org.json.version>20131018</org.json.version>
     <config.configfile.directory>etc/opendaylight/karaf</config.configfile.directory>
