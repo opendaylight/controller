@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dad5f5cf_d4943246",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2015-10-27T15:09:58Z",
+      "side": 1,
+      "message": "I have seen cluster setup scripts which rely on this value (instead of just installing odl-jolokia).\nBut I believe Beryllium controller does not have to honor Lithium assumptions.",
+      "range": {
+        "startLine": 12,
+        "startChar": 9,
+        "endLine": 12,
+        "endChar": 14
+      },
+      "revId": "8a399d1208a89c3bd12ed28a96c205782b257814",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
