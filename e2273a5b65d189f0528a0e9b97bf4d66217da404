@@ -1,0 +1,259 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dad5f5cf_512b74eb",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 488,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-27T14:45:05Z",
+      "side": 1,
+      "message": "We should avoid casting to DefaultConfigParamsImpl. I know DefaultConfigParamsImpl is the only implementation but we should keep it clean and add getCustomRaftPolicyImplementationClass to the interface.",
+      "revId": "e2273a5b65d189f0528a0e9b97bf4d66217da404",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dad5f5cf_7130f856",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 495,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-27T14:45:05Z",
+      "side": 1,
+      "message": "You should use Objects.equals - it handles nulls, i.e. if both are null returns true - no need to check for \"DefaultRaftPolicy\".",
+      "revId": "e2273a5b65d189f0528a0e9b97bf4d66217da404",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dad5f5cf_d1da04e9",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1019,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-27T14:45:05Z",
+      "side": 1,
+      "message": "You should call mockRaftActor.waitForInitializeBehaviorComplete()",
+      "revId": "e2273a5b65d189f0528a0e9b97bf4d66217da404",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dad5f5cf_51ee148d",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1022,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-27T14:45:05Z",
+      "side": 1,
+      "message": "I think the first test should be the normal case where both are null, i.e. initialize the actor with just \"new DefaultConfigParamsImpl()\" and call mockRaftActor.updateConfigParams with a new DefaultConfigParamsImpl instance. Then call updateConfigParams with \"DisableElectionsRaftPolicy\" set and then with \"DisableElectionsRaftPolicy\" again (no change) and then with another non-null instance (\"DefaultRaftPolicy\") and then with null again.",
+      "revId": "e2273a5b65d189f0528a0e9b97bf4d66217da404",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dad5f5cf_31ed908c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1027,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-27T14:45:05Z",
+      "side": 1,
+      "message": "In addition to assertNotSame, also verify that mockRaftActor.getCurrentBehavior().getState() is Follower.",
+      "revId": "e2273a5b65d189f0528a0e9b97bf4d66217da404",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dad5f5cf_3149108c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 816,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-27T14:45:05Z",
+      "side": 1,
+      "message": "We\u0027re logging to error here but logging to debug in other cases. We should be consistent and log to debug here as well.",
+      "revId": "e2273a5b65d189f0528a0e9b97bf4d66217da404",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dad5f5cf_b12bc093",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 818,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-27T14:45:05Z",
+      "side": 1,
+      "message": "I don\u0027t think this is really an illegal state. How about RuntimeException? Also it\u0027s better to include a contextual message with failure as the cause, i.e.\n\nnew RuntimeException(String.format(\"Failed to find the leader for shard %s\", shardName), failure);",
+      "revId": "e2273a5b65d189f0528a0e9b97bf4d66217da404",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dad5f5cf_d1af642a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 836,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-27T14:45:05Z",
+      "side": 1,
+      "message": "\"respose\" (sic) - \"response\"",
+      "revId": "e2273a5b65d189f0528a0e9b97bf4d66217da404",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dad5f5cf_f46e1696",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 853,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-27T14:45:05Z",
+      "side": 1,
+      "message": "I don\u0027t think election timeout*2 is enough here. The RaftActor installs a snapshot and replicates the new server config and together could accumulate enough time to trigger this timeout. Also the RaftActor uses election timeout*2 internally for the snapshot. So we want to give it ample time. The AddServer request could timeout with no reply if we lost connection midstream or consensus isn\u0027t reached. I think election timeout*4 would suffice.",
+      "revId": "e2273a5b65d189f0528a0e9b97bf4d66217da404",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dad5f5cf_11b64c8b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 862,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-27T14:45:05Z",
+      "side": 1,
+      "message": "Same as above re: debug logging. Also can you log the leader actor\u0027s path here and also the failure, i.e.:\n\nLOG.debug(\"The AddServer request to leader {} failed\", response.getPrimaryPath(), failure);",
+      "revId": "e2273a5b65d189f0528a0e9b97bf4d66217da404",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dad5f5cf_711d5873",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 869,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-27T14:45:05Z",
+      "side": 1,
+      "message": "Same as above re: using RuntimeEx and contextual message. You can use the same \"The AddServer request...\" message I suggested above.",
+      "revId": "e2273a5b65d189f0528a0e9b97bf4d66217da404",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dad5f5cf_d412f257",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 902,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-27T14:45:05Z",
+      "side": 1,
+      "message": "%d should be %s",
+      "revId": "e2273a5b65d189f0528a0e9b97bf4d66217da404",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dad5f5cf_f108682f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 903,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-27T14:45:05Z",
+      "side": 1,
+      "message": "Same as above re: using RuntimeEx. Also the \"replication failed\" message would only apply if status is TIMEOUT (the other status at this point could be NO_LEADER). We can make the message more descriptive based on status, e.g. if the status is TIMEOUT then \n\n\"The shard leader %s timed out trying to replicate the initial data to the new shard replica. Possible causes: there was a problem replicating the data or shard leadership changed while replicating\". \n\nIf it\u0027s NO_LEADER (even though this is a real edge case since we just found the leader shard), then \"The apparent shard leader %s indicates there is no longer any leader\".",
+      "revId": "e2273a5b65d189f0528a0e9b97bf4d66217da404",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dad5f5cf_d4ae72e7",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1092,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-27T14:45:05Z",
+      "side": 1,
+      "message": "Can you clarify the variable names for each shard manager to make it easier to follow? Eg, shardManager2 appears to be the leader so you can call it \"leaderShardManager\" and \"mockLeaderShardActor\". Similarly for shardManager, call it \"newReplicaShardManager\" and \"newReplicaShardActor\".",
+      "revId": "e2273a5b65d189f0528a0e9b97bf4d66217da404",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dad5f5cf_34f81ee5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1114,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-27T14:45:05Z",
+      "side": 1,
+      "message": "You should capture the AddServer message via the MessageCollectorActor and verify its contents:\n\nshardManager.tell(new AddShardReplica(\"astronauts\"), getRef());\nAddServer addServer \u003d MessageCollectorActor.expectFirstMatching(mockShardActor2, AddServer.class);\n// verify addServer\nshardManager.tell(new AddServerReply(...), mockShardActor2);\nexpectMsgClass(duration(\"5 seconds\"), Status.Success.class);\n\nYou don\u0027t need the MockRespondActor class.",
+      "revId": "e2273a5b65d189f0528a0e9b97bf4d66217da404",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
