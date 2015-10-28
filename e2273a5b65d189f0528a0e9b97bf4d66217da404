@@ -542,6 +542,24 @@
       "revId": "e2273a5b65d189f0528a0e9b97bf4d66217da404",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dad5f5cf_a56136d5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1114,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-10-28T11:20:46Z",
+      "side": 1,
+      "message": "The javaTestKit expectMsgClass and reply can be used to reply to message if the message is sent to the TestActor of the JavaTestKit.\nBut in this case, the AddServer message goes to the mockShardLeaderActor object. So the reply of JavaTestKit may not be useful in this case.\nPlease correct me if i am wrong.",
+      "parentUuid": "dad5f5cf_1a3bc1ec",
+      "revId": "e2273a5b65d189f0528a0e9b97bf4d66217da404",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
