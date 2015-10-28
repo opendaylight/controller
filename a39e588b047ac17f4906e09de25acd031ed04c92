@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "dad5f5cf_e5941e46",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/DefaultConfigParamsImpl.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-10-28T12:38:22Z",
+      "side": 1,
+      "message": "Reverted to return the customRaftPolicyImplementationClass. Modified junit test added for this function, to avoid verification of change in Raft Policy from DefaultRaftPolicy to empty and empty to DefaultRaftPolicy.",
+      "parentUuid": "dad5f5cf_e51f3e08",
+      "revId": "a39e588b047ac17f4906e09de25acd031ed04c92",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dad5f5cf_0565a2e0",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
         "patchSetId": 6
@@ -66,6 +84,24 @@
       "writtenOn": "2015-10-28T11:23:12Z",
       "side": 1,
       "message": "You should actually send a RemoteFindPrimary message to ensure a RemotePrimaryShardFound response is received.",
+      "revId": "a39e588b047ac17f4906e09de25acd031ed04c92",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dad5f5cf_0548422c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 809,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-10-28T12:38:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dad5f5cf_0565a2e0",
       "revId": "a39e588b047ac17f4906e09de25acd031ed04c92",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -89,6 +125,24 @@
     },
     {
       "key": {
+        "uuid": "dad5f5cf_a554d6ca",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 905,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-10-28T12:38:22Z",
+      "side": 1,
+      "message": "Modified to the descriptive message you had suggested.",
+      "parentUuid": "dad5f5cf_0510424d",
+      "revId": "a39e588b047ac17f4906e09de25acd031ed04c92",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dad5f5cf_85875261",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
         "patchSetId": 6
@@ -106,6 +160,24 @@
     },
     {
       "key": {
+        "uuid": "dad5f5cf_25ab068b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 907,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-10-28T12:38:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dad5f5cf_85875261",
+      "revId": "a39e588b047ac17f4906e09de25acd031ed04c92",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dad5f5cf_2520e69a",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
         "patchSetId": 6
@@ -117,6 +189,24 @@
       "writtenOn": "2015-10-28T11:23:12Z",
       "side": 1,
       "message": "\"there is\". I used \"indicates\" b/c it flows a little better grammatically.  \n\nBut thinking about it more I think \"apparent shard leader\" would be confusing. How about we say:\n\n\"There is no leader for shard %s\"",
+      "revId": "a39e588b047ac17f4906e09de25acd031ed04c92",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dad5f5cf_45b08af4",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 909,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-10-28T12:38:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dad5f5cf_2520e69a",
       "revId": "a39e588b047ac17f4906e09de25acd031ed04c92",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
