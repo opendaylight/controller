@@ -578,6 +578,24 @@
       "revId": "e2273a5b65d189f0528a0e9b97bf4d66217da404",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dad5f5cf_2541c60b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1114,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-10-28T11:53:27Z",
+      "side": 1,
+      "message": "Though the mockShardLeaderActor is the TestActor of JavaTestKit, reply gives an error as \"last receive did not dequeue a message\". So, without the inner class, i am not able to respond back to the ShardManager actor.",
+      "parentUuid": "dad5f5cf_e595fe88",
+      "revId": "e2273a5b65d189f0528a0e9b97bf4d66217da404",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
