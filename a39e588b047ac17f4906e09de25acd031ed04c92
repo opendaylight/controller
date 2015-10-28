@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "dad5f5cf_e51f3e08",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/DefaultConfigParamsImpl.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-28T12:16:31Z",
+      "side": 1,
+      "message": "I see your point but I wouldn\u0027t worry about the transition from empty to DefaultRaftPolicy - it\u0027s not really a sensible workflow. We really just want to prevent changing the behavior when nothing changed with raft policy (i.e. when some other config param changed - the normal case).",
+      "parentUuid": "dad5f5cf_a5bdb604",
+      "revId": "a39e588b047ac17f4906e09de25acd031ed04c92",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dad5f5cf_0565a2e0",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
         "patchSetId": 6
