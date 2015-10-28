@@ -560,6 +560,24 @@
       "revId": "e2273a5b65d189f0528a0e9b97bf4d66217da404",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dad5f5cf_e595fe88",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1114,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-28T11:26:41Z",
+      "side": 1,
+      "message": "The mockShardLeaderActor would be the JavaTestKit actor. It seems that would work. It\u0027s fine either way though, just 1 less inner class using JavaTestKit but not a big deal.",
+      "parentUuid": "dad5f5cf_a56136d5",
+      "revId": "e2273a5b65d189f0528a0e9b97bf4d66217da404",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
