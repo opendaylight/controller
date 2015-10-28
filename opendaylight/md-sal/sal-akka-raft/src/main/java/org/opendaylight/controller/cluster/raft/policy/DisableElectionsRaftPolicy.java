@@ -9,10 +9,11 @@
 package org.opendaylight.controller.cluster.raft.policy;
 
 /**
- * DisableElectionsRaftPolicy can be useful for testing purposes where we may want to disable
- * elections so that the Leaders for a RaftActor can be set externally. Modification to state would
+ * DisableElectionsRaftPolicy can be used for actors that does not
+ * participate in shard election. Modification to state would
  * still require consensus.
  */
+
 public class DisableElectionsRaftPolicy implements RaftPolicy {
     @Override
     public boolean automaticElectionsEnabled() {
