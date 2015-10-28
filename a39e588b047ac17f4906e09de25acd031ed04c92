@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dad5f5cf_fa083d2f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/DefaultConfigParamsImpl.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-28T11:23:12Z",
+      "side": 1,
+      "message": "customRaftPolicyImplementationClass is the user-specified custom class - we should not return something that the user didn\u0027t specify. getRaftPolicy is the resulting instance used the internal raft code and is derived from customRaftPolicyImplementationClass with a fallback.",
+      "revId": "a39e588b047ac17f4906e09de25acd031ed04c92",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dad5f5cf_0565a2e0",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 809,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-28T11:23:12Z",
+      "side": 1,
+      "message": "You should actually send a RemoteFindPrimary message to ensure a RemotePrimaryShardFound response is received.",
+      "revId": "a39e588b047ac17f4906e09de25acd031ed04c92",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dad5f5cf_0510424d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 905,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-28T11:23:12Z",
+      "side": 1,
+      "message": "\"timedout\" should be 2 words. \n\nBut why didn\u0027t you want to use my more descriptive message which included possible causes?  These error messages will ultimately be displayed to end users so we should try to make them as informative and user-friendly as possible.",
+      "revId": "a39e588b047ac17f4906e09de25acd031ed04c92",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dad5f5cf_85875261",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 907,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-28T11:23:12Z",
+      "side": 1,
+      "message": "It would be safest to check if status \u003d\u003d NO_LEADER in case we add more enums. In fact this whole if block could be a switch statement with default case \"The AddServer request to leader %s for shard %s failed with status %s\"",
+      "revId": "a39e588b047ac17f4906e09de25acd031ed04c92",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dad5f5cf_2520e69a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 909,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-28T11:23:12Z",
+      "side": 1,
+      "message": "\"there is\". I used \"indicates\" b/c it flows a little better grammatically.  \n\nBut thinking about it more I think \"apparent shard leader\" would be confusing. How about we say:\n\n\"There is no leader for shard %s\"",
+      "revId": "a39e588b047ac17f4906e09de25acd031ed04c92",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
