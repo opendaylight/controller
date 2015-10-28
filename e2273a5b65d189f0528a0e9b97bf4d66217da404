@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "dad5f5cf_f49ff64e",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 488,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-10-28T06:38:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dad5f5cf_512b74eb",
+      "revId": "e2273a5b65d189f0528a0e9b97bf4d66217da404",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dad5f5cf_7130f856",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2015-10-27T14:45:05Z",
       "side": 1,
       "message": "You should use Objects.equals - it handles nulls, i.e. if both are null returns true - no need to check for \"DefaultRaftPolicy\".",
+      "revId": "e2273a5b65d189f0528a0e9b97bf4d66217da404",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dad5f5cf_94ac6a8e",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 495,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-10-28T06:38:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dad5f5cf_7130f856",
       "revId": "e2273a5b65d189f0528a0e9b97bf4d66217da404",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "dad5f5cf_94c30a38",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1019,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-10-28T06:38:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dad5f5cf_d1da04e9",
+      "revId": "e2273a5b65d189f0528a0e9b97bf4d66217da404",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dad5f5cf_51ee148d",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
         "patchSetId": 4
@@ -64,6 +118,24 @@
       "writtenOn": "2015-10-27T14:45:05Z",
       "side": 1,
       "message": "I think the first test should be the normal case where both are null, i.e. initialize the actor with just \"new DefaultConfigParamsImpl()\" and call mockRaftActor.updateConfigParams with a new DefaultConfigParamsImpl instance. Then call updateConfigParams with \"DisableElectionsRaftPolicy\" set and then with \"DisableElectionsRaftPolicy\" again (no change) and then with another non-null instance (\"DefaultRaftPolicy\") and then with null again.",
+      "revId": "e2273a5b65d189f0528a0e9b97bf4d66217da404",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dad5f5cf_d4af522a",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1022,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-10-28T06:38:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dad5f5cf_51ee148d",
       "revId": "e2273a5b65d189f0528a0e9b97bf4d66217da404",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "dad5f5cf_94a9ca26",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1027,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-10-28T06:38:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dad5f5cf_31ed908c",
+      "revId": "e2273a5b65d189f0528a0e9b97bf4d66217da404",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dad5f5cf_3149108c",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
         "patchSetId": 4
@@ -98,6 +188,24 @@
       "writtenOn": "2015-10-27T14:45:05Z",
       "side": 1,
       "message": "We\u0027re logging to error here but logging to debug in other cases. We should be consistent and log to debug here as well.",
+      "revId": "e2273a5b65d189f0528a0e9b97bf4d66217da404",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dad5f5cf_776308b2",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 816,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-10-28T06:38:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dad5f5cf_3149108c",
       "revId": "e2273a5b65d189f0528a0e9b97bf4d66217da404",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "dad5f5cf_17587cf9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 818,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-10-28T06:38:06Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "dad5f5cf_b12bc093",
+      "revId": "e2273a5b65d189f0528a0e9b97bf4d66217da404",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dad5f5cf_d1af642a",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
         "patchSetId": 4
@@ -132,6 +258,24 @@
       "writtenOn": "2015-10-27T14:45:05Z",
       "side": 1,
       "message": "\"respose\" (sic) - \"response\"",
+      "revId": "e2273a5b65d189f0528a0e9b97bf4d66217da404",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dad5f5cf_9a5491cb",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 836,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-10-28T06:38:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dad5f5cf_d1af642a",
       "revId": "e2273a5b65d189f0528a0e9b97bf4d66217da404",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "dad5f5cf_7a63edb1",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 853,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-10-28T06:38:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dad5f5cf_f46e1696",
+      "revId": "e2273a5b65d189f0528a0e9b97bf4d66217da404",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dad5f5cf_11b64c8b",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
         "patchSetId": 4
@@ -166,6 +328,24 @@
       "writtenOn": "2015-10-27T14:45:05Z",
       "side": 1,
       "message": "Same as above re: debug logging. Also can you log the leader actor\u0027s path here and also the failure, i.e.:\n\nLOG.debug(\"The AddServer request to leader {} failed\", response.getPrimaryPath(), failure);",
+      "revId": "e2273a5b65d189f0528a0e9b97bf4d66217da404",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dad5f5cf_ba5155da",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 862,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-10-28T06:38:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dad5f5cf_11b64c8b",
       "revId": "e2273a5b65d189f0528a0e9b97bf4d66217da404",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -189,6 +369,24 @@
     },
     {
       "key": {
+        "uuid": "dad5f5cf_5a5e29eb",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 869,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-10-28T06:38:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dad5f5cf_711d5873",
+      "revId": "e2273a5b65d189f0528a0e9b97bf4d66217da404",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dad5f5cf_d412f257",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
         "patchSetId": 4
@@ -200,6 +398,24 @@
       "writtenOn": "2015-10-27T14:45:05Z",
       "side": 1,
       "message": "%d should be %s",
+      "revId": "e2273a5b65d189f0528a0e9b97bf4d66217da404",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dad5f5cf_fa6efd95",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 902,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-10-28T06:38:06Z",
+      "side": 1,
+      "message": "Modified the exception statement",
+      "parentUuid": "dad5f5cf_d412f257",
       "revId": "e2273a5b65d189f0528a0e9b97bf4d66217da404",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -223,6 +439,24 @@
     },
     {
       "key": {
+        "uuid": "dad5f5cf_da71b978",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 903,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-10-28T06:38:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dad5f5cf_f108682f",
+      "revId": "e2273a5b65d189f0528a0e9b97bf4d66217da404",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dad5f5cf_d4ae72e7",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
         "patchSetId": 4
@@ -240,6 +474,24 @@
     },
     {
       "key": {
+        "uuid": "dad5f5cf_9a6b3185",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1092,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-10-28T06:38:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dad5f5cf_d4ae72e7",
+      "revId": "e2273a5b65d189f0528a0e9b97bf4d66217da404",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dad5f5cf_34f81ee5",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
         "patchSetId": 4
@@ -251,6 +503,24 @@
       "writtenOn": "2015-10-27T14:45:05Z",
       "side": 1,
       "message": "You should capture the AddServer message via the MessageCollectorActor and verify its contents:\n\nshardManager.tell(new AddShardReplica(\"astronauts\"), getRef());\nAddServer addServer \u003d MessageCollectorActor.expectFirstMatching(mockShardActor2, AddServer.class);\n// verify addServer\nshardManager.tell(new AddServerReply(...), mockShardActor2);\nexpectMsgClass(duration(\"5 seconds\"), Status.Success.class);\n\nYou don\u0027t need the MockRespondActor class.",
+      "revId": "e2273a5b65d189f0528a0e9b97bf4d66217da404",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dad5f5cf_b49bae71",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1114,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-10-28T06:38:06Z",
+      "side": 1,
+      "message": "AddServerReply is processed as response from ask(). So sending a separate AddServerReply message to ShardManager is not taken as response for the ask request.\nSo using MockRespondActor to send a reply on AddServer. Can be used for removeServer verification also.\n\nAdded additional verification for AddServer message in leaderShardActor",
+      "parentUuid": "dad5f5cf_34f81ee5",
       "revId": "e2273a5b65d189f0528a0e9b97bf4d66217da404",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
