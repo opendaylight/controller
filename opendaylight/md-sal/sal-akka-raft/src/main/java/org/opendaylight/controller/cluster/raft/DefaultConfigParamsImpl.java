@@ -103,6 +103,7 @@ public class DefaultConfigParamsImpl implements ConfigParams {
         this.customRaftPolicyImplementationClass = customRaftPolicyImplementationClass;
     }
 
+    @Override
     public String getCustomRaftPolicyImplementationClass() {
         return customRaftPolicyImplementationClass;
     }

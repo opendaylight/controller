@@ -98,4 +98,10 @@ public interface ConfigParams {
      * Returns the PeerAddressResolver.
      */
     @Nonnull PeerAddressResolver getPeerAddressResolver();
+
+    /**
+     * @return the RaftPolicy class used by this configuration
+     */
+    String getCustomRaftPolicyImplementationClass();
+
 }

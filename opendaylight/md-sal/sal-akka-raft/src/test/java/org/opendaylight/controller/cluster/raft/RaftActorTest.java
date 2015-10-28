@@ -10,7 +10,9 @@ package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
@@ -1003,4 +1005,52 @@ public class RaftActorTest extends AbstractActorTest {
         }
     }
 
+    @Test
+    public void testUpdateConfigParam() throws Exception {
+        DefaultConfigParamsImpl emptyConfig = new DefaultConfigParamsImpl();
+        String persistenceId = factory.generateActorId("follower-");
+        ImmutableMap<String, String> peerAddresses =
+            ImmutableMap.<String, String>builder().put("member1", "address").build();
+        DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
+
+        TestActorRef<MockRaftActor> actorRef = factory.createTestActor(
+                MockRaftActor.props(persistenceId, peerAddresses,
+                    Optional.<ConfigParams>of(emptyConfig), dataPersistenceProvider), persistenceId);
+        MockRaftActor mockRaftActor = actorRef.underlyingActor();
+        mockRaftActor.waitForInitializeBehaviorComplete();
+
+        RaftActorBehavior behavior = mockRaftActor.getCurrentBehavior();
+        mockRaftActor.updateConfigParams(emptyConfig);
+        assertSame("Same Behavior", behavior, mockRaftActor.getCurrentBehavior());
+        assertEquals("Behavior State", RaftState.Follower,
+            mockRaftActor.getCurrentBehavior().state());
+
+        DefaultConfigParamsImpl disableConfig = new DefaultConfigParamsImpl();
+        disableConfig.setCustomRaftPolicyImplementationClass(
+            "org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy");
+        mockRaftActor.updateConfigParams(disableConfig);
+        assertNotSame("Different Behavior", behavior, mockRaftActor.getCurrentBehavior());
+        assertEquals("Behavior State", RaftState.Follower,
+            mockRaftActor.getCurrentBehavior().state());
+
+        behavior = mockRaftActor.getCurrentBehavior();
+        mockRaftActor.updateConfigParams(disableConfig);
+        assertSame("Same Behavior", behavior, mockRaftActor.getCurrentBehavior());
+        assertEquals("Behavior State", RaftState.Follower,
+            mockRaftActor.getCurrentBehavior().state());
+
+        DefaultConfigParamsImpl defaultConfig = new DefaultConfigParamsImpl();
+        defaultConfig.setCustomRaftPolicyImplementationClass(
+            "org.opendaylight.controller.cluster.raft.policy.DefaultRaftPolicy");
+        mockRaftActor.updateConfigParams(defaultConfig);
+        assertNotSame("Different Behavior", behavior, mockRaftActor.getCurrentBehavior());
+        assertEquals("Behavior State", RaftState.Follower,
+            mockRaftActor.getCurrentBehavior().state());
+
+        behavior = mockRaftActor.getCurrentBehavior();
+        mockRaftActor.updateConfigParams(defaultConfig);
+        assertSame("Same Behavior", behavior, mockRaftActor.getCurrentBehavior());
+        assertEquals("Behavior State", RaftState.Follower,
+            mockRaftActor.getCurrentBehavior().state());
+    }
 }
