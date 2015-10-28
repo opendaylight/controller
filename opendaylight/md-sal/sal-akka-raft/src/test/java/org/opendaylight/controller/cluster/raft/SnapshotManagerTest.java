@@ -36,6 +36,7 @@ import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.SnapshotManager.LastAppliedTermInformationReader;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.SendInstallSnapshot;
+import org.opendaylight.controller.cluster.raft.base.messages.SnapshotComplete;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.slf4j.LoggerFactory;
@@ -427,6 +428,8 @@ public class SnapshotManagerTest extends AbstractActorTest {
         assertEquals(90, criteriaCaptor.getValue().maxSequenceNr()); // sequenceNumber = 100
                                                                      // config snapShotBatchCount = 10
                                                                      // therefore maxSequenceNumber = 90
+
+        MessageCollectorActor.expectFirstMatching(actorRef, SnapshotComplete.class);
     }
 
     @Test
@@ -489,6 +492,8 @@ public class SnapshotManagerTest extends AbstractActorTest {
         snapshotManager.rollback();
 
         verify(mockReplicatedLog).snapshotRollback();
+
+        MessageCollectorActor.expectFirstMatching(actorRef, SnapshotComplete.class);
     }
 
 

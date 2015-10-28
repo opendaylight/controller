@@ -20,6 +20,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.raft.ServerConfigurationPayload.ServerInfo;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
+import org.opendaylight.controller.cluster.raft.base.messages.SnapshotComplete;
 import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader;
 import org.opendaylight.controller.cluster.raft.messages.AddServer;
 import org.opendaylight.controller.cluster.raft.messages.AddServerReply;
@@ -64,6 +65,9 @@ class RaftActorServerConfigurationSupport {
             return true;
         } else if(message instanceof ApplyState) {
             return onApplyState((ApplyState) message, raftActor);
+        } else if(message instanceof SnapshotComplete) {
+            currentOperationState.onSnapshotComplete(raftActor);
+            return false;
         } else {
             return false;
         }
@@ -133,6 +137,8 @@ class RaftActorServerConfigurationSupport {
         void onUnInitializedFollowerSnapshotReply(RaftActor raftActor, UnInitializedFollowerSnapshotReply reply);
 
         void onApplyState(RaftActor raftActor, ApplyState applyState);
+
+        void onSnapshotComplete(RaftActor raftActor);
     }
 
     /**
@@ -169,6 +175,10 @@ class RaftActorServerConfigurationSupport {
         @Override
         public void onApplyState(RaftActor raftActor, ApplyState applyState) {
             LOG.debug("onApplyState was called in state {}", this);
+        }
+
+        @Override
+        public void onSnapshotComplete(RaftActor raftActor) {
         }
 
         protected void persistNewServerConfiguration(RaftActor raftActor, ServerOperationContext<?> operationContext){
@@ -262,6 +272,32 @@ class RaftActorServerConfigurationSupport {
         AddServerContext getAddServerContext() {
             return addServerContext;
         }
+
+        Cancellable newInstallSnapshotTimer(RaftActor raftActor) {
+            return raftContext.getActorSystem().scheduler().scheduleOnce(
+                    new FiniteDuration(((raftContext.getConfigParams().getElectionTimeOutInterval().toMillis()) * 2),
+                            TimeUnit.MILLISECONDS), raftContext.getActor(),
+                            new FollowerCatchUpTimeout(addServerContext.getOperation().getNewServerId()),
+                            raftContext.getActorSystem().dispatcher(), raftContext.getActor());
+        }
+
+        void handleOnFollowerCatchupTimeout(RaftActor raftActor, FollowerCatchUpTimeout followerTimeout) {
+            String serverId = followerTimeout.getNewServerId();
+
+            LOG.debug("{}: onFollowerCatchupTimeout for new server {}", raftContext.getId(), serverId);
+
+            // cleanup
+            raftContext.removePeer(serverId);
+
+            boolean isLeader = raftActor.isLeader();
+            if(isLeader) {
+                AbstractLeader leader = (AbstractLeader) raftActor.getCurrentBehavior();
+                leader.removeFollower(serverId);
+            }
+
+            operationComplete(raftActor, getAddServerContext(),
+                    isLeader ? ServerChangeStatus.TIMEOUT : ServerChangeStatus.NO_LEADER);
+        }
     }
 
     /**
@@ -288,19 +324,19 @@ class RaftActorServerConfigurationSupport {
             leader.addFollower(addServer.getNewServerId());
 
             if(votingState == VotingState.VOTING_NOT_INITIALIZED){
-                LOG.debug("{}: Leader sending initiate capture snapshot to new follower {}", raftContext.getId(),
-                        addServer.getNewServerId());
-
-                leader.initiateCaptureSnapshot(addServer.getNewServerId());
-
                 // schedule the install snapshot timeout timer
-                Cancellable installSnapshotTimer = raftContext.getActorSystem().scheduler().scheduleOnce(
-                        new FiniteDuration(((raftContext.getConfigParams().getElectionTimeOutInterval().toMillis()) * 2),
-                                TimeUnit.MILLISECONDS), raftContext.getActor(),
-                                new FollowerCatchUpTimeout(addServer.getNewServerId()),
-                                raftContext.getActorSystem().dispatcher(), raftContext.getActor());
+                Cancellable installSnapshotTimer = newInstallSnapshotTimer(raftActor);
+                if(leader.initiateCaptureSnapshot(addServer.getNewServerId())) {
+                    LOG.debug("{}: Initiating capture snapshot for new server {}", raftContext.getId(),
+                            addServer.getNewServerId());
 
-                currentOperationState = new InstallingSnapshot(getAddServerContext(), installSnapshotTimer);
+                    currentOperationState = new InstallingSnapshot(getAddServerContext(), installSnapshotTimer);
+                } else {
+                    LOG.debug("{}: Snapshot already in progress - waiting for completion", raftContext.getId());
+
+                    currentOperationState = new WaitingForPriorSnapshotComplete(getAddServerContext(),
+                            installSnapshotTimer);
+                }
             } else {
                 LOG.debug("{}: New follower is non-voting - directly persisting new server configuration",
                         raftContext.getId());
@@ -324,19 +360,10 @@ class RaftActorServerConfigurationSupport {
 
         @Override
         public void onFollowerCatchupTimeout(RaftActor raftActor, FollowerCatchUpTimeout followerTimeout) {
-            String serverId = followerTimeout.getNewServerId();
+            handleOnFollowerCatchupTimeout(raftActor, followerTimeout);
 
-            LOG.debug("{}: onFollowerCatchupTimeout: {}", raftContext.getId(), serverId);
-
-            AbstractLeader leader = (AbstractLeader) raftActor.getCurrentBehavior();
-
-            // cleanup
-            raftContext.removePeer(serverId);
-            leader.removeFollower(serverId);
-
-            LOG.warn("{}: Timeout occured for new server {} while installing snapshot", raftContext.getId(), serverId);
-
-            operationComplete(raftActor, getAddServerContext(), ServerChangeStatus.TIMEOUT);
+            LOG.warn("{}: Timeout occured for new server {} while installing snapshot", raftContext.getId(),
+                    followerTimeout.getNewServerId());
         }
 
         @Override
@@ -347,7 +374,7 @@ class RaftActorServerConfigurationSupport {
 
             // Sanity check to guard against receiving an UnInitializedFollowerSnapshotReply from a prior
             // add server operation that timed out.
-            if(getAddServerContext().getOperation().getNewServerId().equals(followerId)) {
+            if(getAddServerContext().getOperation().getNewServerId().equals(followerId) && raftActor.isLeader()) {
                 AbstractLeader leader = (AbstractLeader) raftActor.getCurrentBehavior();
                 raftContext.getPeerInfo(followerId).setVotingState(VotingState.VOTING);
                 leader.updateMinReplicaCount();
@@ -355,7 +382,53 @@ class RaftActorServerConfigurationSupport {
                 persistNewServerConfiguration(raftActor, getAddServerContext());
 
                 installSnapshotTimer.cancel();
+            } else {
+                LOG.debug("{}: Dropping UnInitializedFollowerSnapshotReply for server {}: {}",
+                        raftContext.getId(), followerId,
+                        !raftActor.isLeader() ? "not leader" : "server Id doesn't match");
             }
+        }
+    }
+
+    /**
+     * The AddServer operation state for when there is a snapshot already in progress. When the current
+     * snapshot completes, it initiates an install snapshot.
+     */
+    private class WaitingForPriorSnapshotComplete extends AddServerState {
+        private final Cancellable snapshotTimer;
+
+        WaitingForPriorSnapshotComplete(AddServerContext addServerContext, Cancellable snapshotTimer) {
+            super(addServerContext);
+            this.snapshotTimer = Preconditions.checkNotNull(snapshotTimer);
+        }
+
+        @Override
+        public void onSnapshotComplete(RaftActor raftActor) {
+            LOG.debug("{}: onSnapshotComplete", raftContext.getId());
+
+            if(!raftActor.isLeader()) {
+                LOG.debug("{}: No longer the leader", raftContext.getId());
+                return;
+            }
+
+            AbstractLeader leader = (AbstractLeader) raftActor.getCurrentBehavior();
+            if(leader.initiateCaptureSnapshot(getAddServerContext().getOperation().getNewServerId())) {
+                LOG.debug("{}: Initiating capture snapshot for new server {}", raftContext.getId(),
+                        getAddServerContext().getOperation().getNewServerId());
+
+                currentOperationState = new InstallingSnapshot(getAddServerContext(),
+                        newInstallSnapshotTimer(raftActor));
+
+                snapshotTimer.cancel();
+            }
+        }
+
+        @Override
+        public void onFollowerCatchupTimeout(RaftActor raftActor, FollowerCatchUpTimeout followerTimeout) {
+            handleOnFollowerCatchupTimeout(raftActor, followerTimeout);
+
+            LOG.warn("{}: Timeout occured for new server {} while waiting for prior snapshot to complete",
+                    raftContext.getId(), followerTimeout.getNewServerId());
         }
     }
 
