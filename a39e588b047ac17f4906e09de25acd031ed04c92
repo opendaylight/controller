@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "dad5f5cf_a5bdb604",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/DefaultConfigParamsImpl.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-10-28T11:53:02Z",
+      "side": 1,
+      "message": "Will not modify the customRaftPolicyImplementationClass. \n\nBut rather will use a new String objet raftPolicyImplementationClass to return a valid RaftPolicy class name that is currently used by the config params. This is required because when a RaftActor modifies the configParams from empty RaftImplementaionClass to DefaultRaftPolicy there should not be any change in behavior. \n\nIf this approach is not acceptable, in the updateConfigParams(), additional checks have to be added if either of the RaftPolicy string is NULL or empty, and the other RaftPolicy is DefaultRaftPolicy avoid re-initialization.\n\nI felt the 2nd approach is cumbersome with multiple checks and hence feel the 1st approach is a better one.",
+      "parentUuid": "dad5f5cf_fa083d2f",
+      "revId": "a39e588b047ac17f4906e09de25acd031ed04c92",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dad5f5cf_0565a2e0",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
         "patchSetId": 6
