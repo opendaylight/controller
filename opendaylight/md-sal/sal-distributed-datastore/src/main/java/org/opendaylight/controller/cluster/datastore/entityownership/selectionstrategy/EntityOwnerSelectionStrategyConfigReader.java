@@ -12,6 +12,7 @@ import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Enumeration;
+import javax.annotation.Nullable;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
@@ -39,35 +40,48 @@ public class EntityOwnerSelectionStrategyConfigReader {
     }
 
     private EntityOwnerSelectionStrategyConfig readConfiguration(ServiceReference<ConfigurationAdmin> configAdminServiceReference) {
-        EntityOwnerSelectionStrategyConfig strategyConfig;
         EntityOwnerSelectionStrategyConfig.Builder builder = EntityOwnerSelectionStrategyConfig.newBuilder();
+        ConfigurationAdmin configAdmin = null;
         try {
-            ConfigurationAdmin configAdmin = bundleContext.getService(configAdminServiceReference);
-            Configuration config = configAdmin.getConfiguration(CONFIG_ID);
-            Dictionary<String, Object> properties = config.getProperties();
-            Enumeration<String> keys = properties.keys();
-            while (keys.hasMoreElements()) {
-                String key = keys.nextElement();
-                String strategyProps = (String) properties.get(key);
-                String[] strategyClassAndDelay = strategyProps.split(",");
-                if(strategyClassAndDelay.length >= 1) {
-                    Class<? extends EntityOwnerSelectionStrategy> aClass
-                            = (Class<? extends EntityOwnerSelectionStrategy>) getClass().getClassLoader().loadClass(strategyClassAndDelay[0]);
-                    long delay = 0;
-                    if(strategyClassAndDelay.length > 1){
-                        delay = Long.parseLong(strategyClassAndDelay[1]);
+            configAdmin = bundleContext.getService(configAdminServiceReference);
+            Dictionary<String, Object> properties = getProperties(configAdmin);
+            if(properties != null) {
+                Enumeration<String> keys = properties.keys();
+                while (keys.hasMoreElements()) {
+                    String key = keys.nextElement();
+                    String strategyProps = (String) properties.get(key);
+                    String[] strategyClassAndDelay = strategyProps.split(",");
+                    if(strategyClassAndDelay.length >= 1) {
+                        @SuppressWarnings("unchecked")
+                        Class<? extends EntityOwnerSelectionStrategy> aClass
+                        = (Class<? extends EntityOwnerSelectionStrategy>) getClass().getClassLoader().loadClass(strategyClassAndDelay[0]);
+                        long delay = 0;
+                        if(strategyClassAndDelay.length > 1){
+                            delay = Long.parseLong(strategyClassAndDelay[1]);
+                        }
+                        builder.addStrategy(key, aClass, delay);
                     }
-                    builder.addStrategy(key, aClass, delay);
                 }
             }
-            strategyConfig = builder.build();
-        } catch(IOException | ClassNotFoundException | NumberFormatException e){
+        } catch(Exception e){
             LOG.warn("Failed to read selection strategy configuration file. All configuration will be ignored.", e);
-            strategyConfig = EntityOwnerSelectionStrategyConfig.newBuilder().build();
         } finally {
-            bundleContext.ungetService(configAdminServiceReference);
+            if(configAdmin != null) {
+                try {
+                    bundleContext.ungetService(configAdminServiceReference);
+                } catch (Exception e) {
+                    LOG.debug("Error from ungetService", e);
+                }
+            }
         }
-        return strategyConfig;
+
+        return builder.build();
+    }
+
+    @Nullable
+    private static Dictionary<String, Object> getProperties(ConfigurationAdmin configAdmin) throws IOException {
+        Configuration config = configAdmin.getConfiguration(CONFIG_ID);
+        return config != null ? config.getProperties() : null;
     }
 
     public EntityOwnerSelectionStrategyConfig getConfig() {
