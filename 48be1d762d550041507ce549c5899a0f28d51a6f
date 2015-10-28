@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dad5f5cf_058602ba",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 823,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-28T13:59:35Z",
+      "side": 1,
+      "message": "The log message is incorrect here (missed that before) but this case shouldn\u0027t occur anyway - can be corrected later.",
+      "revId": "48be1d762d550041507ce549c5899a0f28d51a6f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dad5f5cf_e5017e3a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 835,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-28T13:59:35Z",
+      "side": 1,
+      "message": "This method\u0027s a bit large but we can refactor later.",
+      "revId": "48be1d762d550041507ce549c5899a0f28d51a6f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dad5f5cf_25446673",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 890,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-28T13:59:35Z",
+      "side": 1,
+      "message": "You could get the shardId from the shardInfo instead of reconstructing.",
+      "revId": "48be1d762d550041507ce549c5899a0f28d51a6f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dad5f5cf_65c7ce13",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 1337,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-28T13:59:35Z",
+      "side": 1,
+      "message": "This should technically be volatile but can be changed in another patch.",
+      "revId": "48be1d762d550041507ce549c5899a0f28d51a6f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
