@@ -524,6 +524,24 @@
       "revId": "e2273a5b65d189f0528a0e9b97bf4d66217da404",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dad5f5cf_1a3bc1ec",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1114,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-28T10:28:59Z",
+      "side": 1,
+      "message": "Right - forgot it\u0027s now using ask. This can also be done using the actor ref from a JavaTestKit via expectMsgClass and reply.",
+      "parentUuid": "dad5f5cf_b49bae71",
+      "revId": "e2273a5b65d189f0528a0e9b97bf4d66217da404",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
