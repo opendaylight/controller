@@ -44,9 +44,6 @@ public class EntityOwnerSelectionStrategyConfigReaderTest {
         doReturn(mockConfigAdmin).when(mockBundleContext).getService(mockConfigAdminServiceRef);
 
         doReturn(mockConfig).when(mockConfigAdmin).getConfiguration(EntityOwnerSelectionStrategyConfigReader.CONFIG_ID);
-
-
-
     }
 
     @Test
@@ -66,8 +63,26 @@ public class EntityOwnerSelectionStrategyConfigReaderTest {
     }
 
     @Test
-    public void testReadStrategiesForNonExistentFile() throws IOException {
+    public void testReadStrategiesWithIOException() throws IOException {
         doThrow(IOException.class).when(mockConfigAdmin).getConfiguration(EntityOwnerSelectionStrategyConfigReader.CONFIG_ID);
+
+        EntityOwnerSelectionStrategyConfig config = new EntityOwnerSelectionStrategyConfigReader(mockBundleContext).getConfig();
+
+        assertFalse(config.isStrategyConfigured("test"));
+    }
+
+    @Test
+    public void testReadStrategiesWithNullConfiguration() throws IOException {
+        doReturn(null).when(mockConfigAdmin).getConfiguration(EntityOwnerSelectionStrategyConfigReader.CONFIG_ID);
+
+        EntityOwnerSelectionStrategyConfig config = new EntityOwnerSelectionStrategyConfigReader(mockBundleContext).getConfig();
+
+        assertFalse(config.isStrategyConfigured("test"));
+    }
+
+    @Test
+    public void testReadStrategiesWithNullConfigurationProperties() throws IOException {
+        doReturn(null).when(mockConfig).getProperties();
 
         EntityOwnerSelectionStrategyConfig config = new EntityOwnerSelectionStrategyConfigReader(mockBundleContext).getConfig();
 
