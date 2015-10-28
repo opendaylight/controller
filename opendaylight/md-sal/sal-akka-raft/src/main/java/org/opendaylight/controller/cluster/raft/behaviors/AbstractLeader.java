@@ -399,12 +399,20 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         FollowerToSnapshot followerToSnapshot = mapFollowerToSnapshot.get(followerId);
 
         if (followerToSnapshot == null) {
-            LOG.error("{}: FollowerId {} in InstallSnapshotReply not known to Leader",
+            LOG.error("{}: FollowerToSnapshot not found for follower {} in InstallSnapshotReply",
                     logName(), followerId);
             return;
         }
 
         FollowerLogInformation followerLogInformation = followerToLog.get(followerId);
+        if(followerLogInformation == null) {
+            // This can happen during AddServer if it times out.
+            LOG.error("{}: FollowerLogInformation not found for follower {} in InstallSnapshotReply",
+                    logName(), followerId);
+            mapFollowerToSnapshot.remove(followerId);
+            return;
+        }
+
         followerLogInformation.markFollowerActive();
 
         if (followerToSnapshot.getChunkIndex() == reply.getChunkIndex()) {
@@ -623,17 +631,16 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
      * then send the existing snapshot in chunks to the follower.
      * @param followerId
      */
-    public void initiateCaptureSnapshot(String followerId) {
+    public boolean initiateCaptureSnapshot(String followerId) {
         if (snapshot.isPresent()) {
             // if a snapshot is present in the memory, most likely another install is in progress
             // no need to capture snapshot.
             // This could happen if another follower needs an install when one is going on.
             final ActorSelection followerActor = context.getPeerActorSelection(followerId);
             sendSnapshotChunk(followerActor, followerId);
-
-
+            return true;
         } else {
-            context.getSnapshotManager().captureToInstall(context.getReplicatedLog().last(),
+            return context.getSnapshotManager().captureToInstall(context.getReplicatedLog().last(),
                     this.getReplicatedToAllIndex(), followerId);
         }
     }

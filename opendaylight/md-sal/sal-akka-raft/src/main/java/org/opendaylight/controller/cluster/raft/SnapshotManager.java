@@ -15,6 +15,7 @@ import java.util.List;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.SendInstallSnapshot;
+import org.opendaylight.controller.cluster.raft.base.messages.SnapshotComplete;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.slf4j.Logger;
 
@@ -404,9 +405,7 @@ public class SnapshotManager implements SnapshotState {
 
             context.getPersistenceProvider().deleteMessages(lastSequenceNumber);
 
-            lastSequenceNumber = -1;
-            applySnapshot = null;
-            SnapshotManager.this.currentState = IDLE;
+            snapshotComplete();
         }
 
         @Override
@@ -424,9 +423,15 @@ public class SnapshotManager implements SnapshotState {
                 applySnapshot.getCallback().onFailure();
             }
 
+            snapshotComplete();
+        }
+
+        private void snapshotComplete() {
             lastSequenceNumber = -1;
             applySnapshot = null;
             SnapshotManager.this.currentState = IDLE;
+
+            context.getActor().tell(SnapshotComplete.INSTANCE, context.getActor());
         }
 
         @Override
