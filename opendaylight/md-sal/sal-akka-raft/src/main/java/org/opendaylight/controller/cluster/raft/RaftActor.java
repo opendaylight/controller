@@ -480,7 +480,20 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     protected void updateConfigParams(ConfigParams configParams) {
+
+        // obtain the RaftPolicy for oldConfigParams and the updated one.
+        String oldRaftPolicy = context.getConfigParams().
+            getCustomRaftPolicyImplementationClass();
+        String newRaftPolicy = configParams.
+            getCustomRaftPolicyImplementationClass();
+
+        LOG.debug ("RaftPolicy used with prev.config {}, RaftPolicy used with newConfig {}",
+            oldRaftPolicy, newRaftPolicy);
         context.setConfigParams(configParams);
+        if (!Objects.equal(oldRaftPolicy, newRaftPolicy)) {
+            //RaftPolicy is modifed for the Actor. Re-initialize its current behaviour
+            initializeBehavior();
+        }
     }
 
     public final DataPersistenceProvider persistence() {

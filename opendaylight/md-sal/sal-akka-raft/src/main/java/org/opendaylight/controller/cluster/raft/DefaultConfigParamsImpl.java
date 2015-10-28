@@ -103,7 +103,12 @@ public class DefaultConfigParamsImpl implements ConfigParams {
         this.customRaftPolicyImplementationClass = customRaftPolicyImplementationClass;
     }
 
+    @Override
     public String getCustomRaftPolicyImplementationClass() {
+        if(Strings.isNullOrEmpty(customRaftPolicyImplementationClass)) {
+            // when no raft policy is set, DefaultRaftPolicy is used. Hence returning the same
+            return "org.opendaylight.controller.cluster.raft.policy.DefaultRaftPolicy";
+        }
         return customRaftPolicyImplementationClass;
     }
 
