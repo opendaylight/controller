@@ -9,7 +9,7 @@
 package org.opendaylight.controller.netconf.persist.impl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Collections2;
@@ -59,7 +59,7 @@ public class ConfigPusherImpl implements ConfigPusher {
     private final long conflictingVersionTimeoutMillis;
     private final NetconfOperationServiceFactory configNetconfConnector;
     private static final int QUEUE_SIZE = 100;
-    private BlockingQueue<List<? extends ConfigSnapshotHolder>> queue = new LinkedBlockingQueue<List<? extends ConfigSnapshotHolder>>(QUEUE_SIZE);
+    private final BlockingQueue<List<? extends ConfigSnapshotHolder>> queue = new LinkedBlockingQueue<>(QUEUE_SIZE);
 
     public ConfigPusherImpl(NetconfOperationServiceFactory configNetconfConnector, long maxWaitForCapabilitiesMillis,
                         long conflictingVersionTimeoutMillis) {
@@ -72,6 +72,7 @@ public class ConfigPusherImpl implements ConfigPusher {
         List<? extends ConfigSnapshotHolder> configs;
         while(true) {
             configs = queue.take();
+
             try {
                 internalPushConfigs(configs);
                 ConfigPersisterNotificationHandler jmxNotificationHandler = new ConfigPersisterNotificationHandler(platformMBeanServer, persisterAggregator);
@@ -80,13 +81,14 @@ public class ConfigPusherImpl implements ConfigPusher {
                 }
 
                 LOG.debug("ConfigPusher has pushed configs {}", configs);
-            } catch (NetconfDocumentedException e) {
-                LOG.error("Error pushing configs {}",configs);
-                throw new IllegalStateException(e);
+            } catch (Exception e) {
+                LOG.debug("Failed to push some of configs: {}", configs, e);
+                break;
             }
         }
     }
 
+    @Override
     public void pushConfigs(List<? extends ConfigSnapshotHolder> configs) throws InterruptedException {
         LOG.debug("Requested to push configs {}", configs);
         this.queue.put(configs);
@@ -98,20 +100,30 @@ public class ConfigPusherImpl implements ConfigPusher {
         // start pushing snapshots:
         for (ConfigSnapshotHolder configSnapshotHolder : configs) {
             if(configSnapshotHolder != null) {
+                LOG.info("Pushing configuration snapshot {}", configSnapshotHolder);
                 EditAndCommitResponse editAndCommitResponseWithRetries = null;
                 try {
                     editAndCommitResponseWithRetries = pushConfigWithConflictingVersionRetries(configSnapshotHolder);
                 } catch (ConfigSnapshotFailureException e) {
-                    LOG.warn("Failed to apply configuration snapshot: {}. Config snapshot is not semantically correct and will be IGNORED. " +
+                    LOG.error("Failed to apply configuration snapshot: {}. Config snapshot is not semantically correct and will be IGNORED. " +
                             "for detailed information see enclosed exception.", e.getConfigIdForReporting(), e);
-                    throw new IllegalStateException("Failed to apply configuration snapshot " + e.getConfigIdForReporting(), e);
+                    onFailedConfigPush("Failed to apply configuration snapshot " + e.getConfigIdForReporting(), e);
+                } catch (Exception e) {
+                    LOG.error("Failed to apply configuration snapshot: {}", configSnapshotHolder, e);
+                    onFailedConfigPush("Failed to apply configuration snapshot " + configSnapshotHolder, e);
                 }
-                LOG.debug("Config snapshot pushed successfully: {}, result: {}", configSnapshotHolder, result);
+
+                LOG.info("Successfully pushed configuration snapshot {}", configSnapshotHolder);
                 result.put(configSnapshotHolder, editAndCommitResponseWithRetries);
             }
         }
         LOG.debug("All configuration snapshots have been pushed successfully.");
         return result;
+    }
+
+    @VisibleForTesting
+    protected void onFailedConfigPush(String message, Exception cause) {
+        throw new IllegalStateException(message, cause);
     }
 
     /**
@@ -188,7 +200,7 @@ public class ConfigPusherImpl implements ConfigPusher {
 
     private static class NotEnoughCapabilitiesException extends ConfigPusherException {
         private static final long serialVersionUID = 1L;
-        private Set<String> missingCaps;
+        private final Set<String> missingCaps;
 
         private NotEnoughCapabilitiesException(String message, Set<String> missingCaps) {
             super(message);
