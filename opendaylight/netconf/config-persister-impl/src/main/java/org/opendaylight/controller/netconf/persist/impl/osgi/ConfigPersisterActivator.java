@@ -164,7 +164,7 @@ public class ConfigPersisterActivator implements BundleActivator {
 
             LOG.debug("Creating new job queue");
 
-            final ConfigPusherImpl configPusher = new ConfigPusherImpl(service, maxWaitForCapabilitiesMillis, conflictingVersionTimeoutMillis);
+            final ConfigPusherImpl configPusher = newConfigPusher(service, maxWaitForCapabilitiesMillis, conflictingVersionTimeoutMillis);
             LOG.debug("Configuration Persister got {}", service);
             LOG.debug("Context was {}", context);
             LOG.debug("Registration was {}", registration);
@@ -210,6 +210,12 @@ public class ConfigPersisterActivator implements BundleActivator {
             LOG.trace("Got InnerCustomizer.removedService {}", reference);
         }
 
+    }
+
+    @VisibleForTesting
+    protected ConfigPusherImpl newConfigPusher(NetconfOperationServiceFactory service, long maxWaitForCapabilitiesMillis,
+            long conflictingVersionTimeoutMillis) {
+        return new ConfigPusherImpl(service, maxWaitForCapabilitiesMillis, conflictingVersionTimeoutMillis);
     }
 }
 

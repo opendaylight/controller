@@ -25,6 +25,8 @@ import org.opendaylight.controller.netconf.mapping.api.HandlingPriority;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperation;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationChainedExecution;
 import org.opendaylight.controller.netconf.mapping.api.NetconfOperationService;
+import org.opendaylight.controller.netconf.mapping.api.NetconfOperationServiceFactory;
+import org.opendaylight.controller.netconf.persist.impl.ConfigPusherImpl;
 import org.opendaylight.controller.netconf.persist.impl.osgi.MockedBundleContext.DummyAdapterWithInitialSnapshot;
 import org.opendaylight.controller.netconf.util.xml.XmlUtil;
 import org.slf4j.Logger;
@@ -42,7 +44,20 @@ public class ConfigPersisterTest {
     private void setUpContext(String requiredCapability) throws Exception {
         DummyAdapterWithInitialSnapshot.expectedCapability = requiredCapability;
         ctx = new MockedBundleContext(1000, 1000);
-        configPersisterActivator = new ConfigPersisterActivator();
+        configPersisterActivator = new ConfigPersisterActivator() {
+            @Override
+            protected ConfigPusherImpl newConfigPusher(NetconfOperationServiceFactory service,
+                    long maxWaitForCapabilitiesMillis, long conflictingVersionTimeoutMillis) {
+                return new ConfigPusherImpl(service, maxWaitForCapabilitiesMillis, conflictingVersionTimeoutMillis) {
+                    @Override
+                    protected void onFailedConfigPush(String message, Exception cause) {
+                        handler.uncaughtException(Thread.currentThread(), cause);
+                        super.onFailedConfigPush(message, cause);
+                    }
+
+                };
+            }
+        };
     }
 
     private void setUpContextAndStartPersister(String requiredCapability, final NetconfOperationService conflictingService) throws Exception {
@@ -54,12 +69,10 @@ public class ConfigPersisterTest {
     @Before
     public void setUp() {
         handler = new TestingExceptionHandler();
-        Thread.setDefaultUncaughtExceptionHandler(handler);
     }
 
     @After
     public void tearDown() throws Exception {
-        Thread.setDefaultUncaughtExceptionHandler(null);
         configPersisterActivator.stop(ctx.getBundleContext());
     }
 
@@ -75,7 +88,7 @@ public class ConfigPersisterTest {
     public void testPersisterSuccessfulPush() throws Exception {
         setUpContextAndStartPersister("cap1", getWorkingService(getOKDocument()));
         Thread.sleep(2000);
-        assertCannotRegisterAsJMXListener_pushWasSuccessful();
+        handler.assertNoException();
     }
 
     // this means pushing of config was successful
@@ -141,9 +154,8 @@ public class ConfigPersisterTest {
             doReturn(workingService).when(ctx.serviceFactory).createService(anyString());
 
         configPersisterActivator.start(ctx.getBundleContext());
-
-        Thread.sleep(1000);
-        assertCannotRegisterAsJMXListener_pushWasSuccessful();
+        Thread.sleep(2000);
+        handler.assertNoException();
     }
 
 }
