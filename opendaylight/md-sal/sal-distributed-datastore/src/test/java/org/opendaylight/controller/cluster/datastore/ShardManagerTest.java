@@ -1334,7 +1334,7 @@ public class ShardManagerTest extends AbstractActorTest {
 
     private static class MockRespondActor extends MessageCollectorActor {
 
-        private Object responseMsg;
+        private volatile Object responseMsg;
 
         public void updateResponse(Object response) {
             responseMsg = response;
