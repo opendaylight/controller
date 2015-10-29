@@ -19,6 +19,8 @@
         <feature version="${project.version}">odl-jolokia</feature>
     </feature>
     <feature name="odl-jolokia" version="${project.version}" description="Jolokia JMX/HTTP bridge">
+        <bundle>mvn:org.opendaylight.controller/odl-jolokia-osgi/{{VERSION}}</bundle>
+        <configfile finalname="/etc/org.jolokia.osgi.cfg">mvn:org.opendaylight.controller/odl-jolokia-osgi/{{VERSION}}/cfg/configuration</configfile>
         <feature>http</feature>
         <bundle>mvn:org.jolokia/jolokia-osgi/{{VERSION}}</bundle>
     </feature>
