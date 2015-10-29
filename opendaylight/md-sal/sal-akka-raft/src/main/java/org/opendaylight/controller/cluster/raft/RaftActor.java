@@ -108,7 +108,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
      */
     private final RaftActorContextImpl context;
 
-    private final DelegatingPersistentDataProvider delegatingPersistenceProvider = new DelegatingPersistentDataProvider(null);
+    private final DelegatingPersistentDataProvider delegatingPersistenceProvider;
 
     private final PersistentDataProvider persistentProvider;
 
@@ -126,6 +126,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
          Optional<ConfigParams> configParams, short payloadVersion) {
 
         persistentProvider = new PersistentDataProvider(this);
+        delegatingPersistenceProvider = new RaftActorDelegatingPersistentDataProvider(null, persistentProvider);
+
         context = new RaftActorContextImpl(this.getSelf(),
             this.getContext(), id, new ElectionTermImpl(persistentProvider, id, LOG),
             -1, -1, peerAddresses,

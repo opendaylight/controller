@@ -178,6 +178,21 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         assertEquals("Follower last applied index", 3, followerActorContext.getLastApplied());
         assertEquals("New follower commit index", 3, newFollowerActorContext.getCommitIndex());
         assertEquals("New follower last applied index", 3, newFollowerActorContext.getLastApplied());
+
+        List<ReplicatedLogImplEntry> persistedLogEntries = InMemoryJournal.get(LEADER_ID, ReplicatedLogImplEntry.class);
+        assertEquals("Leader ReplicatedLogImplEntry entries", 1, persistedLogEntries.size());
+        ReplicatedLogImplEntry logEntry = persistedLogEntries.get(0);
+        assertEquals("Leader ReplicatedLogImplEntry getTerm", 1, logEntry.getTerm());
+        assertEquals("Leader ReplicatedLogImplEntry getIndex", 3, logEntry.getIndex());
+        assertEquals("Leader ReplicatedLogImplEntry getData", ServerConfigurationPayload.class, logEntry.getData().getClass());
+
+        persistedLogEntries = InMemoryJournal.get(NEW_SERVER_ID, ReplicatedLogImplEntry.class);
+        assertEquals("New follower ReplicatedLogImplEntry entries", 1, persistedLogEntries.size());
+        logEntry = persistedLogEntries.get(0);
+        assertEquals("New follower ReplicatedLogImplEntry getTerm", 1, logEntry.getTerm());
+        assertEquals("New follower ReplicatedLogImplEntry getIndex", 3, logEntry.getIndex());
+        assertEquals("New follower ReplicatedLogImplEntry getData", ServerConfigurationPayload.class,
+                logEntry.getData().getClass());
     }
 
     @Test
@@ -701,6 +716,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
     public static class MockNewFollowerRaftActor extends AbstractMockRaftActor {
         public MockNewFollowerRaftActor(ConfigParams config, TestActorRef<MessageCollectorActor> collectorActor) {
             super(NEW_SERVER_ID, Maps.<String, String>newHashMap(), Optional.of(config), null, collectorActor);
+            setPersistence(false);
         }
 
         static Props props(ConfigParams config, TestActorRef<MessageCollectorActor> collectorActor) {
