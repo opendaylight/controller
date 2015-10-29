@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "dad5f5cf_f3c38388",
+        "filename": "opendaylight/netconf/config-persister-impl/src/main/java/org/opendaylight/controller/netconf/persist/impl/ConfigPusherImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-29T22:49:55Z",
+      "side": 1,
+      "message": "yeah - I can change it although not really part of this patch. although neither is \u0027final\u0027 but that was put in by eclipse :)",
+      "parentUuid": "dad5f5cf_53f84fe5",
+      "revId": "8e087c1fe566dc6af4439d87c40371fce1450f83",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dad5f5cf_f3dce376",
         "filename": "opendaylight/netconf/config-persister-impl/src/main/java/org/opendaylight/controller/netconf/persist/impl/ConfigPusherImpl.java",
         "patchSetId": 2
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "dad5f5cf_13c16780",
+        "filename": "opendaylight/netconf/config-persister-impl/src/main/java/org/opendaylight/controller/netconf/persist/impl/ConfigPusherImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-29T22:49:55Z",
+      "side": 1,
+      "message": "it\u0027s overridden by unit tests",
+      "parentUuid": "dad5f5cf_f3dce376",
+      "revId": "8e087c1fe566dc6af4439d87c40371fce1450f83",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dad5f5cf_13dac778",
         "filename": "opendaylight/netconf/config-persister-impl/src/main/java/org/opendaylight/controller/netconf/persist/impl/osgi/ConfigPersisterActivator.java",
         "patchSetId": 2
@@ -47,6 +83,24 @@
       "writtenOn": "2015-10-29T22:46:54Z",
       "side": 1,
       "message": "should be static",
+      "revId": "8e087c1fe566dc6af4439d87c40371fce1450f83",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dad5f5cf_53cfefb0",
+        "filename": "opendaylight/netconf/config-persister-impl/src/main/java/org/opendaylight/controller/netconf/persist/impl/osgi/ConfigPersisterActivator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 216,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-10-29T22:49:55Z",
+      "side": 1,
+      "message": "no - I override it in unit test",
+      "parentUuid": "dad5f5cf_13dac778",
       "revId": "8e087c1fe566dc6af4439d87c40371fce1450f83",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
