@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dad5f5cf_5d5cde25",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 3366
+      },
+      "writtenOn": "2015-10-29T14:51:12Z",
+      "side": 1,
+      "message": "May be it is typo and it should be returning true.",
+      "revId": "79528b5f9e2165939f1ff0095ac026417d2c9a2d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
