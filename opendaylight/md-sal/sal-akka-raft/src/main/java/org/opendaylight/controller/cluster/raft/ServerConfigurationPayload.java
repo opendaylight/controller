@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
+import org.opendaylight.controller.cluster.raft.protobuff.client.messages.PersistentPayload;
 import org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +27,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Thomas Pantelis
  */
-public class ServerConfigurationPayload extends Payload implements Serializable {
+public class ServerConfigurationPayload extends Payload implements PersistentPayload, Serializable {
     private static final long serialVersionUID = 1L;
 
     private static final Logger LOG = LoggerFactory.getLogger(ServerConfigurationPayload.class);
