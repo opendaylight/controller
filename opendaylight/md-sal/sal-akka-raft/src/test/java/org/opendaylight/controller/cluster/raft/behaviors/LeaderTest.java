@@ -37,6 +37,7 @@ import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogImplEntry;
 import org.opendaylight.controller.cluster.raft.SerializationUtils;
 import org.opendaylight.controller.cluster.raft.Snapshot;
+import org.opendaylight.controller.cluster.raft.VotingState;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
@@ -1877,6 +1878,69 @@ public class LeaderTest extends AbstractLeaderTest {
                     appendEntries.size() > 1);
 
         }};
+    }
+
+    @Test
+    public void testReplicationConsensusWithNonVotingFollower() {
+        logStart("testReplicationConsensusWithNonVotingFollower");
+
+        MockRaftActorContext leaderActorContext = createActorContextWithFollower();
+        ((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setHeartBeatInterval(
+                new FiniteDuration(1000, TimeUnit.SECONDS));
+
+        leaderActorContext.setReplicatedLog(new MockRaftActorContext.MockReplicatedLogBuilder().build());
+
+        String nonVotingFollowerId = "nonvoting-follower";
+        TestActorRef<ForwardMessageToBehaviorActor> nonVotingFollowerActor = actorFactory.createTestActor(
+                Props.create(MessageCollectorActor.class), actorFactory.generateActorId(nonVotingFollowerId));
+
+        leaderActorContext.addToPeers(nonVotingFollowerId, nonVotingFollowerActor.path().toString(), VotingState.NON_VOTING);
+
+        leader = new Leader(leaderActorContext);
+
+        // Ignore initial heartbeats
+        MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
+        MessageCollectorActor.expectFirstMatching(nonVotingFollowerActor, AppendEntries.class);
+
+        MessageCollectorActor.clearMessages(followerActor);
+        MessageCollectorActor.clearMessages(nonVotingFollowerActor);
+        MessageCollectorActor.clearMessages(leaderActor);
+
+        // Send a Replicate message and wait for AppendEntries.
+        sendReplicate(leaderActorContext, 0);
+
+        MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
+        MessageCollectorActor.expectFirstMatching(nonVotingFollowerActor, AppendEntries.class);
+
+        // Send reply only from the voting follower and verify consensus via ApplyState.
+        leader.handleMessage(leaderActor, new AppendEntriesReply(FOLLOWER_ID, 1, true, 0, 1, (short)0));
+
+        MessageCollectorActor.expectFirstMatching(leaderActor, ApplyState.class);
+
+        leader.handleMessage(leaderActor, new AppendEntriesReply(nonVotingFollowerId, 1, true, 0, 1, (short)0));
+
+        MessageCollectorActor.clearMessages(followerActor);
+        MessageCollectorActor.clearMessages(nonVotingFollowerActor);
+        MessageCollectorActor.clearMessages(leaderActor);
+
+        // Send another Replicate message
+        sendReplicate(leaderActorContext, 1);
+
+        MessageCollectorActor.expectFirstMatching(followerActor, AppendEntries.class);
+        AppendEntries appendEntries = MessageCollectorActor.expectFirstMatching(nonVotingFollowerActor,
+                AppendEntries.class);
+        assertEquals("Log entries size", 1, appendEntries.getEntries().size());
+        assertEquals("Log entry index", 1, appendEntries.getEntries().get(0).getIndex());
+
+        // Send reply only from the non-voting follower and verify no consensus via no ApplyState.
+        leader.handleMessage(leaderActor, new AppendEntriesReply(nonVotingFollowerId, 1, true, 1, 1, (short)0));
+
+        MessageCollectorActor.assertNoneMatching(leaderActor, ApplyState.class, 500);
+
+        // Send reply from the voting follower and verify consensus.
+        leader.handleMessage(leaderActor, new AppendEntriesReply(FOLLOWER_ID, 1, true, 0, 1, (short)0));
+
+        MessageCollectorActor.expectFirstMatching(leaderActor, ApplyState.class);
     }
 
     @Override
