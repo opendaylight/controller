@@ -60,6 +60,30 @@
     },
     {
       "key": {
+        "uuid": "dad5f5cf_a9a6e8bf",
+        "filename": "opendaylight/netconf/config-persister-impl/src/main/java/org/opendaylight/controller/netconf/persist/impl/ConfigPusherImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1840
+      },
+      "writtenOn": "2015-10-30T12:13:59Z",
+      "side": 1,
+      "message": "Spoke with Tom -- this is catching an exception that is already caught, logged and then rethrown upstream. So this is debug to avoid duplicate logging by default.",
+      "parentUuid": "dad5f5cf_a9bfc8cf",
+      "range": {
+        "startLine": 85,
+        "startChar": 16,
+        "endLine": 85,
+        "endChar": 42
+      },
+      "revId": "8e087c1fe566dc6af4439d87c40371fce1450f83",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dad5f5cf_f3dce376",
         "filename": "opendaylight/netconf/config-persister-impl/src/main/java/org/opendaylight/controller/netconf/persist/impl/ConfigPusherImpl.java",
         "patchSetId": 2
