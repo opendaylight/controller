@@ -84,6 +84,29 @@
     },
     {
       "key": {
+        "uuid": "dad5f5cf_4e12e263",
+        "filename": "opendaylight/netconf/config-persister-impl/src/main/java/org/opendaylight/controller/netconf/persist/impl/ConfigPusherImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2015-10-30T13:42:24Z",
+      "side": 1,
+      "message": "Why are we discarding an exception that was possibly just created on line 126?\nThat sounds like a job for ConfigPersisterActivator after line 181.",
+      "range": {
+        "startLine": 86,
+        "startChar": 16,
+        "endLine": 86,
+        "endChar": 22
+      },
+      "revId": "8e087c1fe566dc6af4439d87c40371fce1450f83",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dad5f5cf_f3dce376",
         "filename": "opendaylight/netconf/config-persister-impl/src/main/java/org/opendaylight/controller/netconf/persist/impl/ConfigPusherImpl.java",
         "patchSetId": 2
