@@ -67,8 +67,10 @@ import org.opendaylight.controller.cluster.raft.base.messages.UpdateElectionTerm
 import org.opendaylight.controller.cluster.raft.behaviors.Follower;
 import org.opendaylight.controller.cluster.raft.behaviors.Leader;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
+import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshot;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
+import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
@@ -338,34 +340,40 @@ public class RaftActorTest extends AbstractActorTest {
         mockRaftActor.waitForRecoveryComplete();
 
         ApplySnapshot applySnapshot = new ApplySnapshot(mock(Snapshot.class));
-        doReturn(true).when(mockSupport).handleSnapshotMessage(same(applySnapshot));
+        doReturn(true).when(mockSupport).handleSnapshotMessage(same(applySnapshot), any(ActorRef.class));
         mockRaftActor.handleCommand(applySnapshot);
 
         CaptureSnapshot captureSnapshot = new CaptureSnapshot(1, 1, 1, 1, 0, 1, null);
-        doReturn(true).when(mockSupport).handleSnapshotMessage(same(captureSnapshot));
+        doReturn(true).when(mockSupport).handleSnapshotMessage(same(captureSnapshot), any(ActorRef.class));
         mockRaftActor.handleCommand(captureSnapshot);
 
         CaptureSnapshotReply captureSnapshotReply = new CaptureSnapshotReply(new byte[0]);
-        doReturn(true).when(mockSupport).handleSnapshotMessage(same(captureSnapshotReply));
+        doReturn(true).when(mockSupport).handleSnapshotMessage(same(captureSnapshotReply), any(ActorRef.class));
         mockRaftActor.handleCommand(captureSnapshotReply);
 
         SaveSnapshotSuccess saveSnapshotSuccess = new SaveSnapshotSuccess(mock(SnapshotMetadata.class));
-        doReturn(true).when(mockSupport).handleSnapshotMessage(same(saveSnapshotSuccess));
+        doReturn(true).when(mockSupport).handleSnapshotMessage(same(saveSnapshotSuccess), any(ActorRef.class));
         mockRaftActor.handleCommand(saveSnapshotSuccess);
 
         SaveSnapshotFailure saveSnapshotFailure = new SaveSnapshotFailure(mock(SnapshotMetadata.class), new Throwable());
-        doReturn(true).when(mockSupport).handleSnapshotMessage(same(saveSnapshotFailure));
+        doReturn(true).when(mockSupport).handleSnapshotMessage(same(saveSnapshotFailure), any(ActorRef.class));
         mockRaftActor.handleCommand(saveSnapshotFailure);
 
-        doReturn(true).when(mockSupport).handleSnapshotMessage(same(RaftActorSnapshotMessageSupport.COMMIT_SNAPSHOT));
+        doReturn(true).when(mockSupport).handleSnapshotMessage(same(RaftActorSnapshotMessageSupport.COMMIT_SNAPSHOT),
+                any(ActorRef.class));
         mockRaftActor.handleCommand(RaftActorSnapshotMessageSupport.COMMIT_SNAPSHOT);
 
-        verify(mockSupport).handleSnapshotMessage(same(applySnapshot));
-        verify(mockSupport).handleSnapshotMessage(same(captureSnapshot));
-        verify(mockSupport).handleSnapshotMessage(same(captureSnapshotReply));
-        verify(mockSupport).handleSnapshotMessage(same(saveSnapshotSuccess));
-        verify(mockSupport).handleSnapshotMessage(same(saveSnapshotFailure));
-        verify(mockSupport).handleSnapshotMessage(same(RaftActorSnapshotMessageSupport.COMMIT_SNAPSHOT));
+        doReturn(true).when(mockSupport).handleSnapshotMessage(same(GetSnapshot.INSTANCE), any(ActorRef.class));
+        mockRaftActor.handleCommand(GetSnapshot.INSTANCE);
+
+        verify(mockSupport).handleSnapshotMessage(same(applySnapshot), any(ActorRef.class));
+        verify(mockSupport).handleSnapshotMessage(same(captureSnapshot), any(ActorRef.class));
+        verify(mockSupport).handleSnapshotMessage(same(captureSnapshotReply), any(ActorRef.class));
+        verify(mockSupport).handleSnapshotMessage(same(saveSnapshotSuccess), any(ActorRef.class));
+        verify(mockSupport).handleSnapshotMessage(same(saveSnapshotFailure), any(ActorRef.class));
+        verify(mockSupport).handleSnapshotMessage(same(RaftActorSnapshotMessageSupport.COMMIT_SNAPSHOT),
+                any(ActorRef.class));
+        verify(mockSupport).handleSnapshotMessage(same(GetSnapshot.INSTANCE), any(ActorRef.class));
     }
 
     @Test
@@ -1052,5 +1060,106 @@ public class RaftActorTest extends AbstractActorTest {
         assertSame("Same Behavior", behavior, mockRaftActor.getCurrentBehavior());
         assertEquals("Behavior State", RaftState.Follower,
             mockRaftActor.getCurrentBehavior().state());
+    }
+
+    @Test
+    public void testGetSnapshot() throws Exception {
+        TEST_LOG.info("testGetSnapshot starting");
+
+        JavaTestKit kit = new JavaTestKit(getSystem());
+
+        String persistenceId = factory.generateActorId("test-actor-");
+        DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+        config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
+
+        ActorRef raftActor = factory.createActor(MockRaftActor.props(persistenceId,
+                new HashMap<String, String>(), Optional.<ConfigParams>of(config)), persistenceId);
+
+        new JavaTestKit(getSystem()) {{
+            String persistenceId = factory.generateActorId("follower-");
+
+            DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+
+            // Set the heartbeat interval high to essentially disable election otherwise the test
+            // may fail if the actor is switched to Leader and the commitIndex is set to the last
+            // log entry.
+            config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
+
+            ImmutableMap<String, String> peerAddresses = ImmutableMap.<String, String>builder().put("member1", "address").build();
+            ActorRef followerActor = factory.createActor(MockRaftActor.props(persistenceId,
+                    peerAddresses, Optional.<ConfigParams>of(config)), persistenceId);
+
+            watch(followerActor);
+
+            List<ReplicatedLogEntry> snapshotUnappliedEntries = new ArrayList<>();
+            ReplicatedLogEntry entry1 = new MockRaftActorContext.MockReplicatedLogEntry(1, 4,
+                    new MockRaftActorContext.MockPayload("E"));
+            snapshotUnappliedEntries.add(entry1);
+
+            int lastAppliedDuringSnapshotCapture = 3;
+            int lastIndexDuringSnapshotCapture = 4;
+
+            // 4 messages as part of snapshot, which are applied to state
+            ByteString snapshotBytes = fromObject(Arrays.asList(
+                    new MockRaftActorContext.MockPayload("A"),
+                    new MockRaftActorContext.MockPayload("B"),
+                    new MockRaftActorContext.MockPayload("C"),
+                    new MockRaftActorContext.MockPayload("D")));
+
+            Snapshot snapshot = Snapshot.create(snapshotBytes.toByteArray(),
+                    snapshotUnappliedEntries, lastIndexDuringSnapshotCapture, 1,
+                    lastAppliedDuringSnapshotCapture, 1);
+            InMemorySnapshotStore.addSnapshot(persistenceId, snapshot);
+
+            // add more entries after snapshot is taken
+            List<ReplicatedLogEntry> entries = new ArrayList<>();
+            ReplicatedLogEntry entry2 = new MockRaftActorContext.MockReplicatedLogEntry(1, 5,
+                    new MockRaftActorContext.MockPayload("F", 2));
+            ReplicatedLogEntry entry3 = new MockRaftActorContext.MockReplicatedLogEntry(1, 6,
+                    new MockRaftActorContext.MockPayload("G", 3));
+            ReplicatedLogEntry entry4 = new MockRaftActorContext.MockReplicatedLogEntry(1, 7,
+                    new MockRaftActorContext.MockPayload("H", 4));
+            entries.add(entry2);
+            entries.add(entry3);
+            entries.add(entry4);
+
+            int lastAppliedToState = 5;
+            int lastIndex = 7;
+
+            InMemoryJournal.addEntry(persistenceId, 5, entry2);
+            // 2 entries are applied to state besides the 4 entries in snapshot
+            InMemoryJournal.addEntry(persistenceId, 6, new ApplyJournalEntries(lastAppliedToState));
+            InMemoryJournal.addEntry(persistenceId, 7, entry3);
+            InMemoryJournal.addEntry(persistenceId, 8, entry4);
+
+            // kill the actor
+            followerActor.tell(PoisonPill.getInstance(), null);
+            expectMsgClass(duration("5 seconds"), Terminated.class);
+
+            unwatch(followerActor);
+
+            //reinstate the actor
+            TestActorRef<MockRaftActor> ref = factory.createTestActor(
+                    MockRaftActor.props(persistenceId, peerAddresses, Optional.<ConfigParams>of(config)));
+
+            MockRaftActor mockRaftActor = ref.underlyingActor();
+
+            mockRaftActor.waitForRecoveryComplete();
+
+            RaftActorContext context = mockRaftActor.getRaftActorContext();
+            assertEquals("Journal log size", snapshotUnappliedEntries.size() + entries.size(),
+                    context.getReplicatedLog().size());
+            assertEquals("Journal data size", 10, context.getReplicatedLog().dataSize());
+            assertEquals("Last index", lastIndex, context.getReplicatedLog().lastIndex());
+            assertEquals("Last applied", lastAppliedToState, context.getLastApplied());
+            assertEquals("Commit index", lastAppliedToState, context.getCommitIndex());
+            assertEquals("Recovered state size", 6, mockRaftActor.getState().size());
+
+            mockRaftActor.waitForInitializeBehaviorComplete();
+
+            assertEquals("getRaftState", RaftState.Follower, mockRaftActor.getRaftState());
+        }};
+
+        TEST_LOG.info("testGetSnapshot ending");
     }
 }

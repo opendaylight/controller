@@ -7,12 +7,15 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import akka.actor.ActorRef;
 import akka.japi.Procedure;
 import akka.persistence.SaveSnapshotFailure;
 import akka.persistence.SaveSnapshotSuccess;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
+import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
+import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshot;
 import org.slf4j.Logger;
 
 /**
@@ -53,7 +56,7 @@ class RaftActorSnapshotMessageSupport {
         context.getSnapshotManager().setApplySnapshotProcedure(applySnapshotProcedure);
     }
 
-    boolean handleSnapshotMessage(Object message) {
+    boolean handleSnapshotMessage(Object message, ActorRef sender) {
         if(message instanceof ApplySnapshot ) {
             onApplySnapshot((ApplySnapshot) message);
             return true;
@@ -68,6 +71,9 @@ class RaftActorSnapshotMessageSupport {
             return true;
         } else if (message.equals(COMMIT_SNAPSHOT)) {
             context.getSnapshotManager().commit(-1, currentBehavior);
+            return true;
+        } else if (message instanceof GetSnapshot) {
+            onGetSnapshot(sender);
             return true;
         } else {
             return false;
@@ -100,5 +106,17 @@ class RaftActorSnapshotMessageSupport {
                 message.getSnapshot().getLastAppliedIndex(), message.getSnapshot().getLastAppliedTerm());
 
         context.getSnapshotManager().apply(message);
+    }
+
+    private void onGetSnapshot(ActorRef sender) {
+        log.debug("{}: onGetSnapshot", context.getId());
+
+        CaptureSnapshot captureSnapshot = context.getSnapshotManager().newCaptureSnapshot(
+                context.getReplicatedLog().last(), -1, false);
+
+        ActorRef snapshotReplyActor = context.actorOf(SnapshotReplyActor.props(captureSnapshot,
+                ImmutableElectionTerm.copyOf(context.getTermInformation()), sender));
+
+        cohort.createSnapshot(snapshotReplyActor);
     }
 }

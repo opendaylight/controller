@@ -116,6 +116,37 @@ public class SnapshotManager implements SnapshotState {
         return context.getId();
     }
 
+    public CaptureSnapshot newCaptureSnapshot(ReplicatedLogEntry lastLogEntry, long replicatedToAllIndex,
+            boolean installSnapshotInitiated) {
+        TermInformationReader lastAppliedTermInfoReader =
+                lastAppliedTermInformationReader.init(context.getReplicatedLog(), context.getLastApplied(),
+                        lastLogEntry, hasFollowers());
+
+        long lastAppliedIndex = lastAppliedTermInfoReader.getIndex();
+        long lastAppliedTerm = lastAppliedTermInfoReader.getTerm();
+
+        TermInformationReader replicatedToAllTermInfoReader =
+                replicatedToAllTermInformationReader.init(context.getReplicatedLog(), replicatedToAllIndex);
+
+        long newReplicatedToAllIndex = replicatedToAllTermInfoReader.getIndex();
+        long newReplicatedToAllTerm = replicatedToAllTermInfoReader.getTerm();
+
+        List<ReplicatedLogEntry> unAppliedEntries = context.getReplicatedLog().getFrom(lastAppliedIndex + 1);
+
+        long lastLogEntryIndex = lastAppliedIndex;
+        long lastLogEntryTerm = lastAppliedTerm;
+        if(lastLogEntry != null) {
+            lastLogEntryIndex = lastLogEntry.getIndex();
+            lastLogEntryTerm = lastLogEntry.getTerm();
+        } else {
+            LOG.warn("Capturing Snapshot : lastLogEntry is null. Using lastAppliedIndex {} and lastAppliedTerm {} instead.",
+                lastAppliedIndex, lastAppliedTerm);
+        }
+
+        return new CaptureSnapshot(lastLogEntryIndex, lastLogEntryTerm, lastAppliedIndex, lastAppliedTerm,
+                newReplicatedToAllIndex, newReplicatedToAllTerm, unAppliedEntries, installSnapshotInitiated);
+    }
+
     private class AbstractSnapshotState implements SnapshotState {
 
         @Override
@@ -200,36 +231,7 @@ public class SnapshotManager implements SnapshotState {
         }
 
         private boolean capture(ReplicatedLogEntry lastLogEntry, long replicatedToAllIndex, String targetFollower) {
-            TermInformationReader lastAppliedTermInfoReader =
-                    lastAppliedTermInformationReader.init(context.getReplicatedLog(), context.getLastApplied(),
-                            lastLogEntry, hasFollowers());
-
-            long lastAppliedIndex = lastAppliedTermInfoReader.getIndex();
-            long lastAppliedTerm = lastAppliedTermInfoReader.getTerm();
-
-            TermInformationReader replicatedToAllTermInfoReader =
-                    replicatedToAllTermInformationReader.init(context.getReplicatedLog(), replicatedToAllIndex);
-
-            long newReplicatedToAllIndex = replicatedToAllTermInfoReader.getIndex();
-            long newReplicatedToAllTerm = replicatedToAllTermInfoReader.getTerm();
-
-            // send a CaptureSnapshot to self to make the expensive operation async.
-
-            List<ReplicatedLogEntry> unAppliedEntries = context.getReplicatedLog().getFrom(lastAppliedIndex + 1);
-
-            long lastLogEntryIndex = lastAppliedIndex;
-            long lastLogEntryTerm = lastAppliedTerm;
-            if(lastLogEntry != null) {
-                lastLogEntryIndex = lastLogEntry.getIndex();
-                lastLogEntryTerm = lastLogEntry.getTerm();
-            } else {
-                LOG.warn("Capturing Snapshot : lastLogEntry is null. Using lastAppliedIndex {} and lastAppliedTerm {} instead.",
-                    lastAppliedIndex, lastAppliedTerm);
-            }
-
-            captureSnapshot = new CaptureSnapshot(lastLogEntryIndex,
-                lastLogEntryTerm, lastAppliedIndex, lastAppliedTerm,
-                    newReplicatedToAllIndex, newReplicatedToAllTerm, unAppliedEntries, targetFollower != null);
+            captureSnapshot = newCaptureSnapshot(lastLogEntry, replicatedToAllIndex, targetFollower != null);
 
             if(captureSnapshot.isInstallSnapshotInitiated()) {
                 LOG.info("{}: Initiating snapshot capture {} to install on {}",
