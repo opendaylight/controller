@@ -83,7 +83,7 @@ public class RaftActorSnapshotMessageSupportTest {
     }
 
     private void sendMessageToSupport(Object message, boolean expHandled) {
-        boolean handled = support.handleSnapshotMessage(message);
+        boolean handled = support.handleSnapshotMessage(message, mockRaftActorRef);
         assertEquals("complete", expHandled, handled);
     }
 

@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.cluster.raft;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
@@ -20,6 +21,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
@@ -46,9 +48,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import org.apache.commons.lang3.SerializationUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.NonPersistentDataProvider;
 import org.opendaylight.controller.cluster.PersistentDataProvider;
@@ -67,8 +71,11 @@ import org.opendaylight.controller.cluster.raft.base.messages.UpdateElectionTerm
 import org.opendaylight.controller.cluster.raft.behaviors.Follower;
 import org.opendaylight.controller.cluster.raft.behaviors.Leader;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
+import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshot;
+import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshotReply;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
+import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
@@ -338,34 +345,40 @@ public class RaftActorTest extends AbstractActorTest {
         mockRaftActor.waitForRecoveryComplete();
 
         ApplySnapshot applySnapshot = new ApplySnapshot(mock(Snapshot.class));
-        doReturn(true).when(mockSupport).handleSnapshotMessage(same(applySnapshot));
+        doReturn(true).when(mockSupport).handleSnapshotMessage(same(applySnapshot), any(ActorRef.class));
         mockRaftActor.handleCommand(applySnapshot);
 
         CaptureSnapshot captureSnapshot = new CaptureSnapshot(1, 1, 1, 1, 0, 1, null);
-        doReturn(true).when(mockSupport).handleSnapshotMessage(same(captureSnapshot));
+        doReturn(true).when(mockSupport).handleSnapshotMessage(same(captureSnapshot), any(ActorRef.class));
         mockRaftActor.handleCommand(captureSnapshot);
 
         CaptureSnapshotReply captureSnapshotReply = new CaptureSnapshotReply(new byte[0]);
-        doReturn(true).when(mockSupport).handleSnapshotMessage(same(captureSnapshotReply));
+        doReturn(true).when(mockSupport).handleSnapshotMessage(same(captureSnapshotReply), any(ActorRef.class));
         mockRaftActor.handleCommand(captureSnapshotReply);
 
         SaveSnapshotSuccess saveSnapshotSuccess = new SaveSnapshotSuccess(mock(SnapshotMetadata.class));
-        doReturn(true).when(mockSupport).handleSnapshotMessage(same(saveSnapshotSuccess));
+        doReturn(true).when(mockSupport).handleSnapshotMessage(same(saveSnapshotSuccess), any(ActorRef.class));
         mockRaftActor.handleCommand(saveSnapshotSuccess);
 
         SaveSnapshotFailure saveSnapshotFailure = new SaveSnapshotFailure(mock(SnapshotMetadata.class), new Throwable());
-        doReturn(true).when(mockSupport).handleSnapshotMessage(same(saveSnapshotFailure));
+        doReturn(true).when(mockSupport).handleSnapshotMessage(same(saveSnapshotFailure), any(ActorRef.class));
         mockRaftActor.handleCommand(saveSnapshotFailure);
 
-        doReturn(true).when(mockSupport).handleSnapshotMessage(same(RaftActorSnapshotMessageSupport.COMMIT_SNAPSHOT));
+        doReturn(true).when(mockSupport).handleSnapshotMessage(same(RaftActorSnapshotMessageSupport.COMMIT_SNAPSHOT),
+                any(ActorRef.class));
         mockRaftActor.handleCommand(RaftActorSnapshotMessageSupport.COMMIT_SNAPSHOT);
 
-        verify(mockSupport).handleSnapshotMessage(same(applySnapshot));
-        verify(mockSupport).handleSnapshotMessage(same(captureSnapshot));
-        verify(mockSupport).handleSnapshotMessage(same(captureSnapshotReply));
-        verify(mockSupport).handleSnapshotMessage(same(saveSnapshotSuccess));
-        verify(mockSupport).handleSnapshotMessage(same(saveSnapshotFailure));
-        verify(mockSupport).handleSnapshotMessage(same(RaftActorSnapshotMessageSupport.COMMIT_SNAPSHOT));
+        doReturn(true).when(mockSupport).handleSnapshotMessage(same(GetSnapshot.INSTANCE), any(ActorRef.class));
+        mockRaftActor.handleCommand(GetSnapshot.INSTANCE);
+
+        verify(mockSupport).handleSnapshotMessage(same(applySnapshot), any(ActorRef.class));
+        verify(mockSupport).handleSnapshotMessage(same(captureSnapshot), any(ActorRef.class));
+        verify(mockSupport).handleSnapshotMessage(same(captureSnapshotReply), any(ActorRef.class));
+        verify(mockSupport).handleSnapshotMessage(same(saveSnapshotSuccess), any(ActorRef.class));
+        verify(mockSupport).handleSnapshotMessage(same(saveSnapshotFailure), any(ActorRef.class));
+        verify(mockSupport).handleSnapshotMessage(same(RaftActorSnapshotMessageSupport.COMMIT_SNAPSHOT),
+                any(ActorRef.class));
+        verify(mockSupport).handleSnapshotMessage(same(GetSnapshot.INSTANCE), any(ActorRef.class));
     }
 
     @Test
@@ -1052,5 +1065,58 @@ public class RaftActorTest extends AbstractActorTest {
         assertSame("Same Behavior", behavior, mockRaftActor.getCurrentBehavior());
         assertEquals("Behavior State", RaftState.Follower,
             mockRaftActor.getCurrentBehavior().state());
+    }
+
+    @Test
+    public void testGetSnapshot() throws Exception {
+        TEST_LOG.info("testGetSnapshot starting");
+
+        JavaTestKit kit = new JavaTestKit(getSystem());
+
+        String persistenceId = factory.generateActorId("test-actor-");
+        DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+        config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
+
+        long seqN = 1;
+        InMemoryJournal.addEntry(persistenceId, seqN++, new UpdateElectionTerm(1, "member-1"));
+        InMemoryJournal.addEntry(persistenceId, seqN++, new MockRaftActorContext.MockReplicatedLogEntry(1, 0,
+                new MockRaftActorContext.MockPayload("A")));
+        InMemoryJournal.addEntry(persistenceId, seqN++, new MockRaftActorContext.MockReplicatedLogEntry(1, 1,
+                new MockRaftActorContext.MockPayload("B")));
+        InMemoryJournal.addEntry(persistenceId, seqN++, new ApplyJournalEntries(1));
+        InMemoryJournal.addEntry(persistenceId, seqN++, new MockRaftActorContext.MockReplicatedLogEntry(1, 2,
+                new MockRaftActorContext.MockPayload("C")));
+
+        TestActorRef<MockRaftActor> raftActorRef = factory.createTestActor(MockRaftActor.props(persistenceId,
+                ImmutableMap.<String, String>builder().put("member1", "address").build(), Optional.<ConfigParams>of(config)).
+                    withDispatcher(Dispatchers.DefaultDispatcherId()), persistenceId);
+        MockRaftActor mockRaftActor = raftActorRef.underlyingActor();
+
+        mockRaftActor.waitForRecoveryComplete();
+
+        mockRaftActor.snapshotCohortDelegate = mock(RaftActorSnapshotCohort.class);
+
+        raftActorRef.tell(GetSnapshot.INSTANCE, kit.getRef());
+
+        ArgumentCaptor<ActorRef> replyActor = ArgumentCaptor.forClass(ActorRef.class);
+        verify(mockRaftActor.snapshotCohortDelegate, timeout(5000)).createSnapshot(replyActor.capture());
+
+        byte[] stateSnapshot = new byte[]{1,2,3};
+        replyActor.getValue().tell(new CaptureSnapshotReply(stateSnapshot), ActorRef.noSender());
+
+        byte[] replySnapshotBytes = kit.expectMsgClass(GetSnapshotReply.class).getSnapshot();
+
+        Snapshot replySnapshot = SerializationUtils.deserialize(replySnapshotBytes);
+        assertEquals("getElectionTerm", 1L, replySnapshot.getElectionTerm());
+        assertEquals("getElectionVotedFor", "member-1", replySnapshot.getElectionVotedFor());
+        assertEquals("getLastAppliedIndex", 1L, replySnapshot.getLastAppliedIndex());
+        assertEquals("getLastAppliedTerm", 1L, replySnapshot.getLastAppliedTerm());
+        assertEquals("getLastIndex", 2L, replySnapshot.getLastIndex());
+        assertEquals("getLastTerm", 1L, replySnapshot.getLastTerm());
+        assertArrayEquals("getState", stateSnapshot, replySnapshot.getState());
+        assertEquals("getUnAppliedEntries size", 1, replySnapshot.getUnAppliedEntries().size());
+        assertEquals("UnApplied entry index ", 2L, replySnapshot.getUnAppliedEntries().get(0).getIndex());
+
+        TEST_LOG.info("testGetSnapshot ending");
     }
 }
