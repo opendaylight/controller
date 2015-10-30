@@ -34,7 +34,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
 
     final RaftActor actorDelegate;
     final RaftActorRecoveryCohort recoveryCohortDelegate;
-    final RaftActorSnapshotCohort snapshotCohortDelegate;
+    volatile RaftActorSnapshotCohort snapshotCohortDelegate;
     private final CountDownLatch recoveryComplete = new CountDownLatch(1);
     private final List<Object> state;
     private ActorRef roleChangeNotifier;
@@ -96,7 +96,12 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
 
     @Override
     protected RaftActorSnapshotMessageSupport newRaftActorSnapshotMessageSupport() {
-        return snapshotMessageSupport != null ? snapshotMessageSupport : super.newRaftActorSnapshotMessageSupport();
+        return snapshotMessageSupport != null ? snapshotMessageSupport :
+            (snapshotMessageSupport = super.newRaftActorSnapshotMessageSupport());
+    }
+
+    public RaftActorSnapshotMessageSupport getSnapshotMessageSupport() {
+        return snapshotMessageSupport;
     }
 
     public void waitForRecoveryComplete() {
