@@ -13,6 +13,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -26,6 +27,7 @@ import akka.cluster.Cluster;
 import akka.cluster.ClusterEvent;
 import akka.dispatch.Dispatchers;
 import akka.japi.Creator;
+import akka.japi.Procedure;
 import akka.pattern.Patterns;
 import akka.persistence.RecoveryCompleted;
 import akka.testkit.JavaTestKit;
@@ -48,6 +50,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.opendaylight.controller.cluster.PersistentDataProvider;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
 import org.opendaylight.controller.cluster.datastore.config.EmptyModuleShardConfigProvider;
@@ -72,6 +75,9 @@ import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
 import org.opendaylight.controller.cluster.datastore.messages.RemotePrimaryShardFound;
 import org.opendaylight.controller.cluster.datastore.messages.RemoveShardReplica;
 import org.opendaylight.controller.cluster.datastore.messages.ShardLeaderStateChanged;
+import org.opendaylight.controller.cluster.datastore.messages.ShardPersistData;
+import org.opendaylight.controller.cluster.datastore.messages.ShardPersistData.ShardReplica;
+import org.opendaylight.controller.cluster.datastore.messages.ShardPersistData.ShardState;
 import org.opendaylight.controller.cluster.datastore.messages.SwitchShardBehavior;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
 import org.opendaylight.controller.cluster.datastore.utils.MockClusterWrapper;
@@ -1166,7 +1172,77 @@ public class ShardManagerTest extends AbstractActorTest {
             assertEquals("Failure obtained", true,
                          (resp.cause() instanceof IllegalArgumentException));
         }};
+    }
 
+    @Test
+    public void testShardPersistenceBeforeRecoveryComplete() throws Exception {
+        String shardManagerID = ShardManagerIdentifier.builder().type(shardMrgIDSuffix).build().toString();
+        MockConfiguration mockConfig =
+                new MockConfiguration(ImmutableMap.<String, List<String>>builder().
+                   put("default", Arrays.asList("member-2")).build());
+        TestActorRef<ForwardingShardManager> shardManager = TestActorRef.create(getSystem(),
+                newPropsShardMgrWithMockShardActor("shardManager1", mockShardActor,
+                   new MockClusterWrapper(), mockConfig), shardManagerID);
+
+        PersistentDataProvider persistentProvider = shardManager.underlyingActor().getPersistenceProvider();
+        //Manually set RecoveryComplete flag false, to avoid persistence
+        shardManager.underlyingActor().getShardPersister().setShardManagerRecoverState(false);
+        shardManager.underlyingActor().getShardPersister().addShard("astronauts");
+        verify(persistentProvider, times(0)).persist(any(ShardPersistData.class), any(Procedure.class));
+        shardManager.underlyingActor().getShardPersister().removeShard("astronauts");
+        verify(persistentProvider, times(0)).persist(any(ShardPersistData.class), any(Procedure.class));
+    }
+
+    @Test
+    public void testShardPersistenceAfterRecoveryComplete() throws Exception {
+        String shardManagerID = ShardManagerIdentifier.builder().type(shardMrgIDSuffix).build().toString();
+        MockConfiguration mockConfig =
+                new MockConfiguration(ImmutableMap.<String, List<String>>builder().
+                   put("default", Arrays.asList("member-2")).build());
+        TestActorRef<ForwardingShardManager> shardManager = TestActorRef.create(getSystem(),
+                newPropsShardMgrWithMockShardActor("shardManager1", mockShardActor,
+                   new MockClusterWrapper(), mockConfig), shardManagerID);
+
+        PersistentDataProvider persistentProvider = shardManager.underlyingActor().getPersistenceProvider();
+        //Manually set RecoveryComplete flag false, to avoid persistence
+        shardManager.underlyingActor().getShardPersister().setShardManagerRecoverState(false);
+
+        shardManager.underlyingActor().getShardPersister().addShard("astronauts");
+        verify(persistentProvider, times(0)).persist(any(ShardPersistData.class), any(Procedure.class));
+        shardManager.underlyingActor().getShardPersister().setShardManagerRecoverState(true);
+        verify(persistentProvider, times(1)).persist(any(ShardPersistData.class), any(Procedure.class));
+        shardManager.underlyingActor().getShardPersister().removeShard("people");
+        verify(persistentProvider, times(2)).persist(any(ShardPersistData.class), any(Procedure.class));
+    }
+
+    @Test
+    public void testShardPersistenceWithRestoredData() throws Exception {
+        new JavaTestKit(getSystem()) {{
+            String shardManagerID = ShardManagerIdentifier.builder().type(shardMrgIDSuffix).build().toString();
+            MockConfiguration mockConfig =
+                new MockConfiguration(ImmutableMap.<String, List<String>>builder().
+                   put("default", Arrays.asList("member-1", "member-2")).
+                   put("astronauts", Arrays.asList("member-2")).build());
+            TestActorRef<ForwardingShardManager> shardManager = TestActorRef.create(getSystem(),
+                newPropsShardMgrWithMockShardActor("shardManager1", mockShardActor,
+                new MockClusterWrapper(), mockConfig), shardManagerID);
+            shardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
+           shardManager.tell(new ActorInitialized(), mockShardActor);
+            ShardReplica rep[] = {new ShardReplica("default", ShardState.Initialized),
+                new ShardReplica("astronauts", ShardState.Initialized),
+                new ShardReplica("people", ShardState.Initialing)};
+            ShardPersistData shardData = new ShardPersistData(Arrays.asList(rep));
+            shardManager.underlyingActor().getShardPersister().processShardList(shardData);
+
+            shardManager.tell(new FindLocalShard("people", false), getRef());
+            LocalShardNotFound notFound = expectMsgClass(duration("5 seconds"), LocalShardNotFound.class);
+            assertEquals("for removed shard", "people", notFound.getShardName());
+
+            shardManager.tell(new FindLocalShard("astronauts", false), getRef());
+            //Not replicating the newly created Shard with primary shard in peer.
+            //so expecting NotInitializedException.
+            expectMsgClass(duration("5 seconds"), NotInitializedException.class);
+        }};
     }
 
     private static class TestShardPropsCreator implements ShardPropsCreator {
@@ -1329,6 +1405,11 @@ public class ShardManagerTest extends AbstractActorTest {
             assertEquals("FindPrimary received", true,
                     Uninterruptibles.awaitUninterruptibly(findPrimaryMessageReceived, 5, TimeUnit.SECONDS));
             findPrimaryMessageReceived = new CountDownLatch(1);
+        }
+
+        @Override
+        protected PersistentDataProvider newPersistentProvider() {
+            return mock(PersistentDataProvider.class);
         }
     }
 

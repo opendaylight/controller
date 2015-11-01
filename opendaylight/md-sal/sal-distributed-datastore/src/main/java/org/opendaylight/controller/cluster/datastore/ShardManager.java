@@ -35,12 +35,14 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import org.opendaylight.controller.cluster.PersistentDataProvider;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActorWithMetering;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ModuleShardConfiguration;
@@ -68,10 +70,14 @@ import org.opendaylight.controller.cluster.datastore.messages.SwitchShardBehavio
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
 import org.opendaylight.controller.cluster.datastore.messages.AddShardReplica;
 import org.opendaylight.controller.cluster.datastore.messages.RemoveShardReplica;
+import org.opendaylight.controller.cluster.datastore.messages.ShardPersistData;
+import org.opendaylight.controller.cluster.datastore.messages.ShardPersistData.ShardReplica;
+import org.opendaylight.controller.cluster.datastore.messages.ShardPersistData.ShardState;
 import org.opendaylight.controller.cluster.datastore.utils.Dispatchers;
 import org.opendaylight.controller.cluster.datastore.utils.PrimaryShardInfoFutureCache;
 import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListener;
 import org.opendaylight.controller.cluster.notifications.RoleChangeNotification;
+import org.opendaylight.controller.cluster.raft.NoopProcedure;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyncUpStatus;
 import org.opendaylight.controller.cluster.raft.base.messages.SwitchBehavior;
@@ -127,6 +133,9 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
     private SchemaContext schemaContext;
 
+    private final PersistentDataProvider persistentProvider;
+
+    private final ShardPersister shardPersister;
     /**
      */
     protected ShardManager(ClusterWrapper cluster, Configuration configuration,
@@ -145,6 +154,8 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         peerAddressResolver = new ShardPeerAddressResolver(type, cluster.getCurrentMemberName());
         this.datastoreContext = DatastoreContext.newBuilderFrom(datastoreContext).shardPeerAddressResolver(
                 peerAddressResolver).build();
+        this.persistentProvider = newPersistentProvider();
+        this.shardPersister = new ShardPersister();
 
         // Subscribe this actor to cluster member events
         cluster.subscribeToMemberEvents(getSelf());
@@ -254,6 +265,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             if(schemaContext != null) {
                 info.setActor(newShardActor(schemaContext, info));
             }
+            shardPersister.updateShardInitializedState(info.getShardName());
 
             reply = new CreateShardReply();
         } catch (Exception e) {
@@ -403,6 +415,12 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             // We no longer persist SchemaContext modules so delete all the prior messages from the akka
             // journal on upgrade from Helium.
             deleteMessages(lastSequenceNr());
+
+            //inform ShardPersister to persist the localShards
+            shardPersister.setShardManagerRecoverState(true);
+        } else if (message instanceof ShardPersistData) {
+            LOG.debug ("{} restore shard list", persistenceId());
+            shardPersister.processShardList((ShardPersistData)message);
         }
     }
 
@@ -701,6 +719,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             localShardActorNames.add(shardId.toString());
             localShards.put(shardName, new ShardInformation(shardName, shardId, peerAddresses, datastoreContext,
                     shardPropsCreator, peerAddressResolver));
+            shardPersister.updateShardInitializedState(shardName);
         }
 
         mBean = ShardManagerInfo.createShardManagerMBean(memberName, "shard-manager-" + this.type,
@@ -845,6 +864,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                           new DefaultShardPropsCreator(), peerAddressResolver);
         localShards.put(shardName, shardInfo);
         shardInfo.setActor(newShardActor(schemaContext, shardInfo));
+        shardPersister.addShard(shardName);
 
         //inform ShardLeader to add this shard as a replica by sending an AddServer message
         LOG.debug ("sending AddServer message to peer {} for shard {}",
@@ -863,6 +883,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                         response.getPrimaryPath(), shardName, failure);
                     // Remove the shard
                     localShards.remove(shardName);
+                    shardPersister.removeShard(shardName);
                     if (shardInfo.getActor() != null) {
                         shardInfo.getActor().tell(PoisonPill.getInstance(), getSelf());
                     }
@@ -889,6 +910,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             ShardIdentifier shardId = getShardIdentifier(cluster.getCurrentMemberName(),
                                                          shardName);
             mBean.addLocalShard(shardId.toString());
+            shardPersister.updateShardInitializedState(shardName);
             sender.tell(new akka.actor.Status.Success(true), getSelf());
         } else {
             LOG.warn ("Cannot add shard replica {} status {}",
@@ -897,6 +919,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                        shardName);
             //remove the local replica created
             localShards.remove(shardName);
+            shardPersister.removeShard(shardName);
             if (shardInfo.getActor() != null) {
                 shardInfo.getActor().tell(PoisonPill.getInstance(), getSelf());
             }
@@ -920,6 +943,33 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         }
     }
 
+    private void addRestoredShard (String shardName) {
+        LOG.debug ("{} creating local shard {} from restoration", persistenceId(), shardName);
+        ShardIdentifier shardId = getShardIdentifier(cluster.getCurrentMemberName(),
+                                                     shardName);
+        ShardInformation shardInfo = new ShardInformation(shardName, shardId,
+            getPeerAddresses(shardName), datastoreContext, new DefaultShardPropsCreator(),
+            peerAddressResolver);
+        localShards.put(shardName, shardInfo);
+        if (schemaContext != null) {
+            shardInfo.setActor(newShardActor(schemaContext, shardInfo));
+        }
+        mBean.addLocalShard(shardId.toString());
+    }
+
+    private void removeRestoredShard (String shardName) {
+        LOG.debug ("{} removing the local shard {}", persistenceId(), shardName);
+        ShardInformation shardInfo = localShards.remove(shardName);
+        if (shardInfo == null) {
+            LOG.debug ("shard {} is not availble in localShards", shardName);
+            return;
+        }
+        if (shardInfo.getActor() != null) {
+            shardInfo.getActor().tell(PoisonPill.getInstance(), getSelf());
+        }
+        mBean.removeLocalShard(shardInfo.getShardId().toString());
+    }
+
     private void onRemoveShardReplica (RemoveShardReplica shardReplicaMsg) {
         String shardName = shardReplicaMsg.getShardName();
         boolean deleteStatus = false;
@@ -935,6 +985,19 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         // call RemoveShard for the shardName
         getSender().tell(new akka.actor.Status.Success(true), getSelf());
         return;
+    }
+
+    @VisibleForTesting
+    protected PersistentDataProvider newPersistentProvider() {
+        return (new PersistentDataProvider(this));
+    }
+
+    protected PersistentDataProvider getPersistenceProvider() {
+        return this.persistentProvider;
+    }
+
+    protected ShardPersister getShardPersister() {
+        return this.shardPersister;
     }
 
     @VisibleForTesting
@@ -1246,6 +1309,86 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
         public Set<String> getModules() {
             return modules;
+        }
+    }
+
+    /**
+     * The local shard replica list persisted by the ShardManager.
+     */
+    protected class ShardPersister {
+        private Map<String, ShardReplica> localShardPersistMap;
+        private boolean shardManagerRecoverState = false;
+
+        public ShardPersister() {
+            localShardPersistMap = new HashMap<String, ShardReplica>();
+        }
+
+        private void persistShardList() {
+            if (this.shardManagerRecoverState == false) {
+                // recoveryComplete is not yet received for the ShardManager.
+                // Donot persist the local shard information.
+                LOG.debug ("RecoveryComplete not received. Not persisting localShardlist");
+                return;
+            }
+            LOG.debug ("persisting shards {}", localShardPersistMap);
+            persistentProvider.persist(new ShardPersistData(new ArrayList(localShardPersistMap.values())),
+                NoopProcedure.instance());
+        }
+
+        public void addShard(String shardName) {
+            ShardReplica shardReplica = new ShardReplica(shardName, ShardState.Initialing);
+            localShardPersistMap.put(shardName, shardReplica);
+            persistShardList();
+        }
+
+        public void removeShard(String shardName) {
+            localShardPersistMap.remove(shardName);
+            persistShardList();
+        }
+
+        public void updateShardInitializedState(String shardName) {
+            ShardReplica shardReplica = localShardPersistMap.get(shardName);
+            if (shardReplica != null) {
+                shardReplica.setShardState(ShardState.Initialized);
+            } else {
+                shardReplica = new ShardReplica(shardName, ShardState.Initialized);
+                localShardPersistMap.put(shardName, shardReplica);
+            }
+            persistShardList();
+        }
+
+        public void setShardManagerRecoverState(boolean flag) {
+            if (this.shardManagerRecoverState == flag) {
+                return;
+            }
+            this.shardManagerRecoverState = flag;
+            if (!localShardPersistMap.isEmpty()) {
+                persistShardList();
+            }
+        }
+
+        public void processShardList(ShardPersistData persistData) {
+            Set<String> shardList = new HashSet<>(localShardPersistMap.keySet());
+            for (ShardReplica shardReplica : persistData.getLocalShardList()) {
+                if (shardReplica.getShardState() == ShardState.Initialized) {
+                    if (!localShardPersistMap.containsKey(shardReplica.getShardName())) {
+                        //localShardList does not have the shard. create it.
+                        addRestoredShard(shardReplica.getShardName());
+                    } else {
+                        // localShardList already contains the shard. Retain it.
+                        shardList.remove(shardReplica.getShardName());
+                    }
+                } else if (localShardPersistMap.containsKey(shardReplica.getShardName())) {
+                    //Shard was not completely initialized. Leader may not be aware of this replica.
+                    //Remove the shard replica
+                    shardList.add(shardReplica.getShardName());
+                }
+            }
+
+            for (String shardName : shardList) {
+                //Remove the shard
+                removeRestoredShard(shardName);
+            }
         }
     }
 }
