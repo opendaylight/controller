@@ -22,6 +22,30 @@
       "revId": "1d92d64264de64022c122b362ac7491c3e6fdb94",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bada0100_7968dbf5",
+        "filename": "opendaylight/netconf/config-persister-impl/src/test/java/org/opendaylight/controller/netconf/persist/impl/osgi/ConfigPersisterTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-02T17:40:47Z",
+      "side": 1,
+      "message": "Yeah looks that way - wouldn\u0027t hurt to sleep anyway since that\u0027s what it did before and we haven\u0027t seen intermittent test failures.",
+      "parentUuid": "bada0100_799a1b16",
+      "range": {
+        "startLine": 90,
+        "startChar": 8,
+        "endLine": 90,
+        "endChar": 36
+      },
+      "revId": "1d92d64264de64022c122b362ac7491c3e6fdb94",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
