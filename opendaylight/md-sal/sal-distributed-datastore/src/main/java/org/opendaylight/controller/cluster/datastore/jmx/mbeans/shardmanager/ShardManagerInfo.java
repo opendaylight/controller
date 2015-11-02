@@ -61,6 +61,10 @@ public class ShardManagerInfo extends AbstractMXBean implements ShardManagerInfo
         localShards.add(shardName);
     }
 
+    public void removeLocalShard(String shardName) {
+        localShards.remove(shardName);
+    }
+
     @Override
     public List<String> getLocalShards() {
         return localShards;
