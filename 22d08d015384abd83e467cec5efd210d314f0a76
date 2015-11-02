@@ -2,6 +2,40 @@
   "comments": [
     {
       "key": {
+        "uuid": "bada0100_f6acd837",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-02T14:33:46Z",
+      "side": 1,
+      "message": "I think we can call the base class directly instead of using a PersistentDataProvider. The reason for using a Provider would be if we wanted to optionally persist the shard manager state but I don\u0027t see that as the case.",
+      "revId": "22d08d015384abd83e467cec5efd210d314f0a76",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bada0100_5663641a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 268,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-02T14:33:46Z",
+      "side": 1,
+      "message": "I\u0027m not sure what we want to do for the CreateShard message yet - this is currently used only for the special entity-ownership shard. I don\u0027t think we\u0027ll want it persisted.",
+      "revId": "22d08d015384abd83e467cec5efd210d314f0a76",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bada0100_9676ac05",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
         "patchSetId": 1
