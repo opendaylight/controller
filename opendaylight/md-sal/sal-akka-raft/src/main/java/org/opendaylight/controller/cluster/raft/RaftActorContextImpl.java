@@ -18,9 +18,12 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Supplier;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
+import org.opendaylight.controller.cluster.raft.ServerConfigurationPayload.ServerInfo;
 import org.slf4j.Logger;
 
 public class RaftActorContextImpl implements RaftActorContext {
@@ -178,6 +181,28 @@ public class RaftActorContextImpl implements RaftActorContext {
 
         return peerAddress;
     }
+
+    @Override
+    public void updatePeerIds(ServerConfigurationPayload serverConfig){
+
+        Set<String> currentPeers = new HashSet<>(this.getPeerIds());
+        for(ServerInfo server: serverConfig.getServerConfig()) {
+            if(!getId().equals(server.getId())) {
+                VotingState votingState = server.isVoting() ? VotingState.VOTING: VotingState.NON_VOTING;
+                if(!currentPeers.contains(server.getId())) {
+                    this.addToPeers(server.getId(), null, votingState);
+                } else {
+                    this.getPeerInfo(server.getId()).setVotingState(votingState);
+                    currentPeers.remove(server.getId());
+                }
+            }
+        }
+
+        for(String peerIdToRemove: currentPeers) {
+            this.removePeer(peerIdToRemove);
+        }
+    }
+
 
     @Override public ConfigParams getConfigParams() {
         return configParams;

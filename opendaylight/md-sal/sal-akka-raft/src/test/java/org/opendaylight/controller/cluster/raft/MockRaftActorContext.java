@@ -20,12 +20,15 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.NonPersistentDataProvider;
 import org.opendaylight.controller.cluster.raft.policy.DefaultRaftPolicy;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
+import org.opendaylight.controller.cluster.raft.ServerConfigurationPayload.ServerInfo;
 import org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages;
 import org.opendaylight.controller.protobuff.messages.cluster.raft.test.MockPayloadMessages;
 import org.slf4j.Logger;
@@ -177,6 +180,26 @@ public class MockRaftActorContext implements RaftActorContext {
         }
 
         return peers;
+    }
+
+    @Override
+    public void updatePeerIds(ServerConfigurationPayload serverConfig){
+        Set<String> currentPeers = new HashSet<>(this.getPeerIds());
+        for(ServerInfo server: serverConfig.getServerConfig()) {
+            if(!getId().equals(server.getId())) {
+                VotingState votingState = server.isVoting() ? VotingState.VOTING: VotingState.NON_VOTING;
+                if(!currentPeers.contains(server.getId())) {
+                    this.addToPeers(server.getId(), null, votingState);
+                } else {
+                    this.getPeerInfo(server.getId()).setVotingState(votingState);
+                    currentPeers.remove(server.getId());
+                }
+            }
+        }
+
+        for(String peerIdToRemove: currentPeers) {
+            this.removePeer(peerIdToRemove);
+        }
     }
 
     @Override public String getPeerAddress(String peerId) {

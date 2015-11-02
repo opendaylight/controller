@@ -146,6 +146,10 @@ class RaftActorRecoverySupport {
                     logEntry.getIndex(), logEntry.size());
         }
 
+        if(logEntry instanceof ServerConfigurationPayload){
+            context.updatePeerIds((ServerConfigurationPayload)logEntry);
+        }
+
         replicatedLog().append(logEntry);
     }
 
