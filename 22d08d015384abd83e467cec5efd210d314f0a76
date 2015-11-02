@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bada0100_9676ac05",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 867,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-02T14:20:28Z",
+      "side": 1,
+      "message": "Shouldn\u0027t we persist the shard list after and only if AddServer is successful?",
+      "revId": "22d08d015384abd83e467cec5efd210d314f0a76",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
