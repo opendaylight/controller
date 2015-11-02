@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bada0100_799a1b16",
+        "filename": "opendaylight/netconf/config-persister-impl/src/test/java/org/opendaylight/controller/netconf/persist/impl/osgi/ConfigPersisterTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-11-02T17:14:21Z",
+      "side": 1,
+      "message": "Shouldn\u0027t the sleep be preserved here ? (Even though its not a great solution) ConfigPrsisterActivator starts a new thread to execute the config persister handling. So the assertion here might occur before the exception could be thrown.",
+      "range": {
+        "startLine": 90,
+        "startChar": 8,
+        "endLine": 90,
+        "endChar": 36
+      },
+      "revId": "1d92d64264de64022c122b362ac7491c3e6fdb94",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
