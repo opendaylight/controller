@@ -1,0 +1,108 @@
+/*
+ * Copyright (c) 2015 Brocade Communications Systems, Inc. and others.  All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ */
+package org.opendaylight.controller.cluster.datastore;
+
+import akka.actor.ActorRef;
+import akka.actor.PoisonPill;
+import akka.actor.Props;
+import akka.actor.ReceiveTimeout;
+import akka.actor.Status.Failure;
+import akka.actor.UntypedActor;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeoutException;
+import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
+import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshot;
+import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshot.ShardSnapshot;
+import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshotReply;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import scala.concurrent.duration.Duration;
+
+/**
+ * Temporary actor used by the ShardManager to compile GetSnapshot replies from the Shard actors and return
+ * a DatastoreSnapshot instance reply.
+ *
+ * @author Thomas Pantelis
+ */
+class ShardManagerGetSnapshotReplyActor extends UntypedActor {
+    private static final Logger LOG = LoggerFactory.getLogger(ShardManagerGetSnapshotReplyActor.class);
+
+    private int repliesReceived;
+    private final Params params;
+    private final List<ShardSnapshot> shardSnapshots = new ArrayList<>();
+
+    private ShardManagerGetSnapshotReplyActor(Params params) {
+        this.params = params;
+
+        LOG.debug("{}: Expecting {} shard snapshot replies", params.id, params.totalShardCount);
+
+        getContext().setReceiveTimeout(params.receiveTimeout);
+    }
+
+    @Override
+    public void onReceive(Object message) {
+        if(message instanceof GetSnapshotReply) {
+            onGetSnapshotReply((GetSnapshotReply)message);
+        } else if(message instanceof Failure) {
+            LOG.debug("{}: Received {}", params.id, message);
+
+            params.replyToActor.tell(message, getSelf());
+            getSelf().tell(PoisonPill.getInstance(), getSelf());
+        } else if (message instanceof ReceiveTimeout) {
+            LOG.warn("{}: Got ReceiveTimeout for inactivity - expected {} GetSnapshotReply messages within {} ms, received {}",
+                    params.id, params.totalShardCount, params.receiveTimeout.toMillis(), repliesReceived);
+
+            params.replyToActor.tell(new akka.actor.Status.Failure(new TimeoutException(String.format(
+                    "Timed out after %s ms while waiting for snapshot replies from %d shards. Actual replies received was %s",
+                        params.receiveTimeout.toMillis(), params.totalShardCount, repliesReceived))), getSelf());
+            getSelf().tell(PoisonPill.getInstance(), getSelf());
+        }
+    }
+
+    private void onGetSnapshotReply(GetSnapshotReply getSnapshotReply) {
+        LOG.debug("{}: Received {}", params.id, getSnapshotReply);
+
+        ShardIdentifier shardId = ShardIdentifier.builder().fromShardIdString(getSnapshotReply.getId()).build();
+        shardSnapshots.add(new ShardSnapshot(shardId.getShardName(), getSnapshotReply.getSnapshot()));
+
+        if(++repliesReceived == params.totalShardCount) {
+            LOG.debug("{}: All shard snapshots received", params.id);
+
+            DatastoreSnapshot datastoreSnapshot = new DatastoreSnapshot(params.datastoreType, params.shardManagerSnapshot,
+                    shardSnapshots);
+            params.replyToActor.tell(datastoreSnapshot, getSelf());
+            getSelf().tell(PoisonPill.getInstance(), getSelf());
+        }
+    }
+
+    public static Props props(int totalShardCount, String datastoreType, byte[] shardManagerSnapshot,
+            ActorRef replyToActor, String id, Duration receiveTimeout) {
+        return Props.create(ShardManagerGetSnapshotReplyActor.class, new Params(totalShardCount, datastoreType,
+                shardManagerSnapshot, replyToActor, id, receiveTimeout));
+    }
+
+    private static final class Params {
+        final int totalShardCount;
+        final String datastoreType;
+        final byte[] shardManagerSnapshot;
+        final ActorRef replyToActor;
+        final String id;
+        final Duration receiveTimeout;
+
+        Params(int totalShardCount, String datastoreType, byte[] shardManagerSnapshot, ActorRef replyToActor,
+                String id, Duration receiveTimeout) {
+            this.totalShardCount = totalShardCount;
+            this.datastoreType = datastoreType;
+            this.shardManagerSnapshot = shardManagerSnapshot;
+            this.replyToActor = replyToActor;
+            this.id = id;
+            this.receiveTimeout = receiveTimeout;
+        }
+    }
+}

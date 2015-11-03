@@ -20,8 +20,10 @@ import static org.mockito.Mockito.verify;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.AddressFromURIString;
+import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.actor.Status;
+import akka.actor.Status.Failure;
 import akka.cluster.Cluster;
 import akka.cluster.ClusterEvent;
 import akka.dispatch.Dispatchers;
@@ -39,8 +41,10 @@ import com.google.common.util.concurrent.Uninterruptibles;
 import com.typesafe.config.ConfigFactory;
 import java.net.URI;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.junit.After;
@@ -61,6 +65,8 @@ import org.opendaylight.controller.cluster.datastore.messages.ActorInitialized;
 import org.opendaylight.controller.cluster.datastore.messages.AddShardReplica;
 import org.opendaylight.controller.cluster.datastore.messages.CreateShard;
 import org.opendaylight.controller.cluster.datastore.messages.CreateShardReply;
+import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshot;
+import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshot.ShardSnapshot;
 import org.opendaylight.controller.cluster.datastore.messages.FindLocalShard;
 import org.opendaylight.controller.cluster.datastore.messages.FindPrimary;
 import org.opendaylight.controller.cluster.datastore.messages.LocalPrimaryShardFound;
@@ -83,6 +89,7 @@ import org.opendaylight.controller.cluster.notifications.RoleChangeNotification;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyncUpStatus;
 import org.opendaylight.controller.cluster.raft.base.messages.SwitchBehavior;
+import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshot;
 import org.opendaylight.controller.cluster.raft.messages.AddServer;
 import org.opendaylight.controller.cluster.raft.messages.AddServerReply;
 import org.opendaylight.controller.cluster.raft.messages.ServerChangeStatus;
@@ -1034,6 +1041,46 @@ public class ShardManagerTest extends AbstractActorTest {
             assertSame("schemaContext", schemaContext, shardPropsCreator.schemaContext);
             assertNotNull("schemaContext is null", shardPropsCreator.datastoreContext);
         }};
+    }
+
+    @Test
+    public void testGetSnapshot() throws Throwable {
+        JavaTestKit kit = new JavaTestKit(getSystem());
+
+        MockConfiguration mockConfig = new MockConfiguration(ImmutableMap.<String, List<String>>builder().
+                   put("shard1", Arrays.asList("member-1")).
+                   put("shard2", Arrays.asList("member-1")).build());
+
+        ActorRef shardManager = getSystem().actorOf(newShardMgrProps(mockConfig).withDispatcher(
+                Dispatchers.DefaultDispatcherId()));
+
+        shardManager.tell(GetSnapshot.INSTANCE, kit.getRef());
+        Failure failure = kit.expectMsgClass(Failure.class);
+        assertEquals("Failure cause type", IllegalStateException.class, failure.cause().getClass());
+
+        kit = new JavaTestKit(getSystem());
+
+        shardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), ActorRef.noSender());
+
+        shardManager.tell(new FindLocalShard("shard1", true), kit.getRef());
+        kit.expectMsgClass(LocalShardFound.class);
+        shardManager.tell(new FindLocalShard("shard2", true), kit.getRef());
+        kit.expectMsgClass(LocalShardFound.class);
+
+        shardManager.tell(GetSnapshot.INSTANCE, kit.getRef());
+
+        DatastoreSnapshot datastoreSnapshot = kit.expectMsgClass(DatastoreSnapshot.class);
+
+        assertEquals("getType", shardMrgIDSuffix, datastoreSnapshot.getType());
+        List<ShardSnapshot> shardSnapshots = datastoreSnapshot.getShardSnapshots();
+        Set<String> actualShardNames = new HashSet<>();
+        for(ShardSnapshot s: shardSnapshots) {
+            actualShardNames.add(s.getName());
+        }
+
+        assertEquals("Shard names", Sets.newHashSet("shard1", "shard2"), actualShardNames);
+
+        shardManager.tell(PoisonPill.getInstance(), ActorRef.noSender());
     }
 
     @Test

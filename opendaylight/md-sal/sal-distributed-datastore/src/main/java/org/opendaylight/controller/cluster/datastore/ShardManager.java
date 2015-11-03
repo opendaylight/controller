@@ -75,6 +75,7 @@ import org.opendaylight.controller.cluster.notifications.RoleChangeNotification;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyncUpStatus;
 import org.opendaylight.controller.cluster.raft.base.messages.SwitchBehavior;
+import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshot;
 import org.opendaylight.controller.cluster.raft.messages.AddServer;
 import org.opendaylight.controller.cluster.raft.messages.AddServerReply;
 import org.opendaylight.controller.cluster.raft.messages.ServerChangeStatus;
@@ -213,10 +214,31 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             onAddShardReplica((AddShardReplica)message);
         } else if(message instanceof RemoveShardReplica){
             onRemoveShardReplica((RemoveShardReplica)message);
+        } else if(message instanceof GetSnapshot) {
+            onGetSnapshot();
         } else {
             unknownMessage(message);
         }
 
+    }
+
+    private void onGetSnapshot() {
+        LOG.debug("{}: onGetSnapshot", persistenceId());
+
+        byte[] shardManagerSnapshot = null;
+        ActorRef replyActor = getContext().actorOf(ShardManagerGetSnapshotReplyActor.props(localShards.size(),
+                type, shardManagerSnapshot , getSender(), persistenceId(),
+                datastoreContext.getShardInitializationTimeout().duration()));
+
+        for(ShardInformation shardInfo: localShards.values()) {
+            if(shardInfo.isShardInitialized()) {
+                shardInfo.getActor().tell(GetSnapshot.INSTANCE, replyActor);
+            } else {
+                getSender().tell(new akka.actor.Status.Failure(new IllegalStateException(
+                        "Some or all shards are not initialized")), getSelf());
+                replyActor.tell(PoisonPill.getInstance(), getSelf());
+            }
+        }
     }
 
     private void onCreateShard(CreateShard createShard) {
@@ -441,8 +463,6 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
                 shardInformation.addOnShardInitialized(onShardInitialized);
 
-                LOG.debug("{}: Scheduling timer to wait for shard {}", persistenceId(), shardInformation.getShardName());
-
                 FiniteDuration timeout = datastoreContext.getShardInitializationTimeout().duration();
                 if(shardInformation.isShardInitialized()) {
                     // If the shard is already initialized then we'll wait enough time for the shard to
@@ -450,6 +470,9 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                     timeout = FiniteDuration.create(datastoreContext.getShardRaftConfig()
                             .getElectionTimeOutInterval().toMillis() * 2, TimeUnit.MILLISECONDS);
                 }
+
+                LOG.debug("{}: Scheduling {} ms timer to wait for shard {}", persistenceId(), timeout.toMillis(),
+                        shardInformation.getShardName());
 
                 Cancellable timeoutSchedule = getContext().system().scheduler().scheduleOnce(
                         timeout, getSelf(),
