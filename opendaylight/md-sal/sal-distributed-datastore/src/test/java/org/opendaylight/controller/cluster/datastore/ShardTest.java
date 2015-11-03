@@ -40,7 +40,6 @@ import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -123,7 +122,6 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.ModificationType;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.impl.ImmutableContainerNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.FiniteDuration;
@@ -190,8 +188,7 @@ public class ShardTest extends AbstractShardTest {
                     // this will cause all other messages to not be queued properly after that.
                     // The basic issue is that you cannot use TestActorRef with a persistent actor (at least when
                     // it does do a persist)
-                    return new Shard(shardID, Collections.<String,String>emptyMap(),
-                            dataStoreContextBuilder.persistent(false).build(), SCHEMA_CONTEXT) {
+                    return new Shard(newShardBuilder()) {
                         @Override
                         public void onReceiveCommand(final Object message) throws Exception {
                             if(message instanceof ElectionTimeout && firstElectionTimeout) {
@@ -309,8 +306,8 @@ public class ShardTest extends AbstractShardTest {
 
                 @Override
                 public Shard create() throws Exception {
-                    return new Shard(shardID, Collections.<String,String>emptyMap(),
-                            dataStoreContextBuilder.persistent(false).build(), SCHEMA_CONTEXT) {
+                    return new Shard(Shard.builder().id(shardID).datastoreContext(
+                            dataStoreContextBuilder.persistent(false).build()).schemaContext(SCHEMA_CONTEXT)) {
                         @Override
                         public void onReceiveCommand(final Object message) throws Exception {
                             if(message instanceof ElectionTimeout && firstElectionTimeout) {
@@ -422,8 +419,9 @@ public class ShardTest extends AbstractShardTest {
             final CountDownLatch recoveryComplete = new CountDownLatch(1);
             class TestShard extends Shard {
                 TestShard() {
-                    super(shardID, Collections.<String, String>singletonMap(shardID.toString(), null),
-                            newDatastoreContext(), SCHEMA_CONTEXT);
+                    super(Shard.builder().id(shardID).datastoreContext(newDatastoreContext()).
+                            peerAddresses(Collections.<String, String>singletonMap(shardID.toString(), null)).
+                            schemaContext(SCHEMA_CONTEXT));
                 }
 
                 String getPeerAddress(String id) {
@@ -1099,8 +1097,7 @@ public class ShardTest extends AbstractShardTest {
 
                 @Override
                 public Shard create() throws Exception {
-                    return new Shard(shardID, Collections.<String,String>emptyMap(),
-                            newDatastoreContext(), SCHEMA_CONTEXT) {
+                    return new Shard(newShardBuilder()) {
                         @Override
                         protected boolean isLeader() {
                             return overrideLeaderCalls.get() ? false : super.isLeader();
@@ -2200,8 +2197,7 @@ public class ShardTest extends AbstractShardTest {
             final Creator<Shard> creator = new Creator<Shard>() {
                 @Override
                 public Shard create() throws Exception {
-                    return new Shard(shardID, Collections.<String,String>emptyMap(),
-                            dataStoreContextBuilder.build(), SCHEMA_CONTEXT) {
+                    return new Shard(newShardBuilder()) {
                         @Override
                         public void onReceiveCommand(final Object message) throws Exception {
                             super.onReceiveCommand(message);
@@ -2296,9 +2292,8 @@ public class ShardTest extends AbstractShardTest {
         new ShardTestKit(getSystem()) {{
             class TestShard extends Shard {
 
-                protected TestShard(final ShardIdentifier name, final Map<String, String> peerAddresses,
-                                    final DatastoreContext datastoreContext, final SchemaContext schemaContext) {
-                    super(name, peerAddresses, datastoreContext, schemaContext);
+                protected TestShard(Builder builder) {
+                    super(builder);
                     setPersistence(new TestPersistentDataProvider(super.persistence()));
                 }
 
@@ -2320,8 +2315,7 @@ public class ShardTest extends AbstractShardTest {
             final Creator<Shard> creator = new Creator<Shard>() {
                 @Override
                 public Shard create() throws Exception {
-                    return new TestShard(shardID, Collections.<String,String>emptyMap(),
-                            newDatastoreContext(), SCHEMA_CONTEXT);
+                    return new TestShard(newShardBuilder());
                 }
             };
 
@@ -2403,14 +2397,14 @@ public class ShardTest extends AbstractShardTest {
         final DatastoreContext persistentContext = DatastoreContext.newBuilder().
                 shardJournalRecoveryLogBatchSize(3).shardSnapshotBatchCount(5000).persistent(true).build();
 
-        final Props persistentProps = Shard.props(shardID, Collections.<String, String>emptyMap(),
-                persistentContext, SCHEMA_CONTEXT);
+        final Props persistentProps = Shard.builder().id(shardID).datastoreContext(persistentContext).
+                schemaContext(SCHEMA_CONTEXT).props();
 
         final DatastoreContext nonPersistentContext = DatastoreContext.newBuilder().
                 shardJournalRecoveryLogBatchSize(3).shardSnapshotBatchCount(5000).persistent(false).build();
 
-        final Props nonPersistentProps = Shard.props(shardID, Collections.<String, String>emptyMap(),
-            nonPersistentContext, SCHEMA_CONTEXT);
+        final Props nonPersistentProps = Shard.builder().id(shardID).datastoreContext(nonPersistentContext).
+                schemaContext(SCHEMA_CONTEXT).props();
 
         new ShardTestKit(getSystem()) {{
             final TestActorRef<Shard> shard1 = TestActorRef.create(getSystem(),
@@ -2523,6 +2517,7 @@ public class ShardTest extends AbstractShardTest {
     @Test
     public void testClusteredDataChangeListernerDelayedRegistration() throws Exception {
         new ShardTestKit(getSystem()) {{
+            dataStoreContextBuilder.persistent(false);
             final CountDownLatch onFirstElectionTimeout = new CountDownLatch(1);
             final CountDownLatch onChangeListenerRegistered = new CountDownLatch(1);
             final Creator<Shard> creator = new Creator<Shard>() {
@@ -2530,8 +2525,7 @@ public class ShardTest extends AbstractShardTest {
 
                 @Override
                 public Shard create() throws Exception {
-                    return new Shard(shardID, Collections.<String,String>emptyMap(),
-                        dataStoreContextBuilder.persistent(false).build(), SCHEMA_CONTEXT) {
+                    return new Shard(newShardBuilder()) {
                         @Override
                         public void onReceiveCommand(final Object message) throws Exception {
                             if(message instanceof ElectionTimeout && firstElectionTimeout) {
@@ -2591,6 +2585,7 @@ public class ShardTest extends AbstractShardTest {
 
     @Test
     public void testClusteredDataChangeListernerRegistration() throws Exception {
+        dataStoreContextBuilder.persistent(false).build();
         new ShardTestKit(getSystem()) {{
             final ShardIdentifier member1ShardID = ShardIdentifier.builder().memberName("member-1")
                 .shardName("inventory").type("config").build();
@@ -2601,9 +2596,9 @@ public class ShardTest extends AbstractShardTest {
 
                 @Override
                 public Shard create() throws Exception {
-                    return new Shard(member1ShardID, Collections.singletonMap(member2ShardID.toString(),
-                        "akka://test/user/" + member2ShardID.toString()),
-                        dataStoreContextBuilder.persistent(false).build(), SCHEMA_CONTEXT) {
+                    return new Shard(Shard.builder().id(member1ShardID).datastoreContext(newDatastoreContext()).
+                            peerAddresses(Collections.singletonMap(member2ShardID.toString(),
+                                    "akka://test/user/" + member2ShardID.toString())).schemaContext(SCHEMA_CONTEXT)) {
                         @Override
                         public void onReceiveCommand(final Object message) throws Exception {
 
@@ -2619,9 +2614,9 @@ public class ShardTest extends AbstractShardTest {
 
                 @Override
                 public Shard create() throws Exception {
-                    return new Shard(member2ShardID, Collections.singletonMap(member1ShardID.toString(),
-                        "akka://test/user/" + member1ShardID.toString()),
-                        dataStoreContextBuilder.persistent(false).build(), SCHEMA_CONTEXT) { };
+                    return new Shard(Shard.builder().id(member2ShardID).datastoreContext(newDatastoreContext()).
+                            peerAddresses(Collections.singletonMap(member1ShardID.toString(),
+                                    "akka://test/user/" + member1ShardID.toString())).schemaContext(SCHEMA_CONTEXT)) {};
                 }
             };
 
