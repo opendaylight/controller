@@ -10,18 +10,13 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 
 import akka.actor.ActorRef;
 import akka.actor.Cancellable;
-import java.util.HashSet;
 import java.util.Random;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.raft.ClientRequestTracker;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
 import org.opendaylight.controller.cluster.raft.SerializationUtils;
-import org.opendaylight.controller.cluster.raft.ServerConfigurationPayload;
-import org.opendaylight.controller.cluster.raft.ServerConfigurationPayload.ServerInfo;
-import org.opendaylight.controller.cluster.raft.VotingState;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.ElectionTimeout;
@@ -493,24 +488,5 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
 
     protected String getId(){
         return context.getId();
-    }
-
-    public void applyServerConfiguration(ServerConfigurationPayload serverConfig) {
-        Set<String> currentPeers = new HashSet<>(context.getPeerIds());
-        for(ServerInfo server: serverConfig.getServerConfig()) {
-            if(!getId().equals(server.getId())) {
-                VotingState votingState = server.isVoting() ? VotingState.VOTING: VotingState.NON_VOTING;
-                if(!currentPeers.contains(server.getId())) {
-                    context.addToPeers(server.getId(), null, votingState);
-                } else {
-                    context.getPeerInfo(server.getId()).setVotingState(votingState);
-                    currentPeers.remove(server.getId());
-                }
-            }
-        }
-
-        for(String peerIdToRemove: currentPeers) {
-            context.removePeer(peerIdToRemove);
-        }
     }
 }

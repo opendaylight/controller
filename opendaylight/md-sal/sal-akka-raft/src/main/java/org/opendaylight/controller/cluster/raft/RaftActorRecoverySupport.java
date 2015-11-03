@@ -95,7 +95,18 @@ class RaftActorRecoverySupport {
                         context.getTermInformation().getVotedFor());
             }
         } else {
-            dataRecoveredWithPersistenceDisabled = true;
+            boolean isServCfgPayload = false;
+            if(message instanceof ReplicatedLogEntry){
+                ReplicatedLogEntry repLogEntry = (ReplicatedLogEntry)message;
+                if(repLogEntry.getData() instanceof ServerConfigurationPayload){
+                    isServCfgPayload = true;
+                    context.updatePeerIds((ServerConfigurationPayload)repLogEntry.getData());
+                }
+            }
+
+            if(!isServCfgPayload){
+                dataRecoveredWithPersistenceDisabled = true;
+            }
         }
 
         return recoveryComplete;
@@ -146,6 +157,9 @@ class RaftActorRecoverySupport {
                     logEntry.getIndex(), logEntry.size());
         }
 
+        if(logEntry.getData() instanceof ServerConfigurationPayload){
+            context.updatePeerIds((ServerConfigurationPayload)logEntry.getData());
+        }
         replicatedLog().append(logEntry);
     }
 
@@ -184,7 +198,9 @@ class RaftActorRecoverySupport {
             cohort.startLogRecoveryBatch(batchSize);
         }
 
-        cohort.appendRecoveredLogEntry(logEntry.getData());
+        if(!(logEntry.getData() instanceof ServerConfigurationPayload)){
+            cohort.appendRecoveredLogEntry(logEntry.getData());
+        }
 
         if(++currentRecoveryBatchCount >= batchSize) {
             endCurrentLogRecoveryBatch();
