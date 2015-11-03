@@ -13,7 +13,6 @@ import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.dispatch.Dispatchers;
 import akka.testkit.TestActorRef;
-import java.util.Collections;
 import org.junit.Assert;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.AbstractActorTest;
@@ -57,11 +56,10 @@ public class ShardTransactionHeliumBackwardsCompatibilityTest extends AbstractAc
     public void testTransactionCommit() throws Exception {
         new ShardTestKit(getSystem()) {{
             SchemaContext schemaContext = TestModel.createTestContext();
-            Props shardProps = Shard.props(ShardIdentifier.builder().memberName("member-1").
-                    shardName("inventory").type("config").build(),
-                    Collections.<String,String>emptyMap(),
-                    DatastoreContext.newBuilder().shardHeartbeatIntervalInMillis(100).build(),
-                    schemaContext).withDispatcher(Dispatchers.DefaultDispatcherId());
+            Props shardProps = Shard.builder().id(ShardIdentifier.builder().memberName("member-1").
+                    shardName("inventory").type("config").build()).datastoreContext(DatastoreContext.newBuilder().
+                            shardHeartbeatIntervalInMillis(100).build()).schemaContext(schemaContext).props().
+                            withDispatcher(Dispatchers.DefaultDispatcherId());
 
             final TestActorRef<Shard> shard = TestActorRef.create(getSystem(), shardProps,
                     "testTransactionCommit");
@@ -131,11 +129,10 @@ public class ShardTransactionHeliumBackwardsCompatibilityTest extends AbstractAc
     public void testTransactionAbort() throws Exception {
         new ShardTestKit(getSystem()) {{
             SchemaContext schemaContext = TestModel.createTestContext();
-            Props shardProps = Shard.props(ShardIdentifier.builder().memberName("member-1").
-                    shardName("inventory").type("config").build(),
-                    Collections.<String,String>emptyMap(),
-                    DatastoreContext.newBuilder().shardHeartbeatIntervalInMillis(100).build(),
-                    schemaContext).withDispatcher(Dispatchers.DefaultDispatcherId());
+            Props shardProps = Shard.builder().id(ShardIdentifier.builder().memberName("member-1").
+                    shardName("inventory").type("config").build()).datastoreContext(DatastoreContext.newBuilder().
+                            shardHeartbeatIntervalInMillis(100).build()).schemaContext(schemaContext).props().
+                            withDispatcher(Dispatchers.DefaultDispatcherId());
 
             final TestActorRef<Shard> shard = TestActorRef.create(getSystem(), shardProps,
                     "testTransactionAbort");

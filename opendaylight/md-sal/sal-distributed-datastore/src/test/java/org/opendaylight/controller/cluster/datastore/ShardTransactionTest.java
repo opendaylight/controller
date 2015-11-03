@@ -19,7 +19,6 @@ import akka.actor.Status.Failure;
 import akka.actor.Terminated;
 import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
-import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 import org.mockito.InOrder;
@@ -85,8 +84,8 @@ public class ShardTransactionTest extends AbstractActorTest {
     private int txCounter = 0;
 
     private ActorRef createShard() {
-        return getSystem().actorOf(Shard.props(SHARD_IDENTIFIER,
-            Collections.<String, String>emptyMap(), datastoreContext, TestModel.createTestContext()));
+        return getSystem().actorOf(Shard.builder().id(SHARD_IDENTIFIER).datastoreContext(datastoreContext).
+                schemaContext(TestModel.createTestContext()).props());
     }
 
     private ActorRef newTransactionActor(TransactionType type, AbstractShardDataTreeTransaction<?> transaction, String name) {
