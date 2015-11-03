@@ -8,7 +8,6 @@
 package org.opendaylight.controller.config.persist.impl;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
@@ -20,7 +19,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-
+import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.lang.management.ManagementFactory;
@@ -92,11 +91,12 @@ public class ConfigPusherImplTest {
 
         configPusher.pushConfigs(Collections.singletonList(mockedConfigSnapshot));
         try {
-            configPusher.process(Lists.<AutoCloseable>newArrayList(), ManagementFactory.getPlatformMBeanServer(), mockedAggregator);
+            configPusher.process(Lists.<AutoCloseable>newArrayList(), ManagementFactory.getPlatformMBeanServer(),
+                    mockedAggregator, true);
         } catch(IllegalStateException e) {
-            assertNotNull(e.getCause());
-            assertTrue(e.getCause() instanceof ConfigPusherImpl.NotEnoughCapabilitiesException);
-            final Set<String> missingCaps = ((ConfigPusherImpl.NotEnoughCapabilitiesException) e.getCause()).getMissingCaps();
+            Throwable cause = Throwables.getRootCause(e);
+            assertTrue(cause instanceof ConfigPusherImpl.NotEnoughCapabilitiesException);
+            final Set<String> missingCaps = ((ConfigPusherImpl.NotEnoughCapabilitiesException) cause).getMissingCaps();
             assertEquals(missingCaps.size(), 1);
             assertEquals(missingCaps.iterator().next(), "required-cap");
             return;
@@ -121,7 +121,7 @@ public class ConfigPusherImplTest {
         final ConfigPusherImpl configPusher = new ConfigPusherImpl(facadeFactory, 0, 0);
 
         configPusher.pushConfigs(Collections.singletonList(mockedConfigSnapshot));
-        configPusher.processSingle(Lists.<AutoCloseable>newArrayList(), mBeanServer, mockedAggregator);
+        configPusher.processSingle(Lists.<AutoCloseable>newArrayList(), mBeanServer, mockedAggregator, true);
 
         verify(facade).executeConfigExecution(cfgExec);
         verify(facade).commitSilentTransaction();
@@ -144,10 +144,10 @@ public class ConfigPusherImplTest {
 
         configPusher.pushConfigs(Collections.singletonList(mockedConfigSnapshot));
         try {
-            configPusher.processSingle(Lists.<AutoCloseable>newArrayList(), mBeanServer, mockedAggregator);
+            configPusher.processSingle(Lists.<AutoCloseable>newArrayList(), mBeanServer, mockedAggregator, true);
         } catch (IllegalStateException e) {
-            assertNotNull(e.getCause());
-            assertTrue(e.getCause() instanceof ConflictingVersionException);
+            Throwable cause = Throwables.getRootCause(e);
+            assertTrue(cause instanceof ConflictingVersionException);
             return;
         }
 
@@ -174,7 +174,7 @@ public class ConfigPusherImplTest {
         final ConfigPusherImpl configPusher = new ConfigPusherImpl(facadeFactory, 5000, 5000);
 
         configPusher.pushConfigs(Collections.singletonList(mockedConfigSnapshot));
-        configPusher.processSingle(Lists.<AutoCloseable>newArrayList(), mBeanServer, mockedAggregator);
+        configPusher.processSingle(Lists.<AutoCloseable>newArrayList(), mBeanServer, mockedAggregator, true);
 
         verify(facade, times(3)).executeConfigExecution(cfgExec);
         verify(facade, times(3)).commitSilentTransaction();
