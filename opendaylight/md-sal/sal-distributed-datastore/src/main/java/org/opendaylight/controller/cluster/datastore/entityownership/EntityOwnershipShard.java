@@ -25,9 +25,9 @@ import static org.opendaylight.controller.cluster.datastore.entityownership.Enti
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.entityOwnersWithCandidate;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
-import akka.actor.Props;
 import akka.pattern.Patterns;
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -62,7 +62,6 @@ import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
-import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.Future;
 
 /**
@@ -86,14 +85,13 @@ class EntityOwnershipShard extends Shard {
         return DatastoreContext.newBuilderFrom(datastoreContext).persistent(false).build();
     }
 
-    protected EntityOwnershipShard(ShardIdentifier name, Map<String, String> peerAddresses,
-            DatastoreContext datastoreContext, SchemaContext schemaContext, String localMemberName) {
-        super(name, peerAddresses, noPersistenceDatastoreContext(datastoreContext), schemaContext);
-        this.localMemberName = localMemberName;
-        this.commitCoordinator = new EntityOwnershipShardCommitCoordinator(localMemberName, LOG);
+    protected EntityOwnershipShard(Builder builder) {
+        super(builder);
+        this.localMemberName = builder.localMemberName;
+        this.commitCoordinator = new EntityOwnershipShardCommitCoordinator(builder.localMemberName, LOG);
         this.listenerSupport = new EntityOwnershipListenerSupport(getContext(), persistenceId());
 
-        for(String peerId: peerAddresses.keySet()) {
+        for(String peerId: getRaftActorContext().getPeerIds()) {
             ShardIdentifier shardId = ShardIdentifier.builder().fromShardIdString(peerId).build();
             peerIdToMemberNames.put(peerId, shardId.getMemberName());
         }
@@ -458,30 +456,31 @@ class EntityOwnershipShard extends Shard {
         return null;
     }
 
-    public static Props props(final ShardIdentifier name, final Map<String, String> peerAddresses,
-            final DatastoreContext datastoreContext, final SchemaContext schemaContext, final String localMemberName) {
-        return Props.create(new Creator(name, peerAddresses, datastoreContext, schemaContext, localMemberName));
+    private static interface EntityWalker {
+        void onEntity(MapEntryNode entityTypeNode, MapEntryNode entityNode);
     }
 
-    private static class Creator extends AbstractShardCreator {
-        private static final long serialVersionUID = 1L;
+    public static Builder newBuilder() {
+        return new Builder();
+    }
 
-        private final String localMemberName;
+    static class Builder extends Shard.AbstractBuilder<Builder, EntityOwnershipShard> {
+        private String localMemberName;
 
-        Creator(final ShardIdentifier name, final Map<String, String> peerAddresses,
-                final DatastoreContext datastoreContext, final SchemaContext schemaContext,
-                final String localMemberName) {
-            super(name, peerAddresses, datastoreContext, schemaContext);
+        protected Builder() {
+            super(EntityOwnershipShard.class);
+        }
+
+        Builder localMemberName(String localMemberName) {
+            checkSealed();
             this.localMemberName = localMemberName;
+            return this;
         }
 
         @Override
-        public Shard create() throws Exception {
-            return new EntityOwnershipShard(name, peerAddresses, datastoreContext, schemaContext, localMemberName);
+        protected void verify() {
+            super.verify();
+            Preconditions.checkNotNull(localMemberName, "localMemberName should not be null");
         }
-    }
-
-    private static interface EntityWalker {
-        void onEntity(MapEntryNode entityTypeNode, MapEntryNode entityNode);
     }
 }

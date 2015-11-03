@@ -1086,11 +1086,11 @@ public class ShardManagerTest extends AbstractActorTest {
 
             DatastoreContext datastoreContext = DatastoreContext.newBuilder().shardElectionTimeoutFactor(100).
                     persistent(false).build();
-            TestShardPropsCreator shardPropsCreator = new TestShardPropsCreator();
+            Shard.Builder shardBuilder = Shard.builder();
 
             ModuleShardConfiguration config = new ModuleShardConfiguration(URI.create("foo-ns"), "foo-module",
                     "foo", null, Arrays.asList("member-1", "member-5", "member-6"));
-            shardManager.tell(new CreateShard(config, shardPropsCreator, datastoreContext), getRef());
+            shardManager.tell(new CreateShard(config, shardBuilder, datastoreContext), getRef());
 
             expectMsgClass(duration("5 seconds"), CreateShardReply.class);
 
@@ -1098,19 +1098,19 @@ public class ShardManagerTest extends AbstractActorTest {
 
             expectMsgClass(duration("5 seconds"), LocalShardFound.class);
 
-            assertEquals("isRecoveryApplicable", false, shardPropsCreator.datastoreContext.isPersistent());
-            assertTrue("Epxected ShardPeerAddressResolver", shardPropsCreator.datastoreContext.getShardRaftConfig().
+            assertEquals("isRecoveryApplicable", false, shardBuilder.getDatastoreContext().isPersistent());
+            assertTrue("Epxected ShardPeerAddressResolver", shardBuilder.getDatastoreContext().getShardRaftConfig().
                     getPeerAddressResolver() instanceof ShardPeerAddressResolver);
             assertEquals("peerMembers", Sets.newHashSet(new ShardIdentifier("foo", "member-5", shardMrgIDSuffix).toString(),
                     new ShardIdentifier("foo", "member-6", shardMrgIDSuffix).toString()),
-                    shardPropsCreator.peerAddresses.keySet());
+                    shardBuilder.getPeerAddresses().keySet());
             assertEquals("ShardIdentifier", new ShardIdentifier("foo", "member-1", shardMrgIDSuffix),
-                    shardPropsCreator.shardId);
-            assertSame("schemaContext", schemaContext, shardPropsCreator.schemaContext);
+                    shardBuilder.getId());
+            assertSame("schemaContext", schemaContext, shardBuilder.getSchemaContext());
 
             // Send CreateShard with same name - should fail.
 
-            shardManager.tell(new CreateShard(config, shardPropsCreator, null), getRef());
+            shardManager.tell(new CreateShard(config, shardBuilder, null), getRef());
 
             expectMsgClass(duration("5 seconds"), akka.actor.Status.Failure.class);
         }};
@@ -1122,11 +1122,11 @@ public class ShardManagerTest extends AbstractActorTest {
             ActorRef shardManager = getSystem().actorOf(newShardMgrProps(
                     new ConfigurationImpl(new EmptyModuleShardConfigProvider())));
 
-            TestShardPropsCreator shardPropsCreator = new TestShardPropsCreator();
+            Shard.Builder shardBuilder = Shard.builder();
 
             ModuleShardConfiguration config = new ModuleShardConfiguration(URI.create("foo-ns"), "foo-module",
                     "foo", null, Arrays.asList("member-1"));
-            shardManager.tell(new CreateShard(config, shardPropsCreator, null), getRef());
+            shardManager.tell(new CreateShard(config, shardBuilder, null), getRef());
 
             expectMsgClass(duration("5 seconds"), CreateShardReply.class);
 
@@ -1137,8 +1137,8 @@ public class ShardManagerTest extends AbstractActorTest {
 
             expectMsgClass(duration("5 seconds"), LocalShardFound.class);
 
-            assertSame("schemaContext", schemaContext, shardPropsCreator.schemaContext);
-            assertNotNull("schemaContext is null", shardPropsCreator.datastoreContext);
+            assertSame("schemaContext", schemaContext, shardBuilder.getSchemaContext());
+            assertNotNull("schemaContext is null", shardBuilder.getDatastoreContext());
         }};
     }
 
@@ -1312,24 +1312,6 @@ public class ShardManagerTest extends AbstractActorTest {
             assertEquals("Failure obtained", true,
                          (resp.cause() instanceof IllegalArgumentException));
         }};
-
-    }
-
-    private static class TestShardPropsCreator implements ShardPropsCreator {
-        ShardIdentifier shardId;
-        Map<String, String> peerAddresses;
-        SchemaContext schemaContext;
-        DatastoreContext datastoreContext;
-
-        @Override
-        public Props newProps(ShardIdentifier shardId, Map<String, String> peerAddresses,
-                DatastoreContext datastoreContext, SchemaContext schemaContext) {
-            this.shardId = shardId;
-            this.peerAddresses = peerAddresses;
-            this.schemaContext = schemaContext;
-            this.datastoreContext = datastoreContext;
-            return Shard.props(shardId, peerAddresses, datastoreContext, schemaContext);
-        }
 
     }
 
