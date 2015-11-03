@@ -128,7 +128,7 @@ public class ConfigPersisterActivator implements BundleActivator {
                         }
                         if(context != null) {
                             registration = context.registerService(ConfigPusher.class.getName(), configPusher, null);
-                            configPusher.process(autoCloseables, platformMBeanServer, persisterAggregator);
+                            configPusher.process(autoCloseables, platformMBeanServer, persisterAggregator, false);
                         } else {
                             LOG.warn("Unable to process configs as BundleContext is null");
                         }
