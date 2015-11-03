@@ -11,7 +11,7 @@ import com.google.common.base.Preconditions;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
-import org.opendaylight.controller.cluster.datastore.ShardPropsCreator;
+import org.opendaylight.controller.cluster.datastore.Shard;
 import org.opendaylight.controller.cluster.datastore.config.ModuleShardConfiguration;
 
 /**
@@ -21,7 +21,7 @@ import org.opendaylight.controller.cluster.datastore.config.ModuleShardConfigura
  */
 public class CreateShard {
     private final ModuleShardConfiguration moduleShardConfig;
-    private final ShardPropsCreator shardPropsCreator;
+    private final Shard.Builder<?> shardBuilder;
     private final DatastoreContext datastoreContext;
 
     /**
@@ -32,26 +32,29 @@ public class CreateShard {
      * @param datastoreContext the DatastoreContext for the new shard. If null, the default is used.
      */
     public CreateShard(@Nonnull ModuleShardConfiguration moduleShardConfig,
-            @Nonnull ShardPropsCreator shardPropsCreator, @Nullable DatastoreContext datastoreContext) {
+            @Nonnull Shard.Builder<?> shardBuilder, @Nullable DatastoreContext datastoreContext) {
         this.moduleShardConfig = Preconditions.checkNotNull(moduleShardConfig);
-        this.shardPropsCreator = Preconditions.checkNotNull(shardPropsCreator);
+        this.shardBuilder = Preconditions.checkNotNull(shardBuilder);
         this.datastoreContext = datastoreContext;
     }
 
-    @Nonnull public ModuleShardConfiguration getModuleShardConfig() {
+    @Nonnull
+    public ModuleShardConfiguration getModuleShardConfig() {
         return moduleShardConfig;
     }
 
-    @Nonnull public ShardPropsCreator getShardPropsCreator() {
-        return shardPropsCreator;
+    @Nonnull
+    public Shard.Builder<?> getShardBuilder() {
+        return shardBuilder;
     }
 
-    @Nullable public DatastoreContext getDatastoreContext() {
+    @Nullable
+    public DatastoreContext getDatastoreContext() {
         return datastoreContext;
     }
 
     @Override
     public String toString() {
-        return "CreateShard [moduleShardConfig=" + moduleShardConfig + ", shardPropsCreator=" + shardPropsCreator + "]";
+        return "CreateShard [moduleShardConfig=" + moduleShardConfig + ", shardPropsCreator=" + shardBuilder + "]";
     }
 }

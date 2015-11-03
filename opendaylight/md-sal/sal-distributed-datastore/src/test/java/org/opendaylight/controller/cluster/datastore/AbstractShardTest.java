@@ -23,7 +23,6 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.Uninterruptibles;
-import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -87,8 +86,11 @@ public abstract class AbstractShardTest extends AbstractActorTest{
     }
 
     protected Props newShardProps() {
-        return Shard.props(shardID, Collections.<String,String>emptyMap(),
-                newDatastoreContext(), SCHEMA_CONTEXT);
+        return newShardBuilder().props();
+    }
+
+    protected Shard.Builder<?> newShardBuilder() {
+        return Shard.builder().id(shardID).datastoreContext(newDatastoreContext()).schemaContext(SCHEMA_CONTEXT);
     }
 
     protected void testRecovery(final Set<Integer> listEntryKeys) throws Exception {
@@ -103,8 +105,7 @@ public abstract class AbstractShardTest extends AbstractActorTest{
         Creator<Shard> creator = new Creator<Shard>() {
             @Override
             public Shard create() throws Exception {
-                return new Shard(shardID, Collections.<String,String>emptyMap(),
-                        newDatastoreContext(), SCHEMA_CONTEXT) {
+                return new Shard(newShardBuilder()) {
                     @Override
                     protected void onRecoveryComplete() {
                         try {
