@@ -807,8 +807,9 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
     }
 
     private Props newShardProps(ShardIdentifier shardId, Map<String,String> peers, String memberName) {
-        return EntityOwnershipShard.props(shardId, peers, dataStoreContextBuilder.build(),
-                SCHEMA_CONTEXT, memberName);
+        return EntityOwnershipShard.builder().id(shardId).peerAddresses(peers).
+                datastoreContext(dataStoreContextBuilder.build()).schemaContext(SCHEMA_CONTEXT).
+                localMemberName(memberName).props().withDispatcher(Dispatchers.DefaultDispatcherId());
     }
 
     private static ShardIdentifier newShardId(String memberName) {
@@ -820,7 +821,8 @@ public class EntityOwnershipShardTest extends AbstractEntityOwnershipTest {
 
         TestEntityOwnershipShard(ShardIdentifier name, Map<String, String> peerAddresses,
                 DatastoreContext datastoreContext) {
-            super(name, peerAddresses, datastoreContext, SCHEMA_CONTEXT, LOCAL_MEMBER_NAME);
+            super(builder().id(name).peerAddresses(peerAddresses).datastoreContext(datastoreContext).
+                    schemaContext(SCHEMA_CONTEXT).localMemberName(LOCAL_MEMBER_NAME));
         }
 
         @Override

@@ -42,6 +42,7 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActorWithMetering;
+import org.opendaylight.controller.cluster.datastore.Shard.Builder;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ModuleShardConfiguration;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
@@ -268,7 +269,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             }
 
             ShardInformation info = new ShardInformation(moduleShardConfig.getShardName(), shardId, peerAddresses,
-                    shardDatastoreContext, createShard.getShardPropsCreator(), peerAddressResolver);
+                    shardDatastoreContext, createShard.getShardBuilder(), peerAddressResolver);
             localShards.put(info.getShardName(), info);
 
             mBean.addLocalShard(shardId.toString());
@@ -716,14 +717,13 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         String memberName = this.cluster.getCurrentMemberName();
         Collection<String> memberShardNames = this.configuration.getMemberShardNames(memberName);
 
-        ShardPropsCreator shardPropsCreator = new DefaultShardPropsCreator();
         List<String> localShardActorNames = new ArrayList<>();
         for(String shardName : memberShardNames){
             ShardIdentifier shardId = getShardIdentifier(memberName, shardName);
             Map<String, String> peerAddresses = getPeerAddresses(shardName);
             localShardActorNames.add(shardId.toString());
             localShards.put(shardName, new ShardInformation(shardName, shardId, peerAddresses, datastoreContext,
-                    shardPropsCreator, peerAddressResolver));
+                    Shard.builder(), peerAddressResolver));
         }
 
         mBean = ShardManagerInfo.createShardManagerMBean(memberName, "shard-manager-" + this.type,
@@ -860,7 +860,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         String localShardAddress = peerAddressResolver.getShardActorAddress(shardName, cluster.getCurrentMemberName());
         final ShardInformation shardInfo = new ShardInformation(shardName, shardId,
                           getPeerAddresses(shardName), getInitShardDataStoreContext(),
-                          new DefaultShardPropsCreator(), peerAddressResolver);
+                          Shard.builder(), peerAddressResolver);
         localShards.put(shardName, shardInfo);
         shardInfo.setActor(newShardActor(schemaContext, shardInfo));
 
@@ -974,22 +974,23 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         private short leaderVersion;
 
         private DatastoreContext datastoreContext;
-        private final ShardPropsCreator shardPropsCreator;
+        private final Builder builder;
         private final ShardPeerAddressResolver addressResolver;
 
         private ShardInformation(String shardName, ShardIdentifier shardId,
                 Map<String, String> initialPeerAddresses, DatastoreContext datastoreContext,
-                ShardPropsCreator shardPropsCreator, ShardPeerAddressResolver addressResolver) {
+                Builder builder, ShardPeerAddressResolver addressResolver) {
             this.shardName = shardName;
             this.shardId = shardId;
             this.initialPeerAddresses = initialPeerAddresses;
             this.datastoreContext = datastoreContext;
-            this.shardPropsCreator = shardPropsCreator;
+            this.builder = builder;
             this.addressResolver = addressResolver;
         }
 
         Props newProps(SchemaContext schemaContext) {
-            return shardPropsCreator.newProps(shardId, initialPeerAddresses, datastoreContext, schemaContext);
+            return builder.id(shardId).peerAddresses(initialPeerAddresses).datastoreContext(datastoreContext).
+                    schemaContext(schemaContext).props();
         }
 
         String getShardName() {
