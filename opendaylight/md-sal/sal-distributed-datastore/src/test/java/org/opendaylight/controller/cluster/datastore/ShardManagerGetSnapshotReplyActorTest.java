@@ -13,6 +13,7 @@ import akka.actor.ActorRef;
 import akka.actor.Status.Failure;
 import akka.actor.Terminated;
 import akka.testkit.JavaTestKit;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -44,7 +45,8 @@ public class ShardManagerGetSnapshotReplyActorTest extends AbstractActorTest {
         JavaTestKit kit = new JavaTestKit(getSystem());
 
         byte[] shardManagerSnapshot = new byte[]{0,5,9};
-        ActorRef replyActor = actorFactory.createActor(ShardManagerGetSnapshotReplyActor.props(3, "config",
+        ActorRef replyActor = actorFactory.createActor(ShardManagerGetSnapshotReplyActor.props(
+                Arrays.asList("shard1", "shard2", "shard3"), "config",
                 shardManagerSnapshot, kit.getRef(), "shard-manager", Duration.create(100, TimeUnit.SECONDS)),
                     actorFactory.generateActorId("actor"));
 
@@ -85,7 +87,8 @@ public class ShardManagerGetSnapshotReplyActorTest extends AbstractActorTest {
         JavaTestKit kit = new JavaTestKit(getSystem());
 
         byte[] shardManagerSnapshot = new byte[]{0,5,9};
-        ActorRef replyActor = actorFactory.createActor(ShardManagerGetSnapshotReplyActor.props(2, "config",
+        ActorRef replyActor = actorFactory.createActor(ShardManagerGetSnapshotReplyActor.props(
+                Arrays.asList("shard1", "shard2"), "config",
                 shardManagerSnapshot, kit.getRef(), "shard-manager", Duration.create(100, TimeUnit.SECONDS)),
                     actorFactory.generateActorId("actor"));
 
@@ -105,7 +108,8 @@ public class ShardManagerGetSnapshotReplyActorTest extends AbstractActorTest {
         JavaTestKit kit = new JavaTestKit(getSystem());
 
         byte[] shardManagerSnapshot = new byte[]{0,5,9};
-        ActorRef replyActor = actorFactory.createActor(ShardManagerGetSnapshotReplyActor.props(1, "config",
+        ActorRef replyActor = actorFactory.createActor(ShardManagerGetSnapshotReplyActor.props(
+                Arrays.asList("shard1"), "config",
                 shardManagerSnapshot, kit.getRef(), "shard-manager", Duration.create(100, TimeUnit.MILLISECONDS)),
                     actorFactory.generateActorId("actor"));
 

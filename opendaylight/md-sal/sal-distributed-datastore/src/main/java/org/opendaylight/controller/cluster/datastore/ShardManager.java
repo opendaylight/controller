@@ -226,8 +226,8 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         LOG.debug("{}: onGetSnapshot", persistenceId());
 
         byte[] shardManagerSnapshot = null;
-        ActorRef replyActor = getContext().actorOf(ShardManagerGetSnapshotReplyActor.props(localShards.size(),
-                type, shardManagerSnapshot , getSender(), persistenceId(),
+        ActorRef replyActor = getContext().actorOf(ShardManagerGetSnapshotReplyActor.props(
+                new ArrayList<>(localShards.keySet()), type, shardManagerSnapshot , getSender(), persistenceId(),
                 datastoreContext.getShardInitializationTimeout().duration()));
 
         for(ShardInformation shardInfo: localShards.values()) {
