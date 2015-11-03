@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bada0100_9731c3a4",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorRecoverySupport.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-03T21:26:28Z",
+      "side": 1,
+      "message": "Can you make the abbreviation less terse, e.g. isServerConfigPayload?",
+      "revId": "91189781f7fbe56ec6b9d670b0b41580743cdd10",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bada0100_d7ff4ba9",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorRecoverySupport.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-03T21:26:28Z",
+      "side": 1,
+      "message": "Can you put this check in a method, isServerConfigurationPayload(ReplicatedLogEntry) for clarity and change the other 2 places as well to call it?",
+      "revId": "91189781f7fbe56ec6b9d670b0b41580743cdd10",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bada0100_b702c7b2",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorRecoverySupport.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-03T21:26:28Z",
+      "side": 1,
+      "message": "If there was only a ServerConfigurationPayload then the derived class would have an empty batch. That shouldn\u0027t cause an issue but I think it would be cleaner to not count ServerConfigurationPayload towards the currentRecoveryBatchCount. So you can move this check above.",
+      "revId": "91189781f7fbe56ec6b9d670b0b41580743cdd10",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
