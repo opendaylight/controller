@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "bada0100_ca9b2771",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorRecoverySupport.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 3366
+      },
+      "writtenOn": "2015-11-03T14:17:45Z",
+      "side": 1,
+      "message": "Changes incorporated.",
+      "parentUuid": "bada0100_1312ce62",
+      "revId": "0c54645dcc12e8940a538396be2ba2f319edbcbb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bada0100_b32bc293",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorRecoverySupport.java",
         "patchSetId": 1
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "bada0100_6a88fb22",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorRecoverySupport.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 3366
+      },
+      "writtenOn": "2015-11-03T14:17:45Z",
+      "side": 1,
+      "message": "Changes incorporated.",
+      "parentUuid": "bada0100_b32bc293",
+      "revId": "0c54645dcc12e8940a538396be2ba2f319edbcbb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bada0100_53185684",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorRecoverySupport.java",
         "patchSetId": 1
@@ -47,6 +83,24 @@
       "writtenOn": "2015-11-02T10:59:01Z",
       "side": 1,
       "message": "We should elide calling the cohort for ServerConfiguratonPayload.",
+      "revId": "0c54645dcc12e8940a538396be2ba2f319edbcbb",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bada0100_8a8d1f34",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorRecoverySupport.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 191,
+      "author": {
+        "id": 3366
+      },
+      "writtenOn": "2015-11-03T14:17:45Z",
+      "side": 1,
+      "message": "Changes incorporated.",
+      "parentUuid": "bada0100_53185684",
       "revId": "0c54645dcc12e8940a538396be2ba2f319edbcbb",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
