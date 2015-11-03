@@ -154,7 +154,7 @@ public class IntegrationTestKit extends ShardTestKit {
         cohort.commit().get(5, TimeUnit.SECONDS);
     }
 
-    void cleanup(DistributedDataStore dataStore) {
+    public void cleanup(DistributedDataStore dataStore) {
         if(dataStore != null) {
             dataStore.getActorContext().getShardManager().tell(PoisonPill.getInstance(), null);
         }

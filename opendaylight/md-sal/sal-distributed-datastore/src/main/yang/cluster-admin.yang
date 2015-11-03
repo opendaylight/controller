@@ -1,10 +1,10 @@
-module cluster-config {
+module cluster-admin {
     yang-version 1;
-    namespace "urn:opendaylight:params:xml:ns:yang:controller:md:sal:cluster:config";
-    prefix "clustering-config";
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:md:sal:cluster:admin";
+    prefix "cluster-admin";
 
     description
-        "This module contains YANG RPC definitions for configuring a cluster.";
+        "This module contains YANG RPC definitions for administering a cluster.";
 
     revision "2015-10-13" {
         description "Initial revision.";
@@ -69,8 +69,19 @@ module cluster-config {
                 description "The names of the cluster members to convert.";
             }
         }
-        
+
         description "Converts the given cluster members to voting for all shards. The members will 
             participate in leader elections and consensus.";
+    }
+
+    rpc backup-datastore {
+        input {
+            leaf file-path {
+              type string;
+              description "The path and name of the file in which to store the backup.";
+            }
+        }
+
+        description "Creates a backup file of the datastore state";
     }
 }

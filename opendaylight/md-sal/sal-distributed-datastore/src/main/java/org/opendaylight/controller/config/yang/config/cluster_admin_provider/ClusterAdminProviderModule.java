@@ -1,18 +1,18 @@
-package org.opendaylight.controller.config.yang.config.cluster_config_provider;
+package org.opendaylight.controller.config.yang.config.cluster_admin_provider;
 
 import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
-import org.opendaylight.controller.cluster.datastore.config.ClusterConfigRpcService;
+import org.opendaylight.controller.cluster.datastore.admin.ClusterAdminRpcService;
 import org.opendaylight.controller.config.api.DependencyResolver;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 
-public class ClusterConfigProviderModule extends AbstractClusterConfigProviderModule {
-    public ClusterConfigProviderModule(ModuleIdentifier identifier, DependencyResolver dependencyResolver) {
+public class ClusterAdminProviderModule extends AbstractClusterAdminProviderModule {
+    public ClusterAdminProviderModule(ModuleIdentifier identifier, DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
     }
 
-    public ClusterConfigProviderModule(ModuleIdentifier identifier, DependencyResolver dependencyResolver,
-            ClusterConfigProviderModule oldModule, java.lang.AutoCloseable oldInstance) {
+    public ClusterAdminProviderModule(ModuleIdentifier identifier, DependencyResolver dependencyResolver,
+            ClusterAdminProviderModule oldModule, java.lang.AutoCloseable oldInstance) {
         super(identifier, dependencyResolver, oldModule, oldInstance);
     }
 
@@ -27,7 +27,7 @@ public class ClusterConfigProviderModule extends AbstractClusterConfigProviderMo
                 "Injected config DOMStore must be an instance of DistributedDataStore");
         Preconditions.checkArgument(getOperDataStoreDependency() instanceof DistributedDataStore,
                 "Injected operational DOMStore must be an instance of DistributedDataStore");
-        ClusterConfigRpcService service = new ClusterConfigRpcService((DistributedDataStore)getConfigDataStoreDependency(),
+        ClusterAdminRpcService service = new ClusterAdminRpcService((DistributedDataStore)getConfigDataStoreDependency(),
                 (DistributedDataStore)getOperDataStoreDependency());
         service.start(getRpcRegistryDependency());
         return service;
