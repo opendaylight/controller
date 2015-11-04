@@ -226,4 +226,9 @@ public class ExampleActor extends RaftActor implements RaftActorRecoveryCohort, 
     protected RaftActorSnapshotCohort getRaftActorSnapshotCohort() {
         return this;
     }
+
+    @Override
+    public byte[] getRestoreFromSnapshot() {
+        return null;
+    }
 }
