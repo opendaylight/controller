@@ -17,7 +17,6 @@ import akka.actor.Terminated;
 import akka.dispatch.Dispatchers;
 import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
-import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableMap;
@@ -75,7 +74,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
 
         private TestRaftActor(String id, Map<String, String> peerAddresses, ConfigParams config,
                 TestActorRef<MessageCollectorActor> collectorActor) {
-            super(id, peerAddresses, Optional.of(config), null);
+            super(builder().id(id).peerAddresses(peerAddresses).config(config));
             this.collectorActor = collectorActor;
         }
 

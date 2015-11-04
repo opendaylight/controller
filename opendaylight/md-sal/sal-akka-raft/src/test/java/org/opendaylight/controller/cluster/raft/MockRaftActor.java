@@ -12,13 +12,13 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import akka.actor.ActorRef;
 import akka.actor.Props;
-import akka.japi.Creator;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -37,52 +37,29 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     volatile RaftActorSnapshotCohort snapshotCohortDelegate;
     private final CountDownLatch recoveryComplete = new CountDownLatch(1);
     private final List<Object> state;
-    private ActorRef roleChangeNotifier;
+    private final ActorRef roleChangeNotifier;
     protected final CountDownLatch initializeBehaviorComplete = new CountDownLatch(1);
     private RaftActorRecoverySupport raftActorRecoverySupport;
     private RaftActorSnapshotMessageSupport snapshotMessageSupport;
+    private final byte[] restoreFromSnapshot;
+    final CountDownLatch snapshotCommitted = new CountDownLatch(1);
 
-    public static final class MockRaftActorCreator implements Creator<MockRaftActor> {
-        private static final long serialVersionUID = 1L;
-        private final Map<String, String> peerAddresses;
-        private final String id;
-        private final Optional<ConfigParams> config;
-        private final DataPersistenceProvider dataPersistenceProvider;
-        private final ActorRef roleChangeNotifier;
-        private RaftActorSnapshotMessageSupport snapshotMessageSupport;
-
-        private MockRaftActorCreator(Map<String, String> peerAddresses, String id,
-            Optional<ConfigParams> config, DataPersistenceProvider dataPersistenceProvider,
-            ActorRef roleChangeNotifier) {
-            this.peerAddresses = peerAddresses;
-            this.id = id;
-            this.config = config;
-            this.dataPersistenceProvider = dataPersistenceProvider;
-            this.roleChangeNotifier = roleChangeNotifier;
-        }
-
-        @Override
-        public MockRaftActor create() throws Exception {
-            MockRaftActor mockRaftActor = new MockRaftActor(id, peerAddresses, config,
-                dataPersistenceProvider);
-            mockRaftActor.roleChangeNotifier = this.roleChangeNotifier;
-            mockRaftActor.snapshotMessageSupport = snapshotMessageSupport;
-            return mockRaftActor;
-        }
-    }
-
-    public MockRaftActor(String id, Map<String, String> peerAddresses, Optional<ConfigParams> config,
-                         DataPersistenceProvider dataPersistenceProvider) {
-        super(id, peerAddresses, config, PAYLOAD_VERSION);
+    protected MockRaftActor(Builder builder) {
+        super(builder.id, builder.peerAddresses, Optional.fromNullable(builder.config), PAYLOAD_VERSION);
         state = new ArrayList<>();
         this.actorDelegate = mock(RaftActor.class);
         this.recoveryCohortDelegate = mock(RaftActorRecoveryCohort.class);
         this.snapshotCohortDelegate = mock(RaftActorSnapshotCohort.class);
-        if(dataPersistenceProvider == null){
-            setPersistence(true);
+
+        if(builder.dataPersistenceProvider == null){
+            setPersistence(builder.persistent.isPresent() ? builder.persistent.get() : true);
         } else {
-            setPersistence(dataPersistenceProvider);
+            setPersistence(builder.dataPersistenceProvider);
         }
+
+        roleChangeNotifier = builder.roleChangeNotifier;
+        snapshotMessageSupport = builder.snapshotMessageSupport;
+        restoreFromSnapshot = builder.restoreFromSnapshot;
     }
 
     public void setRaftActorRecoverySupport(RaftActorRecoverySupport support) {
@@ -134,33 +111,6 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
         return state;
     }
 
-    public static Props props(final String id, final Map<String, String> peerAddresses,
-            Optional<ConfigParams> config){
-        return Props.create(new MockRaftActorCreator(peerAddresses, id, config, null, null));
-    }
-
-    public static Props props(final String id, final Map<String, String> peerAddresses,
-            Optional<ConfigParams> config, RaftActorSnapshotMessageSupport snapshotMessageSupport){
-        MockRaftActorCreator creator = new MockRaftActorCreator(peerAddresses, id, config, null, null);
-        creator.snapshotMessageSupport = snapshotMessageSupport;
-        return Props.create(creator);
-    }
-
-    public static Props props(final String id, final Map<String, String> peerAddresses,
-                              Optional<ConfigParams> config, DataPersistenceProvider dataPersistenceProvider){
-        return Props.create(new MockRaftActorCreator(peerAddresses, id, config, dataPersistenceProvider, null));
-    }
-
-    public static Props props(final String id, final Map<String, String> peerAddresses,
-        Optional<ConfigParams> config, ActorRef roleChangeNotifier){
-        return Props.create(new MockRaftActorCreator(peerAddresses, id, config, null, roleChangeNotifier));
-    }
-
-    public static Props props(final String id, final Map<String, String> peerAddresses,
-                              Optional<ConfigParams> config, ActorRef roleChangeNotifier,
-                              DataPersistenceProvider dataPersistenceProvider){
-        return Props.create(new MockRaftActorCreator(peerAddresses, id, config, dataPersistenceProvider, roleChangeNotifier));
-    }
 
     @Override protected void applyState(ActorRef clientActor, String identifier, Object data) {
         actorDelegate.applyState(clientActor, identifier, data);
@@ -231,8 +181,8 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     @Override
     public void applySnapshot(byte [] snapshot) {
         LOG.info("{}: applySnapshot called", persistenceId());
-        snapshotCohortDelegate.applySnapshot(snapshot);
         applySnapshotBytes(snapshot);
+        snapshotCohortDelegate.applySnapshot(snapshot);
     }
 
     @Override
@@ -259,6 +209,10 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
             super.changeCurrentBehavior((RaftActorBehavior)message);
         } else {
             super.handleCommand(message);
+
+            if(RaftActorSnapshotMessageSupport.COMMIT_SNAPSHOT.equals(message)) {
+                snapshotCommitted.countDown();
+            }
         }
     }
 
@@ -283,5 +237,80 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
 
     public ReplicatedLog getReplicatedLog(){
         return this.getRaftActorContext().getReplicatedLog();
+    }
+
+    @Override
+    public byte[] getRestoreFromSnapshot() {
+        return restoreFromSnapshot;
+    }
+
+    public static Props props(final String id, final Map<String, String> peerAddresses,
+            ConfigParams config){
+        return builder().id(id).peerAddresses(peerAddresses).config(config).props();
+    }
+
+    public static Props props(final String id, final Map<String, String> peerAddresses,
+                              ConfigParams config, DataPersistenceProvider dataPersistenceProvider){
+        return builder().id(id).peerAddresses(peerAddresses).config(config).
+                dataPersistenceProvider(dataPersistenceProvider).props();
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private Map<String, String> peerAddresses = Collections.emptyMap();
+        private String id;
+        private ConfigParams config;
+        private DataPersistenceProvider dataPersistenceProvider;
+        private ActorRef roleChangeNotifier;
+        private RaftActorSnapshotMessageSupport snapshotMessageSupport;
+        private byte[] restoreFromSnapshot;
+        private Optional<Boolean> persistent = Optional.absent();
+
+        public Builder id(String id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder peerAddresses(Map<String, String> peerAddresses) {
+            this.peerAddresses = peerAddresses;
+            return this;
+        }
+
+        public Builder config(ConfigParams config) {
+            this.config = config;
+            return this;
+        }
+
+        public Builder dataPersistenceProvider(DataPersistenceProvider dataPersistenceProvider) {
+            this.dataPersistenceProvider = dataPersistenceProvider;
+            return this;
+        }
+
+        public Builder roleChangeNotifier(ActorRef roleChangeNotifier) {
+            this.roleChangeNotifier = roleChangeNotifier;
+            return this;
+        }
+
+        public Builder snapshotMessageSupport(RaftActorSnapshotMessageSupport snapshotMessageSupport) {
+            this.snapshotMessageSupport = snapshotMessageSupport;
+            return this;
+        }
+
+        public Builder restoreFromSnapshot(byte[] restoreFromSnapshot) {
+            this.restoreFromSnapshot = restoreFromSnapshot;
+            return this;
+        }
+
+        public Builder persistent(Optional<Boolean> persistent) {
+            this.persistent = persistent;
+            return this;
+        }
+
+        public Props props() {
+            return Props.create(MockRaftActor.class, this);
+        }
     }
 }
