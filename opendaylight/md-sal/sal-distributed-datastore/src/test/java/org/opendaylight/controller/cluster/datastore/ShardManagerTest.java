@@ -163,8 +163,9 @@ public class ShardManagerTest extends AbstractActorTest {
     }
 
     private Props newShardMgrProps(Configuration config) {
-        return ShardManager.props(new MockClusterWrapper(), config,
-                newDatastoreContextFactory(datastoreContextBuilder.build()), ready, primaryShardInfoCache);
+        return ShardManager.builder().cluster(new MockClusterWrapper()).configuration(config).
+                datastoreContextFactory(newDatastoreContextFactory(datastoreContextBuilder.build())).
+                waitTillReadyCountdownLatch(ready).primaryShardInfoCache(primaryShardInfoCache).props();
     }
 
     private Props newPropsShardMgrWithMockShardActor() {
@@ -178,8 +179,9 @@ public class ShardManagerTest extends AbstractActorTest {
             private static final long serialVersionUID = 1L;
             @Override
             public ShardManager create() throws Exception {
-                return new ForwardingShardManager(clusterWrapper, config, newDatastoreContextFactory(
-                        datastoreContextBuilder.build()), ready, name, shardActor, primaryShardInfoCache);
+                return new ForwardingShardManager(ShardManager.builder().cluster(clusterWrapper).configuration(config).
+                        datastoreContextFactory(newDatastoreContextFactory(datastoreContextBuilder.build())).
+                        waitTillReadyCountdownLatch(ready).primaryShardInfoCache(primaryShardInfoCache), name, shardActor);
             }
         };
 
@@ -224,7 +226,9 @@ public class ShardManagerTest extends AbstractActorTest {
             private static final long serialVersionUID = 1L;
             @Override
             public ShardManager create() throws Exception {
-                return new ShardManager(new MockClusterWrapper(), mockConfig, mockFactory, ready, primaryShardInfoCache) {
+                return new ShardManager(ShardManager.builder().cluster(new MockClusterWrapper()).configuration(mockConfig).
+                        datastoreContextFactory(mockFactory).waitTillReadyCountdownLatch(ready).
+                        primaryShardInfoCache(primaryShardInfoCache)) {
                     @Override
                     protected ActorRef newShardActor(SchemaContext schemaContext, ShardInformation info) {
                         Entry<ActorRef, DatastoreContext> entry = shardInfoMap.get(info.getShardName());
@@ -950,14 +954,10 @@ public class ShardManagerTest extends AbstractActorTest {
 
     @Test
     public void testWhenShardIsLeaderSyncStatusIsTrue() throws Exception{
-        final Props persistentProps = ShardManager.props(new MockClusterWrapper(), new MockConfiguration(),
-                newDatastoreContextFactory(DatastoreContext.newBuilder().persistent(true).build()), ready,
-                primaryShardInfoCache);
-        final TestActorRef<ShardManager> shardManager =
-                TestActorRef.create(getSystem(), persistentProps);
+        final TestActorRef<ShardManager> shardManager = TestActorRef.create(getSystem(), newShardMgrProps());
 
         ShardManager shardManagerActor = shardManager.underlyingActor();
-        shardManagerActor.onReceiveCommand(new RoleChangeNotification("member-1-shard-default-unknown",
+        shardManagerActor.onReceiveCommand(new RoleChangeNotification("member-1-shard-default-" + shardMrgIDSuffix,
                 RaftState.Follower.name(), RaftState.Leader.name()));
 
         assertEquals(true, shardManagerActor.getMBean().getSyncStatus());
@@ -965,44 +965,43 @@ public class ShardManagerTest extends AbstractActorTest {
 
     @Test
     public void testWhenShardIsCandidateSyncStatusIsFalse() throws Exception{
-        final Props persistentProps = newShardMgrProps();
-        final TestActorRef<ShardManager> shardManager =
-                TestActorRef.create(getSystem(), persistentProps);
+        final TestActorRef<ShardManager> shardManager = TestActorRef.create(getSystem(), newShardMgrProps());
 
         ShardManager shardManagerActor = shardManager.underlyingActor();
-        shardManagerActor.onReceiveCommand(new RoleChangeNotification("member-1-shard-default-unknown",
+        String shardId = "member-1-shard-default-" + shardMrgIDSuffix;
+        shardManagerActor.onReceiveCommand(new RoleChangeNotification(shardId,
                 RaftState.Follower.name(), RaftState.Candidate.name()));
 
         assertEquals(false, shardManagerActor.getMBean().getSyncStatus());
 
         // Send a FollowerInitialSyncStatus with status = true for the replica whose current state is candidate
-        shardManagerActor.onReceiveCommand(new FollowerInitialSyncUpStatus(true, "member-1-shard-default-unknown"));
+        shardManagerActor.onReceiveCommand(new FollowerInitialSyncUpStatus(
+                true, shardId));
 
         assertEquals(false, shardManagerActor.getMBean().getSyncStatus());
     }
 
     @Test
     public void testWhenShardIsFollowerSyncStatusDependsOnFollowerInitialSyncStatus() throws Exception{
-        final Props persistentProps = ShardManager.props(new MockClusterWrapper(), new MockConfiguration(),
-                newDatastoreContextFactory(DatastoreContext.newBuilder().persistent(true).build()), ready,
-                primaryShardInfoCache);
+        final Props persistentProps = newShardMgrProps();
         final TestActorRef<ShardManager> shardManager =
                 TestActorRef.create(getSystem(), persistentProps);
 
+        String shardId = "member-1-shard-default-" + shardMrgIDSuffix;
         ShardManager shardManagerActor = shardManager.underlyingActor();
-        shardManagerActor.onReceiveCommand(new RoleChangeNotification("member-1-shard-default-unknown",
+        shardManagerActor.onReceiveCommand(new RoleChangeNotification(shardId,
                 RaftState.Candidate.name(), RaftState.Follower.name()));
 
         // Initially will be false
         assertEquals(false, shardManagerActor.getMBean().getSyncStatus());
 
         // Send status true will make sync status true
-        shardManagerActor.onReceiveCommand(new FollowerInitialSyncUpStatus(true, "member-1-shard-default-unknown"));
+        shardManagerActor.onReceiveCommand(new FollowerInitialSyncUpStatus(true, shardId));
 
         assertEquals(true, shardManagerActor.getMBean().getSyncStatus());
 
         // Send status false will make sync status false
-        shardManagerActor.onReceiveCommand(new FollowerInitialSyncUpStatus(false, "member-1-shard-default-unknown"));
+        shardManagerActor.onReceiveCommand(new FollowerInitialSyncUpStatus(false, shardId));
 
         assertEquals(false, shardManagerActor.getMBean().getSyncStatus());
 
@@ -1010,15 +1009,13 @@ public class ShardManagerTest extends AbstractActorTest {
 
     @Test
     public void testWhenMultipleShardsPresentSyncStatusMustBeTrueForAllShards() throws Exception{
-        final Props persistentProps = ShardManager.props(new MockClusterWrapper(),
-                new MockConfiguration() {
-                    @Override
-                    public List<String> getMemberShardNames(String memberName) {
-                        return Arrays.asList("default", "astronauts");
-                    }
-                },
-                newDatastoreContextFactory(DatastoreContext.newBuilder().persistent(true).build()), ready,
-                primaryShardInfoCache);
+        final Props persistentProps = newShardMgrProps(new MockConfiguration() {
+            @Override
+            public List<String> getMemberShardNames(String memberName) {
+                return Arrays.asList("default", "astronauts");
+            }
+        });
+
         final TestActorRef<ShardManager> shardManager =
                 TestActorRef.create(getSystem(), persistentProps);
 
@@ -1028,28 +1025,30 @@ public class ShardManagerTest extends AbstractActorTest {
         assertEquals(false, shardManagerActor.getMBean().getSyncStatus());
 
         // Make default shard leader
-        shardManagerActor.onReceiveCommand(new RoleChangeNotification("member-1-shard-default-unknown",
+        String defaultShardId = "member-1-shard-default-" + shardMrgIDSuffix;
+        shardManagerActor.onReceiveCommand(new RoleChangeNotification(defaultShardId,
                 RaftState.Follower.name(), RaftState.Leader.name()));
 
         // default = Leader, astronauts is unknown so sync status remains false
         assertEquals(false, shardManagerActor.getMBean().getSyncStatus());
 
         // Make astronauts shard leader as well
-        shardManagerActor.onReceiveCommand(new RoleChangeNotification("member-1-shard-astronauts-unknown",
+        String astronautsShardId = "member-1-shard-astronauts-" + shardMrgIDSuffix;
+        shardManagerActor.onReceiveCommand(new RoleChangeNotification(astronautsShardId,
                 RaftState.Follower.name(), RaftState.Leader.name()));
 
         // Now sync status should be true
         assertEquals(true, shardManagerActor.getMBean().getSyncStatus());
 
         // Make astronauts a Follower
-        shardManagerActor.onReceiveCommand(new RoleChangeNotification("member-1-shard-astronauts-unknown",
+        shardManagerActor.onReceiveCommand(new RoleChangeNotification(astronautsShardId,
                 RaftState.Leader.name(), RaftState.Follower.name()));
 
         // Sync status is not true
         assertEquals(false, shardManagerActor.getMBean().getSyncStatus());
 
         // Make the astronauts follower sync status true
-        shardManagerActor.onReceiveCommand(new FollowerInitialSyncUpStatus(true, "member-1-shard-astronauts-unknown"));
+        shardManagerActor.onReceiveCommand(new FollowerInitialSyncUpStatus(true, astronautsShardId));
 
         // Sync status is now true
         assertEquals(true, shardManagerActor.getMBean().getSyncStatus());
@@ -1319,9 +1318,9 @@ public class ShardManagerTest extends AbstractActorTest {
         private final CountDownLatch recoveryComplete = new CountDownLatch(1);
 
         TestShardManager(String shardMrgIDSuffix) {
-            super(new MockClusterWrapper(), new MockConfiguration(),
-                    newDatastoreContextFactory(DatastoreContext.newBuilder().dataStoreType(shardMrgIDSuffix).build()),
-                    ready, new PrimaryShardInfoFutureCache());
+            super(ShardManager.builder().cluster(new MockClusterWrapper()).configuration(new MockConfiguration()).
+                    datastoreContextFactory(newDatastoreContextFactory(DatastoreContext.newBuilder().dataStoreType(shardMrgIDSuffix).build())).
+                    waitTillReadyCountdownLatch(ready).primaryShardInfoCache(new PrimaryShardInfoFutureCache()));
         }
 
         @Override
@@ -1379,10 +1378,8 @@ public class ShardManagerTest extends AbstractActorTest {
         private final ActorRef shardActor;
         private final String name;
 
-        protected ForwardingShardManager(ClusterWrapper cluster, Configuration configuration,
-                DatastoreContextFactory factory, CountDownLatch waitTillReadyCountdownLatch, String name,
-                ActorRef shardActor, PrimaryShardInfoFutureCache primaryShardInfoCache) {
-            super(cluster, configuration, factory, waitTillReadyCountdownLatch, primaryShardInfoCache);
+        public ForwardingShardManager(Builder builder, String name, ActorRef shardActor) {
+            super(builder);
             this.shardActor = shardActor;
             this.name = name;
         }
