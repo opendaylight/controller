@@ -19,6 +19,7 @@ import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardManagerIdentifier;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.DatastoreConfigurationMXBeanImpl;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.DatastoreInfoMXBeanImpl;
+import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.cluster.datastore.utils.Dispatchers;
 import org.opendaylight.controller.cluster.datastore.utils.PrimaryShardInfoFutureCache;
@@ -53,7 +54,6 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
     private final ActorContext actorContext;
     private final long waitTillReadyTimeInMillis;
 
-
     private AutoCloseable closeable;
 
     private DatastoreConfigurationMXBeanImpl datastoreConfigMXBean;
@@ -67,7 +67,7 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
     private final TransactionContextFactory txContextFactory;
 
     public DistributedDataStore(ActorSystem actorSystem, ClusterWrapper cluster,
-            Configuration configuration, DatastoreContext datastoreContext) {
+            Configuration configuration, DatastoreContext datastoreContext, DatastoreSnapshot restoreFromSnapshot) {
         Preconditions.checkNotNull(actorSystem, "actorSystem should not be null");
         Preconditions.checkNotNull(cluster, "cluster should not be null");
         Preconditions.checkNotNull(configuration, "configuration should not be null");
@@ -83,9 +83,13 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
                 new Dispatchers(actorSystem.dispatchers()).getDispatcherPath(Dispatchers.DispatcherType.Shard);
 
         PrimaryShardInfoFutureCache primaryShardInfoCache = new PrimaryShardInfoFutureCache();
-        actorContext = new ActorContext(actorSystem, createShardManager(actorSystem, cluster, configuration,
-                datastoreContext, shardDispatcher, shardManagerId, primaryShardInfoCache), cluster,
-                configuration, datastoreContext, primaryShardInfoCache);
+
+        ShardManager.Builder builder = ShardManager.builder().cluster(cluster).configuration(configuration).
+                datastoreContext(datastoreContext).waitTillReadyCountdownLatch(waitTillReadyCountDownLatch).
+                primaryShardInfoCache(primaryShardInfoCache).restoreFromSnapshot(restoreFromSnapshot);
+
+        actorContext = new ActorContext(actorSystem, createShardManager(actorSystem, builder, shardDispatcher,
+                shardManagerId), cluster, configuration, datastoreContext, primaryShardInfoCache);
 
         this.waitTillReadyTimeInMillis =
                 actorContext.getDatastoreContext().getShardLeaderElectionTimeout().duration().toMillis() * READY_WAIT_FACTOR;
@@ -223,17 +227,14 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
         }
     }
 
-    private ActorRef createShardManager(ActorSystem actorSystem, ClusterWrapper cluster, Configuration configuration,
-                                        DatastoreContext datastoreContext, String shardDispatcher, String shardManagerId,
-                                        PrimaryShardInfoFutureCache primaryShardInfoCache){
+    private ActorRef createShardManager(ActorSystem actorSystem, ShardManager.Builder builder, String shardDispatcher,
+                                        String shardManagerId){
         Exception lastException = null;
 
         for(int i=0;i<100;i++) {
             try {
-                return actorSystem.actorOf(
-                        ShardManager.props(cluster, configuration, datastoreContext, waitTillReadyCountDownLatch,
-                                primaryShardInfoCache).withDispatcher(shardDispatcher).withMailbox(
-                                        ActorContext.MAILBOX), shardManagerId);
+                return actorSystem.actorOf(builder.props().withDispatcher(shardDispatcher).withMailbox(
+                        ActorContext.MAILBOX), shardManagerId);
             } catch (Exception e){
                 lastException = e;
                 Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
