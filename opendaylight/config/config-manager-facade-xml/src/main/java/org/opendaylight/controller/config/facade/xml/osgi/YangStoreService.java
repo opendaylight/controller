@@ -10,6 +10,7 @@ package org.opendaylight.controller.config.facade.xml.osgi;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import java.lang.ref.SoftReference;
 import java.util.Collections;
@@ -20,7 +21,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicReference;
-import javax.annotation.Nullable;
 import org.opendaylight.controller.config.util.capability.Capability;
 import org.opendaylight.controller.config.util.capability.ModuleListener;
 import org.opendaylight.controller.config.util.capability.YangModuleCapability;
@@ -83,7 +83,7 @@ public class YangStoreService implements YangStoreContext {
         this.sourceProvider = sourceProvider;
     }
 
-    private synchronized YangStoreContext getYangStoreSnapshot() {
+    synchronized YangStoreContext getYangStoreSnapshot() {
         SoftReference<YangStoreSnapshot> r = ref.get();
         YangStoreSnapshot ret = r.get();
 
@@ -106,6 +106,7 @@ public class YangStoreService implements YangStoreContext {
         return getYangStoreSnapshot();
     }
 
+    @Deprecated
     @Override
     public Map<String, Map<String, ModuleMXBeanEntry>> getModuleMXBeanEntryMap() {
         return getYangStoreSnapshot().getModuleMXBeanEntryMap();
@@ -150,15 +151,16 @@ public class YangStoreService implements YangStoreContext {
 
         return new AutoCloseable() {
             @Override
-            public void close() throws Exception {
+            public void close() {
                 YangStoreService.this.listeners.remove(listener);
             }
         };
     }
 
-    private Set<Capability> toCapabilities(final Set<Module> modules, final YangStoreContext current) {
-        return Sets.newHashSet(Collections2.transform(modules, new Function<Module, Capability>() {
-            @Nullable @Override public Capability apply(final Module input) {
+    private static Set<Capability> toCapabilities(final Set<Module> modules, final YangStoreContext current) {
+        return ImmutableSet.copyOf(Collections2.transform(modules, new Function<Module, Capability>() {
+            @Override
+            public Capability apply(final Module input) {
                 return new YangModuleCapability(input, current.getModuleSource(input));
             }
         }));
@@ -176,12 +178,17 @@ public class YangStoreService implements YangStoreContext {
         public void run() {
             final YangStoreContext current = getYangStoreSnapshot();
 
-            if(!current.equals(previous)) {
-                final Set<Module> removed = Sets.difference(previous.getModules(), current.getModules());
-                final Set<Module> added = Sets.difference(current.getModules(), previous.getModules());
+            if (!current.equals(previous)) {
+                final Set<Module> prevModules = previous.getModules();
+                final Set<Module> currModules = current.getModules();
+                final Set<Module> removed = Sets.difference(prevModules, currModules);
+                final Set<Module> added = Sets.difference(currModules, prevModules);
+
+                final Set<Capability> addedCaps = toCapabilities(added, current);
+                final Set<Capability> removedCaps = toCapabilities(removed, current);
 
                 for (final ModuleListener listener : listeners) {
-                    listener.onCapabilitiesChanged(toCapabilities(added, current), toCapabilities(removed, current));
+                    listener.onCapabilitiesChanged(addedCaps, removedCaps);
                 }
             }
         }
