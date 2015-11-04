@@ -89,7 +89,7 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
             }
         });
 
-        dataStore = new DistributedDataStore(getSystem(), new MockClusterWrapper(), configuration, datastoreContext );
+        dataStore = new DistributedDataStore(getSystem(), new MockClusterWrapper(), configuration, datastoreContext, null );
 
         dataStore.onGlobalContextUpdated(SchemaContextHelper.entityOwners());
     }
