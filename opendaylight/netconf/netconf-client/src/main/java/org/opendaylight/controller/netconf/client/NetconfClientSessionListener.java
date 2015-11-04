@@ -7,8 +7,17 @@
  */
 package org.opendaylight.controller.netconf.client;
 
+import org.opendaylight.controller.netconf.api.NetconfMessage;
 import org.opendaylight.controller.netconf.api.NetconfSessionListener;
+import org.opendaylight.controller.netconf.api.NetconfTerminationReason;
 
 public interface NetconfClientSessionListener extends NetconfSessionListener<NetconfClientSession> {
 
+    @Override void onMessage(NetconfClientSession session, NetconfMessage message);
+
+    @Override void onSessionDown(NetconfClientSession session, Exception e);
+
+    @Override void onSessionTerminated(NetconfClientSession session, NetconfTerminationReason reason);
+
+    @Override void onSessionUp(NetconfClientSession session);
 }

@@ -58,6 +58,11 @@ module odl-sal-netconf-connector-cfg {
                 type string;
             }
 
+            leaf schemaless {
+                type boolean;
+                default false;
+            }
+
             container yang-module-capabilities {
                 leaf-list capability {
                     type string;

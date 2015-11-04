@@ -138,6 +138,12 @@ public final class NetconfDevice implements RemoteDevice<NetconfSessionPreferenc
     @Override
     public void onRemoteSessionUp(final NetconfSessionPreferences remoteSessionCapabilities,
                                   final NetconfDeviceCommunicator listener) {
+
+        if(remoteSessionCapabilities.getNonModuleCaps().contains("netconf1.0")) {
+            // TODO more robust check needed
+            // expose netconf 1.0 version of MD-sal facade
+        }
+
         // SchemaContext setup has to be performed in a dedicated thread since
         // we are in a netty thread in this method
         // Yang models are being downloaded in this method and it would cause a

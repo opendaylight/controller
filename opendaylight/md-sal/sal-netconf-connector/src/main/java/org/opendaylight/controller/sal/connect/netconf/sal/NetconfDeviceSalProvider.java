@@ -27,7 +27,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class NetconfDeviceSalProvider implements AutoCloseable, Provider, BindingAwareProvider {
+public final class NetconfDeviceSalProvider implements AutoCloseable, Provider, BindingAwareProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(NetconfDeviceSalProvider.class);
 
@@ -92,7 +92,7 @@ final class NetconfDeviceSalProvider implements AutoCloseable, Provider, Binding
         topologyDatastoreAdapter = null;
     }
 
-    static final class MountInstance implements AutoCloseable {
+    public static final class MountInstance implements AutoCloseable {
 
         private DOMMountPointService mountService;
         private final RemoteDeviceId id;
@@ -144,7 +144,7 @@ final class NetconfDeviceSalProvider implements AutoCloseable, Provider, Binding
             }
         }
 
-        synchronized void onTopologyDeviceConnected(final SchemaContext initialCtx,
+        public synchronized void onTopologyDeviceConnected(final SchemaContext initialCtx,
                                                     final DOMDataBroker broker, final DOMRpcService rpc,
                                                     final NetconfDeviceNotificationService notificationService) {
 
@@ -163,7 +163,7 @@ final class NetconfDeviceSalProvider implements AutoCloseable, Provider, Binding
 
         }
 
-        synchronized void onTopologyDeviceDisconnected() {
+        public synchronized void onTopologyDeviceDisconnected() {
             if(topologyRegistration == null) {
                 logger.trace("{}: Not removing TOPOLOGY mountpoint from MD-SAL, mountpoint was not registered yet", id);
                 return;

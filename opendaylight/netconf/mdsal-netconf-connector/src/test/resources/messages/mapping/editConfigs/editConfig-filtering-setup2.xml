@@ -17,7 +17,7 @@
         <default-operation>merge</default-operation>
         <config>
             <top xmlns="urn:opendaylight:mdsal:mapping:test">
-                <choice-wrapper>
+                <choice-wrapper operation="">
                     <text>augmented nested choice text1</text>
                 </choice-wrapper>
             </top>

@@ -82,7 +82,7 @@ final class NetconfDeviceDataBroker implements DOMDataBroker {
 
     @Override
     public DOMTransactionChain createTransactionChain(final TransactionChainListener listener) {
-        throw new UnsupportedOperationException(id + ": Transaction chains not supported for netconf mount point");
+        return new CachingTransactionChain(schemaService);
     }
 
     @Override

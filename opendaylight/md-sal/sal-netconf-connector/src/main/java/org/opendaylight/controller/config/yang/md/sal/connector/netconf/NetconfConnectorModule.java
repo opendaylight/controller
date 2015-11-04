@@ -29,6 +29,7 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sal.connect.api.RemoteDeviceHandler;
 import org.opendaylight.controller.sal.connect.netconf.NetconfDevice;
 import org.opendaylight.controller.sal.connect.netconf.NetconfStateSchemas;
+import org.opendaylight.controller.sal.connect.netconf.SchemalessNetconfDevice;
 import org.opendaylight.controller.sal.connect.netconf.listener.NetconfDeviceCommunicator;
 import org.opendaylight.controller.sal.connect.netconf.listener.NetconfSessionPreferences;
 import org.opendaylight.controller.sal.connect.netconf.sal.KeepaliveSalFacade;
@@ -144,8 +145,15 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
         final NetconfDevice.SchemaResourcesDTO schemaResourcesDTO =
                 new NetconfDevice.SchemaResourcesDTO(schemaRegistry, schemaContextFactory, new NetconfStateSchemas.NetconfStateSchemasResolverImpl());
 
-        final NetconfDevice device =
-                new NetconfDevice(schemaResourcesDTO, id, salFacade, globalProcessingExecutor, getReconnectOnChangedSchema());
+//        TODO add netconf device wrapper to decide what NetconfDevice implementation to use schemaless or regular (based on capabilities received in on session up)
+//        new NetconfDeviceWrapper();
+
+        if(getSchemaless()) {
+            new SchemalessNetconfDevice(id, salFacade);
+        } else {
+            final NetconfDevice device = new NetconfDevice(schemaResourcesDTO, id, salFacade, globalProcessingExecutor,
+                getReconnectOnChangedSchema());
+        }
 
         final NetconfDeviceCommunicator listener = userCapabilities.isPresent() ?
                 new NetconfDeviceCommunicator(id, device, userCapabilities.get()) : new NetconfDeviceCommunicator(id, device);
