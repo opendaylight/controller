@@ -1249,6 +1249,9 @@ public class RaftActorTest extends AbstractActorTest {
 
         // Test with data persistence disabled
 
+        snapshot = Snapshot.create(new byte[0], Collections.<ReplicatedLogEntry>emptyList(),
+                -1, -1, -1, -1, 5, "member-1");
+
         persistenceId = factory.generateActorId("test-actor-");
 
         raftActorRef = factory.createTestActor(MockRaftActor.builder().id(persistenceId).
@@ -1258,8 +1261,12 @@ public class RaftActorTest extends AbstractActorTest {
         mockRaftActor = raftActorRef.underlyingActor();
 
         mockRaftActor.waitForRecoveryComplete();
+        assertEquals("snapshot committed", true,
+                Uninterruptibles.awaitUninterruptibly(mockRaftActor.snapshotCommitted, 5, TimeUnit.SECONDS));
 
-        verify(mockRaftActor.snapshotCohortDelegate, timeout(5000)).applySnapshot(any(byte[].class));
+        context = mockRaftActor.getRaftActorContext();
+        assertEquals("Current term", 5L, context.getTermInformation().getCurrentTerm());
+        assertEquals("Voted for", "member-1", context.getTermInformation().getVotedFor());
 
         TEST_LOG.info("testRestoreFromSnapshot ending");
     }

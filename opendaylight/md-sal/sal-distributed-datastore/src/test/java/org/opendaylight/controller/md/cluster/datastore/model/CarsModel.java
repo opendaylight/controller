@@ -11,6 +11,7 @@ package org.opendaylight.controller.md.cluster.datastore.model;
 import java.math.BigInteger;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -64,18 +65,22 @@ public class CarsModel {
     }
 
     public static NormalizedNode<?, ?> createEmptyCarsList(){
+        return newCarsNode(newCarsMapNode());
+    }
 
-        // Create a list builder
-        CollectionNodeBuilder<MapEntryNode, MapNode> cars =
-                ImmutableMapNodeBuilder.create().withNodeIdentifier(
-                        new YangInstanceIdentifier.NodeIdentifier(
-                                CAR_QNAME));
+    public static ContainerNode newCarsNode(MapNode carsList) {
+        return ImmutableContainerNodeBuilder.create().withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(
+                BASE_QNAME)).withChild(carsList).build();
+    }
 
-        return ImmutableContainerNodeBuilder.create()
-                .withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(BASE_QNAME))
-                .withChild(cars.build())
-                .build();
+    public static MapNode newCarsMapNode(MapEntryNode... carEntries) {
+        CollectionNodeBuilder<MapEntryNode, MapNode> builder = ImmutableMapNodeBuilder.create().
+                withNodeIdentifier(new YangInstanceIdentifier.NodeIdentifier(CAR_QNAME));
+        for(MapEntryNode e: carEntries) {
+            builder.withChild(e);
+        }
 
+        return builder.build();
     }
 
     public static NormalizedNode<?, ?> emptyContainer(){

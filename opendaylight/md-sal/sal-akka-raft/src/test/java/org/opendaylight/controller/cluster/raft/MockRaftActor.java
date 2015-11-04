@@ -42,6 +42,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     private RaftActorRecoverySupport raftActorRecoverySupport;
     private RaftActorSnapshotMessageSupport snapshotMessageSupport;
     private final byte[] restoreFromSnapshot;
+    final CountDownLatch snapshotCommitted = new CountDownLatch(1);
 
     protected MockRaftActor(Builder builder) {
         super(builder.id, builder.peerAddresses, Optional.fromNullable(builder.config), PAYLOAD_VERSION);
@@ -208,6 +209,10 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
             super.changeCurrentBehavior((RaftActorBehavior)message);
         } else {
             super.handleCommand(message);
+
+            if(RaftActorSnapshotMessageSupport.COMMIT_SNAPSHOT.equals(message)) {
+                snapshotCommitted.countDown();
+            }
         }
     }
 
