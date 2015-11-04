@@ -148,13 +148,17 @@ final class YangStoreSnapshot implements YangStoreContext, EnumResolver {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof YangStoreSnapshot)) {
+            return false;
+        }
 
         final YangStoreSnapshot that = (YangStoreSnapshot) o;
-
-        if (schemaContext != null ? !schemaContext.equals(that.schemaContext) : that.schemaContext != null)
+        if (schemaContext != null ? !schemaContext.equals(that.schemaContext) : that.schemaContext != null) {
             return false;
+        }
 
         return true;
     }
@@ -177,7 +181,8 @@ final class YangStoreSnapshot implements YangStoreContext, EnumResolver {
         Preconditions.checkState(bindingContextProvider != null, "Binding context provider was not set yet");
         final BiMap<String, String> enumMapping = bindingContextProvider.getEnumMapping(enumClass);
         final String javaName = enumMapping.inverse().get(enumJavaValue);
-        return Preconditions.checkNotNull(javaName, "Unable to map enumcd .." +
-                "cd  value %s for enum class %s with assumed enum mapping: %s", enumJavaValue, enumClass, enumMapping.inverse());
+        return Preconditions.checkNotNull(javaName,
+            "Unable to map enum value %s for enum class %s with assumed enum mapping: %s", enumJavaValue, enumClass,
+            enumMapping.inverse());
     }
 }
