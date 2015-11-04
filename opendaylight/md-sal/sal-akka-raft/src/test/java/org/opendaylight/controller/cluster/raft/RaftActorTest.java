@@ -62,6 +62,7 @@ import org.opendaylight.controller.cluster.NonPersistentDataProvider;
 import org.opendaylight.controller.cluster.PersistentDataProvider;
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.RoleChanged;
+import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyLogEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
@@ -134,7 +135,7 @@ public class RaftActorTest extends AbstractActorTest {
 
             ImmutableMap<String, String> peerAddresses = ImmutableMap.<String, String>builder().put("member1", "address").build();
             ActorRef followerActor = factory.createActor(MockRaftActor.props(persistenceId,
-                    peerAddresses, Optional.<ConfigParams>of(config)), persistenceId);
+                    peerAddresses, config), persistenceId);
 
             watch(followerActor);
 
@@ -187,7 +188,7 @@ public class RaftActorTest extends AbstractActorTest {
 
             //reinstate the actor
             TestActorRef<MockRaftActor> ref = factory.createTestActor(
-                    MockRaftActor.props(persistenceId, peerAddresses, Optional.<ConfigParams>of(config)));
+                    MockRaftActor.props(persistenceId, peerAddresses, config));
 
             MockRaftActor mockRaftActor = ref.underlyingActor();
 
@@ -221,7 +222,7 @@ public class RaftActorTest extends AbstractActorTest {
 
             TestActorRef<MockRaftActor> ref = factory.createTestActor(MockRaftActor.props(persistenceId,
                     ImmutableMap.<String, String>builder().put("member1", "address").build(),
-                    Optional.<ConfigParams>of(config), new NonPersistentDataProvider()), persistenceId);
+                    config, new NonPersistentDataProvider()), persistenceId);
 
             MockRaftActor mockRaftActor = ref.underlyingActor();
 
@@ -245,7 +246,7 @@ public class RaftActorTest extends AbstractActorTest {
 
             TestActorRef<MockRaftActor> ref = factory.createTestActor(MockRaftActor.props(persistenceId,
                     ImmutableMap.<String, String>builder().put("member1", "address").build(),
-                    Optional.<ConfigParams>of(config), new NonPersistentDataProvider()).
+                    config, new NonPersistentDataProvider()).
                             withDispatcher(Dispatchers.DefaultDispatcherId()), persistenceId);
 
             InMemoryJournal.waitForWriteMessagesComplete(persistenceId);
@@ -257,8 +258,8 @@ public class RaftActorTest extends AbstractActorTest {
 
             config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
             ref = factory.createTestActor(MockRaftActor.props(persistenceId,
-                    ImmutableMap.<String, String>builder().put("member1", "address").build(),
-                    Optional.<ConfigParams>of(config), new NonPersistentDataProvider()).
+                    ImmutableMap.<String, String>builder().put("member1", "address").build(), config,
+                    new NonPersistentDataProvider()).
                             withDispatcher(Dispatchers.DefaultDispatcherId()),
                             factory.generateActorId("follower-"));
 
@@ -284,7 +285,7 @@ public class RaftActorTest extends AbstractActorTest {
         config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
 
         TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(MockRaftActor.props(persistenceId,
-                Collections.<String, String>emptyMap(), Optional.<ConfigParams>of(config)), persistenceId);
+                Collections.<String, String>emptyMap(), config), persistenceId);
 
         MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
 
@@ -342,8 +343,8 @@ public class RaftActorTest extends AbstractActorTest {
 
         RaftActorSnapshotMessageSupport mockSupport = mock(RaftActorSnapshotMessageSupport.class);
 
-        TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(MockRaftActor.props(persistenceId,
-                Collections.<String, String>emptyMap(), Optional.<ConfigParams>of(config), mockSupport), persistenceId);
+        TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(MockRaftActor.builder().id(persistenceId).
+                config(config).snapshotMessageSupport(mockSupport).props());
 
         MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
 
@@ -400,7 +401,7 @@ public class RaftActorTest extends AbstractActorTest {
                 DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
 
                 TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(MockRaftActor.props(persistenceId,
-                        Collections.<String, String>emptyMap(), Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
+                        Collections.<String, String>emptyMap(), config, dataPersistenceProvider), persistenceId);
 
                 MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
 
@@ -431,7 +432,7 @@ public class RaftActorTest extends AbstractActorTest {
                 DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
 
                 TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(MockRaftActor.props(persistenceId,
-                        Collections.<String, String>emptyMap(), Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
+                        Collections.<String, String>emptyMap(), config, dataPersistenceProvider), persistenceId);
 
                 MockRaftActor mockRaftActor = mockActorRef.underlyingActor();
 
@@ -462,9 +463,10 @@ public class RaftActorTest extends AbstractActorTest {
 
             String persistenceId = factory.generateActorId("notifier-");
 
-            TestActorRef<MockRaftActor> raftActorRef = factory.createTestActor(MockRaftActor.props(persistenceId,
-                    Collections.<String, String>emptyMap(), Optional.<ConfigParams>of(config), notifierActor,
-                    new NonPersistentDataProvider()).withDispatcher(Dispatchers.DefaultDispatcherId()), persistenceId);
+            TestActorRef<MockRaftActor> raftActorRef = factory.createTestActor(MockRaftActor.builder().id(persistenceId).
+                    config(config).roleChangeNotifier(notifierActor).dataPersistenceProvider(
+                            new NonPersistentDataProvider()).props().withDispatcher(Dispatchers.DefaultDispatcherId()),
+                            persistenceId);
 
             List<RoleChanged> matches =  MessageCollectorActor.expectMatching(notifierActor, RoleChanged.class, 3);
 
@@ -549,8 +551,9 @@ public class RaftActorTest extends AbstractActorTest {
 
             String persistenceId = factory.generateActorId("notifier-");
 
-            factory.createActor(MockRaftActor.props(persistenceId,
-                    ImmutableMap.of("leader", "fake/path"), Optional.<ConfigParams>of(config), notifierActor), persistenceId);
+            factory.createActor(MockRaftActor.builder().id(persistenceId).
+                    peerAddresses(ImmutableMap.of("leader", "fake/path")).
+                    config(config).roleChangeNotifier(notifierActor).props());
 
             List<RoleChanged> matches =  null;
             for(int i = 0; i < 5000 / heartBeatInterval; i++) {
@@ -600,8 +603,7 @@ public class RaftActorTest extends AbstractActorTest {
                 peerAddresses.put(follower1Id, followerActor1.path().toString());
 
                 TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(
-                        MockRaftActor.props(persistenceId, peerAddresses,
-                                Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
+                        MockRaftActor.props(persistenceId, peerAddresses, config, dataPersistenceProvider), persistenceId);
 
                 MockRaftActor leaderActor = mockActorRef.underlyingActor();
 
@@ -698,8 +700,7 @@ public class RaftActorTest extends AbstractActorTest {
                 peerAddresses.put(leaderId, leaderActor1.path().toString());
 
                 TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(
-                        MockRaftActor.props(persistenceId, peerAddresses,
-                                Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
+                        MockRaftActor.props(persistenceId, peerAddresses, config, dataPersistenceProvider), persistenceId);
 
                 MockRaftActor followerActor = mockActorRef.underlyingActor();
                 followerActor.getRaftActorContext().setCommitIndex(4);
@@ -807,8 +808,7 @@ public class RaftActorTest extends AbstractActorTest {
                 peerAddresses.put(follower2Id, followerActor2.path().toString());
 
                 TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(
-                        MockRaftActor.props(persistenceId, peerAddresses,
-                                Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
+                        MockRaftActor.props(persistenceId, peerAddresses, config, dataPersistenceProvider), persistenceId);
 
                 MockRaftActor leaderActor = mockActorRef.underlyingActor();
                 leaderActor.getRaftActorContext().setCommitIndex(9);
@@ -885,8 +885,7 @@ public class RaftActorTest extends AbstractActorTest {
             Map<String, String> peerAddresses = ImmutableMap.<String, String>builder().put("member1", "address").build();
 
             TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(
-                    MockRaftActor.props(persistenceId, peerAddresses,
-                            Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
+                    MockRaftActor.props(persistenceId, peerAddresses, config, dataPersistenceProvider), persistenceId);
 
             MockRaftActor leaderActor = mockActorRef.underlyingActor();
             leaderActor.getRaftActorContext().setCommitIndex(3);
@@ -933,8 +932,7 @@ public class RaftActorTest extends AbstractActorTest {
             Map<String, String> peerAddresses = ImmutableMap.<String, String>builder().put("member1", "address").build();
 
             TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(
-                    MockRaftActor.props(persistenceId, peerAddresses,
-                            Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
+                    MockRaftActor.props(persistenceId, peerAddresses, config, dataPersistenceProvider), persistenceId);
 
             MockRaftActor leaderActor = mockActorRef.underlyingActor();
             leaderActor.getRaftActorContext().setCommitIndex(3);
@@ -984,7 +982,7 @@ public class RaftActorTest extends AbstractActorTest {
                 InMemoryJournal.addEntry(persistenceId, 1, replLogEntry);
 
                 TestActorRef<MockRaftActor> ref = factory.createTestActor(
-                        MockRaftActor.props(persistenceId, peerAddresses, Optional.<ConfigParams>of(config)));
+                        MockRaftActor.props(persistenceId, peerAddresses, config));
 
                 MockRaftActor mockRaftActor = ref.underlyingActor();
 
@@ -1010,8 +1008,7 @@ public class RaftActorTest extends AbstractActorTest {
         Map<String, String> peerAddresses = ImmutableMap.<String, String>builder().build();
 
         TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(
-                MockRaftActor.props(persistenceId, peerAddresses,
-                        Optional.<ConfigParams>of(config), dataPersistenceProvider), persistenceId);
+                MockRaftActor.props(persistenceId, peerAddresses, config, dataPersistenceProvider), persistenceId);
 
         MockRaftActor leaderActor = mockActorRef.underlyingActor();
 
@@ -1067,8 +1064,7 @@ public class RaftActorTest extends AbstractActorTest {
         DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
 
         TestActorRef<MockRaftActor> actorRef = factory.createTestActor(
-                MockRaftActor.props(persistenceId, peerAddresses,
-                    Optional.<ConfigParams>of(emptyConfig), dataPersistenceProvider), persistenceId);
+                MockRaftActor.props(persistenceId, peerAddresses, emptyConfig, dataPersistenceProvider), persistenceId);
         MockRaftActor mockRaftActor = actorRef.underlyingActor();
         mockRaftActor.waitForInitializeBehaviorComplete();
 
@@ -1129,7 +1125,7 @@ public class RaftActorTest extends AbstractActorTest {
                 new MockRaftActorContext.MockPayload("C")));
 
         TestActorRef<MockRaftActor> raftActorRef = factory.createTestActor(MockRaftActor.props(persistenceId,
-                ImmutableMap.<String, String>builder().put("member1", "address").build(), Optional.<ConfigParams>of(config)).
+                ImmutableMap.<String, String>builder().put("member1", "address").build(), config).
                     withDispatcher(Dispatchers.DefaultDispatcherId()), persistenceId);
         MockRaftActor mockRaftActor = raftActorRef.underlyingActor();
 
@@ -1194,5 +1190,119 @@ public class RaftActorTest extends AbstractActorTest {
         assertEquals("getUnAppliedEntries size", 0, replySnapshot.getUnAppliedEntries().size());
 
         TEST_LOG.info("testGetSnapshot ending");
+    }
+
+    @Test
+    public void testRestoreFromSnapshot() throws Exception {
+        TEST_LOG.info("testRestoreFromSnapshot starting");
+
+        String persistenceId = factory.generateActorId("test-actor-");
+        DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+        config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
+
+        List<ReplicatedLogEntry> snapshotUnappliedEntries = new ArrayList<>();
+        snapshotUnappliedEntries.add(new MockRaftActorContext.MockReplicatedLogEntry(1, 4,
+                new MockRaftActorContext.MockPayload("E")));
+
+        int snapshotLastApplied = 3;
+        int snapshotLastIndex = 4;
+
+        List<MockPayload> state = Arrays.asList(
+                new MockRaftActorContext.MockPayload("A"),
+                new MockRaftActorContext.MockPayload("B"),
+                new MockRaftActorContext.MockPayload("C"),
+                new MockRaftActorContext.MockPayload("D"));
+        ByteString stateBytes = fromObject(state);
+
+        Snapshot snapshot = Snapshot.create(stateBytes.toByteArray(), snapshotUnappliedEntries,
+                snapshotLastIndex, 1, snapshotLastApplied, 1, 1, "member-1");
+
+        InMemorySnapshotStore.addSnapshotSavedLatch(persistenceId);
+
+        TestActorRef<MockRaftActor> raftActorRef = factory.createTestActor(MockRaftActor.builder().id(persistenceId).
+                config(config).restoreFromSnapshot(SerializationUtils.serialize(snapshot)).props().
+                    withDispatcher(Dispatchers.DefaultDispatcherId()), persistenceId);
+        MockRaftActor mockRaftActor = raftActorRef.underlyingActor();
+
+        mockRaftActor.waitForRecoveryComplete();
+
+        Snapshot savedSnapshot = InMemorySnapshotStore.waitForSavedSnapshot(persistenceId, Snapshot.class);
+        assertEquals("getElectionTerm", snapshot.getElectionTerm(), savedSnapshot.getElectionTerm());
+        assertEquals("getElectionVotedFor", snapshot.getElectionVotedFor(), savedSnapshot.getElectionVotedFor());
+        assertEquals("getLastAppliedIndex", snapshot.getLastAppliedIndex(), savedSnapshot.getLastAppliedIndex());
+        assertEquals("getLastAppliedTerm", snapshot.getLastAppliedTerm(), savedSnapshot.getLastAppliedTerm());
+        assertEquals("getLastIndex", snapshot.getLastIndex(), savedSnapshot.getLastIndex());
+        assertEquals("getLastTerm", snapshot.getLastTerm(), savedSnapshot.getLastTerm());
+        assertArrayEquals("getState", snapshot.getState(), savedSnapshot.getState());
+        assertEquals("getUnAppliedEntries", snapshot.getUnAppliedEntries(), savedSnapshot.getUnAppliedEntries());
+
+        verify(mockRaftActor.snapshotCohortDelegate, timeout(5000)).applySnapshot(any(byte[].class));
+
+        RaftActorContext context = mockRaftActor.getRaftActorContext();
+        assertEquals("Journal log size", 1, context.getReplicatedLog().size());
+        assertEquals("Last index", snapshotLastIndex, context.getReplicatedLog().lastIndex());
+        assertEquals("Last applied", snapshotLastApplied, context.getLastApplied());
+        assertEquals("Commit index", snapshotLastApplied, context.getCommitIndex());
+        assertEquals("Recovered state", state, mockRaftActor.getState());
+        assertEquals("Current term", 1L, context.getTermInformation().getCurrentTerm());
+        assertEquals("Voted for", "member-1", context.getTermInformation().getVotedFor());
+
+        // Test with data persistence disabled
+
+        snapshot = Snapshot.create(new byte[0], Collections.<ReplicatedLogEntry>emptyList(),
+                -1, -1, -1, -1, 5, "member-1");
+
+        persistenceId = factory.generateActorId("test-actor-");
+
+        raftActorRef = factory.createTestActor(MockRaftActor.builder().id(persistenceId).
+                config(config).restoreFromSnapshot(SerializationUtils.serialize(snapshot)).
+                persistent(Optional.of(Boolean.FALSE)).props().
+                    withDispatcher(Dispatchers.DefaultDispatcherId()), persistenceId);
+        mockRaftActor = raftActorRef.underlyingActor();
+
+        mockRaftActor.waitForRecoveryComplete();
+        assertEquals("snapshot committed", true,
+                Uninterruptibles.awaitUninterruptibly(mockRaftActor.snapshotCommitted, 5, TimeUnit.SECONDS));
+
+        context = mockRaftActor.getRaftActorContext();
+        assertEquals("Current term", 5L, context.getTermInformation().getCurrentTerm());
+        assertEquals("Voted for", "member-1", context.getTermInformation().getVotedFor());
+
+        TEST_LOG.info("testRestoreFromSnapshot ending");
+    }
+
+    @Test
+    public void testRestoreFromSnapshotWithRecoveredData() throws Exception {
+        TEST_LOG.info("testRestoreFromSnapshotWithRecoveredData starting");
+
+        String persistenceId = factory.generateActorId("test-actor-");
+        DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+        config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
+
+        List<MockPayload> state = Arrays.asList(new MockRaftActorContext.MockPayload("A"));
+        Snapshot snapshot = Snapshot.create(fromObject(state).toByteArray(), Arrays.<ReplicatedLogEntry>asList(),
+                5, 2, 5, 2, 2, "member-1");
+
+        InMemoryJournal.addEntry(persistenceId, 1, new MockRaftActorContext.MockReplicatedLogEntry(1, 0,
+                new MockRaftActorContext.MockPayload("B")));
+
+        TestActorRef<MockRaftActor> raftActorRef = factory.createTestActor(MockRaftActor.builder().id(persistenceId).
+                config(config).restoreFromSnapshot(SerializationUtils.serialize(snapshot)).props().
+                    withDispatcher(Dispatchers.DefaultDispatcherId()), persistenceId);
+        MockRaftActor mockRaftActor = raftActorRef.underlyingActor();
+
+        mockRaftActor.waitForRecoveryComplete();
+
+        verify(mockRaftActor.snapshotCohortDelegate, timeout(500).never()).applySnapshot(any(byte[].class));
+
+        RaftActorContext context = mockRaftActor.getRaftActorContext();
+        assertEquals("Journal log size", 1, context.getReplicatedLog().size());
+        assertEquals("Last index", 0, context.getReplicatedLog().lastIndex());
+        assertEquals("Last applied", -1, context.getLastApplied());
+        assertEquals("Commit index", -1, context.getCommitIndex());
+        assertEquals("Current term", 0, context.getTermInformation().getCurrentTerm());
+        assertEquals("Voted for", null, context.getTermInformation().getVotedFor());
+
+        TEST_LOG.info("testRestoreFromSnapshotWithRecoveredData ending");
     }
 }
