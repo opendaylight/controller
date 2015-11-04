@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 
 /**
@@ -42,4 +43,12 @@ public interface RaftActorRecoveryCohort {
      * log entries. This method is called after {@link #appendRecoveredLogEntry}.
      */
     void applyCurrentLogRecoveryBatch();
+
+    /**
+     * Returns the state snapshot to restore from on recovery.
+     *
+     * @return the snapshot bytes or null if there's no snapshot to restore
+     */
+    @Nullable
+    byte[] getRestoreFromSnapshot();
 }

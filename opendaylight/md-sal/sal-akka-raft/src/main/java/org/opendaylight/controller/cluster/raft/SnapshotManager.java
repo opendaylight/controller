@@ -387,12 +387,14 @@ public class SnapshotManager implements SnapshotState {
             if(applySnapshot != null) {
                 try {
                     Snapshot snapshot = applySnapshot.getSnapshot();
-                    applySnapshotProcedure.apply(snapshot.getState());
 
                     //clears the followers log, sets the snapshot index to ensure adjusted-index works
                     context.setReplicatedLog(ReplicatedLogImpl.newInstance(snapshot, context, currentBehavior));
                     context.setLastApplied(snapshot.getLastAppliedIndex());
                     context.setCommitIndex(snapshot.getLastAppliedIndex());
+                    context.getTermInformation().update(snapshot.getElectionTerm(), snapshot.getElectionVotedFor());
+
+                    applySnapshotProcedure.apply(snapshot.getState());
 
                     applySnapshot.getCallback().onSuccess();
                 } catch (Exception e) {

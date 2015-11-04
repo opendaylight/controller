@@ -11,10 +11,13 @@ import akka.persistence.RecoveryCompleted;
 import akka.persistence.SnapshotOffer;
 import akka.persistence.SnapshotSelectionCriteria;
 import com.google.common.base.Stopwatch;
+import org.apache.commons.lang3.SerializationException;
+import org.apache.commons.lang3.SerializationUtils;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.PersistentDataProvider;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyLogEntries;
+import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.DeleteEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
@@ -32,6 +35,7 @@ class RaftActorRecoverySupport {
 
     private int currentRecoveryBatchCount;
     private boolean dataRecoveredWithPersistenceDisabled;
+    private boolean anyDataRecovered;
 
     private Stopwatch recoveryTimer;
     private final Logger log;
@@ -46,6 +50,8 @@ class RaftActorRecoverySupport {
 
     boolean handleRecoveryMessage(Object message, PersistentDataProvider persistentProvider) {
         log.trace("handleRecoveryMessage: {}", message);
+
+        anyDataRecovered = anyDataRecovered || !(message instanceof RecoveryCompleted);
 
         boolean recoveryComplete = false;
         DataPersistenceProvider persistence = context.getPersistenceProvider();
@@ -74,6 +80,7 @@ class RaftActorRecoverySupport {
                 replicatedLog().removeFrom(((org.opendaylight.controller.cluster.raft.RaftActor.DeleteEntries) message).getFromIndex());
             } else if (message instanceof RecoveryCompleted) {
                 onRecoveryCompletedMessage();
+                possiblyRestoreFromSnapshot();
                 recoveryComplete = true;
             }
         } else if (message instanceof RecoveryCompleted) {
@@ -94,11 +101,35 @@ class RaftActorRecoverySupport {
                 context.getTermInformation().updateAndPersist(context.getTermInformation().getCurrentTerm(),
                         context.getTermInformation().getVotedFor());
             }
+
+            possiblyRestoreFromSnapshot();
         } else {
             dataRecoveredWithPersistenceDisabled = true;
         }
 
         return recoveryComplete;
+    }
+
+    private void possiblyRestoreFromSnapshot() {
+        byte[] restoreFromSnapshot = cohort.getRestoreFromSnapshot();
+        if(restoreFromSnapshot == null) {
+            return;
+        }
+
+        if(anyDataRecovered) {
+            log.warn("The provided restore snapshot was not applied because the persistence store is not empty");
+            return;
+        }
+
+        try {
+            Snapshot snapshot = SerializationUtils.deserialize(restoreFromSnapshot);
+
+            log.debug("Deserialized restore snapshot: {}", snapshot);
+
+            context.getSnapshotManager().apply(new ApplySnapshot(snapshot));
+        } catch(SerializationException e) {
+            log.error("Error deserializing snapshot restore", e);
+        }
     }
 
     private ReplicatedLog replicatedLog() {
