@@ -8,6 +8,7 @@
 
 package org.opendaylight.controller.config.manager.impl.osgi.mapping;
 
+import java.util.Dictionary;
 import java.util.Hashtable;
 import org.opendaylight.yangtools.concepts.ObjectRegistration;
 import org.opendaylight.yangtools.sal.binding.generator.api.ClassLoadingStrategy;
@@ -54,10 +55,11 @@ public class RefreshingSCPModuleInfoRegistry implements ModuleInfoRegistry, Auto
         if(osgiReg != null) {
             try {
                 bindingContextProvider.update(classLoadingStrat, schemaContextProvider);
-                osgiReg.setProperties(new Hashtable<String, Object>() {{
-                        put(BindingRuntimeContext.class.getName(), bindingContextProvider.getBindingContext());
-                        put(SchemaSourceProvider.class.getName(), sourceProvider);
-                    }}); // send modifiedService event
+
+                final Dictionary<String, Object> props = new Hashtable<>();
+                props.put(BindingRuntimeContext.class.getName(), bindingContextProvider.getBindingContext());
+                props.put(SchemaSourceProvider.class.getName(), sourceProvider);
+                osgiReg.setProperties(props); // send modifiedService event
             } catch (RuntimeException e) {
                 // The ModuleInfoBackedContext throws a RuntimeException if it can't create the schema context.
                 LOG.warn("Error updating the BindingContextProvider", e);
@@ -66,7 +68,7 @@ public class RefreshingSCPModuleInfoRegistry implements ModuleInfoRegistry, Auto
     }
 
     @Override
-    public ObjectRegistration<YangModuleInfo> registerModuleInfo(YangModuleInfo yangModuleInfo) {
+    public ObjectRegistration<YangModuleInfo> registerModuleInfo(final YangModuleInfo yangModuleInfo) {
         ObjectRegistration<YangModuleInfo> yangModuleInfoObjectRegistration = moduleInfoRegistry.registerModuleInfo(yangModuleInfo);
         ObjectRegistrationWrapper wrapper = new ObjectRegistrationWrapper(yangModuleInfoObjectRegistration);
         return wrapper;
@@ -84,7 +86,7 @@ public class RefreshingSCPModuleInfoRegistry implements ModuleInfoRegistry, Auto
     private class ObjectRegistrationWrapper implements ObjectRegistration<YangModuleInfo> {
         private final ObjectRegistration<YangModuleInfo> inner;
 
-        private ObjectRegistrationWrapper(ObjectRegistration<YangModuleInfo> inner) {
+        private ObjectRegistrationWrapper(final ObjectRegistration<YangModuleInfo> inner) {
             this.inner = inner;
         }
 
