@@ -11,10 +11,13 @@ import akka.persistence.RecoveryCompleted;
 import akka.persistence.SnapshotOffer;
 import akka.persistence.SnapshotSelectionCriteria;
 import com.google.common.base.Stopwatch;
+import java.io.ByteArrayInputStream;
+import java.io.ObjectInputStream;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.PersistentDataProvider;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyLogEntries;
+import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.DeleteEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
@@ -32,6 +35,7 @@ class RaftActorRecoverySupport {
 
     private int currentRecoveryBatchCount;
     private boolean dataRecoveredWithPersistenceDisabled;
+    private boolean anyDataRecovered;
 
     private Stopwatch recoveryTimer;
     private final Logger log;
@@ -45,7 +49,9 @@ class RaftActorRecoverySupport {
     }
 
     boolean handleRecoveryMessage(Object message, PersistentDataProvider persistentProvider) {
-        log.trace("handleRecoveryMessage: {}", message);
+        log.trace("{}: handleRecoveryMessage: {}", context.getId(), message);
+
+        anyDataRecovered = anyDataRecovered || !(message instanceof RecoveryCompleted);
 
         boolean recoveryComplete = false;
         DataPersistenceProvider persistence = context.getPersistenceProvider();
@@ -74,6 +80,7 @@ class RaftActorRecoverySupport {
                 replicatedLog().removeFrom(((org.opendaylight.controller.cluster.raft.RaftActor.DeleteEntries) message).getFromIndex());
             } else if (message instanceof RecoveryCompleted) {
                 onRecoveryCompletedMessage();
+                possiblyRestoreFromSnapshot();
                 recoveryComplete = true;
             }
         } else if (message instanceof RecoveryCompleted) {
@@ -94,11 +101,36 @@ class RaftActorRecoverySupport {
                 context.getTermInformation().updateAndPersist(context.getTermInformation().getCurrentTerm(),
                         context.getTermInformation().getVotedFor());
             }
+
+            possiblyRestoreFromSnapshot();
         } else {
             dataRecoveredWithPersistenceDisabled = true;
         }
 
         return recoveryComplete;
+    }
+
+    private void possiblyRestoreFromSnapshot() {
+        byte[] restoreFromSnapshot = cohort.getRestoreFromSnapshot();
+        if(restoreFromSnapshot == null) {
+            return;
+        }
+
+        if(anyDataRecovered) {
+            log.warn("{}: The provided restore snapshot was not applied because the persistence store is not empty",
+                    context.getId());
+            return;
+        }
+
+        try(ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(restoreFromSnapshot))) {
+            Snapshot snapshot = (Snapshot) ois.readObject();
+
+            log.debug("{}: Deserialized restore snapshot: {}", context.getId(), snapshot);
+
+            context.getSnapshotManager().apply(new ApplySnapshot(snapshot));
+        } catch(Exception e) {
+            log.error("{}: Error deserializing snapshot restore", context.getId(), e);
+        }
     }
 
     private ReplicatedLog replicatedLog() {
@@ -167,7 +199,7 @@ class RaftActorRecoverySupport {
                 batchRecoveredLogEntry(logEntry);
             } else {
                 // Shouldn't happen but cover it anyway.
-                log.error("Log entry not found for index {}", i);
+                log.error("{}: Log entry not found for index {}", context.getId(), i);
                 break;
             }
         }

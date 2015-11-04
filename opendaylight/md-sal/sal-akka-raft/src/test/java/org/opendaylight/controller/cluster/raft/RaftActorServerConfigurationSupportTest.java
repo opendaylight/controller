@@ -579,7 +579,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         TestActorRef<MockRaftActor> noLeaderActor = actorFactory.createTestActor(
                 MockRaftActor.props(LEADER_ID, ImmutableMap.<String,String>of(FOLLOWER_ID, followerActor.path().toString()),
-                        Optional.<ConfigParams>of(configParams), NO_PERSISTENCE).withDispatcher(Dispatchers.DefaultDispatcherId()),
+                        configParams, NO_PERSISTENCE).withDispatcher(Dispatchers.DefaultDispatcherId()),
                 actorFactory.generateActorId(LEADER_ID));
         noLeaderActor.underlyingActor().waitForInitializeBehaviorComplete();
 
@@ -599,7 +599,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         TestActorRef<MockRaftActor> followerRaftActor = actorFactory.createTestActor(
                 MockRaftActor.props(FOLLOWER_ID, ImmutableMap.<String,String>of(LEADER_ID, leaderActor.path().toString()),
-                        Optional.<ConfigParams>of(configParams), NO_PERSISTENCE).withDispatcher(Dispatchers.DefaultDispatcherId()),
+                        configParams, NO_PERSISTENCE).withDispatcher(Dispatchers.DefaultDispatcherId()),
                 actorFactory.generateActorId(FOLLOWER_ID));
         followerRaftActor.underlyingActor().waitForInitializeBehaviorComplete();
 
@@ -647,7 +647,8 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         AbstractMockRaftActor(String id, Map<String, String> peerAddresses, Optional<ConfigParams> config,
                 DataPersistenceProvider dataPersistenceProvider, TestActorRef<MessageCollectorActor> collectorActor) {
-            super(id, peerAddresses, config, dataPersistenceProvider);
+            super(builder().id(id).peerAddresses(peerAddresses).config(config.get()).
+                    dataPersistenceProvider(dataPersistenceProvider));
             this.collectorActor = collectorActor;
         }
 

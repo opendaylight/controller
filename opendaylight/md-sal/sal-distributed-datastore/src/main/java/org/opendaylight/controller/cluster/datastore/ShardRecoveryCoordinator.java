@@ -125,4 +125,10 @@ class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
             log.error("{}: Failed to apply recovery snapshot", shardName, e);
         }
     }
+
+    @Override
+    public byte[] getRestoreFromSnapshot() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }
