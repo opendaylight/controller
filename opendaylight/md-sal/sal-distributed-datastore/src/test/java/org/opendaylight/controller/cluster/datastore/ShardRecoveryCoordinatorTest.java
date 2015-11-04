@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-
 import com.google.common.base.Optional;
 import java.io.IOException;
 import org.junit.Before;
@@ -51,7 +50,8 @@ public class ShardRecoveryCoordinatorTest {
 
     @Test
     public void testAppendRecoveredLogEntryDataTreeCandidatePayload(){
-        final ShardRecoveryCoordinator coordinator = new ShardRecoveryCoordinator(peopleDataTree, peopleSchemaContext, "foobar", LoggerFactory.getLogger("foo"));
+        final ShardRecoveryCoordinator coordinator = new ShardRecoveryCoordinator(peopleDataTree,
+                peopleSchemaContext, null, "foobar", LoggerFactory.getLogger("foo"));
         coordinator.startLogRecoveryBatch(10);
         try {
             coordinator.appendRecoveredLogEntry(DataTreeCandidatePayload.create(createCar()));
@@ -64,7 +64,8 @@ public class ShardRecoveryCoordinatorTest {
 
     @Test
     public void testAppendRecoveredLogEntryModificationPayload() throws IOException {
-        final ShardRecoveryCoordinator coordinator = new ShardRecoveryCoordinator(peopleDataTree, peopleSchemaContext, "foobar", LoggerFactory.getLogger("foo"));
+        final ShardRecoveryCoordinator coordinator = new ShardRecoveryCoordinator(peopleDataTree,
+                peopleSchemaContext, null, "foobar", LoggerFactory.getLogger("foo"));
         coordinator.startLogRecoveryBatch(10);
         try {
             final MutableCompositeModification modification  = new MutableCompositeModification((short) 1);
@@ -77,7 +78,8 @@ public class ShardRecoveryCoordinatorTest {
 
     @Test
     public void testAppendRecoveredLogEntryCompositeModificationPayload() throws IOException {
-        final ShardRecoveryCoordinator coordinator = new ShardRecoveryCoordinator(peopleDataTree, peopleSchemaContext, "foobar", LoggerFactory.getLogger("foo"));
+        final ShardRecoveryCoordinator coordinator = new ShardRecoveryCoordinator(peopleDataTree,
+                peopleSchemaContext, null, "foobar", LoggerFactory.getLogger("foo"));
         coordinator.startLogRecoveryBatch(10);
         try {
             final MutableCompositeModification modification  = new MutableCompositeModification((short) 1);
@@ -90,7 +92,8 @@ public class ShardRecoveryCoordinatorTest {
 
     @Test
     public void testAppendRecoveredLogEntryCompositeModificationByteStringPayload() throws IOException {
-        final ShardRecoveryCoordinator coordinator = new ShardRecoveryCoordinator(peopleDataTree, peopleSchemaContext, "foobar", LoggerFactory.getLogger("foo"));
+        final ShardRecoveryCoordinator coordinator = new ShardRecoveryCoordinator(peopleDataTree,
+                peopleSchemaContext, null, "foobar", LoggerFactory.getLogger("foo"));
         coordinator.startLogRecoveryBatch(10);
         try {
             final MutableCompositeModification modification  = new MutableCompositeModification((short) 1);
@@ -105,7 +108,8 @@ public class ShardRecoveryCoordinatorTest {
 
     @Test
     public void testApplyRecoverySnapshot(){
-        final ShardRecoveryCoordinator coordinator = new ShardRecoveryCoordinator(peopleDataTree , peopleSchemaContext, "foobar", LoggerFactory.getLogger("foo"));
+        final ShardRecoveryCoordinator coordinator = new ShardRecoveryCoordinator(peopleDataTree,
+                peopleSchemaContext, null, "foobar", LoggerFactory.getLogger("foo"));
         coordinator.startLogRecoveryBatch(10);
 
         coordinator.applyRecoverySnapshot(createSnapshot());
@@ -117,7 +121,8 @@ public class ShardRecoveryCoordinatorTest {
 
     @Test
     public void testApplyCurrentLogRecoveryBatch(){
-        final ShardRecoveryCoordinator coordinator = new ShardRecoveryCoordinator(peopleDataTree, peopleSchemaContext, "foobar", LoggerFactory.getLogger("foo"));
+        final ShardRecoveryCoordinator coordinator = new ShardRecoveryCoordinator(peopleDataTree,
+                peopleSchemaContext, null, "foobar", LoggerFactory.getLogger("foo"));
         coordinator.startLogRecoveryBatch(10);
 
         try {

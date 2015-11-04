@@ -31,7 +31,9 @@ import com.typesafe.config.ConfigFactory;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -43,12 +45,17 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.exceptions.NotInitializedException;
+import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.messages.FindLocalShard;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardFound;
 import org.opendaylight.controller.cluster.datastore.utils.MockDataChangeListener;
+import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils;
+import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
+import org.opendaylight.controller.cluster.raft.Snapshot;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.PeopleModel;
+import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker.DataChangeScope;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
@@ -1102,6 +1109,54 @@ public class DistributedDataStoreIntegrationTest {
                     ImmutableNodes.mapEntry(TestModel.OUTER_LIST_QNAME, TestModel.ID_QNAME, 2));
 
             listener.expectNoMoreChanges("Received unexpected change after close");
+
+            cleanup(dataStore);
+        }};
+    }
+
+    @Test
+    public void testRestoreFromDatastoreSnapshot() throws Exception{
+        new IntegrationTestKit(getSystem(), datastoreContextBuilder) {{
+            String name = "transactionIntegrationTest";
+
+            ContainerNode carsNode = CarsModel.newCarsNode(CarsModel.newCarsMapNode(
+                    CarsModel.newCarEntry("optima", BigInteger.valueOf(20000L)),
+                    CarsModel.newCarEntry("sportage", BigInteger.valueOf(30000L))));
+
+            ShardDataTree dataTree = new ShardDataTree(SchemaContextHelper.full());
+            AbstractShardTest.writeToStore(dataTree, CarsModel.BASE_PATH, carsNode);
+            NormalizedNode<?, ?> root = AbstractShardTest.readStore(dataTree.getDataTree(),
+                    YangInstanceIdentifier.builder().build());
+
+            Snapshot carsSnapshot = Snapshot.create(SerializationUtils.serializeNormalizedNode(root),
+                    Collections.<ReplicatedLogEntry>emptyList(), 2, 1, 2, 1, 1, "member-1");
+
+            NormalizedNode<?, ?> peopleNode = PeopleModel.create();
+            dataTree = new ShardDataTree(SchemaContextHelper.full());
+            AbstractShardTest.writeToStore(dataTree, PeopleModel.BASE_PATH, peopleNode);
+            root = AbstractShardTest.readStore(dataTree.getDataTree(), YangInstanceIdentifier.builder().build());
+
+            Snapshot peopleSnapshot = Snapshot.create(SerializationUtils.serializeNormalizedNode(root),
+                    Collections.<ReplicatedLogEntry>emptyList(), 2, 1, 2, 1, 1, "member-1");
+
+            restoreFromSnapshot = new DatastoreSnapshot(name, null, Arrays.asList(
+                    new DatastoreSnapshot.ShardSnapshot("cars",
+                            org.apache.commons.lang3.SerializationUtils.serialize(carsSnapshot)),
+                    new DatastoreSnapshot.ShardSnapshot("people",
+                            org.apache.commons.lang3.SerializationUtils.serialize(peopleSnapshot))));
+
+            DistributedDataStore dataStore = setupDistributedDataStore(name, "module-shards-member1.conf",
+                    true, "cars", "people");
+
+            DOMStoreReadTransaction readTx = dataStore.newReadOnlyTransaction();
+
+            Optional<NormalizedNode<?, ?>> optional = readTx.read(CarsModel.BASE_PATH).get(5, TimeUnit.SECONDS);
+            assertEquals("isPresent", true, optional.isPresent());
+            assertEquals("Data node", carsNode, optional.get());
+
+            optional = readTx.read(PeopleModel.BASE_PATH).get(5, TimeUnit.SECONDS);
+            assertEquals("isPresent", true, optional.isPresent());
+            assertEquals("Data node", peopleNode, optional.get());
 
             cleanup(dataStore);
         }};

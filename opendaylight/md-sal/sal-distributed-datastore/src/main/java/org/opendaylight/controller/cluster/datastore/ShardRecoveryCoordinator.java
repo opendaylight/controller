@@ -44,9 +44,12 @@ class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
     private final Set<URI> validNamespaces;
     private PruningDataTreeModification transaction;
     private int size;
+    private final byte[] restoreFromSnapshot;
 
-    ShardRecoveryCoordinator(ShardDataTree store, SchemaContext schemaContext, String shardName, Logger log) {
+    ShardRecoveryCoordinator(ShardDataTree store, SchemaContext schemaContext, byte[] restoreFromSnapshot,
+            String shardName, Logger log) {
         this.store = Preconditions.checkNotNull(store);
+        this.restoreFromSnapshot = restoreFromSnapshot;
         this.shardName = shardName;
         this.log = log;
         this.validNamespaces = NormalizedNodePruner.namespaces(schemaContext);
@@ -128,7 +131,6 @@ class ShardRecoveryCoordinator implements RaftActorRecoveryCohort {
 
     @Override
     public byte[] getRestoreFromSnapshot() {
-        // TODO Auto-generated method stub
-        return null;
+        return restoreFromSnapshot;
     }
 }
