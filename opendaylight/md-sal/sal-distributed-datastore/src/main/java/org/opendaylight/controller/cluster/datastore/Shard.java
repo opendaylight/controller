@@ -39,6 +39,8 @@ import org.opendaylight.controller.cluster.datastore.messages.CommitTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransactionReply;
+import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshot;
+import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshot.ShardSnapshot;
 import org.opendaylight.controller.cluster.datastore.messages.ForwardedReadyTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.GetShardDataTree;
 import org.opendaylight.controller.cluster.datastore.messages.PeerAddressResolved;
@@ -114,12 +116,15 @@ public class Shard extends RaftActor {
     private final DataTreeChangeListenerSupport treeChangeSupport = new DataTreeChangeListenerSupport(this);
     private final DataChangeListenerSupport changeSupport = new DataChangeListenerSupport(this);
 
+    private ShardSnapshot restoreFromSnapshot;
+
     protected Shard(AbstractBuilder<?, ?> builder) {
         super(builder.getId().toString(), builder.getPeerAddresses(),
                 Optional.of(builder.getDatastoreContext().getShardRaftConfig()), DataStoreVersions.CURRENT_VERSION);
 
         this.name = builder.getId().toString();
         this.datastoreContext = builder.getDatastoreContext();
+        this.restoreFromSnapshot = builder.getRestoreFromSnapshot();
 
         setPersistence(datastoreContext.isPersistent());
 
@@ -585,11 +590,14 @@ public class Shard extends RaftActor {
     @Override
     @Nonnull
     protected RaftActorRecoveryCohort getRaftActorRecoveryCohort() {
-        return new ShardRecoveryCoordinator(store, store.getSchemaContext(), persistenceId(), LOG);
+        return new ShardRecoveryCoordinator(store, store.getSchemaContext(),
+                restoreFromSnapshot != null ? restoreFromSnapshot.getSnapshot() : null, persistenceId(), LOG);
     }
 
     @Override
     protected void onRecoveryComplete() {
+        restoreFromSnapshot = null;
+
         //notify shard manager
         getContext().parent().tell(new ActorInitialized(), getSelf());
 
@@ -712,6 +720,7 @@ public class Shard extends RaftActor {
         private Map<String, String> peerAddresses = Collections.emptyMap();
         private DatastoreContext datastoreContext;
         private SchemaContext schemaContext;
+        private DatastoreSnapshot.ShardSnapshot restoreFromSnapshot;
         private volatile boolean sealed;
 
         protected AbstractBuilder(Class<S> shardClass) {
@@ -751,6 +760,12 @@ public class Shard extends RaftActor {
             return self();
         }
 
+        public T restoreFromSnapshot(DatastoreSnapshot.ShardSnapshot restoreFromSnapshot) {
+            checkSealed();
+            this.restoreFromSnapshot = restoreFromSnapshot;
+            return self();
+        }
+
         public ShardIdentifier getId() {
             return id;
         }
@@ -765,6 +780,10 @@ public class Shard extends RaftActor {
 
         public SchemaContext getSchemaContext() {
             return schemaContext;
+        }
+
+        public DatastoreSnapshot.ShardSnapshot getRestoreFromSnapshot() {
+            return restoreFromSnapshot;
         }
 
         protected void verify() {

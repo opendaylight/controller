@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore;
 import akka.actor.ActorSystem;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
+import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshot;
 import org.opendaylight.controller.sal.core.api.model.SchemaService;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
@@ -19,7 +20,8 @@ public class DistributedDataStoreFactory {
     private static final Logger LOG = LoggerFactory.getLogger(DistributedDataStoreFactory.class);
 
     public static DistributedDataStore createInstance(SchemaService schemaService,
-            DatastoreContext datastoreContext, ActorSystem actorSystem, BundleContext bundleContext) {
+            DatastoreContext datastoreContext, DatastoreSnapshot restoreFromSnapshot, ActorSystem actorSystem,
+            BundleContext bundleContext) {
 
         LOG.info("Create data store instance of type : {}", datastoreContext.getDataStoreType());
 
@@ -29,7 +31,7 @@ public class DistributedDataStoreFactory {
 
         Configuration config = new ConfigurationImpl("module-shards.conf", "modules.conf");
         final DistributedDataStore dataStore = new DistributedDataStore(actorSystem,
-                new ClusterWrapperImpl(actorSystem), config, introspector.getContext());
+                new ClusterWrapperImpl(actorSystem), config, introspector.getContext(), restoreFromSnapshot);
 
         overlay.setListener(dataStore);
 

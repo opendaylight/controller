@@ -1,6 +1,7 @@
 package org.opendaylight.controller.config.yang.config.distributed_datastore_provider;
 
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
+import org.opendaylight.controller.cluster.datastore.DatastoreSnapshotRestore;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStoreFactory;
 import org.osgi.framework.BundleContext;
 
@@ -72,7 +73,8 @@ public class DistributedConfigDataStoreProviderModule extends
                 .build();
 
         return DistributedDataStoreFactory.createInstance(getConfigSchemaServiceDependency(),
-                datastoreContext, getConfigActorSystemProviderDependency().getActorSystem(), bundleContext);
+                datastoreContext, DatastoreSnapshotRestore.instance().getAndRemove(datastoreContext.getDataStoreType()),
+                getConfigActorSystemProviderDependency().getActorSystem(), bundleContext);
     }
 
     public void setBundleContext(BundleContext bundleContext) {
