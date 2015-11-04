@@ -231,8 +231,9 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
         for(int i=0;i<100;i++) {
             try {
                 return actorSystem.actorOf(
-                        ShardManager.props(cluster, configuration, datastoreContext, waitTillReadyCountDownLatch,
-                                primaryShardInfoCache).withDispatcher(shardDispatcher).withMailbox(
+                        ShardManager.builder().cluster(cluster).configuration(configuration).datastoreContext(datastoreContext).
+                        waitTillReadyCountdownLatch(waitTillReadyCountDownLatch).
+                        primaryShardInfoCache(primaryShardInfoCache).props().withDispatcher(shardDispatcher).withMailbox(
                                         ActorContext.MAILBOX), shardManagerId);
             } catch (Exception e){
                 lastException = e;
