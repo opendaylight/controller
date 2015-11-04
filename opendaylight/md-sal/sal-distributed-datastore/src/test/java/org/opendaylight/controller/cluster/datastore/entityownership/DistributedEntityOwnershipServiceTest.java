@@ -97,7 +97,7 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
         Mockito.doReturn(datastoreContext).when(mockContextFactory).getBaseDatastoreContext();
         Mockito.doReturn(datastoreContext).when(mockContextFactory).getShardDatastoreContext(Mockito.anyString());
 
-        dataStore = new DistributedDataStore(getSystem(), new MockClusterWrapper(), configuration, mockContextFactory);
+        dataStore = new DistributedDataStore(getSystem(), new MockClusterWrapper(), configuration, mockContextFactory, null);
 
         dataStore.onGlobalContextUpdated(SchemaContextHelper.entityOwners());
     }

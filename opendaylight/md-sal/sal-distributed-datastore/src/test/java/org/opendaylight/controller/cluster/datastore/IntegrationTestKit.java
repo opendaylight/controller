@@ -22,6 +22,7 @@ import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
+import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
@@ -35,6 +36,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 public class IntegrationTestKit extends ShardTestKit {
 
     DatastoreContext.Builder datastoreContextBuilder;
+    DatastoreSnapshot restoreFromSnapshot;
 
     public IntegrationTestKit(ActorSystem actorSystem, Builder datastoreContextBuilder) {
         super(actorSystem);
@@ -69,7 +71,8 @@ public class IntegrationTestKit extends ShardTestKit {
         Mockito.doReturn(datastoreContext).when(mockContextFactory).getBaseDatastoreContext();
         Mockito.doReturn(datastoreContext).when(mockContextFactory).getShardDatastoreContext(Mockito.anyString());
 
-        DistributedDataStore dataStore = new DistributedDataStore(getSystem(), cluster, config, mockContextFactory);
+        DistributedDataStore dataStore = new DistributedDataStore(getSystem(), cluster, config, mockContextFactory,
+                restoreFromSnapshot);
 
         dataStore.onGlobalContextUpdated(schemaContext);
 
