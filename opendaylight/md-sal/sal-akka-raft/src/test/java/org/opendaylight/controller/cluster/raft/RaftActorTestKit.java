@@ -12,9 +12,7 @@ import akka.actor.ActorSystem;
 import akka.pattern.Patterns;
 import akka.testkit.JavaTestKit;
 import akka.util.Timeout;
-import com.google.common.base.Optional;
 import com.google.common.util.concurrent.Uninterruptibles;
-import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.junit.Assert;
@@ -31,8 +29,7 @@ public class RaftActorTestKit extends JavaTestKit {
     public RaftActorTestKit(ActorSystem actorSystem, String actorName) {
         super(actorSystem);
 
-        raftActor = this.getSystem().actorOf(MockRaftActor.props(actorName,
-                Collections.<String,String>emptyMap(), Optional.<ConfigParams>absent()), actorName);
+        raftActor = this.getSystem().actorOf(MockRaftActor.builder().id(actorName).props(), actorName);
 
     }
 

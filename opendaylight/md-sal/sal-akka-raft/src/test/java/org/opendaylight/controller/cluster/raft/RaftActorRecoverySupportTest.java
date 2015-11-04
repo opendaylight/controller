@@ -238,7 +238,7 @@ public class RaftActorRecoverySupportTest {
         }
 
         inOrder.verify(mockCohort).applyCurrentLogRecoveryBatch();
-
+        inOrder.verify(mockCohort).getRestoreFromSnapshot();
         inOrder.verifyNoMoreInteractions();
     }
 
@@ -246,6 +246,7 @@ public class RaftActorRecoverySupportTest {
     public void testOnRecoveryCompletedWithNoRemainingBatch() {
         sendMessageToSupport(RecoveryCompleted.getInstance(), true);
 
+        verify(mockCohort).getRestoreFromSnapshot();
         verifyNoMoreInteractions(mockCohort);
     }
 
@@ -335,6 +336,7 @@ public class RaftActorRecoverySupportTest {
 
         sendMessageToSupport(RecoveryCompleted.getInstance(), true);
 
+        verify(mockCohort).getRestoreFromSnapshot();
         verifyNoMoreInteractions(mockCohort);
 
         verify(mockPersistentProvider).deleteMessages(10L);
@@ -368,6 +370,7 @@ public class RaftActorRecoverySupportTest {
 
         sendMessageToSupport(RecoveryCompleted.getInstance(), true);
 
+        verify(mockCohort).getRestoreFromSnapshot();
         verifyNoMoreInteractions(mockCohort, mockPersistentProvider);
     }
 
