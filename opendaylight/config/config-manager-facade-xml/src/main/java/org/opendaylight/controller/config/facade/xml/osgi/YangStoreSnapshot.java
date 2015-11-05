@@ -16,6 +16,7 @@ import com.google.common.collect.Sets;
 import com.google.common.io.ByteStreams;
 import com.google.common.util.concurrent.CheckedFuture;
 import java.io.IOException;
+import java.lang.ref.SoftReference;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,79 +41,100 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 final class YangStoreSnapshot implements YangStoreContext, EnumResolver {
+    private static final class MXBeans {
+        private final Map<String /* Namespace from yang file */,
+                Map<String /* Name of module entry from yang file */, ModuleMXBeanEntry>> moduleMXBeanEntryMap;
+        private final Map<QName, Map<String, ModuleMXBeanEntry>> qNamesToIdentitiesToModuleMXBeanEntries;
+
+        MXBeans(final SchemaContext schemaContext) {
+            LOG.trace("Resolved modules:{}", schemaContext.getModules());
+
+            // JMX generator
+            Map<String, String> namespaceToPackageMapping = Maps.newHashMap();
+            PackageTranslator packageTranslator = new PackageTranslator(namespaceToPackageMapping);
+            Map<QName, ServiceInterfaceEntry> qNamesToSIEs = new HashMap<>();
+            Map<IdentitySchemaNode, ServiceInterfaceEntry> knownSEITracker = new HashMap<>();
+            // create SIE structure qNamesToSIEs
+            for (Module module : schemaContext.getModules()) {
+                String packageName = packageTranslator.getPackageName(module);
+                Map<QName, ServiceInterfaceEntry> namesToSIEntries = ServiceInterfaceEntry
+                        .create(module, packageName, knownSEITracker);
+                for (Entry<QName, ServiceInterfaceEntry> sieEntry : namesToSIEntries.entrySet()) {
+                    // merge value into qNamesToSIEs
+                    if (qNamesToSIEs.containsKey(sieEntry.getKey()) == false) {
+                        qNamesToSIEs.put(sieEntry.getKey(), sieEntry.getValue());
+                    } else {
+                        throw new IllegalStateException("Cannot add two SIE with same qname "
+                                + sieEntry.getValue());
+                    }
+                }
+            }
+
+            Map<String, Map<String, ModuleMXBeanEntry>> moduleMXBeanEntryMap = Maps.newHashMap();
+
+            Map<QName, Map<String /* identity local name */, ModuleMXBeanEntry>> qNamesToIdentitiesToModuleMXBeanEntries = new HashMap<>();
+
+
+            for (Module module : schemaContext.getModules()) {
+                String packageName = packageTranslator.getPackageName(module);
+                TypeProviderWrapper typeProviderWrapper = new TypeProviderWrapper(
+                        new TypeProviderImpl(schemaContext));
+
+                QName qName = QName.create(module.getNamespace(), module.getRevision(), module.getName());
+
+                Map<String /* MB identity local name */, ModuleMXBeanEntry> namesToMBEs =
+                        Collections.unmodifiableMap(ModuleMXBeanEntry.create(module, qNamesToSIEs, schemaContext,
+                                typeProviderWrapper, packageName));
+                moduleMXBeanEntryMap.put(module.getNamespace().toString(), namesToMBEs);
+
+                qNamesToIdentitiesToModuleMXBeanEntries.put(qName, namesToMBEs);
+            }
+            this.moduleMXBeanEntryMap = Collections.unmodifiableMap(moduleMXBeanEntryMap);
+            this.qNamesToIdentitiesToModuleMXBeanEntries = Collections.unmodifiableMap(qNamesToIdentitiesToModuleMXBeanEntries);
+        }
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(YangStoreSnapshot.class);
-
-
-    private final Map<String /* Namespace from yang file */,
-        Map<String /* Name of module entry from yang file */, ModuleMXBeanEntry>> moduleMXBeanEntryMap;
-
-
-    private final Map<QName, Map<String, ModuleMXBeanEntry>> qNamesToIdentitiesToModuleMXBeanEntries;
-
-    private final BindingRuntimeContext bindingContextProvider;
     private final SchemaSourceProvider<YangTextSchemaSource> sourceProvider;
+    private final BindingRuntimeContext bindingContextProvider;
+
+    /**
+     * We want to lazily compute the context of the MXBean class and have it only softly-attached to this instance,
+     * so it can be garbage collected when the memory gets tight. If the schema context changes as we are computing
+     * things, YangStoreService will detect that and retry, so we do not have to worry about that.
+     */
+    private volatile SoftReference<MXBeans> ref = new SoftReference<>(null);
 
     public YangStoreSnapshot(final BindingRuntimeContext bindingContextProvider,
         final SchemaSourceProvider<YangTextSchemaSource> sourceProvider) {
-        this.bindingContextProvider = bindingContextProvider;
-        this.sourceProvider = sourceProvider;
+        this.bindingContextProvider = Preconditions.checkNotNull(bindingContextProvider);
+        this.sourceProvider = Preconditions.checkNotNull(sourceProvider);
+    }
 
-        final SchemaContext schemaContext = bindingContextProvider.getSchemaContext();
-        LOG.trace("Resolved modules:{}", schemaContext.getModules());
+    private MXBeans getMXBeans() {
+        MXBeans mxBean = ref.get();
 
-        // JMX generator
-        Map<String, String> namespaceToPackageMapping = Maps.newHashMap();
-        PackageTranslator packageTranslator = new PackageTranslator(namespaceToPackageMapping);
-        Map<QName, ServiceInterfaceEntry> qNamesToSIEs = new HashMap<>();
-        Map<IdentitySchemaNode, ServiceInterfaceEntry> knownSEITracker = new HashMap<>();
-        // create SIE structure qNamesToSIEs
-        for (Module module : schemaContext.getModules()) {
-            String packageName = packageTranslator.getPackageName(module);
-            Map<QName, ServiceInterfaceEntry> namesToSIEntries = ServiceInterfaceEntry
-                    .create(module, packageName, knownSEITracker);
-            for (Entry<QName, ServiceInterfaceEntry> sieEntry : namesToSIEntries.entrySet()) {
-                // merge value into qNamesToSIEs
-                if (qNamesToSIEs.containsKey(sieEntry.getKey()) == false) {
-                    qNamesToSIEs.put(sieEntry.getKey(), sieEntry.getValue());
-                } else {
-                    throw new IllegalStateException("Cannot add two SIE with same qname "
-                            + sieEntry.getValue());
+        if (mxBean == null) {
+            synchronized (this) {
+                mxBean = ref.get();
+                if (mxBean == null) {
+                    mxBean = new MXBeans(bindingContextProvider.getSchemaContext());
+                    ref = new SoftReference<>(mxBean);
                 }
             }
         }
 
-        Map<String, Map<String, ModuleMXBeanEntry>> moduleMXBeanEntryMap = Maps.newHashMap();
-
-        Map<QName, Map<String /* identity local name */, ModuleMXBeanEntry>> qNamesToIdentitiesToModuleMXBeanEntries = new HashMap<>();
-
-
-        for (Module module : schemaContext.getModules()) {
-            String packageName = packageTranslator.getPackageName(module);
-            TypeProviderWrapper typeProviderWrapper = new TypeProviderWrapper(
-                    new TypeProviderImpl(schemaContext));
-
-            QName qName = QName.create(module.getNamespace(), module.getRevision(), module.getName());
-
-            Map<String /* MB identity local name */, ModuleMXBeanEntry> namesToMBEs =
-                    Collections.unmodifiableMap(ModuleMXBeanEntry.create(module, qNamesToSIEs, schemaContext,
-                            typeProviderWrapper, packageName));
-            moduleMXBeanEntryMap.put(module.getNamespace().toString(), namesToMBEs);
-
-            qNamesToIdentitiesToModuleMXBeanEntries.put(qName, namesToMBEs);
-        }
-        this.moduleMXBeanEntryMap = Collections.unmodifiableMap(moduleMXBeanEntryMap);
-        this.qNamesToIdentitiesToModuleMXBeanEntries = Collections.unmodifiableMap(qNamesToIdentitiesToModuleMXBeanEntries);
-
+        return mxBean;
     }
 
     @Override
     public Map<String, Map<String, ModuleMXBeanEntry>> getModuleMXBeanEntryMap() {
-        return moduleMXBeanEntryMap;
+        return getMXBeans().moduleMXBeanEntryMap;
     }
 
     @Override
     public Map<QName, Map<String, ModuleMXBeanEntry>> getQNamesToIdentitiesToModuleMXBeanEntries() {
-        return qNamesToIdentitiesToModuleMXBeanEntries;
+        return getMXBeans().qNamesToIdentitiesToModuleMXBeanEntries;
     }
 
     @Override
