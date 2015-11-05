@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import org.opendaylight.controller.config.yangjmxgenerator.ModuleMXBeanEntry;
 import org.opendaylight.controller.config.yangjmxgenerator.PackageTranslator;
@@ -48,25 +49,24 @@ final class YangStoreSnapshot implements YangStoreContext, EnumResolver {
 
     private final Map<QName, Map<String, ModuleMXBeanEntry>> qNamesToIdentitiesToModuleMXBeanEntries;
 
-    private final SchemaContext schemaContext;
     private final BindingRuntimeContext bindingContextProvider;
     private final SchemaSourceProvider<YangTextSchemaSource> sourceProvider;
 
-    public YangStoreSnapshot(final SchemaContext resolveSchemaContext,
-        final BindingRuntimeContext bindingContextProvider,
+    public YangStoreSnapshot(final BindingRuntimeContext bindingContextProvider,
         final SchemaSourceProvider<YangTextSchemaSource> sourceProvider) {
         this.bindingContextProvider = bindingContextProvider;
         this.sourceProvider = sourceProvider;
-        LOG.trace("Resolved modules:{}", resolveSchemaContext.getModules());
-        this.schemaContext = resolveSchemaContext;
-        // JMX generator
 
+        final SchemaContext schemaContext = bindingContextProvider.getSchemaContext();
+        LOG.trace("Resolved modules:{}", schemaContext.getModules());
+
+        // JMX generator
         Map<String, String> namespaceToPackageMapping = Maps.newHashMap();
         PackageTranslator packageTranslator = new PackageTranslator(namespaceToPackageMapping);
         Map<QName, ServiceInterfaceEntry> qNamesToSIEs = new HashMap<>();
         Map<IdentitySchemaNode, ServiceInterfaceEntry> knownSEITracker = new HashMap<>();
         // create SIE structure qNamesToSIEs
-        for (Module module : resolveSchemaContext.getModules()) {
+        for (Module module : schemaContext.getModules()) {
             String packageName = packageTranslator.getPackageName(module);
             Map<QName, ServiceInterfaceEntry> namesToSIEntries = ServiceInterfaceEntry
                     .create(module, packageName, knownSEITracker);
@@ -89,12 +89,12 @@ final class YangStoreSnapshot implements YangStoreContext, EnumResolver {
         for (Module module : schemaContext.getModules()) {
             String packageName = packageTranslator.getPackageName(module);
             TypeProviderWrapper typeProviderWrapper = new TypeProviderWrapper(
-                    new TypeProviderImpl(resolveSchemaContext));
+                    new TypeProviderImpl(schemaContext));
 
             QName qName = QName.create(module.getNamespace(), module.getRevision(), module.getName());
 
             Map<String /* MB identity local name */, ModuleMXBeanEntry> namesToMBEs =
-                    Collections.unmodifiableMap(ModuleMXBeanEntry.create(module, qNamesToSIEs, resolveSchemaContext,
+                    Collections.unmodifiableMap(ModuleMXBeanEntry.create(module, qNamesToSIEs, schemaContext,
                             typeProviderWrapper, packageName));
             moduleMXBeanEntryMap.put(module.getNamespace().toString(), namesToMBEs);
 
@@ -117,8 +117,8 @@ final class YangStoreSnapshot implements YangStoreContext, EnumResolver {
 
     @Override
     public Set<Module> getModules() {
-        final Set<Module> modules = Sets.newHashSet(schemaContext.getModules());
-        for (final Module module : schemaContext.getModules()) {
+        final Set<Module> modules = Sets.newHashSet(bindingContextProvider.getSchemaContext().getModules());
+        for (final Module module : bindingContextProvider.getSchemaContext().getModules()) {
             modules.addAll(module.getSubmodules());
         }
         return modules;
@@ -147,25 +147,21 @@ final class YangStoreSnapshot implements YangStoreContext, EnumResolver {
     }
 
     @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
+    public boolean equals(final Object obj) {
+        if (this == obj) {
             return true;
         }
-        if (!(o instanceof YangStoreSnapshot)) {
+        if (!(obj instanceof YangStoreSnapshot)) {
             return false;
         }
 
-        final YangStoreSnapshot that = (YangStoreSnapshot) o;
-        if (schemaContext != null ? !schemaContext.equals(that.schemaContext) : that.schemaContext != null) {
-            return false;
-        }
-
-        return true;
+        final YangStoreSnapshot other = (YangStoreSnapshot) obj;
+        return Objects.equals(bindingContextProvider, other.bindingContextProvider);
     }
 
     @Override
     public int hashCode() {
-        return schemaContext != null ? schemaContext.hashCode() : 0;
+        return Objects.hashCode(bindingContextProvider);
     }
 
     @Override
