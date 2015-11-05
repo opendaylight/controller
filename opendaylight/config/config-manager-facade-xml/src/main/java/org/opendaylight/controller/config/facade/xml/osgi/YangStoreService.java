@@ -65,7 +65,6 @@ public class YangStoreService implements YangStoreContext {
     private final AtomicReference<SoftReference<BindingRuntimeContext>> refBindingContext =
             new AtomicReference<>(new SoftReference<BindingRuntimeContext>(null));
 
-    private final SchemaContextProvider schemaContextProvider;
     private final SchemaSourceProvider<YangTextSchemaSource> sourceProvider;
 
     private final ExecutorService notificationExecutor = Executors.newSingleThreadExecutor(new ThreadFactory() {
@@ -79,7 +78,6 @@ public class YangStoreService implements YangStoreContext {
 
     public YangStoreService(final SchemaContextProvider schemaContextProvider,
         final SchemaSourceProvider<YangTextSchemaSource> sourceProvider) {
-        this.schemaContextProvider = schemaContextProvider;
         this.sourceProvider = sourceProvider;
     }
 
@@ -90,7 +88,7 @@ public class YangStoreService implements YangStoreContext {
         while (ret == null) {
             // We need to be compute a new value
             // TODO sourceProvider is not a snapshot
-            ret = new YangStoreSnapshot(schemaContextProvider.getSchemaContext(), refBindingContext.get().get(), sourceProvider);
+            ret = new YangStoreSnapshot(refBindingContext.get().get(), sourceProvider);
 
             if (!ref.compareAndSet(r, new SoftReference<>(ret))) {
                 LOG.debug("Concurrent refresh detected, recomputing snapshot");
