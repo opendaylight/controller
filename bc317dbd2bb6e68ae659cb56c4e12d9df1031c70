@@ -22,6 +22,30 @@
       "revId": "bc317dbd2bb6e68ae659cb56c4e12d9df1031c70",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bada0100_e173a913",
+        "filename": "opendaylight/config/config-manager-facade-xml/src/main/java/org/opendaylight/controller/config/facade/xml/osgi/YangStoreService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-11-05T17:16:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bada0100_017cad1f",
+      "range": {
+        "startLine": 76,
+        "startChar": 34,
+        "endLine": 76,
+        "endChar": 38
+      },
+      "revId": "bc317dbd2bb6e68ae659cb56c4e12d9df1031c70",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
