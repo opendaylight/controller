@@ -1,0 +1,52 @@
+module dsbenchmark-impl {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:dsbenchmark:impl";
+    prefix "dsbenchmark-impl";
+
+    import config { prefix config; revision-date 2013-04-05; }
+    import opendaylight-md-sal-binding { prefix md-sal-binding; revision-date 2013-10-28;}
+    import opendaylight-md-sal-dom { prefix md-sal-dom; revision-date 2013-10-28;}
+
+    description
+        "Service definition for dsbenchmark project";
+
+    revision "2014-12-10" {
+        description
+            "Initial revision";
+    }
+
+    identity dsbenchmark-impl {
+        base config:module-type;
+        config:java-name-prefix DsbenchmarkImpl;
+    }
+
+    augment "/config:modules/config:module/config:configuration" {
+        case dsbenchmark-impl {
+            when "/config:modules/config:module/config:type = 'dsbenchmark-impl'";
+            container broker {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity md-sal-binding:binding-broker-osgi-registry;
+                    }
+                }
+            }
+            container dom-data-broker {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity md-sal-dom:dom-async-data-broker;
+                    }
+                }
+            }
+            container binding-data-broker {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity md-sal-binding:binding-async-data-broker;
+                    }
+                }
+            }
+        }
+    }
+}

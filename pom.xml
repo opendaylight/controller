@@ -32,6 +32,7 @@
     <module>opendaylight/commons/filter-valve</module>
     <module>opendaylight/commons/liblldp</module>
     <module>opendaylight/commons/enunciate-parent</module>
+    <module>benchmark</module>
 
     <!-- Karaf Distribution -->
     <module>karaf</module>

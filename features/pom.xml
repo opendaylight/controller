@@ -18,5 +18,6 @@
     <module>protocol-framework</module>
     <module>akka</module>
     <module>extras</module>
+    <module>benchmark</module>
   </modules>
 </project>
