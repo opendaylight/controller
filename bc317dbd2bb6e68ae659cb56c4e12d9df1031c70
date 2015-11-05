@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bada0100_017cad1f",
+        "filename": "opendaylight/config/config-manager-facade-xml/src/main/java/org/opendaylight/controller/config/facade/xml/osgi/YangStoreService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2015-11-05T16:53:05Z",
+      "side": 1,
+      "message": "Why would snap return to snapshot once it deviates?\nMaybe if line 71 was inside the while loop...",
+      "range": {
+        "startLine": 76,
+        "startChar": 34,
+        "endLine": 76,
+        "endChar": 38
+      },
+      "revId": "bc317dbd2bb6e68ae659cb56c4e12d9df1031c70",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
