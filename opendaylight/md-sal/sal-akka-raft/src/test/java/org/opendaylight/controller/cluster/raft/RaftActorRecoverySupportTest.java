@@ -20,6 +20,8 @@ import akka.persistence.SnapshotOffer;
 import akka.persistence.SnapshotSelectionCriteria;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import org.hamcrest.Description;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,6 +38,7 @@ import org.opendaylight.controller.cluster.raft.base.messages.ApplyLogEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.DeleteEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
+import org.opendaylight.controller.cluster.raft.ServerConfigurationPayload.ServerInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,6 +67,7 @@ public class RaftActorRecoverySupportTest {
 
     private RaftActorContext context;
     private final DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
+
 
     @Before
     public void setup() {
@@ -365,5 +369,54 @@ public class RaftActorRecoverySupportTest {
         sendMessageToSupport(RecoveryCompleted.getInstance(), true);
 
         verifyNoMoreInteractions(mockCohort, mockPersistentProvider);
+    }
+
+    @Test
+    public void testUpdatePeerIds() {
+
+            String leader = "Leader";
+            String follower1 = "follower1";
+            String follower2 = "follower2";
+            String follower3 = "follower3";
+
+            Map<String, String> peerAddresses = new HashMap<>();
+
+            peerAddresses.put(leader, null);
+            peerAddresses.put(follower1, null);
+            peerAddresses.put(follower2, null);
+
+            context.addToPeers(leader,null,VotingState.VOTING);
+            context.addToPeers(follower1,null,VotingState.VOTING);
+            context.addToPeers(follower2,null,VotingState.VOTING);
+
+            assertEquals("Size", 3, context.getPeers().size());
+
+            //add new Server
+            ServerConfigurationPayload obj = new ServerConfigurationPayload(Arrays.asList(
+                                                           new ServerInfo(leader, true),
+                                                           new ServerInfo(follower1, true),
+                                                           new ServerInfo(follower2, true),
+                                                           new ServerInfo(follower3, true)));
+
+            MockRaftActorContext.MockReplicatedLogEntry logEntry = new MockRaftActorContext.MockReplicatedLogEntry(1,
+                1, obj);
+
+            sendMessageToSupport(logEntry);
+            //verify size and names
+            assertEquals("Size", 4, context.getPeers().size());
+            assertEquals("New follower matched", true , context.getPeerIds().contains(follower3));
+
+            //remove existing follower1
+            obj = new ServerConfigurationPayload(Arrays.asList(
+                                                           new ServerInfo("Leader", true),
+                                                           new ServerInfo("follower2", true),
+                                                           new ServerInfo("follower3", true)));
+
+            logEntry = new MockRaftActorContext.MockReplicatedLogEntry(1, 1, obj);
+
+            sendMessageToSupport(logEntry);
+            //verify size and names
+            assertEquals("Size", 3, context.getPeers().size());
+            assertEquals("Removed follower matched", false, context.getPeerIds().contains(follower1));
     }
 }
