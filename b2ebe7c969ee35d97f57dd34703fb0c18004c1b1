@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5ac10518_2de20d04",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 234,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-11-06T19:41:35Z",
+      "side": 1,
+      "message": "We should probably check if all shards are initialized before starting to send the get snapshot message to any shard. It would be wasteful if even one was not initialized to send get snapshot to any one of them.\n\nAlso we could probably create even the reply actor only after we find all shards are initialized.",
+      "revId": "b2ebe7c969ee35d97f57dd34703fb0c18004c1b1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5ac10518_cde6e916",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManagerGetSnapshotReplyActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-11-06T19:41:35Z",
+      "side": 1,
+      "message": "could you explicitly initialize this to 0.",
+      "range": {
+        "startLine": 36,
+        "startChar": 16,
+        "endLine": 36,
+        "endChar": 31
+      },
+      "revId": "b2ebe7c969ee35d97f57dd34703fb0c18004c1b1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
