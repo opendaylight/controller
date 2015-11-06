@@ -40,6 +40,11 @@ module netconf-topology {
                 type string;
             }
 
+            leaf listen-for-config-changes {
+                mandatory true;
+                type boolean;
+            }
+
             container dom-registry {
                 uses config:service-ref {
                     refine type {

@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
 
 public class NetconfDeviceCommunicator implements NetconfClientSessionListener, RemoteDeviceCommunicator<NetconfMessage> {
 
-    private static final Logger logger = LoggerFactory.getLogger(NetconfDeviceCommunicator.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NetconfDeviceCommunicator.class);
 
     private final RemoteDevice<NetconfSessionPreferences, NetconfMessage, NetconfDeviceCommunicator> remoteDevice;
     private final Optional<NetconfSessionPreferences> overrideNetconfCapabilities;
@@ -81,16 +81,17 @@ public class NetconfDeviceCommunicator implements NetconfClientSessionListener, 
     public void onSessionUp(final NetconfClientSession session) {
         sessionLock.lock();
         try {
-            logger.debug("{}: Session established", id);
+            LOG.debug("{}: Session established", id);
             this.session = session;
 
             NetconfSessionPreferences netconfSessionPreferences =
                                              NetconfSessionPreferences.fromNetconfSession(session);
-            logger.trace("{}: Session advertised capabilities: {}", id, netconfSessionPreferences);
+            LOG.trace("{}: Session advertised capabilities: {}", id, netconfSessionPreferences);
 
             if(overrideNetconfCapabilities.isPresent()) {
                 netconfSessionPreferences = netconfSessionPreferences.addModuleCaps(overrideNetconfCapabilities.get());
-                logger.debug("{}: Session capabilities overridden, capabilities that will be used: {}", id, netconfSessionPreferences);
+                LOG.debug("{}: Session capabilities overridden, capabilities that will be used: {}", id,
+                        netconfSessionPreferences);
             }
 
             remoteDevice.onRemoteSessionUp(netconfSessionPreferences, this);
@@ -125,7 +126,7 @@ public class NetconfDeviceCommunicator implements NetconfClientSessionListener, 
             @Override
             public void operationComplete(final Future<Object> future) throws Exception {
                 if (!future.isSuccess() && !future.isCancelled()) {
-                    logger.debug("{}: Connection failed", id, future.cause());
+                    LOG.debug("{}: Connection failed", id, future.cause());
                     NetconfDeviceCommunicator.this.remoteDevice.onRemoteSessionFailed(future.cause());
                     if (firstConnectionFuture.isDone()) {
                         firstConnectionFuture.setException(future.cause());
@@ -143,6 +144,7 @@ public class NetconfDeviceCommunicator implements NetconfClientSessionListener, 
     }
 
     private void tearDown( final String reason ) {
+        LOG.debug("Tearing down {}", reason);
         final List<UncancellableFuture<RpcResult<NetconfMessage>>> futuresToCancel = Lists.newArrayList();
         sessionLock.lock();
         try {
@@ -195,13 +197,13 @@ public class NetconfDeviceCommunicator implements NetconfClientSessionListener, 
 
     @Override
     public void onSessionDown(final NetconfClientSession session, final Exception e) {
-        logger.warn("{}: Session went down", id, e);
+        LOG.warn("{}: Session went down", id, e);
         tearDown( null );
     }
 
     @Override
     public void onSessionTerminated(final NetconfClientSession session, final NetconfTerminationReason reason) {
-        logger.warn("{}: Session terminated {}", id, reason);
+        LOG.warn("{}: Session terminated {}", id, reason);
         tearDown( reason.getErrorMessage() );
     }
 
@@ -241,7 +243,7 @@ public class NetconfDeviceCommunicator implements NetconfClientSessionListener, 
                 requests.poll();
             } else {
                 request = null;
-                logger.warn("{}: Ignoring unsolicited message {}", id, msgToS(message));
+                LOG.warn("{}: Ignoring unsolicited message {}", id, msgToS(message));
             }
         }
         finally {
@@ -250,16 +252,17 @@ public class NetconfDeviceCommunicator implements NetconfClientSessionListener, 
 
         if( request != null ) {
 
-            logger.debug("{}: Message received {}", id, message);
+            LOG.debug("{}: Message received {}", id, message);
 
-            if(logger.isTraceEnabled()) {
-                logger.trace( "{}: Matched request: {} to response: {}", id, msgToS( request.request ), msgToS( message ) );
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("{}: Matched request: {} to response: {}", id, msgToS(request.request), msgToS(message));
             }
 
             try {
                 NetconfMessageTransformUtil.checkValidReply( request.request, message );
             } catch (final NetconfDocumentedException e) {
-                logger.warn( "{}: Invalid request-reply match, reply message contains different message-id, request: {}, response: {}",
+                LOG.warn(
+                        "{}: Invalid request-reply match, reply message contains different message-id, request: {}, response: {}",
                              id, msgToS( request.request ), msgToS( message ), e );
 
                 request.future.set( RpcResultBuilder.<NetconfMessage>failed()
@@ -274,7 +277,7 @@ public class NetconfDeviceCommunicator implements NetconfClientSessionListener, 
             try {
                 NetconfMessageTransformUtil.checkSuccessReply(message);
             } catch(final NetconfDocumentedException e) {
-                logger.warn( "{}: Error reply from remote device, request: {}, response: {}", id,
+                LOG.warn("{}: Error reply from remote device, request: {}, response: {}", id,
                              msgToS( request.request ), msgToS( message ), e );
 
                 request.future.set( RpcResultBuilder.<NetconfMessage>failed()
@@ -302,12 +305,12 @@ public class NetconfDeviceCommunicator implements NetconfClientSessionListener, 
 
     private ListenableFuture<RpcResult<NetconfMessage>> sendRequestWithLock(
                                                final NetconfMessage message, final QName rpc) {
-        if(logger.isTraceEnabled()) {
-            logger.trace("{}: Sending message {}", id, msgToS(message));
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("{}: Sending message {}", id, msgToS(message));
         }
 
         if (session == null) {
-            logger.warn("{}: Session is disconnected, failing RPC request {}", id, message);
+            LOG.warn("{}: Session is disconnected, failing RPC request {}", id, message);
             return Futures.immediateFuture( createSessionDownRpcResult() );
         }
 
@@ -320,7 +323,7 @@ public class NetconfDeviceCommunicator implements NetconfClientSessionListener, 
             public void operationComplete(final Future<Void> future) throws Exception {
                 if( !future.isSuccess() ) {
                     // We expect that a session down will occur at this point
-                    logger.debug( "{}: Failed to send request {}", id,
+                    LOG.debug("{}: Failed to send request {}", id,
                                   XmlUtil.toString(req.request.getDocument()), future.cause() );
 
                     if( future.cause() != null ) {
@@ -332,7 +335,7 @@ public class NetconfDeviceCommunicator implements NetconfClientSessionListener, 
                     req.future.setException( future.cause() );
                 }
                 else {
-                    logger.trace( "Finished sending request {}", req.request );
+                    LOG.trace("Finished sending request {}", req.request);
                 }
             }
         });
@@ -341,8 +344,8 @@ public class NetconfDeviceCommunicator implements NetconfClientSessionListener, 
     }
 
     private void processNotification(final NetconfMessage notification) {
-        if(logger.isTraceEnabled()) {
-            logger.trace("{}: Notification received: {}", id, notification);
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("{}: Notification received: {}", id, notification);
         }
 
         remoteDevice.onNotification(notification);

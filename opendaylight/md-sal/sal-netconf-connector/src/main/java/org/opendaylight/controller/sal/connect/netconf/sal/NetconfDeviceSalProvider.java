@@ -176,7 +176,7 @@ public final class NetconfDeviceSalProvider implements AutoCloseable, Provider, 
                 // Only log and ignore
                 LOG.warn("Unable to unregister mount instance for {}. Ignoring exception", id.getTopologyPath(), e);
             } finally {
-                LOG.debug("{}: TOPOLOGY Mountpoint removed from MD-SAL {}", id, registration);
+                LOG.debug("{}: TOPOLOGY Mountpoint exposed into MD-SAL {}", id, topologyRegistration);
                 topologyRegistration = null;
             }
         }

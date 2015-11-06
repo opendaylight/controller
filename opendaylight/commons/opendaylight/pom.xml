@@ -61,6 +61,7 @@
     <config.mdsal.configfile>01-md-sal.xml</config.mdsal.configfile>
     <config.xsql.configfile>04-xsql.xml</config.xsql.configfile>
     <config.netconf.client.configfile>01-netconf.xml</config.netconf.client.configfile>
+    <config.netconf.topology.configfile>02-netconf.xml</config.netconf.topology.configfile>
     <config.toaster.configfile>03-toaster-sample.xml</config.toaster.configfile>
     <config.netconf.mdsal.configfile>08-mdsal-netconf.xml</config.netconf.mdsal.configfile>
     <config.restconf.configfile>10-rest-connector.xml</config.restconf.configfile>

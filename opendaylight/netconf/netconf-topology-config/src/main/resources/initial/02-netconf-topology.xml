@@ -14,6 +14,10 @@
                 <module>
                     <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:netconf:topology">prefix:netconf-topology-impl</type>
                     <name>default-netconf-topology</name>
+                    <topology-id xmlns="urn:opendaylight:params:xml:ns:yang:controller:netconf:topology">topology-netconf</topology-id>
+                    <listen-for-config-changes xmlns="urn:opendaylight:params:xml:ns:yang:controller:netconf:topology">
+                        true
+                    </listen-for-config-changes>
                     <event-executor xmlns="urn:opendaylight:params:xml:ns:yang:controller:netconf:topology">
                         <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:netty">prefix:netty-event-executor</type>
                         <name>global-event-executor</name>
@@ -43,6 +47,11 @@
                         <name>default-shared-schema-repository</name>
                     </shared-schema-repository>
                 </module>
+
+                <module>
+                    <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:netconf:topology:shared:schema:repository">prefix:shared-schema-repository-impl</type>
+                    <name>default-shared-schema-repository-impl</name>
+                </module>
             </modules>
 
             <services xmlns="urn:opendaylight:params:xml:ns:yang:controller:config">
@@ -53,10 +62,19 @@
                         <provider>/modules/module[type='netconf-topology-impl'][name='default-netconf-topology']</provider>
                     </instance>
                 </service>
+                <service>
+                    <type xmlns:prefix="urn:opendaylight:params:xml:ns:yang:controller:netconf:topology:shared:schema:repository">prefix:shared-schema-repository</type>
+                    <instance>
+                        <name>default-shared-schema-repository</name>
+                        <provider>/modules/module[type='shared-schema-repository-impl'][name='default-shared-schema-repository-impl']</provider>
+                        <!-- no parameters -->
+                    </instance>
+                </service>
             </services>
         </data>
     </configuration>
     <required-capabilities>
         <capability>urn:opendaylight:params:xml:ns:yang:controller:netconf:topology?module=netconf-topology&amp;revision=2015-07-27</capability>
+        <capability>urn:opendaylight:params:xml:ns:yang:controller:netconf:topology:shared:schema:repository?module=shared-schema-repository&amp;revision=2015-07-27</capability>
     </required-capabilities>
 </snapshot>
