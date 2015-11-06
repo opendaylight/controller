@@ -8,6 +8,8 @@
 package org.opendaylight.controller.cluster.datastore.entityownership;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.AdditionalMatchers.or;
 import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.reset;
@@ -33,14 +35,19 @@ import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
 import org.opendaylight.controller.cluster.datastore.IntegrationTestKit;
 import org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.EntityOwnerSelectionStrategyConfig;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
+import org.opendaylight.controller.md.sal.common.api.clustering.CandidateAlreadyRegisteredException;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
+import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipCandidateRegistration;
+import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipChange;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipListener;
 import org.opendaylight.controller.md.sal.common.api.clustering.EntityOwnershipState;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.clustering.entity.owners.rev150804.entity.owners.entity.type.entity.Candidate;
@@ -258,6 +265,50 @@ public class DistributedEntityOwnershipIntegrationTest {
         verifyOwner(leaderDistributedDataStore, ENTITY2, "");
         verify(leaderMockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY2, true, false, false));
         verify(follower1MockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY2, false, false, false));
+    }
+
+    @Test
+    public void bug4554() throws CandidateAlreadyRegisteredException {
+        initDatastores("bug4554");
+
+        leaderEntityOwnershipService.registerListener(ENTITY_TYPE1, leaderMockListener);
+        follower1EntityOwnershipService.registerListener(ENTITY_TYPE1, follower1MockListener);
+        follower2EntityOwnershipService.registerListener(ENTITY_TYPE1, follower2MockListener);
+
+        final EntityOwnershipCandidateRegistration candidate1 = leaderEntityOwnershipService.registerCandidate(ENTITY1);
+        final EntityOwnershipCandidateRegistration candidate2 = follower1EntityOwnershipService.registerCandidate(ENTITY1);
+        final EntityOwnershipCandidateRegistration candidate3 = follower2EntityOwnershipService.registerCandidate(ENTITY1);
+
+        verify(leaderMockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY1, false, true, true));
+
+        Mockito.reset(leaderMockListener);
+
+        candidate1.close();
+        candidate2.close();
+        candidate3.close();
+
+        Uninterruptibles.sleepUninterruptibly(5, TimeUnit.SECONDS);
+
+        ArgumentCaptor<EntityOwnershipChange> ownershipChangeCaptor = ArgumentCaptor.forClass(EntityOwnershipChange.class);
+
+        verify(leaderMockListener, timeout(5000).atLeastOnce()).ownershipChanged(ownershipChangeCaptor.capture());
+        verify(follower1MockListener, timeout(5000).atLeastOnce()).ownershipChanged(ownershipChangeCaptor.capture());
+        verify(follower2MockListener, timeout(5000).atLeastOnce()).ownershipChanged(ownershipChangeCaptor.capture());
+
+        boolean passed = false;
+        for(EntityOwnershipChange change : ownershipChangeCaptor.getAllValues()){
+            // The expectation is that at some point an event should be generated with hasOwner = false
+            if(!change.hasOwner()){
+                passed = true;
+                break;
+            }
+        }
+
+        assertFalse(leaderEntityOwnershipService.getOwnershipState(ENTITY1).get().hasOwner());
+        assertFalse(follower1EntityOwnershipService.getOwnershipState(ENTITY1).get().hasOwner());
+        assertFalse(follower2EntityOwnershipService.getOwnershipState(ENTITY1).get().hasOwner());
+
+        assertTrue("No ownership change message was sent with hasOwner=false", passed);
     }
 
     private void verifyGetOwnershipState(DistributedEntityOwnershipService service, Entity entity,
