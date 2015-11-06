@@ -192,7 +192,7 @@ public class Follower extends AbstractRaftActorBehavior {
                 context.getReplicatedLog().appendAndPersist(entry);
 
                 if(entry.getData() instanceof ServerConfigurationPayload) {
-                    applyServerConfiguration((ServerConfigurationPayload)entry.getData());
+                    context.updatePeerIds((ServerConfigurationPayload)entry.getData());
                 }
             }
 

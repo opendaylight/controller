@@ -113,6 +113,11 @@ public interface RaftActorContext {
     String getPeerAddress(String peerId);
 
     /**
+     * @param serverCfgPayload
+     */
+    void updatePeerIds(ServerConfigurationPayload serverCfgPayload);
+
+    /**
      * @return list of PeerInfo
      */
     Collection<PeerInfo> getPeers();

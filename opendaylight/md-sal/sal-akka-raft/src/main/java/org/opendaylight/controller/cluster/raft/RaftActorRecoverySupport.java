@@ -95,7 +95,18 @@ class RaftActorRecoverySupport {
                         context.getTermInformation().getVotedFor());
             }
         } else {
-            dataRecoveredWithPersistenceDisabled = true;
+            boolean isServerConfigPayload = false;
+            if(message instanceof ReplicatedLogEntry){
+                ReplicatedLogEntry repLogEntry = (ReplicatedLogEntry)message;
+                if(isServerConfigurationPayload(repLogEntry)){
+                    isServerConfigPayload = true;
+                    context.updatePeerIds((ServerConfigurationPayload)repLogEntry.getData());
+                }
+            }
+
+            if(!isServerConfigPayload){
+                dataRecoveredWithPersistenceDisabled = true;
+            }
         }
 
         return recoveryComplete;
@@ -146,6 +157,9 @@ class RaftActorRecoverySupport {
                     logEntry.getIndex(), logEntry.size());
         }
 
+        if(isServerConfigurationPayload(logEntry)){
+            context.updatePeerIds((ServerConfigurationPayload)logEntry.getData());
+        }
         replicatedLog().append(logEntry);
     }
 
@@ -180,14 +194,16 @@ class RaftActorRecoverySupport {
         initRecoveryTimer();
 
         int batchSize = context.getConfigParams().getJournalRecoveryLogBatchSize();
-        if(currentRecoveryBatchCount == 0) {
-            cohort.startLogRecoveryBatch(batchSize);
-        }
+        if(!isServerConfigurationPayload(logEntry)){
+            if(currentRecoveryBatchCount == 0) {
+                cohort.startLogRecoveryBatch(batchSize);
+            }
 
-        cohort.appendRecoveredLogEntry(logEntry.getData());
+            cohort.appendRecoveredLogEntry(logEntry.getData());
 
-        if(++currentRecoveryBatchCount >= batchSize) {
-            endCurrentLogRecoveryBatch();
+            if(++currentRecoveryBatchCount >= batchSize) {
+                endCurrentLogRecoveryBatch();
+            }
         }
     }
 
@@ -213,5 +229,9 @@ class RaftActorRecoverySupport {
                  " Last index in log = {}, snapshotIndex = {}, snapshotTerm = {}, " +
                  "journal-size = {}", replicatedLog().lastIndex(), replicatedLog().getSnapshotIndex(),
                  replicatedLog().getSnapshotTerm(), replicatedLog().size());
+    }
+
+    private boolean isServerConfigurationPayload(ReplicatedLogEntry repLogEntry){
+        return (repLogEntry.getData() instanceof ServerConfigurationPayload);
     }
 }
