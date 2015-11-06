@@ -120,7 +120,6 @@ final class NetconfDeviceTopologyAdapter implements AutoCloseable {
         logger.trace("{}: Init device state transaction {} putting operational data ended.", id, writeTx.getIdentifier());
 
         logger.trace("{}: Init device state transaction {} putting if absent config data started.", id, writeTx.getIdentifier());
-        writeTx.put(LogicalDatastoreType.CONFIGURATION, path, getNodeWithId(id));
         logger.trace("{}: Init device state transaction {} putting config data ended.", id, writeTx.getIdentifier());
 
         commitTransaction(writeTx, "init");
@@ -178,7 +177,6 @@ final class NetconfDeviceTopologyAdapter implements AutoCloseable {
         final WriteTransaction writeTx = txChain.newWriteOnlyTransaction();
 
         logger.trace("{}: Close device state transaction {} removing all data started.", id, writeTx.getIdentifier());
-        writeTx.delete(LogicalDatastoreType.CONFIGURATION, id.getTopologyBindingPath());
         writeTx.delete(LogicalDatastoreType.OPERATIONAL, id.getTopologyBindingPath());
         logger.trace("{}: Close device state transaction {} removing all data ended.", id, writeTx.getIdentifier());
 
@@ -189,12 +187,10 @@ final class NetconfDeviceTopologyAdapter implements AutoCloseable {
 
         final NetworkTopology networkTopology = new NetworkTopologyBuilder().build();
         logger.trace("{}: Merging {} container to ensure its presence", id, networkTopology.QNAME, writeTx.getIdentifier());
-        writeTx.merge(LogicalDatastoreType.CONFIGURATION, networkTopologyPath, networkTopology);
         writeTx.merge(LogicalDatastoreType.OPERATIONAL, networkTopologyPath, networkTopology);
 
         final Topology topology = new TopologyBuilder().setTopologyId(new TopologyId(TopologyNetconf.QNAME.getLocalName())).build();
         logger.trace("{}: Merging {} container to ensure its presence", id, topology.QNAME, writeTx.getIdentifier());
-        writeTx.merge(LogicalDatastoreType.CONFIGURATION, topologyListPath, topology);
         writeTx.merge(LogicalDatastoreType.OPERATIONAL, topologyListPath, topology);
     }
 

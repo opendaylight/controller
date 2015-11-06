@@ -15,6 +15,26 @@
  * Do not modify this file unless it is present under src/main directory
  */
 package org.opendaylight.controller.config.yang.netconf.topology;
+
+import org.opendaylight.controller.config.api.DependencyResolver;
+import org.opendaylight.controller.config.api.ModuleIdentifier;
+import org.osgi.framework.BundleContext;
+
 public class NetconfTopologyModuleFactory extends org.opendaylight.controller.config.yang.netconf.topology.AbstractNetconfTopologyModuleFactory {
+
+    @Override
+    public NetconfTopologyModule instantiateModule(final String instanceName,
+            final DependencyResolver dependencyResolver, final NetconfTopologyModule oldModule,
+            final AutoCloseable oldInstance, final BundleContext bundleContext) {
+        return new NetconfTopologyModule(new ModuleIdentifier(NAME, instanceName), dependencyResolver, oldModule,
+                oldInstance, bundleContext);
+    }
+
+    @Override
+    public NetconfTopologyModule instantiateModule(final String instanceName,
+            final DependencyResolver dependencyResolver,
+            final BundleContext bundleContext) {
+        return new NetconfTopologyModule(new ModuleIdentifier(NAME, instanceName), dependencyResolver, bundleContext);
+    }
 
 }
