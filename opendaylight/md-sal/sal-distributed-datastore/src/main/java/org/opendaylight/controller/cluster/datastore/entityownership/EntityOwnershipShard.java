@@ -277,7 +277,7 @@ class EntityOwnershipShard extends Shard {
 
         if(isLeader()) {
             String currentOwner = getCurrentOwner(message.getEntityPath());
-            if(message.getRemovedCandidate().equals(currentOwner)){
+            if(message.getRemovedCandidate().equals(currentOwner) || message.getRemainingCandidates().size() == 0){
                 String entityType = EntityOwnersModel.entityTypeFromEntityPath(message.getEntityPath());
                 writeNewOwner(message.getEntityPath(),
                         newOwner(message.getRemainingCandidates(), entityOwnershipStatistics.byEntityType(entityType),
