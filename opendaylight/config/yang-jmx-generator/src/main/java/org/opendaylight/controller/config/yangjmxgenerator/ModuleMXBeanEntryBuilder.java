@@ -95,13 +95,15 @@ final class ModuleMXBeanEntryBuilder {
     // TODO: the XPath should be parsed by code generator IMO
     private static final String MAGIC_STRING = "MAGIC_STRING";
     private static final String MODULE_CONDITION_XPATH_TEMPLATE = "^/MAGIC_STRING:modules/MAGIC_STRING:module/MAGIC_STRING:type\\s*=\\s*['\"](.+)['\"]$";
-    private static final SchemaPath EXPECTED_CONFIGURATION_AUGMENTATION_SCHEMA_PATH = SchemaPath.create(true,
-            createConfigQName("modules"), createConfigQName("module"), createConfigQName("configuration"));
-    private static final SchemaPath EXPECTED_STATE_AUGMENTATION_SCHEMA_PATH = SchemaPath.create(true,
-            createConfigQName("modules"), createConfigQName("module"), createConfigQName("state"));
-    private static final Pattern PREFIX_COLON_LOCAL_NAME = Pattern
-            .compile("^(.+):(.+)$");
 
+    private static final SchemaPath AUGMENT_SCHEMAPATH = SchemaPath.create(true,
+        createConfigQName("modules"), createConfigQName("module"));
+
+    private static final SchemaPath EXPECTED_CONFIGURATION_AUGMENTATION_SCHEMA_PATH =
+            AUGMENT_SCHEMAPATH.createChild(createConfigQName("configuration"));
+    private static final SchemaPath EXPECTED_STATE_AUGMENTATION_SCHEMA_PATH =
+            AUGMENT_SCHEMAPATH.createChild(createConfigQName("state"));
+    private static final Pattern PREFIX_COLON_LOCAL_NAME = Pattern.compile("^(.+):(.+)$");
 
     public Map<String, ModuleMXBeanEntry> build() {
         LOG.debug("Generating ModuleMXBeans of {} to package {}",
@@ -212,7 +214,7 @@ final class ModuleMXBeanEntryBuilder {
         return moduleIdentities;
     }
 
-    private Collection<ChoiceCaseNode> castChildNodesToChoiceCases(final Collection<DataSchemaNode> childNodes) {
+    private static Collection<ChoiceCaseNode> castChildNodesToChoiceCases(final Collection<DataSchemaNode> childNodes) {
         return Collections2.transform(childNodes, new Function<DataSchemaNode, ChoiceCaseNode>() {
             @Nullable
             @Override
@@ -222,7 +224,7 @@ final class ModuleMXBeanEntryBuilder {
         });
     }
 
-    private boolean areAllChildrenChoiceCaseNodes(final Iterable<DataSchemaNode> childNodes) {
+    private static boolean areAllChildrenChoiceCaseNodes(final Iterable<DataSchemaNode> childNodes) {
         for (DataSchemaNode childNode : childNodes) {
             if (childNode instanceof ChoiceCaseNode == false) {
                 return false;
@@ -315,7 +317,7 @@ final class ModuleMXBeanEntryBuilder {
         }
     }
 
-    private void checkUniqueRuntimeBeansGeneratedClasses(final Map<String, QName> uniqueGeneratedClassesNames,
+    private static void checkUniqueRuntimeBeansGeneratedClasses(final Map<String, QName> uniqueGeneratedClassesNames,
             final DataSchemaNode when, final Collection<RuntimeBeanEntry> runtimeBeans) {
         for (RuntimeBeanEntry runtimeBean : runtimeBeans) {
             final String javaNameOfRuntimeMXBean = runtimeBean.getJavaNameOfRuntimeMXBean();
@@ -379,7 +381,7 @@ final class ModuleMXBeanEntryBuilder {
      * @param choiceCaseNode state or configuration case statement
      * @return either choiceCaseNode or its only child container
      */
-    private <HAS_CHILDREN_AND_QNAME extends DataNodeContainer & SchemaNode> HAS_CHILDREN_AND_QNAME getDataNodeContainer(final ChoiceCaseNode choiceCaseNode) {
+    private static <HAS_CHILDREN_AND_QNAME extends DataNodeContainer & SchemaNode> HAS_CHILDREN_AND_QNAME getDataNodeContainer(final ChoiceCaseNode choiceCaseNode) {
         Collection<DataSchemaNode> childNodes = choiceCaseNode.getChildNodes();
         if (childNodes.size() == 1) {
             DataSchemaNode onlyChild = childNodes.iterator().next();
@@ -394,7 +396,7 @@ final class ModuleMXBeanEntryBuilder {
         return (HAS_CHILDREN_AND_QNAME) choiceCaseNode;
     }
 
-    private Map<String, AttributeIfc> fillConfiguration(final DataNodeContainer dataNodeContainer, final Module currentModule,
+    private static Map<String, AttributeIfc> fillConfiguration(final DataNodeContainer dataNodeContainer, final Module currentModule,
             final TypeProviderWrapper typeProviderWrapper, final Map<QName, ServiceInterfaceEntry> qNamesToSIEs,
             final SchemaContext schemaContext, final String packageName) {
         Map<String, AttributeIfc> yangToAttributes = new HashMap<>();
@@ -406,7 +408,7 @@ final class ModuleMXBeanEntryBuilder {
         return yangToAttributes;
     }
 
-    private Map<String, QName> findProvidedServices(final IdentitySchemaNode moduleIdentity, final Module currentModule,
+    private static Map<String, QName> findProvidedServices(final IdentitySchemaNode moduleIdentity, final Module currentModule,
             final Map<QName, ServiceInterfaceEntry> qNamesToSIEs, final SchemaContext schemaContext) {
         Map<String, QName> result = new HashMap<>();
         for (UnknownSchemaNode unknownNode : moduleIdentity.getUnknownSchemaNodes()) {
@@ -420,7 +422,7 @@ final class ModuleMXBeanEntryBuilder {
         return result;
     }
 
-    private AttributeIfc getAttributeValue(final DataSchemaNode attrNode, final Module currentModule,
+    private static AttributeIfc getAttributeValue(final DataSchemaNode attrNode, final Module currentModule,
             final Map<QName, ServiceInterfaceEntry> qNamesToSIEs, final TypeProviderWrapper typeProviderWrapper,
             final SchemaContext schemaContext, final String packageName) {
 
@@ -455,7 +457,7 @@ final class ModuleMXBeanEntryBuilder {
         }
     }
 
-    private Optional<? extends AbstractDependencyAttribute> extractDependency(final DataNodeContainer dataNodeContainer,
+    private static Optional<? extends AbstractDependencyAttribute> extractDependency(final DataNodeContainer dataNodeContainer,
             final DataSchemaNode attrNode, final Module currentModule, final Map<QName, ServiceInterfaceEntry> qNamesToSIEs,
             final SchemaContext schemaContext) {
         if (isDependencyContainer(dataNodeContainer)) {
@@ -485,7 +487,7 @@ final class ModuleMXBeanEntryBuilder {
         return Optional.absent();
     }
 
-    private boolean isDependencyContainer(final DataNodeContainer dataNodeContainer) {
+    private static boolean isDependencyContainer(final DataNodeContainer dataNodeContainer) {
         if(dataNodeContainer.getUses().size() != 1) {
             return false;
         }
@@ -497,7 +499,7 @@ final class ModuleMXBeanEntryBuilder {
         return getChildNodeSizeWithoutUses(dataNodeContainer) == 0;
     }
 
-    private int getChildNodeSizeWithoutUses(final DataNodeContainer csn) {
+    private static int getChildNodeSizeWithoutUses(final DataNodeContainer csn) {
         int result = 0;
         for (DataSchemaNode dsn : csn.getChildNodes()) {
             if (dsn.isAddedByUses() == false) {
@@ -507,7 +509,7 @@ final class ModuleMXBeanEntryBuilder {
         return result;
     }
 
-    private ServiceInterfaceEntry findSIE(final String prefixAndIdentityLocalName, final Module currentModule,
+    private static ServiceInterfaceEntry findSIE(final String prefixAndIdentityLocalName, final Module currentModule,
             final Map<QName, ServiceInterfaceEntry> qNamesToSIEs, final SchemaContext schemaContext) {
 
         Matcher m = PREFIX_COLON_LOCAL_NAME.matcher(prefixAndIdentityLocalName);
@@ -531,7 +533,7 @@ final class ModuleMXBeanEntryBuilder {
         return sie;
     }
 
-    private ModuleImport findModuleImport(final Module module, final String prefix) {
+    private static ModuleImport findModuleImport(final Module module, final String prefix) {
         for (ModuleImport moduleImport : module.getImports()) {
             if (moduleImport.getPrefix().equals(prefix)) {
                 return moduleImport;
@@ -547,7 +549,7 @@ final class ModuleMXBeanEntryBuilder {
         return pattern.matcher(whenConstraint.toString());
     }
 
-    String getConfigModulePrefixFromImport(final Module currentModule) {
+    private static String getConfigModulePrefixFromImport(final Module currentModule) {
         for (ModuleImport currentImport : currentModule.getImports()) {
             if (currentImport.getModuleName().equals(ConfigConstants.CONFIG_MODULE)) {
                 return currentImport.getPrefix();
