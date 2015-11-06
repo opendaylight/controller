@@ -13,7 +13,6 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-
 import com.google.common.util.concurrent.Futures;
 import java.net.InetSocketAddress;
 import org.junit.Before;
@@ -32,7 +31,7 @@ import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
 
 public class NetconfDeviceTopologyAdapterTest {
 
-    private RemoteDeviceId id = new RemoteDeviceId("test", new InetSocketAddress("localhost", 22));
+    private final RemoteDeviceId id = new RemoteDeviceId("test", new InetSocketAddress("localhost", 22));
 
     @Mock
     private DataBroker broker;
@@ -43,7 +42,7 @@ public class NetconfDeviceTopologyAdapterTest {
     @Mock
     private Node data;
 
-    private String txIdent = "test transaction";
+    private final String txIdent = "test transaction";
 
     @Before
     public void setUp() throws Exception {
@@ -60,22 +59,22 @@ public class NetconfDeviceTopologyAdapterTest {
     public void testFailedDevice() throws Exception {
         doReturn(Futures.immediateCheckedFuture(null)).when(writeTx).submit();
 
-        NetconfDeviceTopologyAdapter adapter = new NetconfDeviceTopologyAdapter(id, broker);
+        final NetconfDeviceTopologyAdapter adapter = new NetconfDeviceTopologyAdapter(id, broker);
         adapter.setDeviceAsFailed(null);
 
         verify(txChain, times(2)).newWriteOnlyTransaction();
-        verify(writeTx, times(3)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class));
+        verify(writeTx, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class));
     }
 
     @Test
     public void testDeviceUpdate() throws Exception {
         doReturn(Futures.immediateCheckedFuture(null)).when(writeTx).submit();
 
-        NetconfDeviceTopologyAdapter adapter = new NetconfDeviceTopologyAdapter(id, broker);
+        final NetconfDeviceTopologyAdapter adapter = new NetconfDeviceTopologyAdapter(id, broker);
         adapter.updateDeviceData(true, new NetconfDeviceCapabilities());
 
         verify(txChain, times(2)).newWriteOnlyTransaction();
-        verify(writeTx, times(3)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class));
+        verify(writeTx, times(2)).put(any(LogicalDatastoreType.class), any(InstanceIdentifier.class), any(Node.class));
     }
 
 }
