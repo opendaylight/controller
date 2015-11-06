@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -92,5 +93,22 @@ public class MockConfiguration implements Configuration{
     @Override
     public boolean isShardConfigured(String shardName) {
         return (shardMembers.containsKey(shardName));
+    }
+
+    @Override
+    public void updateMemberReplicasForShard (String shardName, String newMemberName, boolean addUpdation) {
+        Map<String, List<String>> newShardMembers = new HashMap<>(shardMembers);
+        for(Map.Entry<String, List<String>> shard : newShardMembers.entrySet()) {
+            if (shard.getKey().equals(shardName)) {
+                List<String> replicas = new ArrayList<>(shard.getValue());
+                if (addUpdation == true) {
+                    replicas.add(newMemberName);
+                } else {
+                    replicas.remove(newMemberName);
+                }
+                shard.setValue(replicas);
+                shardMembers = ImmutableMap.<String, List<String>>builder().putAll(newShardMembers).build();
+            }
+        }
     }
 }
