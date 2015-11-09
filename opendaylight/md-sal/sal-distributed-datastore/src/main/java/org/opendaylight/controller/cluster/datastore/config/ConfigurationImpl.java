@@ -14,6 +14,7 @@ import com.google.common.collect.ImmutableSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -156,5 +157,31 @@ public class ConfigurationImpl implements Configuration {
     public boolean isShardConfigured(String shardName) {
         Preconditions.checkNotNull(shardName, "shardName should not be null");
         return allShardNames.contains(shardName);
+    }
+
+    @Override
+    public void updateMemberReplicasForShard (String shardName, String newMemberName, boolean addUpdation) {
+        Preconditions.checkNotNull(shardName, "shardName should not be null");
+        Preconditions.checkNotNull(newMemberName, "MemberName should not be null");
+
+        for(ModuleConfig moduleConfig: moduleConfigMap.values()) {
+            ShardConfig shardConfig = moduleConfig.getShardConfig(shardName);
+            if(shardConfig != null) {
+                String moduleName = moduleConfig.getName();
+
+                HashMap<String, ModuleConfig> newModuleConfigMap = new HashMap<>(moduleConfigMap);
+                ModuleConfig updatedModuleConfig = newModuleConfigMap.get(moduleName);
+                updatedModuleConfig.removeShardConfig(shardName);
+                Set<String> replica = new HashSet<>(shardConfig.getReplicas());
+                if (addUpdation == true) {
+                    replica.add(newMemberName);
+                } else {
+                    replica.remove(newMemberName);
+                }
+                updatedModuleConfig.addShardConfig(shardName, ImmutableSet.copyOf(replica));
+                moduleConfigMap = ImmutableMap.<String, ModuleConfig>builder().putAll(newModuleConfigMap).build();
+                return;
+            }
+        }
     }
 }

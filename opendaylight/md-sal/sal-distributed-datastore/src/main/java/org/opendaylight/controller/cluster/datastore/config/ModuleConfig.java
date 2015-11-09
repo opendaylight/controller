@@ -63,4 +63,8 @@ public class ModuleConfig {
     public void setShardStrategy(ShardStrategy shardStrategy) {
         this.shardStrategy = shardStrategy;
     }
+
+    public ShardConfig removeShardConfig(String name) {
+        return shardConfigs.remove(name);
+    }
 }

@@ -22,6 +22,9 @@ import akka.dispatch.OnComplete;
 import akka.japi.Creator;
 import akka.japi.Function;
 import akka.persistence.RecoveryCompleted;
+import akka.persistence.SaveSnapshotFailure;
+import akka.persistence.SaveSnapshotSuccess;
+import akka.persistence.SnapshotOffer;
 import akka.serialization.Serialization;
 import akka.util.Timeout;
 import com.google.common.annotations.VisibleForTesting;
@@ -127,6 +130,8 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
     private SchemaContext schemaContext;
 
+    private boolean recoveryCompleteStatus = false;
+
     /**
      */
     protected ShardManager(ClusterWrapper cluster, Configuration configuration,
@@ -146,8 +151,6 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
         // Subscribe this actor to cluster member events
         cluster.subscribeToMemberEvents(getSelf());
-
-        createLocalShards();
     }
 
     public static Props props(
@@ -211,6 +214,10 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             onAddShardReplica((AddShardReplica)message);
         } else if(message instanceof RemoveShardReplica){
             onRemoveShardReplica((RemoveShardReplica)message);
+        } else if (message instanceof SaveSnapshotSuccess) {
+            LOG.debug ("saved ShardManager snapshot successfully");
+        } else if (message instanceof SaveSnapshotFailure) {
+            LOG.error ("SaveSnapshotFailure received for saving snapshot of shards");
         } else {
             unknownMessage(message);
         }
@@ -410,6 +417,10 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             // We no longer persist SchemaContext modules so delete all the prior messages from the akka
             // journal on upgrade from Helium.
             deleteMessages(lastSequenceNr());
+            recoveryCompleteStatus = true;
+            createLocalShards();
+        } else if (message instanceof SnapshotOffer) {
+            handleShardRecovery((SnapshotOffer) message);
         }
     }
 
@@ -841,6 +852,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         final ShardInformation shardInfo = new ShardInformation(shardName, shardId,
                           getPeerAddresses(shardName), datastoreContext,
                           new DefaultShardPropsCreator(), peerAddressResolver);
+        shardInfo.setShardInitializedState(false);
         localShards.put(shardName, shardInfo);
         shardInfo.setActor(newShardActor(schemaContext, shardInfo));
 
@@ -887,6 +899,8 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
             // Make the local shard voting capable
             shardInfo.setDatastoreContext(newShardDatastoreContext(shardName), getSelf());
+            shardInfo.setShardInitializedState(true);
+            persistShardList();
 
             mBean.addLocalShard(shardInfo.getShardId().toString());
             sender.tell(new akka.actor.Status.Success(true), getSelf());
@@ -932,6 +946,43 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         return;
     }
 
+    private void persistShardList() {
+        if (recoveryCompleteStatus == false) {
+            //do nothing
+            return;
+        }
+
+        List<String> shardList = new ArrayList(localShards.keySet());
+        for (ShardInformation shardInfo : localShards.values()) {
+            if (shardInfo.getShardInitializedState() == false) {
+                shardList.remove(shardInfo.getShardName());
+            }
+        }
+        LOG.debug ("persisting the shard list {}", shardList);
+        saveSnapshot(new ShardManagerSnapshot(shardList));
+    }
+
+    private void handleShardRecovery(SnapshotOffer offer) {
+        LOG.debug ("in handleShardRecovery ");
+        ShardManagerSnapshot snapshot = (ShardManagerSnapshot)offer.snapshot();
+        String currentMember = cluster.getCurrentMemberName();
+        List<String> configuredShardList = new ArrayList<>(configuration.getMemberShardNames(currentMember));
+        for (String shard : snapshot.getShardList()) {
+            if (!configuredShardList.contains(shard)) {
+                // add the current member as a replica for the shard
+                LOG.debug ("adding shard {}", shard);
+                configuration.updateMemberReplicasForShard(shard, currentMember, true);
+            } else {
+                configuredShardList.remove(shard);
+            }
+        }
+        for (String shard : configuredShardList) {
+            // remove the member as a replica for the shard
+            LOG.debug ("removing shard {}", shard);
+            configuration.updateMemberReplicasForShard(shard, currentMember, false);
+        }
+    }
+
     @VisibleForTesting
     protected static class ShardInformation {
         private final ShardIdentifier shardId;
@@ -955,6 +1006,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         private DatastoreContext datastoreContext;
         private final ShardPropsCreator shardPropsCreator;
         private final ShardPeerAddressResolver addressResolver;
+        private boolean shardInitializedState = true;
 
         private ShardInformation(String shardName, ShardIdentifier shardId,
                 Map<String, String> initialPeerAddresses, DatastoreContext datastoreContext,
@@ -1148,6 +1200,14 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
         void setLeaderVersion(short leaderVersion) {
             this.leaderVersion = leaderVersion;
+        }
+
+        public void setShardInitializedState(boolean flag) {
+            shardInitializedState = flag;
+        }
+
+        public boolean getShardInitializedState() {
+            return shardInitializedState;
         }
     }
 
