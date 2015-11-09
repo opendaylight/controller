@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "1acb0d3e_8bbd2d05",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/GetSnapshotReplyActor.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-09T02:58:28Z",
+      "side": 1,
+      "message": "Technically it probably should be.",
+      "parentUuid": "bada0100_7c051ec1",
+      "range": {
+        "startLine": 59,
+        "startChar": 37,
+        "endLine": 59,
+        "endChar": 39
+      },
+      "revId": "046588fa8dc2b90a06412bb7943094eac6eb7375",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bada0100_dc68ca89",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/GetSnapshotReplyActor.java",
         "patchSetId": 9
@@ -59,6 +83,30 @@
       "writtenOn": "2015-11-06T19:30:13Z",
       "side": 1,
       "message": "no preconditions for id?",
+      "range": {
+        "startLine": 84,
+        "startChar": 22,
+        "endLine": 84,
+        "endChar": 24
+      },
+      "revId": "046588fa8dc2b90a06412bb7943094eac6eb7375",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1acb0d3e_abba6908",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/GetSnapshotReplyActor.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-09T02:58:28Z",
+      "side": 1,
+      "message": "I added \u0027id\u0027 later for the debug logging and didn\u0027t add Preconditions check. I can add it if you want.",
+      "parentUuid": "bada0100_dc68ca89",
       "range": {
         "startLine": 84,
         "startChar": 22,
