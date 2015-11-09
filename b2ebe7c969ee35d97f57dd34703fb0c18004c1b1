@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "1acb0d3e_6b3c8194",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 234,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-09T03:02:47Z",
+      "side": 1,
+      "message": "Yes - that would be the ideal way to do it and I thought about that but went the lazy route :)  I\u0027ll change it.",
+      "parentUuid": "5ac10518_2de20d04",
+      "revId": "b2ebe7c969ee35d97f57dd34703fb0c18004c1b1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5ac10518_cde6e916",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManagerGetSnapshotReplyActor.java",
         "patchSetId": 2
@@ -30,6 +48,30 @@
       "writtenOn": "2015-11-06T19:41:35Z",
       "side": 1,
       "message": "could you explicitly initialize this to 0.",
+      "range": {
+        "startLine": 36,
+        "startChar": 16,
+        "endLine": 36,
+        "endChar": 31
+      },
+      "revId": "b2ebe7c969ee35d97f57dd34703fb0c18004c1b1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1acb0d3e_0b413d0b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManagerGetSnapshotReplyActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-09T03:02:47Z",
+      "side": 1,
+      "message": "I\u0027ve actually changed this code a bit and removed \u0027repliesReceived\u0027 in a subsequent patch.",
+      "parentUuid": "5ac10518_cde6e916",
       "range": {
         "startLine": 36,
         "startChar": 16,
