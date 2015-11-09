@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "1acb0d3e_cb4a5527",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/admin/ClusterAdminRpcService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-09T03:48:28Z",
+      "side": 1,
+      "message": "SerializationUtils throws unchecked exceptions.",
+      "parentUuid": "5ac10518_cd94a946",
+      "range": {
+        "startLine": 153,
+        "startChar": 16,
+        "endLine": 153,
+        "endChar": 25
+      },
+      "revId": "96c54139dc8fc111cb8d1e52379e9736c0eb3f20",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5ac10518_adc4bd5f",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/yang/cluster-admin.yang",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2015-11-06T19:52:26Z",
       "side": 1,
       "message": "file-name or file-path?",
+      "range": {
+        "startLine": 79,
+        "startChar": 17,
+        "endLine": 79,
+        "endChar": 26
+      },
+      "revId": "96c54139dc8fc111cb8d1e52379e9736c0eb3f20",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1acb0d3e_eb47111c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/yang/cluster-admin.yang",
+        "patchSetId": 2
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-09T03:48:28Z",
+      "side": 1,
+      "message": "path and name.",
+      "parentUuid": "5ac10518_adc4bd5f",
       "range": {
         "startLine": 79,
         "startChar": 17,
