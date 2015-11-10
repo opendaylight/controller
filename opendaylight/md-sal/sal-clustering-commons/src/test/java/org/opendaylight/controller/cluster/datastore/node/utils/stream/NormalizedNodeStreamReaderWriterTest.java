@@ -44,9 +44,12 @@ public class NormalizedNodeStreamReaderWriterTest {
 
         QName toaster = QName.create("http://netconfcentral.org/ns/toaster","2009-11-20","toaster");
         QName darknessFactor = QName.create("http://netconfcentral.org/ns/toaster","2009-11-20","darknessFactor");
+        QName description = QName.create("http://netconfcentral.org/ns/toaster","2009-11-20","description");
         ContainerNode toasterNode = Builders.containerBuilder().
                 withNodeIdentifier(new NodeIdentifier(toaster)).
-                withChild(ImmutableNodes.leafNode(darknessFactor, "1000")).build();
+                withChild(ImmutableNodes.leafNode(darknessFactor, "1000")).
+                withChild(ImmutableNodes.leafNode(description, largeString(20)))
+                .build();
 
         ContainerNode toasterContainer = Builders.containerBuilder().
                 withNodeIdentifier(new NodeIdentifier(SchemaContext.NAME)).
@@ -172,5 +175,15 @@ public class NormalizedNodeStreamReaderWriterTest {
 
         Assert.assertEquals(input, clone.getInput());
 
+    }
+
+    private String largeString(int pow){
+        String s = "X";
+        for(int i=0;i<pow;i++){
+            StringBuilder b = new StringBuilder();
+            b.append(s).append(s);
+            s = b.toString();
+        }
+        return s;
     }
 }
