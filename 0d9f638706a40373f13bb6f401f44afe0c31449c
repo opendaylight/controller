@@ -69,6 +69,23 @@
       "revId": "0d9f638706a40373f13bb6f401f44afe0c31449c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bab3e1c7_881f77b7",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/entityownership/DistributedEntityOwnershipIntegrationTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 294,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-10T02:36:35Z",
+      "side": 1,
+      "message": "To eliminate then hardcoded sleep, can you use a custom matcher here where hasOwner \u003d\u003d false (I did this using AbstractEntityOwnershipTest.ownershipChanged in other tests)?",
+      "revId": "0d9f638706a40373f13bb6f401f44afe0c31449c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
