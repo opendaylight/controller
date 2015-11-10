@@ -31,6 +31,7 @@ final class ValueTypes {
     public static final byte BIG_DECIMAL_TYPE = 11;
     public static final byte BINARY_TYPE = 12;
     public static final byte NULL_TYPE = 13;
+    public static final byte STRING_BYTES_TYPE = 14;
 
     private static final Map<Class<?>, Byte> TYPES;
 
@@ -62,6 +63,9 @@ final class ValueTypes {
 
         final Byte type = TYPES.get(node.getClass());
         if (type != null) {
+            if(type == STRING_TYPE){
+                return STRING_BYTES_TYPE;
+            }
             return type;
         }
 
