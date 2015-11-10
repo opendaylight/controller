@@ -13,13 +13,10 @@ import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.japi.Procedure;
-
 import com.google.protobuf.GeneratedMessage;
-
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.opendaylight.controller.cluster.NonPersistentDataProvider;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
@@ -67,6 +64,7 @@ public class MockRaftActorContext extends RaftActorContextImpl {
     public MockRaftActorContext(){
         super(null, null, "test", newElectionTerm(), -1, -1, new HashMap<String, String>(),
                 new DefaultConfigParamsImpl(), new NonPersistentDataProvider(), LOG);
+        setReplicatedLog(new MockReplicatedLogBuilder().build());
     }
 
     public MockRaftActorContext(String id, ActorSystem system, ActorRef actor){
