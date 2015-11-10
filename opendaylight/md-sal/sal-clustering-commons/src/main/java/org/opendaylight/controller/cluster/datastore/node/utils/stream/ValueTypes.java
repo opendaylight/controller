@@ -31,13 +31,14 @@ final class ValueTypes {
     public static final byte BIG_DECIMAL_TYPE = 11;
     public static final byte BINARY_TYPE = 12;
     public static final byte NULL_TYPE = 13;
+    public static final byte STRING_BYTES_TYPE = 14;
 
     private static final Map<Class<?>, Byte> TYPES;
 
     static {
         final Builder<Class<?>, Byte> b = ImmutableMap.builder();
 
-        b.put(String.class, Byte.valueOf(STRING_TYPE));
+        b.put(String.class, Byte.valueOf(STRING_BYTES_TYPE));
         b.put(Byte.class, Byte.valueOf(BYTE_TYPE));
         b.put(Integer.class, Byte.valueOf(INT_TYPE));
         b.put(Long.class, Byte.valueOf(LONG_TYPE));
