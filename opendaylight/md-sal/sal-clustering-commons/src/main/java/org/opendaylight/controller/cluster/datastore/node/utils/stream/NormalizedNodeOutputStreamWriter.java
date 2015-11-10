@@ -15,6 +15,7 @@ import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -388,6 +389,12 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
                 writeYangInstanceIdentifierInternal((YangInstanceIdentifier) value);
                 break;
             case ValueTypes.NULL_TYPE :
+                break;
+            case ValueTypes.LARGE_STRING_TYPE:
+                String sValue = value.toString();
+                final byte[] valueBytes = sValue.getBytes(StandardCharsets.UTF_8);
+                output.writeInt(valueBytes.length);
+                output.write(valueBytes);
                 break;
             default:
                 output.writeUTF(value.toString());
