@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -291,6 +292,9 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
             case ValueTypes.STRING_TYPE :
                 return input.readUTF();
 
+            case ValueTypes.STRING_BYTES_TYPE:
+                return readStringBytes();
+
             case ValueTypes.BIG_DECIMAL_TYPE :
                 return new BigDecimal(input.readUTF());
 
@@ -308,6 +312,12 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
             default :
                 return null;
         }
+    }
+
+    private String readStringBytes() throws IOException {
+        byte[] bytes = new byte[input.readInt()];
+        input.readFully(bytes);
+        return new String(bytes, StandardCharsets.UTF_8);
     }
 
     public YangInstanceIdentifier readYangInstanceIdentifier() throws IOException {
