@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bab3e1c7_c83ecf29",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/ValueTypes.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-10T02:20:21Z",
+      "side": 1,
+      "message": "I don\u0027t think it\u0027s the length of the String itself (i.e. # of chars) but rather the length of the encoded bytes that is limited by writeUTF. So for multi-byte char sets like Chinese, a single char may be encoded in 2 or 3 bytes (maybe more). I think we should just always write out Strings as utf-8 encoded bytes to be safe.",
+      "revId": "cc9514ada6c5d89fb465be1f3c60012bf4a942d5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
