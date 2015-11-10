@@ -15,5 +15,6 @@ package org.opendaylight.controller.cluster.raft.messages;
 public enum ServerChangeStatus {
     OK,
     NO_LEADER,
-    TIMEOUT
+    TIMEOUT,
+    ALREADY_EXISTS
 }
