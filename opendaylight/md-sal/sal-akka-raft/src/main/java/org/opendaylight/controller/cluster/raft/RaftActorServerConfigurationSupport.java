@@ -321,10 +321,14 @@ class RaftActorServerConfigurationSupport {
         @Override
         public void initiate(RaftActor raftActor) {
             AbstractLeader leader = (AbstractLeader) raftActor.getCurrentBehavior();
-
             AddServer addServer = getAddServerContext().getOperation();
 
             LOG.debug("{}: Initiating {}", raftContext.getId(), addServer);
+
+            if(raftContext.getPeerInfo(addServer.getNewServerId()) != null) {
+                operationComplete(raftActor, getAddServerContext(), ServerChangeStatus.ALREADY_EXISTS);
+                return;
+            }
 
             VotingState votingState = addServer.isVotingMember() ? VotingState.VOTING_NOT_INITIALIZED :
                     VotingState.NON_VOTING;
