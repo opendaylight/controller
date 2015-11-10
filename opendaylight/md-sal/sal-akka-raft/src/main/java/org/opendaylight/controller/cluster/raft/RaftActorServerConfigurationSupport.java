@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.raft.ServerConfigurationPayload.ServerInfo;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.SnapshotComplete;
@@ -190,22 +191,22 @@ class RaftActorServerConfigurationSupport {
 
             newConfig.add(new ServerInfo(raftContext.getId(), true));
 
-            LOG.debug("{}: New server configuration : {}", raftContext.getId(), newConfig);
+            LOG.debug("{}: Persisting new server configuration : {}", raftContext.getId(), newConfig);
 
             ServerConfigurationPayload payload = new ServerConfigurationPayload(newConfig);
 
             raftActor.persistData(operationContext.getClientRequestor(), operationContext.getContextId(), payload);
 
             currentOperationState = new Persisting(operationContext);
+
+            sendReply(raftActor, operationContext, ServerChangeStatus.OK);
         }
 
         protected void operationComplete(RaftActor raftActor, ServerOperationContext<?> operationContext,
-                ServerChangeStatus status) {
-
-            LOG.debug("{}: Returning {} for operation {}", raftContext.getId(), status, operationContext.getOperation());
-
-            operationContext.getClientRequestor().tell(operationContext.newReply(status, raftActor.getLeaderId()),
-                    raftActor.self());
+                @Nullable ServerChangeStatus replyStatus) {
+            if(replyStatus != null) {
+                sendReply(raftActor, operationContext, replyStatus);
+            }
 
             currentOperationState = IDLE;
 
@@ -213,6 +214,14 @@ class RaftActorServerConfigurationSupport {
             if(nextOperation != null) {
                 RaftActorServerConfigurationSupport.this.onNewOperation(raftActor, nextOperation);
             }
+        }
+
+        private void sendReply(RaftActor raftActor, ServerOperationContext<?> operationContext,
+                ServerChangeStatus status) {
+            LOG.debug("{}: Returning {} for operation {}", raftContext.getId(), status, operationContext.getOperation());
+
+            operationContext.getClientRequestor().tell(operationContext.newReply(status, raftActor.getLeaderId()),
+                    raftActor.self());
         }
 
         @Override
@@ -254,7 +263,7 @@ class RaftActorServerConfigurationSupport {
                 LOG.info("{}: {} has been successfully replicated to a majority of followers",
                         applyState.getReplicatedLogEntry().getData());
 
-                operationComplete(raftActor, operationContext, ServerChangeStatus.OK);
+                operationComplete(raftActor, operationContext, null);
             }
         }
     }
