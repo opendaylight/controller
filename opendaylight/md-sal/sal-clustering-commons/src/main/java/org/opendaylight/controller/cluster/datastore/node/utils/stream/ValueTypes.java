@@ -18,6 +18,9 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 final class ValueTypes {
+    // The String length threshold beyond which a String should be encoded as bytes
+    public static final int STRING_BYTES_LENGTH_THRESHOLD = Short.MAX_VALUE / 4;
+
     public static final byte SHORT_TYPE = 1;
     public static final byte BYTE_TYPE = 2;
     public static final byte INT_TYPE = 3;
@@ -31,6 +34,7 @@ final class ValueTypes {
     public static final byte BIG_DECIMAL_TYPE = 11;
     public static final byte BINARY_TYPE = 12;
     public static final byte NULL_TYPE = 13;
+    public static final byte STRING_BYTES_TYPE = 14;
 
     private static final Map<Class<?>, Byte> TYPES;
 
@@ -62,6 +66,9 @@ final class ValueTypes {
 
         final Byte type = TYPES.get(node.getClass());
         if (type != null) {
+            if(type == STRING_TYPE && ((String) node).length() >= STRING_BYTES_LENGTH_THRESHOLD ){
+                return STRING_BYTES_TYPE;
+            }
             return type;
         }
 
