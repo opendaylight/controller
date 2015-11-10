@@ -11,6 +11,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import akka.japi.Procedure;
@@ -18,10 +19,9 @@ import akka.persistence.RecoveryCompleted;
 import akka.persistence.SnapshotMetadata;
 import akka.persistence.SnapshotOffer;
 import akka.persistence.SnapshotSelectionCriteria;
+import com.google.common.collect.Sets;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import org.hamcrest.Description;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,12 +33,13 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.PersistentDataProvider;
+import org.opendaylight.controller.cluster.raft.ServerConfigurationPayload.ServerInfo;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyLogEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.DeleteEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.UpdateElectionTerm;
 import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
-import org.opendaylight.controller.cluster.raft.ServerConfigurationPayload.ServerInfo;
+import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,13 +68,14 @@ public class RaftActorRecoverySupportTest {
 
     private RaftActorContext context;
     private final DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
+    private final String localId = "leader";
 
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
-        context = new RaftActorContextImpl(null, null, "test", new ElectionTermImpl(mockPersistentProvider, "test", LOG),
+        context = new RaftActorContextImpl(null, null, localId, new ElectionTermImpl(mockPersistentProvider, "test", LOG),
                 -1, -1, Collections.<String,String>emptyMap(), configParams, mockPersistence, LOG);
 
         support = new RaftActorRecoverySupport(context, mockBehavior , mockCohort);
@@ -372,51 +374,58 @@ public class RaftActorRecoverySupportTest {
     }
 
     @Test
-    public void testUpdatePeerIds() {
+    public void testServerConfigurationPayloadApplied() {
+        String follower1 = "follower1";
+        String follower2 = "follower2";
+        String follower3 = "follower3";
 
-            String leader = "Leader";
-            String follower1 = "follower1";
-            String follower2 = "follower2";
-            String follower3 = "follower3";
+        context.addToPeers(follower1, null, VotingState.VOTING);
+        context.addToPeers(follower2, null, VotingState.VOTING);
 
-            Map<String, String> peerAddresses = new HashMap<>();
+        //add new Server
+        ServerConfigurationPayload obj = new ServerConfigurationPayload(Arrays.asList(
+                new ServerInfo(localId, true),
+                new ServerInfo(follower1, true),
+                new ServerInfo(follower2, false),
+                new ServerInfo(follower3, true)));
 
-            peerAddresses.put(leader, null);
-            peerAddresses.put(follower1, null);
-            peerAddresses.put(follower2, null);
+        sendMessageToSupport(new MockRaftActorContext.MockReplicatedLogEntry(1, 0, obj));
 
-            context.addToPeers(leader,null,VotingState.VOTING);
-            context.addToPeers(follower1,null,VotingState.VOTING);
-            context.addToPeers(follower2,null,VotingState.VOTING);
+        //verify new peers
+        assertEquals("New peer Ids", Sets.newHashSet(follower1, follower2, follower3),
+                Sets.newHashSet(context.getPeerIds()));
+        assertEquals("follower1 isVoting", true, context.getPeerInfo(follower1).isVoting());
+        assertEquals("follower2 isVoting", false, context.getPeerInfo(follower2).isVoting());
+        assertEquals("follower3 isVoting", true, context.getPeerInfo(follower3).isVoting());
 
-            assertEquals("Size", 3, context.getPeers().size());
+        sendMessageToSupport(new ApplyJournalEntries(0));
 
-            //add new Server
-            ServerConfigurationPayload obj = new ServerConfigurationPayload(Arrays.asList(
-                                                           new ServerInfo(leader, true),
-                                                           new ServerInfo(follower1, true),
-                                                           new ServerInfo(follower2, true),
-                                                           new ServerInfo(follower3, true)));
+        verify(mockCohort, never()).startLogRecoveryBatch(anyInt());
+        verify(mockCohort, never()).appendRecoveredLogEntry(any(Payload.class));
 
-            MockRaftActorContext.MockReplicatedLogEntry logEntry = new MockRaftActorContext.MockReplicatedLogEntry(1,
-                1, obj);
+        //remove existing follower1
+        obj = new ServerConfigurationPayload(Arrays.asList(
+                new ServerInfo(localId, true),
+                new ServerInfo("follower2", true),
+                new ServerInfo("follower3", true)));
 
-            sendMessageToSupport(logEntry);
-            //verify size and names
-            assertEquals("Size", 4, context.getPeers().size());
-            assertEquals("New follower matched", true , context.getPeerIds().contains(follower3));
+        sendMessageToSupport(new MockRaftActorContext.MockReplicatedLogEntry(1, 1, obj));
 
-            //remove existing follower1
-            obj = new ServerConfigurationPayload(Arrays.asList(
-                                                           new ServerInfo("Leader", true),
-                                                           new ServerInfo("follower2", true),
-                                                           new ServerInfo("follower3", true)));
+        //verify new peers
+        assertEquals("New peer Ids", Sets.newHashSet(follower2, follower3), Sets.newHashSet(context.getPeerIds()));
+    }
 
-            logEntry = new MockRaftActorContext.MockReplicatedLogEntry(1, 1, obj);
+    @Test
+    public void testServerConfigurationPayloadAppliedWithPersistenceDisabled() {
+        doReturn(false).when(mockPersistence).isRecoveryApplicable();
 
-            sendMessageToSupport(logEntry);
-            //verify size and names
-            assertEquals("Size", 3, context.getPeers().size());
-            assertEquals("Removed follower matched", false, context.getPeerIds().contains(follower1));
+        String follower = "follower";
+        ServerConfigurationPayload obj = new ServerConfigurationPayload(Arrays.asList(
+                new ServerInfo(localId, true), new ServerInfo(follower, true)));
+
+        sendMessageToSupport(new MockRaftActorContext.MockReplicatedLogEntry(1, 0, obj));
+
+        //verify new peers
+        assertEquals("New peer Ids", Sets.newHashSet(follower), Sets.newHashSet(context.getPeerIds()));
     }
 }
