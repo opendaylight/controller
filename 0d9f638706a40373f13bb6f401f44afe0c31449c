@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bab3e1c7_2881ab4a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/entityownership/DistributedEntityOwnershipIntegrationTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 271,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-10T00:05:02Z",
+      "side": 1,
+      "message": "I\u0027d prefer descriptive test names rather than naming tests by bug # - in the future you won\u0027t know the purpose of the test w/o looking up the bug. The bug # can be referred to in javadocs/comments. Can you name it appropriately, e.g. testCandidateRegistrationsInQuickSuccession?",
+      "revId": "0d9f638706a40373f13bb6f401f44afe0c31449c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bab3e1c7_a8b59b32",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/entityownership/DistributedEntityOwnershipIntegrationTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 290,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-10T00:05:02Z",
+      "side": 1,
+      "message": "Do we need a hardcoded 5 sec sleep?",
+      "revId": "0d9f638706a40373f13bb6f401f44afe0c31449c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
