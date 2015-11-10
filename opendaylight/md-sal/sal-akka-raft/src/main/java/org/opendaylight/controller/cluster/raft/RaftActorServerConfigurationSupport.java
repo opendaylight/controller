@@ -16,7 +16,6 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.raft.ServerConfigurationPayload.ServerInfo;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
@@ -75,12 +74,7 @@ class RaftActorServerConfigurationSupport {
 
     private boolean onApplyState(ApplyState applyState, RaftActor raftActor) {
         Payload data = applyState.getReplicatedLogEntry().getData();
-        if(data instanceof ServerConfigurationPayload) {
-            currentOperationState.onApplyState(raftActor, applyState);
-            return true;
-        }
-
-        return false;
+        return data instanceof ServerConfigurationPayload;
     }
 
     /**
@@ -136,8 +130,6 @@ class RaftActorServerConfigurationSupport {
 
         void onUnInitializedFollowerSnapshotReply(RaftActor raftActor, UnInitializedFollowerSnapshotReply reply);
 
-        void onApplyState(RaftActor raftActor, ApplyState applyState);
-
         void onSnapshotComplete(RaftActor raftActor);
     }
 
@@ -173,11 +165,6 @@ class RaftActorServerConfigurationSupport {
         }
 
         @Override
-        public void onApplyState(RaftActor raftActor, ApplyState applyState) {
-            LOG.debug("onApplyState was called in state {}", this);
-        }
-
-        @Override
         public void onSnapshotComplete(RaftActor raftActor) {
         }
 
@@ -194,9 +181,9 @@ class RaftActorServerConfigurationSupport {
 
             ServerConfigurationPayload payload = new ServerConfigurationPayload(newConfig);
 
-            raftActor.persistData(operationContext.getClientRequestor(), operationContext.getContextId(), payload);
+            raftActor.persistData(null, null, payload);
 
-            currentOperationState = new Persisting(operationContext);
+            operationComplete(raftActor, operationContext, ServerChangeStatus.OK);
         }
 
         protected void operationComplete(RaftActor raftActor, ServerOperationContext<?> operationContext,
@@ -228,34 +215,6 @@ class RaftActorServerConfigurationSupport {
         @Override
         public void onNewOperation(RaftActor raftActor, ServerOperationContext<?> operationContext) {
             operationContext.newInitialOperationState(RaftActorServerConfigurationSupport.this).initiate(raftActor);
-        }
-
-        @Override
-        public void onApplyState(RaftActor raftActor, ApplyState applyState) {
-            // Noop - we override b/c ApplyState is called normally for followers in the idle state.
-        }
-    }
-
-    /**
-     * The state when a new server configuration is being persisted and replicated.
-     */
-    private class Persisting extends AbstractOperationState {
-        private final ServerOperationContext<?> operationContext;
-
-        Persisting(ServerOperationContext<?> operationContext) {
-            this.operationContext = operationContext;
-        }
-
-        @Override
-        public void onApplyState(RaftActor raftActor, ApplyState applyState) {
-            // Sanity check - we could get an ApplyState from a previous operation that timed out so make
-            // sure it's meant for us.
-            if(operationContext.getContextId().equals(applyState.getIdentifier())) {
-                LOG.info("{}: {} has been successfully replicated to a majority of followers",
-                        applyState.getReplicatedLogEntry().getData());
-
-                operationComplete(raftActor, operationContext, ServerChangeStatus.OK);
-            }
         }
     }
 
@@ -440,16 +399,10 @@ class RaftActorServerConfigurationSupport {
     private static abstract class ServerOperationContext<T> {
         private final T operation;
         private final ActorRef clientRequestor;
-        private final String contextId;
 
         ServerOperationContext(T operation, ActorRef clientRequestor){
             this.operation = operation;
             this.clientRequestor = clientRequestor;
-            contextId = UUID.randomUUID().toString();
-        }
-
-        String getContextId() {
-            return contextId;
         }
 
         T getOperation() {
