@@ -86,6 +86,24 @@
       "revId": "0d9f638706a40373f13bb6f401f44afe0c31449c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bab3e1c7_a8735b14",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/entityownership/DistributedEntityOwnershipIntegrationTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 294,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-11-10T03:01:06Z",
+      "side": 1,
+      "message": "basically we want to wait till we receive an ownership changed event where hasOwner \u003d\u003d false. That cannot be achieved by simply having a custom matcher right? I mean the custom matcher will simply fail if the first event the leader listener receives has hasOwner set to true (which is what I have observed)",
+      "parentUuid": "bab3e1c7_881f77b7",
+      "revId": "0d9f638706a40373f13bb6f401f44afe0c31449c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
