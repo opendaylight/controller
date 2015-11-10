@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9ab8dda7_0addbb42",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/sal/dom/broker/GlobalBundleScanningSchemaServiceImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-11-10T18:18:26Z",
+      "side": 1,
+      "message": "can we add a @GuardedBy annotation here?",
+      "revId": "f6af250e9bbd2d6c7c53b554012402155bd09169",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ab8dda7_6ad8f753",
+        "filename": "opendaylight/md-sal/sal-dom-broker/src/main/java/org/opendaylight/controller/sal/dom/broker/GlobalBundleScanningSchemaServiceImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-11-10T18:18:26Z",
+      "side": 1,
+      "message": "can we add a @GuardedBy annotation here?",
+      "revId": "f6af250e9bbd2d6c7c53b554012402155bd09169",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
