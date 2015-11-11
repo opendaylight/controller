@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9ab8dda7_ed85e1ad",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/behaviors/AbstractLeaderElectionScenarioTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-11T04:15:23Z",
+      "side": 0,
+      "message": "I believe delaying assignment here is intentional so the AppendEntriesReply isn\u0027t forwarded to the behavior. I think we should leave this as is as it may cause intermittent test failures.",
+      "revId": "5aa58404a8ee1ad053742780439823309360a3a1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
