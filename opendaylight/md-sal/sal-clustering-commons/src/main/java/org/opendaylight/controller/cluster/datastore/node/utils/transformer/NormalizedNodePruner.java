@@ -10,13 +10,16 @@ package org.opendaylight.controller.cluster.datastore.node.utils.transformer;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+
 import java.io.IOException;
 import java.net.URI;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+
 import javax.xml.transform.dom.DOMSource;
+
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -95,6 +98,11 @@ public class NormalizedNodePruner implements NormalizedNodeStreamWriter {
         checkNotSealed();
 
         addBuilder(Builders.containerBuilder().withNodeIdentifier(nodeIdentifier), nodeIdentifier);
+    }
+
+    @Override
+    public void startYangModeledAnyXmlNode(YangInstanceIdentifier.NodeIdentifier nodeIdentifier, int i) throws IOException, IllegalArgumentException {
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
