@@ -124,6 +124,15 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
     }
 
     @Override
+    public void startYangModeledAnyXmlNode(YangInstanceIdentifier.NodeIdentifier name, int childSizeHint) throws IOException, IllegalArgumentException {
+        Preconditions.checkNotNull(name, "Node identifier should not be null");
+
+        LOG.debug("Starting a new yang modeled anyXml node");
+
+        startNode(name.getNodeType(), NodeTypes.YANG_MODELED_ANY_XML_NODE);
+    }
+
+    @Override
     public void startUnkeyedList(YangInstanceIdentifier.NodeIdentifier name, int childSizeHint) throws IOException, IllegalArgumentException {
         Preconditions.checkNotNull(name, "Node identifier should not be null");
         LOG.debug("Starting a new unkeyed list");
