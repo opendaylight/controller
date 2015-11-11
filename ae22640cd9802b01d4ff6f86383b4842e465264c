@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "9ab8dda7_d07672d8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-11-11T13:24:45Z",
+      "side": 1,
+      "message": "Then even if an add/remove shard replica request is received, will it not be completely processed until the recoveryComplete message is received?\nBecause of this, the configuration previously saved will not be over-written by new configurations applied",
+      "parentUuid": "9ab8dda7_ca76c3d8",
+      "revId": "ae22640cd9802b01d4ff6f86383b4842e465264c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9ab8dda7_4a63b31a",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2015-11-10T21:02:52Z",
       "side": 1,
       "message": "Please prefix message with persistenceId(), i.e. \"{}: ...\", persistenceId()",
+      "revId": "ae22640cd9802b01d4ff6f86383b4842e465264c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ab8dda7_5063621a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-11-11T13:24:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9ab8dda7_4a63b31a",
       "revId": "ae22640cd9802b01d4ff6f86383b4842e465264c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "9ab8dda7_7068e6f5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-11-11T13:24:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9ab8dda7_2a72ffe5",
+      "revId": "ae22640cd9802b01d4ff6f86383b4842e465264c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9ab8dda7_6a4f9793",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
         "patchSetId": 1
@@ -64,6 +118,24 @@
       "writtenOn": "2015-11-10T21:02:52Z",
       "side": 1,
       "message": "Use a Set instead of a List - lookups are quicker.",
+      "revId": "ae22640cd9802b01d4ff6f86383b4842e465264c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ab8dda7_1012ca62",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 968,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-11-11T13:24:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9ab8dda7_6a4f9793",
       "revId": "ae22640cd9802b01d4ff6f86383b4842e465264c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "9ab8dda7_5bff0302",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 981,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-11-11T13:24:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9ab8dda7_4a31730a",
+      "revId": "ae22640cd9802b01d4ff6f86383b4842e465264c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9ab8dda7_8a80cb8c",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
         "patchSetId": 1
@@ -98,6 +188,24 @@
       "writtenOn": "2015-11-10T21:02:52Z",
       "side": 1,
       "message": "Please prefix message with persistenceId() in all log messages above.",
+      "revId": "ae22640cd9802b01d4ff6f86383b4842e465264c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ab8dda7_103baaec",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 983,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-11-11T13:24:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9ab8dda7_8a80cb8c",
       "revId": "ae22640cd9802b01d4ff6f86383b4842e465264c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "9ab8dda7_7036a605",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1206,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-11-11T13:24:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9ab8dda7_ea5aa74f",
+      "revId": "ae22640cd9802b01d4ff6f86383b4842e465264c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9ab8dda7_0a44db72",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
         "patchSetId": 1
@@ -138,6 +264,24 @@
     },
     {
       "key": {
+        "uuid": "9ab8dda7_5031220a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1208,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-11-11T13:24:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9ab8dda7_0a44db72",
+      "revId": "ae22640cd9802b01d4ff6f86383b4842e465264c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9ab8dda7_ed0f212d",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManagerSnapshot.java",
         "patchSetId": 1
@@ -149,6 +293,24 @@
       "writtenOn": "2015-11-10T21:02:52Z",
       "side": 1,
       "message": "It would be safest to copy the input shardList in case someone calls it with a non-Serializable List implementation (e.g. Arrays.asList which I recall is not Serializable) - use ArrayList which is known to be Serializable.",
+      "revId": "ae22640cd9802b01d4ff6f86383b4842e465264c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ab8dda7_db121358",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManagerSnapshot.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-11-11T13:24:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9ab8dda7_ed0f212d",
       "revId": "ae22640cd9802b01d4ff6f86383b4842e465264c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -206,6 +368,24 @@
     },
     {
       "key": {
+        "uuid": "9ab8dda7_fb0fd72c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/config/ShardConfig.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-11-11T13:24:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9ab8dda7_8d1c656c",
+      "revId": "ae22640cd9802b01d4ff6f86383b4842e465264c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9ab8dda7_ad19297b",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
         "patchSetId": 1
@@ -223,6 +403,24 @@
     },
     {
       "key": {
+        "uuid": "9ab8dda7_5b2623bc",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-11-11T13:24:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9ab8dda7_ad19297b",
+      "revId": "ae22640cd9802b01d4ff6f86383b4842e465264c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9ab8dda7_ed3de1bc",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
         "patchSetId": 1
@@ -234,6 +432,24 @@
       "writtenOn": "2015-11-10T21:02:52Z",
       "side": 1,
       "message": "You should verify the exact expected shard list, i.e. \"default\" and \"astronauts\".",
+      "revId": "ae22640cd9802b01d4ff6f86383b4842e465264c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ab8dda7_9b4a5b54",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1123,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-11-11T13:24:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9ab8dda7_ed3de1bc",
       "revId": "ae22640cd9802b01d4ff6f86383b4842e465264c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -274,6 +490,24 @@
     },
     {
       "key": {
+        "uuid": "9ab8dda7_1b20ab9a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1209,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-11-11T13:24:45Z",
+      "side": 1,
+      "message": "Modified the comment.",
+      "parentUuid": "9ab8dda7_6d525115",
+      "revId": "ae22640cd9802b01d4ff6f86383b4842e465264c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9ab8dda7_2d5c5925",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
         "patchSetId": 1
@@ -291,6 +525,24 @@
     },
     {
       "key": {
+        "uuid": "9ab8dda7_db40d337",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1212,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-11-11T13:24:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9ab8dda7_2d5c5925",
+      "revId": "ae22640cd9802b01d4ff6f86383b4842e465264c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9ab8dda7_4d266dbc",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
         "patchSetId": 1
@@ -302,6 +554,24 @@
       "writtenOn": "2015-11-10T21:02:52Z",
       "side": 1,
       "message": "Please fix indentation and remove commented code.",
+      "revId": "ae22640cd9802b01d4ff6f86383b4842e465264c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ab8dda7_7b2be782",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1215,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-11-11T13:24:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9ab8dda7_4d266dbc",
       "revId": "ae22640cd9802b01d4ff6f86383b4842e465264c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
