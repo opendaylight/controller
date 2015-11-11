@@ -293,8 +293,8 @@
     </plugins>
   </build>
   <scm>
-    <connection>scm:git:ssh://git.opendaylight.org:29418/${repoName}.git</connection>
-    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/${repoName}.git</developerConnection>
+    <connection>scm:git:ssh://review.inocybe.com:29418/odl/${repoName}.git</connection>
+    <developerConnection>scm:git:ssh://review.inocybe.com:29418/odl/${repoName}.git</developerConnection>
     <tag>HEAD</tag>
     <url>https://git.opendaylight.org/gerrit/gitweb?p=${repoName}.git;a=summary</url>
   </scm>
