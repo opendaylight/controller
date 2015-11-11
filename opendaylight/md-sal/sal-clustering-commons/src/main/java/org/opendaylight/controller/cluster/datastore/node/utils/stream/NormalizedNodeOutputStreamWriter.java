@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -51,22 +50,34 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
     static final byte IS_CODE_VALUE = 1;
     static final byte IS_STRING_VALUE = 2;
     static final byte IS_NULL_VALUE = 3;
+    static final byte IS_STRING_VALUE_WITH_CODE = 4;
 
     private final DataOutput output;
 
-    private final Map<String, Integer> stringCodeMap = new HashMap<>();
+    private final StringCodeProvider stringCodeProvider;
 
     private NormalizedNodeWriter normalizedNodeWriter;
 
     private boolean wroteSignatureMarker;
 
     public NormalizedNodeOutputStreamWriter(OutputStream stream) throws IOException {
-        Preconditions.checkNotNull(stream);
-        output = new DataOutputStream(stream);
+        this(stream, new SimpleStringCodeProvider(NormalizedNodeOutputStreamWriterVersion.LITHIUM));
     }
 
+    public NormalizedNodeOutputStreamWriter(OutputStream stream, StringCodeProvider stringCodeProvider) throws IOException {
+        Preconditions.checkNotNull(stream);
+        output = new DataOutputStream(stream);
+        this.stringCodeProvider = Preconditions.checkNotNull(stringCodeProvider);
+    }
+
+
     public NormalizedNodeOutputStreamWriter(DataOutput output) {
+        this(output, new SimpleStringCodeProvider(NormalizedNodeOutputStreamWriterVersion.LITHIUM));
+    }
+
+    public NormalizedNodeOutputStreamWriter(DataOutput output, StringCodeProvider stringCodeProvider) {
         this.output = Preconditions.checkNotNull(output);
+        this.stringCodeProvider = Preconditions.checkNotNull(stringCodeProvider);
     }
 
     private NormalizedNodeWriter normalizedNodeWriter() {
@@ -232,19 +243,33 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
     }
 
     private void writeCodedString(String key) throws IOException {
-        Integer value = stringCodeMap.get(key);
+        Integer value = getCode(key);
         if(value != null) {
             output.writeByte(IS_CODE_VALUE);
             output.writeInt(value);
         } else {
             if(key != null) {
-                output.writeByte(IS_STRING_VALUE);
-                stringCodeMap.put(key, Integer.valueOf(stringCodeMap.size()));
-                output.writeUTF(key);
+                if(stringCodeProvider.isCompatibleWith(NormalizedNodeOutputStreamWriterVersion.LITHIUM)){
+                    output.writeByte(IS_STRING_VALUE);
+                    stringCodeProvider.createCode(key);
+                    output.writeUTF(key);
+                } else {
+                    output.writeByte(IS_STRING_VALUE_WITH_CODE);
+                    final Integer code = stringCodeProvider.createCode(key);
+                    output.writeUTF(key);
+                    output.writeInt(code);
+                }
             } else {
                 output.writeByte(IS_NULL_VALUE);
             }
         }
+    }
+
+    private Integer getCode(String key) {
+        if(key == null){
+            return null;
+        }
+        return stringCodeProvider.getCode(key);
     }
 
     private void writeObjSet(Set<?> set) throws IOException {
