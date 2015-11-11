@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.datastore.entityownership;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
@@ -279,6 +280,27 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
         verifyGetOwnershipState(service, entity2, false, false);
 
         service.close();
+    }
+
+    @Test
+    public void testIsCandidateRegistered() throws CandidateAlreadyRegisteredException {
+        final TestShardPropsCreator shardPropsCreator = new TestShardPropsCreator();
+        DistributedEntityOwnershipService service = new DistributedEntityOwnershipService(dataStore, EntityOwnerSelectionStrategyConfig.newBuilder().build()) {
+            @Override
+            protected EntityOwnershipShardPropsCreator newShardPropsCreator() {
+                return shardPropsCreator;
+            }
+        };
+
+        service.start();
+
+        final Entity test = new Entity("test-type", "test");
+
+        assertFalse(service.isCandidateRegistered(test));
+
+        service.registerCandidate(test);
+
+        assertTrue(service.isCandidateRegistered(test));
     }
 
     private void verifyGetOwnershipState(DistributedEntityOwnershipService service, Entity entity,

@@ -58,4 +58,12 @@ public interface EntityOwnershipService {
      * @return an Optional EntityOwnershipState whose instance is present if the entity is found
      */
     Optional<EntityOwnershipState> getOwnershipState(@Nonnull Entity forEntity);
+
+    /**
+     * Check if a local candidate is registered for the given entity
+     *
+     * @param entity
+     * @return true if a candidate was registered locally, false otherwise
+     */
+    boolean isCandidateRegistered(@Nonnull Entity entity);
 }

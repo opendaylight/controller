@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ModuleShardConfiguration;
@@ -190,6 +191,11 @@ public class DistributedEntityOwnershipService implements EntityOwnershipService
         boolean isOwner = hasOwner && localMemberName.equals(owner);
 
         return Optional.of(new EntityOwnershipState(isOwner, hasOwner));
+    }
+
+    @Override
+    public boolean isCandidateRegistered(@Nonnull Entity entity) {
+        return registeredEntities.get(entity) != null;
     }
 
     private DataTree getLocalEntityOwnershipShardDataTree() {
