@@ -67,6 +67,48 @@ public class NormalizedNodeStreamReaderWriterTest {
         writer.close();
     }
 
+    @Test
+    public void testNormalizedNodeStreamingWithExternalStringAndCodeProviders() throws IOException {
+
+        final SimpleStringCodeProvider simpleStringCodeProvider = new SimpleStringCodeProvider(NormalizedNodeOutputStreamWriterVersion.BERYLLIUM);
+        final Integer code = simpleStringCodeProvider.createCode("biginteger-leaf");
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        NormalizedNodeOutputStreamWriter writer = new NormalizedNodeOutputStreamWriter(byteArrayOutputStream, simpleStringCodeProvider);
+
+        NormalizedNode<?, ?> testContainer = createTestContainer();
+        writer.writeNormalizedNode(testContainer);
+
+        QName toaster = QName.create("http://netconfcentral.org/ns/toaster", "2009-11-20", "toaster");
+        QName darknessFactor = QName.create("http://netconfcentral.org/ns/toaster", "2009-11-20", "darknessFactor");
+        ContainerNode toasterNode = Builders.containerBuilder().
+                withNodeIdentifier(new NodeIdentifier(toaster)).
+                withChild(ImmutableNodes.leafNode(darknessFactor, "1000")).build();
+
+        ContainerNode toasterContainer = Builders.containerBuilder().
+                withNodeIdentifier(new NodeIdentifier(SchemaContext.NAME)).
+                withChild(toasterNode).build();
+        writer.writeNormalizedNode(toasterContainer);
+
+        final SimpleCodeStringProvider simpleCodeStringProvider = new SimpleCodeStringProvider();
+        simpleCodeStringProvider.saveString("biginteger-leaf", code);
+
+        NormalizedNodeInputStreamReader reader = new NormalizedNodeInputStreamReader(
+                new ByteArrayInputStream(byteArrayOutputStream.toByteArray()), simpleCodeStringProvider);
+
+        NormalizedNode<?,?> node = reader.readNormalizedNode();
+        Assert.assertEquals(testContainer, node);
+
+        node = reader.readNormalizedNode();
+        Assert.assertEquals(toasterContainer, node);
+
+        writer.close();
+    }
+
+    private void printOutput(ByteArrayOutputStream byteArrayOutputStream) {
+        final String output = new String(byteArrayOutputStream.toByteArray());
+        System.out.println(output);
+    }
+
     private static NormalizedNode<?, ?> createTestContainer() {
         byte[] bytes1 = {1,2,3};
         LeafSetEntryNode<Object> entry1 = ImmutableLeafSetEntryNodeBuilder.create().withNodeIdentifier(

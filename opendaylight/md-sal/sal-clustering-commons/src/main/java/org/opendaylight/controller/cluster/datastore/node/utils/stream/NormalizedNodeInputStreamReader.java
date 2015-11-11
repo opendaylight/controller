@@ -56,7 +56,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
 
     private final DataInput input;
 
-    private final Map<Integer, String> codedStringMap = new HashMap<>();
+    private final CodeStringProvider codeStringProvider;
 
     private QName lastLeafSetQName;
 
@@ -71,11 +71,22 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
     private boolean readSignatureMarker = true;
 
     public NormalizedNodeInputStreamReader(InputStream stream) throws IOException {
+        this(stream, new SimpleCodeStringProvider());
+    }
+
+    public NormalizedNodeInputStreamReader(InputStream stream, CodeStringProvider codeStringProvider) throws IOException {
         Preconditions.checkNotNull(stream);
+        this.codeStringProvider = Preconditions.checkNotNull(codeStringProvider);
         input = new DataInputStream(stream);
     }
 
+
     public NormalizedNodeInputStreamReader(DataInput input) {
+        this(input, new SimpleCodeStringProvider());
+    }
+
+    public NormalizedNodeInputStreamReader(DataInput input, CodeStringProvider codeStringProvider) {
+        this.codeStringProvider = Preconditions.checkNotNull(codeStringProvider);
         this.input = Preconditions.checkNotNull(input);
     }
 
@@ -234,14 +245,25 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
     private String readCodedString() throws IOException {
         byte valueType = input.readByte();
         if(valueType == NormalizedNodeOutputStreamWriter.IS_CODE_VALUE) {
-            return codedStringMap.get(input.readInt());
+            return getString(input.readInt());
         } else if(valueType == NormalizedNodeOutputStreamWriter.IS_STRING_VALUE) {
             String value = input.readUTF().intern();
-            codedStringMap.put(Integer.valueOf(codedStringMap.size()), value);
+            codeStringProvider.saveString(value, null);
+            return value;
+        } else if(valueType == NormalizedNodeOutputStreamWriter.IS_STRING_VALUE_WITH_CODE) {
+            String value = input.readUTF().intern();
+            final int code = input.readInt();
+            codeStringProvider.saveString(value, code);
             return value;
         }
 
+
+
         return null;
+    }
+
+    private String getString(Integer code) throws IOException {
+        return codeStringProvider.getString(code);
     }
 
     private Set<QName> readQNameSet() throws IOException{
