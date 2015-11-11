@@ -22,6 +22,7 @@ final class NodeTypes {
     public static final byte AUGMENTATION_NODE = 11;
     public static final byte ANY_XML_NODE = 12;
     public static final byte END_NODE = 13;
+    public static final byte YANG_MODELED_ANY_XML_NODE = 14;
 
     private NodeTypes() {
         throw new UnsupportedOperationException("utility class");
