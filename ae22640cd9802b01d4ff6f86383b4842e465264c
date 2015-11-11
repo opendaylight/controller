@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "9ab8dda7_5b12a3b5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-11T15:22:48Z",
+      "side": 1,
+      "message": "Akka begins the recovery process immediately after the actor is created. It delays delivery of any \"normal\" message until it has completed the recovery phase. So you cannot get an AddServer message while recovery is in progress.",
+      "parentUuid": "9ab8dda7_d07672d8",
+      "revId": "ae22640cd9802b01d4ff6f86383b4842e465264c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9ab8dda7_4a63b31a",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
         "patchSetId": 1
