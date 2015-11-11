@@ -18,6 +18,7 @@ import akka.persistence.RecoveryCompleted;
 import akka.persistence.SnapshotMetadata;
 import akka.persistence.SnapshotOffer;
 import akka.persistence.SnapshotSelectionCriteria;
+import com.google.common.collect.Sets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -194,8 +195,14 @@ public class RaftActorRecoverySupportTest {
         long electionTerm = 2;
         String electionVotedFor = "member-2";
 
+        ServerConfigurationPayload serverPayload = new ServerConfigurationPayload(Arrays.asList(
+                                                        new ServerInfo("leader", true),
+                                                        new ServerInfo("follower1", true),
+                                                        new ServerInfo("follower2", true)));
+
         Snapshot snapshot = Snapshot.create(snapshotBytes, Arrays.asList(unAppliedEntry1, unAppliedEntry2),
-                lastIndexDuringSnapshotCapture, 1, lastAppliedDuringSnapshotCapture, 1, electionTerm, electionVotedFor);
+                lastIndexDuringSnapshotCapture, 1, lastAppliedDuringSnapshotCapture, 1, electionTerm,
+                electionVotedFor, serverPayload);
 
         SnapshotMetadata metadata = new SnapshotMetadata("test", 6, 12345);
         SnapshotOffer snapshotOffer = new SnapshotOffer(metadata , snapshot);
@@ -211,6 +218,7 @@ public class RaftActorRecoverySupportTest {
         assertEquals("Snapshot index", lastAppliedDuringSnapshotCapture, context.getReplicatedLog().getSnapshotIndex());
         assertEquals("Election term", electionTerm, context.getTermInformation().getCurrentTerm());
         assertEquals("Election votedFor", electionVotedFor, context.getTermInformation().getVotedFor());
+        assertEquals("Peers", Sets.newHashSet("leader", "follower1", "follower2"), Sets.newHashSet(context.getPeerIds()));
 
         verify(mockCohort).applyRecoverySnapshot(snapshotBytes);
     }

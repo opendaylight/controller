@@ -303,7 +303,7 @@ public class SnapshotManager implements SnapshotState {
                     captureSnapshot.getLastIndex(), captureSnapshot.getLastTerm(),
                     captureSnapshot.getLastAppliedIndex(), captureSnapshot.getLastAppliedTerm(),
                     context.getTermInformation().getCurrentTerm(),
-                    context.getTermInformation().getVotedFor());
+                    context.getTermInformation().getVotedFor(), context.getPeerServerInfo());
 
             context.getPersistenceProvider().saveSnapshot(snapshot);
 

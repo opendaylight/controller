@@ -16,9 +16,11 @@ import akka.actor.Props;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Supplier;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
@@ -47,6 +49,8 @@ public class RaftActorContextImpl implements RaftActorContext {
     private final Logger LOG;
 
     private ConfigParams configParams;
+
+    private boolean serverConfigurationEnabled = false;
 
     @VisibleForTesting
     private Supplier<Long> totalMemoryRetriever;
@@ -201,6 +205,7 @@ public class RaftActorContextImpl implements RaftActorContext {
         for(String peerIdToRemove: currentPeers) {
             this.removePeer(peerIdToRemove);
         }
+        enableServerConfiguration();
     }
 
     @Override public ConfigParams getConfigParams() {
@@ -265,5 +270,31 @@ public class RaftActorContextImpl implements RaftActorContext {
     @Override
     public RaftPolicy getRaftPolicy() {
         return configParams.getRaftPolicy();
+    }
+
+    @Override
+    public boolean isServerConfigurationEnabled() {
+        return serverConfigurationEnabled;
+    }
+
+    @Override
+    public void enableServerConfiguration() {
+        this.serverConfigurationEnabled = true;
+    }
+
+    @Override
+    public ServerConfigurationPayload getPeerServerInfo() {
+        if (!isServerConfigurationEnabled()) {
+            return null;
+        }
+        Collection<PeerInfo> peers = getPeers();
+        List<ServerInfo> newConfig = new ArrayList<>(peers.size() + 1);
+        for(PeerInfo peer: peers) {
+            newConfig.add(new ServerInfo(peer.getId(), peer.isVoting()));
+        }
+
+        newConfig.add(new ServerInfo(getId(), true));
+        ServerConfigurationPayload payload = new ServerConfigurationPayload(newConfig);
+        return payload;
     }
 }

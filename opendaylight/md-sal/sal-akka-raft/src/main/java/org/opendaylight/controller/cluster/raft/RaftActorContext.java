@@ -218,4 +218,19 @@ public interface RaftActorContext {
      * @return an implementation of the RaftPolicy so that the Raft code can be adapted
      */
     RaftPolicy getRaftPolicy();
+
+    /**
+     * @return the serverConfiguration status for this actor
+     */
+    boolean isServerConfigurationEnabled();
+
+    /**
+     * Enables the ServerConfiguration status for the RaftActor
+     */
+    void enableServerConfiguration();
+
+    /**
+     * @return the RaftActor's peer information as ServerConfigurationPayload
+     */
+    ServerConfigurationPayload getPeerServerInfo();
 }

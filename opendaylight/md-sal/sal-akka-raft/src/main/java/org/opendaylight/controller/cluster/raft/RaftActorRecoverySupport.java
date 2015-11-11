@@ -145,6 +145,10 @@ class RaftActorRecoverySupport {
         // Apply the snapshot to the actors state
         cohort.applyRecoverySnapshot(snapshot.getState());
 
+        if (snapshot.getServerConfiguration() != null) {
+            context.updatePeerIds(snapshot.getServerConfiguration());
+        }
+
         timer.stop();
         log.info("Recovery snapshot applied for {} in {}: snapshotIndex={}, snapshotTerm={}, journal-size={}",
                 context.getId(), timer.toString(), replicatedLog().getSnapshotIndex(),

@@ -22,9 +22,11 @@ public class Snapshot implements Serializable {
     private final long lastAppliedTerm;
     private final long electionTerm;
     private final String electionVotedFor;
+    private final ServerConfigurationPayload serverConfig;
 
     private Snapshot(byte[] state, List<ReplicatedLogEntry> unAppliedEntries, long lastIndex, long lastTerm,
-            long lastAppliedIndex, long lastAppliedTerm, long electionTerm, String electionVotedFor) {
+            long lastAppliedIndex, long lastAppliedTerm, long electionTerm, String electionVotedFor,
+            ServerConfigurationPayload serverConfig) {
         this.state = state;
         this.unAppliedEntries = unAppliedEntries;
         this.lastIndex = lastIndex;
@@ -33,17 +35,25 @@ public class Snapshot implements Serializable {
         this.lastAppliedTerm = lastAppliedTerm;
         this.electionTerm = electionTerm;
         this.electionVotedFor = electionVotedFor;
+        this.serverConfig = serverConfig;
     }
 
     public static Snapshot create(byte[] state, List<ReplicatedLogEntry> entries, long lastIndex, long lastTerm,
             long lastAppliedIndex, long lastAppliedTerm) {
-        return new Snapshot(state, entries, lastIndex, lastTerm, lastAppliedIndex, lastAppliedTerm, -1, null);
+        return new Snapshot(state, entries, lastIndex, lastTerm, lastAppliedIndex, lastAppliedTerm, -1, null, null);
     }
 
     public static Snapshot create(byte[] state, List<ReplicatedLogEntry> entries, long lastIndex, long lastTerm,
             long lastAppliedIndex, long lastAppliedTerm, long electionTerm, String electionVotedFor) {
         return new Snapshot(state, entries, lastIndex, lastTerm, lastAppliedIndex, lastAppliedTerm,
-                electionTerm, electionVotedFor);
+                electionTerm, electionVotedFor, null);
+    }
+
+    public static Snapshot create(byte[] state, List<ReplicatedLogEntry> entries, long lastIndex, long lastTerm,
+            long lastAppliedIndex, long lastAppliedTerm, long electionTerm, String electionVotedFor,
+            ServerConfigurationPayload serverConfig) {
+        return new Snapshot(state, entries, lastIndex, lastTerm, lastAppliedIndex, lastAppliedTerm,
+                electionTerm, electionVotedFor, serverConfig);
     }
 
     public byte[] getState() {
@@ -79,11 +89,15 @@ public class Snapshot implements Serializable {
         return electionVotedFor;
     }
 
+    public ServerConfigurationPayload getServerConfiguration() {
+        return serverConfig;
+    }
+
     @Override
     public String toString() {
         return "Snapshot [lastIndex=" + lastIndex + ", lastTerm=" + lastTerm + ", lastAppliedIndex=" + lastAppliedIndex
                 + ", lastAppliedTerm=" + lastAppliedTerm + ", unAppliedEntries size=" + unAppliedEntries.size()
                 + ", state size=" + state.length + ", electionTerm=" + electionTerm + ", electionVotedFor=" + electionVotedFor
-                + "]";
+                + ", ServerConfigPayload="  + serverConfig + "]";
     }
 }
