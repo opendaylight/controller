@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9ab8dda7_90579a26",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorContext.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 225,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-11T12:45:45Z",
+      "side": 1,
+      "message": "This is a tough one to name. To clarify it further, how about isDynamicServerConfigurationInUse and setDynamicServerConfigurationInUse?\n\n@return true if there were prior dynamic server configuration changes, false if static peer configuration is still in use",
+      "revId": "383d7900a4e1656e9b352799b25c76ff515b8655",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ab8dda7_504a8284",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorContext.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-11T12:45:45Z",
+      "side": 1,
+      "message": "This can return null so annotate as @Nullable and mention in javadoc, i.e. \"the peer information as a ServerConfigurationPayload instance if dynamic server configuration is in use, otherwise null\"",
+      "revId": "383d7900a4e1656e9b352799b25c76ff515b8655",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ab8dda7_b0a65e52",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorContextImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 298,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-11T12:45:45Z",
+      "side": 1,
+      "message": "Return new ServerConfigurationPayload(...) instead of putting into var (avoids Sonar warning).",
+      "revId": "383d7900a4e1656e9b352799b25c76ff515b8655",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ab8dda7_b002de09",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorRecoverySupportTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-11T12:45:45Z",
+      "side": 1,
+      "message": "Should also verify server configuration is enabled.",
+      "revId": "383d7900a4e1656e9b352799b25c76ff515b8655",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ab8dda7_3b0ecf35",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorRecoverySupportTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-11T12:45:45Z",
+      "side": 1,
+      "message": "We should have another unit test for when there\u0027s no server config in the snapshot - server config should remain disabled in the context. I think it makes sense to have the test above handle the null case and add a separate testOnSnapshotOfferWithServerConfig. For the latter you just need to set/verify the other snapshot params.",
+      "revId": "383d7900a4e1656e9b352799b25c76ff515b8655",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ab8dda7_9b1c9b6c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorRecoverySupportTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 416,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-11T12:45:45Z",
+      "side": 1,
+      "message": "You should also verify here that server configuration is enabled in the context.",
+      "revId": "383d7900a4e1656e9b352799b25c76ff515b8655",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
