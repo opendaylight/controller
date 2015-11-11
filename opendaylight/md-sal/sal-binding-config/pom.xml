@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>sal-parent</artifactId>
-    <version>1.2.3-SNAPSHOT</version>
+    <version>1.2.2-SNAPSHOT</version>
   </parent>
   <artifactId>sal-binding-config</artifactId>
   <packaging>bundle</packaging>
@@ -66,7 +66,7 @@
   </build>
   <scm>
     <connection>scm:git:http://git.opendaylight.org/gerrit/controller.git</connection>
-    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
+    <developerConnection>scm:git:ssh://review.inocybe.com:29418/odl/controller.git</developerConnection>
     <tag>HEAD</tag>
     <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:MD-SAL</url>
   </scm>

@@ -10,7 +10,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>odlparent</artifactId>
-    <version>1.5.3-SNAPSHOT</version>
+    <version>1.5.2-SNAPSHOT</version>
   </parent>
 
   <groupId>${groupId}</groupId>
@@ -50,8 +50,8 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   </build>
 
   <scm>
-    <connection>scm:git:ssh://git.opendaylight.org:29418/${artifactId}.git</connection>
-    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/${artifactId}.git</developerConnection>
+    <connection>scm:git:ssh://review.inocybe.com:29418/odl/${artifactId}.git</connection>
+    <developerConnection>scm:git:ssh://review.inocybe.com:29418/odl/${artifactId}.git</developerConnection>
     <tag>HEAD</tag>
     <url>https://wiki.opendaylight.org/view/${artifactId}:Main</url>
   </scm>

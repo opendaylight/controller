@@ -4,19 +4,19 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>commons.opendaylight</artifactId>
-    <version>1.5.3-SNAPSHOT</version>
+    <version>1.5.2-SNAPSHOT</version>
     <relativePath>../../../../opendaylight/commons/opendaylight</relativePath>
   </parent>
   <scm>
-    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git</connection>
-    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
+    <connection>scm:git:ssh://review.inocybe.com:29418/odl/controller.git</connection>
+    <developerConnection>scm:git:ssh://review.inocybe.com:29418/odl/controller.git</developerConnection>
     <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:Main</url>
   </scm>
 
 
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>northboundtest</artifactId>
-        <version>0.5.3-SNAPSHOT</version>
+        <version>0.5.2-SNAPSHOT</version>
         <packaging>bundle</packaging>
 
         <build>

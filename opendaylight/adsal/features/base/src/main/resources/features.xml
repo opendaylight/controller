@@ -16,8 +16,8 @@
       <feature>odl-base-jackson</feature>
       <feature>odl-base-spring-security</feature>
    </feature>
-   <feature name="odl-base-dummy-console" description="Temporary Dummy Console" version="1.2.3-SNAPSHOT">
-      <bundle>mvn:org.opendaylight.controller/dummy-console/1.2.3-SNAPSHOT</bundle>
+   <feature name="odl-base-dummy-console" description="Temporary Dummy Console" version="1.2.2-SNAPSHOT">
+      <bundle>mvn:org.opendaylight.controller/dummy-console/1.2.2-SNAPSHOT</bundle>
    </feature>
    <feature name="odl-base-felix-dm" description="Felix Dependency Manager" version="${felix.dependencymanager.version}">
       <bundle>mvn:org.osgi/org.osgi.compendium/${osgi.compendium.version}</bundle>

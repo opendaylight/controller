@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>sal-parent</artifactId>
-    <version>1.2.3-SNAPSHOT</version>
+    <version>1.2.2-SNAPSHOT</version>
   </parent>
   <artifactId>sal-rest-connector</artifactId>
   <packaging>bundle</packaging>
@@ -99,7 +99,7 @@
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>yang-model-export</artifactId>
       <!-- FIXME: remove explicit version, once model export package is part of yangtools-artefacts -->
-      <version>0.7.3-SNAPSHOT</version>
+      <version>0.7.2-SNAPSHOT</version>
     </dependency>
 
     <dependency>
@@ -191,7 +191,7 @@
   </build>
   <scm>
     <connection>scm:git:http://git.opendaylight.org/gerrit/controller.git</connection>
-    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git</developerConnection>
+    <developerConnection>scm:git:ssh://review.inocybe.com:29418/odl/controller.git</developerConnection>
     <tag>HEAD</tag>
     <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:MD-SAL</url>
   </scm>

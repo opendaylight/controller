@@ -5,19 +5,19 @@
   <parent>
      <groupId>org.opendaylight.controller.archetypes</groupId>
      <artifactId>archetypes-parent</artifactId>
-     <version>0.2.3-SNAPSHOT</version>
+     <version>0.2.2-SNAPSHOT</version>
   </parent>
 
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>opendaylight-configfile-archetype</artifactId>
-  <version>1.2.3-SNAPSHOT</version>
+  <version>1.2.2-SNAPSHOT</version>
   <packaging>maven-archetype</packaging>
 
   <description>Configuration files for md-sal</description>
 
   <scm>
-    <connection>scm:git:ssh://git.opendaylight.org:29418/controller.git/md-sal-config</connection>
-    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/controller.git/md-sal-config</developerConnection>
+    <connection>scm:git:ssh://review.inocybe.com:29418/odl/controller.git/md-sal-config</connection>
+    <developerConnection>scm:git:ssh://review.inocybe.com:29418/odl/controller.git/md-sal-config</developerConnection>
     <url>https://wiki.opendaylight.org/view/OpenDaylight_Controller:MD-SAL/md-sal-config</url>
   </scm>
 
