@@ -22,6 +22,30 @@
       "revId": "42fd46ec68581f90f1e1b898027ff2395ff7d6d3",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ab8dda7_2d88d9e6",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-11T01:44:08Z",
+      "side": 1,
+      "message": "The reason I did it this way is to minimize the signatures and transfers to make it easier to add new params. Otherwise we\u0027re back to the pain of props -\u003e Creator -\u003e Shard. I didn\u0027t want an intermediate class passed to Shard. Also the product of the Builder is a Props instance.\n\nSo I think from the client perspective it is a builder and follows the builder pattern. Internally to the Shard it differs a little from the usual builder pattern in that it passes itself to the Shard instead of the params but, again, that was done for the reasons above. \n\nThat said, I can change the name to Params if you want.",
+      "parentUuid": "9ab8dda7_2d877911",
+      "range": {
+        "startLine": 117,
+        "startChar": 20,
+        "endLine": 117,
+        "endChar": 35
+      },
+      "revId": "42fd46ec68581f90f1e1b898027ff2395ff7d6d3",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
