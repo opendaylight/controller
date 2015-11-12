@@ -24,6 +24,7 @@ import akka.actor.PoisonPill;
 import akka.actor.Props;
 import akka.actor.Status;
 import akka.actor.Status.Failure;
+import akka.actor.Status.Success;
 import akka.cluster.Cluster;
 import akka.cluster.ClusterEvent;
 import akka.dispatch.Dispatchers;
@@ -70,7 +71,6 @@ import org.opendaylight.controller.cluster.datastore.identifiers.ShardManagerIde
 import org.opendaylight.controller.cluster.datastore.messages.ActorInitialized;
 import org.opendaylight.controller.cluster.datastore.messages.AddShardReplica;
 import org.opendaylight.controller.cluster.datastore.messages.CreateShard;
-import org.opendaylight.controller.cluster.datastore.messages.CreateShardReply;
 import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshot.ShardSnapshot;
 import org.opendaylight.controller.cluster.datastore.messages.FindLocalShard;
@@ -99,6 +99,7 @@ import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshot;
 import org.opendaylight.controller.cluster.raft.messages.AddServer;
 import org.opendaylight.controller.cluster.raft.messages.AddServerReply;
 import org.opendaylight.controller.cluster.raft.messages.ServerChangeStatus;
+import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
@@ -1074,7 +1075,7 @@ public class ShardManagerTest extends AbstractActorTest {
     }
 
     @Test
-    public void testOnReceiveCreateShard() {
+    public void testOnCreateShard() {
         new JavaTestKit(getSystem()) {{
             datastoreContextBuilder.shardInitializationTimeout(1, TimeUnit.MINUTES).persistent(true);
 
@@ -1092,7 +1093,7 @@ public class ShardManagerTest extends AbstractActorTest {
                     "foo", null, Arrays.asList("member-1", "member-5", "member-6"));
             shardManager.tell(new CreateShard(config, shardBuilder, datastoreContext), getRef());
 
-            expectMsgClass(duration("5 seconds"), CreateShardReply.class);
+            expectMsgClass(duration("5 seconds"), Success.class);
 
             shardManager.tell(new FindLocalShard("foo", true), getRef());
 
@@ -1108,16 +1109,43 @@ public class ShardManagerTest extends AbstractActorTest {
                     shardBuilder.getId());
             assertSame("schemaContext", schemaContext, shardBuilder.getSchemaContext());
 
-            // Send CreateShard with same name - should fail.
+            // Send CreateShard with same name - should return Success with a message.
 
             shardManager.tell(new CreateShard(config, shardBuilder, null), getRef());
 
-            expectMsgClass(duration("5 seconds"), akka.actor.Status.Failure.class);
+            Success success = expectMsgClass(duration("5 seconds"), Success.class);
+            assertNotNull("Success status is null", success.status());
         }};
     }
 
     @Test
-    public void testOnReceiveCreateShardWithNoInitialSchemaContext() {
+    public void testOnCreateShardWithLocalMemberNotInShardConfig() {
+        new JavaTestKit(getSystem()) {{
+            datastoreContextBuilder.shardInitializationTimeout(1, TimeUnit.MINUTES).persistent(true);
+
+            ActorRef shardManager = getSystem().actorOf(newShardMgrProps(
+                    new ConfigurationImpl(new EmptyModuleShardConfigProvider())));
+
+            shardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), ActorRef.noSender());
+
+            Shard.Builder shardBuilder = Shard.builder();
+            ModuleShardConfiguration config = new ModuleShardConfiguration(URI.create("foo-ns"), "foo-module",
+                    "foo", null, Arrays.asList("member-5", "member-6"));
+
+            shardManager.tell(new CreateShard(config, shardBuilder, null), getRef());
+            expectMsgClass(duration("5 seconds"), Success.class);
+
+            shardManager.tell(new FindLocalShard("foo", true), getRef());
+            expectMsgClass(duration("5 seconds"), LocalShardFound.class);
+
+            assertEquals("peerMembers size", 0, shardBuilder.getPeerAddresses().size());
+            assertEquals("schemaContext", DisableElectionsRaftPolicy.class.getName(),
+                    shardBuilder.getDatastoreContext().getShardRaftConfig().getCustomRaftPolicyImplementationClass());
+        }};
+    }
+
+    @Test
+    public void testOnCreateShardWithNoInitialSchemaContext() {
         new JavaTestKit(getSystem()) {{
             ActorRef shardManager = getSystem().actorOf(newShardMgrProps(
                     new ConfigurationImpl(new EmptyModuleShardConfigProvider())));
@@ -1128,7 +1156,7 @@ public class ShardManagerTest extends AbstractActorTest {
                     "foo", null, Arrays.asList("member-1"));
             shardManager.tell(new CreateShard(config, shardBuilder, null), getRef());
 
-            expectMsgClass(duration("5 seconds"), CreateShardReply.class);
+            expectMsgClass(duration("5 seconds"), Success.class);
 
             SchemaContext schemaContext = TestModel.createTestContext();
             shardManager.tell(new UpdateSchemaContext(schemaContext), ActorRef.noSender());
