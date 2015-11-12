@@ -5,12 +5,12 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-package org.opendaylight.controller.cluster.datastore.messages;
+package org.opendaylight.controller.cluster.datastore.exceptions;
 
-/**
- * Reply message for CreateShard.
- *
- * @author Thomas Pantelis
- */
-public class CreateShardReply {
+public class AlreadyExistsException extends RuntimeException {
+    private static final long serialVersionUID = 1L;
+
+    public AlreadyExistsException(String message) {
+        super(message);
+    }
 }
