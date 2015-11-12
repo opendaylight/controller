@@ -244,7 +244,12 @@ class EntityOwnershipShard extends Shard {
     protected void onStateChanged() {
         super.onStateChanged();
 
-        commitCoordinator.onStateChanged(this, isLeader());
+        boolean isLeader = isLeader();
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("{}: onStateChanged: isLeader: {}, hasLeader: {}", persistenceId(), isLeader, hasLeader());
+        }
+
+        commitCoordinator.onStateChanged(this, isLeader);
     }
 
     @Override
