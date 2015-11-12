@@ -45,12 +45,17 @@ public class Follower extends AbstractRaftActorBehavior {
     private static final int SYNC_THRESHOLD = 10;
 
     public Follower(RaftActorContext context) {
+        this(context, null);
+    }
+
+    public Follower(RaftActorContext context, String initialLeaderId) {
         super(context, RaftState.Follower);
+        leaderId = initialLeaderId;
 
         initialSyncStatusTracker = new SyncStatusTracker(context.getActor(), getId(), SYNC_THRESHOLD);
 
         if(context.getRaftPolicy().automaticElectionsEnabled()) {
-            if (context.getPeerIds().isEmpty()) {
+            if (context.getPeerIds().isEmpty() && getLeaderId() == null) {
                 actor().tell(ELECTION_TIMEOUT, actor());
             } else {
                 scheduleElection(electionDuration());
@@ -345,6 +350,8 @@ public class Follower extends AbstractRaftActorBehavior {
         LOG.debug("{}: InstallSnapshot received from leader {}, datasize: {} , Chunk: {}/{}",
                     logName(), installSnapshot.getLeaderId(), installSnapshot.getData().size(),
                     installSnapshot.getChunkIndex(), installSnapshot.getTotalChunks());
+
+        leaderId = installSnapshot.getLeaderId();
 
         if(snapshotTracker == null){
             snapshotTracker = new SnapshotTracker(LOG, installSnapshot.getTotalChunks());
