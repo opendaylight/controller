@@ -17,11 +17,14 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.opendaylight.controller.cluster.datastore.entityownership.AbstractEntityOwnershipTest.ownershipChange;
+import static org.opendaylight.controller.cluster.datastore.entityownership.DistributedEntityOwnershipService.ENTITY_OWNERSHIP_SHARD_NAME;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.CANDIDATE_NAME_NODE_ID;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.entityPath;
 import akka.actor.ActorSystem;
 import akka.actor.Address;
 import akka.actor.AddressFromURIString;
+import akka.actor.Status.Failure;
+import akka.actor.Status.Success;
 import akka.cluster.Cluster;
 import akka.testkit.JavaTestKit;
 import com.google.common.base.Function;
@@ -44,6 +47,7 @@ import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
 import org.opendaylight.controller.cluster.datastore.IntegrationTestKit;
 import org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.EntityOwnerSelectionStrategyConfig;
+import org.opendaylight.controller.cluster.datastore.messages.AddShardReplica;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
 import org.opendaylight.controller.md.sal.common.api.clustering.CandidateAlreadyRegisteredException;
 import org.opendaylight.controller.md.sal.common.api.clustering.Entity;
@@ -66,6 +70,7 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 public class DistributedEntityOwnershipIntegrationTest {
     private static final Address MEMBER_1_ADDRESS = AddressFromURIString.parse("akka.tcp://cluster-test@127.0.0.1:2558");
     private static final String MODULE_SHARDS_CONFIG = "module-shards-default.conf";
+    private static final String MODULE_SHARDS_MEMBER_1_CONFIG = "module-shards-default-member-1.conf";
     private static final String ENTITY_TYPE1 = "entityType1";
     private static final String ENTITY_TYPE2 = "entityType2";
     private static final Entity ENTITY1 = new Entity(ENTITY_TYPE1, "entity1");
@@ -110,32 +115,48 @@ public class DistributedEntityOwnershipIntegrationTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-
-        leaderSystem = ActorSystem.create("cluster-test", ConfigFactory.load().getConfig("Member1"));
-        Cluster.get(leaderSystem).join(MEMBER_1_ADDRESS);
-
-        follower1System = ActorSystem.create("cluster-test", ConfigFactory.load().getConfig("Member2"));
-        Cluster.get(follower1System).join(MEMBER_1_ADDRESS);
-
-        follower2System = ActorSystem.create("cluster-test", ConfigFactory.load().getConfig("Member3"));
-        Cluster.get(follower2System).join(MEMBER_1_ADDRESS);
     }
 
     @After
     public void tearDown() {
-        JavaTestKit.shutdownActorSystem(leaderSystem);
-        JavaTestKit.shutdownActorSystem(follower1System);
-        JavaTestKit.shutdownActorSystem(follower2System);
+        if(leaderSystem != null) {
+            JavaTestKit.shutdownActorSystem(leaderSystem);
+        }
+
+        if(follower1System != null) {
+            JavaTestKit.shutdownActorSystem(follower1System);
+        }
+
+        if(follower2System != null) {
+            JavaTestKit.shutdownActorSystem(follower2System);
+        }
+    }
+
+    private void startAllSystems() {
+        startLeaderSystem();
+        startFollower1System();
+        startFollower2System();
+    }
+
+    private void startFollower2System() {
+        follower2System = ActorSystem.create("cluster-test", ConfigFactory.load().getConfig("Member3"));
+        Cluster.get(follower2System).join(MEMBER_1_ADDRESS);
+    }
+
+    private void startFollower1System() {
+        follower1System = ActorSystem.create("cluster-test", ConfigFactory.load().getConfig("Member2"));
+        Cluster.get(follower1System).join(MEMBER_1_ADDRESS);
+    }
+
+    private void startLeaderSystem() {
+        leaderSystem = ActorSystem.create("cluster-test", ConfigFactory.load().getConfig("Member1"));
+        Cluster.get(leaderSystem).join(MEMBER_1_ADDRESS);
     }
 
     private void initDatastores(String type) {
-        leaderTestKit = new IntegrationTestKit(leaderSystem, leaderDatastoreContextBuilder);
-        leaderDistributedDataStore = leaderTestKit.setupDistributedDataStore(
-                type, MODULE_SHARDS_CONFIG, false, SCHEMA_CONTEXT);
+        initLeaderDatastore(type, MODULE_SHARDS_CONFIG);
 
-        follower1TestKit = new IntegrationTestKit(follower1System, followerDatastoreContextBuilder);
-        follower1DistributedDataStore = follower1TestKit.setupDistributedDataStore(
-                type, MODULE_SHARDS_CONFIG, false, SCHEMA_CONTEXT);
+        initFollower1Datastore(type, MODULE_SHARDS_CONFIG);
 
         follower2TestKit = new IntegrationTestKit(follower2System, followerDatastoreContextBuilder);
         follower2DistributedDataStore = follower2TestKit.setupDistributedDataStore(
@@ -145,21 +166,44 @@ public class DistributedEntityOwnershipIntegrationTest {
         follower1DistributedDataStore.waitTillReady();
         follower2DistributedDataStore.waitTillReady();
 
-        leaderEntityOwnershipService = new DistributedEntityOwnershipService(leaderDistributedDataStore, EntityOwnerSelectionStrategyConfig.newBuilder().build());
-        leaderEntityOwnershipService.start();
+        startLeaderService();
 
-        follower1EntityOwnershipService = new DistributedEntityOwnershipService(follower1DistributedDataStore, EntityOwnerSelectionStrategyConfig.newBuilder().build());
-        follower1EntityOwnershipService.start();
+        startFollower1Service();
 
-        follower2EntityOwnershipService = new DistributedEntityOwnershipService(follower2DistributedDataStore, EntityOwnerSelectionStrategyConfig.newBuilder().build());
+        follower2EntityOwnershipService = new DistributedEntityOwnershipService(follower2DistributedDataStore,
+                EntityOwnerSelectionStrategyConfig.newBuilder().build());
         follower2EntityOwnershipService.start();
 
-        leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(),
-                DistributedEntityOwnershipService.ENTITY_OWNERSHIP_SHARD_NAME);
+        leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(), ENTITY_OWNERSHIP_SHARD_NAME);
+    }
+
+    private void startFollower1Service() {
+        follower1EntityOwnershipService = new DistributedEntityOwnershipService(follower1DistributedDataStore,
+                EntityOwnerSelectionStrategyConfig.newBuilder().build());
+        follower1EntityOwnershipService.start();
+    }
+
+    private void startLeaderService() {
+        leaderEntityOwnershipService = new DistributedEntityOwnershipService(leaderDistributedDataStore,
+                EntityOwnerSelectionStrategyConfig.newBuilder().build());
+        leaderEntityOwnershipService.start();
+    }
+
+    private void initFollower1Datastore(String type, String moduleConfig) {
+        follower1TestKit = new IntegrationTestKit(follower1System, followerDatastoreContextBuilder);
+        follower1DistributedDataStore = follower1TestKit.setupDistributedDataStore(
+                type, moduleConfig, false, SCHEMA_CONTEXT);
+    }
+
+    private void initLeaderDatastore(String type, String moduleConfig) {
+        leaderTestKit = new IntegrationTestKit(leaderSystem, leaderDatastoreContextBuilder);
+        leaderDistributedDataStore = leaderTestKit.setupDistributedDataStore(
+                type, moduleConfig, false, SCHEMA_CONTEXT);
     }
 
     @Test
     public void test() throws Exception {
+        startAllSystems();
         initDatastores("test");
 
         leaderEntityOwnershipService.registerListener(ENTITY_TYPE1, leaderMockListener);
@@ -275,6 +319,7 @@ public class DistributedEntityOwnershipIntegrationTest {
      */
     @Test
     public void testCloseCandidateRegistrationInQuickSuccession() throws CandidateAlreadyRegisteredException {
+        startAllSystems();
         initDatastores("testCloseCandidateRegistrationInQuickSuccession");
 
         leaderEntityOwnershipService.registerListener(ENTITY_TYPE1, leaderMockListener);
@@ -316,6 +361,46 @@ public class DistributedEntityOwnershipIntegrationTest {
         assertFalse(leaderChangeCaptor.getAllValues().get(leaderChangeCaptor.getAllValues().size()-1).hasOwner());
         assertFalse(follower1ChangeCaptor.getAllValues().get(follower1ChangeCaptor.getAllValues().size()-1).hasOwner());
         assertFalse(follower2ChangeCaptor.getAllValues().get(follower2ChangeCaptor.getAllValues().size()-1).hasOwner());
+    }
+
+    /**
+     * Tests bootstrapping the entity-ownership shard when there's no shards initially configured for local
+     * member. The entity-ownership shard is initially created as inactive (ie remains a follower), requiring
+     * an AddShardReplica request to join it to an existing leader.
+     */
+    @Test
+    public void testEntityOwnershipShardBootstrapping() throws Throwable {
+        startLeaderSystem();
+        startFollower1System();
+        String type = "testEntityOwnershipShardBootstrapping";
+        initLeaderDatastore(type, MODULE_SHARDS_MEMBER_1_CONFIG);
+        initFollower1Datastore(type, MODULE_SHARDS_MEMBER_1_CONFIG);
+
+        leaderDistributedDataStore.waitTillReady();
+        follower1DistributedDataStore.waitTillReady();
+
+        startLeaderService();
+        startFollower1Service();
+
+        leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(), ENTITY_OWNERSHIP_SHARD_NAME);
+
+        leaderEntityOwnershipService.registerListener(ENTITY_TYPE1, leaderMockListener);
+
+        // Register a candidate for follower1 - should get queued since follower1 has no leader
+        follower1EntityOwnershipService.registerCandidate(ENTITY1);
+        verify(leaderMockListener, timeout(300).never()).ownershipChanged(ownershipChange(ENTITY1));
+
+        // Add replica in follower1
+        AddShardReplica addReplica = new AddShardReplica(ENTITY_OWNERSHIP_SHARD_NAME);
+        follower1DistributedDataStore.getActorContext().getShardManager().tell(addReplica , follower1TestKit.getRef());
+        Object reply = follower1TestKit.expectMsgAnyClassOf(JavaTestKit.duration("5 sec"), Success.class, Failure.class);
+        if(reply instanceof Failure) {
+            throw ((Failure)reply).cause();
+        }
+
+        // The queued candidate registration should proceed
+        verify(leaderMockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY1));
+
     }
 
     private static void verifyGetOwnershipState(DistributedEntityOwnershipService service, Entity entity,
