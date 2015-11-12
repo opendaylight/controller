@@ -26,7 +26,9 @@ import akka.actor.PoisonPill;
 import akka.actor.Props;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -86,12 +88,18 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
         DatastoreContext datastoreContext = DatastoreContext.newBuilder().dataStoreType(dataStoreType).
                 shardInitializationTimeout(10, TimeUnit.SECONDS).build();
 
-        Configuration configuration = new ConfigurationImpl(new ModuleShardConfigProvider() {
+        ModuleShardConfigProvider configProvider = new ModuleShardConfigProvider() {
             @Override
             public Map<String, ModuleConfig> retrieveModuleConfigs(Configuration configuration) {
                 return Collections.emptyMap();
             }
-        });
+        };
+        Configuration configuration = new ConfigurationImpl(configProvider) {
+            @Override
+            public Collection<String> getUniqueMemberNamesForAllShards() {
+                return Sets.newHashSet("member-1");
+            }
+        };
 
         DatastoreContextFactory mockContextFactory = Mockito.mock(DatastoreContextFactory.class);
         Mockito.doReturn(datastoreContext).when(mockContextFactory).getBaseDatastoreContext();
