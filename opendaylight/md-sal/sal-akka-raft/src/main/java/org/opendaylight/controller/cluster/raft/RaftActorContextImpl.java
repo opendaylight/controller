@@ -13,7 +13,6 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
-
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Supplier;
 import java.util.ArrayList;
@@ -24,8 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
-import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.opendaylight.controller.cluster.raft.ServerConfigurationPayload.ServerInfo;
+import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.slf4j.Logger;
 
 public class RaftActorContextImpl implements RaftActorContext {
@@ -181,6 +180,8 @@ public class RaftActorContextImpl implements RaftActorContext {
                 peerAddress = configParams.getPeerAddressResolver().resolve(peerId);
                 peerInfo.setAddress(peerAddress);
             }
+        } else {
+            peerAddress = configParams.getPeerAddressResolver().resolve(peerId);
         }
 
         return peerAddress;
