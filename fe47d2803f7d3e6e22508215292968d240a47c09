@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7aade967_ec915f53",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/entityownership/EntityOwnershipShard.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 514,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-12T19:29:02Z",
+      "side": 1,
+      "message": "This shouldn\u0027t be null so probably should override verify() to check it. Not a big deal - can be done in a follow-up if you want.",
+      "revId": "fe47d2803f7d3e6e22508215292968d240a47c09",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
