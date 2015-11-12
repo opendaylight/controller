@@ -15,6 +15,7 @@ import akka.actor.Props;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Supplier;
 import java.util.Collection;
+import javax.annotation.Nullable;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.policy.RaftPolicy;
 import org.slf4j.Logger;
@@ -218,4 +219,21 @@ public interface RaftActorContext {
      * @return an implementation of the RaftPolicy so that the Raft code can be adapted
      */
     RaftPolicy getRaftPolicy();
+
+    /**
+     * @return true if there are any dynamic server configuration changes available,
+     *  false if static peer configurations are still in use
+     */
+    boolean isDynamicServerConfigurationInUse();
+
+    /**
+     * Configures the dynamic server configurations are avaialble for the RaftActor
+     */
+    void setDynamicServerConfigurationInUse();
+
+    /**
+     * @return the RaftActor's peer information as a ServerConfigurationPayload if the
+     * dynamic server configurations are available, otherwise returns null
+     */
+    @Nullable ServerConfigurationPayload getPeerServerInfo();
 }

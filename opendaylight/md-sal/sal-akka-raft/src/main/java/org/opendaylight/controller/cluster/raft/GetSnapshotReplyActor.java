@@ -45,7 +45,8 @@ class GetSnapshotReplyActor extends UntypedActor {
                     params.captureSnapshot.getUnAppliedEntries(),
                     params.captureSnapshot.getLastIndex(), params.captureSnapshot.getLastTerm(),
                     params.captureSnapshot.getLastAppliedIndex(), params.captureSnapshot.getLastAppliedTerm(),
-                    params.electionTerm.getCurrentTerm(), params.electionTerm.getVotedFor());
+                    params.electionTerm.getCurrentTerm(), params.electionTerm.getVotedFor(),
+                    params.peerInformation);
 
             LOG.debug("{}: Received CaptureSnapshotReply, sending {}", params.id, snapshot);
 
@@ -63,9 +64,9 @@ class GetSnapshotReplyActor extends UntypedActor {
     }
 
     public static Props props(CaptureSnapshot captureSnapshot, ElectionTerm electionTerm, ActorRef replyToActor,
-            Duration receiveTimeout, String id) {
+            Duration receiveTimeout, String id, ServerConfigurationPayload updatedPeerInfo) {
         return Props.create(GetSnapshotReplyActor.class, new Params(captureSnapshot, electionTerm, replyToActor,
-                receiveTimeout, id));
+                receiveTimeout, id, updatedPeerInfo));
     }
 
     private static final class Params {
@@ -74,14 +75,16 @@ class GetSnapshotReplyActor extends UntypedActor {
         final ElectionTerm electionTerm;
         final Duration receiveTimeout;
         final String id;
+        final ServerConfigurationPayload peerInformation;
 
         Params(CaptureSnapshot captureSnapshot, ElectionTerm electionTerm, ActorRef replyToActor,
-                Duration receiveTimeout, String id) {
+                Duration receiveTimeout, String id, ServerConfigurationPayload peerInfo) {
             this.captureSnapshot = Preconditions.checkNotNull(captureSnapshot);
             this.electionTerm = Preconditions.checkNotNull(electionTerm);
             this.replyToActor = Preconditions.checkNotNull(replyToActor);
             this.receiveTimeout = Preconditions.checkNotNull(receiveTimeout);
             this.id = Preconditions.checkNotNull(id);
+            this.peerInformation = peerInfo;
         }
     }
 }
