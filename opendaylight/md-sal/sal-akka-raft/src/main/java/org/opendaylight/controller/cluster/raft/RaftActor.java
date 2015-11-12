@@ -502,12 +502,23 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         String newRaftPolicy = configParams.
             getCustomRaftPolicyImplementationClass();
 
-        LOG.debug ("RaftPolicy used with prev.config {}, RaftPolicy used with newConfig {}",
+        LOG.debug("{}: RaftPolicy used with prev.config {}, RaftPolicy used with newConfig {}", persistenceId(),
             oldRaftPolicy, newRaftPolicy);
         context.setConfigParams(configParams);
         if (!Objects.equal(oldRaftPolicy, newRaftPolicy)) {
-            //RaftPolicy is modifed for the Actor. Re-initialize its current behaviour
-            initializeBehavior();
+            // The RaftPolicy was modified. If the current behavior is Follower then re-initialize to Follower
+            // but transfer the previous leaderId so it doesn't immediately try to schedule an election. This
+            // avoids potential disruption. Otherwise, switch to Follower normally.
+            RaftActorBehavior behavior = currentBehavior.getDelegate();
+            if(behavior instanceof Follower) {
+                String previousLeaderId = ((Follower)behavior).getLeaderId();
+
+                LOG.debug("{}: Re-initializing to Follower with previous leaderId {}", persistenceId(), previousLeaderId);
+
+                changeCurrentBehavior(new Follower(context, previousLeaderId));
+            } else {
+                initializeBehavior();
+            }
         }
     }
 

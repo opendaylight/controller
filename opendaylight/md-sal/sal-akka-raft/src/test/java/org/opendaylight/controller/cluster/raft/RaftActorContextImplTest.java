@@ -60,13 +60,15 @@ public class RaftActorContextImplTest extends AbstractActorTest {
 
         PeerAddressResolver mockResolver = mock(PeerAddressResolver.class);
         doReturn("peerAddress2").when(mockResolver).resolve("peer2");
+        doReturn("peerAddress3").when(mockResolver).resolve("peer3");
         configParams.setPeerAddressResolver(mockResolver);
 
         assertEquals("getPeerAddress", "peerAddress2", context.getPeerAddress("peer2"));
+        assertEquals("getPeerAddress", "peerAddress3", context.getPeerAddress("peer3"));
 
         reset(mockResolver);
-        assertEquals("getPeerAddress", "peerAddress2", context.getPeerAddress("peer2"));
         assertEquals("getPeerAddress", "peerAddress1", context.getPeerAddress("peer1"));
+        assertEquals("getPeerAddress", "peerAddress2", context.getPeerAddress("peer2"));
         verify(mockResolver, never()).resolve(anyString());
     }
 
