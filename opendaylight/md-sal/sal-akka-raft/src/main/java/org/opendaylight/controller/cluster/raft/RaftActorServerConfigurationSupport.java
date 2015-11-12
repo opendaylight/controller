@@ -11,15 +11,11 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Cancellable;
 import com.google.common.base.Preconditions;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
-import org.opendaylight.controller.cluster.raft.ServerConfigurationPayload.ServerInfo;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.SnapshotComplete;
 import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader;
@@ -183,17 +179,9 @@ class RaftActorServerConfigurationSupport {
         }
 
         protected void persistNewServerConfiguration(RaftActor raftActor, ServerOperationContext<?> operationContext){
-            Collection<PeerInfo> peers = raftContext.getPeers();
-            List<ServerInfo> newConfig = new ArrayList<>(peers.size() + 1);
-            for(PeerInfo peer: peers) {
-                newConfig.add(new ServerInfo(peer.getId(), peer.isVoting()));
-            }
-
-            newConfig.add(new ServerInfo(raftContext.getId(), true));
-
-            LOG.debug("{}: Persisting new server configuration : {}", raftContext.getId(), newConfig);
-
-            ServerConfigurationPayload payload = new ServerConfigurationPayload(newConfig);
+            raftContext.setDynamicServerConfigurationInUse();
+            ServerConfigurationPayload payload = raftContext.getPeerServerInfo();
+            LOG.debug("{}: New server configuration : {}", raftContext.getId(), payload.getServerConfig());
 
             raftActor.persistData(operationContext.getClientRequestor(), operationContext.getContextId(), payload);
 

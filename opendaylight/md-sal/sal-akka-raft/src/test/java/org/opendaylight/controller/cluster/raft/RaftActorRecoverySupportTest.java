@@ -8,6 +8,8 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.doReturn;
@@ -213,6 +215,7 @@ public class RaftActorRecoverySupportTest {
         assertEquals("Snapshot index", lastAppliedDuringSnapshotCapture, context.getReplicatedLog().getSnapshotIndex());
         assertEquals("Election term", electionTerm, context.getTermInformation().getCurrentTerm());
         assertEquals("Election votedFor", electionVotedFor, context.getTermInformation().getVotedFor());
+        assertFalse("Dynamic server configuration", context.isDynamicServerConfigurationInUse());
 
         verify(mockCohort).applyRecoverySnapshot(snapshotBytes);
     }
@@ -392,6 +395,7 @@ public class RaftActorRecoverySupportTest {
         sendMessageToSupport(new MockRaftActorContext.MockReplicatedLogEntry(1, 0, obj));
 
         //verify new peers
+        assertTrue("Dynamic server configuration", context.isDynamicServerConfigurationInUse());
         assertEquals("New peer Ids", Sets.newHashSet(follower1, follower2, follower3),
                 Sets.newHashSet(context.getPeerIds()));
         assertEquals("follower1 isVoting", true, context.getPeerInfo(follower1).isVoting());
@@ -412,6 +416,7 @@ public class RaftActorRecoverySupportTest {
         sendMessageToSupport(new MockRaftActorContext.MockReplicatedLogEntry(1, 1, obj));
 
         //verify new peers
+        assertTrue("Dynamic server configuration", context.isDynamicServerConfigurationInUse());
         assertEquals("New peer Ids", Sets.newHashSet(follower2, follower3), Sets.newHashSet(context.getPeerIds()));
     }
 
@@ -427,5 +432,30 @@ public class RaftActorRecoverySupportTest {
 
         //verify new peers
         assertEquals("New peer Ids", Sets.newHashSet(follower), Sets.newHashSet(context.getPeerIds()));
+    }
+
+    @Test
+    public void testOnSnapshotOfferWithServerConfiguration() {
+        long electionTerm = 2;
+        String electionVotedFor = "member-2";
+        ServerConfigurationPayload serverPayload = new ServerConfigurationPayload(Arrays.asList(
+                                                        new ServerInfo(localId, true),
+                                                        new ServerInfo("follower1", true),
+                                                        new ServerInfo("follower2", true)));
+
+        Snapshot snapshot = Snapshot.create(new byte[]{1}, Collections.<ReplicatedLogEntry>emptyList(),
+                -1, -1, -1, -1, electionTerm, electionVotedFor, serverPayload);
+
+        SnapshotMetadata metadata = new SnapshotMetadata("test", 6, 12345);
+        SnapshotOffer snapshotOffer = new SnapshotOffer(metadata , snapshot);
+
+        sendMessageToSupport(snapshotOffer);
+
+        assertEquals("Journal log size", 0, context.getReplicatedLog().size());
+        assertEquals("Election term", electionTerm, context.getTermInformation().getCurrentTerm());
+        assertEquals("Election votedFor", electionVotedFor, context.getTermInformation().getVotedFor());
+        assertTrue("Dynamic server configuration", context.isDynamicServerConfigurationInUse());
+        assertEquals("Peer List", Sets.newHashSet("follower1", "follower2"),
+            Sets.newHashSet(context.getPeerIds()));
     }
 }
