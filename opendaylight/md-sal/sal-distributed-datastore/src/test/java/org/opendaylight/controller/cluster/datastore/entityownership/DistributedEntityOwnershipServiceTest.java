@@ -78,12 +78,12 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
     static int ID_COUNTER = 1;
     static final QName QNAME = QName.create("test", "2015-08-11", "foo");
 
-    private final String dataStoreType = "config" + ID_COUNTER++;
+    private final String dataStoreName = "config" + ID_COUNTER++;
     private DistributedDataStore dataStore;
 
     @Before
     public void setUp() {
-        DatastoreContext datastoreContext = DatastoreContext.newBuilder().dataStoreType(dataStoreType).
+        DatastoreContext datastoreContext = DatastoreContext.newBuilder().dataStoreName(dataStoreName).
                 shardInitializationTimeout(10, TimeUnit.SECONDS).build();
 
         Configuration configuration = new ConfigurationImpl(new EmptyModuleShardConfigProvider()) {
