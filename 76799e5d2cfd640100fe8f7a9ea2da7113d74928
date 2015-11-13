@@ -22,6 +22,30 @@
       "revId": "76799e5d2cfd640100fe8f7a9ea2da7113d74928",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_35cfbab2",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorRecoverySupport.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-13T11:20:26Z",
+      "side": 1,
+      "message": "yes - I did this as a safety measure. You have to first clear the persistent store prior to restoring from backup. Do you think that\u0027s necessary?",
+      "parentUuid": "7aade967_3a5fa974",
+      "range": {
+        "startLine": 130,
+        "startChar": 11,
+        "endLine": 130,
+        "endChar": 27
+      },
+      "revId": "76799e5d2cfd640100fe8f7a9ea2da7113d74928",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
