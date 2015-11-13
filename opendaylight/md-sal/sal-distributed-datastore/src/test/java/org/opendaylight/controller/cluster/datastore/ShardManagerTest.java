@@ -122,7 +122,7 @@ public class ShardManagerTest extends AbstractActorTest {
     private static String mockShardName;
 
     private final DatastoreContext.Builder datastoreContextBuilder = DatastoreContext.newBuilder().
-            dataStoreType(shardMrgIDSuffix).shardInitializationTimeout(600, TimeUnit.MILLISECONDS)
+            dataStoreName(shardMrgIDSuffix).shardInitializationTimeout(600, TimeUnit.MILLISECONDS)
                    .shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(6);
 
     private static ActorRef newMockShardActor(ActorSystem system, String shardName, String memberName) {
@@ -1320,7 +1320,7 @@ public class ShardManagerTest extends AbstractActorTest {
 
         TestShardManager(String shardMrgIDSuffix) {
             super(new MockClusterWrapper(), new MockConfiguration(),
-                    newDatastoreContextFactory(DatastoreContext.newBuilder().dataStoreType(shardMrgIDSuffix).build()),
+                    newDatastoreContextFactory(DatastoreContext.newBuilder().dataStoreName(shardMrgIDSuffix).build()),
                     ready, new PrimaryShardInfoFutureCache());
         }
 
