@@ -10,7 +10,6 @@ package org.opendaylight.controller.cluster.datastore;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-
 import com.google.common.base.Optional;
 import java.io.IOException;
 import org.junit.Before;
@@ -30,6 +29,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateTip
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.TipProducingDataTree;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.SchemaValidationFailedException;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -128,7 +128,7 @@ public class ShardRecoveryCoordinatorTest {
     }
 
     private DataTreeCandidateTip createCar(){
-        final TipProducingDataTree dataTree = InMemoryDataTreeFactory.getInstance().create();
+        final TipProducingDataTree dataTree = InMemoryDataTreeFactory.getInstance().create(TreeType.OPERATIONAL);
         dataTree.setSchemaContext(carsSchemaContext);
 
         final DataTreeSnapshot snapshot = dataTree.takeSnapshot();
@@ -157,7 +157,7 @@ public class ShardRecoveryCoordinatorTest {
     }
 
     private static byte[] createSnapshot(){
-        final TipProducingDataTree dataTree = InMemoryDataTreeFactory.getInstance().create();
+        final TipProducingDataTree dataTree = InMemoryDataTreeFactory.getInstance().create(TreeType.OPERATIONAL);
         dataTree.setSchemaContext(SchemaContextHelper.select(SchemaContextHelper.CARS_YANG, SchemaContextHelper.PEOPLE_YANG));
 
         DataTreeSnapshot snapshot = dataTree.takeSnapshot();

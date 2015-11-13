@@ -20,6 +20,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.TipProducingDataTree;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
 
@@ -32,7 +33,7 @@ public class ReadyLocalTransactionSerializerTest {
 
     @Test
     public void testToAndFromBinary() {
-        TipProducingDataTree dataTree = InMemoryDataTreeFactory.getInstance().create();
+        TipProducingDataTree dataTree = InMemoryDataTreeFactory.getInstance().create(TreeType.OPERATIONAL);
         dataTree.setSchemaContext(TestModel.createTestContext());
         DataTreeModification modification = dataTree.takeSnapshot().newModification();
 
