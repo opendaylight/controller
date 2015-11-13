@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7aade967_d57666d8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 984,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-11-13T17:57:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7aade967_35ec9ac7",
+      "revId": "76bd9c57a130f3822266be870cf2bae306360ac7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7aade967_55b6f6dd",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2015-11-13T13:00:09Z",
       "side": 1,
       "message": "We should not have artificial sleeps in tests, especially 5 sec.",
+      "revId": "76bd9c57a130f3822266be870cf2bae306360ac7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_a0f046ca",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1340,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-11-13T17:57:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7aade967_55b6f6dd",
       "revId": "76bd9c57a130f3822266be870cf2bae306360ac7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "7aade967_60ba4ee3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1341,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-11-13T17:57:14Z",
+      "side": 1,
+      "message": "Modified to create the actor only with the restored information.",
+      "parentUuid": "7aade967_75bbf2c4",
+      "revId": "76bd9c57a130f3822266be870cf2bae306360ac7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7aade967_5504b67d",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
         "patchSetId": 3
@@ -64,6 +118,24 @@
       "writtenOn": "2015-11-13T13:03:03Z",
       "side": 1,
       "message": "You want to convert to Sets for the comparison.",
+      "revId": "76bd9c57a130f3822266be870cf2bae306360ac7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_00e4ba0b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1526,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-11-13T17:57:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7aade967_5504b67d",
       "revId": "76bd9c57a130f3822266be870cf2bae306360ac7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "7aade967_40b072f4",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/config/ConfigurationImplTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-11-13T17:57:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7aade967_d5c9865b",
+      "revId": "76bd9c57a130f3822266be870cf2bae306360ac7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7aade967_55dd9613",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/config/ConfigurationImplTest.java",
         "patchSetId": 3
@@ -104,6 +194,24 @@
     },
     {
       "key": {
+        "uuid": "7aade967_00927a57",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/config/ConfigurationImplTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-11-13T17:57:14Z",
+      "side": 1,
+      "message": "For adding/removing the replicas the complete moduleConfig is newly replicated. So verifying all fields are correct after updation.",
+      "parentUuid": "7aade967_55dd9613",
+      "revId": "76bd9c57a130f3822266be870cf2bae306360ac7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7aade967_95c30e38",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/config/ConfigurationImplTest.java",
         "patchSetId": 3
@@ -115,6 +223,24 @@
       "writtenOn": "2015-11-13T13:00:09Z",
       "side": 1,
       "message": "same as above",
+      "revId": "76bd9c57a130f3822266be870cf2bae306360ac7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_e094fe45",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/config/ConfigurationImplTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-11-13T17:57:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7aade967_95c30e38",
       "revId": "76bd9c57a130f3822266be870cf2bae306360ac7",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
