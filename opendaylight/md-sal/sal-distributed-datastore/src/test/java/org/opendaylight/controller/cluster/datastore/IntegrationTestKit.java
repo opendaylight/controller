@@ -68,7 +68,7 @@ public class IntegrationTestKit extends ShardTestKit {
         ClusterWrapper cluster = new ClusterWrapperImpl(getSystem());
         Configuration config = new ConfigurationImpl(moduleShardsConfig, "modules.conf");
 
-        datastoreContextBuilder.dataStoreType(typeName);
+        datastoreContextBuilder.dataStoreName(typeName);
 
         DatastoreContext datastoreContext = datastoreContextBuilder.build();
         DatastoreContextFactory mockContextFactory = Mockito.mock(DatastoreContextFactory.class);

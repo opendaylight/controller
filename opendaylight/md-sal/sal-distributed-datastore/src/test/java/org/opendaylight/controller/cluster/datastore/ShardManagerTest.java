@@ -137,7 +137,7 @@ public class ShardManagerTest extends AbstractActorTest {
     private static String mockShardName;
 
     private final DatastoreContext.Builder datastoreContextBuilder = DatastoreContext.newBuilder().
-            dataStoreType(shardMrgIDSuffix).shardInitializationTimeout(600, TimeUnit.MILLISECONDS)
+            dataStoreName(shardMrgIDSuffix).shardInitializationTimeout(600, TimeUnit.MILLISECONDS)
                    .shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(6);
 
     private final Collection<ActorSystem> actorSystems = new ArrayList<>();
