@@ -34,6 +34,24 @@
       "revId": "e9ba38844e9831e6f1b757dcff7db0b7c1f453bd",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_bb9b9b71",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 778,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-13T21:19:30Z",
+      "side": 1,
+      "message": "Not sure I follow. What users? The Shard references TreeType so why can\u0027t the DistributedDatastore front-end? It\u0027s all internal to the bundle. Not a big deal either way but it saves conversion and simplifies a bit.",
+      "parentUuid": "7aade967_bbe39b32",
+      "revId": "e9ba38844e9831e6f1b757dcff7db0b7c1f453bd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
