@@ -46,7 +46,7 @@ public class ShardRecoveryCoordinatorTest {
         peopleSchemaContext = SchemaContextHelper.select(SchemaContextHelper.PEOPLE_YANG);
         carsSchemaContext = SchemaContextHelper.select(SchemaContextHelper.CARS_YANG);
 
-        peopleDataTree = new ShardDataTree(peopleSchemaContext);
+        peopleDataTree = new ShardDataTree(peopleSchemaContext, TreeType.OPERATIONAL);
     }
 
     @Test
