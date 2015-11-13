@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "7aade967_f5d92284",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-11-13T11:04:04Z",
+      "side": 1,
+      "message": "Removed the flag",
+      "parentUuid": "9ab8dda7_5b12a3b5",
+      "revId": "ae22640cd9802b01d4ff6f86383b4842e465264c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9ab8dda7_4a63b31a",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
         "patchSetId": 1
@@ -352,6 +370,24 @@
     },
     {
       "key": {
+        "uuid": "7aade967_95e6ae43",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/config/ConfigurationImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-11-13T11:04:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9ab8dda7_4d742d9c",
+      "revId": "ae22640cd9802b01d4ff6f86383b4842e465264c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9ab8dda7_6d79f192",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/config/ConfigurationImpl.java",
         "patchSetId": 1
@@ -363,6 +399,24 @@
       "writtenOn": "2015-11-10T21:02:52Z",
       "side": 1,
       "message": "Please add unit tests in ConfigurationImplTest for new method(s)",
+      "revId": "ae22640cd9802b01d4ff6f86383b4842e465264c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_b5e3aa32",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/config/ConfigurationImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-11-13T11:04:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9ab8dda7_6d79f192",
       "revId": "ae22640cd9802b01d4ff6f86383b4842e465264c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
