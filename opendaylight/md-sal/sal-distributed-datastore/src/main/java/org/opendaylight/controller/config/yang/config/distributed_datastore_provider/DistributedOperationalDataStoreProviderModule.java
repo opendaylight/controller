@@ -2,6 +2,7 @@ package org.opendaylight.controller.config.yang.config.distributed_datastore_pro
 
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStoreFactory;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
 import org.osgi.framework.BundleContext;
 
 public class DistributedOperationalDataStoreProviderModule extends
@@ -41,7 +42,7 @@ public class DistributedOperationalDataStoreProviderModule extends
         }
 
         DatastoreContext datastoreContext = DatastoreContext.newBuilder()
-                .dataStoreType("operational")
+                .treeType(TreeType.OPERATIONAL)
                 .maxShardDataChangeExecutorPoolSize(props.getMaxShardDataChangeExecutorPoolSize().getValue().intValue())
                 .maxShardDataChangeExecutorQueueSize(props.getMaxShardDataChangeExecutorQueueSize().getValue().intValue())
                 .maxShardDataChangeListenerQueueSize(props.getMaxShardDataChangeListenerQueueSize().getValue().intValue())
