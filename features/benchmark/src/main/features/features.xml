@@ -24,4 +24,10 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <bundle>mvn:org.opendaylight.controller/dsbenchmark/{{VERSION}}</bundle>
     <configfile finalname="dsbenchmark-impl-default-config.xml">mvn:org.opendaylight.controller/dsbenchmark/{{VERSION}}/xml/config</configfile>
   </feature>
+  <feature name='odl-ntfbenchmark' version='${project.version}' description='OpenDaylight :: ntfbenchmark :: '>
+    <feature version='${controller.mdsal.version}'>odl-mdsal-broker</feature>
+    <feature version='${project.version}'>odl-benchmark-api</feature>
+    <bundle>mvn:org.opendaylight.controller/ntfbenchmark/{{VERSION}}</bundle>
+    <configfile finalname="ntfbenchmark-impl-default-config.xml">mvn:org.opendaylight.controller/ntfbenchmark/{{VERSION}}/xml/config</configfile>
+  </feature>
 </features>
