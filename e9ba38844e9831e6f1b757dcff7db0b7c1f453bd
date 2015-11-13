@@ -16,6 +16,24 @@
       "revId": "e9ba38844e9831e6f1b757dcff7db0b7c1f453bd",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_bbe39b32",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 778,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-11-13T20:07:33Z",
+      "side": 1,
+      "message": "One is yang-data-api, the other one comes from sal-common-api. It makes sense to use the sal one across the distributed datastore, except it needs to be translated to yang-data-api speak.\n\nI do not believe we want to expose yang-data-api to users.",
+      "parentUuid": "7aade967_7bee8324",
+      "revId": "e9ba38844e9831e6f1b757dcff7db0b7c1f453bd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
