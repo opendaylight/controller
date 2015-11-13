@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7aade967_7bee8324",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 778,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-13T19:57:04Z",
+      "side": 1,
+      "message": "Why do we have 2 enums to represent the same thing? Why not just use TreeType all the way through?",
+      "revId": "e9ba38844e9831e6f1b757dcff7db0b7c1f453bd",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
