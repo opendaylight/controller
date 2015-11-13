@@ -25,6 +25,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidateTip
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidates;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public class ShardDataTreeTest {
@@ -38,12 +39,12 @@ public class ShardDataTreeTest {
 
     @Test
     public void testWrite() throws ExecutionException, InterruptedException {
-        modify(new ShardDataTree(fullSchema), false, true, true);
+        modify(new ShardDataTree(fullSchema, TreeType.OPERATIONAL), false, true, true);
     }
 
     @Test
     public void testMerge() throws ExecutionException, InterruptedException {
-        modify(new ShardDataTree(fullSchema), true, true, true);
+        modify(new ShardDataTree(fullSchema, TreeType.OPERATIONAL), true, true, true);
     }
 
 
@@ -87,7 +88,7 @@ public class ShardDataTreeTest {
 
     @Test
     public void bug4359AddRemoveCarOnce() throws ExecutionException, InterruptedException {
-        ShardDataTree shardDataTree = new ShardDataTree(fullSchema);
+        ShardDataTree shardDataTree = new ShardDataTree(fullSchema, TreeType.OPERATIONAL);
 
         List<DataTreeCandidateTip> candidates = new ArrayList<>();
         candidates.add(addCar(shardDataTree));
@@ -104,7 +105,7 @@ public class ShardDataTreeTest {
 
     @Test
     public void bug4359AddRemoveCarTwice() throws ExecutionException, InterruptedException {
-        ShardDataTree shardDataTree = new ShardDataTree(fullSchema);
+        ShardDataTree shardDataTree = new ShardDataTree(fullSchema, TreeType.OPERATIONAL);
 
         List<DataTreeCandidateTip> candidates = new ArrayList<>();
         candidates.add(addCar(shardDataTree));

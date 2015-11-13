@@ -61,6 +61,7 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
 import org.opendaylight.yangtools.yang.data.impl.schema.ImmutableNodes;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
@@ -263,7 +264,7 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
 
         service.start();
 
-        ShardDataTree shardDataTree = new ShardDataTree(SchemaContextHelper.entityOwners());
+        ShardDataTree shardDataTree = new ShardDataTree(SchemaContextHelper.entityOwners(), TreeType.OPERATIONAL);
         shardBuilder.setDataTree(shardDataTree.getDataTree());
 
         Entity entity1 = new Entity(ENTITY_TYPE, "one");
