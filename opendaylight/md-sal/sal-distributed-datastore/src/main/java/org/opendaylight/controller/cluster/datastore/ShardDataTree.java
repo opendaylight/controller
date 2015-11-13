@@ -31,6 +31,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeSnapshot;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.TipProducingDataTree;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
 import org.opendaylight.yangtools.yang.data.impl.schema.tree.InMemoryDataTreeFactory;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
@@ -54,10 +55,17 @@ public class ShardDataTree extends ShardDataTreeTransactionParent {
     private final TipProducingDataTree dataTree;
     private SchemaContext schemaContext;
 
-    public ShardDataTree(final SchemaContext schemaContext) {
-        dataTree = InMemoryDataTreeFactory.getInstance().create();
+    public ShardDataTree(final SchemaContext schemaContext, final TreeType treeType) {
+        dataTree = InMemoryDataTreeFactory.getInstance().create(treeType);
         updateSchemaContext(schemaContext);
+    }
 
+    /**
+     * @deprecated Use {@link #ShardDataTree(SchemaContext, TreeType)} instead.
+     */
+    @Deprecated
+    public ShardDataTree(final SchemaContext schemaContext) {
+        this(schemaContext, TreeType.OPERATIONAL);
     }
 
     public TipProducingDataTree getDataTree() {

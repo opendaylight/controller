@@ -27,6 +27,7 @@ public class NormalizedNodeAggregator {
                              final SchemaContext schemaContext) {
         this.rootIdentifier = rootIdentifier;
         this.nodes = nodes;
+        // FIXME: BUG-1014: pass down proper DataTree
         this.dataTree = InMemoryDataTreeFactory.getInstance().create();
         this.dataTree.setSchemaContext(schemaContext);
     }
