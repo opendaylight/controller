@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.datastore.entityownership;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.AdditionalMatchers.or;
 import static org.mockito.Mockito.atMost;
@@ -350,17 +349,16 @@ public class DistributedEntityOwnershipIntegrationTest {
             Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
             if(!leaderEntityOwnershipService.getOwnershipState(ENTITY1).get().hasOwner() &&
                     !follower1EntityOwnershipService.getOwnershipState(ENTITY1).get().hasOwner() &&
-                    !follower2EntityOwnershipService.getOwnershipState(ENTITY1).get().hasOwner()) {
+                    !follower2EntityOwnershipService.getOwnershipState(ENTITY1).get().hasOwner() &&
+                    leaderChangeCaptor.getAllValues().size() > 0 && !leaderChangeCaptor.getValue().hasOwner() &&
+                    leaderChangeCaptor.getAllValues().size() > 0 && !follower1ChangeCaptor.getValue().hasOwner() &&
+                    leaderChangeCaptor.getAllValues().size() > 0 && !follower2ChangeCaptor.getValue().hasOwner()) {
                 passed = true;
                 break;
             }
         }
 
         assertTrue("No ownership change message was sent with hasOwner=false", passed);
-
-        assertFalse(leaderChangeCaptor.getAllValues().get(leaderChangeCaptor.getAllValues().size()-1).hasOwner());
-        assertFalse(follower1ChangeCaptor.getAllValues().get(follower1ChangeCaptor.getAllValues().size()-1).hasOwner());
-        assertFalse(follower2ChangeCaptor.getAllValues().get(follower2ChangeCaptor.getAllValues().size()-1).hasOwner());
     }
 
     /**
