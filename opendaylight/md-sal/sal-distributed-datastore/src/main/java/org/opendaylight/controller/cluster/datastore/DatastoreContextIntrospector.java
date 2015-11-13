@@ -270,7 +270,7 @@ public class DatastoreContextIntrospector {
         return updated;
     }
 
-    private ArrayList<String> getSortedKeysByDatastoreType(Collection<String> inKeys,
+    private static ArrayList<String> getSortedKeysByDatastoreType(Collection<String> inKeys,
             final String dataStoreTypePrefix) {
         // Sort the property keys by putting the names prefixed with the data store type last. This
         // is done so data store specific settings are applied after global settings.

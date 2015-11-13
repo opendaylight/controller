@@ -658,7 +658,7 @@ public class DistributedDataStoreRemotingIntegrationTest {
         followerTestKit.doCommit(rwTx.ready());
     }
 
-    private void sendDatastoreContextUpdate(DistributedDataStore dataStore, final Builder builder) {
+    private static void sendDatastoreContextUpdate(DistributedDataStore dataStore, final Builder builder) {
         DatastoreContextFactory mockContextFactory = Mockito.mock(DatastoreContextFactory.class);
         Answer<DatastoreContext> answer = new Answer<DatastoreContext>() {
             @Override

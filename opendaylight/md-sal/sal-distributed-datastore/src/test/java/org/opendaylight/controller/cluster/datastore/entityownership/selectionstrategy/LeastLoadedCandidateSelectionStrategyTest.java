@@ -37,7 +37,7 @@ public class LeastLoadedCandidateSelectionStrategyTest {
 
     }
 
-    private Map<String, Long> prepareStatistics(long... count){
+    private static Map<String, Long> prepareStatistics(long... count){
         Map<String, Long> statistics = new HashMap<>();
         for(int i=0;i<count.length;i++){
             statistics.put("member-" + (i+1), count[i]);
@@ -45,7 +45,7 @@ public class LeastLoadedCandidateSelectionStrategyTest {
         return statistics;
     }
 
-    private Collection<String> prepareViableCandidates(int count){
+    private static Collection<String> prepareViableCandidates(int count){
         Collection<String> viableCandidates = new ArrayList<>();
         for(int i=0;i<count;i++){
             viableCandidates.add("member-" + (i+1));

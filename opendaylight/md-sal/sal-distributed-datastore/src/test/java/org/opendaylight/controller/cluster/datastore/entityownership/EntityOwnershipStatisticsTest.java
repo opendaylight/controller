@@ -130,7 +130,7 @@ public class EntityOwnershipStatisticsTest extends AbstractActorTest {
 
     }
 
-    private void assertStatistics(Map<String, Map<String, Long>> statistics, String memberName, long val) {
+    private static void assertStatistics(Map<String, Map<String, Long>> statistics, String memberName, long val) {
         assertEquals(val, statistics.get(ENTITY_TYPE).get(memberName).longValue());
     }
 

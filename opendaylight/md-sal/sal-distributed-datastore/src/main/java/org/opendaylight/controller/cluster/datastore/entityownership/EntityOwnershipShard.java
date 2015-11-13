@@ -435,7 +435,7 @@ class EntityOwnershipShard extends Shard {
         }
     }
 
-    private Collection<String> getCandidateNames(MapEntryNode entity) {
+    private static Collection<String> getCandidateNames(MapEntryNode entity) {
         Collection<MapEntryNode> candidates = ((MapNode) entity.getChild(CANDIDATE_NODE_ID).get()).getValue();
         Collection<String> candidateNames = new ArrayList<>(candidates.size());
         for(MapEntryNode candidate: candidates) {
