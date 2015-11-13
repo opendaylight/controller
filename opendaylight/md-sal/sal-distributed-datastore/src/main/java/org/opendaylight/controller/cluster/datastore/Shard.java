@@ -67,6 +67,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.ModificationType;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
@@ -125,8 +126,7 @@ public class Shard extends RaftActor {
 
         LOG.info("Shard created : {}, persistent : {}", name, datastoreContext.isPersistent());
 
-        // FIXME: BUG-1014: pass down the proper TreeType
-        store = new ShardDataTree(builder.getSchemaContext());
+        store = new ShardDataTree(builder.getSchemaContext(), builder.getTreeType());
 
         shardMBean = ShardMBeanFactory.getShardStatsMBean(name.toString(),
                 datastoreContext.getDataStoreMXBeanType());
@@ -766,6 +766,17 @@ public class Shard extends RaftActor {
 
         public SchemaContext getSchemaContext() {
             return schemaContext;
+        }
+
+        public TreeType getTreeType() {
+            switch (datastoreContext.getLogicalStoreType()) {
+            case CONFIGURATION:
+                return TreeType.CONFIGURATION;
+            case OPERATIONAL:
+                return TreeType.OPERATIONAL;
+            }
+
+            throw new IllegalStateException("Unhandled logical store type " + datastoreContext.getLogicalStoreType());
         }
 
         protected void verify() {
