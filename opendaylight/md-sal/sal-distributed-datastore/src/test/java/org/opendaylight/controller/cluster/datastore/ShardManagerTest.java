@@ -100,6 +100,7 @@ import org.opendaylight.controller.cluster.raft.messages.AddServer;
 import org.opendaylight.controller.cluster.raft.messages.AddServerReply;
 import org.opendaylight.controller.cluster.raft.messages.ServerChangeStatus;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
+import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
@@ -137,6 +138,7 @@ public class ShardManagerTest extends AbstractActorTest {
         MockitoAnnotations.initMocks(this);
 
         InMemoryJournal.clear();
+        InMemorySnapshotStore.clear();
 
         if(mockShardActor == null) {
             mockShardName = new ShardIdentifier(Shard.DEFAULT_NAME, "member-1", "config").toString();
@@ -149,6 +151,7 @@ public class ShardManagerTest extends AbstractActorTest {
     @After
     public void tearDown() {
         InMemoryJournal.clear();
+        InMemorySnapshotStore.clear();
     }
 
     private Props newShardMgrProps() {
@@ -999,6 +1002,8 @@ public class ShardManagerTest extends AbstractActorTest {
         // Send status true will make sync status true
         shardManagerActor.onReceiveCommand(new FollowerInitialSyncUpStatus(true, "member-1-shard-default-unknown"));
 
+        if (shardManagerActor.getMBean() == null)
+            System.out.println ("mbean is null");
         assertEquals(true, shardManagerActor.getMBean().getSyncStatus());
 
         // Send status false will make sync status false
@@ -1261,7 +1266,8 @@ public class ShardManagerTest extends AbstractActorTest {
                 AddServer.class);
             String addServerId = "member-1-shard-astronauts-" + shardMrgIDSuffix;
             assertEquals("AddServer serverId", addServerId, addServerMsg.getNewServerId());
-
+            newReplicaShardManager.underlyingActor()
+                .verifySnapshotPersisted(Arrays.asList("default", "astronauts"));
             expectMsgClass(duration("5 seconds"), Status.Success.class);
         }};
 
@@ -1315,11 +1321,53 @@ public class ShardManagerTest extends AbstractActorTest {
 
     }
 
+    @Test
+    public void testShardPersistenceWithRestoredData() throws Exception {
+        new JavaTestKit(getSystem()) {{
+            MockConfiguration mockConfig =
+                new MockConfiguration(ImmutableMap.<String, List<String>>builder().
+                   put("default", Arrays.asList("member-1", "member-2")).
+                   put("astronauts", Arrays.asList("member-2")).
+                   put("people", Arrays.asList("member-1", "member-2")).build());
+
+            TestActorRef<TestShardManager> newRestoredShardManager = TestActorRef.create(getSystem(),
+                Props.create(new TestShardManagerCreator(shardMrgIDSuffix, mockConfig)));
+
+            String[] restoredShards = {"default", "astronauts"};
+            ShardManagerSnapshot snapshot = new ShardManagerSnapshot(Arrays.asList(restoredShards));
+            String shardManagerID = newRestoredShardManager.underlyingActor().persistenceId();
+            InMemorySnapshotStore.addSnapshot(shardManagerID, snapshot);
+
+            newRestoredShardManager.tell(PoisonPill.getInstance(), null);
+            Uninterruptibles.sleepUninterruptibly(5, TimeUnit.SECONDS);
+
+            //create shardManager again to come up with restored data
+            newRestoredShardManager = TestActorRef.create(getSystem(),
+                Props.create(new TestShardManagerCreator(shardMrgIDSuffix, mockConfig)));
+
+            newRestoredShardManager.underlyingActor().waitForRecoveryComplete();
+
+            newRestoredShardManager.tell(new FindLocalShard("people", false), getRef());
+            LocalShardNotFound notFound = expectMsgClass(duration("5 seconds"), LocalShardNotFound.class);
+            assertEquals("for uninitialized shard", "people", notFound.getShardName());
+
+            //Verify a local shard is created for the restored shards,
+            //although we expect a NotInitializedException for the shards as the actor initialization
+            //message is not sent for them
+            newRestoredShardManager.tell(new FindLocalShard("default", false), getRef());
+            expectMsgClass(duration("5 seconds"), NotInitializedException.class);
+
+            newRestoredShardManager.tell(new FindLocalShard("astronauts", false), getRef());
+            expectMsgClass(duration("5 seconds"), NotInitializedException.class);
+        }};
+    }
+
+
     private static class TestShardManager extends ShardManager {
         private final CountDownLatch recoveryComplete = new CountDownLatch(1);
 
-        TestShardManager(String shardMrgIDSuffix) {
-            super(new MockClusterWrapper(), new MockConfiguration(),
+        TestShardManager(String shardMrgIDSuffix, Configuration config) {
+            super(new MockClusterWrapper(), config,
                     newDatastoreContextFactory(DatastoreContext.newBuilder().dataStoreType(shardMrgIDSuffix).build()),
                     ready, new PrimaryShardInfoFutureCache());
         }
@@ -1344,14 +1392,21 @@ public class ShardManagerTest extends AbstractActorTest {
     @SuppressWarnings("serial")
     static class TestShardManagerCreator implements Creator<TestShardManager> {
         String shardMrgIDSuffix;
+        Configuration config;
 
         TestShardManagerCreator(String shardMrgIDSuffix) {
             this.shardMrgIDSuffix = shardMrgIDSuffix;
+            this.config = new MockConfiguration();
+        }
+
+        TestShardManagerCreator(String shardMrgIDSuffix, Configuration config) {
+            this.shardMrgIDSuffix = shardMrgIDSuffix;
+            this.config = config;
         }
 
         @Override
         public TestShardManager create() throws Exception {
-            return new TestShardManager(shardMrgIDSuffix);
+            return new TestShardManager(shardMrgIDSuffix, config);
         }
 
     }
@@ -1378,6 +1433,8 @@ public class ShardManagerTest extends AbstractActorTest {
         private CountDownLatch memberReachableReceived = new CountDownLatch(1);
         private final ActorRef shardActor;
         private final String name;
+        private final CountDownLatch snapshotPersist = new CountDownLatch(1);
+        private ShardManagerSnapshot snapshot;
 
         protected ForwardingShardManager(ClusterWrapper cluster, Configuration configuration,
                 DatastoreContextFactory factory, CountDownLatch waitTillReadyCountdownLatch, String name,
@@ -1457,6 +1514,18 @@ public class ShardManagerTest extends AbstractActorTest {
             assertEquals("FindPrimary received", true,
                     Uninterruptibles.awaitUninterruptibly(findPrimaryMessageReceived, 5, TimeUnit.SECONDS));
             findPrimaryMessageReceived = new CountDownLatch(1);
+        }
+
+        @Override
+        public void saveSnapshot(Object obj) {
+            snapshot = (ShardManagerSnapshot) obj;
+            snapshotPersist.countDown();
+        }
+
+        void verifySnapshotPersisted(List<String> shardList) {
+            assertEquals("saveSnapshot invoked", true,
+                Uninterruptibles.awaitUninterruptibly(snapshotPersist, 5, TimeUnit.SECONDS));
+            assertEquals("Shard Persisted", shardList, snapshot.getShardList());
         }
     }
 

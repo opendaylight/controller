@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore.config;
 
+import com.google.common.collect.ImmutableSet;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,6 +27,16 @@ public class ModuleConfig {
 
     public ModuleConfig(final String name) {
         this.name = name;
+    }
+
+    public ModuleConfig(ModuleConfig moduleConfig) {
+        this.name = moduleConfig.getName();
+        this.nameSpace = moduleConfig.getNameSpace();
+        this.shardStrategy = moduleConfig.getShardStrategy();
+        for (ShardConfig shardConfig : moduleConfig.getShardConfigs()) {
+            shardConfigs.put(shardConfig.getName(), new ShardConfig(shardConfig.getName(),
+                ImmutableSet.copyOf(shardConfig.getReplicas())));
+        }
     }
 
     public String getName() {
@@ -62,5 +73,9 @@ public class ModuleConfig {
 
     public void setShardStrategy(ShardStrategy shardStrategy) {
         this.shardStrategy = shardStrategy;
+    }
+
+    public ShardConfig removeShardConfig(String name) {
+        return shardConfigs.remove(name);
     }
 }
