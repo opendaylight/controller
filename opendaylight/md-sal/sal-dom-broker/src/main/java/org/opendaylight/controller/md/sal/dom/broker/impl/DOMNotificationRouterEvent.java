@@ -15,12 +15,15 @@ import java.util.Collection;
 import org.opendaylight.controller.md.sal.dom.api.DOMNotification;
 import org.opendaylight.controller.md.sal.dom.api.DOMNotificationListener;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A single notification event in the disruptor ringbuffer. These objects are reused,
  * so they do have mutable state.
  */
 final class DOMNotificationRouterEvent {
+    private static final Logger LOG = LoggerFactory.getLogger(DOMNotificationRouterEvent.class);
     public static final EventFactory<DOMNotificationRouterEvent> FACTORY = new EventFactory<DOMNotificationRouterEvent>() {
         @Override
         public DOMNotificationRouterEvent newInstance() {
@@ -45,9 +48,13 @@ final class DOMNotificationRouterEvent {
 
     void deliverNotification() {
         for (ListenerRegistration<? extends DOMNotificationListener> r : subscribers) {
-            final DOMNotificationListener l = r.getInstance();
-            if (l != null) {
-                l.onNotification(notification);
+            final DOMNotificationListener listener = r.getInstance();
+            if (listener != null) {
+                try {
+                    listener.onNotification(notification);
+                } catch (Exception e) {
+                    LOG.error("Delivery of notification {} caused an error in listener {}", notification, listener, e);
+                }
             }
         }
     }
