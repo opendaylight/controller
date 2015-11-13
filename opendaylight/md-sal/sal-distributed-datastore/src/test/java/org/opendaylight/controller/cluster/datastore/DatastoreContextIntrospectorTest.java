@@ -17,6 +17,7 @@ import static org.opendaylight.controller.cluster.datastore.DatastoreContext.DEF
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.junit.Test;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreConfigProperties;
 
 /**
@@ -28,7 +29,8 @@ public class DatastoreContextIntrospectorTest {
 
     @Test
     public void testUpdate() {
-        DatastoreContext context = DatastoreContext.newBuilder().dataStoreType("operational").build();
+        DatastoreContext context = DatastoreContext.newBuilder().
+                logicalStoreType(LogicalDatastoreType.OPERATIONAL).build();
         DatastoreContextIntrospector introspector = new DatastoreContextIntrospector(context );
 
         Dictionary<String, Object> properties = new Hashtable<>();
@@ -117,7 +119,8 @@ public class DatastoreContextIntrospectorTest {
 
     @Test
     public void testUpdateWithInvalidValues() {
-        DatastoreContext context = DatastoreContext.newBuilder().dataStoreType("operational").build();
+        DatastoreContext context = DatastoreContext.newBuilder().
+                logicalStoreType(LogicalDatastoreType.OPERATIONAL).build();
         DatastoreContextIntrospector introspector = new DatastoreContextIntrospector(context );
 
         Dictionary<String, Object> properties = new Hashtable<>();
@@ -165,7 +168,8 @@ public class DatastoreContextIntrospectorTest {
         properties.put("persistent", "false"); // global setting
         properties.put("operational.Persistent", "true"); // operational override
 
-        DatastoreContext operContext = DatastoreContext.newBuilder().dataStoreType("operational").build();
+        DatastoreContext operContext = DatastoreContext.newBuilder().
+                logicalStoreType(LogicalDatastoreType.OPERATIONAL).build();
         DatastoreContextIntrospector operIntrospector = new DatastoreContextIntrospector(operContext);
         boolean updated = operIntrospector.update(properties);
         assertEquals("updated", true, updated);
@@ -175,7 +179,8 @@ public class DatastoreContextIntrospectorTest {
         assertEquals(true, operContext.isPersistent());
         assertEquals(333, operContext.getDataStoreProperties().getMaxDataChangeExecutorPoolSize());
 
-        DatastoreContext configContext = DatastoreContext.newBuilder().dataStoreType("config").build();
+        DatastoreContext configContext = DatastoreContext.newBuilder()
+                .logicalStoreType(LogicalDatastoreType.CONFIGURATION).build();
         DatastoreContextIntrospector configIntrospector = new DatastoreContextIntrospector(configContext);
         updated = configIntrospector.update(properties);
         assertEquals("updated", true, updated);
@@ -194,7 +199,8 @@ public class DatastoreContextIntrospectorTest {
         properties.put("config.shard-transaction-idle-timeout-in-minutes", "44"); // config override
         properties.put("topology.shard-transaction-idle-timeout-in-minutes", "55"); // global shard override
 
-        DatastoreContext operContext = DatastoreContext.newBuilder().dataStoreType("operational").build();
+        DatastoreContext operContext = DatastoreContext.newBuilder().
+                logicalStoreType(LogicalDatastoreType.OPERATIONAL).build();
         DatastoreContextIntrospector operIntrospector = new DatastoreContextIntrospector(operContext);
 
         DatastoreContext shardContext = operIntrospector.newContextFactory().getShardDatastoreContext("topology");
@@ -207,7 +213,8 @@ public class DatastoreContextIntrospectorTest {
         shardContext = operIntrospector.newContextFactory().getShardDatastoreContext("topology");
         assertEquals(55, shardContext.getShardTransactionIdleTimeout().toMinutes());
 
-        DatastoreContext configContext = DatastoreContext.newBuilder().dataStoreType("config").build();
+        DatastoreContext configContext = DatastoreContext.newBuilder().
+                logicalStoreType(LogicalDatastoreType.CONFIGURATION).build();
         DatastoreContextIntrospector configIntrospector = new DatastoreContextIntrospector(configContext);
         configIntrospector.update(properties);
         configContext = configIntrospector.getContext();
