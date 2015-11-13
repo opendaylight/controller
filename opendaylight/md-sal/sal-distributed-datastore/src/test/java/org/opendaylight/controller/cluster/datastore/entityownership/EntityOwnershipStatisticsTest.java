@@ -23,6 +23,7 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
 
 public class EntityOwnershipStatisticsTest extends AbstractActorTest {
     private static final String LOCAL_MEMBER_NAME = "member-1";
@@ -34,7 +35,8 @@ public class EntityOwnershipStatisticsTest extends AbstractActorTest {
     private static final YangInstanceIdentifier ENTITY_ID2 =
             YangInstanceIdentifier.of(QName.create("test", "2015-08-14", "entity2"));
 
-    private final ShardDataTree shardDataTree = new ShardDataTree(SchemaContextHelper.entityOwners());
+    private final ShardDataTree shardDataTree = new ShardDataTree(SchemaContextHelper.entityOwners(),
+        TreeType.OPERATIONAL);
     private EntityOwnershipStatistics ownershipStatistics;
 
     @Before

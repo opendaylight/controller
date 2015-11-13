@@ -26,6 +26,7 @@ import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
 ;
 
 /**
@@ -45,7 +46,8 @@ public class EntityOwnerChangeListenerTest {
     private static final Entity ENTITY1 = new Entity(ENTITY_TYPE, ENTITY_ID1);
     private static final Entity ENTITY2 = new Entity(ENTITY_TYPE, ENTITY_ID2);
 
-    private final ShardDataTree shardDataTree = new ShardDataTree(SchemaContextHelper.entityOwners());
+    private final ShardDataTree shardDataTree = new ShardDataTree(SchemaContextHelper.entityOwners(),
+        TreeType.OPERATIONAL);
     private final EntityOwnershipListenerSupport mockListenerSupport = mock(EntityOwnershipListenerSupport.class);
     private EntityOwnerChangeListener listener;
 

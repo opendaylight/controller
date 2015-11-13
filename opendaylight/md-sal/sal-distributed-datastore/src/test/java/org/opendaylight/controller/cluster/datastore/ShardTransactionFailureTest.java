@@ -22,6 +22,7 @@ import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import scala.concurrent.Await;
@@ -40,7 +41,7 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
     private static final TransactionType RW = TransactionType.READ_WRITE;
     private static final TransactionType WO = TransactionType.WRITE_ONLY;
 
-    private static final ShardDataTree store = new ShardDataTree(testSchemaContext);
+    private static final ShardDataTree store = new ShardDataTree(testSchemaContext, TreeType.OPERATIONAL);
 
     private static final ShardIdentifier SHARD_IDENTIFIER =
         ShardIdentifier.builder().memberName("member-1")
