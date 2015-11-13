@@ -3,6 +3,7 @@ package org.opendaylight.controller.config.yang.config.distributed_datastore_pro
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.DatastoreSnapshotRestore;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStoreFactory;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.osgi.framework.BundleContext;
 
 public class DistributedConfigDataStoreProviderModule extends
@@ -41,7 +42,7 @@ public class DistributedConfigDataStoreProviderModule extends
         }
 
         DatastoreContext datastoreContext = DatastoreContext.newBuilder()
-                .dataStoreType("config")
+                .logicalStoreType(LogicalDatastoreType.CONFIGURATION)
                 .maxShardDataChangeExecutorPoolSize(props.getMaxShardDataChangeExecutorPoolSize().getValue().intValue())
                 .maxShardDataChangeExecutorQueueSize(props.getMaxShardDataChangeExecutorQueueSize().getValue().intValue())
                 .maxShardDataChangeListenerQueueSize(props.getMaxShardDataChangeListenerQueueSize().getValue().intValue())

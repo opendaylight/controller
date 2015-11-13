@@ -55,6 +55,7 @@ import org.opendaylight.controller.cluster.datastore.messages.LocalShardFound;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardNotFound;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
 import org.opendaylight.controller.cluster.datastore.messages.RemotePrimaryShardFound;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -396,7 +397,8 @@ public class ActorContextTest extends AbstractActorTest{
             TestActorRef<MessageCollectorActor> shardManager =
                     TestActorRef.create(getSystem(), Props.create(MessageCollectorActor.class));
 
-            DatastoreContext dataStoreContext = DatastoreContext.newBuilder().dataStoreType("config").
+            DatastoreContext dataStoreContext = DatastoreContext.newBuilder().
+                    logicalStoreType(LogicalDatastoreType.CONFIGURATION).
                     shardLeaderElectionTimeout(100, TimeUnit.MILLISECONDS).build();
 
             final String expPrimaryPath = "akka://test-system/find-primary-shard";
@@ -438,7 +440,8 @@ public class ActorContextTest extends AbstractActorTest{
             TestActorRef<MessageCollectorActor> shardManager =
                     TestActorRef.create(getSystem(), Props.create(MessageCollectorActor.class));
 
-            DatastoreContext dataStoreContext = DatastoreContext.newBuilder().dataStoreType("config").
+            DatastoreContext dataStoreContext = DatastoreContext.newBuilder().
+                    logicalStoreType(LogicalDatastoreType.CONFIGURATION).
                     shardLeaderElectionTimeout(100, TimeUnit.MILLISECONDS).build();
 
             final DataTree mockDataTree = Mockito.mock(DataTree.class);
@@ -489,7 +492,8 @@ public class ActorContextTest extends AbstractActorTest{
         TestActorRef<MessageCollectorActor> shardManager =
             TestActorRef.create(getSystem(), Props.create(MessageCollectorActor.class));
 
-        DatastoreContext dataStoreContext = DatastoreContext.newBuilder().dataStoreType("config").
+        DatastoreContext dataStoreContext = DatastoreContext.newBuilder().
+            logicalStoreType(LogicalDatastoreType.CONFIGURATION).
             shardLeaderElectionTimeout(100, TimeUnit.MILLISECONDS).build();
 
         ActorContext actorContext =
