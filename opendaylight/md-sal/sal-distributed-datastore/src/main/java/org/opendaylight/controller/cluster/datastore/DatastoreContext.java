@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.util.Timeout;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -18,6 +19,7 @@ import org.opendaylight.controller.cluster.common.actor.FileAkkaConfigurationRea
 import org.opendaylight.controller.cluster.raft.ConfigParams;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.PeerAddressResolver;
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreConfigProperties;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
@@ -50,7 +52,7 @@ public class DatastoreContext {
     public static final long DEFAULT_SHARD_COMMIT_QUEUE_EXPIRY_TIMEOUT_IN_MS = TimeUnit.MILLISECONDS.convert(2, TimeUnit.MINUTES);
     public static final int DEFAULT_SHARD_SNAPSHOT_CHUNK_SIZE = 2048000;
 
-    private static Set<String> globalDatastoreTypes = Sets.newConcurrentHashSet();
+    private static final Set<String> globalDatastoreTypes = Sets.newConcurrentHashSet();
 
     private InMemoryDOMDataStoreConfigProperties dataStoreProperties;
     private Duration shardTransactionIdleTimeout = DatastoreContext.DEFAULT_SHARD_TRANSACTION_IDLE_TIMEOUT;
@@ -64,7 +66,8 @@ public class DatastoreContext {
     private AkkaConfigurationReader configurationReader = DEFAULT_CONFIGURATION_READER;
     private long transactionCreationInitialRateLimit = DEFAULT_TX_CREATION_INITIAL_RATE_LIMIT;
     private final DefaultConfigParamsImpl raftConfig = new DefaultConfigParamsImpl();
-    private String dataStoreType = UNKNOWN_DATA_STORE_TYPE;
+    private String dataStoreName = UNKNOWN_DATA_STORE_TYPE;
+    private LogicalDatastoreType logicalStoreType;
     private int shardBatchedModificationCount = DEFAULT_SHARD_BATCHED_MODIFICATION_COUNT;
     private boolean writeOnlyTransactionOptimizationsEnabled = true;
     private long shardCommitQueueExpiryTimeoutInMillis = DEFAULT_SHARD_COMMIT_QUEUE_EXPIRY_TIMEOUT_IN_MS;
@@ -96,7 +99,8 @@ public class DatastoreContext {
         this.persistent = other.persistent;
         this.configurationReader = other.configurationReader;
         this.transactionCreationInitialRateLimit = other.transactionCreationInitialRateLimit;
-        this.dataStoreType = other.dataStoreType;
+        this.dataStoreName = other.dataStoreName;
+        this.logicalStoreType = other.logicalStoreType;
         this.shardBatchedModificationCount = other.shardBatchedModificationCount;
         this.writeOnlyTransactionOptimizationsEnabled = other.writeOnlyTransactionOptimizationsEnabled;
         this.shardCommitQueueExpiryTimeoutInMillis = other.shardCommitQueueExpiryTimeoutInMillis;
@@ -169,8 +173,20 @@ public class DatastoreContext {
         return raftConfig.getElectionTimeoutFactor();
     }
 
+    public String getDataStoreName(){
+        return dataStoreName;
+    }
+
+    public LogicalDatastoreType getLogicalStoreType() {
+        return logicalStoreType;
+    }
+
+    /**
+     * @deprecated Use {@link #getDataStoreName()} or {@link #getLogicalStoreType()} instead.
+     */
+    @Deprecated
     public String getDataStoreType(){
-        return dataStoreType;
+        return getDataStoreName();
     }
 
     public long getTransactionCreationInitialRateLimit() {
@@ -370,9 +386,35 @@ public class DatastoreContext {
             return this;
         }
 
+        /**
+         * @deprecated Use {@link #logicalStoreType(LogicalDatastoreType)} or {@link #dataStoreName(String)}.
+         */
+        @Deprecated
         public Builder dataStoreType(String dataStoreType){
-            datastoreContext.dataStoreType = dataStoreType;
-            datastoreContext.dataStoreMXBeanType = "Distributed" + WordUtils.capitalize(dataStoreType) + "Datastore";
+            return dataStoreName(dataStoreType);
+        }
+
+        public Builder logicalStoreType(LogicalDatastoreType logicalStoreType){
+            datastoreContext.logicalStoreType = Preconditions.checkNotNull(logicalStoreType);
+
+            // Retain compatible naming
+            switch (logicalStoreType) {
+            case CONFIGURATION:
+                dataStoreName("config");
+                break;
+            case OPERATIONAL:
+                dataStoreName("operational");
+                break;
+            default:
+                dataStoreName(logicalStoreType.name());
+            }
+
+            return this;
+        }
+
+        public Builder dataStoreName(String dataStoreName){
+            datastoreContext.dataStoreName = Preconditions.checkNotNull(dataStoreName);
+            datastoreContext.dataStoreMXBeanType = "Distributed" + WordUtils.capitalize(dataStoreName) + "Datastore";
             return this;
         }
 
@@ -427,8 +469,8 @@ public class DatastoreContext {
                     maxShardDataChangeExecutorPoolSize, maxShardDataChangeExecutorQueueSize,
                     maxShardDataChangeListenerQueueSize, maxShardDataStoreExecutorQueueSize);
 
-            if(datastoreContext.dataStoreType != null) {
-                globalDatastoreTypes.add(datastoreContext.dataStoreType);
+            if(datastoreContext.dataStoreName != null) {
+                globalDatastoreTypes.add(datastoreContext.dataStoreName);
             }
 
             return datastoreContext;
