@@ -17,17 +17,17 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.Set;
 import org.junit.Assert;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ModuleShardStrategy;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategy;
 
 public class ConfigurationImplTest {
 
-    private static ConfigurationImpl configuration;
+    private ConfigurationImpl configuration;
 
-    @BeforeClass
-    public static void staticSetup(){
+    @Before
+    public void setup(){
         configuration = new ConfigurationImpl("module-shards.conf", "modules.conf");
     }
 
@@ -150,5 +150,39 @@ public class ConfigurationImplTest {
     public void testGetUniqueMemberNamesForAllShards() {
         assertEquals("getUniqueMemberNamesForAllShards", Sets.newHashSet("member-1", "member-2", "member-3"),
                 configuration.getUniqueMemberNamesForAllShards());
+    }
+
+    @Test
+    public void testAddMemberReplicaForShard() {
+        configuration.addMemberReplicaForShard("people-1", "member-2");
+        String shardName = configuration.getShardNameForModule("people");
+        assertEquals("ModuleShardName", "people-1", shardName);
+        ShardStrategy shardStrategy = configuration.getStrategyForModule("people");
+        assertEquals("ModuleStrategy", ModuleShardStrategy.class, shardStrategy.getClass());
+        Collection<String> members = configuration.getMembersFromShardName("people-1");
+        assertEquals("Members", ImmutableSortedSet.of("member-1", "member-2"),
+            ImmutableSortedSet.copyOf(members));
+
+        configuration.addMemberReplicaForShard("non-existent", "member-2");
+        Set<String> shardNames = configuration.getAllShardNames();
+        assertEquals("ShardNames", ImmutableSortedSet.of("people-1", "cars-1", "test-1", "default"),
+            ImmutableSortedSet.copyOf(shardNames));
+    }
+
+    @Test
+    public void testRemoveMemberReplicaForShard() {
+        configuration.removeMemberReplicaForShard("default", "member-2");
+        String shardName = configuration.getShardNameForModule("default");
+        assertEquals("ModuleShardName", "default", shardName);
+        ShardStrategy shardStrategy = configuration.getStrategyForModule("default");
+        assertNull("ModuleStrategy", shardStrategy);
+        Collection<String> members = configuration.getMembersFromShardName("default");
+        assertEquals("Members", ImmutableSortedSet.of("member-1", "member-3"),
+            ImmutableSortedSet.copyOf(members));
+
+        configuration.removeMemberReplicaForShard("non-existent", "member-2");
+        Set<String> shardNames = configuration.getAllShardNames();
+        assertEquals("ShardNames", ImmutableSortedSet.of("people-1", "cars-1", "test-1", "default"),
+            ImmutableSortedSet.copyOf(shardNames));
     }
 }
