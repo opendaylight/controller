@@ -212,6 +212,24 @@
     },
     {
       "key": {
+        "uuid": "7aade967_c04542b4",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/config/ConfigurationImplTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-13T18:34:28Z",
+      "side": 1,
+      "message": "ok",
+      "parentUuid": "7aade967_00927a57",
+      "revId": "76bd9c57a130f3822266be870cf2bae306360ac7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7aade967_95c30e38",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/config/ConfigurationImplTest.java",
         "patchSetId": 3
