@@ -18,12 +18,6 @@ import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.opendaylight.controller.cluster.datastore.messages.AddShardReplica;
-import org.opendaylight.controller.cluster.datastore.messages.RemoveShardReplica;
-import akka.pattern.Patterns;
-import akka.util.Timeout;
-import java.util.concurrent.TimeUnit;
-import scala.concurrent.Await;
 
 public class ShardManagerInfo extends AbstractMXBean implements ShardManagerInfoMBean {
 
@@ -101,39 +95,5 @@ public class ShardManagerInfo extends AbstractMXBean implements ShardManagerInfo
 
     public void setShardManager(ShardManager shardManager){
         this.shardManager = shardManager;
-    }
-
-    @Override
-    public void setAddShardReplica (String shardName) {
-        LOG.info ("addShardReplica initiated for shard {}", shardName);
-
-        // TODO addTimeout to be made configurable
-        Timeout addTimeOut = new Timeout(1, TimeUnit.MINUTES);
-        try {
-            Await.result(Patterns.ask(shardManager.getSelf(),
-                           new AddShardReplica(shardName), addTimeOut),
-                           addTimeOut.duration());
-        } catch (Exception ex) {
-            LOG.debug ("Obtained an exception during addShardReplica", ex);
-            throw (new RuntimeException(ex.getMessage()));
-        }
-        return;
-    }
-
-    @Override
-    public void setRemoveShardReplica (String shardName) {
-        LOG.info ("removeShardReplica initiated for shard {}", shardName);
-
-        // TODO remTimeOut to be made configurable
-        Timeout remTimeOut = new Timeout(30, TimeUnit.SECONDS);
-        try {
-            Await.result(Patterns.ask(shardManager.getSelf(),
-                           new RemoveShardReplica(shardName), remTimeOut),
-                           remTimeOut.duration());
-        } catch (Exception ex) {
-            LOG.debug ("Obtained an exception during removeShardReplica", ex);
-            throw (new RuntimeException(ex.getMessage()));
-        }
-        return;
     }
 }
