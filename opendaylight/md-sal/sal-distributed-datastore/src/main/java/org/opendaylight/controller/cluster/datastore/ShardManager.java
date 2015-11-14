@@ -138,7 +138,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
     private final Set<String> shardReplicaOperationsInProgress = new HashSet<>();
 
-    private final String id;
+    private final String persistenceId;
 
     /**
      */
@@ -154,7 +154,8 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         this.primaryShardInfoCache = builder.primaryShardInfoCache;
         this.restoreFromSnapshot = builder.restoreFromSnapshot;
 
-        id = "shard-manager-" + type;
+        String possiblePersistenceId = datastoreContextFactory.getBaseDatastoreContext().getShardManagerPersistenceId();
+        persistenceId = possiblePersistenceId != null ? possiblePersistenceId : "shard-manager-" + type;
 
         peerAddressResolver = new ShardPeerAddressResolver(type, cluster.getCurrentMemberName());
 
@@ -827,7 +828,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
     @Override
     public String persistenceId() {
-        return id;
+        return persistenceId;
     }
 
     @VisibleForTesting

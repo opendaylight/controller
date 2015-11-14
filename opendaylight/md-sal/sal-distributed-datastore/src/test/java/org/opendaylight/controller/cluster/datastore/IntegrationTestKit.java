@@ -35,12 +35,16 @@ import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 
 public class IntegrationTestKit extends ShardTestKit {
 
-    DatastoreContext.Builder datastoreContextBuilder;
-    DatastoreSnapshot restoreFromSnapshot;
+    protected DatastoreContext.Builder datastoreContextBuilder;
+    protected DatastoreSnapshot restoreFromSnapshot;
 
     public IntegrationTestKit(ActorSystem actorSystem, Builder datastoreContextBuilder) {
         super(actorSystem);
         this.datastoreContextBuilder = datastoreContextBuilder;
+    }
+
+    public DatastoreContext.Builder getDatastoreContextBuilder() {
+        return datastoreContextBuilder;
     }
 
     public DistributedDataStore setupDistributedDataStore(String typeName, String... shardNames) {
@@ -80,6 +84,7 @@ public class IntegrationTestKit extends ShardTestKit {
             waitUntilLeader(dataStore.getActorContext(), shardNames);
         }
 
+        datastoreContextBuilder = DatastoreContext.newBuilderFrom(datastoreContext);
         return dataStore;
     }
 
@@ -143,7 +148,7 @@ public class IntegrationTestKit extends ShardTestKit {
         assertEquals("Data node", nodeToWrite, optional.get());
     }
 
-    void doCommit(final DOMStoreThreePhaseCommitCohort cohort) throws Exception {
+    public void doCommit(final DOMStoreThreePhaseCommitCohort cohort) throws Exception {
         Boolean canCommit = cohort.canCommit().get(7, TimeUnit.SECONDS);
         assertEquals("canCommit", true, canCommit);
         cohort.preCommit().get(5, TimeUnit.SECONDS);

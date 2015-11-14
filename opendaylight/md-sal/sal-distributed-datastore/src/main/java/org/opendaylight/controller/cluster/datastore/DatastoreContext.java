@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.util.Timeout;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -69,6 +70,7 @@ public class DatastoreContext {
     private boolean writeOnlyTransactionOptimizationsEnabled = true;
     private long shardCommitQueueExpiryTimeoutInMillis = DEFAULT_SHARD_COMMIT_QUEUE_EXPIRY_TIMEOUT_IN_MS;
     private boolean transactionDebugContextEnabled = false;
+    private String shardManagerPersistenceId;
 
     public static Set<String> getGlobalDatastoreTypes() {
         return globalDatastoreTypes;
@@ -101,6 +103,7 @@ public class DatastoreContext {
         this.writeOnlyTransactionOptimizationsEnabled = other.writeOnlyTransactionOptimizationsEnabled;
         this.shardCommitQueueExpiryTimeoutInMillis = other.shardCommitQueueExpiryTimeoutInMillis;
         this.transactionDebugContextEnabled = other.transactionDebugContextEnabled;
+        this.shardManagerPersistenceId = shardManagerPersistenceId;
 
         setShardJournalRecoveryLogBatchSize(other.raftConfig.getJournalRecoveryLogBatchSize());
         setSnapshotBatchCount(other.raftConfig.getSnapshotBatchCount());
@@ -175,6 +178,10 @@ public class DatastoreContext {
 
     public long getTransactionCreationInitialRateLimit() {
         return transactionCreationInitialRateLimit;
+    }
+
+    public String getShardManagerPersistenceId() {
+        return shardManagerPersistenceId;
     }
 
     private void setPeerAddressResolver(PeerAddressResolver resolver) {
@@ -419,6 +426,15 @@ public class DatastoreContext {
 
         public Builder maxShardDataStoreExecutorQueueSize(int maxShardDataStoreExecutorQueueSize) {
             this.maxShardDataStoreExecutorQueueSize = maxShardDataStoreExecutorQueueSize;
+            return this;
+        }
+
+        /**
+         * For unit tests only.
+         */
+        @VisibleForTesting
+        public Builder shardManagerPersistenceId(String id) {
+            datastoreContext.shardManagerPersistenceId = id;
             return this;
         }
 
