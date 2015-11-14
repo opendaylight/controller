@@ -60,4 +60,14 @@ public interface Configuration {
      * Verifies if the given module shard in available in the cluster
      */
     boolean isShardConfigured(String shardName);
+
+    /**
+     * Adds the given member as the new replica for the given shardName
+     */
+    void addMemberReplicaForShard (String shardName, String memberName);
+
+    /**
+     * Removes the given member as a replica for the given shardName
+     */
+    void removeMemberReplicaForShard (String shardName, String memberName);
 }
