@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7aade967_2320dd9a",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTree.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-11-14T20:25:32Z",
+      "side": 1,
+      "message": "extra",
+      "range": {
+        "startLine": 67,
+        "startChar": 63,
+        "endLine": 67,
+        "endChar": 74
+      },
+      "revId": "0ce48651e9e4a8825616492243c4e0d3dea29a9c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_e33965d9",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardDataTree.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-11-14T20:25:32Z",
+      "side": 1,
+      "message": "What are you implying by this? Does some other change need to be made to the API or not?",
+      "range": {
+        "startLine": 247,
+        "startChar": 25,
+        "endLine": 247,
+        "endChar": 44
+      },
+      "revId": "0ce48651e9e4a8825616492243c4e0d3dea29a9c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
