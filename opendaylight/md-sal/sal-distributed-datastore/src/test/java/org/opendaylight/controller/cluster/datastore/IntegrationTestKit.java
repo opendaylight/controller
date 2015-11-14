@@ -80,6 +80,7 @@ public class IntegrationTestKit extends ShardTestKit {
             waitUntilLeader(dataStore.getActorContext(), shardNames);
         }
 
+        datastoreContextBuilder = DatastoreContext.newBuilderFrom(datastoreContext);
         return dataStore;
     }
 
@@ -143,7 +144,7 @@ public class IntegrationTestKit extends ShardTestKit {
         assertEquals("Data node", nodeToWrite, optional.get());
     }
 
-    void doCommit(final DOMStoreThreePhaseCommitCohort cohort) throws Exception {
+    public void doCommit(final DOMStoreThreePhaseCommitCohort cohort) throws Exception {
         Boolean canCommit = cohort.canCommit().get(7, TimeUnit.SECONDS);
         assertEquals("canCommit", true, canCommit);
         cohort.preCommit().get(5, TimeUnit.SECONDS);

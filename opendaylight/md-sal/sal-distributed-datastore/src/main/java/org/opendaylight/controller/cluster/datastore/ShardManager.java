@@ -442,9 +442,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
         ShardInformation shardInformation = localShards.get(shardName);
         if (shardInformation != null) {
-            shardInformation.setActorInitialized();
-
-            shardInformation.getActor().tell(new RegisterRoleChangeListener(), self());
+            shardInformation.setActorInitialized(self());
         }
     }
 
@@ -830,7 +828,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
     private void onAddShardReplica (AddShardReplica shardReplicaMsg) {
         final String shardName = shardReplicaMsg.getShardName();
 
-        LOG.debug ("onAddShardReplica: {}", shardReplicaMsg);
+        LOG.debug("{}: onAddShardReplica: {}", persistenceId(), shardReplicaMsg);
 
         // verify the shard with the specified name is present in the cluster configuration
         if (!(this.configuration.isShardConfigured(shardName))) {
@@ -1146,12 +1144,16 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             }
         }
 
-        void setActorInitialized() {
+        void setActorInitialized(ActorRef sender) {
             LOG.debug("Shard {} is initialized", shardId);
 
             this.actorInitialized = true;
 
             notifyOnShardInitializedCallbacks();
+
+            if(actor != null) {
+                actor.tell(new RegisterRoleChangeListener(), sender);
+            }
         }
 
         private void notifyOnShardInitializedCallbacks() {
