@@ -70,7 +70,7 @@ class ShardCommitCoordinator {
     private ReadyTransactionReply readyTransactionReply;
 
     ShardCommitCoordinator(ShardDataTree dataTree,
-            long cacheExpiryTimeoutInMillis, int queueCapacity, ActorRef shardActor, Logger log, String name) {
+            long cacheExpiryTimeoutInMillis, int queueCapacity, Logger log, String name) {
 
         this.queueCapacity = queueCapacity;
         this.log = log;

@@ -137,7 +137,7 @@ public class Shard extends RaftActor {
 
         commitCoordinator = new ShardCommitCoordinator(store,
                 datastoreContext.getShardCommitQueueExpiryTimeoutInMillis(),
-                datastoreContext.getShardTransactionCommitQueueCapacity(), self(), LOG, this.name);
+                datastoreContext.getShardTransactionCommitQueueCapacity(), LOG, this.name);
 
         setTransactionCommitTimeout();
 
