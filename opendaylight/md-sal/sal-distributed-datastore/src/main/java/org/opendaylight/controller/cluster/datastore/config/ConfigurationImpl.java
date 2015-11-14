@@ -14,6 +14,7 @@ import com.google.common.collect.ImmutableSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -156,5 +157,48 @@ public class ConfigurationImpl implements Configuration {
     public boolean isShardConfigured(String shardName) {
         Preconditions.checkNotNull(shardName, "shardName should not be null");
         return allShardNames.contains(shardName);
+    }
+
+    @Override
+    public void addMemberReplicaForShard (String shardName, String newMemberName) {
+        Preconditions.checkNotNull(shardName, "shardName should not be null");
+        Preconditions.checkNotNull(newMemberName, "MemberName should not be null");
+
+        for(ModuleConfig moduleConfig: moduleConfigMap.values()) {
+            ShardConfig shardConfig = moduleConfig.getShardConfig(shardName);
+            if(shardConfig != null) {
+                ModuleConfig newModuleConfig = new ModuleConfig(moduleConfig);
+                Set<String> replica = new HashSet<>(shardConfig.getReplicas());
+                replica.add(newMemberName);
+                newModuleConfig.addShardConfig(shardName, ImmutableSet.copyOf(replica));
+                updateModuleConfigMap(newModuleConfig);
+                return;
+            }
+        }
+    }
+
+    @Override
+    public void removeMemberReplicaForShard (String shardName, String newMemberName) {
+        Preconditions.checkNotNull(shardName, "shardName should not be null");
+        Preconditions.checkNotNull(newMemberName, "MemberName should not be null");
+
+        for(ModuleConfig moduleConfig: moduleConfigMap.values()) {
+            ShardConfig shardConfig = moduleConfig.getShardConfig(shardName);
+            if(shardConfig != null) {
+                ModuleConfig newModuleConfig = new ModuleConfig(moduleConfig);
+                Set<String> replica = new HashSet<>(shardConfig.getReplicas());
+                replica.remove(newMemberName);
+                newModuleConfig.addShardConfig(shardName, ImmutableSet.copyOf(replica));
+                updateModuleConfigMap(newModuleConfig);
+                return;
+            }
+        }
+    }
+
+    private void updateModuleConfigMap(ModuleConfig moduleConfig) {
+        HashMap<String, ModuleConfig> newModuleConfigMap = new HashMap<>(moduleConfigMap);
+        newModuleConfigMap.put(moduleConfig.getName(), moduleConfig);
+        moduleConfigMap = ImmutableMap.<String, ModuleConfig>builder().putAll(newModuleConfigMap).build();
+        return;
     }
 }
