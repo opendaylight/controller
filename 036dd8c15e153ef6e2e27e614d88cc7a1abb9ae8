@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7aade967_23e77de6",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreSnapshotRestore.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-11-14T22:41:08Z",
+      "side": 1,
+      "message": "I presume you are not calling initialize in the constructor because the DatastoreSnapshotRestore instance is created from the Activator and you would probably want to fail data store construction in the module if initialize fails. A note about this may help.",
+      "revId": "036dd8c15e153ef6e2e27e614d88cc7a1abb9ae8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_43ecf9c7",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 1261,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-11-14T22:41:08Z",
+      "side": 1,
+      "message": "Maybe the Builder change should have been in a separate patch.",
+      "range": {
+        "startLine": 1261,
+        "startChar": 24,
+        "endLine": 1261,
+        "endChar": 31
+      },
+      "revId": "036dd8c15e153ef6e2e27e614d88cc7a1abb9ae8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
