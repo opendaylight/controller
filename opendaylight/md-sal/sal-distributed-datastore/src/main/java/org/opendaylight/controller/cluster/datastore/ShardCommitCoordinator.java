@@ -29,7 +29,6 @@ import org.opendaylight.controller.cluster.datastore.messages.ForwardedReadyTran
 import org.opendaylight.controller.cluster.datastore.messages.ReadyLocalTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionReply;
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
-import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.slf4j.Logger;
@@ -128,8 +127,7 @@ class ShardCommitCoordinator {
         log.debug("{}: Readying transaction {}, client version {}", name,
                 ready.getTransactionID(), ready.getTxnClientVersion());
 
-        CohortEntry cohortEntry = new CohortEntry(ready.getTransactionID(), ready.getCohort(),
-                (MutableCompositeModification) ready.getModification());
+        CohortEntry cohortEntry = new CohortEntry(ready.getTransactionID(), ready.getCohort());
         cohortCache.put(ready.getTransactionID(), cohortEntry);
 
         if(!queueCohortEntry(cohortEntry, sender, shard)) {
@@ -551,13 +549,6 @@ class ShardCommitCoordinator {
         CohortEntry(String transactionID, ReadWriteShardDataTreeTransaction transaction) {
             this.transaction = Preconditions.checkNotNull(transaction);
             this.transactionID = transactionID;
-        }
-
-        CohortEntry(String transactionID, ShardDataTreeCohort cohort,
-                MutableCompositeModification compositeModification) {
-            this.transactionID = transactionID;
-            this.cohort = cohort;
-            this.transaction = null;
         }
 
         CohortEntry(String transactionID, ShardDataTreeCohort cohort) {
