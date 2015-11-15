@@ -60,7 +60,6 @@ import org.opendaylight.controller.cluster.datastore.messages.CanCommitTransacti
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.CreateTransaction;
-import org.opendaylight.controller.cluster.datastore.messages.ForwardedReadyTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.PeerAddressResolved;
 import org.opendaylight.controller.cluster.datastore.messages.ReadData;
 import org.opendaylight.controller.cluster.datastore.messages.ReadDataReply;
@@ -677,11 +676,7 @@ public class ShardTest extends AbstractShardTest {
             final FiniteDuration duration = FiniteDuration.create(timeoutSec, TimeUnit.SECONDS);
             final Timeout timeout = new Timeout(duration);
 
-            // Simulate the ForwardedReadyTransaction message for the first Tx that would be sent
-            // by the ShardTransaction.
-
-            shard.tell(new ForwardedReadyTransaction(transactionID1, CURRENT_VERSION,
-                    cohort1, modification1, true, false), getRef());
+            shard.tell(prepareBatchedModifications(shard.underlyingActor(), cohort1, transactionID1, modification1), getRef());
             final ReadyTransactionReply readyReply = ReadyTransactionReply.fromSerializable(
                     expectMsgClass(duration, ReadyTransactionReply.class));
             assertEquals("Cohort path", shard.path().toString(), readyReply.getCohortPath());
@@ -693,14 +688,10 @@ public class ShardTest extends AbstractShardTest {
                     expectMsgClass(duration, CanCommitTransactionReply.SERIALIZABLE_CLASS));
             assertEquals("Can commit", true, canCommitReply.getCanCommit());
 
-            // Send the ForwardedReadyTransaction for the next 2 Tx's.
-
-            shard.tell(new ForwardedReadyTransaction(transactionID2, CURRENT_VERSION,
-                    cohort2, modification2, true, false), getRef());
+            shard.tell(prepareBatchedModifications(shard.underlyingActor(), cohort2, transactionID2, modification2), getRef());
             expectMsgClass(duration, ReadyTransactionReply.class);
 
-            shard.tell(new ForwardedReadyTransaction(transactionID3, CURRENT_VERSION,
-                    cohort3, modification3, true, false), getRef());
+            shard.tell(prepareBatchedModifications(shard.underlyingActor(), cohort3, transactionID3, modification3), getRef());
             expectMsgClass(duration, ReadyTransactionReply.class);
 
             // Send the CanCommitTransaction message for the next 2 Tx's. These should get queued and
@@ -1131,11 +1122,11 @@ public class ShardTest extends AbstractShardTest {
     }
 
     @Test
-    public void testForwardedReadyTransactionWithImmediateCommit() throws Exception{
+    public void testBatchedModificationsWithImmediateCommit() throws Exception{
         new ShardTestKit(getSystem()) {{
             final TestActorRef<Shard> shard = TestActorRef.create(getSystem(),
                     newShardProps().withDispatcher(Dispatchers.DefaultDispatcherId()),
-                    "testForwardedReadyTransactionWithImmediateCommit");
+                    "testBatchedModificationsWithImmediateCommit");
 
             waitUntilLeader(shard);
 
@@ -1149,11 +1140,7 @@ public class ShardTest extends AbstractShardTest {
 
             final FiniteDuration duration = duration("5 seconds");
 
-            // Simulate the ForwardedReadyTransaction messages that would be sent
-            // by the ShardTransaction.
-
-            shard.tell(new ForwardedReadyTransaction(transactionID, CURRENT_VERSION,
-                    cohort, modification, true, true), getRef());
+            shard.tell(prepareBatchedModifications(shard.underlyingActor(), cohort, transactionID, modification, true), getRef());
 
             expectMsgClass(duration, ThreePhaseCommitCohortMessages.CommitTransactionReply.class);
 
@@ -1269,11 +1256,7 @@ public class ShardTest extends AbstractShardTest {
 
             final FiniteDuration duration = duration("5 seconds");
 
-            // Simulate the ForwardedReadyTransaction messages that would be sent
-            // by the ShardTransaction.
-
-            shard.tell(new ForwardedReadyTransaction(transactionID, CURRENT_VERSION,
-                cohort, modification, true, false), getRef());
+            shard.tell(prepareBatchedModifications(shard.underlyingActor(), cohort, transactionID, modification), getRef());
             expectMsgClass(duration, ReadyTransactionReply.class);
 
             // Send the CanCommitTransaction message.
@@ -1341,11 +1324,7 @@ public class ShardTest extends AbstractShardTest {
 
                 final FiniteDuration duration = duration("5 seconds");
 
-                // Simulate the ForwardedReadyTransaction messages that would be sent
-                // by the ShardTransaction.
-
-                shard.tell(new ForwardedReadyTransaction(transactionID, CURRENT_VERSION,
-                        cohort, modification, true, false), getRef());
+                shard.tell(prepareBatchedModifications(shard.underlyingActor(), cohort, transactionID, modification), getRef());
                 expectMsgClass(duration, ReadyTransactionReply.class);
 
                 // Send the CanCommitTransaction message.
@@ -1400,11 +1379,7 @@ public class ShardTest extends AbstractShardTest {
 
                 final FiniteDuration duration = duration("5 seconds");
 
-                // Simulate the ForwardedReadyTransaction messages that would be sent
-                // by the ShardTransaction.
-
-                shard.tell(new ForwardedReadyTransaction(transactionID, CURRENT_VERSION,
-                        cohort, modification, true, false), getRef());
+                shard.tell(prepareBatchedModifications(shard.underlyingActor(), cohort, transactionID, modification), getRef());
                 expectMsgClass(duration, ReadyTransactionReply.class);
 
                 // Send the CanCommitTransaction message.
@@ -1466,15 +1441,10 @@ public class ShardTest extends AbstractShardTest {
             final FiniteDuration duration = duration("5 seconds");
             final Timeout timeout = new Timeout(duration);
 
-            // Simulate the ForwardedReadyTransaction messages that would be sent
-            // by the ShardTransaction.
-
-            shard.tell(new ForwardedReadyTransaction(transactionID1, CURRENT_VERSION,
-                    cohort1, modification1, true, false), getRef());
+            shard.tell(prepareBatchedModifications(shard.underlyingActor(), cohort1, transactionID1, modification1), getRef());
             expectMsgClass(duration, ReadyTransactionReply.class);
 
-            shard.tell(new ForwardedReadyTransaction(transactionID2, CURRENT_VERSION,
-                    cohort2, modification2, true, false), getRef());
+            shard.tell(prepareBatchedModifications(shard.underlyingActor(), cohort2, transactionID2, modification2), getRef());
             expectMsgClass(duration, ReadyTransactionReply.class);
 
             // Send the CanCommitTransaction message for the first Tx.
@@ -1541,15 +1511,10 @@ public class ShardTest extends AbstractShardTest {
             final FiniteDuration duration = duration("5 seconds");
             final Timeout timeout = new Timeout(duration);
 
-            // Simulate the ForwardedReadyTransaction messages that would be sent
-            // by the ShardTransaction.
-
-            shard.tell(new ForwardedReadyTransaction(transactionID1, CURRENT_VERSION,
-                    cohort1, modification1, true, false), getRef());
+            shard.tell(prepareBatchedModifications(shard.underlyingActor(), cohort1, transactionID1, modification1), getRef());
             expectMsgClass(duration, ReadyTransactionReply.class);
 
-            shard.tell(new ForwardedReadyTransaction(transactionID2, CURRENT_VERSION,
-                    cohort2, modification2, true, false), getRef());
+            shard.tell(prepareBatchedModifications(shard.underlyingActor(), cohort2, transactionID2, modification2), getRef());
             expectMsgClass(duration, ReadyTransactionReply.class);
 
             // Send the CanCommitTransaction message for the first Tx.
@@ -1608,11 +1573,7 @@ public class ShardTest extends AbstractShardTest {
             final ShardDataTreeCohort cohort = mock(ShardDataTreeCohort.class, "cohort1");
             doReturn(Futures.immediateFailedFuture(new IllegalStateException("mock"))).when(cohort).canCommit();
 
-            // Simulate the ForwardedReadyTransaction messages that would be sent
-            // by the ShardTransaction.
-
-            shard.tell(new ForwardedReadyTransaction(transactionID1, CURRENT_VERSION,
-                    cohort, modification, true, false), getRef());
+            shard.tell(prepareBatchedModifications(shard.underlyingActor(), cohort, transactionID1, modification), getRef());
             expectMsgClass(duration, ReadyTransactionReply.class);
 
             // Send the CanCommitTransaction message.
@@ -1627,8 +1588,7 @@ public class ShardTest extends AbstractShardTest {
             final String transactionID2 = "tx2";
             doReturn(Futures.immediateFuture(Boolean.TRUE)).when(cohort).canCommit();
 
-            shard.tell(new ForwardedReadyTransaction(transactionID2, CURRENT_VERSION,
-                    cohort, modification, true, false), getRef());
+            shard.tell(prepareBatchedModifications(transactionID2, modification), getRef());
             expectMsgClass(duration, ReadyTransactionReply.class);
 
             shard.tell(new CanCommitTransaction(transactionID2).toSerializable(), getRef());
@@ -1656,11 +1616,7 @@ public class ShardTest extends AbstractShardTest {
             final ShardDataTreeCohort cohort = mock(ShardDataTreeCohort.class, "cohort1");
             doReturn(Futures.immediateFuture(Boolean.FALSE)).when(cohort).canCommit();
 
-            // Simulate the ForwardedReadyTransaction messages that would be sent
-            // by the ShardTransaction.
-
-            shard.tell(new ForwardedReadyTransaction(transactionID1, CURRENT_VERSION,
-                    cohort, modification, true, false), getRef());
+            shard.tell(prepareBatchedModifications(shard.underlyingActor(), cohort, transactionID1, modification), getRef());
             expectMsgClass(duration, ReadyTransactionReply.class);
 
             // Send the CanCommitTransaction message.
@@ -1677,8 +1633,7 @@ public class ShardTest extends AbstractShardTest {
             final String transactionID2 = "tx2";
             doReturn(Futures.immediateFuture(Boolean.TRUE)).when(cohort).canCommit();
 
-            shard.tell(new ForwardedReadyTransaction(transactionID2, CURRENT_VERSION,
-                cohort, modification, true, false), getRef());
+            shard.tell(prepareBatchedModifications(transactionID2, modification), getRef());
             expectMsgClass(duration, ReadyTransactionReply.class);
 
             shard.tell(new CanCommitTransaction(transactionID2).toSerializable(), getRef());
@@ -1706,11 +1661,7 @@ public class ShardTest extends AbstractShardTest {
             final ShardDataTreeCohort cohort = mock(ShardDataTreeCohort.class, "cohort1");
             doReturn(Futures.immediateFailedFuture(new IllegalStateException("mock"))).when(cohort).canCommit();
 
-            // Simulate the ForwardedReadyTransaction messages that would be sent
-            // by the ShardTransaction.
-
-            shard.tell(new ForwardedReadyTransaction(transactionID1, CURRENT_VERSION,
-                    cohort, modification, true, true), getRef());
+            shard.tell(prepareBatchedModifications(shard.underlyingActor(), cohort, transactionID1, modification, true), getRef());
 
             expectMsgClass(duration, akka.actor.Status.Failure.class);
 
@@ -1728,8 +1679,7 @@ public class ShardTest extends AbstractShardTest {
             doReturn(candidateRoot).when(candidate).getRootNode();
             doReturn(candidate).when(cohort).getCandidate();
 
-            shard.tell(new ForwardedReadyTransaction(transactionID2, CURRENT_VERSION,
-                    cohort, modification, true, true), getRef());
+            shard.tell(prepareBatchedModifications(transactionID2, modification, true), getRef());
 
             expectMsgClass(duration, CommitTransactionReply.SERIALIZABLE_CLASS);
 
@@ -1753,11 +1703,7 @@ public class ShardTest extends AbstractShardTest {
             final ShardDataTreeCohort cohort = mock(ShardDataTreeCohort.class, "cohort1");
             doReturn(Futures.immediateFuture(Boolean.FALSE)).when(cohort).canCommit();
 
-            // Simulate the ForwardedReadyTransaction messages that would be sent
-            // by the ShardTransaction.
-
-            shard.tell(new ForwardedReadyTransaction(transactionID, CURRENT_VERSION,
-                    cohort, modification, true, true), getRef());
+            shard.tell(prepareBatchedModifications(shard.underlyingActor(), cohort, transactionID, modification, true), getRef());
 
             expectMsgClass(duration, akka.actor.Status.Failure.class);
 
@@ -1775,8 +1721,7 @@ public class ShardTest extends AbstractShardTest {
             doReturn(candidateRoot).when(candidate).getRootNode();
             doReturn(candidate).when(cohort).getCandidate();
 
-            shard.tell(new ForwardedReadyTransaction(transactionID2, CURRENT_VERSION,
-                    cohort, modification, true, true), getRef());
+            shard.tell(prepareBatchedModifications(transactionID2, modification, true), getRef());
 
             expectMsgClass(duration, CommitTransactionReply.SERIALIZABLE_CLASS);
 
@@ -1822,8 +1767,7 @@ public class ShardTest extends AbstractShardTest {
                     TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME),
                     modification, preCommit);
 
-            shard.tell(new ForwardedReadyTransaction(transactionID, CURRENT_VERSION,
-                cohort, modification, true, false), getRef());
+            shard.tell(prepareBatchedModifications(shard.underlyingActor(), cohort, transactionID, modification), getRef());
             expectMsgClass(duration, ReadyTransactionReply.class);
 
             shard.tell(new CanCommitTransaction(transactionID).toSerializable(), getRef());
@@ -1887,12 +1831,10 @@ public class ShardTest extends AbstractShardTest {
 
             // Ready the Tx's
 
-            shard.tell(new ForwardedReadyTransaction(transactionID1, CURRENT_VERSION,
-                    cohort1, modification1, true, false), getRef());
+            shard.tell(prepareBatchedModifications(shard.underlyingActor(), cohort1, transactionID1, modification1), getRef());
             expectMsgClass(duration, ReadyTransactionReply.class);
 
-            shard.tell(new ForwardedReadyTransaction(transactionID2, CURRENT_VERSION,
-                    cohort2, modification2, true, false), getRef());
+            shard.tell(prepareBatchedModifications(shard.underlyingActor(), cohort2, transactionID2, modification2), getRef());
             expectMsgClass(duration, ReadyTransactionReply.class);
 
             // canCommit 1st Tx. We don't send the commit so it should timeout.
@@ -1935,39 +1877,26 @@ public class ShardTest extends AbstractShardTest {
 
             final FiniteDuration duration = duration("5 seconds");
 
-            final ShardDataTree dataStore = shard.underlyingActor().getDataStore();
-
             final String transactionID1 = "tx1";
             final MutableCompositeModification modification1 = new MutableCompositeModification();
-            final ShardDataTreeCohort cohort1 = setupMockWriteTransaction("cohort1", dataStore,
-                    TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME), modification1);
 
             final String transactionID2 = "tx2";
             final MutableCompositeModification modification2 = new MutableCompositeModification();
-            final ShardDataTreeCohort cohort2 = setupMockWriteTransaction("cohort2", dataStore,
-                    TestModel.OUTER_LIST_PATH,
-                    ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build(),
-                    modification2);
 
             final String transactionID3 = "tx3";
             final MutableCompositeModification modification3 = new MutableCompositeModification();
-            final ShardDataTreeCohort cohort3 = setupMockWriteTransaction("cohort3", dataStore,
-                    TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME), modification3);
 
             // Ready the Tx's
 
-            shard.tell(new ForwardedReadyTransaction(transactionID1, CURRENT_VERSION,
-                    cohort1, modification1, true, false), getRef());
+            shard.tell(prepareBatchedModifications(transactionID1, modification1), getRef());
             expectMsgClass(duration, ReadyTransactionReply.class);
 
-            shard.tell(new ForwardedReadyTransaction(transactionID2, CURRENT_VERSION,
-                    cohort2, modification2, true, false), getRef());
+            shard.tell(prepareBatchedModifications(transactionID2, modification2), getRef());
             expectMsgClass(duration, ReadyTransactionReply.class);
 
             // The 3rd Tx should exceed queue capacity and fail.
 
-            shard.tell(new ForwardedReadyTransaction(transactionID3, CURRENT_VERSION,
-                    cohort3, modification3, true, false), getRef());
+            shard.tell(prepareBatchedModifications(transactionID3, modification3), getRef());
             expectMsgClass(duration, akka.actor.Status.Failure.class);
 
             // canCommit 1st Tx.
@@ -2005,29 +1934,20 @@ public class ShardTest extends AbstractShardTest {
 
             final String transactionID1 = "tx1";
             final MutableCompositeModification modification1 = new MutableCompositeModification();
-            final ShardDataTreeCohort cohort1 = setupMockWriteTransaction("cohort1", dataStore,
-                    TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME), modification1);
 
-            shard.tell(new ForwardedReadyTransaction(transactionID1, CURRENT_VERSION,
-                cohort1, modification1, true, false), getRef());
+            shard.tell(prepareBatchedModifications(transactionID1, modification1), getRef());
             expectMsgClass(duration, ReadyTransactionReply.class);
 
             final String transactionID2 = "tx2";
             final MutableCompositeModification modification2 = new MutableCompositeModification();
-            final ShardDataTreeCohort cohort2 = setupMockWriteTransaction("cohort2", dataStore,
-                    TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME), modification2);
 
-            shard.tell(new ForwardedReadyTransaction(transactionID2, CURRENT_VERSION,
-                    cohort2, modification2, true, false), getRef());
+            shard.tell(prepareBatchedModifications(transactionID2, modification2), getRef());
             expectMsgClass(duration, ReadyTransactionReply.class);
 
             final String transactionID3 = "tx3";
             final MutableCompositeModification modification3 = new MutableCompositeModification();
-            final ShardDataTreeCohort cohort3 = setupMockWriteTransaction("cohort3", dataStore,
-                    TestModel.TEST2_PATH, ImmutableNodes.containerNode(TestModel.TEST2_QNAME), modification3);
 
-            shard.tell(new ForwardedReadyTransaction(transactionID3, CURRENT_VERSION,
-                cohort3, modification3, true, false), getRef());
+            shard.tell(prepareBatchedModifications(transactionID3, modification3), getRef());
             expectMsgClass(duration, ReadyTransactionReply.class);
 
             // All Tx's are readied. We'll send canCommit for the last one but not the others. The others
@@ -2057,11 +1977,8 @@ public class ShardTest extends AbstractShardTest {
 
             final String transactionID1 = "tx1";
             final MutableCompositeModification modification1 = new MutableCompositeModification();
-            final ShardDataTreeCohort cohort1 = setupMockWriteTransaction("cohort1", dataStore,
-                    TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME), modification1);
 
-            shard.tell(new ForwardedReadyTransaction(transactionID1, CURRENT_VERSION,
-                    cohort1, modification1, true, false), getRef());
+            shard.tell(prepareBatchedModifications(transactionID1, modification1), getRef());
             expectMsgClass(duration, ReadyTransactionReply.class);
 
             // CanCommit the first one so it's the current in-progress CohortEntry.
@@ -2073,11 +1990,8 @@ public class ShardTest extends AbstractShardTest {
 
             final String transactionID2 = "tx2";
             final MutableCompositeModification modification2 = new MutableCompositeModification();
-            final ShardDataTreeCohort cohort2 = setupMockWriteTransaction("cohort2", dataStore,
-                    TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME), modification2);
 
-            shard.tell(new ForwardedReadyTransaction(transactionID2, CURRENT_VERSION,
-                    cohort2, modification2, true, false), getRef());
+            shard.tell(prepareBatchedModifications(transactionID2, modification2), getRef());
             expectMsgClass(duration, ReadyTransactionReply.class);
 
             // Ready the third Tx.
@@ -2147,15 +2061,10 @@ public class ShardTest extends AbstractShardTest {
             final FiniteDuration duration = duration("5 seconds");
             final Timeout timeout = new Timeout(duration);
 
-            // Simulate the ForwardedReadyTransaction messages that would be sent
-            // by the ShardTransaction.
-
-            shard.tell(new ForwardedReadyTransaction(transactionID1, CURRENT_VERSION,
-                    cohort1, modification1, true, false), getRef());
+            shard.tell(prepareBatchedModifications(shard.underlyingActor(), cohort1, transactionID1, modification1), getRef());
             expectMsgClass(duration, ReadyTransactionReply.class);
 
-            shard.tell(new ForwardedReadyTransaction(transactionID2, CURRENT_VERSION,
-                    cohort2, modification2, true, false), getRef());
+            shard.tell(prepareBatchedModifications(shard.underlyingActor(), cohort2, transactionID2, modification2), getRef());
             expectMsgClass(duration, ReadyTransactionReply.class);
 
             // Send the CanCommitTransaction message for the first Tx.
@@ -2228,8 +2137,7 @@ public class ShardTest extends AbstractShardTest {
 
             // Ready the tx.
 
-            shard.tell(new ForwardedReadyTransaction(transactionID, CURRENT_VERSION,
-                    cohort, modification, true, false), getRef());
+            shard.tell(prepareBatchedModifications(shard.underlyingActor(), cohort, transactionID, modification), getRef());
             expectMsgClass(duration, ReadyTransactionReply.class);
 
             assertEquals("getPendingTxCommitQueueSize", 1, shard.underlyingActor().getPendingTxCommitQueueSize());
