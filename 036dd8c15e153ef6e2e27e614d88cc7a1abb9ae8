@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7aade967_06c12f80",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreSnapshotRestore.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-15T08:32:15Z",
+      "side": 1,
+      "message": "Originally I was but I was getting ClassNotFoundEx for DatastoreSnapshot when deserializing. So I thought moving it onto the config pusher thread would get the right thread context class loader but that didn\u0027t work. I then thought it had to do with using ArrayList as the top-level serialized class so I introduced DatastoreSnapshotList but that didn\u0027t fix it. Finally I realized it was due to a subtlety in ObjectInputStream where it uses the class loader of the first class in thread call stack which, at the time, was Apache\u0027s SerializationUtils. Hence I changed it to not use SerializationUtils which fixed it. So you can\u0027t use SerializationUtils to deserialize in OSGi environment.\n\nBut I kept the previous troubleshooting changes anyway b/c I thought they were better. Lazy initialization keeps it off the OSGi activation thread so as not to block it.",
+      "parentUuid": "7aade967_23e77de6",
+      "revId": "036dd8c15e153ef6e2e27e614d88cc7a1abb9ae8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7aade967_43ecf9c7",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
         "patchSetId": 11
@@ -30,6 +48,30 @@
       "writtenOn": "2015-11-14T22:41:08Z",
       "side": 1,
       "message": "Maybe the Builder change should have been in a separate patch.",
+      "range": {
+        "startLine": 1261,
+        "startChar": 24,
+        "endLine": 1261,
+        "endChar": 31
+      },
+      "revId": "036dd8c15e153ef6e2e27e614d88cc7a1abb9ae8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_06484f2c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 1261,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-15T08:32:15Z",
+      "side": 1,
+      "message": "Yeah probably but I made that change on the fly after prior changes and figured it wasn\u0027t as invasive a change as adding the Shard builder so I went the easier route of not splitting up the patch. For the Shard builder I thought of it ahead of time so did in it\u0027s own patch.",
+      "parentUuid": "7aade967_43ecf9c7",
       "range": {
         "startLine": 1261,
         "startChar": 24,
