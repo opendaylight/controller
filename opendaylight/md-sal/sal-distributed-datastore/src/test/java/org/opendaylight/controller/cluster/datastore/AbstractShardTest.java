@@ -13,6 +13,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.opendaylight.controller.cluster.datastore.DataStoreVersions.CURRENT_VERSION;
 import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
 import akka.actor.Props;
@@ -35,6 +36,8 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
+import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
+import org.opendaylight.controller.cluster.datastore.messages.ForwardedReadyTransaction;
 import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
@@ -240,6 +243,51 @@ public abstract class AbstractShardTest extends AbstractActorTest{
 
         return cohort;
     }
+
+    protected Object prepareReadyTransactionMessage(boolean remoteReadWriteTransaction, Shard shard, ShardDataTreeCohort cohort,
+                                                                  String transactionID,
+                                                                  MutableCompositeModification modification,
+                                                                  boolean doCommitOnReady) {
+        if(remoteReadWriteTransaction){
+            return new ForwardedReadyTransaction(transactionID, CURRENT_VERSION,
+                    cohort, modification, true, doCommitOnReady);
+        } else {
+            setupCohortDecorator(shard, cohort);
+            return prepareBatchedModifications(transactionID, modification, doCommitOnReady);
+        }
+    }
+
+    protected Object prepareReadyTransactionMessage(boolean remoteReadWriteTransaction, Shard shard, ShardDataTreeCohort cohort,
+                                                                  String transactionID,
+                                                                  MutableCompositeModification modification) {
+        return prepareReadyTransactionMessage(remoteReadWriteTransaction, shard, cohort, transactionID, modification, false);
+    }
+
+    protected void setupCohortDecorator(Shard shard, final ShardDataTreeCohort cohort) {
+        shard.getCommitCoordinator().setCohortDecorator(new ShardCommitCoordinator.CohortDecorator() {
+            @Override
+            public ShardDataTreeCohort decorate(String transactionID, ShardDataTreeCohort actual) {
+                return cohort;
+            }
+        });
+    }
+
+    protected BatchedModifications prepareBatchedModifications(String transactionID,
+                                                               MutableCompositeModification modification) {
+        return prepareBatchedModifications(transactionID, modification, false);
+    }
+
+    private BatchedModifications prepareBatchedModifications(String transactionID,
+                                                             MutableCompositeModification modification,
+                                                             boolean doCommitOnReady) {
+        final BatchedModifications batchedModifications = new BatchedModifications(transactionID, CURRENT_VERSION, null);
+        batchedModifications.addModification(modification);
+        batchedModifications.setReady(true);
+        batchedModifications.setDoCommitOnReady(doCommitOnReady);
+        batchedModifications.setTotalMessagesSent(1);
+        return batchedModifications;
+    }
+
 
     public static NormalizedNode<?,?> readStore(final TestActorRef<? extends Shard> shard, final YangInstanceIdentifier id)
             throws ExecutionException, InterruptedException {
