@@ -141,6 +141,10 @@ public class TestActorFactory implements AutoCloseable {
         killActor(actor, kit, true);
     }
 
+    public String createTestActorPath(String actorId){
+        return "akka://test/user/" + actorId;
+    }
+
     private void killActor(ActorRef actor, JavaTestKit kit, boolean remove) {
         LOG.info("Killing actor {}", actor);
         kit.watch(actor);

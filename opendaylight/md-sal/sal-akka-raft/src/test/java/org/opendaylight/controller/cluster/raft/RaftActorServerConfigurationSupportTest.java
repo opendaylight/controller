@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor.assertNoneMatching;
 import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor.clearMessages;
 import static org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor.expectFirstMatching;
@@ -22,6 +23,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +38,7 @@ import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.base.messages.InitiateCaptureSnapshot;
+import org.opendaylight.controller.cluster.raft.base.messages.SwitchBehavior;
 import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader;
 import org.opendaylight.controller.cluster.raft.behaviors.Follower;
 import org.opendaylight.controller.cluster.raft.behaviors.Leader;
@@ -44,7 +47,10 @@ import org.opendaylight.controller.cluster.raft.messages.AddServerReply;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
 import org.opendaylight.controller.cluster.raft.messages.FollowerCatchUpTimeout;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
+import org.opendaylight.controller.cluster.raft.messages.RemoveServer;
+import org.opendaylight.controller.cluster.raft.messages.RemoveServerReply;
 import org.opendaylight.controller.cluster.raft.messages.ServerChangeStatus;
+import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
 import org.opendaylight.controller.cluster.raft.messages.UnInitializedFollowerSnapshotReply;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.utils.ForwardMessageToBehaviorActor;
@@ -564,7 +570,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         configParams.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
 
         TestActorRef<MockRaftActor> noLeaderActor = actorFactory.createTestActor(
-                MockRaftActor.props(LEADER_ID, ImmutableMap.<String,String>of(FOLLOWER_ID, followerActor.path().toString()),
+                MockRaftActor.props(LEADER_ID, ImmutableMap.of(FOLLOWER_ID, followerActor.path().toString()),
                         configParams, NO_PERSISTENCE).withDispatcher(Dispatchers.DefaultDispatcherId()),
                 actorFactory.generateActorId(LEADER_ID));
         noLeaderActor.underlyingActor().waitForInitializeBehaviorComplete();
@@ -625,7 +631,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
                 actorFactory.generateActorId(LEADER_ID));
 
         TestActorRef<MockRaftActor> followerRaftActor = actorFactory.createTestActor(
-                MockRaftActor.props(FOLLOWER_ID, ImmutableMap.<String,String>of(LEADER_ID, leaderActor.path().toString()),
+                MockRaftActor.props(FOLLOWER_ID, ImmutableMap.of(LEADER_ID, leaderActor.path().toString()),
                         configParams, NO_PERSISTENCE).withDispatcher(Dispatchers.DefaultDispatcherId()),
                 actorFactory.generateActorId(FOLLOWER_ID));
         followerRaftActor.underlyingActor().waitForInitializeBehaviorComplete();
@@ -651,6 +657,155 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         handled = support.handleMessage(new ApplyState(null, null, nonServerConfigEntry), null, ActorRef.noSender());
         assertEquals("Message handled", false, handled);
     }
+
+    @Test
+    public void testRemoveServerWithNoLeader() {
+        DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
+        configParams.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
+
+        TestActorRef<MockRaftActor> leaderActor = actorFactory.createTestActor(
+                MockRaftActor.props(LEADER_ID, ImmutableMap.of(FOLLOWER_ID, followerActor.path().toString()),
+                        configParams, NO_PERSISTENCE).withDispatcher(Dispatchers.DefaultDispatcherId()),
+                actorFactory.generateActorId(LEADER_ID));
+        leaderActor.underlyingActor().waitForInitializeBehaviorComplete();
+
+        leaderActor.tell(new RemoveServer(NEW_SERVER_ID), testKit.getRef());
+        RemoveServerReply removeServerReply = testKit.expectMsgClass(JavaTestKit.duration("5 seconds"), RemoveServerReply.class);
+        assertEquals("getStatus", ServerChangeStatus.NO_LEADER, removeServerReply.getStatus());
+    }
+
+    @Test
+    public void testRemoveServerNonExistentServer() {
+        DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
+        configParams.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
+        configParams.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
+
+        TestActorRef<MockRaftActor> leaderActor = actorFactory.createTestActor(
+                MockRaftActor.props(LEADER_ID, ImmutableMap.of(FOLLOWER_ID, followerActor.path().toString()),
+                        configParams, NO_PERSISTENCE).withDispatcher(Dispatchers.DefaultDispatcherId()),
+                actorFactory.generateActorId(LEADER_ID));
+
+        leaderActor.underlyingActor().waitForInitializeBehaviorComplete();
+
+        leaderActor.tell(new SwitchBehavior(RaftState.Leader, 2), testKit.getRef());
+
+        leaderActor.underlyingActor().waitUntilLeader();
+
+        leaderActor.tell(new RemoveServer(NEW_SERVER_ID), testKit.getRef());
+        RemoveServerReply removeServerReply = testKit.expectMsgClass(JavaTestKit.duration("5 seconds"), RemoveServerReply.class);
+        assertEquals("getStatus", ServerChangeStatus.DOES_NOT_EXIST, removeServerReply.getStatus());
+    }
+
+    @Test
+    public void testRemoveServerSelf() {
+        DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
+        configParams.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
+        configParams.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
+
+        TestActorRef<MockRaftActor> leaderActor = actorFactory.createTestActor(
+                MockRaftActor.props(LEADER_ID, ImmutableMap.of(FOLLOWER_ID, followerActor.path().toString()),
+                        configParams, NO_PERSISTENCE).withDispatcher(Dispatchers.DefaultDispatcherId()),
+                actorFactory.generateActorId(LEADER_ID));
+
+        leaderActor.underlyingActor().waitForInitializeBehaviorComplete();
+
+        leaderActor.tell(new SwitchBehavior(RaftState.Leader, 2), testKit.getRef());
+
+        leaderActor.underlyingActor().waitUntilLeader();
+
+        leaderActor.tell(new RemoveServer(LEADER_ID), testKit.getRef());
+        RemoveServerReply removeServerReply = testKit.expectMsgClass(JavaTestKit.duration("5 seconds"), RemoveServerReply.class);
+        assertEquals("getStatus", ServerChangeStatus.NOT_SUPPORTED, removeServerReply.getStatus());
+    }
+
+    @Test
+    public void testRemoveServerForwardToLeader() {
+        DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
+        configParams.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
+        configParams.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
+
+        TestActorRef<MockRaftActor> leaderActor = actorFactory.createTestActor(
+                MockRaftActor.props(LEADER_ID, ImmutableMap.<String, String>of(),
+                        configParams, NO_PERSISTENCE).withDispatcher(Dispatchers.DefaultDispatcherId()),
+                actorFactory.generateActorId(LEADER_ID));
+
+        TestActorRef<MockRaftActor> followerRaftActor = actorFactory.createTestActor(
+                MockRaftActor.props(FOLLOWER_ID, ImmutableMap.of(LEADER_ID, leaderActor.path().toString()),
+                        configParams, NO_PERSISTENCE).withDispatcher(Dispatchers.DefaultDispatcherId()),
+                actorFactory.generateActorId(FOLLOWER_ID));
+
+
+        leaderActor.underlyingActor().waitForInitializeBehaviorComplete();
+
+        leaderActor.underlyingActor().waitUntilLeader();
+        followerRaftActor.tell(new AppendEntries(1, LEADER_ID, 0, 1, Collections.<ReplicatedLogEntry>emptyList(),
+                -1, -1, (short) 0), leaderActor);
+
+        followerRaftActor.tell(new RemoveServer(LEADER_ID), testKit.getRef());
+        RemoveServerReply removeServerReply = testKit.expectMsgClass(JavaTestKit.duration("5 seconds"), RemoveServerReply.class);
+        assertEquals("getStatus", ServerChangeStatus.NOT_SUPPORTED, removeServerReply.getStatus());
+    }
+
+    @Test
+    public void testRemoveServer() {
+        DefaultConfigParamsImpl configParams = new DefaultConfigParamsImpl();
+        configParams.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
+        configParams.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
+
+        final String followerActorId = actorFactory.generateActorId(FOLLOWER_ID);
+        final String followerActorPath = actorFactory.createTestActorPath(followerActorId);
+
+        TestActorRef<MockRaftActor> leaderActor = actorFactory.createTestActor(
+                MockRaftActor.props(LEADER_ID, ImmutableMap.of(FOLLOWER_ID, followerActorPath),
+                        configParams, NO_PERSISTENCE).withDispatcher(Dispatchers.DefaultDispatcherId()),
+                actorFactory.generateActorId(LEADER_ID));
+
+        TestActorRef<CollectingMockRaftActor> followerRaftActor = actorFactory.createTestActor(
+                CollectingMockRaftActor.props(FOLLOWER_ID, ImmutableMap.of(LEADER_ID, leaderActor.path().toString()),
+                        configParams, NO_PERSISTENCE).withDispatcher(Dispatchers.DefaultDispatcherId()),
+                followerActorId);
+
+        TestActorRef<MessageCollectorActor> collector =
+                actorFactory.createTestActor(MessageCollectorActor.props().withDispatcher(Dispatchers.DefaultDispatcherId()), actorFactory.generateActorId("collector"));
+
+        followerRaftActor.underlyingActor().setCollectorActor(collector);
+
+        leaderActor.underlyingActor().waitForInitializeBehaviorComplete();
+
+        leaderActor.tell(new SwitchBehavior(RaftState.Leader, 2), testKit.getRef());
+
+        leaderActor.underlyingActor().waitUntilLeader();
+
+        leaderActor.tell(new RemoveServer(FOLLOWER_ID), testKit.getRef());
+        RemoveServerReply removeServerReply = testKit.expectMsgClass(JavaTestKit.duration("5 seconds"), RemoveServerReply.class);
+
+        assertEquals("getStatus", ServerChangeStatus.OK, removeServerReply.getStatus());
+
+        // wait for entry to be applied
+        for(int i=0;i<10;i++){
+            if(leaderActor.underlyingActor().getLastApplied() == 0){
+                break;
+            }
+            Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
+        }
+        assertEquals(0L, (long) leaderActor.underlyingActor().getLastApplied());
+        verifyServerConfigurationPayloadInJournal(LEADER_ID, LEADER_ID, 0, 2, 1);
+
+        MessageCollectorActor.expectFirstMatching(collector, ServerRemoved.class);
+    }
+
+    private List<ReplicatedLogImplEntry> verifyServerConfigurationPayloadInJournal(String journalId, String serverId, int index, int term, int size) {
+        List<ReplicatedLogImplEntry> persistedLogEntries = InMemoryJournal.get(journalId, ReplicatedLogImplEntry.class);
+        assertTrue((persistedLogEntries.get(index).getData() instanceof ServerConfigurationPayload));
+        assertEquals(index, persistedLogEntries.get(index).getIndex());
+        assertEquals(term, persistedLogEntries.get(index).getTerm());
+        ServerConfigurationPayload payload = (ServerConfigurationPayload) persistedLogEntries.get(index).getData();
+        assertEquals(size, payload.getServerConfig().size());
+        final ServerInfo serverInfo = payload.getServerConfig().get(index);
+        assertEquals(serverId, serverInfo.getId());
+        return persistedLogEntries;
+    }
+
 
     private ServerInfo votingServer(String id) {
         return new ServerInfo(id, true);
@@ -714,6 +869,20 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
                 collectorActor.tell(message, getSender());
             }
         }
+    }
+
+    public static class CollectingMockRaftActor extends AbstractMockRaftActor {
+
+        CollectingMockRaftActor(String id, Map<String, String> peerAddresses, Optional<ConfigParams> config, DataPersistenceProvider dataPersistenceProvider, TestActorRef<MessageCollectorActor> collectorActor) {
+            super(id, peerAddresses, config, dataPersistenceProvider, collectorActor);
+        }
+
+        public static Props props(final String id, final Map<String, String> peerAddresses,
+                                  ConfigParams config, DataPersistenceProvider dataPersistenceProvider){
+
+            return Props.create(CollectingMockRaftActor.class, id, peerAddresses, Optional.of(config), dataPersistenceProvider, null);
+        }
+
     }
 
     public static class MockLeaderRaftActor extends AbstractMockRaftActor {
