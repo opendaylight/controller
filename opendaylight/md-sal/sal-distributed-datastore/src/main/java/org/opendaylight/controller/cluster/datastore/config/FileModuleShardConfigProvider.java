@@ -7,7 +7,6 @@
  */
 package org.opendaylight.controller.cluster.datastore.config;
 
-import com.google.common.collect.ImmutableSet;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigObject;
@@ -36,7 +35,7 @@ public class FileModuleShardConfigProvider implements ModuleShardConfigProvider 
     }
 
     @Override
-    public Map<String, ModuleConfig> retrieveModuleConfigs(Configuration configuration) {
+    public Map<String, ModuleConfig.Builder> retrieveModuleConfigs(Configuration configuration) {
         File moduleShardsFile = new File("./configuration/initial/" + moduleShardsConfigPath);
         File modulesFile = new File("./configuration/initial/" + modulesConfigPath);
 
@@ -58,13 +57,13 @@ public class FileModuleShardConfigProvider implements ModuleShardConfigProvider 
             modulesConfig = ConfigFactory.load(modulesConfigPath);
         }
 
-        Map<String, ModuleConfig> moduleConfigMap = readModuleShardsConfig(moduleShardsConfig);
+        Map<String, ModuleConfig.Builder> moduleConfigMap = readModuleShardsConfig(moduleShardsConfig);
         readModulesConfig(modulesConfig, moduleConfigMap, configuration);
 
         return moduleConfigMap;
     }
 
-    private static void readModulesConfig(final Config modulesConfig, Map<String, ModuleConfig> moduleConfigMap,
+    private static void readModulesConfig(final Config modulesConfig, Map<String, ModuleConfig.Builder> moduleConfigMap,
             Configuration configuration) {
         List<? extends ConfigObject> modulesConfigObjectList = modulesConfig.getObjectList("modules");
 
@@ -72,26 +71,26 @@ public class FileModuleShardConfigProvider implements ModuleShardConfigProvider 
             ConfigObjectWrapper w = new ConfigObjectWrapper(o);
 
             String moduleName = w.stringValue("name");
-            ModuleConfig moduleConfig = moduleConfigMap.get(moduleName);
-            if(moduleConfig == null) {
-                moduleConfig = new ModuleConfig(moduleName);
-                moduleConfigMap.put(moduleName, moduleConfig);
+            ModuleConfig.Builder builder = moduleConfigMap.get(moduleName);
+            if(builder == null) {
+                builder = ModuleConfig.builder(moduleName);
+                moduleConfigMap.put(moduleName, builder);
             }
 
-            moduleConfig.setNameSpace(w.stringValue("namespace"));
-            moduleConfig.setShardStrategy(ShardStrategyFactory.newShardStrategyInstance(moduleName,
+            builder.nameSpace(w.stringValue("namespace"));
+            builder.shardStrategy(ShardStrategyFactory.newShardStrategyInstance(moduleName,
                     w.stringValue("shard-strategy"), configuration));
         }
     }
 
-    private static Map<String, ModuleConfig> readModuleShardsConfig(final Config moduleShardsConfig) {
+    private static Map<String, ModuleConfig.Builder> readModuleShardsConfig(final Config moduleShardsConfig) {
         List<? extends ConfigObject> moduleShardsConfigObjectList =
             moduleShardsConfig.getObjectList("module-shards");
 
-        Map<String, ModuleConfig> moduleConfigMap = new HashMap<>();
+        Map<String, ModuleConfig.Builder> moduleConfigMap = new HashMap<>();
         for(ConfigObject moduleShardConfigObject : moduleShardsConfigObjectList){
             String moduleName = moduleShardConfigObject.get("name").unwrapped().toString();
-            ModuleConfig moduleConfig = new ModuleConfig(moduleName);
+            ModuleConfig.Builder builder = ModuleConfig.builder(moduleName);
 
             List<? extends ConfigObject> shardsConfigObjectList =
                 moduleShardConfigObject.toConfig().getObjectList("shards");
@@ -99,10 +98,10 @@ public class FileModuleShardConfigProvider implements ModuleShardConfigProvider 
             for(ConfigObject shard : shardsConfigObjectList){
                 String shardName = shard.get("name").unwrapped().toString();
                 List<String> replicas = shard.toConfig().getStringList("replicas");
-                moduleConfig.addShardConfig(shardName, ImmutableSet.copyOf(replicas));
+                builder.shardConfig(shardName, replicas);
             }
 
-            moduleConfigMap.put(moduleName, moduleConfig);
+            moduleConfigMap.put(moduleName, builder);
         }
 
         return moduleConfigMap;
