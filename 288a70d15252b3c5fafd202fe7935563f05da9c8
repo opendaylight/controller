@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "7aade967_128649ba",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreSnapshotRestore.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-16T19:17:35Z",
+      "side": 1,
+      "message": "Yeah that could theoretically happen but wouldn\u0027t as two concurrent calls can\u0027t happen b/c the config system pushes one at a time. But it wouldn\u0027t hurt to synchronize in case it ever could happen.",
+      "parentUuid": "7aade967_92f31973",
+      "revId": "288a70d15252b3c5fafd202fe7935563f05da9c8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7aade967_b24df5c6",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/config/yang/config/distributed_datastore_provider/DistributedConfigDataStoreProviderModule.java",
         "patchSetId": 12
@@ -102,6 +120,24 @@
       "side": 1,
       "message": "What I meant was: is the Activator that calls DatastoreSnapshotRestore.createInstance() guaranteed to have already been run before this module gets loaded?",
       "parentUuid": "7aade967_52d601c7",
+      "revId": "288a70d15252b3c5fafd202fe7935563f05da9c8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_b292d5f4",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/config/yang/config/distributed_datastore_provider/DistributedConfigDataStoreProviderModule.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-16T19:17:35Z",
+      "side": 1,
+      "message": "yes",
+      "parentUuid": "7aade967_f2012d3a",
       "revId": "288a70d15252b3c5fafd202fe7935563f05da9c8",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
