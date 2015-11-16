@@ -17,7 +17,7 @@ import javax.annotation.Nonnull;
  */
 public interface ModuleShardConfigProvider {
     /**
-     * Returns a Map of ModuleConfig instances keyed by module name.
+     * Returns a Map of ModuleConfig Builder instances keyed by module name.
      */
-    @Nonnull Map<String, ModuleConfig> retrieveModuleConfigs(@Nonnull Configuration configuration);
+    @Nonnull Map<String, ModuleConfig.Builder> retrieveModuleConfigs(@Nonnull Configuration configuration);
 }

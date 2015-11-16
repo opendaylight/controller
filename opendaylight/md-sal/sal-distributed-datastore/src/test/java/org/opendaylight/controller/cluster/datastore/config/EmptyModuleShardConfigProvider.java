@@ -18,7 +18,7 @@ import java.util.Map;
 public class EmptyModuleShardConfigProvider implements ModuleShardConfigProvider {
 
     @Override
-    public Map<String, ModuleConfig> retrieveModuleConfigs(Configuration configuration) {
+    public Map<String, ModuleConfig.Builder> retrieveModuleConfigs(Configuration configuration) {
         return Collections.emptyMap();
     }
 }

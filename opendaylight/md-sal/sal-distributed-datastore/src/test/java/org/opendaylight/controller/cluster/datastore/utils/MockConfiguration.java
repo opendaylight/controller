@@ -8,7 +8,6 @@
 
 package org.opendaylight.controller.cluster.datastore.utils;
 
-import com.google.common.collect.Sets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -27,13 +26,11 @@ public class MockConfiguration extends ConfigurationImpl {
     public MockConfiguration(final Map<String, List<String>> shardMembers) {
         super(new ModuleShardConfigProvider() {
             @Override
-            public Map<String, ModuleConfig> retrieveModuleConfigs(Configuration configuration) {
-                Map<String, ModuleConfig> retMap = new HashMap<String, ModuleConfig>();
+            public Map<String, ModuleConfig.Builder> retrieveModuleConfigs(Configuration configuration) {
+                Map<String, ModuleConfig.Builder> retMap = new HashMap<>();
                 for(Map.Entry<String, List<String>> e : shardMembers.entrySet()) {
                     String shardName = e.getKey();
-                    ModuleConfig mc = new ModuleConfig(shardName);
-                    mc.addShardConfig(shardName, Sets.newHashSet(e.getValue()));
-                    retMap.put(mc.getName(), mc);
+                    retMap.put(shardName, ModuleConfig.builder(shardName).shardConfig(shardName, e.getValue()));
                 }
 
                 return retMap;
