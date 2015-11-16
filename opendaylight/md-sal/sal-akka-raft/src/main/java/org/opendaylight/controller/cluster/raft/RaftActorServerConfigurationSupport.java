@@ -22,7 +22,10 @@ import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader;
 import org.opendaylight.controller.cluster.raft.messages.AddServer;
 import org.opendaylight.controller.cluster.raft.messages.AddServerReply;
 import org.opendaylight.controller.cluster.raft.messages.FollowerCatchUpTimeout;
+import org.opendaylight.controller.cluster.raft.messages.RemoveServer;
+import org.opendaylight.controller.cluster.raft.messages.RemoveServerReply;
 import org.opendaylight.controller.cluster.raft.messages.ServerChangeStatus;
+import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
 import org.opendaylight.controller.cluster.raft.messages.UnInitializedFollowerSnapshotReply;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.slf4j.Logger;
@@ -51,14 +54,17 @@ class RaftActorServerConfigurationSupport {
 
     boolean handleMessage(Object message, RaftActor raftActor, ActorRef sender) {
         if(message instanceof AddServer) {
-            onAddServer((AddServer)message, raftActor, sender);
+            onAddServer((AddServer) message, raftActor, sender);
+            return true;
+        } else if(message instanceof RemoveServer) {
+            onRemoveServer((RemoveServer) message, raftActor, sender);
             return true;
         } else if (message instanceof FollowerCatchUpTimeout) {
-            currentOperationState.onFollowerCatchupTimeout(raftActor, (FollowerCatchUpTimeout)message);
+            currentOperationState.onFollowerCatchupTimeout(raftActor, (FollowerCatchUpTimeout) message);
             return true;
         } else if (message instanceof UnInitializedFollowerSnapshotReply) {
             currentOperationState.onUnInitializedFollowerSnapshotReply(raftActor,
-                    (UnInitializedFollowerSnapshotReply)message);
+                    (UnInitializedFollowerSnapshotReply) message);
             return true;
         } else if(message instanceof ApplyState) {
             return onApplyState((ApplyState) message, raftActor);
@@ -67,6 +73,19 @@ class RaftActorServerConfigurationSupport {
             return false;
         } else {
             return false;
+        }
+    }
+
+    private void onRemoveServer(RemoveServer removeServer, RaftActor raftActor, ActorRef sender) {
+        if(removeServer.getServerId().equals(raftActor.getLeaderId())){
+            // Removing current leader is not supported yet
+            // TODO: To properly support current leader removal we need to first implement transfer of leadership
+            LOG.debug("Cannot remove {} replica because it is the Leader", removeServer.getServerId());
+            sender.tell(new RemoveServerReply(ServerChangeStatus.NOT_SUPPORTED, raftActor.getLeaderId()), raftActor.getSelf());
+        } else if(!raftContext.getPeerIds().contains(removeServer.getServerId())) {
+            sender.tell(new RemoveServerReply(ServerChangeStatus.DOES_NOT_EXIST, raftActor.getLeaderId()), raftActor.getSelf());
+        } else {
+            onNewOperation(raftActor, new RemoveServerContext(removeServer, raftContext.getPeerAddress(removeServer.getServerId()), sender));
         }
     }
 
@@ -196,6 +215,8 @@ class RaftActorServerConfigurationSupport {
                 sendReply(raftActor, operationContext, replyStatus);
             }
 
+            operationContext.operationComplete(raftActor, replyStatus);
+
             currentOperationState = IDLE;
 
             ServerOperationContext<?> nextOperation = pendingOperationsQueue.poll();
@@ -248,7 +269,7 @@ class RaftActorServerConfigurationSupport {
             // Sanity check - we could get an ApplyState from a previous operation that timed out so make
             // sure it's meant for us.
             if(operationContext.getContextId().equals(applyState.getIdentifier())) {
-                LOG.info("{}: {} has been successfully replicated to a majority of followers",
+                LOG.info("{}: {} has been successfully replicated to a majority of followers", raftActor.getId(),
                         applyState.getReplicatedLogEntry().getData());
 
                 operationComplete(raftActor, operationContext, null);
@@ -295,6 +316,7 @@ class RaftActorServerConfigurationSupport {
             operationComplete(raftActor, getAddServerContext(),
                     isLeader ? ServerChangeStatus.TIMEOUT : ServerChangeStatus.NO_LEADER);
         }
+
     }
 
     /**
@@ -464,6 +486,8 @@ class RaftActorServerConfigurationSupport {
         abstract Object newReply(ServerChangeStatus status, String leaderId);
 
         abstract InitialOperationState newInitialOperationState(RaftActorServerConfigurationSupport support);
+
+        abstract void operationComplete(RaftActor raftActor, ServerChangeStatus serverChangeStatus);
     }
 
     /**
@@ -483,5 +507,65 @@ class RaftActorServerConfigurationSupport {
         InitialOperationState newInitialOperationState(RaftActorServerConfigurationSupport support) {
             return support.new InitialAddServerState(this);
         }
+
+        @Override
+        void operationComplete(RaftActor raftActor, ServerChangeStatus serverChangeStatus) {
+
+        }
+    }
+
+    private abstract class RemoveServerState extends AbstractOperationState {
+        private final RemoveServerContext removeServerContext;
+
+
+        protected RemoveServerState(RemoveServerContext removeServerContext) {
+            this.removeServerContext = Preconditions.checkNotNull(removeServerContext);
+
+        }
+
+        public RemoveServerContext getRemoveServerContext() {
+            return removeServerContext;
+        }
+
+    }
+
+    private class InitialRemoveServerState extends RemoveServerState implements InitialOperationState{
+
+        protected InitialRemoveServerState(RemoveServerContext removeServerContext) {
+            super(removeServerContext);
+        }
+
+        @Override
+        public void initiate(RaftActor raftActor) {
+            raftContext.removePeer(getRemoveServerContext().getOperation().getServerId());
+            persistNewServerConfiguration(raftActor, getRemoveServerContext());
+        }
+    }
+
+    private static class RemoveServerContext extends ServerOperationContext<RemoveServer> {
+        private final String peerAddress;
+
+        RemoveServerContext(RemoveServer operation, String peerAddress, ActorRef clientRequestor) {
+            super(operation, clientRequestor);
+            this.peerAddress = peerAddress;
+        }
+
+        @Override
+        Object newReply(ServerChangeStatus status, String leaderId) {
+            return new RemoveServerReply(status, leaderId);
+        }
+
+        @Override
+        InitialOperationState newInitialOperationState(RaftActorServerConfigurationSupport support) {
+            return support.new InitialRemoveServerState(this);
+        }
+
+        @Override
+        void operationComplete(RaftActor raftActor, ServerChangeStatus serverChangeStatus) {
+            if(peerAddress != null) {
+                raftActor.context().actorSelection(peerAddress).tell(new ServerRemoved(getOperation().getServerId()), raftActor.getSelf());
+            }
+        }
+
     }
 }

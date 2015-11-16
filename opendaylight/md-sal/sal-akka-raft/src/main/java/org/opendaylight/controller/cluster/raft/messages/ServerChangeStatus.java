@@ -16,5 +16,8 @@ public enum ServerChangeStatus {
     OK,
     NO_LEADER,
     TIMEOUT,
-    ALREADY_EXISTS
+    ALREADY_EXISTS,
+    DOES_NOT_EXIST,  // Server with the specified address does not exist
+    NOT_SUPPORTED,   // Some types of RemoveServer for example Removing the current Leader may not be
+                     // supported (at least initially)
 }
