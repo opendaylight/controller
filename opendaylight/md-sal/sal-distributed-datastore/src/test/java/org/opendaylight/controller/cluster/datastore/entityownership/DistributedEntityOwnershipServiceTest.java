@@ -29,8 +29,6 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -44,8 +42,7 @@ import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
 import org.opendaylight.controller.cluster.datastore.ShardDataTree;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
-import org.opendaylight.controller.cluster.datastore.config.ModuleConfig;
-import org.opendaylight.controller.cluster.datastore.config.ModuleShardConfigProvider;
+import org.opendaylight.controller.cluster.datastore.config.EmptyModuleShardConfigProvider;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.RegisterCandidateLocal;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.RegisterListenerLocal;
 import org.opendaylight.controller.cluster.datastore.entityownership.messages.UnregisterCandidateLocal;
@@ -88,13 +85,7 @@ public class DistributedEntityOwnershipServiceTest extends AbstractEntityOwnersh
         DatastoreContext datastoreContext = DatastoreContext.newBuilder().dataStoreType(dataStoreType).
                 shardInitializationTimeout(10, TimeUnit.SECONDS).build();
 
-        ModuleShardConfigProvider configProvider = new ModuleShardConfigProvider() {
-            @Override
-            public Map<String, ModuleConfig> retrieveModuleConfigs(Configuration configuration) {
-                return Collections.emptyMap();
-            }
-        };
-        Configuration configuration = new ConfigurationImpl(configProvider) {
+        Configuration configuration = new ConfigurationImpl(new EmptyModuleShardConfigProvider()) {
             @Override
             public Collection<String> getUniqueMemberNamesForAllShards() {
                 return Sets.newHashSet("member-1");
