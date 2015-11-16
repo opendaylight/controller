@@ -35,7 +35,12 @@ public class ConfigurationImpl implements Configuration {
     }
 
     public ConfigurationImpl(final ModuleShardConfigProvider provider) {
-        this.moduleConfigMap = ImmutableMap.copyOf(provider.retrieveModuleConfigs(this));
+        ImmutableMap.Builder<String, ModuleConfig> mapBuilder = ImmutableMap.builder();
+        for(Map.Entry<String, ModuleConfig.Builder> e: provider.retrieveModuleConfigs(this).entrySet()) {
+            mapBuilder.put(e.getKey(), e.getValue().build());
+        }
+
+        this.moduleConfigMap = mapBuilder.build();
 
         this.allShardNames = createAllShardNames(moduleConfigMap.values());
         this.namespaceToModuleName = createNamespaceToModuleName(moduleConfigMap.values());
@@ -135,14 +140,12 @@ public class ConfigurationImpl implements Configuration {
     public synchronized void addModuleShardConfiguration(ModuleShardConfiguration config) {
         Preconditions.checkNotNull(config, "ModuleShardConfiguration should not be null");
 
-        ModuleConfig moduleConfig = new ModuleConfig(config.getModuleName());
-        moduleConfig.setNameSpace(config.getNamespace().toASCIIString());
-        moduleConfig.setShardStrategy(createShardStrategy(config.getModuleName(), config.getShardStrategyName()));
+        ModuleConfig moduleConfig = ModuleConfig.builder(config.getModuleName()).
+                nameSpace(config.getNamespace().toASCIIString()).
+                shardStrategy(createShardStrategy(config.getModuleName(), config.getShardStrategyName())).
+                shardConfig(config.getShardName(), config.getShardMemberNames()).build();
 
-        moduleConfig.addShardConfig(config.getShardName(), ImmutableSet.copyOf(config.getShardMemberNames()));
-
-        moduleConfigMap = ImmutableMap.<String, ModuleConfig>builder().putAll(moduleConfigMap).
-                put(config.getModuleName(), moduleConfig).build();
+        updateModuleConfigMap(moduleConfig);
 
         namespaceToModuleName = ImmutableMap.<String, String>builder().putAll(namespaceToModuleName).
                 put(moduleConfig.getNameSpace(), moduleConfig.getName()).build();
@@ -167,11 +170,9 @@ public class ConfigurationImpl implements Configuration {
         for(ModuleConfig moduleConfig: moduleConfigMap.values()) {
             ShardConfig shardConfig = moduleConfig.getShardConfig(shardName);
             if(shardConfig != null) {
-                ModuleConfig newModuleConfig = new ModuleConfig(moduleConfig);
-                Set<String> replica = new HashSet<>(shardConfig.getReplicas());
-                replica.add(newMemberName);
-                newModuleConfig.addShardConfig(shardName, ImmutableSet.copyOf(replica));
-                updateModuleConfigMap(newModuleConfig);
+                Set<String> replicas = new HashSet<>(shardConfig.getReplicas());
+                replicas.add(newMemberName);
+                updateModuleConfigMap(ModuleConfig.builder(moduleConfig).shardConfig(shardName, replicas).build());
                 return;
             }
         }
@@ -185,20 +186,17 @@ public class ConfigurationImpl implements Configuration {
         for(ModuleConfig moduleConfig: moduleConfigMap.values()) {
             ShardConfig shardConfig = moduleConfig.getShardConfig(shardName);
             if(shardConfig != null) {
-                ModuleConfig newModuleConfig = new ModuleConfig(moduleConfig);
-                Set<String> replica = new HashSet<>(shardConfig.getReplicas());
-                replica.remove(newMemberName);
-                newModuleConfig.addShardConfig(shardName, ImmutableSet.copyOf(replica));
-                updateModuleConfigMap(newModuleConfig);
+                Set<String> replicas = new HashSet<>(shardConfig.getReplicas());
+                replicas.remove(newMemberName);
+                updateModuleConfigMap(ModuleConfig.builder(moduleConfig).shardConfig(shardName, replicas).build());
                 return;
             }
         }
     }
 
     private void updateModuleConfigMap(ModuleConfig moduleConfig) {
-        HashMap<String, ModuleConfig> newModuleConfigMap = new HashMap<>(moduleConfigMap);
+        Map<String, ModuleConfig> newModuleConfigMap = new HashMap<>(moduleConfigMap);
         newModuleConfigMap.put(moduleConfig.getName(), moduleConfig);
-        moduleConfigMap = ImmutableMap.<String, ModuleConfig>builder().putAll(newModuleConfigMap).build();
-        return;
+        moduleConfigMap = ImmutableMap.copyOf(newModuleConfigMap);
     }
 }
