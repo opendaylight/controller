@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7aade967_32d105ce",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreSnapshotRestore.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-16T18:53:13Z",
+      "side": 1,
+      "message": "compareAndSet is atomic so only the thread that sees the transition edge from false to true will proceed with initialization.",
+      "parentUuid": "7aade967_f2536d6a",
+      "revId": "288a70d15252b3c5fafd202fe7935563f05da9c8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7aade967_b24df5c6",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/config/yang/config/distributed_datastore_provider/DistributedConfigDataStoreProviderModule.java",
         "patchSetId": 12
@@ -30,6 +48,24 @@
       "writtenOn": "2015-11-16T18:47:16Z",
       "side": 1,
       "message": "Is it guaranteed that DatastoreSnapshotRestore.instance() will have already been initialized here?  I\u0027m not familiar with where such dependencies are specified.",
+      "revId": "288a70d15252b3c5fafd202fe7935563f05da9c8",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_52d601c7",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/config/yang/config/distributed_datastore_provider/DistributedConfigDataStoreProviderModule.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-16T18:53:13Z",
+      "side": 1,
+      "message": "The first call to getAndRemove initializes it.",
+      "parentUuid": "7aade967_b24df5c6",
       "revId": "288a70d15252b3c5fafd202fe7935563f05da9c8",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
