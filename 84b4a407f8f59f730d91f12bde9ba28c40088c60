@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7aade967_3aad5b32",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-17T17:58:59Z",
+      "side": 1,
+      "message": "I guess your auto-formatting config in IJ added the space but I prefer the  no space :)",
+      "revId": "84b4a407f8f59f730d91f12bde9ba28c40088c60",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_daa9a725",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-17T17:58:59Z",
+      "side": 1,
+      "message": "Can you prepend persistenceId() to the log messages?",
+      "revId": "84b4a407f8f59f730d91f12bde9ba28c40088c60",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_faa6e352",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 445,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-17T17:58:59Z",
+      "side": 1,
+      "message": "auto-formatting I assume....  I disable that on save in eclipse...",
+      "revId": "84b4a407f8f59f730d91f12bde9ba28c40088c60",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_7a72f3e6",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1624,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-17T17:58:59Z",
+      "side": 1,
+      "message": "I wonder if we can derive ForwardingShardManager from this class and avoid duplication. But I plan on splitting up this entire test class so I can look at it then unless it would be easy do it now.",
+      "revId": "84b4a407f8f59f730d91f12bde9ba28c40088c60",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_1a773fd6",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 2675,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-17T17:58:59Z",
+      "side": 1,
+      "message": "I think you could create the Shard using the parent\u0027s akka ActorContext instead of specifically passing the parent to the builder. Shard wouldn\u0027t be a TestActorRef but I think it\u0027s better to do tell rather than calling onReceiveCommand directly anyway.",
+      "revId": "84b4a407f8f59f730d91f12bde9ba28c40088c60",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
