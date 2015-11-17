@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7aade967_fa47c349",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-17T13:43:38Z",
+      "side": 1,
+      "message": "This should just call onNewOperation as onAddServer does as it handles no leader and forwarding to leader.",
+      "revId": "e83942e8e7f25050de8ca0db77dcd00c1bf147d5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_5aa5b702",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 556,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-17T13:43:38Z",
+      "side": 1,
+      "message": "Null peerAddress could happen normally and is not a coding error so I think we should return an error and not use a Precondition here.",
+      "revId": "e83942e8e7f25050de8ca0db77dcd00c1bf147d5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_baa06bf5",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/RemoveServer.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-17T13:43:38Z",
+      "side": 1,
+      "message": "Can you clean up the indentation here, move onto 1 line?",
+      "revId": "e83942e8e7f25050de8ca0db77dcd00c1bf147d5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_7aaaf3d5",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/RemoveServerReply.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-17T13:43:38Z",
+      "side": 1,
+      "message": "This should derive from AbstractServerChangeReply",
+      "revId": "e83942e8e7f25050de8ca0db77dcd00c1bf147d5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_1aaf3fe5",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/ServerRemoved.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-17T13:43:38Z",
+      "side": 1,
+      "message": "Cleanup indentation?",
+      "revId": "e83942e8e7f25050de8ca0db77dcd00c1bf147d5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_1a965f95",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupportTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 686,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-17T13:43:38Z",
+      "side": 1,
+      "message": "Can\u0027t you use MockLeaderRaftActor here (it initializes itself as leader)? Same in the other tests as well.",
+      "revId": "e83942e8e7f25050de8ca0db77dcd00c1bf147d5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_fab58331",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupportTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 791,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-17T13:43:38Z",
+      "side": 1,
+      "message": "The AddServer tests wait for ApplyState, can\u0027t you do that here?",
+      "revId": "e83942e8e7f25050de8ca0db77dcd00c1bf147d5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_dab8c72c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupportTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 792,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-17T13:43:38Z",
+      "side": 1,
+      "message": "The AddServer tests use verifyServerConfigurationPayloadEntry that checks the raft replicated log. Can you reuse that here or is there a specific reason you\u0027re checking the persisted journal?",
+      "revId": "e83942e8e7f25050de8ca0db77dcd00c1bf147d5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_3a931ba5",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupportTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 886,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-17T13:43:38Z",
+      "side": 1,
+      "message": "What is the purpose of this class?",
+      "revId": "e83942e8e7f25050de8ca0db77dcd00c1bf147d5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
