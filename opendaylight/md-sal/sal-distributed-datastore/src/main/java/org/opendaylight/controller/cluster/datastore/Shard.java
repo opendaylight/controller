@@ -63,6 +63,7 @@ import org.opendaylight.controller.cluster.raft.RaftActorSnapshotCohort;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyncUpStatus;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
+import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationByteStringPayload;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationPayload;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
@@ -116,7 +117,10 @@ public class Shard extends RaftActor {
     private final DataTreeChangeListenerSupport treeChangeSupport = new DataTreeChangeListenerSupport(this);
     private final DataChangeListenerSupport changeSupport = new DataChangeListenerSupport(this);
 
+
     private ShardSnapshot restoreFromSnapshot;
+
+
 
     protected Shard(AbstractBuilder<?, ?> builder) {
         super(builder.getId().toString(), builder.getPeerAddresses(),
@@ -157,6 +161,7 @@ public class Shard extends RaftActor {
                         Dispatchers.DispatcherType.Transaction), self(), getContext(), shardMBean);
 
         snapshotCohort = new ShardSnapshotCohort(transactionActorFactory, store, LOG, this.name);
+
 
 
     }
@@ -256,8 +261,10 @@ public class Shard extends RaftActor {
                 context().parent().tell(message, self());
             } else if(GET_SHARD_MBEAN_MESSAGE.equals(message)){
                 sender().tell(getShardMBean(), self());
-            } else if(message instanceof GetShardDataTree){
+            } else if(message instanceof GetShardDataTree) {
                 sender().tell(store.getDataTree(), self());
+            } else if(message instanceof ServerRemoved){
+                context().parent().forward(message, context());
             } else {
                 super.onReceiveCommand(message);
             }
@@ -330,7 +337,7 @@ public class Shard extends RaftActor {
             applyModificationToState(cohortEntry.getReplySender(), cohortEntry.getTransactionID(), candidate);
         } else {
             Shard.this.persistData(cohortEntry.getReplySender(), cohortEntry.getTransactionID(),
-                DataTreeCandidatePayload.create(candidate));
+                    DataTreeCandidatePayload.create(candidate));
         }
     }
 
