@@ -264,6 +264,24 @@
       "revId": "84b4a407f8f59f730d91f12bde9ba28c40088c60",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_fdc49d60",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 2675,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-17T22:13:32Z",
+      "side": 1,
+      "message": "Their justification is to avoid coupling and \"that may not be straightforward to test\" but it is in this case. Either way we would be using a fabricated parent which is a recommended option. I\u0027d prefer that rather than muddying the production code with test hooks when possible. Also we would be testing the production code completely.",
+      "parentUuid": "7aade967_1dc41991",
+      "revId": "84b4a407f8f59f730d91f12bde9ba28c40088c60",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
