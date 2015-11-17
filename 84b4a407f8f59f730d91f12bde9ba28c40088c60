@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "7aade967_dd1c416d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-17T18:26:21Z",
+      "side": 1,
+      "message": "What is FF?",
+      "parentUuid": "7aade967_5a129763",
+      "revId": "84b4a407f8f59f730d91f12bde9ba28c40088c60",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7aade967_daa9a725",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
         "patchSetId": 2
@@ -107,6 +125,24 @@
     },
     {
       "key": {
+        "uuid": "7aade967_3d10f54d",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 445,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-17T18:26:21Z",
+      "side": 1,
+      "message": "I know - most don\u0027t. It\u0027s finicky I guess.",
+      "parentUuid": "7aade967_9a180f86",
+      "revId": "84b4a407f8f59f730d91f12bde9ba28c40088c60",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7aade967_7a72f3e6",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
         "patchSetId": 2
@@ -171,6 +207,24 @@
       "side": 1,
       "message": "Looked at the akka docs - they recommend injecting the parent as a dependency. I think it\u0027s easier this way.\n\nI used onReceiveCommand to avoid having to waiting for recovery and such. I think it\u0027s ok what do you think?",
       "parentUuid": "7aade967_1a773fd6",
+      "revId": "84b4a407f8f59f730d91f12bde9ba28c40088c60",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_1d417939",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 2675,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-17T18:26:21Z",
+      "side": 1,
+      "message": "So they don\u0027t recommend using getContext().parent()? But we use that in production for the ShardManager. I think we ought to use one way or the other not a mixture of both. \n\nEither way I think it\u0027s safer/better to use tell. An actor is not supposed to receive new messages until recovery is complete and I think we should avoid violating that. I\u0027ve seen tests fail intermittently b/c of it.",
+      "parentUuid": "7aade967_5a3b77eb",
       "revId": "84b4a407f8f59f730d91f12bde9ba28c40088c60",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
