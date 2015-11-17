@@ -179,6 +179,24 @@
     },
     {
       "key": {
+        "uuid": "7aade967_dd4a0155",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/RemoveServer.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-17T18:27:29Z",
+      "side": 1,
+      "message": "nope - don\u0027t want to do that",
+      "parentUuid": "7aade967_bd04e515",
+      "revId": "e83942e8e7f25050de8ca0db77dcd00c1bf147d5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7aade967_7aaaf3d5",
         "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/messages/RemoveServerReply.java",
         "patchSetId": 1
