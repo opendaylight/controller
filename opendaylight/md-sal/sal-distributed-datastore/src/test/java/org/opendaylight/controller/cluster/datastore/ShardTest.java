@@ -94,6 +94,7 @@ import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyn
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeader;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
+import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
@@ -2658,4 +2659,20 @@ public class ShardTest extends AbstractShardTest {
             shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
         }};
     }
+
+    @Test
+    public void testServerRemoved() throws Exception {
+        final TestActorRef<MessageCollectorActor> parent = TestActorRef.create(getSystem(), MessageCollectorActor.props());
+
+        final Props props = newShardBuilder().parent(parent).props();
+        final TestActorRef<Shard> shard = TestActorRef.create(getSystem(),
+                props.withDispatcher(Dispatchers.DefaultDispatcherId()),
+                "testServerRemoved");
+
+        shard.underlyingActor().onReceiveCommand(new ServerRemoved("test"));
+
+        MessageCollectorActor.expectFirstMatching(parent, ServerRemoved.class);
+
+    }
+
 }
