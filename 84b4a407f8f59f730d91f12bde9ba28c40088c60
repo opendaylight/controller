@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7aade967_5a129763",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-11-17T18:14:30Z",
+      "side": 1,
+      "message": "I don\u0027t think this is IJ it\u0027s probably FF.",
+      "parentUuid": "7aade967_3aad5b32",
+      "revId": "84b4a407f8f59f730d91f12bde9ba28c40088c60",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7aade967_daa9a725",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2015-11-17T17:58:59Z",
       "side": 1,
       "message": "Can you prepend persistenceId() to the log messages?",
+      "revId": "84b4a407f8f59f730d91f12bde9ba28c40088c60",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_7a175352",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-11-17T18:14:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7aade967_daa9a725",
       "revId": "84b4a407f8f59f730d91f12bde9ba28c40088c60",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "7aade967_9a180f86",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 445,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-11-17T18:14:30Z",
+      "side": 1,
+      "message": "what about the space after the for :) \n\nThis does not make sense. There are many many statements in here which do not have a space after an if - why was this space added?",
+      "parentUuid": "7aade967_faa6e352",
+      "revId": "84b4a407f8f59f730d91f12bde9ba28c40088c60",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7aade967_7a72f3e6",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
         "patchSetId": 2
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "7aade967_3a223bba",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1624,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-11-17T18:14:30Z",
+      "side": 1,
+      "message": "Let\u0027s do that in a separate patch.",
+      "parentUuid": "7aade967_7a72f3e6",
+      "revId": "84b4a407f8f59f730d91f12bde9ba28c40088c60",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7aade967_1a773fd6",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
         "patchSetId": 2
@@ -81,6 +153,24 @@
       "writtenOn": "2015-11-17T17:58:59Z",
       "side": 1,
       "message": "I think you could create the Shard using the parent\u0027s akka ActorContext instead of specifically passing the parent to the builder. Shard wouldn\u0027t be a TestActorRef but I think it\u0027s better to do tell rather than calling onReceiveCommand directly anyway.",
+      "revId": "84b4a407f8f59f730d91f12bde9ba28c40088c60",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_5a3b77eb",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 2675,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-11-17T18:14:30Z",
+      "side": 1,
+      "message": "Looked at the akka docs - they recommend injecting the parent as a dependency. I think it\u0027s easier this way.\n\nI used onReceiveCommand to avoid having to waiting for recovery and such. I think it\u0027s ok what do you think?",
+      "parentUuid": "7aade967_1a773fd6",
       "revId": "84b4a407f8f59f730d91f12bde9ba28c40088c60",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
