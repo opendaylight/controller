@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "7aade967_3dc1d580",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-11-17T20:11:53Z",
+      "side": 1,
+      "message": "fat fingers",
+      "parentUuid": "7aade967_dd1c416d",
+      "revId": "84b4a407f8f59f730d91f12bde9ba28c40088c60",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7aade967_daa9a725",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
         "patchSetId": 2
@@ -225,6 +243,24 @@
       "side": 1,
       "message": "So they don\u0027t recommend using getContext().parent()? But we use that in production for the ShardManager. I think we ought to use one way or the other not a mixture of both. \n\nEither way I think it\u0027s safer/better to use tell. An actor is not supposed to receive new messages until recovery is complete and I think we should avoid violating that. I\u0027ve seen tests fail intermittently b/c of it.",
       "parentUuid": "7aade967_5a3b77eb",
+      "revId": "84b4a407f8f59f730d91f12bde9ba28c40088c60",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_1dc41991",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 2675,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-11-17T20:11:53Z",
+      "side": 1,
+      "message": "Injecting is better for testing - thus their recommendation. Here is where I got my info from http://doc.akka.io/docs/akka/snapshot/java/testing.html",
+      "parentUuid": "7aade967_1d417939",
       "revId": "84b4a407f8f59f730d91f12bde9ba28c40088c60",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
