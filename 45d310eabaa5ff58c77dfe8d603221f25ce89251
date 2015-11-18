@@ -22,6 +22,30 @@
       "revId": "45d310eabaa5ff58c77dfe8d603221f25ce89251",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_ddda0117",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/admin/ClusterAdminRpcService.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-18T00:57:18Z",
+      "side": 1,
+      "message": "I was thinking about the dataStoreType as well - I wasn\u0027t sure we really needed it for AddShardReplica  but we could extend it in another patch. dataStoreType would be an enum {configuration, operational, both}, default to both.\n\nmemberName would be needed for RemoveShardReplica as well. I guess we could add it to AddShardReplica as well and forward to the right node but not sure if that\u0027s needed.",
+      "parentUuid": "7aade967_5de7f1e4",
+      "range": {
+        "startLine": 75,
+        "startChar": 57,
+        "endLine": 75,
+        "endChar": 77
+      },
+      "revId": "45d310eabaa5ff58c77dfe8d603221f25ce89251",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
