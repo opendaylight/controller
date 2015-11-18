@@ -178,9 +178,9 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
             if (context.getReplicatedLog().size() > 0) {
                 self().tell(new InitiateCaptureSnapshot(), self());
-                LOG.info("Snapshot capture initiated after recovery");
+                LOG.info("{}: Snapshot capture initiated after recovery", persistenceId());
             } else {
-                LOG.info("Snapshot capture NOT initiated after recovery, journal empty");
+                LOG.info("{}: Snapshot capture NOT initiated after recovery, journal empty", persistenceId());
             }
         }
     }
@@ -303,7 +303,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 .snapshotIndex(replicatedLog().getSnapshotIndex())
                 .snapshotTerm(replicatedLog().getSnapshotTerm())
                 .votedFor(context.getTermInformation().getVotedFor())
-                .peerAddresses(peerAddresses);
+                .peerAddresses(peerAddresses)
+                .customRaftPolicyClassName(context.getConfigParams().getCustomRaftPolicyImplementationClass());
 
         ReplicatedLogEntry lastLogEntry = getLastLogEntry();
         if (lastLogEntry != null) {

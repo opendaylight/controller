@@ -256,10 +256,11 @@ class EntityOwnershipShard extends Shard {
     protected void onLeaderChanged(String oldLeader, String newLeader) {
         super.onLeaderChanged(oldLeader, newLeader);
 
+        boolean isLeader = isLeader();
         LOG.debug("{}: onLeaderChanged: oldLeader: {}, newLeader: {}, isLeader: {}", persistenceId(), oldLeader,
-                newLeader, isLeader());
+                newLeader, isLeader);
 
-        if(isLeader()) {
+        if(isLeader) {
             // We were just elected leader. If the old leader is down, select new owners for the entities
             // owned by the down leader.
 
@@ -270,6 +271,11 @@ class EntityOwnershipShard extends Shard {
             if(downPeerMemberNames.contains(oldLeaderMemberName)) {
                 selectNewOwnerForEntitiesOwnedBy(oldLeaderMemberName);
             }
+        } else {
+            // The leader changed - notify the coordinator to check if pending modifications need to be sent.
+            // While onStateChanged also does this, this method handles the case where the shard hears from a
+            // leader and stays in the follower state. In that case no behavior state change occurs.
+            commitCoordinator.onStateChanged(this, isLeader);
         }
     }
 
@@ -346,6 +352,11 @@ class EntityOwnershipShard extends Shard {
 
         peerIdToMemberNames.put(peerUp.getPeerId(), peerUp.getMemberName());
         downPeerMemberNames.remove(peerUp.getMemberName());
+
+        // Notify the coordinator to check if pending modifications need to be sent. We do this here
+        // to handle the case where the leader's peer address isn't now yet when a prior state or
+        // leader change occurred.
+        commitCoordinator.onStateChanged(this, isLeader());
     }
 
     private void selectNewOwnerForEntitiesOwnedBy(String owner) {
