@@ -8,6 +8,8 @@
 package org.opendaylight.controller.cluster.datastore.entityownership;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.AdditionalMatchers.or;
 import static org.mockito.Mockito.atMost;
@@ -15,16 +17,19 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
+import static org.opendaylight.controller.cluster.datastore.MemberNode.verifyRaftState;
 import static org.opendaylight.controller.cluster.datastore.entityownership.AbstractEntityOwnershipTest.ownershipChange;
 import static org.opendaylight.controller.cluster.datastore.entityownership.DistributedEntityOwnershipService.ENTITY_OWNERSHIP_SHARD_NAME;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.CANDIDATE_NAME_NODE_ID;
 import static org.opendaylight.controller.cluster.datastore.entityownership.EntityOwnersModel.entityPath;
 import akka.actor.Status.Failure;
 import akka.actor.Status.Success;
+import akka.cluster.Cluster;
 import akka.testkit.JavaTestKit;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,8 +46,10 @@ import org.mockito.MockitoAnnotations;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
 import org.opendaylight.controller.cluster.datastore.MemberNode;
+import org.opendaylight.controller.cluster.datastore.MemberNode.RaftStateVerifier;
 import org.opendaylight.controller.cluster.datastore.entityownership.selectionstrategy.EntityOwnerSelectionStrategyConfig;
 import org.opendaylight.controller.cluster.datastore.messages.AddShardReplica;
+import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
@@ -370,6 +377,33 @@ public class DistributedEntityOwnershipIntegrationTest {
 
         // The queued candidate registration should proceed
         verify(leaderMockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY1, false, false, true));
+        reset(leaderMockListener);
+
+        candidateReg.close();
+        verify(leaderMockListener, timeout(5000)).ownershipChanged(ownershipChange(ENTITY1, false, false, false));
+        reset(leaderMockListener);
+
+        // Restart follower1 and verify the entity ownership shard is re-instated by registering.
+        Cluster.get(leaderNode.kit().getSystem()).down(Cluster.get(follower1Node.kit().getSystem()).selfAddress());
+        follower1Node.cleanup();
+
+        follower1Node = MemberNode.builder(memberNodes).akkaConfig("Member2").testName(name ).
+                moduleShardsConfig(moduleShardsConfig).schemaContext(SCHEMA_CONTEXT).createOperDatastore(false).
+                datastoreContextBuilder(followerDatastoreContextBuilder).build();
+        follower1EntityOwnershipService = newOwnershipService(follower1Node.configDataStore());
+
+        follower1EntityOwnershipService.registerCandidate(ENTITY1);
+        verify(leaderMockListener, timeout(20000)).ownershipChanged(ownershipChange(ENTITY1, false, false, true));
+
+        verifyRaftState(follower1Node.configDataStore(), ENTITY_OWNERSHIP_SHARD_NAME, new RaftStateVerifier() {
+            @Override
+            public void verify(OnDemandRaftState raftState) {
+                assertNull("Custom RaftPolicy class name", raftState.getCustomRaftPolicyClassName());
+                assertEquals("Peer count", 1, raftState.getPeerAddresses().keySet().size());
+                assertThat("Peer Id", Iterables.<String>getLast(raftState.getPeerAddresses().keySet()),
+                        org.hamcrest.CoreMatchers.containsString("member-1"));
+            }
+        });
     }
 
     private static void verifyGetOwnershipState(EntityOwnershipService service, Entity entity,

@@ -33,6 +33,7 @@ public class OnDemandRaftState {
     private String raftState;
     private String votedFor;
     private boolean isSnapshotCaptureInitiated;
+    private String customRaftPolicyClassName;
 
     private List<FollowerInfo> followerInfoList = Collections.emptyList();
     private Map<String, String> peerAddresses = Collections.emptyMap();
@@ -114,6 +115,10 @@ public class OnDemandRaftState {
 
     public Map<String, String> getPeerAddresses() {
         return peerAddresses;
+    }
+
+    public String getCustomRaftPolicyClassName() {
+        return customRaftPolicyClassName;
     }
 
     public static class Builder {
@@ -206,6 +211,11 @@ public class OnDemandRaftState {
 
         public Builder isSnapshotCaptureInitiated(boolean value) {
             stats.isSnapshotCaptureInitiated = value;
+            return this;
+        }
+
+        public Builder customRaftPolicyClassName(String className) {
+            stats.customRaftPolicyClassName = className;
             return this;
         }
 
