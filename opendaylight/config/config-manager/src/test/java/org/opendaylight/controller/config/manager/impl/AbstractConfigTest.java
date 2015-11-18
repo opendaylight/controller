@@ -14,6 +14,8 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 
 import com.google.common.base.Preconditions;
+import com.google.common.io.ByteSource;
+import com.google.common.io.Resources;
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -21,6 +23,10 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.LinkedList;
 import java.util.List;
@@ -30,6 +36,7 @@ import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.management.RuntimeMBeanException;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.mockito.Matchers;
 import org.mockito.Mock;
@@ -63,8 +70,7 @@ import org.osgi.framework.ServiceRegistration;
  * {@link #initConfigTransactionManagerImpl(org.opendaylight.controller.config.manager.impl.factoriesresolver.ModuleFactoriesResolver)}
  * typically during setting up the each test.
  */
-public abstract class AbstractConfigTest extends
-        AbstractLockedPlatformMBeanServerTest {
+public abstract class AbstractConfigTest extends AbstractLockedPlatformMBeanServerTest {
     protected ConfigRegistryJMXRegistrator configRegistryJMXRegistrator;
     protected ConfigRegistryImpl configRegistry;
     private JMXNotifierConfigRegistry notifyingConfigRegistry;
@@ -106,7 +112,6 @@ public abstract class AbstractConfigTest extends
                 this.props = props;
             }
         }
-
     }
 
     protected BundleContextServiceRegistrationHandler currentBundleContextServiceRegistrationHandler;
@@ -318,4 +323,19 @@ public abstract class AbstractConfigTest extends
         }
     }
 
+    protected static Collection<ByteSource> getFilesAsByteSources(final List<String> paths, final Class<?> className) {
+        final Collection<ByteSource> resources = new ArrayList<>();
+        final List<String> failedToFind = new ArrayList<>();
+        for (final String path : paths) {
+            final URL url = className.getResource(path);
+            if (url == null) {
+                failedToFind.add(path);
+            } else {
+                resources.add(Resources.asByteSource(url));
+            }
+        }
+        Assert.assertEquals("Some files were not found", Collections.<String> emptyList(), failedToFind);
+
+        return resources;
+    }
 }
