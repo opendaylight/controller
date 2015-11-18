@@ -46,6 +46,30 @@
       "revId": "45d310eabaa5ff58c77dfe8d603221f25ce89251",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_7d03cd73",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/admin/ClusterAdminRpcService.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-11-18T01:05:00Z",
+      "side": 1,
+      "message": "I don\u0027t want both for dataStoreType. I think we should keep the API simple and just remove 1 replica at a time.",
+      "parentUuid": "7aade967_ddda0117",
+      "range": {
+        "startLine": 75,
+        "startChar": 57,
+        "endLine": 75,
+        "endChar": 77
+      },
+      "revId": "45d310eabaa5ff58c77dfe8d603221f25ce89251",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
