@@ -15,7 +15,6 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshotList;
@@ -35,7 +34,6 @@ public class DatastoreSnapshotRestore {
 
     private final String restoreDirectoryPath;
     private final Map<String, DatastoreSnapshot> datastoreSnapshots = new ConcurrentHashMap<>();
-    private final AtomicBoolean initialized = new AtomicBoolean();
 
     public static void createInstance(String restoreDirectoryPath) {
         instance.compareAndSet(null, new DatastoreSnapshotRestore(restoreDirectoryPath));
@@ -54,10 +52,9 @@ public class DatastoreSnapshotRestore {
         this.restoreDirectoryPath = Preconditions.checkNotNull(restoreDirectoryPath);
     }
 
-    private void initialize() {
-        if(!initialized.compareAndSet(false, true)) {
-            return;
-        }
+    // sychronize this method so that, in case of concurrent access to getAndRemove(),
+    // no one ends up with partially initialized data
+    private synchronized void initialize() {
 
         File restoreDirectoryFile = new File(restoreDirectoryPath);
 
