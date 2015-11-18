@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7aade967_5de7f1e4",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/admin/ClusterAdminRpcService.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-11-18T00:24:15Z",
+      "side": 1,
+      "message": "I\u0027m looking at RemoveShardReplica and I think I need to take,\n- shardName,\n- memberName\n- dataStoreType\n\nas input. I think we should probably take the same for AddShardReplica. \n\nBy not taking dataStoreType we have to create replica\u0027s for both operational and config datastores\n\nBy not taking memberName we basically assume that the replica needs to be added/removed on the node on which we called this rpc. This would certainly not be right for removeShardReplica.",
+      "range": {
+        "startLine": 75,
+        "startChar": 57,
+        "endLine": 75,
+        "endChar": 77
+      },
+      "revId": "45d310eabaa5ff58c77dfe8d603221f25ce89251",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
