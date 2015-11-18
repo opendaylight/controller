@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7aade967_3df55583",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 567,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-18T01:06:34Z",
+      "side": 1,
+      "message": "You could call getPeerActorSelection instead of capturing the peerAddress and passing it in but it\u0027s fine either way.",
+      "revId": "caf79aa2158b31b8c4145ab1f2cc27b7d968c947",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
