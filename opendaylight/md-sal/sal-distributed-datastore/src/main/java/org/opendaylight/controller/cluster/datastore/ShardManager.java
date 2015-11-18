@@ -134,6 +134,8 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
     private DatastoreSnapshot restoreFromSnapshot;
 
+    private long lastSnapshotTimeshot;
+
     /**
      */
     protected ShardManager(Builder builder) {
@@ -159,6 +161,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
                 datastoreContextFactory.getBaseDatastoreContext().getDataStoreMXBeanType(),
                 localShardActorNames);
         mBean.setShardManager(this);
+        lastSnapshotTimeshot = 0;
     }
 
     @Override
@@ -209,7 +212,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         } else if(message instanceof GetSnapshot) {
             onGetSnapshot();
         } else if (message instanceof SaveSnapshotSuccess) {
-            LOG.debug ("{} saved ShardManager snapshot successfully", persistenceId());
+            onSaveSnapshotSuccess((SaveSnapshotSuccess)message);
         } else if (message instanceof SaveSnapshotFailure) {
             LOG.error ("{}: SaveSnapshotFailure received for saving snapshot of shards",
                 persistenceId(), ((SaveSnapshotFailure)message).cause());
@@ -1006,6 +1009,13 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             LOG.debug ("{}: removing shard {}", persistenceId(), shard);
             configuration.removeMemberReplicaForShard(shard, currentMember);
         }
+    }
+
+    private void onSaveSnapshotSuccess (SaveSnapshotSuccess successMessage) {
+        LOG.debug ("{} saved ShardManager snapshot successfully. Deleting snapshot with timestamp {}",
+            persistenceId(), lastSnapshotTimeshot);
+        deleteSnapshot (0, lastSnapshotTimeshot);
+        lastSnapshotTimeshot = successMessage.metadata().timestamp();
     }
 
     @VisibleForTesting
