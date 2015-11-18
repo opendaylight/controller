@@ -407,7 +407,7 @@ public class SnapshotManager implements SnapshotState {
             }
 
             context.getPersistenceProvider().deleteSnapshots(new SnapshotSelectionCriteria(
-                    sequenceNumber - context.getConfigParams().getSnapshotBatchCount(), 43200000));
+                    sequenceNumber - context.getConfigParams().getSnapshotBatchCount(), Long.MAX_VALUE));
 
             context.getPersistenceProvider().deleteMessages(lastSequenceNumber);
 
