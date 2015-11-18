@@ -14,7 +14,6 @@ import akka.persistence.SelectedSnapshot;
 import akka.persistence.SnapshotMetadata;
 import akka.persistence.SnapshotSelectionCriteria;
 import akka.persistence.snapshot.japi.SnapshotStore;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.ArrayList;
@@ -66,8 +65,8 @@ public class InMemorySnapshotStore extends SnapshotStore {
         synchronized (stored) {
             retList = Lists.newArrayListWithCapacity(stored.size());
             for(StoredSnapshot s: stored) {
-                if(type.isInstance(s.getData())) {
-                    retList.add((T) s.getData());
+                if(type.isInstance(s.data)) {
+                    retList.add((T) s.data);
                 }
             }
         }
@@ -92,17 +91,29 @@ public class InMemorySnapshotStore extends SnapshotStore {
     }
 
     @Override
-    public Future<Option<SelectedSnapshot>> doLoadAsync(String s,
-        SnapshotSelectionCriteria snapshotSelectionCriteria) {
-        List<StoredSnapshot> snapshotList = snapshots.get(s);
+    public Future<Option<SelectedSnapshot>> doLoadAsync(String persistenceId,
+            SnapshotSelectionCriteria snapshotSelectionCriteria) {
+        List<StoredSnapshot> snapshotList = snapshots.get(persistenceId);
         if(snapshotList == null){
             return Futures.successful(Option.<SelectedSnapshot>none());
         }
 
-        StoredSnapshot snapshot = Iterables.getLast(snapshotList);
-        SelectedSnapshot selectedSnapshot =
-            new SelectedSnapshot(snapshot.getMetadata(), snapshot.getData());
-        return Futures.successful(Option.some(selectedSnapshot));
+        synchronized(snapshotList) {
+            for(int i = snapshotList.size() - 1; i >= 0; i--) {
+                StoredSnapshot snapshot = snapshotList.get(i);
+                if(matches(snapshot, snapshotSelectionCriteria)) {
+                    return Futures.successful(Option.some(new SelectedSnapshot(snapshot.metadata,
+                            snapshot.data)));
+                }
+            }
+        }
+
+        return Futures.successful(Option.<SelectedSnapshot>none());
+    }
+
+    private boolean matches(StoredSnapshot snapshot, SnapshotSelectionCriteria criteria) {
+        return snapshot.metadata.sequenceNr() <= criteria.maxSequenceNr() &&
+                snapshot.metadata.timestamp() <= criteria.maxTimestamp();
     }
 
     @Override
@@ -137,28 +148,24 @@ public class InMemorySnapshotStore extends SnapshotStore {
             return;
         }
 
-        int deleteIndex = -1;
-
         synchronized (snapshotList) {
             for(int i=0;i<snapshotList.size(); i++){
                 StoredSnapshot snapshot = snapshotList.get(i);
-                if(snapshotMetadata.equals(snapshot.getMetadata())){
-                    deleteIndex = i;
+                if(snapshotMetadata.equals(snapshot.metadata)){
+                    snapshotList.remove(i);
                     break;
                 }
-            }
-
-            if(deleteIndex != -1){
-                snapshotList.remove(deleteIndex);
             }
         }
     }
 
     @Override
     public void doDelete(String persistentId, SnapshotSelectionCriteria snapshotSelectionCriteria)
-        throws Exception {
-        List<StoredSnapshot> snapshotList = snapshots.get(persistentId);
+            throws Exception {
+        LOG.trace("doDelete: persistentId {}: maxSequenceNr: {}: maxTimestamp {}", persistentId,
+                snapshotSelectionCriteria.maxSequenceNr(), snapshotSelectionCriteria.maxTimestamp());
 
+        List<StoredSnapshot> snapshotList = snapshots.get(persistentId);
         if(snapshotList == null){
             return;
         }
@@ -167,10 +174,10 @@ public class InMemorySnapshotStore extends SnapshotStore {
             Iterator<StoredSnapshot> iter = snapshotList.iterator();
             while(iter.hasNext()) {
                 StoredSnapshot s = iter.next();
-                LOG.trace("doDelete: sequenceNr: {}, maxSequenceNr: {}", s.getMetadata().sequenceNr(),
-                        snapshotSelectionCriteria.maxSequenceNr());
+                if(matches(s, snapshotSelectionCriteria)) {
+                    LOG.trace("Deleting snapshot for sequenceNr: {}, timestamp: {}",
+                            s.metadata.sequenceNr(), s.metadata.timestamp());
 
-                if(s.getMetadata().sequenceNr() <= snapshotSelectionCriteria.maxSequenceNr()) {
                     iter.remove();
                 }
             }
@@ -184,14 +191,6 @@ public class InMemorySnapshotStore extends SnapshotStore {
         private StoredSnapshot(SnapshotMetadata metadata, Object data) {
             this.metadata = metadata;
             this.data = data;
-        }
-
-        public SnapshotMetadata getMetadata() {
-            return metadata;
-        }
-
-        public Object getData() {
-            return data;
         }
     }
 }
