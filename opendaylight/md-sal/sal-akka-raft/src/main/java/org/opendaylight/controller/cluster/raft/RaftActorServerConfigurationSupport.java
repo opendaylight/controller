@@ -270,7 +270,7 @@ class RaftActorServerConfigurationSupport {
             // sure it's meant for us.
             if(operationContext.getContextId().equals(applyState.getIdentifier())) {
                 LOG.info("{}: {} has been successfully replicated to a majority of followers", raftActor.getId(),
-                        applyState.getReplicatedLogEntry().getData());
+                        raftContext.getId(), applyState.getReplicatedLogEntry().getData());
 
                 operationComplete(raftActor, operationContext, null);
             }

@@ -89,7 +89,7 @@ public class DistributedEntityOwnershipService implements EntityOwnershipService
             @Override
             public void onComplete(Throwable failure, Object response) {
                 if(failure != null) {
-                    LOG.error("Failed to create {} shard", ENTITY_OWNERSHIP_SHARD_NAME);
+                    LOG.error("Failed to create {} shard", ENTITY_OWNERSHIP_SHARD_NAME, failure);
                 } else {
                     LOG.info("Successfully created {} shard", ENTITY_OWNERSHIP_SHARD_NAME);
                 }
