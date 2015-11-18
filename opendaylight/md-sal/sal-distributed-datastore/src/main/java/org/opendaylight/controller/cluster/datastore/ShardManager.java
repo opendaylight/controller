@@ -221,9 +221,11 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         } else if(message instanceof ForwardedAddServerFailure) {
             ForwardedAddServerFailure msg = (ForwardedAddServerFailure)message;
             onAddServerFailure(msg.shardName, msg.failureMessage, msg.failure, getSender(), msg.removeShardOnFailure);
-        } else if(message instanceof ForwardedAddServerPrimaryShardFound) {
-            ForwardedAddServerPrimaryShardFound msg = (ForwardedAddServerPrimaryShardFound)message;
-            addShard(msg.shardName, msg.primaryFound, getSender());
+        } else if(message instanceof PrimaryShardFoundForContext) {
+            PrimaryShardFoundForContext msg = (PrimaryShardFoundForContext)message;
+            if(msg.getContextMessage() instanceof AddShardReplica) {
+                addShard(msg.shardName, msg.getRemotePrimaryShardFound(), getSender());
+            }
         } else if(message instanceof RemoveShardReplica){
             onRemoveShardReplica((RemoveShardReplica)message);
         } else if(message instanceof GetSnapshot) {
@@ -233,8 +235,9 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         } else if (message instanceof SaveSnapshotSuccess) {
             LOG.debug("{} saved ShardManager snapshot successfully", persistenceId());
         } else if (message instanceof SaveSnapshotFailure) {
-            LOG.error ("{}: SaveSnapshotFailure received for saving snapshot of shards",
-                persistenceId(), ((SaveSnapshotFailure)message).cause());
+            LOG.error("{}: SaveSnapshotFailure received for saving snapshot of shards",
+                    persistenceId(), ((SaveSnapshotFailure) message).cause());
+        } else if(message instanceof PrimaryShardFoundForContext){
         } else {
             unknownMessage(message);
         }
@@ -864,7 +867,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         return false;
     }
 
-    private void onAddShardReplica (AddShardReplica shardReplicaMsg) {
+    private void onAddShardReplica (final AddShardReplica shardReplicaMsg) {
         final String shardName = shardReplicaMsg.getShardName();
 
         LOG.debug("{}: onAddShardReplica: {}", persistenceId(), shardReplicaMsg);
@@ -886,34 +889,19 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             return;
         }
 
-        Timeout findPrimaryTimeout = new Timeout(datastoreContextFactory.getBaseDatastoreContext().
-                getShardInitializationTimeout().duration().$times(2));
-
-        final ActorRef sender = getSender();
-        Future<Object> futureObj = ask(getSelf(), new FindPrimary(shardName, true), findPrimaryTimeout);
-        futureObj.onComplete(new OnComplete<Object>() {
+        findPrimary(shardName, new AbstractFindPrimaryResponseHandler(getSender(), shardName, persistenceId(), getSelf()) {
             @Override
-            public void onComplete(Throwable failure, Object response) {
-                if (failure != null) {
-                    LOG.debug ("{}: Received failure from FindPrimary for shard {}", persistenceId(), shardName, failure);
-                    sender.tell(new akka.actor.Status.Failure(new RuntimeException(
-                        String.format("Failed to find leader for shard %s", shardName), failure)), getSelf());
-                } else {
-                    if(response instanceof RemotePrimaryShardFound) {
-                        self().tell(new ForwardedAddServerPrimaryShardFound(shardName,
-                                (RemotePrimaryShardFound)response), sender);
-                    } else if(response instanceof LocalPrimaryShardFound) {
-                        sendLocalReplicaAlreadyExistsReply(shardName, sender);
-                    } else {
-                        String msg = String.format("Failed to find leader for shard %s: received response: %s",
-                                shardName, response);
-                        LOG.debug ("{}: {}", persistenceId(), msg);
-                        sender.tell(new akka.actor.Status.Failure(response instanceof Throwable ? (Throwable)response :
-                            new RuntimeException(msg)), getSelf());
-                    }
-                }
+            public void onRemotePrimaryShardFound(RemotePrimaryShardFound response) {
+                self().tell(new PrimaryShardFoundForContext(getShardName(), shardReplicaMsg, response), getSender());
+
             }
-        }, new Dispatchers(context().system().dispatchers()).getDispatcher(Dispatchers.DispatcherType.Client));
+
+            @Override
+            public void onLocalPrimaryFound(LocalPrimaryShardFound message) {
+                sendLocalReplicaAlreadyExistsReply(getShardName(), getSender());
+            }
+
+        });
     }
 
     private void sendLocalReplicaAlreadyExistsReply(String shardName, ActorRef sender) {
@@ -1047,8 +1035,7 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             getSender().tell(new akka.actor.Status.Failure(new IllegalArgumentException(msg)), getSelf());
             return;
         }
-        // call RemoveShard for the shardName
-        getSender().tell(new akka.actor.Status.Success(true), getSelf());
+
         return;
     }
 
@@ -1082,16 +1069,6 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             // remove the member as a replica for the shard
             LOG.debug ("{}: removing shard {}", persistenceId(), shard);
             configuration.removeMemberReplicaForShard(shard, currentMember);
-        }
-    }
-
-    private static class ForwardedAddServerPrimaryShardFound {
-        String shardName;
-        RemotePrimaryShardFound primaryFound;
-
-        ForwardedAddServerPrimaryShardFound(String shardName, RemotePrimaryShardFound primaryFound) {
-            this.shardName = shardName;
-            this.primaryFound = primaryFound;
         }
     }
 
@@ -1493,6 +1470,118 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         public Props props() {
             verify();
             return Props.create(ShardManager.class, this);
+        }
+    }
+
+    private void findPrimary(final String shardName, final FindPrimaryResponseHandler handler) {
+        Timeout findPrimaryTimeout = new Timeout(datastoreContextFactory.getBaseDatastoreContext().
+                getShardInitializationTimeout().duration().$times(2));
+
+
+        Future<Object> futureObj = ask(getSelf(), new FindPrimary(shardName, true), findPrimaryTimeout);
+        futureObj.onComplete(new OnComplete<Object>() {
+            @Override
+            public void onComplete(Throwable failure, Object response) {
+                if (failure != null) {
+                    handler.onFailure(failure);
+                } else {
+                    if(response instanceof RemotePrimaryShardFound) {
+                        handler.onRemotePrimaryShardFound((RemotePrimaryShardFound) response);
+                    } else if(response instanceof LocalPrimaryShardFound) {
+                        handler.onLocalPrimaryFound((LocalPrimaryShardFound) response);
+                    } else {
+                        handler.onUnknownResponse(response);
+                    }
+                }
+            }
+        }, new Dispatchers(context().system().dispatchers()).getDispatcher(Dispatchers.DispatcherType.Client));
+    }
+
+    private static interface FindPrimaryResponseHandler {
+        void onFailure(Throwable failure);
+        void onRemotePrimaryShardFound(RemotePrimaryShardFound response);
+        void onLocalPrimaryFound(LocalPrimaryShardFound response);
+        void onUnknownResponse(Object response);
+    }
+
+    private static abstract class AbstractFindPrimaryResponseHandler implements FindPrimaryResponseHandler {
+        private final ActorRef sender;
+        private final String shardName;
+        private final String persistenceId;
+        private final ActorRef self;
+
+        protected AbstractFindPrimaryResponseHandler(ActorRef sender, String shardName, String persistenceId, ActorRef self){
+            this.sender = Preconditions.checkNotNull(sender);
+            this.shardName = Preconditions.checkNotNull(shardName);
+            this.persistenceId = Preconditions.checkNotNull(persistenceId);
+            this.self = Preconditions.checkNotNull(self);
+        }
+
+        public ActorRef getSender() {
+            return sender;
+        }
+
+        public String getShardName() {
+            return shardName;
+        }
+
+        @Override
+        public void onFailure(Throwable failure) {
+            LOG.debug ("{}: Received failure from FindPrimary for shard {}", persistenceId, shardName, failure);
+            sender.tell(new akka.actor.Status.Failure(new RuntimeException(
+                    String.format("Failed to find leader for shard %s", shardName), failure)), self);
+        }
+
+        @Override
+        public void onUnknownResponse(Object response) {
+            String msg = String.format("Failed to find leader for shard %s: received response: %s",
+                    shardName, response);
+            LOG.debug ("{}: {}", persistenceId, msg);
+            sender.tell(new akka.actor.Status.Failure(response instanceof Throwable ? (Throwable)response :
+                    new RuntimeException(msg)), self);
+        }
+    }
+
+
+    private static class PrimaryShardFoundForContext {
+        private final String shardName;
+        private final Object contextMessage;
+        private final RemotePrimaryShardFound remotePrimaryShardFound;
+        private final LocalPrimaryShardFound localPrimaryShardFound;
+
+        public PrimaryShardFoundForContext(String shardName, Object contextMessage, Object primaryFoundMessage) {
+            this.shardName = Preconditions.checkNotNull(shardName);
+            this.contextMessage = Preconditions.checkNotNull(contextMessage);
+            Preconditions.checkNotNull(primaryFoundMessage);
+            this.remotePrimaryShardFound = (primaryFoundMessage instanceof RemotePrimaryShardFound) ? (RemotePrimaryShardFound) primaryFoundMessage : null;
+            this.localPrimaryShardFound = (primaryFoundMessage instanceof LocalPrimaryShardFound) ? (LocalPrimaryShardFound) primaryFoundMessage : null;
+        }
+
+        public String getPrimaryPath(){
+            if(remotePrimaryShardFound != null){
+                return remotePrimaryShardFound.getPrimaryPath();
+            }
+            return localPrimaryShardFound.getPrimaryPath();
+        }
+
+        public Object getContextMessage() {
+            return contextMessage;
+        }
+
+        public RemotePrimaryShardFound getRemotePrimaryShardFound(){
+            return remotePrimaryShardFound;
+        }
+
+        public LocalPrimaryShardFound getLocalPrimaryShardFound(){
+            return localPrimaryShardFound;
+        }
+
+        boolean isPrimaryLocal(){
+            return (remotePrimaryShardFound == null);
+        }
+
+        public String getShardName() {
+            return shardName;
         }
     }
 }
