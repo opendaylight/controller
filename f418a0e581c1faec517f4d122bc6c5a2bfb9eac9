@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7aade967_d1874560",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 241,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-11-18T23:21:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7aade967_fe1fb0b5",
+      "revId": "f418a0e581c1faec517f4d122bc6c5a2bfb9eac9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7aade967_de9af413",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2015-11-18T21:19:47Z",
       "side": 1,
       "message": "Should we add a getSelf() method to AbstractFindPrimaryResponseHandler to use here instead of calling self() on the outer class?",
+      "revId": "f418a0e581c1faec517f4d122bc6c5a2bfb9eac9",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_f1b8412c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 896,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-11-18T23:21:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7aade967_de9af413",
       "revId": "f418a0e581c1faec517f4d122bc6c5a2bfb9eac9",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
