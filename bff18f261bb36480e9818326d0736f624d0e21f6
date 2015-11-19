@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7aade967_8fd684c4",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/test/java/org/opendaylight/controller/cluster/raft/utils/InMemorySnapshotStore.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 3172
+      },
+      "writtenOn": "2015-11-19T18:05:33Z",
+      "side": 1,
+      "message": "Should this be i--?",
+      "range": {
+        "startLine": 102,
+        "startChar": 57,
+        "endLine": 102,
+        "endChar": 60
+      },
+      "revId": "bff18f261bb36480e9818326d0736f624d0e21f6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
