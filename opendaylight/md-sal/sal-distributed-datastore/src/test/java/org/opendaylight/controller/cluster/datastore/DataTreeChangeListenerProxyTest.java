@@ -39,6 +39,7 @@ import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.cluster.datastore.utils.Dispatchers;
 import org.opendaylight.controller.cluster.datastore.utils.DoNothingActor;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
+import org.opendaylight.controller.md.sal.dom.api.ClusteredDOMDataTreeChangeListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import scala.concurrent.ExecutionContextExecutor;
@@ -74,6 +75,7 @@ public class DataTreeChangeListenerProxyTest extends AbstractActorTest {
 
             RegisterDataTreeChangeListener registerMsg = expectMsgClass(timeout, RegisterDataTreeChangeListener.class);
             Assert.assertEquals("getPath", path, registerMsg.getPath());
+            Assert.assertEquals("isRegisterOnAllInstances", false, registerMsg.isRegisterOnAllInstances());
 
             reply(new RegisterDataTreeChangeListenerReply(getRef()));
 
@@ -98,6 +100,38 @@ public class DataTreeChangeListenerProxyTest extends AbstractActorTest {
             proxy.close();
 
             expectNoMsg();
+        }};
+    }
+
+    @Test(timeout=10000)
+    public void testSuccessfulRegistrationForClusteredListener() {
+        new JavaTestKit(getSystem()) {{
+            ActorContext actorContext = new ActorContext(getSystem(), getRef(),
+                    mock(ClusterWrapper.class), mock(Configuration.class));
+
+            ClusteredDOMDataTreeChangeListener mockClusteredListener = mock(ClusteredDOMDataTreeChangeListener.class);
+
+            final DataTreeChangeListenerProxy<ClusteredDOMDataTreeChangeListener> proxy =
+                    new DataTreeChangeListenerProxy<>(actorContext, mockClusteredListener);
+
+            final YangInstanceIdentifier path = YangInstanceIdentifier.of(TestModel.TEST_QNAME);
+            new Thread() {
+                @Override
+                public void run() {
+                    proxy.init("shard-1", path);
+                }
+
+            }.start();
+
+            FiniteDuration timeout = duration("5 seconds");
+            FindLocalShard findLocalShard = expectMsgClass(timeout, FindLocalShard.class);
+            Assert.assertEquals("getShardName", "shard-1", findLocalShard.getShardName());
+
+            reply(new LocalShardFound(getRef()));
+
+            RegisterDataTreeChangeListener registerMsg = expectMsgClass(timeout, RegisterDataTreeChangeListener.class);
+            Assert.assertEquals("getPath", path, registerMsg.getPath());
+            Assert.assertEquals("isRegisterOnAllInstances", true, registerMsg.isRegisterOnAllInstances());
         }};
     }
 

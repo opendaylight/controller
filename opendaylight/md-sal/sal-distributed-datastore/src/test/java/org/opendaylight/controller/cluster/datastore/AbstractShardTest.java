@@ -37,6 +37,7 @@ import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
+import org.opendaylight.controller.cluster.raft.TestActorFactory;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.md.cluster.datastore.model.TestModel;
@@ -69,6 +70,8 @@ public abstract class AbstractShardTest extends AbstractActorTest{
             shardJournalRecoveryLogBatchSize(3).shardSnapshotBatchCount(5000).
             shardHeartbeatIntervalInMillis(100);
 
+    protected final TestActorFactory actorFactory = new TestActorFactory(getSystem());
+
     @Before
     public void setUp() {
         InMemorySnapshotStore.clear();
@@ -79,6 +82,7 @@ public abstract class AbstractShardTest extends AbstractActorTest{
     public void tearDown() {
         InMemorySnapshotStore.clear();
         InMemoryJournal.clear();
+        actorFactory.close();
     }
 
     protected DatastoreContext newDatastoreContext() {
