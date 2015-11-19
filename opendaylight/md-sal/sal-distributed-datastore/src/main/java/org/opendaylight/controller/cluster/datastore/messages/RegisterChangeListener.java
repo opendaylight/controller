@@ -17,7 +17,7 @@ import org.opendaylight.controller.md.sal.common.api.data.AsyncDataBroker;
 import org.opendaylight.controller.protobuff.messages.registration.ListenerRegistrationMessages;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
-public class RegisterChangeListener implements SerializableMessage {
+public class RegisterChangeListener implements SerializableMessage, ListenerRegistrationMessage {
     public static final Class<ListenerRegistrationMessages.RegisterChangeListener> SERIALIZABLE_CLASS =
             ListenerRegistrationMessages.RegisterChangeListener.class;
 
@@ -36,6 +36,7 @@ public class RegisterChangeListener implements SerializableMessage {
         this.registerOnAllInstances = registerOnAllInstances;
     }
 
+    @Override
     public YangInstanceIdentifier getPath() {
         return path;
     }
@@ -49,6 +50,7 @@ public class RegisterChangeListener implements SerializableMessage {
         return dataChangeListener.path();
     }
 
+    @Override
     public boolean isRegisterOnAllInstances() {
         return registerOnAllInstances;
     }

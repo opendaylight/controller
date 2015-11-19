@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2015 Brocade Communications Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -7,49 +7,53 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import org.opendaylight.controller.cluster.datastore.messages.RegisterChangeListener;
-import org.opendaylight.controller.md.sal.common.api.data.AsyncDataChangeListener;
+import com.google.common.base.Optional;
+import java.util.EventListener;
+import java.util.Map.Entry;
+import javax.annotation.concurrent.GuardedBy;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 
-final class DelayedListenerRegistration implements
-    ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>>> {
+abstract class DelayedListenerRegistration<L extends EventListener, R> implements ListenerRegistration<L> {
+    private final R registrationMessage;
+    private volatile ListenerRegistration<L> delegate;
 
-    private volatile boolean closed;
+    @GuardedBy("this")
+    private boolean closed;
 
-    private final RegisterChangeListener registerChangeListener;
-
-    private volatile ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier,
-                                                         NormalizedNode<?, ?>>> delegate;
-
-    DelayedListenerRegistration(final RegisterChangeListener registerChangeListener) {
-        this.registerChangeListener = registerChangeListener;
+    protected DelayedListenerRegistration(R registrationMessage) {
+        this.registrationMessage = registrationMessage;
     }
 
-    void setDelegate( final ListenerRegistration<AsyncDataChangeListener<YangInstanceIdentifier,
-                                        NormalizedNode<?, ?>>> registration) {
-        this.delegate = registration;
+    R getRegistrationMessage() {
+        return registrationMessage;
     }
 
-    boolean isClosed() {
-        return closed;
+    ListenerRegistration<L> getDelegate() {
+        return delegate;
     }
 
-    RegisterChangeListener getRegisterChangeListener() {
-        return registerChangeListener;
-    }
-
-    @Override
-    public AsyncDataChangeListener<YangInstanceIdentifier, NormalizedNode<?, ?>> getInstance() {
-        return delegate != null ? delegate.getInstance() : null;
+    synchronized <LR extends ListenerRegistration<L>> void createDelegate(
+            final LeaderLocalDelegateFactory<R, LR, Optional<DataTreeCandidate>> factory) {
+        if (!closed) {
+            final Entry<LR, Optional<DataTreeCandidate>> res = factory.createDelegate(registrationMessage);
+            this.delegate = res.getKey();
+        }
     }
 
     @Override
-    public void close() {
-        closed = true;
-        if(delegate != null) {
-            delegate.close();
+    public L getInstance() {
+        final ListenerRegistration<L> d = delegate;
+        return d == null ? null : (L)d.getInstance();
+    }
+
+    @Override
+    public synchronized void close() {
+        if (!closed) {
+            closed = true;
+            if (delegate != null) {
+                delegate.close();
+            }
         }
     }
 }

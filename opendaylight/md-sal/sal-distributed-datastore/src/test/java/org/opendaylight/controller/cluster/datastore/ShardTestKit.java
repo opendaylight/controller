@@ -46,14 +46,14 @@ public class ShardTestKit extends JavaTestKit {
 
     }
 
-    public void waitUntilLeader(ActorRef shard) {
+    public String waitUntilLeader(ActorRef shard) {
         FiniteDuration duration = Duration.create(100, TimeUnit.MILLISECONDS);
         for(int i = 0; i < 20 * 5; i++) {
             Future<Object> future = Patterns.ask(shard, new FindLeader(), new Timeout(duration));
             try {
                 FindLeaderReply resp = (FindLeaderReply)Await.result(future, duration);
                 if(resp.getLeaderActor() != null) {
-                    return;
+                    return resp.getLeaderActor();
                 }
             } catch(TimeoutException e) {
             } catch(Exception e) {
@@ -66,6 +66,7 @@ public class ShardTestKit extends JavaTestKit {
         }
 
         Assert.fail("Leader not found for shard " + shard.path());
+        return null;
     }
 
     public void waitUntilNoLeader(ActorRef shard) {

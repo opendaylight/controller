@@ -10,8 +10,6 @@ package org.opendaylight.controller.cluster.datastore;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import com.google.common.base.Optional;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Map.Entry;
 import org.opendaylight.controller.cluster.datastore.messages.EnableNotification;
 import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeChangeListener;
@@ -19,65 +17,16 @@ import org.opendaylight.controller.cluster.datastore.messages.RegisterDataTreeCh
 import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeChangeListener;
 import org.opendaylight.yangtools.concepts.ListenerRegistration;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-final class DataTreeChangeListenerSupport extends LeaderLocalDelegateFactory<RegisterDataTreeChangeListener,
-        ListenerRegistration<DOMDataTreeChangeListener>, Optional<DataTreeCandidate>> {
-    private static final Logger LOG = LoggerFactory.getLogger(DataTreeChangeListenerSupport.class);
-    private final ArrayList<DelayedDataTreeListenerRegistration> delayedRegistrations = new ArrayList<>();
-    private final Collection<ActorSelection> actors = new ArrayList<>();
-
+final class DataTreeChangeListenerSupport extends AbstractDataListenerSupport<DOMDataTreeChangeListener,
+        RegisterDataTreeChangeListener, DelayedDataTreeListenerRegistration, ListenerRegistration<DOMDataTreeChangeListener>> {
     DataTreeChangeListenerSupport(final Shard shard) {
         super(shard);
     }
 
     @Override
-    void onLeadershipChange(final boolean isLeader, boolean hasLeader) {
-        final EnableNotification msg = new EnableNotification(isLeader);
-        for (ActorSelection dataChangeListener : actors) {
-            dataChangeListener.tell(msg, getSelf());
-        }
-
-        if (isLeader) {
-            for (DelayedDataTreeListenerRegistration reg : delayedRegistrations) {
-                reg.createDelegate(this);
-            }
-            delayedRegistrations.clear();
-            delayedRegistrations.trimToSize();
-        }
-    }
-
-    @Override
-    void onMessage(final RegisterDataTreeChangeListener registerTreeChangeListener, final boolean isLeader, boolean hasLeader) {
-        LOG.debug("{}: registerTreeChangeListener for {}, leader: {}", persistenceId(), registerTreeChangeListener.getPath(), isLeader);
-
-        final ListenerRegistration<DOMDataTreeChangeListener> registration;
-        if (!isLeader) {
-            LOG.debug("{}: Shard is not the leader - delaying registration", persistenceId());
-
-            DelayedDataTreeListenerRegistration delayedReg =
-                    new DelayedDataTreeListenerRegistration(registerTreeChangeListener);
-            delayedRegistrations.add(delayedReg);
-            registration = delayedReg;
-        } else {
-            final Entry<ListenerRegistration<DOMDataTreeChangeListener>, Optional<DataTreeCandidate>> res =
-                    createDelegate(registerTreeChangeListener);
-            registration = res.getKey();
-            getShard().getDataStore().notifyOfInitialData(registerTreeChangeListener.getPath(),
-                    registration.getInstance(), res.getValue());
-        }
-
-        ActorRef listenerRegistration = createActor(DataTreeChangeListenerRegistrationActor.props(registration));
-
-        LOG.debug("{}: registerDataChangeListener sending reply, listenerRegistrationPath = {} ",
-            persistenceId(), listenerRegistration.path());
-
-        tellSender(new RegisterDataTreeChangeListenerReply(listenerRegistration));
-    }
-
-    @Override
-    Entry<ListenerRegistration<DOMDataTreeChangeListener>, Optional<DataTreeCandidate>> createDelegate(final RegisterDataTreeChangeListener message) {
+    Entry<ListenerRegistration<DOMDataTreeChangeListener>, Optional<DataTreeCandidate>> createDelegate(
+            final RegisterDataTreeChangeListener message) {
         ActorSelection dataChangeListenerPath = selectActor(message.getDataTreeChangeListenerPath());
 
         // Notify the listener if notifications should be enabled or not
@@ -87,12 +36,40 @@ final class DataTreeChangeListenerSupport extends LeaderLocalDelegateFactory<Reg
 
         // Now store a reference to the data change listener so it can be notified
         // at a later point if notifications should be enabled or disabled
-        actors.add(dataChangeListenerPath);
+        if(!message.isRegisterOnAllInstances()) {
+            addListenerActor(dataChangeListenerPath);
+        }
 
         DOMDataTreeChangeListener listener = new ForwardingDataTreeChangeListener(dataChangeListenerPath);
 
-        LOG.debug("{}: Registering for path {}", persistenceId(), message.getPath());
+        log().debug("{}: Registering for path {}", persistenceId(), message.getPath());
 
-        return getShard().getDataStore().registerTreeChangeListener(message.getPath(), listener);
+        Entry<ListenerRegistration<DOMDataTreeChangeListener>, Optional<DataTreeCandidate>> regEntry =
+                getShard().getDataStore().registerTreeChangeListener(message.getPath(), listener);
+
+        getShard().getDataStore().notifyOfInitialData(message.getPath(),
+                regEntry.getKey().getInstance(), regEntry.getValue());
+
+        return regEntry;
+    }
+
+    @Override
+    protected DelayedDataTreeListenerRegistration newDelayedListenerRegistration(RegisterDataTreeChangeListener message) {
+        return new DelayedDataTreeListenerRegistration(message);
+    }
+
+    @Override
+    protected ActorRef newRegistrationActor(ListenerRegistration<DOMDataTreeChangeListener> registration) {
+        return createActor(DataTreeChangeListenerRegistrationActor.props(registration));
+    }
+
+    @Override
+    protected Object newRegistrationReplyMessage(ActorRef registrationActor) {
+        return new RegisterDataTreeChangeListenerReply(registrationActor);
+    }
+
+    @Override
+    protected String logName() {
+        return "registerTreeChangeListener";
     }
 }
