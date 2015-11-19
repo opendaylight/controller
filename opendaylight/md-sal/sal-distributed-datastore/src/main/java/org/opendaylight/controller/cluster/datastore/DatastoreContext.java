@@ -103,7 +103,7 @@ public class DatastoreContext {
         this.writeOnlyTransactionOptimizationsEnabled = other.writeOnlyTransactionOptimizationsEnabled;
         this.shardCommitQueueExpiryTimeoutInMillis = other.shardCommitQueueExpiryTimeoutInMillis;
         this.transactionDebugContextEnabled = other.transactionDebugContextEnabled;
-        this.shardManagerPersistenceId = shardManagerPersistenceId;
+        this.shardManagerPersistenceId = other.shardManagerPersistenceId;
 
         setShardJournalRecoveryLogBatchSize(other.raftConfig.getJournalRecoveryLogBatchSize());
         setSnapshotBatchCount(other.raftConfig.getSnapshotBatchCount());
