@@ -135,7 +135,7 @@ public class RpcRegistryTest {
 
         // Bucket store should get an update bucket message. Updated bucket contains added rpc.
 
-        Map<Address, Bucket> buckets = retrieveBuckets(registry1, mockBroker, nodeAddress);
+        Map<Address, Bucket<RoutingTable>> buckets = retrieveBuckets(registry1, mockBroker, nodeAddress);
         verifyBucket(buckets.get(nodeAddress), addedRouteIds);
 
         Map<Address, Long> versions = retrieveVersions(registry1, mockBroker);
@@ -178,7 +178,7 @@ public class RpcRegistryTest {
 
         // Bucket store on node2 should get a message to update its local copy of remote buckets
 
-        Map<Address, Bucket> buckets = retrieveBuckets(registry2, mockBroker2, node1Address);
+        Map<Address, Bucket<RoutingTable>> buckets = retrieveBuckets(registry2, mockBroker2, node1Address);
         verifyBucket(buckets.get(node1Address), addedRouteIds);
 
         // Now remove
@@ -194,7 +194,7 @@ public class RpcRegistryTest {
 
     private void verifyEmptyBucket(JavaTestKit testKit, ActorRef registry, Address address)
             throws AssertionError {
-        Map<Address, Bucket> buckets;
+        Map<Address, Bucket<RoutingTable>> buckets;
         int nTries = 0;
         while(true) {
             buckets = retrieveBuckets(registry1, testKit, address);
@@ -239,7 +239,7 @@ public class RpcRegistryTest {
         Address node1Address = node1.provider().getDefaultAddress();
         Address node2Address = node2.provider().getDefaultAddress();
 
-        Map<Address, Bucket> buckets = retrieveBuckets(registry3, mockBroker3, node1Address,
+        Map<Address, Bucket<RoutingTable>> buckets = retrieveBuckets(registry3, mockBroker3, node1Address,
                 node2Address);
 
         verifyBucket(buckets.get(node1Address), addedRouteIds1);
@@ -283,18 +283,19 @@ public class RpcRegistryTest {
         Assert.assertEquals("RoutingTable size", expRouteIds.size(), table.size());
     }
 
-    private Map<Address, Bucket> retrieveBuckets(ActorRef bucketStore, JavaTestKit testKit,
+    private Map<Address, Bucket<RoutingTable>> retrieveBuckets(ActorRef bucketStore, JavaTestKit testKit,
             Address... addresses) {
         int nTries = 0;
         while(true) {
             bucketStore.tell(new GetAllBuckets(), testKit.getRef());
-            GetAllBucketsReply reply = testKit.expectMsgClass(Duration.create(3, TimeUnit.SECONDS),
+            @SuppressWarnings("unchecked")
+            GetAllBucketsReply<RoutingTable> reply = testKit.expectMsgClass(Duration.create(3, TimeUnit.SECONDS),
                     GetAllBucketsReply.class);
 
-            Map<Address, Bucket> buckets = reply.getBuckets();
+            Map<Address, Bucket<RoutingTable>> buckets = reply.getBuckets();
             boolean foundAll = true;
             for(Address addr: addresses) {
-                Bucket bucket = buckets.get(addr);
+                Bucket<RoutingTable> bucket = buckets.get(addr);
                 if(bucket  == null) {
                     foundAll = false;
                     break;
@@ -314,7 +315,6 @@ public class RpcRegistryTest {
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testAddRoutesConcurrency() throws Exception {
         final JavaTestKit testKit = new JavaTestKit(node1);
@@ -338,7 +338,8 @@ public class RpcRegistryTest {
         int nTries = 0;
         while(true) {
             registry1.tell(getAllBuckets, testKit.getRef());
-            GetAllBucketsReply reply = testKit.expectMsgClass(duration, GetAllBucketsReply.class);
+            @SuppressWarnings("unchecked")
+            GetAllBucketsReply<RoutingTable> reply = testKit.expectMsgClass(duration, GetAllBucketsReply.class);
 
             Bucket<RoutingTable> localBucket = reply.getBuckets().values().iterator().next();
             RoutingTable table = localBucket.getData();
@@ -364,4 +365,5 @@ public class RpcRegistryTest {
         routeIds.add(new RouteIdentifierImpl(null, type, null));
         return routeIds;
     }
+
 }

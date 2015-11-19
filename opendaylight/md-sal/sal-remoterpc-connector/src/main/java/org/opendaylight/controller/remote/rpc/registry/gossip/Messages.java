@@ -45,20 +45,20 @@ public class Messages {
             }
         }
 
-        public static class ContainsBuckets implements Serializable{
+        public static class ContainsBuckets<T extends Copier<T>> implements Serializable{
             private static final long serialVersionUID = -4940160367495308286L;
 
-            private final Map<Address, Bucket> buckets;
+            private final Map<Address, Bucket<T>> buckets;
 
-            public ContainsBuckets(Map<Address, Bucket> buckets){
+            public ContainsBuckets(Map<Address, Bucket<T>> buckets){
                 Preconditions.checkArgument(buckets != null, "buckets can not be null");
                 this.buckets = buckets;
             }
 
-            public Map<Address, Bucket> getBuckets() {
-                Map<Address, Bucket> copy = new HashMap<>(buckets.size());
+            public Map<Address, Bucket<T>> getBuckets() {
+                Map<Address, Bucket<T>> copy = new HashMap<>(buckets.size());
 
-                for (Map.Entry<Address, Bucket> entry : buckets.entrySet()){
+                for (Map.Entry<Address, Bucket<T>> entry : buckets.entrySet()){
                     //ignore null entries
                     if ( (entry.getKey() == null) || (entry.getValue() == null) ) {
                         continue;
@@ -69,16 +69,16 @@ public class Messages {
             }
         }
 
-        public static class GetAllBucketsReply extends ContainsBuckets implements Serializable{
+        public static class GetAllBucketsReply<T extends Copier<T>> extends ContainsBuckets<T> implements Serializable{
             private static final long serialVersionUID = 1L;
-            public GetAllBucketsReply(Map<Address, Bucket> buckets) {
+            public GetAllBucketsReply(Map<Address, Bucket<T>> buckets) {
                 super(buckets);
             }
         }
 
-        public static class GetBucketsByMembersReply extends ContainsBuckets implements Serializable{
+        public static class GetBucketsByMembersReply<T extends Copier<T>> extends ContainsBuckets<T> implements Serializable{
             private static final long serialVersionUID = 1L;
-            public GetBucketsByMembersReply(Map<Address, Bucket> buckets) {
+            public GetBucketsByMembersReply(Map<Address, Bucket<T>> buckets) {
                 super(buckets);
             }
         }
@@ -111,9 +111,9 @@ public class Messages {
             }
         }
 
-        public static class UpdateRemoteBuckets extends ContainsBuckets implements Serializable{
+        public static class UpdateRemoteBuckets<T extends Copier<T>> extends ContainsBuckets<T> implements Serializable{
             private static final long serialVersionUID = 1L;
-            public UpdateRemoteBuckets(Map<Address, Bucket> buckets) {
+            public UpdateRemoteBuckets(Map<Address, Bucket<T>> buckets) {
                 super(buckets);
             }
         }
@@ -143,13 +143,13 @@ public class Messages {
             }
         }
 
-        public static final class GossipEnvelope extends ContainsBuckets implements Serializable {
+        public static final class GossipEnvelope<T extends Copier<T>> extends ContainsBuckets<T> implements Serializable {
             private static final long serialVersionUID = 8346634072582438818L;
 
             private final Address from;
             private final Address to;
 
-            public GossipEnvelope(Address from, Address to, Map<Address, Bucket> buckets) {
+            public GossipEnvelope(Address from, Address to, Map<Address, Bucket<T>> buckets) {
                 super(buckets);
                 Preconditions.checkArgument(to != null, "Recipient of message must not be null");
                 this.to = to;

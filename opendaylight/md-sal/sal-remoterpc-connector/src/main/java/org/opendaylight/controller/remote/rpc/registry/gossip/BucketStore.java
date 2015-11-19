@@ -102,7 +102,7 @@ public class BucketStore<T extends Copier<T>> extends AbstractUntypedActorWithMe
         } else if (message instanceof GetBucketVersions) {
             receiveGetBucketVersions();
         } else if (message instanceof UpdateRemoteBuckets) {
-            receiveUpdateRemoteBuckets(((UpdateRemoteBuckets) message).getBuckets());
+            receiveUpdateRemoteBuckets(((UpdateRemoteBuckets<T>) message).getBuckets());
         } else {
             if(log.isDebugEnabled()) {
                 log.debug("Unhandled message [{}]", message);
@@ -116,7 +116,7 @@ public class BucketStore<T extends Copier<T>> extends AbstractUntypedActorWithMe
      */
     void receiveGetAllBuckets(){
         final ActorRef sender = getSender();
-        sender.tell(new GetAllBucketsReply(getAllBuckets()), getSelf());
+        sender.tell(new GetAllBucketsReply<T>(getAllBuckets()), getSelf());
     }
 
     /**
@@ -124,9 +124,8 @@ public class BucketStore<T extends Copier<T>> extends AbstractUntypedActorWithMe
      *
      * @return self owned + remote buckets
      */
-    @SuppressWarnings("rawtypes")
-    Map<Address, Bucket> getAllBuckets(){
-        Map<Address, Bucket> all = new HashMap<>(remoteBuckets.size() + 1);
+    Map<Address, Bucket<T>> getAllBuckets(){
+        Map<Address, Bucket<T>> all = new HashMap<>(remoteBuckets.size() + 1);
 
         //first add the local bucket
         all.put(selfAddress, new BucketImpl<>(localBucket));
@@ -142,11 +141,10 @@ public class BucketStore<T extends Copier<T>> extends AbstractUntypedActorWithMe
      *
      * @param members requested members
      */
-    @SuppressWarnings("rawtypes")
     void receiveGetBucketsByMembers(Set<Address> members){
         final ActorRef sender = getSender();
-        Map<Address, Bucket> buckets = getBucketsByMembers(members);
-        sender.tell(new GetBucketsByMembersReply(buckets), getSelf());
+        Map<Address, Bucket<T>> buckets = getBucketsByMembers(members);
+        sender.tell(new GetBucketsByMembersReply<T>(buckets), getSelf());
     }
 
     /**
@@ -155,9 +153,8 @@ public class BucketStore<T extends Copier<T>> extends AbstractUntypedActorWithMe
      * @param members requested members
      * @return buckets for requested memebers
      */
-    @SuppressWarnings("rawtypes")
-    Map<Address, Bucket> getBucketsByMembers(Set<Address> members) {
-        Map<Address, Bucket> buckets = new HashMap<>();
+    Map<Address, Bucket<T>> getBucketsByMembers(Set<Address> members) {
+        Map<Address, Bucket<T>> buckets = new HashMap<>();
 
         //first add the local bucket if asked
         if (members.contains(selfAddress)) {
@@ -189,8 +186,7 @@ public class BucketStore<T extends Copier<T>> extends AbstractUntypedActorWithMe
      * @param receivedBuckets buckets sent by remote
      *                        {@link org.opendaylight.controller.remote.rpc.registry.gossip.Gossiper}
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    void receiveUpdateRemoteBuckets(Map<Address, Bucket> receivedBuckets){
+    void receiveUpdateRemoteBuckets(Map<Address, Bucket<T>> receivedBuckets){
         log.debug("{}: receiveUpdateRemoteBuckets: {}", selfAddress, receivedBuckets);
         if (receivedBuckets == null || receivedBuckets.isEmpty())
          {
@@ -200,7 +196,7 @@ public class BucketStore<T extends Copier<T>> extends AbstractUntypedActorWithMe
         //Remote cant update self's bucket
         receivedBuckets.remove(selfAddress);
 
-        for (Map.Entry<Address, Bucket> entry : receivedBuckets.entrySet()){
+        for (Map.Entry<Address, Bucket<T>> entry : receivedBuckets.entrySet()){
 
             Long localVersion = versions.get(entry.getKey());
             if (localVersion == null) {
