@@ -16,6 +16,7 @@ import akka.persistence.PersistentRepr;
 import akka.persistence.journal.japi.AsyncWriteJournal;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.Uninterruptibles;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -25,6 +26,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import org.apache.commons.lang.SerializationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
@@ -56,6 +58,10 @@ public class InMemoryJournal extends AsyncWriteJournal {
 
     private static final Map<String, CountDownLatch> blockReadMessagesLatches = new ConcurrentHashMap<>();
 
+    private static Object deserialize(Object data) {
+        return data instanceof byte[] ? SerializationUtils.deserialize((byte[])data) : data;
+    }
+
     public static void addEntry(String persistenceId, long sequenceNr, Object data) {
         Map<Long, Object> journal = journals.get(persistenceId);
         if(journal == null) {
@@ -64,7 +70,8 @@ public class InMemoryJournal extends AsyncWriteJournal {
         }
 
         synchronized (journal) {
-            journal.put(sequenceNr, data);
+            journal.put(sequenceNr, data instanceof Serializable ?
+                    SerializationUtils.serialize((Serializable) data) : data);
         }
     }
 
@@ -82,8 +89,9 @@ public class InMemoryJournal extends AsyncWriteJournal {
         synchronized (journalMap) {
             List<T> journal = new ArrayList<>(journalMap.size());
             for(Object entry: journalMap.values()) {
-                if(type.isInstance(entry)) {
-                    journal.add((T) entry);
+                Object data = deserialize(entry);
+                if(type.isInstance(data)) {
+                    journal.add((T) data);
                 }
             }
 
@@ -140,7 +148,7 @@ public class InMemoryJournal extends AsyncWriteJournal {
 
     @Override
     public Future<Void> doAsyncReplayMessages(final String persistenceId, final long fromSequenceNr,
-            final long toSequenceNr, long max, final Procedure<PersistentRepr> replayCallback) {
+            final long toSequenceNr, final long max, final Procedure<PersistentRepr> replayCallback) {
         return Futures.future(new Callable<Void>() {
             @Override
             public Void call() throws Exception {
@@ -155,10 +163,11 @@ public class InMemoryJournal extends AsyncWriteJournal {
                 }
 
                 synchronized (journal) {
+                    int count = 0;
                     for (Map.Entry<Long,Object> entry : journal.entrySet()) {
-                        if (entry.getKey() >= fromSequenceNr && entry.getKey() <= toSequenceNr) {
+                        if (++count <= max && entry.getKey() >= fromSequenceNr && entry.getKey() <= toSequenceNr) {
                             PersistentRepr persistentMessage =
-                                    new PersistentImpl(entry.getValue(), entry.getKey(), persistenceId,
+                                    new PersistentImpl(deserialize(entry.getValue()), entry.getKey(), persistenceId,
                                             false, null, null);
                             replayCallback.apply(persistentMessage);
                         }
@@ -196,17 +205,10 @@ public class InMemoryJournal extends AsyncWriteJournal {
             @Override
             public Void call() throws Exception {
                 for (PersistentRepr repr : messages) {
-                    Map<Long, Object> journal = journals.get(repr.persistenceId());
-                    if(journal == null) {
-                        journal = Maps.newLinkedHashMap();
-                        journals.put(repr.persistenceId(), journal);
-                    }
+                    LOG.trace("doAsyncWriteMessages: id: {}: seqNr: {}, payload: {}", repr.persistenceId(),
+                            repr.sequenceNr(), repr.payload());
 
-                    synchronized (journal) {
-                        LOG.trace("doAsyncWriteMessages: id: {}: seqNr: {}, payload: {}", repr.persistenceId(),
-                                repr.sequenceNr(), repr.payload());
-                        journal.put(repr.sequenceNr(), repr.payload());
-                    }
+                    addEntry(repr.persistenceId(), repr.sequenceNr(), repr.payload());
 
                     WriteMessagesComplete complete = writeMessagesComplete.get(repr.persistenceId());
                     if(complete != null) {
