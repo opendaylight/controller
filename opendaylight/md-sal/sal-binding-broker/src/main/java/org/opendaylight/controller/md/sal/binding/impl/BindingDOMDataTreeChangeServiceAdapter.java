@@ -8,6 +8,7 @@
 package org.opendaylight.controller.md.sal.binding.impl;
 
 import com.google.common.base.Preconditions;
+import org.opendaylight.controller.md.sal.binding.api.ClusteredDataTreeChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeListener;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeChangeService;
 import org.opendaylight.controller.md.sal.binding.api.DataTreeIdentifier;
@@ -48,8 +49,16 @@ final class BindingDOMDataTreeChangeServiceAdapter implements DataTreeChangeServ
     public <T extends DataObject, L extends DataTreeChangeListener<T>> ListenerRegistration<L> registerDataTreeChangeListener(
             final DataTreeIdentifier<T> treeId, final L listener) {
         final DOMDataTreeIdentifier domIdentifier = toDomTreeIdentifier(treeId);
-        final BindingDOMDataTreeChangeListenerAdapter<T> domListener = new BindingDOMDataTreeChangeListenerAdapter<>(codec,listener, treeId.getDatastoreType());
-        final ListenerRegistration<BindingDOMDataTreeChangeListenerAdapter<T>> domReg = dataTreeChangeService.registerDataTreeChangeListener(domIdentifier, domListener);
+
+        @SuppressWarnings({ "rawtypes", "unchecked" })
+        final BindingDOMDataTreeChangeListenerAdapter<T> domListener =
+                listener instanceof ClusteredDataTreeChangeListener ?
+                        new BindingClusteredDOMDataTreeChangeListenerAdapter<T>(
+                                codec, (ClusteredDataTreeChangeListener)listener, treeId.getDatastoreType()) :
+                        new BindingDOMDataTreeChangeListenerAdapter<T>(codec, listener, treeId.getDatastoreType());
+
+        final ListenerRegistration<BindingDOMDataTreeChangeListenerAdapter<T>> domReg =
+                dataTreeChangeService.registerDataTreeChangeListener(domIdentifier, domListener);
         return new BindingDataTreeChangeListenerRegistration<>(listener,domReg);
     }
 
