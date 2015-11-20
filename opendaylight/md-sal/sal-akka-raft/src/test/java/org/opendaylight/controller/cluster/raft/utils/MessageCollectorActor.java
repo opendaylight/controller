@@ -31,7 +31,7 @@ import scala.concurrent.duration.FiniteDuration;
 
 public class MessageCollectorActor extends UntypedActor {
     private static final String ARE_YOU_READY = "ARE_YOU_READY";
-    private static final String GET_ALL_MESSAGES = "get-all-messages";
+    public static final String GET_ALL_MESSAGES = "messages";
     private static final String CLEAR_MESSAGES = "clear-messages";
 
     private final List<Object> messages = new ArrayList<>();
@@ -55,7 +55,7 @@ public class MessageCollectorActor extends UntypedActor {
         messages.clear();
     }
 
-    public static List<Object> getAllMessages(ActorRef actor) throws Exception {
+    private static List<Object> getAllMessages(ActorRef actor) throws Exception {
         FiniteDuration operationDuration = Duration.create(5, TimeUnit.SECONDS);
         Timeout operationTimeout = new Timeout(operationDuration);
         Future<Object> future = Patterns.ask(actor, GET_ALL_MESSAGES, operationTimeout);
@@ -78,7 +78,7 @@ public class MessageCollectorActor extends UntypedActor {
 
         for(Object message : allMessages){
             if(message.getClass().equals(clazz)){
-                return (T) message;
+                return clazz.cast(message);
             }
         }
 
@@ -177,7 +177,7 @@ public class MessageCollectorActor extends UntypedActor {
 
         for(Object message : allMessages){
             if(message.getClass().equals(clazz)){
-                output.add((T) message);
+                output.add(clazz.cast(message));
             }
         }
 
