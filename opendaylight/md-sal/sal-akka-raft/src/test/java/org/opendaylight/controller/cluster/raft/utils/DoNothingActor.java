@@ -10,8 +10,9 @@ package org.opendaylight.controller.cluster.raft.utils;
 
 import akka.actor.UntypedActor;
 
-public class DoNothingActor extends UntypedActor{
-    @Override public void onReceive(Object message) throws Exception {
+public class DoNothingActor extends UntypedActor {
 
+    @Override
+    public void onReceive(Object message) throws Exception {
     }
 }

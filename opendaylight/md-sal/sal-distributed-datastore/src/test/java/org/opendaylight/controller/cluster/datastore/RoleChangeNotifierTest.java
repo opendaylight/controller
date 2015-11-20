@@ -12,12 +12,12 @@ package org.opendaylight.controller.cluster.datastore;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
 import org.junit.Test;
-import org.opendaylight.controller.cluster.datastore.utils.MessageCollectorActor;
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListener;
 import org.opendaylight.controller.cluster.notifications.RegisterRoleChangeListenerReply;
@@ -25,6 +25,7 @@ import org.opendaylight.controller.cluster.notifications.RoleChangeNotification;
 import org.opendaylight.controller.cluster.notifications.RoleChangeNotifier;
 import org.opendaylight.controller.cluster.notifications.RoleChanged;
 import org.opendaylight.controller.cluster.raft.RaftState;
+import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 
 public class RoleChangeNotifierTest extends AbstractActorTest  {
 
@@ -39,11 +40,11 @@ public class RoleChangeNotifierTest extends AbstractActorTest  {
 
             notifierTestActorRef.tell(new RegisterRoleChangeListener(), listenerActor);
 
-            RegisterRoleChangeListenerReply reply = (RegisterRoleChangeListenerReply)
+            RegisterRoleChangeListenerReply reply =
                 MessageCollectorActor.getFirstMatching(listenerActor, RegisterRoleChangeListenerReply.class);
             assertNotNull(reply);
 
-            RoleChangeNotification notification = (RoleChangeNotification)
+            RoleChangeNotification notification =
                 MessageCollectorActor.getFirstMatching(listenerActor, RoleChangeNotification.class);
             assertNull(notification);
         }};
@@ -68,11 +69,11 @@ public class RoleChangeNotifierTest extends AbstractActorTest  {
             // listener registers after role has been changed, ensure we sent the latest role change after a reply
             notifierTestActorRef.tell(new RegisterRoleChangeListener(), listenerActor);
 
-            RegisterRoleChangeListenerReply reply = (RegisterRoleChangeListenerReply)
+            RegisterRoleChangeListenerReply reply =
                 MessageCollectorActor.getFirstMatching(listenerActor, RegisterRoleChangeListenerReply.class);
             assertNotNull(reply);
 
-            RoleChangeNotification notification = (RoleChangeNotification)
+            RoleChangeNotification notification =
                 MessageCollectorActor.getFirstMatching(listenerActor, RoleChangeNotification.class);
             assertNotNull(notification);
             assertEquals(RaftState.Candidate.name(), notification.getOldRole());

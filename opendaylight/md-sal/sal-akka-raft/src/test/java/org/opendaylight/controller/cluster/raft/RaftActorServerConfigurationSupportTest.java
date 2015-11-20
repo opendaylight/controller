@@ -347,7 +347,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
 
         // Wait for leader's install snapshot and capture it
 
-        Object installSnapshot = expectFirstMatching(newFollowerCollectorActor, InstallSnapshot.class);
+        InstallSnapshot installSnapshot = expectFirstMatching(newFollowerCollectorActor, InstallSnapshot.class);
 
         // Send a second AddServer - should get queued
         JavaTestKit testKit2 = new JavaTestKit(getSystem());

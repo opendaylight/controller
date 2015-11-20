@@ -132,9 +132,9 @@ public class AbstractLeaderElectionScenarioTest {
         }
 
         <T> T getCapturedMessage(Class<T> msgClass) throws Exception {
-            Object message = getFirstMatching(getSelf(), msgClass);
+            T message = getFirstMatching(getSelf(), msgClass);
             assertNotNull("Message of type " + msgClass + " not received", message);
-            return (T) message;
+            return message;
         }
     }
 
