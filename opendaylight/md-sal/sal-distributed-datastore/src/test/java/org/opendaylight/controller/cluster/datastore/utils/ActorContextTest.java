@@ -550,8 +550,7 @@ public class ActorContextTest extends AbstractActorTest{
         int count = 5000 / 50;
         for(int i = 0; i < count; i++) {
             try {
-                @SuppressWarnings("unchecked")
-                T message = (T) MessageCollectorActor.getFirstMatching(actor, clazz);
+                T message = MessageCollectorActor.getFirstMatching(actor, clazz);
                 if(message != null) {
                     return message;
                 }
