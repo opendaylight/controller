@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7aade967_6a021340",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/utils/MessageCollectorActor.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-20T18:42:14Z",
+      "side": 1,
+      "message": "We should just get rid of this class entirely and use the one from raft. Also the DoNothing actor class. I\u0027ve been meaning to do this. Most of the usages have been converted anyway.",
+      "revId": "1d22a3b6cae2db088083c0f487c6f7997c150b83",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
