@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7aade967_205e7d46",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1085,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-11-20T13:02:23Z",
+      "side": 1,
+      "message": "Don\u0027t assume 0, also this specifies an upper bound so if the new snapshot\u0027s seqNr is 0 then you\u0027re incorrectly targeting it for deletion. But since both seqNr and timestamp criteria have to pass, it won\u0027t get deleted but neither will the previous one. You don\u0027t really need both criteria, just specifying (timestamp - 1) and Long.MAX_VALUE for maxSeqNr will suffice.\n\nYou should extend the test case in ShardManager to do 2 snapshots and restarts and verify there\u0027s only 1 in the end. The first snapshot seqNr will always be 0 but the 2nd should be 1, etc.  You will need https://git.opendaylight.org/gerrit/#/c/29900/ as it fixes the InMemorySnapshotStore.",
+      "revId": "d5b3e20889ba45e99288972917dd8b3c92fca19e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
