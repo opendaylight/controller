@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7aade967_8f81a44c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-11-20T07:42:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7aade967_5ec7e445",
+      "revId": "6f331ca30263299b6bae50dbec3bdc717e45c110",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7aade967_5ef5a481",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2015-11-18T20:30:33Z",
       "side": 1,
       "message": "deleteSnapshot deletes a specific snapshot identified by seqNr and timestamp so this won\u0027t work.  The RaftActor uses deleteSnapshots with a selection criteria. I think you want to use the seqNr-1 and timestamp-1 from the SaveSnapshotSuccess as upper bounds. Then you don\u0027t need to store the lastSnapshotTimestamp.",
+      "revId": "6f331ca30263299b6bae50dbec3bdc717e45c110",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_ef4db8c5",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1076,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-11-20T07:42:03Z",
+      "side": 1,
+      "message": "deleteSnapshot deletes a specific snapshot identified by either the seqNr or the timestamp (confirmed this with a manual test). Here the snapshot persisted does not have a seqNr, the seqNr obtained in metadata is always 0. So using the timestamp for deleting the snapshot.\nAlso as suggested used the SnapshotSelectionCriteria  for deleting snapshots. Hence avoided addition of the new variable lastSnapshotTimestamp.",
+      "parentUuid": "7aade967_5ef5a481",
       "revId": "6f331ca30263299b6bae50dbec3bdc717e45c110",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
