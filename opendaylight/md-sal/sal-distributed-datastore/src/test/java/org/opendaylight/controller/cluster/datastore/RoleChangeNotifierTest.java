@@ -39,7 +39,7 @@ public class RoleChangeNotifierTest extends AbstractActorTest  {
 
             notifierTestActorRef.tell(new RegisterRoleChangeListener(), listenerActor);
 
-            RegisterRoleChangeListenerReply reply = (RegisterRoleChangeListenerReply)
+            RegisterRoleChangeListenerReply reply =
                 MessageCollectorActor.getFirstMatching(listenerActor, RegisterRoleChangeListenerReply.class);
             assertNotNull(reply);
 
