@@ -14,7 +14,6 @@
     <relativePath>../../opendaylight/commons/opendaylight</relativePath>
    </parent>
    <artifactId>features-akka</artifactId>
-   <groupId>org.opendaylight.controller</groupId>
    <packaging>jar</packaging>
    <properties>
       <features.file>features.xml</features.file>
@@ -96,7 +95,6 @@
     <dependency>
       <groupId>org.scala-lang</groupId>
       <artifactId>scala-library</artifactId>
-      <version>${scala.version}.${scala.micro.version}</version>
     </dependency>
     <dependency>
       <groupId>org.scala-lang</groupId>
@@ -240,7 +238,6 @@
          <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-surefire-plugin</artifactId>
-            <version>${surefire.version}</version>
             <configuration>
               <systemPropertyVariables>
                 <karaf.distro.groupId>org.opendaylight.controller</karaf.distro.groupId>

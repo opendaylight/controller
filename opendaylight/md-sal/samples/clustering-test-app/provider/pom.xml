@@ -15,7 +15,6 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>${bundle.plugin.version}</version>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
@@ -27,7 +26,6 @@
             <plugin>
                 <groupId>org.opendaylight.yangtools</groupId>
                 <artifactId>yang-maven-plugin</artifactId>
-                <version>${yangtools.version}</version>
                 <executions>
                     <execution>
                         <id>config</id>
@@ -77,17 +75,14 @@
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>config-api</artifactId>
-            <version>${config.version}</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-binding-config</artifactId>
-            <version>${mdsal.version}</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-binding-api</artifactId>
-            <version>${mdsal.version}</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
@@ -96,12 +91,10 @@
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-common-util</artifactId>
-            <version>${mdsal.version}</version>
         </dependency>
         <dependency>
           <groupId>equinoxSDK381</groupId>
           <artifactId>org.eclipse.osgi</artifactId>
-          <version>3.8.1.v20120830-144521</version>
         </dependency>
     </dependencies>
 </project>
