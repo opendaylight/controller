@@ -94,7 +94,10 @@ public class TransactionProvider implements AutoCloseable{
     public synchronized void abortTransaction() {
         LOG.debug("Aborting current candidateTransaction");
         Optional<DOMDataReadWriteTransaction> otx = getCandidateTransaction();
-        Preconditions.checkState(otx.isPresent(), NO_TRANSACTION_FOUND_FOR_SESSION + netconfSessionIdForReporting);
+        if (!otx.isPresent()) {
+            LOG.warn("discard-changes triggerd on an empty transaction for session: {}", netconfSessionIdForReporting );
+            return;
+        }
         candidateTransaction.cancel();
         allOpenReadWriteTransactions.remove(candidateTransaction);
         candidateTransaction = null;
