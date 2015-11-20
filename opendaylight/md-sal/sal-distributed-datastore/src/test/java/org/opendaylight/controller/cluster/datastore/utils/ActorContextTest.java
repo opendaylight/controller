@@ -31,7 +31,6 @@ import akka.util.Timeout;
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.google.common.util.concurrent.Uninterruptibles;
 import com.typesafe.config.ConfigFactory;
 import java.util.Arrays;
 import java.util.Map;
@@ -55,6 +54,8 @@ import org.opendaylight.controller.cluster.datastore.messages.LocalShardFound;
 import org.opendaylight.controller.cluster.datastore.messages.LocalShardNotFound;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
 import org.opendaylight.controller.cluster.datastore.messages.RemotePrimaryShardFound;
+import org.opendaylight.controller.cluster.raft.utils.EchoActor;
+import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -541,26 +542,9 @@ public class ActorContextTest extends AbstractActorTest{
 
             actorContext.broadcast(new TestMessage());
 
-            expectFirstMatching(shardActorRef1, TestMessage.class);
-            expectFirstMatching(shardActorRef2, TestMessage.class);
+            MessageCollectorActor.expectFirstMatching(shardActorRef1, TestMessage.class);
+            MessageCollectorActor.expectFirstMatching(shardActorRef2, TestMessage.class);
         }};
     }
 
-    private static <T> T expectFirstMatching(ActorRef actor, Class<T> clazz) {
-        int count = 5000 / 50;
-        for(int i = 0; i < count; i++) {
-            try {
-                @SuppressWarnings("unchecked")
-                T message = (T) MessageCollectorActor.getFirstMatching(actor, clazz);
-                if(message != null) {
-                    return message;
-                }
-            } catch (Exception e) {}
-
-            Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
-        }
-
-        Assert.fail("Did not receive message of type " + clazz);
-        return null;
-    }
 }

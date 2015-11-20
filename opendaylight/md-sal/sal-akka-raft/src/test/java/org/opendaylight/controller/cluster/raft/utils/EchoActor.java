@@ -6,12 +6,17 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.cluster.datastore.utils;
+package org.opendaylight.controller.cluster.raft.utils;
 
 import akka.actor.UntypedActor;
 
-public class DoNothingActor extends UntypedActor {
+/**
+ * The EchoActor simply responds back with the same message that it receives
+ */
+public class EchoActor extends UntypedActor {
 
-    @Override public void onReceive(Object message) throws Exception {
+    @Override
+    public void onReceive(Object message) throws Exception {
+        getSender().tell(message, getSelf());
     }
 }
