@@ -93,6 +93,7 @@ import org.opendaylight.controller.cluster.datastore.messages.RemoveShardReplica
 import org.opendaylight.controller.cluster.datastore.messages.ShardLeaderStateChanged;
 import org.opendaylight.controller.cluster.datastore.messages.SwitchShardBehavior;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
+import org.opendaylight.controller.cluster.datastore.utils.ForwardingActor;
 import org.opendaylight.controller.cluster.datastore.utils.MockClusterWrapper;
 import org.opendaylight.controller.cluster.datastore.utils.MockConfiguration;
 import org.opendaylight.controller.cluster.datastore.utils.PrimaryShardInfoFutureCache;
@@ -106,6 +107,8 @@ import org.opendaylight.controller.cluster.raft.base.messages.SwitchBehavior;
 import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshot;
 import org.opendaylight.controller.cluster.raft.messages.AddServer;
 import org.opendaylight.controller.cluster.raft.messages.AddServerReply;
+import org.opendaylight.controller.cluster.raft.messages.RemoveServer;
+import org.opendaylight.controller.cluster.raft.messages.RemoveServerReply;
 import org.opendaylight.controller.cluster.raft.messages.ServerChangeStatus;
 import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
 import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
@@ -210,12 +213,22 @@ public class ShardManagerTest extends AbstractActorTest {
     }
 
     private TestShardManager.Builder newTestShardMgrBuilderWithMockShardActor() {
-        return TestShardManager.builder(datastoreContextBuilder).shardActor(mockShardActor);
+        return newTestShardMgrBuilderWithMockShardActor(mockShardActor);
     }
+
+    private TestShardManager.Builder newTestShardMgrBuilderWithMockShardActor(ActorRef shardActor) {
+        return TestShardManager.builder(datastoreContextBuilder).shardActor(shardActor);
+    }
+
 
     private Props newPropsShardMgrWithMockShardActor() {
         return newTestShardMgrBuilderWithMockShardActor().props();
     }
+
+    private Props newPropsShardMgrWithMockShardActor(ActorRef shardActor) {
+        return newTestShardMgrBuilderWithMockShardActor(shardActor).props();
+    }
+
 
     private TestShardManager newTestShardManager() {
         return newTestShardManager(newShardMgrProps());
@@ -1579,31 +1592,8 @@ public class ShardManagerTest extends AbstractActorTest {
 
     @Test
     public void testAddShardReplicaWithAlreadyInProgress() throws Exception {
-        LOG.info("testAddShardReplicaWithAlreadyInProgress starting");
-        new JavaTestKit(getSystem()) {{
-            JavaTestKit mockShardLeaderKit = new JavaTestKit(getSystem());
-            JavaTestKit secondRequestKit = new JavaTestKit(getSystem());
-
-            MockConfiguration mockConfig =
-                    new MockConfiguration(ImmutableMap.<String, List<String>>builder().
-                       put("astronauts", Arrays.asList("member-2")).build());
-
-            final TestActorRef<TestShardManager> shardManager = actorFactory.createTestActor(
-                    newTestShardMgrBuilder(mockConfig).shardActor(mockShardActor).props(), shardMgrID);
-            shardManager.underlyingActor().setMessageInterceptor(newFindPrimaryInterceptor(mockShardLeaderKit.getRef()));
-
-            shardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
-
-            shardManager.tell(new AddShardReplica("astronauts"), getRef());
-
-            mockShardLeaderKit.expectMsgClass(AddServer.class);
-
-            shardManager.tell(new AddShardReplica("astronauts"), secondRequestKit.getRef());
-
-            secondRequestKit.expectMsgClass(duration("5 seconds"), Failure.class);
-        }};
-
-        LOG.info("testAddShardReplicaWithAlreadyInProgress ending");
+        testServerChangeWhenAlreadyInProgress("astronauts", new AddShardReplica("astronauts"),
+                AddServer.class, new AddShardReplica("astronauts"));
     }
 
     @Test
@@ -1634,12 +1624,171 @@ public class ShardManagerTest extends AbstractActorTest {
             ActorRef shardManager = actorFactory.createActor(newShardMgrProps(
                     new ConfigurationImpl(new EmptyModuleShardConfigProvider())));
 
-            shardManager.tell(new RemoveShardReplica("model-inventory"), getRef());
-            Status.Failure resp = expectMsgClass(duration("2 seconds"), Status.Failure.class);
+            shardManager.tell(new RemoveShardReplica("model-inventory", "member-1"), getRef());
+            Status.Failure resp = expectMsgClass(duration("10 seconds"), Status.Failure.class);
             assertEquals("Failure obtained", true,
-                         (resp.cause() instanceof IllegalArgumentException));
+                         (resp.cause() instanceof PrimaryNotFoundException));
+        }};
+    }
+
+    @Test
+    /**
+     * Primary is Local
+     */
+    public void testRemoveShardReplicaLocal() throws Exception {
+        new JavaTestKit(getSystem()) {{
+            String memberId = "member-1-shard-default-" + shardMrgIDSuffix;
+
+            final TestActorRef<MockRespondActor> respondActor =
+                    TestActorRef.create(getSystem(), Props.create(MockRespondActor.class), memberId);
+
+            ActorRef shardManager = getSystem().actorOf(newPropsShardMgrWithMockShardActor(respondActor));
+
+            shardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
+            shardManager.tell(new ActorInitialized(), respondActor);
+            shardManager.tell(new ShardLeaderStateChanged(memberId, memberId, Optional.of(mock(DataTree.class)),
+                    DataStoreVersions.CURRENT_VERSION), getRef());
+            shardManager.tell((new RoleChangeNotification(memberId, RaftState.Candidate.name(),
+                    RaftState.Leader.name())), respondActor);
+
+            respondActor.underlyingActor().updateResponse(new RemoveServerReply(ServerChangeStatus.OK, null));
+            shardManager.tell(new RemoveShardReplica(Shard.DEFAULT_NAME, "member-1"), getRef());
+            final RemoveServer removeServer = MessageCollectorActor.expectFirstMatching(respondActor, RemoveServer.class);
+            assertEquals(new ShardIdentifier("default", "member-1", shardMrgIDSuffix).toString(),
+                    removeServer.getServerId());
+            expectMsgClass(duration("5 seconds"), Success.class);
+        }};
+    }
+
+    @Test
+    public void testRemoveShardReplicaRemote() throws Exception {
+        MockConfiguration mockConfig =
+                new MockConfiguration(ImmutableMap.<String, List<String>>builder().
+                        put("default", Arrays.asList("member-1", "member-2")).
+                        put("astronauts", Arrays.asList("member-1")).build());
+
+        String shardManagerID = ShardManagerIdentifier.builder().type(shardMrgIDSuffix).build().toString();
+
+        // Create an ActorSystem ShardManager actor for member-1.
+        final ActorSystem system1 = newActorSystem("Member1");
+        Cluster.get(system1).join(AddressFromURIString.parse("akka.tcp://cluster-test@127.0.0.1:2558"));
+        ActorRef mockDefaultShardActor = newMockShardActor(system1, Shard.DEFAULT_NAME, "member-1");
+
+        final TestActorRef<TestShardManager> newReplicaShardManager = TestActorRef.create(system1,
+                newTestShardMgrBuilder().configuration(mockConfig).shardActor(mockDefaultShardActor).cluster(
+                        new ClusterWrapperImpl(system1)).props(),
+                shardManagerID);
+
+        // Create an ActorSystem ShardManager actor for member-2.
+        final ActorSystem system2 = newActorSystem("Member2");
+        Cluster.get(system2).join(AddressFromURIString.parse("akka.tcp://cluster-test@127.0.0.1:2558"));
+
+        String name = new ShardIdentifier("default", "member-2", shardMrgIDSuffix).toString();
+        final TestActorRef<MockRespondActor> mockShardLeaderActor =
+                TestActorRef.create(system2, Props.create(MockRespondActor.class), name);
+
+        LOG.error("Mock Shard Leader Actor : {}", mockShardLeaderActor);
+
+        final TestActorRef<TestShardManager> leaderShardManager = TestActorRef.create(system2,
+                newTestShardMgrBuilder().configuration(mockConfig).shardActor(mockShardLeaderActor).cluster(
+                        new ClusterWrapperImpl(system2)).props(),
+                shardManagerID);
+
+        // Because mockShardLeaderActor is created at the top level of the actor system it has an address like so,
+        //    akka.tcp://cluster-test@127.0.0.1:2559/user/member-2-shard-default-config1
+        // However when a shard manager has a local shard which is a follower and a leader that is remote it will
+        // try to compute an address for the remote shard leader using the ShardPeerAddressResolver. This address will
+        // look like so,
+        //    akka.tcp://cluster-test@127.0.0.1:2559/user/shardmanager-config1/member-2-shard-default-config1
+        // In this specific case if we did a FindPrimary for shard default from member-1 we would come up
+        // with the address of an actor which does not exist, therefore any message sent to that actor would go to
+        // dead letters.
+        // To work around this problem we create a ForwardingActor with the right address and pass to it the
+        // mockShardLeaderActor. The ForwardingActor simply forwards all messages to the mockShardLeaderActor and every
+        // thing works as expected
+        final ActorRef actorRef = leaderShardManager.underlyingActor().context()
+                .actorOf(Props.create(ForwardingActor.class, mockShardLeaderActor), "member-2-shard-default-" + shardMrgIDSuffix);
+
+        LOG.error("Forwarding actor : {}", actorRef);
+
+        new JavaTestKit(system1) {{
+
+            newReplicaShardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
+            leaderShardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
+
+            leaderShardManager.tell(new ActorInitialized(), mockShardLeaderActor);
+            newReplicaShardManager.tell(new ActorInitialized(), mockShardLeaderActor);
+
+            String memberId2 = "member-2-shard-default-" + shardMrgIDSuffix;
+            short leaderVersion = DataStoreVersions.CURRENT_VERSION - 1;
+            leaderShardManager.tell(new ShardLeaderStateChanged(memberId2, memberId2,
+                    Optional.of(mock(DataTree.class)), leaderVersion), mockShardLeaderActor);
+            leaderShardManager.tell(new RoleChangeNotification(memberId2,
+                    RaftState.Candidate.name(), RaftState.Leader.name()), mockShardLeaderActor);
+
+            String memberId1 = "member-1-shard-default-" + shardMrgIDSuffix;
+            newReplicaShardManager.tell(new ShardLeaderStateChanged(memberId1, memberId2,
+                    Optional.of(mock(DataTree.class)), leaderVersion), mockShardActor);
+            newReplicaShardManager.tell(new RoleChangeNotification(memberId1,
+                    RaftState.Candidate.name(), RaftState.Follower.name()), mockShardActor);
+
+            newReplicaShardManager.underlyingActor().waitForMemberUp();
+            leaderShardManager.underlyingActor().waitForMemberUp();
+
+            //construct a mock response message
+            RemoveServerReply response = new RemoveServerReply(ServerChangeStatus.OK, memberId2);
+            mockShardLeaderActor.underlyingActor().updateResponse(response);
+            newReplicaShardManager.tell(new RemoveShardReplica("default", "member-1"), getRef());
+            RemoveServer removeServer = MessageCollectorActor.expectFirstMatching(mockShardLeaderActor,
+                    RemoveServer.class);
+            String removeServerId = new ShardIdentifier("default", "member-1", shardMrgIDSuffix).toString();
+            assertEquals("RemoveServer serverId", removeServerId, removeServer.getServerId());
+            expectMsgClass(duration("5 seconds"), Status.Success.class);
         }};
 
+    }
+
+    @Test
+    public void testRemoveShardReplicaWhenAnotherRemoveShardReplicaAlreadyInProgress() throws Exception {
+        testServerChangeWhenAlreadyInProgress("astronauts", new RemoveShardReplica("astronauts", "member-2"),
+                RemoveServer.class, new RemoveShardReplica("astronauts", "member-3"));
+    }
+
+    @Test
+    public void testRemoveShardReplicaWhenAddShardReplicaAlreadyInProgress() throws Exception {
+        testServerChangeWhenAlreadyInProgress("astronauts", new AddShardReplica("astronauts"),
+                AddServer.class, new RemoveShardReplica("astronauts", "member-2"));
+    }
+
+
+    public void testServerChangeWhenAlreadyInProgress(final String shardName, final Object firstServerChange,
+                                                      final Class firstForwardedServerChangeClass,
+                                                      final Object secondServerChange) throws Exception {
+        new JavaTestKit(getSystem()) {{
+            JavaTestKit mockShardLeaderKit = new JavaTestKit(getSystem());
+            JavaTestKit secondRequestKit = new JavaTestKit(getSystem());
+
+            MockConfiguration mockConfig =
+                    new MockConfiguration(ImmutableMap.<String, List<String>>builder().
+                            put(shardName, Arrays.asList("member-2")).build());
+
+            final TestActorRef<TestShardManager> shardManager = TestActorRef.create(getSystem(),
+                    newTestShardMgrBuilder().configuration(mockConfig).shardActor(mockShardActor).cluster(
+                            new MockClusterWrapper()).props(),
+                    shardMgrID);
+
+            shardManager.underlyingActor().setMessageInterceptor(newFindPrimaryInterceptor(mockShardLeaderKit.getRef()));
+
+            shardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
+
+            shardManager.tell(firstServerChange, getRef());
+
+            mockShardLeaderKit.expectMsgClass(firstForwardedServerChangeClass);
+
+            shardManager.tell(secondServerChange, secondRequestKit.getRef());
+
+            secondRequestKit.expectMsgClass(duration("5 seconds"), Failure.class);
+        }};
     }
 
     @Test
@@ -1962,6 +2111,7 @@ public class ShardManagerTest extends AbstractActorTest {
 
     private static class MockRespondActor extends MessageCollectorActor {
         static final String CLEAR_RESPONSE = "clear-response";
+        static final org.slf4j.Logger LOG = LoggerFactory.getLogger(MockRespondActor.class);
 
         private volatile Object responseMsg;
 
@@ -1980,12 +2130,15 @@ public class ShardManagerTest extends AbstractActorTest {
 
         @Override
         public void onReceive(Object message) throws Exception {
+            if(!"get-all-messages".equals(message)) {
+                LOG.debug("Received message : {}", message);
+            }
             super.onReceive(message);
-            if (message instanceof AddServer) {
-                if (responseMsg != null) {
-                    getSender().tell(responseMsg, getSelf());
-                }
-            } if(message.equals(CLEAR_RESPONSE)) {
+            if (message instanceof AddServer && responseMsg != null) {
+                getSender().tell(responseMsg, getSelf());
+            } else if(message instanceof RemoveServer && responseMsg != null){
+                getSender().tell(responseMsg, getSelf());
+            } else if(message.equals(CLEAR_RESPONSE)) {
                 responseMsg = null;
             }
         }
