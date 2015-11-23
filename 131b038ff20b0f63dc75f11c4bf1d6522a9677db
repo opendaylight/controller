@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "7aade967_79250fc1",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/CodeStringProvider.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-11-23T17:21:11Z",
+      "side": 1,
+      "message": "do we want to use Integer, or is int fine?",
+      "revId": "131b038ff20b0f63dc75f11c4bf1d6522a9677db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7aade967_c62482c8",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/NormalizedNodeInputStreamReader.java",
         "patchSetId": 2
@@ -31,6 +48,23 @@
       "side": 1,
       "message": "To free up the memory used up when creating the string from bytes in readUTF.",
       "parentUuid": "7aade967_c62482c8",
+      "revId": "131b038ff20b0f63dc75f11c4bf1d6522a9677db",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_99224bb8",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/NormalizedNodeOutputStreamWriter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 282,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-11-23T17:21:11Z",
+      "side": 1,
+      "message": "Precondintions.checkArgument(o instanceof String, ...) ?",
       "revId": "131b038ff20b0f63dc75f11c4bf1d6522a9677db",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
