@@ -24,6 +24,7 @@ import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.type.EnumTypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.type.IdentityrefTypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.type.UnionTypeDefinition;
+import org.opendaylight.yangtools.yang.model.util.type.CompatUtils;
 
 public class JavaAttribute extends AbstractAttribute implements TypedAttribute {
 
@@ -34,20 +35,20 @@ public class JavaAttribute extends AbstractAttribute implements TypedAttribute {
     private final TypeProviderWrapper typeProviderWrapper;
     private final TypeDefinition<?> typeDefinition;
 
-    public JavaAttribute(LeafSchemaNode leaf,
-            TypeProviderWrapper typeProviderWrapper) {
+    public JavaAttribute(final LeafSchemaNode leaf,
+            final TypeProviderWrapper typeProviderWrapper) {
         super(leaf);
         this.type = typeProviderWrapper.getType(leaf);
 
-        this.typeDefinition = leaf.getType();
+        this.typeDefinition = CompatUtils.compatLeafType(leaf);
         this.typeProviderWrapper = typeProviderWrapper;
         this.nullableDefault = leaf.getDefault();
         this.nullableDefaultWrappedForCode = leaf.getDefault() == null ? null : typeProviderWrapper.getDefault(leaf);
         this.nullableDescription = leaf.getDescription();
     }
 
-    public JavaAttribute(LeafListSchemaNode leaf,
-            TypeProviderWrapper typeProviderWrapper) {
+    public JavaAttribute(final LeafListSchemaNode leaf,
+            final TypeProviderWrapper typeProviderWrapper) {
         super(leaf);
         this.type = typeProviderWrapper.getType(leaf);
         this.typeDefinition = leaf.getType();
@@ -73,7 +74,7 @@ public class JavaAttribute extends AbstractAttribute implements TypedAttribute {
     /**
      * Returns the most base type
      */
-    private TypeDefinition<?> getBaseType(TypeProviderWrapper typeProviderWrapper, TypeDefinition<?> baseType) {
+    private TypeDefinition<?> getBaseType(final TypeProviderWrapper typeProviderWrapper, TypeDefinition<?> baseType) {
         while(baseType.getBaseType()!=null) {
             baseType = baseType.getBaseType();
         }
@@ -100,7 +101,7 @@ public class JavaAttribute extends AbstractAttribute implements TypedAttribute {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
@@ -184,7 +185,7 @@ public class JavaAttribute extends AbstractAttribute implements TypedAttribute {
         return typeDefinition instanceof IdentityrefTypeDefinition;
     }
 
-    private OpenType<?> getCompositeTypeForUnion(TypeDefinition<?> baseTypeDefinition) {
+    private OpenType<?> getCompositeTypeForUnion(final TypeDefinition<?> baseTypeDefinition) {
         Preconditions.checkArgument(baseTypeDefinition instanceof UnionTypeDefinition,
                 "Expected %s instance but was %s", UnionTypeDefinition.class, baseTypeDefinition);
 
@@ -232,7 +233,7 @@ public class JavaAttribute extends AbstractAttribute implements TypedAttribute {
 
     public static final Class<Character> TYPE_OF_ARTIFICIAL_UNION_PROPERTY = char.class;
 
-    private void addArtificialPropertyToUnionCompositeType(TypeDefinition<?> baseTypeDefinition, String[] itemNames, OpenType<?>[] itemTypes) {
+    private void addArtificialPropertyToUnionCompositeType(final TypeDefinition<?> baseTypeDefinition, final String[] itemNames, final OpenType<?>[] itemTypes) {
         String artificialPropertyName = typeProviderWrapper.getJMXParamForBaseType(baseTypeDefinition);
         itemNames[0] = artificialPropertyName;
 
@@ -241,12 +242,12 @@ public class JavaAttribute extends AbstractAttribute implements TypedAttribute {
         itemTypes[0] = artificialPropertyType;
     }
 
-    private OpenType<?> getSimpleType(Type type) {
+    private OpenType<?> getSimpleType(final Type type) {
         SimpleType<?> simpleType = SimpleTypeResolver.getSimpleType(type);
         return simpleType;
     }
 
-    private OpenType<?> getCompositeType(Type baseType, TypeDefinition<?> baseTypeDefinition) {
+    private OpenType<?> getCompositeType(final Type baseType, final TypeDefinition<?> baseTypeDefinition) {
 
         SimpleType<?> innerItemType = SimpleTypeResolver.getSimpleType(baseType);
         String innerItemName = typeProviderWrapper.getJMXParamForBaseType(baseTypeDefinition);
@@ -282,7 +283,7 @@ public class JavaAttribute extends AbstractAttribute implements TypedAttribute {
         return getArrayOpenTypeForSimpleType(innerTypeFullyQName, innerSimpleType);
     }
 
-    private OpenType<?> getArrayOpenTypeForSimpleType(String innerTypeFullyQName, SimpleType<?> innerSimpleType) {
+    private OpenType<?> getArrayOpenTypeForSimpleType(final String innerTypeFullyQName, final SimpleType<?> innerSimpleType) {
         try {
             ArrayType<Object> arrayType = isPrimitive(innerTypeFullyQName) ? new ArrayType<>(innerSimpleType, true)
                     : new ArrayType<>(1, innerSimpleType);
@@ -294,7 +295,7 @@ public class JavaAttribute extends AbstractAttribute implements TypedAttribute {
     }
 
     // TODO verify
-    private boolean isPrimitive(String innerTypeFullyQName) {
+    private boolean isPrimitive(final String innerTypeFullyQName) {
         if (innerTypeFullyQName.contains(".")) {
             return false;
         }
@@ -306,11 +307,11 @@ public class JavaAttribute extends AbstractAttribute implements TypedAttribute {
         return type.getName().endsWith("[]");
     }
 
-    private boolean isDerivedType(Type baseType, Type currentType) {
+    private boolean isDerivedType(final Type baseType, final Type currentType) {
         return baseType.equals(currentType) == false;
     }
 
-    private static String getInnerType(Type type) {
+    private static String getInnerType(final Type type) {
         String fullyQualifiedName = type.getFullyQualifiedName();
         return fullyQualifiedName.substring(0, fullyQualifiedName.length() - 2);
     }

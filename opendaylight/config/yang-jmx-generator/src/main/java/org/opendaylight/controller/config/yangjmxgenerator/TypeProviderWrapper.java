@@ -15,11 +15,12 @@ import org.opendaylight.yangtools.yang.model.api.LeafSchemaNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaNode;
 import org.opendaylight.yangtools.yang.model.api.TypeDefinition;
 import org.opendaylight.yangtools.yang.model.api.UnknownSchemaNode;
+import org.opendaylight.yangtools.yang.model.util.type.CompatUtils;
 
 public class TypeProviderWrapper {
     private final TypeProvider typeProvider;
 
-    public TypeProviderWrapper(TypeProvider typeProvider) {
+    public TypeProviderWrapper(final TypeProvider typeProvider) {
         this.typeProvider = typeProvider;
     }
 
@@ -27,16 +28,16 @@ public class TypeProviderWrapper {
      * For input node, find if it contains config:java-name-prefix extension. If
      * not found, convert local name of node converted to cammel case.
      */
-    public static String findJavaNamePrefix(SchemaNode schemaNode) {
+    public static String findJavaNamePrefix(final SchemaNode schemaNode) {
         return convertToJavaName(schemaNode, true);
     }
 
-    public static String findJavaParameter(SchemaNode schemaNode) {
+    public static String findJavaParameter(final SchemaNode schemaNode) {
         return convertToJavaName(schemaNode, false);
     }
 
-    public static String convertToJavaName(SchemaNode schemaNode,
-                                           boolean capitalizeFirstLetter) {
+    public static String convertToJavaName(final SchemaNode schemaNode,
+                                           final boolean capitalizeFirstLetter) {
         for (UnknownSchemaNode unknownNode : schemaNode.getUnknownSchemaNodes()) {
             if (ConfigConstants.JAVA_NAME_PREFIX_EXTENSION_QNAME
                     .equals(unknownNode.getNodeType())) {
@@ -48,8 +49,8 @@ public class TypeProviderWrapper {
                 capitalizeFirstLetter);
     }
 
-    public static String convertToJavaName(String localName,
-                                           boolean capitalizeFirstLetter) {
+    public static String convertToJavaName(final String localName,
+                                           final boolean capitalizeFirstLetter) {
         if (capitalizeFirstLetter) {
             return BindingGeneratorUtil.parseToClassName(localName);
         } else {
@@ -57,16 +58,16 @@ public class TypeProviderWrapper {
         }
     }
 
-    public Type getType(LeafSchemaNode leaf) {
-        TypeDefinition<?> type = leaf.getType();
+    public Type getType(final LeafSchemaNode leaf) {
+        TypeDefinition<?> type = CompatUtils.compatLeafType(leaf);
         return getType(leaf, type);
     }
 
-    public String getDefault(LeafSchemaNode node) {
+    public String getDefault(final LeafSchemaNode node) {
         return typeProvider.getTypeDefaultConstruction(node);
     }
 
-    public Type getType(SchemaNode leaf, TypeDefinition<?> type) {
+    public Type getType(final SchemaNode leaf, final TypeDefinition<?> type) {
         Type javaType;
         try {
             javaType = typeProvider.javaTypeForSchemaDefinitionType(
@@ -83,7 +84,7 @@ public class TypeProviderWrapper {
     }
 
     // there is no getType in common interface
-    public Type getType(LeafListSchemaNode leaf) {
+    public Type getType(final LeafListSchemaNode leaf) {
         Type javaType;
         try {
             javaType = typeProvider.javaTypeForSchemaDefinitionType(
@@ -99,11 +100,11 @@ public class TypeProviderWrapper {
         return javaType;
     }
 
-    public String getJMXParamForBaseType(TypeDefinition<?> baseType) {
+    public String getJMXParamForBaseType(final TypeDefinition<?> baseType) {
         return typeProvider.getConstructorPropertyName(baseType);
     }
 
-    public String getJMXParamForUnionInnerType(TypeDefinition<?> unionInnerType) {
+    public String getJMXParamForUnionInnerType(final TypeDefinition<?> unionInnerType) {
         return typeProvider.getParamNameFromType(unionInnerType);
     }
 }
