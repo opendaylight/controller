@@ -1218,13 +1218,14 @@ public class ShardManagerTest extends AbstractActorTest {
                    put("astronauts", Arrays.asList("member-2")).build());
 
         String shardManagerID = ShardManagerIdentifier.builder().type(shardMrgIDSuffix).build().toString();
+        final String replicaShardManagerId = "shardManager1";
 
         // Create an ActorSystem ShardManager actor for member-1.
         final ActorSystem system1 = ActorSystem.create("cluster-test", ConfigFactory.load().getConfig("Member1"));
         Cluster.get(system1).join(AddressFromURIString.parse("akka.tcp://cluster-test@127.0.0.1:2558"));
         ActorRef mockDefaultShardActor = newMockShardActor(system1, Shard.DEFAULT_NAME, "member-1");
         final TestActorRef<ForwardingShardManager> newReplicaShardManager = TestActorRef.create(system1,
-                newPropsShardMgrWithMockShardActor("shardManager1", mockDefaultShardActor,
+                newPropsShardMgrWithMockShardActor(replicaShardManagerId, mockDefaultShardActor,
                    new ClusterWrapperImpl(system1), mockConfig), shardManagerID);
 
         // Create an ActorSystem ShardManager actor for member-2.
@@ -1256,6 +1257,11 @@ public class ShardManagerTest extends AbstractActorTest {
             newReplicaShardManager.underlyingActor().waitForMemberUp();
             leaderShardManager.underlyingActor().waitForMemberUp();
 
+            //Have a dummy snapshot to be overwritten by the new data persisted.
+            String[] restoredShards = {"default", "people"};
+            ShardManagerSnapshot snapshot = new ShardManagerSnapshot(Arrays.asList(restoredShards));
+            InMemorySnapshotStore.addSnapshot(replicaShardManagerId, snapshot);
+
             //construct a mock response message
             AddServerReply response = new AddServerReply(ServerChangeStatus.OK, memberId2);
             mockShardLeaderActor.underlyingActor().updateResponse(response);
@@ -1267,6 +1273,12 @@ public class ShardManagerTest extends AbstractActorTest {
             newReplicaShardManager.underlyingActor()
                 .verifySnapshotPersisted(Sets.newHashSet("default", "astronauts"));
             expectMsgClass(duration("5 seconds"), Status.Success.class);
+            List<ShardManagerSnapshot> persistedSnapshots =
+                InMemorySnapshotStore.getSnapshots(replicaShardManagerId, ShardManagerSnapshot.class);
+            assertEquals("Number of snapshots persisted", 1, persistedSnapshots.size());
+            ShardManagerSnapshot shardManagerSnapshot = persistedSnapshots.get(0);
+            assertEquals("Persisted local shards", Sets.newHashSet(shardManagerSnapshot.getShardList()),
+                Sets.newHashSet("default", "astronauts"));
         }};
 
         JavaTestKit.shutdownActorSystem(system1);
@@ -1758,6 +1770,7 @@ public class ShardManagerTest extends AbstractActorTest {
         public void saveSnapshot(Object obj) {
             snapshot = (ShardManagerSnapshot) obj;
             snapshotPersist.countDown();
+            super.saveSnapshot(obj);
         }
 
         void verifySnapshotPersisted(Set<String> shardList) {
