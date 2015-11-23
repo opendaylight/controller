@@ -16,6 +16,24 @@
       "revId": "d5b3e20889ba45e99288972917dd8b3c92fca19e",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_f34a7e82",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1085,
+      "author": {
+        "id": 3374
+      },
+      "writtenOn": "2015-11-23T08:58:10Z",
+      "side": 1,
+      "message": "Done.\nFor verification, without restoration verified the contents of the snapshot available in the InMemorySnaboshotStore.",
+      "parentUuid": "7aade967_205e7d46",
+      "revId": "d5b3e20889ba45e99288972917dd8b3c92fca19e",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
