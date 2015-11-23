@@ -21,22 +21,13 @@
     <artifactId>enunciate-parent</artifactId>
     <packaging>pom</packaging>
 
-    <!-- enunciate plugin does not work with JDK8 onwards -->
-    <profiles>
-        <profile>
-            <id>non-java8</id>
-            <activation>
-                <jdk>1.7</jdk>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.enunciate</groupId>
-                        <artifactId>maven-enunciate-plugin</artifactId>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.webcohesion.enunciate</groupId>
+                <artifactId>enunciate-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 </project>
 
