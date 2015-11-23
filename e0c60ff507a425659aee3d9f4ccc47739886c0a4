@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "7aade967_64d8021e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 3172
+      },
+      "writtenOn": "2015-11-23T22:02:16Z",
+      "side": 1,
+      "message": "Ah, ok.  Thanks.",
+      "parentUuid": "7aade967_e4ecf2c9",
+      "range": {
+        "startLine": 249,
+        "startChar": 72,
+        "endLine": 249,
+        "endChar": 87
+      },
+      "revId": "e0c60ff507a425659aee3d9f4ccc47739886c0a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7aade967_847c1e22",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
         "patchSetId": 1
