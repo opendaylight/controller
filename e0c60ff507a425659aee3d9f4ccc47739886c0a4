@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7aade967_e487120e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 3172
+      },
+      "writtenOn": "2015-11-23T20:59:53Z",
+      "side": 1,
+      "message": "Does it matter that this changes the actor name?  If the actor name doesn\u0027t matter, then maybe remove this parameter?",
+      "range": {
+        "startLine": 249,
+        "startChar": 72,
+        "endLine": 249,
+        "endChar": 87
+      },
+      "revId": "e0c60ff507a425659aee3d9f4ccc47739886c0a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_847c1e22",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/test/java/org/opendaylight/controller/cluster/datastore/ShardManagerTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 251,
+      "author": {
+        "id": 3172
+      },
+      "writtenOn": "2015-11-23T20:59:53Z",
+      "side": 1,
+      "message": "Same as above.",
+      "range": {
+        "startLine": 251,
+        "startChar": 72,
+        "endLine": 251,
+        "endChar": 87
+      },
+      "revId": "e0c60ff507a425659aee3d9f4ccc47739886c0a4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
