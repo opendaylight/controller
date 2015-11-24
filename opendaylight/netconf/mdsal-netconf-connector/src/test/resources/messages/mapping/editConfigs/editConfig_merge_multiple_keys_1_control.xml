@@ -1,0 +1,21 @@
+<!--
+  ~ Copyright (c) 2015 Cisco Systems, Inc. and others.  All rights reserved.
+  ~
+  ~ This program and the accompanying materials are made available under the
+  ~ terms of the Eclipse Public License v1.0 which accompanies this distribution,
+  ~ and is available at http://www.eclipse.org/legal/epl-v10.html
+  -->
+
+<rpc-reply id="a" a="64" xmlnx="a:b:c:d" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="101">
+    <data xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+        <mapping-nodes xmlns="urn:opendaylight:mdsal:mapping:test">
+            <multiple-keys>
+                <key3>3</key3>
+                <key1>1</key1>
+                <key2>2</key2>
+                <value2>22</value2>
+                <value1>11</value1>
+            </multiple-keys>
+        </mapping-nodes>
+    </data>
+</rpc-reply>
