@@ -26,15 +26,14 @@ import org.osgi.framework.BundleContext;
 public class NetconfConnectorModuleFactory extends
         org.opendaylight.controller.config.yang.md.sal.connector.netconf.AbstractNetconfConnectorModuleFactory {
 
-    // TODO this should be injected
-    // Netconf devices have separated schema registry + factory from controller
+    private static final String SCHEMA_CACHE_DIRECTORY = "cache/schema";
     private final SharedSchemaRepository repository = new SharedSchemaRepository(NAME);
     private final SchemaContextFactory schemaContextFactory
             = repository.createSchemaContextFactory(SchemaSourceFilter.ALWAYS_ACCEPT);
 
     public NetconfConnectorModuleFactory() {
         // Start cache and Text to AST transformer
-        final FilesystemSchemaSourceCache<YangTextSchemaSource> cache = new FilesystemSchemaSourceCache<>(repository, YangTextSchemaSource.class, new File("cache/schema"));
+        final FilesystemSchemaSourceCache<YangTextSchemaSource> cache = new FilesystemSchemaSourceCache<>(repository, YangTextSchemaSource.class, new File(SCHEMA_CACHE_DIRECTORY));
         repository.registerSchemaSourceListener(cache);
         repository.registerSchemaSourceListener(TextToASTTransformer.create(repository, repository));
     }
@@ -56,8 +55,24 @@ public class NetconfConnectorModuleFactory extends
         final NetconfConnectorModule module = (NetconfConnectorModule) super.createModule(instanceName, dependencyResolver,
                 bundleContext);
         module.setBundleContext(bundleContext);
-        module.setSchemaRegistry(repository);
+        final String schemaCacheDirectory = module.getSchemaCacheDirectory();
+        if(schemaCacheDirectory.equals(SCHEMA_CACHE_DIRECTORY)) {
+            module.setSchemaRegistry(repository);
+        } else {
+            final SharedSchemaRepository deviceRepository = createDeviceRepository(instanceName, schemaCacheDirectory);
+            module.setSchemaRegistry(deviceRepository);
+        }
         module.setSchemaContextFactory(schemaContextFactory);
         return module;
+    }
+
+    private SharedSchemaRepository createDeviceRepository(final String instanceName, final String schemaCacheDirectory) {
+        final SharedSchemaRepository deviceRepository = new SharedSchemaRepository(instanceName);
+        final SchemaContextFactory deviceSchemaContextFactory =
+                deviceRepository.createSchemaContextFactory(SchemaSourceFilter.ALWAYS_ACCEPT);
+        final FilesystemSchemaSourceCache<YangTextSchemaSource> deviceCache = new FilesystemSchemaSourceCache<>(repository, YangTextSchemaSource.class, new File(schemaCacheDirectory));
+        deviceRepository.registerSchemaSourceListener(deviceCache);
+        deviceRepository.registerSchemaSourceListener(TextToASTTransformer.create(deviceRepository, deviceRepository));
+        return deviceRepository;
     }
 }
