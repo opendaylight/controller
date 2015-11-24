@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "7aade967_8a6e64c8",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/config/yang/md/sal/connector/netconf/NetconfConnectorModuleFactory.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2015-11-24T22:28:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7aade967_ea527812",
+      "revId": "423486aea9477a25a897509d43245fce1273f039",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7aade967_ca4d3c74",
         "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/config/yang/md/sal/connector/netconf/NetconfConnectorModuleFactory.java",
         "patchSetId": 4
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "7aade967_4a686cba",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/config/yang/md/sal/connector/netconf/NetconfConnectorModuleFactory.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2015-11-24T22:28:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7aade967_ca4d3c74",
+      "revId": "423486aea9477a25a897509d43245fce1273f039",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7aade967_6a3768e4",
         "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/yang/odl-sal-netconf-connector-cfg.yang",
         "patchSetId": 4
@@ -47,6 +83,24 @@
       "writtenOn": "2015-11-24T22:22:45Z",
       "side": 1,
       "message": "How about: \"...stored to a distinct directory to avoid potential conflicts with other netconf mounts.\"\n\nWe should also mention that \"If not specified, the directory defaults to the shared cache/schema directory.\"",
+      "revId": "423486aea9477a25a897509d43245fce1273f039",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7aade967_6a6528e0",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/yang/odl-sal-netconf-connector-cfg.yang",
+        "patchSetId": 4
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 3635
+      },
+      "writtenOn": "2015-11-24T22:28:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7aade967_6a3768e4",
       "revId": "423486aea9477a25a897509d43245fce1273f039",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
