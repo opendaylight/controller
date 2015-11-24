@@ -58,6 +58,13 @@ module odl-sal-netconf-connector-cfg {
                 type string;
             }
 
+            leaf schema-cache-directory {
+                type string;
+                default "schema";
+                description "The destination schema repository for yang files relative to the cache directory.  This may be specified per netconf mount
+                             so that the loaded yang files are stored to a distinct directory to avoid potential conflict.";
+            }
+
             container yang-module-capabilities {
                 leaf-list capability {
                     type string;
