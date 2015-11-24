@@ -58,6 +58,11 @@ module odl-sal-netconf-connector-cfg {
                 type string;
             }
 
+            leaf schema-cache-directory {
+                type string;
+                default "cache/schema";
+            }
+
             container yang-module-capabilities {
                 leaf-list capability {
                     type string;
