@@ -188,6 +188,24 @@ public class NetconfMDSalMappingTest {
     }
 
     @Test
+    public void testKeyOrder() throws Exception {
+        verifyResponse(edit("messages/mapping/editConfigs/editConfig_merge_multiple_keys_1.xml"), RPC_REPLY_OK);
+        verifyResponse(commit(), RPC_REPLY_OK);
+        final Document configRunning = getConfigRunning();
+        final String responseAsString = XmlUtil.toString(configRunning);
+        verifyResponse(configRunning, XmlFileLoader.xmlFileToDocument("messages/mapping/editConfigs/editConfig_merge_multiple_keys_1_control.xml"));
+
+        final int key3 = responseAsString.indexOf("key3");
+        final int key1 = responseAsString.indexOf("key1");
+        final int key2 = responseAsString.indexOf("key2");
+
+        assertTrue(String.format("Key ordering invalid, should be key3(%d) < key1(%d) < key2(%d)", key3, key1, key2),
+            key3 < key1 && key1 < key2);
+
+        deleteDatastore();
+    }
+
+    @Test
     public void testMultipleEditsWithMerge() throws Exception {
 
         verifyResponse(edit("messages/mapping/editConfigs/editConfig_merge_multiple_1.xml"), RPC_REPLY_OK);

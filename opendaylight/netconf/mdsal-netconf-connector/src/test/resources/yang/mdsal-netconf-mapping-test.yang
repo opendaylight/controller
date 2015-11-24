@@ -7,6 +7,30 @@ module config {
 
     container mapping-nodes {
 
+        list multiple-keys {
+            key "key3 key1 key2";
+
+            leaf value1 {
+                type string;
+            }
+
+            leaf key1 {
+                type string;
+            }
+
+            leaf value2 {
+                type string;
+            }
+
+            leaf key2 {
+                type string;
+            }
+
+            leaf key3 {
+                type string;
+            }
+        }
+
         list mapping-node{
             key "id";
             leaf id {

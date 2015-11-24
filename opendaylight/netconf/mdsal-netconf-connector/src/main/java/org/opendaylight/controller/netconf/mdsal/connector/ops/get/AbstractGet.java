@@ -85,7 +85,7 @@ public abstract class AbstractGet extends AbstractSingletonNetconfOperation {
         final NormalizedNodeStreamWriter nnStreamWriter = XMLStreamNormalizedNodeStreamWriter.create(xmlWriter,
                 schemaContext.getCurrentContext(), getSchemaPath(dataRoot));
 
-        final NormalizedNodeWriter nnWriter = NormalizedNodeWriter.forStreamWriter(nnStreamWriter);
+        final NormalizedNodeWriter nnWriter = NormalizedNodeWriter.forStreamWriter(nnStreamWriter, true);
 
         writeRootElement(xmlWriter, nnWriter, (ContainerNode) data);
         return result.getNode();
