@@ -121,8 +121,8 @@
     <samples.loadbalancer.northbound.version>0.6.0-SNAPSHOT</samples.loadbalancer.northbound.version>
     <samples.simpleforwarding.version>0.6.0-SNAPSHOT</samples.simpleforwarding.version>
     <sanitytest.version>0.6.0-SNAPSHOT</sanitytest.version>
-    <scala.version>2.10</scala.version>
-    <scala.micro.version>4</scala.micro.version>
+    <scala.version>2.11</scala.version>
+    <scala.micro.version>5</scala.micro.version>
     <security.version>0.6.0-SNAPSHOT</security.version>
     <karaf.security.version>0.6.0-SNAPSHOT</karaf.security.version>
     <sitedeploy>dav:http://nexus.opendaylight.org/content/sites/site</sitedeploy>
