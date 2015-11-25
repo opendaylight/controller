@@ -28,9 +28,9 @@ module opendaylight-mdsal-list-test {
                 }
                 leaf type {
                     type string;
-                    mandatory true;
-                    description
-                        "Mandatory type of list.";
+//                    mandatory true;
+//                    description
+//                        "Mandatory type of list.";
                 }
                 ordered-by user;
                 description
