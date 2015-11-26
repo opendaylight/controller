@@ -45,13 +45,6 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeDataOutpu
 
     private static final Logger LOG = LoggerFactory.getLogger(NormalizedNodeOutputStreamWriter.class);
 
-    static final byte SIGNATURE_MARKER = (byte) 0xab;
-    static final short CURRENT_VERSION = (short) 1;
-
-    static final byte IS_CODE_VALUE = 1;
-    static final byte IS_STRING_VALUE = 2;
-    static final byte IS_NULL_VALUE = 3;
-
     private final DataOutput output;
 
     private final Map<String, Integer> stringCodeMap = new HashMap<>();
@@ -92,8 +85,8 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeDataOutpu
 
     private void writeSignatureMarkerAndVersionIfNeeded() throws IOException {
         if(!wroteSignatureMarker) {
-            output.writeByte(SIGNATURE_MARKER);
-            output.writeShort(CURRENT_VERSION);
+            output.writeByte(TokenTypes.SIGNATURE_MARKER);
+            output.writeShort(TokenTypes.LITHIUM_VERSION);
             wroteSignatureMarker = true;
         }
     }
@@ -251,15 +244,15 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeDataOutpu
     private void writeCodedString(String key) throws IOException {
         Integer value = stringCodeMap.get(key);
         if(value != null) {
-            output.writeByte(IS_CODE_VALUE);
+            output.writeByte(TokenTypes.IS_CODE_VALUE);
             output.writeInt(value);
         } else {
             if(key != null) {
-                output.writeByte(IS_STRING_VALUE);
+                output.writeByte(TokenTypes.IS_STRING_VALUE);
                 stringCodeMap.put(key, Integer.valueOf(stringCodeMap.size()));
                 output.writeUTF(key);
             } else {
-                output.writeByte(IS_NULL_VALUE);
+                output.writeByte(TokenTypes.IS_NULL_VALUE);
             }
         }
     }
