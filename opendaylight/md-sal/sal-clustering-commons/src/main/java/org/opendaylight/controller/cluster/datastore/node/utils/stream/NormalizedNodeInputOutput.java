@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 import java.io.DataInput;
 import java.io.DataOutput;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public final class NormalizedNodeInputOutput {
     private NormalizedNodeInputOutput() {
@@ -23,4 +24,15 @@ public final class NormalizedNodeInputOutput {
     public static NormalizedNodeDataOutput newDataOutput(@Nonnull final DataOutput output) {
         return new NormalizedNodeOutputStreamWriter(output);
     }
+
+    public static NormalizedNodeDataInput newDictionaryDataInput(@Nonnull final DataInput input,
+            @Nullable final NormalizedNodeInputDictionary dictionary) {
+        return new NormalizedNodeInputStreamReader(input, dictionary);
+    }
+
+    public static NormalizedNodeDataOutput newDictionaryDataOutput(@Nonnull final DataOutput output,
+            @Nullable final NormalizedNodeOutputDictionary dictionary) {
+        return new NormalizedNodeOutputStreamWriter(output, dictionary);
+    }
+
 }
