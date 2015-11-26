@@ -56,8 +56,6 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
 
     private final DataInput input;
 
-    private final Map<Integer, String> codedStringMap = new HashMap<>();
-
     private QName lastLeafSetQName;
 
     private NormalizedNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier,
@@ -70,17 +68,23 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
 
     private boolean readSignatureMarker = true;
 
+    private StreamReaderDictionary dictionary;
+
     /**
      * @deprecated Use {@link #NormalizedNodeInputStreamReader(DataInput)} instead.
      */
     @Deprecated
     public NormalizedNodeInputStreamReader(final InputStream stream) throws IOException {
-        Preconditions.checkNotNull(stream);
-        input = new DataInputStream(stream);
+        this((DataInput) new DataInputStream(Preconditions.checkNotNull(stream)));
     }
 
     public NormalizedNodeInputStreamReader(final DataInput input) {
+        this(input, new StreamReaderDictionary());
+    }
+
+    NormalizedNodeInputStreamReader(final DataInput input, final StreamReaderDictionary dictionary) {
         this.input = Preconditions.checkNotNull(input);
+        this.dictionary = Preconditions.checkNotNull(dictionary);
     }
 
     @Override
@@ -237,18 +241,24 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
         return QNameFactory.create(qName);
     }
 
-
     private String readCodedString() throws IOException {
-        byte valueType = input.readByte();
-        if(valueType == NormalizedNodeOutputStreamWriter.IS_CODE_VALUE) {
-            return codedStringMap.get(input.readInt());
-        } else if(valueType == NormalizedNodeOutputStreamWriter.IS_STRING_VALUE) {
-            String value = input.readUTF().intern();
-            codedStringMap.put(Integer.valueOf(codedStringMap.size()), value);
-            return value;
+        final byte type = input.readByte();
+        switch (type) {
+            case NormalizedNodeOutputStreamWriter.IS_CODE_VALUE:
+                final int code = input.readInt();
+                final String string = dictionary.lookupString(code);
+                if (string == null) {
+                    throw new InvalidNormalizedNodeStreamException("String code " + code + " not found in dictionary");
+                }
+                return string;
+            case NormalizedNodeOutputStreamWriter.IS_STRING_VALUE:
+                // TODO: do we really want to intern here?
+                final String value = input.readUTF().intern();
+                dictionary.storeString(value);
+                return value;
+            default:
+                throw new InvalidNormalizedNodeStreamException("Unhandled string type " + type);
         }
-
-        return null;
     }
 
     private Set<QName> readQNameSet() throws IOException{
@@ -404,5 +414,14 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
             child = readNormalizedNodeInternal();
         }
         return builder;
+    }
+
+    @Override
+    public StreamReaderDictionary detachDictionary() {
+        Preconditions.checkState(dictionary != null, "Dictionary has already been detached");
+
+        final StreamReaderDictionary ret = dictionary;
+        dictionary = null;
+        return ret;
     }
 }
