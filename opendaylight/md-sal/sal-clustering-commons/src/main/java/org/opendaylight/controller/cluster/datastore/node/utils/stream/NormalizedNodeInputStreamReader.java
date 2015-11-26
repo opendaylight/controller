@@ -93,13 +93,16 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
         if(readSignatureMarker) {
             readSignatureMarker = false;
 
-            byte marker = input.readByte();
-            if(marker != NormalizedNodeOutputStreamWriter.SIGNATURE_MARKER) {
+            final byte marker = input.readByte();
+            if (marker != TokenTypes.SIGNATURE_MARKER) {
                 throw new InvalidNormalizedNodeStreamException(String.format(
                         "Invalid signature marker: %d", marker));
             }
 
-            input.readShort(); // read the version - not currently used/needed.
+            final short version = input.readShort();
+            if (version != TokenTypes.LITHIUM_VERSION) {
+                throw new InvalidNormalizedNodeStreamException(String.format("Unhandled stream version %s", version));
+            }
         }
     }
 
@@ -237,9 +240,9 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
 
     private String readCodedString() throws IOException {
         byte valueType = input.readByte();
-        if(valueType == NormalizedNodeOutputStreamWriter.IS_CODE_VALUE) {
+        if(valueType == TokenTypes.IS_CODE_VALUE) {
             return codedStringMap.get(input.readInt());
-        } else if(valueType == NormalizedNodeOutputStreamWriter.IS_STRING_VALUE) {
+        } else if(valueType == TokenTypes.IS_STRING_VALUE) {
             String value = input.readUTF().intern();
             codedStringMap.put(Integer.valueOf(codedStringMap.size()), value);
             return value;
