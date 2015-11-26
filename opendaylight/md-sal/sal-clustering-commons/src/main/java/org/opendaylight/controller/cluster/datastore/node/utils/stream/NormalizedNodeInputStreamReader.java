@@ -93,13 +93,16 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
         if(readSignatureMarker) {
             readSignatureMarker = false;
 
-            byte marker = input.readByte();
+            final byte marker = input.readByte();
             if(marker != NormalizedNodeOutputStreamWriter.SIGNATURE_MARKER) {
                 throw new InvalidNormalizedNodeStreamException(String.format(
                         "Invalid signature marker: %d", marker));
             }
 
-            input.readShort(); // read the version - not currently used/needed.
+            final short version = input.readShort();
+            if (version != NormalizedNodeOutputStreamWriter.CURRENT_VERSION) {
+                throw new InvalidNormalizedNodeStreamException(String.format("Unhandled stream version %s", version));
+            }
         }
     }
 
