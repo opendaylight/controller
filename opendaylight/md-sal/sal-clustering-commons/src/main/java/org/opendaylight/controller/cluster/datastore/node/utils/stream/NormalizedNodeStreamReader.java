@@ -8,13 +8,10 @@
 
 package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 
-import java.io.IOException;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-
 /**
  * Interface for a class that can read serialized NormalizedNode instances from a stream.
+ * 
+ * @deprecated Use {@link NormalizedNodeDataInput} instead.
  */
-public interface NormalizedNodeStreamReader {
-
-    NormalizedNode<?, ?> readNormalizedNode() throws IOException;
+public interface NormalizedNodeStreamReader extends NormalizedNodeDataInput {
 }
