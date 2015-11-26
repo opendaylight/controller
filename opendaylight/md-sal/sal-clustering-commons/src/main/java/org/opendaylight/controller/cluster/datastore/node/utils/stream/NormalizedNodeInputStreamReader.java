@@ -45,18 +45,15 @@ import org.slf4j.LoggerFactory;
  * NormalizedNodeInputStreamReader reads the byte stream and constructs the normalized node including its children nodes.
  * This process goes in recursive manner, where each NodeTypes object signifies the start of the object, except END_NODE.
  * If a node can have children, then that node's end is calculated based on appearance of END_NODE.
- *
  */
-
-public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput, NormalizedNodeStreamReader {
+public class NormalizedNodeInputStreamReader extends AbstractNormalizedNodeStream<NormalizedNodeInputDictionary>
+        implements NormalizedNodeDataInput, NormalizedNodeStreamReader {
 
     private static final Logger LOG = LoggerFactory.getLogger(NormalizedNodeInputStreamReader.class);
 
     private static final String REVISION_ARG = "?revision=";
 
     private final DataInput input;
-
-    private final Map<Integer, String> codedStringMap = new HashMap<>();
 
     private QName lastLeafSetQName;
 
@@ -75,8 +72,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput,
      */
     @Deprecated
     public NormalizedNodeInputStreamReader(final InputStream stream) throws IOException {
-        Preconditions.checkNotNull(stream);
-        input = new DataInputStream(stream);
+        this((DataInput) new DataInputStream(Preconditions.checkNotNull(stream)));
     }
 
     /**
@@ -84,6 +80,11 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput,
      */
     @Deprecated
     public NormalizedNodeInputStreamReader(final DataInput input) {
+        this(input, new NormalizedNodeInputDictionary());
+    }
+
+    NormalizedNodeInputStreamReader(final DataInput input, final NormalizedNodeInputDictionary dictionary) {
+        super(dictionary);
         this.input = Preconditions.checkNotNull(input);
     }
 
@@ -241,18 +242,26 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput,
         return QNameFactory.create(qName);
     }
 
-
     private String readCodedString() throws IOException {
-        byte valueType = input.readByte();
-        if(valueType == NormalizedNodeOutputStreamWriter.IS_CODE_VALUE) {
-            return codedStringMap.get(input.readInt());
-        } else if(valueType == NormalizedNodeOutputStreamWriter.IS_STRING_VALUE) {
-            String value = input.readUTF().intern();
-            codedStringMap.put(Integer.valueOf(codedStringMap.size()), value);
-            return value;
+        final byte type = input.readByte();
+        switch (type) {
+            case NormalizedNodeOutputStreamWriter.IS_CODE_VALUE:
+                final int code = input.readInt();
+                final String string = dictionary().lookupString(code);
+                if (string == null) {
+                    throw new InvalidNormalizedNodeStreamException("String code " + code + " not found in dictionary");
+                }
+                return string;
+            case NormalizedNodeOutputStreamWriter.IS_NULL_VALUE:
+                return null;
+            case NormalizedNodeOutputStreamWriter.IS_STRING_VALUE:
+                // TODO: do we really want to intern here?
+                final String value = input.readUTF().intern();
+                dictionary().storeString(value);
+                return value;
+            default:
+                throw new InvalidNormalizedNodeStreamException("Unhandled string type " + type);
         }
-
-        return null;
     }
 
     private Set<QName> readQNameSet() throws IOException{
