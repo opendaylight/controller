@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -37,11 +36,9 @@ import org.slf4j.LoggerFactory;
  *
  * Based on the each node, the node type is also written to the stream, that helps in reconstructing the object,
  * while reading.
- *
- *
  */
-
-public class NormalizedNodeOutputStreamWriter implements NormalizedNodeDataOutput, NormalizedNodeStreamWriter {
+public class NormalizedNodeOutputStreamWriter extends AbstractNormalizedNodeStream<StreamWriterDictionary>
+        implements NormalizedNodeDataOutput, NormalizedNodeStreamWriter {
 
     private static final Logger LOG = LoggerFactory.getLogger(NormalizedNodeOutputStreamWriter.class);
 
@@ -54,10 +51,7 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeDataOutpu
 
     private final DataOutput output;
 
-    private final Map<String, Integer> stringCodeMap = new HashMap<>();
-
     private NormalizedNodeWriter normalizedNodeWriter;
-
     private boolean wroteSignatureMarker;
 
     /**
@@ -68,7 +62,12 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeDataOutpu
         this((DataOutput) new DataOutputStream(Preconditions.checkNotNull(stream)));
     }
 
-    public NormalizedNodeOutputStreamWriter(DataOutput output) {
+    public NormalizedNodeOutputStreamWriter(final DataOutput output) {
+        this(output, new StreamWriterDictionary());
+    }
+
+    NormalizedNodeOutputStreamWriter(final DataOutput output, final StreamWriterDictionary dictionary) {
+        super(dictionary);
         this.output = Preconditions.checkNotNull(output);
     }
 
@@ -81,7 +80,7 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeDataOutpu
     }
 
     @Override
-    public void writeNormalizedNode(NormalizedNode<?, ?> node) throws IOException {
+    public void writeNormalizedNode(final NormalizedNode<?, ?> node) throws IOException {
         writeSignatureMarkerAndVersionIfNeeded();
         normalizedNodeWriter().write(node);
     }
@@ -95,7 +94,7 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeDataOutpu
     }
 
     @Override
-    public void leafNode(YangInstanceIdentifier.NodeIdentifier name, Object value) throws IOException, IllegalArgumentException {
+    public void leafNode(final YangInstanceIdentifier.NodeIdentifier name, final Object value) throws IOException, IllegalArgumentException {
         Preconditions.checkNotNull(name, "Node identifier should not be null");
         LOG.debug("Writing a new leaf node");
         startNode(name.getNodeType(), NodeTypes.LEAF_NODE);
@@ -104,7 +103,7 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeDataOutpu
     }
 
     @Override
-    public void startLeafSet(YangInstanceIdentifier.NodeIdentifier name, int childSizeHint) throws IOException, IllegalArgumentException {
+    public void startLeafSet(final YangInstanceIdentifier.NodeIdentifier name, final int childSizeHint) throws IOException, IllegalArgumentException {
         Preconditions.checkNotNull(name, "Node identifier should not be null");
         LOG.debug("Starting a new leaf set");
 
@@ -112,7 +111,7 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeDataOutpu
     }
 
     @Override
-    public void leafSetEntryNode(Object value) throws IOException, IllegalArgumentException {
+    public void leafSetEntryNode(final Object value) throws IOException, IllegalArgumentException {
         LOG.debug("Writing a new leaf set entry node");
 
         output.writeByte(NodeTypes.LEAF_SET_ENTRY_NODE);
@@ -120,7 +119,7 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeDataOutpu
     }
 
     @Override
-    public void startContainerNode(YangInstanceIdentifier.NodeIdentifier name, int childSizeHint) throws IOException, IllegalArgumentException {
+    public void startContainerNode(final YangInstanceIdentifier.NodeIdentifier name, final int childSizeHint) throws IOException, IllegalArgumentException {
         Preconditions.checkNotNull(name, "Node identifier should not be null");
 
         LOG.debug("Starting a new container node");
@@ -129,7 +128,7 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeDataOutpu
     }
 
     @Override
-    public void startUnkeyedList(YangInstanceIdentifier.NodeIdentifier name, int childSizeHint) throws IOException, IllegalArgumentException {
+    public void startUnkeyedList(final YangInstanceIdentifier.NodeIdentifier name, final int childSizeHint) throws IOException, IllegalArgumentException {
         Preconditions.checkNotNull(name, "Node identifier should not be null");
         LOG.debug("Starting a new unkeyed list");
 
@@ -137,7 +136,7 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeDataOutpu
     }
 
     @Override
-    public void startUnkeyedListItem(YangInstanceIdentifier.NodeIdentifier name, int childSizeHint) throws IOException, IllegalStateException {
+    public void startUnkeyedListItem(final YangInstanceIdentifier.NodeIdentifier name, final int childSizeHint) throws IOException, IllegalStateException {
         Preconditions.checkNotNull(name, "Node identifier should not be null");
         LOG.debug("Starting a new unkeyed list item");
 
@@ -145,7 +144,7 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeDataOutpu
     }
 
     @Override
-    public void startMapNode(YangInstanceIdentifier.NodeIdentifier name, int childSizeHint) throws IOException, IllegalArgumentException {
+    public void startMapNode(final YangInstanceIdentifier.NodeIdentifier name, final int childSizeHint) throws IOException, IllegalArgumentException {
         Preconditions.checkNotNull(name, "Node identifier should not be null");
         LOG.debug("Starting a new map node");
 
@@ -153,7 +152,7 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeDataOutpu
     }
 
     @Override
-    public void startMapEntryNode(YangInstanceIdentifier.NodeIdentifierWithPredicates identifier, int childSizeHint) throws IOException, IllegalArgumentException {
+    public void startMapEntryNode(final YangInstanceIdentifier.NodeIdentifierWithPredicates identifier, final int childSizeHint) throws IOException, IllegalArgumentException {
         Preconditions.checkNotNull(identifier, "Node identifier should not be null");
         LOG.debug("Starting a new map entry node");
         startNode(identifier.getNodeType(), NodeTypes.MAP_ENTRY_NODE);
@@ -163,7 +162,7 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeDataOutpu
     }
 
     @Override
-    public void startOrderedMapNode(YangInstanceIdentifier.NodeIdentifier name, int childSizeHint) throws IOException, IllegalArgumentException {
+    public void startOrderedMapNode(final YangInstanceIdentifier.NodeIdentifier name, final int childSizeHint) throws IOException, IllegalArgumentException {
         Preconditions.checkNotNull(name, "Node identifier should not be null");
         LOG.debug("Starting a new ordered map node");
 
@@ -171,7 +170,7 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeDataOutpu
     }
 
     @Override
-    public void startChoiceNode(YangInstanceIdentifier.NodeIdentifier name, int childSizeHint) throws IOException, IllegalArgumentException {
+    public void startChoiceNode(final YangInstanceIdentifier.NodeIdentifier name, final int childSizeHint) throws IOException, IllegalArgumentException {
         Preconditions.checkNotNull(name, "Node identifier should not be null");
         LOG.debug("Starting a new choice node");
 
@@ -179,7 +178,7 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeDataOutpu
     }
 
     @Override
-    public void startAugmentationNode(YangInstanceIdentifier.AugmentationIdentifier identifier) throws IOException, IllegalArgumentException {
+    public void startAugmentationNode(final YangInstanceIdentifier.AugmentationIdentifier identifier) throws IOException, IllegalArgumentException {
         Preconditions.checkNotNull(identifier, "Node identifier should not be null");
         LOG.debug("Starting a new augmentation node");
 
@@ -188,7 +187,7 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeDataOutpu
     }
 
     @Override
-    public void anyxmlNode(YangInstanceIdentifier.NodeIdentifier name, Object value) throws IOException, IllegalArgumentException {
+    public void anyxmlNode(final YangInstanceIdentifier.NodeIdentifier name, final Object value) throws IOException, IllegalArgumentException {
         Preconditions.checkNotNull(name, "Node identifier should not be null");
         LOG.debug("Writing a new xml node");
 
@@ -216,7 +215,7 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeDataOutpu
         }
     }
 
-    private void startNode(final QName qName, byte nodeType) throws IOException {
+    private void startNode(final QName qName, final byte nodeType) throws IOException {
 
         Preconditions.checkNotNull(qName, "QName of node identifier should not be null.");
 
@@ -228,30 +227,31 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeDataOutpu
         writeQName(qName);
     }
 
-    private void writeQName(QName qName) throws IOException {
-
+    private void writeQName(final QName qName) throws IOException {
         writeCodedString(qName.getLocalName());
         writeCodedString(qName.getNamespace().toString());
         writeCodedString(qName.getFormattedRevision());
     }
 
-    private void writeCodedString(String key) throws IOException {
-        Integer value = stringCodeMap.get(key);
-        if(value != null) {
-            output.writeByte(IS_CODE_VALUE);
-            output.writeInt(value);
-        } else {
-            if(key != null) {
-                output.writeByte(IS_STRING_VALUE);
-                stringCodeMap.put(key, Integer.valueOf(stringCodeMap.size()));
-                output.writeUTF(key);
-            } else {
-                output.writeByte(IS_NULL_VALUE);
-            }
+    private void writeCodedString(final String key) throws IOException {
+        if (key == null) {
+            output.writeByte(IS_NULL_VALUE);
+            return;
         }
+
+        final Integer existingCode = dictionary().lookupString(key);
+        if (existingCode != null) {
+            output.writeByte(IS_CODE_VALUE);
+            output.writeInt(existingCode);
+            return;
+        }
+
+        dictionary().storeString(key);
+        output.writeByte(IS_STRING_VALUE);
+        output.writeUTF(key);
     }
 
-    private void writeObjSet(Set<?> set) throws IOException {
+    private void writeObjSet(final Set<?> set) throws IOException {
         if(!set.isEmpty()){
             output.writeInt(set.size());
             for(Object o : set){
@@ -268,12 +268,12 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeDataOutpu
     }
 
     @Override
-    public void writeYangInstanceIdentifier(YangInstanceIdentifier identifier) throws IOException {
+    public void writeYangInstanceIdentifier(final YangInstanceIdentifier identifier) throws IOException {
         writeSignatureMarkerAndVersionIfNeeded();
         writeYangInstanceIdentifierInternal(identifier);
     }
 
-    private void writeYangInstanceIdentifierInternal(YangInstanceIdentifier identifier) throws IOException {
+    private void writeYangInstanceIdentifierInternal(final YangInstanceIdentifier identifier) throws IOException {
         Collection<YangInstanceIdentifier.PathArgument> pathArguments = identifier.getPathArguments();
         output.writeInt(pathArguments.size());
 
@@ -283,7 +283,7 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeDataOutpu
     }
 
     @Override
-    public void writePathArgument(YangInstanceIdentifier.PathArgument pathArgument) throws IOException {
+    public void writePathArgument(final YangInstanceIdentifier.PathArgument pathArgument) throws IOException {
 
         byte type = PathArgumentTypes.getSerializablePathArgumentType(pathArgument);
 
@@ -329,7 +329,7 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeDataOutpu
         }
     }
 
-    private void writeKeyValueMap(Map<QName, Object> keyValueMap) throws IOException {
+    private void writeKeyValueMap(final Map<QName, Object> keyValueMap) throws IOException {
         if(keyValueMap != null && !keyValueMap.isEmpty()) {
             output.writeInt(keyValueMap.size());
             Set<QName> qNameSet = keyValueMap.keySet();
@@ -343,7 +343,7 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeDataOutpu
         }
     }
 
-    private void writeQNameSet(Set<QName> children) throws IOException {
+    private void writeQNameSet(final Set<QName> children) throws IOException {
         // Write each child's qname separately, if list is empty send count as 0
         if(children != null && !children.isEmpty()) {
             output.writeInt(children.size());
@@ -356,7 +356,7 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeDataOutpu
         }
     }
 
-    private void writeObject(Object value) throws IOException {
+    private void writeObject(final Object value) throws IOException {
 
         byte type = ValueTypes.getSerializableType(value);
         // Write object type first
