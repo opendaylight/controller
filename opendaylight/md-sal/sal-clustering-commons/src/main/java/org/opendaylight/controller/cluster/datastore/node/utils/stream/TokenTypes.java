@@ -18,9 +18,31 @@ final class TokenTypes {
      * Original stream version. Uses a per-stream dictionary for strings. QNames are serialized as three strings.
      */
     static final short LITHIUM_VERSION = 1;
+    /**
+     * Revised stream version. Uses a shared dictionary with explicit resets. QNames have a separate dictionary.
+     */
+    static final short BERYLLIUM_VERSION  = 2;
 
     // Tokens supported in LITHIUM_VERSION
     static final byte IS_CODE_VALUE = 1;
     static final byte IS_STRING_VALUE = 2;
     static final byte IS_NULL_VALUE = 3;
+    
+    // Tokes supported in BERYLLIUM_VERSION
+    /**
+     * Retain the pre-existing dictionary.
+     */
+    static final byte KEEP_DICTIONARY = 4;
+    /**
+     * Reset the dictionary.
+     */
+    static final byte RESET_DICTIONARY = 5;
+    /**
+     * Define a new QName shorthand.
+     */
+    static final byte QNAME_DEFINITION = 6;
+    /**
+     * Use a previously-defined QName.
+     */
+    static final byte QNAME_REFERENCE = 7;
 }

@@ -23,16 +23,41 @@ import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeWrit
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOutput, NormalizedNodeStreamWriter {
+abstract class AbstractNormalizedNodeDataOutput extends AbstractDictionaryAware<NormalizedNodeOutputDictionary>
+        implements DictionaryNormalizedNodeDataOutput, NormalizedNodeStreamWriter {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractNormalizedNodeDataOutput.class);
-
     private final DataOutput output;
 
     private NormalizedNodeWriter normalizedNodeWriter;
     private boolean headerWritten;
 
-    AbstractNormalizedNodeDataOutput(final DataOutput output) {
+    AbstractNormalizedNodeDataOutput(final DataOutput output, final NormalizedNodeOutputDictionary dictionary) {
+        super(dictionary);
         this.output = Preconditions.checkNotNull(output);
+    }
+
+    protected abstract short streamVersion();
+
+    void writeQName(final QName qname) throws IOException {
+        writeString(qname.getLocalName());
+        writeString(qname.getNamespace().toString());
+        writeString(qname.getFormattedRevision());
+    }
+
+    final void writeString(final String string) throws IOException {
+        if (string != null) {
+            final Integer value = dictionary().lookupString(string);
+            if (value == null) {
+                dictionary().storeString(string);
+                writeByte(TokenTypes.IS_STRING_VALUE);
+                writeUTF(string);
+            } else {
+                writeByte(TokenTypes.IS_CODE_VALUE);
+                writeInt(value);
+            }
+        } else {
+            writeByte(TokenTypes.IS_NULL_VALUE);
+        }
     }
 
     private void ensureHeaderWritten() throws IOException {
@@ -42,10 +67,6 @@ abstract class AbstractNormalizedNodeDataOutput implements NormalizedNodeDataOut
             headerWritten = true;
         }
     }
-
-    protected abstract short streamVersion();
-    protected abstract void writeQName(QName qname) throws IOException;
-    protected abstract void writeString(String string) throws IOException;
 
     @Override
     public final void write(final int b) throws IOException {
