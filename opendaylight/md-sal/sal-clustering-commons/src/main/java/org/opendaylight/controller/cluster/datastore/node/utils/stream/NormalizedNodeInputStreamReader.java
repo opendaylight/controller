@@ -70,12 +70,12 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
 
     private boolean readSignatureMarker = true;
 
-    public NormalizedNodeInputStreamReader(InputStream stream) throws IOException {
+    public NormalizedNodeInputStreamReader(final InputStream stream) throws IOException {
         Preconditions.checkNotNull(stream);
         input = new DataInputStream(stream);
     }
 
-    public NormalizedNodeInputStreamReader(DataInput input) {
+    public NormalizedNodeInputStreamReader(final DataInput input) {
         this.input = Preconditions.checkNotNull(input);
     }
 
@@ -158,7 +158,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
         return leafSetEntryBuilder;
     }
 
-    private NormalizedNode<?, ?> readNodeIdentifierDependentNode(byte nodeType, NodeIdentifier identifier)
+    private NormalizedNode<?, ?> readNodeIdentifierDependentNode(final byte nodeType, final NodeIdentifier identifier)
         throws IOException {
 
         switch(nodeType) {
@@ -369,8 +369,8 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
     }
 
     @SuppressWarnings("unchecked")
-    private ListNodeBuilder<Object, LeafSetEntryNode<Object>> addLeafSetChildren(QName nodeType,
-            ListNodeBuilder<Object, LeafSetEntryNode<Object>> builder) throws IOException {
+    private ListNodeBuilder<Object, LeafSetEntryNode<Object>> addLeafSetChildren(final QName nodeType,
+            final ListNodeBuilder<Object, LeafSetEntryNode<Object>> builder) throws IOException {
 
         LOG.debug("Reading children of leaf set");
 
@@ -387,7 +387,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private NormalizedNodeContainerBuilder addDataContainerChildren(
-            NormalizedNodeContainerBuilder builder) throws IOException {
+            final NormalizedNodeContainerBuilder builder) throws IOException {
         LOG.debug("Reading data container (leaf nodes) nodes");
 
         NormalizedNode<?, ?> child = readNormalizedNodeInternal();
