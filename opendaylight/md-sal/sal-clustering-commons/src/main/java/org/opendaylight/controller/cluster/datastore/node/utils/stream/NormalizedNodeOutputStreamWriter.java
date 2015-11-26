@@ -13,10 +13,6 @@ import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.HashMap;
-import java.util.Map;
-import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
 
 /**
@@ -32,8 +28,6 @@ import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStre
  * while reading.
  */
 public class NormalizedNodeOutputStreamWriter extends AbstractNormalizedNodeDataOutput implements NormalizedNodeStreamWriter {
-    private final Map<String, Integer> stringCodeMap = new HashMap<>();
-
     /**
      * @deprecated Use {@link #NormalizedNodeOutputStreamWriter(DataOutput)} instead.
      */
@@ -47,35 +41,11 @@ public class NormalizedNodeOutputStreamWriter extends AbstractNormalizedNodeData
      */
     @Deprecated
     public NormalizedNodeOutputStreamWriter(final DataOutput output) {
-        super(output);
+        super(output, new NormalizedNodeOutputDictionary());
     }
 
     @Override
     protected final short streamVersion() {
         return TokenTypes.LITHIUM_VERSION;
-    }
-
-    @Override
-    protected void writeQName(final QName qname) throws IOException {
-        writeString(qname.getLocalName());
-        writeString(qname.getNamespace().toString());
-        writeString(qname.getFormattedRevision());
-    }
-
-    @Override
-    protected void writeString(final String string) throws IOException {
-        if (string != null) {
-            final Integer value = stringCodeMap.get(string);
-            if (value == null) {
-                stringCodeMap.put(string, stringCodeMap.size());
-                writeByte(TokenTypes.IS_STRING_VALUE);
-                writeUTF(string);
-            } else {
-                writeByte(TokenTypes.IS_CODE_VALUE);
-                writeInt(value);
-            }
-        } else {
-            writeByte(TokenTypes.IS_NULL_VALUE);
-        }
     }
 }
