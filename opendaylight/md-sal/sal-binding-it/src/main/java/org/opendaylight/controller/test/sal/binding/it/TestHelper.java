@@ -16,6 +16,10 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.options.DefaultCompositeOption;
 import org.ops4j.pax.exam.util.PathUtils;
 
+/**
+ * @deprecated Use config-it and/or mdsal-it instead.
+ */
+@Deprecated
 public class TestHelper {
 
     public static final String CONTROLLER = "org.opendaylight.controller";
