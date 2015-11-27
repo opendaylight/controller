@@ -60,6 +60,14 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
 
     private boolean wroteSignatureMarker;
 
+    /**
+     * @deprecated Use {@link #NormalizedNodeOutputStreamWriter(DataOutput)} instead.
+     */
+    @Deprecated
+    public NormalizedNodeOutputStreamWriter(final OutputStream stream) throws IOException {
+        this((DataOutput) new DataOutputStream(Preconditions.checkNotNull(stream)));
+    }
+
     public NormalizedNodeOutputStreamWriter(OutputStream stream) throws IOException {
         Preconditions.checkNotNull(stream);
         output = new DataOutputStream(stream);

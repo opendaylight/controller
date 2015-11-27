@@ -70,6 +70,10 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
 
     private boolean readSignatureMarker = true;
 
+    /**
+     * @deprecated Use {@link #NormalizedNodeInputStreamReader(DataInput)} instead.
+     */
+    @Deprecated
     public NormalizedNodeInputStreamReader(final InputStream stream) throws IOException {
         Preconditions.checkNotNull(stream);
         input = new DataInputStream(stream);
