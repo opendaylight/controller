@@ -86,7 +86,7 @@ public class TestHelper {
                 mavenBundle(MDSAL, "mdsal-binding-generator-util").versionAsInProject(), //
                 mavenBundle(MDSAL, "mdsal-binding-generator-impl").versionAsInProject(),
                 mavenBundle(MDSAL, "mdsal-binding-dom-codec").versionAsInProject(),
-                mavenBundle(YANGTOOLS + ".thirdparty", "antlr4-runtime-osgi-nohead").versionAsInProject(), // //
+                mavenBundle("org.antlr", "antlr4-runtime").versionAsInProject(), // //
 
                 mavenBundle(CONTROLLER, "sal-binding-util").versionAsInProject(), //
                 mavenBundle(CONTROLLER, "sal-common-util").versionAsInProject(), // //

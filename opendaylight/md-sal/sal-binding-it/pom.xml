@@ -70,8 +70,10 @@
       <artifactId>sal-dom-broker-config</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opendaylight.yangtools.thirdparty</groupId>
-      <artifactId>antlr4-runtime-osgi-nohead</artifactId>
+      <!-- TODO Add this to odlparent -->
+      <groupId>org.antlr</groupId>
+      <artifactId>antlr4-runtime</artifactId>
+      <version>4.5.1-1</version>
     </dependency>
 
     <!--Compile scopes for all testing dependencies are intentional-->
