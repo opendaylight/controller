@@ -8,7 +8,7 @@
 
 package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 
-import java.io.ByteArrayInputStream;
+import com.google.common.io.ByteStreams;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import org.apache.commons.lang.SerializationUtils;
@@ -56,7 +56,7 @@ public class NormalizedNodeStreamReaderWriterTest {
         writer.writeNormalizedNode(toasterContainer);
 
         NormalizedNodeInputStreamReader reader = new NormalizedNodeInputStreamReader(
-                new ByteArrayInputStream(byteArrayOutputStream.toByteArray()));
+            ByteStreams.newDataInput(byteArrayOutputStream.toByteArray()));
 
         NormalizedNode<?,?> node = reader.readNormalizedNode();
         Assert.assertEquals(testContainer, node);
@@ -107,7 +107,7 @@ public class NormalizedNodeStreamReaderWriterTest {
         writer.writeYangInstanceIdentifier(path);
 
         NormalizedNodeInputStreamReader reader = new NormalizedNodeInputStreamReader(
-                new ByteArrayInputStream(byteArrayOutputStream.toByteArray()));
+            ByteStreams.newDataInput(byteArrayOutputStream.toByteArray()));
 
         YangInstanceIdentifier newPath = reader.readYangInstanceIdentifier();
         Assert.assertEquals(path, newPath);
@@ -131,7 +131,7 @@ public class NormalizedNodeStreamReaderWriterTest {
         writer.writeYangInstanceIdentifier(path);
 
         NormalizedNodeInputStreamReader reader = new NormalizedNodeInputStreamReader(
-                new ByteArrayInputStream(byteArrayOutputStream.toByteArray()));
+            ByteStreams.newDataInput(byteArrayOutputStream.toByteArray()));
 
         NormalizedNode<?,?> node = reader.readNormalizedNode();
         Assert.assertEquals(testContainer, node);
@@ -148,7 +148,7 @@ public class NormalizedNodeStreamReaderWriterTest {
                 TestModel.createBaseTestContainerBuilder().build()).getNormalizedNode().toByteArray();
 
         NormalizedNodeInputStreamReader reader = new NormalizedNodeInputStreamReader(
-                new ByteArrayInputStream(protobufBytes));
+            ByteStreams.newDataInput(protobufBytes));
 
         reader.readNormalizedNode();
     }
@@ -161,7 +161,7 @@ public class NormalizedNodeStreamReaderWriterTest {
                 InstanceIdentifierUtils.toSerializable(path)).build().toByteArray();
 
         NormalizedNodeInputStreamReader reader = new NormalizedNodeInputStreamReader(
-                new ByteArrayInputStream(protobufBytes));
+            ByteStreams.newDataInput(protobufBytes));
 
         reader.readYangInstanceIdentifier();
     }
@@ -176,7 +176,7 @@ public class NormalizedNodeStreamReaderWriterTest {
 
     }
 
-    private String largeString(int pow){
+    private static String largeString(final int pow){
         String s = "X";
         for(int i=0;i<pow;i++){
             StringBuilder b = new StringBuilder();
