@@ -24,6 +24,13 @@
 
   <dependencyManagement>
     <dependencies>
+       <dependency>
+        <groupId>org.opendaylight.odlparent</groupId>
+        <artifactId>odlparent-artifacts</artifactId>
+        <version>1.6.0-SNAPSHOT</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
       <dependency>
         <groupId>org.opendaylight.yangtools</groupId>
         <artifactId>yangtools-artifacts</artifactId>
@@ -52,6 +59,12 @@
   <dependencies>
 
     <!-- Required features repositories -->
+    <dependency>
+      <groupId>org.opendaylight.odlparent</groupId>
+      <artifactId>features-odlparent</artifactId>
+      <classifier>features</classifier>
+      <type>xml</type>
+    </dependency>
     <dependency>
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>features-yangtools</artifactId>

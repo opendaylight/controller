@@ -5,6 +5,7 @@
           xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
 
   <repository>mvn:org.opendaylight.mdsal/features-mdsal/{{VERSION}}/xml/features</repository>
+  <repository>mvn:org.opendaylight.odlparent/features-odlparent/{{VERSION}}/xml/features</repository>
 
   <feature name='odl-config-all' version='${project.version}' description="OpenDaylight :: Config :: All">
       <feature version='${project.version}'>odl-config-api</feature>
@@ -20,12 +21,8 @@
 
   <feature name='odl-config-netty-config-api' version='${project.version}' description="OpenDaylight :: Config :: Netty Config API">
     <feature version='${project.version}'>odl-config-api</feature>
+    <feature version='[4.0.30,4.1.0)'>odl-netty</feature>
     <bundle>mvn:org.opendaylight.controller/netty-config-api/{{VERSION}}</bundle>
-    <bundle>mvn:io.netty/netty-transport/{{VERSION}}</bundle>
-    <bundle>mvn:io.netty/netty-common/{{VERSION}}</bundle>
-    <bundle>mvn:io.netty/netty-buffer/{{VERSION}}</bundle>
-    <bundle>mvn:io.netty/netty-codec/{{VERSION}}</bundle>
-    <bundle>mvn:io.netty/netty-handler/{{VERSION}}</bundle>
   </feature>
 
   <feature name='odl-config-core' version='${project.version}' description="OpenDaylight :: Config :: Core">
