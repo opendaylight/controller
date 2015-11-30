@@ -22,8 +22,8 @@ import static org.opendaylight.controller.cluster.datastore.node.utils.serializa
 import static org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeType.UNKEYED_LIST_ENTRY_NODE_TYPE;
 import static org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeType.UNKEYED_LIST_NODE_TYPE;
 import static org.opendaylight.controller.cluster.datastore.node.utils.serialization.NormalizedNodeType.getSerializableNodeType;
-
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 import java.util.EnumMap;
 import java.util.Map;
 import javax.xml.transform.dom.DOMSource;
@@ -31,6 +31,10 @@ import org.opendaylight.controller.cluster.datastore.util.InstanceIdentifierUtil
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages.Node.Builder;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.AugmentationIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifierWithPredicates;
+import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeWithValue;
 import org.opendaylight.yangtools.yang.data.api.schema.AnyXmlNode;
 import org.opendaylight.yangtools.yang.data.api.schema.AugmentationNode;
 import org.opendaylight.yangtools.yang.data.api.schema.ChoiceNode;
@@ -39,11 +43,8 @@ import org.opendaylight.yangtools.yang.data.api.schema.DataContainerChild;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafNode;
 import org.opendaylight.yangtools.yang.data.api.schema.LeafSetEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
-import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-import org.opendaylight.yangtools.yang.data.api.schema.OrderedMapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.UnkeyedListEntryNode;
-import org.opendaylight.yangtools.yang.data.api.schema.UnkeyedListNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.CollectionNodeBuilder;
 import org.opendaylight.yangtools.yang.data.impl.schema.builder.api.DataContainerNodeAttrBuilder;
@@ -203,208 +204,118 @@ public class NormalizedNodeSerializer {
 
     public static class DeSerializer extends QNameDeSerializationContextImpl
                                      implements NormalizedNodeDeSerializationContext {
-        private static Map<NormalizedNodeType, DeSerializationFunction>
-            deSerializationFunctions = new EnumMap<>(NormalizedNodeType.class);
-
+        private static final Map<NormalizedNodeType, DeSerializationFunction> DESERIALIZATION_FUNCTIONS;
         static {
-            deSerializationFunctions.put(CONTAINER_NODE_TYPE,
-                new DeSerializationFunction() {
-                    @Override public NormalizedNode<?, ?> apply(
-                        DeSerializer deSerializer,
-                        NormalizedNodeMessages.Node node) {
-                        DataContainerNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier, ContainerNode>
-                            builder = Builders.containerBuilder();
+            final EnumMap<NormalizedNodeType, DeSerializationFunction> m = new EnumMap<>(NormalizedNodeType.class);
 
-                        builder
-                            .withNodeIdentifier(deSerializer.toNodeIdentifier(
+            m.put(CONTAINER_NODE_TYPE, new DeSerializationFunction() {
+                @Override
+                public NormalizedNode<?, ?> apply(DeSerializer deSerializer, NormalizedNodeMessages.Node node) {
+                    DataContainerNodeAttrBuilder<NodeIdentifier, ContainerNode> builder = Builders.containerBuilder()
+                            .withNodeIdentifier(deSerializer.toNodeIdentifier(node.getPathArgument()));
+
+                    return deSerializer.buildDataContainer(builder, node);
+                }
+            });
+            m.put(LEAF_NODE_TYPE, new DeSerializationFunction() {
+                @Override
+                public NormalizedNode<?, ?> apply(DeSerializer deSerializer, NormalizedNodeMessages.Node node) {
+                    NormalizedNodeAttrBuilder<NodeIdentifier, Object, LeafNode<Object>> builder = Builders.leafBuilder()
+                            .withNodeIdentifier(deSerializer.toNodeIdentifier(node.getPathArgument()));
+
+                    return deSerializer.buildNormalizedNode(builder, node);
+                }
+            });
+            m.put(MAP_NODE_TYPE, new DeSerializationFunction() {
+                @Override
+                public NormalizedNode<?, ?> apply(DeSerializer deSerializer, NormalizedNodeMessages.Node node) {
+                    return deSerializer.buildCollectionNode(Builders.mapBuilder(), node);
+                }
+            });
+            m.put(MAP_ENTRY_NODE_TYPE, new DeSerializationFunction() {
+                @Override
+                public NormalizedNode<?, ?> apply(DeSerializer deSerializer, NormalizedNodeMessages.Node node) {
+                    DataContainerNodeAttrBuilder<NodeIdentifierWithPredicates, MapEntryNode> builder =
+                            Builders.mapEntryBuilder().withNodeIdentifier(deSerializer.toNodeIdentifierWithPredicates(
                                 node.getPathArgument()));
 
-                        return deSerializer.buildDataContainer(builder, node);
+                    return deSerializer.buildDataContainer(builder, node);
+                }
+            });
+            m.put(AUGMENTATION_NODE_TYPE, new DeSerializationFunction() {
+                @Override
+                public NormalizedNode<?, ?> apply(DeSerializer deSerializer, NormalizedNodeMessages.Node node) {
+                    DataContainerNodeBuilder<AugmentationIdentifier, AugmentationNode> builder =
+                            Builders.augmentationBuilder().withNodeIdentifier(
+                                deSerializer.toAugmentationIdentifier(node.getPathArgument()));
 
-                    }
-
-                });
-
-            deSerializationFunctions.put(LEAF_NODE_TYPE,
-                new DeSerializationFunction() {
-                    @Override public NormalizedNode<?, ?> apply(
-                        DeSerializer deSerializer,
-                        NormalizedNodeMessages.Node node) {
-                        NormalizedNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier, Object, LeafNode<Object>>
-                            builder = Builders.leafBuilder();
-
-                        builder
-                            .withNodeIdentifier(deSerializer.toNodeIdentifier(
+                    return deSerializer.buildDataContainer(builder, node);
+                }
+            });
+            m.put(LEAF_SET_NODE_TYPE, new DeSerializationFunction() {
+                @Override
+                public NormalizedNode<?, ?> apply(DeSerializer deSerializer, NormalizedNodeMessages.Node node) {
+                    return deSerializer.buildListNode(Builders.leafSetBuilder(), node);
+                }
+            });
+            m.put(LEAF_SET_ENTRY_NODE_TYPE, new DeSerializationFunction() {
+                @Override
+                public NormalizedNode<?, ?> apply(DeSerializer deSerializer, NormalizedNodeMessages.Node node) {
+                    NormalizedNodeAttrBuilder<NodeWithValue, Object, LeafSetEntryNode<Object>> builder =
+                            Builders.leafSetEntryBuilder().withNodeIdentifier(deSerializer.toNodeWithValue(
                                 node.getPathArgument()));
 
-                        return deSerializer.buildNormalizedNode(builder, node);
+                    return deSerializer.buildNormalizedNode(builder, node);
+                }
+            });
+            m.put(CHOICE_NODE_TYPE, new DeSerializationFunction() {
+                @Override
+                public NormalizedNode<?, ?> apply(DeSerializer deSerializer, NormalizedNodeMessages.Node node) {
+                    DataContainerNodeBuilder<NodeIdentifier, ChoiceNode> builder = Builders.choiceBuilder()
+                            .withNodeIdentifier(deSerializer.toNodeIdentifier(node.getPathArgument()));
 
-                    }
-                });
-
-            deSerializationFunctions.put(MAP_NODE_TYPE,
-                new DeSerializationFunction() {
-                    @Override public NormalizedNode<?, ?> apply(
-                        DeSerializer deSerializer,
-                        NormalizedNodeMessages.Node node) {
-                        CollectionNodeBuilder<MapEntryNode, MapNode>
-                            builder = Builders.mapBuilder();
-
-                        return deSerializer.buildCollectionNode(builder, node);
-                    }
-                });
-
-            deSerializationFunctions.put(MAP_ENTRY_NODE_TYPE,
-                new DeSerializationFunction() {
-                    @Override public NormalizedNode<?, ?> apply(
-                        DeSerializer deSerializer,
-                        NormalizedNodeMessages.Node node) {
-                        DataContainerNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifierWithPredicates, MapEntryNode>
-                            builder = Builders.mapEntryBuilder();
-
-                        builder.withNodeIdentifier(deSerializer.toNodeIdentifierWithPredicates(
-                            node.getPathArgument()));
-
-                        return deSerializer.buildDataContainer(builder, node);
-                    }
-                });
-
-            deSerializationFunctions.put(AUGMENTATION_NODE_TYPE,
-                new DeSerializationFunction() {
-                    @Override public NormalizedNode<?, ?> apply(
-                        DeSerializer deSerializer,
-                        NormalizedNodeMessages.Node node) {
-                        DataContainerNodeBuilder<YangInstanceIdentifier.AugmentationIdentifier, AugmentationNode>
-                            builder = Builders.augmentationBuilder();
-
-                        builder.withNodeIdentifier(
-                            deSerializer.toAugmentationIdentifier(
+                    return deSerializer.buildDataContainer(builder, node);
+                }
+            });
+            m.put(ORDERED_LEAF_SET_NODE_TYPE, new DeSerializationFunction() {
+                @Override
+                public NormalizedNode<?, ?> apply(DeSerializer deSerializer, NormalizedNodeMessages.Node node) {
+                    return deSerializer.buildListNode(Builders.orderedLeafSetBuilder(), node);
+                }
+            });
+            m.put(ORDERED_MAP_NODE_TYPE, new DeSerializationFunction() {
+                @Override
+                public NormalizedNode<?, ?> apply(DeSerializer deSerializer, NormalizedNodeMessages.Node node) {
+                    return deSerializer.buildCollectionNode(Builders.orderedMapBuilder(), node);
+                }
+            });
+            m.put(UNKEYED_LIST_NODE_TYPE, new DeSerializationFunction() {
+                @Override
+                public NormalizedNode<?, ?> apply(DeSerializer deSerializer, NormalizedNodeMessages.Node node) {
+                    return deSerializer.buildCollectionNode(Builders.unkeyedListBuilder(), node);
+                }
+            });
+            m.put(UNKEYED_LIST_ENTRY_NODE_TYPE, new DeSerializationFunction() {
+                @Override
+                public NormalizedNode<?, ?> apply(DeSerializer deSerializer, NormalizedNodeMessages.Node node) {
+                    DataContainerNodeAttrBuilder<NodeIdentifier, UnkeyedListEntryNode> builder =
+                            Builders.unkeyedListEntryBuilder().withNodeIdentifier(deSerializer.toNodeIdentifier(
                                 node.getPathArgument()));
 
-                        return deSerializer.buildDataContainer(builder, node);
-                    }
-                });
+                    return deSerializer.buildDataContainer(builder, node);
+                }
+            });
+            m.put(ANY_XML_NODE_TYPE, new DeSerializationFunction() {
+                @Override
+                public NormalizedNode<?, ?> apply(DeSerializer deSerializer, NormalizedNodeMessages.Node node) {
+                    NormalizedNodeAttrBuilder<NodeIdentifier, DOMSource, AnyXmlNode> builder = Builders.anyXmlBuilder()
+                            .withNodeIdentifier(deSerializer.toNodeIdentifier(node.getPathArgument()));
 
-            deSerializationFunctions.put(LEAF_SET_NODE_TYPE,
-                new DeSerializationFunction() {
-                    @Override public NormalizedNode<?, ?> apply(
-                        DeSerializer deSerializer,
-                        NormalizedNodeMessages.Node node) {
-                        ListNodeBuilder<Object, LeafSetEntryNode<Object>>
-                            builder = Builders.leafSetBuilder();
+                    return deSerializer.buildNormalizedNode(builder, node);
+                }
+            });
 
-                        return deSerializer.buildListNode(builder, node);
-                    }
-                });
-
-            deSerializationFunctions.put(LEAF_SET_ENTRY_NODE_TYPE,
-                new DeSerializationFunction() {
-                    @Override public NormalizedNode<?, ?> apply(
-                        DeSerializer deSerializer,
-                        NormalizedNodeMessages.Node node) {
-                        NormalizedNodeAttrBuilder<YangInstanceIdentifier.NodeWithValue, Object, LeafSetEntryNode<Object>>
-                            builder = Builders.leafSetEntryBuilder();
-
-                        builder.withNodeIdentifier(deSerializer.toNodeWithValue(
-                            node.getPathArgument()));
-
-                        return deSerializer.buildNormalizedNode(builder, node);
-                    }
-                });
-
-            deSerializationFunctions.put(CHOICE_NODE_TYPE,
-                new DeSerializationFunction() {
-                    @Override public NormalizedNode<?, ?> apply(
-                        DeSerializer deSerializer,
-                        NormalizedNodeMessages.Node node) {
-                        DataContainerNodeBuilder<YangInstanceIdentifier.NodeIdentifier, ChoiceNode>
-                            builder =
-                            Builders.choiceBuilder();
-
-                        builder
-                            .withNodeIdentifier(deSerializer.toNodeIdentifier(
-                                node.getPathArgument()));
-
-                        return deSerializer.buildDataContainer(builder, node);
-                    }
-                });
-
-            deSerializationFunctions.put(ORDERED_LEAF_SET_NODE_TYPE,
-                new DeSerializationFunction() {
-                    @Override public NormalizedNode<?, ?> apply(
-                        DeSerializer deSerializer,
-                        NormalizedNodeMessages.Node node) {
-                        ListNodeBuilder<Object, LeafSetEntryNode<Object>>
-                            builder =
-                            Builders.orderedLeafSetBuilder();
-
-                        return deSerializer.buildListNode(builder, node);
-
-
-                    }
-                });
-
-            deSerializationFunctions.put(ORDERED_MAP_NODE_TYPE,
-                new DeSerializationFunction() {
-                    @Override public NormalizedNode<?, ?> apply(
-                        DeSerializer deSerializer,
-                        NormalizedNodeMessages.Node node) {
-                        CollectionNodeBuilder<MapEntryNode, OrderedMapNode>
-                            builder =
-                            Builders.orderedMapBuilder();
-
-                        return deSerializer.buildCollectionNode(builder, node);
-                    }
-                });
-
-            deSerializationFunctions.put(UNKEYED_LIST_NODE_TYPE,
-                new DeSerializationFunction() {
-                    @Override public NormalizedNode<?, ?> apply(
-                        DeSerializer deSerializer,
-                        NormalizedNodeMessages.Node node) {
-                        CollectionNodeBuilder<UnkeyedListEntryNode, UnkeyedListNode>
-                            builder =
-                            Builders.unkeyedListBuilder();
-
-                        return deSerializer.buildCollectionNode(builder, node);
-                    }
-                });
-
-            deSerializationFunctions.put(UNKEYED_LIST_ENTRY_NODE_TYPE,
-                new DeSerializationFunction() {
-                    @Override public NormalizedNode<?, ?> apply(
-                        DeSerializer deSerializer,
-                        NormalizedNodeMessages.Node node) {
-                        DataContainerNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier, UnkeyedListEntryNode>
-                            builder =
-                            Builders.unkeyedListEntryBuilder();
-
-                        builder
-                            .withNodeIdentifier(deSerializer.toNodeIdentifier(
-                                node.getPathArgument()));
-
-                        return deSerializer.buildDataContainer(builder, node);
-                    }
-                });
-
-            deSerializationFunctions.put(ANY_XML_NODE_TYPE,
-                new DeSerializationFunction() {
-
-                    @Override public NormalizedNode<?, ?> apply(
-                        DeSerializer deSerializer,
-                        NormalizedNodeMessages.Node node) {
-                        NormalizedNodeAttrBuilder<YangInstanceIdentifier.NodeIdentifier, DOMSource, AnyXmlNode>
-                            builder =
-                            Builders.anyXmlBuilder();
-
-                        builder
-                            .withNodeIdentifier(deSerializer.toNodeIdentifier(
-                                node.getPathArgument()));
-
-                        return deSerializer.buildNormalizedNode(builder, node);
-                    }
-                });
-
+            DESERIALIZATION_FUNCTIONS = Maps.immutableEnumMap(m);
         }
 
         private final NormalizedNodeMessages.Node node;
@@ -434,7 +345,7 @@ public class NormalizedNodeSerializer {
         private NormalizedNode<?, ?> deSerialize(NormalizedNodeMessages.Node node){
             Preconditions.checkNotNull(node, "node should not be null");
 
-            DeSerializationFunction deSerializationFunction = deSerializationFunctions.get(
+            DeSerializationFunction deSerializationFunction = DESERIALIZATION_FUNCTIONS.get(
                     NormalizedNodeType.values()[node.getIntType()]);
 
             return deSerializationFunction.apply(this, node);
@@ -505,9 +416,8 @@ public class NormalizedNodeSerializer {
                 this, path);
         }
 
-        private YangInstanceIdentifier.NodeIdentifier toNodeIdentifier(NormalizedNodeMessages.PathArgument path){
-            return (YangInstanceIdentifier.NodeIdentifier) PathArgumentSerializer.deSerialize(
-                this, path);
+        private NodeIdentifier toNodeIdentifier(NormalizedNodeMessages.PathArgument path){
+            return (NodeIdentifier) PathArgumentSerializer.deSerialize(this, path);
         }
 
         public YangInstanceIdentifier.PathArgument deSerialize(
