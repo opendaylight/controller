@@ -21,7 +21,6 @@ import org.opendaylight.controller.cluster.raft.base.messages.SnapshotComplete;
 import org.opendaylight.controller.cluster.raft.behaviors.AbstractLeader;
 import org.opendaylight.controller.cluster.raft.messages.AddServer;
 import org.opendaylight.controller.cluster.raft.messages.AddServerReply;
-import org.opendaylight.controller.cluster.raft.messages.FollowerCatchUpTimeout;
 import org.opendaylight.controller.cluster.raft.messages.RemoveServer;
 import org.opendaylight.controller.cluster.raft.messages.RemoveServerReply;
 import org.opendaylight.controller.cluster.raft.messages.ServerChangeStatus;
@@ -59,8 +58,8 @@ class RaftActorServerConfigurationSupport {
         } else if(message instanceof RemoveServer) {
             onRemoveServer((RemoveServer) message, raftActor, sender);
             return true;
-        } else if (message instanceof FollowerCatchUpTimeout) {
-            currentOperationState.onFollowerCatchupTimeout(raftActor, (FollowerCatchUpTimeout) message);
+        } else if (message instanceof ServerOperationTimeout) {
+            currentOperationState.onServerOperationTimeout(raftActor, (ServerOperationTimeout) message);
             return true;
         } else if (message instanceof UnInitializedFollowerSnapshotReply) {
             currentOperationState.onUnInitializedFollowerSnapshotReply(raftActor,
@@ -77,6 +76,7 @@ class RaftActorServerConfigurationSupport {
     }
 
     private void onRemoveServer(RemoveServer removeServer, RaftActor raftActor, ActorRef sender) {
+        LOG.debug("{}: onRemoveServer: {}, state: {}", raftContext.getId(), removeServer, currentOperationState);
         if(removeServer.getServerId().equals(raftActor.getLeaderId())){
             // Removing current leader is not supported yet
             // TODO: To properly support current leader removal we need to first implement transfer of leadership
@@ -121,7 +121,7 @@ class RaftActorServerConfigurationSupport {
      * </ul>
      */
     private void onAddServer(AddServer addServer, RaftActor raftActor, ActorRef sender) {
-        LOG.debug("{}: onAddServer: {}", raftContext.getId(), addServer);
+        LOG.debug("{}: onAddServer: {}, state: {}", raftContext.getId(), addServer, currentOperationState);
 
         onNewOperation(raftActor, new AddServerContext(addServer, sender));
     }
@@ -148,7 +148,7 @@ class RaftActorServerConfigurationSupport {
     private interface OperationState {
         void onNewOperation(RaftActor raftActor, ServerOperationContext<?> operationContext);
 
-        void onFollowerCatchupTimeout(RaftActor raftActor, FollowerCatchUpTimeout followerTimeout);
+        void onServerOperationTimeout(RaftActor raftActor, ServerOperationTimeout timeout);
 
         void onUnInitializedFollowerSnapshotReply(RaftActor raftActor, UnInitializedFollowerSnapshotReply reply);
 
@@ -165,7 +165,7 @@ class RaftActorServerConfigurationSupport {
     }
 
     /**
-     * Abstract base class for server operation FSM state. Handles common behavior for all states.
+     * Abstract base class for a server operation FSM state. Handles common behavior for all states.
      */
     private abstract class AbstractOperationState implements OperationState {
         @Override
@@ -179,8 +179,8 @@ class RaftActorServerConfigurationSupport {
         }
 
         @Override
-        public void onFollowerCatchupTimeout(RaftActor raftActor, FollowerCatchUpTimeout followerTimeout) {
-            LOG.debug("onFollowerCatchupTimeout should not be called in state {}", this);
+        public void onServerOperationTimeout(RaftActor raftActor, ServerOperationTimeout timeout) {
+            LOG.debug("onServerOperationTimeout should not be called in state {}", this);
         }
 
         @Override
@@ -204,7 +204,8 @@ class RaftActorServerConfigurationSupport {
 
             raftActor.persistData(operationContext.getClientRequestor(), operationContext.getContextId(), payload);
 
-            currentOperationState = new Persisting(operationContext);
+            currentOperationState = new Persisting(operationContext, newTimer(raftActor,
+                    new ServerOperationTimeout(operationContext.getServerId())));
 
             sendReply(raftActor, operationContext, ServerChangeStatus.OK);
         }
@@ -225,12 +226,19 @@ class RaftActorServerConfigurationSupport {
             }
         }
 
-        private void sendReply(RaftActor raftActor, ServerOperationContext<?> operationContext,
+        protected void sendReply(RaftActor raftActor, ServerOperationContext<?> operationContext,
                 ServerChangeStatus status) {
             LOG.debug("{}: Returning {} for operation {}", raftContext.getId(), status, operationContext.getOperation());
 
             operationContext.getClientRequestor().tell(operationContext.newReply(status, raftActor.getLeaderId()),
                     raftActor.self());
+        }
+
+        Cancellable newTimer(RaftActor raftActor, Object message) {
+            return raftContext.getActorSystem().scheduler().scheduleOnce(
+                    new FiniteDuration(((raftContext.getConfigParams().getElectionTimeOutInterval().toMillis()) * 2),
+                            TimeUnit.MILLISECONDS), raftContext.getActor(), message,
+                            raftContext.getActorSystem().dispatcher(), raftContext.getActor());
         }
 
         @Override
@@ -259,9 +267,12 @@ class RaftActorServerConfigurationSupport {
      */
     private class Persisting extends AbstractOperationState {
         private final ServerOperationContext<?> operationContext;
+        private final Cancellable timer;
+        private boolean timedOut = false;
 
-        Persisting(ServerOperationContext<?> operationContext) {
+        Persisting(ServerOperationContext<?> operationContext, Cancellable timer) {
             this.operationContext = operationContext;
+            this.timer = timer;
         }
 
         @Override
@@ -272,7 +283,32 @@ class RaftActorServerConfigurationSupport {
                 LOG.info("{}: {} has been successfully replicated to a majority of followers", raftActor.getId(),
                         applyState.getReplicatedLogEntry().getData());
 
+                timer.cancel();
                 operationComplete(raftActor, operationContext, null);
+            }
+        }
+
+        @Override
+        public void onServerOperationTimeout(RaftActor raftActor, ServerOperationTimeout timeout) {
+            LOG.warn("{}: Timeout occured while replicating the new server configuration for {}", raftContext.getId(),
+                    timeout.getServerId());
+
+            timedOut = true;
+
+            // Fail any pending operations
+            ServerOperationContext<?> nextOperation = pendingOperationsQueue.poll();
+            while(nextOperation != null) {
+                sendReply(raftActor, nextOperation, ServerChangeStatus.TIMEOUT);
+                nextOperation = pendingOperationsQueue.poll();
+            }
+        }
+
+        @Override
+        public void onNewOperation(RaftActor raftActor, ServerOperationContext<?> operationContext) {
+            if(timedOut) {
+                sendReply(raftActor, operationContext, ServerChangeStatus.TIMEOUT);
+            } else {
+                super.onNewOperation(raftActor, operationContext);
             }
         }
     }
@@ -292,17 +328,13 @@ class RaftActorServerConfigurationSupport {
         }
 
         Cancellable newInstallSnapshotTimer(RaftActor raftActor) {
-            return raftContext.getActorSystem().scheduler().scheduleOnce(
-                    new FiniteDuration(((raftContext.getConfigParams().getElectionTimeOutInterval().toMillis()) * 2),
-                            TimeUnit.MILLISECONDS), raftContext.getActor(),
-                            new FollowerCatchUpTimeout(addServerContext.getOperation().getNewServerId()),
-                            raftContext.getActorSystem().dispatcher(), raftContext.getActor());
+            return newTimer(raftActor, new ServerOperationTimeout(addServerContext.getOperation().getNewServerId()));
         }
 
-        void handleOnFollowerCatchupTimeout(RaftActor raftActor, FollowerCatchUpTimeout followerTimeout) {
-            String serverId = followerTimeout.getNewServerId();
+        void handleInstallSnapshotTimeout(RaftActor raftActor, ServerOperationTimeout timeout) {
+            String serverId = timeout.getServerId();
 
-            LOG.debug("{}: onFollowerCatchupTimeout for new server {}", raftContext.getId(), serverId);
+            LOG.debug("{}: handleInstallSnapshotTimeout for new server {}", raftContext.getId(), serverId);
 
             // cleanup
             raftContext.removePeer(serverId);
@@ -382,11 +414,11 @@ class RaftActorServerConfigurationSupport {
         }
 
         @Override
-        public void onFollowerCatchupTimeout(RaftActor raftActor, FollowerCatchUpTimeout followerTimeout) {
-            handleOnFollowerCatchupTimeout(raftActor, followerTimeout);
+        public void onServerOperationTimeout(RaftActor raftActor, ServerOperationTimeout timeout) {
+            handleInstallSnapshotTimeout(raftActor, timeout);
 
             LOG.warn("{}: Timeout occured for new server {} while installing snapshot", raftContext.getId(),
-                    followerTimeout.getNewServerId());
+                    timeout.getServerId());
         }
 
         @Override
@@ -447,11 +479,11 @@ class RaftActorServerConfigurationSupport {
         }
 
         @Override
-        public void onFollowerCatchupTimeout(RaftActor raftActor, FollowerCatchUpTimeout followerTimeout) {
-            handleOnFollowerCatchupTimeout(raftActor, followerTimeout);
+        public void onServerOperationTimeout(RaftActor raftActor, ServerOperationTimeout timeout) {
+            handleInstallSnapshotTimeout(raftActor, timeout);
 
             LOG.warn("{}: Timeout occured for new server {} while waiting for prior snapshot to complete",
-                    raftContext.getId(), followerTimeout.getNewServerId());
+                    raftContext.getId(), timeout.getServerId());
         }
     }
 
@@ -488,6 +520,8 @@ class RaftActorServerConfigurationSupport {
         abstract InitialOperationState newInitialOperationState(RaftActorServerConfigurationSupport support);
 
         abstract void operationComplete(RaftActor raftActor, ServerChangeStatus serverChangeStatus);
+
+        abstract String getServerId();
     }
 
     /**
@@ -512,6 +546,11 @@ class RaftActorServerConfigurationSupport {
         void operationComplete(RaftActor raftActor, ServerChangeStatus serverChangeStatus) {
 
         }
+
+        @Override
+        String getServerId() {
+            return getOperation().getNewServerId();
+        }
     }
 
     private abstract class RemoveServerState extends AbstractOperationState {
@@ -526,7 +565,6 @@ class RaftActorServerConfigurationSupport {
         public RemoveServerContext getRemoveServerContext() {
             return removeServerContext;
         }
-
     }
 
     private class InitialRemoveServerState extends RemoveServerState implements InitialOperationState{
@@ -567,5 +605,21 @@ class RaftActorServerConfigurationSupport {
             }
         }
 
+        @Override
+        String getServerId() {
+            return getOperation().getServerId();
+        }
+    }
+
+    static class ServerOperationTimeout {
+        private final String serverId;
+
+        ServerOperationTimeout(String serverId){
+           this.serverId = Preconditions.checkNotNull(serverId, "serverId should not be null");
+        }
+
+        String getServerId() {
+            return serverId;
+        }
     }
 }

@@ -42,7 +42,6 @@ import org.opendaylight.controller.cluster.raft.behaviors.Leader;
 import org.opendaylight.controller.cluster.raft.messages.AddServer;
 import org.opendaylight.controller.cluster.raft.messages.AddServerReply;
 import org.opendaylight.controller.cluster.raft.messages.AppendEntries;
-import org.opendaylight.controller.cluster.raft.messages.FollowerCatchUpTimeout;
 import org.opendaylight.controller.cluster.raft.messages.InstallSnapshot;
 import org.opendaylight.controller.cluster.raft.messages.RemoveServer;
 import org.opendaylight.controller.cluster.raft.messages.RemoveServerReply;
@@ -484,7 +483,7 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         // Complete the prior snapshot - this should be a no-op b/c it's no longer the leader
         leaderActor.tell(commitMsg, leaderActor);
 
-        leaderActor.tell(new FollowerCatchUpTimeout(NEW_SERVER_ID), leaderActor);
+        leaderActor.tell(new RaftActorServerConfigurationSupport.ServerOperationTimeout(NEW_SERVER_ID), leaderActor);
 
         AddServerReply addServerReply = testKit.expectMsgClass(JavaTestKit.duration("5 seconds"), AddServerReply.class);
         assertEquals("getStatus", ServerChangeStatus.NO_LEADER, addServerReply.getStatus());
@@ -589,18 +588,50 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
         MockLeaderRaftActor leaderRaftActor = leaderActor.underlyingActor();
         RaftActorContext leaderActorContext = leaderRaftActor.getRaftActorContext();
 
-        newFollowerRaftActor.underlyingActor().setDropMessageOfType(AppendEntries.class);
+        //((DefaultConfigParamsImpl)leaderActorContext.getConfigParams()).setElectionTimeoutFactor(1000);
+
+        TestActorRef<MessageCollectorActor> leaderCollectorActor = newLeaderCollectorActor(leaderRaftActor);
+        // Drop UnInitializedFollowerSnapshotReply initially
+        leaderRaftActor.setDropMessageOfType(UnInitializedFollowerSnapshotReply.class);
+
+        MockNewFollowerRaftActor newFollowerRaftActorInstance = newFollowerRaftActor.underlyingActor();
+        TestActorRef<MessageCollectorActor> newFollowerCollectorActor =
+                newCollectorActor(newFollowerRaftActorInstance, NEW_SERVER_ID);
+
+        // Drop AppendEntries to the new follower so consensus isn't reached
+        newFollowerRaftActorInstance.setDropMessageOfType(AppendEntries.class);
 
         leaderActor.tell(new AddServer(NEW_SERVER_ID, newFollowerRaftActor.path().toString(), true), testKit.getRef());
 
+        // Capture the UnInitializedFollowerSnapshotReply
+        Object snapshotReply = expectFirstMatching(leaderCollectorActor, UnInitializedFollowerSnapshotReply.class);
+
+        // Send the UnInitializedFollowerSnapshotReply to resume the first request
+        leaderRaftActor.setDropMessageOfType(null);
+        leaderActor.tell(snapshotReply, leaderActor);
+
+        expectFirstMatching(newFollowerCollectorActor, AppendEntries.class);
+
+        // Send a second AddServer
+        leaderActor.tell(new AddServer(NEW_SERVER_ID2, "", false), testKit.getRef());
+
+        // The first AddServer should succeed with OK even though consensus wasn't reached
         AddServerReply addServerReply = testKit.expectMsgClass(JavaTestKit.duration("5 seconds"), AddServerReply.class);
         assertEquals("getStatus", ServerChangeStatus.OK, addServerReply.getStatus());
         assertEquals("getLeaderHint", LEADER_ID, addServerReply.getLeaderHint());
 
         // Verify ServerConfigurationPayload entry in leader's log
-
         verifyServerConfigurationPayloadEntry(leaderActorContext.getReplicatedLog(), votingServer(LEADER_ID),
                 votingServer(NEW_SERVER_ID));
+
+        // The second AddServer should fail since consensus wasn't reached for the first
+        addServerReply = testKit.expectMsgClass(JavaTestKit.duration("5 seconds"), AddServerReply.class);
+        assertEquals("getStatus", ServerChangeStatus.TIMEOUT, addServerReply.getStatus());
+
+        // Re-send a second AddServer - should also fail
+        leaderActor.tell(new AddServer(NEW_SERVER_ID2, "", false), testKit.getRef());
+        addServerReply = testKit.expectMsgClass(JavaTestKit.duration("5 seconds"), AddServerReply.class);
+        assertEquals("getStatus", ServerChangeStatus.TIMEOUT, addServerReply.getStatus());
     }
 
     @Test
@@ -774,11 +805,15 @@ public class RaftActorServerConfigurationSupportTest extends AbstractActorTest {
     }
 
     private TestActorRef<MessageCollectorActor> newLeaderCollectorActor(MockLeaderRaftActor leaderRaftActor) {
-        TestActorRef<MessageCollectorActor> leaderCollectorActor = actorFactory.createTestActor(
+        return newCollectorActor(leaderRaftActor, LEADER_ID);
+    }
+
+    private TestActorRef<MessageCollectorActor> newCollectorActor(AbstractMockRaftActor raftActor, String id) {
+        TestActorRef<MessageCollectorActor> collectorActor = actorFactory.createTestActor(
                 MessageCollectorActor.props().withDispatcher(Dispatchers.DefaultDispatcherId()),
-                actorFactory.generateActorId(LEADER_ID + "Collector"));
-        leaderRaftActor.setCollectorActor(leaderCollectorActor);
-        return leaderCollectorActor;
+                actorFactory.generateActorId(id + "Collector"));
+        raftActor.setCollectorActor(collectorActor);
+        return collectorActor;
     }
 
     private static void verifyServerConfigurationPayloadEntry(ReplicatedLog log, ServerInfo... expected) {
