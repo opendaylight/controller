@@ -74,7 +74,7 @@ public class DistributedConfigDataStoreProviderModule extends
                 .build();
 
         return DistributedDataStoreFactory.createInstance(getConfigSchemaServiceDependency(),
-                datastoreContext, DatastoreSnapshotRestore.instance().getAndRemove(datastoreContext.getDataStoreType()),
+                datastoreContext, DatastoreSnapshotRestore.instance().getAndRemove(datastoreContext.getDataStoreName()),
                 getConfigActorSystemProviderDependency().getActorSystem(), bundleContext);
     }
 

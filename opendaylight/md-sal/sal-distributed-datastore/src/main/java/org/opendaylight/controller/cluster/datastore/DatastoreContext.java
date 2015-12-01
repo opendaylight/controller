@@ -184,14 +184,6 @@ public class DatastoreContext {
         return logicalStoreType;
     }
 
-    /**
-     * @deprecated Use {@link #getDataStoreName()} or {@link #getLogicalStoreType()} instead.
-     */
-    @Deprecated
-    public String getDataStoreType(){
-        return getDataStoreName();
-    }
-
     public long getTransactionCreationInitialRateLimit() {
         return transactionCreationInitialRateLimit;
     }
