@@ -51,11 +51,11 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
                             <codeGenerators>
                                 <generator>
                                     <codeGeneratorClass>org.opendaylight.yangtools.maven.sal.api.gen.plugin.CodeGeneratorImpl</codeGeneratorClass>
-                                    <outputBaseDir>${project.build.directory}/generated-sources/sal</outputBaseDir>
+                                    <outputBaseDir>${salGeneratorPath}</outputBaseDir>
                                 </generator>
                                 <generator>
                                     <codeGeneratorClass>org.opendaylight.controller.config.yangjmxgenerator.plugin.JMXGenerator</codeGeneratorClass>
-                                    <outputBaseDir>${project.build.directory}/generated-sources/config</outputBaseDir>
+                                    <outputBaseDir>${jmxGeneratorPath}</outputBaseDir>
                                     <additionalConfiguration>
                                         <namespaceToPackage1>urn:opendaylight:params:xml:ns:yang:controller==org.opendaylight.controller.config.yang</namespaceToPackage1>
                                     </additionalConfiguration>
@@ -66,25 +66,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
                                 </generator>
                             </codeGenerators>
                             <inspectDependencies>true</inspectDependencies>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <version>1.8</version>
-                <executions>
-                    <execution>
-                        <id>add-source</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>add-source</goal>
-                        </goals>
-                        <configuration>
-                            <sources>
-                                <source>${project.build.directory}/generated-sources/config</source>
-                            </sources>
                         </configuration>
                     </execution>
                 </executions>
