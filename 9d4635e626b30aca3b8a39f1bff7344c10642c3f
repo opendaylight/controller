@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5aaae553_33410b0c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/DatastoreContext.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 400,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-12-01T11:57:13Z",
+      "side": 1,
+      "message": "Why not just remove this method? This isn\u0027t a public/published API.",
+      "revId": "9d4635e626b30aca3b8a39f1bff7344c10642c3f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
