@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5aaae553_181d0c10",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/yang/odl-sal-netconf-connector-cfg.yang",
+        "patchSetId": 6
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-12-01T15:02:23Z",
+      "side": 1,
+      "message": "Have you tested this change with original configuration? ones without specifying this leaf to work?",
+      "range": {
+        "startLine": 61,
+        "startChar": 12,
+        "endLine": 66,
+        "endChar": 13
+      },
+      "revId": "c43d0e7aeefb1b2ccea5dfdb2cf2ff77119a4553",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
