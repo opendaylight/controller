@@ -13,11 +13,40 @@ package org.opendaylight.controller.cluster.raft.messages;
  * @author Thomas Pantelis
  */
 public enum ServerChangeStatus {
+    /**
+     * Request successfully completed.
+     */
     OK,
+
+    /**
+     * No leader exists to process the request.
+     */
     NO_LEADER,
+
+    /**
+     * For an AddServer request, the leader timed out trying to install a snapshot on the new server or,
+     * for any request, the leader coild not process the request a prior request timed out while .
+     */
     TIMEOUT,
+
+    /**
+     * For an AddServer request, the server to add already exists.
+     */
     ALREADY_EXISTS,
-    DOES_NOT_EXIST,  // Server with the specified address does not exist
-    NOT_SUPPORTED,   // Some types of RemoveServer for example Removing the current Leader may not be
-                     // supported (at least initially)
+
+    /**
+     * For a RemoveServer request, the server to remove does not exist.
+     */
+    DOES_NOT_EXIST,
+
+    /**
+     * The leader could not process the request due to a prior request that timed out while trying to
+     * achieve replication consensus.
+     */
+    PRIOR_REQUEST_CONSENSUS_TIMEOUT,
+
+    /**
+     * An unsupported request, for example removing the current leader may not be supported (at least initially)
+     */
+    NOT_SUPPORTED,
 }
