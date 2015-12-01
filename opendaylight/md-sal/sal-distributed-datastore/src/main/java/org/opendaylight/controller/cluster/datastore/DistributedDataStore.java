@@ -74,7 +74,7 @@ public class DistributedDataStore implements DOMStore, SchemaContextListener,
         Preconditions.checkNotNull(configuration, "configuration should not be null");
         Preconditions.checkNotNull(datastoreContextFactory, "datastoreContextFactory should not be null");
 
-        this.type = datastoreContextFactory.getBaseDatastoreContext().getDataStoreType();
+        this.type = datastoreContextFactory.getBaseDatastoreContext().getDataStoreName();
 
         String shardManagerId = ShardManagerIdentifier.builder().type(type).build().toString();
 

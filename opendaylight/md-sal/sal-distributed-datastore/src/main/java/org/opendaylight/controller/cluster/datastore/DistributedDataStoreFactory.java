@@ -23,7 +23,7 @@ public class DistributedDataStoreFactory {
             DatastoreContext datastoreContext, DatastoreSnapshot restoreFromSnapshot, ActorSystem actorSystem,
             BundleContext bundleContext) {
 
-        LOG.info("Create data store instance of type : {}", datastoreContext.getDataStoreType());
+        LOG.info("Create data store instance of type : {}", datastoreContext.getDataStoreName());
 
         DatastoreContextIntrospector introspector = new DatastoreContextIntrospector(datastoreContext);
         DatastoreContextConfigAdminOverlay overlay = new DatastoreContextConfigAdminOverlay(

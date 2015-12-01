@@ -478,7 +478,7 @@ public class ActorContext {
      * @return
      */
     public Timer getOperationTimer(String operationName){
-        return getOperationTimer(datastoreContext.getDataStoreType(), operationName);
+        return getOperationTimer(datastoreContext.getDataStoreName(), operationName);
     }
 
     public Timer getOperationTimer(String dataStoreType, String operationName){
@@ -488,12 +488,22 @@ public class ActorContext {
     }
 
     /**
-     * Get the type of the data store to which this ActorContext belongs
+     * Get the name of the data store to which this ActorContext belongs
      *
      * @return
      */
+    public String getDataStoreName() {
+        return datastoreContext.getDataStoreName();
+    }
+
+    /**
+     * Get the type of the data store to which this ActorContext belongs
+     *
+     * @return
+     * @deprecated Use {@link #getDataStoreName()} instead.
+     */
     public String getDataStoreType() {
-        return datastoreContext.getDataStoreType();
+        return datastoreContext.getDataStoreName();
     }
 
     /**

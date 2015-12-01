@@ -203,7 +203,7 @@ public class DatastoreContextIntrospector {
         }
 
         Builder builder = DatastoreContext.newBuilderFrom(context);
-        String dataStoreTypePrefix = context.getDataStoreType() + '.';
+        String dataStoreTypePrefix = context.getDataStoreName() + '.';
         final String shardNamePrefix = forShardName + '.';
 
         List<String> keys = getSortedKeysByDatastoreType(currentProperties.keySet(), dataStoreTypePrefix);
@@ -242,7 +242,7 @@ public class DatastoreContextIntrospector {
 
         Builder builder = DatastoreContext.newBuilderFrom(context);
 
-        final String dataStoreTypePrefix = context.getDataStoreType() + '.';
+        final String dataStoreTypePrefix = context.getDataStoreName() + '.';
 
         List<String> keys = getSortedKeysByDatastoreType(Collections.list(properties.keys()), dataStoreTypePrefix);
 

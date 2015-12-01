@@ -75,7 +75,7 @@ public class DistributedOperationalDataStoreProviderModule extends
                 .build();
 
         return DistributedDataStoreFactory.createInstance(getOperationalSchemaServiceDependency(),
-                datastoreContext, DatastoreSnapshotRestore.instance().getAndRemove(datastoreContext.getDataStoreType()),
+                datastoreContext, DatastoreSnapshotRestore.instance().getAndRemove(datastoreContext.getDataStoreName()),
                 getOperationalActorSystemProviderDependency().getActorSystem(), bundleContext);
     }
 
