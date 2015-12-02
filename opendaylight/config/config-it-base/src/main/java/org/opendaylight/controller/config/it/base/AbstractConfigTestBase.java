@@ -18,7 +18,10 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRunti
 import com.google.common.base.Stopwatch;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.management.ManagementFactory;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import javax.management.ObjectName;
@@ -50,9 +53,8 @@ public abstract class AbstractConfigTestBase {
     public static final String ORG_OPS4J_PAX_LOGGING_CFG = "etc/org.ops4j.pax.logging.cfg";
 
     /*
-     * Default values for karaf distro version, type, groupId, and artifactId
+     * Default values for karaf distro type, groupId, and artifactId
      */
-    private static final String KARAF_DISTRO_VERSION = "3.0.4";
     private static final String KARAF_DISTRO_TYPE = "zip";
     private static final String KARAF_DISTRO_ARTIFACTID = "apache-karaf";
     private static final String KARAF_DISTRO_GROUPID = "org.apache.karaf";
@@ -64,6 +66,11 @@ public abstract class AbstractConfigTestBase {
     private static final String KARAF_DISTRO_TYPE_PROP = "karaf.distro.type";
     private static final String KARAF_DISTRO_ARTIFACTID_PROP = "karaf.distro.artifactId";
     private static final String KARAF_DISTRO_GROUPID_PROP = "karaf.distro.groupId";
+
+    /**
+     * Property file used to store the Karaf distribution version
+     */
+    private static final String PROPERTIES_FILENAME = "abstractconfigtestbase.properties";
 
     /*
      * Wait up to 10s for our configured module to come up
@@ -92,8 +99,20 @@ public abstract class AbstractConfigTestBase {
     public String getKarafDistro() {
         String groupId = System.getProperty(KARAF_DISTRO_GROUPID_PROP,KARAF_DISTRO_GROUPID);
         String artifactId = System.getProperty(KARAF_DISTRO_ARTIFACTID_PROP,KARAF_DISTRO_ARTIFACTID);
-        String version = System.getProperty(KARAF_DISTRO_VERSION_PROP,KARAF_DISTRO_VERSION);
+        String version = System.getProperty(KARAF_DISTRO_VERSION_PROP);
         String type = System.getProperty(KARAF_DISTRO_TYPE_PROP,KARAF_DISTRO_TYPE);
+        if (version == null) {
+            // We use a properties file to retrieve ${karaf.version}, instead of .versionAsInProject()
+            // This avoids forcing all users to depend on Karaf in their POMs
+            Properties abstractConfigTestBaseProps = new Properties();
+            try (InputStream abstractConfigTestBaseInputStream = Thread.currentThread().getContextClassLoader()
+                    .getResourceAsStream(PROPERTIES_FILENAME)) {
+                abstractConfigTestBaseProps.load(abstractConfigTestBaseInputStream);
+            } catch (IOException e) {
+                LOG.error("Unable to load {} to determine the Karaf version", PROPERTIES_FILENAME, e);
+            }
+            version = abstractConfigTestBaseProps.getProperty(KARAF_DISTRO_VERSION_PROP);
+        }
         MavenArtifactUrlReference karafUrl = maven()
                 .groupId(groupId)
                 .artifactId(artifactId)
