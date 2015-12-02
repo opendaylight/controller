@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5aaae553_7c5d0fe9",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/schema/repository/RemoteSchemaRepository.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-12-02T10:01:05Z",
+      "side": 1,
+      "message": "Probably RemoteYangTextProvider name is better suited, given declared methods.",
+      "range": {
+        "startLine": 22,
+        "startChar": 17,
+        "endLine": 22,
+        "endChar": 39
+      },
+      "revId": "f114fcf6ffcf4036f24a75af031214fec36b23a7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5aaae553_dc6be383",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/schema/repository/impl/RemoteSchemaRepositoryImpl.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 21
+      },
+      "writtenOn": "2015-12-02T10:01:05Z",
+      "side": 1,
+      "message": "RemoteYangTextSourceProviderImpl",
+      "range": {
+        "startLine": 30,
+        "startChar": 13,
+        "endLine": 30,
+        "endChar": 39
+      },
+      "revId": "f114fcf6ffcf4036f24a75af031214fec36b23a7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
