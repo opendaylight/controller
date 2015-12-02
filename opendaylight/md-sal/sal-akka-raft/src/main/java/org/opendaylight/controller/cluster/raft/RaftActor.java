@@ -146,7 +146,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
         super.preStart();
 
         snapshotSupport = newRaftActorSnapshotMessageSupport();
-        serverConfigurationSupport = new RaftActorServerConfigurationSupport(getRaftActorContext());
+        serverConfigurationSupport = new RaftActorServerConfigurationSupport(this);
     }
 
     @Override
@@ -201,7 +201,7 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
 
     @Override
     public void handleCommand(final Object message) {
-        if(serverConfigurationSupport.handleMessage(message, this, getSender())) {
+        if(serverConfigurationSupport.handleMessage(message, getSender())) {
             return;
         } else if (message instanceof ApplyState){
             ApplyState applyState = (ApplyState) message;
