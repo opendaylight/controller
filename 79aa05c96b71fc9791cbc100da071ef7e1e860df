@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5aaae553_82a182ab",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 3172
+      },
+      "writtenOn": "2015-12-02T20:33:22Z",
+      "side": 1,
+      "message": "raftActor is unused.  Should it be removed?",
+      "range": {
+        "startLine": 237,
+        "startChar": 39,
+        "endLine": 237,
+        "endChar": 48
+      },
+      "revId": "79aa05c96b71fc9791cbc100da071ef7e1e860df",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5aaae553_82bae2df",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActorServerConfigurationSupport.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 240,
+      "author": {
+        "id": 3172
+      },
+      "writtenOn": "2015-12-02T20:33:22Z",
+      "side": 1,
+      "message": "This can be simplified to:\ngetElectionTimeOutInterval().$times(2)",
+      "range": {
+        "startLine": 239,
+        "startChar": 20,
+        "endLine": 240,
+        "endChar": 50
+      },
+      "revId": "79aa05c96b71fc9791cbc100da071ef7e1e860df",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
