@@ -159,6 +159,12 @@ module odl-sal-netconf-connector-cfg {
                              If a value <1 is provided, no keepalives will be sent";
             }
 
+            leaf keepalive-timeout-millis {
+                type uint32;
+                default 30000;
+                description "Timeout in milliseconds for keepalive RPCs";
+            }
+
             container keepalive-executor {
                 uses config:service-ref {
                     refine type {
