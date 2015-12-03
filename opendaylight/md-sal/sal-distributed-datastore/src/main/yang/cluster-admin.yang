@@ -12,20 +12,25 @@ module cluster-admin {
 
     typedef data-store-type {
         type enumeration {
-          enum config {
-            value 1;
-          }
-          enum operational {
-            value 2;
-          }
+            enum config {
+                value 1;
+            }
+            enum operational {
+                value 2;
+            }
         }
     }
 
     rpc add-shard-replica {
         input {
             leaf shard-name {
-              type string;
-              description "The name of the shard for which to create a replica.";
+                type string;
+                description "The name of the shard for which to create a replica.";
+            }
+            
+            leaf data-store-type {
+                type data-store-type;
+                description "The type of the data store to which the replica belongs";
             }
         }
 
@@ -39,18 +44,18 @@ module cluster-admin {
     rpc remove-shard-replica {
         input {
             leaf shard-name {
-              type string;
-              description "The name of the shard for which to remove the replica.";
+                type string;
+                description "The name of the shard for which to remove the replica.";
             }
 
             leaf member-name {
-              type string;
-              description "The cluster member from which the shard replica should be removed";
+                type string;
+                description "The cluster member from which the shard replica should be removed";
             }
 
             leaf data-store-type {
-              type data-store-type;
-              description "The type of the data store to which the replica belongs";
+                type data-store-type;
+                description "The type of the data store to which the replica belongs";
             }
         }
 

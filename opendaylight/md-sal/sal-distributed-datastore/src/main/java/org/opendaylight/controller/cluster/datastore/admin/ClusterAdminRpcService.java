@@ -34,6 +34,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ClusterAdminService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ConvertMembersToNonvotingForAllShardsInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ConvertMembersToVotingForAllShardsInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.DataStoreType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemoveShardReplicaInput;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -78,13 +79,18 @@ public class ClusterAdminRpcService implements ClusterAdminService, AutoCloseabl
             return newFailedRpcResultBuilder("A valid shard name must be specified").buildFuture();
         }
 
+        DataStoreType dataStoreType = input.getDataStoreType();
+        if(dataStoreType == null) {
+            return newFailedRpcResultBuilder("A valid DataStoreType must be specified").buildFuture();
+        }
+
         LOG.info("Adding replica for shard {}", shardName);
 
         final SettableFuture<RpcResult<Void>> returnFuture = SettableFuture.create();
-        ListenableFuture<List<Success>> future = sendMessageToShardManagers(new AddShardReplica(shardName));
-        Futures.addCallback(future, new FutureCallback<List<Success>>() {
+        ListenableFuture<Success> future = sendMessageToShardManager(dataStoreType, new AddShardReplica(shardName));
+        Futures.addCallback(future, new FutureCallback<Success>() {
             @Override
-            public void onSuccess(List<Success> snapshots) {
+            public void onSuccess(Success success) {
                 LOG.info("Successfully added replica for shard {}", shardName);
                 returnFuture.set(newSuccessfulResult());
             }
@@ -167,6 +173,12 @@ public class ClusterAdminRpcService implements ClusterAdminService, AutoCloseabl
         ListenableFuture<T> operFuture = ask(operDataStore.getActorContext().getShardManager(), message, timeout);
 
         return Futures.allAsList(configFuture, operFuture);
+    }
+
+    private <T> ListenableFuture<T> sendMessageToShardManager(DataStoreType dataStoreType, Object message) {
+        ActorRef shardManager = dataStoreType == DataStoreType.Config ?
+                configDataStore.getActorContext().getShardManager() : operDataStore.getActorContext().getShardManager();
+        return ask(shardManager, message, new Timeout(1, TimeUnit.MINUTES));
     }
 
     private static void saveSnapshotsToFile(DatastoreSnapshotList snapshots, String fileName,

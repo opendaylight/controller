@@ -42,6 +42,7 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCoh
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddShardReplicaInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.BackupDatastoreInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.DataStoreType;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -80,7 +81,7 @@ public class ClusterAdminRpcServiceTest {
 
         RpcResult<Void> rpcResult = service .backupDatastore(new BackupDatastoreInputBuilder().
                 setFilePath(fileName).build()).get(5, TimeUnit.SECONDS);
-        checkSuccessfulRpcResult(rpcResult);
+        verifySuccessfulRpcResult(rpcResult);
 
         try(FileInputStream fis = new FileInputStream(fileName)) {
             List<DatastoreSnapshot> snapshots = SerializationUtils.deserialize(fis);
@@ -134,7 +135,7 @@ public class ClusterAdminRpcServiceTest {
 
         leaderNode1.waitForMembersUp("member-2");
 
-        testAddShardReplica(newReplicaNode2, "cars", "member-1");
+        doAddShardReplica(newReplicaNode2, "cars", "member-1");
 
         MemberNode newReplicaNode3 = MemberNode.builder(memberNodes).akkaConfig("Member3").testName(name).
                 moduleShardsConfig(moduleShardsConfig).build();
@@ -142,7 +143,7 @@ public class ClusterAdminRpcServiceTest {
         leaderNode1.waitForMembersUp("member-3");
         newReplicaNode2.waitForMembersUp("member-3");
 
-        testAddShardReplica(newReplicaNode3, "cars", "member-1", "member-2");
+        doAddShardReplica(newReplicaNode3, "cars", "member-1", "member-2");
 
         verifyRaftPeersPresent(newReplicaNode2.configDataStore(), "cars", "member-1", "member-3");
         verifyRaftPeersPresent(newReplicaNode2.operDataStore(), "cars", "member-1", "member-3");
@@ -186,6 +187,30 @@ public class ClusterAdminRpcServiceTest {
         readCarsNodeAndVerify(newReplicaNode3.configDataStore(), configCarsNode);
     }
 
+    @Test
+    public void testAddShardReplicaFailures() throws Exception {
+        String name = "testAddShardReplicaFailures";
+        MemberNode memberNode = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name).
+                moduleShardsConfig("module-shards-cars-member-1.conf").build();
+
+        ClusterAdminRpcService service = new ClusterAdminRpcService(memberNode.configDataStore(),
+                memberNode.operDataStore());
+
+        RpcResult<Void> rpcResult = service.addShardReplica(new AddShardReplicaInputBuilder().
+                setDataStoreType(DataStoreType.Config).build()).get(10, TimeUnit.SECONDS);
+        verifyFailedRpcResult(rpcResult);
+
+        rpcResult = service.addShardReplica(new AddShardReplicaInputBuilder().setShardName("cars").
+                build()).get(10, TimeUnit.SECONDS);
+        verifyFailedRpcResult(rpcResult);
+
+        rpcResult = service.addShardReplica(new AddShardReplicaInputBuilder().setShardName("people").
+                setDataStoreType(DataStoreType.Config).build()).get(10, TimeUnit.SECONDS);
+        verifyFailedRpcResult(rpcResult);
+
+        service.close();
+    }
+
     private NormalizedNode<?, ?> writeCarsNodeAndVerify(DistributedDataStore writeToStore,
             DistributedDataStore readFromStore) throws Exception {
         DOMStoreWriteTransaction writeTx = writeToStore.newWriteOnlyTransaction();
@@ -210,7 +235,7 @@ public class ClusterAdminRpcServiceTest {
         assertEquals("Data node", expCarsNode, optional.get());
     }
 
-    private void testAddShardReplica(MemberNode memberNode, String shardName, String... peerMemberNames)
+    private void doAddShardReplica(MemberNode memberNode, String shardName, String... peerMemberNames)
             throws Exception {
         memberNode.waitForMembersUp(peerMemberNames);
 
@@ -218,16 +243,24 @@ public class ClusterAdminRpcServiceTest {
                 memberNode.operDataStore());
 
         RpcResult<Void> rpcResult = service.addShardReplica(new AddShardReplicaInputBuilder().setShardName(shardName).
-                build()).get(10, TimeUnit.SECONDS);
-        checkSuccessfulRpcResult(rpcResult);
+                setDataStoreType(DataStoreType.Config).build()).get(10, TimeUnit.SECONDS);
+        verifySuccessfulRpcResult(rpcResult);
 
         verifyRaftPeersPresent(memberNode.configDataStore(), shardName, peerMemberNames);
+
+        Optional<ActorRef> optional = memberNode.operDataStore().getActorContext().findLocalShard(shardName);
+        assertEquals("Oper shard present", false, optional.isPresent());
+
+        rpcResult = service.addShardReplica(new AddShardReplicaInputBuilder().setShardName(shardName).
+                setDataStoreType(DataStoreType.Operational).build()).get(10, TimeUnit.SECONDS);
+        verifySuccessfulRpcResult(rpcResult);
+
         verifyRaftPeersPresent(memberNode.operDataStore(), shardName, peerMemberNames);
 
         service.close();
     }
 
-    private void checkSuccessfulRpcResult(RpcResult<Void> rpcResult) {
+    private void verifySuccessfulRpcResult(RpcResult<Void> rpcResult) {
         if(!rpcResult.isSuccessful()) {
             if(rpcResult.getErrors().size() > 0) {
                 RpcError error = Iterables.getFirst(rpcResult.getErrors(), null);
@@ -236,6 +269,13 @@ public class ClusterAdminRpcServiceTest {
 
             fail("Rpc failed with no error");
         }
+    }
+
+    private void verifyFailedRpcResult(RpcResult<Void> rpcResult) {
+        assertEquals("RpcResult", false, rpcResult.isSuccessful());
+        assertEquals("RpcResult errors size", 1, rpcResult.getErrors().size());
+        RpcError error = Iterables.getFirst(rpcResult.getErrors(), null);
+        assertNotNull("RpcResult error message null", error.getMessage());
     }
 
     @Test
