@@ -4,7 +4,7 @@
     <parent>
         <artifactId>clustering-it</artifactId>
         <groupId>org.opendaylight.controller.samples</groupId>
-        <version>1.2.3-Lithium-SR3</version>
+        <version>1.2.4-SNAPSHOT</version>
     </parent>
     <artifactId>clustering-it-model</artifactId>
     <packaging>bundle</packaging>

@@ -14,7 +14,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>config-parent</artifactId>
-    <version>0.3.3-Lithium-SR3</version>
+    <version>0.3.4-SNAPSHOT</version>
     <relativePath/>
   </parent>
 
