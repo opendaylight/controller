@@ -185,8 +185,14 @@ public final class KeepaliveSalFacade implements RemoteDeviceHandler<NetconfSess
 
         @Override
         public void onSuccess(final DOMRpcResult result) {
-            LOG.debug("{}: Keepalive RPC successful with response: {}", id, result.getResult());
-            scheduleKeepalive();
+            if (result != null && result.getResult() != null) {
+                LOG.debug("{}: Keepalive RPC successful with response: {}", id, result.getResult());
+                scheduleKeepalive();
+            }
+            else {
+                LOG.warn("{} Keepalive RPC returned null with response: {}. Reconnecting netconf session", id, result);
+                reconnect();
+            }
         }
 
         @Override
