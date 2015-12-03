@@ -14,7 +14,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
     <parent>
         <groupId>org.opendaylight.controller</groupId>
         <artifactId>sal-parent</artifactId>
-        <version>1.2.3-Lithium-SR3</version>
+        <version>1.2.4-SNAPSHOT</version>
     </parent>
 
     <artifactId>messagebus-impl</artifactId>
@@ -50,12 +50,12 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>messagebus-api</artifactId>
-            <version>1.2.3-Lithium-SR3</version>
+            <version>1.2.4-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>messagebus-spi</artifactId>
-            <version>1.2.3-Lithium-SR3</version>
+            <version>1.2.4-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
