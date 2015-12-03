@@ -12,15 +12,15 @@ import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessag
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_RUNNING_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.toPath;
 
-import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.CheckedFuture;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
 import org.opendaylight.controller.md.sal.dom.api.DOMNotification;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcAvailabilityListener;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
@@ -39,6 +39,11 @@ import org.opendaylight.yangtools.yang.model.api.SchemaPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+
 /**
  * SalFacade proxy that invokes keepalive RPCs to prevent session shutdown from remote device
  * and to detect incorrect session drops (netconf session is inactive, but TCP/SSH connection is still present).
@@ -50,11 +55,14 @@ public final class KeepaliveSalFacade implements RemoteDeviceHandler<NetconfSess
 
     // 2 minutes keepalive delay by default
     private static final long DEFAULT_DELAY = TimeUnit.MINUTES.toSeconds(2);
+    // 2 minutes keepalive timeout by default
+    private static final long DEFAULT_TIMEOUT_MILLIS = TimeUnit.SECONDS.toMillis(30);
 
     private final RemoteDeviceId id;
     private final RemoteDeviceHandler<NetconfSessionPreferences> salFacade;
     private final ScheduledExecutorService executor;
     private final long keepaliveDelaySeconds;
+    private final long keepaliveTimeoutMillis;
     private final ResetKeepalive resetKeepaliveTask;
 
     private volatile NetconfDeviceCommunicator listener;
@@ -62,17 +70,18 @@ public final class KeepaliveSalFacade implements RemoteDeviceHandler<NetconfSess
     private volatile DOMRpcService currentDeviceRpc;
 
     public KeepaliveSalFacade(final RemoteDeviceId id, final RemoteDeviceHandler<NetconfSessionPreferences> salFacade,
-                              final ScheduledExecutorService executor, final long keepaliveDelaySeconds) {
+                              final ScheduledExecutorService executor, final long keepaliveDelaySeconds, final long keepaliveTimeoutMillis) {
         this.id = id;
         this.salFacade = salFacade;
         this.executor = executor;
         this.keepaliveDelaySeconds = keepaliveDelaySeconds;
+        this.keepaliveTimeoutMillis = keepaliveTimeoutMillis;
         this.resetKeepaliveTask = new ResetKeepalive();
     }
 
     public KeepaliveSalFacade(final RemoteDeviceId id, final RemoteDeviceHandler<NetconfSessionPreferences> salFacade,
                               final ScheduledExecutorService executor) {
-        this(id, salFacade, executor, DEFAULT_DELAY);
+        this(id, salFacade, executor, DEFAULT_DELAY, DEFAULT_TIMEOUT_MILLIS);
     }
 
     /**
@@ -173,7 +182,17 @@ public final class KeepaliveSalFacade implements RemoteDeviceHandler<NetconfSess
             LOG.trace("{}: Invoking keepalive RPC", id);
 
             try {
-                Futures.addCallback(currentDeviceRpc.invokeRpc(PATH, KEEPALIVE_PAYLOAD), this);
+                CheckedFuture<DOMRpcResult, DOMRpcException> future = currentDeviceRpc.invokeRpc(PATH, KEEPALIVE_PAYLOAD);
+                Futures.addCallback(future, this);
+                    try {
+                        future.get(keepaliveTimeoutMillis, TimeUnit.MILLISECONDS);
+                    } catch (InterruptedException | ExecutionException e) {
+                        LOG.error("{}: Keepalive RPC failed with error", id, e);
+                        throw new RuntimeException(id + ": Keepalive RPC failed");
+                    } catch (TimeoutException e) {
+                        LOG.warn("{}: Keepalive RPC failed after {} milliseconds with exception: {}", id, keepaliveTimeoutMillis, e);
+                        reconnect();
+                    }
             } catch (NullPointerException e) {
                 LOG.debug("{}: Skipping keepalive while reconnecting", id);
                 // Empty catch block intentional

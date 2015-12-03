@@ -10,6 +10,7 @@ package org.opendaylight.controller.sal.connect.netconf.schema;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.GET_SCHEMA_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.NETCONF_DATA_QNAME;
 import static org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil.toId;
+
 import com.google.common.base.Charsets;
 import com.google.common.base.Function;
 import com.google.common.base.MoreObjects;
@@ -18,10 +19,16 @@ import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.CheckedFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import javax.xml.transform.dom.DOMSource;
+
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcService;
 import org.opendaylight.controller.sal.connect.netconf.util.NetconfMessageTransformUtil;
@@ -60,10 +67,12 @@ public final class NetconfRemoteSchemaYangSourceProvider implements SchemaSource
 
     private final DOMRpcService rpc;
     private final RemoteDeviceId id;
+    private final long keepaliveTimeoutMillis;
 
-    public NetconfRemoteSchemaYangSourceProvider(final RemoteDeviceId id, final DOMRpcService rpc) {
+    public NetconfRemoteSchemaYangSourceProvider(final RemoteDeviceId id, final DOMRpcService rpc, final long keepaliveTimeoutSeconds) {
         this.id = id;
         this.rpc = Preconditions.checkNotNull(rpc);
+        this.keepaliveTimeoutMillis = keepaliveTimeoutSeconds;
     }
 
     public static ContainerNode createGetSchemaRequest(final String moduleName, final Optional<String> revision) {
@@ -127,6 +136,16 @@ public final class NetconfRemoteSchemaYangSourceProvider implements SchemaSource
                 new ResultToYangSourceTransformer(id, sourceIdentifier, moduleName, revision));
 
         final CheckedFuture<YangTextSchemaSource, SchemaSourceException> checked = Futures.makeChecked(transformed, MAPPER);
+
+        try {
+            checked.get(keepaliveTimeoutMillis, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException | ExecutionException e) {
+            logger.error("{}: Invoke RPC failed with error", id, e);
+            throw new RuntimeException(id + ": Invoke RPC failed");
+        } catch (TimeoutException e) {
+            logger.warn("Unable to invoke rpc after {} milliseconds", sourceIdentifier, keepaliveTimeoutMillis, e);
+            return Futures.immediateFailedCheckedFuture(new SchemaSourceException(e.getMessage()));
+        }
 
         // / FIXME remove this get, it is only present to wait until source is retrieved
         // (goal is to limit concurrent schema download, since NetconfDevice listener does not handle concurrent messages properly)

@@ -20,12 +20,15 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
+
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import org.opendaylight.controller.md.sal.dom.api.DOMNotification;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
@@ -106,13 +109,22 @@ public final class NetconfDevice implements RemoteDevice<NetconfSessionPreferenc
     private final NotificationHandler notificationHandler;
     private final List<SchemaSourceRegistration<? extends SchemaSourceRepresentation>> sourceRegistrations = Lists.newArrayList();
 
+    // 2 minutes keepalive timeout by default
+    private static final long DEFAULT_TIMEOUT_MILLIS = TimeUnit.SECONDS.toMillis(30);
+    private final long keepaliveTimeoutMillis;
+
     // Message transformer is constructed once the schemas are available
     private MessageTransformer<NetconfMessage> messageTransformer;
 
     public NetconfDevice(final SchemaResourcesDTO schemaResourcesDTO, final RemoteDeviceId id, final RemoteDeviceHandler<NetconfSessionPreferences> salFacade,
                          final ExecutorService globalProcessingExecutor) {
-        this(schemaResourcesDTO, id, salFacade, globalProcessingExecutor, false);
+        this(schemaResourcesDTO, id, salFacade, globalProcessingExecutor, false, DEFAULT_TIMEOUT_MILLIS);
     }
+
+    public NetconfDevice(final SchemaResourcesDTO schemaResourcesDTO, final RemoteDeviceId id, final RemoteDeviceHandler<NetconfSessionPreferences> salFacade,
+            final ExecutorService globalProcessingExecutor, final boolean reconnectOnSchemasChange) {
+        this(schemaResourcesDTO, id, salFacade, globalProcessingExecutor, reconnectOnSchemasChange, DEFAULT_TIMEOUT_MILLIS);
+}
 
     /**
      * Create rpc implementation capable of handling RPC for monitoring and notifications even before the schemas of remote device are downloaded
@@ -124,7 +136,7 @@ public final class NetconfDevice implements RemoteDevice<NetconfSessionPreferenc
 
     // FIXME reduce parameters
     public NetconfDevice(final SchemaResourcesDTO schemaResourcesDTO, final RemoteDeviceId id, final RemoteDeviceHandler<NetconfSessionPreferences> salFacade,
-                         final ExecutorService globalProcessingExecutor, final boolean reconnectOnSchemasChange) {
+                         final ExecutorService globalProcessingExecutor, final boolean reconnectOnSchemasChange, final long keepaliveTimeoutMillis) {
         this.id = id;
         this.reconnectOnSchemasChange = reconnectOnSchemasChange;
         this.schemaRegistry = schemaResourcesDTO.getSchemaRegistry();
@@ -133,6 +145,7 @@ public final class NetconfDevice implements RemoteDevice<NetconfSessionPreferenc
         this.stateSchemasResolver = schemaResourcesDTO.getStateSchemasResolver();
         this.processingExecutor = MoreExecutors.listeningDecorator(globalProcessingExecutor);
         this.notificationHandler = new NotificationHandler(salFacade, id);
+        this.keepaliveTimeoutMillis = keepaliveTimeoutMillis;
     }
 
     @Override
@@ -245,7 +258,7 @@ public final class NetconfDevice implements RemoteDevice<NetconfSessionPreferenc
     }
 
     private void addProvidedSourcesToSchemaRegistry(final NetconfDeviceRpc deviceRpc, final DeviceSources deviceSources) {
-        final NetconfRemoteSchemaYangSourceProvider yangProvider = new NetconfRemoteSchemaYangSourceProvider(id, deviceRpc);
+        final NetconfRemoteSchemaYangSourceProvider yangProvider = new NetconfRemoteSchemaYangSourceProvider(id, deviceRpc, keepaliveTimeoutMillis);
         for (final SourceIdentifier sourceId : deviceSources.getProvidedSources()) {
             sourceRegistrations.add(schemaRegistry.registerSchemaSource(yangProvider,
                     PotentialSchemaSource.create(sourceId, YangTextSchemaSource.class, PotentialSchemaSource.Costs.REMOTE_IO.getValue())));

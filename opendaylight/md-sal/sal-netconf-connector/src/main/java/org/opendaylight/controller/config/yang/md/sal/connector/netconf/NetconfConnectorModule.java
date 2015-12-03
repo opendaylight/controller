@@ -9,9 +9,8 @@ package org.opendaylight.controller.config.yang.md.sal.connector.netconf;
 
 import static org.opendaylight.controller.config.api.JmxAttributeValidationException.checkCondition;
 import static org.opendaylight.controller.config.api.JmxAttributeValidationException.checkNotNull;
-
-import com.google.common.base.Optional;
 import io.netty.util.concurrent.EventExecutor;
+
 import java.math.BigDecimal;
 import java.net.InetSocketAddress;
 import java.util.List;
@@ -19,6 +18,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
+
 import org.opendaylight.controller.config.api.JmxAttributeValidationException;
 import org.opendaylight.controller.netconf.client.NetconfClientDispatcher;
 import org.opendaylight.controller.netconf.client.conf.NetconfClientConfiguration;
@@ -45,6 +45,8 @@ import org.opendaylight.yangtools.yang.model.repo.spi.SchemaSourceRegistry;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Optional;
 
 /**
  *
@@ -82,6 +84,9 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
 
         checkNotNull(getBetweenAttemptsTimeoutMillis(), betweenAttemptsTimeoutMillisJmxAttribute);
         checkCondition(getBetweenAttemptsTimeoutMillis() > 0, "must be > 0", betweenAttemptsTimeoutMillisJmxAttribute);
+
+        checkNotNull(getKeepaliveTimeoutMillis(), keepaliveTimeoutMillisJmxAttribute);
+        checkCondition(getKeepaliveTimeoutMillis() > 0, "must be > 0", keepaliveTimeoutMillisJmxAttribute);
 
         checkNotNull(getClientDispatcher(), clientDispatcherJmxAttribute);
         checkNotNull(getBindingRegistry(), bindingRegistryJmxAttribute);
@@ -134,18 +139,19 @@ public final class NetconfConnectorModule extends org.opendaylight.controller.co
                 = new NetconfDeviceSalFacade(id, domBroker, bindingBroker, bundleContext, getDefaultRequestTimeoutMillis());
 
         final Long keepaliveDelay = getKeepaliveDelay();
+        final Long keepaliveTimeout = getKeepaliveTimeoutMillis();
         if(shouldSendKeepalive()) {
             // Keepalive executor is optional for now and a default instance is supported
             final ScheduledExecutorService executor = getKeepaliveExecutor() == null ?
                     DEFAULT_KEEPALIVE_EXECUTOR : getKeepaliveExecutorDependency().getExecutor();
-            salFacade = new KeepaliveSalFacade(id, salFacade, executor, keepaliveDelay);
+            salFacade = new KeepaliveSalFacade(id, salFacade, executor, keepaliveDelay, keepaliveTimeout);
         }
 
         final NetconfDevice.SchemaResourcesDTO schemaResourcesDTO =
                 new NetconfDevice.SchemaResourcesDTO(schemaRegistry, schemaContextFactory, new NetconfStateSchemas.NetconfStateSchemasResolverImpl());
 
         final NetconfDevice device =
-                new NetconfDevice(schemaResourcesDTO, id, salFacade, globalProcessingExecutor, getReconnectOnChangedSchema());
+                new NetconfDevice(schemaResourcesDTO, id, salFacade, globalProcessingExecutor, getReconnectOnChangedSchema(), keepaliveTimeout);
 
         final NetconfDeviceCommunicator listener = userCapabilities.isPresent() ?
                 new NetconfDeviceCommunicator(id, device, userCapabilities.get()) : new NetconfDeviceCommunicator(id, device);
