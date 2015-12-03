@@ -4,12 +4,12 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>enunciate-parent</artifactId>
-    <version>1.5.3-Lithium-SR3</version>
+    <version>1.5.4-SNAPSHOT</version>
     <relativePath>../../../commons/enunciate-parent</relativePath>
   </parent>
 
   <artifactId>containermanager.northbound</artifactId>
-  <version>0.5.3-Lithium-SR3</version>
+  <version>0.5.4-SNAPSHOT</version>
   <packaging>bundle</packaging>
   <dependencies>
     <dependency>

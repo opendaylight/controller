@@ -4,7 +4,7 @@
 
   <groupId>org.opendaylight.controller</groupId>
   <artifactId>app-northbound</artifactId>
-  <version>0.1.3-Lithium-SR3</version>
+  <version>0.1.4-SNAPSHOT</version>
   <packaging>maven-archetype</packaging>
 
   <name>app-northbound</name>
