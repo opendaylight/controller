@@ -16,13 +16,14 @@ import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import com.google.common.util.concurrent.Futures;
 import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -40,6 +41,8 @@ import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.impl.schema.Builders;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.opendaylight.yangtools.yang.model.api.SchemaPath;
+
+import com.google.common.util.concurrent.Futures;
 
 public class KeepaliveSalFacadeTest {
 
@@ -98,10 +101,13 @@ public class KeepaliveSalFacadeTest {
         final DOMRpcResult result = new DefaultDOMRpcResult(Builders.containerBuilder().withNodeIdentifier(
                 new YangInstanceIdentifier.NodeIdentifier(NetconfMessageTransformUtil.NETCONF_RUNNING_QNAME)).build());
 
-        final DOMRpcResult resultFail = new DefaultDOMRpcResult(mock(RpcError.class));
+        RpcError error = mock(RpcError.class);
+        doReturn("Failure").when(error).toString();
+
+        final DOMRpcResult resultFailwithResultAndError = new DefaultDOMRpcResult(mock(NormalizedNode.class), error);
 
         doReturn(Futures.immediateCheckedFuture(result))
-                .doReturn(Futures.immediateCheckedFuture(resultFail))
+                .doReturn(Futures.immediateCheckedFuture(resultFailwithResultAndError))
                 .doReturn(Futures.immediateFailedCheckedFuture(new IllegalStateException("illegal-state")))
                 .when(deviceRpc).invokeRpc(any(SchemaPath.class), any(NormalizedNode.class));
 
@@ -121,7 +127,7 @@ public class KeepaliveSalFacadeTest {
 
         // Reconnect with same keepalive responses
         doReturn(Futures.immediateCheckedFuture(result))
-                .doReturn(Futures.immediateCheckedFuture(resultFail))
+                .doReturn(Futures.immediateCheckedFuture(resultFailwithResultAndError))
                 .doReturn(Futures.immediateFailedCheckedFuture(new IllegalStateException("illegal-state")))
                 .when(deviceRpc).invokeRpc(any(SchemaPath.class), any(NormalizedNode.class));
 
@@ -131,6 +137,17 @@ public class KeepaliveSalFacadeTest {
         verify(listener, timeout(15000).times(2)).disconnect();
         // 6 attempts now total
         verify(deviceRpc, times(3 * 2)).invokeRpc(any(SchemaPath.class), any(NormalizedNode.class));
+
+
+        final DOMRpcResult resultFailwithError = new DefaultDOMRpcResult(error);
+
+        doReturn(Futures.immediateCheckedFuture(resultFailwithError))
+                .when(deviceRpc).invokeRpc(any(SchemaPath.class), any(NormalizedNode.class));
+
+        keepaliveSalFacade.onDeviceConnected(null, null, deviceRpc);
+
+        // 1 failed that results in disconnect, 3 total with previous fail
+        verify(listener, timeout(15000).times(3)).disconnect();
     }
 
     @Test
