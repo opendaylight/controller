@@ -6,7 +6,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.cluster.schema.repository.impl;
+package org.opendaylight.controller.cluster.schema.provider.impl;
 
 import com.google.common.annotations.Beta;
 import com.google.common.util.concurrent.CheckedFuture;
@@ -14,7 +14,7 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import java.io.IOException;
 import java.util.Set;
-import org.opendaylight.controller.cluster.schema.repository.RemoteYangTextSourceProvider;
+import org.opendaylight.controller.cluster.schema.provider.RemoteYangTextSourceProvider;
 import org.opendaylight.yangtools.yang.model.repo.api.SchemaRepository;
 import org.opendaylight.yangtools.yang.model.repo.api.SourceIdentifier;
 import org.opendaylight.yangtools.yang.model.repo.api.YangTextSchemaSource;
@@ -24,16 +24,16 @@ import scala.concurrent.Future;
 import scala.concurrent.Promise;
 
 /**
- *  Remote schema repository implementation backed by local schema repository.
+ *  Remote schema provider implementation backed by local schema provider.
  */
 @Beta
-public class RemoteYangTextSourceImpl implements RemoteYangTextSourceProvider {
-    private static final Logger LOG = LoggerFactory.getLogger(RemoteYangTextSourceImpl.class);
+public class RemoteYangTextSourceProviderImpl implements RemoteYangTextSourceProvider {
+    private static final Logger LOG = LoggerFactory.getLogger(RemoteYangTextSourceProviderImpl.class);
 
     private final SchemaRepository repository;
     private final Set<SourceIdentifier> providedSources;
 
-    public RemoteYangTextSourceImpl(SchemaRepository repository, Set<SourceIdentifier> providedSources) {
+    public RemoteYangTextSourceProviderImpl(SchemaRepository repository, Set<SourceIdentifier> providedSources) {
         this.repository = repository;
         this.providedSources = providedSources;
     }
@@ -63,7 +63,7 @@ public class RemoteYangTextSourceImpl implements RemoteYangTextSourceProvider {
 
             @Override
             public void onFailure(Throwable t) {
-                LOG.warn("Unable to retrieve schema source from repository", t);
+                LOG.warn("Unable to retrieve schema source from provider", t);
                 promise.failure(t);
             }
         });

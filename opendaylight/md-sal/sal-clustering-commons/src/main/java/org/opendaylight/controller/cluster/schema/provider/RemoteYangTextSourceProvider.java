@@ -6,12 +6,12 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.cluster.schema.repository;
+package org.opendaylight.controller.cluster.schema.provider;
 
 import com.google.common.annotations.Beta;
 import java.util.Set;
 import javax.annotation.Nonnull;
-import org.opendaylight.controller.cluster.schema.repository.impl.YangTextSchemaSourceSerializationProxy;
+import org.opendaylight.controller.cluster.schema.provider.impl.YangTextSchemaSourceSerializationProxy;
 import org.opendaylight.yangtools.yang.model.repo.api.SourceIdentifier;
 import scala.concurrent.Future;
 

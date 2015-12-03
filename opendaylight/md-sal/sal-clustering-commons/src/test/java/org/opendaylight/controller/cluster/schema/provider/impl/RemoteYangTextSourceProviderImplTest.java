@@ -6,7 +6,7 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.opendaylight.controller.cluster.schema.repository.impl;
+package org.opendaylight.controller.cluster.schema.provider.impl;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -31,7 +31,7 @@ public class RemoteYangTextSourceProviderImplTest {
 
     private static final SourceIdentifier ID = new SourceIdentifier("Test", "2015-10-30");
 
-    private RemoteYangTextSourceImpl remoteRepository;
+    private RemoteYangTextSourceProviderImpl remoteRepository;
     private SchemaRepository mockedLocalRepository;
     private Set<SourceIdentifier> providedSources = Collections.singleton(ID);
 
@@ -39,7 +39,7 @@ public class RemoteYangTextSourceProviderImplTest {
     public void setUp() {
         mockedLocalRepository = Mockito.mock(SchemaRepository.class);
 
-        remoteRepository = new RemoteYangTextSourceImpl(mockedLocalRepository, providedSources);
+        remoteRepository = new RemoteYangTextSourceProviderImpl(mockedLocalRepository, providedSources);
     }
 
     @Test
