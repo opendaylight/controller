@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>netconf-subsystem</artifactId>
-    <version>0.3.3-SNAPSHOT</version>
+    <version>0.3.3-Lithium-SR3</version>
   </parent>
   <artifactId>ietf-netconf-monitoring-extension</artifactId>
   <packaging>bundle</packaging>

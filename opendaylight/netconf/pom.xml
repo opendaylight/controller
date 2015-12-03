@@ -5,12 +5,12 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>commons.opendaylight</artifactId>
-    <version>1.5.3-SNAPSHOT</version>
+    <version>1.5.3-Lithium-SR3</version>
     <relativePath>../commons/opendaylight</relativePath>
   </parent>
   <artifactId>netconf-subsystem</artifactId>
 
-  <version>0.3.3-SNAPSHOT</version>
+  <version>0.3.3-Lithium-SR3</version>
   <packaging>pom</packaging>
   <name>${project.artifactId}</name>
 

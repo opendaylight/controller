@@ -4,12 +4,12 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>adsal-enunciate-parent</artifactId>
-    <version>1.5.3-SNAPSHOT</version>
+    <version>1.5.3-Lithium-SR3</version>
     <relativePath>../../../adsal-enunciate-parent</relativePath>
   </parent>
 
   <artifactId>networkconfig.bridgedomain.northbound</artifactId>
-  <version>0.1.3-SNAPSHOT</version>
+  <version>0.1.3-Lithium-SR3</version>
   <packaging>bundle</packaging>
   <dependencies>
     <dependency>

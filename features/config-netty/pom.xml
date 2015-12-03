@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>config-subsystem</artifactId>
-    <version>0.3.3-SNAPSHOT</version>
+    <version>0.3.3-Lithium-SR3</version>
     <relativePath>../../opendaylight/config/</relativePath>
   </parent>
   <artifactId>features-config-netty</artifactId>

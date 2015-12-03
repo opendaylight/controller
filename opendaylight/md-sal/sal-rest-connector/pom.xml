@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>sal-parent</artifactId>
-    <version>1.2.3-SNAPSHOT</version>
+    <version>1.2.3-Lithium-SR3</version>
   </parent>
   <artifactId>sal-rest-connector</artifactId>
   <packaging>bundle</packaging>
@@ -99,7 +99,7 @@
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>yang-model-export</artifactId>
       <!-- FIXME: remove explicit version, once model export package is part of yangtools-artefacts -->
-      <version>0.7.3-SNAPSHOT</version>
+      <version>0.7.3-Lithium-SR3</version>
     </dependency>
 
     <dependency>

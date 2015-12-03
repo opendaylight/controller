@@ -10,7 +10,7 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
   <parent>
     <groupId>org.opendaylight.odlparent</groupId>
     <artifactId>odlparent</artifactId>
-    <version>1.5.3-SNAPSHOT</version>
+    <version>1.5.3-Lithium-SR3</version>
   </parent>
 
   <groupId>${groupId}</groupId>
