@@ -20,12 +20,15 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
+
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import org.opendaylight.controller.md.sal.dom.api.DOMNotification;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcException;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
@@ -106,12 +109,16 @@ public final class NetconfDevice implements RemoteDevice<NetconfSessionPreferenc
     private final NotificationHandler notificationHandler;
     private final List<SchemaSourceRegistration<? extends SchemaSourceRepresentation>> sourceRegistrations = Lists.newArrayList();
 
+    // 2 minutes keepalive timeout by default
+    private static final long DEFAULT_TIMEOUT = TimeUnit.MINUTES.toSeconds(2);
+    private final long keepaliveTimeoutSeconds;
+
     // Message transformer is constructed once the schemas are available
     private MessageTransformer<NetconfMessage> messageTransformer;
 
     public NetconfDevice(final SchemaResourcesDTO schemaResourcesDTO, final RemoteDeviceId id, final RemoteDeviceHandler<NetconfSessionPreferences> salFacade,
-                         final ExecutorService globalProcessingExecutor) {
-        this(schemaResourcesDTO, id, salFacade, globalProcessingExecutor, false);
+                         final ExecutorService globalProcessingExecutor, final long keepaliveTimeoutSeconds) {
+        this(schemaResourcesDTO, id, salFacade, globalProcessingExecutor, false, keepaliveTimeoutSeconds);
     }
 
     /**
@@ -124,7 +131,7 @@ public final class NetconfDevice implements RemoteDevice<NetconfSessionPreferenc
 
     // FIXME reduce parameters
     public NetconfDevice(final SchemaResourcesDTO schemaResourcesDTO, final RemoteDeviceId id, final RemoteDeviceHandler<NetconfSessionPreferences> salFacade,
-                         final ExecutorService globalProcessingExecutor, final boolean reconnectOnSchemasChange) {
+                         final ExecutorService globalProcessingExecutor, final boolean reconnectOnSchemasChange, final long keepaliveTimeoutSeconds) {
         this.id = id;
         this.reconnectOnSchemasChange = reconnectOnSchemasChange;
         this.schemaRegistry = schemaResourcesDTO.getSchemaRegistry();
@@ -133,6 +140,7 @@ public final class NetconfDevice implements RemoteDevice<NetconfSessionPreferenc
         this.stateSchemasResolver = schemaResourcesDTO.getStateSchemasResolver();
         this.processingExecutor = MoreExecutors.listeningDecorator(globalProcessingExecutor);
         this.notificationHandler = new NotificationHandler(salFacade, id);
+        this.keepaliveTimeoutSeconds = keepaliveTimeoutSeconds;
     }
 
     @Override
@@ -245,7 +253,7 @@ public final class NetconfDevice implements RemoteDevice<NetconfSessionPreferenc
     }
 
     private void addProvidedSourcesToSchemaRegistry(final NetconfDeviceRpc deviceRpc, final DeviceSources deviceSources) {
-        final NetconfRemoteSchemaYangSourceProvider yangProvider = new NetconfRemoteSchemaYangSourceProvider(id, deviceRpc);
+        final NetconfRemoteSchemaYangSourceProvider yangProvider = new NetconfRemoteSchemaYangSourceProvider(id, deviceRpc, keepaliveTimeoutSeconds);
         for (final SourceIdentifier sourceId : deviceSources.getProvidedSources()) {
             sourceRegistrations.add(schemaRegistry.registerSchemaSource(yangProvider,
                     PotentialSchemaSource.create(sourceId, YangTextSchemaSource.class, PotentialSchemaSource.Costs.REMOTE_IO.getValue())));
