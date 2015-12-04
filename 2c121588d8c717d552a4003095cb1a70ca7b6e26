@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "5aaae553_e1bdcb03",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/netconf/sal/KeepaliveSalFacade.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-12-04T14:28:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5aaae553_0ba7e650",
+      "range": {
+        "startLine": 188,
+        "startChar": 16,
+        "endLine": 188,
+        "endChar": 30
+      },
+      "revId": "2c121588d8c717d552a4003095cb1a70ca7b6e26",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5aaae553_eba92a25",
         "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/netconf/sal/KeepaliveSalFacade.java",
         "patchSetId": 3
@@ -36,6 +60,30 @@
       "writtenOn": "2015-12-04T10:08:30Z",
       "side": 1,
       "message": "I\u0027d say this should be WARN level, since its pretty unexpected situation",
+      "range": {
+        "startLine": 193,
+        "startChar": 20,
+        "endLine": 193,
+        "endChar": 25
+      },
+      "revId": "2c121588d8c717d552a4003095cb1a70ca7b6e26",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5aaae553_01bb470f",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/netconf/sal/KeepaliveSalFacade.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-12-04T14:28:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5aaae553_eba92a25",
       "range": {
         "startLine": 193,
         "startChar": 20,
