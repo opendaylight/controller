@@ -181,13 +181,11 @@
     -->
     <!-- test to validate features.xml -->
    <!--FIXME BUG-2195 When running single feature tests for netconf connector, features including ssh proxy server always fail (this behavior does not appear when running karaf distro directly)-->
-   <!-- TEMPORARILY DISABLE TO BREAK CYCLIC DEPENDENCY
     <dependency>
       <groupId>org.opendaylight.odlparent</groupId>
       <artifactId>features-test</artifactId>
       <scope>test</scope>
     </dependency>
-   -->
     <!-- dependency for opendaylight-karaf-empty for use by testing -->
     <dependency>
       <groupId>org.opendaylight.controller</groupId>
