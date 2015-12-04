@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "5aaae553_e1c38b36",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/netconf/sal/KeepaliveSalFacade.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 191,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-12-04T19:35:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5aaae553_0b2cc6aa",
+      "range": {
+        "startLine": 191,
+        "startChar": 25,
+        "endLine": 191,
+        "endChar": 45
+      },
+      "revId": "384996bffe30a53165d1d4a1a70d600ff82415ef",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5aaae553_cb36ae03",
         "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/netconf/schema/NetconfRemoteSchemaYangSourceProvider.java",
         "patchSetId": 1
@@ -71,6 +95,30 @@
     },
     {
       "key": {
+        "uuid": "5aaae553_41c7ff45",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/netconf/schema/NetconfRemoteSchemaYangSourceProvider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-12-04T19:35:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5aaae553_cb36ae03",
+      "range": {
+        "startLine": 140,
+        "startChar": 0,
+        "endLine": 145,
+        "endChar": 9
+      },
+      "revId": "384996bffe30a53165d1d4a1a70d600ff82415ef",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5aaae553_0b7e06af",
         "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/yang/odl-sal-netconf-connector-cfg.yang",
         "patchSetId": 1
@@ -82,6 +130,30 @@
       "writtenOn": "2015-12-04T10:20:04Z",
       "side": 1,
       "message": "120 seconds might be to high, the keepalive message is really small, so should be reasonably fast. I\u0027d go with 30/60 seconds here as default.",
+      "range": {
+        "startLine": 164,
+        "startChar": 24,
+        "endLine": 164,
+        "endChar": 30
+      },
+      "revId": "384996bffe30a53165d1d4a1a70d600ff82415ef",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5aaae553_01c1072e",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/yang/odl-sal-netconf-connector-cfg.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-12-04T19:35:13Z",
+      "side": 1,
+      "message": "Done, I\u0027ll go with 30 seconds",
+      "parentUuid": "5aaae553_0b7e06af",
       "range": {
         "startLine": 164,
         "startChar": 24,
