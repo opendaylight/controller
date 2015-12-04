@@ -216,6 +216,7 @@ public class BrokerFacade {
         // FIXME: This is doing correct post for container and list children
         //        not sure if this will work for choice case
         if(payload instanceof MapNode) {
+            LOG.trace("POST " + datastore.name() + " via Restconf: {} with payload {}", path, payload);
             final NormalizedNode<?, ?> emptySubtree = ImmutableNodes.fromInstanceId(schemaContext, path);
             rWTransaction.merge(datastore, YangInstanceIdentifier.create(emptySubtree.getIdentifier()), emptySubtree);
             ensureParentsByMerge(datastore, path, rWTransaction, schemaContext);
@@ -251,7 +252,7 @@ public class BrokerFacade {
     private CheckedFuture<Void, TransactionCommitFailedException> putDataViaTransaction(
             final DOMDataReadWriteTransaction writeTransaction, final LogicalDatastoreType datastore,
             final YangInstanceIdentifier path, final NormalizedNode<?, ?> payload, final SchemaContext schemaContext) {
-        LOG.trace("Put " + datastore.name() + " via Restconf: {}", path);
+        LOG.trace("Put " + datastore.name() + " via Restconf: {} with payload {}", path, payload);
         ensureParentsByMerge(datastore, path, writeTransaction, schemaContext);
         writeTransaction.put(datastore, path, payload);
         return writeTransaction.submit();
