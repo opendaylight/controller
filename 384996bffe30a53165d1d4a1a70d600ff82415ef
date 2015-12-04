@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5aaae553_4b22beba",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/netconf/NetconfDevice.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-12-04T10:20:04Z",
+      "side": 1,
+      "message": "I think these are millis, but are treated as Seconds later on",
+      "range": {
+        "startLine": 120,
+        "startChar": 84,
+        "endLine": 120,
+        "endChar": 107
+      },
+      "revId": "384996bffe30a53165d1d4a1a70d600ff82415ef",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5aaae553_0b2cc6aa",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/netconf/sal/KeepaliveSalFacade.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 191,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-12-04T10:20:04Z",
+      "side": 1,
+      "message": "Interrupt should probably be handled in a different fashion: \n\n// log error\n// throw runtime exception\n\nbecause if we are interrupted, its probably useless to try to reconnect.\n\nThe same applies for the other place where timeout was introduced",
+      "range": {
+        "startLine": 191,
+        "startChar": 25,
+        "endLine": 191,
+        "endChar": 45
+      },
+      "revId": "384996bffe30a53165d1d4a1a70d600ff82415ef",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5aaae553_cb36ae03",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/netconf/schema/NetconfRemoteSchemaYangSourceProvider.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-12-04T10:20:04Z",
+      "side": 1,
+      "message": "It\u0027s a good idea to have a timeout here, so that we dont get stuck while we download sources.\n\nJust one thing, we should return a failed CheckedFuture (Futures.immediateCHeckedFuture....) in the catch block after warn. This will try to download rest of the sources. If all of them fail on timeout, the device will end up in a failed state, which is what we want.",
+      "range": {
+        "startLine": 140,
+        "startChar": 0,
+        "endLine": 145,
+        "endChar": 9
+      },
+      "revId": "384996bffe30a53165d1d4a1a70d600ff82415ef",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5aaae553_0b7e06af",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/yang/odl-sal-netconf-connector-cfg.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-12-04T10:20:04Z",
+      "side": 1,
+      "message": "120 seconds might be to high, the keepalive message is really small, so should be reasonably fast. I\u0027d go with 30/60 seconds here as default.",
+      "range": {
+        "startLine": 164,
+        "startChar": 24,
+        "endLine": 164,
+        "endChar": 30
+      },
+      "revId": "384996bffe30a53165d1d4a1a70d600ff82415ef",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
