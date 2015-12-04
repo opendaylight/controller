@@ -53,7 +53,7 @@
     <concepts.version>0.6.4-SNAPSHOT</concepts.version>
     <concurrentlinkedhashmap.version>1.4</concurrentlinkedhashmap.version>
     <config.version>0.3.4-SNAPSHOT</config.version>
-    <aaa.version>0.2.3-Lithium-SR3</aaa.version>
+    <aaa.version>0.2.4-SNAPSHOT</aaa.version>
     <config.configfile.directory>etc/opendaylight/karaf</config.configfile.directory>
     <config.clustering.configfile>05-clustering.xml</config.clustering.configfile>
     <config.clustered-entity-ownership.configfile>06-clustered-entity-ownership.xml</config.clustered-entity-ownership.configfile>
