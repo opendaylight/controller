@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "5aaae553_bd7cd373",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/AbstractStreamDictionary.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-12-05T11:46:19Z",
+      "side": 1,
+      "message": "it already is :)",
+      "parentUuid": "5aaae553_07512d62",
+      "revId": "4f3599275554b9986789120d3f4e42a2b56cea37",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5aaae553_67c7c113",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/AbstractStreamDictionary.java",
         "patchSetId": 8
@@ -30,6 +48,24 @@
       "writtenOn": "2015-11-30T19:37:37Z",
       "side": 1,
       "message": "I think this should be this.owner !\u003d null.",
+      "revId": "4f3599275554b9986789120d3f4e42a2b56cea37",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5aaae553_dd818f4b",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/AbstractStreamDictionary.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-12-05T11:46:19Z",
+      "side": 1,
+      "message": "same here ...",
+      "parentUuid": "5aaae553_67c7c113",
       "revId": "4f3599275554b9986789120d3f4e42a2b56cea37",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "5aaae553_fd824b51",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/StreamReaderDictionary.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-12-05T11:46:19Z",
+      "side": 1,
+      "message": "The idea is to add a dedicated code for QNames, since there is a limited number of them. That should speed up deserialization, since instead of 4 lookups (3 strings + string-\u003eQName) we\u0027ll perform only one (code-\u003eQName). That needs a stream version bump though, so it\u0027s not in this patch.",
+      "parentUuid": "5aaae553_c7f8f54b",
+      "revId": "4f3599275554b9986789120d3f4e42a2b56cea37",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5aaae553_87f3dd72",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/StreamReaderDictionary.java",
         "patchSetId": 8
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "5aaae553_1d888770",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/StreamReaderDictionary.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-12-05T11:46:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5aaae553_87f3dd72",
+      "revId": "4f3599275554b9986789120d3f4e42a2b56cea37",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5aaae553_e701713a",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/StreamWriterDictionary.java",
         "patchSetId": 8
@@ -81,6 +153,24 @@
       "writtenOn": "2015-11-30T19:37:37Z",
       "side": 1,
       "message": "qnames.size()?",
+      "revId": "4f3599275554b9986789120d3f4e42a2b56cea37",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5aaae553_7d965b96",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/StreamWriterDictionary.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-12-05T11:46:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5aaae553_e701713a",
       "revId": "4f3599275554b9986789120d3f4e42a2b56cea37",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
