@@ -10,17 +10,17 @@
     <parent>
         <groupId>org.opendaylight.odlparent</groupId>
         <artifactId>features-parent</artifactId>
-        <version>1.6.0-SNAPSHOT</version>
+        <version>1.7.0-SNAPSHOT</version>
         <relativePath/>
     </parent>
 
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>features-extras</artifactId>
-    <version>1.6.0-SNAPSHOT</version>
+    <version>1.7.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     <properties>
         <jolokia.version>1.3.1</jolokia.version>
-        <odl-jolokia-osgi.version>0.3.0-SNAPSHOT</odl-jolokia-osgi.version>
+        <odl-jolokia-osgi.version>0.4.0-SNAPSHOT</odl-jolokia-osgi.version>
     </properties>
 
     <dependencies>

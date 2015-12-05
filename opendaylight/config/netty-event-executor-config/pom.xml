@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.opendaylight.controller</groupId>
     <artifactId>config-plugin-parent</artifactId>
-    <version>0.4.0-SNAPSHOT</version>
+    <version>0.5.0-SNAPSHOT</version>
     <relativePath>../config-plugin-parent</relativePath>
   </parent>
   <artifactId>netty-event-executor-config</artifactId>
