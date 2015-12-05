@@ -20,6 +20,7 @@ import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.common.actor.CommonConfig;
@@ -52,6 +53,8 @@ import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContex
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
 import org.opendaylight.controller.cluster.datastore.modification.ModificationPayload;
 import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputDictionary;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeOutputDictionary;
 import org.opendaylight.controller.cluster.datastore.utils.Dispatchers;
 import org.opendaylight.controller.cluster.datastore.utils.MessageTracker;
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
@@ -66,6 +69,7 @@ import org.opendaylight.controller.cluster.raft.messages.AppendEntriesReply;
 import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationByteStringPayload;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.CompositeModificationPayload;
+import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeCandidate;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataValidationFailedException;
@@ -122,6 +126,17 @@ public class Shard extends RaftActor {
     private ShardSnapshot restoreFromSnapshot;
 
     private final ShardTransactionMessageRetrySupport messageRetrySupport;
+
+    /**
+     * Dictionary for deserialization of {@link DataTreeCandidatePayload} messages from current leader. May be reset
+     * by NormalizedNodeStreamReader internally.
+     */
+    private NormalizedNodeInputDictionary readerDictionary;
+    /**
+     * Dictionary for serialization of {@link DataTreeCandidatePayload} messages. This dictionary is reset whenever
+     * we become the leader or when the SchemaContext is updated.
+     */
+    private NormalizedNodeOutputDictionary writerDictionary;
 
     protected Shard(AbstractBuilder<?, ?> builder) {
         super(builder.getId().toString(), builder.getPeerAddresses(),
@@ -339,8 +354,11 @@ public class Shard extends RaftActor {
         if ((!hasFollowers() && !persistence().isRecoveryApplicable()) || isEmptyCommit(candidate)) {
             applyModificationToState(cohortEntry.getReplySender(), cohortEntry.getTransactionID(), candidate);
         } else {
-            Shard.this.persistData(cohortEntry.getReplySender(), cohortEntry.getTransactionID(),
-                    DataTreeCandidatePayload.create(candidate));
+            final Entry<Payload, NormalizedNodeOutputDictionary> e = DataTreeCandidatePayload.create(
+                candidate, writerDictionary);
+
+            writerDictionary = e.getValue();
+            Shard.this.persistData(cohortEntry.getReplySender(), cohortEntry.getTransactionID(), e.getKey());
         }
     }
 
@@ -601,6 +619,7 @@ public class Shard extends RaftActor {
 
     @VisibleForTesting
     void updateSchemaContext(final SchemaContext schemaContext) {
+        writerDictionary = null;
         store.updateSchemaContext(schemaContext);
     }
 
@@ -646,7 +665,10 @@ public class Shard extends RaftActor {
             if (clientActor == null) {
                 // No clientActor indicates a replica coming from the leader
                 try {
-                    store.applyForeignCandidate(identifier, ((DataTreeCandidatePayload)data).getCandidate());
+                    final Entry<DataTreeCandidate, NormalizedNodeInputDictionary> e =
+                            ((DataTreeCandidatePayload)data).getCandidate(readerDictionary);
+                    readerDictionary = e.getValue();
+                    store.applyForeignCandidate(identifier, e.getKey());
                 } catch (DataValidationFailedException | IOException e) {
                     LOG.error("{}: Error applying replica {}", persistenceId(), identifier, e);
                 }
@@ -707,6 +729,13 @@ public class Shard extends RaftActor {
 
             store.closeAllTransactionChains();
         }
+
+        /*
+         * We want to reset the dictionary here, because if we lost leadership we do not want to retain an useless
+         * dictionary. When we become the leader, we want to start with a fresh dictionary -- hence the reset is
+         * unconditional.
+         */
+        writerDictionary = null;
 
         if(hasLeader && !isIsolatedLeader()) {
             messageRetrySupport.retryMessages();
