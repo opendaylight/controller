@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import com.google.common.base.Preconditions;
-import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import com.google.protobuf.GeneratedMessage.GeneratedExtension;
@@ -21,9 +20,16 @@ import java.io.ObjectOutput;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Map;
+import java.util.Map.Entry;
+import javax.annotation.Nullable;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.DictionaryNormalizedNodeStreamReader;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputStreamReader;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeOutputStreamWriter;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeStreamReader;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeStreams;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.StreamReaderDictionary;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -139,7 +145,7 @@ final class DataTreeCandidatePayload extends Payload implements Externalizable {
         return new DataTreeCandidatePayload(out.toByteArray());
     }
 
-    private static Collection<DataTreeCandidateNode> readChildren(final NormalizedNodeInputStreamReader reader,
+    private static Collection<DataTreeCandidateNode> readChildren(final NormalizedNodeStreamReader reader,
         final DataInput in) throws IOException {
         final int size = in.readInt();
         if (size != 0) {
@@ -157,7 +163,7 @@ final class DataTreeCandidatePayload extends Payload implements Externalizable {
     }
 
     private static DataTreeCandidateNode readModifiedNode(final ModificationType type,
-            final NormalizedNodeInputStreamReader reader, final DataInput in) throws IOException {
+            final NormalizedNodeStreamReader reader, final DataInput in) throws IOException {
 
         final PathArgument identifier = reader.readPathArgument();
         final Collection<DataTreeCandidateNode> children = readChildren(reader, in);
@@ -169,7 +175,7 @@ final class DataTreeCandidatePayload extends Payload implements Externalizable {
         }
     }
 
-    private static DataTreeCandidateNode readNode(final NormalizedNodeInputStreamReader reader,
+    private static DataTreeCandidateNode readNode(final NormalizedNodeStreamReader reader,
             final DataInput in) throws IOException {
         final byte type = in.readByte();
         switch (type) {
@@ -190,8 +196,8 @@ final class DataTreeCandidatePayload extends Payload implements Externalizable {
         }
     }
 
-    private static DataTreeCandidate parseCandidate(final ByteArrayDataInput in) throws IOException {
-        final NormalizedNodeInputStreamReader reader = new NormalizedNodeInputStreamReader(in);
+    private static DataTreeCandidate parseCandidate(final DataInput in, final NormalizedNodeStreamReader reader)
+            throws IOException {
         final YangInstanceIdentifier rootPath = reader.readYangInstanceIdentifier();
         final byte type = in.readByte();
 
@@ -214,7 +220,21 @@ final class DataTreeCandidatePayload extends Payload implements Externalizable {
     }
 
     DataTreeCandidate getCandidate() throws IOException {
-        return parseCandidate(ByteStreams.newDataInput(serialized));
+        final DataInput input = ByteStreams.newDataInput(serialized);
+        final NormalizedNodeStreamReader reader = new NormalizedNodeInputStreamReader(input);
+
+        return parseCandidate(input, reader);
+    }
+
+    Entry<DataTreeCandidate, StreamReaderDictionary> getCandidate(@Nullable StreamReaderDictionary dictionary)
+            throws IOException {
+        final DataInput input = ByteStreams.newDataInput(serialized);
+        final DictionaryNormalizedNodeStreamReader reader = dictionary == null ?
+                NormalizedNodeStreams.newStreamReader(input) :
+                NormalizedNodeStreams.newReaderForDictionary(input, dictionary);
+
+        final DataTreeCandidate candidate = parseCandidate(input, reader);
+        return new SimpleImmutableEntry<>(candidate, reader.detachDictionary());
     }
 
     @Override
