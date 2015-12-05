@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "5aaae553_7dddfb6f",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/AbstractStreamDictionary.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-12-05T12:12:43Z",
+      "side": 1,
+      "message": "In checkState(owner \u003d\u003d null, ...), \"owner\" references the local param but should be this.owner. Or am I losing it....",
+      "parentUuid": "5aaae553_bd7cd373",
+      "revId": "4f3599275554b9986789120d3f4e42a2b56cea37",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5aaae553_67c7c113",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/AbstractStreamDictionary.java",
         "patchSetId": 8
