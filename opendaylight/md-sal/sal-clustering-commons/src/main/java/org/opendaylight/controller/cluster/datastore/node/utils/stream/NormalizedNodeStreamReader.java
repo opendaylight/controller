@@ -8,25 +8,10 @@
 
 package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 
-import java.io.IOException;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.PathArgument;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
-
 /**
  * Interface for a class that can read serialized NormalizedNode instances from a stream.
+ * 
+ * @deprecated Use {@link NormalizedNodeDataInput} instead.
  */
-public interface NormalizedNodeStreamReader {
-    /**
-     * Read a normalized node from the reader.
-     *
-     * @return Next node from the stream, or null if end of stream has been reached.
-     * @throws IOException if an error occurs
-     * @throws IllegalStateException if the dictionary has been detached
-     */
-    NormalizedNode<?, ?> readNormalizedNode() throws IOException;
-
-    YangInstanceIdentifier readYangInstanceIdentifier() throws IOException;
-
-    PathArgument readPathArgument() throws IOException;
+public interface NormalizedNodeStreamReader extends NormalizedNodeDataInput {
 }

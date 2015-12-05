@@ -16,20 +16,20 @@ public final class NormalizedNodeStreams {
         throw new UnsupportedOperationException();
     }
 
-    public static DictionaryNormalizedNodeStreamReader newStreamReader(@Nonnull final DataInput stream) {
+    public static NormalizedNodeInputStreamReader newStreamReader(@Nonnull final DataInput stream) {
         return new NormalizedNodeInputStreamReader(stream);
     }
 
-    public static DictionaryNormalizedNodeStreamReader newReaderForDictionary(@Nonnull final DataInput stream,
+    public static NormalizedNodeInputStreamReader newReaderForDictionary(@Nonnull final DataInput stream,
             @Nonnull final StreamReaderDictionary dictionary) {
         return new NormalizedNodeInputStreamReader(stream, dictionary);
     }
 
-    public static DictionaryNormalizedNodeStreamWriter newStreamWriter(@Nonnull final DataOutput stream) {
+    public static NormalizedNodeOutputStreamWriter newStreamWriter(@Nonnull final DataOutput stream) {
         return new NormalizedNodeOutputStreamWriter(stream);
     }
 
-    public static DictionaryNormalizedNodeStreamWriter newWriterForDictionary(@Nonnull final DataOutput stream,
+    public static NormalizedNodeOutputStreamWriter newWriterForDictionary(@Nonnull final DataOutput stream,
             @Nonnull final StreamWriterDictionary dictionary) {
         return new NormalizedNodeOutputStreamWriter(stream, dictionary);
     }

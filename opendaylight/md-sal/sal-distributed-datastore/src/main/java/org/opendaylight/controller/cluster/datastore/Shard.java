@@ -20,6 +20,7 @@ import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.common.actor.CommonConfig;
@@ -52,6 +53,9 @@ import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContex
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
 import org.opendaylight.controller.cluster.datastore.modification.ModificationPayload;
 import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeStreamReader;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.StreamReaderDictionary;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.StreamWriterDictionary;
 import org.opendaylight.controller.cluster.datastore.utils.Dispatchers;
 import org.opendaylight.controller.cluster.datastore.utils.MessageTracker;
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
@@ -120,7 +124,16 @@ public class Shard extends RaftActor {
 
     private ShardSnapshot restoreFromSnapshot;
 
-
+    /**
+     * Dictionary for deserialization of {@link DataTreeCandidatePayload} messages from current leader. May be reset
+     * by {@link NormalizedNodeStreamReader} internally.
+     */
+    private StreamReaderDictionary readerDictionary;
+    /**
+     * Dictionary for serialization of {@link DataTreeCandidatePayload} messages. This dictionary is reset whenever
+     * we become the leader or when the SchemaContext is updated.
+     */
+    private StreamWriterDictionary writerDictionary;
 
     protected Shard(AbstractBuilder<?, ?> builder) {
         super(builder.getId().toString(), builder.getPeerAddresses(),
@@ -338,7 +351,7 @@ public class Shard extends RaftActor {
             applyModificationToState(cohortEntry.getReplySender(), cohortEntry.getTransactionID(), candidate);
         } else {
             Shard.this.persistData(cohortEntry.getReplySender(), cohortEntry.getTransactionID(),
-                    DataTreeCandidatePayload.create(candidate));
+                    DataTreeCandidatePayload.create(candidate, writerDictionary));
         }
     }
 
@@ -581,6 +594,7 @@ public class Shard extends RaftActor {
 
     @VisibleForTesting
     void updateSchemaContext(final SchemaContext schemaContext) {
+        writerDictionary = null;
         store.updateSchemaContext(schemaContext);
     }
 
@@ -626,7 +640,10 @@ public class Shard extends RaftActor {
             if (clientActor == null) {
                 // No clientActor indicates a replica coming from the leader
                 try {
-                    store.applyForeignCandidate(identifier, ((DataTreeCandidatePayload)data).getCandidate());
+                    final Entry<DataTreeCandidate, StreamReaderDictionary> e =
+                            ((DataTreeCandidatePayload)data).getCandidate(readerDictionary);
+                    readerDictionary = e.getValue();
+                    store.applyForeignCandidate(identifier, e.getKey());
                 } catch (DataValidationFailedException | IOException e) {
                     LOG.error("{}: Error applying replica {}", persistenceId(), identifier, e);
                 }
@@ -687,6 +704,13 @@ public class Shard extends RaftActor {
 
             store.closeAllTransactionChains();
         }
+
+        /*
+         * We want to reset the dictionary here, because if we lost leadership we do not want to retain an useless
+         * dictionary. When we become the leader, we want to start with a fresh dictionary -- hence the reset is
+         * unconditional.
+         */
+        writerDictionary = null;
     }
 
     @Override

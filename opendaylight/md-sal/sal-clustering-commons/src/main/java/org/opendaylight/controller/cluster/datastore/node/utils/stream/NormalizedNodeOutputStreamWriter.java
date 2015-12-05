@@ -20,6 +20,7 @@ import java.util.Set;
 import org.opendaylight.yangtools.yang.common.QName;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +38,7 @@ import org.slf4j.LoggerFactory;
  * while reading.
  */
 public class NormalizedNodeOutputStreamWriter extends AbstractNormalizedNodeStream<StreamWriterDictionary>
-        implements DictionaryNormalizedNodeStreamWriter {
+        implements NormalizedNodeDataOutput, NormalizedNodeStreamWriter {
 
     private static final Logger LOG = LoggerFactory.getLogger(NormalizedNodeOutputStreamWriter.class);
 
@@ -78,6 +79,7 @@ public class NormalizedNodeOutputStreamWriter extends AbstractNormalizedNodeStre
         return normalizedNodeWriter;
     }
 
+    @Override
     public void writeNormalizedNode(final NormalizedNode<?, ?> node) throws IOException {
         writeSignatureMarkerAndVersionIfNeeded();
         normalizedNodeWriter().write(node);
@@ -265,6 +267,7 @@ public class NormalizedNodeOutputStreamWriter extends AbstractNormalizedNodeStre
         }
     }
 
+    @Override
     public void writeYangInstanceIdentifier(final YangInstanceIdentifier identifier) throws IOException {
         writeSignatureMarkerAndVersionIfNeeded();
         writeYangInstanceIdentifierInternal(identifier);
@@ -279,6 +282,7 @@ public class NormalizedNodeOutputStreamWriter extends AbstractNormalizedNodeStre
         }
     }
 
+    @Override
     public void writePathArgument(final YangInstanceIdentifier.PathArgument pathArgument) throws IOException {
 
         byte type = PathArgumentTypes.getSerializablePathArgumentType(pathArgument);

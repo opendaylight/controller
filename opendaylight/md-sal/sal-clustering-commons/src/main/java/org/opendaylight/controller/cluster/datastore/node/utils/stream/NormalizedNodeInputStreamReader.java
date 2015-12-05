@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
  * If a node can have children, then that node's end is calculated based on appearance of END_NODE.
  */
 public class NormalizedNodeInputStreamReader extends AbstractNormalizedNodeStream<StreamReaderDictionary>
-        implements DictionaryNormalizedNodeStreamReader {
+        implements NormalizedNodeDataInput, NormalizedNodeStreamReader {
 
     private static final Logger LOG = LoggerFactory.getLogger(NormalizedNodeInputStreamReader.class);
 
