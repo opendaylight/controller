@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import com.google.common.base.Preconditions;
-import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import com.google.protobuf.GeneratedMessage.GeneratedExtension;
@@ -21,9 +20,17 @@ import java.io.ObjectOutput;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Map;
+import java.util.Map.Entry;
+import javax.annotation.Nullable;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataInput;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataOutput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputStreamReader;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeOutputStreamWriter;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeStreams;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.StreamReaderDictionary;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.StreamWriterDictionary;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.opendaylight.controller.protobuff.messages.cluster.raft.AppendEntriesMessages.AppendEntries;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -56,7 +63,7 @@ final class DataTreeCandidatePayload extends Payload implements Externalizable {
         this.serialized = Preconditions.checkNotNull(serialized);
     }
 
-    private static void writeChildren(final NormalizedNodeOutputStreamWriter writer, final DataOutput out,
+    private static void writeChildren(final NormalizedNodeDataOutput writer, final DataOutput out,
             final Collection<DataTreeCandidateNode> children) throws IOException {
         out.writeInt(children.size());
         for (DataTreeCandidateNode child : children) {
@@ -64,7 +71,7 @@ final class DataTreeCandidatePayload extends Payload implements Externalizable {
         }
     }
 
-    private static void writeNode(final NormalizedNodeOutputStreamWriter writer, final DataOutput out,
+    private static void writeNode(final NormalizedNodeDataOutput writer, final DataOutput out,
             final DataTreeCandidateNode node) throws IOException {
         switch (node.getModificationType()) {
         case APPEARED:
@@ -101,37 +108,7 @@ final class DataTreeCandidatePayload extends Payload implements Externalizable {
     static DataTreeCandidatePayload create(DataTreeCandidate candidate) {
         final ByteArrayDataOutput out = ByteStreams.newDataOutput();
         try (final NormalizedNodeOutputStreamWriter writer = new NormalizedNodeOutputStreamWriter(out)) {
-            writer.writeYangInstanceIdentifier(candidate.getRootPath());
-
-            final DataTreeCandidateNode node = candidate.getRootNode();
-            switch (node.getModificationType()) {
-            case APPEARED:
-                out.writeByte(APPEARED);
-                writeChildren(writer, out, node.getChildNodes());
-                break;
-            case DELETE:
-                out.writeByte(DELETE);
-                break;
-            case DISAPPEARED:
-                out.writeByte(DISAPPEARED);
-                writeChildren(writer, out, node.getChildNodes());
-                break;
-            case SUBTREE_MODIFIED:
-                out.writeByte(SUBTREE_MODIFIED);
-                writeChildren(writer, out, node.getChildNodes());
-                break;
-            case UNMODIFIED:
-                out.writeByte(UNMODIFIED);
-                break;
-            case WRITE:
-                out.writeByte(WRITE);
-                writer.writeNormalizedNode(node.getDataAfter().get());
-                break;
-            default:
-                throw new IllegalArgumentException("Unhandled node type " + node.getModificationType());
-            }
-
-            writer.close();
+            
         } catch (IOException e) {
             throw new IllegalArgumentException(String.format("Failed to serialize candidate %s", candidate), e);
         }
@@ -139,7 +116,57 @@ final class DataTreeCandidatePayload extends Payload implements Externalizable {
         return new DataTreeCandidatePayload(out.toByteArray());
     }
 
-    private static Collection<DataTreeCandidateNode> readChildren(final NormalizedNodeInputStreamReader reader,
+    static Payload create(final DataTreeCandidate candidate, final StreamWriterDictionary dictionary) {
+        final ByteArrayDataOutput out = ByteStreams.newDataOutput();
+        final NormalizedNodeOutputStreamWriter writer = NormalizedNodeStreams.newWriterForDictionary(out, dictionary); 
+        
+        try {
+            serializeCandidate(out, writer, candidate);
+        } catch (IOException e) {
+            throw new IllegalArgumentException(String.format("Failed to serialize candidate %s", candidate), e);
+        } finally {
+            writer.detachDictionary();
+        }
+        
+        return new DataTreeCandidatePayload(out.toByteArray());
+    }
+    
+    
+    private static void serializeCandidate(final ByteArrayDataOutput out,
+            final NormalizedNodeDataOutput writer, final DataTreeCandidate candidate) throws IOException {
+        writer.writeYangInstanceIdentifier(candidate.getRootPath());
+
+        final DataTreeCandidateNode node = candidate.getRootNode();
+        switch (node.getModificationType()) {
+        case APPEARED:
+            out.writeByte(APPEARED);
+            writeChildren(writer, out, node.getChildNodes());
+            break;
+        case DELETE:
+            out.writeByte(DELETE);
+            break;
+        case DISAPPEARED:
+            out.writeByte(DISAPPEARED);
+            writeChildren(writer, out, node.getChildNodes());
+            break;
+        case SUBTREE_MODIFIED:
+            out.writeByte(SUBTREE_MODIFIED);
+            writeChildren(writer, out, node.getChildNodes());
+            break;
+        case UNMODIFIED:
+            out.writeByte(UNMODIFIED);
+            break;
+        case WRITE:
+            out.writeByte(WRITE);
+            writer.writeNormalizedNode(node.getDataAfter().get());
+            break;
+        default:
+            throw new IllegalArgumentException("Unhandled node type " + node.getModificationType());
+        }
+
+    }
+
+    private static Collection<DataTreeCandidateNode> readChildren(final NormalizedNodeDataInput reader,
         final DataInput in) throws IOException {
         final int size = in.readInt();
         if (size != 0) {
@@ -157,7 +184,7 @@ final class DataTreeCandidatePayload extends Payload implements Externalizable {
     }
 
     private static DataTreeCandidateNode readModifiedNode(final ModificationType type,
-            final NormalizedNodeInputStreamReader reader, final DataInput in) throws IOException {
+            final NormalizedNodeDataInput reader, final DataInput in) throws IOException {
 
         final PathArgument identifier = reader.readPathArgument();
         final Collection<DataTreeCandidateNode> children = readChildren(reader, in);
@@ -169,7 +196,7 @@ final class DataTreeCandidatePayload extends Payload implements Externalizable {
         }
     }
 
-    private static DataTreeCandidateNode readNode(final NormalizedNodeInputStreamReader reader,
+    private static DataTreeCandidateNode readNode(final NormalizedNodeDataInput reader,
             final DataInput in) throws IOException {
         final byte type = in.readByte();
         switch (type) {
@@ -190,8 +217,8 @@ final class DataTreeCandidatePayload extends Payload implements Externalizable {
         }
     }
 
-    private static DataTreeCandidate parseCandidate(final ByteArrayDataInput in) throws IOException {
-        final NormalizedNodeInputStreamReader reader = new NormalizedNodeInputStreamReader(in);
+    private static DataTreeCandidate parseCandidate(final DataInput in, final NormalizedNodeDataInput reader)
+            throws IOException {
         final YangInstanceIdentifier rootPath = reader.readYangInstanceIdentifier();
         final byte type = in.readByte();
 
@@ -214,7 +241,21 @@ final class DataTreeCandidatePayload extends Payload implements Externalizable {
     }
 
     DataTreeCandidate getCandidate() throws IOException {
-        return parseCandidate(ByteStreams.newDataInput(serialized));
+        final DataInput input = ByteStreams.newDataInput(serialized);
+        final NormalizedNodeDataInput reader = new NormalizedNodeInputStreamReader(input);
+
+        return parseCandidate(input, reader);
+    }
+
+    Entry<DataTreeCandidate, StreamReaderDictionary> getCandidate(@Nullable StreamReaderDictionary dictionary)
+            throws IOException {
+        final DataInput input = ByteStreams.newDataInput(serialized);
+        final NormalizedNodeInputStreamReader reader = dictionary == null ?
+                NormalizedNodeStreams.newStreamReader(input) :
+                NormalizedNodeStreams.newReaderForDictionary(input, dictionary);
+
+        final DataTreeCandidate candidate = parseCandidate(input, reader);
+        return new SimpleImmutableEntry<>(candidate, reader.detachDictionary());
     }
 
     @Override
