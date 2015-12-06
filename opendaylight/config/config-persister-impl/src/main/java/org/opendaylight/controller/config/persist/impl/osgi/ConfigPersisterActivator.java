@@ -146,6 +146,7 @@ public class ConfigPersisterActivator implements BundleActivator {
                 }
             });
         }
+        pushingThread.setDaemon(true);
         pushingThread.start();
     }
 }
