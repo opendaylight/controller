@@ -48,7 +48,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 
-public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamReader {
+public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput, NormalizedNodeStreamReader {
 
     private static final Logger LOG = LoggerFactory.getLogger(NormalizedNodeInputStreamReader.class);
 
@@ -79,6 +79,10 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
         input = new DataInputStream(stream);
     }
 
+    /**
+     * @deprecated Use {@link NormalizedNodeInputOutput#newDataInput(DataInput)} instead.
+     */
+    @Deprecated
     public NormalizedNodeInputStreamReader(final DataInput input) {
         this.input = Preconditions.checkNotNull(input);
     }
@@ -327,6 +331,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
         return new String(bytes, StandardCharsets.UTF_8);
     }
 
+    @Override
     public YangInstanceIdentifier readYangInstanceIdentifier() throws IOException {
         readSignatureMarkerAndVersionIfNeeded();
         return readYangInstanceIdentifierInternal();
@@ -352,6 +357,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
         return children;
     }
 
+    @Override
     public PathArgument readPathArgument() throws IOException {
         // read Type
         int type = input.readByte();
@@ -404,5 +410,95 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeStreamRead
             child = readNormalizedNodeInternal();
         }
         return builder;
+    }
+
+    @Override
+    public void readFully(byte[] b) throws IOException {
+        readSignatureMarkerAndVersionIfNeeded();
+        input.readFully(b);
+    }
+
+    @Override
+    public void readFully(byte[] b, int off, int len) throws IOException {
+        readSignatureMarkerAndVersionIfNeeded();
+        input.readFully(b, off, len);
+    }
+
+    @Override
+    public int skipBytes(int n) throws IOException {
+        readSignatureMarkerAndVersionIfNeeded();
+        return input.skipBytes(n);
+    }
+
+    @Override
+    public boolean readBoolean() throws IOException {
+        readSignatureMarkerAndVersionIfNeeded();
+        return input.readBoolean();
+    }
+
+    @Override
+    public byte readByte() throws IOException {
+        readSignatureMarkerAndVersionIfNeeded();
+        return input.readByte();
+    }
+
+    @Override
+    public int readUnsignedByte() throws IOException {
+        readSignatureMarkerAndVersionIfNeeded();
+        return input.readUnsignedByte();
+    }
+
+    @Override
+    public short readShort() throws IOException {
+        readSignatureMarkerAndVersionIfNeeded();
+        return input.readShort();
+    }
+
+    @Override
+    public int readUnsignedShort() throws IOException {
+        readSignatureMarkerAndVersionIfNeeded();
+        return input.readUnsignedShort();
+    }
+
+    @Override
+    public char readChar() throws IOException {
+        readSignatureMarkerAndVersionIfNeeded();
+        return input.readChar();
+    }
+
+    @Override
+    public int readInt() throws IOException {
+        readSignatureMarkerAndVersionIfNeeded();
+        return input.readInt();
+    }
+
+    @Override
+    public long readLong() throws IOException {
+        readSignatureMarkerAndVersionIfNeeded();
+        return input.readLong();
+    }
+
+    @Override
+    public float readFloat() throws IOException {
+        readSignatureMarkerAndVersionIfNeeded();
+        return input.readFloat();
+    }
+
+    @Override
+    public double readDouble() throws IOException {
+        readSignatureMarkerAndVersionIfNeeded();
+        return input.readDouble();
+    }
+
+    @Override
+    public String readLine() throws IOException {
+        readSignatureMarkerAndVersionIfNeeded();
+        return input.readLine();
+    }
+
+    @Override
+    public String readUTF() throws IOException {
+        readSignatureMarkerAndVersionIfNeeded();
+        return input.readUTF();
     }
 }
