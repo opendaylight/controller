@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 
-public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWriter {
+public class NormalizedNodeOutputStreamWriter implements NormalizedNodeDataOutput, NormalizedNodeStreamWriter {
 
     private static final Logger LOG = LoggerFactory.getLogger(NormalizedNodeOutputStreamWriter.class);
 
@@ -80,6 +80,7 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
         return normalizedNodeWriter;
     }
 
+    @Override
     public void writeNormalizedNode(NormalizedNode<?, ?> node) throws IOException {
         writeSignatureMarkerAndVersionIfNeeded();
         normalizedNodeWriter().write(node);
@@ -266,6 +267,7 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
         }
     }
 
+    @Override
     public void writeYangInstanceIdentifier(YangInstanceIdentifier identifier) throws IOException {
         writeSignatureMarkerAndVersionIfNeeded();
         writeYangInstanceIdentifierInternal(identifier);
@@ -280,6 +282,7 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
         }
     }
 
+    @Override
     public void writePathArgument(YangInstanceIdentifier.PathArgument pathArgument) throws IOException {
 
         byte type = PathArgumentTypes.getSerializablePathArgumentType(pathArgument);
@@ -287,7 +290,7 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
         output.writeByte(type);
 
         switch(type) {
-            case PathArgumentTypes.NODE_IDENTIFIER :
+            case PathArgumentTypes.NODE_IDENTIFIER:
 
                 YangInstanceIdentifier.NodeIdentifier nodeIdentifier =
                     (YangInstanceIdentifier.NodeIdentifier) pathArgument;
@@ -400,5 +403,75 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
                 output.writeUTF(value.toString());
                 break;
         }
+    }
+
+    @Override
+    public void write(int b) throws IOException {
+        output.write(b);
+    }
+
+    @Override
+    public void write(byte[] b) throws IOException {
+        output.write(b);
+    }
+
+    @Override
+    public void write(byte[] b, int off, int len) throws IOException {
+        output.write(b, off, len);
+    }
+
+    @Override
+    public void writeBoolean(boolean v) throws IOException {
+        output.writeBoolean(v);
+    }
+
+    @Override
+    public void writeByte(int v) throws IOException {
+        output.writeByte(v);
+    }
+
+    @Override
+    public void writeShort(int v) throws IOException {
+        output.writeShort(v);
+    }
+
+    @Override
+    public void writeChar(int v) throws IOException {
+        output.writeChar(v);
+    }
+
+    @Override
+    public void writeInt(int v) throws IOException {
+        output.writeInt(v);
+    }
+
+    @Override
+    public void writeLong(long v) throws IOException {
+        output.writeLong(v);
+    }
+
+    @Override
+    public void writeFloat(float v) throws IOException {
+        output.writeFloat(v);
+    }
+
+    @Override
+    public void writeDouble(double v) throws IOException {
+        output.writeDouble(v);
+    }
+
+    @Override
+    public void writeBytes(String s) throws IOException {
+        output.writeBytes(s);
+    }
+
+    @Override
+    public void writeChars(String s) throws IOException {
+        output.writeChars(s);
+    }
+
+    @Override
+    public void writeUTF(String s) throws IOException {
+        output.writeUTF(s);
     }
 }
