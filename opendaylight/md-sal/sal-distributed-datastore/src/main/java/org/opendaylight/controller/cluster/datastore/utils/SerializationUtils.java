@@ -18,6 +18,8 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.InvalidNormalizedNodeStreamException;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataInput;
+import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeDataOutput;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeInputStreamReader;
 import org.opendaylight.controller.cluster.datastore.node.utils.stream.NormalizedNodeOutputStreamWriter;
 import org.opendaylight.controller.protobuff.messages.common.NormalizedNodeMessages;
@@ -37,7 +39,7 @@ public final class SerializationUtils {
         void apply(T instance, YangInstanceIdentifier path, NormalizedNode<?, ?> node);
     }
 
-    private static NormalizedNodeOutputStreamWriter streamWriter(DataOutput out) throws IOException {
+    private static NormalizedNodeDataOutput streamWriter(DataOutput out) throws IOException {
         NormalizedNodeOutputStreamWriter streamWriter = REUSABLE_WRITER_TL.get();
         if(streamWriter == null) {
             streamWriter = new NormalizedNodeOutputStreamWriter(out);
@@ -46,7 +48,7 @@ public final class SerializationUtils {
         return streamWriter;
     }
 
-    private static NormalizedNodeInputStreamReader streamReader(DataInput in) throws IOException {
+    private static NormalizedNodeDataInput streamReader(DataInput in) throws IOException {
         NormalizedNodeInputStreamReader streamWriter = REUSABLE_READER_TL.get();
         if(streamWriter == null) {
             streamWriter = new NormalizedNodeInputStreamReader(in);
@@ -60,7 +62,7 @@ public final class SerializationUtils {
         Preconditions.checkNotNull(path);
         Preconditions.checkNotNull(node);
         try {
-            NormalizedNodeOutputStreamWriter streamWriter = streamWriter(out);
+            NormalizedNodeDataOutput streamWriter = streamWriter(out);
             streamWriter.writeNormalizedNode(node);
             streamWriter.writeYangInstanceIdentifier(path);
         } catch (IOException e) {
@@ -71,7 +73,7 @@ public final class SerializationUtils {
 
     public static <T> void deserializePathAndNode(DataInput in, T instance, Applier<T> applier) {
         try {
-            NormalizedNodeInputStreamReader streamReader = streamReader(in);
+            NormalizedNodeDataInput streamReader = streamReader(in);
             NormalizedNode<?, ?> node = streamReader.readNormalizedNode();
             YangInstanceIdentifier path = streamReader.readYangInstanceIdentifier();
             applier.apply(instance, path, node);
@@ -84,7 +86,7 @@ public final class SerializationUtils {
         try {
             out.writeBoolean(node != null);
             if(node != null) {
-                NormalizedNodeOutputStreamWriter streamWriter = streamWriter(out);
+                NormalizedNodeDataOutput streamWriter = streamWriter(out);
                 streamWriter.writeNormalizedNode(node);
             }
         } catch (IOException e) {
@@ -104,7 +106,7 @@ public final class SerializationUtils {
     private static NormalizedNode<?, ?> tryDeserializeNormalizedNode(DataInput in) throws IOException {
         boolean present = in.readBoolean();
         if(present) {
-            NormalizedNodeInputStreamReader streamReader = streamReader(in);
+            NormalizedNodeDataInput streamReader = streamReader(in);
             return streamReader.readNormalizedNode();
         }
 
@@ -139,7 +141,7 @@ public final class SerializationUtils {
     public static void serializePath(YangInstanceIdentifier path, DataOutput out) {
         Preconditions.checkNotNull(path);
         try {
-            NormalizedNodeOutputStreamWriter streamWriter = streamWriter(out);
+            NormalizedNodeDataOutput streamWriter = streamWriter(out);
             streamWriter.writeYangInstanceIdentifier(path);
         } catch (IOException e) {
             throw new IllegalArgumentException(String.format("Error serializing path %s", path), e);
@@ -148,7 +150,7 @@ public final class SerializationUtils {
 
     public static YangInstanceIdentifier deserializePath(DataInput in) {
         try {
-            NormalizedNodeInputStreamReader streamReader = streamReader(in);
+            NormalizedNodeDataInput streamReader = streamReader(in);
             return streamReader.readYangInstanceIdentifier();
         } catch (IOException e) {
             throw new IllegalArgumentException("Error deserializing path", e);
