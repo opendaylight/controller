@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.datastore.node.utils.stream;
 
 import com.google.common.base.Preconditions;
+import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -41,7 +42,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 
-public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWriter {
+public class NormalizedNodeOutputStreamWriter implements NormalizedNodeDataOutput, NormalizedNodeStreamWriter {
 
     private static final Logger LOG = LoggerFactory.getLogger(NormalizedNodeOutputStreamWriter.class);
 
@@ -68,7 +69,11 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
         this((DataOutput) new DataOutputStream(Preconditions.checkNotNull(stream)));
     }
 
-    public NormalizedNodeOutputStreamWriter(DataOutput output) {
+    /**
+     * @deprecated Use {@link NormalizedNodeInputOutput#newDataOutput(DataOutput)} instead.
+     */
+    @Deprecated
+    public NormalizedNodeOutputStreamWriter(final DataOutput output) {
         this.output = Preconditions.checkNotNull(output);
     }
 
@@ -80,6 +85,7 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
         return normalizedNodeWriter;
     }
 
+    @Override
     public void writeNormalizedNode(NormalizedNode<?, ?> node) throws IOException {
         writeSignatureMarkerAndVersionIfNeeded();
         normalizedNodeWriter().write(node);
@@ -275,6 +281,7 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
         }
     }
 
+    @Override
     public void writeYangInstanceIdentifier(YangInstanceIdentifier identifier) throws IOException {
         writeSignatureMarkerAndVersionIfNeeded();
         writeYangInstanceIdentifierInternal(identifier);
@@ -289,6 +296,7 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
         }
     }
 
+    @Override
     public void writePathArgument(YangInstanceIdentifier.PathArgument pathArgument) throws IOException {
 
         byte type = PathArgumentTypes.getSerializablePathArgumentType(pathArgument);
@@ -296,7 +304,7 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
         output.writeByte(type);
 
         switch(type) {
-            case PathArgumentTypes.NODE_IDENTIFIER :
+            case PathArgumentTypes.NODE_IDENTIFIER:
 
                 YangInstanceIdentifier.NodeIdentifier nodeIdentifier =
                     (YangInstanceIdentifier.NodeIdentifier) pathArgument;
@@ -409,5 +417,89 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeStreamWri
                 output.writeUTF(value.toString());
                 break;
         }
+    }
+
+    @Override
+    public void write(int b) throws IOException {
+        writeSignatureMarkerAndVersionIfNeeded();
+        output.write(b);
+    }
+
+    @Override
+    public void write(byte[] b) throws IOException {
+        writeSignatureMarkerAndVersionIfNeeded();
+        output.write(b);
+    }
+
+    @Override
+    public void write(byte[] b, int off, int len) throws IOException {
+        writeSignatureMarkerAndVersionIfNeeded();
+        output.write(b, off, len);
+    }
+
+    @Override
+    public void writeBoolean(boolean v) throws IOException {
+        writeSignatureMarkerAndVersionIfNeeded();
+        output.writeBoolean(v);
+    }
+
+    @Override
+    public void writeByte(int v) throws IOException {
+        writeSignatureMarkerAndVersionIfNeeded();
+        output.writeByte(v);
+    }
+
+    @Override
+    public void writeShort(int v) throws IOException {
+        writeSignatureMarkerAndVersionIfNeeded();
+        output.writeShort(v);
+    }
+
+    @Override
+    public void writeChar(int v) throws IOException {
+        writeSignatureMarkerAndVersionIfNeeded();
+        output.writeChar(v);
+    }
+
+    @Override
+    public void writeInt(int v) throws IOException {
+        writeSignatureMarkerAndVersionIfNeeded();
+        output.writeInt(v);
+    }
+
+    @Override
+    public void writeLong(long v) throws IOException {
+        writeSignatureMarkerAndVersionIfNeeded();
+        output.writeLong(v);
+    }
+
+    @Override
+    public void writeFloat(float v) throws IOException {
+        writeSignatureMarkerAndVersionIfNeeded();
+        output.writeFloat(v);
+    }
+
+    @Override
+    public void writeDouble(double v) throws IOException {
+        writeSignatureMarkerAndVersionIfNeeded();
+        output.writeDouble(v);
+    }
+
+    @Override
+    public void writeBytes(String s) throws IOException {
+        writeSignatureMarkerAndVersionIfNeeded();
+        output.writeBytes(s);
+    }
+
+    @Override
+    public void writeChars(String s) throws IOException {
+        writeSignatureMarkerAndVersionIfNeeded();
+        output.writeChars(s);
+    }
+
+    @Override
+    public void writeUTF(String s) throws IOException {
+        writeSignatureMarkerAndVersionIfNeeded();
+        output.writeUTF(s);
     }
 }
