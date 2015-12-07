@@ -34,6 +34,24 @@
       "revId": "3c5cca3180d1a8fa50bfe089b0f92de89dcae2ba",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aa7f18b_6a1793a4",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/NormalizedNodeInputStreamReader.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-12-07T13:37:44Z",
+      "side": 1,
+      "message": "We at least need to handle backwards compatibility, i.e. reading an older version from persistence, which this check will break. If it\u0027s a newer version we can error out. However in that case, the caller should fall back to the older version semantics and send the older version.",
+      "parentUuid": "5aaae553_3d4b035b",
+      "revId": "3c5cca3180d1a8fa50bfe089b0f92de89dcae2ba",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
