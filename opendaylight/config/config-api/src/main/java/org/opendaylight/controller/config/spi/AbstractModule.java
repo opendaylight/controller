@@ -21,8 +21,17 @@ public abstract class AbstractModule<M extends AbstractModule<M>> implements org
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractModule.class);
 
-    protected final DependencyResolver dependencyResolver;
+    /**
+     * @deprecated Use {@link #getIdentifier()} instead.
+     */
+    @Deprecated
     protected final ModuleIdentifier identifier;
+
+    /**
+     * @deprecated Use {@link #getDependencyResolver()} instead.
+     */
+    @Deprecated
+    protected DependencyResolver dependencyResolver;
 
     private AutoCloseable oldInstance;
     private M oldModule;
@@ -58,6 +67,10 @@ public abstract class AbstractModule<M extends AbstractModule<M>> implements org
         return identifier;
     }
 
+    protected final DependencyResolver getDependencyResolver() {
+        return dependencyResolver;
+    }
+
     /**
      *
      * General algorithm for spawning/closing and reusing wrapped instances.
@@ -86,6 +99,7 @@ public abstract class AbstractModule<M extends AbstractModule<M>> implements org
             }
 
             // Prevent serial memory leak: clear these references as we will not use them again.
+            dependencyResolver = null;
             oldInstance = null;
             oldModule = null;
         }
