@@ -63,6 +63,7 @@ import org.opendaylight.controller.cluster.PersistentDataProvider;
 import org.opendaylight.controller.cluster.notifications.LeaderStateChanged;
 import org.opendaylight.controller.cluster.notifications.RoleChanged;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext.MockPayload;
+import org.opendaylight.controller.cluster.raft.ServerConfigurationPayload.ServerInfo;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyJournalEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyLogEntries;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplySnapshot;
@@ -1304,5 +1305,31 @@ public class RaftActorTest extends AbstractActorTest {
         assertEquals("Voted for", null, context.getTermInformation().getVotedFor());
 
         TEST_LOG.info("testRestoreFromSnapshotWithRecoveredData ending");
+    }
+
+    @Test
+    public void testNonVotingOnRecovery() throws Exception {
+        TEST_LOG.info("testNonVotingOnRecovery starting");
+
+        DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+        config.setElectionTimeoutFactor(1);
+        config.setHeartBeatInterval(FiniteDuration.create(1, TimeUnit.MILLISECONDS));
+
+        String persistenceId = factory.generateActorId("test-actor-");
+        InMemoryJournal.addEntry(persistenceId, 1,  new MockRaftActorContext.MockReplicatedLogEntry(1, 0,
+                new ServerConfigurationPayload(Arrays.asList(new ServerInfo(persistenceId, false)))));
+
+        TestActorRef<MockRaftActor> raftActorRef = factory.createTestActor(MockRaftActor.builder().id(persistenceId).
+                config(config).props().withDispatcher(Dispatchers.DefaultDispatcherId()), persistenceId);
+        MockRaftActor mockRaftActor = raftActorRef.underlyingActor();
+
+        mockRaftActor.waitForInitializeBehaviorComplete();
+
+        // Sleep a bit and verify it didn't get an election timeout and schedule an election.
+
+        Uninterruptibles.sleepUninterruptibly(400, TimeUnit.MILLISECONDS);
+        assertEquals("getRaftState", RaftState.Follower, mockRaftActor.getRaftState());
+
+        TEST_LOG.info("testNonVotingOnRecovery ending");
     }
 }
