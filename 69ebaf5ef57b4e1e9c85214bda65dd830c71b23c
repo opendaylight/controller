@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_29bbe973",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 307,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-12-08T13:27:36Z",
+      "side": 1,
+      "message": "Can you pass back a RuntimeEx wrapping msg and failure?",
+      "revId": "69ebaf5ef57b4e1e9c85214bda65dd830c71b23c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_e985d1ad",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1134,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-12-08T13:27:36Z",
+      "side": 1,
+      "message": "\"AddServer\" should be formatted with serverChange.getSimpleName().",
+      "revId": "69ebaf5ef57b4e1e9c85214bda65dd830c71b23c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_c976d5d8",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/RemoveShardReplica.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-12-08T13:27:36Z",
+      "side": 1,
+      "message": "What is dataStoreType needed for?",
+      "revId": "69ebaf5ef57b4e1e9c85214bda65dd830c71b23c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
