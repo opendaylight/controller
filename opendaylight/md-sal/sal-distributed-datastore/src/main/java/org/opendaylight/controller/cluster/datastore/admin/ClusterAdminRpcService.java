@@ -12,13 +12,19 @@ import akka.actor.Status.Success;
 import akka.dispatch.OnComplete;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
+import com.google.common.base.Function;
 import com.google.common.base.Strings;
+import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import java.io.FileOutputStream;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.SerializationUtils;
@@ -26,9 +32,12 @@ import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
 import org.opendaylight.controller.cluster.datastore.messages.AddShardReplica;
 import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshotList;
+import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshot;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RpcRegistration;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddReplicasForAllShardsOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddReplicasForAllShardsOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddShardReplicaInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.BackupDatastoreInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ClusterAdminService;
@@ -36,6 +45,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.ConvertMembersToVotingForAllShardsInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.DataStoreType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemoveShardReplicaInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.add.replicas._for.all.shards.output.ShardResult;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.add.replicas._for.all.shards.output.ShardResultBuilder;
 import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
@@ -48,6 +59,8 @@ import org.slf4j.LoggerFactory;
  * @author Thomas Pantelis
  */
 public class ClusterAdminRpcService implements ClusterAdminService, AutoCloseable {
+    private static final Timeout SHARD_MGR_TIMEOUT = new Timeout(1, TimeUnit.MINUTES);
+
     private static final Logger LOG = LoggerFactory.getLogger(ClusterAdminRpcService.class);
 
     private final DistributedDataStore configDataStore;
@@ -113,11 +126,28 @@ public class ClusterAdminRpcService implements ClusterAdminService, AutoCloseabl
     }
 
     @Override
-    public Future<RpcResult<Void>> addReplicasForAllShards() {
-        // TODO implement
-        return RpcResultBuilder.<Void>failed().withError(ErrorType.APPLICATION, "operation-not-supported",
-                "Not implemented yet").buildFuture();
+    public Future<RpcResult<AddReplicasForAllShardsOutput>> addReplicasForAllShards() {
+        LOG.info("Adding replicas for all shards");
+
+        final List<Entry<ListenableFuture<Success>, ShardResultBuilder>> shardResultData = new ArrayList<>();
+        Function<String, Object> messageSupplier = new Function<String, Object>() {
+            @Override
+            public Object apply(String shardName) {
+                return new AddShardReplica(shardName);
+            }
+        };
+
+        sendMessageToManagerForConfiguredShards(DataStoreType.Config, shardResultData, messageSupplier);
+        sendMessageToManagerForConfiguredShards(DataStoreType.Operational, shardResultData, messageSupplier);
+
+        return waitForShardResults(shardResultData, new Function<List<ShardResult>, AddReplicasForAllShardsOutput>() {
+            @Override
+            public AddReplicasForAllShardsOutput apply(List<ShardResult> shardResults) {
+                return new AddReplicasForAllShardsOutputBuilder().setShardResult(shardResults).build();
+            }
+        }, "Failed to add replica");
     }
+
 
     @Override
     public Future<RpcResult<Void>> removeAllShardReplicas() {
@@ -166,9 +196,68 @@ public class ClusterAdminRpcService implements ClusterAdminService, AutoCloseabl
         return returnFuture;
     }
 
+    private static <T> SettableFuture<RpcResult<T>> waitForShardResults(
+            final List<Entry<ListenableFuture<Success>, ShardResultBuilder>> shardResultData,
+            final Function<List<ShardResult>, T> resultDataSupplier,
+            final String failureLogMsgPrefix) {
+        final SettableFuture<RpcResult<T>> returnFuture = SettableFuture.create();
+        final List<ShardResult> shardResults = new ArrayList<>();
+        for(final Entry<ListenableFuture<Success>, ShardResultBuilder> entry: shardResultData) {
+            Futures.addCallback(entry.getKey(), new FutureCallback<Success>() {
+                @Override
+                public void onSuccess(Success result) {
+                    synchronized(shardResults) {
+                        ShardResultBuilder shardResult = entry.getValue();
+                        LOG.debug("onSuccess for shard {}, type {}", shardResult.getShardName(),
+                                shardResult.getDataStoreType());
+                        shardResults.add(shardResult.setSucceeded(true).build());
+                        checkIfComplete();
+                    }
+                }
+
+                @Override
+                public void onFailure(Throwable t) {
+                    synchronized(shardResults) {
+                        ShardResultBuilder shardResult = entry.getValue();
+                        LOG.warn("{} for shard {}, type {}", failureLogMsgPrefix, shardResult.getShardName(),
+                                shardResult.getDataStoreType(), t);
+                        shardResults.add(shardResult.setSucceeded(false).setErrorMessage(
+                                Throwables.getRootCause(t).getMessage()).build());
+                        checkIfComplete();
+                    }
+                }
+
+                void checkIfComplete() {
+                    LOG.debug("checkIfComplete: expected {}, actual {}", shardResultData.size(), shardResults.size());
+                    if(shardResults.size() == shardResultData.size()) {
+                        returnFuture.set(newSuccessfulResult(resultDataSupplier.apply(shardResults)));
+                    }
+                }
+            });
+        }
+        return returnFuture;
+    }
+
+    private <T> void sendMessageToManagerForConfiguredShards(DataStoreType dataStoreType,
+            List<Entry<ListenableFuture<T>, ShardResultBuilder>> shardResultData,
+            Function<String, Object> messageSupplier) {
+        ActorContext actorContext = dataStoreType == DataStoreType.Config ?
+                configDataStore.getActorContext() : operDataStore.getActorContext();
+        Set<String> allShardNames = actorContext.getConfiguration().getAllShardNames();
+
+        LOG.debug("Sending message to all shards {} for data store {}", allShardNames, actorContext.getDataStoreType());
+
+        for(String shardName: allShardNames) {
+            ListenableFuture<T> future = this.<T>ask(actorContext.getShardManager(), messageSupplier.apply(shardName),
+                    SHARD_MGR_TIMEOUT);
+            shardResultData.add(new SimpleEntry<ListenableFuture<T>, ShardResultBuilder>(future,
+                    new ShardResultBuilder().setShardName(shardName).setDataStoreType(dataStoreType)));
+        }
+    }
+
     @SuppressWarnings("unchecked")
     private <T> ListenableFuture<List<T>> sendMessageToShardManagers(Object message) {
-        Timeout timeout = new Timeout(1, TimeUnit.MINUTES);
+        Timeout timeout = SHARD_MGR_TIMEOUT;
         ListenableFuture<T> configFuture = ask(configDataStore.getActorContext().getShardManager(), message, timeout);
         ListenableFuture<T> operFuture = ask(operDataStore.getActorContext().getShardManager(), message, timeout);
 
@@ -178,7 +267,7 @@ public class ClusterAdminRpcService implements ClusterAdminService, AutoCloseabl
     private <T> ListenableFuture<T> sendMessageToShardManager(DataStoreType dataStoreType, Object message) {
         ActorRef shardManager = dataStoreType == DataStoreType.Config ?
                 configDataStore.getActorContext().getShardManager() : operDataStore.getActorContext().getShardManager();
-        return ask(shardManager, message, new Timeout(1, TimeUnit.MINUTES));
+        return ask(shardManager, message, SHARD_MGR_TIMEOUT);
     }
 
     private static void saveSnapshotsToFile(DatastoreSnapshotList snapshots, String fileName,
@@ -232,6 +321,10 @@ public class ClusterAdminRpcService implements ClusterAdminService, AutoCloseabl
     }
 
     private static RpcResult<Void> newSuccessfulResult() {
-        return RpcResultBuilder.<Void>success().build();
+        return newSuccessfulResult((Void)null);
+    }
+
+    private static <T> RpcResult<T> newSuccessfulResult(T data) {
+        return RpcResultBuilder.<T>success(data).build();
     }
 }
