@@ -21,13 +21,31 @@ module cluster-admin {
         }
     }
 
+    grouping shard-operation-result {
+        leaf shard-name {
+            type string;
+        }
+
+        leaf data-store-type {
+            type data-store-type;
+        }
+
+        leaf succeeded {
+            type boolean;
+        }
+
+        leaf error-message {
+            type string;
+        }
+    }
+    
     rpc add-shard-replica {
         input {
             leaf shard-name {
                 type string;
                 description "The name of the shard for which to create a replica.";
             }
-            
+
             leaf data-store-type {
                 type data-store-type;
                 description "The type of the data store to which the replica belongs";
@@ -64,6 +82,16 @@ module cluster-admin {
     }
 
     rpc add-replicas-for-all-shards {
+        output {
+            list shard-result {
+                key "shard-name";
+                key "data-store-type";
+                uses shard-operation-result;
+
+                description "The list of results, one per shard";
+            }
+        }
+
         description "Adds replicas on this node for all currently defined shards. This is equivalent to issuing
             an add-shard-replica RPC for all shards.";
     }
