@@ -9,11 +9,13 @@ package org.opendaylight.controller.cluster.datastore.admin;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import static org.opendaylight.controller.cluster.datastore.MemberNode.verifyRaftPeersPresent;
 import static org.opendaylight.controller.cluster.datastore.MemberNode.verifyRaftState;
 import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
+import akka.actor.Status.Success;
 import akka.cluster.Cluster;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
@@ -21,9 +23,13 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import java.io.File;
 import java.io.FileInputStream;
+import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.SerializationUtils;
@@ -33,6 +39,9 @@ import org.junit.Test;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
 import org.opendaylight.controller.cluster.datastore.MemberNode;
 import org.opendaylight.controller.cluster.datastore.MemberNode.RaftStateVerifier;
+import org.opendaylight.controller.cluster.datastore.Shard;
+import org.opendaylight.controller.cluster.datastore.config.ModuleShardConfiguration;
+import org.opendaylight.controller.cluster.datastore.messages.CreateShard;
 import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
@@ -40,9 +49,12 @@ import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddReplicasForAllShardsOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddShardReplicaInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.BackupDatastoreInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.DataStoreType;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.add.replicas._for.all.shards.output.ShardResult;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.add.replicas._for.all.shards.output.ShardResultBuilder;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -260,7 +272,7 @@ public class ClusterAdminRpcServiceTest {
         service.close();
     }
 
-    private void verifySuccessfulRpcResult(RpcResult<Void> rpcResult) {
+    private <T> T verifySuccessfulRpcResult(RpcResult<T> rpcResult) {
         if(!rpcResult.isSuccessful()) {
             if(rpcResult.getErrors().size() > 0) {
                 RpcError error = Iterables.getFirst(rpcResult.getErrors(), null);
@@ -269,6 +281,8 @@ public class ClusterAdminRpcServiceTest {
 
             fail("Rpc failed with no error");
         }
+
+        return rpcResult.getResult();
     }
 
     private void verifyFailedRpcResult(RpcResult<Void> rpcResult) {
@@ -284,8 +298,54 @@ public class ClusterAdminRpcServiceTest {
     }
 
     @Test
-    public void testAddReplicasForAllShards() {
-        // TODO implement
+    public void testAddReplicasForAllShards() throws Exception {
+        String name = "testAddReplicasForAllShards";
+        String moduleShardsConfig = "module-shards-member1.conf";
+        MemberNode leaderNode1 = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name ).
+                moduleShardsConfig(moduleShardsConfig).waitForShardLeader("cars", "people").build();
+
+        ModuleShardConfiguration petsModuleConfig = new ModuleShardConfiguration(URI.create("pets-ns"), "pets-module",
+                "pets", null, Arrays.asList("member-1"));
+        leaderNode1.configDataStore().getActorContext().getShardManager().tell(
+                new CreateShard(petsModuleConfig, Shard.builder(), null), leaderNode1.kit().getRef());
+        leaderNode1.kit().expectMsgClass(Success.class);
+        leaderNode1.kit().waitUntilLeader(leaderNode1.configDataStore().getActorContext(), "pets");
+
+        MemberNode newReplicaNode2 = MemberNode.builder(memberNodes).akkaConfig("Member2").testName(name).
+                moduleShardsConfig(moduleShardsConfig).build();
+
+        leaderNode1.waitForMembersUp("member-2");
+        newReplicaNode2.waitForMembersUp("member-1");
+
+        newReplicaNode2.configDataStore().getActorContext().getShardManager().tell(
+                new CreateShard(petsModuleConfig, Shard.builder(), null), newReplicaNode2.kit().getRef());
+        newReplicaNode2.kit().expectMsgClass(Success.class);
+
+        newReplicaNode2.operDataStore().getActorContext().getShardManager().tell(
+                new CreateShard(new ModuleShardConfiguration(URI.create("no-leader-ns"), "no-leader-module",
+                        "no-leader", null, Arrays.asList("member-1")), Shard.builder(), null),
+                                newReplicaNode2.kit().getRef());
+        newReplicaNode2.kit().expectMsgClass(Success.class);
+
+        ClusterAdminRpcService service = new ClusterAdminRpcService(newReplicaNode2.configDataStore(),
+                newReplicaNode2.operDataStore());
+
+        RpcResult<AddReplicasForAllShardsOutput> rpcResult = service.addReplicasForAllShards().get(10, TimeUnit.SECONDS);
+        AddReplicasForAllShardsOutput result = verifySuccessfulRpcResult(rpcResult);
+        verifyShardResults(result.getShardResult(), successShardResult("cars", DataStoreType.Config),
+                successShardResult("people", DataStoreType.Config),
+                successShardResult("pets", DataStoreType.Config),
+                successShardResult("cars", DataStoreType.Operational),
+                successShardResult("people", DataStoreType.Operational),
+                failedShardResult("no-leader", DataStoreType.Operational));
+
+        verifyRaftPeersPresent(newReplicaNode2.configDataStore(), "cars", "member-1");
+        verifyRaftPeersPresent(newReplicaNode2.configDataStore(), "people", "member-1");
+        verifyRaftPeersPresent(newReplicaNode2.configDataStore(), "pets", "member-1");
+        verifyRaftPeersPresent(newReplicaNode2.operDataStore(), "cars", "member-1");
+        verifyRaftPeersPresent(newReplicaNode2.operDataStore(), "people", "member-1");
+
+        service.close();
     }
 
     @Test
@@ -301,5 +361,36 @@ public class ClusterAdminRpcServiceTest {
     @Test
     public void testConvertMembersToNonvotingForAllShards() {
         // TODO implement
+    }
+
+    private void verifyShardResults(List<ShardResult> shardResults, ShardResult... expShardResults) {
+        Map<String, ShardResult> expResultsMap = new HashMap<>();
+        for(ShardResult r: expShardResults) {
+            expResultsMap.put(r.getShardName() + "-" + r.getDataStoreType(), r);
+        }
+
+        for(ShardResult result: shardResults) {
+            ShardResult exp = expResultsMap.remove(result.getShardName() + "-" + result.getDataStoreType());
+            assertNotNull(String.format("Unexpected result for shard %s, type %s", result.getShardName(),
+                    result.getDataStoreType()), exp);
+            assertEquals("isSucceeded", exp.isSucceeded(), result.isSucceeded());
+            if(exp.isSucceeded()) {
+                assertNull("Expected null error message", result.getErrorMessage());
+            } else {
+                assertNotNull("Expected error message", result.getErrorMessage());
+            }
+        }
+
+        if(!expResultsMap.isEmpty()) {
+            fail("Missing shard results for " + expResultsMap.keySet());
+        }
+    }
+
+    private ShardResult successShardResult(String shardName, DataStoreType type) {
+        return new ShardResultBuilder().setDataStoreType(type).setShardName(shardName).setSucceeded(true).build();
+    }
+
+    private ShardResult failedShardResult(String shardName, DataStoreType type) {
+        return new ShardResultBuilder().setDataStoreType(type).setShardName(shardName).setSucceeded(false).build();
     }
 }
