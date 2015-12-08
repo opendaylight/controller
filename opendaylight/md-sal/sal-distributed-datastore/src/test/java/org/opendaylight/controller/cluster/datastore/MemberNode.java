@@ -7,7 +7,7 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
@@ -17,6 +17,7 @@ import akka.cluster.Cluster;
 import akka.cluster.ClusterEvent.CurrentClusterState;
 import akka.cluster.Member;
 import akka.cluster.MemberStatus;
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Sets;
@@ -144,11 +145,23 @@ public class MemberNode {
         verifyRaftState(datastore, shardName, new RaftStateVerifier() {
             @Override
             public void verify(OnDemandRaftState raftState) {
-                assertTrue(String.format("Peer(s) %s not found for shard %s. Actual: %s", peerIds, shardName,
-                        raftState.getPeerAddresses().keySet()),
-                        raftState.getPeerAddresses().keySet().containsAll(peerIds));
+                assertEquals("Peers for shard " + shardName, peerIds, raftState.getPeerAddresses().keySet());
             }
         });
+    }
+
+    public static void verifyNoShardPresent(DistributedDataStore datastore, String shardName) {
+        Stopwatch sw = Stopwatch.createStarted();
+        while(sw.elapsed(TimeUnit.SECONDS) <= 5) {
+            Optional<ActorRef> shardReply = datastore.getActorContext().findLocalShard(shardName);
+            if(!shardReply.isPresent()) {
+                return;
+            }
+
+            Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
+        }
+
+        fail("Shard " + shardName + " is present");
     }
 
     public static class Builder {

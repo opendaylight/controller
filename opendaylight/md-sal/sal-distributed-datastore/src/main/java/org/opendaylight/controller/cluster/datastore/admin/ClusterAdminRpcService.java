@@ -32,6 +32,7 @@ import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
 import org.opendaylight.controller.cluster.datastore.messages.AddShardReplica;
 import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshotList;
+import org.opendaylight.controller.cluster.datastore.messages.RemoveShardReplica;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshot;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RpcRegistration;
@@ -120,9 +121,41 @@ public class ClusterAdminRpcService implements ClusterAdminService, AutoCloseabl
 
     @Override
     public Future<RpcResult<Void>> removeShardReplica(RemoveShardReplicaInput input) {
-        // TODO implement
-        return RpcResultBuilder.<Void>failed().withError(ErrorType.APPLICATION, "operation-not-supported",
-                "Not implemented yet").buildFuture();
+        final String shardName = input.getShardName();
+        if(Strings.isNullOrEmpty(shardName)) {
+            return newFailedRpcResultBuilder("A valid shard name must be specified").buildFuture();
+        }
+
+        DataStoreType dataStoreType = input.getDataStoreType();
+        if(dataStoreType == null) {
+            return newFailedRpcResultBuilder("A valid DataStoreType must be specified").buildFuture();
+        }
+
+        final String memberName = input.getMemberName();
+        if(Strings.isNullOrEmpty(memberName)) {
+            return newFailedRpcResultBuilder("A valid member name must be specified").buildFuture();
+        }
+
+        LOG.info("Removing replica for shard {} memberName {}, datastoreType {}", shardName, memberName, dataStoreType);
+
+        final SettableFuture<RpcResult<Void>> returnFuture = SettableFuture.create();
+        ListenableFuture<Success> future = sendMessageToShardManager(dataStoreType,
+                new RemoveShardReplica(shardName, memberName));
+        Futures.addCallback(future, new FutureCallback<Success>() {
+            @Override
+            public void onSuccess(Success success) {
+                LOG.info("Successfully removed replica for shard {}", shardName);
+                returnFuture.set(newSuccessfulResult());
+            }
+
+            @Override
+            public void onFailure(Throwable failure) {
+                onMessageFailure(String.format("Failed to remove replica for shard %s", shardName),
+                        returnFuture, failure);
+            }
+        });
+
+        return returnFuture;
     }
 
     @Override

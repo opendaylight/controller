@@ -11,6 +11,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
+import static org.opendaylight.controller.cluster.datastore.MemberNode.verifyNoShardPresent;
 import static org.opendaylight.controller.cluster.datastore.MemberNode.verifyRaftPeersPresent;
 import static org.opendaylight.controller.cluster.datastore.MemberNode.verifyRaftState;
 import akka.actor.ActorRef;
@@ -36,6 +37,7 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.opendaylight.controller.cluster.datastore.DatastoreContext;
 import org.opendaylight.controller.cluster.datastore.DistributedDataStore;
 import org.opendaylight.controller.cluster.datastore.MemberNode;
 import org.opendaylight.controller.cluster.datastore.MemberNode.RaftStateVerifier;
@@ -53,6 +55,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controll
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.AddShardReplicaInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.BackupDatastoreInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.DataStoreType;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.RemoveShardReplicaInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.add.replicas._for.all.shards.output.ShardResult;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.controller.md.sal.cluster.admin.rev151013.add.replicas._for.all.shards.output.ShardResultBuilder;
 import org.opendaylight.yangtools.yang.common.RpcError;
@@ -293,8 +296,63 @@ public class ClusterAdminRpcServiceTest {
     }
 
     @Test
-    public void testRemoveShardReplica() {
-        // TODO implement
+    public void testRemoveShardReplica() throws Exception {
+        String name = "testRemoveShardReplicaLocal";
+        String moduleShardsConfig = "module-shards-member1-and-2-and-3.conf";
+        MemberNode leaderNode1 = MemberNode.builder(memberNodes).akkaConfig("Member1").testName(name ).
+                moduleShardsConfig(moduleShardsConfig).
+                datastoreContextBuilder(DatastoreContext.newBuilder().
+                        shardHeartbeatIntervalInMillis(300).shardElectionTimeoutFactor(1)).build();
+
+        MemberNode replicaNode2 = MemberNode.builder(memberNodes).akkaConfig("Member2").testName(name).
+                moduleShardsConfig(moduleShardsConfig).build();
+
+        MemberNode replicaNode3 = MemberNode.builder(memberNodes).akkaConfig("Member3").testName(name).
+                moduleShardsConfig(moduleShardsConfig).build();
+
+        leaderNode1.configDataStore().waitTillReady();
+        verifyRaftPeersPresent(leaderNode1.configDataStore(), "cars", "member-2", "member-3");
+        verifyRaftPeersPresent(replicaNode2.configDataStore(), "cars", "member-1", "member-3");
+        verifyRaftPeersPresent(replicaNode3.configDataStore(), "cars", "member-1", "member-2");
+
+        // Invoke RPC service on member-3 to remove it's local shard
+
+        ClusterAdminRpcService service3 = new ClusterAdminRpcService(replicaNode3.configDataStore(),
+                replicaNode3.operDataStore());
+
+        RpcResult<Void> rpcResult = service3.removeShardReplica(new RemoveShardReplicaInputBuilder().
+                setShardName("cars").setMemberName("member-3").setDataStoreType(DataStoreType.Config).build()).
+                        get(10, TimeUnit.SECONDS);
+        verifySuccessfulRpcResult(rpcResult);
+        service3.close();
+
+        verifyRaftPeersPresent(leaderNode1.configDataStore(), "cars", "member-2");
+        verifyRaftPeersPresent(replicaNode2.configDataStore(), "cars", "member-1");
+        verifyNoShardPresent(replicaNode3.configDataStore(), "cars");
+
+        // Restart member-2 and verify member-3 isn't present.
+
+        Cluster.get(leaderNode1.kit().getSystem()).down(Cluster.get(replicaNode2.kit().getSystem()).selfAddress());
+        replicaNode2.cleanup();
+
+        replicaNode2 = MemberNode.builder(memberNodes).akkaConfig("Member2").testName(name).
+                moduleShardsConfig(moduleShardsConfig).build();
+
+        verifyRaftPeersPresent(replicaNode2.configDataStore(), "cars", "member-1");
+
+        // Invoke RPC service on member-1 to remove member-2
+
+        ClusterAdminRpcService service1 = new ClusterAdminRpcService(leaderNode1.configDataStore(),
+                leaderNode1.operDataStore());
+
+        rpcResult = service1.removeShardReplica(new RemoveShardReplicaInputBuilder().
+                setShardName("cars").setMemberName("member-2").setDataStoreType(DataStoreType.Config).build()).
+                        get(10, TimeUnit.SECONDS);
+        verifySuccessfulRpcResult(rpcResult);
+        service1.close();
+
+        verifyRaftPeersPresent(leaderNode1.configDataStore(), "cars");
+        verifyNoShardPresent(replicaNode2.configDataStore(), "cars");
     }
 
     @Test
