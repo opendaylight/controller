@@ -22,6 +22,30 @@
       "revId": "9ebbbe3c582c0ac7362b13d134ae89c80e71baae",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_2cd697c6",
+        "filename": "opendaylight/config/config-api/src/main/java/org/opendaylight/controller/config/spi/AbstractModule.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-12-08T16:35:32Z",
+      "side": 1,
+      "message": "Since this is a public non-synchronized method, any number of threads can be inside it at once. However we are calling it only from ConfigRegistry.commitConfig which is synchronized.",
+      "parentUuid": "1aa4ed85_a9d7d9ec",
+      "range": {
+        "startLine": 81,
+        "startChar": 4,
+        "endLine": 81,
+        "endChar": 44
+      },
+      "revId": "9ebbbe3c582c0ac7362b13d134ae89c80e71baae",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
