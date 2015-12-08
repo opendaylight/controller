@@ -13,45 +13,27 @@ import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import org.opendaylight.yangtools.yang.common.QName;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeStreamWriter;
-import org.opendaylight.yangtools.yang.data.api.schema.stream.NormalizedNodeWriter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * NormalizedNodeOutputStreamWriter will be used by distributed datastore to send normalized node in
  * a stream.
  * A stream writer wrapper around this class will write node objects to stream in recursive manner.
  * for example - If you have a ContainerNode which has a two LeafNode as children, then
- * you will first call {@link #startContainerNode(YangInstanceIdentifier.NodeIdentifier, int)}, then will call
- * {@link #leafNode(YangInstanceIdentifier.NodeIdentifier, Object)} twice and then, {@link #endNode()} to end
- * container node.
+ * you will first call
+ * {@link #startContainerNode(org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier, int)},
+ * then will call
+ * {@link #leafNode(org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier.NodeIdentifier, Object)} twice
+ * and then, {@link #endNode()} to end container node.
  *
  * Based on the each node, the node type is also written to the stream, that helps in reconstructing the object,
  * while reading.
- *
- *
  */
-
-public class NormalizedNodeOutputStreamWriter implements NormalizedNodeDataOutput, NormalizedNodeStreamWriter {
-
-    private static final Logger LOG = LoggerFactory.getLogger(NormalizedNodeOutputStreamWriter.class);
-
-    private final DataOutput output;
-
+public class NormalizedNodeOutputStreamWriter extends AbstractNormalizedNodeDataOutput implements NormalizedNodeStreamWriter {
     private final Map<String, Integer> stringCodeMap = new HashMap<>();
-
-    private NormalizedNodeWriter normalizedNodeWriter;
-
-    private boolean wroteSignatureMarker;
 
     /**
      * @deprecated Use {@link #NormalizedNodeOutputStreamWriter(DataOutput)} instead.
@@ -66,432 +48,35 @@ public class NormalizedNodeOutputStreamWriter implements NormalizedNodeDataOutpu
      */
     @Deprecated
     public NormalizedNodeOutputStreamWriter(final DataOutput output) {
-        this.output = Preconditions.checkNotNull(output);
-    }
-
-    private NormalizedNodeWriter normalizedNodeWriter() {
-        if(normalizedNodeWriter == null) {
-            normalizedNodeWriter = NormalizedNodeWriter.forStreamWriter(this);
-        }
-
-        return normalizedNodeWriter;
+        super(output);
     }
 
     @Override
-    public void writeNormalizedNode(NormalizedNode<?, ?> node) throws IOException {
-        writeSignatureMarkerAndVersionIfNeeded();
-        normalizedNodeWriter().write(node);
-    }
-
-    private void writeSignatureMarkerAndVersionIfNeeded() throws IOException {
-        if(!wroteSignatureMarker) {
-            output.writeByte(TokenTypes.SIGNATURE_MARKER);
-            output.writeShort(TokenTypes.LITHIUM_VERSION);
-            wroteSignatureMarker = true;
-        }
+    protected final short streamVersion() {
+        return TokenTypes.LITHIUM_VERSION;
     }
 
     @Override
-    public void leafNode(YangInstanceIdentifier.NodeIdentifier name, Object value) throws IOException, IllegalArgumentException {
-        Preconditions.checkNotNull(name, "Node identifier should not be null");
-        LOG.debug("Writing a new leaf node");
-        startNode(name.getNodeType(), NodeTypes.LEAF_NODE);
-
-        writeObject(value);
+    protected void writeQName(final QName qname) throws IOException {
+        writeString(qname.getLocalName());
+        writeString(qname.getNamespace().toString());
+        writeString(qname.getFormattedRevision());
     }
 
     @Override
-    public void startLeafSet(YangInstanceIdentifier.NodeIdentifier name, int childSizeHint) throws IOException, IllegalArgumentException {
-        Preconditions.checkNotNull(name, "Node identifier should not be null");
-        LOG.debug("Starting a new leaf set");
-
-        startNode(name.getNodeType(), NodeTypes.LEAF_SET);
-    }
-
-    @Override
-    public void leafSetEntryNode(Object value) throws IOException, IllegalArgumentException {
-        LOG.debug("Writing a new leaf set entry node");
-
-        output.writeByte(NodeTypes.LEAF_SET_ENTRY_NODE);
-        writeObject(value);
-    }
-
-    @Override
-    public void startContainerNode(YangInstanceIdentifier.NodeIdentifier name, int childSizeHint) throws IOException, IllegalArgumentException {
-        Preconditions.checkNotNull(name, "Node identifier should not be null");
-
-        LOG.debug("Starting a new container node");
-
-        startNode(name.getNodeType(), NodeTypes.CONTAINER_NODE);
-    }
-
-    @Override
-    public void startYangModeledAnyXmlNode(YangInstanceIdentifier.NodeIdentifier name, int childSizeHint) throws IOException, IllegalArgumentException {
-        Preconditions.checkNotNull(name, "Node identifier should not be null");
-
-        LOG.debug("Starting a new yang modeled anyXml node");
-
-        startNode(name.getNodeType(), NodeTypes.YANG_MODELED_ANY_XML_NODE);
-    }
-
-    @Override
-    public void startUnkeyedList(YangInstanceIdentifier.NodeIdentifier name, int childSizeHint) throws IOException, IllegalArgumentException {
-        Preconditions.checkNotNull(name, "Node identifier should not be null");
-        LOG.debug("Starting a new unkeyed list");
-
-        startNode(name.getNodeType(), NodeTypes.UNKEYED_LIST);
-    }
-
-    @Override
-    public void startUnkeyedListItem(YangInstanceIdentifier.NodeIdentifier name, int childSizeHint) throws IOException, IllegalStateException {
-        Preconditions.checkNotNull(name, "Node identifier should not be null");
-        LOG.debug("Starting a new unkeyed list item");
-
-        startNode(name.getNodeType(), NodeTypes.UNKEYED_LIST_ITEM);
-    }
-
-    @Override
-    public void startMapNode(YangInstanceIdentifier.NodeIdentifier name, int childSizeHint) throws IOException, IllegalArgumentException {
-        Preconditions.checkNotNull(name, "Node identifier should not be null");
-        LOG.debug("Starting a new map node");
-
-        startNode(name.getNodeType(), NodeTypes.MAP_NODE);
-    }
-
-    @Override
-    public void startMapEntryNode(YangInstanceIdentifier.NodeIdentifierWithPredicates identifier, int childSizeHint) throws IOException, IllegalArgumentException {
-        Preconditions.checkNotNull(identifier, "Node identifier should not be null");
-        LOG.debug("Starting a new map entry node");
-        startNode(identifier.getNodeType(), NodeTypes.MAP_ENTRY_NODE);
-
-        writeKeyValueMap(identifier.getKeyValues());
-
-    }
-
-    @Override
-    public void startOrderedMapNode(YangInstanceIdentifier.NodeIdentifier name, int childSizeHint) throws IOException, IllegalArgumentException {
-        Preconditions.checkNotNull(name, "Node identifier should not be null");
-        LOG.debug("Starting a new ordered map node");
-
-        startNode(name.getNodeType(), NodeTypes.ORDERED_MAP_NODE);
-    }
-
-    @Override
-    public void startChoiceNode(YangInstanceIdentifier.NodeIdentifier name, int childSizeHint) throws IOException, IllegalArgumentException {
-        Preconditions.checkNotNull(name, "Node identifier should not be null");
-        LOG.debug("Starting a new choice node");
-
-        startNode(name.getNodeType(), NodeTypes.CHOICE_NODE);
-    }
-
-    @Override
-    public void startAugmentationNode(YangInstanceIdentifier.AugmentationIdentifier identifier) throws IOException, IllegalArgumentException {
-        Preconditions.checkNotNull(identifier, "Node identifier should not be null");
-        LOG.debug("Starting a new augmentation node");
-
-        output.writeByte(NodeTypes.AUGMENTATION_NODE);
-        writeQNameSet(identifier.getPossibleChildNames());
-    }
-
-    @Override
-    public void anyxmlNode(YangInstanceIdentifier.NodeIdentifier name, Object value) throws IOException, IllegalArgumentException {
-        Preconditions.checkNotNull(name, "Node identifier should not be null");
-        LOG.debug("Writing a new xml node");
-
-        startNode(name.getNodeType(), NodeTypes.ANY_XML_NODE);
-
-        writeObject(value);
-    }
-
-    @Override
-    public void endNode() throws IOException, IllegalStateException {
-        LOG.debug("Ending the node");
-
-        output.writeByte(NodeTypes.END_NODE);
-    }
-
-    @Override
-    public void close() throws IOException {
-        flush();
-    }
-
-    @Override
-    public void flush() throws IOException {
-        if (output instanceof OutputStream) {
-            ((OutputStream)output).flush();
-        }
-    }
-
-    private void startNode(final QName qName, byte nodeType) throws IOException {
-
-        Preconditions.checkNotNull(qName, "QName of node identifier should not be null.");
-
-        writeSignatureMarkerAndVersionIfNeeded();
-
-        // First write the type of node
-        output.writeByte(nodeType);
-        // Write Start Tag
-        writeQName(qName);
-    }
-
-    private void writeQName(QName qName) throws IOException {
-
-        writeCodedString(qName.getLocalName());
-        writeCodedString(qName.getNamespace().toString());
-        writeCodedString(qName.getFormattedRevision());
-    }
-
-    private void writeCodedString(String key) throws IOException {
-        Integer value = stringCodeMap.get(key);
-        if(value != null) {
-            output.writeByte(TokenTypes.IS_CODE_VALUE);
-            output.writeInt(value);
-        } else {
-            if(key != null) {
-                output.writeByte(TokenTypes.IS_STRING_VALUE);
-                stringCodeMap.put(key, Integer.valueOf(stringCodeMap.size()));
-                output.writeUTF(key);
+    protected void writeString(final String string) throws IOException {
+        if (string != null) {
+            final Integer value = stringCodeMap.get(string);
+            if (value == null) {
+                stringCodeMap.put(string, stringCodeMap.size());
+                writeByte(TokenTypes.IS_STRING_VALUE);
+                writeUTF(string);
             } else {
-                output.writeByte(TokenTypes.IS_NULL_VALUE);
-            }
-        }
-    }
-
-    private void writeObjSet(Set<?> set) throws IOException {
-        if(!set.isEmpty()){
-            output.writeInt(set.size());
-            for(Object o : set){
-                if(o instanceof String){
-                    writeCodedString(o.toString());
-                } else {
-                    throw new IllegalArgumentException("Expected value type to be String but was : " +
-                        o.toString());
-                }
+                writeByte(TokenTypes.IS_CODE_VALUE);
+                writeInt(value);
             }
         } else {
-            output.writeInt(0);
+            writeByte(TokenTypes.IS_NULL_VALUE);
         }
-    }
-
-    @Override
-    public void writeYangInstanceIdentifier(YangInstanceIdentifier identifier) throws IOException {
-        writeSignatureMarkerAndVersionIfNeeded();
-        writeYangInstanceIdentifierInternal(identifier);
-    }
-
-    private void writeYangInstanceIdentifierInternal(YangInstanceIdentifier identifier) throws IOException {
-        Collection<YangInstanceIdentifier.PathArgument> pathArguments = identifier.getPathArguments();
-        output.writeInt(pathArguments.size());
-
-        for(YangInstanceIdentifier.PathArgument pathArgument : pathArguments) {
-            writePathArgument(pathArgument);
-        }
-    }
-
-    @Override
-    public void writePathArgument(YangInstanceIdentifier.PathArgument pathArgument) throws IOException {
-
-        byte type = PathArgumentTypes.getSerializablePathArgumentType(pathArgument);
-
-        output.writeByte(type);
-
-        switch(type) {
-            case PathArgumentTypes.NODE_IDENTIFIER:
-
-                YangInstanceIdentifier.NodeIdentifier nodeIdentifier =
-                    (YangInstanceIdentifier.NodeIdentifier) pathArgument;
-
-                writeQName(nodeIdentifier.getNodeType());
-                break;
-
-            case PathArgumentTypes.NODE_IDENTIFIER_WITH_PREDICATES:
-
-                YangInstanceIdentifier.NodeIdentifierWithPredicates nodeIdentifierWithPredicates =
-                    (YangInstanceIdentifier.NodeIdentifierWithPredicates) pathArgument;
-                writeQName(nodeIdentifierWithPredicates.getNodeType());
-
-                writeKeyValueMap(nodeIdentifierWithPredicates.getKeyValues());
-                break;
-
-            case PathArgumentTypes.NODE_IDENTIFIER_WITH_VALUE :
-
-                YangInstanceIdentifier.NodeWithValue nodeWithValue =
-                    (YangInstanceIdentifier.NodeWithValue) pathArgument;
-
-                writeQName(nodeWithValue.getNodeType());
-                writeObject(nodeWithValue.getValue());
-                break;
-
-            case PathArgumentTypes.AUGMENTATION_IDENTIFIER :
-
-                YangInstanceIdentifier.AugmentationIdentifier augmentationIdentifier =
-                    (YangInstanceIdentifier.AugmentationIdentifier) pathArgument;
-
-                // No Qname in augmentation identifier
-                writeQNameSet(augmentationIdentifier.getPossibleChildNames());
-                break;
-            default :
-                throw new IllegalStateException("Unknown node identifier type is found : " + pathArgument.getClass().toString() );
-        }
-    }
-
-    private void writeKeyValueMap(Map<QName, Object> keyValueMap) throws IOException {
-        if(keyValueMap != null && !keyValueMap.isEmpty()) {
-            output.writeInt(keyValueMap.size());
-            Set<QName> qNameSet = keyValueMap.keySet();
-
-            for(QName qName : qNameSet) {
-                writeQName(qName);
-                writeObject(keyValueMap.get(qName));
-            }
-        } else {
-            output.writeInt(0);
-        }
-    }
-
-    private void writeQNameSet(Set<QName> children) throws IOException {
-        // Write each child's qname separately, if list is empty send count as 0
-        if(children != null && !children.isEmpty()) {
-            output.writeInt(children.size());
-            for(QName qName : children) {
-                writeQName(qName);
-            }
-        } else {
-            LOG.debug("augmentation node does not have any child");
-            output.writeInt(0);
-        }
-    }
-
-    private void writeObject(Object value) throws IOException {
-
-        byte type = ValueTypes.getSerializableType(value);
-        // Write object type first
-        output.writeByte(type);
-
-        switch(type) {
-            case ValueTypes.BOOL_TYPE:
-                output.writeBoolean((Boolean) value);
-                break;
-            case ValueTypes.QNAME_TYPE:
-                writeQName((QName) value);
-                break;
-            case ValueTypes.INT_TYPE:
-                output.writeInt((Integer) value);
-                break;
-            case ValueTypes.BYTE_TYPE:
-                output.writeByte((Byte) value);
-                break;
-            case ValueTypes.LONG_TYPE:
-                output.writeLong((Long) value);
-                break;
-            case ValueTypes.SHORT_TYPE:
-                output.writeShort((Short) value);
-                break;
-            case ValueTypes.BITS_TYPE:
-                writeObjSet((Set<?>) value);
-                break;
-            case ValueTypes.BINARY_TYPE:
-                byte[] bytes = (byte[]) value;
-                output.writeInt(bytes.length);
-                output.write(bytes);
-                break;
-            case ValueTypes.YANG_IDENTIFIER_TYPE:
-                writeYangInstanceIdentifierInternal((YangInstanceIdentifier) value);
-                break;
-            case ValueTypes.NULL_TYPE :
-                break;
-            case ValueTypes.STRING_BYTES_TYPE:
-                final byte[] valueBytes = value.toString().getBytes(StandardCharsets.UTF_8);
-                output.writeInt(valueBytes.length);
-                output.write(valueBytes);
-                break;
-            default:
-                output.writeUTF(value.toString());
-                break;
-        }
-    }
-
-    @Override
-    public void write(int b) throws IOException {
-        writeSignatureMarkerAndVersionIfNeeded();
-        output.write(b);
-    }
-
-    @Override
-    public void write(byte[] b) throws IOException {
-        writeSignatureMarkerAndVersionIfNeeded();
-        output.write(b);
-    }
-
-    @Override
-    public void write(byte[] b, int off, int len) throws IOException {
-        writeSignatureMarkerAndVersionIfNeeded();
-        output.write(b, off, len);
-    }
-
-    @Override
-    public void writeBoolean(boolean v) throws IOException {
-        writeSignatureMarkerAndVersionIfNeeded();
-        output.writeBoolean(v);
-    }
-
-    @Override
-    public void writeByte(int v) throws IOException {
-        writeSignatureMarkerAndVersionIfNeeded();
-        output.writeByte(v);
-    }
-
-    @Override
-    public void writeShort(int v) throws IOException {
-        writeSignatureMarkerAndVersionIfNeeded();
-        output.writeShort(v);
-    }
-
-    @Override
-    public void writeChar(int v) throws IOException {
-        writeSignatureMarkerAndVersionIfNeeded();
-        output.writeChar(v);
-    }
-
-    @Override
-    public void writeInt(int v) throws IOException {
-        writeSignatureMarkerAndVersionIfNeeded();
-        output.writeInt(v);
-    }
-
-    @Override
-    public void writeLong(long v) throws IOException {
-        writeSignatureMarkerAndVersionIfNeeded();
-        output.writeLong(v);
-    }
-
-    @Override
-    public void writeFloat(float v) throws IOException {
-        writeSignatureMarkerAndVersionIfNeeded();
-        output.writeFloat(v);
-    }
-
-    @Override
-    public void writeDouble(double v) throws IOException {
-        writeSignatureMarkerAndVersionIfNeeded();
-        output.writeDouble(v);
-    }
-
-    @Override
-    public void writeBytes(String s) throws IOException {
-        writeSignatureMarkerAndVersionIfNeeded();
-        output.writeBytes(s);
-    }
-
-    @Override
-    public void writeChars(String s) throws IOException {
-        writeSignatureMarkerAndVersionIfNeeded();
-        output.writeChars(s);
-    }
-
-    @Override
-    public void writeUTF(String s) throws IOException {
-        writeSignatureMarkerAndVersionIfNeeded();
-        output.writeUTF(s);
     }
 }
