@@ -62,6 +62,8 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     private short payloadVersion;
 
+    private boolean votingMember = true;
+
     public RaftActorContextImpl(ActorRef actor, ActorContext context, String id,
             ElectionTerm termInformation, long commitIndex, long lastApplied, Map<String, String> peerAddresses,
             ConfigParams configParams, DataPersistenceProvider persistenceProvider, Logger logger) {
@@ -189,10 +191,14 @@ public class RaftActorContextImpl implements RaftActorContext {
 
     @Override
     public void updatePeerIds(ServerConfigurationPayload serverConfig){
-
+        votingMember = true;
         Set<String> currentPeers = new HashSet<>(this.getPeerIds());
         for(ServerInfo server: serverConfig.getServerConfig()) {
-            if(!getId().equals(server.getId())) {
+            if(getId().equals(server.getId())) {
+                if(!server.isVoting()) {
+                    votingMember = false;
+                }
+            } else {
                 VotingState votingState = server.isVoting() ? VotingState.VOTING: VotingState.NON_VOTING;
                 if(!currentPeers.contains(server.getId())) {
                     this.addToPeers(server.getId(), null, votingState);
@@ -296,5 +302,10 @@ public class RaftActorContextImpl implements RaftActorContext {
 
         newConfig.add(new ServerInfo(getId(), true));
         return (new ServerConfigurationPayload(newConfig));
+    }
+
+    @Override
+    public boolean isVotingMember() {
+        return votingMember;
     }
 }

@@ -236,4 +236,9 @@ public interface RaftActorContext {
      * dynamic server configurations are available, otherwise returns null
      */
     @Nullable ServerConfigurationPayload getPeerServerInfo();
+
+    /**
+     * @return true if this RaftActor is a voting member of the cluster, false otherwise.
+     */
+    boolean isVotingMember();
 }

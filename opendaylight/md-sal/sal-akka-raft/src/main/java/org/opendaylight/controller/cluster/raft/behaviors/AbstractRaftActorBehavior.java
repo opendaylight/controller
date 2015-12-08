@@ -252,6 +252,10 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
         }
     }
 
+    protected boolean canStartElection() {
+        return context.getRaftPolicy().automaticElectionsEnabled() && context.isVotingMember();
+    }
+
     /**
      * schedule a new election
      *
@@ -260,12 +264,11 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
     protected void scheduleElection(FiniteDuration interval) {
         stopElection();
 
-        // Schedule an election. When the scheduler triggers an ElectionTimeout
-        // message is sent to itself
-        electionCancel =
-            context.getActorSystem().scheduler().scheduleOnce(interval,
-                context.getActor(), ELECTION_TIMEOUT,
-                context.getActorSystem().dispatcher(), context.getActor());
+        if(canStartElection()) {
+            // Schedule an election. When the scheduler triggers an ElectionTimeout message is sent to itself
+            electionCancel = context.getActorSystem().scheduler().scheduleOnce(interval, context.getActor(),
+                    ELECTION_TIMEOUT,context.getActorSystem().dispatcher(), context.getActor());
+        }
     }
 
     /**
