@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_cc8823c9",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/netconf/sal/KeepaliveSalFacade.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 84
+      },
+      "writtenOn": "2015-12-08T16:54:39Z",
+      "side": 1,
+      "message": "Thinking about this solution a bit... I think we can do better here, because with this approach, we might exhaust the keepalive executor pretty quickly. Let\u0027s say the executor has 8 threads and we are connected to 10000 devices, where 50 of them stop responding to keepalives. The executor becomes exhausted (unless it\u0027s a cached pool in which case we will be spawning excessive amount of threads) and we will stop performing keepalives to all the devices for some time.\n\nWhat if we reimplemented the insides of \"try {} catch\" block to something like this:\n\n                if(!currentKeepalive.isDone()) {\n                    onFailure(new IllegalStateException(\"Previous keepalive timed out\"));    \n                } else {\n                    Futures.addCallback(currentDeviceRpc.invokeRpc(PATH, KEEPALIVE_PAYLOAD), this);\n                    scheduleKeepalive();\n                }\n\n\nThis approach would schedule next keepalive task right away (instead of waiting for it to finish) and that next task would check if the previous one finished or not. If not, we have timed out for a keepalive and can disconnect.\n\nThis approach would use just a single number for both timeout and delay, but would keep the implementation simple and efficient. We could do different values for timeout and delay with this approach, but that would increase the complexity here, because we would have to add another task called e.g. Timeout that would do the scheduling + timeout check.",
+      "range": {
+        "startLine": 185,
+        "startChar": 0,
+        "endLine": 195,
+        "endChar": 21
+      },
+      "revId": "35daa6f5deb5772802906d5b2566ae8e335ca4d5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
