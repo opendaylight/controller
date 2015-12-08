@@ -75,8 +75,7 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput,
      */
     @Deprecated
     public NormalizedNodeInputStreamReader(final InputStream stream) throws IOException {
-        Preconditions.checkNotNull(stream);
-        input = new DataInputStream(stream);
+        this((DataInput) new DataInputStream(Preconditions.checkNotNull(stream)));
     }
 
     /**
@@ -84,7 +83,12 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput,
      */
     @Deprecated
     public NormalizedNodeInputStreamReader(final DataInput input) {
+        this(input, false);
+    }
+
+    NormalizedNodeInputStreamReader(final DataInput input, final boolean versionChecked) {
         this.input = Preconditions.checkNotNull(input);
+        readSignatureMarker = !versionChecked;
     }
 
     @Override
@@ -413,19 +417,19 @@ public class NormalizedNodeInputStreamReader implements NormalizedNodeDataInput,
     }
 
     @Override
-    public void readFully(byte[] b) throws IOException {
+    public void readFully(final byte[] b) throws IOException {
         readSignatureMarkerAndVersionIfNeeded();
         input.readFully(b);
     }
 
     @Override
-    public void readFully(byte[] b, int off, int len) throws IOException {
+    public void readFully(final byte[] b, final int off, final int len) throws IOException {
         readSignatureMarkerAndVersionIfNeeded();
         input.readFully(b, off, len);
     }
 
     @Override
-    public int skipBytes(int n) throws IOException {
+    public int skipBytes(final int n) throws IOException {
         readSignatureMarkerAndVersionIfNeeded();
         return input.skipBytes(n);
     }
