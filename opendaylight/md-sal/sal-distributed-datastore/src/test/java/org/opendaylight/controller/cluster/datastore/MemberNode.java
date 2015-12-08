@@ -144,7 +144,8 @@ public class MemberNode {
         verifyRaftState(datastore, shardName, new RaftStateVerifier() {
             @Override
             public void verify(OnDemandRaftState raftState) {
-                assertTrue("Peer(s) " + peerIds + " not found for shard " + shardName,
+                assertTrue(String.format("Peer(s) %s not found for shard %s. Actual: %s", peerIds, shardName,
+                        raftState.getPeerAddresses().keySet()),
                         raftState.getPeerAddresses().keySet().containsAll(peerIds));
             }
         });

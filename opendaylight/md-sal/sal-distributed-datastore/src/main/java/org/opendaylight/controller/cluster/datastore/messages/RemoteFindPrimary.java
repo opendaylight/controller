@@ -7,6 +7,12 @@
  */
 package org.opendaylight.controller.cluster.datastore.messages;
 
+import com.google.common.base.Preconditions;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import javax.annotation.Nonnull;
+
 /**
  * A remote message sent to locate the primary shard.
  *
@@ -15,7 +21,15 @@ package org.opendaylight.controller.cluster.datastore.messages;
 public class RemoteFindPrimary extends FindPrimary {
     private static final long serialVersionUID = 1L;
 
-    public RemoteFindPrimary(String shardName, boolean waitUntilReady) {
+    private final Set<String> visitedAddresses;
+
+    public RemoteFindPrimary(String shardName, boolean waitUntilReady, @Nonnull Collection<String> visitedAddresses) {
         super(shardName, waitUntilReady);
+        this.visitedAddresses = new HashSet<>(Preconditions.checkNotNull(visitedAddresses));
+    }
+
+    @Nonnull
+    public Set<String> getVisitedAddresses() {
+        return visitedAddresses;
     }
 }
