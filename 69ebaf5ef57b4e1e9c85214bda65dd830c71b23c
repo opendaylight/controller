@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "1aa4ed85_77045815",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 307,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-12-08T17:24:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1aa4ed85_29bbe973",
+      "revId": "69ebaf5ef57b4e1e9c85214bda65dd830c71b23c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1aa4ed85_e985d1ad",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
         "patchSetId": 4
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "1aa4ed85_2cec57c7",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardManager.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1134,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-12-08T17:24:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1aa4ed85_e985d1ad",
+      "revId": "69ebaf5ef57b4e1e9c85214bda65dd830c71b23c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1aa4ed85_c976d5d8",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/RemoveShardReplica.java",
         "patchSetId": 4
@@ -47,6 +83,24 @@
       "writtenOn": "2015-12-08T13:27:36Z",
       "side": 1,
       "message": "What is dataStoreType needed for?",
+      "revId": "69ebaf5ef57b4e1e9c85214bda65dd830c71b23c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_b719707b",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/RemoveShardReplica.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 795
+      },
+      "writtenOn": "2015-12-08T17:24:23Z",
+      "side": 1,
+      "message": "I do use it to construct the ShardIdentifier in ShardManager - then there is also the toString? Any objection to having it in here?",
+      "parentUuid": "1aa4ed85_c976d5d8",
       "revId": "69ebaf5ef57b4e1e9c85214bda65dd830c71b23c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
