@@ -22,6 +22,30 @@
       "revId": "35daa6f5deb5772802906d5b2566ae8e335ca4d5",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_7731b8a1",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/sal/connect/netconf/sal/KeepaliveSalFacade.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-12-08T18:10:24Z",
+      "side": 1,
+      "message": "Ok what you\u0027re saying make sense to me. So instead of having a proper timeout, we use the delay to timeout the keepalive RPC. I agree this approach is more elegant.\n\nBut if we do that, I think the keepalive delay need to have a min value, i.e. 5 seconds or whatever value that make sense. Because if we set the keepalive delay to 1 second, we could hit a scenario where we never get the callback, thus reconnecting the session everytime. So we will end up in a \"reconnect loop\".\n\nMaybe adding a new task for the timeout could be a good idea, because I believe keepalive timeout and keepalive delay are really 2 different notions that should be treated separately. \nI thought at this approach at first, but I did it like it is because it was more simple.",
+      "parentUuid": "1aa4ed85_cc8823c9",
+      "range": {
+        "startLine": 185,
+        "startChar": 0,
+        "endLine": 195,
+        "endChar": 21
+      },
+      "revId": "35daa6f5deb5772802906d5b2566ae8e335ca4d5",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
