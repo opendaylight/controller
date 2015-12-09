@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_429e3758",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/NormalizedNodeStreamReader.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-12-09T16:15:36Z",
+      "side": 1,
+      "message": "I don\u0027t think we need this interface since NormalizedNodeInoutStreamReader is the only impl. Not sure why this interface was added in the first place, especially since there\u0027s no corresponding NormalizedNodeStreamWriter interface.",
+      "revId": "47d6602079a05c6ee043c07914f20898410a715d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
