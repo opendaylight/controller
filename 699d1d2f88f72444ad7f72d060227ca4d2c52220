@@ -16,6 +16,24 @@
       "revId": "699d1d2f88f72444ad7f72d060227ca4d2c52220",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_e05e3b12",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/FailedNormalizedNodeInput.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-12-09T22:22:34Z",
+      "side": 1,
+      "message": "Your question is spot-on, that\u0027s exactly what I did before, but then decided to decode the header directly in the factory methods/constructors, so that we do not have defunct Inputs floating around.\n\nI forgot to delete this one, will do that tomorrow.",
+      "parentUuid": "1aa4ed85_e225e30a",
+      "revId": "699d1d2f88f72444ad7f72d060227ca4d2c52220",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
