@@ -10,6 +10,7 @@ package org.opendaylight.controller.netconf.test.tool.client.http.perf;
 
 import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.AsyncHttpClientConfig;
+import com.ning.http.client.Realm;
 import com.ning.http.client.Request;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
@@ -36,12 +37,22 @@ public class PerfClientCallable implements Callable<Void>{
                 .build());
         this.payloads = new ArrayList<>();
         for (DestToPayload payload : payloads) {
-            this.payloads.add(asyncHttpClient.preparePost(payload.getDestination())
+            AsyncHttpClient.BoundRequestBuilder requestBuilder = asyncHttpClient.preparePost(payload.getDestination())
                     .addHeader("content-type", "application/json")
                     .addHeader("Accept", "application/xml")
                     .setBody(payload.getPayload())
-                    .setRequestTimeout(Integer.MAX_VALUE)
-                    .build());
+                    .setRequestTimeout(Integer.MAX_VALUE);
+
+            if(params.auth != null) {
+                requestBuilder.setRealm(new Realm.RealmBuilder()
+                        .setScheme(Realm.AuthScheme.BASIC)
+                        .setPrincipal(params.auth.get(0))
+                        .setPassword(params.auth.get(1))
+                        .setUsePreemptiveAuth(true)
+                        .build());
+            }
+
+            this.payloads.add(requestBuilder.build());
         }
         executionStrategy = getExecutionStrategy();
     }
