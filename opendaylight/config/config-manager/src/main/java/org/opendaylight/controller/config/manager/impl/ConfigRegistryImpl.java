@@ -338,6 +338,11 @@ public class ConfigRegistryImpl implements AutoCloseable, ConfigRegistryImplMXBe
 
                 // close old module jmx registrator
                 oldInternalInfo.getModuleJMXRegistrator().close();
+
+                // We no longer need old internal info. Clear it out, so we do not create a serial leak evidenced
+                // by BUG-4514. The reason is that modules retain their resolver, which retains modules. If we retain
+                // the old module, we would have the complete reconfiguration history held in heap for no good reason.
+                entry.clearOldInternalInfo();
             } else {
                 // new instance:
                 // wrap in readable dynamic mbean
