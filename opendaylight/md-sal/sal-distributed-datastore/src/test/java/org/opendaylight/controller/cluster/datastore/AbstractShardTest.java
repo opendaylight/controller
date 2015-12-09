@@ -253,8 +253,7 @@ public abstract class AbstractShardTest extends AbstractActorTest{
                                                                   MutableCompositeModification modification,
                                                                   boolean doCommitOnReady) {
         if(remoteReadWriteTransaction){
-            return new ForwardedReadyTransaction(transactionID, CURRENT_VERSION,
-                    cohort, modification, true, doCommitOnReady);
+            return new ForwardedReadyTransaction(transactionID, CURRENT_VERSION, cohort, true, doCommitOnReady);
         } else {
             setupCohortDecorator(shard, cohort);
             return prepareBatchedModifications(transactionID, modification, doCommitOnReady);

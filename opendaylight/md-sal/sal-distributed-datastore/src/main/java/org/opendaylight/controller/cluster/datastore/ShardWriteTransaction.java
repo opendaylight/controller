@@ -198,7 +198,7 @@ public class ShardWriteTransaction extends ShardTransaction {
         ShardDataTreeCohort cohort =  transaction.ready();
 
         getShardActor().forward(new ForwardedReadyTransaction(transactionID, getClientTxVersion(),
-                cohort, compositeModification, returnSerialized, doImmediateCommit), getContext());
+                cohort, returnSerialized, doImmediateCommit), getContext());
 
         // The shard will handle the commit from here so we're no longer needed - self-destruct.
         getSelf().tell(PoisonPill.getInstance(), getSelf());

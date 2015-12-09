@@ -8,7 +8,6 @@
 package org.opendaylight.controller.cluster.datastore.messages;
 
 import org.opendaylight.controller.cluster.datastore.ShardDataTreeCohort;
-import org.opendaylight.controller.cluster.datastore.modification.Modification;
 
 /**
  * Transaction ReadyTransaction message that is forwarded to the local Shard from the ShardTransaction.
@@ -18,17 +17,15 @@ import org.opendaylight.controller.cluster.datastore.modification.Modification;
 public class ForwardedReadyTransaction {
     private final String transactionID;
     private final ShardDataTreeCohort cohort;
-    private final Modification modification;
     private final boolean returnSerialized;
     private final boolean doImmediateCommit;
     private final short txnClientVersion;
 
     public ForwardedReadyTransaction(String transactionID, short txnClientVersion,
-            ShardDataTreeCohort cohort, Modification modification,
-            boolean returnSerialized, boolean doImmediateCommit) {
+            ShardDataTreeCohort cohort, boolean returnSerialized,
+            boolean doImmediateCommit) {
         this.transactionID = transactionID;
         this.cohort = cohort;
-        this.modification = modification;
         this.returnSerialized = returnSerialized;
         this.txnClientVersion = txnClientVersion;
         this.doImmediateCommit = doImmediateCommit;
@@ -40,10 +37,6 @@ public class ForwardedReadyTransaction {
 
     public ShardDataTreeCohort getCohort() {
         return cohort;
-    }
-
-    public Modification getModification() {
-        return modification;
     }
 
     public boolean isReturnSerialized() {
