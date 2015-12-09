@@ -16,6 +16,24 @@
       "revId": "47d6602079a05c6ee043c07914f20898410a715d",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_206533e1",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/NormalizedNodeStreamReader.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-12-09T22:19:56Z",
+      "side": 1,
+      "message": "Yes, the plan is to remove it, but there is a user in netconf clustering already, so this is done gradually. NormalizedNodeDataInput/Output replace the writers.\n\nAs for single implementations, I would like to hide them, so users do not directly instantiate implementations, but rather go through NormalizedNodeInputOutput\u0027s static factory methods.",
+      "parentUuid": "1aa4ed85_429e3758",
+      "revId": "47d6602079a05c6ee043c07914f20898410a715d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
