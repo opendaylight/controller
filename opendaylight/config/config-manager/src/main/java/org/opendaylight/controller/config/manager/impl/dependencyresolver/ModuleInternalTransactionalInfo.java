@@ -8,6 +8,7 @@
 package org.opendaylight.controller.config.manager.impl.dependencyresolver;
 
 import com.google.common.base.Preconditions;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.opendaylight.controller.config.api.ModuleIdentifier;
 import org.opendaylight.controller.config.manager.impl.ModuleInternalInfo;
@@ -22,11 +23,11 @@ public class ModuleInternalTransactionalInfo implements Identifiable<ModuleIdent
     private final ModuleIdentifier name;
     private final Module proxiedModule, realModule;
     private final ModuleFactory moduleFactory;
-    @Nullable
-    private final ModuleInternalInfo maybeOldInternalInfo;
+
     private final TransactionModuleJMXRegistration transactionModuleJMXRegistration;
     private final boolean isDefaultBean;
     private final BundleContext bundleContext;
+    @Nullable private ModuleInternalInfo maybeOldInternalInfo;
 
     public ModuleInternalTransactionalInfo(ModuleIdentifier name, Module proxiedModule,
                                            ModuleFactory moduleFactory,
@@ -69,9 +70,13 @@ public class ModuleInternalTransactionalInfo implements Identifiable<ModuleIdent
         return moduleFactory;
     }
 
-    @Nullable
-    public ModuleInternalInfo getOldInternalInfo() {
+    @Nonnull public ModuleInternalInfo getOldInternalInfo() {
         return Preconditions.checkNotNull(maybeOldInternalInfo);
+    }
+
+    public void clearOldInternalInfo() {
+        Preconditions.checkState(maybeOldInternalInfo != null, "No old internal info present");
+        maybeOldInternalInfo = null;
     }
 
     public TransactionModuleJMXRegistration getTransactionModuleJMXRegistration() {
