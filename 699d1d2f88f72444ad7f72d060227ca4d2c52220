@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_e225e30a",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/FailedNormalizedNodeInput.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-12-09T16:37:45Z",
+      "side": 1,
+      "message": "I don\u0027t see this used anywhere. Did you intend to return it from NormalizedNodeInputOutput.newDataInput instead of throwing an exception directly?",
+      "revId": "699d1d2f88f72444ad7f72d060227ca4d2c52220",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
