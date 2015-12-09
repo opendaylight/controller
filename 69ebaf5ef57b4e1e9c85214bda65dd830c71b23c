@@ -104,6 +104,24 @@
       "revId": "69ebaf5ef57b4e1e9c85214bda65dd830c71b23c",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_25b465f1",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/messages/RemoveShardReplica.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-12-09T19:40:58Z",
+      "side": 1,
+      "message": "Shouldn\u0027t this message be sent to the correct ShardManager corresponding to the DatastoreType in the RPC? That\u0027s what I did for AddShardReplica.",
+      "parentUuid": "1aa4ed85_b719707b",
+      "revId": "69ebaf5ef57b4e1e9c85214bda65dd830c71b23c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
