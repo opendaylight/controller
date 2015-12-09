@@ -64,7 +64,7 @@ public class JsonNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPr
             jsonParser.parse(reader);
             return new NormalizedNodeContext(path.get(),resultHolder.getResult());
         } catch (Exception e) {
-            LOG.debug("Error parsing json input", e);
+            LOG.info("Error parsing json input", e);
 
             throw new RestconfDocumentedException("Error parsing input: " + e.getMessage(), ErrorType.PROTOCOL,
                     ErrorTag.MALFORMED_MESSAGE);
