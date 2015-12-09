@@ -87,7 +87,7 @@ public class JsonNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPr
                     "Are you creating multiple resources/subresources in POST request?");
         }
 
-        LOG.debug("Error parsing json input", e);
+        LOG.info("Error parsing json input", e);
 
         throw new RestconfDocumentedException("Error parsing input: " + e.getMessage(), ErrorType.PROTOCOL,
                 ErrorTag.MALFORMED_MESSAGE, e);
