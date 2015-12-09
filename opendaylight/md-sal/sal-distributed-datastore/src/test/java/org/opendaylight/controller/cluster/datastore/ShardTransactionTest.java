@@ -23,7 +23,6 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
-import org.opendaylight.controller.cluster.datastore.ShardWriteTransaction.GetCompositeModificationReply;
 import org.opendaylight.controller.cluster.datastore.exceptions.UnknownMessageException;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
@@ -45,10 +44,8 @@ import org.opendaylight.controller.cluster.datastore.messages.ReadyTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.WriteData;
 import org.opendaylight.controller.cluster.datastore.messages.WriteDataReply;
-import org.opendaylight.controller.cluster.datastore.modification.CompositeModification;
 import org.opendaylight.controller.cluster.datastore.modification.DeleteModification;
 import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
-import org.opendaylight.controller.cluster.datastore.modification.Modification;
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
 import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec;
 import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec.Encoded;
@@ -250,19 +247,6 @@ public class ShardTransactionTest extends AbstractActorTest {
         }};
     }
 
-    private void assertModification(final ActorRef subject,
-        final Class<? extends Modification> modificationType) {
-        new JavaTestKit(getSystem()) {{
-            subject.tell(new ShardWriteTransaction.GetCompositedModification(), getRef());
-
-            CompositeModification compositeModification = expectMsgClass(duration("3 seconds"),
-                    GetCompositeModificationReply.class).getModification();
-
-            assertTrue(compositeModification.getModifications().size() == 1);
-            assertEquals(modificationType, compositeModification.getModifications().get(0).getClass());
-        }};
-    }
-
     @Test
     public void testOnReceiveWriteData() {
         new JavaTestKit(getSystem()) {{
@@ -274,8 +258,6 @@ public class ShardTransactionTest extends AbstractActorTest {
                         toSerializable(), getRef());
 
             expectMsgClass(duration("5 seconds"), ShardTransactionMessages.WriteDataReply.class);
-
-            assertModification(transaction, WriteModification.class);
 
             // unserialized write
             transaction.tell(new WriteData(TestModel.TEST_PATH,
@@ -301,8 +283,6 @@ public class ShardTransactionTest extends AbstractActorTest {
             transaction.tell(serialized, getRef());
 
             expectMsgClass(duration("5 seconds"), ShardTransactionMessages.WriteDataReply.class);
-
-            assertModification(transaction, WriteModification.class);
         }};
     }
 
@@ -317,8 +297,6 @@ public class ShardTransactionTest extends AbstractActorTest {
                         toSerializable(), getRef());
 
             expectMsgClass(duration("5 seconds"), ShardTransactionMessages.MergeDataReply.class);
-
-            assertModification(transaction, MergeModification.class);
 
             //unserialized merge
             transaction.tell(new MergeData(TestModel.TEST_PATH,
@@ -344,8 +322,6 @@ public class ShardTransactionTest extends AbstractActorTest {
             transaction.tell(serialized, getRef());
 
             expectMsgClass(duration("5 seconds"), ShardTransactionMessages.MergeDataReply.class);
-
-            assertModification(transaction, MergeModification.class);
         }};
     }
 
@@ -359,8 +335,6 @@ public class ShardTransactionTest extends AbstractActorTest {
                     toSerializable(), getRef());
 
             expectMsgClass(duration("5 seconds"), ShardTransactionMessages.DeleteDataReply.class);
-
-            assertModification(transaction, DeleteModification.class);
 
             //unserialized
             transaction.tell(new DeleteData(TestModel.TEST_PATH, DataStoreVersions.CURRENT_VERSION), getRef());
@@ -398,25 +372,6 @@ public class ShardTransactionTest extends AbstractActorTest {
 
             BatchedModificationsReply reply = expectMsgClass(duration("5 seconds"), BatchedModificationsReply.class);
             assertEquals("getNumBatched", 3, reply.getNumBatched());
-
-            JavaTestKit verification = new JavaTestKit(getSystem());
-            transaction.tell(new ShardWriteTransaction.GetCompositedModification(), verification.getRef());
-
-            CompositeModification compositeModification = verification.expectMsgClass(duration("5 seconds"),
-                        GetCompositeModificationReply.class).getModification();
-
-            assertEquals("CompositeModification size", 3, compositeModification.getModifications().size());
-
-            WriteModification write = (WriteModification)compositeModification.getModifications().get(0);
-            assertEquals("getPath", writePath, write.getPath());
-            assertEquals("getData", writeData, write.getData());
-
-            MergeModification merge = (MergeModification)compositeModification.getModifications().get(1);
-            assertEquals("getPath", mergePath, merge.getPath());
-            assertEquals("getData", mergeData, merge.getData());
-
-            DeleteModification delete = (DeleteModification)compositeModification.getModifications().get(2);
-            assertEquals("getPath", deletePath, delete.getPath());
 
             InOrder inOrder = Mockito.inOrder(mockModification);
             inOrder.verify(mockModification).write(writePath, writeData);

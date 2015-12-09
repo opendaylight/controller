@@ -24,12 +24,7 @@ import org.opendaylight.controller.cluster.datastore.messages.ReadData;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.WriteData;
 import org.opendaylight.controller.cluster.datastore.messages.WriteDataReply;
-import org.opendaylight.controller.cluster.datastore.modification.CompositeModification;
-import org.opendaylight.controller.cluster.datastore.modification.DeleteModification;
-import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
-import org.opendaylight.controller.cluster.datastore.modification.MutableCompositeModification;
-import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
 
 /**
  * @author: syedbahm
@@ -37,7 +32,6 @@ import org.opendaylight.controller.cluster.datastore.modification.WriteModificat
  */
 public class ShardWriteTransaction extends ShardTransaction {
 
-    private final MutableCompositeModification compositeModification = new MutableCompositeModification();
     private int totalBatchedModificationsReceived;
     private Exception lastBatchedModificationsException;
     private final ReadWriteShardDataTreeTransaction transaction;
@@ -70,10 +64,6 @@ public class ShardWriteTransaction extends ShardTransaction {
 
         } else if(DeleteData.isSerializedType(message)) {
             deleteData(DeleteData.fromSerializable(message), SERIALIZED_REPLY);
-
-        } else if (message instanceof GetCompositedModification) {
-            // This is here for testing only
-            getSender().tell(new GetCompositeModificationReply(compositeModification), getSelf());
         } else {
             super.handleReceive(message);
         }
@@ -89,7 +79,6 @@ public class ShardWriteTransaction extends ShardTransaction {
 
         try {
             for(Modification modification: batched.getModifications()) {
-                compositeModification.addModification(modification);
                 modification.apply(transaction.getSnapshot());
             }
 
@@ -142,8 +131,6 @@ public class ShardWriteTransaction extends ShardTransaction {
             return;
         }
 
-        compositeModification.addModification(
-                new WriteModification(message.getPath(), message.getData()));
         try {
             transaction.getSnapshot().write(message.getPath(), message.getData());
             WriteDataReply writeDataReply = WriteDataReply.INSTANCE;
@@ -159,9 +146,6 @@ public class ShardWriteTransaction extends ShardTransaction {
         if (checkClosed()) {
             return;
         }
-
-        compositeModification.addModification(
-                new MergeModification(message.getPath(), message.getData()));
 
         try {
             transaction.getSnapshot().merge(message.getPath(), message.getData());
@@ -179,7 +163,6 @@ public class ShardWriteTransaction extends ShardTransaction {
             return;
         }
 
-        compositeModification.addModification(new DeleteModification(message.getPath()));
         try {
             transaction.getSnapshot().delete(message.getPath());
             DeleteDataReply deleteDataReply = DeleteDataReply.INSTANCE;
@@ -202,23 +185,5 @@ public class ShardWriteTransaction extends ShardTransaction {
 
         // The shard will handle the commit from here so we're no longer needed - self-destruct.
         getSelf().tell(PoisonPill.getInstance(), getSelf());
-    }
-
-    // These classes are in here for test purposes only
-
-    static class GetCompositedModification {
-    }
-
-    static class GetCompositeModificationReply {
-        private final CompositeModification modification;
-
-
-        GetCompositeModificationReply(CompositeModification modification) {
-            this.modification = modification;
-        }
-
-        public CompositeModification getModification() {
-            return modification;
-        }
     }
 }
