@@ -76,18 +76,16 @@ public class JsonNormalizedNodeBodyReader extends AbstractIdentifierAwareJaxRsPr
     }
 
     private static void propagateExceptionAs(Exception e) throws RestconfDocumentedException {
-        if(e instanceof RestconfDocumentedException) {
+    	LOG.info("Error parsing json input", e);
+
+    	if(e instanceof RestconfDocumentedException) {
             throw (RestconfDocumentedException)e;
         }
 
         if(e instanceof ResultAlreadySetException) {
-            LOG.debug("Error parsing json input:", e);
-
             throw new RestconfDocumentedException("Error parsing json input: Failed to create new parse result data. " +
                     "Are you creating multiple resources/subresources in POST request?");
         }
-
-        LOG.debug("Error parsing json input", e);
 
         throw new RestconfDocumentedException("Error parsing input: " + e.getMessage(), ErrorType.PROTOCOL,
                 ErrorTag.MALFORMED_MESSAGE, e);
