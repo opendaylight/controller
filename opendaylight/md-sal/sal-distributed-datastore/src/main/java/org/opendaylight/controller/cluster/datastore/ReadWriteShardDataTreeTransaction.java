@@ -10,7 +10,7 @@ package org.opendaylight.controller.cluster.datastore;
 import com.google.common.base.Preconditions;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 
-final class ReadWriteShardDataTreeTransaction extends AbstractShardDataTreeTransaction<DataTreeModification> {
+public final class ReadWriteShardDataTreeTransaction extends AbstractShardDataTreeTransaction<DataTreeModification> {
     private final ShardDataTreeTransactionParent parent;
 
     protected ReadWriteShardDataTreeTransaction(final ShardDataTreeTransactionParent parent, final String id, final DataTreeModification modification) {

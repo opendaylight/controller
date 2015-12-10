@@ -11,7 +11,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.opendaylight.controller.cluster.datastore.DataStoreVersions.CURRENT_VERSION;
 import akka.actor.ActorRef;
@@ -253,11 +256,22 @@ public abstract class AbstractShardTest extends AbstractActorTest{
                                                                   MutableCompositeModification modification,
                                                                   boolean doCommitOnReady) {
         if(remoteReadWriteTransaction){
-            return new ForwardedReadyTransaction(transactionID, CURRENT_VERSION, cohort, true, doCommitOnReady);
+            return prepareForwardedReadyTransaction(cohort, transactionID, CURRENT_VERSION,
+                    doCommitOnReady);
         } else {
             setupCohortDecorator(shard, cohort);
             return prepareBatchedModifications(transactionID, modification, doCommitOnReady);
         }
+    }
+
+    protected Object prepareForwardedReadyTransaction(ShardDataTreeCohort cohort, String transactionID,
+            short version, boolean doCommitOnReady) {
+        ShardDataTreeTransactionParent mockParent = mock(ShardDataTreeTransactionParent.class);
+        doReturn(cohort).when(mockParent).finishTransaction(any(ReadWriteShardDataTreeTransaction.class));
+        doNothing().when(mockParent).abortTransaction(any(AbstractShardDataTreeTransaction.class));
+        return new ForwardedReadyTransaction(transactionID, version,
+                new ReadWriteShardDataTreeTransaction(mockParent, transactionID,
+                        mock(DataTreeModification.class)), true, doCommitOnReady);
     }
 
     protected Object prepareReadyTransactionMessage(boolean remoteReadWriteTransaction, Shard shard, ShardDataTreeCohort cohort,
