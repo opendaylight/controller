@@ -127,7 +127,8 @@ class ShardCommitCoordinator {
         log.debug("{}: Readying transaction {}, client version {}", name,
                 ready.getTransactionID(), ready.getTxnClientVersion());
 
-        CohortEntry cohortEntry = new CohortEntry(ready.getTransactionID(), ready.getCohort());
+        ShardDataTreeCohort cohort = ready.getTransaction().ready();
+        CohortEntry cohortEntry = new CohortEntry(ready.getTransactionID(), cohort);
         cohortCache.put(ready.getTransactionID(), cohortEntry);
 
         if(!queueCohortEntry(cohortEntry, sender, shard)) {
