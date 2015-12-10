@@ -11,6 +11,7 @@
   <artifactId>opendaylight-karaf-empty</artifactId>
   <version>1.5.4-SNAPSHOT</version>
   <name>${project.artifactId}</name>
+  <packaging>pom</packaging>
   <prerequisites>
     <maven>3.1.1</maven>
   </prerequisites>
