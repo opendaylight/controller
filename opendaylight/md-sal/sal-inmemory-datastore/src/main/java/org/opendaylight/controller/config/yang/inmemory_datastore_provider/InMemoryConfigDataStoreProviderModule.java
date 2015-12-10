@@ -1,5 +1,6 @@
 package org.opendaylight.controller.config.yang.inmemory_datastore_provider;
 
+import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStore;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreConfigProperties;
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreFactory;
@@ -22,11 +23,11 @@ public class InMemoryConfigDataStoreProviderModule extends org.opendaylight.cont
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-        InMemoryDOMDataStore dataStore = InMemoryDOMDataStoreFactory.create("DOM-CFG", getSchemaServiceDependency(),
-                getDebugTransactions(),
-                InMemoryDOMDataStoreConfigProperties.create(getMaxDataChangeExecutorPoolSize(),
-                        getMaxDataChangeExecutorQueueSize(), getMaxDataChangeListenerQueueSize(),
-                        getMaxDataStoreExecutorQueueSize()));
+        InMemoryDOMDataStore dataStore = InMemoryDOMDataStoreFactory.create("DOM-CFG",
+            LogicalDatastoreType.CONFIGURATION, getSchemaServiceDependency(), getDebugTransactions(),
+            InMemoryDOMDataStoreConfigProperties.create(getMaxDataChangeExecutorPoolSize(),
+                getMaxDataChangeExecutorQueueSize(), getMaxDataChangeListenerQueueSize(),
+                getMaxDataStoreExecutorQueueSize()));
 
         InMemoryDataStoreStats statsBean = new InMemoryDataStoreStats("InMemoryConfigDataStore", dataStore);
         dataStore.setCloseable(statsBean);
