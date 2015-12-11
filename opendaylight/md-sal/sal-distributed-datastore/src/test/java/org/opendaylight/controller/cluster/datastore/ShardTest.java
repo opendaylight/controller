@@ -49,6 +49,7 @@ import org.junit.Test;
 import org.mockito.InOrder;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.DelegatingPersistentDataProvider;
+import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardIdentifier;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 import org.opendaylight.controller.cluster.datastore.messages.AbortTransaction;
@@ -94,6 +95,7 @@ import org.opendaylight.controller.cluster.raft.client.messages.FindLeader;
 import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
 import org.opendaylight.controller.cluster.raft.messages.RequestVote;
 import org.opendaylight.controller.cluster.raft.messages.ServerRemoved;
+import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.cluster.raft.utils.InMemorySnapshotStore;
 import org.opendaylight.controller.cluster.raft.utils.MessageCollectorActor;
@@ -1119,6 +1121,32 @@ public class ShardTest extends AbstractShardTest {
             expectMsgEquals(batched);
 
             shard.tell(PoisonPill.getInstance(), ActorRef.noSender());
+        }};
+    }
+
+    @Test
+    public void testTransactionMessagesWithNoLeader() {
+        new ShardTestKit(getSystem()) {{
+            dataStoreContextBuilder.customRaftPolicyImplementation(DisableElectionsRaftPolicy.class.getName()).
+                shardHeartbeatIntervalInMillis(50).shardElectionTimeoutFactor(1);
+            final TestActorRef<Shard> shard = actorFactory.createTestActor(
+                    newShardProps().withDispatcher(Dispatchers.DefaultDispatcherId()),
+                    "testTransactionMessagesWithNoLeader");
+
+            waitUntilNoLeader(shard);
+
+            shard.tell(new BatchedModifications("tx", DataStoreVersions.CURRENT_VERSION, ""), getRef());
+            Failure failure = expectMsgClass(Failure.class);
+            assertEquals("Failure cause type", NoShardLeaderException.class, failure.cause().getClass());
+
+            shard.tell(prepareForwardedReadyTransaction(mock(ShardDataTreeCohort.class), "tx",
+                    DataStoreVersions.CURRENT_VERSION, true), getRef());
+            failure = expectMsgClass(Failure.class);
+            assertEquals("Failure cause type", NoShardLeaderException.class, failure.cause().getClass());
+
+            shard.tell(new ReadyLocalTransaction("tx", mock(DataTreeModification.class), true), getRef());
+            failure = expectMsgClass(Failure.class);
+            assertEquals("Failure cause type", NoShardLeaderException.class, failure.cause().getClass());
         }};
     }
 
