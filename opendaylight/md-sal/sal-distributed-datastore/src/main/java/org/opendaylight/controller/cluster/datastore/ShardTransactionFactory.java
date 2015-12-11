@@ -7,9 +7,9 @@
  */
 package org.opendaylight.controller.cluster.datastore;
 
-import com.google.common.base.Preconditions;
 import akka.actor.ActorRef;
 import akka.actor.UntypedActorContext;
+import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.datastore.identifiers.ShardTransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 
@@ -43,10 +43,15 @@ class ShardTransactionActorFactory {
         switch (type) {
         case READ_ONLY:
             transaction = dataTree.newReadOnlyTransaction(transactionID.toString(), transactionChainID);
+            shardMBean.incrementReadOnlyTransactionCount();
             break;
         case READ_WRITE:
+            transaction = dataTree.newReadWriteTransaction(transactionID.toString(), transactionChainID);
+            shardMBean.incrementReadWriteTransactionCount();
+            break;
         case WRITE_ONLY:
             transaction = dataTree.newReadWriteTransaction(transactionID.toString(), transactionChainID);
+            shardMBean.incrementWriteOnlyTransactionCount();
             break;
         default:
             throw new IllegalArgumentException("Unsupported transaction type " + type);

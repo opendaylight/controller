@@ -14,6 +14,7 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.PoisonPill;
 import com.google.common.base.Optional;
+import com.google.common.base.Stopwatch;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.util.concurrent.Callable;
@@ -22,6 +23,7 @@ import org.mockito.Mockito;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
 import org.opendaylight.controller.cluster.datastore.config.ConfigurationImpl;
+import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 import org.opendaylight.controller.cluster.datastore.messages.DatastoreSnapshot;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.md.cluster.datastore.model.SchemaContextHelper;
@@ -32,6 +34,9 @@ import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
+import scala.concurrent.Await;
+import scala.concurrent.Future;
+import scala.concurrent.duration.Duration;
 
 public class IntegrationTestKit extends ShardTestKit {
 
@@ -107,7 +112,7 @@ public class IntegrationTestKit extends ShardTestKit {
         }
     }
 
-    private static ActorRef findLocalShard(ActorContext actorContext, String shardName) {
+    public static ActorRef findLocalShard(ActorContext actorContext, String shardName) {
         ActorRef shard = null;
         for(int i = 0; i < 20 * 5 && shard == null; i++) {
             Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
@@ -117,6 +122,31 @@ public class IntegrationTestKit extends ShardTestKit {
             }
         }
         return shard;
+    }
+
+    public static void verifyShardStats(DistributedDataStore datastore, String shardName, ShardStatsVerifier verifier)
+            throws Exception {
+        ActorContext actorContext = datastore.getActorContext();
+
+        Future<ActorRef> future = actorContext.findLocalShardAsync(shardName);
+        ActorRef shardActor = Await.result(future, Duration.create(10, TimeUnit.SECONDS));
+
+        AssertionError lastError = null;
+        Stopwatch sw = Stopwatch.createStarted();
+        while(sw.elapsed(TimeUnit.SECONDS) <= 5) {
+            ShardStats shardStats = (ShardStats)actorContext.
+                    executeOperation(shardActor, Shard.GET_SHARD_MBEAN_MESSAGE);
+
+            try {
+                verifier.verify(shardStats);
+                return;
+            } catch (AssertionError e) {
+                lastError = e;
+                Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
+            }
+        }
+
+        throw lastError;
     }
 
     void testWriteTransaction(DistributedDataStore dataStore, YangInstanceIdentifier nodePath,
@@ -203,5 +233,9 @@ public class IntegrationTestKit extends ShardTestKit {
                 return null;
             }
         }, expType);
+    }
+
+    public interface ShardStatsVerifier {
+        void verify(ShardStats stats);
     }
 }

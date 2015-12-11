@@ -120,7 +120,7 @@ public class Shard extends RaftActor {
 
     private ShardSnapshot restoreFromSnapshot;
 
-
+    private final ShardTransactionMessageRetrySupport messageRetrySupport;
 
     protected Shard(AbstractBuilder<?, ?> builder) {
         super(builder.getId().toString(), builder.getPeerAddresses(),
@@ -163,8 +163,7 @@ public class Shard extends RaftActor {
 
         snapshotCohort = new ShardSnapshotCohort(transactionActorFactory, store, LOG, this.name);
 
-
-
+        messageRetrySupport = new ShardTransactionMessageRetrySupport(this);
     }
 
     private void setTransactionCommitTimeout() {
@@ -265,6 +264,8 @@ public class Shard extends RaftActor {
                 sender().tell(store.getDataTree(), self());
             } else if(message instanceof ServerRemoved){
                 context().parent().forward(message, context());
+            } else if(ShardTransactionMessageRetrySupport.TIMER_MESSAGE_CLASS.isInstance(message)) {
+                messageRetrySupport.onTimerMessage(message);
             } else {
                 super.onReceiveCommand(message);
             }
@@ -410,12 +411,6 @@ public class Shard extends RaftActor {
         commitCoordinator.handleCanCommit(canCommit.getTransactionID(), getSender(), this);
     }
 
-    private void noLeaderError(String errMessage) {
-        // TODO: rather than throwing an immediate exception, we could schedule a timer to try again to make
-        // it more resilient in case we're in the process of electing a new leader.
-        getSender().tell(new akka.actor.Status.Failure(new NoShardLeaderException(errMessage, persistenceId())), getSelf());
-    }
-
     protected void handleBatchedModificationsLocal(BatchedModifications batched, ActorRef sender) {
         try {
             commitCoordinator.handleBatchedModifications(batched, sender, this);
@@ -452,7 +447,8 @@ public class Shard extends RaftActor {
                 LOG.debug("{}: Forwarding BatchedModifications to leader {}", persistenceId(), leader);
                 leader.forward(batched, getContext());
             } else {
-                noLeaderError("Could not commit transaction " + batched.getTransactionID());
+                messageRetrySupport.addMessageToRetry(batched, getSender(),
+                        "Could not commit transaction " + batched.getTransactionID());
             }
         }
     }
@@ -491,7 +487,8 @@ public class Shard extends RaftActor {
                 message.setRemoteVersion(getCurrentBehavior().getLeaderPayloadVersion());
                 leader.forward(message, getContext());
             } else {
-                noLeaderError("Could not commit transaction " + message.getTransactionID());
+                messageRetrySupport.addMessageToRetry(message, getSender(),
+                        "Could not commit transaction " + message.getTransactionID());
             }
         }
     }
@@ -511,7 +508,8 @@ public class Shard extends RaftActor {
                 readyLocal.setRemoteVersion(getCurrentBehavior().getLeaderPayloadVersion());
                 leader.forward(readyLocal, getContext());
             } else {
-                noLeaderError("Could not commit transaction " + forwardedReady.getTransactionID());
+                messageRetrySupport.addMessageToRetry(forwardedReady, getSender(),
+                        "Could not commit transaction " + forwardedReady.getTransactionID());
             }
         }
     }
@@ -711,6 +709,10 @@ public class Shard extends RaftActor {
     @Override
     protected void onLeaderChanged(String oldLeader, String newLeader) {
         shardMBean.incrementLeadershipChangeCount();
+
+        if(hasLeader()) {
+            messageRetrySupport.retryMessages();
+        }
     }
 
     @Override
