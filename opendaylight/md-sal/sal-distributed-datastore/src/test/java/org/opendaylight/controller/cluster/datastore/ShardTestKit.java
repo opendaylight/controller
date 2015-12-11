@@ -71,6 +71,7 @@ public class ShardTestKit extends JavaTestKit {
 
     public void waitUntilNoLeader(ActorRef shard) {
         FiniteDuration duration = Duration.create(100, TimeUnit.MILLISECONDS);
+        Object lastResponse = null;
         for(int i = 0; i < 20 * 5; i++) {
             Future<Object> future = Patterns.ask(shard, new FindLeader(), new Timeout(duration));
             try {
@@ -78,16 +79,25 @@ public class ShardTestKit extends JavaTestKit {
                 if(resp.getLeaderActor() == null) {
                     return;
                 }
+
+                lastResponse = resp.getLeaderActor();
             } catch(TimeoutException e) {
+                lastResponse = e;
             } catch(Exception e) {
                 System.err.println("FindLeader threw ex");
                 e.printStackTrace();
+                lastResponse = e;
             }
-
 
             Uninterruptibles.sleepUninterruptibly(50, TimeUnit.MILLISECONDS);
         }
 
-        Assert.fail("Unexpected leader found for shard " + shard.path());
+        if(lastResponse instanceof Throwable) {
+            throw (AssertionError)new AssertionError(
+                    String.format("Unexpected error occurred from FindLeader for shard %s", shard.path())).
+                            initCause((Throwable)lastResponse);
+        }
+
+        Assert.fail(String.format("Unexpected leader %s found for shard %s", lastResponse, shard.path()));
     }
 }
