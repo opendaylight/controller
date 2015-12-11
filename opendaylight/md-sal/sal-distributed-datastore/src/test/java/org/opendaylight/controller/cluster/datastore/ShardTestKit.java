@@ -46,7 +46,7 @@ public class ShardTestKit extends JavaTestKit {
 
     }
 
-    public String waitUntilLeader(ActorRef shard) {
+    public static String waitUntilLeader(ActorRef shard) {
         FiniteDuration duration = Duration.create(100, TimeUnit.MILLISECONDS);
         for(int i = 0; i < 20 * 5; i++) {
             Future<Object> future = Patterns.ask(shard, new FindLeader(), new Timeout(duration));

@@ -52,8 +52,10 @@ public class ShardTransactionFailureTest extends AbstractActorTest {
     private final ShardStats shardStats = new ShardStats(SHARD_IDENTIFIER.toString(), "DataStore");
 
     private ActorRef createShard(){
-        return getSystem().actorOf(Shard.builder().id(SHARD_IDENTIFIER).datastoreContext(datastoreContext).
+        ActorRef shard = getSystem().actorOf(Shard.builder().id(SHARD_IDENTIFIER).datastoreContext(datastoreContext).
                 schemaContext(TestModel.createTestContext()).props());
+        ShardTestKit.waitUntilLeader(shard);
+        return shard;
     }
 
     @Test(expected = ReadFailedException.class)

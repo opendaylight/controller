@@ -82,8 +82,10 @@ public class ShardTransactionTest extends AbstractActorTest {
     private int txCounter = 0;
 
     private ActorRef createShard() {
-        return getSystem().actorOf(Shard.builder().id(SHARD_IDENTIFIER).datastoreContext(datastoreContext).
+        ActorRef shard = getSystem().actorOf(Shard.builder().id(SHARD_IDENTIFIER).datastoreContext(datastoreContext).
                 schemaContext(TestModel.createTestContext()).props());
+        ShardTestKit.waitUntilLeader(shard);
+        return shard;
     }
 
     private ActorRef newTransactionActor(TransactionType type, AbstractShardDataTreeTransaction<?> transaction, String name) {
