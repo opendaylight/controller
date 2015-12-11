@@ -264,13 +264,17 @@ public abstract class AbstractShardTest extends AbstractActorTest{
         }
     }
 
-    protected Object prepareForwardedReadyTransaction(ShardDataTreeCohort cohort, String transactionID,
-            short version, boolean doCommitOnReady) {
+    static ShardDataTreeTransactionParent newShardDataTreeTransactionParent(ShardDataTreeCohort cohort) {
         ShardDataTreeTransactionParent mockParent = mock(ShardDataTreeTransactionParent.class);
         doReturn(cohort).when(mockParent).finishTransaction(any(ReadWriteShardDataTreeTransaction.class));
         doNothing().when(mockParent).abortTransaction(any(AbstractShardDataTreeTransaction.class));
+        return mockParent;
+    }
+
+    protected ForwardedReadyTransaction prepareForwardedReadyTransaction(ShardDataTreeCohort cohort,
+            String transactionID, short version, boolean doCommitOnReady) {
         return new ForwardedReadyTransaction(transactionID, version,
-                new ReadWriteShardDataTreeTransaction(mockParent, transactionID,
+                new ReadWriteShardDataTreeTransaction(newShardDataTreeTransactionParent(cohort), transactionID,
                         mock(DataTreeModification.class)), true, doCommitOnReady);
     }
 
