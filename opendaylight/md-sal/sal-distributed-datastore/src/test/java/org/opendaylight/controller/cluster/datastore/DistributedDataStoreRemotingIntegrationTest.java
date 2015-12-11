@@ -16,10 +16,12 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import akka.actor.ActorRef;
+import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Address;
 import akka.actor.AddressFromURIString;
 import akka.cluster.Cluster;
+import akka.dispatch.Futures;
 import akka.pattern.AskTimeoutException;
 import akka.testkit.JavaTestKit;
 import com.google.common.base.Optional;
@@ -28,6 +30,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.typesafe.config.ConfigFactory;
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import org.junit.After;
@@ -40,7 +43,10 @@ import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.exceptions.ShardLeaderNotRespondingException;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
+import org.opendaylight.controller.cluster.datastore.messages.ForwardedReadyTransaction;
+import org.opendaylight.controller.cluster.datastore.messages.GetShardDataTree;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyLocalTransaction;
+import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionReply;
 import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyJournalEntries;
@@ -65,6 +71,7 @@ import org.opendaylight.yangtools.yang.data.api.schema.ContainerNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapEntryNode;
 import org.opendaylight.yangtools.yang.data.api.schema.MapNode;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTreeModification;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.TipProducingDataTree;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.TreeType;
@@ -525,16 +532,18 @@ public class DistributedDataStoreRemotingIntegrationTest {
 
         TipProducingDataTree dataTree = InMemoryDataTreeFactory.getInstance().create(TreeType.OPERATIONAL);
         dataTree.setSchemaContext(SchemaContextHelper.full());
-        DataTreeModification modification = dataTree.takeSnapshot().newModification();
 
+        // Send a tx with immediate commit.
+
+        DataTreeModification modification = dataTree.takeSnapshot().newModification();
         new WriteModification(CarsModel.BASE_PATH, CarsModel.emptyContainer()).apply(modification);
         new MergeModification(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode()).apply(modification);
 
-        MapEntryNode car = CarsModel.newCarEntry("optima", BigInteger.valueOf(20000));
-        new WriteModification(CarsModel.newCarPath("optima"), car).apply(modification);
+        MapEntryNode car1 = CarsModel.newCarEntry("optima", BigInteger.valueOf(20000));
+        new WriteModification(CarsModel.newCarPath("optima"), car1).apply(modification);
+        modification.ready();
 
-        String transactionID = "tx-1";
-        ReadyLocalTransaction readyLocal = new ReadyLocalTransaction(transactionID , modification, true);
+        ReadyLocalTransaction readyLocal = new ReadyLocalTransaction("tx-1" , modification, true);
 
         carsFollowerShard.get().tell(readyLocal, followerTestKit.getRef());
         Object resp = followerTestKit.expectMsgClass(Object.class);
@@ -542,10 +551,101 @@ public class DistributedDataStoreRemotingIntegrationTest {
             throw new AssertionError("Unexpected failure response", ((akka.actor.Status.Failure)resp).cause());
         }
 
-        assertTrue("Expected response of type " + CommitTransactionReply.SERIALIZABLE_CLASS,
-                CommitTransactionReply.SERIALIZABLE_CLASS.equals(resp.getClass()));
+        assertEquals("Response type", CommitTransactionReply.SERIALIZABLE_CLASS, resp.getClass());
 
-        verifyCars(leaderDistributedDataStore.newReadOnlyTransaction(), car);
+        verifyCars(leaderDistributedDataStore.newReadOnlyTransaction(), car1);
+
+        // Send another tx without immediate commit.
+
+        modification = dataTree.takeSnapshot().newModification();
+        MapEntryNode car2 = CarsModel.newCarEntry("sportage", BigInteger.valueOf(30000));
+        new WriteModification(CarsModel.newCarPath("sportage"), car2).apply(modification);
+        modification.ready();
+
+        readyLocal = new ReadyLocalTransaction("tx-2" , modification, false);
+
+        carsFollowerShard.get().tell(readyLocal, followerTestKit.getRef());
+        resp = followerTestKit.expectMsgClass(Object.class);
+        if(resp instanceof akka.actor.Status.Failure) {
+            throw new AssertionError("Unexpected failure response", ((akka.actor.Status.Failure)resp).cause());
+        }
+
+        assertEquals("Response type", ReadyTransactionReply.class, resp.getClass());
+
+        ActorSelection txActor = leaderDistributedDataStore.getActorContext().actorSelection(
+                ((ReadyTransactionReply)resp).getCohortPath());
+
+        ThreePhaseCommitCohortProxy cohort = new ThreePhaseCommitCohortProxy(
+                leaderDistributedDataStore.getActorContext(), Arrays.asList(Futures.successful(txActor)), "tx-2");
+        cohort.canCommit().get(5, TimeUnit.SECONDS);
+        cohort.preCommit().get(5, TimeUnit.SECONDS);
+        cohort.commit().get(5, TimeUnit.SECONDS);
+
+        verifyCars(leaderDistributedDataStore.newReadOnlyTransaction(), car1, car2);
+    }
+
+    @Test
+    public void testForwardedReadyTransactionForwardedToLeader() throws Exception {
+        initDatastores("testForwardedReadyTransactionForwardedToLeader");
+        followerTestKit.waitUntilLeader(followerDistributedDataStore.getActorContext(), "cars");
+
+        Optional<ActorRef> carsFollowerShard = followerDistributedDataStore.getActorContext().findLocalShard("cars");
+        assertEquals("Cars follower shard found", true, carsFollowerShard.isPresent());
+
+        carsFollowerShard.get().tell(GetShardDataTree.INSTANCE, followerTestKit.getRef());
+        DataTree dataTree = followerTestKit.expectMsgClass(DataTree.class);
+
+        // Send a tx with immediate commit.
+
+        DataTreeModification modification = dataTree.takeSnapshot().newModification();
+        new WriteModification(CarsModel.BASE_PATH, CarsModel.emptyContainer()).apply(modification);
+        new MergeModification(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode()).apply(modification);
+
+        MapEntryNode car1 = CarsModel.newCarEntry("optima", BigInteger.valueOf(20000));
+        new WriteModification(CarsModel.newCarPath("optima"), car1).apply(modification);
+
+        ForwardedReadyTransaction forwardedReady = new ForwardedReadyTransaction("tx-1",
+                DataStoreVersions.CURRENT_VERSION, new ReadWriteShardDataTreeTransaction(
+                        Mockito.mock(ShardDataTreeTransactionParent.class), "tx-1", modification), true, true);
+
+        carsFollowerShard.get().tell(forwardedReady, followerTestKit.getRef());
+        Object resp = followerTestKit.expectMsgClass(Object.class);
+        if(resp instanceof akka.actor.Status.Failure) {
+            throw new AssertionError("Unexpected failure response", ((akka.actor.Status.Failure)resp).cause());
+        }
+
+        assertEquals("Response type", CommitTransactionReply.SERIALIZABLE_CLASS, resp.getClass());
+
+        verifyCars(leaderDistributedDataStore.newReadOnlyTransaction(), car1);
+
+        // Send another tx without immediate commit.
+
+        modification = dataTree.takeSnapshot().newModification();
+        MapEntryNode car2 = CarsModel.newCarEntry("sportage", BigInteger.valueOf(30000));
+        new WriteModification(CarsModel.newCarPath("sportage"), car2).apply(modification);
+
+        forwardedReady = new ForwardedReadyTransaction("tx-2",
+                DataStoreVersions.CURRENT_VERSION, new ReadWriteShardDataTreeTransaction(
+                        Mockito.mock(ShardDataTreeTransactionParent.class), "tx-2", modification), true, false);
+
+        carsFollowerShard.get().tell(forwardedReady, followerTestKit.getRef());
+        resp = followerTestKit.expectMsgClass(Object.class);
+        if(resp instanceof akka.actor.Status.Failure) {
+            throw new AssertionError("Unexpected failure response", ((akka.actor.Status.Failure)resp).cause());
+        }
+
+        assertEquals("Response type", ReadyTransactionReply.class, resp.getClass());
+
+        ActorSelection txActor = leaderDistributedDataStore.getActorContext().actorSelection(
+                ((ReadyTransactionReply)resp).getCohortPath());
+
+        ThreePhaseCommitCohortProxy cohort = new ThreePhaseCommitCohortProxy(
+                leaderDistributedDataStore.getActorContext(), Arrays.asList(Futures.successful(txActor)), "tx-2");
+        cohort.canCommit().get(5, TimeUnit.SECONDS);
+        cohort.preCommit().get(5, TimeUnit.SECONDS);
+        cohort.commit().get(5, TimeUnit.SECONDS);
+
+        verifyCars(leaderDistributedDataStore.newReadOnlyTransaction(), car1, car2);
     }
 
     @Test(expected=NoShardLeaderException.class)
