@@ -40,8 +40,10 @@ import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.cluster.datastore.DatastoreContext.Builder;
+import org.opendaylight.controller.cluster.datastore.IntegrationTestKit.ShardStatsVerifier;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.exceptions.ShardLeaderNotRespondingException;
+import org.opendaylight.controller.cluster.datastore.jmx.mbeans.shard.ShardStats;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.ForwardedReadyTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.GetShardDataTree;
@@ -50,6 +52,7 @@ import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionRe
 import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
 import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
 import org.opendaylight.controller.cluster.raft.base.messages.ApplyJournalEntries;
+import org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy;
 import org.opendaylight.controller.cluster.raft.utils.InMemoryJournal;
 import org.opendaylight.controller.md.cluster.datastore.model.CarsModel;
 import org.opendaylight.controller.md.cluster.datastore.model.PeopleModel;
@@ -130,18 +133,22 @@ public class DistributedDataStoreRemotingIntegrationTest {
     }
 
     private void initDatastores(String type) {
-        initDatastores(type, MODULE_SHARDS_CONFIG_2);
+        initDatastores(type, MODULE_SHARDS_CONFIG_2, SHARD_NAMES);
     }
 
-    private void initDatastores(String type, String moduleShardsConfig) {
+    private void initDatastores(String type, String[] shards) {
+        initDatastores(type, MODULE_SHARDS_CONFIG_2, shards);
+    }
+
+    private void initDatastores(String type, String moduleShardsConfig, String[] shards) {
         leaderTestKit = new IntegrationTestKit(leaderSystem, leaderDatastoreContextBuilder);
 
-        leaderDistributedDataStore = leaderTestKit.setupDistributedDataStore(type, moduleShardsConfig, false, SHARD_NAMES);
+        leaderDistributedDataStore = leaderTestKit.setupDistributedDataStore(type, moduleShardsConfig, false, shards);
 
         followerTestKit = new IntegrationTestKit(followerSystem, followerDatastoreContextBuilder);
-        followerDistributedDataStore = followerTestKit.setupDistributedDataStore(type, moduleShardsConfig, false, SHARD_NAMES);
+        followerDistributedDataStore = followerTestKit.setupDistributedDataStore(type, moduleShardsConfig, false, shards);
 
-        leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(), SHARD_NAMES);
+        leaderTestKit.waitUntilLeader(leaderDistributedDataStore.getActorContext(), shards);
     }
 
     private static void verifyCars(DOMStoreReadTransaction readTx, MapEntryNode... entries) throws Exception {
@@ -648,6 +655,67 @@ public class DistributedDataStoreRemotingIntegrationTest {
         verifyCars(leaderDistributedDataStore.newReadOnlyTransaction(), car1, car2);
     }
 
+    @Test
+    public void testTransactionForwardedToLeaderAfterRetry() throws Exception {
+        followerDatastoreContextBuilder.customRaftPolicyImplementation(DisableElectionsRaftPolicy.class.getName()).
+                shardElectionTimeoutFactor(100);
+        initDatastores("testTransactionForwardedToLeaderAfterRetry", new String[]{"cars"});
+
+        // Do an initial write to get the primary shard info cached.
+
+        DOMStoreWriteTransaction writeTx = followerDistributedDataStore.newWriteOnlyTransaction();
+        writeTx.write(CarsModel.BASE_PATH, CarsModel.emptyContainer());
+        writeTx.write(CarsModel.CAR_LIST_PATH, CarsModel.newCarMapNode());
+        followerTestKit.doCommit(writeTx.ready());
+
+        // Wait for the commit to be replicated to the follower.
+
+        IntegrationTestKit.verifyShardStats(followerDistributedDataStore, "cars", new ShardStatsVerifier() {
+            @Override
+            public void verify(ShardStats stats) {
+                assertEquals("getLastApplied", 0, stats.getLastApplied());
+            }
+        });
+
+        // Create and prepare wo and rw tx's.
+
+        writeTx = followerDistributedDataStore.newWriteOnlyTransaction();
+        MapEntryNode car1 = CarsModel.newCarEntry("optima", BigInteger.valueOf(20000));
+        writeTx.write(CarsModel.newCarPath("optima"), car1);
+
+        DOMStoreReadWriteTransaction readWriteTx = followerDistributedDataStore.newReadWriteTransaction();
+        MapEntryNode car2 = CarsModel.newCarEntry("sportage", BigInteger.valueOf(30000));
+        readWriteTx.write(CarsModel.newCarPath("sportage"), car2);
+
+        IntegrationTestKit.verifyShardStats(leaderDistributedDataStore, "cars", new ShardStatsVerifier() {
+            @Override
+            public void verify(ShardStats stats) {
+                assertEquals("getReadWriteTransactionCount", 1, stats.getReadWriteTransactionCount());
+            }
+        });
+
+        // Disable elections on the leader so it switches to follower.
+
+        sendDatastoreContextUpdate(leaderDistributedDataStore, leaderDatastoreContextBuilder.
+                customRaftPolicyImplementation(DisableElectionsRaftPolicy.class.getName()));
+
+        leaderTestKit.waitUntilNoLeader(leaderDistributedDataStore.getActorContext(), "cars");
+
+        // Submit tx's and enable elections on the follower so it becomes the leader, at which point the
+        // readied tx's should get forwarded from the previous leader.
+
+        DOMStoreThreePhaseCommitCohort cohort1 = writeTx.ready();
+        DOMStoreThreePhaseCommitCohort cohort2 = readWriteTx.ready();
+
+        sendDatastoreContextUpdate(followerDistributedDataStore, followerDatastoreContextBuilder.
+                customRaftPolicyImplementation(null).shardElectionTimeoutFactor(1));
+
+        followerTestKit.doCommit(cohort1);
+        followerTestKit.doCommit(cohort2);
+
+        verifyCars(leaderDistributedDataStore.newReadOnlyTransaction(), car1, car2);
+    }
+
     @Test(expected=NoShardLeaderException.class)
     public void testTransactionWithIsolatedLeader() throws Throwable {
         leaderDatastoreContextBuilder.shardIsolatedLeaderCheckIntervalInMillis(300);
@@ -733,7 +801,7 @@ public class DistributedDataStoreRemotingIntegrationTest {
     public void testTransactionRetryWithInitialAskTimeoutExOnCreateTx() throws Exception {
         followerDatastoreContextBuilder.shardElectionTimeoutFactor(30);
         String testName = "testTransactionRetryWithInitialAskTimeoutExOnCreateTx";
-        initDatastores(testName, MODULE_SHARDS_CONFIG_3);
+        initDatastores(testName, MODULE_SHARDS_CONFIG_3, SHARD_NAMES);
 
         DatastoreContext.Builder follower2DatastoreContextBuilder = DatastoreContext.newBuilder().
                 shardHeartbeatIntervalInMillis(100).shardElectionTimeoutFactor(5);
@@ -760,11 +828,12 @@ public class DistributedDataStoreRemotingIntegrationTest {
     }
 
     private static void sendDatastoreContextUpdate(DistributedDataStore dataStore, final Builder builder) {
+        final Builder newBuilder = DatastoreContext.newBuilderFrom(builder.build());
         DatastoreContextFactory mockContextFactory = Mockito.mock(DatastoreContextFactory.class);
         Answer<DatastoreContext> answer = new Answer<DatastoreContext>() {
             @Override
             public DatastoreContext answer(InvocationOnMock invocation) {
-                return builder.build();
+                return newBuilder.build();
             }
         };
         Mockito.doAnswer(answer).when(mockContextFactory).getBaseDatastoreContext();
