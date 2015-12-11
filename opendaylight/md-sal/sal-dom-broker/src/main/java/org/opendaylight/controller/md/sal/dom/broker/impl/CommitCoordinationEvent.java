@@ -12,13 +12,13 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.lmax.disruptor.EventFactory;
 import java.util.Collection;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
-import org.opendaylight.yangtools.util.DurationStatisticsTracker;
+import org.opendaylight.yangtools.util.concurrent.SettableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,30 +26,39 @@ import org.slf4j.LoggerFactory;
  * Implementation of blocking three-phase commit-coordination tasks without
  * support of cancellation.
  */
-final class CommitCoordinationTask implements Callable<Void> {
+final class CommitCoordinationEvent {
     private static enum Phase {
         canCommit,
         preCommit,
         doCommit,
     }
 
-    private static final Logger LOG = LoggerFactory.getLogger(CommitCoordinationTask.class);
-    private final Collection<DOMStoreThreePhaseCommitCohort> cohorts;
-    private final DurationStatisticsTracker commitStatTracker;
-    private final DOMDataWriteTransaction tx;
+    public static final EventFactory<CommitCoordinationEvent> FACTORY = new EventFactory<CommitCoordinationEvent>() {
+        @Override
+        public CommitCoordinationEvent newInstance() {
+            return new CommitCoordinationEvent();
+        }
+    };
 
-    public CommitCoordinationTask(final DOMDataWriteTransaction transaction,
-            final Collection<DOMStoreThreePhaseCommitCohort> cohorts,
-            final DurationStatisticsTracker commitStatTracker) {
-        this.tx = Preconditions.checkNotNull(transaction, "transaction must not be null");
-        this.cohorts = Preconditions.checkNotNull(cohorts, "cohorts must not be null");
-        this.commitStatTracker = commitStatTracker;
+    private static final Logger LOG = LoggerFactory.getLogger(CommitCoordinationEvent.class);
+    private Collection<DOMStoreThreePhaseCommitCohort> cohorts;
+    private SettableFuture<Void> future;
+    private DOMDataWriteTransaction tx;
+    private long startTime;
+
+    private CommitCoordinationEvent() {
+        // Hidden on purpose, initialized in initialize()
     }
 
-    @Override
-    public Void call() throws TransactionCommitFailedException {
-        final long startTime = commitStatTracker != null ? System.nanoTime() : 0;
+    void initialize(final DOMDataWriteTransaction transaction, final Collection<DOMStoreThreePhaseCommitCohort> cohorts,
+            final SettableFuture<Void> future) {
+        this.tx = Preconditions.checkNotNull(transaction, "transaction must not be null");
+        this.cohorts = Preconditions.checkNotNull(cohorts, "cohorts must not be null");
+        this.future = Preconditions.checkNotNull(future, "future must not be null");
+        this.startTime = System.nanoTime();
+    }
 
+    void coordinateCommit() throws TransactionCommitFailedException {
         Phase phase = Phase.canCommit;
 
         try {
@@ -65,16 +74,23 @@ final class CommitCoordinationTask implements Callable<Void> {
             commitBlocking();
 
             LOG.debug("Transaction {}: doCommit completed", tx.getIdentifier());
-            return null;
         } catch (final TransactionCommitFailedException e) {
             LOG.warn("Tx: {} Error during phase {}, starting Abort", tx.getIdentifier(), phase, e);
             abortBlocking(e);
             throw e;
-        } finally {
-            if (commitStatTracker != null) {
-                commitStatTracker.addDuration(System.nanoTime() - startTime);
-            }
         }
+    }
+
+    void failure(final Throwable t) {
+        future.setException(t);
+    }
+
+    void success() {
+        future.set(null);
+    }
+
+    long getStartTime() {
+        return startTime;
     }
 
     /**

@@ -8,12 +8,12 @@
 package org.opendaylight.controller.config.yang.md.sal.dom.impl;
 
 import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import org.opendaylight.controller.md.sal.common.api.data.LogicalDatastoreType;
-import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitDeadlockException;
 import org.opendaylight.controller.md.sal.common.util.jmx.AbstractMXBean;
 import org.opendaylight.controller.md.sal.common.util.jmx.ThreadExecutorStatsMXBeanImpl;
 import org.opendaylight.controller.md.sal.dom.broker.impl.SerializedDOMDataBroker;
@@ -21,8 +21,8 @@ import org.opendaylight.controller.md.sal.dom.broker.impl.jmx.CommitStatsMXBeanI
 import org.opendaylight.controller.md.sal.dom.store.impl.InMemoryDOMDataStoreFactory;
 import org.opendaylight.controller.sal.core.spi.data.DOMStore;
 import org.opendaylight.yangtools.util.DurationStatisticsTracker;
-import org.opendaylight.yangtools.util.concurrent.DeadlockDetectingListeningExecutorService;
 import org.opendaylight.yangtools.util.concurrent.SpecialExecutors;
+import org.opendaylight.yangtools.util.concurrent.TrackingThreadFactory;
 
 /**
 *
@@ -68,6 +68,11 @@ public final class DomInmemoryDataBrokerModule extends
         datastores.put(LogicalDatastoreType.OPERATIONAL, operStore);
         datastores.put(LogicalDatastoreType.CONFIGURATION, configStore);
 
+        final TrackingThreadFactory threadFactory = TrackingThreadFactory.create(new ThreadFactoryBuilder()
+            .setNameFormat(getIdentifier().getInstanceName() + "-%d").setDaemon(true).build());
+
+        getMaxDataBrokerCommitQueueSize();
+
         /*
          * We use an executor for commit ListenableFuture callbacks that favors reusing available
          * threads over creating new threads at the expense of execution time. The assumption is
@@ -78,10 +83,10 @@ public final class DomInmemoryDataBrokerModule extends
          */
         ExecutorService listenableFutureExecutor = SpecialExecutors.newBlockingBoundedCachedThreadPool(
                 getMaxDataBrokerFutureCallbackPoolSize(), getMaxDataBrokerFutureCallbackQueueSize(),
-                "CommitFutures");
+                threadFactory);
 
         final List<AbstractMXBean> mBeans = Lists.newArrayList();
-        final DurationStatisticsTracker commitStatsTracker;
+        final DurationStatisticsTracker commitStatsTracker = null;
 
         /*
          * We use a single-threaded executor for commits with a bounded queue capacity. If the
@@ -94,18 +99,21 @@ public final class DomInmemoryDataBrokerModule extends
         ExecutorService commitExecutor = SpecialExecutors.newBoundedSingleThreadExecutor(
             getMaxDataBrokerCommitQueueSize(), "WriteTxCommit");
 
-        SerializedDOMDataBroker sdb = new SerializedDOMDataBroker(datastores,
-            new DeadlockDetectingListeningExecutorService(commitExecutor,
-                TransactionCommitDeadlockException.DEADLOCK_EXCEPTION_SUPPLIER,
-                listenableFutureExecutor));
-        commitStatsTracker = sdb.getCommitStatsTracker();
+//        SerializedDOMDataBroker sdb = new SerializedDOMDataBroker(datastores,
+//            new DeadlockDetectingListeningExecutorService(commitExecutor,
+//                TransactionCommitDeadlockException.DEADLOCK_EXCEPTION_SUPPLIER,
+//                listenableFutureExecutor));
+//        commitStatsTracker = sdb.getCommitStatsTracker();
+//
+//        final AbstractMXBean commitExecutorStatsMXBean =
+//                ThreadExecutorStatsMXBeanImpl.create(commitExecutor, "CommitExecutorStats",
+//                    JMX_BEAN_TYPE, null);
+//        if(commitExecutorStatsMXBean != null) {
+//            mBeans.add(commitExecutorStatsMXBean);
+//        }
 
-        final AbstractMXBean commitExecutorStatsMXBean =
-                ThreadExecutorStatsMXBeanImpl.create(commitExecutor, "CommitExecutorStats",
-                    JMX_BEAN_TYPE, null);
-        if(commitExecutorStatsMXBean != null) {
-            mBeans.add(commitExecutorStatsMXBean);
-        }
+        final SerializedDOMDataBroker sdb = new SerializedDOMDataBroker(datastores, listenableFutureExecutor,
+            threadFactory, getMaxDataBrokerCommitQueueSize());
 
         if(commitStatsTracker != null) {
             final CommitStatsMXBeanImpl commitStatsMXBean = new CommitStatsMXBeanImpl(

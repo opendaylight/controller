@@ -28,6 +28,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMDataTreeIdentifier;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreThreePhaseCommitCohort;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
+import org.opendaylight.yangtools.util.concurrent.DefaultSettableFuture;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -95,8 +96,12 @@ final class ShardedDOMDataWriteTransaction implements DOMDataWriteTransaction {
             cohorts.add(tx.ready());
         }
 
+        final CommitCoordinationEvent event = CommitCoordinationEvent.FACTORY.newInstance();
+        event.initialize(this, cohorts, DefaultSettableFuture.<Void>create());
+
         try {
-            return Futures.immediateCheckedFuture(new CommitCoordinationTask(this, cohorts, null).call());
+            event.coordinateCommit();
+            return Futures.immediateCheckedFuture(null);
         } catch (TransactionCommitFailedException e) {
             return Futures.immediateFailedCheckedFuture(e);
         }
