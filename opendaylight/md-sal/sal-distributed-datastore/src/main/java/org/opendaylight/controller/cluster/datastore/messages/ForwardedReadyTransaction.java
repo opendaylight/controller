@@ -51,4 +51,10 @@ public class ForwardedReadyTransaction {
     public boolean isDoImmediateCommit() {
         return doImmediateCommit;
     }
+
+    @Override
+    public String toString() {
+        return "ForwardedReadyTransaction [transactionID=" + transactionID + ", doImmediateCommit=" + doImmediateCommit
+                + ", txnClientVersion=" + txnClientVersion + "]";
+    }
 }
