@@ -720,13 +720,21 @@ public class DistributedDataStoreRemotingIntegrationTest {
         verifyCars(leaderDistributedDataStore.newReadOnlyTransaction(), car1, car2);
     }
 
-    @Test(expected=NoShardLeaderException.class)
+    @Test
     public void testTransactionWithIsolatedLeader() throws Throwable {
         leaderDatastoreContextBuilder.shardIsolatedLeaderCheckIntervalInMillis(200);
         String testName = "testTransactionWithIsolatedLeader";
         initDatastoresWithCars(testName);
 
-        JavaTestKit.shutdownActorSystem(followerSystem, null, true);
+        DOMStoreWriteTransaction failWriteTx = leaderDistributedDataStore.newWriteOnlyTransaction();
+        failWriteTx.write(CarsModel.BASE_PATH, CarsModel.emptyContainer());
+
+        DOMStoreWriteTransaction successWriteTx = leaderDistributedDataStore.newWriteOnlyTransaction();
+        successWriteTx.merge(CarsModel.BASE_PATH, CarsModel.emptyContainer());
+
+        followerTestKit.watch(followerDistributedDataStore.getActorContext().getShardManager());
+        followerDistributedDataStore.close();
+        followerTestKit.expectTerminated(followerDistributedDataStore.getActorContext().getShardManager());
 
         MemberNode.verifyRaftState(leaderDistributedDataStore, "cars", new RaftStateVerifier() {
             @Override
@@ -735,14 +743,22 @@ public class DistributedDataStoreRemotingIntegrationTest {
             }
         });
 
-        DOMStoreWriteTransaction writeTx = leaderDistributedDataStore.newWriteOnlyTransaction();
-        writeTx.write(CarsModel.BASE_PATH, CarsModel.emptyContainer());
-
         try {
-            followerTestKit.doCommit(writeTx.ready());
+            leaderTestKit.doCommit(failWriteTx.ready());
+            fail("Expected NoShardLeaderException");
         } catch (ExecutionException e) {
-            throw e.getCause();
+            assertEquals("getCause", NoShardLeaderException.class, e.getCause().getClass());
         }
+
+        sendDatastoreContextUpdate(leaderDistributedDataStore, leaderDatastoreContextBuilder.
+                shardElectionTimeoutFactor(100));
+
+        DOMStoreThreePhaseCommitCohort writeTxCohort = successWriteTx.ready();
+
+        followerDistributedDataStore = followerTestKit.setupDistributedDataStore(testName,
+                MODULE_SHARDS_CARS_ONLY_1_2, false, CARS);
+
+        leaderTestKit.doCommit(writeTxCohort);
     }
 
     @Test(expected=AskTimeoutException.class)
