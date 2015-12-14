@@ -990,6 +990,43 @@ public class DistributedDataStoreIntegrationTest {
     }
 
     @Test
+    public void testChainWithReadOnlyTxAfterPreviousReady() throws Throwable {
+        new IntegrationTestKit(getSystem(), datastoreContextBuilder) {{
+            DistributedDataStore dataStore = setupDistributedDataStore(
+                    "testChainWithReadOnlyTxAfterPreviousReady", "test-1");
+
+            final DOMStoreTransactionChain txChain = dataStore.createTransactionChain();
+
+            DOMStoreWriteTransaction writeTx = txChain.newWriteOnlyTransaction();
+            writeTx.write(TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+            DOMStoreThreePhaseCommitCohort cohort1 = writeTx.ready();
+
+            // Try to create another Tx of each type - each should fail b/c the previous Tx wasn't
+            // readied.
+
+            CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> readFuture =
+                    txChain.newReadOnlyTransaction().read(TestModel.TEST_PATH);
+
+            txChain.newReadOnlyTransaction().read(TestModel.TEST_PATH);
+
+            DOMStoreWriteTransaction writeTx2 = txChain.newWriteOnlyTransaction();
+            writeTx2.write(TestModel.OUTER_LIST_PATH,
+                    ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build());
+
+            Optional<NormalizedNode<?, ?>> read = readFuture.checkedGet(5, TimeUnit.SECONDS);
+            assertEquals("isPresent", read.isPresent(), read.isPresent());
+
+            DOMStoreThreePhaseCommitCohort cohort2 = writeTx2.ready();
+
+            doCommit(cohort1);
+            doCommit(cohort2);
+
+            read = txChain.newReadOnlyTransaction().read(TestModel.OUTER_LIST_PATH).checkedGet(5, TimeUnit.SECONDS);
+            assertEquals("isPresent", read.isPresent(), read.isPresent());
+        }};
+    }
+
+    @Test
     public void testChainedTransactionFailureWithSingleShard() throws Exception{
         new IntegrationTestKit(getSystem(), datastoreContextBuilder) {{
             DistributedDataStore dataStore = setupDistributedDataStore(

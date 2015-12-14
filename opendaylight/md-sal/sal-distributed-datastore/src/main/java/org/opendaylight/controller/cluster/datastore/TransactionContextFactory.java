@@ -57,4 +57,8 @@ final class TransactionContextFactory extends AbstractTransactionContextFactory<
     DOMStoreTransactionChain createTransactionChain() {
         return new TransactionChainProxy(this);
     }
+
+    @Override
+    protected void onTransactionContextCreated(TransactionIdentifier transactionId) {
+    }
 }
