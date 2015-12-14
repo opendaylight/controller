@@ -45,7 +45,7 @@ final class TransactionContextFactory extends AbstractTransactionContextFactory<
     }
 
     @Override
-    protected Future<PrimaryShardInfo> findPrimaryShard(final String shardName, final String txId) {
+    protected Future<PrimaryShardInfo> findPrimaryShard(final String shardName, TransactionIdentifier txId) {
         return getActorContext().findPrimaryShardAsync(shardName);
     }
 
@@ -56,5 +56,9 @@ final class TransactionContextFactory extends AbstractTransactionContextFactory<
 
     DOMStoreTransactionChain createTransactionChain() {
         return new TransactionChainProxy(this);
+    }
+
+    @Override
+    protected void onTransactionContextCreated(TransactionIdentifier transactionId) {
     }
 }
