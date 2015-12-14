@@ -1,5 +1,5 @@
 [gerrit]
 host=git.opendaylight.org
 port=29418
-paoject=controller.git
+project=controller.git
 defaultbranch=master
