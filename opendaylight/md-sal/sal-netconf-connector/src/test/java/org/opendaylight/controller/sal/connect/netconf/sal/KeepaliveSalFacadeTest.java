@@ -18,12 +18,15 @@ import static org.mockito.Mockito.verify;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.internal.util.reflection.Whitebox;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.md.sal.dom.api.DOMRpcResult;
@@ -50,7 +53,7 @@ public class KeepaliveSalFacadeTest {
     @Mock
     private RemoteDeviceHandler<NetconfSessionPreferences> underlyingSalFacade;
 
-    private static java.util.concurrent.ScheduledExecutorService executorService;
+    private ScheduledExecutorService executorService;
 
     @Mock
     private NetconfDeviceCommunicator listener;
@@ -58,6 +61,9 @@ public class KeepaliveSalFacadeTest {
     private DOMRpcService deviceRpc;
 
     private DOMRpcService proxyRpc;
+
+    @Mock
+    private ScheduledFuture currentKeepalive;
 
     @Before
     public void setUp() throws Exception {
@@ -69,6 +75,8 @@ public class KeepaliveSalFacadeTest {
         doReturn("mockedRpc").when(deviceRpc).toString();
         doNothing().when(underlyingSalFacade).onDeviceConnected(
                 any(SchemaContext.class), any(NetconfSessionPreferences.class), any(DOMRpcService.class));
+
+        doReturn(true).when(currentKeepalive).isDone();
     }
 
     @After
@@ -81,18 +89,21 @@ public class KeepaliveSalFacadeTest {
         final DOMRpcResult result = new DefaultDOMRpcResult(Builders.containerBuilder().withNodeIdentifier(
                 new YangInstanceIdentifier.NodeIdentifier(NetconfMessageTransformUtil.NETCONF_RUNNING_QNAME)).build());
 
+
         doReturn(Futures.immediateCheckedFuture(result)).when(deviceRpc).invokeRpc(any(SchemaPath.class), any(NormalizedNode.class));
 
         final KeepaliveSalFacade keepaliveSalFacade =
                 new KeepaliveSalFacade(REMOTE_DEVICE_ID, underlyingSalFacade, executorService, 1L);
+
         keepaliveSalFacade.setListener(listener);
 
         keepaliveSalFacade.onDeviceConnected(null, null, deviceRpc);
+        Whitebox.setInternalState(keepaliveSalFacade, "currentKeepalive", currentKeepalive);
 
         verify(underlyingSalFacade).onDeviceConnected(
                 any(SchemaContext.class), any(NetconfSessionPreferences.class), any(DOMRpcService.class));
 
-        verify(deviceRpc, timeout(15000).times(5)).invokeRpc(any(SchemaPath.class), any(NormalizedNode.class));
+        verify(deviceRpc, timeout(15000).times(1)).invokeRpc(any(SchemaPath.class), any(NormalizedNode.class));
     }
 
     @Test
@@ -112,41 +123,40 @@ public class KeepaliveSalFacadeTest {
 
         final KeepaliveSalFacade keepaliveSalFacade =
                 new KeepaliveSalFacade(REMOTE_DEVICE_ID, underlyingSalFacade, executorService, 1L);
+
         keepaliveSalFacade.setListener(listener);
 
         keepaliveSalFacade.onDeviceConnected(null, null, deviceRpc);
+        Whitebox.setInternalState(keepaliveSalFacade, "currentKeepalive", currentKeepalive);
 
         verify(underlyingSalFacade).onDeviceConnected(
                 any(SchemaContext.class), any(NetconfSessionPreferences.class), any(DOMRpcService.class));
 
         // 1 failed that results in disconnect
-        verify(listener, timeout(15000).times(1)).disconnect();
+        verify(listener, timeout(3000).times(1)).disconnect();
         // 3 attempts total
-        verify(deviceRpc, times(3)).invokeRpc(any(SchemaPath.class), any(NormalizedNode.class));
+        verify(deviceRpc, times(1)).invokeRpc(any(SchemaPath.class), any(NormalizedNode.class));
 
         // Reconnect with same keepalive responses
         doReturn(Futures.immediateCheckedFuture(result))
                 .doReturn(Futures.immediateCheckedFuture(resultFailwithResultAndError))
                 .doReturn(Futures.immediateFailedCheckedFuture(new IllegalStateException("illegal-state")))
                 .when(deviceRpc).invokeRpc(any(SchemaPath.class), any(NormalizedNode.class));
-
         keepaliveSalFacade.onDeviceConnected(null, null, deviceRpc);
-
+        Whitebox.setInternalState(keepaliveSalFacade, "currentKeepalive", currentKeepalive);
         // 1 failed that results in disconnect, 2 total with previous fail
-        verify(listener, timeout(15000).times(2)).disconnect();
+        verify(listener, timeout(3000).times(2)).disconnect();
         // 6 attempts now total
-        verify(deviceRpc, times(3 * 2)).invokeRpc(any(SchemaPath.class), any(NormalizedNode.class));
+        verify(deviceRpc, times(1 * 2)).invokeRpc(any(SchemaPath.class), any(NormalizedNode.class));
 
-
-        final DOMRpcResult resultFailwithError = new DefaultDOMRpcResult(error);
-
-        doReturn(Futures.immediateCheckedFuture(resultFailwithError))
-                .when(deviceRpc).invokeRpc(any(SchemaPath.class), any(NormalizedNode.class));
-
-        keepaliveSalFacade.onDeviceConnected(null, null, deviceRpc);
-
-        // 1 failed that results in disconnect, 3 total with previous fail
-        verify(listener, timeout(15000).times(3)).disconnect();
+        // the with currentKeepalive.isDone = false
+//        Mockito.reset(currentKeepalive);
+//        doReturn(false).when(currentKeepalive).isDone();
+//        doReturn("yo").when(currentKeepalive).toString();
+//        keepaliveSalFacade.onDeviceConnected(null, null, deviceRpc);
+//        Whitebox.setInternalState(keepaliveSalFacade, "currentKeepalive", currentKeepalive);
+//        // 1 failed that results in disconnect, 3 total with previous fail
+//        verify(listener, timeout(3000).times(3)).disconnect();
     }
 
     @Test
@@ -164,6 +174,7 @@ public class KeepaliveSalFacadeTest {
 
         final KeepaliveSalFacade keepaliveSalFacade =
                 new KeepaliveSalFacade(REMOTE_DEVICE_ID, underlyingSalFacade, executorService, 100L);
+
         keepaliveSalFacade.setListener(listener);
 
         keepaliveSalFacade.onDeviceConnected(null, null, deviceRpc);
