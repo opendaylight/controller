@@ -55,7 +55,12 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
                 LOG.debug("Tx {} - Creating local component for shard {} using factory {}",
                         parent.getIdentifier(), shardName, local);
             }
-            return createLocalTransactionContext(local, parent);
+
+            try {
+                return createLocalTransactionContext(local, parent);
+            } catch(Exception e) {
+                return new NoOpTransactionContext(e, parent.getIdentifier());
+            }
         }
 
         return null;
@@ -70,29 +75,37 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
 
         updateShardInfo(shardName, primaryShardInfo);
 
-        TransactionContext localContext = maybeCreateLocalTransactionContext(parent, shardName);
-        if(localContext != null) {
-            transactionContextWrapper.executePriorTransactionOperations(localContext);
-        } else {
-            RemoteTransactionContextSupport remote = new RemoteTransactionContextSupport(transactionContextWrapper,
-                    parent, shardName);
-            remote.setPrimaryShard(primaryShardInfo.getPrimaryShardActor(), primaryShardInfo.getPrimaryShardVersion());
+        try {
+            TransactionContext localContext = maybeCreateLocalTransactionContext(parent, shardName);
+            if(localContext != null) {
+                transactionContextWrapper.executePriorTransactionOperations(localContext);
+            } else {
+                RemoteTransactionContextSupport remote = new RemoteTransactionContextSupport(transactionContextWrapper,
+                        parent, shardName);
+                remote.setPrimaryShard(primaryShardInfo.getPrimaryShardActor(), primaryShardInfo.getPrimaryShardVersion());
+            }
+        } finally {
+            onTransactionContextCreated(parent.getIdentifier());
         }
     }
 
-    private static void onFindPrimaryShardFailure(Throwable failure, TransactionProxy parent,
+    private void onFindPrimaryShardFailure(Throwable failure, TransactionProxy parent,
             String shardName, TransactionContextWrapper transactionContextWrapper) {
         LOG.debug("Tx {}: Find primary for shard {} failed", parent.getIdentifier(), shardName, failure);
 
-        transactionContextWrapper.executePriorTransactionOperations(new NoOpTransactionContext(failure,
-                parent.getIdentifier()));
+        try {
+            transactionContextWrapper.executePriorTransactionOperations(new NoOpTransactionContext(failure,
+                    parent.getIdentifier()));
+        } finally {
+            onTransactionContextCreated(parent.getIdentifier());
+        }
     }
 
     final TransactionContextWrapper newTransactionContextWrapper(final TransactionProxy parent, final String shardName) {
         final TransactionContextWrapper transactionContextWrapper =
                 new TransactionContextWrapper(parent.getIdentifier(), actorContext);
 
-        Future<PrimaryShardInfo> findPrimaryFuture = findPrimaryShard(shardName, parent.getIdentifier().toString());
+        Future<PrimaryShardInfo> findPrimaryFuture = findPrimaryShard(shardName, parent.getIdentifier());
         if(findPrimaryFuture.isCompleted()) {
             Try<PrimaryShardInfo> maybe = findPrimaryFuture.value().get();
             if(maybe.isSuccess()) {
@@ -154,7 +167,8 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
      * @param shardName Shard name
      * @return Future containing shard information.
      */
-    protected abstract Future<PrimaryShardInfo> findPrimaryShard(String shardName, String txId);
+    protected abstract Future<PrimaryShardInfo> findPrimaryShard(@Nonnull String shardName,
+            @Nonnull TransactionIdentifier txId);
 
     /**
      * Create local transaction factory for specified shard, backed by specified shard leader
@@ -174,6 +188,13 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
      * @param cohortFutures Collection of futures
      */
     protected abstract <T> void onTransactionReady(@Nonnull TransactionIdentifier transaction, @Nonnull Collection<Future<T>> cohortFutures);
+
+    /**
+     * Callback invoked when the internal TransactionContext has been created for a transaction.
+     *
+     * @param transactionId the ID of the transaction.
+     */
+    protected abstract void onTransactionContextCreated(@Nonnull TransactionIdentifier transactionId);
 
     private static TransactionContext createLocalTransactionContext(final LocalTransactionFactory factory,
                                                                     final TransactionProxy parent) {

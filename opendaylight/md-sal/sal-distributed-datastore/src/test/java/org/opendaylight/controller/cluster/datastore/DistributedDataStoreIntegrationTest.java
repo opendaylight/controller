@@ -990,6 +990,51 @@ public class DistributedDataStoreIntegrationTest {
     }
 
     @Test
+    public void testChainWithReadOnlyTxAfterPreviousReady() throws Throwable {
+        new IntegrationTestKit(getSystem(), datastoreContextBuilder) {{
+            DistributedDataStore dataStore = setupDistributedDataStore(
+                    "testChainWithReadOnlyTxAfterPreviousReady", "test-1");
+
+            final DOMStoreTransactionChain txChain = dataStore.createTransactionChain();
+
+            // Create a write tx and submit.
+
+            DOMStoreWriteTransaction writeTx = txChain.newWriteOnlyTransaction();
+            writeTx.write(TestModel.TEST_PATH, ImmutableNodes.containerNode(TestModel.TEST_QNAME));
+            DOMStoreThreePhaseCommitCohort cohort1 = writeTx.ready();
+
+            // Create read-only tx's and issue a read.
+
+            CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> readFuture1 =
+                    txChain.newReadOnlyTransaction().read(TestModel.TEST_PATH);
+
+            CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> readFuture2 =
+                    txChain.newReadOnlyTransaction().read(TestModel.TEST_PATH);
+
+            // Create another write tx and issue the write.
+
+            DOMStoreWriteTransaction writeTx2 = txChain.newWriteOnlyTransaction();
+            writeTx2.write(TestModel.OUTER_LIST_PATH,
+                    ImmutableNodes.mapNodeBuilder(TestModel.OUTER_LIST_QNAME).build());
+
+            // Ensure the reads succeed.
+
+            assertEquals("isPresent", true, readFuture1.checkedGet(5, TimeUnit.SECONDS).isPresent());
+            assertEquals("isPresent", true, readFuture2.checkedGet(5, TimeUnit.SECONDS).isPresent());
+
+            // Ensure the writes succeed.
+
+            DOMStoreThreePhaseCommitCohort cohort2 = writeTx2.ready();
+
+            doCommit(cohort1);
+            doCommit(cohort2);
+
+            assertEquals("isPresent", true, txChain.newReadOnlyTransaction().read(TestModel.OUTER_LIST_PATH).
+                    checkedGet(5, TimeUnit.SECONDS).isPresent());
+        }};
+    }
+
+    @Test
     public void testChainedTransactionFailureWithSingleShard() throws Exception{
         new IntegrationTestKit(getSystem(), datastoreContextBuilder) {{
             DistributedDataStore dataStore = setupDistributedDataStore(
