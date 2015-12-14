@@ -28,7 +28,7 @@ import org.opendaylight.controller.config.spi.ModuleFactory;
 /**
  * Represents modules to be committed.
  */
-class ModulesHolder {
+class ModulesHolder implements AutoCloseable {
     private final TransactionIdentifier transactionIdentifier;
     @GuardedBy("this")
     private final Map<ModuleIdentifier, ModuleInternalTransactionalInfo> commitMap = new HashMap<>();
@@ -36,7 +36,7 @@ class ModulesHolder {
     @GuardedBy("this")
     private final Set<ModuleInternalTransactionalInfo> unorderedDestroyedFromPreviousTransactions = new HashSet<>();
 
-    ModulesHolder(TransactionIdentifier transactionIdentifier) {
+    ModulesHolder(final TransactionIdentifier transactionIdentifier) {
         this.transactionIdentifier = transactionIdentifier;
     }
 
@@ -54,8 +54,8 @@ class ModulesHolder {
     }
 
     private ModuleInternalTransactionalInfo findModuleInternalTransactionalInfo(
-            ModuleIdentifier moduleIdentifier,
-            JmxAttribute jmxAttributeForReporting) {
+            final ModuleIdentifier moduleIdentifier,
+            final JmxAttribute jmxAttributeForReporting) {
         ModuleInternalTransactionalInfo moduleInternalTransactionalInfo = commitMap
                 .get(moduleIdentifier);
         JmxAttributeValidationException.checkNotNull(
@@ -65,14 +65,14 @@ class ModulesHolder {
         return moduleInternalTransactionalInfo;
     }
 
-    public Module findModule(ModuleIdentifier moduleIdentifier,
-            JmxAttribute jmxAttributeForReporting) {
+    public Module findModule(final ModuleIdentifier moduleIdentifier,
+            final JmxAttribute jmxAttributeForReporting) {
         return findModuleInternalTransactionalInfo(moduleIdentifier,
                 jmxAttributeForReporting).getProxiedModule();
     }
 
-    public ModuleFactory findModuleFactory(ModuleIdentifier moduleIdentifier,
-            JmxAttribute jmxAttributeForReporting) {
+    public ModuleFactory findModuleFactory(final ModuleIdentifier moduleIdentifier,
+            final JmxAttribute jmxAttributeForReporting) {
         return findModuleInternalTransactionalInfo(moduleIdentifier,
                 jmxAttributeForReporting).getModuleFactory();
     }
@@ -87,13 +87,13 @@ class ModulesHolder {
     }
 
     public void put(
-            ModuleInternalTransactionalInfo moduleInternalTransactionalInfo) {
+            final ModuleInternalTransactionalInfo moduleInternalTransactionalInfo) {
         commitMap.put(moduleInternalTransactionalInfo.getIdentifier(),
                 moduleInternalTransactionalInfo);
     }
 
     public ModuleInternalTransactionalInfo destroyModule(
-            ModuleIdentifier moduleIdentifier) {
+            final ModuleIdentifier moduleIdentifier) {
         ModuleInternalTransactionalInfo found = commitMap.remove(moduleIdentifier);
         if (found == null) {
             throw new IllegalStateException("Not found:" + moduleIdentifier);
@@ -104,7 +104,7 @@ class ModulesHolder {
         return found;
     }
 
-    public void assertNotExists(ModuleIdentifier moduleIdentifier)
+    public void assertNotExists(final ModuleIdentifier moduleIdentifier)
             throws InstanceAlreadyExistsException {
         if (commitMap.containsKey(moduleIdentifier)) {
             throw new InstanceAlreadyExistsException(
@@ -116,11 +116,16 @@ class ModulesHolder {
         return commitMap.values();
     }
 
-    public ModuleInternalTransactionalInfo findModuleInternalTransactionalInfo(ModuleIdentifier moduleIdentifier) {
+    public ModuleInternalTransactionalInfo findModuleInternalTransactionalInfo(final ModuleIdentifier moduleIdentifier) {
         ModuleInternalTransactionalInfo found = commitMap.get(moduleIdentifier);
         if (found == null) {
             throw new IllegalStateException("Not found:" + moduleIdentifier);
         }
         return found;
+    }
+
+    @Override
+    public void close() {
+        unorderedDestroyedFromPreviousTransactions.clear();
     }
 }
