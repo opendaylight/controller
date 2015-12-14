@@ -18,6 +18,7 @@ import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListen
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.dsbenchmark.DatastoreAbstractWriter;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput.DataStore;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.TestExec;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.test.exec.OuterList;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.test.exec.OuterListKey;
@@ -32,8 +33,8 @@ public class TxchainBaDelete extends DatastoreAbstractWriter implements Transact
     private static final Logger LOG = (Logger) LoggerFactory.getLogger(TxchainBaDelete.class);
     private DataBroker bindingDataBroker;
 
-    public TxchainBaDelete(DataBroker bindingDataBroker, int outerListElem, int innerListElem, long writesPerTx) {
-        super(StartTestInput.Operation.DELETE, outerListElem, innerListElem, writesPerTx);
+    public TxchainBaDelete(DataBroker bindingDataBroker, int outerListElem, int innerListElem, long writesPerTx, DataStore dataStore) {
+        super(StartTestInput.Operation.DELETE, outerListElem, innerListElem, writesPerTx, dataStore);
         this.bindingDataBroker = bindingDataBroker;
         LOG.info("Created TxchainBaDelete");
     }
@@ -48,7 +49,8 @@ public class TxchainBaDelete extends DatastoreAbstractWriter implements Transact
                                                StartTestInput.Operation.PUT,
                                                outerListElem,
                                                innerListElem,
-                                               outerListElem);
+                                               outerListElem,
+                                               dataStore);
         dd.createList();
         dd.executeList();
     }

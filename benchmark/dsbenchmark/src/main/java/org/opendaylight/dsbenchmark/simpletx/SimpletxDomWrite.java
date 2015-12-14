@@ -17,6 +17,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.dsbenchmark.DatastoreAbstractWriter;
 import org.opendaylight.dsbenchmark.DomListBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput.DataStore;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.TestExec;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.test.exec.OuterList;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -31,8 +32,8 @@ public class SimpletxDomWrite extends DatastoreAbstractWriter {
     private List<MapEntryNode> list;
 
     public SimpletxDomWrite(DOMDataBroker domDataBroker, StartTestInput.Operation oper,
-                                    int outerListElem, int innerListElem, long putsPerTx ) {
-        super(oper, outerListElem, innerListElem, putsPerTx);
+                                    int outerListElem, int innerListElem, long putsPerTx, DataStore dataStore ) {
+        super(oper, outerListElem, innerListElem, putsPerTx, dataStore);
         this.domDataBroker = domDataBroker;
         LOG.info("Created SimpletxDomWrite");
     }

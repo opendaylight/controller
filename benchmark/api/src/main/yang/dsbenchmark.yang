@@ -125,6 +125,20 @@ module dsbenchmark {
                     "Data format:-binding-aware or binding-independent";
             }
 
+            leaf data-store {
+                mandatory true;
+                type enumeration {
+                    enum "CONFIG" {
+                        value 1;
+                    }
+                    enum "OPERATIONAL" {
+                        value 2;
+                    }
+                    enum "BOTH" {
+                        value 3;
+                    }
+                }
+            }
             leaf outerElements {
                 type uint32;
                 default 100000;
