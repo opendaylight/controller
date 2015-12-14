@@ -71,6 +71,30 @@
     },
     {
       "key": {
+        "uuid": "1aa4ed85_d7a095f6",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/AbstractNormalizedNodeDataInput.java",
+        "patchSetId": 27
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-12-14T20:17:19Z",
+      "side": 1,
+      "message": "This is existing code, just moved here. This code is exercised a lot so avoiding internal object creation is beneficial. This was the main reason we moved away from protobuf. You\u0027re suggestion to use setLength(0) and move above sounds reasonable.",
+      "parentUuid": "1aa4ed85_342567c2",
+      "range": {
+        "startLine": 68,
+        "startChar": 0,
+        "endLine": 76,
+        "endChar": 72
+      },
+      "revId": "56c917919add78aaa204e4065ce525970c7eea54",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1aa4ed85_5486e3ba",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/AbstractNormalizedNodeDataInput.java",
         "patchSetId": 27
@@ -82,6 +106,30 @@
       "writtenOn": "2015-12-14T19:56:57Z",
       "side": 1,
       "message": "Seems risky to reuse a builder like this; it leaves open the risk of someone later not realizing that the builder might already have had attributes set from prior use.  Can we just allocate a new builder each time?",
+      "range": {
+        "startLine": 238,
+        "startChar": 0,
+        "endLine": 240,
+        "endChar": 9
+      },
+      "revId": "56c917919add78aaa204e4065ce525970c7eea54",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_37afa9e5",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/AbstractNormalizedNodeDataInput.java",
+        "patchSetId": 27
+      },
+      "lineNbr": 240,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-12-14T20:17:19Z",
+      "side": 1,
+      "message": "Again, this is existing code, just moved here. Same reason as above.",
+      "parentUuid": "1aa4ed85_5486e3ba",
       "range": {
         "startLine": 238,
         "startChar": 0,
