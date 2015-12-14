@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_920eab33",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardTransactionMessageRetrySupport.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 3172
+      },
+      "writtenOn": "2015-12-14T23:29:22Z",
+      "side": 1,
+      "message": "Seems a bit roundabout to send a message to Shard only to have it routed back to this class for disposition.  Would it work to just schedule a Runnable to call onTimerMessage() directly?",
+      "range": {
+        "startLine": 44,
+        "startChar": 68,
+        "endLine": 44,
+        "endChar": 76
+      },
+      "revId": "8e9a47d26b682fc8f718cbb9aba169c4222f720a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_92254bad",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/ShardTransactionMessageRetrySupport.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 3172
+      },
+      "writtenOn": "2015-12-14T23:29:22Z",
+      "side": 1,
+      "message": "This logic is unclear to me... if onTimerMessage() gets triggered more than once for the same MessageInfo, then it will be removed from the messagesToRetry set but will continue to reply with a NoShardLeaderException forever.  Since it\u0027s gone from messagesToRetry, the retryMessages() method will no longer be able to retrieve and cancel its associated timer.\n\nIf the intention is to generate only a single NoShardLeaderException after a specified delay, then we maybe should use scheduleOnce()?\n\nIf the intention is to repeatedly generate NoShardLeaderExceptions until retried, then the messageInfo probably should not be removed from messagesToRetry here?",
+      "range": {
+        "startLine": 69,
+        "startChar": 0,
+        "endLine": 70,
+        "endChar": 36
+      },
+      "revId": "8e9a47d26b682fc8f718cbb9aba169c4222f720a",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
