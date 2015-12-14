@@ -14,6 +14,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataWriteTransaction;
 import org.opendaylight.dsbenchmark.DatastoreAbstractWriter;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput.DataStore;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.TestExec;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.test.exec.OuterList;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -26,8 +27,8 @@ public class SimpletxDomDelete extends DatastoreAbstractWriter {
     private final DOMDataBroker domDataBroker;
 
     public SimpletxDomDelete(DOMDataBroker domDataBroker, int outerListElem,
-            int innerListElem, long writesPerTx) {
-        super(StartTestInput.Operation.DELETE, outerListElem, innerListElem, writesPerTx);
+            int innerListElem, long writesPerTx, DataStore dataStore) {
+        super(StartTestInput.Operation.DELETE, outerListElem, innerListElem, writesPerTx, dataStore);
         this.domDataBroker = domDataBroker;
         LOG.info("Created simpleTxDomDelete");
    }
@@ -41,7 +42,8 @@ public class SimpletxDomDelete extends DatastoreAbstractWriter {
                                                    StartTestInput.Operation.PUT,
                                                    outerListElem,
                                                    innerListElem,
-                                                   outerListElem);
+                                                   outerListElem,
+                                                   dataStore);
         dd.createList();
         dd.executeList();
     }

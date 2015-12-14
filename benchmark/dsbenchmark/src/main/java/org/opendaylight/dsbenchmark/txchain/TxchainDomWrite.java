@@ -21,6 +21,7 @@ import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
 import org.opendaylight.dsbenchmark.DatastoreAbstractWriter;
 import org.opendaylight.dsbenchmark.DomListBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput.DataStore;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.TestExec;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.test.exec.OuterList;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
@@ -38,8 +39,8 @@ public class TxchainDomWrite extends DatastoreAbstractWriter implements Transact
     private List<MapEntryNode> list;
 
     public TxchainDomWrite(DOMDataBroker domDataBroker, StartTestInput.Operation oper, int outerListElem,
-            int innerListElem, long writesPerTx) {
-        super(oper, outerListElem, innerListElem, writesPerTx);
+            int innerListElem, long writesPerTx, DataStore dataStore) {
+        super(oper, outerListElem, innerListElem, writesPerTx, dataStore);
         this.domDataBroker = domDataBroker;
         LOG.info("Created TxchainDomWrite");
     }

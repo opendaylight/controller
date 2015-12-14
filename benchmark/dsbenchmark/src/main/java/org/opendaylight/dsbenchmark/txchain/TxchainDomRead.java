@@ -10,12 +10,14 @@ package org.opendaylight.dsbenchmark.txchain;
 
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
+
 import org.opendaylight.controller.md.sal.common.api.data.*;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataBroker;
 import org.opendaylight.controller.md.sal.dom.api.DOMDataReadOnlyTransaction;
 import org.opendaylight.controller.md.sal.dom.api.DOMTransactionChain;
 import org.opendaylight.dsbenchmark.DatastoreAbstractWriter;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput.DataStore;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.TestExec;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.test.exec.OuterList;
 import org.opendaylight.yangtools.yang.common.QName;
@@ -29,8 +31,9 @@ public class TxchainDomRead extends DatastoreAbstractWriter implements Transacti
     private static final Logger LOG = LoggerFactory.getLogger(TxchainDomRead.class);
     private final DOMDataBroker domDataBroker;
 
-    public TxchainDomRead(DOMDataBroker domDataBroker, int outerListElem, int innerListElem, long writesPerTx) {
-        super(StartTestInput.Operation.DELETE, outerListElem, innerListElem, writesPerTx);
+    public TxchainDomRead(DOMDataBroker domDataBroker, int outerListElem, int innerListElem, 
+            long writesPerTx, DataStore dataStore) {
+        super(StartTestInput.Operation.DELETE, outerListElem, innerListElem, writesPerTx, dataStore);
         this.domDataBroker = domDataBroker;
         LOG.info("Created TxchainDomDelete");
     }
@@ -42,10 +45,11 @@ public class TxchainDomRead extends DatastoreAbstractWriter implements Transacti
         // Dump the whole list into the data store in a single transaction
         // with <outerListElem> PUTs on the transaction
         TxchainDomWrite dd = new TxchainDomWrite(domDataBroker,
-                StartTestInput.Operation.PUT,
-                outerListElem,
-                innerListElem,
-                outerListElem);
+                                                 StartTestInput.Operation.PUT,
+                                                     outerListElem,
+                                                     innerListElem,
+                                                     outerListElem,
+                                                     dataStore);
         dd.createList();
         dd.executeList();
     }
