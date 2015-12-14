@@ -1,0 +1,136 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_14738b4e",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/AbstractDictionaryAware.java",
+        "patchSetId": 27
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 3172
+      },
+      "writtenOn": "2015-12-14T19:56:57Z",
+      "side": 1,
+      "message": "Is the \"this\" reference leak from the constructor here guaranteed safe?  If so, maybe add a comment here indicating as such?",
+      "range": {
+        "startLine": 17,
+        "startChar": 26,
+        "endLine": 17,
+        "endChar": 30
+      },
+      "revId": "56c917919add78aaa204e4065ce525970c7eea54",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_f41fcfb5",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/AbstractDictionaryAware.java",
+        "patchSetId": 27
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 3172
+      },
+      "writtenOn": "2015-12-14T19:56:57Z",
+      "side": 1,
+      "message": "This method doesn\u0027t seem to be used?",
+      "range": {
+        "startLine": 26,
+        "startChar": 19,
+        "endLine": 26,
+        "endChar": 35
+      },
+      "revId": "56c917919add78aaa204e4065ce525970c7eea54",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_342567c2",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/AbstractNormalizedNodeDataInput.java",
+        "patchSetId": 27
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 3172
+      },
+      "writtenOn": "2015-12-14T19:56:57Z",
+      "side": 1,
+      "message": "Is reusing a StringBuilder that much faster than just allocating a new one?  If so, I think it would be clearer to move the delete() before the if clause so that it\u0027s obvious that we\u0027re building a brand new string instead of possibly appending to some existing content.  Also, StringBuilder.setLength(0) would be a tiny bit faster than the delete().\n\nIf the performance difference isn\u0027t that great, I personally would prefer just allocating a new StringBuilder each time to make the code clearer.",
+      "range": {
+        "startLine": 68,
+        "startChar": 0,
+        "endLine": 76,
+        "endChar": 72
+      },
+      "revId": "56c917919add78aaa204e4065ce525970c7eea54",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_5486e3ba",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/AbstractNormalizedNodeDataInput.java",
+        "patchSetId": 27
+      },
+      "lineNbr": 240,
+      "author": {
+        "id": 3172
+      },
+      "writtenOn": "2015-12-14T19:56:57Z",
+      "side": 1,
+      "message": "Seems risky to reuse a builder like this; it leaves open the risk of someone later not realizing that the builder might already have had attributes set from prior use.  Can we just allocate a new builder each time?",
+      "range": {
+        "startLine": 238,
+        "startChar": 0,
+        "endLine": 240,
+        "endChar": 9
+      },
+      "revId": "56c917919add78aaa204e4065ce525970c7eea54",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_14906beb",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/AbstractNormalizedNodeDataInput.java",
+        "patchSetId": 27
+      },
+      "lineNbr": 248,
+      "author": {
+        "id": 3172
+      },
+      "writtenOn": "2015-12-14T19:56:57Z",
+      "side": 1,
+      "message": "Same as above.",
+      "range": {
+        "startLine": 246,
+        "startChar": 0,
+        "endLine": 248,
+        "endChar": 9
+      },
+      "revId": "56c917919add78aaa204e4065ce525970c7eea54",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_97253dad",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/DictionaryNodeInputStreamReader.java",
+        "patchSetId": 27
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 3172
+      },
+      "writtenOn": "2015-12-14T19:56:57Z",
+      "side": 1,
+      "message": "Do we need to detach the old dictionary here somewhere?",
+      "revId": "56c917919add78aaa204e4065ce525970c7eea54",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
