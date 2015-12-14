@@ -8,7 +8,6 @@
 package org.opendaylight.controller.config.manager.impl.dependencyresolver;
 
 import static com.google.common.base.Preconditions.checkState;
-
 import com.google.common.base.Preconditions;
 import com.google.common.reflect.AbstractInvocationHandler;
 import com.google.common.reflect.Reflection;
@@ -225,6 +224,7 @@ public class DependencyResolverManager implements DependencyResolverFactory, Aut
 
     @Override
     public void close() {
+        modulesHolder.close();
         deadlockMonitor.close();
     }
 
