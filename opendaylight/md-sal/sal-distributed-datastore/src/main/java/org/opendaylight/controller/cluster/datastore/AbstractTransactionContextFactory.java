@@ -78,14 +78,18 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
                     parent, shardName);
             remote.setPrimaryShard(primaryShardInfo.getPrimaryShardActor(), primaryShardInfo.getPrimaryShardVersion());
         }
+
+        onTransactionContextCreated(parent.getIdentifier());
     }
 
-    private static void onFindPrimaryShardFailure(Throwable failure, TransactionProxy parent,
+    private void onFindPrimaryShardFailure(Throwable failure, TransactionProxy parent,
             String shardName, TransactionContextWrapper transactionContextWrapper) {
         LOG.debug("Tx {}: Find primary for shard {} failed", parent.getIdentifier(), shardName, failure);
 
         transactionContextWrapper.executePriorTransactionOperations(new NoOpTransactionContext(failure,
                 parent.getIdentifier()));
+
+        onTransactionContextCreated(parent.getIdentifier());
     }
 
     final TransactionContextWrapper newTransactionContextWrapper(final TransactionProxy parent, final String shardName) {
@@ -174,6 +178,13 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
      * @param cohortFutures Collection of futures
      */
     protected abstract <T> void onTransactionReady(@Nonnull TransactionIdentifier transaction, @Nonnull Collection<Future<T>> cohortFutures);
+
+    /**
+     * Callback invoked when the internal TransactionContext has been created for a transaction.
+     *
+     * @param transactionId the ID of the transaction.
+     */
+    protected abstract void onTransactionContextCreated(@Nonnull TransactionIdentifier transactionId);
 
     private static TransactionContext createLocalTransactionContext(final LocalTransactionFactory factory,
                                                                     final TransactionProxy parent) {
