@@ -56,6 +56,7 @@ public class TxchainDomWrite extends DatastoreAbstractWriter implements Transact
         int writeCnt = 0;
 
         DOMTransactionChain chain = domDataBroker.createTransactionChain(this);
+        LogicalDatastoreType dsType = getDataStoreType();
         DOMDataWriteTransaction tx = chain.newWriteOnlyTransaction();
 
         YangInstanceIdentifier pid = YangInstanceIdentifier.builder().node(TestExec.QNAME).node(OuterList.QNAME).build();
@@ -63,9 +64,9 @@ public class TxchainDomWrite extends DatastoreAbstractWriter implements Transact
             YangInstanceIdentifier yid = pid.node(new NodeIdentifierWithPredicates(OuterList.QNAME, element.getIdentifier().getKeyValues()));
 
             if (oper == StartTestInput.Operation.PUT) {
-                tx.put(LogicalDatastoreType.CONFIGURATION, yid, element);
+                tx.put(dsType, yid, element);
             } else {
-                tx.merge(LogicalDatastoreType.CONFIGURATION, yid, element);
+                tx.merge(dsType, yid, element);
             }
 
             writeCnt++;
@@ -84,6 +85,7 @@ public class TxchainDomWrite extends DatastoreAbstractWriter implements Transact
                     }
                 });
                 tx = chain.newWriteOnlyTransaction();
+                dsType = getDataStoreType();
                 writeCnt = 0;
             }
         }
@@ -91,6 +93,7 @@ public class TxchainDomWrite extends DatastoreAbstractWriter implements Transact
         // *** Clean up and close the transaction chain ***
         // Submit the outstanding transaction even if it's empty and wait for it to finish
         // We need to empty the transaction chain before closing it
+
         try {
             txSubmitted++;
             tx.submit().checkedGet();
