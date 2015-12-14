@@ -45,7 +45,7 @@ final class TransactionContextFactory extends AbstractTransactionContextFactory<
     }
 
     @Override
-    protected Future<PrimaryShardInfo> findPrimaryShard(final String shardName) {
+    protected Future<PrimaryShardInfo> findPrimaryShard(final String shardName, final String txId) {
         return getActorContext().findPrimaryShardAsync(shardName);
     }
 

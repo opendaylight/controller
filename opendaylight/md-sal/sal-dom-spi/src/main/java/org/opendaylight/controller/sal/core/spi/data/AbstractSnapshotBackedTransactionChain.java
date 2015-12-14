@@ -32,7 +32,7 @@ public abstract class AbstractSnapshotBackedTransactionChain<T> extends Transact
          *
          * @return A new snapshot
          */
-        protected abstract DataTreeSnapshot getSnapshot();
+        protected abstract DataTreeSnapshot getSnapshot(Object transactionId);
     }
 
     private static final class Idle extends State {
@@ -43,7 +43,7 @@ public abstract class AbstractSnapshotBackedTransactionChain<T> extends Transact
         }
 
         @Override
-        protected DataTreeSnapshot getSnapshot() {
+        protected DataTreeSnapshot getSnapshot(Object transactionId) {
             return chain.takeSnapshot();
         }
     }
@@ -66,9 +66,10 @@ public abstract class AbstractSnapshotBackedTransactionChain<T> extends Transact
         }
 
         @Override
-        protected DataTreeSnapshot getSnapshot() {
+        protected DataTreeSnapshot getSnapshot(Object transactionId) {
             final DataTreeSnapshot ret = snapshot;
-            Preconditions.checkState(ret != null, "Previous transaction %s is not ready yet", transaction.getIdentifier());
+            Preconditions.checkState(ret != null, "Could not get snapshot for transaction %s - previous transaction %s is not ready yet",
+                    transactionId, transaction.getIdentifier());
             return ret;
         }
 
@@ -89,7 +90,7 @@ public abstract class AbstractSnapshotBackedTransactionChain<T> extends Transact
         }
 
         @Override
-        protected DataTreeSnapshot getSnapshot() {
+        protected DataTreeSnapshot getSnapshot(Object transactionId) {
             throw new IllegalStateException(message);
         }
     }
@@ -108,9 +109,9 @@ public abstract class AbstractSnapshotBackedTransactionChain<T> extends Transact
         state = idleState;
     }
 
-    private Entry<State, DataTreeSnapshot> getSnapshot() {
+    private Entry<State, DataTreeSnapshot> getSnapshot(T transactionId) {
         final State localState = state;
-        return new SimpleEntry<>(localState, localState.getSnapshot());
+        return new SimpleEntry<>(localState, localState.getSnapshot(transactionId));
     }
 
     private boolean recordTransaction(final State expected, final DOMStoreWriteTransaction transaction) {
@@ -124,7 +125,7 @@ public abstract class AbstractSnapshotBackedTransactionChain<T> extends Transact
     }
 
     protected DOMStoreReadTransaction newReadOnlyTransaction(T transactionId) {
-        final Entry<State, DataTreeSnapshot> entry = getSnapshot();
+        final Entry<State, DataTreeSnapshot> entry = getSnapshot(transactionId);
         return SnapshotBackedTransactions.newReadTransaction(transactionId, getDebugTransactions(), entry.getValue());
     }
 
@@ -138,7 +139,7 @@ public abstract class AbstractSnapshotBackedTransactionChain<T> extends Transact
         DOMStoreReadWriteTransaction ret;
 
         do {
-            entry = getSnapshot();
+            entry = getSnapshot(transactionId);
             ret = new SnapshotBackedReadWriteTransaction<T>(transactionId, getDebugTransactions(), entry.getValue(), this);
         } while (!recordTransaction(entry.getKey(), ret));
 
@@ -155,7 +156,7 @@ public abstract class AbstractSnapshotBackedTransactionChain<T> extends Transact
         DOMStoreWriteTransaction ret;
 
         do {
-            entry = getSnapshot();
+            entry = getSnapshot(transactionId);
             ret = new SnapshotBackedWriteTransaction<T>(transactionId, getDebugTransactions(), entry.getValue(), this);
         } while (!recordTransaction(entry.getKey(), ret));
 

@@ -92,7 +92,7 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
         final TransactionContextWrapper transactionContextWrapper =
                 new TransactionContextWrapper(parent.getIdentifier(), actorContext);
 
-        Future<PrimaryShardInfo> findPrimaryFuture = findPrimaryShard(shardName);
+        Future<PrimaryShardInfo> findPrimaryFuture = findPrimaryShard(shardName, parent.getIdentifier().toString());
         if(findPrimaryFuture.isCompleted()) {
             Try<PrimaryShardInfo> maybe = findPrimaryFuture.value().get();
             if(maybe.isSuccess()) {
@@ -154,7 +154,7 @@ abstract class AbstractTransactionContextFactory<F extends LocalTransactionFacto
      * @param shardName Shard name
      * @return Future containing shard information.
      */
-    protected abstract Future<PrimaryShardInfo> findPrimaryShard(String shardName);
+    protected abstract Future<PrimaryShardInfo> findPrimaryShard(String shardName, String txId);
 
     /**
      * Create local transaction factory for specified shard, backed by specified shard leader
