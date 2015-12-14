@@ -17,6 +17,7 @@ import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFaile
 import org.opendaylight.dsbenchmark.BaListBuilder;
 import org.opendaylight.dsbenchmark.DatastoreAbstractWriter;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput.DataStore;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.TestExec;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.test.exec.OuterList;
 import org.opendaylight.yangtools.yang.binding.InstanceIdentifier;
@@ -29,8 +30,8 @@ public class SimpletxBaWrite extends DatastoreAbstractWriter {
     private List<OuterList> list;
 
     public SimpletxBaWrite(DataBroker dataBroker, StartTestInput.Operation oper,
-            int outerListElem, int innerListElem, long writesPerTx) {
-        super(oper, outerListElem, innerListElem, writesPerTx);
+            int outerListElem, int innerListElem, long writesPerTx, DataStore dataStore) {
+        super(oper, outerListElem, innerListElem, writesPerTx, dataStore);
         this.dataBroker = dataBroker;
         LOG.info("Created SimpletxBaWrite");
     }

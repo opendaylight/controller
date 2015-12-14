@@ -176,9 +176,19 @@ public class DsbenchmarkProvider implements BindingAwareProvider, DsbenchmarkSer
         tx.put(LogicalDatastoreType.CONFIGURATION, TEST_EXEC_IID, data);
         try {
             tx.submit().checkedGet();
-            LOG.info("DataStore test data cleaned up");
+            LOG.info("DataStore config test data cleaned up");
         } catch (TransactionCommitFailedException e) {
-            LOG.info("Failed to cleanup DataStore test data");
+            LOG.info("Failed to cleanup DataStore configtest data");
+            throw new IllegalStateException(e);
+        }
+        
+        tx = dataBroker.newWriteOnlyTransaction();
+        tx.put(LogicalDatastoreType.OPERATIONAL, TEST_EXEC_IID, data);
+        try {
+            tx.submit().checkedGet();
+            LOG.info("DataStore operational test data cleaned up");
+        } catch (TransactionCommitFailedException e) {
+            LOG.info("Failed to cleanup DataStore operational test data");
             throw new IllegalStateException(e);
         }
 
@@ -191,6 +201,7 @@ public class DsbenchmarkProvider implements BindingAwareProvider, DsbenchmarkSer
         StartTestInput.TransactionType txType = input.getTransactionType();
         StartTestInput.Operation oper = input.getOperation();
         StartTestInput.DataFormat dataFormat = input.getDataFormat();
+        StartTestInput.DataStore dataStore = input.getDataStore();
         int outerListElem = input.getOuterElements().intValue();
         int innerListElem = input.getInnerElements().intValue();
         int writesPerTx = input.getPutsPerTx().intValue();
@@ -200,49 +211,49 @@ public class DsbenchmarkProvider implements BindingAwareProvider, DsbenchmarkSer
                 if (dataFormat == StartTestInput.DataFormat.BINDINGAWARE) {
                     if (StartTestInput.Operation.DELETE == oper) {
                         retVal = new SimpletxBaDelete(this.dataBroker, outerListElem,
-                                innerListElem,writesPerTx);
+                                innerListElem,writesPerTx, dataStore);
                     } else if (StartTestInput.Operation.READ == oper) {
                         retVal = new SimpletxBaRead(this.dataBroker, outerListElem,
-                                innerListElem,writesPerTx);
+                                innerListElem, writesPerTx, dataStore);
                     } else {
                         retVal = new SimpletxBaWrite(this.dataBroker, oper, outerListElem,
-                                innerListElem,writesPerTx);
+                                innerListElem, writesPerTx, dataStore);
                     }
                 } else {
                     if (StartTestInput.Operation.DELETE == oper) {
                         retVal = new SimpletxDomDelete(this.domDataBroker, outerListElem,
-                                innerListElem, writesPerTx);
+                                innerListElem, writesPerTx, dataStore);
                     } else if (StartTestInput.Operation.READ == oper) {
                         retVal = new SimpletxDomRead(this.domDataBroker, outerListElem,
-                                innerListElem, writesPerTx);
+                                innerListElem, writesPerTx, dataStore);
                     } else {
                         retVal = new SimpletxDomWrite(this.domDataBroker, oper, outerListElem,
-                                innerListElem,writesPerTx);
+                                innerListElem, writesPerTx, dataStore);
                     }
                 }
             } else {
                 if (dataFormat == StartTestInput.DataFormat.BINDINGAWARE) {
                     if (StartTestInput.Operation.DELETE == oper) {
                         retVal = new TxchainBaDelete(this.bindingDataBroker, outerListElem,
-                                innerListElem, writesPerTx);
+                                innerListElem, writesPerTx, dataStore);
                     } else if (StartTestInput.Operation.READ == oper) {
                         retVal = new TxchainBaRead(this.bindingDataBroker,outerListElem,
-                                innerListElem,writesPerTx);
+                                innerListElem,writesPerTx, dataStore);
                     } else {
                         retVal = new TxchainBaWrite(this.bindingDataBroker, oper, outerListElem,
-                                innerListElem,writesPerTx);
+                                innerListElem, writesPerTx, dataStore);
                     }
                 } else {
                     if (StartTestInput.Operation.DELETE == oper) {
                         retVal = new TxchainDomDelete(this.domDataBroker, outerListElem,
-                                innerListElem, writesPerTx);
+                                innerListElem, writesPerTx, dataStore);
                     } else if (StartTestInput.Operation.READ == oper) {
                         retVal = new TxchainDomRead(this.domDataBroker, outerListElem,
-                                innerListElem, writesPerTx);
+                                innerListElem, writesPerTx, dataStore);
 
                     } else {
                         retVal = new TxchainDomWrite(this.domDataBroker, oper, outerListElem,
-                                innerListElem,writesPerTx);
+                                innerListElem,writesPerTx, dataStore);
                     }
                 }
             }

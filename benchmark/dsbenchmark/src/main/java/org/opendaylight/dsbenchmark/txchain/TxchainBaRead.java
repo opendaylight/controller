@@ -10,12 +10,14 @@ package org.opendaylight.dsbenchmark.txchain;
 
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.CheckedFuture;
+
 import org.opendaylight.controller.md.sal.binding.api.BindingTransactionChain;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
 import org.opendaylight.controller.md.sal.binding.api.ReadTransaction;
 import org.opendaylight.controller.md.sal.common.api.data.*;
 import org.opendaylight.dsbenchmark.DatastoreAbstractWriter;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput.DataStore;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.TestExec;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.test.exec.OuterList;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.test.exec.OuterListKey;
@@ -28,8 +30,8 @@ public class TxchainBaRead extends DatastoreAbstractWriter implements Transactio
     private static final Logger LOG = (Logger) LoggerFactory.getLogger(TxchainBaRead.class);
     private DataBroker bindingDataBroker;
 
-    public TxchainBaRead(DataBroker bindingDataBroker, int outerListElem, int innerListElem, long writesPerTx) {
-        super(StartTestInput.Operation.DELETE, outerListElem, innerListElem, writesPerTx);
+    public TxchainBaRead(DataBroker bindingDataBroker, int outerListElem, int innerListElem, long writesPerTx, DataStore dataStore) {
+        super(StartTestInput.Operation.DELETE, outerListElem, innerListElem, writesPerTx, dataStore);
         this.bindingDataBroker = bindingDataBroker;
         LOG.info("Created TxchainBaRead");
     }
@@ -41,10 +43,11 @@ public class TxchainBaRead extends DatastoreAbstractWriter implements Transactio
         // Dump the whole list into the data store in a single transaction
         // with <outerListElem> PUTs on the transaction
         TxchainBaWrite dd = new TxchainBaWrite(bindingDataBroker,
-                StartTestInput.Operation.PUT,
-                outerListElem,
-                innerListElem,
-                outerListElem);
+                                               StartTestInput.Operation.PUT,
+                                               outerListElem,
+                                               innerListElem,
+                                               outerListElem,
+                                               dataStore);
         dd.createList();
         dd.executeList();
     }

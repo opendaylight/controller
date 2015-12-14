@@ -9,6 +9,7 @@
 package org.opendaylight.dsbenchmark.txchain;
 
 import java.util.List;
+import java.util.Random;
 
 import org.opendaylight.controller.md.sal.binding.api.BindingTransactionChain;
 import org.opendaylight.controller.md.sal.binding.api.DataBroker;
@@ -20,6 +21,7 @@ import org.opendaylight.controller.md.sal.common.api.data.TransactionChainListen
 import org.opendaylight.controller.md.sal.common.api.data.TransactionCommitFailedException;
 import org.opendaylight.dsbenchmark.BaListBuilder;
 import org.opendaylight.dsbenchmark.DatastoreAbstractWriter;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput.DataStore;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput.Operation;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.StartTestInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.params.xml.ns.yang.dsbenchmark.rev150105.TestExec;
@@ -37,8 +39,8 @@ public class TxchainBaWrite extends DatastoreAbstractWriter implements Transacti
     private List<OuterList> list;
 
     public TxchainBaWrite(DataBroker bindingDataBroker, Operation oper,
-                          int outerListElem, int innerListElem, long writesPerTx) {
-        super(oper, outerListElem, innerListElem, writesPerTx);
+                          int outerListElem, int innerListElem, long writesPerTx, DataStore dataStore) {
+        super(oper, outerListElem, innerListElem, writesPerTx, dataStore);
         this.bindingDataBroker = bindingDataBroker;
         LOG.info("Created TxchainBaWrite");
     }
@@ -55,14 +57,16 @@ public class TxchainBaWrite extends DatastoreAbstractWriter implements Transacti
 
         BindingTransactionChain chain = bindingDataBroker.createTransactionChain(this);
         WriteTransaction tx = chain.newWriteOnlyTransaction();
+        LogicalDatastoreType dsType = getDataStoreType();
 
         for (OuterList element : this.list) {
             InstanceIdentifier<OuterList> iid = InstanceIdentifier.create(TestExec.class)
                                                     .child(OuterList.class, element.getKey());
+
             if (oper == StartTestInput.Operation.PUT) {
-                tx.put(LogicalDatastoreType.CONFIGURATION, iid, element);
+                tx.put(dsType, iid, element);
             } else {
-                tx.merge(LogicalDatastoreType.CONFIGURATION, iid, element);
+                tx.merge(dsType, iid, element);
             }
 
             writeCnt++;
@@ -81,6 +85,7 @@ public class TxchainBaWrite extends DatastoreAbstractWriter implements Transacti
                     }
                 });
                 tx = chain.newWriteOnlyTransaction();
+                dsType = getDataStoreType();
                 writeCnt = 0;
             }
         }
