@@ -145,7 +145,6 @@
     <topologymanager.version>0.6.0-SNAPSHOT</topologymanager.version>
     <topologymanager.shell.version>1.2.0-SNAPSHOT</topologymanager.shell.version>
     <troubleshoot.web.version>0.6.0-SNAPSHOT</troubleshoot.web.version>
-    <typesafe.config.version>1.2.0</typesafe.config.version>
     <uncommons.maths.version>1.2.2a</uncommons.maths.version>
     <usermanager.implementation.version>0.6.0-SNAPSHOT</usermanager.implementation.version>
     <usermanager.northbound.version>0.2.0-SNAPSHOT</usermanager.northbound.version>
@@ -295,6 +294,26 @@
         <groupId>org.eclipse.equinox</groupId>
         <artifactId>app</artifactId>
         <version>1.0.0-v20070606</version>
+      </dependency>
+      <dependency>
+        <groupId>org.uncommons.maths</groupId>
+        <artifactId>uncommons-maths</artifactId>
+        <version>${uncommons.maths.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.protobuf</groupId>
+        <artifactId>protobuf-java</artifactId>
+        <version>${protobuf.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.iq80.leveldb</groupId>
+        <artifactId>leveldb</artifactId>
+        <version>${leveldb.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.fusesource.leveldbjni</groupId>
+        <artifactId>leveldbjni-all</artifactId>
+        <version>${leveldbjni.version}</version>
       </dependency>
 
       <!-- equinox http service bridge -->
@@ -765,6 +784,11 @@
       <dependency>
         <groupId>org.scala-lang</groupId>
         <artifactId>scala-library</artifactId>
+        <version>${scala.version}.1</version>
+      </dependency>
+      <dependency>
+        <groupId>org.scala-lang</groupId>
+        <artifactId>scala-reflect</artifactId>
         <version>${scala.version}.1</version>
       </dependency>
       <dependency>
