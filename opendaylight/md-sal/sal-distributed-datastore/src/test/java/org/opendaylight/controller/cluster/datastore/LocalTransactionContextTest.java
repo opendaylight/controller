@@ -106,12 +106,12 @@ public class LocalTransactionContextTest {
     public void testReady() {
         final LocalThreePhaseCommitCohort mockCohort = mock(LocalThreePhaseCommitCohort.class);
         doReturn(akka.dispatch.Futures.successful(null)).when(mockCohort).initiateCoordinatedCommit();
-        doReturn(mockCohort).when(mockReadySupport).onTransactionReady(readWriteTransaction);
+        doReturn(mockCohort).when(mockReadySupport).onTransactionReady(readWriteTransaction, null);
 
         Future<ActorSelection> future = localTransactionContext.readyTransaction();
         assertTrue(future.isCompleted());
 
-        verify(mockReadySupport).onTransactionReady(readWriteTransaction);
+        verify(mockReadySupport).onTransactionReady(readWriteTransaction, null);
     }
 
     @Test
@@ -161,10 +161,8 @@ public class LocalTransactionContextTest {
     private void doReadyWithExpectedError(RuntimeException expError) {
         LocalThreePhaseCommitCohort mockCohort = mock(LocalThreePhaseCommitCohort.class);
         doReturn(akka.dispatch.Futures.successful(null)).when(mockCohort).initiateCoordinatedCommit();
-        doReturn(mockCohort).when(mockReadySupport).onTransactionReady(readWriteTransaction);
+        doReturn(mockCohort).when(mockReadySupport).onTransactionReady(readWriteTransaction, expError);
 
         localTransactionContext.readyTransaction();
-
-        verify(mockCohort).setOperationError(expError);
     }
 }

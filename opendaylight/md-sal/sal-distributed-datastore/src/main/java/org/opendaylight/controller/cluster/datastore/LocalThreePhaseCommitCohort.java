@@ -12,7 +12,6 @@ import akka.dispatch.Futures;
 import akka.dispatch.OnComplete;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListenableFuture;
-import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyLocalTransaction;
@@ -38,7 +37,7 @@ class LocalThreePhaseCommitCohort implements DOMStoreThreePhaseCommitCohort {
     private final DataTreeModification modification;
     private final ActorContext actorContext;
     private final ActorSelection leader;
-    private Exception operationError;
+    private final Exception operationError;
 
     protected LocalThreePhaseCommitCohort(final ActorContext actorContext, final ActorSelection leader,
             final SnapshotBackedWriteTransaction<TransactionIdentifier> transaction, final DataTreeModification modification) {
@@ -46,6 +45,7 @@ class LocalThreePhaseCommitCohort implements DOMStoreThreePhaseCommitCohort {
         this.leader = Preconditions.checkNotNull(leader);
         this.transaction = Preconditions.checkNotNull(transaction);
         this.modification = Preconditions.checkNotNull(modification);
+        this.operationError = null;
     }
 
     protected LocalThreePhaseCommitCohort(final ActorContext actorContext, final ActorSelection leader,
@@ -65,14 +65,6 @@ class LocalThreePhaseCommitCohort implements DOMStoreThreePhaseCommitCohort {
         final ReadyLocalTransaction message = new ReadyLocalTransaction(transaction.getIdentifier().toString(),
                 modification, immediate);
         return actorContext.executeOperationAsync(leader, message, actorContext.getTransactionCommitOperationTimeout());
-    }
-
-    void setOperationError(@Nonnull Exception operationError) {
-        if (this.operationError != null) {
-            LOG.info("Cohort {} already had operation error", this, this.operationError);
-        }
-
-        this.operationError = Preconditions.checkNotNull(operationError);
     }
 
     Future<ActorSelection> initiateCoordinatedCommit() {
