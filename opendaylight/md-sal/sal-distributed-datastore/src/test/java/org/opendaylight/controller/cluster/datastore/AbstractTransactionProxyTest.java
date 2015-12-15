@@ -58,6 +58,7 @@ import org.opendaylight.controller.cluster.datastore.messages.DataExistsReply;
 import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
 import org.opendaylight.controller.cluster.datastore.messages.ReadData;
 import org.opendaylight.controller.cluster.datastore.messages.ReadDataReply;
+import org.opendaylight.controller.cluster.datastore.messages.ReadyLocalTransaction;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyTransactionReply;
 import org.opendaylight.controller.cluster.datastore.modification.AbstractModification;
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
@@ -317,6 +318,12 @@ public abstract class AbstractTransactionProxyTest {
     protected void expectFailedBatchedModifications(ActorRef actorRef) {
         doReturn(Futures.failed(new TestException())).when(mockActorContext).executeOperationAsync(
                 eq(actorSelection(actorRef)), isA(BatchedModifications.class));
+    }
+
+    protected void expectReadyLocalTransaction(ActorRef actorRef, boolean doCommitOnReady) {
+        doReturn(doCommitOnReady ? Futures.successful(new CommitTransactionReply().toSerializable()) :
+            readyTxReply(actorRef.path().toString())).when(mockActorContext).executeOperationAsync(
+                    eq(actorSelection(actorRef)), isA(ReadyLocalTransaction.class), any(Timeout.class));
     }
 
     protected CreateTransactionReply createTransactionReply(ActorRef actorRef, int transactionVersion){
