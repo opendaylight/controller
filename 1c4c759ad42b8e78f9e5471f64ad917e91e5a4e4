@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_08b60c3e",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 441,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-12-15T11:38:11Z",
+      "side": 1,
+      "message": "I forgot to remove this call",
+      "revId": "1c4c759ad42b8e78f9e5471f64ad917e91e5a4e4",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
