@@ -16,6 +16,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -643,6 +644,54 @@ public class TransactionProxyTest extends AbstractTransactionProxyTest {
         assertTrue(ready instanceof DebugThreePhaseCommitCohort);
 
         verifyCohortFutures((DebugThreePhaseCommitCohort)ready, new CommitTransactionReply().toSerializable());
+    }
+
+    @Test
+    public void testReadyWithLocalTransaction() throws Exception {
+        ActorRef shardActorRef = getSystem().actorOf(Props.create(DoNothingActor.class));
+
+        doReturn(getSystem().actorSelection(shardActorRef.path())).
+                when(mockActorContext).actorSelection(shardActorRef.path().toString());
+
+        doReturn(Futures.successful(newPrimaryShardInfo(shardActorRef, createDataTree()))).
+                when(mockActorContext).findPrimaryShardAsync(eq(DefaultShardStrategy.DEFAULT_SHARD));
+
+        TransactionProxy transactionProxy = new TransactionProxy(mockComponentFactory, WRITE_ONLY);
+
+        expectReadyLocalTransaction(shardActorRef, true);
+
+        NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
+
+        DOMStoreThreePhaseCommitCohort ready = transactionProxy.ready();
+        assertTrue(ready instanceof SingleCommitCohortProxy);
+        verifyCohortFutures((SingleCommitCohortProxy)ready, new CommitTransactionReply().toSerializable());
+    }
+
+    @Test
+    public void testReadyWithLocalTransactionWithFailure() throws Exception {
+        ActorRef shardActorRef = getSystem().actorOf(Props.create(DoNothingActor.class));
+
+        doReturn(getSystem().actorSelection(shardActorRef.path())).
+                when(mockActorContext).actorSelection(shardActorRef.path().toString());
+
+        Optional<DataTree> mockDataTree = createDataTree();
+        DataTreeModification mockModification = mockDataTree.get().takeSnapshot().newModification();
+        doThrow(new RuntimeException("mock")).when(mockModification).ready();
+
+        doReturn(Futures.successful(newPrimaryShardInfo(shardActorRef, mockDataTree))).
+                when(mockActorContext).findPrimaryShardAsync(eq(DefaultShardStrategy.DEFAULT_SHARD));
+
+        TransactionProxy transactionProxy = new TransactionProxy(mockComponentFactory, WRITE_ONLY);
+
+        expectReadyLocalTransaction(shardActorRef, true);
+
+        NormalizedNode<?, ?> nodeToWrite = ImmutableNodes.containerNode(TestModel.TEST_QNAME);
+        transactionProxy.write(TestModel.TEST_PATH, nodeToWrite);
+
+        DOMStoreThreePhaseCommitCohort ready = transactionProxy.ready();
+        assertTrue(ready instanceof SingleCommitCohortProxy);
+        verifyCohortFutures((SingleCommitCohortProxy)ready, RuntimeException.class);
     }
 
     private void testWriteOnlyTxWithFindPrimaryShardFailure(Exception toThrow) throws Exception {
