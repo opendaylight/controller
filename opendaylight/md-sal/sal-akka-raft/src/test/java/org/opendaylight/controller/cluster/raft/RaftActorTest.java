@@ -71,6 +71,7 @@ import org.opendaylight.controller.cluster.raft.base.messages.ApplyState;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshot;
 import org.opendaylight.controller.cluster.raft.base.messages.CaptureSnapshotReply;
 import org.opendaylight.controller.cluster.raft.base.messages.DeleteEntries;
+import org.opendaylight.controller.cluster.raft.base.messages.LeaderTransitioning;
 import org.opendaylight.controller.cluster.raft.base.messages.SendHeartBeat;
 import org.opendaylight.controller.cluster.raft.base.messages.SwitchBehavior;
 import org.opendaylight.controller.cluster.raft.base.messages.UpdateElectionTerm;
@@ -1331,5 +1332,40 @@ public class RaftActorTest extends AbstractActorTest {
         assertEquals("getRaftState", RaftState.Follower, mockRaftActor.getRaftState());
 
         TEST_LOG.info("testNonVotingOnRecovery ending");
+    }
+
+    @Test
+    public void testLeaderTransitioning() throws Exception {
+        TEST_LOG.info("testLeaderTransitioning starting");
+
+        TestActorRef<MessageCollectorActor> notifierActor = factory.createTestActor(
+                Props.create(MessageCollectorActor.class));
+
+        DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+        config.setCustomRaftPolicyImplementationClass(DisableElectionsRaftPolicy.class.getName());
+
+        String persistenceId = factory.generateActorId("test-actor-");
+
+        TestActorRef<MockRaftActor> raftActorRef = factory.createTestActor(MockRaftActor.builder().id(persistenceId).
+                config(config).roleChangeNotifier(notifierActor).props().withDispatcher(Dispatchers.DefaultDispatcherId()), persistenceId);
+        MockRaftActor mockRaftActor = raftActorRef.underlyingActor();
+
+        mockRaftActor.waitForInitializeBehaviorComplete();
+
+        raftActorRef.tell(new AppendEntries(1L, "leader", 0L, 1L, Collections.<ReplicatedLogEntry>emptyList(),
+                0L, -1L, (short)1), ActorRef.noSender());
+        LeaderStateChanged leaderStateChange = MessageCollectorActor.expectFirstMatching(
+                notifierActor, LeaderStateChanged.class);
+        assertEquals("getLeaderId", "leader", leaderStateChange.getLeaderId());
+
+        MessageCollectorActor.clearMessages(notifierActor);
+
+        raftActorRef.tell(new LeaderTransitioning(), ActorRef.noSender());
+
+        leaderStateChange = MessageCollectorActor.expectFirstMatching(notifierActor, LeaderStateChanged.class);
+        assertEquals("getMemberId", persistenceId, leaderStateChange.getMemberId());
+        assertEquals("getLeaderId", null, leaderStateChange.getLeaderId());
+
+        TEST_LOG.info("testLeaderTransitioning ending");
     }
 }
