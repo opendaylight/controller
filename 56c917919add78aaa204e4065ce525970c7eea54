@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "1aa4ed85_8d5f6e72",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/AbstractDictionaryAware.java",
+        "patchSetId": 27
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-12-15T09:42:31Z",
+      "side": 1,
+      "message": "It is, since it is only used fro identity comparison.",
+      "parentUuid": "1aa4ed85_14738b4e",
+      "range": {
+        "startLine": 17,
+        "startChar": 26,
+        "endLine": 17,
+        "endChar": 30
+      },
+      "revId": "56c917919add78aaa204e4065ce525970c7eea54",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1aa4ed85_f41fcfb5",
         "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/AbstractDictionaryAware.java",
         "patchSetId": 27
@@ -36,6 +60,30 @@
       "writtenOn": "2015-12-14T19:56:57Z",
       "side": 1,
       "message": "This method doesn\u0027t seem to be used?",
+      "range": {
+        "startLine": 26,
+        "startChar": 19,
+        "endLine": 26,
+        "endChar": 35
+      },
+      "revId": "56c917919add78aaa204e4065ce525970c7eea54",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_4d517661",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/AbstractDictionaryAware.java",
+        "patchSetId": 27
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-12-15T09:42:31Z",
+      "side": 1,
+      "message": "Public method, used in follow up patch.",
+      "parentUuid": "1aa4ed85_f41fcfb5",
       "range": {
         "startLine": 26,
         "startChar": 19,
@@ -82,6 +130,30 @@
       "writtenOn": "2015-12-14T20:17:19Z",
       "side": 1,
       "message": "This is existing code, just moved here. This code is exercised a lot so avoiding internal object creation is beneficial. This was the main reason we moved away from protobuf. You\u0027re suggestion to use setLength(0) and move above sounds reasonable.",
+      "parentUuid": "1aa4ed85_342567c2",
+      "range": {
+        "startLine": 68,
+        "startChar": 0,
+        "endLine": 76,
+        "endChar": 72
+      },
+      "revId": "56c917919add78aaa204e4065ce525970c7eea54",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_6d5a3285",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/AbstractNormalizedNodeDataInput.java",
+        "patchSetId": 27
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-12-15T09:42:31Z",
+      "side": 1,
+      "message": "Done",
       "parentUuid": "1aa4ed85_342567c2",
       "range": {
         "startLine": 68,
@@ -176,6 +248,24 @@
       "writtenOn": "2015-12-14T19:56:57Z",
       "side": 1,
       "message": "Do we need to detach the old dictionary here somewhere?",
+      "revId": "56c917919add78aaa204e4065ce525970c7eea54",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_0deffeb1",
+        "filename": "opendaylight/md-sal/sal-clustering-commons/src/main/java/org/opendaylight/controller/cluster/datastore/node/utils/stream/DictionaryNodeInputStreamReader.java",
+        "patchSetId": 27
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-12-15T09:42:31Z",
+      "side": 1,
+      "message": "No need, the dictionary is already detached.",
+      "parentUuid": "1aa4ed85_97253dad",
       "revId": "56c917919add78aaa204e4065ce525970c7eea54",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
