@@ -145,7 +145,7 @@
     <topologymanager.version>0.6.0-SNAPSHOT</topologymanager.version>
     <topologymanager.shell.version>1.2.0-SNAPSHOT</topologymanager.shell.version>
     <troubleshoot.web.version>0.6.0-SNAPSHOT</troubleshoot.web.version>
-    <typesafe.config.version>1.2.0</typesafe.config.version>
+    <typesafe.config.version>1.2.1</typesafe.config.version>
     <uncommons.maths.version>1.2.2a</uncommons.maths.version>
     <usermanager.implementation.version>0.6.0-SNAPSHOT</usermanager.implementation.version>
     <usermanager.northbound.version>0.2.0-SNAPSHOT</usermanager.northbound.version>
