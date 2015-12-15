@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_ea2cc34c",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 3172
+      },
+      "writtenOn": "2015-12-15T23:55:00Z",
+      "side": 1,
+      "message": "Seems like this is never assigned?  Is that to come in a future patch?",
+      "range": {
+        "startLine": 135,
+        "startChar": 43,
+        "endLine": 135,
+        "endChar": 59
+      },
+      "revId": "ccc8ffbf33a0ded40d39713a38c7d6c1480bfdf6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
