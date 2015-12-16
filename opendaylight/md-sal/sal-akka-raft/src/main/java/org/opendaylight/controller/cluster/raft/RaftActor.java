@@ -11,6 +11,7 @@ package org.opendaylight.controller.cluster.raft;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
+import akka.actor.PoisonPill;
 import akka.japi.Procedure;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
@@ -47,6 +48,7 @@ import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
 import org.opendaylight.controller.cluster.raft.client.messages.FollowerInfo;
 import org.opendaylight.controller.cluster.raft.client.messages.GetOnDemandRaftState;
 import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
+import org.opendaylight.controller.cluster.raft.client.messages.Shutdown;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -253,9 +255,44 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             switchBehavior(((SwitchBehavior) message));
         } else if(message instanceof LeaderTransitioning) {
             onLeaderTransitioning();
+        } else if(message instanceof Shutdown) {
+            onShutDown();
         } else if(!snapshotSupport.handleSnapshotMessage(message, getSender())) {
             switchBehavior(reusableSwitchBehaviorSupplier.handleMessage(getSender(), message));
         }
+    }
+
+    private void onShutDown() {
+        LOG.debug("{}: onShutDown", persistenceId());
+
+        if(currentBehavior.state() != RaftState.Leader) {
+            LOG.debug("{}: Not the leader - sending PoisonPill", persistenceId());
+            self().tell(PoisonPill.getInstance(), self());
+            return;
+        }
+
+        Optional<ActorRef> roleChangeNotifier = getRoleChangeNotifier();
+        if(roleChangeNotifier.isPresent()) {
+            roleChangeNotifier.get().tell(newLeaderStateChanged(getId(), null,
+                    currentBehavior.getLeaderPayloadVersion()), getSelf());
+        }
+
+        for(String peerId: context.getPeerIds()) {
+            ActorSelection followerActor = context.getPeerActorSelection(peerId);
+            if(followerActor != null) {
+                followerActor.tell(new LeaderTransitioning(), context.getActor());
+            }
+        }
+
+        RaftActorLeadershipTransferCohort leadershipTransferCohort = new RaftActorLeadershipTransferCohort(this) {
+            @Override
+            public void transferComplete() {
+                LOG.debug("{}: leader transfer complete - sending PoisonPill", persistenceId());
+                self().tell(PoisonPill.getInstance(), self());
+            }
+        };
+
+        leadershipTransferStarting(leadershipTransferCohort);
     }
 
     private void onLeaderTransitioning() {
@@ -637,6 +674,21 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
      * @return ActorRef - ActorRef of the notifier or Optional.absent if none.
      */
     protected abstract Optional<ActorRef> getRoleChangeNotifier();
+
+    /**
+     * This method is called when leader transfer is starting and allows derived classes to perform work
+     * prior to transferring leadership. On completion of the work, the proceedWithTransfer method on the
+     * RaftActorLeadershipTransferCohort must be called to proceed with the transfer. If a condition occurs
+     * such that the transfer should not proceed, the abortTransfer method on the
+     * RaftActorLeadershipTransferCohort must be called.
+     * <p>
+     * The default implementation immediately proceeds with the transfer.
+     *
+     * @param leadershipTransferCohort
+     */
+    protected void leadershipTransferStarting(RaftActorLeadershipTransferCohort leadershipTransferCohort) {
+        leadershipTransferCohort.proceedWithTransfer();
+    }
 
     protected void onLeaderChanged(String oldLeader, String newLeader){};
 
