@@ -2094,20 +2094,6 @@ public class LeaderTest extends AbstractLeaderTest {
         MessageCollectorActor.assertNoneMatching(followerActor, ElectionTimeout.class, 100);
     }
 
-    @Test
-    public void testTransferLeadershipWithNoFollowers() {
-        logStart("testTransferLeadershipWithNoFollowers");
-
-        MockRaftActorContext leaderActorContext = createActorContext();
-
-        leader = new Leader(leaderActorContext);
-
-        RaftActorLeadershipTransferCohort mockTransferCohort = mock(RaftActorLeadershipTransferCohort.class);
-        leader.transferLeadership(mockTransferCohort);
-
-        verify(mockTransferCohort).transferComplete();
-    }
-
     @Override
     protected void assertStateChangesToFollowerWhenRaftRPCHasNewerTerm(RaftActorContext actorContext,
             ActorRef actorRef, RaftRPC rpc) throws Exception {
