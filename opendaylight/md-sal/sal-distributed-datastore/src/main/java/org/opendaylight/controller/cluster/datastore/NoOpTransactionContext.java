@@ -8,14 +8,13 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorSelection;
-import com.google.common.base.Optional;
 import com.google.common.util.concurrent.SettableFuture;
 import org.opendaylight.controller.cluster.datastore.exceptions.NoShardLeaderException;
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
+import org.opendaylight.controller.cluster.datastore.messages.AbstractRead;
+import org.opendaylight.controller.cluster.datastore.modification.AbstractModification;
 import org.opendaylight.controller.md.sal.common.api.data.DataStoreUnavailableException;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
@@ -53,23 +52,15 @@ final class NoOpTransactionContext extends AbstractTransactionContext {
     }
 
     @Override
-    public void deleteData(YangInstanceIdentifier path) {
-        LOG.debug("Tx {} deleteData called path = {}", getIdentifier(), path);
+    public void executeModification(AbstractModification modification) {
+        LOG.debug("Tx {} executeModification {} called path = {}", getIdentifier(), modification.getClass().getSimpleName(),
+                modification.getPath());
     }
 
     @Override
-    public void mergeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
-        LOG.debug("Tx {} mergeData called path = {}", getIdentifier(), path);
-    }
-
-    @Override
-    public void writeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
-        LOG.debug("Tx {} writeData called path = {}", getIdentifier(), path);
-    }
-
-    @Override
-    public void readData(final YangInstanceIdentifier path, SettableFuture<Optional<NormalizedNode<?, ?>>> proxyFuture) {
-        LOG.debug("Tx {} readData called path = {}", getIdentifier(), path);
+    public <T> void executeRead(AbstractRead<T> readCmd, SettableFuture<T> proxyFuture) {
+        LOG.debug("Tx {} executeRead {} called path = {}", getIdentifier(), readCmd.getClass().getSimpleName(),
+                readCmd.getPath());
 
         final Throwable t;
         if (failure instanceof NoShardLeaderException) {
@@ -77,12 +68,7 @@ final class NoOpTransactionContext extends AbstractTransactionContext {
         } else {
             t = failure;
         }
-        proxyFuture.setException(new ReadFailedException("Error reading data for path " + path, t));
-    }
-
-    @Override
-    public void dataExists(YangInstanceIdentifier path, SettableFuture<Boolean> proxyFuture) {
-        LOG.debug("Tx {} dataExists called path = {}", getIdentifier(), path);
-        proxyFuture.setException(new ReadFailedException("Error checking exists for path " + path, failure));
+        proxyFuture.setException(new ReadFailedException("Error executeRead " + readCmd.getClass().getSimpleName()
+                + " for path " + readCmd.getPath(), t));
     }
 }

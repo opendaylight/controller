@@ -8,26 +8,27 @@
 
 package org.opendaylight.controller.cluster.datastore.messages;
 
+import com.google.common.base.Optional;
+import com.google.common.util.concurrent.CheckedFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import org.opendaylight.controller.cluster.datastore.util.InstanceIdentifierUtils;
+import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
+import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
+import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 
-public class ReadData implements SerializableMessage {
+public class ReadData extends AbstractRead<Optional<NormalizedNode<?, ?>>> {
   public static final Class<ShardTransactionMessages.ReadData> SERIALIZABLE_CLASS =
           ShardTransactionMessages.ReadData.class;
-  private final YangInstanceIdentifier path;
 
   public ReadData(final YangInstanceIdentifier path) {
-    this.path = path;
-  }
-
-  public YangInstanceIdentifier getPath() {
-    return path;
+    super(path);
   }
 
   public Object toSerializable(){
     return ShardTransactionMessages.ReadData.newBuilder()
-        .setInstanceIdentifierPathArguments(InstanceIdentifierUtils.toSerializable(path))
+        .setInstanceIdentifierPathArguments(InstanceIdentifierUtils.toSerializable(getPath()))
         .build();
   }
 
@@ -35,4 +36,24 @@ public class ReadData implements SerializableMessage {
     ShardTransactionMessages.ReadData o = (ShardTransactionMessages.ReadData) serializable;
     return new ReadData(InstanceIdentifierUtils.fromSerializable(o.getInstanceIdentifierPathArguments()));
   }
+
+    @Override
+    public CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> apply(DOMStoreReadTransaction readDelegate) {
+        return readDelegate.read(getPath());
+    }
+
+    @Override
+    public void processResponse(Object readResponse, SettableFuture<Optional<NormalizedNode<?, ?>>> returnFuture) {
+        if(readResponse instanceof ReadDataReply) {
+            ReadDataReply reply = (ReadDataReply) readResponse;
+            returnFuture.set(Optional.<NormalizedNode<?, ?>> fromNullable(reply.getNormalizedNode()));
+
+        } else if(ReadDataReply.isSerializedType(readResponse)) {
+            ReadDataReply reply = ReadDataReply.fromSerializable(readResponse);
+            returnFuture.set(Optional.<NormalizedNode<?, ?>> fromNullable(reply.getNormalizedNode()));
+
+        } else {
+            returnFuture.setException(new ReadFailedException("Invalid response reading data for path " + getPath()));
+        }
+    }
 }
