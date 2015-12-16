@@ -298,7 +298,7 @@ public abstract class AbstractShardTest extends AbstractActorTest{
         return prepareBatchedModifications(transactionID, modification, false);
     }
 
-    private BatchedModifications prepareBatchedModifications(String transactionID,
+    private static BatchedModifications prepareBatchedModifications(String transactionID,
                                                              MutableCompositeModification modification,
                                                              boolean doCommitOnReady) {
         final BatchedModifications batchedModifications = new BatchedModifications(transactionID, CURRENT_VERSION, null);
