@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
+import org.opendaylight.controller.cluster.datastore.messages.DeleteData;
+import org.opendaylight.controller.cluster.datastore.messages.VersionedExternalizableMessage;
 import org.opendaylight.controller.cluster.datastore.util.InstanceIdentifierUtils;
 import org.opendaylight.controller.cluster.datastore.utils.SerializationUtils;
 import org.opendaylight.controller.protobuff.messages.persistent.PersistentMessages;
@@ -81,4 +83,11 @@ public class DeleteModification extends AbstractModification {
         mod.readExternal(in);
         return mod;
     }
+
+    @Override
+    @Deprecated
+    public VersionedExternalizableMessage getPreLithiumOpMessage(short remoteTransactionVersion) {
+        return new DeleteData(getPath(), remoteTransactionVersion);
+    }
+
 }
