@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.datastore.messages;
 
 
+import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.protobuff.messages.transaction.ShardTransactionMessages;
 
@@ -32,7 +33,7 @@ public class CreateTransaction implements SerializableMessage {
 
     private CreateTransaction(String transactionId, int transactionType, String transactionChainId,
             short version) {
-        this.transactionId = transactionId;
+        this.transactionId = Preconditions.checkNotNull(transactionId);
         this.transactionType = transactionType;
         this.transactionChainId = transactionChainId;
         this.version = version;

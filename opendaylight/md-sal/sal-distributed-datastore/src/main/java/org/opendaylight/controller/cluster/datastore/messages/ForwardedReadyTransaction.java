@@ -25,7 +25,7 @@ public class ForwardedReadyTransaction {
     public ForwardedReadyTransaction(String transactionID, short txnClientVersion,
             ReadWriteShardDataTreeTransaction transaction, boolean returnSerialized,
             boolean doImmediateCommit) {
-        this.transactionID = transactionID;
+        this.transactionID = Preconditions.checkNotNull(transactionID);
         this.transaction = Preconditions.checkNotNull(transaction);
         this.returnSerialized = returnSerialized;
         this.txnClientVersion = txnClientVersion;
