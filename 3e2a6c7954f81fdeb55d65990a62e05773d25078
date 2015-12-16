@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "1aa4ed85_c1a52a05",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/AbstractTransactionContextFactory.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-12-16T19:43:51Z",
+      "side": 1,
+      "message": "Yes - thanks for catching that.",
+      "parentUuid": "1aa4ed85_3606c221",
+      "range": {
+        "startLine": 62,
+        "startChar": 0,
+        "endLine": 62,
+        "endChar": 70
+      },
+      "revId": "3e2a6c7954f81fdeb55d65990a62e05773d25078",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1aa4ed85_962216b8",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionChainProxy.java",
         "patchSetId": 3
@@ -36,6 +60,30 @@
       "writtenOn": "2015-12-16T19:22:06Z",
       "side": 1,
       "message": "Can we use TransactionIdentifier as the key type?",
+      "range": {
+        "startLine": 149,
+        "startChar": 32,
+        "endLine": 149,
+        "endChar": 38
+      },
+      "revId": "3e2a6c7954f81fdeb55d65990a62e05773d25078",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_e1aaa6d3",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionChainProxy.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-12-16T19:43:51Z",
+      "side": 1,
+      "message": "I thought that too but String is passed to findPrimaryShard. I should be able to change that.",
+      "parentUuid": "1aa4ed85_962216b8",
       "range": {
         "startLine": 149,
         "startChar": 32,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "1aa4ed85_01834257",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionChainProxy.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 266,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-12-16T19:43:51Z",
+      "side": 1,
+      "message": "priorReadOnlyTxPromises could change and be empty in between.",
+      "parentUuid": "1aa4ed85_a137cee2",
+      "range": {
+        "startLine": 264,
+        "startChar": 0,
+        "endLine": 266,
+        "endChar": 13
+      },
+      "revId": "3e2a6c7954f81fdeb55d65990a62e05773d25078",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1aa4ed85_01002200",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionChainProxy.java",
         "patchSetId": 3
@@ -82,6 +154,30 @@
       "writtenOn": "2015-12-16T19:22:06Z",
       "side": 1,
       "message": "Doesn\u0027t matter practically, but I was sort of expecting that only read-only transactions attempt to remove themselves.",
+      "range": {
+        "startLine": 327,
+        "startChar": 58,
+        "endLine": 327,
+        "endChar": 64
+      },
+      "revId": "3e2a6c7954f81fdeb55d65990a62e05773d25078",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_2188be70",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionChainProxy.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 327,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-12-16T19:43:51Z",
+      "side": 1,
+      "message": "I can\u0027t tell from the TransactionIdentifier if it\u0027s read-only. I suppose I could pass more info but it doesn\u0027t really matter since TransactionIdentifier\u0027s are unique.",
+      "parentUuid": "1aa4ed85_01002200",
       "range": {
         "startLine": 327,
         "startChar": 58,
