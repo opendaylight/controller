@@ -9,31 +9,7 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import static akka.pattern.Patterns.ask;
-import akka.actor.ActorPath;
-import akka.actor.ActorRef;
-import akka.actor.Address;
-import akka.actor.Cancellable;
-import akka.actor.OneForOneStrategy;
-import akka.actor.PoisonPill;
-import akka.actor.Props;
-import akka.actor.SupervisorStrategy;
-import akka.cluster.ClusterEvent;
-import akka.dispatch.OnComplete;
-import akka.japi.Function;
-import akka.persistence.RecoveryCompleted;
-import akka.persistence.SaveSnapshotFailure;
-import akka.persistence.SaveSnapshotSuccess;
-import akka.persistence.SnapshotOffer;
-import akka.persistence.SnapshotSelectionCriteria;
-import akka.serialization.Serialization;
-import akka.util.Timeout;
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Objects;
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
-import com.google.common.base.Supplier;
-import com.google.common.collect.Sets;
+
 import java.io.ByteArrayInputStream;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
@@ -49,8 +25,10 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.SerializationUtils;
 import org.opendaylight.controller.cluster.common.actor.AbstractUntypedPersistentActorWithMetering;
 import org.opendaylight.controller.cluster.datastore.config.Configuration;
@@ -97,6 +75,32 @@ import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Objects;
+import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
+import com.google.common.base.Supplier;
+import com.google.common.collect.Sets;
+
+import akka.actor.ActorRef;
+import akka.actor.Address;
+import akka.actor.Cancellable;
+import akka.actor.OneForOneStrategy;
+import akka.actor.PoisonPill;
+import akka.actor.Props;
+import akka.actor.SupervisorStrategy;
+import akka.cluster.ClusterEvent;
+import akka.dispatch.OnComplete;
+import akka.japi.Function;
+import akka.persistence.RecoveryCompleted;
+import akka.persistence.SaveSnapshotFailure;
+import akka.persistence.SaveSnapshotSuccess;
+import akka.persistence.SnapshotOffer;
+import akka.persistence.SnapshotSelectionCriteria;
+import akka.serialization.Serialization;
+import akka.util.Timeout;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
@@ -1167,7 +1171,6 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         private final ShardIdentifier shardId;
         private final String shardName;
         private ActorRef actor;
-        private ActorPath actorPath;
         private final Map<String, String> initialPeerAddresses;
         private Optional<DataTree> localShardDataTree;
         private boolean leaderAvailable = false;
@@ -1215,13 +1218,8 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             return actor;
         }
 
-        ActorPath getActorPath() {
-            return actorPath;
-        }
-
         void setActor(ActorRef actor) {
             this.actor = actor;
-            this.actorPath = actor.path();
         }
 
         ShardIdentifier getShardId() {
@@ -1627,10 +1625,6 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
 
         public String getShardName() {
             return shardName;
-        }
-
-        public ActorRef getShardManagerActor() {
-            return shardManagerActor;
         }
 
         @Override
