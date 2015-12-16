@@ -128,6 +128,10 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         return followerToLog.keySet();
     }
 
+    protected Collection<FollowerLogInformation> getFollowers() {
+        return followerToLog.values();
+    }
+
     public void addFollower(String followerId) {
         FollowerLogInformation followerLogInformation = new FollowerLogInformationImpl(
                 context.getPeerInfo(followerId), -1, context);
@@ -509,7 +513,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
         }
     }
 
-    private void sendAppendEntries(long timeSinceLastActivityInterval, boolean isHeartbeat) {
+    protected void sendAppendEntries(long timeSinceLastActivityInterval, boolean isHeartbeat) {
         // Send an AppendEntries to all followers
         for (Entry<String, FollowerLogInformation> e : followerToLog.entrySet()) {
             final String followerId = e.getKey();
