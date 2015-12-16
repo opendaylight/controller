@@ -12,6 +12,7 @@ import akka.dispatch.Futures;
 import akka.dispatch.OnComplete;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListenableFuture;
+import javax.annotation.Nonnull;
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
 import org.opendaylight.controller.cluster.datastore.messages.CommitTransactionReply;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyLocalTransaction;
@@ -66,8 +67,12 @@ class LocalThreePhaseCommitCohort implements DOMStoreThreePhaseCommitCohort {
         return actorContext.executeOperationAsync(leader, message, actorContext.getTransactionCommitOperationTimeout());
     }
 
-    void setOperationError(Exception operationError) {
-        this.operationError = operationError;
+    void setOperationError(@Nonnull Exception operationError) {
+        if (this.operationError != null) {
+            LOG.info("Cohort {} already had operation error", this, this.operationError);
+        }
+
+        this.operationError = Preconditions.checkNotNull(operationError);
     }
 
     Future<ActorSelection> initiateCoordinatedCommit() {
