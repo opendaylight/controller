@@ -65,11 +65,11 @@ public class DataServiceIT extends AbstractIT {
         assertNotNull(transaction);
 
         InstanceIdentifier<UnorderedList> node1 = createNodeRef("0");
-        DataObject node = consumerDataService.readConfigurationData(node1);
+        DataObject node = consumerDataService.readOperationalData(node1);
         assertNull(node);
         UnorderedList nodeData1 = createNode("0");
 
-        transaction.putConfigurationData(node1, nodeData1);
+        transaction.putOperationalData(node1, nodeData1);
         Future<RpcResult<TransactionStatus>> commitResult = transaction.commit();
         assertNotNull(commitResult);
 
@@ -79,14 +79,14 @@ public class DataServiceIT extends AbstractIT {
         assertNotNull(result.getResult());
         assertEquals(TransactionStatus.COMMITED, result.getResult());
 
-        UnorderedList readedData = (UnorderedList) consumerDataService.readConfigurationData(node1);
+        UnorderedList readedData = (UnorderedList) consumerDataService.readOperationalData(node1);
         assertNotNull(readedData);
         assertEquals(nodeData1.getKey(), readedData.getKey());
 
         DataModificationTransaction transaction2 = consumerDataService.beginTransaction();
         assertNotNull(transaction2);
 
-        transaction2.removeConfigurationData(node1);
+        transaction2.removeOperationalData(node1);
 
         Future<RpcResult<TransactionStatus>> commitResult2 = transaction2.commit();
         assertNotNull(commitResult2);
@@ -97,7 +97,7 @@ public class DataServiceIT extends AbstractIT {
         assertNotNull(result2.getResult());
         assertEquals(TransactionStatus.COMMITED, result2.getResult());
 
-        DataObject readedData2 = consumerDataService.readConfigurationData(node1);
+        DataObject readedData2 = consumerDataService.readOperationalData(node1);
         assertNull(readedData2);
     }
 
