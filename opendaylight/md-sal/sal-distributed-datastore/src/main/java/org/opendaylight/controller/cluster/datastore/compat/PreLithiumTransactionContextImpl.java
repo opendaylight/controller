@@ -15,7 +15,12 @@ import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIden
 import org.opendaylight.controller.cluster.datastore.messages.DeleteData;
 import org.opendaylight.controller.cluster.datastore.messages.MergeData;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyTransaction;
+import org.opendaylight.controller.cluster.datastore.messages.VersionedExternalizableMessage;
 import org.opendaylight.controller.cluster.datastore.messages.WriteData;
+import org.opendaylight.controller.cluster.datastore.modification.AbstractModification;
+import org.opendaylight.controller.cluster.datastore.modification.DeleteModification;
+import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
+import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
@@ -43,18 +48,29 @@ public class PreLithiumTransactionContextImpl extends RemoteTransactionContext {
     }
 
     @Override
-    public void deleteData(YangInstanceIdentifier path) {
-        executeOperationAsync(new DeleteData(path, getRemoteTransactionVersion()));
-    }
+    public void executeModification(AbstractModification modification) {
+        final short remoteTransactionVersion = getRemoteTransactionVersion();
+        final YangInstanceIdentifier path = modification.getPath();
+        VersionedExternalizableMessage msg = null;
 
-    @Override
-    public void mergeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
-        executeOperationAsync(new MergeData(path, data, getRemoteTransactionVersion()));
-    }
+        if(modification instanceof DeleteModification) {
+            msg = new DeleteData(path, remoteTransactionVersion);
+        } else if(modification instanceof WriteModification) {
+            final NormalizedNode<?, ?> data = ((WriteModification) modification).getData();
 
-    @Override
-    public void writeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
-        executeOperationAsync(new WriteData(path, data, getRemoteTransactionVersion()));
+            // be sure to check for Merge before Write, since Merge is a subclass of Write
+            if(modification instanceof MergeModification) {
+                msg = new MergeData(path, data, remoteTransactionVersion);
+            } else {
+                msg = new WriteData(path, data, remoteTransactionVersion);
+            }
+        } else {
+            LOG.error("Invalid modification type " + modification.getClass().getName());
+        }
+
+        if(msg != null) {
+            executeOperationAsync(msg);
+        }
     }
 
     @Override

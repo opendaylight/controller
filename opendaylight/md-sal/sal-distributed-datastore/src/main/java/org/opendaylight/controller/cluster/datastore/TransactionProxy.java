@@ -25,6 +25,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
+import org.opendaylight.controller.cluster.datastore.messages.AbstractRead;
+import org.opendaylight.controller.cluster.datastore.messages.DataExists;
+import org.opendaylight.controller.cluster.datastore.messages.ReadData;
+import org.opendaylight.controller.cluster.datastore.modification.AbstractModification;
+import org.opendaylight.controller.cluster.datastore.modification.DeleteModification;
+import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
+import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.cluster.datastore.utils.NormalizedNodeAggregator;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
@@ -67,16 +74,20 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
 
     @Override
     public CheckedFuture<Boolean, ReadFailedException> exists(final YangInstanceIdentifier path) {
+        return executeRead(shardNameFromIdentifier(path), new DataExists(path));
+    }
+
+    private <T> CheckedFuture<T, ReadFailedException> executeRead(String shardName, final AbstractRead<T> readCmd) {
         Preconditions.checkState(type != TransactionType.WRITE_ONLY, "Reads from write-only transactions are not allowed");
 
-        LOG.debug("Tx {} exists {}", getIdentifier(), path);
+        LOG.debug("Tx {} {} {}", getIdentifier(), readCmd.getClass().getSimpleName(), readCmd.getPath());
 
-        final SettableFuture<Boolean> proxyFuture = SettableFuture.create();
-        TransactionContextWrapper contextWrapper = getContextWrapper(path);
+        final SettableFuture<T> proxyFuture = SettableFuture.create();
+        TransactionContextWrapper contextWrapper = getContextWrapper(shardName);
         contextWrapper.maybeExecuteTransactionOperation(new TransactionOperation() {
             @Override
             public void invoke(TransactionContext transactionContext) {
-                transactionContext.dataExists(path, proxyFuture);
+                transactionContext.executeRead(readCmd, proxyFuture);
             }
         });
 
@@ -98,16 +109,7 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
 
     private CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> singleShardRead(
             final String shardName, final YangInstanceIdentifier path) {
-        final SettableFuture<Optional<NormalizedNode<?, ?>>> proxyFuture = SettableFuture.create();
-        TransactionContextWrapper contextWrapper = getContextWrapper(shardName);
-        contextWrapper.maybeExecuteTransactionOperation(new TransactionOperation() {
-            @Override
-            public void invoke(TransactionContext transactionContext) {
-                transactionContext.readData(path, proxyFuture);
-            }
-        });
-
-        return MappingCheckedFuture.create(proxyFuture, ReadFailedException.MAPPER);
+        return executeRead(shardName, new ReadData(path));
     }
 
     private CheckedFuture<Optional<NormalizedNode<?, ?>>, ReadFailedException> readAllData() {
@@ -137,45 +139,29 @@ public class TransactionProxy extends AbstractDOMStoreTransaction<TransactionIde
 
     @Override
     public void delete(final YangInstanceIdentifier path) {
-        checkModificationState();
-
-        LOG.debug("Tx {} delete {}", getIdentifier(), path);
-
-        TransactionContextWrapper contextWrapper = getContextWrapper(path);
-        contextWrapper.maybeExecuteTransactionOperation(new TransactionOperation() {
-            @Override
-            public void invoke(TransactionContext transactionContext) {
-                transactionContext.deleteData(path);
-            }
-        });
+        executeModification(new DeleteModification(path));
     }
 
     @Override
     public void merge(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
-        checkModificationState();
-
-        LOG.debug("Tx {} merge {}", getIdentifier(), path);
-
-        TransactionContextWrapper contextWrapper = getContextWrapper(path);
-        contextWrapper.maybeExecuteTransactionOperation(new TransactionOperation() {
-            @Override
-            public void invoke(TransactionContext transactionContext) {
-                transactionContext.mergeData(path, data);
-            }
-        });
+        executeModification(new MergeModification(path, data));
     }
 
     @Override
     public void write(final YangInstanceIdentifier path, final NormalizedNode<?, ?> data) {
+        executeModification(new WriteModification(path, data));
+    }
+
+    private void executeModification(final AbstractModification modification) {
         checkModificationState();
 
-        LOG.debug("Tx {} write {}", getIdentifier(), path);
+        LOG.debug("Tx {} executeModification {} {}", getIdentifier(), modification.getClass().getSimpleName(), modification.getPath());
 
-        TransactionContextWrapper contextWrapper = getContextWrapper(path);
+        TransactionContextWrapper contextWrapper = getContextWrapper(modification.getPath());
         contextWrapper.maybeExecuteTransactionOperation(new TransactionOperation() {
             @Override
-            public void invoke(TransactionContext transactionContext) {
-                transactionContext.writeData(path, data);
+            protected void invoke(TransactionContext transactionContext) {
+                transactionContext.executeModification(modification);
             }
         });
     }
