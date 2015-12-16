@@ -48,6 +48,29 @@
     },
     {
       "key": {
+        "uuid": "1aa4ed85_a137cee2",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionChainProxy.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 266,
+      "author": {
+        "id": 3172
+      },
+      "writtenOn": "2015-12-16T19:24:51Z",
+      "side": 1,
+      "message": "This seems to be a redundant check vs the prior check on the map itself?",
+      "range": {
+        "startLine": 264,
+        "startChar": 0,
+        "endLine": 266,
+        "endChar": 13
+      },
+      "revId": "3e2a6c7954f81fdeb55d65990a62e05773d25078",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1aa4ed85_01002200",
         "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionChainProxy.java",
         "patchSetId": 3
