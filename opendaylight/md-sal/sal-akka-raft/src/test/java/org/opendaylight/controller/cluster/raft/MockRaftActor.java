@@ -44,7 +44,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     private final byte[] restoreFromSnapshot;
     final CountDownLatch snapshotCommitted = new CountDownLatch(1);
 
-    protected MockRaftActor(Builder builder) {
+    protected MockRaftActor(AbstractBuilder<?, ?> builder) {
         super(builder.id, builder.peerAddresses, Optional.fromNullable(builder.config), PAYLOAD_VERSION);
         state = new ArrayList<>();
         this.actorDelegate = mock(RaftActor.class);
@@ -259,7 +259,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
         return new Builder();
     }
 
-    public static class Builder {
+    public static class AbstractBuilder<T extends AbstractBuilder<T, A>, A extends MockRaftActor> {
         private Map<String, String> peerAddresses = Collections.emptyMap();
         private String id;
         private ConfigParams config;
@@ -268,49 +268,65 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
         private RaftActorSnapshotMessageSupport snapshotMessageSupport;
         private byte[] restoreFromSnapshot;
         private Optional<Boolean> persistent = Optional.absent();
+        private final Class<A> actorClass;
 
-        public Builder id(String id) {
+        protected AbstractBuilder(Class<A> actorClass) {
+            this.actorClass = actorClass;
+        }
+
+        @SuppressWarnings("unchecked")
+        private T self() {
+            return (T) this;
+        }
+
+        public T id(String id) {
             this.id = id;
-            return this;
+            return self();
         }
 
-        public Builder peerAddresses(Map<String, String> peerAddresses) {
+        public T peerAddresses(Map<String, String> peerAddresses) {
             this.peerAddresses = peerAddresses;
-            return this;
+            return self();
         }
 
-        public Builder config(ConfigParams config) {
+        public T config(ConfigParams config) {
             this.config = config;
-            return this;
+            return self();
         }
 
-        public Builder dataPersistenceProvider(DataPersistenceProvider dataPersistenceProvider) {
+        public T dataPersistenceProvider(DataPersistenceProvider dataPersistenceProvider) {
             this.dataPersistenceProvider = dataPersistenceProvider;
-            return this;
+            return self();
         }
 
-        public Builder roleChangeNotifier(ActorRef roleChangeNotifier) {
+        public T roleChangeNotifier(ActorRef roleChangeNotifier) {
             this.roleChangeNotifier = roleChangeNotifier;
-            return this;
+            return self();
         }
 
-        public Builder snapshotMessageSupport(RaftActorSnapshotMessageSupport snapshotMessageSupport) {
+        public T snapshotMessageSupport(RaftActorSnapshotMessageSupport snapshotMessageSupport) {
             this.snapshotMessageSupport = snapshotMessageSupport;
-            return this;
+            return self();
         }
 
-        public Builder restoreFromSnapshot(byte[] restoreFromSnapshot) {
+        public T restoreFromSnapshot(byte[] restoreFromSnapshot) {
             this.restoreFromSnapshot = restoreFromSnapshot;
-            return this;
+            return self();
         }
 
-        public Builder persistent(Optional<Boolean> persistent) {
+        public T persistent(Optional<Boolean> persistent) {
             this.persistent = persistent;
-            return this;
+            return self();
         }
 
         public Props props() {
-            return Props.create(MockRaftActor.class, this);
+            return Props.create(actorClass, this);
+        }
+    }
+
+    public static class Builder extends AbstractBuilder<Builder, MockRaftActor> {
+        private Builder() {
+            super(MockRaftActor.class);
         }
     }
 }
