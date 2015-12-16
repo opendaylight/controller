@@ -12,7 +12,6 @@ import static org.junit.Assert.assertNotNull;
 import akka.actor.ActorRef;
 import akka.actor.InvalidActorNameException;
 import akka.actor.PoisonPill;
-import akka.actor.Props;
 import akka.actor.Terminated;
 import akka.dispatch.Dispatchers;
 import akka.testkit.JavaTestKit;
@@ -72,16 +71,9 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         private final TestActorRef<MessageCollectorActor> collectorActor;
         private final Map<Class<?>, Boolean> dropMessages = new ConcurrentHashMap<>();
 
-        private TestRaftActor(String id, Map<String, String> peerAddresses, ConfigParams config,
-                TestActorRef<MessageCollectorActor> collectorActor) {
-            super(builder().id(id).peerAddresses(peerAddresses).config(config));
-            this.collectorActor = collectorActor;
-        }
-
-        public static Props props(String id, Map<String, String> peerAddresses, ConfigParams config,
-                TestActorRef<MessageCollectorActor> collectorActor) {
-            return Props.create(TestRaftActor.class, id, peerAddresses, config, collectorActor).
-                    withDispatcher(Dispatchers.DefaultDispatcherId());
+        private TestRaftActor(Builder builder) {
+            super(builder);
+            this.collectorActor = builder.collectorActor;
         }
 
         void startDropMessages(Class<?> msgClass) {
@@ -147,6 +139,23 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
         public ActorRef collectorActor() {
             return collectorActor;
         }
+
+        public static Builder newBuilder() {
+            return new Builder();
+        }
+
+        public static class Builder extends AbstractBuilder<Builder, TestRaftActor> {
+            private TestActorRef<MessageCollectorActor> collectorActor;
+
+            public Builder collectorActor(TestActorRef<MessageCollectorActor> collectorActor) {
+                this.collectorActor = collectorActor;
+                return this;
+            }
+
+            private Builder() {
+                super(TestRaftActor.class);
+            }
+        }
     }
 
     protected final Logger testLog = LoggerFactory.getLogger(getClass());
@@ -211,16 +220,19 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
 
     protected TestActorRef<TestRaftActor> newTestRaftActor(String id, Map<String, String> peerAddresses,
             ConfigParams configParams) {
-        TestActorRef<MessageCollectorActor> collectorActor = factory.createTestActor(
+        return newTestRaftActor(id, TestRaftActor.newBuilder().peerAddresses(peerAddresses != null ? peerAddresses :
+            Collections.<String, String>emptyMap()).config(configParams));
+    }
+
+    protected TestActorRef<TestRaftActor> newTestRaftActor(String id, TestRaftActor.Builder builder) {
+        builder.collectorActor(factory.<MessageCollectorActor>createTestActor(
                 MessageCollectorActor.props().withDispatcher(Dispatchers.DefaultDispatcherId()),
-                        factory.generateActorId(id + "-collector"));
+                        factory.generateActorId(id + "-collector"))).id(id);
 
         InvalidActorNameException lastEx = null;
         for(int i = 0; i < 10; i++) {
             try {
-                return factory.createTestActor(TestRaftActor.props(id,
-                        peerAddresses != null ? peerAddresses : Collections.<String, String>emptyMap(),
-                                configParams, collectorActor), id);
+                return factory.createTestActor(builder.props().withDispatcher(Dispatchers.DefaultDispatcherId()), id);
             } catch (InvalidActorNameException e) {
                 lastEx = e;
                 Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
@@ -309,7 +321,7 @@ public abstract class AbstractRaftActorIntegrationTest extends AbstractActorTest
     }
 
     protected String testActorPath(String id){
-        return "akka://test/user" + id;
+        return factory.createTestActorPath(id);
     }
 
     protected void verifyLeadersTrimmedLog(long lastIndex) {
