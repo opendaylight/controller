@@ -71,6 +71,7 @@ public class TxchainDomWrite extends DatastoreAbstractWriter implements Transact
 
             writeCnt++;
 
+            // Start performing the operation; submit the transaction at every n-th operation
             if (writeCnt == writesPerTx) {
                 txSubmitted++;
                 Futures.addCallback(tx.submit(), new FutureCallback<Void>() {

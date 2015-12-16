@@ -62,7 +62,7 @@ public abstract class DatastoreAbstractWriter {
         }
         else
         {
-            if (rn.nextInt() % 2 != 0) {
+            if (rn.nextBoolean() == true) {
                 dsType = LogicalDatastoreType.OPERATIONAL;
             } else {
                 dsType = LogicalDatastoreType.CONFIGURATION;
