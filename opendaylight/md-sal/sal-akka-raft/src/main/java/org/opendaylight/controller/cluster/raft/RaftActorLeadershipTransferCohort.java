@@ -26,9 +26,9 @@ public abstract class RaftActorLeadershipTransferCohort {
     }
 
     /**
-     * This method is invoked to start leadership transfer.
+     * This method is invoked to proceed with the leadership transfer.
      */
-    public void startTransfer() {
+    public void proceedWithTransfer() {
         RaftActorBehavior behavior = raftActor.getCurrentBehavior();
         if(behavior instanceof Leader) {
             ((Leader)behavior).transferLeadership(this);
