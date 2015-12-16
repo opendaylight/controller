@@ -9,7 +9,6 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import static akka.pattern.Patterns.ask;
-import akka.actor.ActorPath;
 import akka.actor.ActorRef;
 import akka.actor.Address;
 import akka.actor.Cancellable;
@@ -1315,7 +1314,6 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         private final ShardIdentifier shardId;
         private final String shardName;
         private ActorRef actor;
-        private ActorPath actorPath;
         private final Map<String, String> initialPeerAddresses;
         private Optional<DataTree> localShardDataTree;
         private boolean leaderAvailable = false;
@@ -1363,13 +1361,8 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
             return actor;
         }
 
-        ActorPath getActorPath() {
-            return actorPath;
-        }
-
         void setActor(ActorRef actor) {
             this.actor = actor;
-            this.actorPath = actor.path();
         }
 
         ShardIdentifier getShardId() {
@@ -1628,7 +1621,6 @@ public class ShardManager extends AbstractUntypedPersistentActorWithMetering {
         private CountDownLatch waitTillReadyCountdownLatch;
         private PrimaryShardInfoFutureCache primaryShardInfoCache;
         private DatastoreSnapshot restoreFromSnapshot;
-
         private volatile boolean sealed;
 
         @SuppressWarnings("unchecked")
