@@ -11,7 +11,7 @@ package org.opendaylight.controller.cluster.datastore;
  * Abstract superclass for transaction operations which should be executed
  * on a {@link TransactionContext} at a later point in time.
  */
-abstract class TransactionOperation {
+public abstract class TransactionOperation {
     /**
      * Execute the delayed operation.
      *

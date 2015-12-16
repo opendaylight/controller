@@ -8,17 +8,16 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorSelection;
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
+import org.opendaylight.controller.cluster.datastore.messages.AbstractRead;
+import org.opendaylight.controller.cluster.datastore.modification.AbstractModification;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreReadTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreTransaction;
 import org.opendaylight.controller.sal.core.spi.data.DOMStoreWriteTransaction;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import scala.concurrent.Future;
 
 /**
@@ -44,24 +43,11 @@ abstract class LocalTransactionContext extends AbstractTransactionContext {
     protected abstract DOMStoreReadTransaction getReadDelegate();
 
     @Override
-    public void writeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
+    public void executeModification(AbstractModification modification) {
         incrementModificationCount();
         if(operationError == null) {
             try {
-                getWriteDelegate().write(path, data);
-            } catch (Exception e) {
-                operationError = e;
-            }
-        }
-
-    }
-
-    @Override
-    public void mergeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
-        incrementModificationCount();
-        if(operationError == null) {
-            try {
-                getWriteDelegate().merge(path, data);
+                modification.apply(getWriteDelegate());
             } catch (Exception e) {
                 operationError = e;
             }
@@ -69,37 +55,10 @@ abstract class LocalTransactionContext extends AbstractTransactionContext {
     }
 
     @Override
-    public void deleteData(YangInstanceIdentifier path) {
-        incrementModificationCount();
-        if(operationError == null) {
-            try {
-                getWriteDelegate().delete(path);
-            } catch (Exception e) {
-                operationError = e;
-            }
-        }
-    }
-
-    @Override
-    public void readData(YangInstanceIdentifier path, final SettableFuture<Optional<NormalizedNode<?, ?>>> proxyFuture) {
-        Futures.addCallback(getReadDelegate().read(path), new FutureCallback<Optional<NormalizedNode<?, ?>>>() {
+    public <T> void executeRead(AbstractRead<T> read, final SettableFuture<T> proxyFuture) {
+        Futures.addCallback(read.apply(getReadDelegate()), new FutureCallback<T>() {
             @Override
-            public void onSuccess(final Optional<NormalizedNode<?, ?>> result) {
-                proxyFuture.set(result);
-            }
-
-            @Override
-            public void onFailure(final Throwable t) {
-                proxyFuture.setException(t);
-            }
-        });
-    }
-
-    @Override
-    public void dataExists(YangInstanceIdentifier path, final SettableFuture<Boolean> proxyFuture) {
-        Futures.addCallback(getReadDelegate().exists(path), new FutureCallback<Boolean>() {
-            @Override
-            public void onSuccess(final Boolean result) {
+            public void onSuccess(final T result) {
                 proxyFuture.set(result);
             }
 

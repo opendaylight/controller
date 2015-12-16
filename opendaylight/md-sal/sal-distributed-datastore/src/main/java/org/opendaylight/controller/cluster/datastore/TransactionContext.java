@@ -8,30 +8,23 @@
 package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorSelection;
-import com.google.common.base.Optional;
 import com.google.common.util.concurrent.SettableFuture;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
+import org.opendaylight.controller.cluster.datastore.messages.AbstractRead;
+import org.opendaylight.controller.cluster.datastore.modification.AbstractModification;
 import scala.concurrent.Future;
 
 /*
  * FIXME: why do we need this interface? It should be possible to integrate it with
  *        AbstractTransactionContext, which is the only implementation anyway.
  */
-interface TransactionContext {
+public interface TransactionContext {
     void closeTransaction();
 
     Future<ActorSelection> readyTransaction();
 
-    void writeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data);
+    void executeModification(AbstractModification modification);
 
-    void deleteData(YangInstanceIdentifier path);
-
-    void mergeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data);
-
-    void readData(final YangInstanceIdentifier path, SettableFuture<Optional<NormalizedNode<?, ?>>> proxyFuture);
-
-    void dataExists(YangInstanceIdentifier path, SettableFuture<Boolean> proxyFuture);
+    <T> void executeRead(AbstractRead<T> readCmd, SettableFuture<T> promise);
 
     boolean supportsDirectCommit();
 

@@ -9,12 +9,16 @@
 package org.opendaylight.controller.cluster.datastore.modification;
 
 
+import org.opendaylight.controller.cluster.datastore.TransactionContext;
+
+import org.opendaylight.controller.cluster.datastore.TransactionOperation;
+import org.opendaylight.controller.cluster.datastore.messages.VersionedExternalizableMessage;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 /**
  * Base class to be used for all simple modifications that can be applied to a DOMStoreTransaction
  */
-public abstract class AbstractModification implements Modification {
+public abstract class AbstractModification extends TransactionOperation implements Modification {
 
     private YangInstanceIdentifier path;
     private short version;
@@ -37,5 +41,13 @@ public abstract class AbstractModification implements Modification {
 
     public short getVersion() {
         return version;
+    }
+
+    @Deprecated
+    public abstract VersionedExternalizableMessage getPreLithiumOpMessage(short remoteTransactionVersion);
+
+    @Override
+    protected void invoke(TransactionContext transactionContext) {
+        transactionContext.executeModification(this);
     }
 }
