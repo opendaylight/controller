@@ -11,6 +11,7 @@ package org.opendaylight.controller.cluster.raft;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
+import akka.actor.PoisonPill;
 import akka.japi.Procedure;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
@@ -47,6 +48,7 @@ import org.opendaylight.controller.cluster.raft.client.messages.FindLeaderReply;
 import org.opendaylight.controller.cluster.raft.client.messages.FollowerInfo;
 import org.opendaylight.controller.cluster.raft.client.messages.GetOnDemandRaftState;
 import org.opendaylight.controller.cluster.raft.client.messages.OnDemandRaftState;
+import org.opendaylight.controller.cluster.raft.client.messages.Shutdown;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -122,6 +124,8 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     private final SwitchBehaviorSupplier reusableSwitchBehaviorSupplier = new SwitchBehaviorSupplier();
 
     private RaftActorServerConfigurationSupport serverConfigurationSupport;
+
+    private RaftActorLeadershipTransferCohort leadershipTransferInProgress;
 
     public RaftActor(String id, Map<String, String> peerAddresses,
          Optional<ConfigParams> configParams, short payloadVersion) {
@@ -253,9 +257,60 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             switchBehavior(((SwitchBehavior) message));
         } else if(message instanceof LeaderTransitioning) {
             onLeaderTransitioning();
+        } else if(message instanceof Shutdown) {
+            onShutDown();
+        } else if(message instanceof Runnable) {
+            ((Runnable)message).run();
         } else if(!snapshotSupport.handleSnapshotMessage(message, getSender())) {
             switchBehavior(reusableSwitchBehaviorSupplier.handleMessage(getSender(), message));
         }
+    }
+
+    void setLeadershipTransferInProgress(RaftActorLeadershipTransferCohort cohort) {
+        leadershipTransferInProgress = cohort;
+    }
+
+    private void initiateLeaderShipTransfer(final RaftActorLeadershipTransferCohort.OnComplete onComplete) {
+        LOG.debug("{}: Initiating leader transfer", persistenceId());
+
+        if(leadershipTransferInProgress == null) {
+            leadershipTransferInProgress = new RaftActorLeadershipTransferCohort(this, getSender());
+            leadershipTransferInProgress.addOnComplete(new RaftActorLeadershipTransferCohort.OnComplete() {
+                @Override
+                public void onSuccess(ActorRef raftActorRef, ActorRef replyTo) {
+                    leadershipTransferInProgress = null;
+                    onComplete.onSuccess(raftActorRef, replyTo);
+                }
+
+                @Override
+                public void onFailure(ActorRef raftActorRef, ActorRef replyTo) {
+                    leadershipTransferInProgress = null;
+                    onComplete.onFailure(raftActorRef, replyTo);
+                }
+            });
+            leadershipTransferInProgress.init();
+        } else {
+            LOG.debug("{}: prior leader transfer in progress - adding callback", persistenceId());
+            leadershipTransferInProgress.addOnComplete(onComplete);
+        }
+    }
+
+    private void onShutDown() {
+        LOG.debug("{}: onShutDown", persistenceId());
+
+        initiateLeaderShipTransfer(new RaftActorLeadershipTransferCohort.OnComplete() {
+            @Override
+            public void onSuccess(ActorRef raftActorRef, ActorRef replyTo) {
+                LOG.debug("{}: leader transfer succeeded - sending PoisonPill", persistenceId());
+                raftActorRef.tell(PoisonPill.getInstance(), raftActorRef);
+            }
+
+            @Override
+            public void onFailure(ActorRef raftActorRef, ActorRef replyTo) {
+                LOG.debug("{}: leader transfer failed - sending PoisonPill", persistenceId());
+                raftActorRef.tell(PoisonPill.getInstance(), raftActorRef);
+            }
+        });
     }
 
     private void onLeaderTransitioning() {
@@ -361,6 +416,10 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
             }
 
             onLeaderChanged(lastValidLeaderId, currentBehavior.getLeaderId());
+
+            if(leadershipTransferInProgress != null) {
+                leadershipTransferInProgress.onNewLeader(currentBehavior.getLeaderId());
+            }
         }
 
         if (roleChangeNotifier.isPresent() &&
@@ -637,6 +696,21 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
      * @return ActorRef - ActorRef of the notifier or Optional.absent if none.
      */
     protected abstract Optional<ActorRef> getRoleChangeNotifier();
+
+    /**
+     * This method is called when leader transfer is starting and allows derived classes to perform work
+     * prior to transferring leadership. On completion of the work, the proceedWithTransfer method on the
+     * RaftActorLeadershipTransferCohort must be called to proceed with the transfer. If a condition occurs
+     * such that the transfer should not proceed, the abortTransfer method on the
+     * RaftActorLeadershipTransferCohort must be called.
+     * <p>
+     * The default implementation immediately proceeds with the transfer.
+     *
+     * @param leadershipTransferCohort
+     */
+    protected void leadershipTransferStarting(RaftActorLeadershipTransferCohort leadershipTransferCohort) {
+        leadershipTransferCohort.proceedWithTransfer();
+    }
 
     protected void onLeaderChanged(String oldLeader, String newLeader){};
 

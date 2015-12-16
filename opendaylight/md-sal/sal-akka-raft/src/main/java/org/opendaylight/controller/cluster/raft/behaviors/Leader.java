@@ -91,12 +91,25 @@ public class Leader extends AbstractLeader {
         return returnBehavior;
     }
 
+    /**
+     * Attempts to transfer leadership to a follower as per the raft paper (§3.10) as follows:
+     * <ul>
+     * <li>Start a timer (Stopwatch).</li>
+     * <li>Send an initial AppendEntries heartbeat to all followers.</li>
+     * <li>On AppendEntriesReply, check if the follower's new match Index matches the leader's last index</li>
+     * <li>If it matches, </li>
+     *   <ul>
+     *   <li>Send an additional AppendEntries to ensure the follower has applied all its log entries to its state.</li>
+     *   <li>Send an ElectionTimeout to the follower to immediately start an election.</li>
+     *   <li>Notify {@link RaftActorLeadershipTransferCohort#transferComplete}.</li>
+     *   </ul>
+     * <li>Otherwise if the election time out period elapses, notify
+     *     {@link RaftActorLeadershipTransferCohort#abortTtransfer}.</li>
+     * </ul>
+     *
+     * @param leadershipTransferCohort
+     */
     public void transferLeadership(@Nonnull RaftActorLeadershipTransferCohort leadershipTransferCohort) {
-        if(!context.hasFollowers()) {
-            leadershipTransferCohort.transferComplete();
-            return;
-        }
-
         LOG.debug("{}: Attempting to transfer leadership", logName());
 
         leadershipTransferContext = new LeadershipTransferContext(leadershipTransferCohort);
@@ -124,7 +137,7 @@ public class Leader extends AbstractLeader {
             LOG.debug("{}: Follower's log matches - sending ElectionTimeout", logName());
 
             // We can't be sure if the follower has applied all its log entries to its state so send an
-            // additional AppendEntries.
+            // additional AppendEntries with the latest commit index.
             sendAppendEntries(0, false);
 
             // Now send an ElectionTimeout to the matching follower to immediately start an election.
