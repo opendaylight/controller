@@ -22,6 +22,23 @@
       "revId": "ccc8ffbf33a0ded40d39713a38c7d6c1480bfdf6",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_4a74f7fc",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 353,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-12-16T02:02:55Z",
+      "side": 1,
+      "message": "The DataTreeCandidatePayload will also be persisted. This isn\u0027t going to work. When recovered it will use a new dictionary which may not match the output dictionary. We would also have to persist the dictionary.",
+      "revId": "ccc8ffbf33a0ded40d39713a38c7d6c1480bfdf6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
