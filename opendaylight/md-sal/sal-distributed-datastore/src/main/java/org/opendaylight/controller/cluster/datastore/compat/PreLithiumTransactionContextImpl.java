@@ -12,13 +12,9 @@ import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
 import org.opendaylight.controller.cluster.datastore.OperationLimiter;
 import org.opendaylight.controller.cluster.datastore.RemoteTransactionContext;
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
-import org.opendaylight.controller.cluster.datastore.messages.DeleteData;
-import org.opendaylight.controller.cluster.datastore.messages.MergeData;
 import org.opendaylight.controller.cluster.datastore.messages.ReadyTransaction;
-import org.opendaylight.controller.cluster.datastore.messages.WriteData;
+import org.opendaylight.controller.cluster.datastore.modification.AbstractModification;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
-import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
@@ -43,18 +39,8 @@ public class PreLithiumTransactionContextImpl extends RemoteTransactionContext {
     }
 
     @Override
-    public void deleteData(YangInstanceIdentifier path) {
-        executeOperationAsync(new DeleteData(path, getRemoteTransactionVersion()));
-    }
-
-    @Override
-    public void mergeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
-        executeOperationAsync(new MergeData(path, data, getRemoteTransactionVersion()));
-    }
-
-    @Override
-    public void writeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
-        executeOperationAsync(new WriteData(path, data, getRemoteTransactionVersion()));
+    public void executeModification(AbstractModification modification) {
+        executeOperationAsync(modification.getPreLithiumOpMessage(getRemoteTransactionVersion()));
     }
 
     @Override

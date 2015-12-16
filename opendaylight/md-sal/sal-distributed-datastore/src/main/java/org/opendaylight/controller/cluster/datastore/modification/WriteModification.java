@@ -8,6 +8,9 @@
 
 package org.opendaylight.controller.cluster.datastore.modification;
 
+import org.opendaylight.controller.cluster.datastore.messages.WriteData;
+
+import org.opendaylight.controller.cluster.datastore.messages.VersionedExternalizableMessage;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -104,4 +107,10 @@ public class WriteModification extends AbstractModification {
             instance.data = node;
         }
     };
+
+    @Override
+    @Deprecated
+    public VersionedExternalizableMessage getPreLithiumOpMessage(short remoteTransactionVersion) {
+        return new WriteData(getPath(), data, remoteTransactionVersion);
+    }
 }

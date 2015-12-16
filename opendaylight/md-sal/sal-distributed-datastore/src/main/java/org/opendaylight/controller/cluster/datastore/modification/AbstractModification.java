@@ -9,6 +9,7 @@
 package org.opendaylight.controller.cluster.datastore.modification;
 
 
+import org.opendaylight.controller.cluster.datastore.messages.VersionedExternalizableMessage;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
 
 /**
@@ -38,4 +39,7 @@ public abstract class AbstractModification implements Modification {
     public short getVersion() {
         return version;
     }
+
+    @Deprecated
+    public abstract VersionedExternalizableMessage getPreLithiumOpMessage(short remoteTransactionVersion);
 }

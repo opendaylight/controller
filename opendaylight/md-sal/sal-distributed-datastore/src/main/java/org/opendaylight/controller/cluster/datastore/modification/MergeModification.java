@@ -11,6 +11,8 @@ package org.opendaylight.controller.cluster.datastore.modification;
 import java.io.IOException;
 import java.io.ObjectInput;
 import org.opendaylight.controller.cluster.datastore.DataStoreVersions;
+import org.opendaylight.controller.cluster.datastore.messages.MergeData;
+import org.opendaylight.controller.cluster.datastore.messages.VersionedExternalizableMessage;
 import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec;
 import org.opendaylight.controller.cluster.datastore.node.NormalizedNodeToNodeCodec.Decoded;
 import org.opendaylight.controller.protobuff.messages.persistent.PersistentMessages;
@@ -64,5 +66,11 @@ public class MergeModification extends WriteModification {
         MergeModification mod = new MergeModification(version);
         mod.readExternal(in);
         return mod;
+    }
+
+    @Override
+    @Deprecated
+    public VersionedExternalizableMessage getPreLithiumOpMessage(short remoteTransactionVersion) {
+        return new MergeData(getPath(), getData(), remoteTransactionVersion);
     }
 }

@@ -10,25 +10,18 @@ package org.opendaylight.controller.cluster.datastore;
 
 import akka.actor.ActorSelection;
 import akka.dispatch.OnComplete;
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.SettableFuture;
 import org.opendaylight.controller.cluster.datastore.identifiers.TransactionIdentifier;
+import org.opendaylight.controller.cluster.datastore.messages.AbstractRead;
 import org.opendaylight.controller.cluster.datastore.messages.BatchedModifications;
 import org.opendaylight.controller.cluster.datastore.messages.CloseTransaction;
-import org.opendaylight.controller.cluster.datastore.messages.DataExists;
-import org.opendaylight.controller.cluster.datastore.messages.DataExistsReply;
-import org.opendaylight.controller.cluster.datastore.messages.ReadData;
-import org.opendaylight.controller.cluster.datastore.messages.ReadDataReply;
 import org.opendaylight.controller.cluster.datastore.messages.SerializableMessage;
-import org.opendaylight.controller.cluster.datastore.modification.DeleteModification;
-import org.opendaylight.controller.cluster.datastore.modification.MergeModification;
+import org.opendaylight.controller.cluster.datastore.modification.AbstractModification;
 import org.opendaylight.controller.cluster.datastore.modification.Modification;
-import org.opendaylight.controller.cluster.datastore.modification.WriteModification;
 import org.opendaylight.controller.cluster.datastore.utils.ActorContext;
 import org.opendaylight.controller.md.sal.common.api.data.ReadFailedException;
 import org.opendaylight.yangtools.yang.data.api.YangInstanceIdentifier;
-import org.opendaylight.yangtools.yang.data.api.schema.NormalizedNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
@@ -175,77 +168,18 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
     }
 
     @Override
-    public void deleteData(YangInstanceIdentifier path) {
-        LOG.debug("Tx {} deleteData called path = {}", getIdentifier(), path);
-
+    public void executeModification(AbstractModification modification) {
+        LOG.debug("Tx {} executeModification {} called path = {}", getIdentifier(), modification.getClass().getSimpleName(),
+                modification.getPath());
         acquireOperation();
-        batchModification(new DeleteModification(path));
+        batchModification(modification);
     }
 
     @Override
-    public void mergeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
-        LOG.debug("Tx {} mergeData called path = {}", getIdentifier(), path);
+    public <T> void executeRead(final AbstractRead<T> readCmd, final SettableFuture<T> returnFuture) {
 
-        acquireOperation();
-        batchModification(new MergeModification(path, data));
-    }
-
-    @Override
-    public void writeData(YangInstanceIdentifier path, NormalizedNode<?, ?> data) {
-        LOG.debug("Tx {} writeData called path = {}", getIdentifier(), path);
-
-        acquireOperation();
-        batchModification(new WriteModification(path, data));
-    }
-
-    @Override
-    public void readData(final YangInstanceIdentifier path,
-            final SettableFuture<Optional<NormalizedNode<?, ?>>> returnFuture ) {
-
-        LOG.debug("Tx {} readData called path = {}", getIdentifier(), path);
-
-        // Send any batched modifications. This is necessary to honor the read uncommitted semantics of the
-        // public API contract.
-
-        acquireOperation();
-        sendBatchedModifications();
-
-        OnComplete<Object> onComplete = new OnComplete<Object>() {
-            @Override
-            public void onComplete(Throwable failure, Object readResponse) throws Throwable {
-                if(failure != null) {
-                    LOG.debug("Tx {} read operation failed: {}", getIdentifier(), failure);
-                    returnFuture.setException(new ReadFailedException(
-                            "Error reading data for path " + path, failure));
-
-                } else {
-                    LOG.debug("Tx {} read operation succeeded", getIdentifier(), failure);
-
-                    if (readResponse instanceof ReadDataReply) {
-                        ReadDataReply reply = (ReadDataReply) readResponse;
-                        returnFuture.set(Optional.<NormalizedNode<?, ?>>fromNullable(reply.getNormalizedNode()));
-
-                    } else if (ReadDataReply.isSerializedType(readResponse)) {
-                        ReadDataReply reply = ReadDataReply.fromSerializable(readResponse);
-                        returnFuture.set(Optional.<NormalizedNode<?, ?>>fromNullable(reply.getNormalizedNode()));
-
-                    } else {
-                        returnFuture.setException(new ReadFailedException(
-                            "Invalid response reading data for path " + path));
-                    }
-                }
-            }
-        };
-
-        Future<Object> readFuture = executeOperationAsync(new ReadData(path));
-
-        readFuture.onComplete(onComplete, actorContext.getClientDispatcher());
-    }
-
-    @Override
-    public void dataExists(final YangInstanceIdentifier path, final SettableFuture<Boolean> returnFuture) {
-
-        LOG.debug("Tx {} dataExists called path = {}", getIdentifier(), path);
+        final YangInstanceIdentifier path = readCmd.getPath();
+        LOG.debug("Tx {} executeRead {} called path = {}", getIdentifier(), readCmd.getClass().getSimpleName(), path);
 
         // Send any batched modifications. This is necessary to honor the read uncommitted semantics of the
         // public API contract.
@@ -257,27 +191,18 @@ public class RemoteTransactionContext extends AbstractTransactionContext {
             @Override
             public void onComplete(Throwable failure, Object response) throws Throwable {
                 if(failure != null) {
-                    LOG.debug("Tx {} dataExists operation failed: {}", getIdentifier(), failure);
-                    returnFuture.setException(new ReadFailedException(
-                            "Error checking data exists for path " + path, failure));
+                    LOG.debug("Tx {} {} operation failed: {}", getIdentifier(), readCmd.getClass().getSimpleName(), failure);
+                    returnFuture.setException(new ReadFailedException("Error checking " + readCmd.getClass().getSimpleName()
+                            + " for path " + path, failure));
                 } else {
-                    LOG.debug("Tx {} dataExists operation succeeded", getIdentifier(), failure);
+                    LOG.debug("Tx {} {} operation succeeded", getIdentifier(), readCmd.getClass().getSimpleName(), failure);
 
-                    if (response instanceof DataExistsReply) {
-                        returnFuture.set(Boolean.valueOf(((DataExistsReply) response).exists()));
-
-                    } else if (response.getClass().equals(DataExistsReply.SERIALIZABLE_CLASS)) {
-                        returnFuture.set(Boolean.valueOf(DataExistsReply.fromSerializable(response).exists()));
-
-                    } else {
-                        returnFuture.setException(new ReadFailedException(
-                                "Invalid response checking exists for path " + path));
-                    }
+                    readCmd.processResponse(response, returnFuture);
                 }
             }
         };
 
-        Future<Object> future = executeOperationAsync(new DataExists(path));
+        Future<Object> future = executeOperationAsync(readCmd);
 
         future.onComplete(onComplete, actorContext.getClientDispatcher());
     }
