@@ -58,6 +58,7 @@ public class TxchainDomWrite extends DatastoreAbstractWriter implements Transact
         DOMTransactionChain chain = domDataBroker.createTransactionChain(this);
         LogicalDatastoreType dsType = getDataStoreType();
         DOMDataWriteTransaction tx = chain.newWriteOnlyTransaction();
+        LogicalDatastoreType dsType = getDataStoreType();
 
         YangInstanceIdentifier pid = YangInstanceIdentifier.builder().node(TestExec.QNAME).node(OuterList.QNAME).build();
         for (MapEntryNode element : this.list) {

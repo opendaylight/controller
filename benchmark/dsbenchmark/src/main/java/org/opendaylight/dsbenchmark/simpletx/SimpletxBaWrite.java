@@ -44,15 +44,17 @@ public class SimpletxBaWrite extends DatastoreAbstractWriter {
     @Override
     public void executeList() {
         WriteTransaction tx = dataBroker.newWriteOnlyTransaction();
+        LogicalDatastoreType dsType = getDataStoreType();
+
         long writeCnt = 0;
 
         for (OuterList element : this.list) {
             InstanceIdentifier<OuterList> iid = InstanceIdentifier.create(TestExec.class)
                                                     .child(OuterList.class, element.getKey());
             if (oper == StartTestInput.Operation.PUT) {
-                tx.put(LogicalDatastoreType.CONFIGURATION, iid, element);
+                tx.put(dsType, iid, element);
             } else {
-                tx.merge(LogicalDatastoreType.CONFIGURATION, iid, element);
+                tx.merge(dsType, iid, element);
             }
 
             writeCnt++;
@@ -66,6 +68,8 @@ public class SimpletxBaWrite extends DatastoreAbstractWriter {
                     txError++;
                 }
                 tx = dataBroker.newWriteOnlyTransaction();
+                dsType = getDataStoreType();
+
                 writeCnt = 0;
             }
         }
