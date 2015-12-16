@@ -57,15 +57,16 @@ public class TxchainDomWrite extends DatastoreAbstractWriter implements Transact
 
         DOMTransactionChain chain = domDataBroker.createTransactionChain(this);
         DOMDataWriteTransaction tx = chain.newWriteOnlyTransaction();
+        LogicalDatastoreType dsType = getDataStoreType();
 
         YangInstanceIdentifier pid = YangInstanceIdentifier.builder().node(TestExec.QNAME).node(OuterList.QNAME).build();
         for (MapEntryNode element : this.list) {
             YangInstanceIdentifier yid = pid.node(new NodeIdentifierWithPredicates(OuterList.QNAME, element.getIdentifier().getKeyValues()));
 
             if (oper == StartTestInput.Operation.PUT) {
-                tx.put(LogicalDatastoreType.CONFIGURATION, yid, element);
+                tx.put(dsType, yid, element);
             } else {
-                tx.merge(LogicalDatastoreType.CONFIGURATION, yid, element);
+                tx.merge(dsType, yid, element);
             }
 
             writeCnt++;
@@ -84,6 +85,7 @@ public class TxchainDomWrite extends DatastoreAbstractWriter implements Transact
                     }
                 });
                 tx = chain.newWriteOnlyTransaction();
+                dsType = getDataStoreType();
                 writeCnt = 0;
             }
         }
