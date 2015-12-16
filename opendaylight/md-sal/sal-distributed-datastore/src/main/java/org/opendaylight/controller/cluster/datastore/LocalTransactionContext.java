@@ -113,7 +113,9 @@ abstract class LocalTransactionContext extends AbstractTransactionContext {
     private LocalThreePhaseCommitCohort ready() {
         logModificationCount();
         LocalThreePhaseCommitCohort cohort = readySupport.onTransactionReady(getWriteDelegate());
-        cohort.setOperationError(operationError);
+        if (operationError != null) {
+            cohort.setOperationError(operationError);
+        }
         return cohort;
     }
 
