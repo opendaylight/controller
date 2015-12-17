@@ -39,6 +39,24 @@
       "revId": "ccc8ffbf33a0ded40d39713a38c7d6c1480bfdf6",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_53026b3f",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 353,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-12-17T13:54:46Z",
+      "side": 1,
+      "message": "The contents of the dictionary is the sum of all previous messages. Each raft term starts with a clean dictionary, so we can recover it for each term by replaying the messages from the start of the term.\n\nThe only case where I am not certain this is going to work is mid-term snapshots, where the leader would have to send the current dictionary along with the snapshot.\n\nAm I missing something?",
+      "parentUuid": "1aa4ed85_4a74f7fc",
+      "revId": "ccc8ffbf33a0ded40d39713a38c7d6c1480bfdf6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
