@@ -55,7 +55,7 @@
         <feature version="${akka.version}">odl-akka-system</feature>
         <bundle>wrap:mvn:org.uncommons.maths/uncommons-maths/${uncommons.maths.version}</bundle>
         <bundle>mvn:com.google.protobuf/protobuf-java/${protobuf.version}</bundle>
-        <bundle>mvn:io.netty/netty/3.8.0.Final</bundle>
+        <bundle>mvn:io.netty/netty/3.9.6.Final</bundle>
         <bundle>mvn:com.typesafe.akka/akka-remote_${scala.version}/${akka.version}</bundle>
         <bundle>mvn:com.typesafe.akka/akka-cluster_${scala.version}/${akka.version}</bundle>
     </feature>
