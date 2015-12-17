@@ -109,8 +109,6 @@ public class RestconfImpl implements RestconfService {
 
     private static final int CHAR_NOT_FOUND = -1;
 
-    private static final String MOUNT_POINT_MODULE_NAME = "ietf-netconf";
-
     private static final String SAL_REMOTE_NAMESPACE = "urn:opendaylight:params:xml:ns:yang:controller:md:sal:remote";
 
     private static final String SAL_REMOTE_RPC_SUBSRCIBE = "create-data-change-event-subscription";
@@ -435,7 +433,7 @@ public class RestconfImpl implements RestconfService {
         final CheckedFuture<DOMRpcResult, DOMRpcException> response;
         final DOMMountPoint mountPoint = payload.getInstanceIdentifierContext().getMountPoint();
         final SchemaContext schemaContext;
-        if (identifier.contains(MOUNT_POINT_MODULE_NAME) && mountPoint != null) {
+        if (mountPoint != null) {
             final Optional<DOMRpcService> mountRpcServices = mountPoint.getService(DOMRpcService.class);
             if ( ! mountRpcServices.isPresent()) {
                 LOG.debug("Error: Rpc service is missing.");
