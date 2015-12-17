@@ -57,6 +57,24 @@
       "revId": "ccc8ffbf33a0ded40d39713a38c7d6c1480bfdf6",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_c6a1bbaa",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 353,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-12-17T15:49:34Z",
+      "side": 1,
+      "message": "Re: journal recovery, currently each DataTreeCandidatePayload would create its own local dictionary (see ShardRecoveryCoordinator::appendRecoveredLogEntry). This doesn\u0027t seem right - it may have a QNAME_REFERENCE whose definition is contained in a previous DataTreeCandidatePayload stream. It seems that an entry must be written to the log indicating to throw away the current dictionary.\n\nI think this is working currently and unit tests are passing b/c of Gary\u0027s comment, i.e. writerDictionary is never set in Shard so each persisted DataTreeCandidatePayload uses its own dictionary, thus reverting to the current behavior.\n\nRe: snapshots, they are self-contained and can/should use their own dictionary (I assume you plan to convert it to use the Be streaming). However a snapshot does clear all prior journal entries so that must be taken into account as there may be unapplied log entries left over. A further complication is that leaders and followers snapshot independently and snapshots can be installed on the follower by the leader. Also a snapshot is now taken after recovery when there are log entries.",
+      "parentUuid": "1aa4ed85_53026b3f",
+      "revId": "ccc8ffbf33a0ded40d39713a38c7d6c1480bfdf6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
