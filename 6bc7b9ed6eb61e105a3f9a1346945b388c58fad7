@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_f5a6d7c0",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/test/java/org/opendaylight/controller/sal/connect/netconf/sal/KeepaliveSalFacadeTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 3675
+      },
+      "writtenOn": "2015-12-18T13:17:52Z",
+      "side": 1,
+      "message": "with the current implementation done in order to mock the return statement of executorService.schedule(), I can\u0027t control the number of call within 15000 milliseconds. This is why I\u0027m asking here for atLeast(5).\n\nLet me know if you\u0027re fine with that",
+      "range": {
+        "startLine": 118,
+        "startChar": 41,
+        "endLine": 118,
+        "endChar": 48
+      },
+      "revId": "6bc7b9ed6eb61e105a3f9a1346945b388c58fad7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
