@@ -84,8 +84,7 @@ module cluster-admin {
     rpc add-replicas-for-all-shards {
         output {
             list shard-result {
-                key "shard-name";
-                key "data-store-type";
+                key "shard-name data-store-type";
                 uses shard-operation-result;
 
                 description "The list of results, one per shard";
