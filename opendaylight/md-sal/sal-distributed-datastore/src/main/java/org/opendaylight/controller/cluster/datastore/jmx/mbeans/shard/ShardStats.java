@@ -347,6 +347,10 @@ public class ShardStats extends AbstractMXBean implements ShardStatsMXBean {
         return shard.getPendingTxCommitQueueSize();
     }
 
+    public int getTxCohortCacheSize() {
+        return shard.getCohortCacheSize();
+    }
+
     @Override
     public void captureSnapshot() {
         if(shard != null) {
