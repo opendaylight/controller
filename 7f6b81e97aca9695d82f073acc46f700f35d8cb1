@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_ce3ea5b8",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 3172
+      },
+      "writtenOn": "2015-12-21T21:46:38Z",
+      "side": 1,
+      "message": "So this class is here just to hold a timer?  Can we move the timer into RaftActorLeadershipTransferCohort and do away with this class?",
+      "range": {
+        "startLine": 160,
+        "startChar": 25,
+        "endLine": 160,
+        "endChar": 50
+      },
+      "revId": "7f6b81e97aca9695d82f073acc46f700f35d8cb1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
