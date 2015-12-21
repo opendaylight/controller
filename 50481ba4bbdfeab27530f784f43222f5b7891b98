@@ -22,6 +22,30 @@
       "revId": "50481ba4bbdfeab27530f784f43222f5b7891b98",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_6ec45140",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 271,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-12-21T23:44:31Z",
+      "side": 1,
+      "message": "Somewhere we have to clear leadershipTransferInProgress when it\u0027s complete and it only needs to be done once. So I added the proxy OnComplete below to handle that rather than have each caller handle it in their OnComplete instance.",
+      "parentUuid": "1aa4ed85_8e174ded",
+      "range": {
+        "startLine": 271,
+        "startChar": 95,
+        "endLine": 271,
+        "endChar": 105
+      },
+      "revId": "50481ba4bbdfeab27530f784f43222f5b7891b98",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
