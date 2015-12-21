@@ -84,6 +84,7 @@ public interface ShardStatsMXBean {
 
    int getPendingTxCommitQueueSize();
 
-   void captureSnapshot();
+   int getTxCohortCacheSize();
 
+   void captureSnapshot();
 }
