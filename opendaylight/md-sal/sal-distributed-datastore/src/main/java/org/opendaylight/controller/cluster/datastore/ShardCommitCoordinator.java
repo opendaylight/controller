@@ -68,6 +68,8 @@ class ShardCommitCoordinator {
 
     private ReadyTransactionReply readyTransactionReply;
 
+    private Runnable runOnPendingTransactionsComplete;
+
     ShardCommitCoordinator(ShardDataTree dataTree,
             long cacheExpiryTimeoutInMillis, int queueCapacity, Logger log, String name) {
 
@@ -80,6 +82,10 @@ class ShardCommitCoordinator {
 
     int getQueueSize() {
         return queuedCohortEntries.size();
+    }
+
+    int getCohortCacheSize() {
+        return cohortCache.size();
     }
 
     void setQueueCapacity(int queueCapacity) {
@@ -524,10 +530,26 @@ class ShardCommitCoordinator {
             iter.remove();
             cohortCache.remove(next.getTransactionID());
         }
+
+        maybeRunOperationOnPendingTransactionsComplete();
     }
 
     void cleanupExpiredCohortEntries() {
         maybeProcessNextCohortEntry();
+    }
+
+    void setRunOnPendingTransactionsComplete(Runnable operation) {
+        runOnPendingTransactionsComplete = operation;
+        maybeRunOperationOnPendingTransactionsComplete();
+    }
+
+    private void maybeRunOperationOnPendingTransactionsComplete() {
+        if(runOnPendingTransactionsComplete != null && currentCohortEntry == null && queuedCohortEntries.isEmpty()) {
+            log.debug("{}: Pending transactions complete - running operation {}", name, runOnPendingTransactionsComplete);
+
+            runOnPendingTransactionsComplete.run();
+            runOnPendingTransactionsComplete = null;
+        }
     }
 
     @VisibleForTesting

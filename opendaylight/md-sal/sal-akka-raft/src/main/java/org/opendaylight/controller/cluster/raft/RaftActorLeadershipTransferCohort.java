@@ -57,6 +57,7 @@ public class RaftActorLeadershipTransferCohort implements Runnable {
     private final List<OnComplete> onCompleteCallbacks = new ArrayList<>();
     private long newLeaderTimeoutInMillis = 2000;
     private final Stopwatch transferTimer = Stopwatch.createUnstarted();
+    private boolean isTransferring;
 
     RaftActorLeadershipTransferCohort(RaftActor raftActor, ActorRef replyTo) {
         this.raftActor = raftActor;
@@ -94,6 +95,7 @@ public class RaftActorLeadershipTransferCohort implements Runnable {
         RaftActorBehavior behavior = raftActor.getCurrentBehavior();
         // Sanity check...
         if(behavior instanceof Leader) {
+            isTransferring = true;
             ((Leader)behavior).transferLeadership(this);
         } else {
             LOG.debug("{}: No longer the leader - skipping transfer", raftActor.persistenceId());
@@ -144,6 +146,7 @@ public class RaftActorLeadershipTransferCohort implements Runnable {
     }
 
     private void finish(boolean success) {
+        isTransferring = false;
         if(transferTimer.isRunning()) {
             transferTimer.stop();
             if(success) {
@@ -166,6 +169,10 @@ public class RaftActorLeadershipTransferCohort implements Runnable {
 
     void addOnComplete(OnComplete onComplete) {
         onCompleteCallbacks.add(onComplete);
+    }
+
+    boolean isTransferring() {
+        return isTransferring;
     }
 
     @VisibleForTesting
