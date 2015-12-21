@@ -22,6 +22,30 @@
       "revId": "7f6b81e97aca9695d82f073acc46f700f35d8cb1",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_8eaaed6e",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/behaviors/Leader.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2015-12-21T23:37:35Z",
+      "side": 1,
+      "message": "Originally it had another field that I didn\u0027t end up using/needing. Either way the timer is specific to the Leader\u0027s internal implementation so I think it should be kept private here.",
+      "parentUuid": "1aa4ed85_ce3ea5b8",
+      "range": {
+        "startLine": 160,
+        "startChar": 25,
+        "endLine": 160,
+        "endChar": 50
+      },
+      "revId": "7f6b81e97aca9695d82f073acc46f700f35d8cb1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
