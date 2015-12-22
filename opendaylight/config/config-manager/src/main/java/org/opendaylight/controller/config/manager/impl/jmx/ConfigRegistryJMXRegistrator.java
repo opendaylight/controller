@@ -19,20 +19,18 @@ import org.opendaylight.controller.config.manager.impl.ConfigRegistryImplMXBean;
 public class ConfigRegistryJMXRegistrator implements AutoCloseable {
     private final InternalJMXRegistrator internalJMXRegistrator;
 
-    public ConfigRegistryJMXRegistrator(MBeanServer configMBeanServer) {
-        internalJMXRegistrator = new InternalJMXRegistrator(configMBeanServer);
+    public ConfigRegistryJMXRegistrator(final MBeanServer configMBeanServer) {
+        internalJMXRegistrator = InternalJMXRegistrator.create(configMBeanServer);
     }
 
-    public AutoCloseable registerToJMX(ConfigRegistryImplMXBean configRegistry)
+    public AutoCloseable registerToJMX(final ConfigRegistryImplMXBean configRegistry)
             throws InstanceAlreadyExistsException {
-        return internalJMXRegistrator.registerMBean(configRegistry,
-                ConfigRegistryMXBean.OBJECT_NAME);
+        return internalJMXRegistrator.registerMBean(configRegistry, ConfigRegistryMXBean.OBJECT_NAME);
     }
 
-    public AutoCloseable registerToJMXNoNotifications(ConfigRegistryImplMXBean configRegistry)
+    public AutoCloseable registerToJMXNoNotifications(final ConfigRegistryImplMXBean configRegistry)
             throws InstanceAlreadyExistsException {
-        return internalJMXRegistrator.registerMBean(configRegistry,
-                ConfigRegistryMXBean.OBJECT_NAME_NO_NOTIFICATIONS);
+        return internalJMXRegistrator.registerMBean(configRegistry, ConfigRegistryMXBean.OBJECT_NAME_NO_NOTIFICATIONS);
     }
 
     @Override
