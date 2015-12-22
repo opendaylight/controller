@@ -7,6 +7,7 @@
  */
 package org.opendaylight.controller.config.manager.impl.jmx;
 
+import com.google.common.base.Preconditions;
 import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,17 +30,24 @@ public class InternalJMXRegistrator implements Closeable {
     private static final Logger LOG = LoggerFactory
             .getLogger(InternalJMXRegistrator.class);
     private final MBeanServer configMBeanServer;
+    private final InternalJMXRegistrator parent;
 
-    public InternalJMXRegistrator(MBeanServer configMBeanServer) {
+    public InternalJMXRegistrator(final MBeanServer configMBeanServer) {
         this.configMBeanServer = configMBeanServer;
+        this.parent = null;
+    }
+
+    private InternalJMXRegistrator(final InternalJMXRegistrator parent) {
+        this.parent = Preconditions.checkNotNull(parent);
+        this.configMBeanServer = parent.configMBeanServer;
     }
 
     static class InternalJMXRegistration implements AutoCloseable {
         private final InternalJMXRegistrator internalJMXRegistrator;
         private final ObjectName on;
 
-        InternalJMXRegistration(InternalJMXRegistrator internalJMXRegistrator,
-                                ObjectName on) {
+        InternalJMXRegistration(final InternalJMXRegistrator internalJMXRegistrator,
+                                final ObjectName on) {
             this.internalJMXRegistrator = internalJMXRegistrator;
             this.on = on;
         }
@@ -55,8 +63,8 @@ public class InternalJMXRegistrator implements Closeable {
     @GuardedBy("this")
     private final List<InternalJMXRegistrator> children = new ArrayList<>();
 
-    public synchronized InternalJMXRegistration registerMBean(Object object,
-                                                              ObjectName on) throws InstanceAlreadyExistsException {
+    public synchronized InternalJMXRegistration registerMBean(final Object object,
+                                                              final ObjectName on) throws InstanceAlreadyExistsException {
         try {
             configMBeanServer.registerMBean(object, on);
         } catch (MBeanRegistrationException | NotCompliantMBeanException e) {
@@ -66,7 +74,7 @@ public class InternalJMXRegistrator implements Closeable {
         return new InternalJMXRegistration(this, on);
     }
 
-    private synchronized void unregisterMBean(ObjectName on) {
+    private synchronized void unregisterMBean(final ObjectName on) {
         // first check that on was registered using this instance
         boolean removed = registeredObjectNames.remove(on);
         if (!removed) {
@@ -80,9 +88,13 @@ public class InternalJMXRegistrator implements Closeable {
     }
 
     public synchronized InternalJMXRegistrator createChild() {
-        InternalJMXRegistrator child = new InternalJMXRegistrator(configMBeanServer);
+        InternalJMXRegistrator child = new InternalJMXRegistrator(this);
         children.add(child);
         return child;
+    }
+
+    private synchronized void removeChild(final InternalJMXRegistrator child) {
+        children.remove(child);
     }
 
     /**
@@ -90,10 +102,14 @@ public class InternalJMXRegistrator implements Closeable {
      */
     @Override
     public synchronized void close() {
-        // close children
-        for (InternalJMXRegistrator child : children) {
+        // close all children
+        while (!children.isEmpty()) {
+            final InternalJMXRegistrator child = children.get(0);
+
+            // This cascade and remove the child from the list via removeChild()
             child.close();
         }
+
         // close registered ONs
         for (ObjectName on : registeredObjectNames) {
             try {
@@ -103,25 +119,29 @@ public class InternalJMXRegistrator implements Closeable {
             }
         }
         registeredObjectNames.clear();
+
+        if (parent != null) {
+            parent.removeChild(this);
+        }
     }
 
-    public <T> T newMBeanProxy(ObjectName objectName, Class<T> interfaceClass) {
+    public <T> T newMBeanProxy(final ObjectName objectName, final Class<T> interfaceClass) {
         return JMX.newMBeanProxy(configMBeanServer, objectName, interfaceClass);
     }
 
-    public <T> T newMBeanProxy(ObjectName objectName, Class<T> interfaceClass,
-                               boolean notificationBroadcaster) {
+    public <T> T newMBeanProxy(final ObjectName objectName, final Class<T> interfaceClass,
+                               final boolean notificationBroadcaster) {
         return JMX.newMBeanProxy(configMBeanServer, objectName, interfaceClass,
                 notificationBroadcaster);
     }
 
-    public <T> T newMXBeanProxy(ObjectName objectName, Class<T> interfaceClass) {
+    public <T> T newMXBeanProxy(final ObjectName objectName, final Class<T> interfaceClass) {
         return JMX
                 .newMXBeanProxy(configMBeanServer, objectName, interfaceClass);
     }
 
-    public <T> T newMXBeanProxy(ObjectName objectName, Class<T> interfaceClass,
-                                boolean notificationBroadcaster) {
+    public <T> T newMXBeanProxy(final ObjectName objectName, final Class<T> interfaceClass,
+                                final boolean notificationBroadcaster) {
         return JMX.newMXBeanProxy(configMBeanServer, objectName,
                 interfaceClass, notificationBroadcaster);
     }
@@ -130,13 +150,13 @@ public class InternalJMXRegistrator implements Closeable {
         return Collections.unmodifiableSet(registeredObjectNames);
     }
 
-    public Set<ObjectName> queryNames(ObjectName name, QueryExp query) {
+    public Set<ObjectName> queryNames(final ObjectName name, final QueryExp query) {
         Set<ObjectName> result = configMBeanServer.queryNames(name, query);
         // keep only those that were registered using this instance
         return getSameNames(result);
     }
 
-    private synchronized Set<ObjectName> getSameNames(Set<ObjectName> superSet) {
+    private synchronized Set<ObjectName> getSameNames(final Set<ObjectName> superSet) {
         Set<ObjectName> result = new HashSet<>(superSet);
         result.retainAll(registeredObjectNames);
         for (InternalJMXRegistrator child : children) {
