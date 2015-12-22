@@ -13,7 +13,6 @@ import javax.management.InstanceAlreadyExistsException;
 import javax.management.ObjectName;
 import javax.management.QueryExp;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
-import org.opendaylight.controller.config.manager.impl.jmx.InternalJMXRegistrator.InternalJMXRegistration;
 
 public class TransactionModuleJMXRegistrator implements Closeable, NestableJMXRegistrator {
     private final InternalJMXRegistrator currentJMXRegistrator;
