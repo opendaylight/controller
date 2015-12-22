@@ -46,6 +46,30 @@
       "revId": "50481ba4bbdfeab27530f784f43222f5b7891b98",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_eee7e1e2",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/RaftActor.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 271,
+      "author": {
+        "id": 3172
+      },
+      "writtenOn": "2015-12-22T00:01:03Z",
+      "side": 1,
+      "message": "I meant, can we call addOnComplete() on two separate OnCompletes, the one passed to initiateLeadershipTransfer() and one that just clears leadershipTransferInProgress?  e.g. leverage the capability to add multiple OnCompletes instead of calling one from inside the other.",
+      "parentUuid": "1aa4ed85_6ec45140",
+      "range": {
+        "startLine": 271,
+        "startChar": 95,
+        "endLine": 271,
+        "endChar": 105
+      },
+      "revId": "50481ba4bbdfeab27530f784f43222f5b7891b98",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
