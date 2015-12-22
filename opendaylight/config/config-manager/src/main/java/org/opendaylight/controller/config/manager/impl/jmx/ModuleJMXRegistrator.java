@@ -12,7 +12,6 @@ import javax.annotation.concurrent.ThreadSafe;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.ObjectName;
 import org.opendaylight.controller.config.api.jmx.ObjectNameUtil;
-import org.opendaylight.controller.config.manager.impl.jmx.InternalJMXRegistrator.InternalJMXRegistration;
 
 /**
  * This subclass is used for registering readable module into JMX, it is also
