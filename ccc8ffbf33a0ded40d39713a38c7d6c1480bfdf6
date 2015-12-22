@@ -75,6 +75,24 @@
       "revId": "ccc8ffbf33a0ded40d39713a38c7d6c1480bfdf6",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_f89ec255",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/Shard.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 353,
+      "author": {
+        "id": 649
+      },
+      "writtenOn": "2015-12-22T16:06:54Z",
+      "side": 1,
+      "message": "The instruction to throw away the dictionary is part of the payload stream: the first byte after signature/version indicates whether to retain or clear the dictionary -- that part is addressed in the next revision.\n\nSo adding the contents of the dictionary at the point when snapshot is created should solve this.\n\nWhat are the left over entries -- are they stuff that needs to be applied *after* the snapshot?",
+      "parentUuid": "1aa4ed85_c6a1bbaa",
+      "revId": "ccc8ffbf33a0ded40d39713a38c7d6c1480bfdf6",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
