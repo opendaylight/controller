@@ -49,6 +49,13 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+      <dependency>
+        <groupId>org.opendaylight.yangtools</groupId>
+        <artifactId>yangtools-artifacts</artifactId>
+        <version>${yangtools.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
     </dependencies>
   </dependencyManagement>
   <dependencies>
@@ -56,7 +63,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
       <groupId>org.opendaylight.yangtools</groupId>
       <artifactId>features-yangtools</artifactId>
       <classifier>features</classifier>
-      <version>${yangtools.version}</version>
       <type>xml</type>
       <scope>runtime</scope>
     </dependency>
@@ -72,7 +78,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
       <groupId>org.opendaylight.controller</groupId>
       <artifactId>features-mdsal</artifactId>
       <classifier>features</classifier>
-      <version>${mdsal.version}</version>
       <type>xml</type>
       <scope>runtime</scope>
     </dependency>
@@ -80,7 +85,6 @@ and is available at http://www.eclipse.org/legal/epl-v10.html INTERNAL
       <groupId>org.opendaylight.netconf</groupId>
       <artifactId>features-restconf</artifactId>
       <classifier>features</classifier>
-      <version>${restconf.version}</version>
       <type>xml</type>
       <scope>runtime</scope>
     </dependency>

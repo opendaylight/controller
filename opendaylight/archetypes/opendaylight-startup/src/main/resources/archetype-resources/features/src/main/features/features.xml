@@ -13,20 +13,20 @@ and is available at http://www.eclipse.org/legal/epl-v10.html
 <features name="odl-${artifactId}-${symbol_dollar}{project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
-  <repository>mvn:org.opendaylight.yangtools/features-yangtools/${symbol_dollar}{yangtools.version}/xml/features</repository>
-  <repository>mvn:org.opendaylight.controller/features-mdsal/${symbol_dollar}{mdsal.version}/xml/features</repository>
-  <repository>mvn:org.opendaylight.mdsal.model/features-mdsal-model/${symbol_dollar}{mdsal.model.version}/xml/features</repository>
-  <repository>mvn:org.opendaylight.netconf/features-restconf/${symbol_dollar}{restconf.version}/xml/features</repository>
-  <repository>mvn:org.opendaylight.dlux/features-dlux/${symbol_dollar}{dlux.version}/xml/features</repository>
+  <repository>mvn:org.opendaylight.yangtools/features-yangtools/{{VERSION}}/xml/features</repository>
+  <repository>mvn:org.opendaylight.controller/features-mdsal/{{VERSION}}/xml/features</repository>
+  <repository>mvn:org.opendaylight.mdsal.model/features-mdsal-model/{{VERSION}}/xml/features</repository>
+  <repository>mvn:org.opendaylight.netconf/features-restconf/{{VERSION}}/xml/features</repository>
+  <repository>mvn:org.opendaylight.dlux/features-dlux/{{VERSION}}/xml/features</repository>
   <feature name='odl-${artifactId}-api' version='${symbol_dollar}{project.version}' description='OpenDaylight :: ${artifactId} :: api'>
     <feature version='${symbol_dollar}{mdsal.model.version}'>odl-mdsal-models</feature>
-    <bundle>mvn:${groupId}/${artifactId}-api/${symbol_dollar}{project.version}</bundle>
+    <bundle>mvn:${groupId}/${artifactId}-api/{{VERSION}}</bundle>
   </feature>
   <feature name='odl-${artifactId}' version='${symbol_dollar}{project.version}' description='OpenDaylight :: ${artifactId}'>
     <feature version='${symbol_dollar}{mdsal.version}'>odl-mdsal-broker</feature>
     <feature version='${symbol_dollar}{project.version}'>odl-${artifactId}-api</feature>
-    <bundle>mvn:${groupId}/${artifactId}-impl/${symbol_dollar}{project.version}</bundle>
-    <configfile finalname="${configfile.directory}/${artifactId}.xml">mvn:${groupId}/${artifactId}-impl/${symbol_dollar}{project.version}/xml/config</configfile>
+    <bundle>mvn:${groupId}/${artifactId}-impl/{{VERSION}}</bundle>
+    <configfile finalname="${configfile.directory}/${artifactId}.xml">mvn:${groupId}/${artifactId}-impl/{{VERSION}}/xml/config</configfile>
   </feature>
   <feature name='odl-${artifactId}-rest' version='${symbol_dollar}{project.version}' description='OpenDaylight :: ${artifactId} :: REST'>
     <feature version="${symbol_dollar}{project.version}">odl-${artifactId}</feature>
