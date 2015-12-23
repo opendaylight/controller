@@ -255,7 +255,7 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
             for (XSQLBluePrintRelation r : node.getRelations()) {
                 fld.add(r.toString());
             }
-            String p[] = (String[]) fld.toArray(new String[fld.size()]);
+            String p[] = fld.toArray(new String[fld.size()]);
             Arrays.sort(p);
             for (int i = 0; i < p.length; i++) {
                 sout.println(p[i]);
@@ -272,7 +272,7 @@ public class XSQLAdapter extends Thread implements SchemaContextListener {
             for (XSQLColumn c : node.getColumns()) {
                 fld.add(c.getName());
             }
-            String p[] = (String[]) fld.toArray(new String[fld.size()]);
+            String p[] = fld.toArray(new String[fld.size()]);
             Arrays.sort(p);
             for (int i = 0; i < p.length; i++) {
                 sout.println(p[i]);

@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 
 
 public class SimpletxBaRead extends DatastoreAbstractWriter {
-    private static final Logger LOG = (Logger) LoggerFactory.getLogger(SimpletxBaRead.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SimpletxBaRead.class);
     private DataBroker dataBroker;
 
     public SimpletxBaRead(DataBroker dataBroker, int outerListElem, int innerListElem, 

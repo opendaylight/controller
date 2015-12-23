@@ -54,7 +54,7 @@ public class PersistentMessagesTest extends AbstractMessagesTest {
     builder.setType("test");
     builder.setPath(expectedOne);
 
-    writeToFile((com.google.protobuf.GeneratedMessage.Builder<?>) builder);
+    writeToFile(builder);
 
     PersistentMessages.Modification modificationNew =
         (PersistentMessages.Modification) readFromFile(PersistentMessages.Modification.PARSER);

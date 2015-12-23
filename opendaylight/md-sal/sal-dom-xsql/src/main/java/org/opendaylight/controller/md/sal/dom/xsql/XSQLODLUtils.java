@@ -222,7 +222,7 @@ public class XSQLODLUtils {
         Map<?, ?> children = getChildren(o);
         List<Object> result = new LinkedList<Object>();
         for (Object val : children.values()) {
-            result.add((Object) val);
+            result.add(val);
         }
         return result;
     }

@@ -180,7 +180,7 @@ public class EventSourceTopologyTest {
         Map<NodeKey, BindingAwareBroker.RoutedRpcRegistration<EventSourceService>> localMap = getRoutedRpcRegistrations();
         NodeKey nodeKeyMock = mock(NodeKey.class);
         doReturn(nodeKeyMock).when(eventSourceMock).getSourceNodeKey();
-        BindingAwareBroker.RoutedRpcRegistration<EventSourceService> routedRpcRegistrationMock = (BindingAwareBroker.RoutedRpcRegistration<EventSourceService>) mock(BindingAwareBroker.RoutedRpcRegistration.class);
+        BindingAwareBroker.RoutedRpcRegistration<EventSourceService> routedRpcRegistrationMock = mock(BindingAwareBroker.RoutedRpcRegistration.class);
         localMap.put(nodeKeyMock, routedRpcRegistrationMock);
         eventSourceTopology.unRegister(eventSourceMock);
         verify(routedRpcRegistrationMock, times(1)).close();

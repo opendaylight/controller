@@ -85,7 +85,7 @@ public class ServiceReferenceRegistryImplTest extends AbstractParallelAPSPTest {
         assertEquals(1, registrations.size());
         RegistrationHolder record = registrations.get(0);
         assertEquals(TestingThreadPoolIfc.class, record.clazz);
-        assertEquals(ImmutableMap.of("name","ref"), (Map<String, String>) record.props);
+        assertEquals(ImmutableMap.of("name","ref"), record.props);
 
         // switch reference to scheduled
         ConfigTransactionJMXClient transaction2 = configRegistryClient.createTransaction();
