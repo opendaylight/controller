@@ -9,18 +9,18 @@ package org.opendaylight.controller.config.manager.impl.jmx;
 
 import com.google.common.base.Preconditions;
 import javax.management.ObjectName;
+import org.opendaylight.yangtools.concepts.AbstractObjectRegistration;
 
-final class InternalJMXRegistration implements AutoCloseable {
+final class InternalJMXRegistration extends AbstractObjectRegistration<ObjectName> {
     private final InternalJMXRegistrator internalJMXRegistrator;
-    private final ObjectName on;
 
     InternalJMXRegistration(final InternalJMXRegistrator internalJMXRegistrator, final ObjectName on) {
+        super(on);
         this.internalJMXRegistrator = Preconditions.checkNotNull(internalJMXRegistrator);
-        this.on = on;
     }
 
     @Override
-    public void close() {
-        internalJMXRegistrator.unregisterMBean(on);
+    protected void removeRegistration() {
+        internalJMXRegistrator.unregisterMBean(getInstance());
     }
 }
