@@ -517,8 +517,8 @@ public class ShardManagerTest extends AbstractActorTest {
             String path = found.getPrimaryPath();
             assertTrue("Unexpected primary path " + path, path.contains("member-2-shard-default-config"));
 
-            shardManager1.underlyingActor().onReceiveCommand(MockClusterWrapper.
-                createUnreachableMember("member-2", "akka.tcp://cluster-test@127.0.0.1:2558"));
+            shardManager1.tell(MockClusterWrapper.
+                createUnreachableMember("member-2", "akka.tcp://cluster-test@127.0.0.1:2558"), ActorRef.noSender());
 
             shardManager1.underlyingActor().waitForUnreachableMember();
 
@@ -526,8 +526,8 @@ public class ShardManagerTest extends AbstractActorTest {
             assertEquals("getMemberName", "member-2", peerDown.getMemberName());
             MessageCollectorActor.clearMessages(mockShardActor1);
 
-            shardManager1.underlyingActor().onReceiveCommand(MockClusterWrapper.
-                    createMemberRemoved("member-2", "akka.tcp://cluster-test@127.0.0.1:2558"));
+            shardManager1.tell(MockClusterWrapper.
+                    createMemberRemoved("member-2", "akka.tcp://cluster-test@127.0.0.1:2558"), ActorRef.noSender());
 
             MessageCollectorActor.expectFirstMatching(mockShardActor1, PeerDown.class);
 
@@ -535,8 +535,8 @@ public class ShardManagerTest extends AbstractActorTest {
 
             expectMsgClass(duration("5 seconds"), NoShardLeaderException.class);
 
-            shardManager1.underlyingActor().onReceiveCommand(MockClusterWrapper.
-                createReachableMember("member-2", "akka.tcp://cluster-test@127.0.0.1:2558"));
+            shardManager1.tell(MockClusterWrapper.
+                createReachableMember("member-2", "akka.tcp://cluster-test@127.0.0.1:2558"), ActorRef.noSender());
 
             shardManager1.underlyingActor().waitForReachableMember();
 
@@ -550,11 +550,25 @@ public class ShardManagerTest extends AbstractActorTest {
             String path1 = found1.getPrimaryPath();
             assertTrue("Unexpected primary path " + path1, path1.contains("member-2-shard-default-config"));
 
-            shardManager1.underlyingActor().onReceiveCommand(MockClusterWrapper.
-                    createMemberUp("member-2", "akka.tcp://cluster-test@127.0.0.1:2558"));
+            shardManager1.tell(MockClusterWrapper.
+                    createMemberUp("member-2", "akka.tcp://cluster-test@127.0.0.1:2558"), ActorRef.noSender());
 
             MessageCollectorActor.expectFirstMatching(mockShardActor1, PeerUp.class);
 
+            // Test FindPrimary wait succeeds after reachable member event.
+
+            shardManager1.tell(MockClusterWrapper.
+                    createUnreachableMember("member-2", "akka.tcp://cluster-test@127.0.0.1:2558"), ActorRef.noSender());
+            shardManager1.underlyingActor().waitForUnreachableMember();
+
+            shardManager1.tell(new FindPrimary("default", true), getRef());
+
+            shardManager1.tell(MockClusterWrapper.
+                    createReachableMember("member-2", "akka.tcp://cluster-test@127.0.0.1:2558"), ActorRef.noSender());
+
+            RemotePrimaryShardFound found2 = expectMsgClass(duration("5 seconds"), RemotePrimaryShardFound.class);
+            String path2 = found2.getPrimaryPath();
+            assertTrue("Unexpected primary path " + path2, path2.contains("member-2-shard-default-config"));
         }};
 
         JavaTestKit.shutdownActorSystem(system1);
