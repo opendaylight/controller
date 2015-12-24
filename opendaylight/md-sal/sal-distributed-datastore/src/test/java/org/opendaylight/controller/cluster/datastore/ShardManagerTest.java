@@ -555,6 +555,20 @@ public class ShardManagerTest extends AbstractActorTest {
 
             MessageCollectorActor.expectFirstMatching(mockShardActor1, PeerUp.class);
 
+            // Test FindPrimary wait succeeds after reachable member event.
+
+            shardManager1.underlyingActor().onReceiveCommand(MockClusterWrapper.
+                    createUnreachableMember("member-2", "akka.tcp://cluster-test@127.0.0.1:2558"));
+            shardManager1.underlyingActor().waitForUnreachableMember();
+
+            shardManager1.tell(new FindPrimary("default", true), getRef());
+
+            shardManager1.underlyingActor().onReceiveCommand(MockClusterWrapper.
+                    createReachableMember("member-2", "akka.tcp://cluster-test@127.0.0.1:2558"));
+
+            RemotePrimaryShardFound found2 = expectMsgClass(duration("5 seconds"), RemotePrimaryShardFound.class);
+            String path2 = found2.getPrimaryPath();
+            assertTrue("Unexpected primary path " + path2, path2.contains("member-2-shard-default-config"));
         }};
 
         JavaTestKit.shutdownActorSystem(system1);
