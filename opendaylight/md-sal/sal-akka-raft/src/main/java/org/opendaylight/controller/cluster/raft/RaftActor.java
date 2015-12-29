@@ -316,9 +316,14 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 }
             });
         } else if(currentBehavior.state() == RaftState.Leader) {
-            pauseLeader(new Runnable() {
+            pauseLeader(new TimedRunnable(context.getConfigParams().getElectionTimeOutInterval(), this) {
                 @Override
-                public void run() {
+                protected void doRun() {
+                    self().tell(PoisonPill.getInstance(), self());
+                }
+
+                @Override
+                protected void doCancel() {
                     self().tell(PoisonPill.getInstance(), self());
                 }
             });
