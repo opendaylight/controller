@@ -13,6 +13,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -105,6 +106,7 @@ import org.opendaylight.controller.cluster.raft.TestActorFactory;
 import org.opendaylight.controller.cluster.raft.base.messages.FollowerInitialSyncUpStatus;
 import org.opendaylight.controller.cluster.raft.base.messages.SwitchBehavior;
 import org.opendaylight.controller.cluster.raft.client.messages.GetSnapshot;
+import org.opendaylight.controller.cluster.raft.client.messages.Shutdown;
 import org.opendaylight.controller.cluster.raft.messages.AddServer;
 import org.opendaylight.controller.cluster.raft.messages.AddServerReply;
 import org.opendaylight.controller.cluster.raft.messages.RemoveServer;
@@ -1897,6 +1899,54 @@ public class ShardManagerTest extends AbstractActorTest {
         LOG.info("testShardPersistenceWithRestoredData ending");
     }
 
+    @Test
+    public void testShutDown() throws Exception {
+        LOG.info("testShutDown starting");
+        new JavaTestKit(getSystem()) {{
+            MockConfiguration mockConfig =
+                    new MockConfiguration(ImmutableMap.<String, List<String>>builder().
+                            put("shard1", Arrays.asList("member-1")).
+                            put("shard2", Arrays.asList("member-1")).build());
+
+            String shardId1 = ShardIdentifier.builder().shardName("shard1").memberName("member-1").
+                    type(shardMrgIDSuffix).build().toString();
+            TestActorRef<MessageCollectorActor> shard1 = actorFactory.createTestActor(
+                    MessageCollectorActor.props(), shardId1);
+
+            String shardId2 = ShardIdentifier.builder().shardName("shard2").memberName("member-1").
+                    type(shardMrgIDSuffix).build().toString();
+            TestActorRef<MessageCollectorActor> shard2 = actorFactory.createTestActor(
+                    MessageCollectorActor.props(), shardId2);
+
+            TestActorRef<TestShardManager> shardManager = actorFactory.createTestActor(newTestShardMgrBuilder(
+                    mockConfig).addShardActor("shard1", shard1).addShardActor("shard2", shard2).props());
+
+            shardManager.tell(new UpdateSchemaContext(TestModel.createTestContext()), getRef());
+            shardManager.tell(new ActorInitialized(), shard1);
+            shardManager.tell(new ActorInitialized(), shard2);
+
+            FiniteDuration duration = FiniteDuration.create(5, TimeUnit.SECONDS);
+            Future<Boolean> stopFuture = Patterns.gracefulStop(shardManager, duration, new Shutdown());
+
+            MessageCollectorActor.expectFirstMatching(shard1, Shutdown.class);
+            MessageCollectorActor.expectFirstMatching(shard2, Shutdown.class);
+
+            try {
+                Await.ready(stopFuture, FiniteDuration.create(500, TimeUnit.MILLISECONDS));
+                fail("ShardManager actor stopped without waiting for the Shards to be stopped");
+            } catch(TimeoutException e) {
+                // expected
+            }
+
+            actorFactory.killActor(shard1, this);
+            actorFactory.killActor(shard2, this);
+
+            Boolean stopped = Await.result(stopFuture, duration);
+            assertEquals("Stopped", Boolean.TRUE, stopped);
+        }};
+
+        LOG.info("testShutDown ending");
+    }
 
     private static class TestShardManager extends ShardManager {
         private final CountDownLatch recoveryComplete = new CountDownLatch(1);
