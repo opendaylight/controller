@@ -12,6 +12,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import akka.dispatch.Dispatchers;
+import com.google.common.base.Function;
 import org.junit.After;
 import org.junit.Test;
 import org.opendaylight.controller.cluster.raft.RaftActorLeadershipTransferCohort.OnComplete;
@@ -26,7 +27,8 @@ public class RaftActorLeadershipTransferCohortTest extends AbstractActorTest {
     private MockRaftActor mockRaftActor;
     private RaftActorLeadershipTransferCohort cohort;
     private final OnComplete onComplete = mock(OnComplete.class);
-    DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+    private final DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
+    private Function<Runnable, Void> pauseLeaderFunction;
 
     @After
     public void tearDown() {
@@ -36,7 +38,8 @@ public class RaftActorLeadershipTransferCohortTest extends AbstractActorTest {
     private void setup() {
         String persistenceId = factory.generateActorId("leader-");
         mockRaftActor = factory.<MockRaftActor>createTestActor(MockRaftActor.builder().id(persistenceId).config(
-                config).props().withDispatcher(Dispatchers.DefaultDispatcherId()), persistenceId).underlyingActor();
+                config).pauseLeaderFunction(pauseLeaderFunction).props().withDispatcher(Dispatchers.DefaultDispatcherId()),
+                persistenceId).underlyingActor();
         cohort = new RaftActorLeadershipTransferCohort(mockRaftActor, null);
         cohort.addOnComplete(onComplete);
         mockRaftActor.waitForInitializeBehaviorComplete();
@@ -71,7 +74,7 @@ public class RaftActorLeadershipTransferCohortTest extends AbstractActorTest {
     public void testNotLeaderOnRun() {
         config.setElectionTimeoutFactor(10000);
         setup();
-        cohort.run();
+        cohort.doTransfer();
         verify(onComplete).onSuccess(mockRaftActor.self(), null);
     }
 
@@ -80,5 +83,19 @@ public class RaftActorLeadershipTransferCohortTest extends AbstractActorTest {
         setup();
         cohort.abortTransfer();
         verify(onComplete).onFailure(mockRaftActor.self(), null);
+    }
+
+    @Test
+    public void testPauseLeaderTimeout() {
+        pauseLeaderFunction = new Function<Runnable, Void>() {
+            @Override
+            public Void apply(Runnable input) {
+                return null;
+            }
+        };
+
+        setup();
+        cohort.init();
+        verify(onComplete, timeout(2000)).onFailure(mockRaftActor.self(), null);
     }
 }

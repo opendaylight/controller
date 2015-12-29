@@ -48,7 +48,7 @@ import scala.concurrent.duration.FiniteDuration;
  *
  * @author Thomas Pantelis
  */
-public class RaftActorLeadershipTransferCohort implements Runnable {
+public class RaftActorLeadershipTransferCohort {
     private static final Logger LOG = LoggerFactory.getLogger(RaftActorLeadershipTransferCohort.class);
 
     private final RaftActor raftActor;
@@ -84,14 +84,24 @@ public class RaftActorLeadershipTransferCohort implements Runnable {
             }
         }
 
-        raftActor.pauseLeader(this);
+        raftActor.pauseLeader(new TimedRunnable(context.getConfigParams().getElectionTimeOutInterval(), raftActor) {
+            @Override
+            protected void doRun() {
+                doTransfer();
+            }
+
+            @Override
+            protected void doCancel() {
+                abortTransfer();
+            }
+        });
     }
 
     /**
-     * This method is invoked to run the leadership transfer.
+     * This method is invoked to perform the leadership transfer.
      */
-    @Override
-    public void run() {
+    @VisibleForTesting
+    void doTransfer() {
         RaftActorBehavior behavior = raftActor.getCurrentBehavior();
         // Sanity check...
         if(behavior instanceof Leader) {
@@ -125,7 +135,7 @@ public class RaftActorLeadershipTransferCohort implements Runnable {
 
         // Add a timer in case we don't get a leader change - 2 sec should be plenty of time if a new
         // leader is elected. Note: the Runnable is sent as a message to the raftActor which executes it
-        // safely run on actor's thread dispatcher.
+        // safely run on the actor's thread dispatcher.
         FiniteDuration timeout = FiniteDuration.create(newLeaderTimeoutInMillis, TimeUnit.MILLISECONDS);
         newLeaderTimer = raftActor.getContext().system().scheduler().scheduleOnce(timeout, raftActor.self(),
                 new Runnable() {
@@ -153,7 +163,7 @@ public class RaftActorLeadershipTransferCohort implements Runnable {
                 LOG.info("{}: Successfully transferred leadership to {} in {}", raftActor.persistenceId(),
                         raftActor.getLeaderId(), transferTimer.toString());
             } else {
-                LOG.info("{}: Failed to transfer leadership in {}", raftActor.persistenceId(),
+                LOG.warn("{}: Failed to transfer leadership in {}", raftActor.persistenceId(),
                         transferTimer.toString());
             }
         }
