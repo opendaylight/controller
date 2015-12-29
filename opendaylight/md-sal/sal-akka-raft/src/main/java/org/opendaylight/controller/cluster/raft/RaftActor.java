@@ -316,9 +316,14 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
                 }
             });
         } else if(currentBehavior.state() == RaftState.Leader) {
-            pauseLeader(new Runnable() {
+            pauseLeader(new TimedRunnable(context.getConfigParams().getElectionTimeOutInterval(), this) {
                 @Override
-                public void run() {
+                protected void doRun() {
+                    self().tell(PoisonPill.getInstance(), self());
+                }
+
+                @Override
+                protected void doCancel() {
                     self().tell(PoisonPill.getInstance(), self());
                 }
             });
@@ -723,8 +728,9 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     /**
      * This method is called prior to operations such as leadership transfer and actor shutdown when the leader
      * must pause or stop its duties. This method allows derived classes to gracefully pause or finish current
-     * work prior to performing the operation. On completion of any work, the run method must be called to
-     * proceed with the given operation.
+     * work prior to performing the operation. On completion of any work, the run method must be called on the
+     * given Runnable to proceed with the given operation. <b>Important:</b> the run method must be called on
+     * this actor's thread dispatcher as as it modifies internal state.
      * <p>
      * The default implementation immediately runs the operation.
      *

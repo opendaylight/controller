@@ -12,6 +12,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import akka.actor.ActorRef;
 import akka.actor.Props;
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.ByteArrayInputStream;
@@ -29,7 +30,6 @@ import org.opendaylight.controller.cluster.raft.behaviors.RaftActorBehavior;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
 
 public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort, RaftActorSnapshotCohort {
-
     public static final short PAYLOAD_VERSION = 5;
 
     final RaftActor actorDelegate;
@@ -43,6 +43,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
     private RaftActorSnapshotMessageSupport snapshotMessageSupport;
     private final byte[] restoreFromSnapshot;
     final CountDownLatch snapshotCommitted = new CountDownLatch(1);
+    private final Function<Runnable, Void> pauseLeaderFunction;
 
     protected MockRaftActor(AbstractBuilder<?, ?> builder) {
         super(builder.id, builder.peerAddresses, Optional.fromNullable(builder.config), PAYLOAD_VERSION);
@@ -60,6 +61,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
         roleChangeNotifier = builder.roleChangeNotifier;
         snapshotMessageSupport = builder.snapshotMessageSupport;
         restoreFromSnapshot = builder.restoreFromSnapshot;
+        pauseLeaderFunction = builder.pauseLeaderFunction;
     }
 
     public void setRaftActorRecoverySupport(RaftActorRecoverySupport support) {
@@ -216,6 +218,15 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
         }
     }
 
+    @Override
+    protected void pauseLeader(Runnable operation) {
+        if(pauseLeaderFunction != null) {
+            pauseLeaderFunction.apply(operation);
+        } else {
+            super.pauseLeader(operation);
+        }
+    }
+
     public static Object toObject(byte[] bs) throws ClassNotFoundException, IOException {
         Object obj = null;
         ByteArrayInputStream bis = null;
@@ -269,6 +280,7 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
         private byte[] restoreFromSnapshot;
         private Optional<Boolean> persistent = Optional.absent();
         private final Class<A> actorClass;
+        private Function<Runnable, Void> pauseLeaderFunction;
 
         protected AbstractBuilder(Class<A> actorClass) {
             this.actorClass = actorClass;
@@ -316,6 +328,11 @@ public class MockRaftActor extends RaftActor implements RaftActorRecoveryCohort,
 
         public T persistent(Optional<Boolean> persistent) {
             this.persistent = persistent;
+            return self();
+        }
+
+        public T pauseLeaderFunction(Function<Runnable, Void> pauseLeaderFunction) {
+            this.pauseLeaderFunction = pauseLeaderFunction;
             return self();
         }
 
