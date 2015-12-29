@@ -14,10 +14,10 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Address;
-import akka.actor.PoisonPill;
 import akka.dispatch.Mapper;
 import akka.dispatch.OnComplete;
 import akka.pattern.AskTimeoutException;
+import akka.pattern.Patterns;
 import akka.util.Timeout;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
@@ -45,6 +45,7 @@ import org.opendaylight.controller.cluster.datastore.messages.PrimaryShardInfo;
 import org.opendaylight.controller.cluster.datastore.messages.RemotePrimaryShardFound;
 import org.opendaylight.controller.cluster.datastore.messages.UpdateSchemaContext;
 import org.opendaylight.controller.cluster.datastore.shardstrategy.ShardStrategyFactory;
+import org.opendaylight.controller.cluster.raft.client.messages.Shutdown;
 import org.opendaylight.controller.cluster.reporting.MetricsReporter;
 import org.opendaylight.yangtools.yang.data.api.schema.tree.DataTree;
 import org.opendaylight.yangtools.yang.model.api.SchemaContext;
@@ -377,7 +378,12 @@ public class ActorContext {
     }
 
     public void shutdown() {
-        shardManager.tell(PoisonPill.getInstance(), ActorRef.noSender());
+        FiniteDuration duration = datastoreContext.getShardRaftConfig().getElectionTimeOutInterval().$times(3);
+        try {
+            Await.ready(Patterns.gracefulStop(shardManager, duration, new Shutdown()), duration);
+        } catch(Exception e) {
+            LOG.warn("ShardManager for {} data store did not shutdown gracefully", getDataStoreName(), e);
+        }
     }
 
     public ClusterWrapper getClusterWrapper() {
@@ -502,6 +508,7 @@ public class ActorContext {
      * @return
      * @deprecated Use {@link #getDataStoreName()} instead.
      */
+    @Deprecated
     public String getDataStoreType() {
         return datastoreContext.getDataStoreName();
     }

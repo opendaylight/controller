@@ -36,7 +36,7 @@ public class RemoteRpcProvider implements AutoCloseable, Provider, SchemaContext
   private final DOMRpcProviderService rpcProvisionRegistry;
 
   private ListenerRegistration<SchemaContextListener> schemaListenerRegistration;
-  private ActorSystem actorSystem;
+  private final ActorSystem actorSystem;
   private Broker.ProviderSession brokerSession;
   private SchemaContext schemaContext;
   private ActorRef rpcManager;
@@ -53,10 +53,6 @@ public class RemoteRpcProvider implements AutoCloseable, Provider, SchemaContext
 
   @Override
   public void close() throws Exception {
-    if (actorSystem != null) {
-        actorSystem.shutdown();
-        actorSystem = null;
-    }
     if (schemaListenerRegistration != null) {
         schemaListenerRegistration.close();
         schemaListenerRegistration = null;
