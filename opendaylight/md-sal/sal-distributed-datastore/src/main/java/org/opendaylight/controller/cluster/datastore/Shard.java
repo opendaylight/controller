@@ -189,6 +189,8 @@ public class Shard extends RaftActor {
             txCommitTimeoutCheckSchedule.cancel();
         }
 
+        commitCoordinator.abortPendingTransactions("Transaction aborted due to shutdown.", this);
+
         shardMBean.unregisterMBean();
     }
 
@@ -252,7 +254,7 @@ public class Shard extends RaftActor {
                 setPeerAddress(resolved.getPeerId().toString(),
                         resolved.getPeerAddress());
             } else if (message.equals(TX_COMMIT_TIMEOUT_CHECK_MESSAGE)) {
-                handleTransactionCommitTimeoutCheck();
+                commitCoordinator.checkForExpiredTransactions(transactionCommitTimeout, this);
             } else if(message instanceof DatastoreContext) {
                 onDatastoreContext((DatastoreContext)message);
             } else if(message instanceof RegisterRoleChangeListener){
@@ -314,20 +316,6 @@ public class Shard extends RaftActor {
         }
 
         updateConfigParams(datastoreContext.getShardRaftConfig());
-    }
-
-    private void handleTransactionCommitTimeoutCheck() {
-        CohortEntry cohortEntry = commitCoordinator.getCurrentCohortEntry();
-        if(cohortEntry != null) {
-            if(cohortEntry.isExpired(transactionCommitTimeout)) {
-                LOG.warn("{}: Current transaction {} has timed out after {} ms - aborting",
-                        persistenceId(), cohortEntry.getTransactionID(), transactionCommitTimeout);
-
-                doAbortTransaction(cohortEntry.getTransactionID(), null);
-            }
-        }
-
-        commitCoordinator.cleanupExpiredCohortEntries();
     }
 
     private static boolean isEmptyCommit(final DataTreeCandidate candidate) {
@@ -710,6 +698,9 @@ public class Shard extends RaftActor {
             }
 
             store.closeAllTransactionChains();
+
+            commitCoordinator.abortPendingTransactions(
+                    "The transacton was aborted due to inflight leadership change.", this);
         }
 
         if(hasLeader && !isIsolatedLeader()) {
