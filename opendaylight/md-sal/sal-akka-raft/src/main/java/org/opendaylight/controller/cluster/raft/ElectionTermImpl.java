@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import akka.japi.Procedure;
+import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.base.messages.UpdateElectionTerm;
 import org.slf4j.Logger;
@@ -26,10 +28,10 @@ class ElectionTermImpl implements ElectionTerm {
     private final Logger log;
     private final String logId;
 
-    ElectionTermImpl(DataPersistenceProvider persistence, String logId, Logger log) {
-        this.persistence = persistence;
+    ElectionTermImpl(final DataPersistenceProvider persistence, final String logId, final Logger log) {
+        this.persistence = Preconditions.checkNotNull(persistence);
         this.logId = logId;
-        this.log = log;
+        this.log = Preconditions.checkNotNull(log);
     }
 
     @Override
@@ -42,18 +44,23 @@ class ElectionTermImpl implements ElectionTerm {
         return votedFor;
     }
 
-    @Override public void update(long currentTerm, String votedFor) {
-        if(log.isDebugEnabled()) {
-            log.debug("{}: Set currentTerm={}, votedFor={}", logId, currentTerm, votedFor);
-        }
+    @Override
+    public void update(final long currentTerm, final String votedFor) {
+        log.debug("{}: Set currentTerm={}, votedFor={}", logId, currentTerm, votedFor);
         this.currentTerm = currentTerm;
         this.votedFor = votedFor;
     }
 
     @Override
-    public void updateAndPersist(long currentTerm, String votedFor){
-        update(currentTerm, votedFor);
-        // FIXME : Maybe first persist then update the state
-        persistence.persist(new UpdateElectionTerm(this.currentTerm, this.votedFor), NoopProcedure.instance());
+    public void updateAndPersist(final long currentTerm, final String votedFor,
+            final Procedure<ElectionTerm> callback) {
+        log.debug("{}: Persisting currentTerm={}, votedFor={}", logId, currentTerm, votedFor);
+        persistence.persist(new UpdateElectionTerm(currentTerm, votedFor), new Procedure<UpdateElectionTerm>() {
+            @Override
+            public void apply(final UpdateElectionTerm param) throws Exception {
+                update(param.getCurrentTerm(), param.getVotedFor());
+                callback.apply(ElectionTermImpl.this);
+            }
+        });
     }
 }

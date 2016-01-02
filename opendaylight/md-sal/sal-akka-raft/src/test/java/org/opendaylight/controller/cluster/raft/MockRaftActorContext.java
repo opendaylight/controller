@@ -13,6 +13,7 @@ import akka.actor.ActorSelection;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.japi.Procedure;
+import com.google.common.base.Throwables;
 import com.google.protobuf.GeneratedMessage;
 import java.io.Serializable;
 import java.util.HashMap;
@@ -47,16 +48,22 @@ public class MockRaftActorContext extends RaftActorContextImpl {
             }
 
             @Override
-            public void update(long currentTerm, String votedFor){
+            public void update(long currentTerm, String votedFor) {
                 this.currentTerm = currentTerm;
                 this.votedFor = votedFor;
-
-                // TODO : Write to some persistent state
             }
 
-            @Override public void updateAndPersist(long currentTerm,
-                String votedFor) {
+            @Override
+            public void updateAndPersist(long currentTerm, String votedFor, Procedure<ElectionTerm> callback) {
+                // TODO : Write to some persistent state
+                
                 update(currentTerm, votedFor);
+
+                try {
+                    callback.apply(this);
+                } catch (Exception e) {
+                    Throwables.propagate(e);
+                }
             }
         };
     }
