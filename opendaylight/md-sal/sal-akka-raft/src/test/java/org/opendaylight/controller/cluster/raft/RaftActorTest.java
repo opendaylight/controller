@@ -19,6 +19,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.same;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -38,9 +39,11 @@ import akka.persistence.SaveSnapshotSuccess;
 import akka.persistence.SnapshotMetadata;
 import akka.persistence.SnapshotOffer;
 import akka.persistence.SnapshotSelectionCriteria;
+import akka.persistence.UntypedPersistentActor;
 import akka.testkit.JavaTestKit;
 import akka.testkit.TestActorRef;
 import com.google.common.base.Optional;
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.google.protobuf.ByteString;
@@ -59,6 +62,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.NonPersistentDataProvider;
 import org.opendaylight.controller.cluster.PersistentDataProvider;
@@ -110,8 +115,15 @@ public class RaftActorTest extends AbstractActorTest {
         doReturn(false).when(dataPersistenceProvider).isRecoveryApplicable();
         doReturn(0L).when(dataPersistenceProvider).getLastSequenceNumber();
         doNothing().when(dataPersistenceProvider).saveSnapshot(any(Object.class));
-        doNothing().when(dataPersistenceProvider).persist(any(Object.class), any(Procedure.class));
         doNothing().when(dataPersistenceProvider).deleteSnapshots(any(SnapshotSelectionCriteria.class));
+        doAnswer(new Answer<Void>() {
+            @Override
+            public Void answer(InvocationOnMock invocation) throws Exception {
+                final Object[] args = invocation.getArguments();
+                ((Procedure<Object>)args[1]).apply(args[0]);
+                return null;
+            }
+        }).when(dataPersistenceProvider).persist(any(Object.class), any(Procedure.class));
         doNothing().when(dataPersistenceProvider).deleteMessages(0L);
 
         return dataPersistenceProvider;
@@ -1012,8 +1024,24 @@ public class RaftActorTest extends AbstractActorTest {
             }};
     }
 
+    // Utility method to wait for persistence invocations running in the background
+    private static void waitForPendingInvocations(final UntypedPersistentActor actor) throws InterruptedException,
+            TimeoutException {
+        final Stopwatch watch = Stopwatch.createStarted();
+
+        do {
+            if (actor.akka$persistence$Eventsourced$$pendingInvocations().isEmpty()) {
+                TEST_LOG.debug("Settled in {} milliseconds", watch.elapsed(TimeUnit.MILLISECONDS));
+                return;
+            }
+            Thread.sleep(1);
+        } while (watch.elapsed(TimeUnit.SECONDS) < 2);
+
+        throw new TimeoutException("Timed out waiting for actor " + actor + " to settle");
+    }
+
     @Test
-    public void testSwitchBehavior(){
+    public void testSwitchBehavior() throws InterruptedException, TimeoutException {
         String persistenceId = factory.generateActorId("leader-");
         DefaultConfigParamsImpl config = new DefaultConfigParamsImpl();
         config.setCustomRaftPolicyImplementationClass("org.opendaylight.controller.cluster.raft.policy.DisableElectionsRaftPolicy");
@@ -1029,25 +1057,28 @@ public class RaftActorTest extends AbstractActorTest {
                 MockRaftActor.props(persistenceId, peerAddresses, config, dataPersistenceProvider), persistenceId);
 
         MockRaftActor leaderActor = mockActorRef.underlyingActor();
-
         leaderActor.waitForRecoveryComplete();
 
-        leaderActor.handleCommand(new SwitchBehavior(RaftState.Follower, 100));
+        mockActorRef.tell(new SwitchBehavior(RaftState.Follower, 100), mockActorRef);
+        waitForPendingInvocations(leaderActor);
 
         assertEquals(100, leaderActor.getRaftActorContext().getTermInformation().getCurrentTerm());
         assertEquals(RaftState.Follower, leaderActor.getCurrentBehavior().state());
 
-        leaderActor.handleCommand(new SwitchBehavior(RaftState.Leader, 110));
+        mockActorRef.tell(new SwitchBehavior(RaftState.Leader, 110), mockActorRef);
+        waitForPendingInvocations(leaderActor);
 
         assertEquals(110, leaderActor.getRaftActorContext().getTermInformation().getCurrentTerm());
         assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
 
-        leaderActor.handleCommand(new SwitchBehavior(RaftState.Candidate, 125));
+        mockActorRef.tell(new SwitchBehavior(RaftState.Candidate, 125), mockActorRef);
+        waitForPendingInvocations(leaderActor);
 
         assertEquals(110, leaderActor.getRaftActorContext().getTermInformation().getCurrentTerm());
         assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
 
-        leaderActor.handleCommand(new SwitchBehavior(RaftState.IsolatedLeader, 125));
+        mockActorRef.tell(new SwitchBehavior(RaftState.IsolatedLeader, 125), mockActorRef);
+        waitForPendingInvocations(leaderActor);
 
         assertEquals(110, leaderActor.getRaftActorContext().getTermInformation().getCurrentTerm());
         assertEquals(RaftState.Leader, leaderActor.getCurrentBehavior().state());
