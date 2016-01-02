@@ -24,6 +24,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
@@ -413,7 +414,7 @@ public class RaftActorTest extends AbstractActorTest {
 
                 mockRaftActor.onReceiveCommand(new ApplyJournalEntries(10));
 
-                verify(dataPersistenceProvider).persist(any(ApplyJournalEntries.class), any(Procedure.class));
+                verify(dataPersistenceProvider, times(2)).persist(any(ApplyJournalEntries.class), any(Procedure.class));
 
             }
 
