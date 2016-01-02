@@ -10,6 +10,7 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 
 import akka.actor.ActorRef;
 import akka.actor.Cancellable;
+import akka.japi.Procedure;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.raft.ClientRequestTracker;
@@ -120,7 +121,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      * @param appendEntries
      * @return a new behavior if it was changed or the current behavior
      */
-    protected RaftActorBehavior appendEntries(ActorRef sender,
+    protected final RaftActorBehavior appendEntries(ActorRef sender,
         AppendEntries appendEntries) {
 
         // 1. Reply false if term < currentTerm (§5.1)
@@ -164,21 +165,27 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      * @param requestVote
      * @return a new behavior if it was changed or the current behavior
      */
-    protected RaftActorBehavior requestVote(ActorRef sender, RequestVote requestVote) {
-
+    protected RaftActorBehavior requestVote(final ActorRef sender, final RequestVote requestVote) {
         LOG.debug("{}: In requestVote:  {}", logName(), requestVote);
 
-        boolean grantVote = canGrantVote(requestVote);
+        final RequestVoteReply reply = new RequestVoteReply(requestVote.getTerm(), canGrantVote(requestVote));
+        if (reply.isVoteGranted()) {
+            // We are granting the vote, but we have to record it first, which is asynchronous.
+            LOG.debug("{}: requestVote will return: {}", logName(), reply);
 
-        if(grantVote) {
-            context.getTermInformation().updateAndPersist(requestVote.getTerm(), requestVote.getCandidateId());
+            context.getTermInformation().updateAndPersist(requestVote.getTerm(), requestVote.getCandidateId(),
+                new Procedure<Void>() {
+                @Override
+                public void apply(final Void param) {
+                    LOG.debug("{}: requestVote returning: {}", logName(), reply);
+                    sender.tell(reply, actor());
+                }
+            });
+        } else {
+            // We cannot grant the vote, exit quickly
+            LOG.debug("{}: requestVote returning: {}", logName(), reply);
+            sender.tell(reply, actor());
         }
-
-        RequestVoteReply reply = new RequestVoteReply(currentTerm(), grantVote);
-
-        LOG.debug("{}: requestVote returning: {}", logName(), reply);
-
-        sender.tell(reply, actor());
 
         return this;
     }

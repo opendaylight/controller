@@ -29,6 +29,7 @@ import org.opendaylight.controller.cluster.raft.ClientRequestTracker;
 import org.opendaylight.controller.cluster.raft.ClientRequestTrackerImpl;
 import org.opendaylight.controller.cluster.raft.FollowerLogInformation;
 import org.opendaylight.controller.cluster.raft.FollowerLogInformationImpl;
+import org.opendaylight.controller.cluster.raft.NoopProcedure;
 import org.opendaylight.controller.cluster.raft.PeerInfo;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
@@ -363,7 +364,7 @@ public abstract class AbstractLeader extends AbstractRaftActorBehavior {
                 LOG.debug("{}: Term {} in \"{}\" message is greater than leader's term {} - switching to Follower",
                         logName(), rpc.getTerm(), rpc, context.getTermInformation().getCurrentTerm());
 
-                context.getTermInformation().updateAndPersist(rpc.getTerm(), null);
+                context.getTermInformation().updateAndPersist(rpc.getTerm(), null, NoopProcedure.<Void>instance());
 
                 return internalSwitchBehavior(RaftState.Follower);
             }

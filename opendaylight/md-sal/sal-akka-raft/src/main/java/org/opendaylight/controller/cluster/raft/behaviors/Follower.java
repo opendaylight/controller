@@ -9,7 +9,9 @@
 package org.opendaylight.controller.cluster.raft.behaviors;
 
 import akka.actor.ActorRef;
+import akka.japi.Procedure;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Verify;
 import java.util.ArrayList;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
@@ -95,8 +97,8 @@ public class Follower extends AbstractRaftActorBehavior {
         initialSyncStatusTracker.update(leaderId, currentLeaderCommit, context.getCommitIndex());
     }
 
-    @Override protected RaftActorBehavior handleAppendEntries(ActorRef sender,
-                                                              AppendEntries appendEntries) {
+    @Override
+    protected RaftActorBehavior handleAppendEntries(ActorRef sender, AppendEntries appendEntries) {
 
         int numLogEntries = appendEntries.getEntries() != null ? appendEntries.getEntries().size() : 0;
         if(LOG.isTraceEnabled()) {
@@ -304,19 +306,59 @@ public class Follower extends AbstractRaftActorBehavior {
         return outOfSync;
     }
 
-    @Override protected RaftActorBehavior handleAppendEntriesReply(ActorRef sender,
-        AppendEntriesReply appendEntriesReply) {
+    @Override
+    protected RaftActorBehavior handleAppendEntriesReply(ActorRef sender, AppendEntriesReply appendEntriesReply) {
+        // NO-OP
         return this;
     }
 
-    @Override protected RaftActorBehavior handleRequestVoteReply(ActorRef sender,
-        RequestVoteReply requestVoteReply) {
+    @Override
+    protected RaftActorBehavior handleRequestVoteReply(ActorRef sender, RequestVoteReply requestVoteReply) {
+        // NO-OP
         return this;
     }
 
-    @Override public RaftActorBehavior handleMessage(ActorRef sender, Object originalMessage) {
+    private void processMessage(ActorRef sender, Object message) {
+        if (message instanceof InstallSnapshot) {
+            InstallSnapshot installSnapshot = (InstallSnapshot) message;
+            handleInstallSnapshot(sender, installSnapshot);
+        }
 
-        Object message = fromSerializableMessage(originalMessage);
+        if (message instanceof RaftRPC && (!(message instanceof RequestVote) || canGrantVote((RequestVote) message))) {
+            scheduleElection(electionDuration());
+        }
+
+        final RaftActorBehavior safety = super.handleMessage(sender, message);
+
+        // Verification of handleMessage() assumption that when this method is called the behavior will not change.
+        Verify.verify(this == safety, "Follower attempted to change behavior from %s to %s", this, safety);
+    }
+
+    @Override
+    public RaftActorBehavior handleMessage(final ActorRef sender, final Object originalMessage) {
+        final Object message = fromSerializableMessage(originalMessage);
+
+        // We need to take care of ElectionTimeout first. That is not a RaftRPC, hence we do not have to
+        // adjust our term based on the information.
+        if (message instanceof ElectionTimeout) {
+            if (canStartElection()) {
+                LOG.debug("{}: Received ElectionTimeout - switching to Candidate", logName());
+                return internalSwitchBehavior(RaftState.Candidate);
+            } else {
+                return this;
+            }
+        }
+
+        /*
+         * At this point, the Follower behavior will not change, no matter what the message is going to be, as all
+         * our behavior-specific methods which can be invoked by superclass do not change it. This is very important,
+         * because in the next step we may end up needing to update term information, which will force us to exit
+         * this method and return the behavior resulting from processing of this message.
+         *
+         * Knowing a behavior switch cannot possibly happen makes that easy, as we will just return this.
+         *
+         * This assumption is verified in processMessage() so that we get a hard error should this ever get violated.
+         */
 
         if (message instanceof RaftRPC) {
             RaftRPC rpc = (RaftRPC) message;
@@ -327,28 +369,22 @@ public class Follower extends AbstractRaftActorBehavior {
                 LOG.debug("{}: Term {} in \"{}\" message is greater than follower's term {} - updating term",
                         logName(), rpc.getTerm(), rpc, context.getTermInformation().getCurrentTerm());
 
-                context.getTermInformation().updateAndPersist(rpc.getTerm(), null);
-            }
-        }
+                // Here is the tricky part. We must process this message only after we have persisted the term
+                // information change, which is an asynchronous call.
+                context.getTermInformation().updateAndPersist(rpc.getTerm(), null, new Procedure<Void>() {
+                    @Override
+                    public void apply(Void param) {
+                        processMessage(sender, message);
+                    }
+                });
 
-        if (message instanceof ElectionTimeout) {
-            if(canStartElection()) {
-                LOG.debug("{}: Received ElectionTimeout - switching to Candidate", logName());
-                return internalSwitchBehavior(RaftState.Candidate);
-            } else {
+                // Exit to akka immediately, message processing will occur in the callback
                 return this;
             }
-
-        } else if (message instanceof InstallSnapshot) {
-            InstallSnapshot installSnapshot = (InstallSnapshot) message;
-            handleInstallSnapshot(sender, installSnapshot);
         }
 
-        if(message instanceof RaftRPC && (!(message instanceof RequestVote) || (canGrantVote((RequestVote) message)))){
-            scheduleElection(electionDuration());
-        }
-
-        return super.handleMessage(sender, message);
+        processMessage(sender, message);
+        return this;
     }
 
     private void handleInstallSnapshot(final ActorRef sender, InstallSnapshot installSnapshot) {

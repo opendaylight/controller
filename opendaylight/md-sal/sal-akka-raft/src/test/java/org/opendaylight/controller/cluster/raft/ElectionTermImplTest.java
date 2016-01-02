@@ -8,10 +8,12 @@
 package org.opendaylight.controller.cluster.raft;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.any;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
 import akka.japi.Procedure;
+import com.google.common.util.concurrent.SettableFuture;
+import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -50,18 +52,28 @@ public class ElectionTermImplTest {
         }).when(mockPersistence).persist(any(Object.class), any(Procedure.class));
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test
     public void testUpdateAndPersist() throws Exception {
-        ElectionTermImpl impl = new ElectionTermImpl(mockPersistence, "test", LOG);
+        final ElectionTermImpl impl = new ElectionTermImpl(mockPersistence, "test", LOG);
 
-        impl.updateAndPersist(10, "member-1");
+        final SettableFuture<Void> p = SettableFuture.create();
+        impl.updateAndPersist(10, "member-1", new Procedure<Void>() {
+            @Override
+            public void apply(final Void param) throws Exception {
+                p.set(null);
+            }
+        });
+
+        // Wait up to 10 seconds for callback to execute
+        p.get(10, TimeUnit.SECONDS);
 
         assertEquals("getCurrentTerm", 10, impl.getCurrentTerm());
         assertEquals("getVotedFor", "member-1", impl.getVotedFor());
 
         ArgumentCaptor<Object> message = ArgumentCaptor.forClass(Object.class);
-        ArgumentCaptor<Procedure> procedure = ArgumentCaptor.forClass(Procedure.class);
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+        ArgumentCaptor<Procedure<Object>> procedure =
+                (ArgumentCaptor)ArgumentCaptor.forClass(Procedure.class);
         verify(mockPersistence).persist(message.capture(), procedure.capture());
 
         assertEquals("Message type", UpdateElectionTerm.class, message.getValue().getClass());
@@ -69,6 +81,6 @@ public class ElectionTermImplTest {
         assertEquals("getCurrentTerm", 10, update.getCurrentTerm());
         assertEquals("getVotedFor", "member-1", update.getVotedFor());
 
-        procedure.getValue().apply(null);
+        procedure.getValue().apply(update);
     }
 }

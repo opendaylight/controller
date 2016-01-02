@@ -8,6 +8,9 @@
 
 package org.opendaylight.controller.cluster.raft;
 
+import akka.japi.Procedure;
+import javax.annotation.Nonnull;
+
 /**
  * ElectionTerm contains information about a RaftActors election term.
  * <p>
@@ -45,10 +48,16 @@ public interface ElectionTerm {
      * <p>
      * This information needs to be persisted so that on recovery the replica
      * can start itself in the right term and know if it has already voted in
-     * that term or not
+     * that term or not.
+     *
+     * Note that the update will be asynchronous and observed only once persistence
+     * has had a chance to run. For that to happen, the caller is required to
+     * return from actor processing. If further actions need to be taken once
+     * the update has completed, provide a callback containing the required code.
      *
      * @param currentTerm
      * @param votedFor
+     * @param callback callback to be invoked once update has completed
      */
-    void updateAndPersist(long currentTerm, String votedFor);
+    void updateAndPersist(long currentTerm, String votedFor, @Nonnull Procedure<Void> callback);
 }
