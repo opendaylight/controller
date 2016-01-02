@@ -12,6 +12,10 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
 import akka.japi.Procedure;
+import com.google.common.util.concurrent.SettableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -50,25 +54,33 @@ public class ElectionTermImplTest {
         }).when(mockPersistence).persist(any(Object.class), any(Procedure.class));
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test
-    public void testUpdateAndPersist() throws Exception {
-        ElectionTermImpl impl = new ElectionTermImpl(mockPersistence, "test", LOG);
+    public void testUpdateAndPersist() throws InterruptedException, TimeoutException, ExecutionException {
+        final ElectionTermImpl impl = new ElectionTermImpl(mockPersistence, "test", LOG);
 
-        impl.updateAndPersist(10, "member-1");
+        final SettableFuture<Void> p = SettableFuture.create();
+        impl.updateAndPersist(10, "member-1", new Procedure<ElectionTerm>() {
+            @SuppressWarnings({ "rawtypes", "unchecked" })
+            @Override
+            public void apply(ElectionTerm param) throws Exception {
+                assertEquals("getCurrentTerm", 10, param.getCurrentTerm());
+                assertEquals("getVotedFor", "member-1", param.getVotedFor());
 
-        assertEquals("getCurrentTerm", 10, impl.getCurrentTerm());
-        assertEquals("getVotedFor", "member-1", impl.getVotedFor());
+                ArgumentCaptor<Object> message = ArgumentCaptor.forClass(Object.class);
+                ArgumentCaptor<Procedure> procedure = ArgumentCaptor.forClass(Procedure.class);
+                verify(mockPersistence).persist(message.capture(), procedure.capture());
 
-        ArgumentCaptor<Object> message = ArgumentCaptor.forClass(Object.class);
-        ArgumentCaptor<Procedure> procedure = ArgumentCaptor.forClass(Procedure.class);
-        verify(mockPersistence).persist(message.capture(), procedure.capture());
+                assertEquals("Message type", UpdateElectionTerm.class, message.getValue().getClass());
+                UpdateElectionTerm update = (UpdateElectionTerm)message.getValue();
+                assertEquals("getCurrentTerm", 10, update.getCurrentTerm());
+                assertEquals("getVotedFor", "member-1", update.getVotedFor());
 
-        assertEquals("Message type", UpdateElectionTerm.class, message.getValue().getClass());
-        UpdateElectionTerm update = (UpdateElectionTerm)message.getValue();
-        assertEquals("getCurrentTerm", 10, update.getCurrentTerm());
-        assertEquals("getVotedFor", "member-1", update.getVotedFor());
+                procedure.getValue().apply(update);
+                p.set(null);
+            }
+        });
 
-        procedure.getValue().apply(null);
+        // Wait up to 10 seconds for callback to execute
+        p.get(10, TimeUnit.SECONDS);
     }
 }

@@ -97,9 +97,12 @@ class RaftActorRecoverySupport {
                 persistentProvider.deleteSnapshots(new SnapshotSelectionCriteria(scala.Long.MaxValue(),
                         scala.Long.MaxValue()));
 
-                // Since we cleaned out the journal, we need to re-write the current election info.
+                // Since we cleaned out the journal, we need to re-write the current election info. Not waiting
+                // for updating the term before restoring from snapshot should be fine, as we will not be doing
+                // anything with term information until the next message arrives (at which point persistence is
+                // guaranteed to have run).
                 context.getTermInformation().updateAndPersist(context.getTermInformation().getCurrentTerm(),
-                        context.getTermInformation().getVotedFor());
+                        context.getTermInformation().getVotedFor(), NoopProcedure.<ElectionTerm>instance());
             }
 
             possiblyRestoreFromSnapshot();

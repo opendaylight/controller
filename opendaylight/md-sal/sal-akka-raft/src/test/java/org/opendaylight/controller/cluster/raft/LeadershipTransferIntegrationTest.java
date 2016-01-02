@@ -147,7 +147,7 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
         testLog.info("createRaftActors starting");
     }
 
-    private void verifyRaftState(ActorRef raftActor, final RaftState expState) throws Throwable {
+    private static void verifyRaftState(ActorRef raftActor, final RaftState expState) throws Throwable {
         Timeout timeout = new Timeout(500, TimeUnit.MILLISECONDS);
         Throwable lastError = null;
         Stopwatch sw = Stopwatch.createStarted();
@@ -166,7 +166,7 @@ public class LeadershipTransferIntegrationTest extends AbstractRaftActorIntegrat
         throw lastError;
     }
 
-    private void assertNullLeaderIdChange(TestActorRef<MessageCollectorActor> notifierActor) {
+    private static void assertNullLeaderIdChange(TestActorRef<MessageCollectorActor> notifierActor) {
         LeaderStateChanged change = expectFirstMatching(notifierActor, LeaderStateChanged.class);
         assertNull("Expected null leader Id", change.getLeaderId());
     }

@@ -10,9 +10,11 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 
 import akka.actor.ActorRef;
 import akka.actor.Cancellable;
+import akka.japi.Procedure;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import org.opendaylight.controller.cluster.raft.ClientRequestTracker;
+import org.opendaylight.controller.cluster.raft.ElectionTerm;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.ReplicatedLogEntry;
@@ -164,22 +166,28 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
      * @param requestVote
      * @return a new behavior if it was changed or the current behavior
      */
-    protected RaftActorBehavior requestVote(ActorRef sender, RequestVote requestVote) {
+    protected RaftActorBehavior requestVote(final ActorRef sender, final RequestVote requestVote) {
 
         LOG.debug("{}: In requestVote:  {}", logName(), requestVote);
 
-        boolean grantVote = canGrantVote(requestVote);
-
-        if(grantVote) {
-            context.getTermInformation().updateAndPersist(requestVote.getTerm(), requestVote.getCandidateId());
+        if (!canGrantVote(requestVote)) {
+            // We cannot grant the vote, exit quickly
+            RequestVoteReply reply = new RequestVoteReply(requestVote.getTerm(), false);
+            LOG.debug("{}: requestVote returning: {}", logName(), reply);
+            sender.tell(reply, actor());
+            return this;
         }
 
-        RequestVoteReply reply = new RequestVoteReply(currentTerm(), grantVote);
-
-        LOG.debug("{}: requestVote returning: {}", logName(), reply);
-
-        sender.tell(reply, actor());
-
+        // We are granting the vote, but we have to record it first, which is asynchronous.
+        context.getTermInformation().updateAndPersist(requestVote.getTerm(), requestVote.getCandidateId(),
+            new Procedure<ElectionTerm>() {
+                @Override
+                public void apply(final ElectionTerm param) {
+                    RequestVoteReply reply = new RequestVoteReply(param.getCurrentTerm(), true);
+                    LOG.debug("{}: requestVote returning: {}", logName(), reply);
+                    sender.tell(reply, actor());
+                }
+        });
         return this;
     }
 

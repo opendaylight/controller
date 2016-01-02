@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import akka.japi.Procedure;
+
 /**
  * Immutable implementation of ElectionTerm.
  *
@@ -37,7 +39,7 @@ public class ImmutableElectionTerm implements ElectionTerm {
     }
 
     @Override
-    public void updateAndPersist(long currentTerm, String votedFor) {
+    public void updateAndPersist(long currentTerm, String votedFor, Procedure<ElectionTerm> callback) {
         throw new UnsupportedOperationException();
     }
 
