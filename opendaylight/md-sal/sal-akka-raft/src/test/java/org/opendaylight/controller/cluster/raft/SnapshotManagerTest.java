@@ -14,6 +14,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -71,7 +72,7 @@ public class SnapshotManagerTest extends AbstractActorTest {
     private TestActorRef<MessageCollectorActor> actorRef;
 
     @Before
-    public void setUp(){
+    public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
         doReturn(false).when(mockRaftActorContext).hasFollowers();
@@ -82,6 +83,8 @@ public class SnapshotManagerTest extends AbstractActorTest {
         doReturn("123").when(mockRaftActorContext).getId();
         doReturn(mockDataPersistenceProvider).when(mockRaftActorContext).getPersistenceProvider();
         doReturn("123").when(mockRaftActorBehavior).getLeaderId();
+        doReturn(null).when(mockRaftActorBehavior).handleMessage(any(ActorRef.class), any(Object.class));
+        doReturn(0L).when(mockRaftActorBehavior).getReplicatedToAllIndex();
 
         doReturn(mockElectionTerm).when(mockRaftActorContext).getTermInformation();
         doReturn(5L).when(mockElectionTerm).getCurrentTerm();
@@ -92,6 +95,26 @@ public class SnapshotManagerTest extends AbstractActorTest {
 
         actorRef = factory.createTestActor(MessageCollectorActor.props(), factory.generateActorId("test-"));
         doReturn(actorRef).when(mockRaftActorContext).getActor();
+        doReturn(0L).when(mockRaftActorContext).getLastApplied();
+        doReturn(null).when(mockRaftActorContext).getPeerServerInfo();
+        doReturn(null).when(mockReplicatedLog).get(any(long.class));
+        doReturn(null).when(mockReplicatedLog).getFrom(any(long.class));
+        doReturn(0).when(mockReplicatedLog).dataSize();
+        doReturn(0L).when(mockReplicatedLog).size();
+        doReturn(0L).when(mockReplicatedLog).getSnapshotIndex();
+        doReturn(0L).when(mockReplicatedLog).getSnapshotTerm();
+        doNothing().when(mockReplicatedLog).snapshotPreCommit(any(long.class), any(long.class));
+        doNothing().when(mockReplicatedLog).snapshotRollback();
+        doNothing().when(mockReplicatedLog).snapshotCommit();
+        doNothing().when(mockRaftActorBehavior).setReplicatedToAllIndex(any(long.class));
+
+        doReturn(0L).when(mockDataPersistenceProvider).getLastSequenceNumber();
+        doNothing().when(mockDataPersistenceProvider).saveSnapshot(any(Object.class));
+        doNothing().when(mockDataPersistenceProvider).persist(any(Object.class), any(Procedure.class));
+        doNothing().when(mockDataPersistenceProvider).deleteSnapshots(any(SnapshotSelectionCriteria.class));
+        doNothing().when(mockDataPersistenceProvider).deleteMessages(any(long.class));
+
+        doNothing().when(mockProcedure).apply(null);
 
         snapshotManager.setCreateSnapshotCallable(mockProcedure);
     }
