@@ -12,6 +12,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -77,13 +78,12 @@ public class RaftActorRecoverySupportTest {
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
-        context = new RaftActorContextImpl(null, null, localId, new ElectionTermImpl(mockPersistentProvider, "test", LOG),
-                -1, -1, Collections.<String,String>emptyMap(), configParams, mockPersistence, LOG);
-
-        support = new RaftActorRecoverySupport(context, mockBehavior , mockCohort);
-
+        doNothing().when(mockCohort).startLogRecoveryBatch(any(int.class));
         doReturn(true).when(mockPersistence).isRecoveryApplicable();
 
+        context = new RaftActorContextImpl(null, null, localId, new ElectionTermImpl(mockPersistentProvider, "test", LOG),
+                -1, -1, Collections.<String,String>emptyMap(), configParams, mockPersistence, LOG);
+        support = new RaftActorRecoverySupport(context, mockBehavior , mockCohort);
         context.setReplicatedLog(ReplicatedLogImpl.newInstance(context, mockBehavior));
     }
 
