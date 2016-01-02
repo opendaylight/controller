@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import akka.japi.Procedure;
+import com.google.common.base.Preconditions;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.raft.base.messages.UpdateElectionTerm;
 import org.slf4j.Logger;
@@ -15,6 +17,13 @@ import org.slf4j.Logger;
  * Implementation of ElectionTerm for the RaftActor.
  */
 class ElectionTermImpl implements ElectionTerm {
+    private final Procedure<UpdateElectionTerm> updateProcedure = new Procedure<UpdateElectionTerm>() {
+        @Override
+        public void apply(final UpdateElectionTerm param) {
+            update(param.getCurrentTerm(), param.getVotedFor());
+        }
+    };
+
     /**
      * Identifier of the actor whose election term information this is
      */
@@ -26,10 +35,10 @@ class ElectionTermImpl implements ElectionTerm {
     private final Logger log;
     private final String logId;
 
-    ElectionTermImpl(DataPersistenceProvider persistence, String logId, Logger log) {
-        this.persistence = persistence;
+    ElectionTermImpl(final DataPersistenceProvider persistence, final String logId, final Logger log) {
+        this.persistence = Preconditions.checkNotNull(persistence);
         this.logId = logId;
-        this.log = log;
+        this.log = Preconditions.checkNotNull(log);
     }
 
     @Override
@@ -42,8 +51,9 @@ class ElectionTermImpl implements ElectionTerm {
         return votedFor;
     }
 
-    @Override public void update(long currentTerm, String votedFor) {
-        if(log.isDebugEnabled()) {
+    @Override
+    public void update(final long currentTerm, final String votedFor) {
+        if (log.isDebugEnabled()) {
             log.debug("{}: Set currentTerm={}, votedFor={}", logId, currentTerm, votedFor);
         }
         this.currentTerm = currentTerm;
@@ -51,9 +61,7 @@ class ElectionTermImpl implements ElectionTerm {
     }
 
     @Override
-    public void updateAndPersist(long currentTerm, String votedFor){
-        update(currentTerm, votedFor);
-        // FIXME : Maybe first persist then update the state
-        persistence.persist(new UpdateElectionTerm(this.currentTerm, this.votedFor), NoopProcedure.instance());
+    public void updateAndPersist(final long currentTerm, final String votedFor) {
+        persistence.persist(new UpdateElectionTerm(currentTerm, votedFor), updateProcedure);
     }
 }
