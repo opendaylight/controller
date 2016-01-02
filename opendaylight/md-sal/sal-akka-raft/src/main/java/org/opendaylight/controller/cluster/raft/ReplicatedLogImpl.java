@@ -26,7 +26,9 @@ class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
 
     private final Procedure<DeleteEntries> deleteProcedure = new Procedure<DeleteEntries>() {
         @Override
-        public void apply(final DeleteEntries notUsed) {
+        public void apply(final DeleteEntries param) {
+            context.getLogger().debug("{}: remove persist complete {}", context.getId(), param);
+            removeFrom(param.getFromIndex());
         }
     };
 
@@ -50,11 +52,8 @@ class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
 
     @Override
     public void removeFromAndPersist(final long logEntryIndex) {
-        // FIXME: Maybe this should be done after the command is saved
-        long adjustedIndex = removeFrom(logEntryIndex);
-        if(adjustedIndex >= 0) {
-            context.getPersistenceProvider().persist(new DeleteEntries(adjustedIndex), deleteProcedure);
-        }
+        context.getLogger().debug("{}: Remove log entry and persist {}", context.getId(), logEntryIndex);
+        context.getPersistenceProvider().persist(new DeleteEntries(logEntryIndex), deleteProcedure);
     }
 
     @Override
@@ -104,12 +103,7 @@ class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
     public void appendAndPersist(final ReplicatedLogEntry replicatedLogEntry,
             final Procedure<ReplicatedLogEntry> callback)  {
 
-        if (context.getLogger().isDebugEnabled()) {
-            context.getLogger().debug("{}: Append log entry and persist {} ", context.getId(), replicatedLogEntry);
-        }
-
-        // FIXME : By adding the replicated log entry to the in-memory journal we are not truly ensuring durability of the logs
-        append(replicatedLogEntry);
+        context.getLogger().debug("{}: Append log entry and persist {} ", context.getId(), replicatedLogEntry);
 
         // When persisting events with persist it is guaranteed that the
         // persistent actor will not receive further commands between the
@@ -121,6 +115,9 @@ class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
                 @Override
                 public void apply(final ReplicatedLogEntry param) throws Exception {
                     context.getLogger().debug("{}: persist complete {}", context.getId(), param);
+
+                    // Append only after persistence has completed, so the logs are really durable
+                    append(param);
 
                     int logEntrySize = param.size();
                     dataSizeSinceLastSnapshot += logEntrySize;
