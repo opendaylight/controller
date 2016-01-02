@@ -174,7 +174,7 @@ public abstract class AbstractRaftActorBehavior implements RaftActorBehavior {
             context.getTermInformation().updateAndPersist(requestVote.getTerm(), requestVote.getCandidateId());
         }
 
-        RequestVoteReply reply = new RequestVoteReply(currentTerm(), grantVote);
+        RequestVoteReply reply = new RequestVoteReply(requestVote.getTerm(), grantVote);
 
         LOG.debug("{}: requestVote returning: {}", logName(), reply);
 

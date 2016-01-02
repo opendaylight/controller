@@ -69,6 +69,6 @@ public class ElectionTermImplTest {
         assertEquals("getCurrentTerm", 10, update.getCurrentTerm());
         assertEquals("getVotedFor", "member-1", update.getVotedFor());
 
-        procedure.getValue().apply(null);
+        procedure.getValue().apply(update);
     }
 }

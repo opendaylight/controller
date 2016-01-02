@@ -174,17 +174,18 @@ public class Candidate extends AbstractRaftActorBehavior {
         LOG.debug("{}: Starting new term {}", logName(), newTerm);
 
         // Request for a vote
+        // FIXME: (rovarga) I think this should happen only after TermInformation has finished persisting
+        final RequestVote requestVote = new RequestVote(
+            currentTerm,
+            context.getId(),
+            context.getReplicatedLog().lastIndex(),
+            context.getReplicatedLog().lastTerm());
+
         // TODO: Retry request for vote if replies do not arrive in a reasonable
         // amount of time TBD
         for (String peerId : votingPeers) {
             ActorSelection peerActor = context.getPeerActorSelection(peerId);
-            if(peerActor != null) {
-                RequestVote requestVote = new RequestVote(
-                        context.getTermInformation().getCurrentTerm(),
-                        context.getId(),
-                        context.getReplicatedLog().lastIndex(),
-                        context.getReplicatedLog().lastTerm());
-
+            if (peerActor != null) {
                 LOG.debug("{}: Sending {} to peer {}", logName(), requestVote, peerId);
 
                 peerActor.tell(requestVote, context.getActor());
