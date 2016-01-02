@@ -10,8 +10,13 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import akka.actor.ActorRef;
 import akka.actor.Props;
+import akka.japi.Procedure;
 import akka.testkit.TestActorRef;
 import com.google.common.base.Stopwatch;
 import java.util.ArrayList;
@@ -23,7 +28,8 @@ import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.cluster.NonPersistentDataProvider;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.ElectionTerm;
@@ -153,11 +159,19 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest {
         assertEquals("Behavior", RaftState.Leader, candidate.state());
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testBecomeLeaderOnReceivingMajorityVotesWithNonVotingPeers(){
-        ElectionTerm mockElectionTerm = Mockito.mock(ElectionTerm.class);
-        Mockito.doReturn(1L).when(mockElectionTerm).getCurrentTerm();
-        Mockito.doNothing().when(mockElectionTerm).updateAndPersist(Mockito.any(long.class), Mockito.any(String.class));
+        final ElectionTerm mockElectionTerm = mock(ElectionTerm.class);
+        doReturn(1L).when(mockElectionTerm).getCurrentTerm();
+        doAnswer(new Answer<Void>() {
+            @Override
+            public Void answer(InvocationOnMock invocation) throws Exception {
+                final Object[] args = invocation.getArguments();
+                ((Procedure<Void>)args[2]).apply(null);
+                return null;
+            }
+        }).when(mockElectionTerm).updateAndPersist(any(long.class), any(String.class), any(Procedure.class));
 
         RaftActorContext raftActorContext = new RaftActorContextImpl(candidateActor, candidateActor.actorContext(),
                 "candidate", mockElectionTerm, -1, -1, setupPeers(4), new DefaultConfigParamsImpl(),
