@@ -8,6 +8,7 @@
 package org.opendaylight.controller.cluster.raft;
 
 import akka.japi.Procedure;
+import com.google.common.base.Preconditions;
 import java.util.Collections;
 import java.util.List;
 import org.opendaylight.controller.cluster.raft.base.messages.DeleteEntries;
@@ -25,30 +26,30 @@ class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
 
     private final Procedure<DeleteEntries> deleteProcedure = new Procedure<DeleteEntries>() {
         @Override
-        public void apply(DeleteEntries notUsed) {
+        public void apply(final DeleteEntries notUsed) {
         }
     };
 
-    static ReplicatedLog newInstance(Snapshot snapshot, RaftActorContext context,
-            RaftActorBehavior currentBehavior) {
+    static ReplicatedLog newInstance(final Snapshot snapshot, final RaftActorContext context,
+            final RaftActorBehavior currentBehavior) {
         return new ReplicatedLogImpl(snapshot.getLastAppliedIndex(), snapshot.getLastAppliedTerm(),
                 snapshot.getUnAppliedEntries(), context, currentBehavior);
     }
 
-    static ReplicatedLog newInstance(RaftActorContext context, RaftActorBehavior currentBehavior) {
+    static ReplicatedLog newInstance(final RaftActorContext context, final RaftActorBehavior currentBehavior) {
         return new ReplicatedLogImpl(-1L, -1L, Collections.<ReplicatedLogEntry>emptyList(), context,
                 currentBehavior);
     }
 
-    private ReplicatedLogImpl(long snapshotIndex, long snapshotTerm, List<ReplicatedLogEntry> unAppliedEntries,
-            RaftActorContext context, RaftActorBehavior currentBehavior) {
+    private ReplicatedLogImpl(final long snapshotIndex, final long snapshotTerm, final List<ReplicatedLogEntry> unAppliedEntries,
+            final RaftActorContext context, final RaftActorBehavior currentBehavior) {
         super(snapshotIndex, snapshotTerm, unAppliedEntries);
-        this.context = context;
-        this.currentBehavior = currentBehavior;
+        this.context = Preconditions.checkNotNull(context);
+        this.currentBehavior = Preconditions.checkNotNull(currentBehavior);
     }
 
     @Override
-    public void removeFromAndPersist(long logEntryIndex) {
+    public void removeFromAndPersist(final long logEntryIndex) {
         // FIXME: Maybe this should be done after the command is saved
         long adjustedIndex = removeFrom(logEntryIndex);
         if(adjustedIndex >= 0) {
@@ -62,7 +63,7 @@ class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
     }
 
     @Override
-    public void captureSnapshotIfReady(ReplicatedLogEntry replicatedLogEntry) {
+    public void captureSnapshotIfReady(final ReplicatedLogEntry replicatedLogEntry) {
         long journalSize = replicatedLogEntry.getIndex() + 1;
         long dataThreshold = context.getTotalMemory() *
                 context.getConfigParams().getSnapshotDataThresholdPercentage() / 100;
@@ -103,7 +104,7 @@ class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
     public void appendAndPersist(final ReplicatedLogEntry replicatedLogEntry,
             final Procedure<ReplicatedLogEntry> callback)  {
 
-        if(context.getLogger().isDebugEnabled()) {
+        if (context.getLogger().isDebugEnabled()) {
             context.getLogger().debug("{}: Append log entry and persist {} ", context.getId(), replicatedLogEntry);
         }
 
@@ -118,14 +119,14 @@ class ReplicatedLogImpl extends AbstractReplicatedLogImpl {
         context.getPersistenceProvider().persist(replicatedLogEntry,
             new Procedure<ReplicatedLogEntry>() {
                 @Override
-                public void apply(ReplicatedLogEntry evt) throws Exception {
-                    context.getLogger().debug("{}: persist complete {}", context.getId(), replicatedLogEntry);
+                public void apply(final ReplicatedLogEntry param) throws Exception {
+                    context.getLogger().debug("{}: persist complete {}", context.getId(), param);
 
-                    int logEntrySize = replicatedLogEntry.size();
+                    int logEntrySize = param.size();
                     dataSizeSinceLastSnapshot += logEntrySize;
 
-                    if (callback != null){
-                        callback.apply(replicatedLogEntry);
+                    if (callback != null) {
+                        callback.apply(param);
                     }
                 }
             }
