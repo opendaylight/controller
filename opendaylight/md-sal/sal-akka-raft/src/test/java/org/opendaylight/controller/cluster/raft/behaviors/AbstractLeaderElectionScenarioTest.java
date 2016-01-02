@@ -25,6 +25,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.opendaylight.controller.cluster.raft.DefaultConfigParamsImpl;
 import org.opendaylight.controller.cluster.raft.MockRaftActorContext;
+import org.opendaylight.controller.cluster.raft.NoopProcedure;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
 import org.opendaylight.controller.cluster.raft.base.messages.SendHeartBeat;
@@ -189,7 +190,7 @@ public class AbstractLeaderElectionScenarioTest {
             Map<String, String> peerAddresses) {
         MockRaftActorContext context = new MockRaftActorContext(id, system, actor);
         context.setPeerAddresses(peerAddresses);
-        context.getTermInformation().updateAndPersist(1, "");
+        context.getTermInformation().updateAndPersist(1, "", NoopProcedure.<Void>instance());
         return context;
     }
 

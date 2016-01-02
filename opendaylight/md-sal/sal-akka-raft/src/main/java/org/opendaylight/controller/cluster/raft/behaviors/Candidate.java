@@ -10,8 +10,10 @@ package org.opendaylight.controller.cluster.raft.behaviors;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
+import akka.japi.Procedure;
 import java.util.ArrayList;
 import java.util.Collection;
+import org.opendaylight.controller.cluster.raft.NoopProcedure;
 import org.opendaylight.controller.cluster.raft.PeerInfo;
 import org.opendaylight.controller.cluster.raft.RaftActorContext;
 import org.opendaylight.controller.cluster.raft.RaftState;
@@ -133,8 +135,7 @@ public class Candidate extends AbstractRaftActorBehavior {
             // set currentTerm = T, convert to follower (§5.1)
             // This applies to all RPC messages and responses
             if (rpc.getTerm() > context.getTermInformation().getCurrentTerm()) {
-                context.getTermInformation().updateAndPersist(rpc.getTerm(), null);
-
+                context.getTermInformation().updateAndPersist(rpc.getTerm(), null, NoopProcedure.<Void>instance());
                 return internalSwitchBehavior(RaftState.Follower);
             }
         }
@@ -161,38 +162,40 @@ public class Candidate extends AbstractRaftActorBehavior {
 
 
     private void startNewTerm() {
-
-
         // set voteCount back to 1 (that is voting for self)
         voteCount = 1;
 
-        // Increment the election term and vote for self
+        // Increment the election term and vote for self. Once persistence completes, initiate a new election
         long currentTerm = context.getTermInformation().getCurrentTerm();
-        long newTerm = currentTerm + 1;
-        context.getTermInformation().updateAndPersist(newTerm, context.getId());
+        final long newTerm = currentTerm + 1;
+        context.getTermInformation().updateAndPersist(newTerm, context.getId(), new Procedure<Void>() {
+            @Override
+            public void apply(final Void param) throws Exception {
+                // Request for a vote
+                LOG.debug("{}: Starting new term {}", logName(), newTerm);
 
-        LOG.debug("{}: Starting new term {}", logName(), newTerm);
+                final RequestVote requestVote = new RequestVote(
+                    newTerm,
+                    context.getId(),
+                    context.getReplicatedLog().lastIndex(),
+                    context.getReplicatedLog().lastTerm());
 
-        // Request for a vote
-        // TODO: Retry request for vote if replies do not arrive in a reasonable
-        // amount of time TBD
-        for (String peerId : votingPeers) {
-            ActorSelection peerActor = context.getPeerActorSelection(peerId);
-            if(peerActor != null) {
-                RequestVote requestVote = new RequestVote(
-                        context.getTermInformation().getCurrentTerm(),
-                        context.getId(),
-                        context.getReplicatedLog().lastIndex(),
-                        context.getReplicatedLog().lastTerm());
+                // TODO: Retry request for vote if replies do not arrive in a reasonable
+                // amount of time TBD
+                for (String peerId : votingPeers) {
+                    ActorSelection peerActor = context.getPeerActorSelection(peerId);
+                    if (peerActor != null) {
+                        LOG.debug("{}: Sending {} to peer {}", logName(), requestVote, peerId);
 
-                LOG.debug("{}: Sending {} to peer {}", logName(), requestVote, peerId);
-
-                peerActor.tell(requestVote, context.getActor());
+                        peerActor.tell(requestVote, context.getActor());
+                    }
+                }
             }
-        }
+        });
     }
 
-    @Override public void close() throws Exception {
+    @Override
+    public void close() {
         stopElection();
     }
 }

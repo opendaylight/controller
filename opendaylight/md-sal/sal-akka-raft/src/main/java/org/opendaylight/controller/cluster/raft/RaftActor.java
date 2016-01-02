@@ -337,13 +337,16 @@ public abstract class RaftActor extends AbstractUntypedPersistentActor {
     }
 
     private void switchBehavior(SwitchBehavior message) {
-        if(!getRaftActorContext().getRaftPolicy().automaticElectionsEnabled()) {
-            RaftState newState = message.getNewState();
-            if( newState == RaftState.Leader || newState == RaftState.Follower) {
+        if (!getRaftActorContext().getRaftPolicy().automaticElectionsEnabled()) {
+            switch (message.getNewState()) {
+            case Follower:
+            case Leader:
                 switchBehavior(reusableSwitchBehaviorSupplier.handleMessage(getSender(), message));
-                getRaftActorContext().getTermInformation().updateAndPersist(message.getNewTerm(), "");
-            } else {
-                LOG.warn("Switching to behavior : {} - not supported", newState);
+                getRaftActorContext().getTermInformation().updateAndPersist(message.getNewTerm(), "",
+                    NoopProcedure.<Void>instance());
+                break;
+            default:
+                LOG.warn("Switching to behavior : {} - not supported", message.getNewState());
             }
         }
     }
