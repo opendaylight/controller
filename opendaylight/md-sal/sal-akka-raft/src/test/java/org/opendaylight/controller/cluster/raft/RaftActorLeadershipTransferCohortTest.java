@@ -7,10 +7,13 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
+import akka.actor.ActorRef;
 import akka.dispatch.Dispatchers;
 import org.junit.After;
 import org.junit.Test;
@@ -34,6 +37,9 @@ public class RaftActorLeadershipTransferCohortTest extends AbstractActorTest {
     }
 
     private void setup() {
+        doNothing().when(onComplete).onSuccess(any(ActorRef.class), any(ActorRef.class));
+        doNothing().when(onComplete).onFailure(any(ActorRef.class), any(ActorRef.class));
+
         String persistenceId = factory.generateActorId("leader-");
         mockRaftActor = factory.<MockRaftActor>createTestActor(MockRaftActor.builder().id(persistenceId).config(
                 config).props().withDispatcher(Dispatchers.DefaultDispatcherId()), persistenceId).underlyingActor();

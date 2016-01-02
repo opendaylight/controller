@@ -19,6 +19,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.same;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -401,6 +402,7 @@ public class RaftActorTest extends AbstractActorTest {
                 config.setHeartBeatInterval(new FiniteDuration(1, TimeUnit.DAYS));
 
                 DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
+                doReturn(false).when(dataPersistenceProvider).isRecoveryApplicable();
 
                 TestActorRef<MockRaftActor> mockActorRef = factory.createTestActor(MockRaftActor.props(persistenceId,
                         Collections.<String, String>emptyMap(), config, dataPersistenceProvider), persistenceId);
@@ -1064,6 +1066,7 @@ public class RaftActorTest extends AbstractActorTest {
         ImmutableMap<String, String> peerAddresses =
             ImmutableMap.<String, String>builder().put("member1", "address").build();
         DataPersistenceProvider dataPersistenceProvider = mock(DataPersistenceProvider.class);
+        doReturn(false).when(dataPersistenceProvider).isRecoveryApplicable();
 
         TestActorRef<MockRaftActor> actorRef = factory.createTestActor(
                 MockRaftActor.props(persistenceId, peerAddresses, emptyConfig, dataPersistenceProvider), persistenceId);
@@ -1137,6 +1140,7 @@ public class RaftActorTest extends AbstractActorTest {
         verify(mockRaftActor.snapshotCohortDelegate, timeout(5000)).createSnapshot(any(ActorRef.class));
 
         mockRaftActor.snapshotCohortDelegate = mock(RaftActorSnapshotCohort.class);
+        doNothing().when(mockRaftActor).createSnapshot(any(ActorRef.class));
 
         raftActorRef.tell(GetSnapshot.INSTANCE, kit.getRef());
 
