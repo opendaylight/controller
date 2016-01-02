@@ -178,10 +178,12 @@ public class ReplicatedLogImplTest {
         assertEquals("size", 1, log.size());
 
         reset(mockPersistence);
+        doNothing().when(mockPersistence).persist(any(Object.class), any(Procedure.class));
 
         log.removeFromAndPersist(1);
 
-        verifyNoMoreInteractions(mockPersistence);
+        // The message should be bounced via persistence, even when it's a no-op
+        verify(mockPersistence).persist(any(Object.class), any(Procedure.class));
     }
 
     public Matcher<DeleteEntries> match(final DeleteEntries actual){
