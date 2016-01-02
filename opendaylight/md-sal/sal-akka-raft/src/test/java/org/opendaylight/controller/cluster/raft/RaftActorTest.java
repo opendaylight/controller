@@ -19,6 +19,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.same;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -59,6 +60,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.NonPersistentDataProvider;
 import org.opendaylight.controller.cluster.PersistentDataProvider;
@@ -110,8 +113,15 @@ public class RaftActorTest extends AbstractActorTest {
         doReturn(false).when(dataPersistenceProvider).isRecoveryApplicable();
         doReturn(0L).when(dataPersistenceProvider).getLastSequenceNumber();
         doNothing().when(dataPersistenceProvider).saveSnapshot(any(Object.class));
-        doNothing().when(dataPersistenceProvider).persist(any(Object.class), any(Procedure.class));
         doNothing().when(dataPersistenceProvider).deleteSnapshots(any(SnapshotSelectionCriteria.class));
+        doAnswer(new Answer<Void>() {
+            @Override
+            public Void answer(InvocationOnMock invocation) throws Exception {
+                final Object[] args = invocation.getArguments();
+                ((Procedure<Object>)args[1]).apply(args[0]);
+                return null;
+            }
+        }).when(dataPersistenceProvider).persist(any(Object.class), any(Procedure.class));
         doNothing().when(dataPersistenceProvider).deleteMessages(0L);
 
         return dataPersistenceProvider;
