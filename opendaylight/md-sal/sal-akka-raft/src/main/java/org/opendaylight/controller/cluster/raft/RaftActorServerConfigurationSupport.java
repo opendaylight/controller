@@ -11,7 +11,7 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Cancellable;
 import com.google.common.base.Preconditions;
-import java.util.LinkedList;
+import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.UUID;
 import javax.annotation.Nullable;
@@ -43,7 +43,7 @@ class RaftActorServerConfigurationSupport {
 
     private final RaftActorContext raftContext;
 
-    private final Queue<ServerOperationContext<?>> pendingOperationsQueue = new LinkedList<>();
+    private final Queue<ServerOperationContext<?>> pendingOperationsQueue = new ArrayDeque<>();
 
     private OperationState currentOperationState = IDLE;
 
