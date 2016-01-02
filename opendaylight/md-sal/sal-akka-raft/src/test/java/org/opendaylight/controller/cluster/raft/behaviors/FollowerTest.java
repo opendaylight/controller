@@ -840,6 +840,7 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
         // Send an append entry
         AppendEntries appendEntries = mock(AppendEntries.class);
         doReturn(context.getTermInformation().getCurrentTerm()).when(appendEntries).getTerm();
+        doReturn(null).when(appendEntries).getEntries();
 
         follower.handleMessage(leaderActor, appendEntries);
 
@@ -967,6 +968,8 @@ public class FollowerTest extends AbstractRaftActorBehaviorTest {
         MockRaftActorContext context = createActorContext();
         follower = createBehavior(context);
         follower.handleMessage(leaderActor, new RaftRPC() {
+            private static final long serialVersionUID = 1L;
+
             @Override
             public long getTerm() {
                 return 100;

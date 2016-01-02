@@ -157,6 +157,8 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest {
     public void testBecomeLeaderOnReceivingMajorityVotesWithNonVotingPeers(){
         ElectionTerm mockElectionTerm = Mockito.mock(ElectionTerm.class);
         Mockito.doReturn(1L).when(mockElectionTerm).getCurrentTerm();
+        Mockito.doNothing().when(mockElectionTerm).updateAndPersist(Mockito.any(long.class), Mockito.any(String.class));
+
         RaftActorContext raftActorContext = new RaftActorContextImpl(candidateActor, candidateActor.actorContext(),
                 "candidate", mockElectionTerm, -1, -1, setupPeers(4), new DefaultConfigParamsImpl(),
                 new NonPersistentDataProvider(), LOG);
@@ -314,6 +316,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest {
 
         // Send an unknown message so that the state of the RaftActor remains unchanged
         RaftActorBehavior expected = behavior.handleMessage(candidateActor, "unknown");
+        assertTrue(expected instanceof Candidate);
 
         RaftActorBehavior raftBehavior = behavior.handleMessage(candidateActor, appendEntries);
 
@@ -333,6 +336,7 @@ public class CandidateTest extends AbstractRaftActorBehaviorTest {
         return new MockRaftActorContext("candidate", getSystem(), candidateActor);
     }
 
+    @SuppressWarnings("unchecked")
     private Map<String, String> setupPeers(int count) {
         Map<String, String> peerMap = new HashMap<>();
         peerActors = new TestActorRef[count];

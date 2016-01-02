@@ -11,9 +11,12 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.same;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import akka.actor.ActorRef;
+import akka.japi.Procedure;
 import akka.persistence.SaveSnapshotFailure;
 import akka.persistence.SaveSnapshotSuccess;
 import akka.persistence.SnapshotMetadata;
@@ -61,6 +64,13 @@ public class RaftActorSnapshotMessageSupportTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
+
+        doNothing().when(mockSnapshotManager).setApplySnapshotProcedure(any(Procedure.class));
+        doNothing().when(mockSnapshotManager).setCreateSnapshotCallable(any(Procedure.class));
+        doNothing().when(mockSnapshotManager).apply(any(ApplySnapshot.class));
+        doNothing().when(mockSnapshotManager).commit(any(long.class), any(RaftActorBehavior.class));
+        doNothing().when(mockSnapshotManager).persist(any(byte[].class), any(RaftActorBehavior.class), any(long.class));
+        doNothing().when(mockSnapshotManager).rollback();
 
         context = new RaftActorContextImpl(mockRaftActorRef, null, "test",
                 new ElectionTermImpl(mockPersistence, "test", LOG),
