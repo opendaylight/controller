@@ -7,6 +7,8 @@
  */
 package org.opendaylight.controller.cluster.raft;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import akka.japi.Procedure;
@@ -16,6 +18,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.cluster.DataPersistenceProvider;
 import org.opendaylight.controller.cluster.PersistentDataProvider;
 import org.opendaylight.controller.cluster.raft.protobuff.client.messages.Payload;
@@ -51,11 +55,21 @@ public class RaftActorDelegatingPersistentDataProviderTest {
 
     private RaftActorDelegatingPersistentDataProvider provider;
 
+    @SuppressWarnings("unchecked")
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
         doReturn(PERSISTENT_PAYLOAD).when(mockPersistentLogEntry).getData();
         doReturn(NON_PERSISTENT_PAYLOAD).when(mockNonPersistentLogEntry).getData();
+
+        doAnswer(new Answer<Void>() {
+            @Override
+            public Void answer(InvocationOnMock invocation) throws Exception {
+                final Object[] args = invocation.getArguments();
+                ((Procedure<Object>)args[1]).apply(args[0]);
+                return null;
+            }
+        }).when(mockPersistentProvider).persist(any(Object.class), any(Procedure.class));
         provider = new RaftActorDelegatingPersistentDataProvider(mockDelegateProvider, mockPersistentProvider);
     }
 
