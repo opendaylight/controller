@@ -125,7 +125,7 @@ public abstract class HydrogenDataChangeEvent implements
 
         @Override
         public Map<InstanceIdentifier<?>, DataObject> getOriginalOperationalData() {
-            return (Map) delegate.getOriginalData();
+            return delegate.getOriginalData();
         }
 
         @Override
@@ -181,7 +181,7 @@ public abstract class HydrogenDataChangeEvent implements
 
         @Override
         public Map<InstanceIdentifier<?>, DataObject> getOriginalConfigurationData() {
-            return (Map) delegate.getOriginalData();
+            return delegate.getOriginalData();
         }
 
         @Override
