@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_7d7dcde6",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/modification/AbstractModification.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-01-04T22:34:46Z",
+      "side": 1,
+      "message": "Instead of adding a @Deprecated API, can we isolate this in PreLithiumTransactionContextImpl to keep this class clean? I actually intend to remove the pre-lithium transaction code soon anyway, probably in Be.",
+      "revId": "2b9bae4263f724d0bd58bea00f56813c9b242540",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
