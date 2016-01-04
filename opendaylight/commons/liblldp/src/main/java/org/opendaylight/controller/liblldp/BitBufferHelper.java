@@ -103,7 +103,7 @@ public abstract class BitBufferHelper {
                 logger.error("", e);
             }
         }
-        return (long) toNumber(data);
+        return toNumber(data);
     }
 
     /**
@@ -189,7 +189,7 @@ public abstract class BitBufferHelper {
         } catch (BufferException e) {
             logger.error("", e);
         }
-        return (long) toNumber(bits, numBits);
+        return toNumber(bits, numBits);
     }
 
     /**
@@ -238,7 +238,7 @@ public abstract class BitBufferHelper {
                 return bytes;
             } else {
                 System.arraycopy(data, startByteOffset, bytes, 0, numBytes - 1);
-                bytes[numBytes - 1] = (byte) ((int) data[startByteOffset
+                bytes[numBytes - 1] = (byte) (data[startByteOffset
                         + numBytes - 1] & getMSBMask(extranumBits));
             }
         } else {
@@ -363,7 +363,7 @@ public abstract class BitBufferHelper {
                 value += 256;
             }
             ret = ret
-                    | (long) ((long) value << ((length - i - 1) * NetUtils.NumBitsInAByte));
+                    | (long) value << ((length - i - 1) * NetUtils.NumBitsInAByte);
         }
         return ret;
     }
@@ -395,7 +395,7 @@ public abstract class BitBufferHelper {
                 value += 256;
             }
             ret = ret
-                    | (long) ((long) value << ((array.length - i - 1) * NetUtils.NumBitsInAByte));
+                    | (long) value << ((array.length - i - 1) * NetUtils.NumBitsInAByte);
         }
 
         return ret;
