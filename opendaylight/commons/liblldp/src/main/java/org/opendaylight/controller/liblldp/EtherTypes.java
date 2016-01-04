@@ -54,11 +54,11 @@ public enum EtherTypes {
     }
 
     public static String getEtherTypeName(short number) {
-        return getEtherTypeInternal((int) number & 0xffff);
+        return getEtherTypeInternal(number & 0xffff);
     }
 
     public static String getEtherTypeName(byte number) {
-        return getEtherTypeInternal((int) number & 0xff);
+        return getEtherTypeInternal(number & 0xff);
     }
 
     private static String getEtherTypeInternal(int number) {

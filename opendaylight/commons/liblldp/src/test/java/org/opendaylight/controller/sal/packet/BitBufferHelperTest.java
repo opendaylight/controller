@@ -295,7 +295,7 @@ public class BitBufferHelperTest {
         Assert.assertTrue(data_sh[0] == (byte) 255);
         Assert.assertTrue(data_sh[1] == (byte) 128);
 
-        data_sh = BitBufferHelper.toByteArray((int) 511, len);
+        data_sh = BitBufferHelper.toByteArray(511, len);
         Assert.assertTrue(data_sh[0] == (byte) 255);
         Assert.assertTrue(data_sh[1] == (byte) 128);
 
