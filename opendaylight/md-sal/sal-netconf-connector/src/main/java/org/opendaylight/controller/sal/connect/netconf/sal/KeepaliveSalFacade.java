@@ -128,7 +128,7 @@ public final class KeepaliveSalFacade implements RemoteDeviceHandler<NetconfSess
     private void scheduleKeepalive() {
         Preconditions.checkState(currentDeviceRpc != null);
         LOG.trace("{}: Scheduling next keepalive in {} {}", id, keepaliveDelaySeconds, TimeUnit.SECONDS);
-        currentKeepalive = executor.schedule(new Keepalive(), keepaliveDelaySeconds, TimeUnit.SECONDS);
+        currentKeepalive = executor.schedule(new Keepalive(currentKeepalive), keepaliveDelaySeconds, TimeUnit.SECONDS);
     }
 
     @Override
@@ -168,12 +168,23 @@ public final class KeepaliveSalFacade implements RemoteDeviceHandler<NetconfSess
      */
     private class Keepalive implements Runnable, FutureCallback<DOMRpcResult> {
 
+        private final ScheduledFuture<?> previousKeepalive;
+
+        public Keepalive(final ScheduledFuture<?> previousKeepalive) {
+            this.previousKeepalive = previousKeepalive;
+        }
+
         @Override
         public void run() {
             LOG.trace("{}: Invoking keepalive RPC", id);
 
             try {
-                Futures.addCallback(currentDeviceRpc.invokeRpc(PATH, KEEPALIVE_PAYLOAD), this);
+                if(previousKeepalive != null && !previousKeepalive.isDone()) {
+                    onFailure(new IllegalStateException("Previous keepalive timed out"));
+                } else {
+                    Futures.addCallback(currentDeviceRpc.invokeRpc(PATH, KEEPALIVE_PAYLOAD), this);
+                    scheduleKeepalive();
+                }
             } catch (NullPointerException e) {
                 LOG.debug("{}: Skipping keepalive while reconnecting", id);
                 // Empty catch block intentional
