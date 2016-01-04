@@ -173,7 +173,12 @@ public final class KeepaliveSalFacade implements RemoteDeviceHandler<NetconfSess
             LOG.trace("{}: Invoking keepalive RPC", id);
 
             try {
-                Futures.addCallback(currentDeviceRpc.invokeRpc(PATH, KEEPALIVE_PAYLOAD), this);
+                if(!currentKeepalive.isDone()) {
+                    onFailure(new IllegalStateException("Previous keepalive timed out"));
+                } else {
+                    Futures.addCallback(currentDeviceRpc.invokeRpc(PATH, KEEPALIVE_PAYLOAD), this);
+                    scheduleKeepalive();
+                }
             } catch (NullPointerException e) {
                 LOG.debug("{}: Skipping keepalive while reconnecting", id);
                 // Empty catch block intentional
