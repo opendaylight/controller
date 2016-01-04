@@ -23,7 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SimpletxDomDelete extends DatastoreAbstractWriter {
-    private static final Logger LOG = (Logger) LoggerFactory.getLogger(SimpletxDomDelete.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SimpletxDomDelete.class);
     private final DOMDataBroker domDataBroker;
 
     public SimpletxDomDelete(DOMDataBroker domDataBroker, int outerListElem,

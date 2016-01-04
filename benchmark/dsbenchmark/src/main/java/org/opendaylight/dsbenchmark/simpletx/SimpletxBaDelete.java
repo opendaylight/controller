@@ -24,7 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SimpletxBaDelete extends DatastoreAbstractWriter {
-    private static final Logger LOG = (Logger) LoggerFactory.getLogger(SimpletxBaDelete.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SimpletxBaDelete.class);
     private DataBroker dataBroker;
 
     public SimpletxBaDelete(DataBroker dataBroker, int outerListElem, int innerListElem,

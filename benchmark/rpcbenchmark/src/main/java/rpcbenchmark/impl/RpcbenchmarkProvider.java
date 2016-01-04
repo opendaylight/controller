@@ -133,8 +133,8 @@ public class RpcbenchmarkProvider implements BindingAwareProvider, AutoCloseable
 
             StartTestOutput output = new StartTestOutputBuilder()
                                             .setRate((long)0)
-                                            .setGlobalRtcClientError((long)client.getRpcError())
-                                            .setGlobalRtcClientOk((long)client.getRpcOk())
+                                            .setGlobalRtcClientError(client.getRpcError())
+                                            .setGlobalRtcClientOk(client.getRpcOk())
                                             .setExecTime(TimeUnit.NANOSECONDS.toMillis(elapsedTime))
                                             .setRate(((client.getRpcOk() + client.getRpcError()) * 1000000000) / elapsedTime)
                                             .build();
