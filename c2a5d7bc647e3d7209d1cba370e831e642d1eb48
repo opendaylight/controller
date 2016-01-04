@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_19ee2eb5",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 2046
+      },
+      "writtenOn": "2016-01-04T18:06:26Z",
+      "side": 1,
+      "message": "AutoCloseable [0] only strongly encourages (as opposed to requires) idempotency of close method, so multiple calls to close() are allowed to have bad side effects.\n\nHowever, AbstractRegistration#close() makes sure removeRegistration() is called at most once (no matter how many times close was called), so this patch is correct and it follows contract of AbstractRegistration#removeRegistration() (which prohibits more than one call).\n\nBut if patches like this are needed, it looks like parts of config subsystem assume the idempotent Closable#close() contract.\n\n[0] https://docs.oracle.com/javase/7/docs/api/java/lang/AutoCloseable.html",
+      "range": {
+        "startLine": 9,
+        "startChar": 57,
+        "endLine": 10,
+        "endChar": 12
+      },
+      "revId": "c2a5d7bc647e3d7209d1cba370e831e642d1eb48",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
