@@ -37,7 +37,7 @@ public class ListenerRegistrationMessagesTest extends AbstractMessagesTest {
         ListenerRegistrationMessages.RegisterChangeListenerReply.newBuilder();
     builder.setListenerRegistrationPath(testListenerRegistrationPath);
 
-    writeToFile((com.google.protobuf.GeneratedMessage.Builder<?>) builder);
+    writeToFile(builder);
 
     ListenerRegistrationMessages.RegisterChangeListenerReply rclrNew =
         (ListenerRegistrationMessages.RegisterChangeListenerReply) readFromFile(ListenerRegistrationMessages.RegisterChangeListenerReply.PARSER);

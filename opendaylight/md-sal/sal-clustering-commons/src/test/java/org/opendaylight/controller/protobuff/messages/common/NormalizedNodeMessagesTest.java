@@ -36,7 +36,7 @@ public class NormalizedNodeMessagesTest extends AbstractMessagesTest {
     builder.setName("test");
     builder.setType("fake");
     builder.setValue("testValue");
-    writeToFile((com.google.protobuf.GeneratedMessage.Builder<?>) builder);
+    writeToFile(builder);
 
     NormalizedNodeMessages.Attribute attributeNew =
         (NormalizedNodeMessages.Attribute) readFromFile(NormalizedNodeMessages.Attribute.PARSER);

@@ -52,7 +52,7 @@ public class DataChangeListenerMessagesTest extends AbstractMessagesTest {
         DataChangeListenerMessages.DataChanged.newBuilder();
     builder.addRemovedPaths(expectedOne);
 
-    writeToFile((com.google.protobuf.GeneratedMessage.Builder<?>) builder);
+    writeToFile(builder);
 
     DataChangeListenerMessages.DataChanged dataChangedNew =
         (DataChangeListenerMessages.DataChanged) readFromFile(DataChangeListenerMessages.DataChanged.PARSER);
