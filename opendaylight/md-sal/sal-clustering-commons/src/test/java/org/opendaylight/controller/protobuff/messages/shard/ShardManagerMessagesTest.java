@@ -34,7 +34,7 @@ public class ShardManagerMessagesTest extends AbstractMessagesTest {
         ShardManagerMessages.FindPrimary.newBuilder();
     builder.setShardName("Inventory");
 
-    writeToFile((com.google.protobuf.GeneratedMessage.Builder<?>) builder);
+    writeToFile(builder);
 
 
     // Here we will read the same and check we got back what we had saved

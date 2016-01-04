@@ -39,7 +39,7 @@ public class ThreePhaseCommitCohortMessagesTest extends AbstractMessagesTest {
         ThreePhaseCommitCohortMessages.CanCommitTransactionReply.newBuilder();
     builder.setCanCommit(true);
 
-    writeToFile((com.google.protobuf.GeneratedMessage.Builder<?>) builder);
+    writeToFile(builder);
 
     // Here we will read from the just serialized data
 

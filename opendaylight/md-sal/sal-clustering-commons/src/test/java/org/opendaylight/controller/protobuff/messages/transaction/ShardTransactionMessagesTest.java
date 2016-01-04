@@ -51,7 +51,7 @@ public class ShardTransactionMessagesTest extends AbstractMessagesTest {
         instanceIdentifierBuilder.build();
     builder.setInstanceIdentifierPathArguments(expectedOne);
 
-    writeToFile((com.google.protobuf.GeneratedMessage.Builder<?>) builder);
+    writeToFile(builder);
 
     // Here we will read the same and check we got back what we had saved
     ShardTransactionMessages.ReadData readDataNew =
