@@ -93,7 +93,6 @@ public abstract class HydrogenDataChangeEvent implements
         return null;
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     private static final class OperationalChangeEvent extends HydrogenDataChangeEvent {
 
         private final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> delegate;
@@ -125,7 +124,7 @@ public abstract class HydrogenDataChangeEvent implements
 
         @Override
         public Map<InstanceIdentifier<?>, DataObject> getOriginalOperationalData() {
-            return (Map) delegate.getOriginalData();
+            return delegate.getOriginalData();
         }
 
         @Override
@@ -149,7 +148,6 @@ public abstract class HydrogenDataChangeEvent implements
 
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     private static final class ConfigurationChangeEvent extends HydrogenDataChangeEvent {
 
         private final AsyncDataChangeEvent<InstanceIdentifier<?>, DataObject> delegate;
@@ -181,7 +179,7 @@ public abstract class HydrogenDataChangeEvent implements
 
         @Override
         public Map<InstanceIdentifier<?>, DataObject> getOriginalConfigurationData() {
-            return (Map) delegate.getOriginalData();
+            return delegate.getOriginalData();
         }
 
         @Override
