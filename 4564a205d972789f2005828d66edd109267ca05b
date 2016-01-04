@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_390d2a3f",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/ReplicatedLogImpl.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-01-04T19:15:37Z",
+      "side": 1,
+      "message": "The index here doesn\u0027t look right. getFromIndex is an adjusted index so we\u0027d be calling removeFrom with an already adjusted index. This will work fine with snapshot index \u003d\u003d -1, i.e. where adjustIndex is a noop, but looks like will be incorrect otherwise.  Please add a unit test to cover this case.",
+      "revId": "4564a205d972789f2005828d66edd109267ca05b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
