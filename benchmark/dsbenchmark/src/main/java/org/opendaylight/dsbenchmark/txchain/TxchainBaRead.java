@@ -27,7 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TxchainBaRead extends DatastoreAbstractWriter implements TransactionChainListener{
-    private static final Logger LOG = (Logger) LoggerFactory.getLogger(TxchainBaRead.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TxchainBaRead.class);
     private DataBroker bindingDataBroker;
 
     public TxchainBaRead(DataBroker bindingDataBroker, int outerListElem, int innerListElem, long writesPerTx, DataStore dataStore) {

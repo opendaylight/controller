@@ -30,7 +30,7 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 
 public class TxchainBaDelete extends DatastoreAbstractWriter implements TransactionChainListener{
-    private static final Logger LOG = (Logger) LoggerFactory.getLogger(TxchainBaDelete.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TxchainBaDelete.class);
     private DataBroker bindingDataBroker;
 
     public TxchainBaDelete(DataBroker bindingDataBroker, int outerListElem, int innerListElem, long writesPerTx, DataStore dataStore) {
