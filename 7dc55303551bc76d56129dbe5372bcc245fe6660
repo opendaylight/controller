@@ -34,6 +34,24 @@
       "revId": "7dc55303551bc76d56129dbe5372bcc245fe6660",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_b1bfeea9",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/TimedRunnable.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 3172
+      },
+      "writtenOn": "2016-01-05T19:39:32Z",
+      "side": 1,
+      "message": "Yes, but there\u0027s no guarantee that this Runnable is run by the same actor as the one passed in the constructor.  Someone who didn\u0027t know better could conceivably run a TimedRunnable directly using Thread.start(), no?  TimedRunnable seems like a good generic utility class, and I\u0027m concerned that someone might end up using it as such without understanding the caveats.",
+      "parentUuid": "1aa4ed85_b19a8e6c",
+      "revId": "7dc55303551bc76d56129dbe5372bcc245fe6660",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
