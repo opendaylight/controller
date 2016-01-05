@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_4624c2ae",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/RemoteTransactionContext.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-01-05T12:57:24Z",
+      "side": 1,
+      "message": "Since this now has 3 format args and is on a fast path, can you add LOG.isDebugEnabled() check to avoid the Object[] creation?",
+      "revId": "eec8c9af833c0500cad8ae7a29cdc063a85037ea",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_e63a8ecc",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/RemoteTransactionContext.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-01-05T12:57:24Z",
+      "side": 1,
+      "message": "Same as above.",
+      "revId": "eec8c9af833c0500cad8ae7a29cdc063a85037ea",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_c62f5287",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-01-05T12:57:24Z",
+      "side": 1,
+      "message": "Since this now has 3 format args and is on a fast path, can you add LOG.isDebugEnabled() check to avoid the Object[] creation?",
+      "revId": "eec8c9af833c0500cad8ae7a29cdc063a85037ea",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_664e9e71",
+        "filename": "opendaylight/md-sal/sal-distributed-datastore/src/main/java/org/opendaylight/controller/cluster/datastore/TransactionProxy.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-01-05T12:57:24Z",
+      "side": 1,
+      "message": "Same as above.",
+      "revId": "eec8c9af833c0500cad8ae7a29cdc063a85037ea",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
