@@ -16,6 +16,24 @@
       "revId": "7dc55303551bc76d56129dbe5372bcc245fe6660",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_b19a8e6c",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/TimedRunnable.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-01-05T19:11:51Z",
+      "side": 1,
+      "message": "The cancel timer Runnable is a message that is executed  on the actor\u0027s dispatch thread so no synchronization/concurrency protection is needed.",
+      "parentUuid": "1aa4ed85_51bb1ae5",
+      "revId": "7dc55303551bc76d56129dbe5372bcc245fe6660",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
