@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_51bb1ae5",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/TimedRunnable.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 3172
+      },
+      "writtenOn": "2016-01-05T18:59:58Z",
+      "side": 1,
+      "message": "Even if canRun is volatile, it looks like it\u0027s possible for doRun() and doCancel() to both execute.  Is TimedRunnable intended to guarantee that only one or the other will get executed?  If so, we might need a lock somewhere.",
+      "revId": "7dc55303551bc76d56129dbe5372bcc245fe6660",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
