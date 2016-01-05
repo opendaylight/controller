@@ -70,6 +70,24 @@
       "revId": "7dc55303551bc76d56129dbe5372bcc245fe6660",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_f18486b2",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/TimedRunnable.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 3172
+      },
+      "writtenOn": "2016-01-05T20:58:16Z",
+      "side": 1,
+      "message": "Sounds good.  Thanks!",
+      "parentUuid": "1aa4ed85_5196baf1",
+      "revId": "7dc55303551bc76d56129dbe5372bcc245fe6660",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
