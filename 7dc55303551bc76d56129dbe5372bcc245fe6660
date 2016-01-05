@@ -52,6 +52,24 @@
       "revId": "7dc55303551bc76d56129dbe5372bcc245fe6660",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1aa4ed85_5196baf1",
+        "filename": "opendaylight/md-sal/sal-akka-raft/src/main/java/org/opendaylight/controller/cluster/raft/TimedRunnable.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-01-05T20:55:28Z",
+      "side": 1,
+      "message": "There\u0027s no guarantee but that\u0027s the intended semantics/usage. Even if I added synchronization wrt to canRun, there would still be an issue with doRun being executed outside the intended actor\u0027s context. How about if I add javadocs stating the restrictions, i.e. it\u0027s not thread safe and intended for use within the context of the same actor that\u0027s passed on construction?",
+      "parentUuid": "1aa4ed85_b1bfeea9",
+      "revId": "7dc55303551bc76d56129dbe5372bcc245fe6660",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
     }
   ]
 }
