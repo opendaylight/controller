@@ -8,9 +8,9 @@
 package org.opendaylight.controller.config.manager.impl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -422,7 +422,7 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
             } catch (InstanceAlreadyExistsException e) {
                 throw new IllegalStateException("Possible error in code. Cannot register " + result, e);
             }
-            mBeans.put(serviceReference, createMXBeanEntry(dummyMXBean, dummyMXBeanRegistration));
+            mBeans.put(serviceReference, new SimpleImmutableEntry<>(dummyMXBean, dummyMXBeanRegistration));
         } else {
             // update
             mxBeanEntry.getKey().setCurrentImplementation(moduleON);
@@ -439,26 +439,6 @@ public class ServiceReferenceRegistryImpl implements CloseableServiceReferenceRe
         checkNotNull(annotation, "Possible error in code, cannot find annotation for " + serviceReference);
         refNamesToAnnotations.put(annotation, serviceReference.getRefName());
         return result;
-    }
-
-    private Entry<ServiceReferenceMXBeanImpl, ServiceReferenceJMXRegistration> createMXBeanEntry(
-            final ServiceReferenceMXBeanImpl mxBean, final ServiceReferenceJMXRegistration registration) {
-        return new Entry<ServiceReferenceMXBeanImpl, ServiceReferenceJMXRegistration>() {
-            @Override
-            public ServiceReferenceMXBeanImpl getKey() {
-                return mxBean;
-            }
-
-            @Override
-            public ServiceReferenceJMXRegistration getValue() {
-                return registration;
-            }
-
-            @Override
-            public ServiceReferenceJMXRegistration setValue(final ServiceReferenceJMXRegistration value) {
-                throw new UnsupportedOperationException();
-            }
-        };
     }
 
     private ObjectName getServiceON(final ServiceReference serviceReference) {
