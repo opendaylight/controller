@@ -77,15 +77,14 @@ class RaftActorServerConfigurationSupport {
 
     private void onRemoveServer(RemoveServer removeServer, ActorRef sender) {
         LOG.debug("{}: onRemoveServer: {}, state: {}", raftContext.getId(), removeServer, currentOperationState);
-        if(removeServer.getServerId().equals(raftActor.getLeaderId())){
-            // Removing current leader is not supported yet
-            // TODO: To properly support current leader removal we need to first implement transfer of leadership
-            LOG.debug("Cannot remove {} replica because it is the Leader", removeServer.getServerId());
-            sender.tell(new RemoveServerReply(ServerChangeStatus.NOT_SUPPORTED, raftActor.getLeaderId()), raftActor.getSelf());
-        } else if(!raftContext.getPeerIds().contains(removeServer.getServerId())) {
-            sender.tell(new RemoveServerReply(ServerChangeStatus.DOES_NOT_EXIST, raftActor.getLeaderId()), raftActor.getSelf());
+        boolean isSelf = removeServer.getServerId().equals(raftActor.getId());
+        if(!isSelf && !raftContext.getPeerIds().contains(removeServer.getServerId())) {
+            sender.tell(new RemoveServerReply(ServerChangeStatus.DOES_NOT_EXIST, raftActor.getLeaderId()),
+                    raftActor.getSelf());
         } else {
-            onNewOperation(new RemoveServerContext(removeServer, raftContext.getPeerAddress(removeServer.getServerId()), sender));
+            String serverAddress = isSelf ? raftActor.self().path().toString() :
+                raftContext.getPeerAddress(removeServer.getServerId());
+            onNewOperation(new RemoveServerContext(removeServer, serverAddress, sender));
         }
     }
 
@@ -199,7 +198,9 @@ class RaftActorServerConfigurationSupport {
 
         protected void persistNewServerConfiguration(ServerOperationContext<?> operationContext){
             raftContext.setDynamicServerConfigurationInUse();
-            ServerConfigurationPayload payload = raftContext.getPeerServerInfo();
+
+            boolean includeSelf = !operationContext.getServerId().equals(raftActor.getId());
+            ServerConfigurationPayload payload = raftContext.getPeerServerInfo(includeSelf);
             LOG.debug("{}: New server configuration : {}", raftContext.getId(), payload.getServerConfig());
 
             raftActor.persistData(operationContext.getClientRequestor(), operationContext.getContextId(), payload);
