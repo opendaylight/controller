@@ -36,18 +36,22 @@ public class ClusterWrapperImpl implements ClusterWrapper {
         selfAddress = cluster.selfAddress();
     }
 
+    @Override
     public void subscribeToMemberEvents(ActorRef actorRef){
         Preconditions.checkNotNull(actorRef, "actorRef should not be null");
 
         cluster.subscribe(actorRef, ClusterEvent.initialStateAsEvents(),
             ClusterEvent.MemberEvent.class,
-            ClusterEvent.UnreachableMember.class);
+            ClusterEvent.UnreachableMember.class,
+            ClusterEvent.ReachableMember.class);
     }
 
+    @Override
     public String getCurrentMemberName() {
         return currentMemberName;
     }
 
+    @Override
     public Address getSelfAddress() {
         return selfAddress;
     }
