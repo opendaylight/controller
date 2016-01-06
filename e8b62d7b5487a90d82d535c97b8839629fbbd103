@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1aa4ed85_12584031",
+        "filename": "opendaylight/md-sal/sal-netconf-connector/src/main/java/org/opendaylight/controller/config/yang/md/sal/connector/netconf/NetconfConnectorModule.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1842
+      },
+      "writtenOn": "2016-01-06T19:14:11Z",
+      "side": 1,
+      "message": "It would be safest to also check !Strings.isNullOrEmpty(moduleSchemaCacheDirectory)",
+      "revId": "e8b62d7b5487a90d82d535c97b8839629fbbd103",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
