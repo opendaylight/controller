@@ -26,7 +26,6 @@ import org.osgi.framework.BundleContext;
 public class NetconfConnectorModuleFactory extends
         org.opendaylight.controller.config.yang.md.sal.connector.netconf.AbstractNetconfConnectorModuleFactory {
 
-    // TODO this should be injected
     // Netconf devices have separated schema registry + factory from controller
     private final SharedSchemaRepository repository = new SharedSchemaRepository(NAME);
     private final SchemaContextFactory schemaContextFactory
@@ -44,7 +43,7 @@ public class NetconfConnectorModuleFactory extends
             final DynamicMBeanWithInstance old, final BundleContext bundleContext) throws Exception {
         final NetconfConnectorModule module = (NetconfConnectorModule) super.createModule(instanceName, dependencyResolver,
                 old, bundleContext);
-
+        module.setInstanceName(instanceName);
         module.setBundleContext(bundleContext);
         module.setSchemaRegistry(repository);
         module.setSchemaContextFactory(schemaContextFactory);
@@ -55,6 +54,7 @@ public class NetconfConnectorModuleFactory extends
     public Module createModule(final String instanceName, final DependencyResolver dependencyResolver, final BundleContext bundleContext) {
         final NetconfConnectorModule module = (NetconfConnectorModule) super.createModule(instanceName, dependencyResolver,
                 bundleContext);
+        module.setInstanceName(instanceName);
         module.setBundleContext(bundleContext);
         module.setSchemaRegistry(repository);
         module.setSchemaContextFactory(schemaContextFactory);
