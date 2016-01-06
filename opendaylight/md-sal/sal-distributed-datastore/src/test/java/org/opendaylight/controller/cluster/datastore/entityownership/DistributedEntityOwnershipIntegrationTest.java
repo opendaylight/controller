@@ -303,16 +303,16 @@ public class DistributedEntityOwnershipIntegrationTest {
 
         Mockito.reset(leaderMockListener);
 
-        candidate1.close();
-        candidate2.close();
-        candidate3.close();
-
         ArgumentCaptor<EntityOwnershipChange> leaderChangeCaptor = ArgumentCaptor.forClass(EntityOwnershipChange.class);
         ArgumentCaptor<EntityOwnershipChange> follower1ChangeCaptor = ArgumentCaptor.forClass(EntityOwnershipChange.class);
         ArgumentCaptor<EntityOwnershipChange> follower2ChangeCaptor = ArgumentCaptor.forClass(EntityOwnershipChange.class);
         doNothing().when(leaderMockListener).ownershipChanged(leaderChangeCaptor.capture());
         doNothing().when(follower1MockListener).ownershipChanged(follower1ChangeCaptor.capture());
         doNothing().when(follower2MockListener).ownershipChanged(follower2ChangeCaptor.capture());
+
+        candidate1.close();
+        candidate2.close();
+        candidate3.close();
 
         boolean passed = false;
         for(int i=0;i<100;i++) {
